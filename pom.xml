@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>uk.gov.justice</groupId>
+        <artifactId>parent-pom</artifactId>
+        <version>1.6.0-SNAPSHOT</version>
+    </parent>
+
+    <groupId>uk.gov.justice.services</groupId>
+    <artifactId>microservice-framework</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>Microservice Framework</name>
+    <description>Framework for building microservices</description>
+
+    <scm>
+        <connection>scm:git:git@github.com:CJSCommonPlatform/microservice_framework.git</connection>
+        <developerConnection>scm:git:git@github.com:CJSCommonPlatform/microservice_framework.git</developerConnection>
+    </scm>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>uk.gov.justice</groupId>
+                <artifactId>common-bom</artifactId>
+                <version>1.6.0-SNAPSHOT</version>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>

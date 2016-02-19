@@ -1,0 +1,7 @@
+language: java
+jdk:
+  - oraclejdk8
+install:
+  - curl -L https://github.com/CJSCommonPlatform/maven-common/archive/master.tar.gz | tar xz && cd maven-common-master && mvn install && cd ..
+  - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+script: mvn --show-version --errors clean verify

@@ -22,6 +22,10 @@
         <developerConnection>scm:git:git@github.com:CJSCommonPlatform/microservice_framework.git</developerConnection>
     </scm>
 
+    <modules>
+        <module>messaging</module>
+    </modules>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -29,6 +33,7 @@
                 <artifactId>common-bom</artifactId>
                 <version>1.6.0-SNAPSHOT</version>
                 <scope>import</scope>
+                <type>pom</type>
             </dependency>
         </dependencies>
     </dependencyManagement>

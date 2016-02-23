@@ -7,6 +7,7 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import javax.json.JsonString;
 import java.util.List;
 import java.util.Optional;
@@ -238,5 +239,16 @@ public class JsonObjectsTest {
         Optional<String> string = JsonObjects.getString(object, "name");
 
         assertThat(string.isPresent(), is(false));
+    }
+
+    @Test
+    public void shouldCreateBuilderFromJsonObject() {
+        JsonObject source = Json.createObjectBuilder()
+                .add("name", "test")
+                .build();
+
+        JsonObjectBuilder builder = JsonObjects.createObjectBuilder(source);
+
+        assertThat(builder.build(), equalTo(source));
     }
 }

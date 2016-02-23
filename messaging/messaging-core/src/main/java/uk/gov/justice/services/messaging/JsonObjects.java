@@ -2,9 +2,11 @@ package uk.gov.justice.services.messaging;
 
 import com.google.common.collect.ImmutableList;
 
+import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import javax.json.JsonString;
 import javax.json.JsonValue;
 import java.util.Arrays;
@@ -209,6 +211,19 @@ public final class JsonObjects {
     public static List<UUID> getUUIDs(final JsonObject object, final String... names) {
         return getList(object, JsonString.class, jsonString -> UUID.fromString(jsonString.getString()), names)
                 .orElse(Collections.emptyList());
+    }
+
+    /**
+     * Create a {@link JsonObjectBuilder} from an existing {@link JsonObject}.
+     * @param source {@link JsonObject} to copy fields from
+     * @return a {@link JsonObjectBuilder} initialised with the fields contained in the source
+     */
+    public static JsonObjectBuilder createObjectBuilder(final JsonObject source) {
+        JsonObjectBuilder builder = Json.createObjectBuilder();
+        for (String key : source.keySet()) {
+            builder = builder.add(key, source.get(key));
+        }
+        return builder;
     }
 
     /**

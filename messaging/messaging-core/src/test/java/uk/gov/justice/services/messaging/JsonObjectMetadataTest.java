@@ -1,6 +1,7 @@
 package uk.gov.justice.services.messaging;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.testing.EqualsTester;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -161,5 +162,56 @@ public class JsonObjectMetadataTest {
                 .add(NAME, NULL)
                 .build()
         );
+    }
+
+    @SuppressWarnings({"squid:MethodCyclomaticComplexity", "squid:S1067", "squid:S00122"})
+    @Test
+    public void shouldTestEqualsAndHashCode() {
+
+        Metadata item1 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, STREAM_VERSION);
+        Metadata item2 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, STREAM_VERSION);
+        Metadata item3 = metadata(UUID.randomUUID().toString(), UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, STREAM_VERSION);
+        Metadata item4 = metadata(UUID_ID, UUID.randomUUID().toString(), UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, STREAM_VERSION);
+        Metadata item5 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID.randomUUID().toString(), UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, STREAM_VERSION);
+        Metadata item6 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID.randomUUID().toString(), UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, STREAM_VERSION);
+        Metadata item7 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID.randomUUID().toString(), UUID_STREAM_ID, MESSAGE_NAME, STREAM_VERSION);
+        Metadata item8 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID.randomUUID().toString(), MESSAGE_NAME, STREAM_VERSION);
+        Metadata item9 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, "dummy name", STREAM_VERSION);
+        Metadata item10 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, 0L);
+
+        new EqualsTester()
+                .addEqualityGroup(item1, item2)
+                .addEqualityGroup(item3)
+                .addEqualityGroup(item4)
+                .addEqualityGroup(item5)
+                .addEqualityGroup(item6)
+                .addEqualityGroup(item7)
+                .addEqualityGroup(item8)
+                .addEqualityGroup(item9)
+                .addEqualityGroup(item10)
+                .testEquals();
+    }
+
+    private Metadata metadata(String id, String uuidClientCorrelation, String uuidCausation, String uuidUserId,
+                              String uuidSessionId, String uuidStreamId, String messageName, Long streamVersion) {
+        return metadataFrom(Json.createObjectBuilder()
+                .add(ID, id)
+                .add(NAME, messageName)
+                .add(CLIENT_CORRELATION[0], Json.createObjectBuilder()
+                        .add(CLIENT_CORRELATION[1], uuidClientCorrelation)
+                )
+                .add(CAUSATION, Json.createArrayBuilder()
+                        .add(uuidCausation)
+                )
+                .add(CONTEXT, Json.createObjectBuilder()
+                        .add(USER_ID[1], uuidUserId)
+                        .add(SESSION_ID[1], uuidSessionId)
+                )
+                .add(STREAM, Json.createObjectBuilder()
+                        .add(STREAM_ID[1], uuidStreamId)
+                        .add(VERSION[1], streamVersion)
+                )
+                .build());
+
     }
 }

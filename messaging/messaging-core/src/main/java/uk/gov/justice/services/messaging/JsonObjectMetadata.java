@@ -3,6 +3,7 @@ package uk.gov.justice.services.messaging;
 import javax.json.JsonObject;
 import javax.json.JsonString;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -89,5 +90,18 @@ public class JsonObjectMetadata implements Metadata {
         }
 
         return new JsonObjectMetadata(jsonObject);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        JsonObjectMetadata that = (JsonObjectMetadata) o;
+        return Objects.equals(metadata, that.metadata);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(metadata);
     }
 }

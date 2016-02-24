@@ -7,9 +7,6 @@ import javax.json.JsonObject;
  */
 public interface Envelope {
 
-    public static final String METADATA = "metadata";
-    public static final String PAYLOAD = "payload";
-
     Metadata metadata();
 
     JsonObject payload();

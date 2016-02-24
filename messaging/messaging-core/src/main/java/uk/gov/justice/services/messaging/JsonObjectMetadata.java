@@ -38,7 +38,7 @@ public class JsonObjectMetadata implements Metadata {
 
     @Override
     public Optional<String> clientCorrelationId() {
-        return getString(metadata, CLIENT_CORRELATION);
+        return getString(metadata, CLIENT_CORRELATION_PATH);
     }
 
     @Override
@@ -48,22 +48,22 @@ public class JsonObjectMetadata implements Metadata {
 
     @Override
     public Optional<String> userId() {
-        return getString(metadata, USER_ID);
+        return getString(metadata, USER_ID_PATH);
     }
 
     @Override
     public Optional<String> sessionId() {
-        return getString(metadata, SESSION_ID);
+        return getString(metadata, SESSION_ID_PATH);
     }
 
     @Override
     public Optional<UUID> streamId() {
-        return getUUID(metadata, STREAM_ID);
+        return getUUID(metadata, STREAM_ID_PATH);
     }
 
     @Override
     public Optional<Long> version() {
-        return getLong(metadata, VERSION);
+        return getLong(metadata, VERSION_PATH);
     }
 
     @Override

@@ -37,15 +37,11 @@ public class RestEnvelopeBuilderTest {
     @Mock
     private HttpHeaders httpHeaders;
 
-    @Mock
-    private RandomUUIDGenerator uuidGenerator;
-
     private RestEnvelopeBuilder builder;
 
     @Before
     public void setup() {
-        when(uuidGenerator.generate()).thenReturn(UUID_ID);
-        builder = new RestEnvelopeBuilder(uuidGenerator);
+        builder = new RestEnvelopeBuilder(UUID_ID);
     }
 
     @Test(expected = IllegalStateException.class)

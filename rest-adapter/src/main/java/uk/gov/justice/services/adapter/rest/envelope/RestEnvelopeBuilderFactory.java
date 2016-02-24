@@ -1,16 +1,13 @@
 package uk.gov.justice.services.adapter.rest.envelope;
 
-import javax.inject.Inject;
+import java.util.UUID;
 
 /**
  * Factory for generating {@link RestEnvelopeBuilder} objects.
  */
 public class RestEnvelopeBuilderFactory {
 
-    @Inject
-    RandomUUIDGenerator uuidGenerator;
-
     public RestEnvelopeBuilder builder() {
-        return new RestEnvelopeBuilder(uuidGenerator);
+        return new RestEnvelopeBuilder(UUID.randomUUID());
     }
 }

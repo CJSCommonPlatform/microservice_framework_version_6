@@ -10,6 +10,9 @@ import javax.ws.rs.core.Response;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import static javax.ws.rs.core.Response.Status.ACCEPTED;
+import static javax.ws.rs.core.Response.status;
+
 /**
  * In order to minimise the amount of generated code in the JAX-RS implementation classes, this service encapsulates
  * all the logic for building an envelope from the REST request, passing it to a consumer and building a suitable
@@ -42,6 +45,6 @@ public class RestProcessor {
 
         consumer.accept(envelope);
 
-        return Response.status(202).build();
+        return status(ACCEPTED).build();
     }
 }

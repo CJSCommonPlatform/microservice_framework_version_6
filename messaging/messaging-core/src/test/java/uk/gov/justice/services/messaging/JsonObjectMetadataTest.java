@@ -14,16 +14,17 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.CAUSATION;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.CLIENT_CORRELATION;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.CONTEXT;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.SESSION_ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.STREAM;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.STREAM_ID;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.USER_ID;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.VERSION;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
+import static uk.gov.justice.services.messaging.Metadata.CLIENT_ID;
+import static uk.gov.justice.services.messaging.Metadata.CORRELATION;
+import static uk.gov.justice.services.messaging.Metadata.SESSION_ID;
+import static uk.gov.justice.services.messaging.Metadata.STREAM_ID;
+import static uk.gov.justice.services.messaging.Metadata.USER_ID;
+import static uk.gov.justice.services.messaging.Metadata.VERSION;
 
 /**
  * Unit tests for the {@link JsonObjectMetadata} class.
@@ -47,19 +48,19 @@ public class JsonObjectMetadataTest {
         jsonObject = Json.createObjectBuilder()
                 .add(ID, UUID_ID)
                 .add(NAME, MESSAGE_NAME)
-                .add(CLIENT_CORRELATION[0], Json.createObjectBuilder()
-                        .add(CLIENT_CORRELATION[1], UUID_CLIENT_CORRELATION)
+                .add(CORRELATION, Json.createObjectBuilder()
+                        .add(CLIENT_ID, UUID_CLIENT_CORRELATION)
                 )
                 .add(CAUSATION, Json.createArrayBuilder()
                         .add(UUID_CAUSATION)
                 )
                 .add(CONTEXT, Json.createObjectBuilder()
-                        .add(USER_ID[1], UUID_USER_ID)
-                        .add(SESSION_ID[1], UUID_SESSION_ID)
+                        .add(USER_ID, UUID_USER_ID)
+                        .add(SESSION_ID, UUID_SESSION_ID)
                 )
                 .add(STREAM, Json.createObjectBuilder()
-                        .add(STREAM_ID[1], UUID_STREAM_ID)
-                        .add(VERSION[1], STREAM_VERSION)
+                        .add(STREAM_ID, UUID_STREAM_ID)
+                        .add(VERSION, STREAM_VERSION)
                 )
                 .build();
         metadata = metadataFrom(jsonObject);

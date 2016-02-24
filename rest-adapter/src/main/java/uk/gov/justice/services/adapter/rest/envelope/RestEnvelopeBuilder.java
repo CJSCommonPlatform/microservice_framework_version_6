@@ -10,15 +10,17 @@ import javax.json.JsonObjectBuilder;
 import javax.ws.rs.core.HttpHeaders;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import static java.util.Collections.emptyMap;
 import static uk.gov.justice.services.adapter.rest.HeaderConstants.CLIENT_CORRELATION_ID;
 import static uk.gov.justice.services.adapter.rest.HeaderConstants.SESSION_ID;
 import static uk.gov.justice.services.adapter.rest.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.messaging.DefaultEnvelope.envelopeFrom;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.CLIENT_CORRELATION;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
+import static uk.gov.justice.services.messaging.Metadata.CLIENT_ID;
 import static uk.gov.justice.services.messaging.Metadata.CONTEXT;
+import static uk.gov.justice.services.messaging.Metadata.CORRELATION;
 import static uk.gov.justice.services.messaging.Metadata.ID;
 
 /**
@@ -26,14 +28,14 @@ import static uk.gov.justice.services.messaging.Metadata.ID;
  */
 public class RestEnvelopeBuilder {
 
-    private RandomUUIDGenerator uuidGenerator;
+    private UUID id;
 
     private Optional<JsonObject> initialPayload = Optional.empty();
     private Optional<HttpHeaders> headers = Optional.empty();
     private Optional<Map<String, String>> pathParams = Optional.empty();
 
-    RestEnvelopeBuilder(RandomUUIDGenerator uuidGenerator) {
-        this.uuidGenerator = uuidGenerator;
+    RestEnvelopeBuilder(final UUID id) {
+        this.id = id;
     }
 
     /**
@@ -95,7 +97,7 @@ public class RestEnvelopeBuilder {
     private Metadata buildMetadata() {
         JsonObjectBuilder metadataBuilder = Json.createObjectBuilder();
 
-        metadataBuilder = metadataBuilder.add(ID, uuidGenerator.generate().toString());
+        metadataBuilder = metadataBuilder.add(ID, id.toString());
 
         HttpHeaders httpHeaders = headers.orElseThrow(() ->
                 new IllegalStateException("Cannot get name from empty headers"));
@@ -105,17 +107,17 @@ public class RestEnvelopeBuilder {
 
         if (contains(CLIENT_CORRELATION_ID, httpHeaders)) {
             metadataBuilder = metadataBuilder
-                    .add(CLIENT_CORRELATION[0], Json.createObjectBuilder()
-                            .add(CLIENT_CORRELATION[1], getHeader(CLIENT_CORRELATION_ID, httpHeaders)));
+                    .add(CORRELATION, Json.createObjectBuilder()
+                            .add(CLIENT_ID, getHeader(CLIENT_CORRELATION_ID, httpHeaders)));
         }
 
         if (contains(USER_ID, httpHeaders) || contains(SESSION_ID, httpHeaders)) {
             JsonObjectBuilder contextBuilder = Json.createObjectBuilder();
             if (contains(USER_ID, httpHeaders)) {
-                contextBuilder = contextBuilder.add(Metadata.USER_ID[1], getHeader(USER_ID, httpHeaders));
+                contextBuilder = contextBuilder.add(Metadata.USER_ID, getHeader(USER_ID, httpHeaders));
             }
             if (contains(SESSION_ID, httpHeaders)) {
-                contextBuilder = contextBuilder.add(Metadata.SESSION_ID[1], getHeader(SESSION_ID, httpHeaders));
+                contextBuilder = contextBuilder.add(Metadata.SESSION_ID, getHeader(SESSION_ID, httpHeaders));
             }
             metadataBuilder = metadataBuilder.add(CONTEXT, contextBuilder);
         }

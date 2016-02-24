@@ -15,6 +15,7 @@ import javax.ws.rs.core.Response;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import static javax.ws.rs.core.Response.Status.ACCEPTED;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.verify;
@@ -64,7 +65,7 @@ public class RestProcessorTest {
     public void shouldReturn202Response() throws Exception {
         Response response = restProcessor.process(consumer, payload, headers, pathParams);
 
-        assertThat(response.getStatus(), equalTo(202));
+        assertThat(response.getStatus(), equalTo(ACCEPTED.getStatusCode()));
     }
 
     @Test

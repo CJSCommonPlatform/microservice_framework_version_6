@@ -32,7 +32,9 @@ public class AnnotationScanner implements Extension {
     private Optional<ServiceComponentFoundEvent> getEvent(final Bean bean) {
         if (bean.getBeanClass().isAnnotationPresent(ServiceComponent.class)) {
             return Optional.of(new ServiceComponentFoundEvent(Component.getComponentFromServiceComponent(bean.getBeanClass()), bean));
-        } else return Optional.empty();
+        } else {
+            return Optional.empty();
+        }
     }
 
 }

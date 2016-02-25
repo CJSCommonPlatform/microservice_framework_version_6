@@ -13,8 +13,8 @@ public enum Component {
      * @param clazz The service component to be analysed.
      * @return the component from the provided {@link ServiceComponent}.
      */
-    public static Component getComponentFromServiceComponent(Class<ServiceComponent> clazz) {
-        ServiceComponent serviceComponent = clazz.getAnnotation(ServiceComponent.class);
+    public static Component getComponentFromServiceComponent(final Class<ServiceComponent> clazz) {
+        final ServiceComponent serviceComponent = clazz.getAnnotation(ServiceComponent.class);
         return serviceComponent.value();
     }
 
@@ -25,7 +25,7 @@ public enum Component {
      * @return the component from the provided {@link Adapter}.
      */
     public static Component getComponentFromAdapter(final Class<Adapter> clazz) {
-        Adapter adapter = clazz.getAnnotation(Adapter.class);
+        final Adapter adapter = clazz.getAnnotation(Adapter.class);
         return adapter.value();
     }
 

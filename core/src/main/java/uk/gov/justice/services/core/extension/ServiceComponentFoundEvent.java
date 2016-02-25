@@ -6,8 +6,8 @@ import javax.enterprise.inject.spi.Bean;
 
 public class ServiceComponentFoundEvent {
 
-    private Component component;
-    private Bean handlerBean;
+    private final Component component;
+    private final Bean handlerBean;
 
     public ServiceComponentFoundEvent(final Component component, final Bean commandHandlerBean) {
         this.component = component;

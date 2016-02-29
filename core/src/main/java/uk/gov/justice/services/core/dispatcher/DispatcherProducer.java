@@ -34,6 +34,7 @@ public class DispatcherProducer {
      * @return The correct dispatcher instance.
      * @throws IllegalArgumentException if the injection point does not contain any adaptor annotations.
      */
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Produces
     public Dispatcher produce(final InjectionPoint injectionPoint) {
         final Class targetClass = injectionPoint.getMember().getDeclaringClass();
@@ -45,6 +46,7 @@ public class DispatcherProducer {
         }
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     void register(@Observes final ServiceComponentFoundEvent event) {
         getDispatcher(event.getComponent()).register(instantiateHandler(event.getHandlerBean()));
     }
@@ -60,10 +62,7 @@ public class DispatcherProducer {
     }
 
     private AsynchronousDispatcher getDispatcher(final Component component) {
-        if (!dispatcherMap.containsKey(component)) {
-            dispatcherMap.put(component, new AsynchronousDispatcher());
-        }
-
+        dispatcherMap.putIfAbsent(component, new AsynchronousDispatcher());
         return dispatcherMap.get(component);
     }
 

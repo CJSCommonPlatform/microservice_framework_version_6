@@ -12,7 +12,7 @@ public final class CoreUtil {
      */
     public static String extractContextNameFromActionOrEventName(final String actionOrEventName) {
         if (!actionOrEventName.contains(".")) {
-            throw new IllegalArgumentException("Invalid action or event name.");
+            throw new IllegalArgumentException("Invalid action or event name: " + actionOrEventName);
         } else return actionOrEventName.split("\\.")[0];
     }
 

@@ -19,7 +19,7 @@ import java.io.StringWriter;
 @ApplicationScoped
 public class JsonObjectConverter {
 
-    public static String METADATA = "_metadata";
+    public static final String METADATA = "_metadata";
 
     /**
      * Converts a json string into a JsonObject.

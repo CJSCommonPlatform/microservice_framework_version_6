@@ -39,7 +39,7 @@ public class HandlerUtilTest {
         }
 
         @Handles("test-context.commands.update-something")
-        public void handler2(JsonObject envelopeAsJSONObject) {
+        public void handler2(JsonObject envelopeAsJsonObject) {
         }
 
         @Handles("test-context.commands.delete-something")

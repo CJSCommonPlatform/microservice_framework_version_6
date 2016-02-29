@@ -1,10 +1,15 @@
 language: java
 jdk:
   - oraclejdk8
-install:
-  - curl -L https://github.com/CJSCommonPlatform/maven-common/archive/master.tar.gz | tar xz && cd maven-common-master && mvn install && cd ..
-  - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
-script: mvn --show-version --errors clean verify coveralls:report
+before_install: git clone https://github.com/CJSCommonPlatform/travis-settings.git target/travis-settings
+install: true
+script: mvn -Dmaven.wagon.http.ssl.insecure=true -B -V --settings target/travis-settings/settings.xml verify coveralls:report
+after_success:
+  - '[[ $TRAVIS_BRANCH == "master" ]] && mvn -Dmaven.wagon.http.ssl.insecure=true -DskipTests=true -B -V --errors deploy --settings target/travis-settings/settings.xml'
 notifications:
   slack:
     secure: fPlaMvrczZ2riJ4tjMOAqxSGj4JfxGlH/K08knLgG4T/n6EL4LN4+184Npz9XueNbV3m26WUrPkbXEiWXpqkKsbwcZXqqnFxGacGiyxv7LeBeQLYp7NFeARAyB5qDwUpjHlCPAEoAeyeGsZNrpui/wceY4j1tB7ObfdwbxLzAO0tekdbwitSaK1cc7V2sVHkBYr7ChuC+dVO1pshPw0EVTmzPioS8nfFKPaxWoMgyRAuYe7MD0U7DxNQ4Wzsb7tpfd5Oom1wLXyZ7M3wwSMMamIAAxHVG389Az6YvN7hXQggTGDawf/YwVOaoMR2bh7uHBCOiNZO1GbRTOA7IuTPwT7GsK94THRtfvqNm7RFBPkoD4657FATnk2o5c7QNTY3dAlYLsxLnS6mVTL/vAbqC7BbDHo/UGsxmOusQtKt8sRoL8pOCEInHaS3b88Osl7u7oYO/E4YTptdnkEe8tNyWWdx34nEUT0j1Mu/VAN38YcgTMUuiBU6chkMJ5BjIHisJlAAnBJ9VGgF9liqnigNwAGhbrHZPyAlKUX8HLejpD+t4aR0UaEvvauh6aHh4pYm0mZra4zOBC/lBDOXqsu5ajHL8LpHc6j+5FrmNwciiTVoxdud2S4c0U2ymr3L07ivX+UyhoraS9oSH3v7L73Q4NyvuAmD8Zc0xw/cR4Pff9c=
+env:
+  global:
+  - secure: 1I5o+lWqnsw8LW1AY3x5QkbFko+TVyCg7dTxAKaFgDreNjDxc4K3KlgkVay6+5eZXOJNyh+xqWGWItmELubWuM1QRnfTXJWqIb9xfMvqLlWygaPRP+zOYrkrY9H4NUstKvF41tkXWmz+BNheU7HeG7x9Ts2bTJ+sVKSHC7R0waOJRGj0rn/NEWzi0FpRMwoqOxJCEno4lmkj5Sb8XOTDtCE8PwxX6/p0ICgPIjA9Ctz/2j2ZAd1REgxAHsK+g3Qe3W2Zqry6NC3Bbb0eeMjjzF7ZouVYzOjqE92CPvaUhcnlAWTLHjn/b08qFcX6Q2GNNQGJxzZ564gC44PBRRlJBdgkHCDFTFdj6ecKMgZp6cVh6ZTUdN3RVV+ti41RjIpF0ll2QR8psYsWcTywNXR1t3YdMnZQkMrQGcLbwe1Rq//DF4nahJnms8E7Q9/nW2BFgaG2y8Jt9a9pWj1URC/K2/AuLQmsQ+fxVeHh8iKifRN1F7jKHRrNZdKFzXVpTW+Pd4WL1x9+cF6syDp/aizypvcxpCM8ERowxBmwAFhDGaPns8gC7lvUuZmlTgg1HKS8IAGArTaMje6Bw0QJYu5oioXeYY+/Ae6AYb6jCgytPKPk9IDFf+mPQ5DfFnlNNNgOiKjMITGbvkIkixQWLvXO+b+Ilf76xD3r6fCNyZnVDGE=
+  - secure: RgKO2J/xG5o6MBxjkuRg1N7rHvlzHJjTwaGw3Ccv+16AQsxjygC/+OOgPWdoH9Ghi3StJjKUEpfAzGwKWJLIfCww8O8jdy21ClBjtVAnpXF4IdUY+nUvkrYVIJShk/jsPfhHg8bSV+2UcvoXXvxrqPnjkq2h56w+6LNmLfKhOms45RFgdLaDJYtrzfaWa+LvB6nRqLTbtUnaW5mc8iG25uOmTGj9OH8lZ9/hUAPh/C1PM27VAKg5qjMsRre0bZ/vDPADNL7cVAGrkR3JUp+3IVQJjl7TYtZbaQl1YfjlGwSYuWvQjJfNQmXtNTydXI1rBCGglORnOG8m7FEufK9O4m8ee4cw9gWJhJVbfQyfe2tX0Q0uaE9aZieZlJA4fNEjt++7gXyP3XHMNjkmy1N1KaGc/3Vkc5QyiGdQ+Mp1hS+Gt8MH/OXX3yIr2ozn3fXTXFSkBcHgQD+cDf077l5JPIaFRE4/IFWuWnxxWpSuOwu7lhzt+SLmiJhupmOcFWyYiHZvyUL5/+FjErdqBeyEGnozP9PvrNfR5iH3q7nOdRrsdNX96SXZwEgbLNcdnIwC2l+KTddNKuo7rVjw/df4JfdVJsIiEhcd3Y0HIDzcSRINTPrBfhDHxjfnfVD749OP0XpYry1/Xm1beGFRRWqoYQSbxkqfOGSWj/xvXlfMs34=

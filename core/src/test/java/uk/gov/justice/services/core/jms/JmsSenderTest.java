@@ -6,7 +6,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.slf4j.Logger;
 import uk.gov.justice.services.core.jms.exception.JmsSenderException;
 import uk.gov.justice.services.core.util.JsonObjectConverter;
 import uk.gov.justice.services.messaging.DefaultEnvelope;
@@ -68,15 +67,11 @@ public class JmsSenderTest {
     @Mock
     private TextMessage textMessage;
 
-    @Mock
-    private Logger logger;
-
     private JmsSender jmsSender;
 
     @Before
     public void setup() throws JMSException, NamingException {
         jmsSender = new JmsSender();
-        jmsSender.logger = logger;
         jmsSender.queueConnectionFactory = queueConnectionFactory;
         jmsSender.jsonObjectConverter = new JsonObjectConverter();
         when(queueConnection.createQueueSession(false, QueueSession.AUTO_ACKNOWLEDGE)).thenReturn(session);

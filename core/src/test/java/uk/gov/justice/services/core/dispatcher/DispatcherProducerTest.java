@@ -37,12 +37,12 @@ public class DispatcherProducerTest {
     @Mock
     private Metadata metadata;
 
-    private TestCommandAPIHandler handlerInstance;
+    private TestCommandApiHandler handlerInstance;
 
     private DispatcherProducer dispatcherProducer;
 
     @Mock
-    private InjectionPoint commandAPIInjectionPoint;
+    private InjectionPoint commandApiInjectionPoint;
 
     @Mock
     private InjectionPoint commandControllerInjectionPoint1;
@@ -51,7 +51,7 @@ public class DispatcherProducerTest {
     private InjectionPoint commandControllerInjectionPoint2;
 
     @Mock
-    private Member commandAPIMember;
+    private Member commandApiMember;
 
     @Mock
     private Member commandControllerMember1;
@@ -66,10 +66,10 @@ public class DispatcherProducerTest {
     private Bean bean;
 
     @Mock
-    private AsynchronousDispatcher commandAPIDispatcher;
+    private AsynchronousDispatcher commandApiDispatcher;
 
     @Mock
-    private HandlerRegistry commandAPIRegistry;
+    private HandlerRegistry commandApiRegistry;
 
     @Mock
     private HandlerRegistry commandControllerRegistry;
@@ -86,15 +86,15 @@ public class DispatcherProducerTest {
     @Before
     public void setup() {
         dispatcherProducer = new DispatcherProducer();
-        handlerInstance = new TestCommandAPIHandler();
+        handlerInstance = new TestCommandApiHandler();
 
         dispatcherProducer.beanManager = beanManager;
 
-        when(commandAPIInjectionPoint.getMember()).thenReturn(commandAPIMember);
+        when(commandApiInjectionPoint.getMember()).thenReturn(commandApiMember);
         when(commandControllerInjectionPoint1.getMember()).thenReturn(commandControllerMember1);
         when(commandControllerInjectionPoint2.getMember()).thenReturn(commandControllerMember2);
 
-        doReturn(TestCommandAPIAdaptor.class).when(commandAPIMember).getDeclaringClass();
+        doReturn(TestCommandApiAdaptor.class).when(commandApiMember).getDeclaringClass();
         doReturn(TestCommandControllerAdaptor1.class).when(commandControllerMember1).getDeclaringClass();
         doReturn(TestCommandControllerAdaptor2.class).when(commandControllerMember2).getDeclaringClass();
 
@@ -123,7 +123,7 @@ public class DispatcherProducerTest {
 
     @Test
     public void shouldReturnADifferentDispatcher() throws Exception {
-        Dispatcher dispatcher = dispatcherProducer.produce(commandAPIInjectionPoint);
+        Dispatcher dispatcher = dispatcherProducer.produce(commandApiInjectionPoint);
         assertThat(dispatcher, notNullValue());
 
         Dispatcher anotherDispatcher = dispatcherProducer.produce(commandControllerInjectionPoint2);
@@ -139,15 +139,15 @@ public class DispatcherProducerTest {
     @Test
     public void shouldRegisterHandler() throws Exception {
         dispatcherProducer.register(new ServiceComponentFoundEvent(COMMAND_API, bean));
-        
-        Dispatcher dispatcher = dispatcherProducer.produce(commandAPIInjectionPoint);
+
+        Dispatcher dispatcher = dispatcherProducer.produce(commandApiInjectionPoint);
         assertThat(dispatcher, notNullValue());
         dispatcher.dispatch(envelope);
         assertThat(handlerInstance.envelope, equalTo(envelope));
     }
 
     @Adapter(COMMAND_API)
-    public static class TestCommandAPIAdaptor {
+    public static class TestCommandApiAdaptor {
     }
 
     @Adapter(COMMAND_CONTROLLER)
@@ -159,7 +159,7 @@ public class DispatcherProducerTest {
     }
 
     @ServiceComponent(COMMAND_API)
-    public static class TestCommandAPIHandler {
+    public static class TestCommandApiHandler {
 
         public Envelope envelope;
 

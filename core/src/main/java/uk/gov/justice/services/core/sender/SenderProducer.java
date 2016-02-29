@@ -40,6 +40,7 @@ public class SenderProducer {
      * @param injectionPoint injection point where the Sender is being injected into.
      * @return An implementation of the Sender.
      */
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Produces
     public Sender produce(final InjectionPoint injectionPoint) {
         final Class targetClass = injectionPoint.getMember().getDeclaringClass();
@@ -53,7 +54,7 @@ public class SenderProducer {
 
     private Sender getSender(final Component component) {
         if (!senderMap.containsKey(component)) {
-            senderMap.put(component, new DefaultSender(jmsSender, componentDestination.getDefault(component), jmsEndpoints));
+            senderMap.putIfAbsent(component, new DefaultSender(jmsSender, componentDestination.getDefault(component), jmsEndpoints));
         }
         return senderMap.get(component);
     }

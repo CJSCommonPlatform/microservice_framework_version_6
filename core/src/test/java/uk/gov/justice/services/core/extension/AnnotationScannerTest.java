@@ -36,7 +36,7 @@ public class AnnotationScannerTest {
     private ServiceComponentFoundEvent serviceComponentFoundEvent;
 
     @Mock
-    private Bean<TestCommandAPIHandler> beanMockCommandAPIHandler;
+    private Bean<TestCommandApiHandler> beanMockCommandApiHandler;
 
     @Mock
     private Bean<TestCommandController> beanMockCommandController;
@@ -53,17 +53,17 @@ public class AnnotationScannerTest {
     public void setup() {
         annotationScanner = new AnnotationScanner();
 
-        doReturn(TestCommandAPIHandler.class).when(beanMockCommandAPIHandler).getBeanClass();
+        doReturn(TestCommandApiHandler.class).when(beanMockCommandApiHandler).getBeanClass();
         doReturn(TestCommandController.class).when(beanMockCommandController).getBeanClass();
         doReturn(TestCommandHandler.class).when(beanMockCommandHandler).getBeanClass();
         doReturn(Object.class).when(beanMockDummy).getBeanClass();
     }
 
     @Test
-    public void shouldFireCommandAPIFoundEventWithCommandAPI() throws Exception {
+    public void shouldFireCommandApiFoundEventWithCommandApi() throws Exception {
         ArgumentCaptor<ServiceComponentFoundEvent> captor = ArgumentCaptor.forClass(ServiceComponentFoundEvent.class);
         doReturn(new HashSet<Bean>() {{
-            add(beanMockCommandAPIHandler);
+            add(beanMockCommandApiHandler);
         }}).when(beanManager).getBeans(any(), any());
 
         annotationScanner.afterDeploymentValidation(afterDeploymentValidation, beanManager);
@@ -110,7 +110,7 @@ public class AnnotationScannerTest {
     }
 
     @ServiceComponent(COMMAND_API)
-    public static class TestCommandAPIHandler {
+    public static class TestCommandApiHandler {
     }
 
     @ServiceComponent(COMMAND_CONTROLLER)

@@ -5,8 +5,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
-import uk.gov.justice.services.core.handler.HandlerUtilTest;
 import uk.gov.justice.services.core.jms.JmsEndpoints;
 import uk.gov.justice.services.core.jms.JmsSender;
 
@@ -27,7 +27,7 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 public class SenderProducerTest {
 
     @Mock
-    private InjectionPoint commandAPIInjectionPoint;
+    private InjectionPoint commandApiInjectionPoint;
 
     @Mock
     private InjectionPoint commandControllerInjectionPoint1;
@@ -42,7 +42,7 @@ public class SenderProducerTest {
     private InjectionPoint invalidInjectionPoint;
 
     @Mock
-    private Member commandAPIMember;
+    private Member commandApiMember;
 
     @Mock
     private Member commandControllerMember1;
@@ -60,41 +60,41 @@ public class SenderProducerTest {
     private JmsSender jmsSender;
 
     @Mock
-    private Sender commandAPISender;
+    private Sender commandApiSender;
 
     private SenderProducer senderProducer;
 
+    private JmsEndpoints jmsEndpoints;
+
+    private Sender sender;
+
     @Before
     public void setup() {
+        jmsEndpoints = new JmsEndpoints();
         senderProducer = new SenderProducer();
-        senderProducer.jmsEndpoints = new JmsEndpoints();
+        senderProducer.jmsEndpoints = jmsEndpoints;
         senderProducer.jmsSender = jmsSender;
         senderProducer.componentDestination = new ComponentDestination();
-
-        when(commandAPIInjectionPoint.getMember()).thenReturn(commandAPIMember);
-        when(commandControllerInjectionPoint1.getMember()).thenReturn(commandControllerMember1);
-        when(commandControllerInjectionPoint2.getMember()).thenReturn(commandControllerMember2);
-        when(commandHandlerInjectionPoint.getMember()).thenReturn(commandHandlerMember);
-        when(invalidInjectionPoint.getMember()).thenReturn(invalidMember);
-
-        doReturn(TestCommandAPI.class).when(commandAPIMember).getDeclaringClass();
-        doReturn(TestCommandController1.class).when(commandControllerMember1).getDeclaringClass();
-        doReturn(TestCommandController1.class).when(commandControllerMember2).getDeclaringClass();
-        doReturn(TestCommandHandler.class).when(commandHandlerMember).getDeclaringClass();
-        doReturn(HandlerUtilTest.InvalidHandler.class).when(invalidMember).getDeclaringClass();
-
     }
 
     @Test
     public void shouldReturnSender() throws Exception {
+        mockInjectionPoint(commandControllerInjectionPoint1, commandControllerMember1, TestCommandController1.class);
+
         Sender sender = senderProducer.produce(commandControllerInjectionPoint1);
+
         assertThat(sender, notNullValue());
+        assertThat(sender, equalTo(createSender(COMMAND_HANDLER)));
     }
 
     @Test
     public void shouldReturnExistingSender() throws Exception {
+        mockInjectionPoint(commandControllerInjectionPoint1, commandControllerMember1, TestCommandController1.class);
+        mockInjectionPoint(commandControllerInjectionPoint2, commandControllerMember2, TestCommandController2.class);
+
         Sender sender = senderProducer.produce(commandControllerInjectionPoint1);
         assertThat(sender, notNullValue());
+        assertThat(sender, equalTo(createSender(COMMAND_HANDLER)));
 
         Sender anotherSender = senderProducer.produce(commandControllerInjectionPoint2);
         assertThat(anotherSender, equalTo(sender));
@@ -102,25 +102,44 @@ public class SenderProducerTest {
 
     @Test
     public void shouldReturnADifferentSender() throws Exception {
-        Sender sender = senderProducer.produce(commandAPIInjectionPoint);
+        mockInjectionPoint(commandApiInjectionPoint, commandApiMember, TestCommandApi.class);
+        mockInjectionPoint(commandControllerInjectionPoint2, commandControllerMember2, TestCommandController2.class);
+
+        Sender sender = senderProducer.produce(commandApiInjectionPoint);
         assertThat(sender, notNullValue());
+        assertThat(sender, equalTo(createSender(COMMAND_CONTROLLER)));
 
         Sender anotherSender = senderProducer.produce(commandControllerInjectionPoint2);
         assertThat(anotherSender, not(equalTo(sender)));
+        assertThat(anotherSender, equalTo(createSender(COMMAND_HANDLER)));
+        assertThat(anotherSender, not(equalTo(createSender(COMMAND_CONTROLLER))));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionWithInvalidHandler() throws Exception {
+        mockInjectionPoint(invalidInjectionPoint, invalidMember, TestInvalidHandler.class);
+
         senderProducer.produce(invalidInjectionPoint);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionWithInvalidComponent() throws Exception {
+        mockInjectionPoint(commandHandlerInjectionPoint, commandHandlerMember, TestCommandHandler.class);
+
         senderProducer.produce(commandHandlerInjectionPoint);
     }
 
+    private void mockInjectionPoint(final InjectionPoint injectionPoint, final Member member, final Class declaringClass) {
+        when(injectionPoint.getMember()).thenReturn(member);
+        doReturn(declaringClass).when(member).getDeclaringClass();
+    }
+
+    private Sender createSender(final Component destinationComponent) {
+        return new DefaultSender(jmsSender, destinationComponent, jmsEndpoints);
+    }
+
     @ServiceComponent(COMMAND_API)
-    public static class TestCommandAPI {
+    public static class TestCommandApi {
     }
 
     @ServiceComponent(COMMAND_CONTROLLER)

@@ -17,6 +17,7 @@ import java.util.Optional;
  */
 public class AnnotationScanner implements Extension {
 
+    @SuppressWarnings("unused")
     void afterDeploymentValidation(@Observes final AfterDeploymentValidation event, final BeanManager beanManager) {
         beanManager.getBeans(Object.class, new AnnotationLiteral<Any>() {
         }).stream().forEach(bean -> getEvent(bean).ifPresent(x -> beanManager.fireEvent(x)));
@@ -29,6 +30,7 @@ public class AnnotationScanner implements Extension {
      * @param bean a bean that could be a handler.
      * @return an optional event.
      */
+    @SuppressWarnings({"rawtypes", "unchecked"})
     private Optional<ServiceComponentFoundEvent> getEvent(final Bean bean) {
         if (bean.getBeanClass().isAnnotationPresent(ServiceComponent.class)) {
             return Optional.of(new ServiceComponentFoundEvent(Component.getComponentFromServiceComponent(bean.getBeanClass()), bean));

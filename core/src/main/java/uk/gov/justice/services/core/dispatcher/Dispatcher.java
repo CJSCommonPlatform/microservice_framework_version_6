@@ -7,7 +7,9 @@ import uk.gov.justice.services.messaging.Envelope;
  * Dispatches command to the correct handler.
  * The framework will inject the correct implementation based on the {@link Adapter} annotation.
  */
+@FunctionalInterface
 public interface Dispatcher {
+
     /**
      * Dispatches the {@code envelope} to the correct handler.
      *

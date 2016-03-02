@@ -22,6 +22,7 @@ import java.lang.reflect.Member;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
@@ -118,7 +119,7 @@ public class DispatcherProducerTest {
         assertThat(dispatcher, notNullValue());
 
         Dispatcher anotherDispatcher = dispatcherProducer.produce(commandControllerInjectionPoint2);
-        assertThat(anotherDispatcher, equalTo(dispatcher));
+        assertThat(anotherDispatcher, sameInstance(dispatcher));
     }
 
     @Test
@@ -172,7 +173,6 @@ public class DispatcherProducerTest {
         public void doSomethingElse(Envelope envelope) {
             this.envelope = null;
         }
-
 
     }
 }

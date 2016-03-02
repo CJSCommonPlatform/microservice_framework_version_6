@@ -1,6 +1,7 @@
 package uk.gov.justice.services.core.dispatcher;
 
 
+import uk.gov.justice.services.core.handler.exception.MissingHandlerException;
 import uk.gov.justice.services.core.handler.registry.HandlerRegistry;
 import uk.gov.justice.services.messaging.Envelope;
 
@@ -33,7 +34,7 @@ public class AsynchronousDispatcher implements Dispatcher {
         if (handlerRegistry.canHandle(name)) {
             handlerRegistry.get(name).execute(envelope);
         } else {
-            throw new IllegalArgumentException("No handler registered to handle action :" + name);
+            throw new MissingHandlerException("No handler registered to handle action :" + name);
         }
 
     }

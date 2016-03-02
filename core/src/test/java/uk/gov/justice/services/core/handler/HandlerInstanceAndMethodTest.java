@@ -1,6 +1,7 @@
 package uk.gov.justice.services.core.handler;
 
 import com.google.common.io.Resources;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -26,17 +27,22 @@ public class HandlerInstanceAndMethodTest {
     @Mock
     private CommandHandler commandHandler;
 
+    private Envelope envelope;
+
+    @Before
+    public void setup() throws Exception {
+        envelope = testEnvelope("envelope.json");
+    }
+
     @Test
     public void shouldExecuteHandlerMethod() throws Exception {
-        Envelope envelope = testEnvelope("envelope.json");
         handlerInstanceWithMethod().execute(envelope);
-        verify(commandHandler).handler1(envelope);
+        verify(commandHandler).handles(envelope);
     }
 
     @Test(expected = HandlerExecutionException.class)
     public void shouldThrowHandlerExecutionExceptionIfExceptionThrown() throws Exception {
-        Envelope envelope = testEnvelope("envelope.json");
-        doThrow(new RuntimeException()).when(commandHandler).handler1(envelope);
+        doThrow(new RuntimeException()).when(commandHandler).handles(envelope);
         handlerInstanceWithMethod().execute(envelope);
     }
 
@@ -81,9 +87,7 @@ public class HandlerInstanceAndMethodTest {
     public static class CommandHandler {
 
         @Handles("test-context.commands.create-something")
-        public void handler1(final Envelope envelope) {
-            if (envelope == null) throw new IllegalArgumentException();
-
+        public void handles(final Envelope envelope) {
         }
 
     }

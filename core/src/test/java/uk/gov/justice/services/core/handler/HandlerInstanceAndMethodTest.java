@@ -1,7 +1,7 @@
 package uk.gov.justice.services.core.handler;
 
 import com.google.common.io.Resources;
-import org.hamcrest.CoreMatchers;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -12,7 +12,6 @@ import uk.gov.justice.services.core.util.JsonObjectConverter;
 import uk.gov.justice.services.messaging.Envelope;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.List;
@@ -28,45 +27,54 @@ public class HandlerInstanceAndMethodTest {
     @Mock
     private CommandHandler commandHandler;
 
-    @Test
-    public void shouldExecuteHandlerMethod() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, IOException {
-        Envelope envelope = testEnvelope("envelope.json");
-        List<Method> methods = HandlerUtil.findHandlerMethods(CommandHandler.class, Handles.class);
-        HandlerInstanceAndMethod handlerInstanceAndMethod = new HandlerInstanceAndMethod(commandHandler, methods.get(0));
-        assertThat(handlerInstanceAndMethod, notNullValue());
+    private Envelope envelope;
 
-        handlerInstanceAndMethod.execute(envelope);
-        verify(commandHandler).handler1(envelope);
+    @Before
+    public void setup() throws Exception {
+        envelope = testEnvelope("envelope.json");
+    }
+
+    @Test
+    public void shouldExecuteHandlerMethod() throws Exception {
+        handlerInstanceWithMethod().execute(envelope);
+        verify(commandHandler).handles(envelope);
     }
 
     @Test(expected = HandlerExecutionException.class)
-    public void shouldThrowExceptionWithExceptionFromuteThrowsException() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, IOException {
-        Envelope envelope = testEnvelope("envelope.json");
-        List<Method> methods = HandlerUtil.findHandlerMethods(CommandHandler.class, Handles.class);
-        HandlerInstanceAndMethod handlerInstanceAndMethod = new HandlerInstanceAndMethod(commandHandler, methods.get(0));
-        assertThat(handlerInstanceAndMethod, CoreMatchers.notNullValue());
-
-        doThrow(new RuntimeException()).when(commandHandler).handler1(envelope);
-        handlerInstanceAndMethod.execute(envelope);
+    public void shouldThrowHandlerExecutionExceptionIfExceptionThrown() throws Exception {
+        doThrow(new RuntimeException()).when(commandHandler).handles(envelope);
+        handlerInstanceWithMethod().execute(envelope);
     }
 
     @Test
     public void shouldReturnStringDescriptionOfHandlerInstanceAndMethod() {
-        List<Method> methods = HandlerUtil.findHandlerMethods(CommandHandler.class, Handles.class);
-        HandlerInstanceAndMethod handlerInstanceAndMethod = new HandlerInstanceAndMethod(commandHandler, methods.get(0));
-        assertThat(handlerInstanceAndMethod.toString(), CoreMatchers.notNullValue());
+        assertThat(handlerInstanceWithMethod().toString(), notNullValue());
     }
 
     @Test
     public void shouldNotReturnNullWithNullHandlerInstance() {
-        List<Method> methods = HandlerUtil.findHandlerMethods(CommandHandler.class, Handles.class);
-        HandlerInstanceAndMethod handlerInstanceAndMethod = new HandlerInstanceAndMethod(null, methods.get(0));
-        assertThat(handlerInstanceAndMethod.toString(), CoreMatchers.notNullValue());
+        assertThat(nullHandlerInstanceWithMethod().toString(), notNullValue());
     }
 
     @Test
     public void shouldNotReturnNullWithNullMethod() {
-        assertThat(new HandlerInstanceAndMethod(commandHandler, null).toString(), CoreMatchers.notNullValue());
+        assertThat(handlerInstanceWithNullMethod().toString(), notNullValue());
+    }
+
+    private HandlerInstanceAndMethod handlerInstanceWithNullMethod() {
+        return new HandlerInstanceAndMethod(commandHandler, null);
+    }
+
+    private HandlerInstanceAndMethod nullHandlerInstanceWithMethod() {
+        return new HandlerInstanceAndMethod(null, methods().get(0));
+    }
+
+    private HandlerInstanceAndMethod handlerInstanceWithMethod() {
+        return new HandlerInstanceAndMethod(commandHandler, methods().get(0));
+    }
+
+    private List<Method> methods() {
+        return HandlerUtil.findHandlerMethods(CommandHandler.class, Handles.class);
     }
 
     private Envelope testEnvelope(String fileName) throws IOException {
@@ -79,12 +87,8 @@ public class HandlerInstanceAndMethodTest {
     public static class CommandHandler {
 
         @Handles("test-context.commands.create-something")
-        public void handler1(final Envelope envelope) {
-            if (envelope == null) throw new IllegalArgumentException();
-
+        public void handles(final Envelope envelope) {
         }
 
     }
-
-
 }

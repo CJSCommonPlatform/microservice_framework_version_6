@@ -7,14 +7,14 @@ import javax.enterprise.inject.spi.Bean;
 public class ServiceComponentFoundEvent {
 
     private final Component component;
-    private final Bean handlerBean;
+    private final Bean<Object> handlerBean;
 
-    public ServiceComponentFoundEvent(final Component component, final Bean commandHandlerBean) {
+    public ServiceComponentFoundEvent(final Component component, final Bean<Object> commandHandlerBean) {
         this.component = component;
         this.handlerBean = commandHandlerBean;
     }
 
-    public Bean getHandlerBean() {
+    public Bean<Object> getHandlerBean() {
         return handlerBean;
     }
 

@@ -46,7 +46,6 @@ public class DispatcherProducer {
         }
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     void register(@Observes final ServiceComponentFoundEvent event) {
         getDispatcher(event.getComponent()).register(instantiateHandler(event.getHandlerBean()));
     }

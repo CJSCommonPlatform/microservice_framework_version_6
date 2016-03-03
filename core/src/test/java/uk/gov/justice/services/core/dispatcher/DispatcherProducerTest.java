@@ -64,7 +64,7 @@ public class DispatcherProducerTest {
     private ServiceComponentFoundEvent serviceComponentFoundEvent;
 
     @Mock
-    private Bean bean;
+    private Bean<Object> bean;
 
     @Mock
     private AsynchronousDispatcher commandApiDispatcher;

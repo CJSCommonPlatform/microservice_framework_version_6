@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -39,8 +40,7 @@ public class JsonObjectConverterTest {
     public void shouldReturnJsonObjectFromString() throws Exception {
         JsonObjectConverter jsonObjectConverter = new JsonObjectConverter();
 
-        JsonObject joEnvelope = jsonObjectConverter.fromString(Resources.toString(Resources.getResource("json/envelope.json"),
-                Charset.defaultCharset()));
+        JsonObject joEnvelope = jsonObjectConverter.fromString(jsonFromFile("envelope"));
 
         assertThat(joEnvelope, notNullValue());
         JsonObject joMetadata = joEnvelope.getJsonObject(JsonObjectConverter.METADATA);
@@ -74,6 +74,7 @@ public class JsonObjectConverterTest {
     @Test
     public void shouldReturnStringFromJsonObject() throws IOException {
         JsonObjectConverter jsonObjectConverter = new JsonObjectConverter();
+        
         String envelopeAsString = jsonObjectConverter.asString(envelopeAsJsonObject());
 
         assertThat(envelopeAsString, notNullValue());
@@ -87,15 +88,13 @@ public class JsonObjectConverterTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionOnMissingId() throws Exception {
-        final JsonObject joEnvelope = new JsonObjectConverter().fromString(Resources.toString(Resources.getResource("json/envelope-missing-id.json"),
-                Charset.defaultCharset()));
+        final JsonObject joEnvelope = new JsonObjectConverter().fromString(jsonFromFile("json/envelope-missing-id.json"));
         JsonObjectMetadata.metadataFrom(joEnvelope.getJsonObject(JsonObjectConverter.METADATA));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionOnMissingName() throws Exception {
-        final JsonObject joEnvelope = new JsonObjectConverter().fromString(Resources.toString(Resources.getResource("json/envelope-missing-name.json"),
-                Charset.defaultCharset()));
+        final JsonObject joEnvelope = new JsonObjectConverter().fromString(jsonFromFile("envelope-missing-name"));
         JsonObjectMetadata.metadataFrom(joEnvelope.getJsonObject(JsonObjectConverter.METADATA));
     }
 
@@ -103,8 +102,7 @@ public class JsonObjectConverterTest {
     public void shouldReturnEnvelope() throws Exception {
         final JsonObjectConverter jsonObjectConverter = new JsonObjectConverter();
 
-        Envelope envelope = jsonObjectConverter.asEnvelope(jsonObjectConverter.fromString(Resources.toString(Resources.getResource("json/envelope.json"),
-                Charset.defaultCharset())));
+        Envelope envelope = jsonObjectConverter.asEnvelope(jsonObjectConverter.fromString(jsonFromFile("envelope")));
 
         assertThat(envelope, notNullValue());
         Metadata metadata = envelope.metadata();
@@ -119,7 +117,7 @@ public class JsonObjectConverterTest {
         assertThat(metadata.sessionId().get(), equalTo(SESSION));
         assertThat(metadata.userId().get(), equalTo(USER));
 
-        List causation = metadata.causation();
+        List<UUID> causation = metadata.causation();
         assertThat(causation, notNullValue());
         assertThat(causation.size(), equalTo(2));
         assertThat(causation.get(0).toString(), equalTo(CAUSATION_1));
@@ -130,13 +128,12 @@ public class JsonObjectConverterTest {
     @Test
     public void shouldReturnJsonObjectFromEnvelope() throws IOException {
         final JsonObjectConverter jsonObjectConverter = new JsonObjectConverter();
-
-        final JsonObject expectedEnvelope = jsonObjectConverter.fromString(Resources.toString(Resources.getResource("json/envelope.json"),
-                Charset.defaultCharset()));
+        final JsonObject expectedEnvelope = jsonObjectConverter.fromString(jsonFromFile("envelope"));
         final Metadata metadata = JsonObjectMetadata.metadataFrom(expectedEnvelope.getJsonObject(JsonObjectConverter.METADATA));
         final JsonObject payload = jsonObjectConverter.extractPayloadFromEnvelope(expectedEnvelope);
 
         final Envelope envelope = DefaultEnvelope.envelopeFrom(metadata, payload);
+
         assertThat(jsonObjectConverter.fromEnvelope(envelope), equalTo(expectedEnvelope));
     }
 
@@ -154,6 +151,10 @@ public class JsonObjectConverterTest {
         envelopeBuilder.add("payloadVersion", PAYLOAD_VERSION);
 
         return envelopeBuilder.build();
+    }
+
+    private String jsonFromFile(final String name) throws IOException {
+        return Resources.toString(Resources.getResource(String.format("json/%s.json", name)), Charset.defaultCharset());
     }
 
 }

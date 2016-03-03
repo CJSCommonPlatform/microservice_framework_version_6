@@ -12,4 +12,5 @@ import javax.servlet.annotation.WebServlet;
         value = "/internal/metrics/*"
 )
 public class MetricsAdminServlet extends AdminServlet {
+    private static final long serialVersionUID = 8926448900805363286L;
 }

@@ -27,6 +27,8 @@
         <module>rest-adapter</module>
         <module>core</module>
         <module>metrics</module>
+        <module>components</module>
+        <module>example</module>
     </modules>
 
     <dependencyManagement>

@@ -5,7 +5,15 @@ package uk.gov.justice.services.core.annotation;
  */
 public enum Component {
 
-    COMMAND_API, COMMAND_CONTROLLER, COMMAND_HANDLER;
+    COMMAND_API("commands", "api"), COMMAND_CONTROLLER("commands", "controller"), COMMAND_HANDLER("commands", "handler");
+
+    private final String pillar;
+    private final String tier;
+
+    Component(final String pillar, final String tier) {
+        this.pillar = pillar;
+        this.tier = tier;
+    }
 
     /**
      * Retrieves the Component of the provided {@link ServiceComponent}
@@ -27,6 +35,14 @@ public enum Component {
     public static Component getComponentFromAdapter(final Class<Adapter> clazz) {
         final Adapter adapter = clazz.getAnnotation(Adapter.class);
         return adapter.value();
+    }
+
+    public String pillar() {
+        return pillar;
+    }
+
+    public String tier() {
+        return tier;
     }
 
 }

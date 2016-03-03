@@ -2,13 +2,16 @@ package uk.gov.justice.services.core.util;
 
 import com.google.common.io.Resources;
 import org.junit.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
 import uk.gov.justice.services.messaging.DefaultEnvelope;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonObjectMetadata;
 import uk.gov.justice.services.messaging.Metadata;
 
+import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
@@ -21,7 +24,7 @@ import static org.junit.Assert.assertThat;
 public class JsonObjectConverterTest {
 
     private static final String ID = "861c9430-7bc6-4bf0-b549-6534394b8d65";
-    private static final String NAME = "court-names.commands.create-court-name";
+    private static final String NAME = "test.commands.do-something";
     private static final String CLIENT = "d51597dc-2526-4c71-bd08-5031c79f11e1";
     private static final String SESSION = "45b0c3fe-afe6-4652-882f-7882d79eadd9";
     private static final String USER = "72251abb-5872-46e3-9045-950ac5bae399";
@@ -33,7 +36,7 @@ public class JsonObjectConverterTest {
     private static final String PAYLOAD_NAME = "Name of the Payload";
 
     @Test
-    public void fromString() throws Exception {
+    public void shouldReturnJsonObjectFromString() throws Exception {
         JsonObjectConverter jsonObjectConverter = new JsonObjectConverter();
 
         JsonObject joEnvelope = jsonObjectConverter.fromString(Resources.toString(Resources.getResource("json/envelope.json"),
@@ -63,27 +66,41 @@ public class JsonObjectConverterTest {
         assertThat(causation.get(1).toString().replaceAll("\"", ""), equalTo(CAUSATION_2));
 
         assertThat(joEnvelope.getString("payloadId"), equalTo(PAYLOAD_ID));
-        assertThat(new Long(joEnvelope.getInt("payloadVersion")), equalTo(PAYLOAD_VERSION));
+        assertThat((long) joEnvelope.getInt("payloadVersion"), equalTo(PAYLOAD_VERSION));
         assertThat(joEnvelope.getString("payloadName"), equalTo(PAYLOAD_NAME));
 
     }
 
+    @Test
+    public void shouldReturnStringFromJsonObject() throws IOException {
+        JsonObjectConverter jsonObjectConverter = new JsonObjectConverter();
+        String envelopeAsString = jsonObjectConverter.asString(envelopeAsJsonObject());
+
+        assertThat(envelopeAsString, notNullValue());
+        JSONAssert.assertEquals("{payloadId:" + PAYLOAD_ID + "}", envelopeAsString, false);
+        JSONAssert.assertEquals("{payloadName:" + PAYLOAD_NAME + "}", envelopeAsString, false);
+        JSONAssert.assertEquals("{payloadVersion:" + PAYLOAD_VERSION + "}", envelopeAsString, false);
+        JSONAssert.assertEquals("{_metadata:{id:" + ID + "}}", envelopeAsString, false);
+        JSONAssert.assertEquals("{_metadata:{name:" + NAME + "}}", envelopeAsString, false);
+
+    }
+
     @Test(expected = IllegalArgumentException.class)
-    public void asMetadata_MissingId() throws Exception {
+    public void shouldThrowExceptionOnMissingId() throws Exception {
         final JsonObject joEnvelope = new JsonObjectConverter().fromString(Resources.toString(Resources.getResource("json/envelope-missing-id.json"),
                 Charset.defaultCharset()));
         JsonObjectMetadata.metadataFrom(joEnvelope.getJsonObject(JsonObjectConverter.METADATA));
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void asMetadata_MissingName() throws Exception {
+    public void shouldThrowExceptionOnMissingName() throws Exception {
         final JsonObject joEnvelope = new JsonObjectConverter().fromString(Resources.toString(Resources.getResource("json/envelope-missing-name.json"),
                 Charset.defaultCharset()));
         JsonObjectMetadata.metadataFrom(joEnvelope.getJsonObject(JsonObjectConverter.METADATA));
     }
 
     @Test
-    public void asEnvelope() throws Exception {
+    public void shouldReturnEnvelope() throws Exception {
         final JsonObjectConverter jsonObjectConverter = new JsonObjectConverter();
 
         Envelope envelope = jsonObjectConverter.asEnvelope(jsonObjectConverter.fromString(Resources.toString(Resources.getResource("json/envelope.json"),
@@ -111,7 +128,7 @@ public class JsonObjectConverterTest {
     }
 
     @Test
-    public void fromEnvelope() throws IOException {
+    public void shouldReturnJsonObjectFromEnvelope() throws IOException {
         final JsonObjectConverter jsonObjectConverter = new JsonObjectConverter();
 
         final JsonObject expectedEnvelope = jsonObjectConverter.fromString(Resources.toString(Resources.getResource("json/envelope.json"),
@@ -121,6 +138,22 @@ public class JsonObjectConverterTest {
 
         final Envelope envelope = DefaultEnvelope.envelopeFrom(metadata, payload);
         assertThat(jsonObjectConverter.fromEnvelope(envelope), equalTo(expectedEnvelope));
+    }
+
+    private JsonObject envelopeAsJsonObject() {
+
+        JsonObjectBuilder envelopeBuilder = Json.createObjectBuilder();
+
+        JsonObjectBuilder metadataBuilder = Json.createObjectBuilder();
+        metadataBuilder.add(JsonObjectMetadata.ID, ID);
+        metadataBuilder.add(JsonObjectMetadata.NAME, NAME);
+
+        envelopeBuilder.add(JsonObjectConverter.METADATA, metadataBuilder.build());
+        envelopeBuilder.add("payloadId", PAYLOAD_ID);
+        envelopeBuilder.add("payloadName", PAYLOAD_NAME);
+        envelopeBuilder.add("payloadVersion", PAYLOAD_VERSION);
+
+        return envelopeBuilder.build();
     }
 
 }

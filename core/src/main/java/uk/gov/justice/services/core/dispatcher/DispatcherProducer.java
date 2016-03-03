@@ -62,8 +62,7 @@ public class DispatcherProducer {
     }
 
     private AsynchronousDispatcher getDispatcher(final Component component) {
-        dispatcherMap.putIfAbsent(component, new AsynchronousDispatcher());
-        return dispatcherMap.get(component);
+        return dispatcherMap.computeIfAbsent(component, c -> new AsynchronousDispatcher());
     }
 
 }

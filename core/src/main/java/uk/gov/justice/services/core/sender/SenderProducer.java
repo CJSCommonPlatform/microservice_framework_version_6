@@ -2,8 +2,8 @@ package uk.gov.justice.services.core.sender;
 
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
-import uk.gov.justice.services.core.jms.JmsEndpoints;
-import uk.gov.justice.services.core.jms.JmsSender;
+import uk.gov.justice.services.core.annotation.exception.MissingAnnotationException;
+import uk.gov.justice.services.core.jms.JmsSenderFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
@@ -20,10 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SenderProducer {
 
     @Inject
-    JmsSender jmsSender;
-
-    @Inject
-    JmsEndpoints jmsEndpoints;
+    JmsSenderFactory jmsSenderFactory;
 
     @Inject
     ComponentDestination componentDestination;
@@ -48,13 +45,12 @@ public class SenderProducer {
         if (targetClass.isAnnotationPresent(ServiceComponent.class)) {
             return getSender(Component.getComponentFromServiceComponent(targetClass));
         } else {
-            throw new IllegalArgumentException("InjectionPoint class must be annotated with " + ServiceComponent.class);
+            throw new MissingAnnotationException("InjectionPoint class must be annotated with " + ServiceComponent.class);
         }
     }
 
     private Sender getSender(final Component component) {
-        senderMap.putIfAbsent(component, new DefaultSender(jmsSender, componentDestination.getDefault(component), jmsEndpoints));
-        return senderMap.get(component);
+        return senderMap.computeIfAbsent(component, c -> jmsSenderFactory.createJmsSender(componentDestination.getDefault(c)));
     }
 
 }

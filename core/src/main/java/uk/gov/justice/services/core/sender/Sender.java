@@ -5,6 +5,7 @@ import uk.gov.justice.services.messaging.Envelope;
 /**
  * Sends an action to the next layer.
  */
+@FunctionalInterface
 public interface Sender {
 
     /**

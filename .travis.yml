@@ -1,6 +1,9 @@
 language: java
 jdk:
   - oraclejdk8
+cache:
+  directories:
+  - $HOME/.m2
 before_install: git clone https://github.com/CJSCommonPlatform/travis-settings.git target/travis-settings
 install: true
 script: mvn -Dmaven.wagon.http.ssl.insecure=true -B -V --settings target/travis-settings/settings.xml verify coveralls:report

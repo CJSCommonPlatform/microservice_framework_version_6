@@ -18,6 +18,24 @@ import static uk.gov.justice.services.messaging.JsonObjects.getUUIDs;
  */
 public class JsonObjectMetadata implements Metadata {
 
+    public static final String ID = "id";
+    public static final String NAME = "name";
+    public static final String CORRELATION = "correlation";
+    public static final String CLIENT_ID = "client";
+    public static final String CONTEXT = "context";
+    public static final String USER_ID = "user";
+    public static final String SESSION_ID = "session";
+    public static final String STREAM = "stream";
+    public static final String STREAM_ID = "id";
+    public static final String VERSION = "version";
+    public static final String CAUSATION = "causation";
+
+    private static final String[] USER_ID_PATH = new String[]{CONTEXT, USER_ID};
+    private static final String[] CLIENT_CORRELATION_PATH = new String[]{CORRELATION, CLIENT_ID};
+    private static final String[] VERSION_PATH = new String[]{STREAM, VERSION};
+    private static final String[] SESSION_ID_PATH = new String[]{CONTEXT, SESSION_ID};
+    private static final String[] STREAM_ID_PATH = new String[]{STREAM, STREAM_ID};
+
     private final JsonObject metadata;
 
     private JsonObjectMetadata(final JsonObject metadata) {
@@ -79,11 +97,11 @@ public class JsonObjectMetadata implements Metadata {
      */
     public static Metadata metadataFrom(final JsonObject jsonObject) {
 
-        JsonString id = getJsonString(jsonObject, Metadata.ID)
+        JsonString id = getJsonString(jsonObject, ID)
                 .orElseThrow(() -> new IllegalArgumentException("Missing id field"));
         UUID.fromString(id.getString());
 
-        JsonString name = getJsonString(jsonObject, Metadata.NAME)
+        JsonString name = getJsonString(jsonObject, NAME)
                 .orElseThrow(() -> new IllegalArgumentException("Missing name field"));
         if (name.getString().isEmpty()) {
             throw new IllegalArgumentException("Name field cannot be empty");

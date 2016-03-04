@@ -1,6 +1,7 @@
 package uk.gov.justice.services.adapter.rest.envelope;
 
 import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonObjectMetadata;
 import uk.gov.justice.services.messaging.JsonObjects;
 import uk.gov.justice.services.messaging.Metadata;
 
@@ -17,11 +18,11 @@ import static uk.gov.justice.services.adapter.rest.HeaderConstants.CLIENT_CORREL
 import static uk.gov.justice.services.adapter.rest.HeaderConstants.SESSION_ID;
 import static uk.gov.justice.services.adapter.rest.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.messaging.DefaultEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.CLIENT_ID;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.CONTEXT;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.CORRELATION;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
-import static uk.gov.justice.services.messaging.Metadata.CLIENT_ID;
-import static uk.gov.justice.services.messaging.Metadata.CONTEXT;
-import static uk.gov.justice.services.messaging.Metadata.CORRELATION;
-import static uk.gov.justice.services.messaging.Metadata.ID;
 
 /**
  * Utility class for building envelopes from a payload, headers, and path parameters.
@@ -87,8 +88,8 @@ public class RestEnvelopeBuilder {
                 .orElse(Json.createObjectBuilder());
 
         final Map<String, String> params = pathParams.orElse(emptyMap());
-        for (String key : params.keySet()) {
-            payloadBuilder = payloadBuilder.add(key, params.get(key));
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            payloadBuilder = payloadBuilder.add(entry.getKey(), entry.getValue());
         }
 
         return payloadBuilder.build();
@@ -103,7 +104,7 @@ public class RestEnvelopeBuilder {
                 new IllegalStateException("Cannot get name from empty headers"));
 
         StructuredMediaType mediaType = new StructuredMediaType(httpHeaders.getMediaType());
-        metadataBuilder = metadataBuilder.add(Metadata.NAME, mediaType.getName());
+        metadataBuilder = metadataBuilder.add(JsonObjectMetadata.NAME, mediaType.getName());
 
         if (contains(CLIENT_CORRELATION_ID, httpHeaders)) {
             metadataBuilder = metadataBuilder
@@ -114,10 +115,10 @@ public class RestEnvelopeBuilder {
         if (contains(USER_ID, httpHeaders) || contains(SESSION_ID, httpHeaders)) {
             JsonObjectBuilder contextBuilder = Json.createObjectBuilder();
             if (contains(USER_ID, httpHeaders)) {
-                contextBuilder = contextBuilder.add(Metadata.USER_ID, getHeader(USER_ID, httpHeaders));
+                contextBuilder = contextBuilder.add(JsonObjectMetadata.USER_ID, getHeader(USER_ID, httpHeaders));
             }
             if (contains(SESSION_ID, httpHeaders)) {
-                contextBuilder = contextBuilder.add(Metadata.SESSION_ID, getHeader(SESSION_ID, httpHeaders));
+                contextBuilder = contextBuilder.add(JsonObjectMetadata.SESSION_ID, getHeader(SESSION_ID, httpHeaders));
             }
             metadataBuilder = metadataBuilder.add(CONTEXT, contextBuilder);
         }

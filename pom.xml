@@ -26,6 +26,9 @@
         <module>messaging</module>
         <module>rest-adapter</module>
         <module>core</module>
+        <module>metrics</module>
+        <module>components</module>
+        <module>example</module>
     </modules>
 
     <dependencyManagement>
@@ -45,7 +48,6 @@
             <plugin>
                 <groupId>org.eluder.coveralls</groupId>
                 <artifactId>coveralls-maven-plugin</artifactId>
-                <version>4.1.0</version>
             </plugin>
         </plugins>
     </build>

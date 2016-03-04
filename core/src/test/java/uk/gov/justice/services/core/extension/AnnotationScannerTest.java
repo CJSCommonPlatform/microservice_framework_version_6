@@ -36,13 +36,13 @@ public class AnnotationScannerTest {
     private ServiceComponentFoundEvent serviceComponentFoundEvent;
 
     @Mock
-    private Bean<TestCommandApiHandler> beanMockCommandApiHandler;
+    private Bean<Object> beanMockCommandApiHandler;
 
     @Mock
-    private Bean<TestCommandController> beanMockCommandController;
+    private Bean<Object> beanMockCommandController;
 
     @Mock
-    private Bean<TestCommandHandler> beanMockCommandHandler;
+    private Bean<Object> beanMockCommandHandler;
 
     @Mock
     private Bean<Object> beanMockDummy;
@@ -61,52 +61,45 @@ public class AnnotationScannerTest {
 
     @Test
     public void shouldFireCommandApiFoundEventWithCommandApi() throws Exception {
-        ArgumentCaptor<ServiceComponentFoundEvent> captor = ArgumentCaptor.forClass(ServiceComponentFoundEvent.class);
-        doReturn(new HashSet<Bean>() {{
-            add(beanMockCommandApiHandler);
-        }}).when(beanManager).getBeans(any(), any());
-
-        annotationScanner.afterDeploymentValidation(afterDeploymentValidation, beanManager);
-
-        verify(beanManager).fireEvent(captor.capture());
-        assertThat(captor.getValue(), CoreMatchers.instanceOf(ServiceComponentFoundEvent.class));
+        verifyIfEventFiredWith(beanMockCommandApiHandler);
     }
 
     @Test
     public void shouldFireCommandControllerFoundEventWithCommandController() throws Exception {
-        ArgumentCaptor<ServiceComponentFoundEvent> captor = ArgumentCaptor.forClass(ServiceComponentFoundEvent.class);
-        doReturn(new HashSet<Bean>() {{
-            add(beanMockCommandController);
-        }}).when(beanManager).getBeans(any(), any());
-
-        annotationScanner.afterDeploymentValidation(afterDeploymentValidation, beanManager);
-
-        verify(beanManager).fireEvent(captor.capture());
-        assertThat(captor.getValue(), CoreMatchers.instanceOf(ServiceComponentFoundEvent.class));
+        verifyIfEventFiredWith(beanMockCommandController);
     }
 
     @Test
     public void shouldFireCommandHandlerFoundEventWithCommandHandler() throws Exception {
+        verifyIfEventFiredWith(beanMockCommandHandler);
+    }
+
+    @Test
+    public void shouldNotFireAnyEventWithNoHandler() throws Exception {
+        mockBeanManagerGetBeansWith(beanMockDummy);
+
+        annotationScanner.afterDeploymentValidation(afterDeploymentValidation, beanManager);
+
+        verify(beanManager, never()).fireEvent(any());
+    }
+
+    @SuppressWarnings("serial")
+    private void mockBeanManagerGetBeansWith(Bean<Object> handler) {
+        doReturn(new HashSet<Bean<Object>>() {
+            {
+                add(handler);
+            }
+        }).when(beanManager).getBeans(any(), any());
+    }
+
+    private void verifyIfEventFiredWith(Bean<Object> handler) {
         ArgumentCaptor<ServiceComponentFoundEvent> captor = ArgumentCaptor.forClass(ServiceComponentFoundEvent.class);
-        doReturn(new HashSet<Bean>() {{
-            add(beanMockCommandHandler);
-        }}).when(beanManager).getBeans(any(), any());
+        mockBeanManagerGetBeansWith(handler);
 
         annotationScanner.afterDeploymentValidation(afterDeploymentValidation, beanManager);
 
         verify(beanManager).fireEvent(captor.capture());
         assertThat(captor.getValue(), CoreMatchers.instanceOf(ServiceComponentFoundEvent.class));
-    }
-
-    @Test
-    public void shouldNotFireAnyEventWithNoHandler() throws Exception {
-        doReturn(new HashSet<Bean>() {{
-            add(beanMockDummy);
-        }}).when(beanManager).getBeans(any(), any());
-
-        annotationScanner.afterDeploymentValidation(afterDeploymentValidation, beanManager);
-
-        verify(beanManager, never()).fireEvent(any());
     }
 
     @ServiceComponent(COMMAND_API)

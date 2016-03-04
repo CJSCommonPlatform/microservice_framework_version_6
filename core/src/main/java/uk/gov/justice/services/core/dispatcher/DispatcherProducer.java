@@ -46,7 +46,6 @@ public class DispatcherProducer {
         }
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     void register(@Observes final ServiceComponentFoundEvent event) {
         getDispatcher(event.getComponent()).register(instantiateHandler(event.getHandlerBean()));
     }
@@ -62,8 +61,7 @@ public class DispatcherProducer {
     }
 
     private AsynchronousDispatcher getDispatcher(final Component component) {
-        dispatcherMap.putIfAbsent(component, new AsynchronousDispatcher());
-        return dispatcherMap.get(component);
+        return dispatcherMap.computeIfAbsent(component, c -> new AsynchronousDispatcher());
     }
 
 }

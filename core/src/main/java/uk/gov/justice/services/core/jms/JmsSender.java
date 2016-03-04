@@ -1,39 +1,41 @@
 package uk.gov.justice.services.core.jms;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import uk.gov.justice.services.core.annotation.Component;
+import uk.gov.justice.services.core.context.ContextName;
+import uk.gov.justice.services.core.jms.converter.EnvelopeConverter;
 import uk.gov.justice.services.core.jms.exception.JmsSenderException;
-import uk.gov.justice.services.core.util.JsonObjectConverter;
+import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.Envelope;
 
-import javax.annotation.Resource;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import javax.enterprise.inject.Alternative;
 import javax.jms.JMSException;
 import javax.jms.Queue;
 import javax.jms.QueueConnection;
 import javax.jms.QueueConnectionFactory;
 import javax.jms.QueueSender;
 import javax.jms.QueueSession;
-import javax.jms.TextMessage;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import java.util.Objects;
 
-@ApplicationScoped
-public class JmsSender {
+@Alternative
+public class JmsSender implements Sender {
 
-    static final String JMS_HEADER_CPPNAME = "CPPNAME";
-
-    Logger logger = LoggerFactory.getLogger(JmsSender.class);
-
-    @Inject
-    JsonObjectConverter jsonObjectConverter;
-
-    @Resource(mappedName = "java:comp/DefaultJMSConnectionFactory")
-    QueueConnectionFactory queueConnectionFactory;
+    private final JmsEndpoints jmsEndpoints;
+    private final Component destinationComponent;
+    private final QueueConnectionFactory queueConnectionFactory;
 
     Context initialContext;
+    private EnvelopeConverter envelopeConverter;
+
+    public JmsSender(final Component destinationComponent, final EnvelopeConverter envelopeConverter, final JmsEndpoints jmsEndpoints,
+                     final QueueConnectionFactory queueConnectionFactory) {
+        this.envelopeConverter = envelopeConverter;
+        this.destinationComponent = destinationComponent;
+        this.jmsEndpoints = jmsEndpoints;
+        this.queueConnectionFactory = queueConnectionFactory;
+    }
 
     private Context getInitialContext() throws NamingException {
         if (initialContext == null) {
@@ -42,6 +44,24 @@ public class JmsSender {
         return initialContext;
     }
 
+    @Override
+    public void send(Envelope envelope) {
+        final String contextName = ContextName.fromName(envelope.metadata().name());
+        send(jmsEndpoints.getEndpoint(destinationComponent, contextName), envelope);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        JmsSender jmsSender = (JmsSender) o;
+        return destinationComponent == jmsSender.destinationComponent;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(destinationComponent);
+    }
 
     /**
      * Sends the <code>envelope</code> to the JMS queue <code>queueName</code>
@@ -49,25 +69,18 @@ public class JmsSender {
      * @param queueName Name of the queue.
      * @param envelope  Envelope that needs to be sent.
      */
-    public void send(final String queueName, final Envelope envelope) {
+    private void send(final String queueName, final Envelope envelope) {
 
         try {
             final Queue queue = (Queue) getInitialContext().lookup(queueName);
 
-            try (QueueConnection queueConnection = queueConnectionFactory.createQueueConnection()) {
+            try (QueueConnection queueConnection = queueConnectionFactory.createQueueConnection();
+                 QueueSession session = queueConnection.createQueueSession(false, QueueSession.AUTO_ACKNOWLEDGE);
+                 QueueSender sender = session.createSender(queue)) {
 
-                try (QueueSession session = queueConnection.createQueueSession(false, QueueSession.AUTO_ACKNOWLEDGE)) {
+                sender.send(envelopeConverter.toMessage(envelope, session));
 
-                    final String envelopeAsString = jsonObjectConverter.asString(jsonObjectConverter.fromEnvelope(envelope));
-                    final TextMessage textMessage = session.createTextMessage(envelopeAsString);
-                    textMessage.setStringProperty(JMS_HEADER_CPPNAME, envelope.metadata().name());
-
-                    try (QueueSender sender = session.createSender(queue)) {
-                        sender.send(textMessage);
-                    }
-                }
             }
-
         } catch (JMSException | NamingException e) {
             throw new JmsSenderException("Exception while sending command to the controller.", e);
         }

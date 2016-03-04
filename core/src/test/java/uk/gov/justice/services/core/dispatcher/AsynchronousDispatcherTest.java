@@ -8,6 +8,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.handler.HandlerInstanceAndMethod;
+import uk.gov.justice.services.core.handler.exception.MissingHandlerException;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.Metadata;
 
@@ -45,7 +46,7 @@ public class AsynchronousDispatcherTest {
         assertThat(testHandler.envelope, equalTo(envelope));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = MissingHandlerException.class)
     public void shouldThrowExceptionWithNoHandler() throws Exception {
         new AsynchronousDispatcher().dispatch(envelope);
     }

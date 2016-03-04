@@ -21,6 +21,7 @@ import java.util.UUID;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.CAUSATION;
 
 public class JsonObjectConverterTest {
 
@@ -59,7 +60,7 @@ public class JsonObjectConverterTest {
         assertThat(context.getString("session"), equalTo(SESSION));
         assertThat(context.getString("user"), equalTo(USER));
 
-        JsonArray causation = joMetadata.getJsonArray(Metadata.CAUSATION);
+        JsonArray causation = joMetadata.getJsonArray(CAUSATION);
         assertThat(causation, notNullValue());
         assertThat(causation.size(), equalTo(2));
         assertThat(causation.get(0).toString().replaceAll("\"", ""), equalTo(CAUSATION_1));
@@ -74,7 +75,7 @@ public class JsonObjectConverterTest {
     @Test
     public void shouldReturnStringFromJsonObject() throws IOException {
         JsonObjectConverter jsonObjectConverter = new JsonObjectConverter();
-        
+
         String envelopeAsString = jsonObjectConverter.asString(envelopeAsJsonObject());
 
         assertThat(envelopeAsString, notNullValue());

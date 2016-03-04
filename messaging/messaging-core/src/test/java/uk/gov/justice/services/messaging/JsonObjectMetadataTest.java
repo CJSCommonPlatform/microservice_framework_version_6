@@ -14,17 +14,17 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.CAUSATION;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.CLIENT_ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.CONTEXT;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.CORRELATION;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.SESSION_ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.STREAM;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.STREAM_ID;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.USER_ID;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.VERSION;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
-import static uk.gov.justice.services.messaging.Metadata.CLIENT_ID;
-import static uk.gov.justice.services.messaging.Metadata.CORRELATION;
-import static uk.gov.justice.services.messaging.Metadata.SESSION_ID;
-import static uk.gov.justice.services.messaging.Metadata.STREAM_ID;
-import static uk.gov.justice.services.messaging.Metadata.USER_ID;
-import static uk.gov.justice.services.messaging.Metadata.VERSION;
 
 /**
  * Unit tests for the {@link JsonObjectMetadata} class.

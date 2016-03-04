@@ -74,16 +74,13 @@ public class JmsSender implements Sender {
         try {
             final Queue queue = (Queue) getInitialContext().lookup(queueName);
 
-            try (QueueConnection queueConnection = queueConnectionFactory.createQueueConnection()) {
+            try (QueueConnection queueConnection = queueConnectionFactory.createQueueConnection();
+                 QueueSession session = queueConnection.createQueueSession(false, QueueSession.AUTO_ACKNOWLEDGE);
+                 QueueSender sender = session.createSender(queue)) {
 
-                try (QueueSession session = queueConnection.createQueueSession(false, QueueSession.AUTO_ACKNOWLEDGE)) {
+                sender.send(envelopeConverter.toMessage(envelope, session));
 
-                    try (QueueSender sender = session.createSender(queue)) {
-                        sender.send(envelopeConverter.toMessage(envelope, session));
-                    }
-                }
             }
-
         } catch (JMSException | NamingException e) {
             throw new JmsSenderException("Exception while sending command to the controller.", e);
         }

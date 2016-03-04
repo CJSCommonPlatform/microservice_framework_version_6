@@ -10,23 +10,6 @@ import java.util.UUID;
  */
 public interface Metadata {
 
-    String ID = "id";
-    String NAME = "name";
-    String CORRELATION = "correlation";
-    String CLIENT_ID = "client";
-    String[] CLIENT_CORRELATION_PATH = new String[]{CORRELATION, CLIENT_ID};
-    String CONTEXT = "context";
-    String USER_ID = "user";
-    String[] USER_ID_PATH = new String[]{CONTEXT, USER_ID};
-    String SESSION_ID = "session";
-    String[] SESSION_ID_PATH = new String[]{CONTEXT, SESSION_ID};
-    String STREAM = "stream";
-    String STREAM_ID = "id";
-    String[] STREAM_ID_PATH = new String[]{STREAM, STREAM_ID};
-    String VERSION = "version";
-    String[] VERSION_PATH = new String[]{STREAM, VERSION};
-    String CAUSATION = "causation";
-
     /**
      * A system generated unique id used to definitively identify the payload within the system.
      *

@@ -36,8 +36,8 @@ public class HandlerInstanceAndMethod {
 
     @Override
     public String toString() {
-        return String.format("HandlerInstanceAndMethod[ Class:%s method:%s]", (handlerInstance != null ? handlerInstance.getClass().getName() : null),
-                (handlerMethod != null ? handlerMethod.getName() : null));
+        return String.format("HandlerInstanceAndMethod[ Class:%s method:%s]", handlerInstance != null ? handlerInstance.getClass().getName() : null,
+                handlerMethod != null ? handlerMethod.getName() : null);
     }
 
 }

@@ -139,7 +139,7 @@ public class SenderProducerTest {
         senderProducer.produce(commandHandlerInjectionPoint);
     }
 
-    private void mockInjectionPoint(final InjectionPoint injectionPoint, final Member member, final Class declaringClass) {
+    private void mockInjectionPoint(final InjectionPoint injectionPoint, final Member member, final Class<?> declaringClass) {
         when(injectionPoint.getMember()).thenReturn(member);
         doReturn(declaringClass).when(member).getDeclaringClass();
     }

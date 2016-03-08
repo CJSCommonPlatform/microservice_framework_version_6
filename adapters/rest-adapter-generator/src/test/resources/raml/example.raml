@@ -1,0 +1,18 @@
+#%RAML 0.8
+title: Example Service
+baseUri: http://localhost:8080/webcontext
+version: v0.1
+mediaType: application/json
+protocols: [ HTTP, HTTPS ]
+
+/users/{userId}:
+  description: |
+    Create user or Update user
+  post:
+    body:
+        application/vnd.people.commands.create-user+json:
+            schema: !include json/schema/create-user.json
+            example: !include json/create-user.json
+        application/vnd.people.commands.update-user+json:
+            schema: !include json/schema/update-user.json
+            example: !include json/update-user.json

@@ -1,10 +1,11 @@
 package uk.gov.justice.services.adapters.rest.util.compiler;
 
-import com.sun.jersey.api.core.ResourceConfig;
 import org.apache.commons.io.FileUtils;
+import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.ejb.Stateless;
 import javax.tools.Diagnostic;
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaCompiler;
@@ -12,12 +13,14 @@ import javax.tools.JavaCompiler.CompilationTask;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
+import javax.ws.rs.Path;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -119,15 +122,15 @@ public class JavaCompilerUtil {
         URLClassLoader resourceClassLoader = new URLClassLoader(new URL[]{compilationOutputDir.toURI().toURL()});
 
         ClassLoader initialClassLoader = Thread.currentThread().getContextClassLoader();
-        ResourceConfig config = null;
+        Set<Class<?>> rootResourceClasses = new HashSet<>();
         try {
             Thread.currentThread().setContextClassLoader(resourceClassLoader);
-            config = new ExtendedPackagesResourceConfig(basePackage);
-
+            Reflections reflections = new Reflections(basePackage);
+            rootResourceClasses.addAll(reflections.getTypesAnnotatedWith(Path.class));
+            rootResourceClasses.addAll(reflections.getTypesAnnotatedWith(Stateless.class));
         } finally {
             Thread.currentThread().setContextClassLoader(initialClassLoader);
         }
-        Set<Class<?>> rootResourceClasses = config.getRootResourceClasses();
         return rootResourceClasses;
     }
 

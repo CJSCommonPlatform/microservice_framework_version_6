@@ -22,7 +22,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class DefaultUsersUserIdResourceIntegrationTest {
+public class DefaultUsersUserIdResourceIT {
     private static final String JSON = "{\"userUrn\" : \"test\"}";
 
     private static EJBContainer container;
@@ -49,14 +49,14 @@ public class DefaultUsersUserIdResourceIntegrationTest {
     public void before() throws NamingException, JMSException {
         context.bind("inject", this);
         client = new ResteasyClientBuilder().build();
-        target = client.target("http://localhost:4204/raml-jaxrs-maven-plugin-it/users/1234");
-    } 
-    
+        target = client.target("http://localhost:4204/rest-adapter-generator/users/1234");
+    }
+
     @After
     public void cleanup() throws Exception {
         client.close();
-    }  
-    
+    }
+
     @Test
     public void shouldCallCreateUser() throws Exception {
         Response response = target.request()
@@ -72,5 +72,5 @@ public class DefaultUsersUserIdResourceIntegrationTest {
 
         assertThat(response.getStatus(), is(202));
     }
- 
+
 }

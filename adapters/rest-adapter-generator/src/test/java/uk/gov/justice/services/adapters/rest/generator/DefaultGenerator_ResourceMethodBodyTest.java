@@ -1,8 +1,7 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
-import com.sun.jersey.core.header.InBoundHeaders;
-import com.sun.jersey.server.impl.application.WebApplicationImpl;
-import com.sun.jersey.spi.container.ContainerRequest;
+import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
+import org.jboss.resteasy.specimpl.ResteasyHttpHeaders;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -169,8 +168,7 @@ public class DefaultGenerator_ResourceMethodBodyTest {
         Class<?> resourceClass = compiler.compiledClassOf(generatedClasses, BASE_PACKAGE);
         Object resourceObject = instantiate(resourceClass);
 
-        HttpHeaders headers = new ContainerRequest(new WebApplicationImpl(), null, null, null, new InBoundHeaders(),
-                null);
+        HttpHeaders headers = new ResteasyHttpHeaders(new MultivaluedMapImpl<>());
         setField(resourceObject, "headers", headers);
 
         Method method = firstMethodOf(resourceClass);

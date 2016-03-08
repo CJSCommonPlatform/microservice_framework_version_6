@@ -11,10 +11,9 @@
 
     <artifactId>adapters</artifactId>
     <packaging>pom</packaging>
+
     <modules>
         <module>rest-adapter-generator</module>
-        <module>raml-jaxrs-maven-plugin-it</module>
     </modules>
-
 
 </project>

@@ -10,7 +10,7 @@ install:
   - cp -f $JAVA_HOME/jre/lib/security/cacerts target/travis-settings/cacerts
   - chmod u+w target/travis-settings/cacerts
   - $JAVA_HOME/jre/bin/keytool -import -v -noprompt -storepass changeit -storetype jks -trustcacerts -alias IndigoBlueRoot -file target/travis-settings/ROOT-CA.crt -keystore target/travis-settings/cacerts
-script: mvn -Djavax.net.ssl.trustStore=$PWD/target/travis-settings/cacerts -B -V --settings target/travis-settings/settings.xml verify coveralls:report
+script: mvn -Djavax.net.ssl.trustStore=$PWD/target/travis-settings/cacerts -B -V -U --settings target/travis-settings/settings.xml verify coveralls:report
 after_success:
   - '[[ $TRAVIS_BRANCH == "master" && $TRAVIS_PULL_REQUEST == "false" ]] && mvn -Djavax.net.ssl.trustStore=$PWD/target/travis-settings/cacerts -DdeployAtEnd=true -DskipTests=true -B -V --errors deploy --settings target/travis-settings/settings.xml'
 notifications:

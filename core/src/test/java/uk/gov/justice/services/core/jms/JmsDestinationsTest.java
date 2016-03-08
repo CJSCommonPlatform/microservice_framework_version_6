@@ -23,7 +23,7 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
 @RunWith(MockitoJUnitRunner.class)
-public class JmsEndpointsTest {
+public class JmsDestinationsTest {
 
     private static final String CONTEXT_NAME = "test";
     private static final String CONTROLLER_ENDPOINT = "test.controller.commands";
@@ -36,19 +36,19 @@ public class JmsEndpointsTest {
     @Mock
     Destination destination;
 
-    private JmsEndpoints jmsEndpoints;
+    private JmsDestinations jmsDestinations;
 
     @Before
     public void setup() throws NamingException {
-        jmsEndpoints = new JmsEndpoints();
-        jmsEndpoints.initialContext = initialContext;
+        jmsDestinations = new JmsDestinations();
+        jmsDestinations.initialContext = initialContext;
     }
 
     @Test
     public void shouldReturnCommandControllerEndpoint() throws Exception {
         when(initialContext.lookup(CONTROLLER_ENDPOINT)).thenReturn(destination);
 
-        Destination actualDestination = jmsEndpoints.getEndpoint(Component.COMMAND_CONTROLLER, CONTEXT_NAME);
+        Destination actualDestination = jmsDestinations.getDestination(Component.COMMAND_CONTROLLER, CONTEXT_NAME);
 
         assertThat(actualDestination, equalTo(destination));
         verify(initialContext).lookup(CONTROLLER_ENDPOINT);
@@ -59,7 +59,7 @@ public class JmsEndpointsTest {
     public void shouldReturnCommandHandlerEndPoint() throws Exception {
         when(initialContext.lookup(HANDLER_ENDPOINT)).thenReturn(destination);
 
-        Destination actualDestination = jmsEndpoints.getEndpoint(COMMAND_HANDLER, CONTEXT_NAME);
+        Destination actualDestination = jmsDestinations.getDestination(COMMAND_HANDLER, CONTEXT_NAME);
 
         assertThat(actualDestination, equalTo(destination));
         verify(initialContext).lookup(HANDLER_ENDPOINT);
@@ -69,7 +69,7 @@ public class JmsEndpointsTest {
     public void shouldReturnEventListenerEndPoint() throws Exception {
         when(initialContext.lookup(LISTENER_ENDPOINT)).thenReturn(destination);
 
-        Destination actualDestination = jmsEndpoints.getEndpoint(EVENT_LISTENER, CONTEXT_NAME);
+        Destination actualDestination = jmsDestinations.getDestination(EVENT_LISTENER, CONTEXT_NAME);
 
         assertThat(actualDestination, equalTo(destination));
         verify(initialContext).lookup(LISTENER_ENDPOINT);
@@ -77,14 +77,14 @@ public class JmsEndpointsTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionOnNonExistentEndpoint() throws Exception {
-        jmsEndpoints.getEndpoint(Component.COMMAND_API, CONTEXT_NAME);
+        jmsDestinations.getDestination(Component.COMMAND_API, CONTEXT_NAME);
     }
 
     @Test(expected = JmsSenderException.class)
     public void shouldThrowExceptionOnNonExistentJndiName() throws Exception {
         doThrow(NameNotFoundException.class).when(initialContext).lookup(anyString());
 
-        jmsEndpoints.getEndpoint(Component.COMMAND_CONTROLLER, CONTEXT_NAME);
+        jmsDestinations.getDestination(Component.COMMAND_CONTROLLER, CONTEXT_NAME);
     }
 
 }

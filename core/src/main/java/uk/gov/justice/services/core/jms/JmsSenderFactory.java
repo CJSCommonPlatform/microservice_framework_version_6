@@ -13,7 +13,7 @@ import javax.inject.Inject;
 public class JmsSenderFactory {
 
     @Inject
-    JmsEndpoints jmsEndpoints;
+    JmsDestinations jmsDestinations;
 
     @Inject
     JmsEnvelopeSender jmsEnvelopeSender;
@@ -25,6 +25,6 @@ public class JmsSenderFactory {
      * @return a new JmsSender instance.
      */
     public JmsSender createJmsSender(final Component componentDestination) {
-        return new JmsSender(componentDestination, jmsEndpoints, jmsEnvelopeSender);
+        return new JmsSender(componentDestination, jmsDestinations, jmsEnvelopeSender);
     }
 }

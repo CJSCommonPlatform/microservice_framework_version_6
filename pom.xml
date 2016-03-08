@@ -30,6 +30,9 @@
         <module>components</module>
         <module>example</module>
         <module>adapters</module>
+        <module>event-sourcing</module>
+        <module>common</module>
+        <module>event-source</module>
     </modules>
 
     <properties>

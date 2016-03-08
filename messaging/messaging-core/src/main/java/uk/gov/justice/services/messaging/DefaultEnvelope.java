@@ -16,6 +16,10 @@ public class DefaultEnvelope implements Envelope {
         this.payload = payload;
     }
 
+    public static Envelope envelopeFrom(final Metadata metadata, final JsonObject payload) {
+        return new DefaultEnvelope(metadata, payload);
+    }
+
     @Override
     public Metadata metadata() {
         return metadata;
@@ -26,7 +30,4 @@ public class DefaultEnvelope implements Envelope {
         return payload;
     }
 
-    public static Envelope envelopeFrom(final Metadata metadata, final JsonObject payload) {
-        return new DefaultEnvelope(metadata, payload);
-    }
 }

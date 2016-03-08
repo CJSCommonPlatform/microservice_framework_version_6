@@ -215,6 +215,7 @@ public final class JsonObjects {
 
     /**
      * Create a {@link JsonObjectBuilder} from an existing {@link JsonObject}.
+     *
      * @param source {@link JsonObject} to copy fields from
      * @return a {@link JsonObjectBuilder} initialised with the fields contained in the source
      */

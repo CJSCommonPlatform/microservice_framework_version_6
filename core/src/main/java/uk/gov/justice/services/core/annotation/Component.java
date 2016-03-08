@@ -5,7 +5,7 @@ package uk.gov.justice.services.core.annotation;
  */
 public enum Component {
 
-    COMMAND_API("commands", "api"), COMMAND_CONTROLLER("commands", "controller"), COMMAND_HANDLER("commands", "handler");
+    COMMAND_API("commands", "api"), COMMAND_CONTROLLER("commands", "controller"), COMMAND_HANDLER("commands", "handler"), EVENT_LISTENER("events", "listener");
 
     private final String pillar;
     private final String tier;

@@ -2,8 +2,8 @@ package uk.gov.justice.services.core.jms;
 
 
 import uk.gov.justice.services.core.dispatcher.Dispatcher;
-import uk.gov.justice.services.core.jms.converter.EnvelopeConverter;
 import uk.gov.justice.services.core.jms.exception.InvalildJmsMessageTypeException;
+import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
 
 import javax.inject.Inject;
 import javax.jms.JMSException;

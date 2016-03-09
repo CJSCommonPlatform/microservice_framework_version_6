@@ -1,35 +1,5 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
-import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
-import org.jboss.resteasy.specimpl.ResteasyHttpHeaders;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.rules.TemporaryFolder;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import uk.gov.justice.raml.core.Configuration;
-import uk.gov.justice.services.adapter.rest.RestProcessor;
-import uk.gov.justice.services.adapters.rest.util.compiler.JavaCompilerUtil;
-import uk.gov.justice.services.core.dispatcher.Dispatcher;
-import uk.gov.justice.services.messaging.Envelope;
-
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-import java.io.File;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -44,6 +14,37 @@ import static uk.gov.justice.services.adapters.rest.util.builder.RamlBuilder.aRa
 import static uk.gov.justice.services.adapters.rest.util.builder.RamlResourceBuilder.aResource;
 import static uk.gov.justice.services.adapters.rest.util.builder.RamlResourceMethodBuilder.aResourceMethod;
 import static uk.gov.justice.services.messaging.DefaultEnvelope.envelopeFrom;
+
+import java.io.File;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
+
+import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
+import org.jboss.resteasy.specimpl.ResteasyHttpHeaders;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+
+import uk.gov.justice.raml.core.Configuration;
+import uk.gov.justice.services.adapter.rest.RestProcessor;
+import uk.gov.justice.services.adapters.test.utils.JavaCompilerUtil;
+import uk.gov.justice.services.core.dispatcher.Dispatcher;
+import uk.gov.justice.services.messaging.Envelope;
 
 public class DefaultGenerator_ResourceMethodBodyTest {
     private static final JsonObject NOT_USED_JSONOBJECT = Json.createObjectBuilder().build();
@@ -82,14 +83,14 @@ public class DefaultGenerator_ResourceMethodBodyTest {
     @SuppressWarnings("unchecked")
     @Test
     public void shouldReturnResponseGeneratedByRestProcessor() throws Exception {
-        Set<String> generatedClasses = generator.run(
+         generator.run(
                 aRaml()
                         .with(aResource()
                                 .with(aResourceMethod(POST)))
                         .toString(),
                 configuration);
 
-        Class<?> resourceClass = compiler.compiledClassOf(generatedClasses, BASE_PACKAGE);
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
         Object resourceObject = instantiate(resourceClass);
 
         Response processorResponse = Response.ok().build();
@@ -107,14 +108,14 @@ public class DefaultGenerator_ResourceMethodBodyTest {
     @SuppressWarnings({"rawtypes", "unchecked"})
     public void shouldCallDispatcher() throws Exception {
 
-        Set<String> generatedClasses = generator.run(
+         generator.run(
                 aRaml()
                         .with(aResource()
                                 .with(aResourceMethod(POST)))
                         .toString(),
                 configuration);
 
-        Class<?> resourceClass = compiler.compiledClassOf(generatedClasses, BASE_PACKAGE);
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
         Object resourceObject = instantiate(resourceClass);
 
         Method method = firstMethodOf(resourceClass);
@@ -136,14 +137,14 @@ public class DefaultGenerator_ResourceMethodBodyTest {
     @Test
     public void shouldPassJsonObjectToRestProcessor() throws Exception {
 
-        Set<String> generatedClasses = generator.run(
+         generator.run(
                 aRaml()
                         .with(aResource()
                                 .with(aResourceMethod(POST)))
                         .toString(),
                 configuration);
 
-        Class<?> resourceClass = compiler.compiledClassOf(generatedClasses, BASE_PACKAGE);
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
         Object resourceObject = instantiate(resourceClass);
 
         JsonObject jsonObject = Json.createObjectBuilder().add("dummy", "abc").build();
@@ -158,14 +159,14 @@ public class DefaultGenerator_ResourceMethodBodyTest {
     @SuppressWarnings("unchecked")
     @Test
     public void shouldPassHttpHeadersToRestProcessor() throws Exception {
-        Set<String> generatedClasses = generator.run(
+         generator.run(
                 aRaml()
                         .with(aResource()
                                 .with(aResourceMethod(POST)))
                         .toString(),
                 configuration);
 
-        Class<?> resourceClass = compiler.compiledClassOf(generatedClasses, BASE_PACKAGE);
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
         Object resourceObject = instantiate(resourceClass);
 
         HttpHeaders headers = new ResteasyHttpHeaders(new MultivaluedMapImpl<>());
@@ -180,7 +181,7 @@ public class DefaultGenerator_ResourceMethodBodyTest {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void shouldPassMapWithOnePathParamToRestProcessor() throws Exception {
-        Set<String> generatedClasses = generator.run(
+         generator.run(
                 aRaml()
                         .with(aResource()
                                 .with(aResourceMethod(POST))
@@ -188,7 +189,7 @@ public class DefaultGenerator_ResourceMethodBodyTest {
                         .toString(),
                 configuration);
 
-        Class<?> resourceClass = compiler.compiledClassOf(generatedClasses, BASE_PACKAGE);
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
         Object resourceObject = instantiate(resourceClass);
 
         Method method = firstMethodOf(resourceClass);
@@ -209,7 +210,7 @@ public class DefaultGenerator_ResourceMethodBodyTest {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void shouldPassMapWithOnePathParamToRestProcessorWhenInvocing2ndMethod() throws Exception {
-        Set<String> generatedClasses = generator.run(
+         generator.run(
                 aRaml()
                         .with(aResource()
                                 .with(aResourceMethod(POST)
@@ -220,7 +221,7 @@ public class DefaultGenerator_ResourceMethodBodyTest {
                         .toString(),
                 configuration);
 
-        Class<?> resourceClass = compiler.compiledClassOf(generatedClasses, BASE_PACKAGE);
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
         Object resourceObject = instantiate(resourceClass);
 
         List<Method> methods = methodsOf(resourceClass);
@@ -243,7 +244,7 @@ public class DefaultGenerator_ResourceMethodBodyTest {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void shouldPassMapWithTwoPathParamsToRestProcessor() throws Exception {
-        Set<String> generatedClasses = generator.run(
+         generator.run(
                 aRaml()
                         .with(aResource()
                                 .with(aResourceMethod(POST))
@@ -252,7 +253,7 @@ public class DefaultGenerator_ResourceMethodBodyTest {
                         .toString(),
                 configuration);
 
-        Class<?> resourceClass = compiler.compiledClassOf(generatedClasses, BASE_PACKAGE);
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
         Object resourceObject = instantiate(resourceClass);
 
         Method method = firstMethodOf(resourceClass);

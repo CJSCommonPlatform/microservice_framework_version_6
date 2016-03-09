@@ -1,34 +1,5 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import uk.gov.justice.raml.core.Configuration;
-import uk.gov.justice.services.adapter.rest.RestProcessor;
-import uk.gov.justice.services.adapters.rest.util.compiler.JavaCompilerUtil;
-import uk.gov.justice.services.core.annotation.Adapter;
-import uk.gov.justice.services.core.annotation.Component;
-import uk.gov.justice.services.core.dispatcher.Dispatcher;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.json.JsonObject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-import java.io.File;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -41,6 +12,37 @@ import static uk.gov.justice.services.adapters.rest.util.builder.HttpMethod.POST
 import static uk.gov.justice.services.adapters.rest.util.builder.RamlBuilder.aRaml;
 import static uk.gov.justice.services.adapters.rest.util.builder.RamlResourceBuilder.aResource;
 import static uk.gov.justice.services.adapters.rest.util.builder.RamlResourceMethodBuilder.aResourceMethod;
+
+import java.io.File;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.json.JsonObject;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
+
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+
+import uk.gov.justice.raml.core.Configuration;
+import uk.gov.justice.services.adapter.rest.RestProcessor;
+import uk.gov.justice.services.adapters.test.utils.JavaCompilerUtil;
+import uk.gov.justice.services.core.annotation.Adapter;
+import uk.gov.justice.services.core.annotation.Component;
+import uk.gov.justice.services.core.dispatcher.Dispatcher;
 
 public class DefaultGenerator_ResourceCodeStructureTest {
 

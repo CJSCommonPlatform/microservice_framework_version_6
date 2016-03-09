@@ -19,7 +19,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
@@ -76,14 +75,14 @@ public class DefaultGenerator_ResourceCodeStructureTest {
     @Test
     public void shouldGenerateAnnotatedResourceInterface() throws Exception {
 
-        Set<String> generatedClasses = generator.run(
+        generator.run(
                 aRaml()
                         .with(aResource()
                                 .withPath("/some/path"))
                         .toString(),
                 configuration);
 
-        Class<?> interface1 = compiler.compiledInterfaceOf(generatedClasses, BASE_PACKAGE);
+        Class<?> interface1 = compiler.compiledInterfaceOf(BASE_PACKAGE);
 
         assertThat(interface1.isInterface(), is(true));
         assertThat(interface1.getAnnotation(Path.class), not(nullValue()));
@@ -95,9 +94,9 @@ public class DefaultGenerator_ResourceCodeStructureTest {
     public void shouldGenerateInterfaceInSpecifiedPackage() throws Exception {
         String basePackageName = "uk.gov.test1";
         configuration.setBasePackageName(basePackageName);
-        Set<String> generatedClasses = generator.run(aRaml().withDefaults().toString(), configuration);
+        generator.run(aRaml().withDefaults().toString(), configuration);
 
-        Class<?> interface1 = compiler.compiledInterfaceOf(generatedClasses, basePackageName);
+        Class<?> interface1 = compiler.compiledInterfaceOf(basePackageName);
 
         assertThat(interface1.getPackage().getName(), is(basePackageName + ".resource"));
 
@@ -105,7 +104,7 @@ public class DefaultGenerator_ResourceCodeStructureTest {
 
     @Test
     public void shouldGenerateResourceInterfaceWithOnePOSTMethod() throws Exception {
-        Set<String> generatedClasses = generator.run(
+        generator.run(
                 aRaml()
                         .with(aResource()
                                 .with(aResourceMethod(POST)
@@ -113,7 +112,7 @@ public class DefaultGenerator_ResourceCodeStructureTest {
                         .toString(),
                 configuration);
 
-        Class<?> interface1 = compiler.compiledInterfaceOf(generatedClasses, BASE_PACKAGE);
+        Class<?> interface1 = compiler.compiledInterfaceOf(BASE_PACKAGE);
 
         List<Method> methods = methodsOf(interface1);
         assertThat(methods, hasSize(1));
@@ -128,7 +127,7 @@ public class DefaultGenerator_ResourceCodeStructureTest {
 
     @Test
     public void shouldGenerateResourceInterfaceWithTwoPOSTMethods() throws Exception {
-        Set<String> generatedClasses = generator.run(
+        generator.run(
                 aRaml()
                         .with(aResource()
                                 .with(aResourceMethod(POST)
@@ -137,7 +136,7 @@ public class DefaultGenerator_ResourceCodeStructureTest {
                         .toString(),
                 configuration);
 
-        Class<?> interface1 = compiler.compiledInterfaceOf(generatedClasses, BASE_PACKAGE);
+        Class<?> interface1 = compiler.compiledInterfaceOf(BASE_PACKAGE);
 
         List<Method> methods = methodsOf(interface1);
         assertThat(methods, hasSize(2));
@@ -160,7 +159,7 @@ public class DefaultGenerator_ResourceCodeStructureTest {
 
     @Test
     public void interfaceShouldContainMethodWithBodyParameter() throws Exception {
-        Set<String> generatedClasses = generator.run(
+        generator.run(
                 aRaml()
                         .with(aResource()
                                 .with(aResourceMethod(POST))
@@ -169,7 +168,7 @@ public class DefaultGenerator_ResourceCodeStructureTest {
                         .toString(),
                 configuration);
 
-        Class<?> interface1 = compiler.compiledInterfaceOf(generatedClasses, BASE_PACKAGE);
+        Class<?> interface1 = compiler.compiledInterfaceOf(BASE_PACKAGE);
 
         List<Method> methods = methodsOf(interface1);
         assertThat(methods, hasSize(1));
@@ -181,7 +180,7 @@ public class DefaultGenerator_ResourceCodeStructureTest {
 
     @Test
     public void interfaceShouldContainMethodWithPathParamAndBodyParam() throws Exception {
-        Set<String> generatedClasses = generator.run(
+        generator.run(
                 aRaml()
                         .with(aResource()
                                 .with(aResourceMethod(POST))
@@ -190,7 +189,7 @@ public class DefaultGenerator_ResourceCodeStructureTest {
                         .toString(),
                 configuration);
 
-        Class<?> interface1 = compiler.compiledInterfaceOf(generatedClasses, BASE_PACKAGE);
+        Class<?> interface1 = compiler.compiledInterfaceOf(BASE_PACKAGE);
         assertThat(interface1.isInterface(), is(true));
         List<Method> methods = methodsOf(interface1);
         assertThat(methods, hasSize(1));
@@ -211,7 +210,7 @@ public class DefaultGenerator_ResourceCodeStructureTest {
 
     @Test
     public void interfaceShouldContainMethodWithTwoPathParamsAndBodyParam() throws Exception {
-        Set<String> generatedClasses = generator.run(
+        generator.run(
                 aRaml()
                         .with(aResource()
                                 .with(aResourceMethod(POST))
@@ -220,7 +219,7 @@ public class DefaultGenerator_ResourceCodeStructureTest {
                         .toString(),
                 configuration);
 
-        Class<?> interface1 = compiler.compiledInterfaceOf(generatedClasses, BASE_PACKAGE);
+        Class<?> interface1 = compiler.compiledInterfaceOf(BASE_PACKAGE);
 
         List<Method> methods = methodsOf(interface1);
         assertThat(methods, hasSize(1));
@@ -247,10 +246,10 @@ public class DefaultGenerator_ResourceCodeStructureTest {
 
     @Test
     public void shouldGenerateResourceClassImplementingInterface() throws Exception {
-        Set<String> generatedClasses = generator.run(aRaml().withDefaults().toString(), configuration);
+        generator.run(aRaml().withDefaults().toString(), configuration);
 
-        Class<?> resourceInterface = compiler.compiledInterfaceOf(generatedClasses, BASE_PACKAGE);
-        Class<?> resourceClass = compiler.compiledClassOf(generatedClasses, BASE_PACKAGE);
+        Class<?> resourceInterface = compiler.compiledInterfaceOf(BASE_PACKAGE);
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
 
         assertThat(resourceClass.isInterface(), is(false));
         assertThat(resourceClass.getGenericInterfaces(), arrayWithSize(1));
@@ -260,9 +259,9 @@ public class DefaultGenerator_ResourceCodeStructureTest {
 
     @Test
     public void shouldGenerateResourceClassContainingAdapterAnnotation() throws Exception {
-        Set<String> generatedClasses = generator.run(aRaml().withDefaults().toString(), configuration);
+        generator.run(aRaml().withDefaults().toString(), configuration);
 
-        Class<?> resourceClass = compiler.compiledClassOf(generatedClasses, BASE_PACKAGE);
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
 
         assertThat(resourceClass.isInterface(), is(false));
         assertThat(resourceClass.getAnnotation(Adapter.class), not(nullValue()));
@@ -272,7 +271,7 @@ public class DefaultGenerator_ResourceCodeStructureTest {
 
     @Test
     public void shouldGenerateResourceClassContainingOneMethod() throws Exception {
-        Set<String> generatedClasses = generator.run(
+        generator.run(
                 aRaml()
                         .with(aResource()
                                 .with(aResourceMethod(POST)))
@@ -280,7 +279,7 @@ public class DefaultGenerator_ResourceCodeStructureTest {
                         .toString(),
                 configuration);
 
-        Class<?> clazz = compiler.compiledClassOf(generatedClasses, BASE_PACKAGE);
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
 
         assertThat(clazz.isInterface(), is(false));
         List<Method> methods = methodsOf(clazz);
@@ -291,7 +290,7 @@ public class DefaultGenerator_ResourceCodeStructureTest {
 
     @Test
     public void shouldGenerateResourceClassContaining4Methods() throws Exception {
-        Set<String> generatedClasses = generator.run(
+        generator.run(
                 aRaml()
                         .with(aResource()
                                 .with(aResourceMethod(POST)
@@ -303,7 +302,7 @@ public class DefaultGenerator_ResourceCodeStructureTest {
                         .toString(),
                 configuration);
 
-        Class<?> clazz = compiler.compiledClassOf(generatedClasses, BASE_PACKAGE);
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
 
         assertThat(clazz.isInterface(), is(false));
         List<Method> methods = methodsOf(clazz);
@@ -312,7 +311,7 @@ public class DefaultGenerator_ResourceCodeStructureTest {
 
     @Test
     public void classShouldContainMethodWithPathParamAndBodyParam() throws Exception {
-        Set<String> generatedClasses = generator.run(
+        generator.run(
                 aRaml()
                         .with(aResource()
                                 .with(aResourceMethod(POST)
@@ -322,7 +321,7 @@ public class DefaultGenerator_ResourceCodeStructureTest {
                         .toString(),
                 configuration);
 
-        Class<?> clazz = compiler.compiledClassOf(generatedClasses, BASE_PACKAGE);
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
 
         assertThat(clazz.isInterface(), is(false));
         List<Method> methods = methodsOf(clazz);
@@ -341,7 +340,7 @@ public class DefaultGenerator_ResourceCodeStructureTest {
 
     @Test
     public void classShouldContainMethodWith3PathParamsAnd1BodyParam() throws Exception {
-        Set<String> generatedClasses = generator.run(
+        generator.run(
                 aRaml()
                         .with(aResource()
                                 .with(aResourceMethod(POST))
@@ -350,7 +349,7 @@ public class DefaultGenerator_ResourceCodeStructureTest {
                         .toString(),
                 configuration);
 
-        Class<?> clazz = compiler.compiledClassOf(generatedClasses, BASE_PACKAGE);
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
 
         assertThat(clazz.isInterface(), is(false));
         List<Method> methods = methodsOf(clazz);
@@ -380,9 +379,9 @@ public class DefaultGenerator_ResourceCodeStructureTest {
     public void shouldGenerateClassInSpecifiedPackage() throws Exception {
         String basePackageName = "uk.gov.test2";
         configuration.setBasePackageName(basePackageName);
-        Set<String> generatedClasses = generator.run(aRaml().withDefaults().toString(), configuration);
+        generator.run(aRaml().withDefaults().toString(), configuration);
 
-        Class<?> resourceImplementation = compiler.compiledClassOf(generatedClasses, basePackageName);
+        Class<?> resourceImplementation = compiler.compiledClassOf(basePackageName);
 
         assertThat(resourceImplementation.getPackage().getName(), is(basePackageName + ".resource"));
 
@@ -390,22 +389,22 @@ public class DefaultGenerator_ResourceCodeStructureTest {
 
     @Test
     public void shouldGenerateEJBAnnotatedClass() throws Exception {
-        Set<String> generatedClasses = generator.run(aRaml().withDefaults().toString(), configuration);
+        generator.run(aRaml().withDefaults().toString(), configuration);
 
-        Class<?> resourceImplementation = compiler.compiledClassOf(generatedClasses, BASE_PACKAGE);
+        Class<?> resourceImplementation = compiler.compiledClassOf(BASE_PACKAGE);
         assertThat(resourceImplementation.getAnnotation(Stateless.class), not(nullValue()));
     }
 
     @Test
     public void shouldGenerateResourceClassWithOnePOSTMethod() throws Exception {
-        Set<String> generatedClasses = generator.run(
+        generator.run(
                 aRaml()
                         .with(aResource()
                                 .with(aResourceMethod(POST)))
                         .toString(),
                 configuration);
 
-        Class<?> class1 = compiler.compiledClassOf(generatedClasses, BASE_PACKAGE);
+        Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE);
         List<Method> methods = methodsOf(class1);
         assertThat(methods, hasSize(1));
         Method method = methods.get(0);
@@ -416,9 +415,9 @@ public class DefaultGenerator_ResourceCodeStructureTest {
 
     @Test
     public void shouldAddDispatcherBean() throws Exception {
-        Set<String> generatedClasses = generator.run(aRaml().withDefaults().toString(), configuration);
+        generator.run(aRaml().withDefaults().toString(), configuration);
 
-        Class<?> resourceClass = compiler.compiledClassOf(generatedClasses, BASE_PACKAGE);
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
 
         Field dispatcher = resourceClass.getDeclaredField("dispatcher");
         assertThat(dispatcher, not(nullValue()));
@@ -429,9 +428,9 @@ public class DefaultGenerator_ResourceCodeStructureTest {
 
     @Test
     public void shouldAddHeadersContext() throws Exception {
-        Set<String> generatedClasses = generator.run(aRaml().withDefaults().toString(), configuration);
+        generator.run(aRaml().withDefaults().toString(), configuration);
 
-        Class<?> resourceClass = compiler.compiledClassOf(generatedClasses, BASE_PACKAGE);
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
 
         Field dispatcher = resourceClass.getDeclaredField("headers");
         assertThat(dispatcher, not(nullValue()));
@@ -442,9 +441,9 @@ public class DefaultGenerator_ResourceCodeStructureTest {
 
     @Test
     public void shouldAddAnnotatedRestProcessorProperty() throws Exception {
-        Set<String> generatedClasses = generator.run(aRaml().withDefaults().toString(), configuration);
+        generator.run(aRaml().withDefaults().toString(), configuration);
 
-        Class<?> resourceClass = compiler.compiledClassOf(generatedClasses, BASE_PACKAGE);
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
 
         Field dispatcher = resourceClass.getDeclaredField("restProcessor");
         assertThat(dispatcher, not(nullValue()));

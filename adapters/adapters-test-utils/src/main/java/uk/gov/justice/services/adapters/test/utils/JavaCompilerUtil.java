@@ -46,17 +46,16 @@ public class JavaCompilerUtil {
 
     /**
      * Compiles and loads a single class
-     *
-     * @param classNames
      * @param basePackage
+     *
      * @return
      * @throws MalformedURLException
      * @throws IllegalStateException
      *             - if more or less than one classes found
      */
-    public Class<?> compiledClassOf(Set<String> classNames, String basePackage)
+    public Class<?> compiledClassOf(String basePackage)
             throws MalformedURLException {
-        Set<Class<?>> resourceClasses = compiledClassesOf(classNames, basePackage);
+        Set<Class<?>> resourceClasses = compiledClassesOf(basePackage);
         if (resourceClasses.size() != 1) {
             throw new IllegalStateException(format("Expected to find single class but found {0}", resourceClasses));
         }
@@ -65,17 +64,16 @@ public class JavaCompilerUtil {
 
     /**
      * Compiles and loads a single interface
-     *
-     * @param classNames
      * @param basePackageName
+     *
      * @return
      * @throws MalformedURLException
      * @throws IllegalStateException
      *             - if more or less than one interfaces found
      */
-    public Class<?> compiledInterfaceOf(Set<String> classNames, String basePackageName)
+    public Class<?> compiledInterfaceOf(String basePackageName)
             throws MalformedURLException {
-        Set<Class<?>> resourceInterfaces = compiledInterfacesOf(classNames, basePackageName);
+        Set<Class<?>> resourceInterfaces = compiledInterfacesOf(basePackageName);
         if (resourceInterfaces.size() != 1) {
             throw new IllegalStateException(
                     format("Expected to find single interface but found {0}", resourceInterfaces));
@@ -86,38 +84,36 @@ public class JavaCompilerUtil {
 
     /**
      * compiles and loads specified classes
-     *
-     * @param classNames
      * @param basePackage
+     *
      * @return
      * @throws MalformedURLException
      */
-    public Set<Class<?>> compiledClassesOf(Set<String> classNames, String basePackage)
+    public Set<Class<?>> compiledClassesOf(String basePackage)
             throws MalformedURLException {
-        return compiledClassesAndInterfaces(classNames, c -> !c.isInterface(), basePackage);
+        return compiledClassesAndInterfaces(c -> !c.isInterface(), basePackage);
     }
 
     /**
      * compiles and loads specified interfaces
-     *
-     * @param resourceClasses
      * @param basePackage
+     *
      * @return
      * @throws MalformedURLException
      */
-    public Set<Class<?>> compiledInterfacesOf(Set<String> resourceClasses, String basePackage)
+    public Set<Class<?>> compiledInterfacesOf(String basePackage)
             throws MalformedURLException {
-        return compiledClassesAndInterfaces(resourceClasses, c -> c.isInterface(), basePackage);
+        return compiledClassesAndInterfaces(c -> c.isInterface(), basePackage);
     }
 
-    private Set<Class<?>> compiledClassesAndInterfaces(Set<String> classNames,
-            Predicate<? super Class<?>> predicate, String basePackage)
+    private Set<Class<?>> compiledClassesAndInterfaces(Predicate<? super Class<?>> predicate,
+            String basePackage)
                     throws MalformedURLException {
-        return compile(classNames, basePackage).stream().filter(predicate).collect(Collectors.toSet());
+        return compile(basePackage).stream().filter(predicate).collect(Collectors.toSet());
     }
 
-    private Set<Class<?>> compile(Set<String> classNames, String basePackage) throws MalformedURLException {
-        compile(classNames);
+    private Set<Class<?>> compile(String basePackage) throws MalformedURLException {
+        compile();
         return loadClasses(basePackage);
     }
 
@@ -137,7 +133,7 @@ public class JavaCompilerUtil {
         return rootResourceClasses;
     }
 
-    private void compile(Set<String> resourceClasses) {
+    private void compile() {
 
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 

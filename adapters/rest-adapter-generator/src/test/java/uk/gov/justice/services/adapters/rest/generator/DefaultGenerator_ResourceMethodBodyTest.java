@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -84,14 +83,14 @@ public class DefaultGenerator_ResourceMethodBodyTest {
     @SuppressWarnings("unchecked")
     @Test
     public void shouldReturnResponseGeneratedByRestProcessor() throws Exception {
-        Set<String> generatedClasses = generator.run(
+         generator.run(
                 aRaml()
                         .with(aResource()
                                 .with(aResourceMethod(POST)))
                         .toString(),
                 configuration);
 
-        Class<?> resourceClass = compiler.compiledClassOf(generatedClasses, BASE_PACKAGE);
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
         Object resourceObject = instantiate(resourceClass);
 
         Response processorResponse = Response.ok().build();
@@ -109,14 +108,14 @@ public class DefaultGenerator_ResourceMethodBodyTest {
     @SuppressWarnings({"rawtypes", "unchecked"})
     public void shouldCallDispatcher() throws Exception {
 
-        Set<String> generatedClasses = generator.run(
+         generator.run(
                 aRaml()
                         .with(aResource()
                                 .with(aResourceMethod(POST)))
                         .toString(),
                 configuration);
 
-        Class<?> resourceClass = compiler.compiledClassOf(generatedClasses, BASE_PACKAGE);
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
         Object resourceObject = instantiate(resourceClass);
 
         Method method = firstMethodOf(resourceClass);
@@ -138,14 +137,14 @@ public class DefaultGenerator_ResourceMethodBodyTest {
     @Test
     public void shouldPassJsonObjectToRestProcessor() throws Exception {
 
-        Set<String> generatedClasses = generator.run(
+         generator.run(
                 aRaml()
                         .with(aResource()
                                 .with(aResourceMethod(POST)))
                         .toString(),
                 configuration);
 
-        Class<?> resourceClass = compiler.compiledClassOf(generatedClasses, BASE_PACKAGE);
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
         Object resourceObject = instantiate(resourceClass);
 
         JsonObject jsonObject = Json.createObjectBuilder().add("dummy", "abc").build();
@@ -160,14 +159,14 @@ public class DefaultGenerator_ResourceMethodBodyTest {
     @SuppressWarnings("unchecked")
     @Test
     public void shouldPassHttpHeadersToRestProcessor() throws Exception {
-        Set<String> generatedClasses = generator.run(
+         generator.run(
                 aRaml()
                         .with(aResource()
                                 .with(aResourceMethod(POST)))
                         .toString(),
                 configuration);
 
-        Class<?> resourceClass = compiler.compiledClassOf(generatedClasses, BASE_PACKAGE);
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
         Object resourceObject = instantiate(resourceClass);
 
         HttpHeaders headers = new ResteasyHttpHeaders(new MultivaluedMapImpl<>());
@@ -182,7 +181,7 @@ public class DefaultGenerator_ResourceMethodBodyTest {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void shouldPassMapWithOnePathParamToRestProcessor() throws Exception {
-        Set<String> generatedClasses = generator.run(
+         generator.run(
                 aRaml()
                         .with(aResource()
                                 .with(aResourceMethod(POST))
@@ -190,7 +189,7 @@ public class DefaultGenerator_ResourceMethodBodyTest {
                         .toString(),
                 configuration);
 
-        Class<?> resourceClass = compiler.compiledClassOf(generatedClasses, BASE_PACKAGE);
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
         Object resourceObject = instantiate(resourceClass);
 
         Method method = firstMethodOf(resourceClass);
@@ -211,7 +210,7 @@ public class DefaultGenerator_ResourceMethodBodyTest {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void shouldPassMapWithOnePathParamToRestProcessorWhenInvocing2ndMethod() throws Exception {
-        Set<String> generatedClasses = generator.run(
+         generator.run(
                 aRaml()
                         .with(aResource()
                                 .with(aResourceMethod(POST)
@@ -222,7 +221,7 @@ public class DefaultGenerator_ResourceMethodBodyTest {
                         .toString(),
                 configuration);
 
-        Class<?> resourceClass = compiler.compiledClassOf(generatedClasses, BASE_PACKAGE);
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
         Object resourceObject = instantiate(resourceClass);
 
         List<Method> methods = methodsOf(resourceClass);
@@ -245,7 +244,7 @@ public class DefaultGenerator_ResourceMethodBodyTest {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void shouldPassMapWithTwoPathParamsToRestProcessor() throws Exception {
-        Set<String> generatedClasses = generator.run(
+         generator.run(
                 aRaml()
                         .with(aResource()
                                 .with(aResourceMethod(POST))
@@ -254,7 +253,7 @@ public class DefaultGenerator_ResourceMethodBodyTest {
                         .toString(),
                 configuration);
 
-        Class<?> resourceClass = compiler.compiledClassOf(generatedClasses, BASE_PACKAGE);
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
         Object resourceObject = instantiate(resourceClass);
 
         Method method = firstMethodOf(resourceClass);

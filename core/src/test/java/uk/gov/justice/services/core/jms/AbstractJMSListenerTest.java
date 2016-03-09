@@ -7,9 +7,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.services.core.dispatcher.Dispatcher;
-import uk.gov.justice.services.core.jms.converter.EnvelopeConverter;
 import uk.gov.justice.services.core.jms.exception.InvalildJmsMessageTypeException;
 import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
 
 import javax.jms.JMSException;
 import javax.jms.ObjectMessage;

@@ -1,0 +1,8 @@
+{
+  "id": "861c9430-7bc6-4bf0-b549-6534394b8d65",
+  "name": "test name",
+  "nested": {
+    "id": "c3f7182b-bd20-4678-ba8b-e7e5ea8629c3",
+    "name": "Nested Name"
+  }
+}

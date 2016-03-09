@@ -42,6 +42,27 @@ public class JsonObjectMetadata implements Metadata {
         this.metadata = metadata;
     }
 
+    /**
+     * Instantiate a {@link JsonObjectMetadata} object from a {@link JsonObject}.
+     *
+     * @param jsonObject the {@link JsonObject} to build the metadata from
+     * @return the {@link JsonObjectMetadata}
+     */
+    public static Metadata metadataFrom(final JsonObject jsonObject) {
+
+        JsonString id = getJsonString(jsonObject, ID)
+                .orElseThrow(() -> new IllegalArgumentException("Missing id field"));
+        UUID.fromString(id.getString());
+
+        JsonString name = getJsonString(jsonObject, NAME)
+                .orElseThrow(() -> new IllegalArgumentException("Missing name field"));
+        if (name.getString().isEmpty()) {
+            throw new IllegalArgumentException("Name field cannot be empty");
+        }
+
+        return new JsonObjectMetadata(jsonObject);
+    }
+
     @Override
     public UUID id() {
         return getUUID(metadata, ID)
@@ -87,27 +108,6 @@ public class JsonObjectMetadata implements Metadata {
     @Override
     public JsonObject asJsonObject() {
         return metadata;
-    }
-
-    /**
-     * Instantiate a {@link JsonObjectMetadata} object from a {@link JsonObject}.
-     *
-     * @param jsonObject the {@link JsonObject} to build the metadata from
-     * @return the {@link JsonObjectMetadata}
-     */
-    public static Metadata metadataFrom(final JsonObject jsonObject) {
-
-        JsonString id = getJsonString(jsonObject, ID)
-                .orElseThrow(() -> new IllegalArgumentException("Missing id field"));
-        UUID.fromString(id.getString());
-
-        JsonString name = getJsonString(jsonObject, NAME)
-                .orElseThrow(() -> new IllegalArgumentException("Missing name field"));
-        if (name.getString().isEmpty()) {
-            throw new IllegalArgumentException("Name field cannot be empty");
-        }
-
-        return new JsonObjectMetadata(jsonObject);
     }
 
     @Override

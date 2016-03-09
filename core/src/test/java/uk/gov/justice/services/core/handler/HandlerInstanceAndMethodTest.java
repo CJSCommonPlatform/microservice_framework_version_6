@@ -6,10 +6,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.justice.services.common.converter.JsonObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.handler.exception.HandlerExecutionException;
-import uk.gov.justice.services.core.util.JsonObjectConverter;
 import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -81,7 +82,7 @@ public class HandlerInstanceAndMethodTest {
         JsonObjectConverter jsonObjectConverter = new JsonObjectConverter();
 
         String jsonString = Resources.toString(Resources.getResource("json/" + fileName), Charset.defaultCharset());
-        return jsonObjectConverter.asEnvelope(jsonObjectConverter.fromString(jsonString));
+        return new JsonObjectEnvelopeConverter().asEnvelope(jsonObjectConverter.fromString(jsonString));
     }
 
     public static class CommandHandler {

@@ -1,12 +1,10 @@
 package uk.gov.justice.services.core.jms;
 
 import uk.gov.justice.services.core.annotation.Component;
-import uk.gov.justice.services.core.jms.converter.EnvelopeConverter;
+import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
 
-import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.jms.QueueConnectionFactory;
 
 /**
  * Factory to create {@link JmsSender}.
@@ -18,10 +16,7 @@ public class JmsSenderFactory {
     JmsEndpoints jmsEndpoints;
 
     @Inject
-    EnvelopeConverter envelopeConverter;
-
-    @Resource(mappedName = "java:comp/DefaultJMSConnectionFactory")
-    QueueConnectionFactory queueConnectionFactory;
+    JmsEnvelopeSender jmsEnvelopeSender;
 
     /**
      * Creates a {@link JmsSender} based on the componentDestination.
@@ -30,6 +25,6 @@ public class JmsSenderFactory {
      * @return a new JmsSender instance.
      */
     public JmsSender createJmsSender(final Component componentDestination) {
-        return new JmsSender(componentDestination, envelopeConverter, jmsEndpoints, queueConnectionFactory);
+        return new JmsSender(componentDestination, jmsEndpoints, jmsEnvelopeSender);
     }
 }

@@ -10,4 +10,5 @@ public interface Envelope {
     Metadata metadata();
 
     JsonObject payload();
+
 }

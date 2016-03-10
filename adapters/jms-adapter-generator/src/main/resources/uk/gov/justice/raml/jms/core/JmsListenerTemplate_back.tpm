@@ -1,0 +1,30 @@
+package uk.gov.justice.api.resource;
+
+
+import uk.gov.justice.services.core.annotation.Adapter;
+import uk.gov.justice.services.core.dispatcher.Dispatcher;
+import uk.gov.justice.services.core.jms.AbstractJMSListener;
+
+import javax.ejb.ActivationConfigProperty;
+import javax.ejb.MessageDriven;
+import javax.inject.Inject;
+
+import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
+
+@MessageDriven(activationConfig = {
+        @ActivationConfigProperty(propertyName = "destinationLookup", propertyValue = "hello.controller.commands"),
+        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
+        @ActivationConfigProperty(propertyName = "messageSelector", propertyValue = "CPPNAME in('hello.commands.say-hello', 'hello.commands.another-command-hello')")
+})
+
+@Adapter(COMMAND_HANDLER)
+public class ${CLASS_NAME}JmsListener extends AbstractJMSListener {
+
+    @Inject
+    Dispatcher dispatcher;
+
+    @Override
+    protected Dispatcher getDispatcher() {
+        return dispatcher;
+    }
+}

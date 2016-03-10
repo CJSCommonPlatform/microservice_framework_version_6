@@ -8,4 +8,7 @@ public class CompilationException extends RuntimeException {
     }
 
 
+    public CompilationException(Throwable throwable) {
+        super(throwable);
+    }
 }

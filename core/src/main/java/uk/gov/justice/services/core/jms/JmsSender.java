@@ -24,12 +24,13 @@ public class JmsSender implements Sender {
     }
 
     @Override
-    public void send(Envelope envelope) {
+    public void send(final Envelope envelope) {
         final String contextName = ContextName.fromName(envelope.metadata().name());
         jmsEnvelopeSender.send(envelope, jmsDestinations.getDestination(destinationComponent, contextName));
     }
 
     @Override
+    @SuppressWarnings({"squid:MethodCyclomaticComplexity", "squid:S1067", "squid:S00122"})
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

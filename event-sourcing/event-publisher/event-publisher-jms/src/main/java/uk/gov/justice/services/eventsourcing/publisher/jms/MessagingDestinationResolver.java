@@ -5,6 +5,7 @@ import javax.jms.Destination;
 /**
  * Interface for a service that can derive what JMS destination a message should be sent to from action or event name.
  */
+@FunctionalInterface
 public interface MessagingDestinationResolver {
 
     /**

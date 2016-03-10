@@ -12,6 +12,7 @@ import javax.json.JsonValue;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiFunction;
@@ -221,8 +222,8 @@ public final class JsonObjects {
      */
     public static JsonObjectBuilder createObjectBuilder(final JsonObject source) {
         JsonObjectBuilder builder = Json.createObjectBuilder();
-        for (String key : source.keySet()) {
-            builder = builder.add(key, source.get(key));
+        for (Entry<String, JsonValue> entry : source.entrySet()) {
+            builder = builder.add(entry.getKey(), entry.getValue());
         }
         return builder;
     }

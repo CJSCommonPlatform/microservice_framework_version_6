@@ -21,7 +21,7 @@ public class AnnotationScanner implements Extension {
     void afterDeploymentValidation(@Observes final AfterDeploymentValidation event, final BeanManager beanManager) {
         beanManager.getBeans(Object.class, new AnnotationLiteral<Any>() {
             private static final long serialVersionUID = -3118797828842400134L;
-        }).stream().forEach(bean -> getEvent(bean).ifPresent(x -> beanManager.fireEvent(x)));
+        }).stream().forEach(bean -> getEvent(bean).ifPresent(beanManager::fireEvent));
 
     }
 

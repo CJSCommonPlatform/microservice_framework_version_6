@@ -72,3 +72,5 @@ sftp-config.json
 ehthumbs.db
 Thumbs.db
 
+*.h2.db
+*.trace.db

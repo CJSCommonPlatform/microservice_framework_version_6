@@ -6,6 +6,7 @@ import uk.gov.justice.services.messaging.Envelope;
 /**
  * Interface for a service that can publish events.
  */
+@FunctionalInterface
 public interface EventPublisher {
 
     /**

@@ -42,7 +42,7 @@ import org.mockito.Mock;
 
 import uk.gov.justice.raml.core.Configuration;
 import uk.gov.justice.services.adapter.rest.RestProcessor;
-import uk.gov.justice.services.adapters.test.utils.JavaCompilerUtil;
+import uk.gov.justice.services.adapters.test.utils.compiler.JavaCompilerUtil;
 import uk.gov.justice.services.core.dispatcher.Dispatcher;
 import uk.gov.justice.services.messaging.Envelope;
 

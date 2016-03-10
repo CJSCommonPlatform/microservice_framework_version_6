@@ -1,4 +1,4 @@
-package uk.gov.justice.services.adapters.test.utils;
+package uk.gov.justice.services.adapters.test.utils.builder;
 
 import org.raml.model.Action;
 import org.raml.model.ActionType;

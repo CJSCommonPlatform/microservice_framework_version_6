@@ -33,25 +33,35 @@ public class JmsEndpointGenerator implements Generator {
 
         for (Resource ramlResourceModel : ramlResourceModels) {
 
-            File file = new File(outputDirectory, createJmsFilenameFrom(ramlResourceModel.getUri()));
+            String uri = ramlResourceModel.getUri();
+            File file = new File(outputDirectory, createJmsFilenameFrom(uri));
             generatedFiles.add(file.getName());
 
             try {
                 final HashMap<String, String> templateData = new HashMap<>();
                 templateData.put("PACKAGE_NAME", configuration.getBasePackageName());
-                templateData.put("CLASS_NAME", createJmsListenerClassNameFrom(ramlResourceModel.getUri()));
-                String[] uriParts = ramlResourceModel.getUri().split("\\.");
-                Component component = Component.valueOf(uriParts[uriParts.length-1], uriParts[uriParts.length-2]);
-                templateData.put("ADAPTER_TYPE", component.name());
+                templateData.put("CLASS_NAME", classNameOf(uri));
+                templateData.put("ADAPTER_TYPE", componentOf(uri).name());
+                templateData.put("DESTINATION_LOOKUP", destinationNameOf(uri));
 
                 write(file, render(jmsTemplate, templateData));
             } catch (IOException e) {
-                throw new JmsEndpointGeneratorException(String.format("Failed to create output file for %s", ramlResourceModel.getUri()), e);
+                throw new JmsEndpointGeneratorException(String.format("Failed to create output file for %s", uri), e);
             }
 
         }
 
         return generatedFiles;
+    }
+
+    private String destinationNameOf(String uri) {
+        return uri.replaceAll("/", "");
+    }
+
+    private Component componentOf(String uri) {
+        String[] uriParts = uri.split("\\.");
+        Component component = Component.valueOf(uriParts[uriParts.length-1], uriParts[uriParts.length-2]);
+        return component;
     }
 
     @SuppressWarnings("resource")
@@ -64,10 +74,10 @@ public class JmsEndpointGenerator implements Generator {
     }
 
     private String createJmsFilenameFrom(final String uri) {
-        return createJmsListenerClassNameFrom(uri) + FILENAME_POSTFIX;
+        return classNameOf(uri) + FILENAME_POSTFIX;
     }
 
-    private String createJmsListenerClassNameFrom(final String uri) {
+    private String classNameOf(final String uri) {
         return toCamelCase(uri);
     }
 

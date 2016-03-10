@@ -1,26 +1,37 @@
 package uk.gov.justice.raml.jms.core;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.arrayContainingInAnyOrder;
+import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItemInArray;
 import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
-import static uk.gov.justice.services.adapters.test.utils.ActionBuilder.action;
-import static uk.gov.justice.services.adapters.test.utils.RamlBuilder.raml;
-import static uk.gov.justice.services.adapters.test.utils.ResourceBuilder.resource;
+import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
+import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.raml;
+import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLLER;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.ejb.ActivationConfigProperty;
+import javax.ejb.MessageDriven;
+import javax.inject.Inject;
+
+import org.hamcrest.FeatureMatcher;
+import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -30,7 +41,7 @@ import org.raml.model.Raml;
 
 import uk.gov.justice.raml.core.Generator;
 import uk.gov.justice.raml.core.GeneratorConfig;
-import uk.gov.justice.services.adapters.test.utils.JavaCompilerUtil;
+import uk.gov.justice.services.adapters.test.utils.compiler.JavaCompilerUtil;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.jms.AbstractJMSListener;
 
@@ -183,9 +194,76 @@ public class JmsEndpointGeneratorTest {
         assertThat(clazz.getSuperclass(), equalTo(AbstractJMSListener.class));
     }
 
+    @Test
+    public void shouldCreateJmsEndpointWithAnnotatedDispatcherProperty() throws Exception {
+        generator.run(raml().withDefaults().build(), configurationWithBasePackage(BASE_PACKAGE));
+
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        Field dispatcherField = clazz.getDeclaredField("dispatcher");
+        assertThat(dispatcherField, not(nullValue()));
+        assertThat(dispatcherField.getAnnotations(), arrayWithSize(1));
+        assertThat(dispatcherField.getAnnotation(Inject.class), not(nullValue()));
+    }
+
+    @Test
+    public void shouldCreateAnnotatedJmsEndpointWithDestinationLookupProperty() throws Exception {
+
+        generator.run(
+                raml()
+                        .with(resource()
+                                .withRelativeUri("/people.controller.commands")
+                                .with(action().with(ActionType.POST)))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE));
+
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
+        assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
+                hasItemInArray(allOf(propertyName(equalTo("destinationLookup")),
+                        propertyValue(equalTo("people.controller.commands")))));
+
+    }
+    
+    @Test
+    public void shouldCreateAnnotatedJmsEndpointWithDestinationLookupProperty2() throws Exception {
+
+        generator.run(
+                raml()
+                        .with(resource()
+                                .withRelativeUri("/structure.controller.commands")
+                                .with(action().with(ActionType.POST)))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE));
+
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
+        assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
+                hasItemInArray(allOf(propertyName(equalTo("destinationLookup")),
+                        propertyValue(equalTo("structure.controller.commands")))));
+
+    }
+
     private GeneratorConfig configurationWithBasePackage(String basePackageName) {
         Path outputPath = Paths.get(outputFolder.getRoot().getAbsolutePath());
         return new GeneratorConfig(outputPath, outputPath, basePackageName);
+    }
+
+    private FeatureMatcher<ActivationConfigProperty, String> propertyName(Matcher<String> matcher) {
+        return new FeatureMatcher<ActivationConfigProperty, String>(matcher, "propertyName", "propertyName") {
+            @Override
+            protected String featureValueOf(ActivationConfigProperty actual) {
+                return actual.propertyName();
+            }
+        };
+    }
+
+    private FeatureMatcher<ActivationConfigProperty, String> propertyValue(Matcher<String> matcher) {
+        return new FeatureMatcher<ActivationConfigProperty, String>(matcher, "propertyValue", "propertyValue") {
+            @Override
+            protected String featureValueOf(ActivationConfigProperty actual) {
+                return actual.propertyValue();
+            }
+        };
     }
 
 }

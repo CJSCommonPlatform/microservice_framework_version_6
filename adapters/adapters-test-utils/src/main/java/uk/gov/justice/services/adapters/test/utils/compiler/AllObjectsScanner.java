@@ -1,4 +1,4 @@
-package uk.gov.justice.services.adapters.test.utils;
+package uk.gov.justice.services.adapters.test.utils.compiler;
 
 import org.reflections.scanners.SubTypesScanner;
 

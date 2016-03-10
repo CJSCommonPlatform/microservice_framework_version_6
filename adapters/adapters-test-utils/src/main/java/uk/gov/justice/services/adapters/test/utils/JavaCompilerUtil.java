@@ -26,11 +26,13 @@ import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
 import org.apache.commons.io.FileUtils;
+import org.reflections.ReflectionUtils;
 import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
 import org.reflections.util.ClasspathHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Sets;
 
 /**
  * Compiles and loads classes and interfaces from the specified folders
@@ -125,8 +127,10 @@ public class JavaCompilerUtil {
         try {
             Thread.currentThread().setContextClassLoader(resourceClassLoader);
             Reflections reflections = new Reflections(basePackage, ClasspathHelper.forClass(Object.class),
-                    new SubTypesScanner(false));
-            rootResourceClasses.addAll(reflections.getSubTypesOf(Object.class));
+                    new AllObjectsScanner());
+            Set<String> classNames = reflections.getStore().get(AllObjectsScanner.class, Object.class.getName());
+            rootResourceClasses.addAll(Sets.newHashSet(ReflectionUtils.forNames(classNames, reflections.getConfiguration().getClassLoaders())));
+            
         } finally {
             Thread.currentThread().setContextClassLoader(initialClassLoader);
         }

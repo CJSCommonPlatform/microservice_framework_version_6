@@ -1,7 +1,11 @@
-package uk.gov.justice.raml.jms.core.util;
+package uk.gov.justice.services.adapters.test.utils;
 
+import org.raml.model.ActionType;
 import org.raml.model.Raml;
 import org.raml.model.Resource;
+
+import static uk.gov.justice.services.adapters.test.utils.ActionBuilder.action;
+import static uk.gov.justice.services.adapters.test.utils.ResourceBuilder.resource;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,6 +22,12 @@ public class RamlBuilder {
     public RamlBuilder with(final ResourceBuilder resource) {
         resourceBuilders.add(resource);
         return this;
+    }
+
+    public RamlBuilder withDefaults() {
+        return this.with(resource()
+                .withRelativeUri("/somecontext.controller.commands")
+                .with(action().with(ActionType.POST)));
     }
 
     public Raml build() {

@@ -1,4 +1,4 @@
-package uk.gov.justice.raml.jms.core.util;
+package uk.gov.justice.services.adapters.test.utils;
 
 import org.raml.model.Action;
 import org.raml.model.ActionType;
@@ -13,7 +13,7 @@ public class ResourceBuilder {
     private final List<ActionBuilder> actionBuilders = new ArrayList<>();
 
     private String parentUri = "";
-    private String relativeUri;
+    private String relativeUri = "/somecontext.controller.commands";
 
     public static ResourceBuilder resource() {
         return new ResourceBuilder();

@@ -1,4 +1,15 @@
 package ${PACKAGE_NAME};
 
-public class ${CLASS_NAME}JmsListener {
+import uk.gov.justice.services.core.annotation.Adapter;
+import uk.gov.justice.services.core.dispatcher.Dispatcher;
+import uk.gov.justice.services.core.jms.AbstractJMSListener;
+import static uk.gov.justice.services.core.annotation.Component.*;
+
+@Adapter(${ADAPTER_TYPE})
+public class ${CLASS_NAME}JmsListener extends AbstractJMSListener {
+
+
+   protected Dispatcher getDispatcher() {
+       return null;
+   }
 }

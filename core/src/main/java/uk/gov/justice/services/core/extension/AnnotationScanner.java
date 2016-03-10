@@ -17,7 +17,6 @@ import java.util.Optional;
  */
 public class AnnotationScanner implements Extension {
 
-    @SuppressWarnings("unused")
     void afterDeploymentValidation(@Observes final AfterDeploymentValidation event, final BeanManager beanManager) {
         beanManager.getBeans(Object.class, new AnnotationLiteral<Any>() {
             private static final long serialVersionUID = -3118797828842400134L;

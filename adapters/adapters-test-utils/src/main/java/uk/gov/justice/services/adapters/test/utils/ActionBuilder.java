@@ -1,4 +1,4 @@
-package uk.gov.justice.raml.jms.core.util;
+package uk.gov.justice.services.adapters.test.utils;
 
 import org.raml.model.Action;
 import org.raml.model.ActionType;
@@ -20,9 +20,12 @@ public class ActionBuilder {
         return this;
     }
 
-    public ActionBuilder withBody(final MimeType mimeType) {
+    public ActionBuilder withMediaType(final MimeType mimeType) {
         body.put(mimeType.toString(), mimeType);
         return this;
+    }
+    public ActionBuilder withMediaType(String stringMimeType) {
+        return withMediaType(new MimeType(stringMimeType));
     }
 
     public Action build() {
@@ -31,4 +34,5 @@ public class ActionBuilder {
         action.setBody(body);
         return action;
     }
+
 }

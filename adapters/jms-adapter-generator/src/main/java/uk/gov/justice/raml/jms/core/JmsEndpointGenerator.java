@@ -48,6 +48,7 @@ public class JmsEndpointGenerator implements Generator {
         return generatedFiles;
     }
 
+    @SuppressWarnings("resource")
     private String jmsListenerTemplate() {
         try (final InputStream stream = getClass().getResourceAsStream("JmsListenerTemplate.tpm")) {
             return new Scanner(stream, "UTF-8").useDelimiter("\\A").next();

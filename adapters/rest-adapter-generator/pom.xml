@@ -36,7 +36,6 @@
         <dependency>
             <groupId>org.raml</groupId>
             <artifactId>raml-parser</artifactId>
-            <version>0.8.12</version>
         </dependency>
         <dependency>
             <groupId>com.sun.codemodel</groupId>
@@ -96,6 +95,12 @@
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
             <version>0.9.9-RC1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>adapters-test-utils</artifactId>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

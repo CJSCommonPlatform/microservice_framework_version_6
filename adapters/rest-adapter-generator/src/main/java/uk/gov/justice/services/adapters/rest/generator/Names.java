@@ -4,7 +4,6 @@ import org.apache.commons.lang.StringUtils;
 import org.raml.model.Action;
 import org.raml.model.MimeType;
 import org.raml.model.Resource;
-import uk.gov.justice.raml.core.Configuration;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -37,7 +36,7 @@ public class Names {
     private Names() {
     }
 
-    public static String resourceInterfaceNameOf(final Resource resource, Configuration config) {
+    public static String resourceInterfaceNameOf(final Resource resource) {
         final String resourceInterfaceName = buildJavaFriendlyName(defaultIfBlank(resource.getDisplayName(),
                 resource.getRelativeUri()));
 

@@ -41,7 +41,7 @@ public class JaxRsResourceImplementationCodeGenerator {
         final JDefinedClass resourceImplementation = pkg._class("Default" + resourceInterface.name());
         resourceImplementation._implements(resourceInterface);
         addAnnotations(resourceImplementation);
-        addImplemetationMethods(resourceImplementation, resourceInterface);
+        addImplementationMethods(resourceImplementation, resourceInterface);
 
         addAnnotatedProperty(resourceImplementation, Dispatcher.class, "dispatcher", Inject.class);
         addAnnotatedProperty(resourceImplementation, RestProcessor.class, "restProcessor", Inject.class);
@@ -55,7 +55,7 @@ public class JaxRsResourceImplementationCodeGenerator {
         adapterAnnotation.param("value", Component.COMMAND_API);
     }
 
-    private void addImplemetationMethods(final JDefinedClass resourceImplementation, JDefinedClass resourceInterface) {
+    private void addImplementationMethods(final JDefinedClass resourceImplementation, JDefinedClass resourceInterface) {
         JClass str = codeModel.ref("String");
         resourceInterface.methods().forEach(interfaceMethod -> {
             JMethod implementationMethod = resourceImplementation.method(PUBLIC, interfaceMethod.type(),

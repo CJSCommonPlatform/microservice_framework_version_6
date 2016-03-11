@@ -13,7 +13,7 @@ import org.raml.model.Action;
 import org.raml.model.MimeType;
 import org.raml.model.Resource;
 import org.raml.model.parameter.UriParameter;
-import uk.gov.justice.raml.core.Configuration;
+import uk.gov.justice.raml.core.GeneratorConfig;
 
 import javax.json.JsonObject;
 import javax.ws.rs.Consumes;
@@ -35,7 +35,6 @@ import static org.apache.commons.lang.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.apache.commons.lang.StringUtils.strip;
 import static org.apache.commons.lang.StringUtils.substringAfter;
-
 import static uk.gov.justice.services.adapters.rest.generator.Names.GENERIC_PAYLOAD_ARGUMENT_NAME;
 
 public class JaxRsResourceInterfaceCodeGenerator {
@@ -44,11 +43,11 @@ public class JaxRsResourceInterfaceCodeGenerator {
     private static final String DEFAULT_ANNOTATION_PARAMETER = "value";
     private static final String REST_INTERFACE_PACKAGE_NAME = "resource";
     private final JCodeModel codeModel;
-    private final Configuration configuration;
+    private final GeneratorConfig configuration;
     private final Map<String, Set<String>> resourcesMethods;
     private final Map<String, Object> httpMethodAnnotations;
 
-    public JaxRsResourceInterfaceCodeGenerator(final JCodeModel codeModel, final Configuration configuration) {
+    public JaxRsResourceInterfaceCodeGenerator(final JCodeModel codeModel, final GeneratorConfig configuration) {
         super();
         this.codeModel = codeModel;
         this.configuration = configuration;
@@ -62,7 +61,7 @@ public class JaxRsResourceInterfaceCodeGenerator {
     public JDefinedClass createInterface(final Resource ramlResourceDef)
             throws JClassAlreadyExistsException {
 
-        String interfaceName = Names.resourceInterfaceNameOf(ramlResourceDef, configuration);
+        String interfaceName = Names.resourceInterfaceNameOf(ramlResourceDef);
         final JDefinedClass resourceInterface = interfaceClassOf(interfaceName);
         final String path = strip(ramlResourceDef.getRelativeUri(), "/");
         resourceInterface.annotate(Path.class).param(DEFAULT_ANNOTATION_PARAMETER, defaultIfBlank(path, "/"));

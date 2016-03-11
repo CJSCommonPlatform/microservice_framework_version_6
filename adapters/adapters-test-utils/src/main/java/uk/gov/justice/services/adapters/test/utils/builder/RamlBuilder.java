@@ -1,11 +1,11 @@
-package uk.gov.justice.services.adapters.test.utils;
+package uk.gov.justice.services.adapters.test.utils.builder;
 
 import org.raml.model.ActionType;
 import org.raml.model.Raml;
 import org.raml.model.Resource;
 
-import static uk.gov.justice.services.adapters.test.utils.ActionBuilder.action;
-import static uk.gov.justice.services.adapters.test.utils.ResourceBuilder.resource;
+import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
+import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -1,6 +1,5 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -8,16 +7,16 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-import static uk.gov.justice.services.adapters.rest.util.builder.HttpMethod.POST;
-import static uk.gov.justice.services.adapters.rest.util.builder.RamlBuilder.aRaml;
-import static uk.gov.justice.services.adapters.rest.util.builder.RamlResourceBuilder.aResource;
-import static uk.gov.justice.services.adapters.rest.util.builder.RamlResourceMethodBuilder.aResourceMethod;
+import static org.raml.model.ActionType.POST;
+import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
+import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithDefaults;
+import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.messaging.DefaultEnvelope.envelopeFrom;
 
-import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -37,58 +36,54 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import uk.gov.justice.raml.core.Configuration;
+import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.services.adapter.rest.RestProcessor;
 import uk.gov.justice.services.adapters.test.utils.compiler.JavaCompilerUtil;
 import uk.gov.justice.services.core.dispatcher.Dispatcher;
 import uk.gov.justice.services.messaging.Envelope;
 
+@RunWith(MockitoJUnitRunner.class)
 public class DefaultGenerator_ResourceMethodBodyTest {
+
     private static final JsonObject NOT_USED_JSONOBJECT = Json.createObjectBuilder().build();
 
     private static final String BASE_PACKAGE = "org.raml.test";
 
     @Rule
-    public TemporaryFolder codegenOutputFolder = new TemporaryFolder();
+    public TemporaryFolder outputFolder = new TemporaryFolder();
 
     @Rule
-    public TemporaryFolder compilationOutputFolder = new TemporaryFolder();
-    @Rule
     public ExpectedException thrown = ExpectedException.none();
+
     private JavaCompilerUtil compiler;
-    private Configuration configuration;
     private DefaultGenerator generator;
+
     @Mock
     private Dispatcher dispatcher;
+
     @Mock
     private RestProcessor restProcessorMock;
 
     @Before
     public void before() {
-        initMocks(this);
-
-        configuration = new Configuration();
-        configuration.setOutputDirectory(codegenOutputFolder.getRoot());
-        configuration.setBasePackageName(BASE_PACKAGE);
-        configuration.setSourceDirectory(new File(getClass().getResource("/").getPath()));
         generator = new DefaultGenerator();
-        compiler = new JavaCompilerUtil(codegenOutputFolder.getRoot(),
-                compilationOutputFolder.getRoot());
-
+        compiler = new JavaCompilerUtil(outputFolder.getRoot(), outputFolder.getRoot());
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void shouldReturnResponseGeneratedByRestProcessor() throws Exception {
-         generator.run(
-                aRaml()
-                        .with(aResource()
-                                .with(aResourceMethod(POST)))
-                        .toString(),
-                configuration);
+        generator.run(
+                restRamlWithDefaults().with(
+                        resource("/default/path")
+                                .with(action(POST, "application/vnd.default+json"))
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
         Object resourceObject = instantiate(resourceClass);
@@ -108,12 +103,12 @@ public class DefaultGenerator_ResourceMethodBodyTest {
     @SuppressWarnings({"rawtypes", "unchecked"})
     public void shouldCallDispatcher() throws Exception {
 
-         generator.run(
-                aRaml()
-                        .with(aResource()
-                                .with(aResourceMethod(POST)))
-                        .toString(),
-                configuration);
+        generator.run(
+                restRamlWithDefaults().with(
+                        resource("/default/path")
+                                .with(action(POST, "application/vnd.default+json"))
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
         Object resourceObject = instantiate(resourceClass);
@@ -137,12 +132,12 @@ public class DefaultGenerator_ResourceMethodBodyTest {
     @Test
     public void shouldPassJsonObjectToRestProcessor() throws Exception {
 
-         generator.run(
-                aRaml()
-                        .with(aResource()
-                                .with(aResourceMethod(POST)))
-                        .toString(),
-                configuration);
+        generator.run(
+                restRamlWithDefaults().with(
+                        resource("/default/path")
+                                .with(action(POST, "application/vnd.default+json"))
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
         Object resourceObject = instantiate(resourceClass);
@@ -159,12 +154,12 @@ public class DefaultGenerator_ResourceMethodBodyTest {
     @SuppressWarnings("unchecked")
     @Test
     public void shouldPassHttpHeadersToRestProcessor() throws Exception {
-         generator.run(
-                aRaml()
-                        .with(aResource()
-                                .with(aResourceMethod(POST)))
-                        .toString(),
-                configuration);
+        generator.run(
+                restRamlWithDefaults().with(
+                        resource("/default/path")
+                                .with(action(POST, "application/vnd.default+json"))
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
         Object resourceObject = instantiate(resourceClass);
@@ -181,15 +176,16 @@ public class DefaultGenerator_ResourceMethodBodyTest {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void shouldPassMapWithOnePathParamToRestProcessor() throws Exception {
-         generator.run(
-                aRaml()
-                        .with(aResource()
-                                .with(aResourceMethod(POST))
-                                .withPath("/some/path/{paramA}"))
-                        .toString(),
-                configuration);
+
+        generator.run(
+                restRamlWithDefaults().with(
+                        resource("/some/path/{paramA}", "paramA")
+                                .with(action(POST, "application/vnd.default+json"))
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
+
         Object resourceObject = instantiate(resourceClass);
 
         Method method = firstMethodOf(resourceClass);
@@ -209,19 +205,17 @@ public class DefaultGenerator_ResourceMethodBodyTest {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
-    public void shouldPassMapWithOnePathParamToRestProcessorWhenInvocing2ndMethod() throws Exception {
-         generator.run(
-                aRaml()
-                        .with(aResource()
-                                .with(aResourceMethod(POST)
-                                        .withConsumedMediaTypes("application/vnd.cmd-aa+json",
-                                                "application/vnd.cmd-bb+json"))
-                                .withPath("/some/path/{p1}"))
+    public void shouldPassMapWithOnePathParamToRestProcessorWhenInvoking2ndMethod() throws Exception {
 
-                        .toString(),
-                configuration);
+        generator.run(
+                restRamlWithDefaults().with(
+                        resource("/some/path/{p1}", "p1")
+                                .with(action(POST, "application/vnd.cmd-aa+json", "application/vnd.cmd-bb+json"))
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
+
         Object resourceObject = instantiate(resourceClass);
 
         List<Method> methods = methodsOf(resourceClass);
@@ -244,16 +238,15 @@ public class DefaultGenerator_ResourceMethodBodyTest {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void shouldPassMapWithTwoPathParamsToRestProcessor() throws Exception {
-         generator.run(
-                aRaml()
-                        .with(aResource()
-                                .with(aResourceMethod(POST))
-                                .withPath("/some/path/{param1}/{param2}"))
-
-                        .toString(),
-                configuration);
+        generator.run(
+                restRamlWithDefaults().with(
+                        resource("/some/path/{param1}/{param2}", "param1", "param2")
+                                .with(action(POST, "application/vnd.default+json"))
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
+
         Object resourceObject = instantiate(resourceClass);
 
         Method method = firstMethodOf(resourceClass);
@@ -271,28 +264,6 @@ public class DefaultGenerator_ResourceMethodBodyTest {
 
         assertThat(pathParams.containsKey("param2"), is(true));
         assertThat(pathParams.get("param2"), is("paramValueDEF"));
-    }
-
-    @Test
-    public void shouldFailIfRamlInvalid() {
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("ERROR Invalid RAML");
-        generator.run("not_a_raml", configuration);
-    }
-
-    @Test
-    public void shouldFailIfInvalidMediaType() {
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage(containsString("Unknown key: cmd-aa"));
-        generator.run(
-                aRaml()
-                        .with(aResource()
-                                .with(aResourceMethod(POST)
-                                        .withConsumedMediaTypes("cmd-aa"))
-                                .withPath("/some/path/{p1}"))
-
-                        .toString(),
-                configuration);
     }
 
     private Object instantiate(Class<?> resourceClass) throws InstantiationException, IllegalAccessException {
@@ -326,4 +297,8 @@ public class DefaultGenerator_ResourceMethodBodyTest {
                 .collect(Collectors.toList());
     }
 
+    private GeneratorConfig configurationWithBasePackage(String basePackageName) {
+        Path outputPath = Paths.get(outputFolder.getRoot().getAbsolutePath());
+        return new GeneratorConfig(outputPath, outputPath, basePackageName);
+    }
 }

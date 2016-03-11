@@ -14,9 +14,18 @@ import java.util.Map;
 
 public class RamlBuilder {
     private final List<ResourceBuilder> resourceBuilders = new ArrayList<>();
+    private String version;
+    private String title;
+    private String baseUri;
 
     public static RamlBuilder raml() {
         return new RamlBuilder();
+    }
+
+    public static RamlBuilder restRamlWithDefaults() {
+        return new RamlBuilder()
+                .withVersion("#%RAML 0.8")
+                .withTitle("Example Service");
     }
 
     public RamlBuilder with(final ResourceBuilder resource) {
@@ -30,8 +39,27 @@ public class RamlBuilder {
                 .with(action().with(ActionType.POST)));
     }
 
+    public RamlBuilder withVersion(final String version) {
+        this.version = version;
+        return this;
+    }
+
+    public RamlBuilder withTitle(final String title) {
+        this.title = title;
+        return this;
+    }
+
+    public RamlBuilder withBaseUri(final String baseUri) {
+        this.baseUri = baseUri;
+        return this;
+    }
+
     public Raml build() {
         Raml raml = new Raml();
+
+        raml.setBaseUri(baseUri);
+        raml.setVersion(version);
+        raml.setTitle(title);
 
         Map<String, Resource> resources = new HashMap<>();
         for (ResourceBuilder resourceBuilder : resourceBuilders) {

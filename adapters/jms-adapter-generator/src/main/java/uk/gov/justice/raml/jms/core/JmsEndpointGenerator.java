@@ -24,9 +24,8 @@ public class JmsEndpointGenerator implements Generator {
     private static final String FILENAME_POSTFIX = "JmsListener.java";
 
     @Override
-    public Set<String> run(Raml raml, GeneratorConfig configuration) {
+    public void run(Raml raml, GeneratorConfig configuration) {
         final File outputDirectory = createOutputDirectories(configuration);
-        final Set<String> generatedFiles = new HashSet<>();
         final String jmsTemplate = jmsListenerTemplate();
 
         final Collection<Resource> ramlResourceModels = raml.getResources().values();
@@ -35,7 +34,6 @@ public class JmsEndpointGenerator implements Generator {
 
             String uri = ramlResourceModel.getUri();
             File file = new File(outputDirectory, createJmsFilenameFrom(uri));
-            generatedFiles.add(file.getName());
 
             try {
                 final HashMap<String, String> templateData = new HashMap<>();
@@ -48,10 +46,7 @@ public class JmsEndpointGenerator implements Generator {
             } catch (IOException e) {
                 throw new JmsEndpointGeneratorException(String.format("Failed to create output file for %s", uri), e);
             }
-
         }
-
-        return generatedFiles;
     }
 
     private String destinationNameOf(String uri) {

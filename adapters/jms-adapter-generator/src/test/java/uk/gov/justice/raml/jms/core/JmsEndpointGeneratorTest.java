@@ -5,6 +5,7 @@ import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 import org.raml.model.ActionType;
 import org.raml.model.Raml;
@@ -305,8 +306,7 @@ public class JmsEndpointGeneratorTest {
                                         .withMediaType("application/vnd.structure.commands.test-cmd7+json"))
                                 .with(action()
                                         .with(ActionType.TRACE)
-                                        .withMediaType("application/vnd.structure.commands.test-cmd8+json"))
-                        )
+                                        .withMediaType("application/vnd.structure.commands.test-cmd8+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE));
 
@@ -317,8 +317,15 @@ public class JmsEndpointGeneratorTest {
                         propertyValue(equalTo("CPPNAME in('structure.commands.test-cmd1')")))));
     }
 
-    @Test(expected = JmsEndpointGeneratorException.class)
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
+
+    @Test
     public void shouldThrowExceptionIfNoActionsInRaml() throws Exception {
+
+        exception.expect(JmsEndpointGeneratorException.class);
+        exception.expectMessage("No actions to process");
+
         generator.run(
                 raml()
                         .with(resource()
@@ -335,8 +342,7 @@ public class JmsEndpointGeneratorTest {
                                 .with(action()
                                         .with(ActionType.POST)
                                         .withMediaType("application/vnd.people.commands.command1+json")
-                                        .withMediaType("application/vnd.people.commands.command2+json")
-                                ))
+                                        .withMediaType("application/vnd.people.commands.command2+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE));
 
@@ -345,8 +351,8 @@ public class JmsEndpointGeneratorTest {
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("messageSelector")),
                         propertyValue(startsWith("CPPNAME in")),
-                        propertyValue(allOf(containsString("'people.commands.command1'"), containsString("'people.commands.command2'"))
-                        ))));
+                        propertyValue(allOf(containsString("'people.commands.command1'"),
+                                containsString("'people.commands.command2'"))))));
     }
 
     @Test
@@ -394,7 +400,7 @@ public class JmsEndpointGeneratorTest {
     public static class DummyDispatcher implements Dispatcher {
         @Override
         public void dispatch(Envelope envelope) {
-            //do nothing
+            // do nothing
         }
     }
 

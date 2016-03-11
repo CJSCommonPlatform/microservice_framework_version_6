@@ -2,7 +2,7 @@ package uk.gov.justice.raml.jms.core;
 
 import static java.lang.String.format;
 import static org.apache.commons.io.FileUtils.write;
-import static uk.gov.justice.raml.jms.core.TemplateMarker.render;
+import static uk.gov.justice.raml.jms.core.TemplateRenderer.render;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,12 +24,29 @@ import uk.gov.justice.raml.core.Generator;
 import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.services.core.annotation.Component;
 
+/**
+ * Generates JMS endpoint classes out of RAML object
+ *
+ */
 public class JmsEndpointGenerator implements Generator {
 
+    private static final String UTF_8 = "UTF-8";
+    private static final String TEMPLATE_LOADING_ERROR = "Failed to load template resource JmsListenerTemplate.tpm";
+    private static final String ACTIONS_EMPTY_ERROR = "No actions to process";
+    private static final String OUTPUT_FILE_GENERATION_ERROR = "Failed to create output file for %s";
     private static final String FILENAME_POSTFIX = "JmsListener.java";
     private static final String JMS_TEMPLATE_RESOURCE = "JmsListenerTemplate.tpm";
     private static final Pattern MEDIA_TYPE_PATTERN = Pattern.compile("(application/vnd.)(\\S+)(\\+\\S+)");
 
+    /**
+     * Generates JMS endpoint classes out of RAML object
+     * 
+     * @param raml
+     *            - the RAML object
+     * @param generatorConfig
+     *            - contains package of generated sources, as well as source and
+     *            destination folders
+     */
     @Override
     public void run(final Raml raml, final GeneratorConfig configuration) {
         final File outputDirectory = createOutputDirectories(configuration);
@@ -42,16 +59,18 @@ public class JmsEndpointGenerator implements Generator {
 
     }
 
-    private void writeToTemplateFile(final TemplateModel templateModel, final String jmsTemplate, final File outputDirectory) {
-        final File file = new File(outputDirectory, createJmsFilenameFrom(templateModel.uri));
+    private void writeToTemplateFile(final Attributes attributes, final String jmsTemplate,
+            final File outputDirectory) {
+        final File file = new File(outputDirectory, createJmsFilenameFrom(attributes.uri));
         try {
-            write(file, render(jmsTemplate, templateModel.model));
+            write(file, render(jmsTemplate, attributes.attributesMap));
         } catch (IOException e) {
-            throw new JmsEndpointGeneratorException(format("Failed to create output file for %s", templateModel.uri), e);
+            throw new JmsEndpointGeneratorException(format(OUTPUT_FILE_GENERATION_ERROR, attributes.uri),
+                    e);
         }
     }
 
-    private TemplateModel templateModelFrom(final Resource resource, final GeneratorConfig configuration) {
+    private Attributes templateModelFrom(final Resource resource, final GeneratorConfig configuration) {
         final String uri = resource.getUri();
         final HashMap<String, String> data = new HashMap<>();
 
@@ -61,14 +80,14 @@ public class JmsEndpointGenerator implements Generator {
         data.put("DESTINATION_LOOKUP", destinationNameOf(uri));
         data.put("MESSAGE_SELECTOR", messageSelectorsFrom(resource.getActions()));
 
-        return new TemplateModel(data, uri);
+        return new Attributes(data, uri);
     }
 
     private String messageSelectorsFrom(final Map<ActionType, Action> actions) {
         if (actions.isEmpty()) {
-            throw new JmsEndpointGeneratorException("No Actions to parse to Message Selectors");
+            throw new JmsEndpointGeneratorException(ACTIONS_EMPTY_ERROR);
         }
-        return "'" + parse(actions.get(ActionType.POST)) + "'";
+        return format("'%s'", parse(actions.get(ActionType.POST)));
     }
 
     private String parse(final Action action) {
@@ -93,9 +112,9 @@ public class JmsEndpointGenerator implements Generator {
     @SuppressWarnings("resource")
     private String jmsListenerTemplate() {
         try (final InputStream stream = getClass().getResourceAsStream(JMS_TEMPLATE_RESOURCE)) {
-            return new Scanner(stream, "UTF-8").useDelimiter("\\A").next();
+            return new Scanner(stream, UTF_8).useDelimiter("\\A").next();
         } catch (IOException e) {
-            throw new JmsEndpointGeneratorException("Failed to load template resource JmsListenerTemplate.tpm", e);
+            throw new JmsEndpointGeneratorException(TEMPLATE_LOADING_ERROR, e);
         }
     }
 
@@ -131,12 +150,12 @@ public class JmsEndpointGenerator implements Generator {
         return packageFolder;
     }
 
-    private class TemplateModel {
-        final Map<String, String> model;
+    private class Attributes {
+        final Map<String, String> attributesMap;
         final String uri;
 
-        public TemplateModel(final Map<String, String> model, final String uri) {
-            this.model = model;
+        public Attributes(final Map<String, String> attributesMap, final String uri) {
+            this.attributesMap = attributesMap;
             this.uri = uri;
         }
     }

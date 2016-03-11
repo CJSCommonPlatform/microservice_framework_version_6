@@ -16,7 +16,7 @@ public class TemplateMarkerTest {
         Map<String, String> data = new HashMap<>();
         data.put("replace", "replacement");
 
-        String result = TemplateMarker.render(template, data);
+        String result = TemplateRenderer.render(template, data);
         assertThat(result, equalTo("Test replacement"));
     }
 
@@ -26,7 +26,7 @@ public class TemplateMarkerTest {
         Map<String, String> data = new HashMap<>();
         data.put("replace", "replacement");
 
-        String result = TemplateMarker.render(template, data);
+        String result = TemplateRenderer.render(template, data);
         assertThat(result, equalTo("Test replace"));
     }
 
@@ -36,7 +36,7 @@ public class TemplateMarkerTest {
         Map<String, String> data = new HashMap<>();
         data.put("replace", "replacement");
 
-        String result = TemplateMarker.render(template, data);
+        String result = TemplateRenderer.render(template, data);
         assertThat(result, equalTo("replacement Test replacement"));
     }
 
@@ -47,7 +47,7 @@ public class TemplateMarkerTest {
         data.put("replace", "replacement");
         data.put("different", "other");
 
-        String result = TemplateMarker.render(template, data);
+        String result = TemplateRenderer.render(template, data);
         assertThat(result, equalTo("replacement Test other replacement Test other"));
     }
 

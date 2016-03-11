@@ -9,7 +9,9 @@ import uk.gov.justice.services.core.jms.AbstractJMSListener;
 import static uk.gov.justice.services.core.annotation.Component.*;
 
 @MessageDriven(activationConfig = {
-        @ActivationConfigProperty(propertyName = "destinationLookup", propertyValue = "${DESTINATION_LOOKUP}")
+        @ActivationConfigProperty(propertyName = "destinationLookup", propertyValue = "${DESTINATION_LOOKUP}"),
+        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
+        @ActivationConfigProperty(propertyName = "messageSelector", propertyValue = "CPPNAME in(${MESSAGE_SELECTOR})")
 })
 @Adapter(${ADAPTER_TYPE})
 public class ${CLASS_NAME}JmsListener extends AbstractJMSListener {
@@ -18,6 +20,6 @@ public class ${CLASS_NAME}JmsListener extends AbstractJMSListener {
    Dispatcher dispatcher;
 
    protected Dispatcher getDispatcher() {
-       return null;
+       return dispatcher;
    }
 }

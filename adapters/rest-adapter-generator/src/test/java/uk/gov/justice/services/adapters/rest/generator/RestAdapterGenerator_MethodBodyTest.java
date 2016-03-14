@@ -49,7 +49,7 @@ import uk.gov.justice.services.messaging.Envelope;
 
 
 @RunWith(MockitoJUnitRunner.class)
-public class DefaultGenerator_ResourceMethodBodyTest {
+public class RestAdapterGenerator_MethodBodyTest {
 
     private static final JsonObject NOT_USED_JSONOBJECT = Json.createObjectBuilder().build();
 
@@ -62,7 +62,7 @@ public class DefaultGenerator_ResourceMethodBodyTest {
     public ExpectedException thrown = ExpectedException.none();
 
     private JavaCompilerUtil compiler;
-    private DefaultGenerator generator;
+    private RestAdapterGenerator generator;
 
     @Mock
     private Dispatcher dispatcher;
@@ -72,7 +72,7 @@ public class DefaultGenerator_ResourceMethodBodyTest {
 
     @Before
     public void before() {
-        generator = new DefaultGenerator();
+        generator = new RestAdapterGenerator();
         compiler = new JavaCompilerUtil(outputFolder.getRoot(), outputFolder.getRoot());
     }
 

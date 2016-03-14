@@ -1,5 +1,6 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
+import static java.nio.file.Paths.get;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -16,7 +17,6 @@ import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilde
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -43,7 +43,7 @@ import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.dispatcher.Dispatcher;
 
-public class DefaultGenerator_ResourceCodeStructureTest {
+public class RestAdapterGenerator_CodeStructureTest {
 
     private static final String BASE_PACKAGE = "org.raml.test";
 
@@ -52,11 +52,11 @@ public class DefaultGenerator_ResourceCodeStructureTest {
 
     private JavaCompilerUtil compiler;
 
-    private DefaultGenerator generator;
+    private RestAdapterGenerator generator;
 
     @Before
     public void before() {
-        generator = new DefaultGenerator();
+        generator = new RestAdapterGenerator();
         compiler = new JavaCompilerUtil(outputFolder.getRoot(), outputFolder.getRoot());
     }
 
@@ -74,14 +74,13 @@ public class DefaultGenerator_ResourceCodeStructureTest {
         assertThat(interfaceClass.isInterface(), is(true));
         assertThat(interfaceClass.getAnnotation(Path.class), not(nullValue()));
         assertThat(interfaceClass.getAnnotation(Path.class).value(), is("some/path"));
-
     }
 
     @Test
     public void shouldGenerateInterfaceInSpecifiedPackage() throws Exception {
         String basePackageName = "uk.gov.test1";
 
-        java.nio.file.Path outputPath = Paths.get(outputFolder.getRoot().getAbsolutePath());
+        java.nio.file.Path outputPath = get(outputFolder.getRoot().getAbsolutePath());
         GeneratorConfig config = new GeneratorConfig(outputPath, outputPath, basePackageName);
         generator.run(
                 restRamlWithDefaults().with(
@@ -368,7 +367,7 @@ public class DefaultGenerator_ResourceCodeStructureTest {
     public void shouldGenerateClassInSpecifiedPackage() throws Exception {
         String basePackageName = "uk.gov.test2";
 
-        java.nio.file.Path outputPath = Paths.get(outputFolder.getRoot().getAbsolutePath());
+        java.nio.file.Path outputPath = get(outputFolder.getRoot().getAbsolutePath());
         GeneratorConfig config = new GeneratorConfig(outputPath, outputPath, basePackageName);
         generator.run(
                 restRamlWithDefaults().with(
@@ -479,7 +478,7 @@ public class DefaultGenerator_ResourceCodeStructureTest {
     }
 
     private GeneratorConfig configurationWithBasePackage(String basePackageName) {
-        java.nio.file.Path outputPath = Paths.get(outputFolder.getRoot().getAbsolutePath());
+        java.nio.file.Path outputPath = get(outputFolder.getRoot().getAbsolutePath());
         return new GeneratorConfig(outputPath, outputPath, basePackageName);
     }
 }

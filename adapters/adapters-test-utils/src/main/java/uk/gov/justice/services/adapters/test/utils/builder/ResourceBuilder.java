@@ -1,4 +1,4 @@
-package uk.gov.justice.services.adapters.test.utils;
+package uk.gov.justice.services.adapters.test.utils.builder;
 
 import org.raml.model.Action;
 import org.raml.model.ActionType;
@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
 
 public class ResourceBuilder {
     private final List<ActionBuilder> actionBuilders = new ArrayList<>();
@@ -60,5 +61,10 @@ public class ResourceBuilder {
 
         resource.setActions(actions);
         return resource;
+    }
+    
+    public ResourceBuilder withDefaultAction() {
+        with(action().with(ActionType.POST));
+        return this;
     }
 }

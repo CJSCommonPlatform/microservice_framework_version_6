@@ -15,7 +15,7 @@
     <modules>
         <module>rest-adapter-core</module>
         <module>rest-adapter-generator</module>
+        <module>jms-adapter-generator</module>
         <module>adapters-test-utils</module>
     </modules>
-
 </project>

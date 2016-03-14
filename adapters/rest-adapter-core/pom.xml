@@ -49,7 +49,6 @@
         <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>javax.json</artifactId>
-            <version>1.0.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>

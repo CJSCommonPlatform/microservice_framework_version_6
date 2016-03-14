@@ -1,4 +1,4 @@
-package uk.gov.justice.services.adapters.rest.util.compiler;
+package uk.gov.justice.services.adapters.test.utils.compiler;
 
 public class CompilationException extends RuntimeException {
     private static final long serialVersionUID = 1L;
@@ -8,4 +8,7 @@ public class CompilationException extends RuntimeException {
     }
 
 
+    public CompilationException(Throwable throwable) {
+        super(throwable);
+    }
 }

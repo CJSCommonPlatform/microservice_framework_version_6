@@ -1,24 +1,23 @@
 package uk.gov.justice.raml.jms.core;
 
-import static java.lang.String.format;
+import org.apache.commons.lang.text.StrBuilder;
 
 import java.util.Map;
 
-import org.apache.commons.lang.text.StrBuilder;
+import static java.lang.String.format;
 
 /**
  * Basic template rendering class
- *
  */
-public class TemplateRenderer {
+public final class TemplateRenderer {
     public static final String ATTRIBUTE_KEY_FORMAT = "${%s}";
 
     private TemplateRenderer() {
     }
 
     /**
-     * @param template - string containing template
-     * @param attributes - attribute keys and values to be used in rendering of the template 
+     * @param template   - string containing template
+     * @param attributes - attribute keys and values to be used in rendering of the template
      * @return - rendered template
      */
     public static String render(final String template, final Map<String, String> attributes) {

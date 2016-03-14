@@ -18,8 +18,8 @@ import static org.apache.commons.lang.StringUtils.substringAfter;
 import static org.apache.commons.lang.StringUtils.uncapitalize;
 import static org.apache.commons.lang.WordUtils.capitalize;
 
-public class Names {
-    public static final Set<String> JAVA_KEYWORDS = Collections.unmodifiableSet(new HashSet<String>(
+public final class Names {
+    public static final Set<String> JAVA_KEYWORDS = Collections.unmodifiableSet(new HashSet<>(
             Arrays.asList("abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class",
                     "const", "continue", "default", "do", "double", "else", "enum", "extends", "false", "final",
                     "finally", "float", "for", "goto", "if", "implements", "import", "instanceof", "int",

@@ -1,4 +1,4 @@
-package uk.gov.justice.services.adapters.test.utils;
+package uk.gov.justice.services.adapters.test.utils.compiler;
 
 import com.google.common.collect.Sets;
 import org.apache.commons.io.FileUtils;

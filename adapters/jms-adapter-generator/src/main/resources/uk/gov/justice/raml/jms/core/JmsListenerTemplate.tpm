@@ -10,7 +10,7 @@ import static uk.gov.justice.services.core.annotation.Component.*;
 
 @MessageDriven(activationConfig = {
         @ActivationConfigProperty(propertyName = "destinationLookup", propertyValue = "${DESTINATION_LOOKUP}"),
-        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
+        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "${DESTINATION_TYPE}"),
         @ActivationConfigProperty(propertyName = "messageSelector", propertyValue = "CPPNAME in(${MESSAGE_SELECTOR})")
 })
 @Adapter(${ADAPTER_TYPE})

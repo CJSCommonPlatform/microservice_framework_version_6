@@ -31,6 +31,8 @@ import static uk.gov.justice.raml.jms.core.TemplateRenderer.render;
 public class JmsEndpointGenerator implements Generator {
 
     private static final String UTF_8 = "UTF-8";
+    private static final String EVENTS = "events";
+    private static final String LISTENER = "listener";
     private static final String TEMPLATE_LOADING_ERROR = "Failed to load template resource JmsListenerTemplate.tpm";
     private static final String ACTIONS_EMPTY_ERROR = "No actions to process";
     private static final String OUTPUT_FILE_GENERATION_ERROR = "Failed to create output file for %s";
@@ -93,10 +95,12 @@ public class JmsEndpointGenerator implements Generator {
     private Attributes templateAttributesFrom(final Resource resource, final GeneratorConfig configuration) {
         final String uri = resource.getUri();
         final HashMap<String, String> data = new HashMap<>();
+        Component component = componentOf(uri);
 
         data.put("PACKAGE_NAME", configuration.getBasePackageName());
         data.put("CLASS_NAME", classNameOf(uri));
-        data.put("ADAPTER_TYPE", componentOf(uri).name());
+        data.put("ADAPTER_TYPE", component.name());
+        data.put("DESTINATION_TYPE", component.destinationType().getName());
         data.put("DESTINATION_LOOKUP", destinationNameOf(uri));
         data.put("MESSAGE_SELECTOR", messageSelectorsFrom(resource.getActions()));
 
@@ -125,7 +129,9 @@ public class JmsEndpointGenerator implements Generator {
      */
     private Component componentOf(final String uri) {
         final String[] uriParts = uri.split("\\.");
-        return Component.valueOf(uriParts[uriParts.length - 1], uriParts[uriParts.length - 2]);
+        String pillar = uriParts[uriParts.length - 1];
+        String tier = EVENTS.equals(pillar) ? LISTENER : uriParts[uriParts.length - 2];
+        return Component.valueOf(pillar, tier);
     }
 
     /**

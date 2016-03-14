@@ -14,7 +14,7 @@
     <dependencies>
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
-            <artifactId>rest-adapter</artifactId>
+            <artifactId>rest-adapter-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

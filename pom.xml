@@ -24,7 +24,6 @@
 
     <modules>
         <module>messaging</module>
-        <module>rest-adapter</module>
         <module>core</module>
         <module>metrics</module>
         <module>components</module>

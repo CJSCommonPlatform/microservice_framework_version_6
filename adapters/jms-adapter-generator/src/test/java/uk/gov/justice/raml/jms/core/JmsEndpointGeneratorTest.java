@@ -45,7 +45,6 @@ import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 import org.raml.model.ActionType;
 
@@ -166,7 +165,7 @@ public class JmsEndpointGeneratorTest {
                 raml()
                         .with(resource()
                                 .withRelativeUri("/people.handler.commands")
-                                .with(action().with(ActionType.POST)))
+                                .with(action(POST, "application/vnd.people.commands.abc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
@@ -182,7 +181,7 @@ public class JmsEndpointGeneratorTest {
                 raml()
                         .with(resource()
                                 .withRelativeUri("/people.controller.commands")
-                                .with(action().with(ActionType.POST)))
+                                .with(action(POST, "application/vnd.people.commands.abc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
@@ -199,7 +198,7 @@ public class JmsEndpointGeneratorTest {
                 raml()
                         .with(resource()
                                 .withRelativeUri("/people.events")
-                                .with(action().with(ActionType.POST)))
+                                .with(action(POST, "application/vnd.people.events.abc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
@@ -235,7 +234,7 @@ public class JmsEndpointGeneratorTest {
                 raml()
                         .with(resource()
                                 .withRelativeUri("/people.controller.commands")
-                                .with(action().with(ActionType.POST)))
+                                .with(action(ActionType.POST, "application/vnd.people.commands.abc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
@@ -252,7 +251,7 @@ public class JmsEndpointGeneratorTest {
                 raml()
                         .with(resource()
                                 .withRelativeUri("/structure.controller.commands")
-                                .with(action().with(ActionType.POST)))
+                                .with(action(POST, "application/vnd.structure.commands.abc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
@@ -269,7 +268,7 @@ public class JmsEndpointGeneratorTest {
                 raml()
                         .with(resource()
                                 .withRelativeUri("/structure.handler.commands")
-                                .with(action().with(ActionType.POST)))
+                                .with(action(POST, "application/vnd.structure.commands.abc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
@@ -286,7 +285,7 @@ public class JmsEndpointGeneratorTest {
                 raml()
                         .with(resource()
                                 .withRelativeUri("/structure.events")
-                                .with(action().with(ActionType.POST)))
+                                .with(action(POST, "application/vnd.structure.events.abc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
@@ -302,7 +301,7 @@ public class JmsEndpointGeneratorTest {
         generator.run(raml()
                 .with(resource()
                         .withRelativeUri("/structure.controller.commands")
-                        .with(action().with(ActionType.POST)))
+                        .with(action(POST, "application/vnd.structure.commands.abc+json")))
                 .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
         
@@ -318,7 +317,7 @@ public class JmsEndpointGeneratorTest {
         generator.run(raml()
                 .with(resource()
                         .withRelativeUri("/lifecycle.handler.commands")
-                        .with(action().with(ActionType.POST)))
+                        .with(action(POST, "application/vnd.lifecycle.commands.abc+json")))
                 .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
@@ -334,7 +333,7 @@ public class JmsEndpointGeneratorTest {
         generator.run(raml()
                 .with(resource()
                         .withRelativeUri("/people.events")
-                        .with(action().with(ActionType.POST)))
+                        .with(action(POST, "application/vnd.people.events.abc+json")))
                 .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
@@ -350,6 +349,7 @@ public class JmsEndpointGeneratorTest {
         generator.run(
                 raml()
                         .with(resource()
+                                .withRelativeUri("/structure.controller.commands")
                                 .with(action()
                                         .with(ActionType.POST)
                                         .withMediaType("application/vnd.structure.commands.test-cmd+json")))
@@ -362,12 +362,32 @@ public class JmsEndpointGeneratorTest {
                 hasItemInArray(allOf(propertyName(equalTo("messageSelector")),
                         propertyValue(equalTo("CPPNAME in('structure.commands.test-cmd')")))));
     }
+    
+    @Test
+    public void shouldCreateAnnotatedJmsEndpointWithMessageSelectorContainingOneEvent() throws Exception {
+        generator.run(
+                raml()
+                        .with(resource()
+                                .withRelativeUri("/structure.controller.commands")
+                                .with(action()
+                                        .with(ActionType.POST)
+                                        .withMediaType("application/vnd.structure.events.test-event+json")))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
+        assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
+                hasItemInArray(allOf(propertyName(equalTo("messageSelector")),
+                        propertyValue(equalTo("CPPNAME in('structure.events.test-event')")))));
+    }
 
     @Test
     public void shouldOnlyCreateMessageSelectorForPostActionAndIgnoreAllOtherActions() throws Exception {
         generator.run(
                 raml()
                         .with(resource()
+                                .withRelativeUri("/structure.controller.commands")
                                 .with(action(POST, "application/vnd.structure.commands.test-cmd1+json"))
                                 .with(action(GET, "application/vnd.structure.commands.test-cmd2+json"))
                                 .with(action(DELETE, "application/vnd.structure.commands.test-cmd3+json"))
@@ -385,28 +405,12 @@ public class JmsEndpointGeneratorTest {
                         propertyValue(equalTo("CPPNAME in('structure.commands.test-cmd1')")))));
     }
 
-    @Rule
-    public ExpectedException exception = ExpectedException.none();
-
-    @Test
-    public void shouldThrowExceptionIfNoActionsInRaml() throws Exception {
-
-        exception.expect(JmsEndpointGeneratorException.class);
-        exception.expectMessage("No actions to process");
-
-        generator.run(
-                raml()
-                        .with(resource()
-                                .withRelativeUri("/structure.controller.commands"))
-                        .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
-    }
-
     @Test
     public void shouldCreateAnnotatedJmsEndpointWithMessageSelectorContainingTwoCommands() throws Exception {
         generator.run(
                 raml()
                         .with(resource()
+                                .withRelativeUri("/people.controller.commands")
                                 .with(action()
                                         .with(ActionType.POST)
                                         .withMediaType("application/vnd.people.commands.command1+json")

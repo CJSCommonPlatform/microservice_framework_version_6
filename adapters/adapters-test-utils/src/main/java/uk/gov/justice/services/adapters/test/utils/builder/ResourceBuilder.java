@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
 
 public class ResourceBuilder {
@@ -25,7 +27,7 @@ public class ResourceBuilder {
     public static ResourceBuilder resource(final String relativeUri, final String... pathParams) {
         ResourceBuilder resourceBuilder = new ResourceBuilder()
                 .withRelativeUri(relativeUri);
-        for(String pathParam: pathParams) {
+        for (String pathParam : pathParams) {
             resourceBuilder = resourceBuilder.withPathParam(pathParam);
         }
         return resourceBuilder;
@@ -33,6 +35,11 @@ public class ResourceBuilder {
 
     public ResourceBuilder with(final ActionBuilder action) {
         actionBuilders.add(action);
+        return this;
+    }
+
+    public ResourceBuilder withDefaultAction() {
+        with(action(POST, "application/vnd.structure.commands.test-cmd+json"));
         return this;
     }
 
@@ -62,9 +69,5 @@ public class ResourceBuilder {
         resource.setActions(actions);
         return resource;
     }
-    
-    public ResourceBuilder withDefaultAction() {
-        with(action().with(ActionType.POST));
-        return this;
-    }
+
 }

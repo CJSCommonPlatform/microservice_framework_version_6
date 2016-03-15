@@ -7,7 +7,4 @@ public class JmsEndpointGeneratorException extends RuntimeException {
         super(message, e);
     }
 
-    public JmsEndpointGeneratorException(final String message) {
-        super(message);
-    }
 }

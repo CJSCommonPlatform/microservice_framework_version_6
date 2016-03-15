@@ -5,17 +5,12 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-import static net.trajano.commons.testing.UtilityClassTestUtil.assertUtilityClassWellDefined;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 
 
 public class TemplateRendererTest {
 
-    @Test
-    public void shouldBeWellDefinedUtilityClass() {
-        assertUtilityClassWellDefined(TemplateRenderer.class);
-    }
 
     @Test
     public void shouldReplaceMarkedPosition() throws Exception {

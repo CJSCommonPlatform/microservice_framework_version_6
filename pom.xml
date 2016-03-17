@@ -6,7 +6,7 @@
     <parent>
         <groupId>uk.gov.justice</groupId>
         <artifactId>parent-pom</artifactId>
-        <version>1.6.0-SNAPSHOT</version>
+        <version>1.6.5-SNAPSHOT</version>
     </parent>
 
     <groupId>uk.gov.justice.services</groupId>
@@ -44,7 +44,7 @@
             <dependency>
                 <groupId>uk.gov.justice</groupId>
                 <artifactId>common-bom</artifactId>
-                <version>1.6.0-SNAPSHOT</version>
+                <version>1.6.5-SNAPSHOT</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>

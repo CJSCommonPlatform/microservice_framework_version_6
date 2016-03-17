@@ -35,7 +35,7 @@
     </modules>
 
     <properties>
-        <raml-maven-plugin.version>1.0.0-SNAPSHOT</raml-maven-plugin.version>
+        <raml-maven-plugin.version>1.0.0</raml-maven-plugin.version>
         <jersey.version>1.19</jersey.version>
     </properties>
 

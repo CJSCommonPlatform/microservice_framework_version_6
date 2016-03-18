@@ -74,11 +74,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-client</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.apache.tomee</groupId>
             <artifactId>openejb-cxf-rs</artifactId>
             <version>7.0.0-M1</version>

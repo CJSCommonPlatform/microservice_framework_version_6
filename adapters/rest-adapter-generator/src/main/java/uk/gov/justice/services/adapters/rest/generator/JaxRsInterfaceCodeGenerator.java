@@ -1,5 +1,6 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
+import com.google.common.collect.ImmutableList;
 import com.sun.codemodel.JAnnotatable;
 import com.sun.codemodel.JClass;
 import com.sun.codemodel.JClassAlreadyExistsException;
@@ -22,7 +23,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import java.lang.annotation.Annotation;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -30,17 +30,20 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import static java.util.Collections.unmodifiableList;
+import static java.lang.String.join;
 import static org.apache.commons.lang.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.apache.commons.lang.StringUtils.strip;
 import static org.apache.commons.lang.StringUtils.substringAfter;
-import static uk.gov.justice.services.adapters.rest.generator.Names.*;
 import static uk.gov.justice.services.adapters.rest.generator.Names.GENERIC_PAYLOAD_ARGUMENT_NAME;
+import static uk.gov.justice.services.adapters.rest.generator.Names.buildResourceMethodName;
+import static uk.gov.justice.services.adapters.rest.generator.Names.buildVariableName;
+import static uk.gov.justice.services.adapters.rest.generator.Names.resourceInterfaceNameOf;
 
-public class JaxRsInterfaceCodeGenerator {
-    private static final List<Class<? extends Annotation>> JAXRS_HTTP_METHODS = unmodifiableList(Arrays.asList(
-            GET.class, POST.class));
+class JaxRsInterfaceCodeGenerator {
+
+    private static final List<Class<? extends Annotation>> JAXRS_HTTP_METHODS = ImmutableList.of(GET.class, POST.class);
+
     private static final String DEFAULT_ANNOTATION_PARAMETER = "value";
     private static final String REST_INTERFACE_PACKAGE_NAME = "resource";
     private final JCodeModel codeModel;
@@ -48,26 +51,24 @@ public class JaxRsInterfaceCodeGenerator {
     private final Map<String, Set<String>> resourcesMethods;
     private final Map<String, Object> httpMethodAnnotations;
 
-    public JaxRsInterfaceCodeGenerator(final JCodeModel codeModel, final GeneratorConfig configuration) {
-        super();
+    JaxRsInterfaceCodeGenerator(final JCodeModel codeModel, final GeneratorConfig configuration) {
         this.codeModel = codeModel;
         this.configuration = configuration;
         this.resourcesMethods = new HashMap<>();
         this.httpMethodAnnotations = new HashMap<>();
-        for (final Class<? extends Annotation> clazz : JAXRS_HTTP_METHODS) {
-            httpMethodAnnotations.put(clazz.getSimpleName(), clazz);
-        }
+
+        JAXRS_HTTP_METHODS.forEach(clazz -> httpMethodAnnotations.put(clazz.getSimpleName(), clazz));
     }
 
-    public JDefinedClass createInterface(final Resource resource) {
+    JDefinedClass createInterface(final Resource resource) {
 
         String interfaceName = resourceInterfaceNameOf(resource);
         final JDefinedClass resourceInterface = interfaceClassOf(interfaceName);
         final String relativeUri = strip(resource.getRelativeUri(), "/");
         resourceInterface.annotate(Path.class).param(DEFAULT_ANNOTATION_PARAMETER, defaultIfBlank(relativeUri, "/"));
         addResourceMethods(resource, resourceInterface, relativeUri);
-        return resourceInterface;
 
+        return resourceInterface;
     }
 
     private JDefinedClass interfaceClassOf(final String name) {
@@ -81,8 +82,7 @@ public class JaxRsInterfaceCodeGenerator {
             }
         }
 
-        final JPackage pkg = codeModel
-                ._package(configuration.getBasePackageName() + "." + REST_INTERFACE_PACKAGE_NAME);
+        final JPackage pkg = codeModel._package(join(".", configuration.getBasePackageName(), REST_INTERFACE_PACKAGE_NAME));
         try {
             return pkg._interface(actualName);
         } catch (JClassAlreadyExistsException ex) {

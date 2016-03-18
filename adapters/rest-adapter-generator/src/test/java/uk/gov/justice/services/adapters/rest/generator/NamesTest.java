@@ -4,7 +4,9 @@ import org.junit.Test;
 import org.raml.model.Action;
 import org.raml.model.ActionType;
 import org.raml.model.MimeType;
+import org.raml.model.Raml;
 import org.raml.model.Resource;
+import uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder;
 
 import static net.trajano.commons.testing.UtilityClassTestUtil.assertUtilityClassWellDefined;
 import static org.hamcrest.core.Is.is;
@@ -70,4 +72,43 @@ public class NamesTest {
         assertThat(interfaceName, is("SomecontextControllerCommandsResource"));
     }
 
+    @Test
+    public void shouldReturnApplicationName() throws Exception {
+        Raml raml = RamlBuilder.restRamlWithDefaults().build();
+        String applicationName = Names.applicationNameOf(raml);
+        assertThat(applicationName, is("CommandApiRestServiceApplication"));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void shouldThrowExceptionForMalformedUri() throws Exception {
+        Raml raml = RamlBuilder.restRamlWithDefaults().withBaseUri("blah").build();
+        Names.applicationNameOf(raml);
+    }
+
+    @Test
+    public void shouldReturnPathIfNoContextFound() throws Exception {
+        Raml raml = RamlBuilder.restRamlWithDefaults().withBaseUri("http://localhost:8080/webcontext").build();
+        String applicationName = Names.applicationNameOf(raml);
+        assertThat(applicationName, is("WebcontextApplication"));
+    }
+
+    @Test
+    public void shouldRemoveContextFromBaseUri() throws Exception {
+        Raml raml = RamlBuilder.restRamlWithDefaults().build();
+        String applicationName = Names.baseUriPathWithoutContext(raml);
+        assertThat(applicationName, is("/command/api/rest/service"));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void shouldThrowExceptionForMalformedBaseUri() throws Exception {
+        Raml raml = RamlBuilder.restRamlWithDefaults().withBaseUri("blah").build();
+        Names.baseUriPathWithoutContext(raml);
+    }
+
+    @Test
+    public void shouldThrowExceptionForBaseUriThatDoesNotHaveEnoughPathElements() throws Exception {
+        Raml raml = RamlBuilder.restRamlWithDefaults().withBaseUri("http://localhost:8080/webcontext").build();
+        String applicationName = Names.baseUriPathWithoutContext(raml);
+        assertThat(applicationName, is("/webcontext"));
+    }
 }

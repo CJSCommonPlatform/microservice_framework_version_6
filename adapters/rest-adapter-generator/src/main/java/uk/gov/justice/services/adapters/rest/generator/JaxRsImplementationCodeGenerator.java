@@ -28,14 +28,18 @@ import java.util.Map;
 
 import static com.sun.codemodel.JMod.PUBLIC;
 
-public class JaxRsImplementationCodeGenerator {
+/**
+ * Internal code generation class for generating JAX-RS resource implementation classes.
+ */
+class JaxRsImplementationCodeGenerator {
+
     private final JCodeModel codeModel;
 
-    public JaxRsImplementationCodeGenerator(JCodeModel codeModel) {
+    JaxRsImplementationCodeGenerator(JCodeModel codeModel) {
         this.codeModel = codeModel;
     }
 
-    public JDefinedClass createImplementation(JDefinedClass resourceInterface) {
+    JDefinedClass createImplementation(JDefinedClass resourceInterface) {
         final JPackage pkg = resourceInterface.getPackage();
         try {
             final JDefinedClass resourceImplementation = pkg._class("Default" + resourceInterface.name());

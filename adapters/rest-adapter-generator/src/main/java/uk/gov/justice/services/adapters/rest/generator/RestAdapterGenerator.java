@@ -1,6 +1,5 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
-import com.sun.codemodel.JDefinedClass;
 import org.raml.model.Raml;
 import org.raml.model.Resource;
 import uk.gov.justice.raml.core.Generator;
@@ -8,6 +7,7 @@ import uk.gov.justice.raml.core.GeneratorConfig;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang.Validate.isTrue;
@@ -23,10 +23,13 @@ public class RestAdapterGenerator implements Generator {
         Collection<Resource> resources = raml.getResources().values();
 
         JaxRsCodeGenerator codeGenerator = new JaxRsCodeGenerator(configuration);
-        for (final Resource resource : resources) {
-            JDefinedClass resourceInterface = codeGenerator.createInterface(resource);
-            codeGenerator.createImplementation(resourceInterface);
-        }
+        Collection<String> implementationNames = resources.stream()
+                .map(resource -> {
+                    final String interfaceName = codeGenerator.createInterface(resource);
+                    return codeGenerator.createImplementation(interfaceName);
+                })
+                .collect(Collectors.toList());
+        codeGenerator.createApplication(raml, implementationNames);
         codeGenerator.generate();
     }
 

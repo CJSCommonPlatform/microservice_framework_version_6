@@ -25,6 +25,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.DefaultEnvelope.envelopeFrom;
 
+/**
+ * Unit tests for the generated {@link DefaultUsersUserIdResource} class.
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultUsersUserIdResourceTest {
     private static final String NOT_USED_USER_ID = "1";

@@ -1,10 +1,16 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.raml.model.ActionType.POST;
@@ -21,6 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -29,8 +36,6 @@ import javax.json.JsonObject;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
-import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
-import org.jboss.resteasy.specimpl.ResteasyHttpHeaders;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -46,7 +51,6 @@ import uk.gov.justice.services.adapter.rest.RestProcessor;
 import uk.gov.justice.services.adapters.test.utils.compiler.JavaCompilerUtil;
 import uk.gov.justice.services.core.dispatcher.Dispatcher;
 import uk.gov.justice.services.messaging.Envelope;
-
 
 @RunWith(MockitoJUnitRunner.class)
 public class RestAdapterGenerator_MethodBodyTest {
@@ -68,7 +72,7 @@ public class RestAdapterGenerator_MethodBodyTest {
     private Dispatcher dispatcher;
 
     @Mock
-    private RestProcessor restProcessorMock;
+    private RestProcessor restProcessor;
 
     @Before
     public void before() {
@@ -81,16 +85,16 @@ public class RestAdapterGenerator_MethodBodyTest {
     public void shouldReturnResponseGeneratedByRestProcessor() throws Exception {
         generator.run(
                 restRamlWithDefaults().with(
-                        resource("/default/path")
+                        resource("/path")
                                 .with(action(POST, "application/vnd.default+json"))
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
         Object resourceObject = instantiate(resourceClass);
 
         Response processorResponse = Response.ok().build();
-        when(restProcessorMock.process(any(Consumer.class), any(JsonObject.class), any(HttpHeaders.class),
+        when(restProcessor.process(any(Consumer.class), any(JsonObject.class), any(HttpHeaders.class),
                 any(Map.class))).thenReturn(processorResponse);
 
         Method method = firstMethodOf(resourceClass);
@@ -106,12 +110,12 @@ public class RestAdapterGenerator_MethodBodyTest {
 
         generator.run(
                 restRamlWithDefaults().with(
-                        resource("/default/path")
+                        resource("/path")
                                 .with(action(POST, "application/vnd.default+json"))
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
         Object resourceObject = instantiate(resourceClass);
 
         Method method = firstMethodOf(resourceClass);
@@ -119,7 +123,7 @@ public class RestAdapterGenerator_MethodBodyTest {
         method.invoke(resourceObject, NOT_USED_JSONOBJECT);
 
         ArgumentCaptor<Consumer> consumerCaptor = ArgumentCaptor.forClass(Consumer.class);
-        verify(restProcessorMock).process(consumerCaptor.capture(), any(JsonObject.class), any(HttpHeaders.class),
+        verify(restProcessor).process(consumerCaptor.capture(), any(JsonObject.class), any(HttpHeaders.class),
                 any(Map.class));
 
         Envelope envelope = envelopeFrom(null, null);
@@ -135,12 +139,12 @@ public class RestAdapterGenerator_MethodBodyTest {
 
         generator.run(
                 restRamlWithDefaults().with(
-                        resource("/default/path")
+                        resource("/path")
                                 .with(action(POST, "application/vnd.default+json"))
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
         Object resourceObject = instantiate(resourceClass);
 
         JsonObject jsonObject = Json.createObjectBuilder().add("dummy", "abc").build();
@@ -148,7 +152,7 @@ public class RestAdapterGenerator_MethodBodyTest {
         Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, jsonObject);
 
-        verify(restProcessorMock).process(any(Consumer.class), eq(jsonObject), any(HttpHeaders.class), any(Map.class));
+        verify(restProcessor).process(any(Consumer.class), eq(jsonObject), any(HttpHeaders.class), any(Map.class));
 
     }
 
@@ -157,21 +161,21 @@ public class RestAdapterGenerator_MethodBodyTest {
     public void shouldPassHttpHeadersToRestProcessor() throws Exception {
         generator.run(
                 restRamlWithDefaults().with(
-                        resource("/default/path")
+                        resource("/path")
                                 .with(action(POST, "application/vnd.default+json"))
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
         Object resourceObject = instantiate(resourceClass);
 
-        HttpHeaders headers = new ResteasyHttpHeaders(new MultivaluedMapImpl<>());
+        HttpHeaders headers = mock(HttpHeaders.class);
         setField(resourceObject, "headers", headers);
 
         Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, NOT_USED_JSONOBJECT);
 
-        verify(restProcessorMock).process(any(Consumer.class), any(JsonObject.class), eq(headers), any(Map.class));
+        verify(restProcessor).process(any(Consumer.class), any(JsonObject.class), eq(headers), any(Map.class));
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -185,7 +189,7 @@ public class RestAdapterGenerator_MethodBodyTest {
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamAResource");
 
         Object resourceObject = instantiate(resourceClass);
 
@@ -194,7 +198,7 @@ public class RestAdapterGenerator_MethodBodyTest {
 
         ArgumentCaptor<Map> pathParamsCaptor = ArgumentCaptor.forClass(Map.class);
 
-        verify(restProcessorMock).process(any(Consumer.class), any(JsonObject.class), any(HttpHeaders.class),
+        verify(restProcessor).process(any(Consumer.class), any(JsonObject.class), any(HttpHeaders.class),
                 pathParamsCaptor.capture());
 
         Map pathParams = pathParamsCaptor.getValue();
@@ -215,7 +219,7 @@ public class RestAdapterGenerator_MethodBodyTest {
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathP1Resource");
 
         Object resourceObject = instantiate(resourceClass);
 
@@ -226,7 +230,7 @@ public class RestAdapterGenerator_MethodBodyTest {
 
         ArgumentCaptor<Map> pathParamsCaptor = ArgumentCaptor.forClass(Map.class);
 
-        verify(restProcessorMock).process(any(Consumer.class), any(JsonObject.class), any(HttpHeaders.class),
+        verify(restProcessor).process(any(Consumer.class), any(JsonObject.class), any(HttpHeaders.class),
                 pathParamsCaptor.capture());
 
         Map pathParams = pathParamsCaptor.getValue();
@@ -246,7 +250,7 @@ public class RestAdapterGenerator_MethodBodyTest {
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParam1Param2Resource");
 
         Object resourceObject = instantiate(resourceClass);
 
@@ -255,7 +259,7 @@ public class RestAdapterGenerator_MethodBodyTest {
 
         ArgumentCaptor<Map> pathParamsCaptor = ArgumentCaptor.forClass(Map.class);
 
-        verify(restProcessorMock).process(any(Consumer.class), any(JsonObject.class), any(HttpHeaders.class),
+        verify(restProcessor).process(any(Consumer.class), any(JsonObject.class), any(HttpHeaders.class),
                 pathParamsCaptor.capture());
 
         Map pathParams = pathParamsCaptor.getValue();
@@ -267,9 +271,33 @@ public class RestAdapterGenerator_MethodBodyTest {
         assertThat(pathParams.get("param2"), is("paramValueDEF"));
     }
 
+    @SuppressWarnings("unchecked")
+    @Test
+    public void shouldReturnSetOfResourceClasses() throws Exception {
+        generator.run(
+                restRamlWithDefaults()
+                        .with(resource("/pathA").with(action(POST, "application/vnd.default+json")))
+                        .with(resource("/pathB").with(action(POST, "application/vnd.default+json")))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE));
+
+        Set<Class<?>> compiledClasses = compiler.compiledClassesOf(BASE_PACKAGE);
+        Class<?> applicationClass = compiler.classOf(compiledClasses, BASE_PACKAGE, "CommandApiRestServiceApplication");
+        Object application = applicationClass.newInstance();
+
+        Method method = applicationClass.getDeclaredMethod("getClasses");
+        Object result = method.invoke(application);
+        assertThat(result, is(instanceOf(Set.class)));
+        Set<Class<?>> classes = (Set<Class<?>>) result;
+        assertThat(classes, hasSize(2));
+        assertThat(classes, containsInAnyOrder(
+                equalTo(compiler.classOf(compiledClasses, BASE_PACKAGE, "resource", "DefaultPathAResource" )),
+                equalTo(compiler.classOf(compiledClasses, BASE_PACKAGE, "resource", "DefaultPathBResource" ))));
+    }
+
     private Object instantiate(Class<?> resourceClass) throws InstantiationException, IllegalAccessException {
         Object resourceObject = resourceClass.newInstance();
-        setField(resourceObject, "restProcessor", restProcessorMock);
+        setField(resourceObject, "restProcessor", restProcessor);
         setField(resourceObject, "dispatcher", dispatcher);
         return resourceObject;
     }

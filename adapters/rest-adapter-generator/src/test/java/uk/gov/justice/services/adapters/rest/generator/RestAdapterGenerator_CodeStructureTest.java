@@ -1,5 +1,9 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
+import static java.lang.String.format;
+import static java.lang.reflect.Modifier.isAbstract;
+import static java.lang.reflect.Modifier.isPublic;
+import static java.lang.reflect.Modifier.isStatic;
 import static java.nio.file.Paths.get;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
@@ -19,11 +23,14 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.json.JsonObject;
+import javax.ws.rs.core.Application;
+import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -31,6 +38,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
+import com.google.common.reflect.TypeToken;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -58,6 +66,69 @@ public class RestAdapterGenerator_CodeStructureTest {
     public void before() {
         generator = new RestAdapterGenerator();
         compiler = new JavaCompilerUtil(outputFolder.getRoot(), outputFolder.getRoot());
+    }
+
+    @Test
+    public void shouldGenerateApplicationClass() throws Exception {
+        generator.run(
+                restRamlWithDefaults().with(
+                        resource("/some/path")
+                                .with(action(POST, "application/vnd.default+json"))
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE));
+
+        Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceApplication");
+
+        assertThat(applicationClass.isInterface(), is(false));
+    }
+
+    @Test
+    public void shouldGenerateExtendingApplicationClass() throws Exception {
+        generator.run(
+                restRamlWithDefaults().with(
+                        resource("/some/path")
+                                .with(action(POST, "application/vnd.default+json"))
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE));
+
+        Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceApplication");
+
+        assertThat(Application.class.isAssignableFrom(applicationClass), is(true));
+    }
+
+    @Test
+    public void shouldGenerateAnnotatedApplicationClass() throws Exception {
+        generator.run(
+                restRamlWithDefaults().with(
+                        resource("/some/path")
+                                .with(action(POST, "application/vnd.default+json"))
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE));
+
+        Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceApplication");
+
+        assertThat(applicationClass.getAnnotation(ApplicationPath.class), not(nullValue()));
+        assertThat(applicationClass.getAnnotation(ApplicationPath.class).value(), is("/command/api/rest/service"));
+    }
+
+    @Test
+    public void shouldGenerateApplicationClassWithGetClassesMethod() throws Exception {
+        generator.run(
+                restRamlWithDefaults().with(
+                        resource("/some/path")
+                                .with(action(POST, "application/vnd.default+json"))
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE));
+
+        Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceApplication");
+
+        Method method = applicationClass.getDeclaredMethod("getClasses");
+        assertThat(method, not(nullValue()));
+        assertThat(method.getParameterCount(), equalTo(0));
+        assertThat(isPublic(method.getModifiers()), is(true));
+        assertThat(isStatic(method.getModifiers()), is(false));
+        assertThat(isAbstract(method.getModifiers()), is(false));
+        assertThat(method.getGenericReturnType(), equalTo(new TypeToken<Set<Class<?>>>(){}.getType()));
     }
 
     @Test
@@ -239,7 +310,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                 configurationWithBasePackage(BASE_PACKAGE));
 
         Class<?> resourceInterface = compiler.compiledInterfaceOf(BASE_PACKAGE);
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
         assertThat(resourceClass.isInterface(), is(false));
         assertThat(resourceClass.getGenericInterfaces(), arrayWithSize(1));
@@ -256,7 +327,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
         assertThat(resourceClass.isInterface(), is(false));
         assertThat(resourceClass.getAnnotation(Adapter.class), not(nullValue()));
@@ -273,7 +344,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
         assertThat(clazz.isInterface(), is(false));
         List<Method> methods = methodsOf(clazz);
@@ -295,7 +366,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathP1Resource");
 
         assertThat(clazz.isInterface(), is(false));
         List<Method> methods = methodsOf(clazz);
@@ -311,7 +382,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                 ).build(),
             configurationWithBasePackage(BASE_PACKAGE));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamAResource");
 
         assertThat(clazz.isInterface(), is(false));
         List<Method> methods = methodsOf(clazz);
@@ -337,7 +408,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamAParamBParamCResource");
 
         assertThat(clazz.isInterface(), is(false));
         List<Method> methods = methodsOf(clazz);
@@ -376,7 +447,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                 ).build(),
                 config);
 
-        Class<?> resourceImplementation = compiler.compiledClassOf(basePackageName);
+        Class<?> resourceImplementation = compiler.compiledClassOf(basePackageName, "resource", "DefaultSomePathResource");
 
         assertThat(resourceImplementation.getPackage().getName(), is(basePackageName + ".resource"));
 
@@ -390,7 +461,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                                 .with(action(POST, "application/vnd.command+json"))
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE));
-        Class<?> resourceImplementation = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> resourceImplementation = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
         assertThat(resourceImplementation.getAnnotation(Stateless.class), not(nullValue()));
     }
 
@@ -403,7 +474,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE));
 
-        Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
         List<Method> methods = methodsOf(class1);
         assertThat(methods, hasSize(1));
         Method method = methods.get(0);
@@ -420,7 +491,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                                 .with(action(POST, "application/vnd.command+json"))
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE));
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
         Field dispatcher = resourceClass.getDeclaredField("dispatcher");
         assertThat(dispatcher, not(nullValue()));
@@ -437,7 +508,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                                 .with(action(POST, "application/vnd.command+json"))
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE));
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
         Field dispatcher = resourceClass.getDeclaredField("headers");
         assertThat(dispatcher, not(nullValue()));
@@ -455,7 +526,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
         Field dispatcher = resourceClass.getDeclaredField("restProcessor");
         assertThat(dispatcher, not(nullValue()));
@@ -474,7 +545,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                 .value()[0]
                 .equals(mediaType))
                 .findFirst()
-                .get();
+                .orElseThrow(() -> new IllegalStateException(format("No method consuming %s found", mediaType)));
     }
 
     private GeneratorConfig configurationWithBasePackage(String basePackageName) {

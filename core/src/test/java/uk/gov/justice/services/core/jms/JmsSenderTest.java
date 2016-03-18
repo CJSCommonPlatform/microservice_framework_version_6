@@ -28,7 +28,7 @@ public class JmsSenderTest {
     @Mock
     JmsEnvelopeSender jmsEnvelopeSender;
     @Mock
-    JmsEndpoints jmsEndpoints;
+    JmsDestinations jmsDestinations;
     @Mock
     Destination destination;
     @Mock
@@ -47,11 +47,11 @@ public class JmsSenderTest {
     @SuppressWarnings({"squid:MethodCyclomaticComplexity", "squid:S1067", "squid:S00122"})
     @Test
     public void shouldTestEqualsAndHashCode() throws NamingException {
-        final JmsEndpoints jmsEndpoints = new JmsEndpoints();
+        final JmsDestinations jmsDestinations = new JmsDestinations();
 
-        final JmsSender item1 = new JmsSender(COMMAND_API, jmsEndpoints, jmsEnvelopeSender);
-        final JmsSender item2 = new JmsSender(COMMAND_API, jmsEndpoints, jmsEnvelopeSender);
-        final JmsSender item3 = new JmsSender(COMMAND_CONTROLLER, jmsEndpoints, jmsEnvelopeSender);
+        final JmsSender item1 = new JmsSender(COMMAND_API, jmsDestinations, jmsEnvelopeSender);
+        final JmsSender item2 = new JmsSender(COMMAND_API, jmsDestinations, jmsEnvelopeSender);
+        final JmsSender item3 = new JmsSender(COMMAND_CONTROLLER, jmsDestinations, jmsEnvelopeSender);
 
         new EqualsTester()
                 .addEqualityGroup(item1, item2)
@@ -64,7 +64,7 @@ public class JmsSenderTest {
 
         final JmsSender jmsSender = jmsSenderWithComponent(COMMAND_CONTROLLER);
 
-        when(jmsEndpoints.getEndpoint(COMMAND_CONTROLLER, ContextName.fromName(QUEUE_NAME))).thenReturn(destination);
+        when(jmsDestinations.getDestination(COMMAND_CONTROLLER, ContextName.fromName(QUEUE_NAME))).thenReturn(destination);
 
         jmsSender.send(envelope);
         verify(jmsEnvelopeSender).send(envelope, destination);
@@ -72,7 +72,7 @@ public class JmsSenderTest {
     }
 
     private JmsSender jmsSenderWithComponent(final Component component) {
-        final JmsSender jmsSender = new JmsSender(component, jmsEndpoints, jmsEnvelopeSender);
+        final JmsSender jmsSender = new JmsSender(component, jmsDestinations, jmsEnvelopeSender);
         return jmsSender;
     }
 

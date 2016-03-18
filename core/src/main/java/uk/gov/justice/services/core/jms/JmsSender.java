@@ -12,24 +12,25 @@ import java.util.Objects;
 @Alternative
 public class JmsSender implements Sender {
 
-    private final JmsEndpoints jmsEndpoints;
+    private final JmsDestinations jmsDestinations;
     private final Component destinationComponent;
     private JmsEnvelopeSender jmsEnvelopeSender;
 
-    public JmsSender(final Component destinationComponent, final JmsEndpoints jmsEndpoints,
+    public JmsSender(final Component destinationComponent, final JmsDestinations jmsDestinations,
                      JmsEnvelopeSender jmsEnvelopeSender) {
         this.destinationComponent = destinationComponent;
-        this.jmsEndpoints = jmsEndpoints;
+        this.jmsDestinations = jmsDestinations;
         this.jmsEnvelopeSender = jmsEnvelopeSender;
     }
 
     @Override
-    public void send(Envelope envelope) {
+    public void send(final Envelope envelope) {
         final String contextName = ContextName.fromName(envelope.metadata().name());
-        jmsEnvelopeSender.send(envelope, jmsEndpoints.getEndpoint(destinationComponent, contextName));
+        jmsEnvelopeSender.send(envelope, jmsDestinations.getDestination(destinationComponent, contextName));
     }
 
     @Override
+    @SuppressWarnings({"squid:MethodCyclomaticComplexity", "squid:S1067", "squid:S00122"})
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

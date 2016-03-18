@@ -5,6 +5,9 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
+import javax.jms.Queue;
+import javax.jms.Topic;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -28,6 +31,14 @@ public class ComponentTest {
         assertThat(Component.COMMAND_API.tier(), equalTo(TIER_API));
         assertThat(Component.COMMAND_CONTROLLER.tier(), equalTo(TIER_CONTROLLER));
         assertThat(Component.COMMAND_HANDLER.tier(), equalTo(TIER_HANDLER));
+    }
+    
+    @Test
+    public void shouldReturnDestinationType() throws Exception {
+        assertThat(Component.COMMAND_API.destinationType(), equalTo(Queue.class));
+        assertThat(Component.COMMAND_CONTROLLER.destinationType(), equalTo(Queue.class));
+        assertThat(Component.COMMAND_HANDLER.destinationType(), equalTo(Queue.class));
+        assertThat(Component.EVENT_LISTENER.destinationType(), equalTo(Topic.class));
     }
 
     @Test

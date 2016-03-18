@@ -1,9 +1,6 @@
 package uk.gov.justice.services.adapters.test.utils.builder;
 
-import org.raml.model.ActionType;
-import org.raml.model.Raml;
-import org.raml.model.Resource;
-
+import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 
@@ -11,6 +8,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.raml.model.Raml;
+import org.raml.model.Resource;
 
 public class RamlBuilder {
     private final List<ResourceBuilder> resourceBuilders = new ArrayList<>();
@@ -36,7 +36,7 @@ public class RamlBuilder {
     public RamlBuilder withDefaults() {
         return this.with(resource()
                 .withRelativeUri("/somecontext.controller.commands")
-                .with(action().with(ActionType.POST)));
+                .with(action(POST,"application/vnd.somecontext.commands.command1+json")));
     }
 
     public RamlBuilder withVersion(final String version) {

@@ -28,7 +28,7 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>uk.gov.justice</groupId>
+            <groupId>uk.gov.justice.maven</groupId>
             <artifactId>raml-generator-core</artifactId>
             <version>${raml-maven-plugin.version}</version>
         </dependency>
@@ -76,7 +76,6 @@
         <dependency>
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-client</artifactId>
-            <version>3.0.14.Final</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -94,7 +93,6 @@
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
-            <version>0.9.9-RC1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -113,7 +111,7 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>uk.gov.justice</groupId>
+                <groupId>uk.gov.justice.maven</groupId>
                 <artifactId>raml-maven-plugin</artifactId>
                 <version>${raml-maven-plugin.version}</version>
                 <configuration>

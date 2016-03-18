@@ -4,20 +4,25 @@ import static java.util.Arrays.stream;
 
 import java.util.Optional;
 
+import javax.jms.Destination;
+import javax.jms.Queue;
+import javax.jms.Topic;
+
 /**
  * Enum representing all the service components.
  */
 public enum Component {
 
-    COMMAND_API("commands", "api"), COMMAND_CONTROLLER("commands", "controller"), COMMAND_HANDLER("commands", "handler"), EVENT_LISTENER("events", "listener");
-
+    COMMAND_API("commands", "api", Queue.class), COMMAND_CONTROLLER("commands", "controller", Queue.class), COMMAND_HANDLER("commands", "handler", Queue.class), EVENT_LISTENER("events", "listener", Topic.class);
 
     private final String pillar;
     private final String tier;
+    private final Class<? extends Destination> destinationType;
 
-    Component(final String pillar, final String tier) {
+    Component(final String pillar, final String tier, final Class<? extends Destination> destinationType) {
         this.pillar = pillar;
         this.tier = tier;
+        this.destinationType = destinationType;
     }
 
     /**
@@ -66,5 +71,9 @@ public enum Component {
 
     public String tier() {
         return tier;
+    }
+
+    public Class<? extends Destination> destinationType() {
+        return destinationType;
     }
 }

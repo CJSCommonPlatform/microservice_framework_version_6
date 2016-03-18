@@ -6,7 +6,7 @@
     <parent>
         <groupId>uk.gov.justice</groupId>
         <artifactId>parent-pom</artifactId>
-        <version>1.6.0-SNAPSHOT</version>
+        <version>1.6.5-SNAPSHOT</version>
     </parent>
 
     <groupId>uk.gov.justice.services</groupId>
@@ -35,7 +35,7 @@
     </modules>
 
     <properties>
-        <raml-maven-plugin.version>1.0.0-SNAPSHOT</raml-maven-plugin.version>
+        <raml-maven-plugin.version>1.0.0</raml-maven-plugin.version>
         <jersey.version>1.19</jersey.version>
     </properties>
 
@@ -44,7 +44,7 @@
             <dependency>
                 <groupId>uk.gov.justice</groupId>
                 <artifactId>common-bom</artifactId>
-                <version>1.6.0-SNAPSHOT</version>
+                <version>1.6.5-SNAPSHOT</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>

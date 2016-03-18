@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static java.lang.String.join;
 import static java.text.MessageFormat.format;
 
 /**
@@ -56,6 +57,34 @@ public class JavaCompilerUtil {
     public Class<?> compiledClassOf(String basePackage)
             throws MalformedURLException {
         Set<Class<?>> resourceClasses = compiledClassesOf(basePackage);
+        if (resourceClasses.size() != 1) {
+            throw new IllegalStateException(format("Expected to find single class but found {0}", resourceClasses));
+        }
+        return resourceClasses.iterator().next();
+    }
+
+    /**
+     * Compiles then finds a single class.
+     *
+     * @param basePackage the base package
+     *
+     * @return the class
+     * @throws MalformedURLException
+     * @throws IllegalStateException
+     *             - if more or less than one classes found
+     */
+    public Class<?> compiledClassOf(String basePackage, String... additionalFilterElements) throws MalformedURLException {
+        Set<Class<?>> resourceClasses = compiledClassesAndInterfaces(
+                c -> !c.isInterface() && c.getName().equals(join(".", basePackage, join(".", additionalFilterElements))), basePackage);
+        if (resourceClasses.size() != 1) {
+            throw new IllegalStateException(format("Expected to find single class but found {0}", resourceClasses));
+        }
+        return resourceClasses.iterator().next();
+    }
+
+    public Class<?> classOf(Set<Class<?>> classes, String basePackage, String... additionalFilterElements) throws MalformedURLException {
+        Set<Class<?>> resourceClasses = classesMatching(classes,
+                c -> !c.isInterface() && c.getName().equals(join(".", basePackage, join(".", additionalFilterElements))));
         if (resourceClasses.size() != 1) {
             throw new IllegalStateException(format("Expected to find single class but found {0}", resourceClasses));
         }
@@ -103,13 +132,18 @@ public class JavaCompilerUtil {
      */
     public Set<Class<?>> compiledInterfacesOf(String basePackage)
             throws MalformedURLException {
-        return compiledClassesAndInterfaces(c -> c.isInterface(), basePackage);
+        return compiledClassesAndInterfaces(Class::isInterface, basePackage);
     }
 
     private Set<Class<?>> compiledClassesAndInterfaces(Predicate<? super Class<?>> predicate,
                                                        String basePackage)
             throws MalformedURLException {
-        return compile(basePackage).stream().filter(predicate).collect(Collectors.toSet());
+        return classesMatching(compile(basePackage), predicate);
+    }
+
+    private Set<Class<?>> classesMatching(Set<Class<?>> classes, Predicate<? super Class<?>> predicate)
+            throws MalformedURLException {
+        return classes.stream().filter(predicate).collect(Collectors.toSet());
     }
 
     private Set<Class<?>> compile(String basePackage) throws MalformedURLException {

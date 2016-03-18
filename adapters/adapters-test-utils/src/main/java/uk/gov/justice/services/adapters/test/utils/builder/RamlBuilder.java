@@ -25,7 +25,8 @@ public class RamlBuilder {
     public static RamlBuilder restRamlWithDefaults() {
         return new RamlBuilder()
                 .withVersion("#%RAML 0.8")
-                .withTitle("Example Service");
+                .withTitle("Example Service")
+                .withBaseUri("http://localhost:8080/warname/command/api/rest/service");
     }
 
     public RamlBuilder with(final ResourceBuilder resource) {

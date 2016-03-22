@@ -1,11 +1,15 @@
 package ${PACKAGE_NAME};
 
-import javax.inject.Inject;
-import javax.ejb.MessageDriven;
-import javax.ejb.ActivationConfigProperty;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.dispatcher.Dispatcher;
-import uk.gov.justice.services.core.jms.AbstractJMSListener;
+import uk.gov.justice.services.adapter.messaging.JmsProcessor;
+
+import javax.ejb.ActivationConfigProperty;
+import javax.ejb.MessageDriven;
+import javax.inject.Inject;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+
 import static uk.gov.justice.services.core.annotation.Component.*;
 
 @MessageDriven(activationConfig = {
@@ -14,12 +18,16 @@ import static uk.gov.justice.services.core.annotation.Component.*;
         @ActivationConfigProperty(propertyName = "messageSelector", propertyValue = "CPPNAME in(${MESSAGE_SELECTOR})")
 })
 @Adapter(${ADAPTER_TYPE})
-public class ${CLASS_NAME}JmsListener extends AbstractJMSListener {
+public class ${CLASS_NAME}JmsListener implements MessageListener {
 
    @Inject
    Dispatcher dispatcher;
 
-   protected Dispatcher getDispatcher() {
-       return dispatcher;
+   @Inject
+   JmsProcessor jmsProcessor;
+
+   @Override
+   public void onMessage(Message message) {
+       jmsProcessor.process(dispatcher::dispatch, message);
    }
 }

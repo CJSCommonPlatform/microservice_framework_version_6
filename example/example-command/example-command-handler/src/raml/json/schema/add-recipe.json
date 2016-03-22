@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "",
+  "type": "object",
+  "properties": {
+    "recipeId": {
+      "id": "/recipeId",
+      "type": "string",
+      "description": "Uniquely identifies the recipe",
+      "name": "id of recipe",
+      "title": "id of recipe"
+    },
+    "name": {
+      "id": "/name",
+      "type": "string",
+      "description": "Name of the recipe",
+      "name": "Name of Cake",
+      "title": "Name of Cake"
+    },
+    "ingredients": {
+      "id": "/ingredients",
+      "type": "array",
+      "items": [
+        {
+          "id": "ingredient",
+          "type": "object",
+          "properties": {
+            "name": {
+              "id": "name",
+              "type": "string"
+            },
+            "quantity": {
+              "id": "quantity",
+              "type": "integer"
+            }
+          }
+        }
+      ],
+      "minItems": "1",
+      "description": "List ingredients and quantities for recipe"
+    }
+  },
+  "required": [
+    "cakeName",
+    "ingredients"
+  ]
+}

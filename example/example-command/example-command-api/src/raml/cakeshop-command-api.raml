@@ -1,0 +1,26 @@
+#%RAML 0.8
+title: Cakeshop Command API
+baseUri: http://localhost:8080/example-command-api/command/api/rest/cakeshop
+version: v0.1
+mediaType: application/json
+protocols: [ HTTP, HTTPS ]
+
+/recipes/{recipeId}:
+  description: |
+    Add a new recipe
+  post:
+    body:
+        application/vnd.cakeshop.commands.add-recipe+json:
+            schema: !include json/schema/add-recipe.json
+            example: !include json/add-recipe.json
+
+
+
+/cakes/{cakeId}:
+  description: |
+    Make a cake from recipeId in json
+  post:
+    body:
+        application/vnd.cakeshop.commands.make-cake+json:
+            schema: !include json/schema/make-cake.json
+            example: !include json/make-cake.json

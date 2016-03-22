@@ -3,27 +3,44 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>example-command</artifactId>
+        <artifactId>example-event</artifactId>
         <groupId>uk.gov.justice.services.example</groupId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>example-command-api</artifactId>
+    <artifactId>example-event-listener</artifactId>
     <packaging>war</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>event-listener</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 
     <build>
         <finalName>${project.artifactId}</finalName>
+
         <plugins>
             <plugin>
                 <groupId>uk.gov.justice.maven</groupId>
                 <artifactId>raml-maven-plugin</artifactId>
                 <version>${raml-maven-plugin.version}</version>
                 <configuration>
-                    <generatorName>uk.gov.justice.services.adapters.rest.generator.RestAdapterGenerator</generatorName>
+                    <generatorName>uk.gov.justice.raml.jms.core.JmsEndpointGenerator</generatorName>
                     <sourceDirectory>${basedir}/src/raml</sourceDirectory>
                     <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
                     <basePackageName>uk.gov.justice.api</basePackageName>
+                    <includes>
+                        <include>**/*.messaging.raml</include>
+                    </includes>
                 </configuration>
                 <executions>
                     <execution>
@@ -36,40 +53,15 @@
                 <dependencies>
                     <dependency>
                         <groupId>uk.gov.justice.services</groupId>
-                        <artifactId>rest-adapter-generator</artifactId>
+                        <artifactId>messaging-adapter-generator</artifactId>
                         <version>${project.version}</version>
                     </dependency>
                 </dependencies>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
-
-    <dependencies>
-
-        <dependency>
-            <groupId>uk.gov.justice.services</groupId>
-            <artifactId>command-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>javax</groupId>
-            <artifactId>javaee-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- JUnit regression testing framework. -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-    </dependencies>
-
 </project>

@@ -1,9 +1,46 @@
 package uk.gov.justice.raml.jms.core;
 
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.FeatureMatcher;
+import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.raml.model.ActionType;
+import uk.gov.justice.raml.core.Generator;
+import uk.gov.justice.services.adapter.messaging.JmsProcessor;
+import uk.gov.justice.services.adapters.test.utils.compiler.JavaCompilerUtil;
+import uk.gov.justice.services.core.annotation.Adapter;
+import uk.gov.justice.services.core.annotation.Component;
+import uk.gov.justice.services.core.dispatcher.Dispatcher;
+import uk.gov.justice.services.messaging.Envelope;
+
+import javax.ejb.ActivationConfigProperty;
+import javax.ejb.MessageDriven;
+import javax.inject.Inject;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import java.io.File;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
 import static java.util.Arrays.asList;
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.arrayContainingInAnyOrder;
 import static org.hamcrest.Matchers.arrayWithSize;
@@ -11,10 +48,15 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItemInArray;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.StringStartsWith.startsWith;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.raml.model.ActionType.DELETE;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.HEAD;
@@ -28,40 +70,21 @@ import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.ra
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLLER;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
+import static uk.gov.justice.services.messaging.DefaultEnvelope.envelopeFrom;
 
-import java.io.File;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.List;
-
-import javax.ejb.ActivationConfigProperty;
-import javax.ejb.MessageDriven;
-import javax.inject.Inject;
-
-import org.hamcrest.FeatureMatcher;
-import org.hamcrest.Matcher;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.raml.model.ActionType;
-
-import uk.gov.justice.raml.core.Generator;
-import uk.gov.justice.services.adapters.test.utils.compiler.JavaCompilerUtil;
-import uk.gov.justice.services.core.annotation.Adapter;
-import uk.gov.justice.services.core.annotation.Component;
-import uk.gov.justice.services.core.dispatcher.Dispatcher;
-import uk.gov.justice.services.core.jms.AbstractJMSListener;
-import uk.gov.justice.services.messaging.Envelope;
-
+@RunWith(MockitoJUnitRunner.class)
 public class JmsEndpointGeneratorTest {
 
     private static final String BASE_PACKAGE = "uk.test";
     private static final String BASE_PACKAGE_FOLDER = "/uk/test";
 
     private Generator generator = new JmsEndpointGenerator();
+
+    @Mock
+    JmsProcessor jmsProcessor;
+
+    @Mock
+    Dispatcher dispatcher;
 
     @Rule
     public TemporaryFolder outputFolder = new TemporaryFolder();
@@ -210,11 +233,12 @@ public class JmsEndpointGeneratorTest {
     }
 
     @Test
-    public void shouldCreateJmsEndpointExtendingAbstractJmsListener() throws Exception {
+    public void shouldCreateJmsEndpointImplementingMessageListener() throws Exception {
         generator.run(raml().withDefaults().build(), configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
-        assertThat(clazz.getSuperclass(), equalTo(AbstractJMSListener.class));
+        assertThat(clazz.getInterfaces().length, equalTo(1));
+        assertThat(clazz.getInterfaces()[0], equalTo(MessageListener.class));
     }
 
     @Test
@@ -224,8 +248,21 @@ public class JmsEndpointGeneratorTest {
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
         Field dispatcherField = clazz.getDeclaredField("dispatcher");
         assertThat(dispatcherField, not(nullValue()));
+        assertThat(dispatcherField.getType(), CoreMatchers.equalTo((Dispatcher.class)));
         assertThat(dispatcherField.getAnnotations(), arrayWithSize(1));
         assertThat(dispatcherField.getAnnotation(Inject.class), not(nullValue()));
+    }
+
+    @Test
+    public void shouldCreateJmsEndpointWithAnnotatedJmsProcessorProperty() throws Exception {
+        generator.run(raml().withDefaults().build(), configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        Field jmsProcessorField = clazz.getDeclaredField("jmsProcessor");
+        assertThat(jmsProcessorField, not(nullValue()));
+        assertThat(jmsProcessorField.getType(), CoreMatchers.equalTo((JmsProcessor.class)));
+        assertThat(jmsProcessorField.getAnnotations(), arrayWithSize(1));
+        assertThat(jmsProcessorField.getAnnotation(Inject.class), not(nullValue()));
     }
 
     @Test
@@ -299,12 +336,12 @@ public class JmsEndpointGeneratorTest {
     @Test
     public void shouldCreateAnnotatedCommandControllerEndpointWithQueueAsDestinationType() throws Exception {
         generator.run(raml()
-                .with(resource()
-                        .withRelativeUri("/structure.controller.commands")
-                        .with(action(POST, "application/vnd.structure.commands.abc+json")))
-                .build(),
+                        .with(resource()
+                                .withRelativeUri("/structure.controller.commands")
+                                .with(action(POST, "application/vnd.structure.commands.abc+json")))
+                        .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
-        
+
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
@@ -315,10 +352,10 @@ public class JmsEndpointGeneratorTest {
     @Test
     public void shouldCreateAnnotatedCommandHandlerEndpointWithQueueAsDestinationType() throws Exception {
         generator.run(raml()
-                .with(resource()
-                        .withRelativeUri("/lifecycle.handler.commands")
-                        .with(action(POST, "application/vnd.lifecycle.commands.abc+json")))
-                .build(),
+                        .with(resource()
+                                .withRelativeUri("/lifecycle.handler.commands")
+                                .with(action(POST, "application/vnd.lifecycle.commands.abc+json")))
+                        .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
@@ -327,14 +364,14 @@ public class JmsEndpointGeneratorTest {
                 hasItemInArray(allOf(propertyName(equalTo("destinationType")),
                         propertyValue(equalTo("javax.jms.Queue")))));
     }
-    
+
     @Test
     public void shouldCreateAnnotatedEventListenerEndpointWithQueueAsDestinationType() throws Exception {
         generator.run(raml()
-                .with(resource()
-                        .withRelativeUri("/people.events")
-                        .with(action(POST, "application/vnd.people.events.abc+json")))
-                .build(),
+                        .with(resource()
+                                .withRelativeUri("/people.events")
+                                .with(action(POST, "application/vnd.people.events.abc+json")))
+                        .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
@@ -362,7 +399,7 @@ public class JmsEndpointGeneratorTest {
                 hasItemInArray(allOf(propertyName(equalTo("messageSelector")),
                         propertyValue(equalTo("CPPNAME in('structure.commands.test-cmd')")))));
     }
-    
+
     @Test
     public void shouldCreateAnnotatedJmsEndpointWithMessageSelectorContainingOneEvent() throws Exception {
         generator.run(
@@ -428,22 +465,46 @@ public class JmsEndpointGeneratorTest {
     }
 
     @Test
-    public void shouldCreateJmsEndpointWithDispatcherGetter() throws Exception {
+    public void shouldCreateJmsEndpointWithOnMessage() throws Exception {
         generator.run(raml().withDefaults().build(), configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
 
-        Object endpointInstance = clazz.newInstance();
-        Dispatcher dispatcher = new DummyDispatcher();
-        Field dispatcherField = clazz.getDeclaredField("dispatcher");
-        dispatcherField.setAccessible(true);
-        dispatcherField.set(endpointInstance, dispatcher);
+        List<Method> methods = methodsOf(clazz);
+        assertThat(methods, hasSize(1));
+        Method method = methods.get(0);
+        assertThat(method.getReturnType(), CoreMatchers.equalTo(void.class));
+        assertThat(method.getParameterCount(), Matchers.is(1));
+        assertThat(method.getParameters()[0].getType(), CoreMatchers.equalTo(Message.class));
+    }
 
-        Method getDispatcherMethod = clazz.getDeclaredMethod("getDispatcher");
-        getDispatcherMethod.setAccessible(true);
+    @Test
+    @SuppressWarnings("unchecked")
+    public void shouldCallJmsProcessorWhenOnMessageIsInvoked() throws Exception {
+        generator.run(raml().withDefaults().build(), configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
-        Object getDispatcherResult = getDispatcherMethod.invoke(endpointInstance);
-        assertThat(getDispatcherResult, sameInstance(dispatcher));
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        Object object = instantiate(clazz);
+        assertThat(object, is(instanceOf(MessageListener.class)));
+
+        MessageListener jmsListener = (MessageListener) object;
+        Message message = mock(Message.class);
+        jmsListener.onMessage(message);
+
+        ArgumentCaptor<Consumer> consumerCaptor = ArgumentCaptor.forClass(Consumer.class);
+        verify(jmsProcessor).process(consumerCaptor.capture(), eq(message));
+
+        Envelope envelope = envelopeFrom(null, null);
+        consumerCaptor.getValue().accept(envelope);
+
+        verify(dispatcher).dispatch(envelope);
+    }
+
+    private Object instantiate(Class<?> resourceClass) throws InstantiationException, IllegalAccessException {
+        Object resourceObject = resourceClass.newInstance();
+        setField(resourceObject, "jmsProcessor", jmsProcessor);
+        setField(resourceObject, "dispatcher", dispatcher);
+        return resourceObject;
     }
 
     private FeatureMatcher<ActivationConfigProperty, String> propertyName(Matcher<String> matcher) {
@@ -462,6 +523,30 @@ public class JmsEndpointGeneratorTest {
                 return actual.propertyValue();
             }
         };
+    }
+
+    private void setField(Object resourceObject, String fieldName, Object object)
+            throws IllegalAccessException {
+        Field field = fieldOf(resourceObject.getClass(), fieldName);
+        field.setAccessible(true);
+        field.set(resourceObject, object);
+    }
+
+    private Field fieldOf(Class<?> clazz, String fieldName) {
+        Optional<Field> field = Arrays.stream(clazz.getDeclaredFields()).filter(f -> f.getName().equals(fieldName))
+                .findFirst();
+        assertTrue(field.isPresent());
+        return field.get();
+    }
+
+    private Method firstMethodOf(Class<?> resourceClass) {
+        List<Method> methods = methodsOf(resourceClass);
+        return methods.get(0);
+    }
+
+    private List<Method> methodsOf(Class<?> class1) {
+        return Arrays.stream(class1.getDeclaredMethods()).filter(m -> !m.getName().contains("jacoco") && !m.getName().contains("lambda"))
+                .collect(Collectors.toList());
     }
 
     public static class DummyDispatcher implements Dispatcher {

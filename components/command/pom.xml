@@ -13,6 +13,8 @@
     <packaging>pom</packaging>
     <modules>
         <module>command-api</module>
+        <module>command-controller</module>
+        <module>command-handler</module>
     </modules>
 
 

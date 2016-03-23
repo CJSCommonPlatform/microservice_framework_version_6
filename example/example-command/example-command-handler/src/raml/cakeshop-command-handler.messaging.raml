@@ -1,0 +1,13 @@
+#%RAML 0.8
+title: API Using media type in the URL
+version: v1
+/cakeshop.handler.commands:
+  post:
+    body:
+        application/vnd.cakeshop.commands.add-recipe+json:
+            schema: !include json/schema/add-recipe.json
+            example: !include json/add-recipe.json
+
+        application/vnd.cakeshop.commands.make-cake+json:
+            schema: !include json/schema/make-cake.json
+            example: !include json/make-cake.json

@@ -34,9 +34,6 @@ public class MakeCakeCommandHandlerTest {
     @Mock
     EventStream eventStream;
 
-    @Mock
-    TemporaryEventUtil temporaryEventUtil;
-
     @InjectMocks
     private MakeCakeCommandHandler makeCakeCommandHandler;
 
@@ -47,7 +44,6 @@ public class MakeCakeCommandHandlerTest {
         Envelope envelope = createCommandEnvelope();
 
         makeCakeCommandHandler.handle(envelope);
-
 
     }
 

@@ -5,19 +5,24 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.justice.services.core.sender.Sender;
+import uk.gov.justice.services.event.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
+import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
+import uk.gov.justice.services.example.cakeshop.domain.event.RecipeAdded;
 import uk.gov.justice.services.messaging.DefaultEnvelope;
 import uk.gov.justice.services.messaging.Envelope;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
@@ -28,6 +33,7 @@ public class AddRecipeCommandHandlerTest {
 
     private static final String EVENT_NAME = "cakeshop.events.recipe-added";
     private static final UUID RECIPE_ID = UUID.randomUUID();
+    private static final String RECIPE_NAME = "Test Recipe";
 
     @Mock
     Envelope envelope;
@@ -36,30 +42,34 @@ public class AddRecipeCommandHandlerTest {
     EventSource eventSource;
 
     @Mock
-    EventStream eventStream;
+    Enveloper enveloper;
 
     @Mock
-    TemporaryEventUtil temporaryEventUtil;
+    Function<Object, Envelope> enveloperFunction;
 
     @Mock
-    Stream<Envelope> events;
+    Stream<RecipeAdded> events;
 
     @Mock
-    private Sender sender;
-
+    Stream<Envelope> envelopes;
 
     @InjectMocks
     private AddRecipeCommandHandler addRecipeCommandHandler;
 
     @Test
-    public void shouldHandleMakeCakeCommand() throws Exception {
+    public void shouldHandleAddRecipeCommand() throws Exception {
         final Envelope command = createCommand();
-        when(eventSource.getStreamById(RECIPE_ID)).thenReturn(eventStream);
-        when(temporaryEventUtil.eventsFrom(command, EVENT_NAME)).thenReturn(events);
+        final EventStreamStub eventStreamStub = new EventStreamStub();
+
+        when(enveloper.withMetadataFrom(command)).thenReturn(enveloperFunction);
+        when(enveloperFunction.apply(anyObject())).thenReturn(envelope);
+        when(eventSource.getStreamById(RECIPE_ID)).thenReturn(eventStreamStub);
 
         addRecipeCommandHandler.addRecipe(command);
 
-        verify(eventStream, times(1)).append(temporaryEventUtil.eventsFrom(command, EVENT_NAME));
+        assertThat(eventStreamStub.events, notNullValue());
+        assertThat(eventStreamStub.events.findFirst().get(), equalTo(envelope));
+
     }
 
     private Envelope createCommand() {
@@ -70,9 +80,46 @@ public class AddRecipeCommandHandlerTest {
 
         final JsonObject payloadAsJsonObject = Json.createObjectBuilder()
                 .add("recipeId", RECIPE_ID.toString())
+                .add("name", RECIPE_NAME)
+                .add("ingredients", Json.createArrayBuilder().build())
                 .build();
 
         return DefaultEnvelope.envelopeFrom(metadataFrom(metadataAsJsonObject), payloadAsJsonObject);
+    }
+
+    private class EventStreamStub implements EventStream {
+
+        private Stream<Envelope> events;
+
+        @Override
+        public Stream<Envelope> read() {
+            return null;
+        }
+
+        @Override
+        public Stream<Envelope> readFrom(Long version) {
+            return null;
+        }
+
+        @Override
+        public void append(Stream<Envelope> events) throws EventStreamException {
+            this.events = events;
+        }
+
+        @Override
+        public void appendAfter(Stream<Envelope> events, Long version) throws EventStreamException {
+
+        }
+
+        @Override
+        public Long getCurrentVersion() {
+            return null;
+        }
+
+        @Override
+        public UUID getId() {
+            return null;
+        }
     }
 
 }

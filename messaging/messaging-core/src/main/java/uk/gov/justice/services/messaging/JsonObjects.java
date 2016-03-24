@@ -12,7 +12,6 @@ import javax.json.JsonValue;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiFunction;
@@ -215,17 +214,26 @@ public final class JsonObjects {
     }
 
     /**
+     * Create a {@link JsonObjectBuilder} from an existing {@link JsonObject} applying the filter.
+     * Only copy the field names for which the filter returns true.
+     *
+     * @param source {@link JsonObject} to copy fields from
+     * @return a {@link JsonObjectBuilder} initialised with the fields contained in the source
+     */
+    public static JsonObjectBuilder createObjectBuilderWithFilter(final JsonObject source, Function<String, Boolean> filter) {
+        JsonObjectBuilder builder = Json.createObjectBuilder();
+        source.entrySet().stream().filter(e -> filter.apply(e.getKey())).forEach(x -> builder.add(x.getKey(), x.getValue()));
+        return builder;
+    }
+
+    /**
      * Create a {@link JsonObjectBuilder} from an existing {@link JsonObject}.
      *
      * @param source {@link JsonObject} to copy fields from
      * @return a {@link JsonObjectBuilder} initialised with the fields contained in the source
      */
     public static JsonObjectBuilder createObjectBuilder(final JsonObject source) {
-        JsonObjectBuilder builder = Json.createObjectBuilder();
-        for (Entry<String, JsonValue> entry : source.entrySet()) {
-            builder = builder.add(entry.getKey(), entry.getValue());
-        }
-        return builder;
+        return createObjectBuilderWithFilter(source, x -> true);
     }
 
     /**

@@ -50,7 +50,7 @@ public class CakeShopIT {
 
         String recipeId = "163af847-effb-46a9-96bc-32a0f7526f88";
         Response response = sendTo(RECIPES_RESOURCE_URI + recipeId).request()
-                .post(entity("{}", ADD_RECIPE_MEDIA_TYPE));
+                .post(entity(addRecipeCommand(), ADD_RECIPE_MEDIA_TYPE));
         assertThat(response.getStatus(), is(ACCEPTED));
     }
 
@@ -58,8 +58,7 @@ public class CakeShopIT {
     public void shouldRegisterRecipeAddedEvent() {
         String recipeId = "163af847-effb-46a9-96bc-32a0f7526f99";
         sendTo(RECIPES_RESOURCE_URI + recipeId).request()
-                .post(entity(jsonObject()
-                                .add("recipeName", "Chocolate muffin in six easy steps").build().toString(),
+                .post(entity(addRecipeCommand(),
                         ADD_RECIPE_MEDIA_TYPE));
 
         await().until(() -> eventsWithPayloadContaining(recipeId).count() == 1);
@@ -69,8 +68,15 @@ public class CakeShopIT {
         String eventPayload = event.getPayload();
         with(eventPayload)
                 .assertThat("$.recipeId", equalTo(recipeId))
-                .assertThat("$.recipeName", equalTo("Chocolate muffin in six easy steps"));
+                .assertThat("$.name", equalTo("Chocolate muffin in six easy steps"));
 
+    }
+
+    private String addRecipeCommand() {
+        return jsonObject()
+                .add("name", "Chocolate muffin in six easy steps")
+                .add("ingredients", Json.createArrayBuilder().build())
+                .build().toString();
     }
 
     @Test
@@ -83,25 +89,6 @@ public class CakeShopIT {
 
     }
 
-    @Test
-    public void shouldRegisterCakeMadeEvent() {
-        String cakeId = "163af847-effb-46a9-96bc-32a0f7526f66";
-        sendTo(CAKES_RESOURCE_URI + cakeId).request()
-                .post(entity(jsonObject()
-                                .add("cakeName", "Chocolate muffin").build().toString(),
-                        MAKE_CAKE_MEDIA_TYPE));
-
-        await().until(() -> eventsWithPayloadContaining(cakeId).count() == 1);
-
-        EventLog event = eventsWithPayloadContaining(cakeId).findFirst().get();
-        assertThat(event.getName(), is("cakeshop.events.cake-made"));
-        String eventPayload = event.getPayload();
-        with(eventPayload)
-                .assertThat("$.cakeId", equalTo(cakeId))
-                .assertThat("$.cakeName", equalTo("Chocolate muffin"));
-
-    }
-
     private JsonObjectBuilder jsonObject() {
         return Json.createObjectBuilder();
     }
@@ -111,8 +98,7 @@ public class CakeShopIT {
     }
 
     private WebTarget sendTo(String url) {
-        WebTarget target = client.target(url);
-        return target;
+        return client.target(url);
     }
 
     @BeforeClass

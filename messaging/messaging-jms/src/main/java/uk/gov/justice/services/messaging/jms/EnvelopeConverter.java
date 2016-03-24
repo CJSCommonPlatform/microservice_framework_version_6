@@ -1,8 +1,8 @@
 package uk.gov.justice.services.messaging.jms;
 
-import uk.gov.justice.services.common.converter.JsonObjectConverter;
-import uk.gov.justice.services.common.converter.jms.JmsConverterException;
-import uk.gov.justice.services.common.converter.jms.MessageConverter;
+import uk.gov.justice.services.common.converter.JsonObjectToStringConverter;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.messaging.jms.exception.JmsConverterException;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 
@@ -21,18 +21,21 @@ public class EnvelopeConverter implements MessageConverter<Envelope, TextMessage
     static final String JMS_HEADER_CPPNAME = "CPPNAME";
 
     @Inject
-    JsonObjectConverter jsonObjectConverter;
+    StringToJsonObjectConverter stringToJsonObjectConverter;
+
+    @Inject
+    JsonObjectToStringConverter jsonObjectToStringConverter;
 
     @Inject
     JsonObjectEnvelopeConverter jsonObjectEnvelopeConverter;
 
     @Override
     public Envelope fromMessage(final TextMessage message) {
-        String messageAsString = null;
+        String messageAsString;
 
         try {
             messageAsString = message.getText();
-            return jsonObjectEnvelopeConverter.asEnvelope(jsonObjectConverter.fromString(messageAsString));
+            return jsonObjectEnvelopeConverter.asEnvelope(stringToJsonObjectConverter.convert(messageAsString));
         } catch (JMSException e) {
             throw createJmsConverterException(message, e);
         }
@@ -40,7 +43,7 @@ public class EnvelopeConverter implements MessageConverter<Envelope, TextMessage
 
     @Override
     public TextMessage toMessage(final Envelope envelope, final Session session) {
-        final String envelopeAsString = jsonObjectConverter.asString(jsonObjectEnvelopeConverter.fromEnvelope(envelope));
+        final String envelopeAsString = jsonObjectToStringConverter.convert(jsonObjectEnvelopeConverter.fromEnvelope(envelope));
 
         try {
             final TextMessage textMessage = session.createTextMessage(envelopeAsString);

@@ -1,4 +1,4 @@
-package uk.gov.justice.services.common.converter.jms;
+package uk.gov.justice.services.messaging.jms;
 
 import javax.jms.Message;
 import javax.jms.Session;

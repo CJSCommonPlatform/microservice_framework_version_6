@@ -1,4 +1,4 @@
-package uk.gov.justice.services.common.converter.jms;
+package uk.gov.justice.services.messaging.jms.exception;
 
 public class JmsConverterException extends RuntimeException {
 

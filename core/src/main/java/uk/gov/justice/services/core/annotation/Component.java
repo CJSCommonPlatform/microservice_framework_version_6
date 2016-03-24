@@ -1,12 +1,11 @@
 package uk.gov.justice.services.core.annotation;
 
-import static java.util.Arrays.stream;
-
-import java.util.Optional;
-
 import javax.jms.Destination;
 import javax.jms.Queue;
 import javax.jms.Topic;
+import java.util.Optional;
+
+import static java.util.Arrays.stream;
 
 /**
  * Enum representing all the service components.
@@ -47,8 +46,8 @@ public enum Component {
     /**
      * Retrieves the component of the provided {@link ServiceComponent}
      *
-     * @param clazz the service component class to be analysed
-     * @return the component from the provided {@link ServiceComponent}
+     * @param clazz The service component to be analysed.
+     * @return the component from the provided {@link ServiceComponent}.
      */
     public static Component componentFromServiceComponent(final Class<?> clazz) {
         final ServiceComponent serviceComponent = clazz.getAnnotation(ServiceComponent.class);
@@ -58,8 +57,8 @@ public enum Component {
     /**
      * Retrieves the Component of the provided {@link Adapter}
      *
-     * @param clazz the adapter class to be analysed
-     * @return the component from the provided {@link Adapter}
+     * @param clazz The adapter class to be analysed.
+     * @return the component from the provided {@link Adapter}.
      */
     public static Component componentFromAdapter(final Class<?> clazz) {
         final Adapter adapter = clazz.getAnnotation(Adapter.class);

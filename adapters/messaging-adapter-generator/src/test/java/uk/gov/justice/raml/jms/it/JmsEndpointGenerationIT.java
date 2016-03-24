@@ -18,8 +18,8 @@ import uk.gov.justice.api.StructureControllerCommandsJmsListener;
 import uk.gov.justice.api.StructureEventsJmsListener;
 import uk.gov.justice.api.StructureHandlerCommandsJmsListener;
 import uk.gov.justice.services.adapter.messaging.JmsProcessor;
-import uk.gov.justice.services.adapters.test.utils.dispatcher.AsynchronousRecordingDispatcher;
-import uk.gov.justice.services.common.converter.JsonObjectConverter;
+import uk.gov.justice.services.common.converter.JsonObjectToStringConverter;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
@@ -92,7 +92,8 @@ public class JmsEndpointGenerationIT {
             StructureEventsJmsListener.class,
             StructureHandlerCommandsJmsListener.class,
             EnvelopeConverter.class,
-            JsonObjectConverter.class,
+            JsonObjectToStringConverter.class,
+            StringToJsonObjectConverter.class,
             JsonObjectEnvelopeConverter.class
     })
     public WebApp war() {

@@ -1,44 +1,47 @@
 package uk.gov.justice.services.core.dispatcher;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.justice.services.core.annotation.Adapter;
-import uk.gov.justice.services.core.annotation.Handles;
-import uk.gov.justice.services.core.annotation.ServiceComponent;
-import uk.gov.justice.services.core.extension.ServiceComponentFoundEvent;
-import uk.gov.justice.services.core.handler.registry.HandlerRegistry;
-import uk.gov.justice.services.messaging.Envelope;
-import uk.gov.justice.services.messaging.Metadata;
-
-import javax.enterprise.context.spi.Context;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.InjectionPoint;
-import java.lang.reflect.Member;
-
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.sameInstance;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLLER;
 
+import uk.gov.justice.services.core.annotation.Adapter;
+import uk.gov.justice.services.core.annotation.Handles;
+import uk.gov.justice.services.core.annotation.ServiceComponent;
+import uk.gov.justice.services.core.extension.ServiceComponentFoundEvent;
+import uk.gov.justice.services.core.handler.exception.MissingHandlerException;
+import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.Metadata;
+
+import java.lang.reflect.Member;
+
+import javax.enterprise.context.spi.Context;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.InjectionPoint;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+
 @RunWith(MockitoJUnitRunner.class)
 public class DispatcherProducerTest {
 
-    private static final String NAME = "test.commands.do-something";
+    private static final String NAME_A = "test.commands.do-somethingA";
+    private static final String NAME_B = "test.commands.do-somethingB";
+    private static final String NAME_C = "test.commands.do-somethingC";
 
-    @Mock
-    private Metadata metadata;
+    private TestCommandApiHandler commandApiHandler;
 
-    private TestCommandApiHandler handlerInstance;
+    private TestCommandControllerHandler commandControllerHandler;
 
     private DispatcherProducer dispatcherProducer;
 
@@ -64,16 +67,10 @@ public class DispatcherProducerTest {
     private ServiceComponentFoundEvent serviceComponentFoundEvent;
 
     @Mock
-    private Bean<Object> bean;
+    private Bean<Object> beanA;
 
     @Mock
-    private AsynchronousDispatcher commandApiDispatcher;
-
-    @Mock
-    private HandlerRegistry commandApiRegistry;
-
-    @Mock
-    private HandlerRegistry commandControllerRegistry;
+    private Bean<Object> beanB;
 
     @Mock
     private BeanManager beanManager;
@@ -82,12 +79,28 @@ public class DispatcherProducerTest {
     private Context context;
 
     @Mock
-    private Envelope envelope;
+    private Envelope envelopeA;
+
+    @Mock
+    private Envelope envelopeB;
+
+    @Mock
+    private Envelope envelopeC;
+
+    @Mock
+    private Metadata metadataA;
+
+    @Mock
+    private Metadata metadataB;
+
+    @Mock
+    private Metadata metadataC;
 
     @Before
     public void setup() {
         dispatcherProducer = new DispatcherProducer();
-        handlerInstance = new TestCommandApiHandler();
+        commandApiHandler = new TestCommandApiHandler();
+        commandControllerHandler = new TestCommandControllerHandler();
 
         dispatcherProducer.beanManager = beanManager;
 
@@ -100,51 +113,89 @@ public class DispatcherProducerTest {
         doReturn(TestCommandControllerAdaptor2.class).when(commandControllerMember2).getDeclaringClass();
 
         when(beanManager.getContext(any())).thenReturn(context);
-        when(context.get(any(), any())).thenReturn(handlerInstance);
+        when(context.get(eq(beanA), any())).thenReturn(commandApiHandler);
+        when(context.get(eq(beanB), any())).thenReturn(commandControllerHandler);
 
-        when(envelope.metadata()).thenReturn(metadata);
-        when(metadata.name()).thenReturn(NAME);
-
+        when(envelopeA.metadata()).thenReturn(metadataA);
+        when(metadataA.name()).thenReturn(NAME_A);
+        when(envelopeB.metadata()).thenReturn(metadataB);
+        when(metadataB.name()).thenReturn(NAME_B);
+        when(envelopeC.metadata()).thenReturn(metadataC);
+        when(metadataC.name()).thenReturn(NAME_C);
     }
 
     @Test
     public void shouldReturnDispatcher() throws Exception {
-        Dispatcher dispatcher = dispatcherProducer.produce(commandControllerInjectionPoint1);
+        AsynchronousDispatcher dispatcher = dispatcherProducer.produceAsynchronousDispatcher(commandControllerInjectionPoint1);
         assertThat(dispatcher, notNullValue());
-    }
-
-    @Test
-    public void shouldReturnExistingDispatcher() throws Exception {
-        Dispatcher dispatcher = dispatcherProducer.produce(commandControllerInjectionPoint1);
-        assertThat(dispatcher, notNullValue());
-
-        Dispatcher anotherDispatcher = dispatcherProducer.produce(commandControllerInjectionPoint2);
-        assertThat(anotherDispatcher, sameInstance(dispatcher));
-    }
-
-    @Test
-    public void shouldReturnADifferentDispatcher() throws Exception {
-        Dispatcher dispatcher = dispatcherProducer.produce(commandApiInjectionPoint);
-        assertThat(dispatcher, notNullValue());
-
-        Dispatcher anotherDispatcher = dispatcherProducer.produce(commandControllerInjectionPoint2);
-        assertThat(anotherDispatcher, not(equalTo(dispatcher)));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionWithNoAdaptor() throws Exception {
         doReturn(Object.class).when(commandControllerMember1).getDeclaringClass();
-        dispatcherProducer.produce(commandControllerInjectionPoint1);
+        dispatcherProducer.produceAsynchronousDispatcher(commandControllerInjectionPoint1);
     }
 
     @Test
     public void shouldRegisterHandler() throws Exception {
-        dispatcherProducer.register(new ServiceComponentFoundEvent(COMMAND_API, bean));
+        dispatcherProducer.register(new ServiceComponentFoundEvent(COMMAND_API, beanA));
 
-        Dispatcher dispatcher = dispatcherProducer.produce(commandApiInjectionPoint);
+        AsynchronousDispatcher dispatcher = dispatcherProducer.produceAsynchronousDispatcher(commandApiInjectionPoint);
         assertThat(dispatcher, notNullValue());
-        dispatcher.dispatch(envelope);
-        assertThat(handlerInstance.envelope, equalTo(envelope));
+        dispatcher.dispatch(envelopeA);
+        assertThat(commandApiHandler.envelope, equalTo(envelopeA));
+    }
+
+    @Test(expected = MissingHandlerException.class)
+    public void shouldThrowExceptionForUnhandledCommand() throws Exception {
+        dispatcherProducer.register(new ServiceComponentFoundEvent(COMMAND_API, beanA));
+        dispatcherProducer.register(new ServiceComponentFoundEvent(COMMAND_CONTROLLER, beanB));
+
+        AsynchronousDispatcher controllerDispatcher = dispatcherProducer.produceAsynchronousDispatcher(commandControllerInjectionPoint1);
+        controllerDispatcher.dispatch(envelopeC);
+    }
+
+    @Test(expected = MissingHandlerException.class)
+    public void shouldThrowExceptionForAsyncMismatch() throws Exception {
+        dispatcherProducer.register(new ServiceComponentFoundEvent(COMMAND_API, beanA));
+        dispatcherProducer.register(new ServiceComponentFoundEvent(COMMAND_CONTROLLER, beanB));
+
+        SynchronousDispatcher syncDispatcher = dispatcherProducer.produceSynchronousDispatcher(commandControllerInjectionPoint1);
+        syncDispatcher.dispatch(envelopeB);
+        assertThat(commandControllerHandler.envelopeB, equalTo(envelopeB));
+
+        AsynchronousDispatcher asyncDispatcher = dispatcherProducer.produceAsynchronousDispatcher(commandControllerInjectionPoint1);
+        asyncDispatcher.dispatch(envelopeB);
+    }
+
+    @Test(expected = MissingHandlerException.class)
+    public void shouldThrowExceptionForSyncMismatch() throws Exception {
+        dispatcherProducer.register(new ServiceComponentFoundEvent(COMMAND_API, beanA));
+        dispatcherProducer.register(new ServiceComponentFoundEvent(COMMAND_CONTROLLER, beanB));
+
+        AsynchronousDispatcher asyncDispatcher = dispatcherProducer.produceAsynchronousDispatcher(commandControllerInjectionPoint1);
+        asyncDispatcher.dispatch(envelopeA);
+        assertThat(commandControllerHandler.envelopeA, equalTo(envelopeA));
+
+        SynchronousDispatcher syncDispatcher = dispatcherProducer.produceSynchronousDispatcher(commandControllerInjectionPoint1);
+        syncDispatcher.dispatch(envelopeA);
+    }
+
+    @Test
+    public void shouldRegisterDifferentHandlersForEachComponent() throws Exception {
+        dispatcherProducer.register(new ServiceComponentFoundEvent(COMMAND_API, beanA));
+        dispatcherProducer.register(new ServiceComponentFoundEvent(COMMAND_CONTROLLER, beanB));
+
+        AsynchronousDispatcher apiDispatcher = dispatcherProducer.produceAsynchronousDispatcher(commandApiInjectionPoint);
+        apiDispatcher.dispatch(envelopeA);
+        assertThat(commandApiHandler.envelope, equalTo(envelopeA));
+        assertThat(commandControllerHandler.envelopeA, nullValue());
+
+        commandApiHandler.envelope = null;
+        AsynchronousDispatcher controllerDispatcher = dispatcherProducer.produceAsynchronousDispatcher(commandControllerInjectionPoint1);
+        controllerDispatcher.dispatch(envelopeA);
+        assertThat(commandControllerHandler.envelopeA, equalTo(envelopeA));
+        assertThat(commandApiHandler.envelope, nullValue());
     }
 
     @Adapter(COMMAND_API)
@@ -164,15 +215,32 @@ public class DispatcherProducerTest {
 
         public Envelope envelope;
 
-        @Handles("test.commands.do-something")
+        @Handles(NAME_A)
         public void doSomething(Envelope envelope) {
             this.envelope = envelope;
         }
 
-        @Handles("test.commands.do-something-else")
+        @Handles(NAME_C)
         public void doSomethingElse(Envelope envelope) {
             this.envelope = null;
         }
+    }
 
+    @ServiceComponent(COMMAND_CONTROLLER)
+    public static class TestCommandControllerHandler {
+
+        public Envelope envelopeA;
+        public Envelope envelopeB;
+
+        @Handles(NAME_A)
+        public void doSomethingA(Envelope envelope) {
+            this.envelopeA = envelope;
+        }
+
+        @Handles(NAME_B)
+        public Envelope doSomethingB(Envelope envelope) {
+            this.envelopeB = envelope;
+            return envelope;
+        }
     }
 }

@@ -1,7 +1,7 @@
 package ${PACKAGE_NAME};
 
 import uk.gov.justice.services.core.annotation.Adapter;
-import uk.gov.justice.services.core.dispatcher.Dispatcher;
+import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
 import uk.gov.justice.services.adapter.messaging.JmsProcessor;
 
 import javax.ejb.ActivationConfigProperty;
@@ -21,7 +21,7 @@ import static uk.gov.justice.services.core.annotation.Component.*;
 public class ${CLASS_NAME}JmsListener implements MessageListener {
 
    @Inject
-   Dispatcher dispatcher;
+   AsynchronousDispatcher dispatcher;
 
    @Inject
    JmsProcessor jmsProcessor;

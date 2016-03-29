@@ -1,30 +1,41 @@
 package uk.gov.justice.services.core.handler.registry;
 
+import static uk.gov.justice.services.core.handler.HandlerUtil.findHandlerMethods;
 
 import uk.gov.justice.services.core.annotation.Handles;
-import uk.gov.justice.services.core.handler.HandlerInstanceAndMethod;
-import uk.gov.justice.services.core.handler.HandlerUtil;
+import uk.gov.justice.services.core.handler.AsynchronousHandlerMethod;
+import uk.gov.justice.services.core.handler.HandlerMethod;
+import uk.gov.justice.services.core.handler.SynchronousHandlerMethod;
 import uk.gov.justice.services.core.handler.registry.exception.DuplicateHandlerException;
-import uk.gov.justice.services.core.handler.registry.exception.InvalidHandlerException;
-import uk.gov.justice.services.messaging.Envelope;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
 
 /**
  * Service for storing a map of which command handlers handle which commands.
  */
 public class HandlerRegistry {
 
-    private final HashMap<String, HandlerInstanceAndMethod> handlerMapping = new HashMap<>();
+    private final Map<String, AsynchronousHandlerMethod> asynchronousMethods = new HashMap<>();
+    private final Map<String, SynchronousHandlerMethod> synchronousMethods = new HashMap<>();
 
-    public HandlerInstanceAndMethod get(final String name) {
-        return handlerMapping.get(name);
+    public AsynchronousHandlerMethod getAsynchronous(final String name) {
+        return asynchronousMethods.get(name);
     }
 
-    public boolean canHandle(final String name) {
-        return handlerMapping.containsKey(name);
+    public SynchronousHandlerMethod getSynchronous(final String name) {
+        return synchronousMethods.get(name);
+    }
+
+    public boolean canHandleAsynchronous(final String name) {
+        return asynchronousMethods.containsKey(name);
+    }
+
+    public boolean canHandleSynchronous(final String name) {
+        return synchronousMethods.containsKey(name);
     }
 
     /**
@@ -33,7 +44,7 @@ public class HandlerRegistry {
      * @param handlerInstance Handler instance to be registered.
      */
     public void register(final Object handlerInstance) {
-        final List<Method> handlerMethods = HandlerUtil.findHandlerMethods(handlerInstance.getClass(), Handles.class);
+        final List<Method> handlerMethods = findHandlerMethods(handlerInstance.getClass(), Handles.class);
 
         for (Method handlerMethod : handlerMethods) {
             register(handlerInstance, handlerMethod);
@@ -43,28 +54,30 @@ public class HandlerRegistry {
     /**
      * Registers handler instance and method.
      *
-     * @param handler       Handler instance to register.
-     * @param handlerMethod Handler method to register.
+     * @param handler handler instance to register.
+     * @param method handler method to register.
      */
-    private void register(final Object handler, final Method handlerMethod) {
-        if (handlerMethod.getParameterTypes().length != 1) {
-            throw new InvalidHandlerException("Handles method must have exactly one parameter. Found " + handlerMethod.getParameterTypes().length);
+    private void register(final Object handler, final Method method) {
+
+        if (Void.TYPE.equals(method.getReturnType())) {
+            put(handler, method, AsynchronousHandlerMethod::new, asynchronousMethods);
+        } else {
+            put(handler, method, SynchronousHandlerMethod::new, synchronousMethods);
         }
-
-        final Class<?> clazz = handlerMethod.getParameterTypes()[0];
-        if (clazz != Envelope.class) {
-            throw new IllegalArgumentException("Handler methods must receive Envelope as an argument.");
-        }
-
-        HandlerInstanceAndMethod handlerInstanceAndMethod = new HandlerInstanceAndMethod(handler, handlerMethod);
-
-        String name = handlerMethod.getAnnotation(Handles.class).value();
-        if (handlerMapping.containsKey(name)) {
-            throw new DuplicateHandlerException("Can't register " + handlerInstanceAndMethod + ", because a command handler method "
-                    + handlerMapping.get(clazz) + " has already been registered for " + name);
-        }
-
-        handlerMapping.put(handlerMethod.getAnnotation(Handles.class).value(), handlerInstanceAndMethod);
     }
 
+    private <T extends HandlerMethod> void put(final Object handler,
+                                               final Method method,
+                                               final BiFunction<Object, Method, T> constructor,
+                                               final Map<String, T> map) {
+
+        T handlerMethod = constructor.apply(handler, method);
+        String name = method.getAnnotation(Handles.class).value();
+        if (map.containsKey(name)) {
+            throw new DuplicateHandlerException("Can't register " + handlerMethod + ", because a command handler method "
+                    + map.get(name) + " has already been registered for " + name);
+        }
+
+        map.put(name, handlerMethod);
+    }
 }

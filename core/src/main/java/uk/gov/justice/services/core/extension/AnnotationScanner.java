@@ -3,6 +3,8 @@ package uk.gov.justice.services.core.extension;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 
+import java.util.Optional;
+
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.spi.AfterDeploymentValidation;
@@ -10,7 +12,6 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.util.AnnotationLiteral;
-import java.util.Optional;
 
 /**
  * Scans all beans and processes framework specific annotations.
@@ -34,7 +35,7 @@ public class AnnotationScanner implements Extension {
     @SuppressWarnings({"rawtypes", "unchecked"})
     private Optional<ServiceComponentFoundEvent> getEvent(final Bean bean) {
         if (bean.getBeanClass().isAnnotationPresent(ServiceComponent.class)) {
-            return Optional.of(new ServiceComponentFoundEvent(Component.getComponentFromServiceComponent(bean.getBeanClass()), bean));
+            return Optional.of(new ServiceComponentFoundEvent(Component.componentFromServiceComponent(bean.getBeanClass()), bean));
         } else {
             return Optional.empty();
         }

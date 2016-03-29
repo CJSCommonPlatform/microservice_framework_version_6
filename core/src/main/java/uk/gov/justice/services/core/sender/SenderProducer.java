@@ -1,21 +1,23 @@
 package uk.gov.justice.services.core.sender;
 
+import static uk.gov.justice.services.core.annotation.Component.*;
+
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.annotation.exception.MissingAnnotationException;
 import uk.gov.justice.services.core.jms.JmsSenderFactory;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Produces the correct Sender based on the injection point.
  */
-
 @ApplicationScoped
 public class SenderProducer {
 
@@ -43,7 +45,7 @@ public class SenderProducer {
         final Class targetClass = injectionPoint.getMember().getDeclaringClass();
 
         if (targetClass.isAnnotationPresent(ServiceComponent.class)) {
-            return getSender(Component.getComponentFromServiceComponent(targetClass));
+            return getSender(componentFromServiceComponent(targetClass));
         } else {
             throw new MissingAnnotationException("InjectionPoint class must be annotated with " + ServiceComponent.class);
         }

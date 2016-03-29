@@ -49,7 +49,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.services.adapter.rest.RestProcessor;
 import uk.gov.justice.services.adapters.test.utils.compiler.JavaCompilerUtil;
-import uk.gov.justice.services.core.dispatcher.Dispatcher;
+import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
 import uk.gov.justice.services.messaging.Envelope;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -69,7 +69,7 @@ public class RestAdapterGenerator_MethodBodyTest {
     private RestAdapterGenerator generator;
 
     @Mock
-    private Dispatcher dispatcher;
+    private AsynchronousDispatcher dispatcher;
 
     @Mock
     private RestProcessor restProcessor;

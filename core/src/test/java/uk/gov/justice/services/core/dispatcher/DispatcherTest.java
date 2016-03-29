@@ -1,32 +1,29 @@
 package uk.gov.justice.services.core.dispatcher;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.justice.services.core.annotation.Handles;
-import uk.gov.justice.services.core.annotation.ServiceComponent;
-import uk.gov.justice.services.core.handler.HandlerInstanceAndMethod;
-import uk.gov.justice.services.core.handler.exception.MissingHandlerException;
-import uk.gov.justice.services.messaging.Envelope;
-import uk.gov.justice.services.messaging.Metadata;
-
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 
+import uk.gov.justice.services.core.annotation.Handles;
+import uk.gov.justice.services.core.annotation.ServiceComponent;
+import uk.gov.justice.services.core.handler.exception.MissingHandlerException;
+import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.Metadata;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+
 @RunWith(MockitoJUnitRunner.class)
-public class AsynchronousDispatcherTest {
+public class DispatcherTest {
 
     private static final String NAME = "test.commands.do-something";
 
     @Mock
     private Envelope envelope;
-
-    @Mock
-    private HandlerInstanceAndMethod handlerInstanceAndMethod;
 
     @Mock
     private Metadata metadata;
@@ -39,16 +36,16 @@ public class AsynchronousDispatcherTest {
 
     @Test
     public void shouldDispatchToAValidHandler() throws Exception {
-        AsynchronousDispatcher dispatcher = new AsynchronousDispatcher();
+        Dispatcher dispatcher = new Dispatcher();
         TestHandler testHandler = new TestHandler();
         dispatcher.register(testHandler);
-        dispatcher.dispatch(envelope);
+        dispatcher.asynchronousDispatch(envelope);
         assertThat(testHandler.envelope, equalTo(envelope));
     }
 
     @Test(expected = MissingHandlerException.class)
     public void shouldThrowExceptionWithNoHandler() throws Exception {
-        new AsynchronousDispatcher().dispatch(envelope);
+        new Dispatcher().asynchronousDispatch(envelope);
     }
 
     @ServiceComponent(COMMAND_API)
@@ -62,5 +59,4 @@ public class AsynchronousDispatcherTest {
         }
 
     }
-
 }

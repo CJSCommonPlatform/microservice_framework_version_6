@@ -1,12 +1,12 @@
 package uk.gov.justice.raml.jms.it;
 
-import uk.gov.justice.services.core.dispatcher.Dispatcher;
+import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
 import uk.gov.justice.services.messaging.Envelope;
 
 import javax.inject.Singleton;
 
 @Singleton
-public class DummyDispatcher implements Dispatcher {
+public class DummyDispatcher implements AsynchronousDispatcher {
 
     private Envelope envelope;
 

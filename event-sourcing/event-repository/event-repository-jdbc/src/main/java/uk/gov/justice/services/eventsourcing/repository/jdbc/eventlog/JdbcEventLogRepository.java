@@ -159,7 +159,7 @@ public class JdbcEventLogRepository {
         return initialContext;
     }
 
-    private DataSource getDataSource() throws NamingException {
+    protected DataSource getDataSource() throws NamingException {
         if (datasource == null) {
             final String appName = (String) getInitialContext().lookup(JNDI_APP_NAME_LOOKUP);
 
@@ -169,7 +169,7 @@ public class JdbcEventLogRepository {
         return datasource;
     }
 
-    private List<EventLog> extractResults(final PreparedStatement preparedStatement) throws SQLException {
+    protected List<EventLog> extractResults(final PreparedStatement preparedStatement) throws SQLException {
         List<EventLog> events = new ArrayList<>();
 
         try (final ResultSet resultSet = preparedStatement.executeQuery()) {

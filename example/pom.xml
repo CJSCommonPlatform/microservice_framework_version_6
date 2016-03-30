@@ -21,6 +21,7 @@
     <modules>
         <module>example-command</module>
         <module>example-event</module>
+        <module>example-it</module>
     </modules>
 
 </project>

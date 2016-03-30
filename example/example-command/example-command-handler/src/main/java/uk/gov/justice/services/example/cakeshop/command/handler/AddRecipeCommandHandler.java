@@ -20,6 +20,7 @@ public class AddRecipeCommandHandler {
 
     private static final Logger LOGGER = getLogger(MakeCakeCommandHandler.class);
     private static final String FIELD_RECIPE_ID = "recipeId";
+    private static final String EVENT_NAME = "cakeshop.events.recipe-added";
 
     @Inject
     EventSource eventSource;
@@ -33,8 +34,8 @@ public class AddRecipeCommandHandler {
 
         final UUID recipeId = UUID.fromString(command.payload().getString(FIELD_RECIPE_ID));
 
-        EventStream eventStream = eventSource.getStreamById(recipeId);
-        final Stream<Envelope> events = temporaryEventUtil.eventsFrom(command);
+        final EventStream eventStream = eventSource.getStreamById(recipeId);
+        final Stream<Envelope> events = temporaryEventUtil.eventsFrom(command, EVENT_NAME);
         eventStream.append(events);
     }
 

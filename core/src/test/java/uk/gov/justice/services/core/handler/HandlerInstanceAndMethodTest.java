@@ -16,7 +16,9 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import static java.util.Arrays.stream;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.doThrow;
@@ -75,7 +77,9 @@ public class HandlerInstanceAndMethodTest {
     }
 
     private List<Method> methods() {
-        return HandlerUtil.findHandlerMethods(CommandHandler.class, Handles.class);
+        return stream(CommandHandler.class.getMethods())
+                .filter(method -> method.isAnnotationPresent(Handles.class))
+                .collect(Collectors.toList());
     }
 
     private Envelope testEnvelope(String fileName) throws IOException {

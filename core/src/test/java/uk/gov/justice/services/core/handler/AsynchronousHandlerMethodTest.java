@@ -1,29 +1,32 @@
 package uk.gov.justice.services.core.handler;
 
-import com.google.common.io.Resources;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import static java.lang.String.format;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static uk.gov.justice.services.core.handler.HandlerUtil.findHandlerMethods;
+
 import uk.gov.justice.services.common.converter.JsonObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.handler.exception.HandlerExecutionException;
+import uk.gov.justice.services.core.handler.registry.exception.InvalidHandlerException;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
-import java.util.List;
 
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
+import com.google.common.io.Resources;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class HandlerInstanceAndMethodTest {
+public class AsynchronousHandlerMethodTest {
 
     @Mock
     private CommandHandler commandHandler;
@@ -52,30 +55,30 @@ public class HandlerInstanceAndMethodTest {
         assertThat(handlerInstanceWithMethod().toString(), notNullValue());
     }
 
-    @Test
-    public void shouldNotReturnNullWithNullHandlerInstance() {
-        assertThat(nullHandlerInstanceWithMethod().toString(), notNullValue());
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionWithNullHandlerInstance() {
+        new AsynchronousHandlerMethod(null, method("handles"));
     }
 
-    @Test
-    public void shouldNotReturnNullWithNullMethod() {
-        assertThat(handlerInstanceWithNullMethod().toString(), notNullValue());
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionWithNullMethod() {
+        new AsynchronousHandlerMethod(commandHandler, null);
     }
 
-    private HandlerInstanceAndMethod handlerInstanceWithNullMethod() {
-        return new HandlerInstanceAndMethod(commandHandler, null);
+    @Test(expected = InvalidHandlerException.class)
+    public void shouldThrowExceptionWithSynchronousMethod() {
+        new AsynchronousHandlerMethod(commandHandler, method("handlesSync"));
     }
 
-    private HandlerInstanceAndMethod nullHandlerInstanceWithMethod() {
-        return new HandlerInstanceAndMethod(null, methods().get(0));
+    private AsynchronousHandlerMethod handlerInstanceWithMethod() {
+        return new AsynchronousHandlerMethod(commandHandler, method("handles"));
     }
 
-    private HandlerInstanceAndMethod handlerInstanceWithMethod() {
-        return new HandlerInstanceAndMethod(commandHandler, methods().get(0));
-    }
-
-    private List<Method> methods() {
-        return HandlerUtil.findHandlerMethods(CommandHandler.class, Handles.class);
+    private Method method(final String name) {
+        return findHandlerMethods(CommandHandler.class, Handles.class).stream()
+                .filter(m -> name.equals(m.getName()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(format("Cannot find method with name %s", name)));
     }
 
     private Envelope testEnvelope(String fileName) throws IOException {
@@ -91,5 +94,9 @@ public class HandlerInstanceAndMethodTest {
         public void handles(final Envelope envelope) {
         }
 
+        @Handles("test-context.commands.create-something-else")
+        public Envelope handlesSync(final Envelope envelope) {
+            return envelope;
+        }
     }
 }

@@ -17,7 +17,7 @@ import com.sun.codemodel.JVar;
 import uk.gov.justice.services.adapter.rest.RestProcessor;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
-import uk.gov.justice.services.core.dispatcher.Dispatcher;
+import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -47,7 +47,7 @@ class JaxRsImplementationCodeGenerator {
             addAnnotations(resourceImplementation);
             addImplementationMethods(resourceImplementation, resourceInterface);
 
-            addAnnotatedProperty(resourceImplementation, Dispatcher.class, "dispatcher", Inject.class);
+            addAnnotatedProperty(resourceImplementation, AsynchronousDispatcher.class, "dispatcher", Inject.class);
             addAnnotatedProperty(resourceImplementation, RestProcessor.class, "restProcessor", Inject.class);
             addAnnotatedProperty(resourceImplementation, HttpHeaders.class, "headers", javax.ws.rs.core.Context.class);
             return resourceImplementation;

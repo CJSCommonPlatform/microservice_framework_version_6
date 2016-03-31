@@ -7,7 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.services.adapter.rest.RestProcessor;
-import uk.gov.justice.services.core.dispatcher.Dispatcher;
+import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
 import uk.gov.justice.services.messaging.Envelope;
 
 import javax.json.JsonObject;
@@ -34,7 +34,7 @@ public class DefaultUsersUserIdResourceTest {
     private static final JsonObject NOT_USED_ENTITY = createObjectBuilder().build();
 
     @Mock
-    private Dispatcher dispatcher;
+    private AsynchronousDispatcher dispatcher;
 
     @Mock
     private RestProcessor restProcessor;

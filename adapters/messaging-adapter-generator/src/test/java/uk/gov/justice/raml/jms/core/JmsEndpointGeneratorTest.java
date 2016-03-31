@@ -18,7 +18,7 @@ import uk.gov.justice.services.adapter.messaging.JmsProcessor;
 import uk.gov.justice.services.adapters.test.utils.compiler.JavaCompilerUtil;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
-import uk.gov.justice.services.core.dispatcher.Dispatcher;
+import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
 import uk.gov.justice.services.messaging.Envelope;
 
 import javax.ejb.ActivationConfigProperty;
@@ -84,7 +84,7 @@ public class JmsEndpointGeneratorTest {
     JmsProcessor jmsProcessor;
 
     @Mock
-    Dispatcher dispatcher;
+    AsynchronousDispatcher dispatcher;
 
     @Rule
     public TemporaryFolder outputFolder = new TemporaryFolder();
@@ -248,7 +248,7 @@ public class JmsEndpointGeneratorTest {
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
         Field dispatcherField = clazz.getDeclaredField("dispatcher");
         assertThat(dispatcherField, not(nullValue()));
-        assertThat(dispatcherField.getType(), CoreMatchers.equalTo((Dispatcher.class)));
+        assertThat(dispatcherField.getType(), CoreMatchers.equalTo((AsynchronousDispatcher.class)));
         assertThat(dispatcherField.getAnnotations(), arrayWithSize(1));
         assertThat(dispatcherField.getAnnotation(Inject.class), not(nullValue()));
     }
@@ -549,7 +549,7 @@ public class JmsEndpointGeneratorTest {
                 .collect(Collectors.toList());
     }
 
-    public static class DummyDispatcher implements Dispatcher {
+    public static class DummyDispatcher implements AsynchronousDispatcher {
         @Override
         public void dispatch(Envelope envelope) {
             // do nothing

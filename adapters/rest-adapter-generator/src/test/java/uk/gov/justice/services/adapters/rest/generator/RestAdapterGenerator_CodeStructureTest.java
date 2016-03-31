@@ -49,7 +49,7 @@ import uk.gov.justice.services.adapter.rest.RestProcessor;
 import uk.gov.justice.services.adapters.test.utils.compiler.JavaCompilerUtil;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
-import uk.gov.justice.services.core.dispatcher.Dispatcher;
+import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
 
 public class RestAdapterGenerator_CodeStructureTest {
 
@@ -495,7 +495,7 @@ public class RestAdapterGenerator_CodeStructureTest {
 
         Field dispatcher = resourceClass.getDeclaredField("dispatcher");
         assertThat(dispatcher, not(nullValue()));
-        assertThat(dispatcher.getType(), equalTo(Dispatcher.class));
+        assertThat(dispatcher.getType(), equalTo(AsynchronousDispatcher.class));
         assertThat(dispatcher.getAnnotation(Inject.class), not(nullValue()));
         assertThat(dispatcher.getModifiers(), is(0));
     }

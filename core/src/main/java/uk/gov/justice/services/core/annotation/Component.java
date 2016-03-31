@@ -13,7 +13,10 @@ import javax.jms.Topic;
  */
 public enum Component {
 
-    COMMAND_API("commands", "api", Queue.class), COMMAND_CONTROLLER("commands", "controller", Queue.class), COMMAND_HANDLER("commands", "handler", Queue.class), EVENT_LISTENER("events", "listener", Topic.class);
+    COMMAND_API("commands", "api", Queue.class),
+    COMMAND_CONTROLLER("commands", "controller", Queue.class),
+    COMMAND_HANDLER("commands", "handler", Queue.class),
+    EVENT_LISTENER("events", "listener", Topic.class);
 
     private final String pillar;
     private final String tier;
@@ -26,11 +29,11 @@ public enum Component {
     }
 
     /**
-     * Returns Component of the provided pillar and tier
-     * 
-     * @param pillar
-     * @param tier
-     * @return the component of the provided pillar and tier
+     * Returns component of the provided pillar and tier.
+     *
+     * @param pillar the pillar
+     * @param tier the tier
+     * @return the component for the provided pillar and tier
      */
     public static Component valueOf(final String pillar, final String tier) {
         Optional<Component> first = stream(Component.values())
@@ -42,13 +45,12 @@ public enum Component {
     }
 
     /**
-     * Retrieves the Component of the provided {@link ServiceComponent}
+     * Retrieves the component of the provided {@link ServiceComponent}
      *
-     * @param clazz
-     *            The service component to be analysed.
-     * @return the component from the provided {@link ServiceComponent}.
+     * @param clazz the service component class to be analysed
+     * @return the component from the provided {@link ServiceComponent}
      */
-    public static Component getComponentFromServiceComponent(final Class<ServiceComponent> clazz) {
+    public static Component componentFromServiceComponent(final Class<?> clazz) {
         final ServiceComponent serviceComponent = clazz.getAnnotation(ServiceComponent.class);
         return serviceComponent.value();
     }
@@ -56,11 +58,10 @@ public enum Component {
     /**
      * Retrieves the Component of the provided {@link Adapter}
      *
-     * @param clazz
-     *            The adapter class to be analysed.
-     * @return the component from the provided {@link Adapter}.
+     * @param clazz the adapter class to be analysed
+     * @return the component from the provided {@link Adapter}
      */
-    public static Component getComponentFromAdapter(final Class<Adapter> clazz) {
+    public static Component componentFromAdapter(final Class<?> clazz) {
         final Adapter adapter = clazz.getAnnotation(Adapter.class);
         return adapter.value();
     }

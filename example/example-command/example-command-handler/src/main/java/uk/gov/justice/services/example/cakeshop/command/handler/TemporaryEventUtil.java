@@ -16,13 +16,13 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
 
 public class TemporaryEventUtil {
 
-    private static final String RECIPE_ADDED_EVENT = "cakeshop.events.recipe-added";
 
-    public Stream<Envelope> eventsFrom(final Envelope command) {
+
+    public Stream<Envelope> eventsFrom(final Envelope command, String eventName) {
 
         final JsonObject jsonObject = Json.createObjectBuilder()
                 .add(ID, UUID.randomUUID().toString())
-                .add(NAME, RECIPE_ADDED_EVENT)
+                .add(NAME, eventName)
                 .build();
         final Metadata metadata = metadataFrom(jsonObject);
 

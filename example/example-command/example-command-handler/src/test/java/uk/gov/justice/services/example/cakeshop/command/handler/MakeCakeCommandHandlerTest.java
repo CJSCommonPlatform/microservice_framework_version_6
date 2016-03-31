@@ -5,7 +5,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.messaging.DefaultEnvelope;
@@ -24,7 +23,7 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
 public class MakeCakeCommandHandlerTest {
 
     private static final String EVENT_NAME = "cakeshop.events.cake-made";
-    private static final UUID RECIPE_ID = UUID.randomUUID();
+    private static final UUID CAKE_ID = UUID.randomUUID();
 
     @Mock
     Envelope envelope;
@@ -35,12 +34,15 @@ public class MakeCakeCommandHandlerTest {
     @Mock
     EventStream eventStream;
 
+    @Mock
+    TemporaryEventUtil temporaryEventUtil;
+
     @InjectMocks
     private MakeCakeCommandHandler makeCakeCommandHandler;
 
     @Test
     public void shouldHandleMakeCakeCommand() throws Exception {
-        when(eventSource.getStreamById(RECIPE_ID)).thenReturn(eventStream);
+        when(eventSource.getStreamById(CAKE_ID)).thenReturn(eventStream);
 
         Envelope envelope = createCommandEnvelope();
 
@@ -51,12 +53,12 @@ public class MakeCakeCommandHandlerTest {
 
     private Envelope createCommandEnvelope() {
         JsonObject metadataAsJsonObject = Json.createObjectBuilder()
-                .add(ID, RECIPE_ID.toString())
+                .add(ID, UUID.randomUUID().toString())
                 .add(NAME, EVENT_NAME)
                 .build();
 
         JsonObject payloadAsJsonObject = Json.createObjectBuilder()
-                .add("recipeId", UUID.randomUUID().toString())
+                .add("cakeId", CAKE_ID.toString())
                 .build();
 
         return DefaultEnvelope.envelopeFrom(metadataFrom(metadataAsJsonObject), payloadAsJsonObject);

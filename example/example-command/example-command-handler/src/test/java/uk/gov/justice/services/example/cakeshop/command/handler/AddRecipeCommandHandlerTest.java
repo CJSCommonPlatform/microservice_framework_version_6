@@ -44,6 +44,10 @@ public class AddRecipeCommandHandlerTest {
     @Mock
     Stream<Envelope> events;
 
+    @Mock
+    private Sender sender;
+
+
     @InjectMocks
     private AddRecipeCommandHandler addRecipeCommandHandler;
 
@@ -51,11 +55,11 @@ public class AddRecipeCommandHandlerTest {
     public void shouldHandleMakeCakeCommand() throws Exception {
         final Envelope command = createCommand();
         when(eventSource.getStreamById(RECIPE_ID)).thenReturn(eventStream);
-        when(temporaryEventUtil.eventsFrom(command)).thenReturn(events);
+        when(temporaryEventUtil.eventsFrom(command, EVENT_NAME)).thenReturn(events);
 
         addRecipeCommandHandler.addRecipe(command);
 
-        verify(eventStream, times(1)).append(events);
+        verify(eventStream, times(1)).append(temporaryEventUtil.eventsFrom(command, EVENT_NAME));
     }
 
     private Envelope createCommand() {

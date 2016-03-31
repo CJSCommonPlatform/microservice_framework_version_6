@@ -27,7 +27,7 @@ public class TemporaryEventUtilTest {
     public void shouldReturnStreamOfEvents() {
         Envelope command = createTestCommand();
 
-        Stream<Envelope> actual = new TemporaryEventUtil().eventsFrom(command);
+        Stream<Envelope> actual = new TemporaryEventUtil().eventsFrom(command, EVENT_NAME);
 
         Envelope actualEvent = actual.findFirst().get();
         assertThat(actualEvent.metadata().id(), not(equalTo(COMMAND_ID)));

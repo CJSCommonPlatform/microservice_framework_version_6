@@ -16,6 +16,7 @@ public class CakeShopCommandController {
 
     private static final Logger LOGGER = getLogger(CakeShopCommandController.class);
     private static final String FIELD_RECIPE_ID = "recipeId";
+    private static final String FIELD_CAKE_ID = "cakeId";
 
     @Inject
     Sender sender;
@@ -29,7 +30,7 @@ public class CakeShopCommandController {
 
     @Handles("cakeshop.commands.make-cake")
     public void makeCake(final Envelope command) {
-        LOGGER.info("=============> Inside make-cake Command Controller. RecipeId: " + command.payload().getString(FIELD_RECIPE_ID));
+        LOGGER.info("=============> Inside make-cake Command Controller. CakeId: " + command.payload().getString(FIELD_CAKE_ID));
 
         sender.send(command);
     }

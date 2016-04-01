@@ -10,14 +10,17 @@ import org.apache.openejb.testing.EnableServices;
 import org.apache.openejb.testing.Module;
 import org.apache.openejb.testng.PropertiesBuilder;
 import org.apache.openejb.util.NetworkUtil;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.gov.justice.api.RestApplication;
 import uk.gov.justice.services.adapter.rest.RestProcessor;
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
-import uk.gov.justice.services.example.DummyDispatcher;
+import uk.gov.justice.services.adapters.test.utils.dispatcher.AsynchronousRecordingDispatcher;
+import uk.gov.justice.services.messaging.Envelope;
 
+import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 import java.util.Properties;
 
@@ -33,6 +36,8 @@ import static org.junit.Assert.assertThat;
 @RunWith(ApplicationComposer.class)
 public class DefaultUsersUserIdResourceIT {
 
+    private static final String CREATE_USER_MEDIA_TYPE = "application/vnd.people.commands.create-user+json";
+    private static final String UPDATE_USER_MEDIA_TYPE = "application/vnd.people.commands.update-user+json";
     private static int port = -1;
     private static String BASE_URI = "undefined";
 
@@ -40,10 +45,18 @@ public class DefaultUsersUserIdResourceIT {
 
     private static final String JSON = "{\"userUrn\" : \"test\"}";
 
+    @Inject
+    AsynchronousRecordingDispatcher dispatcher;
+
     @BeforeClass
     public static void beforeClass() {
         port = NetworkUtil.getNextAvailablePort();
         BASE_URI = String.format(BASE_URI_PATTERN, port);
+    }
+
+    @Before
+    public void before() {
+
     }
 
     @Configuration
@@ -58,7 +71,7 @@ public class DefaultUsersUserIdResourceIT {
     @Classes(cdi = true, value = {
             RestProcessor.class,
             RestEnvelopeBuilderFactory.class,
-            DummyDispatcher.class
+            AsynchronousRecordingDispatcher.class
     })
     public WebApp war() {
         return new WebApp()
@@ -68,20 +81,48 @@ public class DefaultUsersUserIdResourceIT {
     }
 
     @Test
-    public void shouldCallCreateUser() throws Exception {
+    public void shouldReturn202CreatingUser() throws Exception {
         Response response = create(BASE_URI)
                 .path("/users/1234")
-                .post(entity(JSON, "application/vnd.people.commands.create-user+json"));
+                .post(entity(JSON, CREATE_USER_MEDIA_TYPE));
 
         assertThat(response.getStatus(), is(202));
     }
 
     @Test
-    public void shouldCallUpdateUser() throws Exception {
+    public void shouldDispatchCreateUserCommand() throws Exception {
+        Response response = create(BASE_URI)
+                .path("/users/567-8910")
+                .post(entity("{\"userName\" : \"John Smith\"}", CREATE_USER_MEDIA_TYPE));
+
+        Envelope envelope = dispatcher.awaitForEnvelopeWithPayloadOf("userId", "567-8910");
+        assertThat(envelope.metadata().name(), is("people.commands.create-user"));
+        assertThat(envelope.payload().getString("userId"), is("567-8910"));
+        assertThat(envelope.payload().getString("userName"), is("John Smith"));
+
+    }
+
+
+    @Test
+    public void shouldReturn202UpdatingUser() throws Exception {
         Response response = create(BASE_URI)
                 .path("/users/1234")
-                .post(entity(JSON, "application/vnd.people.commands.update-user+json"));
+                .post(entity(JSON, UPDATE_USER_MEDIA_TYPE));
 
         assertThat(response.getStatus(), is(202));
     }
+
+    @Test
+    public void shouldDispatchUpdateUserCommand() throws Exception {
+        Response response = create(BASE_URI)
+                .path("/users/4444-9876")
+                .post(entity("{\"userName\" : \"Peggy Brown\"}", UPDATE_USER_MEDIA_TYPE));
+
+        Envelope envelope = dispatcher.awaitForEnvelopeWithPayloadOf("userId", "4444-9876");
+        assertThat(envelope.metadata().name(), is("people.commands.update-user"));
+        assertThat(envelope.payload().getString("userId"), is("4444-9876"));
+        assertThat(envelope.payload().getString("userName"), is("Peggy Brown"));
+
+    }
+
 }

@@ -18,6 +18,7 @@ import uk.gov.justice.api.StructureControllerCommandsJmsListener;
 import uk.gov.justice.api.StructureEventsJmsListener;
 import uk.gov.justice.api.StructureHandlerCommandsJmsListener;
 import uk.gov.justice.services.adapter.messaging.JmsProcessor;
+import uk.gov.justice.services.adapters.test.utils.dispatcher.AsynchronousRecordingDispatcher;
 import uk.gov.justice.services.common.converter.JsonObjectConverter;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
@@ -29,23 +30,19 @@ import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.naming.NamingException;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.UUID;
 
-import static com.jayway.awaitility.Awaitility.await;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Integration tests for the generated JAX-RS classes.
@@ -56,7 +53,7 @@ public class JmsEndpointGenerationIT {
     private static int port = -1;
 
     @Inject
-    DummyDispatcher dispatcher;
+    AsynchronousRecordingDispatcher dispatcher;
 
     @Resource(name = "structure.handler.commands")
     private Queue commandHandlerDestination;
@@ -90,7 +87,7 @@ public class JmsEndpointGenerationIT {
     @Module
     @Classes(cdi = true, value = {
             JmsProcessor.class,
-            DummyDispatcher.class,
+            AsynchronousRecordingDispatcher.class,
             StructureControllerCommandsJmsListener.class,
             StructureEventsJmsListener.class,
             StructureHandlerCommandsJmsListener.class,
@@ -108,12 +105,6 @@ public class JmsEndpointGenerationIT {
         connection = factory.createConnection();
         connection.start();
         session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-
-        cleanQueue(commandControllerDestination);
-        cleanQueue(commandHandlerDestination);
-        cleanQueue(eventsListenerDestination);
-
-        dispatcher.reset();
     }
 
     @After
@@ -130,9 +121,7 @@ public class JmsEndpointGenerationIT {
         String commandName = "structure.commands.commanda";
         sendEnvelope(metadataId, commandName, commandControllerDestination);
 
-        await().until(() -> dispatcher.receivedEnvelope() != null);
-
-        Envelope receivedEnvelope = dispatcher.receivedEnvelope();
+        Envelope receivedEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
         assertThat(receivedEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
         assertThat(receivedEnvelope.metadata().name(), is(commandName));
 
@@ -146,9 +135,7 @@ public class JmsEndpointGenerationIT {
 
         sendEnvelope(metadataId, commandName, commandControllerDestination);
 
-        await().until(() -> dispatcher.receivedEnvelope() != null);
-
-        Envelope receivedEnvelope = dispatcher.receivedEnvelope();
+        Envelope receivedEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
         assertThat(receivedEnvelope.metadata().name(), is(commandName));
         assertThat(receivedEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
 
@@ -158,14 +145,11 @@ public class JmsEndpointGenerationIT {
     public void commandControllerHandlerShouldNotReceiveACommandUnspecifiedInMessageSelector()
             throws JMSException, InterruptedException {
 
-        String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d11";
+        String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d12";
         String commandName = "structure.commands.commandc";
 
         sendEnvelope(metadataId, commandName, commandControllerDestination);
-
-        Thread.sleep(300);
-
-        assertThat(dispatcher.receivedEnvelope(), nullValue());
+        assertTrue(dispatcher.notFoundEnvelopeWithMetadataOf("id", metadataId));
 
     }
 
@@ -176,39 +160,37 @@ public class JmsEndpointGenerationIT {
         String commandName = "structure.commands.cmdaa";
         sendEnvelope(metadataId, commandName, commandHandlerDestination);
 
-        await().until(() -> dispatcher.receivedEnvelope() != null);
-
-        Envelope receivedEnvelope = dispatcher.receivedEnvelope();
+        Envelope receivedEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
         assertThat(receivedEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
         assertThat(receivedEnvelope.metadata().name(), is(commandName));
 
     }
 
     @Test
-    public void commandHandlerHandlerShouldNotReceiveACommandUnspecifiedInMessageSelector()
-            throws JMSException, InterruptedException {
+    public void commandHandlerHandlerShouldNotReceiveACommandUnspecifiedInMessageSelector() throws JMSException {
 
-        String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d12";
+        String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d13";
         String commandName = "structure.handler.cmdcc";
 
         sendEnvelope(metadataId, commandName, commandHandlerDestination);
-
-        Thread.sleep(300);
-
-        assertThat(dispatcher.receivedEnvelope(), nullValue());
+        assertTrue(dispatcher.notFoundEnvelopeWithMetadataOf("id", metadataId));
 
     }
 
     @Test
-    public void eventListenerHandlerShouldReceiveEventA() throws JMSException {
+    public void eventListenerHandlerShouldReceiveEventA() throws JMSException, InterruptedException {
 
+        //There's an issue in OpenEJB causing tests that involve JMS topics to fail.
+        //On slower machines (e.g. travis) topic consumers tend to be registered after this test starts,
+        //which means the message sent to the topic is lost, which in turn causes this test to fail occasionally.
+        //Delaying test execution (Thread.sleep) mitigates the issue.
+        //TODO: check OpenEJB code and investigate if we can't fix the issue.
+        Thread.sleep(300);
         String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d20";
         String commandName = "structure.events.eventaa";
         sendEnvelope(metadataId, commandName, eventsListenerDestination);
 
-        await().until(() -> dispatcher.receivedEnvelope() != null);
-
-        Envelope receivedEnvelope = dispatcher.receivedEnvelope();
+        Envelope receivedEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
         assertThat(receivedEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
         assertThat(receivedEnvelope.metadata().name(), is(commandName));
 
@@ -222,10 +204,7 @@ public class JmsEndpointGenerationIT {
         String commandName = "structure.events.eventcc";
 
         sendEnvelope(metadataId, commandName, eventsListenerDestination);
-
-        Thread.sleep(300);
-
-        assertThat(dispatcher.receivedEnvelope(), nullValue());
+        assertTrue(dispatcher.notFoundEnvelopeWithMetadataOf("id", metadataId));
 
     }
 
@@ -245,17 +224,4 @@ public class JmsEndpointGenerationIT {
                         .add("name", commandName))
                 .build().toString();
     }
-
-    private void cleanQueue(Destination queue) throws JMSException {
-        try (MessageConsumer consumer = session.createConsumer(queue)) {
-            Optional<Message> message;
-            do {
-                message = Optional.ofNullable(consumer.receiveNoWait());
-                if (message.isPresent()) {
-                    message.get().acknowledge();
-                }
-            } while (message.isPresent());
-        }
-    }
-
 }

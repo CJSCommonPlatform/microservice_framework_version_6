@@ -18,7 +18,7 @@ public class ObjectToJsonObjectConverter implements Converter<Object, JsonObject
     @Override
     public JsonObject convert(final Object source) {
         try {
-            JsonObject jsonObject = mapper.readValue(mapper.writeValueAsString(source), JsonObject.class);
+            final JsonObject jsonObject = mapper.readValue(mapper.writeValueAsString(source), JsonObject.class);
 
             if (jsonObject == null) {
                 throw new ConverterException(String.format("Failed to convert %s to JsonObject", source));

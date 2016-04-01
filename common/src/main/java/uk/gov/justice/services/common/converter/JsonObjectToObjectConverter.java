@@ -18,7 +18,7 @@ public class JsonObjectToObjectConverter implements TypedConverter<JsonObject, O
     @Override
     public <R> R convert(final JsonObject source, final Class<R> clazz) {
         try {
-            R object = mapper.readValue(mapper.writeValueAsString(source), clazz);
+            final R object = mapper.readValue(mapper.writeValueAsString(source), clazz);
 
             if (object == null) {
                 throw new ConverterException(String.format("Failed to convert %s to Object", source));

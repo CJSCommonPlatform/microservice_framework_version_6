@@ -27,12 +27,12 @@
         <module>core</module>
         <module>metrics</module>
         <module>components</module>
-        <module>example</module>
         <module>adapters</module>
         <module>event-sourcing</module>
         <module>common</module>
         <module>event-source-destination</module>
         <module>enveloper</module>
+        <module>example-context</module>
     </modules>
 
     <properties>

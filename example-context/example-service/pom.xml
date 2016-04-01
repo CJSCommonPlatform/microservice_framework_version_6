@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>uk.gov.justice.services.example</groupId>
-    <artifactId>example</artifactId>
+    <artifactId>example-service</artifactId>
     <packaging>pom</packaging>
 
     <properties>
@@ -22,7 +22,6 @@
         <module>example-command</module>
         <module>example-event</module>
         <module>example-it</module>
-        <module>example-domain</module>
     </modules>
 
 </project>

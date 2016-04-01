@@ -6,9 +6,12 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsNull.nullValue;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
+import static uk.gov.justice.services.core.handler.HandlerMethod.*;
 
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
+import uk.gov.justice.services.core.handler.HandlerMethod;
+import uk.gov.justice.services.core.handler.exception.MissingHandlerException;
 import uk.gov.justice.services.core.handler.registry.exception.DuplicateHandlerException;
 import uk.gov.justice.services.core.handler.registry.exception.InvalidHandlerException;
 import uk.gov.justice.services.messaging.Envelope;
@@ -35,41 +38,27 @@ public class HandlerRegistryTest {
     private HandlerRegistry registry;
 
     @Test
-    public void shouldHandleActionWithAValidAsynchronousHandler() {
-        createRegistry(new TestCommandHandler());
-        assertThat(registry.canHandleAsynchronous(COMMAND_NAME), equalTo(true));
-        assertThat(registry.canHandleSynchronous(COMMAND_NAME), equalTo(false));
-    }
-
-    @Test
-    public void shouldHandleActionWithAValidSynchronousHandler() {
-        createRegistry(new TestCommandHandlerWithSynchronousHandler());
-        assertThat(registry.canHandleSynchronous(COMMAND_NAME), equalTo(true));
-        assertThat(registry.canHandleAsynchronous(COMMAND_NAME), equalTo(false));
-    }
-
-    @Test
     public void shouldReturnTheRegisteredAsynchronousHandler() {
         createRegistry(new TestCommandHandler());
-        assertThat(registry.getAsynchronous(COMMAND_NAME), notNullValue());
+        assertThat(registry.get(COMMAND_NAME, ASYNCHRONOUS), notNullValue());
     }
 
     @Test
     public void shouldReturnTheRegisteredSynchronousHandler() {
         createRegistry(new TestCommandHandlerWithSynchronousHandler());
-        assertThat(registry.getSynchronous(COMMAND_NAME), notNullValue());
+        assertThat(registry.get(COMMAND_NAME, SYNCHRONOUS), notNullValue());
     }
 
-    @Test
-    public void shouldNotReturnTheRegisteredAsynchronousHandler() {
+    @Test(expected = MissingHandlerException.class)
+    public void shouldThrowExceptionForAsyncMismatch() {
         createRegistry(new TestCommandHandler());
-        assertThat(registry.getSynchronous(COMMAND_NAME), nullValue());
+        assertThat(registry.get(COMMAND_NAME, SYNCHRONOUS), nullValue());
     }
 
-    @Test
-    public void shouldNotReturnTheRegisteredSynchronousHandler() {
+    @Test(expected = MissingHandlerException.class)
+    public void shouldThrowExceptionForSyncMismatch() {
         createRegistry(new TestCommandHandlerWithSynchronousHandler());
-        assertThat(registry.getAsynchronous(COMMAND_NAME), nullValue());
+        assertThat(registry.get(COMMAND_NAME, ASYNCHRONOUS), nullValue());
     }
 
     @Test(expected = InvalidHandlerException.class)

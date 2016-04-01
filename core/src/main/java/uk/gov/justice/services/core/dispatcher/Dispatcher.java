@@ -1,12 +1,11 @@
 package uk.gov.justice.services.core.dispatcher;
 
-import uk.gov.justice.services.core.handler.AsynchronousHandlerMethod;
-import uk.gov.justice.services.core.handler.SynchronousHandlerMethod;
-import uk.gov.justice.services.core.handler.exception.MissingHandlerException;
+import static uk.gov.justice.services.core.handler.HandlerMethod.ASYNCHRONOUS;
+import static uk.gov.justice.services.core.handler.HandlerMethod.SYNCHRONOUS;
+
+import uk.gov.justice.services.core.handler.HandlerMethod;
 import uk.gov.justice.services.core.handler.registry.HandlerRegistry;
 import uk.gov.justice.services.messaging.Envelope;
-
-import javax.enterprise.inject.Alternative;
 
 /**
  * Dispatches messages synchronously or asynchronously to their corresponding handlers, which could
@@ -29,10 +28,14 @@ class Dispatcher {
      * Asynchronously dispatch message to its corresponding handler, which could be a command
      * handler, command controller, event processor, etc.
      *
+     * The underlying {@link HandlerMethod} will have returned a null {@link Void}, which we throw
+     * away at this point to provide void method that can be exposed via the
+     * {@link AsynchronousDispatcher} interface.
+     *
      * @param envelope the envelope to dispatch to a handler
      */
     void asynchronousDispatch(final Envelope envelope) {
-        getAsynchronousMethod(envelope).execute(envelope);
+        getMethod(envelope, ASYNCHRONOUS).execute(envelope);
     }
 
     /**
@@ -43,7 +46,7 @@ class Dispatcher {
      * @return the envelope returned by the handler method
      */
     Envelope synchronousDispatch(final Envelope envelope) {
-        return getSynchronousMethod(envelope).execute(envelope);
+        return (Envelope) getMethod(envelope, SYNCHRONOUS).execute(envelope);
     }
 
     /**
@@ -63,31 +66,8 @@ class Dispatcher {
      * @param envelope the envelope to be handled
      * @return the handler method
      */
-    private AsynchronousHandlerMethod getAsynchronousMethod(final Envelope envelope) {
-
+    private HandlerMethod getMethod(final Envelope envelope, final boolean isSynchronous) {
         final String name = envelope.metadata().name();
-
-        if (handlerRegistry.canHandleAsynchronous(name)) {
-            return handlerRegistry.getAsynchronous(name);
-        } else {
-            throw new MissingHandlerException("No handler registered to handle action: " + name);
-        }
-    }
-
-    /**
-     * Get the handler method for handling this envelope or throw an exception.
-     *
-     * @param envelope the envelope to be handled
-     * @return the handler method
-     */
-    private SynchronousHandlerMethod getSynchronousMethod(final Envelope envelope) {
-
-        final String name = envelope.metadata().name();
-
-        if (handlerRegistry.canHandleSynchronous(name)) {
-            return handlerRegistry.getSynchronous(name);
-        } else {
-            throw new MissingHandlerException("No handler registered to handle action: " + name);
-        }
+        return handlerRegistry.get(name, isSynchronous);
     }
 }

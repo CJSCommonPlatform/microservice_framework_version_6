@@ -2,9 +2,12 @@ package uk.gov.justice.services.core.handler;
 
 import static java.lang.String.format;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.handler.HandlerUtil.findHandlerMethods;
 
 import uk.gov.justice.services.common.converter.JsonObjectConverter;
@@ -26,10 +29,14 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AsynchronousHandlerMethodTest {
+public class HandlerMethodTest {
 
     @Mock
-    private CommandHandler commandHandler;
+    private AsynchronousCommandHandler asynchronousCommandHandler;
+
+    @Mock
+    private SynchronousCommandHandler synchronousCommandHandler;
+
 
     private Envelope envelope;
 
@@ -39,43 +46,65 @@ public class AsynchronousHandlerMethodTest {
     }
 
     @Test
-    public void shouldExecuteHandlerMethod() throws Exception {
-        handlerInstanceWithMethod().execute(envelope);
-        verify(commandHandler).handles(envelope);
+    public void shouldExecuteAsynchronousHandlerMethod() throws Exception {
+        Object result = asyncHandlerInstance().execute(envelope);
+        verify(asynchronousCommandHandler).handles(envelope);
+        assertThat(result, nullValue());
+    }
+
+    @Test
+    public void shouldExecuteSynchronousHandlerMethod() throws Exception {
+        when(synchronousCommandHandler.handles(envelope)).thenReturn(envelope);
+        Object result = syncHandlerInstance().execute(envelope);
+        assertThat(result, sameInstance(envelope));
     }
 
     @Test(expected = HandlerExecutionException.class)
     public void shouldThrowHandlerExecutionExceptionIfExceptionThrown() throws Exception {
-        doThrow(new RuntimeException()).when(commandHandler).handles(envelope);
-        handlerInstanceWithMethod().execute(envelope);
+        doThrow(new RuntimeException()).when(asynchronousCommandHandler).handles(envelope);
+        asyncHandlerInstance().execute(envelope);
     }
 
     @Test
     public void shouldReturnStringDescriptionOfHandlerInstanceAndMethod() {
-        assertThat(handlerInstanceWithMethod().toString(), notNullValue());
+        assertThat(asyncHandlerInstance().toString(), notNullValue());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionWithNullHandlerInstance() {
-        new AsynchronousHandlerMethod(null, method("handles"));
+        new HandlerMethod(null, method(AsynchronousCommandHandler.class, "handles"), Void.TYPE);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionWithNullMethod() {
-        new AsynchronousHandlerMethod(commandHandler, null);
+        new HandlerMethod(asynchronousCommandHandler, null, Void.TYPE);
     }
 
     @Test(expected = InvalidHandlerException.class)
     public void shouldThrowExceptionWithSynchronousMethod() {
-        new AsynchronousHandlerMethod(commandHandler, method("handlesSync"));
+        new HandlerMethod(asynchronousCommandHandler, method(AsynchronousCommandHandler.class, "handlesSync"), Void.TYPE);
     }
 
-    private AsynchronousHandlerMethod handlerInstanceWithMethod() {
-        return new AsynchronousHandlerMethod(commandHandler, method("handles"));
+    @Test(expected = InvalidHandlerException.class)
+    public void shouldThrowExceptionWithAsynchronousMethod() {
+        new HandlerMethod(synchronousCommandHandler, method(SynchronousCommandHandler.class, "handlesAsync"), Envelope.class);
     }
 
-    private Method method(final String name) {
-        return findHandlerMethods(CommandHandler.class, Handles.class).stream()
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldOnlyAcceptVoidOrEnvelopeReturnTypes() {
+        new HandlerMethod(synchronousCommandHandler, method(SynchronousCommandHandler.class, "handles"), Object.class);
+    }
+
+    private HandlerMethod asyncHandlerInstance() {
+        return new HandlerMethod(asynchronousCommandHandler, method(AsynchronousCommandHandler.class, "handles"), Void.TYPE);
+    }
+
+    private HandlerMethod syncHandlerInstance() {
+        return new HandlerMethod(synchronousCommandHandler, method(SynchronousCommandHandler.class, "handles"), Envelope.class);
+    }
+
+    private Method method(final Class<?> clazz, final String name) {
+        return findHandlerMethods(clazz, Handles.class).stream()
                 .filter(m -> name.equals(m.getName()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(format("Cannot find method with name %s", name)));
@@ -88,7 +117,7 @@ public class AsynchronousHandlerMethodTest {
         return new JsonObjectEnvelopeConverter().asEnvelope(jsonObjectConverter.fromString(jsonString));
     }
 
-    public static class CommandHandler {
+    public static class AsynchronousCommandHandler {
 
         @Handles("test-context.commands.create-something")
         public void handles(final Envelope envelope) {
@@ -97,6 +126,18 @@ public class AsynchronousHandlerMethodTest {
         @Handles("test-context.commands.create-something-else")
         public Envelope handlesSync(final Envelope envelope) {
             return envelope;
+        }
+    }
+
+    public static class SynchronousCommandHandler {
+
+        @Handles("test-context.commands.create-something")
+        public Envelope handles(final Envelope envelope) {
+            return envelope;
+        }
+
+        @Handles("test-context.commands.create-something-else")
+        public void handlesAsync(final Envelope envelope) {
         }
     }
 }

@@ -25,8 +25,8 @@ import static org.hamcrest.Matchers.hasSize;
  */
 public class JsonObjectsTest {
 
-    public static final String UUID_A = "da45e8f6-d945-4f09-a115-1139a9dbb754";
-    public static final String UUID_B = "d04885b4-9652-4c2a-87c6-299bda0a87d4";
+    private static final String UUID_A = "da45e8f6-d945-4f09-a115-1139a9dbb754";
+    private static final String UUID_B = "d04885b4-9652-4c2a-87c6-299bda0a87d4";
 
     @Test
     public void shouldBeWellDefinedUtilityClass() {
@@ -251,4 +251,22 @@ public class JsonObjectsTest {
 
         assertThat(builder.build(), equalTo(source));
     }
+
+    @Test
+    public void shouldCreateBuilderFromJsonObjectWithFilter() {
+        JsonObject source = Json.createObjectBuilder()
+                .add("id", "test id")
+                .add("ignore1", "ignore this")
+                .add("name", "test")
+                .add("ignore2", "ignore this as well")
+                .build();
+
+        JsonObjectBuilder builder = JsonObjects.createObjectBuilderWithFilter(source, x -> !"ignore1".equals(x) && !"ignore2".equals(x));
+
+        JsonObject actual = builder.build();
+        assertThat(actual.size(), equalTo(2));
+        assertThat(actual.getString("id"), equalTo(source.getString("id")));
+        assertThat(actual.getString("name"), equalTo(source.getString("name")));
+    }
+
 }

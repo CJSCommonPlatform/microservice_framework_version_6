@@ -1,8 +1,6 @@
 package uk.gov.justice.services.messaging;
 
-import uk.gov.justice.services.common.converter.JsonObjectConverter;
 
-import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -13,9 +11,6 @@ import javax.json.JsonObjectBuilder;
 public class JsonObjectEnvelopeConverter {
 
     public static final String METADATA = "_metadata";
-
-    @Inject
-    private JsonObjectConverter jsonObjectConverter;
 
     /**
      * Converts a jsonObject into {@link Envelope}

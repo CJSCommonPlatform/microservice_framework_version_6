@@ -1,6 +1,7 @@
 package uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog;
 
-import uk.gov.justice.services.common.converter.JsonObjectConverter;
+import uk.gov.justice.services.common.converter.JsonObjectToStringConverter;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidStreamIdException;
 import uk.gov.justice.services.messaging.DefaultEnvelope;
 import uk.gov.justice.services.messaging.Envelope;
@@ -23,8 +24,10 @@ public class EventLogConverter {
     JsonObjectEnvelopeConverter jsonObjectEnvelopeConverter;
 
     @Inject
-    JsonObjectConverter jsonObjectConverter;
+    JsonObjectToStringConverter jsonObjectToStringConverter;
 
+    @Inject
+    StringToJsonObjectConverter stringToJsonObjectConverter;
 
     /**
      * Creates an {@link EventLog} object from the <code>eventEnvelope</code>.
@@ -46,7 +49,7 @@ public class EventLogConverter {
                 streamId,
                 version,
                 eventMetadata.name(),
-                jsonObjectConverter.asString(envelope.metadata().asJsonObject()),
+                jsonObjectToStringConverter.convert(envelope.metadata().asJsonObject()),
                 extractPayloadAsString(envelope));
 
     }
@@ -68,15 +71,15 @@ public class EventLogConverter {
      * @return metadata from the eventLog.
      */
     public Metadata getMetaData(final EventLog eventLog) {
-        return JsonObjectMetadata.metadataFrom(jsonObjectConverter.fromString(eventLog.getMetadata()));
+        return JsonObjectMetadata.metadataFrom(stringToJsonObjectConverter.convert(eventLog.getMetadata()));
     }
 
     private JsonObject getPayload(final EventLog eventLog) {
-        return jsonObjectConverter.fromString(eventLog.getPayload());
+        return stringToJsonObjectConverter.convert(eventLog.getPayload());
     }
 
     private String extractPayloadAsString(final Envelope envelope) {
-        return jsonObjectConverter.asString(jsonObjectEnvelopeConverter.extractPayloadFromEnvelope(
+        return jsonObjectToStringConverter.convert(jsonObjectEnvelopeConverter.extractPayloadFromEnvelope(
                 jsonObjectEnvelopeConverter.fromEnvelope(envelope)));
     }
 

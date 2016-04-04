@@ -1,16 +1,12 @@
 package uk.gov.justice.services.core.handler;
 
-import static java.lang.String.format;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.CoreMatchers.sameInstance;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.core.handler.HandlerUtil.findHandlerMethods;
-
-import uk.gov.justice.services.common.converter.JsonObjectConverter;
+import com.google.common.io.Resources;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.handler.exception.HandlerExecutionException;
 import uk.gov.justice.services.core.handler.registry.exception.InvalidHandlerException;
@@ -21,12 +17,15 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 
-import com.google.common.io.Resources;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import static java.lang.String.format;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.CoreMatchers.sameInstance;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.core.handler.HandlerUtil.findHandlerMethods;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HandlerMethodTest {
@@ -111,10 +110,8 @@ public class HandlerMethodTest {
     }
 
     private Envelope testEnvelope(String fileName) throws IOException {
-        JsonObjectConverter jsonObjectConverter = new JsonObjectConverter();
-
         String jsonString = Resources.toString(Resources.getResource("json/" + fileName), Charset.defaultCharset());
-        return new JsonObjectEnvelopeConverter().asEnvelope(jsonObjectConverter.fromString(jsonString));
+        return new JsonObjectEnvelopeConverter().asEnvelope(new StringToJsonObjectConverter().convert(jsonString));
     }
 
     public static class AsynchronousCommandHandler {

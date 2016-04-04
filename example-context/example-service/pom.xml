@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>microservice-framework</artifactId>
+        <groupId>uk.gov.justice.services</groupId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>uk.gov.justice.services.example</groupId>
+    <artifactId>example-service</artifactId>
+    <packaging>pom</packaging>
+
+    <properties>
+        <version.war.plugin>2.1.1</version.war.plugin>
+        <version.wildfly.maven.plugin>1.0.2.Final</version.wildfly.maven.plugin>
+    </properties>
+
+    <modules>
+        <module>example-command</module>
+        <module>example-event</module>
+        <module>example-it</module>
+    </modules>
+
+</project>

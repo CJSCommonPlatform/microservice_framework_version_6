@@ -7,11 +7,14 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.justice.services.core.annotation.Event;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 
 import javax.enterprise.inject.spi.AfterDeploymentValidation;
+import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import java.util.HashSet;
 
 import static org.junit.Assert.assertThat;
@@ -26,14 +29,25 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 @RunWith(MockitoJUnitRunner.class)
 public class AnnotationScannerTest {
 
+    private static final String TEST_EVENT_NAME = "Test-Event";
+
     @Mock
     private AfterDeploymentValidation afterDeploymentValidation;
+
+    @Mock
+    private ProcessAnnotatedType processAnnotatedType;
+
+    @Mock
+    private AnnotatedType annotatedType;
 
     @Mock
     private BeanManager beanManager;
 
     @Mock
     private ServiceComponentFoundEvent serviceComponentFoundEvent;
+
+    @Mock
+    private EventFoundEvent eventFoundEvent;
 
     @Mock
     private Bean<Object> beanMockCommandApiHandler;
@@ -61,17 +75,22 @@ public class AnnotationScannerTest {
 
     @Test
     public void shouldFireCommandApiFoundEventWithCommandApi() throws Exception {
-        verifyIfEventFiredWith(beanMockCommandApiHandler);
+        verifyIfServiceComponentFoundEventFiredWith(beanMockCommandApiHandler);
     }
 
     @Test
     public void shouldFireCommandControllerFoundEventWithCommandController() throws Exception {
-        verifyIfEventFiredWith(beanMockCommandController);
+        verifyIfServiceComponentFoundEventFiredWith(beanMockCommandController);
     }
 
     @Test
     public void shouldFireCommandHandlerFoundEventWithCommandHandler() throws Exception {
-        verifyIfEventFiredWith(beanMockCommandHandler);
+        verifyIfServiceComponentFoundEventFiredWith(beanMockCommandHandler);
+    }
+
+    @Test
+    public void shouldFireEventFoundEventWithTestEvent() throws Exception {
+        verifyIfEventFoundEventFiredWith(processAnnotatedType);
     }
 
     @Test
@@ -92,7 +111,14 @@ public class AnnotationScannerTest {
         }).when(beanManager).getBeans(any(), any());
     }
 
-    private void verifyIfEventFiredWith(Bean<Object> handler) {
+    private void mockProcessAnnotatedType() {
+        doReturn(annotatedType).when(processAnnotatedType).getAnnotatedType();
+        doReturn(true).when(annotatedType).isAnnotationPresent(Event.class);
+        doReturn(TestEvent.class).when(annotatedType).getJavaClass();
+        doReturn(TestEvent.class.getAnnotation(Event.class)).when(annotatedType).getAnnotation(Event.class);
+    }
+
+    private void verifyIfServiceComponentFoundEventFiredWith(Bean<Object> handler) {
         ArgumentCaptor<ServiceComponentFoundEvent> captor = ArgumentCaptor.forClass(ServiceComponentFoundEvent.class);
         mockBeanManagerGetBeansWith(handler);
 
@@ -100,6 +126,17 @@ public class AnnotationScannerTest {
 
         verify(beanManager).fireEvent(captor.capture());
         assertThat(captor.getValue(), CoreMatchers.instanceOf(ServiceComponentFoundEvent.class));
+    }
+
+    private void verifyIfEventFoundEventFiredWith(ProcessAnnotatedType processAnnotatedType) {
+        ArgumentCaptor<EventFoundEvent> captor = ArgumentCaptor.forClass(EventFoundEvent.class);
+        mockProcessAnnotatedType();
+
+        annotationScanner.processAnnotatedType(processAnnotatedType);
+        annotationScanner.afterDeploymentValidation(afterDeploymentValidation, beanManager);
+
+        verify(beanManager).fireEvent(captor.capture());
+        assertThat(captor.getValue(), CoreMatchers.instanceOf(EventFoundEvent.class));
     }
 
     @ServiceComponent(COMMAND_API)
@@ -112,5 +149,9 @@ public class AnnotationScannerTest {
 
     @ServiceComponent(COMMAND_HANDLER)
     public static class TestCommandHandler {
+    }
+
+    @Event(TEST_EVENT_NAME)
+    public static class TestEvent {
     }
 }

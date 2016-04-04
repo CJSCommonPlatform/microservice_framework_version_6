@@ -30,14 +30,19 @@ public class TestProperties {
 
     /**
      * Singleton method
+     *
      * @return instance of the class
      */
     public static TestProperties getInstance() {
-        return new TestProperties();
+        if (instance == null) {
+            instance = new TestProperties();
+        }
+        return instance;
     }
 
     /**
      * Accessor method to read property values
+     *
      * @param propertyName - name of the property defined in the properties files
      * @return value of the property
      */

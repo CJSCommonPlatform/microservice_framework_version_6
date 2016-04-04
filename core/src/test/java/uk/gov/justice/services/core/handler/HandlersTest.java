@@ -14,23 +14,23 @@ import static net.trajano.commons.testing.UtilityClassTestUtil.assertUtilityClas
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
-public class HandlerUtilTest {
+public class HandlersTest {
 
     @Test
     public void shouldBeAWellDefinedUtilityClass() {
-        assertUtilityClassWellDefined(HandlerUtil.class);
+        assertUtilityClassWellDefined(Handlers.class);
     }
 
     @Test
     public void shouldFindHandlerMethods() {
-        List<Method> methods = HandlerUtil.findHandlerMethods(CommandHandler.class, Handles.class);
+        List<Method> methods = Handlers.handlerMethodsFrom(new CommandHandler());
         assertThat(methods, notNullValue());
         assertThat(methods, IsCollectionWithSize.hasSize(3));
     }
 
     @Test(expected = InvalidHandlerException.class)
     public void shouldThrowExceptionWithInvalidHandlerMethods() {
-        HandlerUtil.findHandlerMethods(InvalidHandler.class, Handles.class);
+        Handlers.handlerMethodsFrom(new InvalidHandler());
     }
 
     public static class CommandHandler {

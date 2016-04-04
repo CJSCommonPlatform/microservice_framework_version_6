@@ -1,8 +1,5 @@
 package uk.gov.justice.services.core.handler.registry;
 
-import static java.lang.String.format;
-import static uk.gov.justice.services.core.handler.HandlerUtil.findHandlerMethods;
-
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.handler.HandlerMethod;
 import uk.gov.justice.services.core.handler.exception.MissingHandlerException;
@@ -10,8 +7,10 @@ import uk.gov.justice.services.core.handler.registry.exception.DuplicateHandlerE
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+
+import static java.lang.String.format;
+import static uk.gov.justice.services.core.handler.Handlers.handlerMethodsFrom;
 
 /**
  * Service for storing a map of which command handlers handle which commands.
@@ -36,11 +35,8 @@ public class HandlerRegistry {
      * @param handlerInstance handler instance to be registered.
      */
     public void register(final Object handlerInstance) {
-        final List<Method> handlerMethods = findHandlerMethods(handlerInstance.getClass(), Handles.class);
-
-        for (Method handlerMethod : handlerMethods) {
-            register(handlerInstance, handlerMethod);
-        }
+        handlerMethodsFrom(handlerInstance).stream()
+                .forEach(method -> register(handlerInstance, method));
     }
 
     /**

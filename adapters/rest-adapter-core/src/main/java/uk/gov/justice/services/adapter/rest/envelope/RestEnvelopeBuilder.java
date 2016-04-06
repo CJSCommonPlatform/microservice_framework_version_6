@@ -103,7 +103,12 @@ public class RestEnvelopeBuilder {
         HttpHeaders httpHeaders = headers.orElseThrow(() ->
                 new IllegalStateException("Cannot get name from empty headers"));
 
-        StructuredMediaType mediaType = new StructuredMediaType(httpHeaders.getMediaType());
+        StructuredMediaType mediaType = new StructuredMediaType(
+                httpHeaders.getMediaType() != null
+                        && httpHeaders.getMediaType().toString().startsWith("application/vnd.")
+                        ? httpHeaders.getMediaType()
+                        : httpHeaders.getAcceptableMediaTypes().get(0));
+
         metadataBuilder = metadataBuilder.add(JsonObjectMetadata.NAME, mediaType.getName());
 
         if (contains(CLIENT_CORRELATION_ID, httpHeaders)) {
@@ -127,7 +132,7 @@ public class RestEnvelopeBuilder {
     }
 
     private boolean contains(final String header, final HttpHeaders headers) {
-        return headers.getRequestHeaders().containsKey(header);
+        return headers.getRequestHeaders() != null && headers.getRequestHeaders().containsKey(header);
     }
 
     private String getHeader(final String header, final HttpHeaders headers) {

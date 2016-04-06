@@ -1,55 +1,58 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
-import static java.lang.String.format;
-import static java.lang.reflect.Modifier.isAbstract;
-import static java.lang.reflect.Modifier.isPublic;
-import static java.lang.reflect.Modifier.isStatic;
-import static java.nio.file.Paths.get;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.Matchers.arrayWithSize;
-import static org.hamcrest.Matchers.emptyArray;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.raml.model.ActionType.POST;
-import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
-import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithDefaults;
-import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.json.JsonObject;
-import javax.ws.rs.core.Application;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-
 import com.google.common.reflect.TypeToken;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
 import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.services.adapter.rest.RestProcessor;
 import uk.gov.justice.services.adapters.test.utils.compiler.JavaCompilerUtil;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
+import uk.gov.justice.services.core.dispatcher.SynchronousDispatcher;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.json.JsonObject;
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Application;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static java.lang.String.format;
+import static java.lang.reflect.Modifier.isAbstract;
+import static java.lang.reflect.Modifier.isPublic;
+import static java.lang.reflect.Modifier.isStatic;
+import static java.nio.file.Paths.get;
+import static java.util.Arrays.stream;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.Matchers.arrayContainingInAnyOrder;
+import static org.hamcrest.Matchers.arrayWithSize;
+import static org.hamcrest.Matchers.emptyArray;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.raml.model.ActionType.GET;
+import static org.raml.model.ActionType.POST;
+import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
+import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithDefaults;
+import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 
 public class RestAdapterGenerator_CodeStructureTest {
 
@@ -128,7 +131,8 @@ public class RestAdapterGenerator_CodeStructureTest {
         assertThat(isPublic(method.getModifiers()), is(true));
         assertThat(isStatic(method.getModifiers()), is(false));
         assertThat(isAbstract(method.getModifiers()), is(false));
-        assertThat(method.getGenericReturnType(), equalTo(new TypeToken<Set<Class<?>>>(){}.getType()));
+        assertThat(method.getGenericReturnType(), equalTo(new TypeToken<Set<Class<?>>>() {
+        }.getType()));
     }
 
     @Test
@@ -187,6 +191,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                 is(new String[]{"application/vnd.command+json"}));
     }
 
+
     @Test
     public void shouldGenerateResourceInterfaceWithTwoPOSTMethods() throws Exception {
         generator.run(
@@ -216,6 +221,55 @@ public class RestAdapterGenerator_CodeStructureTest {
                 is(new String[]{"application/vnd.cmd-b+json"}));
 
     }
+
+    @Test
+    public void shouldGenerateResourceInterfaceWithOneGETMethod() throws Exception {
+        generator.run(
+                restRamlWithDefaults().with(
+                        resource("/some/path")
+                                .with(action(GET).withResponse("application/vnd.ctx.queries.query1+json"))
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE));
+
+        Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+
+        List<Method> methods = methodsOf(interfaceClass);
+        assertThat(methods, hasSize(1));
+        Method method = methods.get(0);
+        assertThat(method.getReturnType(), equalTo(Response.class));
+        assertThat(method.getAnnotation(javax.ws.rs.GET.class), not(nullValue()));
+        assertThat(method.getAnnotation(Produces.class), not(nullValue()));
+        assertThat(method.getAnnotation(Produces.class).value(),
+                is(new String[]{"application/vnd.ctx.queries.query1+json"}));
+    }
+
+
+    @Test
+    public void shouldGenerateGETMethodWithTwoMediaTypeAnnotations() throws Exception {
+        generator.run(
+                restRamlWithDefaults().with(
+                        resource("/some/path")
+                                .with(action(GET)
+                                        .withResponse(
+                                                "application/vnd.ctx.queries.query1+json",
+                                                "application/vnd.ctx.queries.query2+json")
+                                )
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE));
+
+        Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+
+        List<Method> methods = methodsOf(interfaceClass);
+        assertThat(methods, hasSize(1));
+        Method method = methods.get(0);
+        assertThat(method.getReturnType(), equalTo(Response.class));
+        assertThat(method.getAnnotation(javax.ws.rs.GET.class), not(nullValue()));
+        assertThat(method.getAnnotation(Produces.class), not(nullValue()));
+        assertThat(method.getAnnotation(Produces.class).value(),
+                arrayContainingInAnyOrder("application/vnd.ctx.queries.query1+json", "application/vnd.ctx.queries.query2+json"));
+
+    }
+
 
     @Test
     public void interfaceShouldContainMethodWithBodyParameter() throws Exception {
@@ -380,7 +434,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path/{paramA}", "paramA")
                                 .with(action(POST, "application/vnd.command-a+json"))
                 ).build(),
-            configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamAResource");
 
@@ -484,7 +538,7 @@ public class RestAdapterGenerator_CodeStructureTest {
     }
 
     @Test
-    public void shouldAddDispatcherBean() throws Exception {
+    public void shouldAddAsyncDispatcherBeanIfThereIsPOSTResourceInRAML() throws Exception {
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/some/path")
@@ -493,12 +547,66 @@ public class RestAdapterGenerator_CodeStructureTest {
                 configurationWithBasePackage(BASE_PACKAGE));
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
-        Field dispatcher = resourceClass.getDeclaredField("dispatcher");
+        Field dispatcher = resourceClass.getDeclaredField("asyncDispatcher");
         assertThat(dispatcher, not(nullValue()));
         assertThat(dispatcher.getType(), equalTo(AsynchronousDispatcher.class));
         assertThat(dispatcher.getAnnotation(Inject.class), not(nullValue()));
         assertThat(dispatcher.getModifiers(), is(0));
     }
+
+    @Test
+    public void shouldNotAddAsyncDispatcherBeanIfThereIsNoPOSTResourceInRAML() throws Exception {
+        generator.run(
+                restRamlWithDefaults().with(
+                        resource("/some/path")
+                                .with(action(GET))
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE));
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+
+        assertFalse(stream(resourceClass.getDeclaredFields())
+                .filter(f -> f.getName().equals("asyncDispatcher"))
+                .findAny()
+                .isPresent());
+    }
+
+
+    @Test
+    public void shouldAddSyncDispatcherBeanIfThereIsGETResourceInRAML() throws Exception {
+        generator.run(
+                restRamlWithDefaults().with(
+                        resource("/some/path")
+                                .with(action()
+                                        .with(GET))
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE));
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+
+        Field dispatcher = resourceClass.getDeclaredField("syncDispatcher");
+        assertThat(dispatcher, not(nullValue()));
+        assertThat(dispatcher.getType(), equalTo(SynchronousDispatcher.class));
+        assertThat(dispatcher.getAnnotation(Inject.class), not(nullValue()));
+        assertThat(dispatcher.getModifiers(), is(0));
+    }
+
+    @Test
+    public void shouldNotAddSyncDispatcherBeanIfThereIsNoGETResourceInRAML() throws Exception {
+        generator.run(
+                restRamlWithDefaults().with(
+                        resource("/some/path")
+                                .with(action(POST, "application/vnd.command+json"))
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE));
+
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+
+        assertFalse(stream(resourceClass.getDeclaredFields())
+                .filter(f -> f.getName().equals("syncDispatcher"))
+                .findAny()
+                .isPresent());
+
+    }
+
 
     @Test
     public void shouldAddHeadersContext() throws Exception {
@@ -536,7 +644,7 @@ public class RestAdapterGenerator_CodeStructureTest {
     }
 
     private List<Method> methodsOf(Class<?> class1) {
-        return Arrays.stream(class1.getDeclaredMethods()).filter(m -> !m.getName().contains("jacoco"))
+        return stream(class1.getDeclaredMethods()).filter(m -> !m.getName().contains("jacoco"))
                 .collect(Collectors.toList());
     }
 

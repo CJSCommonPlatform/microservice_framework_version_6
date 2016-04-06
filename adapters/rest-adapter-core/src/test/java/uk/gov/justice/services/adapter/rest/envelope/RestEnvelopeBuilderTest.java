@@ -1,26 +1,24 @@
 package uk.gov.justice.services.adapter.rest.envelope;
 
 import com.google.common.collect.ImmutableMap;
+import org.jboss.resteasy.specimpl.ResteasyHttpHeaders;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.services.adapter.rest.HeaderConstants;
 import uk.gov.justice.services.messaging.Envelope;
 
 import javax.json.Json;
 import javax.json.JsonObject;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
 import java.util.UUID;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.adapter.rest.HeaderConstants.CLIENT_CORRELATION_ID;
 
 /**
  * Unit tests for the {@link RestEnvelopeBuilder} class.
@@ -32,10 +30,11 @@ public class RestEnvelopeBuilderTest {
     private static final UUID UUID_CLIENT_CORRELATION_ID = UUID.randomUUID();
     private static final UUID UUID_USER_ID = UUID.randomUUID();
     private static final UUID UUID_SESSION_ID = UUID.randomUUID();
-    private static final MultivaluedHashMap<String, String> EMPTY_HEADERS = new MultivaluedHashMap<>();
+    private static final MultivaluedHashMap<String, String> DEFAULT_HEADERS = new MultivaluedHashMap<>();
 
-    @Mock
-    private HttpHeaders httpHeaders;
+    static {
+        DEFAULT_HEADERS.add("Content-Type", "application/vnd.sometype+json");
+    }
 
     private RestEnvelopeBuilder builder;
 
@@ -50,21 +49,63 @@ public class RestEnvelopeBuilderTest {
     }
 
     @Test
-    public void shouldBuildEmptyEnvelope() throws Exception {
+    public void shouldBuildEnvelopeWithUUID() throws Exception {
 
-        setupHttpHeaders("vnd.blah+json", EMPTY_HEADERS);
+        MultivaluedMap<String, String> headers = new MultivaluedHashMap<>();
+        headers.add("Content-Type", "application/vnd.blah+json");
+        setupHttpHeaders(headers);
 
         Envelope envelope = builder.build();
 
         assertThat(envelope.metadata().id(), equalTo(UUID_ID));
         assertThat(envelope.metadata().name(), equalTo("blah"));
-        assertThat(envelope.metadata().asJsonObject().keySet(), hasSize(2));
-        assertThat(envelope.payload().keySet(), hasSize(0));
     }
 
     @Test
+    public void shouldBuildEmptyEnvelopeWithNameBasedOnContentTypeHeader() throws Exception {
+
+        MultivaluedMap<String, String> headers = new MultivaluedHashMap<>();
+        headers.add("Content-Type", "application/vnd.blah+json");
+        setupHttpHeaders(headers);
+
+        Envelope envelope = builder.build();
+
+        assertThat(envelope.metadata().name(), equalTo("blah"));
+
+    }
+
+    @Test
+    public void shouldBuildEmptyEnvelopeWithNameBasedOnAcceptHeader() throws Exception {
+
+        MultivaluedMap<String, String> headers = new MultivaluedHashMap<>();
+        headers.add("Accept", "application/vnd.blahblah+json");
+        setupHttpHeaders(headers);
+
+        Envelope envelope = builder.build();
+
+        assertThat(envelope.metadata().name(), equalTo("blahblah"));
+
+    }
+
+    @Test
+    public void shouldBuildEmptyEnvelopeWithNameBasedOnAcceptHeader_ContentTypeInvalid() throws Exception {
+
+        MultivaluedMap<String, String> headers = new MultivaluedHashMap<>();
+        headers.add("Content-Type", "*/*");
+        headers.add("Accept", "application/vnd.blahblah2+json");
+        setupHttpHeaders(headers);
+
+        Envelope envelope = builder.build();
+
+        assertThat(envelope.metadata().name(), equalTo("blahblah2"));
+
+    }
+
+
+
+    @Test
     public void shouldAddInitialPayload() throws Exception {
-        setupHttpHeaders("vnd.blah+json", EMPTY_HEADERS);
+        setupHttpHeaders(DEFAULT_HEADERS);
         JsonObject initialPayload = Json.createObjectBuilder()
                 .add("test", "value")
                 .build();
@@ -77,7 +118,7 @@ public class RestEnvelopeBuilderTest {
 
     @Test
     public void shouldAddPathParams() throws Exception {
-        setupHttpHeaders("vnd.blah+json", EMPTY_HEADERS);
+        setupHttpHeaders(DEFAULT_HEADERS);
         JsonObject initialPayload = Json.createObjectBuilder()
                 .add("test", "value")
                 .build();
@@ -96,8 +137,8 @@ public class RestEnvelopeBuilderTest {
 
     @Test
     public void shouldSetClientCorrelationId() throws Exception {
-        setupHttpHeaders("vnd.blah+json", new MultivaluedHashMap<>(
-                ImmutableMap.of(HeaderConstants.CLIENT_CORRELATION_ID, UUID_CLIENT_CORRELATION_ID.toString())));
+        setupHttpHeaders(new MultivaluedHashMap<>(
+                ImmutableMap.of("Content-Type", "application/vnd.blah+json", CLIENT_CORRELATION_ID, UUID_CLIENT_CORRELATION_ID.toString())));
 
         Envelope envelope = builder.build();
 
@@ -107,8 +148,8 @@ public class RestEnvelopeBuilderTest {
 
     @Test
     public void shouldSetUserId() throws Exception {
-        setupHttpHeaders("vnd.blah+json", new MultivaluedHashMap<>(
-                ImmutableMap.of(HeaderConstants.USER_ID, UUID_USER_ID.toString())));
+        setupHttpHeaders(new MultivaluedHashMap<>(
+                ImmutableMap.of("Content-Type", "application/vnd.blah+json", HeaderConstants.USER_ID, UUID_USER_ID.toString())));
 
         Envelope envelope = builder.build();
 
@@ -118,8 +159,8 @@ public class RestEnvelopeBuilderTest {
 
     @Test
     public void shouldSetSessionId() throws Exception {
-        setupHttpHeaders("vnd.blah+json", new MultivaluedHashMap<>(
-                ImmutableMap.of(HeaderConstants.SESSION_ID, UUID_SESSION_ID.toString())));
+        setupHttpHeaders(new MultivaluedHashMap<>(
+                ImmutableMap.of("Content-Type", "application/vnd.blah+json",HeaderConstants.SESSION_ID, UUID_SESSION_ID.toString())));
 
         Envelope envelope = builder.build();
 
@@ -127,13 +168,9 @@ public class RestEnvelopeBuilderTest {
         assertThat(envelope.metadata().sessionId().get(), equalTo(UUID_SESSION_ID.toString()));
     }
 
-    private void setupHttpHeaders(final String subtype, final MultivaluedHashMap<String, String> headers) {
-        MediaType mediaType = new MediaType("application", subtype);
-        when(httpHeaders.getMediaType()).thenReturn(mediaType);
-        when(httpHeaders.getRequestHeaders()).thenReturn(headers);
-        for (String key : headers.keySet()) {
-            when(httpHeaders.getHeaderString(key)).thenReturn(headers.getFirst(key));
-        }
-        builder = builder.withHeaders(httpHeaders);
+    private void setupHttpHeaders(final MultivaluedMap<String, String> headers) {
+
+
+        builder = builder.withHeaders(new ResteasyHttpHeaders(headers));
     }
 }

@@ -1,24 +1,26 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.raml.model.ActionType.POST;
-import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
-import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithDefaults;
-import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
-import static uk.gov.justice.services.messaging.DefaultEnvelope.envelopeFrom;
+import org.apache.cxf.jaxrs.impl.tl.ThreadLocalHttpHeaders;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.justice.raml.core.GeneratorConfig;
+import uk.gov.justice.services.adapter.rest.RestProcessor;
+import uk.gov.justice.services.adapters.test.utils.compiler.JavaCompilerUtil;
+import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
+import uk.gov.justice.services.messaging.Envelope;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
@@ -31,29 +33,25 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import uk.gov.justice.raml.core.GeneratorConfig;
-import uk.gov.justice.services.adapter.rest.RestProcessor;
-import uk.gov.justice.services.adapters.test.utils.compiler.JavaCompilerUtil;
-import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
-import uk.gov.justice.services.messaging.Envelope;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.raml.model.ActionType.POST;
+import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
+import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithDefaults;
+import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
+import static uk.gov.justice.services.messaging.DefaultEnvelope.envelopeFrom;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RestAdapterGenerator_MethodBodyTest {
+public class RestAdapterGenerator_POSTMethodBodyTest {
 
     private static final JsonObject NOT_USED_JSONOBJECT = Json.createObjectBuilder().build();
 
@@ -94,7 +92,7 @@ public class RestAdapterGenerator_MethodBodyTest {
         Object resourceObject = instantiate(resourceClass);
 
         Response processorResponse = Response.ok().build();
-        when(restProcessor.process(any(Consumer.class), any(JsonObject.class), any(HttpHeaders.class),
+        when(restProcessor.processAsynchronously(any(Consumer.class), any(JsonObject.class), any(HttpHeaders.class),
                 any(Map.class))).thenReturn(processorResponse);
 
         Method method = firstMethodOf(resourceClass);
@@ -123,7 +121,7 @@ public class RestAdapterGenerator_MethodBodyTest {
         method.invoke(resourceObject, NOT_USED_JSONOBJECT);
 
         ArgumentCaptor<Consumer> consumerCaptor = ArgumentCaptor.forClass(Consumer.class);
-        verify(restProcessor).process(consumerCaptor.capture(), any(JsonObject.class), any(HttpHeaders.class),
+        verify(restProcessor).processAsynchronously(consumerCaptor.capture(), any(JsonObject.class), any(HttpHeaders.class),
                 any(Map.class));
 
         Envelope envelope = envelopeFrom(null, null);
@@ -152,7 +150,7 @@ public class RestAdapterGenerator_MethodBodyTest {
         Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, jsonObject);
 
-        verify(restProcessor).process(any(Consumer.class), eq(jsonObject), any(HttpHeaders.class), any(Map.class));
+        verify(restProcessor).processAsynchronously(any(Consumer.class), eq(jsonObject), any(HttpHeaders.class), any(Map.class));
 
     }
 
@@ -169,13 +167,13 @@ public class RestAdapterGenerator_MethodBodyTest {
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
         Object resourceObject = instantiate(resourceClass);
 
-        HttpHeaders headers = mock(HttpHeaders.class);
+        HttpHeaders headers = new ThreadLocalHttpHeaders();
         setField(resourceObject, "headers", headers);
 
         Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, NOT_USED_JSONOBJECT);
 
-        verify(restProcessor).process(any(Consumer.class), any(JsonObject.class), eq(headers), any(Map.class));
+        verify(restProcessor).processAsynchronously(any(Consumer.class), any(JsonObject.class), eq(headers), any(Map.class));
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -198,7 +196,7 @@ public class RestAdapterGenerator_MethodBodyTest {
 
         ArgumentCaptor<Map> pathParamsCaptor = ArgumentCaptor.forClass(Map.class);
 
-        verify(restProcessor).process(any(Consumer.class), any(JsonObject.class), any(HttpHeaders.class),
+        verify(restProcessor).processAsynchronously(any(Consumer.class), any(JsonObject.class), any(HttpHeaders.class),
                 pathParamsCaptor.capture());
 
         Map pathParams = pathParamsCaptor.getValue();
@@ -230,7 +228,7 @@ public class RestAdapterGenerator_MethodBodyTest {
 
         ArgumentCaptor<Map> pathParamsCaptor = ArgumentCaptor.forClass(Map.class);
 
-        verify(restProcessor).process(any(Consumer.class), any(JsonObject.class), any(HttpHeaders.class),
+        verify(restProcessor).processAsynchronously(any(Consumer.class), any(JsonObject.class), any(HttpHeaders.class),
                 pathParamsCaptor.capture());
 
         Map pathParams = pathParamsCaptor.getValue();
@@ -259,7 +257,7 @@ public class RestAdapterGenerator_MethodBodyTest {
 
         ArgumentCaptor<Map> pathParamsCaptor = ArgumentCaptor.forClass(Map.class);
 
-        verify(restProcessor).process(any(Consumer.class), any(JsonObject.class), any(HttpHeaders.class),
+        verify(restProcessor).processAsynchronously(any(Consumer.class), any(JsonObject.class), any(HttpHeaders.class),
                 pathParamsCaptor.capture());
 
         Map pathParams = pathParamsCaptor.getValue();
@@ -298,7 +296,7 @@ public class RestAdapterGenerator_MethodBodyTest {
     private Object instantiate(Class<?> resourceClass) throws InstantiationException, IllegalAccessException {
         Object resourceObject = resourceClass.newInstance();
         setField(resourceObject, "restProcessor", restProcessor);
-        setField(resourceObject, "dispatcher", dispatcher);
+        setField(resourceObject, "asyncDispatcher", dispatcher);
         return resourceObject;
     }
 

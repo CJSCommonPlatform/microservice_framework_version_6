@@ -2,6 +2,7 @@ package uk.gov.justice.services.adapters.rest.generator;
 
 import com.google.common.collect.ImmutableList;
 import com.sun.codemodel.JAnnotatable;
+import com.sun.codemodel.JAnnotationArrayMember;
 import com.sun.codemodel.JClass;
 import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JCodeModel;
@@ -13,6 +14,7 @@ import com.sun.codemodel.JVar;
 import org.raml.model.Action;
 import org.raml.model.MimeType;
 import org.raml.model.Resource;
+import org.raml.model.Response;
 import org.raml.model.parameter.UriParameter;
 import uk.gov.justice.raml.core.GeneratorConfig;
 
@@ -22,7 +24,9 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import java.lang.annotation.Annotation;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -31,6 +35,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import static java.lang.String.join;
+import static java.util.Collections.emptyList;
 import static org.apache.commons.lang.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.apache.commons.lang.StringUtils.strip;
@@ -95,24 +100,38 @@ class JaxRsInterfaceCodeGenerator {
                                     final String resourceInterfacePath) {
 
         for (final Action action : resource.getActions().values()) {
+            Collection<MimeType> responseMimeTypes = responseMimeTypesOf(action);
+
             if (!action.hasBody()) {
-                addResourceMethod(resourceInterface, resourceInterfacePath, action, null, false);
+                addResourceMethod(resourceInterface, resourceInterfacePath, action, null, false, responseMimeTypes);
             } else if (action.getBody().size() == 1) {
                 final MimeType bodyMimeType = action.getBody().values().iterator().next();
-                addResourceMethod(resourceInterface, resourceInterfacePath, action, bodyMimeType, false);
+                addResourceMethod(resourceInterface, resourceInterfacePath, action, bodyMimeType, false, responseMimeTypes);
             } else {
                 action.getBody().values().stream().sorted((t1, t2) -> t1.getType().compareTo(t2.getType()))
                         .forEach(bodyMimeType -> addResourceMethod(resourceInterface, resourceInterfacePath,
-                                action, bodyMimeType, true));
+                                action, bodyMimeType, true, responseMimeTypes));
             }
         }
+    }
+
+    private Collection<MimeType> responseMimeTypesOf(final Action action) {
+        Map<String, Response> responses = action.getResponses();
+        return notEmpty(responses)
+                && notEmpty(responses.values().iterator().next().getBody())
+                ? responses.values().iterator().next().getBody().values()
+                : emptyList();
+    }
+
+    private boolean notEmpty(final Map<String, ?> responses) {
+        return responses != null && responses.values().iterator().hasNext() && responses.values().iterator().next() != null;
     }
 
     private JMethod addResourceMethod(final JDefinedClass resourceInterface,
                                       final String resourceInterfacePath,
                                       final Action action,
                                       final MimeType bodyMimeType,
-                                      final boolean addBodyMimeTypeInMethodName) {
+                                      final boolean addBodyMimeTypeInMethodName, final Collection<MimeType> responseMimeTypes) {
 
         MimeType actualBodyMimeType = addBodyMimeTypeInMethodName ? bodyMimeType : null;
 
@@ -126,6 +145,7 @@ class JaxRsInterfaceCodeGenerator {
 
         addParamAnnotation(resourceInterfacePath, action, method);
         addConsumesAnnotation(bodyMimeType, method);
+        addProducesAnnotation(responseMimeTypes, method);
 
         addPathParameters(action, method);
         addBodyParameters(bodyMimeType, method);
@@ -146,6 +166,20 @@ class JaxRsInterfaceCodeGenerator {
         if (bodyMimeType != null) {
             method.annotate(Consumes.class).param(DEFAULT_ANNOTATION_PARAMETER,
                     bodyMimeType.getType());
+        }
+    }
+
+    protected void addProducesAnnotation(
+            final Collection<MimeType> responseMimeTypes,
+            final JMethod method) {
+        if (responseMimeTypes.isEmpty()) {
+            return;
+        }
+        final JAnnotationArrayMember paramArray = method.annotate(
+                Produces.class).paramArray(DEFAULT_ANNOTATION_PARAMETER);
+
+        for (final MimeType responseMimeType : responseMimeTypes) {
+            paramArray.param(responseMimeType.getType());
         }
     }
 

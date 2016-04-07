@@ -10,8 +10,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>example-context</artifactId>
+    <groupId>uk.gov.justice.services.example</groupId>
     <packaging>pom</packaging>
-    
+
     <modules>
         <module>example-domain</module>
         <module>example-service</module>

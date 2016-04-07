@@ -1,11 +1,10 @@
-package uk.gov.justice.raml.jms.core;
+package uk.gov.justice.services.adapters.test.utils.config;
+
+import org.junit.rules.TemporaryFolder;
+import uk.gov.justice.raml.core.GeneratorConfig;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import org.junit.rules.TemporaryFolder;
-
-import uk.gov.justice.raml.core.GeneratorConfig;
 
 public class GeneratorConfigUtil {
     

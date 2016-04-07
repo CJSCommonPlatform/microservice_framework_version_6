@@ -1,4 +1,9 @@
-package uk.gov.justice.raml.jms.validation;
+package uk.gov.justice.raml.common.validator;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.raml.model.ActionType;
 
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.HEAD;
@@ -9,14 +14,9 @@ import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.raml.model.ActionType;
+public class RequestContentTypeRamlValidatorTest {
 
-public class MediaTypeRamlValidatorTest {
-
-    private RamlValidator validator = new MediaTypeRamlValidator();
+    private RamlValidator validator = new RequestContentTypeRamlValidator();
 
     @Test
     public void shouldPassIfMediaTypeContainsAValidCommand() throws Exception {
@@ -28,7 +28,7 @@ public class MediaTypeRamlValidatorTest {
                         .build());
 
     }
-    
+
     @Test
     public void shouldIgnoreInvalidMediaTypesInNonPOSTActions() throws Exception {
 
@@ -40,7 +40,7 @@ public class MediaTypeRamlValidatorTest {
                                 .with(action(HEAD, "application/vnd.structure.dummy.command3+json"))
                                 .with(action(PUT, "application/vnd.structure.dummy.command4+json"))
                                 .with(action(OPTIONS, "application/vnd.structure.dummy.command5+json"))
-                                )
+                        )
                         .build());
 
     }
@@ -52,7 +52,7 @@ public class MediaTypeRamlValidatorTest {
     public void shouldThrowExceptionIfMediaTypeNotSet() throws Exception {
 
         exception.expect(RamlValidationException.class);
-        exception.expectMessage("No declared media types");
+        exception.expectMessage("Request type not set");
 
         validator.validate(raml()
                 .with(resource()
@@ -65,7 +65,7 @@ public class MediaTypeRamlValidatorTest {
     public void shouldThrowExceptionIfMediaTypeDoesNotContainAValidCommand() throws Exception {
 
         exception.expect(RamlValidationException.class);
-        exception.expectMessage("Invalid media type: application/vnd.people.invalid.command1+json");
+        exception.expectMessage("Invalid request type: application/vnd.people.invalid.command1+json");
 
         validator.validate(
                 raml()
@@ -79,7 +79,7 @@ public class MediaTypeRamlValidatorTest {
     public void shouldThrowExceptionIfNotvalidMediaType() throws Exception {
 
         exception.expect(RamlValidationException.class);
-        exception.expectMessage("Invalid media type: nd.people.commands.command1+json");
+        exception.expectMessage("Invalid request type: nd.people.commands.command1+json");
 
         validator.validate(
                 raml()
@@ -93,7 +93,7 @@ public class MediaTypeRamlValidatorTest {
     public void shouldThrowExceptionIfNotvalidMediaType2() throws Exception {
 
         exception.expect(RamlValidationException.class);
-        exception.expectMessage("Invalid media type: nd.people.unknown.command1+nonjson");
+        exception.expectMessage("Invalid request type: nd.people.unknown.command1+nonjson");
 
         validator.validate(
                 raml()
@@ -107,7 +107,7 @@ public class MediaTypeRamlValidatorTest {
     public void shouldThrowExceptionIfMediaTypeDoesNotContainContext() throws Exception {
 
         exception.expect(RamlValidationException.class);
-        exception.expectMessage("Invalid media type: application/vnd.handlers.command1+json");
+        exception.expectMessage("Invalid request type: application/vnd.handlers.command1+json");
 
         validator.validate(
                 raml()

@@ -31,7 +31,7 @@ public class JaxRsInterfaceCodeGeneratorTest {
 
         Raml raml = restRamlWithDefaults().with(
                 resource("/some/path")
-                        .with(action(POST, "application/vnd.default+json"))
+                        .with(action(POST).withDefaultRequestType())
         ).build();
         Resource resource = raml.getResources().values().iterator().next();
 

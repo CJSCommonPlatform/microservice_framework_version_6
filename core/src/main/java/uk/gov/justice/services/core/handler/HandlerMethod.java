@@ -26,7 +26,7 @@ public class HandlerMethod {
     private final boolean isSynchronous;
 
     /**
-     * Constructor with handler method validation.
+     * Constructor with handler method validator.
      *
      * @param object             the instance of the handler object
      * @param method             the method on the handler object

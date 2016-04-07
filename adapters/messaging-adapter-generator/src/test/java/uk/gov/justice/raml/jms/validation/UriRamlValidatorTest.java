@@ -1,11 +1,13 @@
 package uk.gov.justice.raml.jms.validation;
 
-import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.raml;
-import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import uk.gov.justice.raml.common.validator.RamlValidationException;
+import uk.gov.justice.raml.common.validator.RamlValidator;
+
+import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.raml;
+import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 
 public class UriRamlValidatorTest {
 

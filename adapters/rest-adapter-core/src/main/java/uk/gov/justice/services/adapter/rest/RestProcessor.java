@@ -9,9 +9,11 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static javax.ws.rs.core.Response.Status.ACCEPTED;
-import static javax.ws.rs.core.Response.status;
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import static javax.ws.rs.core.Response.Status.OK;
 
 /**
  * In order to minimise the amount of generated code in the JAX-RS implementation classes, this service encapsulates
@@ -26,16 +28,17 @@ public class RestProcessor {
     /**
      * Process an incoming REST request by combining the payload, headers and path parameters into an envelope and
      * passing the envelope to the given consumer.
-     * @param consumer a consumer for the envelope
+     *
+     * @param consumer       a consumer for the envelope
      * @param initialPayload the payload from the REST request
-     * @param headers the headers from the REST request
-     * @param pathParams the path parameters from the REST request
+     * @param headers        the headers from the REST request
+     * @param pathParams     the path parameters from the REST request
      * @return the HTTP response to return to the client
      */
-    public Response process(final Consumer<Envelope> consumer,
-                            final JsonObject initialPayload,
-                            final HttpHeaders headers,
-                            final Map<String, String> pathParams) {
+    public Response processAsynchronously(final Consumer<Envelope> consumer,
+                                          final JsonObject initialPayload,
+                                          final HttpHeaders headers,
+                                          final Map<String, String> pathParams) {
 
         Envelope envelope = envelopeBuilderFactory.builder()
                 .withInitialPayload(initialPayload)
@@ -45,6 +48,20 @@ public class RestProcessor {
 
         consumer.accept(envelope);
 
-        return status(ACCEPTED).build();
+        return Response.status(ACCEPTED).build();
+    }
+
+    public Response processSynchronously(final Function<Envelope, Envelope> function,
+                                         final HttpHeaders headers,
+                                         final Map<String, String> pathParams) {
+        Envelope envelope = envelopeBuilderFactory.builder()
+                .withHeaders(headers)
+                .withPathParams(pathParams)
+                .build();
+
+        Envelope result = function.apply(envelope);
+        Response.ResponseBuilder response =
+                result != null ? Response.status(OK).entity(result.payload().toString()) : Response.status(NOT_FOUND);
+        return response.build();
     }
 }

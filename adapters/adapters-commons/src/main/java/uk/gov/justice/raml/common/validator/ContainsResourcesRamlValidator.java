@@ -1,4 +1,4 @@
-package uk.gov.justice.raml.jms.validation;
+package uk.gov.justice.raml.common.validator;
 
 import org.raml.model.Raml;
 

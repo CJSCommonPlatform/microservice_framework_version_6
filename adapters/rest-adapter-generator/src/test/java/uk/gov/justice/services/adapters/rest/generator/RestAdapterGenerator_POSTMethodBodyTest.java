@@ -84,7 +84,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest {
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/path")
-                                .with(action(POST, "application/vnd.default+json"))
+                                .with(action(POST).withDefaultRequestType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE));
 
@@ -109,7 +109,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest {
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/path")
-                                .with(action(POST, "application/vnd.default+json"))
+                                .with(action(POST).withDefaultRequestType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE));
 
@@ -138,7 +138,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest {
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/path")
-                                .with(action(POST, "application/vnd.default+json"))
+                                .with(action(POST).withDefaultRequestType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE));
 
@@ -160,7 +160,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest {
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/path")
-                                .with(action(POST, "application/vnd.default+json"))
+                                .with(action(POST).withDefaultRequestType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE));
 
@@ -183,7 +183,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest {
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/some/path/{paramA}", "paramA")
-                                .with(action(POST, "application/vnd.default+json"))
+                                .with(action(POST).withDefaultRequestType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE));
 
@@ -213,7 +213,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest {
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/some/path/{p1}", "p1")
-                                .with(action(POST, "application/vnd.cmd-aa+json", "application/vnd.cmd-bb+json"))
+                                .with(action(POST, "application/vnd.ctx.commands.cmd-aa+json", "application/vnd.ctx.commands.cmd-bb+json"))
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE));
 
@@ -244,7 +244,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest {
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/some/path/{param1}/{param2}", "param1", "param2")
-                                .with(action(POST, "application/vnd.default+json"))
+                                .with(action(POST).withDefaultRequestType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE));
 
@@ -274,8 +274,8 @@ public class RestAdapterGenerator_POSTMethodBodyTest {
     public void shouldReturnSetOfResourceClasses() throws Exception {
         generator.run(
                 restRamlWithDefaults()
-                        .with(resource("/pathA").with(action(POST, "application/vnd.default+json")))
-                        .with(resource("/pathB").with(action(POST, "application/vnd.default+json")))
+                        .with(resource("/pathA").with(action(POST).withDefaultRequestType()))
+                        .with(resource("/pathB").with(action(POST).withDefaultRequestType()))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE));
 

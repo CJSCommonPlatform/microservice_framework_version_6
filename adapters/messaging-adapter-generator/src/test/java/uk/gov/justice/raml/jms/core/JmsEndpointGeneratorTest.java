@@ -64,7 +64,7 @@ import static org.raml.model.ActionType.OPTIONS;
 import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
 import static org.raml.model.ActionType.TRACE;
-import static uk.gov.justice.raml.jms.core.GeneratorConfigUtil.configurationWithBasePackage;
+import static uk.gov.justice.services.adapters.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;

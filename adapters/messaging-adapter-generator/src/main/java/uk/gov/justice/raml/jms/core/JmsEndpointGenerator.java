@@ -1,10 +1,19 @@
 package uk.gov.justice.raml.jms.core;
 
-import static java.lang.String.format;
-import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.joining;
-import static org.apache.commons.io.FileUtils.write;
-import static uk.gov.justice.raml.jms.core.TemplateRenderer.render;
+import org.apache.commons.lang.StringUtils;
+import org.raml.model.Action;
+import org.raml.model.ActionType;
+import org.raml.model.Raml;
+import org.raml.model.Resource;
+import uk.gov.justice.raml.common.validator.CompositeRamlValidator;
+import uk.gov.justice.raml.common.validator.RamlValidator;
+import uk.gov.justice.raml.core.Generator;
+import uk.gov.justice.raml.core.GeneratorConfig;
+import uk.gov.justice.raml.common.validator.ContainsActionsRamlValidator;
+import uk.gov.justice.raml.common.validator.ContainsResourcesRamlValidator;
+import uk.gov.justice.raml.common.validator.RequestContentTypeRamlValidator;
+import uk.gov.justice.raml.jms.validation.UriRamlValidator;
+import uk.gov.justice.services.core.annotation.Component;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,21 +26,11 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.StringUtils;
-import org.raml.model.Action;
-import org.raml.model.ActionType;
-import org.raml.model.Raml;
-import org.raml.model.Resource;
-
-import uk.gov.justice.raml.core.Generator;
-import uk.gov.justice.raml.core.GeneratorConfig;
-import uk.gov.justice.raml.jms.validation.CompositeRamlValidator;
-import uk.gov.justice.raml.jms.validation.ContainsActionsRamlValidator;
-import uk.gov.justice.raml.jms.validation.ContainsResourcesRamlValidator;
-import uk.gov.justice.raml.jms.validation.MediaTypeRamlValidator;
-import uk.gov.justice.raml.jms.validation.RamlValidator;
-import uk.gov.justice.raml.jms.validation.UriRamlValidator;
-import uk.gov.justice.services.core.annotation.Component;
+import static java.lang.String.format;
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.joining;
+import static org.apache.commons.io.FileUtils.write;
+import static uk.gov.justice.raml.jms.core.TemplateRenderer.render;
 
 /**
  * Generates JMS endpoint classes out of RAML object
@@ -52,7 +51,8 @@ public class JmsEndpointGenerator implements Generator {
             new UriRamlValidator(),
             new ContainsResourcesRamlValidator(),
             new ContainsActionsRamlValidator(),
-            new MediaTypeRamlValidator());
+            new RequestContentTypeRamlValidator()
+    );
 
     /**
      * Generates JMS endpoint classes out of RAML object

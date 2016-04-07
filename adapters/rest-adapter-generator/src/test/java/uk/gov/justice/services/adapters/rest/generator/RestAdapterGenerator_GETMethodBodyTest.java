@@ -84,7 +84,7 @@ public class RestAdapterGenerator_GETMethodBodyTest {
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/path")
-                                .with(action(GET))
+                                .with(action(GET).withDefaultResponseType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE));
 
@@ -108,7 +108,7 @@ public class RestAdapterGenerator_GETMethodBodyTest {
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/path")
-                                .with(action(GET))
+                                .with(action(GET).withDefaultResponseType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE));
 
@@ -136,7 +136,7 @@ public class RestAdapterGenerator_GETMethodBodyTest {
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/path")
-                                .with(action(GET))
+                                .with(action(GET).withDefaultResponseType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE));
 
@@ -160,7 +160,7 @@ public class RestAdapterGenerator_GETMethodBodyTest {
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/some/path/{paramA}", "paramA")
-                                .with(action(GET))
+                                .with(action(GET).withDefaultResponseType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE));
 
@@ -190,7 +190,7 @@ public class RestAdapterGenerator_GETMethodBodyTest {
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/some/path/{param1}/{param2}", "param1", "param2")
-                                .with(action(GET))
+                                .with(action(GET).withDefaultResponseType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE));
 
@@ -220,8 +220,8 @@ public class RestAdapterGenerator_GETMethodBodyTest {
     public void shouldReturnSetOfResourceClasses() throws Exception {
         generator.run(
                 restRamlWithDefaults()
-                        .with(resource("/pathA").with(action(GET)))
-                        .with(resource("/pathB").with(action(GET)))
+                        .with(resource("/pathA").with(action(GET).withDefaultResponseType()))
+                        .with(resource("/pathB").with(action(GET).withDefaultResponseType()))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE));
 

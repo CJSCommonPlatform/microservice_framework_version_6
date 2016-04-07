@@ -33,6 +33,14 @@ public class ActionBuilder {
         return this;
     }
 
+    public ActionBuilder withDefaultRequestType() {
+        return withMediaType("application/vnd.ctx.commands.defcmd+json");
+    }
+
+    public ActionBuilder withDefaultResponseType() {
+        return withResponse("application/vnd.ctx.queries.defquery+json");
+    }
+
     public ActionBuilder withResponse(final String... responseTypes) {
         Response response = new Response();
         Map<String, MimeType> respBody = new HashMap<>();

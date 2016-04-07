@@ -2,8 +2,14 @@ package uk.gov.justice.services.adapters.rest.generator;
 
 import org.raml.model.Raml;
 import org.raml.model.Resource;
+import uk.gov.justice.raml.common.validator.CompositeRamlValidator;
+import uk.gov.justice.raml.common.validator.ContainsActionsRamlValidator;
+import uk.gov.justice.raml.common.validator.ContainsResourcesRamlValidator;
+import uk.gov.justice.raml.common.validator.RamlValidator;
+import uk.gov.justice.raml.common.validator.RequestContentTypeRamlValidator;
 import uk.gov.justice.raml.core.Generator;
 import uk.gov.justice.raml.core.GeneratorConfig;
+import uk.gov.justice.services.adapters.rest.validator.ResponseContentTypeRamlValidator;
 
 import java.io.File;
 import java.util.Collection;
@@ -16,9 +22,19 @@ import static org.apache.commons.lang.Validate.notNull;
 
 public class RestAdapterGenerator implements Generator {
 
+    private final RamlValidator validator = new CompositeRamlValidator(
+            new ContainsResourcesRamlValidator(),
+            new ContainsActionsRamlValidator(),
+            new RequestContentTypeRamlValidator(),
+            new ResponseContentTypeRamlValidator()
+    );
+
+
+
     @Override
     public void run(final Raml raml, final GeneratorConfig configuration) {
         validate(configuration);
+        validator.validate(raml);
 
         Collection<Resource> resources = raml.getResources().values();
 

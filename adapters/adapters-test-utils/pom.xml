@@ -39,12 +39,21 @@
             <artifactId>reflections</artifactId>
         </dependency>
         <dependency>
+            <groupId>uk.gov.justice.maven</groupId>
+            <artifactId>raml-generator-core</artifactId>
+            <version>${raml-maven-plugin.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.raml</groupId>
             <artifactId>raml-parser</artifactId>
         </dependency>
         <dependency>
             <groupId>com.jayway.awaitility</groupId>
             <artifactId>awaitility</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
         </dependency>
     </dependencies>
 </project>

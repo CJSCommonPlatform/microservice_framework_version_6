@@ -32,7 +32,11 @@
             <artifactId>raml-generator-core</artifactId>
             <version>${raml-maven-plugin.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>adapters-commons</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.raml</groupId>
             <artifactId>raml-parser</artifactId>
@@ -76,13 +80,11 @@
         <dependency>
             <groupId>org.apache.tomee</groupId>
             <artifactId>openejb-cxf-rs</artifactId>
-            <version>7.0.0-M1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.tomee</groupId>
             <artifactId>openejb-core</artifactId>
-            <version>7.0.0-M3</version>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -1,9 +1,9 @@
-package uk.gov.justice.raml.jms.validation;
+package uk.gov.justice.raml.common.validator;
 
 import org.raml.model.Raml;
 import org.raml.model.Resource;
 
-abstract class AbstractResourceRamlValidator implements RamlValidator {
+public abstract class AbstractResourceRamlValidator implements RamlValidator {
 
     @Override
     public void validate(final Raml raml) {

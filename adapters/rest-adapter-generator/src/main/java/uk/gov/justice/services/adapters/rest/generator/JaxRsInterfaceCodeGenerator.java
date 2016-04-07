@@ -14,7 +14,6 @@ import com.sun.codemodel.JVar;
 import org.raml.model.Action;
 import org.raml.model.MimeType;
 import org.raml.model.Resource;
-import org.raml.model.Response;
 import org.raml.model.parameter.UriParameter;
 import uk.gov.justice.raml.core.GeneratorConfig;
 
@@ -35,11 +34,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import static java.lang.String.join;
-import static java.util.Collections.emptyList;
 import static org.apache.commons.lang.StringUtils.defaultIfBlank;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.apache.commons.lang.StringUtils.strip;
-import static org.apache.commons.lang.StringUtils.substringAfter;
+import static uk.gov.justice.services.adapters.rest.generator.Actions.responseMimeTypesOf;
 import static uk.gov.justice.services.adapters.rest.generator.Names.GENERIC_PAYLOAD_ARGUMENT_NAME;
 import static uk.gov.justice.services.adapters.rest.generator.Names.buildResourceMethodName;
 import static uk.gov.justice.services.adapters.rest.generator.Names.buildVariableName;
@@ -115,17 +112,6 @@ class JaxRsInterfaceCodeGenerator {
         }
     }
 
-    private Collection<MimeType> responseMimeTypesOf(final Action action) {
-        Map<String, Response> responses = action.getResponses();
-        return notEmpty(responses)
-                && notEmpty(responses.values().iterator().next().getBody())
-                ? responses.values().iterator().next().getBody().values()
-                : emptyList();
-    }
-
-    private boolean notEmpty(final Map<String, ?> responses) {
-        return responses != null && responses.values().iterator().hasNext() && responses.values().iterator().next() != null;
-    }
 
     private JMethod addResourceMethod(final JDefinedClass resourceInterface,
                                       final String resourceInterfacePath,
@@ -143,7 +129,6 @@ class JaxRsInterfaceCodeGenerator {
                 resourceMethodReturnType);
         addHttpMethodAnnotation(action.getType().toString(), method);
 
-        addParamAnnotation(resourceInterfacePath, action, method);
         addConsumesAnnotation(bodyMimeType, method);
         addProducesAnnotation(responseMimeTypes, method);
 
@@ -152,14 +137,7 @@ class JaxRsInterfaceCodeGenerator {
         return method;
     }
 
-    private void addParamAnnotation(final String resourceInterfacePath,
-                                    final Action action, final JMethod method) {
-        final String path = substringAfter(action.getResource().getUri(), resourceInterfacePath + "/");
-        if (isNotBlank(path)) {
-            method.annotate(Path.class).param(DEFAULT_ANNOTATION_PARAMETER,
-                    path);
-        }
-    }
+
 
     private void addConsumesAnnotation(final MimeType bodyMimeType,
                                        final JMethod method) {
@@ -169,7 +147,7 @@ class JaxRsInterfaceCodeGenerator {
         }
     }
 
-    protected void addProducesAnnotation(
+    private void addProducesAnnotation(
             final Collection<MimeType> responseMimeTypes,
             final JMethod method) {
         if (responseMimeTypes.isEmpty()) {
@@ -189,18 +167,10 @@ class JaxRsInterfaceCodeGenerator {
 
     private void addAllResourcePathParameters(Resource resource,
                                               final JMethod method) {
-
         for (final Entry<String, UriParameter> namedUriParameter : resource
                 .getUriParameters().entrySet()) {
             addParameter(namedUriParameter.getKey(), PathParam.class, method);
         }
-
-        Resource parentResource = resource.getParentResource();
-
-        if (parentResource != null) {
-            addAllResourcePathParameters(parentResource, method);
-        }
-
     }
 
     private void addParameter(final String name,

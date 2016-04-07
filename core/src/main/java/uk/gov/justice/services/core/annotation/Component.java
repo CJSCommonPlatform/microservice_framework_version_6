@@ -15,7 +15,9 @@ public enum Component {
     COMMAND_API("commands", "api", Queue.class),
     COMMAND_CONTROLLER("commands", "controller", Queue.class),
     COMMAND_HANDLER("commands", "handler", Queue.class),
-    EVENT_LISTENER("events", "listener", Topic.class);
+    EVENT_LISTENER("events", "listener", Topic.class),
+    QUERY_API("queries", "api", null);
+
 
     private final String pillar;
     private final String tier;
@@ -31,7 +33,7 @@ public enum Component {
      * Returns component of the provided pillar and tier.
      *
      * @param pillar the pillar
-     * @param tier the tier
+     * @param tier   the tier
      * @return the component for the provided pillar and tier
      */
     public static Component valueOf(final String pillar, final String tier) {

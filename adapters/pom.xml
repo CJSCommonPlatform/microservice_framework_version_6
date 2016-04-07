@@ -18,5 +18,6 @@
         <module>messaging-adapter-core</module>
         <module>messaging-adapter-generator</module>
         <module>adapters-test-utils</module>
+        <module>adapters-commons</module>
     </modules>
 </project>

@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "",
+  "type": "array",
+  "items": {
+    "id": "/",
+    "type": "object",
+    "properties": {
+      "name": {
+        "id": "name",
+        "type": "string"
+      },
+      "recipeId": {
+        "id": "recipeId",
+        "type": "string"
+      }
+    },
+    "required": [
+      "name",
+      "recipeId"
+    ]
+  },
+  "required": [
+    "0"
+  ]
+}

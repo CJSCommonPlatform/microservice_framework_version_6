@@ -1,0 +1,30 @@
+#%RAML 0.8
+title: Cakeshop View Controller API
+baseUri: http://localhost:8080/example-view-controller/view/controller/rest/cakeshop
+version: v0.1
+mediaType: application/json
+protocols: [ HTTP, HTTPS ]
+
+/recipes:
+  description: list all recipes
+  get:
+    responses:
+      404:
+           description: The specified recipe data could not be found.
+      200:
+        body:
+          application/vnd.cakeshop.queries.recipes+json:
+            schema: !include json/schema/recipes.json
+            example: !include json/recipes.json
+
+/recipes/{recipeId}:
+  description: return a recipe
+  get:
+    responses:
+      404:
+           description: The specified recipe data could not be found.
+      200:
+        body:
+          application/vnd.cakeshop.queries.recipe+json:
+            schema: !include json/schema/recipe.json
+            example: !include json/recipe.json

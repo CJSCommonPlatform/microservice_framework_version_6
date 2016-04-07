@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "",
+  "type": "object",
+  "properties": {
+    "cakeName": {
+      "id": "/cakeName",
+      "type": "string"
+    },
+    "ingredients": {
+      "id": "/ingredients",
+      "type": "array",
+      "items": {
+        "id": "/ingredients/0",
+        "type": "object",
+        "properties": {
+          "name": {
+            "id": "/ingredients/0/name",
+            "type": "string"
+          },
+          "quantity": {
+            "id": "/ingredients/0/quantity",
+            "type": "integer"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "cakeName",
+    "ingredients"
+  ]
+}

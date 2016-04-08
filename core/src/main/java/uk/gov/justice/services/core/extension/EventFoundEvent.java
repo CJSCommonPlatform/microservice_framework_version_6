@@ -15,7 +15,7 @@ public class EventFoundEvent {
         this.eventName = eventName;
     }
 
-    public Class getClazz() {
+    public Class<?> getClazz() {
         return clazz;
     }
 

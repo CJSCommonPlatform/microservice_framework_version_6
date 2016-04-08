@@ -1,14 +1,16 @@
 package uk.gov.justice.services.core.extension;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+
 import uk.gov.justice.services.core.annotation.Event;
+import uk.gov.justice.services.core.annotation.Remote;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
+import uk.gov.justice.services.core.annotation.ServiceComponentLocation;
 
 import javax.enterprise.inject.spi.AfterDeploymentValidation;
 import javax.enterprise.inject.spi.AnnotatedType;
@@ -17,6 +19,8 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import java.util.HashSet;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
@@ -25,6 +29,7 @@ import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLLER;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
+import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AnnotationScannerTest {
@@ -59,6 +64,9 @@ public class AnnotationScannerTest {
     private Bean<Object> beanMockCommandHandler;
 
     @Mock
+    private Bean<Object> beanMockRemoteQueryApi;
+
+    @Mock
     private Bean<Object> beanMockDummy;
 
     private AnnotationScanner annotationScanner;
@@ -70,6 +78,7 @@ public class AnnotationScannerTest {
         doReturn(TestCommandApiHandler.class).when(beanMockCommandApiHandler).getBeanClass();
         doReturn(TestCommandController.class).when(beanMockCommandController).getBeanClass();
         doReturn(TestCommandHandler.class).when(beanMockCommandHandler).getBeanClass();
+        doReturn(TestRemoteQueryApiHandler.class).when(beanMockRemoteQueryApi).getBeanClass();
         doReturn(Object.class).when(beanMockDummy).getBeanClass();
     }
 
@@ -86,6 +95,11 @@ public class AnnotationScannerTest {
     @Test
     public void shouldFireCommandHandlerFoundEventWithCommandHandler() throws Exception {
         verifyIfServiceComponentFoundEventFiredWith(beanMockCommandHandler);
+    }
+
+    @Test
+    public void shouldFireRemoteQueryApiHandlerFoundEventWithRemoteQueryApi() throws Exception {
+        verifyIfRemoteServiceComponentFoundEventFiredWith(beanMockRemoteQueryApi);
     }
 
     @Test
@@ -125,7 +139,19 @@ public class AnnotationScannerTest {
         annotationScanner.afterDeploymentValidation(afterDeploymentValidation, beanManager);
 
         verify(beanManager).fireEvent(captor.capture());
-        assertThat(captor.getValue(), CoreMatchers.instanceOf(ServiceComponentFoundEvent.class));
+        assertThat(captor.getValue(), instanceOf(ServiceComponentFoundEvent.class));
+        assertThat(captor.getValue().getLocation(), equalTo(ServiceComponentLocation.LOCAL));
+    }
+
+    private void verifyIfRemoteServiceComponentFoundEventFiredWith(Bean<Object> handler) {
+        ArgumentCaptor<ServiceComponentFoundEvent> captor = ArgumentCaptor.forClass(ServiceComponentFoundEvent.class);
+        mockBeanManagerGetBeansWith(handler);
+
+        annotationScanner.afterDeploymentValidation(afterDeploymentValidation, beanManager);
+
+        verify(beanManager).fireEvent(captor.capture());
+        assertThat(captor.getValue(), instanceOf(ServiceComponentFoundEvent.class));
+        assertThat(captor.getValue().getLocation(), equalTo(ServiceComponentLocation.REMOTE));
     }
 
     private void verifyIfEventFoundEventFiredWith(ProcessAnnotatedType processAnnotatedType) {
@@ -136,7 +162,7 @@ public class AnnotationScannerTest {
         annotationScanner.afterDeploymentValidation(afterDeploymentValidation, beanManager);
 
         verify(beanManager).fireEvent(captor.capture());
-        assertThat(captor.getValue(), CoreMatchers.instanceOf(EventFoundEvent.class));
+        assertThat(captor.getValue(), instanceOf(EventFoundEvent.class));
     }
 
     @ServiceComponent(COMMAND_API)
@@ -149,6 +175,11 @@ public class AnnotationScannerTest {
 
     @ServiceComponent(COMMAND_HANDLER)
     public static class TestCommandHandler {
+    }
+
+    @Remote
+    @ServiceComponent(QUERY_API)
+    public static class TestRemoteQueryApiHandler {
     }
 
     @Event(TEST_EVENT_NAME)

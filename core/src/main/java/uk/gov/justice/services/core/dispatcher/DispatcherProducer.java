@@ -1,10 +1,12 @@
 package uk.gov.justice.services.core.dispatcher;
 
-import static uk.gov.justice.services.core.annotation.Component.componentFromAdapter;
+import static uk.gov.justice.services.core.annotation.Component.componentFrom;
+import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.componentLocationFrom;
 
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
+import uk.gov.justice.services.core.annotation.ServiceComponentLocation;
 import uk.gov.justice.services.core.extension.ServiceComponentFoundEvent;
 
 import java.util.Map;
@@ -18,11 +20,13 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 /**
  * CDI producer for dispatchers.
  *
  * This can produce both {@link SynchronousDispatcher} and {@link AsynchronousDispatcher} beans,
- * based on the service component they are being injected into.
+ * as well as {@link Requester} beans, based on the service component they are being injected into.
  *
  * Internally, the same dispatcher is used for both synchronous and asynchronous handlers; the
  * injection point in fact gets a functional interface that provides the <code>dispatch</code>
@@ -35,9 +39,9 @@ public class DispatcherProducer {
     @Inject
     BeanManager beanManager;
 
-    private Map<Component, Dispatcher> dispatcherMap;
+    private Map<Pair<Component, ServiceComponentLocation>, Dispatcher> dispatcherMap;
 
-    public DispatcherProducer() {
+    DispatcherProducer() {
         dispatcherMap = new ConcurrentHashMap<>();
     }
 
@@ -45,33 +49,50 @@ public class DispatcherProducer {
      * Produces the correct implementation of an asynchronous dispatcher depending on the
      * {@link Adapter} annotation at the injection point.
      *
-     * @param injectionPoint class where the {@link AsynchronousDispatcher} is being injected.
-     * @return the correct dispatcher instance.
-     * @throws IllegalArgumentException if the injection point does not contain any adaptor
-     *                                  annotations.
+     * @param injectionPoint class where the {@link AsynchronousDispatcher} is being injected
+     * @return the correct dispatcher instance
+     * @throws IllegalStateException if the injection point does not have an {@link Adapter} annotation
      */
     @Produces
     public AsynchronousDispatcher produceAsynchronousDispatcher(final InjectionPoint injectionPoint) {
-        return produceDispatcher(injectionPoint)::asynchronousDispatch;
+        return dispatcherFor(injectionPoint)::asynchronousDispatch;
     }
 
     /**
      * Produces the correct implementation of a synchronous dispatcher depending on the
      * {@link Adapter} annotation at the injection point.
      *
-     * @param injectionPoint class where the {@link AsynchronousDispatcher} is being injected.
-     * @return the correct dispatcher instance.
-     * @throws IllegalArgumentException if the injection point does not contain any adaptor
-     *                                  annotations.
+     * @param injectionPoint class where the {@link AsynchronousDispatcher} is being injected
+     * @return the correct dispatcher instance
+     * @throws IllegalStateException if the injection point does not have an {@link Adapter} annotation
      */
-
     @Produces
     public SynchronousDispatcher produceSynchronousDispatcher(final InjectionPoint injectionPoint) {
-        return produceDispatcher(injectionPoint)::synchronousDispatch;
+        return dispatcherFor(injectionPoint)::synchronousDispatch;
+    }
+
+    /**
+     * Produces the correct implementation of a requester depending on the {@link ServiceComponent}
+     * annotation at the injection point.
+     *
+     * @param injectionPoint class where the {@link Requester} is being injected
+     * @return the correct requester instance
+     * @throws IllegalStateException if the injection point does not have a {@link ServiceComponent}
+     * annotation
+     */
+    @Produces
+    public Requester produceRequester(final InjectionPoint injectionPoint) {
+        return dispatcherFor(injectionPoint)::synchronousDispatch;
     }
 
     void register(@Observes final ServiceComponentFoundEvent event) {
-        getDispatcher(event.getComponent()).register(instantiateHandler(event.getHandlerBean()));
+        registerEventWithDispatcher(event);
+    }
+
+    private void registerEventWithDispatcher(final ServiceComponentFoundEvent event) {
+
+        createDispatcherIfAbsent(Pair.of(event.getComponent(), event.getLocation()))
+                .register(instantiateHandler(event.getHandlerBean()));
     }
 
     /**
@@ -80,21 +101,18 @@ public class DispatcherProducer {
      * @param bean the bean from which to get the instance
      * @return an instance of the handler
      */
-    private Object instantiateHandler(final Bean<Object> bean) {
-        return beanManager.getContext(bean.getScope()).get(bean, beanManager.createCreationalContext(bean));
+    private <T> T instantiateHandler(final Bean<T> bean) {
+        return beanManager.getContext(bean.getScope())
+                .get(bean, beanManager.createCreationalContext(bean));
     }
 
-    private Dispatcher getDispatcher(final Component component) {
+    private Dispatcher createDispatcherIfAbsent(final Pair<Component, ServiceComponentLocation> component) {
         return dispatcherMap.computeIfAbsent(component, c -> new Dispatcher());
     }
 
-    private Dispatcher produceDispatcher(final InjectionPoint injectionPoint) {
-        final Class<?> targetClass = injectionPoint.getMember().getDeclaringClass();
-
-        if (targetClass.isAnnotationPresent(Adapter.class)) {
-            return getDispatcher(componentFromAdapter(targetClass));
-        } else {
-            throw new IllegalArgumentException("InjectionPoint class must be annotated with " + ServiceComponent.class);
-        }
+    private Dispatcher dispatcherFor(final InjectionPoint injectionPoint) {
+        return createDispatcherIfAbsent(
+                Pair.of(componentFrom(injectionPoint), componentLocationFrom(injectionPoint)));
     }
+
 }

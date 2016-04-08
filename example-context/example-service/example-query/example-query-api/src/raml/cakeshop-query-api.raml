@@ -9,8 +9,6 @@ protocols: [ HTTP, HTTPS ]
   description: list all recipes
   get:
     responses:
-      404:
-           description: The specified recipe data could not be found.
       200:
         body:
           application/vnd.cakeshop.recipes+json:
@@ -21,8 +19,6 @@ protocols: [ HTTP, HTTPS ]
   description: return a recipe
   get:
     responses:
-      404:
-           description: The specified recipe data could not be found.
       200:
         body:
           application/vnd.cakeshop.queries.recipe+json:

@@ -25,6 +25,7 @@ import java.util.UUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -78,7 +79,7 @@ public class EnveloperTest {
         enveloper.objectToJsonObjectConverter = objectToJsonObjectConverter;
         object = new TestEvent();
 
-        when(event.getClazz()).thenReturn(TestEvent.class);
+        doReturn(TestEvent.class).when(event).getClazz();
         when(event.getEventName()).thenReturn(TEST_EVENT_NAME);
 
         enveloper.register(event);

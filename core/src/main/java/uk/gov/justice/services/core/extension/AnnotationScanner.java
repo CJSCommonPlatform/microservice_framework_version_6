@@ -1,7 +1,14 @@
 package uk.gov.justice.services.core.extension;
 
+import static uk.gov.justice.services.core.annotation.Component.componentFrom;
+import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.componentLocationFrom;
+
 import uk.gov.justice.services.core.annotation.Event;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
@@ -12,11 +19,6 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.util.AnnotationLiteral;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import static uk.gov.justice.services.core.annotation.Component.componentFromServiceComponent;
 
 /**
  * Scans all beans and processes framework specific annotations.
@@ -38,7 +40,7 @@ public class AnnotationScanner implements Extension {
 
         beanManager.getBeans(Object.class, annotationLiteral()).stream()
                 .filter(b -> b.getBeanClass().isAnnotationPresent(ServiceComponent.class))
-                .forEach(this::processBeansForEvents);
+                .forEach(this::processServiceComponentsForEvents);
 
         fireAllCollectedEvents(beanManager);
     }
@@ -58,9 +60,8 @@ public class AnnotationScanner implements Extension {
      *
      * @param bean a bean that has an annotation and could be of interest to the framework wiring.
      */
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    private void processBeansForEvents(final Bean bean) {
-        events.add(new ServiceComponentFoundEvent(componentFromServiceComponent(bean.getBeanClass()), bean));
+    private void processServiceComponentsForEvents(final Bean<?> bean) {
+        final Class<?> clazz = bean.getBeanClass();
+        events.add(new ServiceComponentFoundEvent(componentFrom(clazz), bean, componentLocationFrom(clazz)));
     }
-
 }

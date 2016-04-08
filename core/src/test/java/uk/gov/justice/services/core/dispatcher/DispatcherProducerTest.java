@@ -10,9 +10,13 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLLER;
+import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
+import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.LOCAL;
+import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.REMOTE;
 
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Handles;
+import uk.gov.justice.services.core.annotation.Remote;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.extension.ServiceComponentFoundEvent;
 import uk.gov.justice.services.core.handler.exception.MissingHandlerException;
@@ -43,6 +47,8 @@ public class DispatcherProducerTest {
 
     private TestCommandControllerHandler commandControllerHandler;
 
+    private TestRemoteQueryApiHandler remoteQueryApiHandler;
+
     private DispatcherProducer dispatcherProducer;
 
     @Mock
@@ -55,6 +61,9 @@ public class DispatcherProducerTest {
     private InjectionPoint commandControllerInjectionPoint2;
 
     @Mock
+    private InjectionPoint queryApiInjectionPoint;
+
+    @Mock
     private Member commandApiMember;
 
     @Mock
@@ -64,6 +73,9 @@ public class DispatcherProducerTest {
     private Member commandControllerMember2;
 
     @Mock
+    private Member queryApiMember;
+
+    @Mock
     private ServiceComponentFoundEvent serviceComponentFoundEvent;
 
     @Mock
@@ -71,6 +83,9 @@ public class DispatcherProducerTest {
 
     @Mock
     private Bean<Object> beanB;
+
+    @Mock
+    private Bean<Object> beanD;
 
     @Mock
     private BeanManager beanManager;
@@ -101,20 +116,24 @@ public class DispatcherProducerTest {
         dispatcherProducer = new DispatcherProducer();
         commandApiHandler = new TestCommandApiHandler();
         commandControllerHandler = new TestCommandControllerHandler();
+        remoteQueryApiHandler = new TestRemoteQueryApiHandler();
 
         dispatcherProducer.beanManager = beanManager;
 
         when(commandApiInjectionPoint.getMember()).thenReturn(commandApiMember);
         when(commandControllerInjectionPoint1.getMember()).thenReturn(commandControllerMember1);
         when(commandControllerInjectionPoint2.getMember()).thenReturn(commandControllerMember2);
+        when(queryApiInjectionPoint.getMember()).thenReturn(queryApiMember);
 
         doReturn(TestCommandApiAdaptor.class).when(commandApiMember).getDeclaringClass();
         doReturn(TestCommandControllerAdaptor1.class).when(commandControllerMember1).getDeclaringClass();
         doReturn(TestCommandControllerAdaptor2.class).when(commandControllerMember2).getDeclaringClass();
+        doReturn(TestRemoteQueryApiHandler.class).when(queryApiMember).getDeclaringClass();
 
         when(beanManager.getContext(any())).thenReturn(context);
         when(context.get(eq(beanA), any())).thenReturn(commandApiHandler);
         when(context.get(eq(beanB), any())).thenReturn(commandControllerHandler);
+        when(context.get(eq(beanD), any())).thenReturn(remoteQueryApiHandler);
 
         when(envelopeA.metadata()).thenReturn(metadataA);
         when(metadataA.name()).thenReturn(NAME_A);
@@ -130,7 +149,7 @@ public class DispatcherProducerTest {
         assertThat(dispatcher, notNullValue());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = IllegalStateException.class)
     public void shouldThrowExceptionWithNoAdaptor() throws Exception {
         doReturn(Object.class).when(commandControllerMember1).getDeclaringClass();
         dispatcherProducer.produceAsynchronousDispatcher(commandControllerInjectionPoint1);
@@ -138,7 +157,7 @@ public class DispatcherProducerTest {
 
     @Test
     public void shouldRegisterHandler() throws Exception {
-        dispatcherProducer.register(new ServiceComponentFoundEvent(COMMAND_API, beanA));
+        dispatcherProducer.register(new ServiceComponentFoundEvent(COMMAND_API, beanA, LOCAL));
 
         AsynchronousDispatcher dispatcher = dispatcherProducer.produceAsynchronousDispatcher(commandApiInjectionPoint);
         assertThat(dispatcher, notNullValue());
@@ -146,10 +165,20 @@ public class DispatcherProducerTest {
         assertThat(commandApiHandler.envelope, equalTo(envelopeA));
     }
 
+    @Test
+    public void shouldRegisterRemoteHandler() throws Exception {
+        dispatcherProducer.register(new ServiceComponentFoundEvent(QUERY_API, beanD, REMOTE));
+
+        Requester requester = dispatcherProducer.produceRequester(queryApiInjectionPoint);
+        assertThat(requester, notNullValue());
+        Envelope result = requester.request(envelopeA);
+        assertThat(result, equalTo(envelopeA));
+    }
+
     @Test(expected = MissingHandlerException.class)
     public void shouldThrowExceptionForUnhandledCommand() throws Exception {
-        dispatcherProducer.register(new ServiceComponentFoundEvent(COMMAND_API, beanA));
-        dispatcherProducer.register(new ServiceComponentFoundEvent(COMMAND_CONTROLLER, beanB));
+        dispatcherProducer.register(new ServiceComponentFoundEvent(COMMAND_API, beanA, LOCAL));
+        dispatcherProducer.register(new ServiceComponentFoundEvent(COMMAND_CONTROLLER, beanB, LOCAL));
 
         AsynchronousDispatcher controllerDispatcher = dispatcherProducer.produceAsynchronousDispatcher(commandControllerInjectionPoint1);
         controllerDispatcher.dispatch(envelopeC);
@@ -157,8 +186,8 @@ public class DispatcherProducerTest {
 
     @Test(expected = MissingHandlerException.class)
     public void shouldThrowExceptionForAsyncMismatch() throws Exception {
-        dispatcherProducer.register(new ServiceComponentFoundEvent(COMMAND_API, beanA));
-        dispatcherProducer.register(new ServiceComponentFoundEvent(COMMAND_CONTROLLER, beanB));
+        dispatcherProducer.register(new ServiceComponentFoundEvent(COMMAND_API, beanA, LOCAL));
+        dispatcherProducer.register(new ServiceComponentFoundEvent(COMMAND_CONTROLLER, beanB, LOCAL));
 
         SynchronousDispatcher syncDispatcher = dispatcherProducer.produceSynchronousDispatcher(commandControllerInjectionPoint1);
         syncDispatcher.dispatch(envelopeB);
@@ -170,8 +199,8 @@ public class DispatcherProducerTest {
 
     @Test(expected = MissingHandlerException.class)
     public void shouldThrowExceptionForSyncMismatch() throws Exception {
-        dispatcherProducer.register(new ServiceComponentFoundEvent(COMMAND_API, beanA));
-        dispatcherProducer.register(new ServiceComponentFoundEvent(COMMAND_CONTROLLER, beanB));
+        dispatcherProducer.register(new ServiceComponentFoundEvent(COMMAND_API, beanA, LOCAL));
+        dispatcherProducer.register(new ServiceComponentFoundEvent(COMMAND_CONTROLLER, beanB, LOCAL));
 
         AsynchronousDispatcher asyncDispatcher = dispatcherProducer.produceAsynchronousDispatcher(commandControllerInjectionPoint1);
         asyncDispatcher.dispatch(envelopeA);
@@ -183,8 +212,8 @@ public class DispatcherProducerTest {
 
     @Test
     public void shouldRegisterDifferentHandlersForEachComponent() throws Exception {
-        dispatcherProducer.register(new ServiceComponentFoundEvent(COMMAND_API, beanA));
-        dispatcherProducer.register(new ServiceComponentFoundEvent(COMMAND_CONTROLLER, beanB));
+        dispatcherProducer.register(new ServiceComponentFoundEvent(COMMAND_API, beanA, LOCAL));
+        dispatcherProducer.register(new ServiceComponentFoundEvent(COMMAND_CONTROLLER, beanB, LOCAL));
 
         AsynchronousDispatcher apiDispatcher = dispatcherProducer.produceAsynchronousDispatcher(commandApiInjectionPoint);
         apiDispatcher.dispatch(envelopeA);
@@ -240,6 +269,16 @@ public class DispatcherProducerTest {
         @Handles(NAME_B)
         public Envelope doSomethingB(Envelope envelope) {
             this.envelopeB = envelope;
+            return envelope;
+        }
+    }
+
+    @Remote
+    @ServiceComponent(QUERY_API)
+    public static class TestRemoteQueryApiHandler {
+
+        @Handles(NAME_A)
+        public Envelope doSomething(Envelope envelope) {
             return envelope;
         }
     }

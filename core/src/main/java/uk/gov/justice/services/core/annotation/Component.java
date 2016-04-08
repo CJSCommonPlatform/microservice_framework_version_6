@@ -1,11 +1,12 @@
 package uk.gov.justice.services.core.annotation;
 
+import static java.lang.String.format;
+import static java.util.Arrays.stream;
+
+import javax.enterprise.inject.spi.InjectionPoint;
 import javax.jms.Destination;
 import javax.jms.Queue;
 import javax.jms.Topic;
-import java.util.Optional;
-
-import static java.util.Arrays.stream;
 
 /**
  * Enum representing all the service components.
@@ -17,7 +18,6 @@ public enum Component {
     COMMAND_HANDLER("commands", "handler", Queue.class),
     EVENT_LISTENER("events", "listener", Topic.class),
     QUERY_API("queries", "api", null);
-
 
     private final String pillar;
     private final String tier;
@@ -37,34 +37,37 @@ public enum Component {
      * @return the component for the provided pillar and tier
      */
     public static Component valueOf(final String pillar, final String tier) {
-        Optional<Component> first = stream(Component.values())
-                .filter(c -> c.pillar.equals(pillar) && c.tier.equals(tier)).findFirst();
-
-        return first.orElseThrow(() -> new IllegalArgumentException(
-                String.format("No enum constant for pillar: %s, tier: %s", pillar, tier)));
-
+        return stream(values())
+                .filter(c -> c.pillar.equals(pillar) && c.tier.equals(tier))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(
+                        format("No enum constant for pillar: %s, tier: %s", pillar, tier)));
     }
 
     /**
-     * Retrieves the component of the provided {@link ServiceComponent}
+     * Retrieves the component of the provided {@link ServiceComponent} or {@link Adapter}.
      *
-     * @param clazz The service component to be analysed.
-     * @return the component from the provided {@link ServiceComponent}.
+     * @param clazz The service component to be analysed
+     * @return the component from the provided {@link ServiceComponent} or {@link Adapter}
      */
-    public static Component componentFromServiceComponent(final Class<?> clazz) {
-        final ServiceComponent serviceComponent = clazz.getAnnotation(ServiceComponent.class);
-        return serviceComponent.value();
+    public static Component componentFrom(final Class<?> clazz) {
+        if (clazz.isAnnotationPresent(ServiceComponent.class)) {
+            return clazz.getAnnotation(ServiceComponent.class).value();
+        } else if (clazz.isAnnotationPresent(Adapter.class)) {
+            return clazz.getAnnotation(Adapter.class).value();
+        } else {
+            throw new IllegalStateException(format("No annotation found to define component for class %s", clazz));
+        }
     }
 
     /**
-     * Retrieves the Component of the provided {@link Adapter}
+     * Retrieves the component of the provided injection point.
      *
-     * @param clazz The adapter class to be analysed.
-     * @return the component from the provided {@link Adapter}.
+     * @param injectionPoint the injection point to be analysed
+     * @return the component from the provided injection point
      */
-    public static Component componentFromAdapter(final Class<?> clazz) {
-        final Adapter adapter = clazz.getAnnotation(Adapter.class);
-        return adapter.value();
+    public static Component componentFrom(final InjectionPoint injectionPoint) {
+        return componentFrom(injectionPoint.getMember().getDeclaringClass());
     }
 
     public String pillar() {

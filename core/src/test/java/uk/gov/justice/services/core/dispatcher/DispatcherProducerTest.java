@@ -10,10 +10,13 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLLER;
+import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Handles;
+import uk.gov.justice.services.core.annotation.Remote;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
+import uk.gov.justice.services.core.extension.RemoteServiceComponentFoundEvent;
 import uk.gov.justice.services.core.extension.ServiceComponentFoundEvent;
 import uk.gov.justice.services.core.handler.exception.MissingHandlerException;
 import uk.gov.justice.services.messaging.Envelope;
@@ -43,6 +46,8 @@ public class DispatcherProducerTest {
 
     private TestCommandControllerHandler commandControllerHandler;
 
+    private TestRemoteQueryApiHandler remoteQueryApiHandler;
+
     private DispatcherProducer dispatcherProducer;
 
     @Mock
@@ -55,6 +60,9 @@ public class DispatcherProducerTest {
     private InjectionPoint commandControllerInjectionPoint2;
 
     @Mock
+    private InjectionPoint queryApiInjectionPoint;
+
+    @Mock
     private Member commandApiMember;
 
     @Mock
@@ -64,6 +72,9 @@ public class DispatcherProducerTest {
     private Member commandControllerMember2;
 
     @Mock
+    private Member queryApiMember;
+
+    @Mock
     private ServiceComponentFoundEvent serviceComponentFoundEvent;
 
     @Mock
@@ -71,6 +82,9 @@ public class DispatcherProducerTest {
 
     @Mock
     private Bean<Object> beanB;
+
+    @Mock
+    private Bean<Object> beanD;
 
     @Mock
     private BeanManager beanManager;
@@ -101,20 +115,24 @@ public class DispatcherProducerTest {
         dispatcherProducer = new DispatcherProducer();
         commandApiHandler = new TestCommandApiHandler();
         commandControllerHandler = new TestCommandControllerHandler();
+        remoteQueryApiHandler = new TestRemoteQueryApiHandler();
 
         dispatcherProducer.beanManager = beanManager;
 
         when(commandApiInjectionPoint.getMember()).thenReturn(commandApiMember);
         when(commandControllerInjectionPoint1.getMember()).thenReturn(commandControllerMember1);
         when(commandControllerInjectionPoint2.getMember()).thenReturn(commandControllerMember2);
+        when(queryApiInjectionPoint.getMember()).thenReturn(queryApiMember);
 
         doReturn(TestCommandApiAdaptor.class).when(commandApiMember).getDeclaringClass();
         doReturn(TestCommandControllerAdaptor1.class).when(commandControllerMember1).getDeclaringClass();
         doReturn(TestCommandControllerAdaptor2.class).when(commandControllerMember2).getDeclaringClass();
+        doReturn(TestRemoteQueryApiHandler.class).when(queryApiMember).getDeclaringClass();
 
         when(beanManager.getContext(any())).thenReturn(context);
         when(context.get(eq(beanA), any())).thenReturn(commandApiHandler);
         when(context.get(eq(beanB), any())).thenReturn(commandControllerHandler);
+        when(context.get(eq(beanD), any())).thenReturn(remoteQueryApiHandler);
 
         when(envelopeA.metadata()).thenReturn(metadataA);
         when(metadataA.name()).thenReturn(NAME_A);
@@ -144,6 +162,16 @@ public class DispatcherProducerTest {
         assertThat(dispatcher, notNullValue());
         dispatcher.dispatch(envelopeA);
         assertThat(commandApiHandler.envelope, equalTo(envelopeA));
+    }
+
+    @Test
+    public void shouldRegisterRemoteHandler() throws Exception {
+        dispatcherProducer.register(new RemoteServiceComponentFoundEvent(QUERY_API, beanD));
+
+        Requester requester = dispatcherProducer.produceRequester(queryApiInjectionPoint);
+        assertThat(requester, notNullValue());
+        Envelope result = requester.request(envelopeA);
+        assertThat(result, equalTo(envelopeA));
     }
 
     @Test(expected = MissingHandlerException.class)
@@ -240,6 +268,16 @@ public class DispatcherProducerTest {
         @Handles(NAME_B)
         public Envelope doSomethingB(Envelope envelope) {
             this.envelopeB = envelope;
+            return envelope;
+        }
+    }
+
+    @Remote
+    @ServiceComponent(QUERY_API)
+    public static class TestRemoteQueryApiHandler {
+
+        @Handles(NAME_A)
+        public Envelope doSomething(Envelope envelope) {
             return envelope;
         }
     }

@@ -1,6 +1,8 @@
 package uk.gov.justice.services.core.extension;
 
+import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.Event;
+import uk.gov.justice.services.core.annotation.Remote;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 
 import javax.enterprise.event.Observes;
@@ -38,7 +40,7 @@ public class AnnotationScanner implements Extension {
 
         beanManager.getBeans(Object.class, annotationLiteral()).stream()
                 .filter(b -> b.getBeanClass().isAnnotationPresent(ServiceComponent.class))
-                .forEach(this::processBeansForEvents);
+                .forEach(this::processServiceComponentsForEvents);
 
         fireAllCollectedEvents(beanManager);
     }
@@ -59,8 +61,11 @@ public class AnnotationScanner implements Extension {
      * @param bean a bean that has an annotation and could be of interest to the framework wiring.
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private void processBeansForEvents(final Bean bean) {
-        events.add(new ServiceComponentFoundEvent(componentFromServiceComponent(bean.getBeanClass()), bean));
+    private void processServiceComponentsForEvents(final Bean bean) {
+        final Component component = componentFromServiceComponent(bean.getBeanClass());
+        final Object event = bean.getBeanClass().isAnnotationPresent(Remote.class) ?
+                new RemoteServiceComponentFoundEvent(component, bean) :
+                new ServiceComponentFoundEvent(component, bean);
+        events.add(event);
     }
-
 }

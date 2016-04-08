@@ -307,6 +307,7 @@
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:messaging-activemq:1.0">
             <server name="default">
+                <journal type="NIO"/>
                 <security-setting name="#">
                     <role name="guest" delete-non-durable-queue="true" create-non-durable-queue="true" consume="true"
                           send="true"/>

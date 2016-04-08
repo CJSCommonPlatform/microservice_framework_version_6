@@ -16,9 +16,14 @@ public class ComponentTest {
 
     private static final String PILLAR_COMMANDS = "commands";
     private static final String PILLAR_QUERIES = "queries";
+    private static final String PILLAR_EVENTS = "events";
+
     private static final String TIER_API = "api";
     private static final String TIER_CONTROLLER = "controller";
     private static final String TIER_HANDLER = "handler";
+    private static final String TIER_LISTENER = "listener";
+    private static final String TIER_PROCESSOR = "processor";
+
     @Rule
     public ExpectedException exception = ExpectedException.none();
 
@@ -28,6 +33,8 @@ public class ComponentTest {
         assertThat(Component.QUERY_API.pillar(), equalTo(PILLAR_QUERIES));
         assertThat(Component.COMMAND_CONTROLLER.pillar(), equalTo(PILLAR_COMMANDS));
         assertThat(Component.COMMAND_HANDLER.pillar(), equalTo(PILLAR_COMMANDS));
+        assertThat(Component.EVENT_LISTENER.pillar(), equalTo(PILLAR_EVENTS));
+        assertThat(Component.EVENT_PROCESSOR.pillar(), equalTo(PILLAR_EVENTS));
     }
 
     @Test
@@ -36,6 +43,8 @@ public class ComponentTest {
         assertThat(Component.QUERY_API.tier(), equalTo(TIER_API));
         assertThat(Component.COMMAND_CONTROLLER.tier(), equalTo(TIER_CONTROLLER));
         assertThat(Component.COMMAND_HANDLER.tier(), equalTo(TIER_HANDLER));
+        assertThat(Component.EVENT_LISTENER.tier(), equalTo(TIER_LISTENER));
+        assertThat(Component.EVENT_PROCESSOR.tier(), equalTo(TIER_PROCESSOR));
     }
 
     @Test
@@ -52,6 +61,7 @@ public class ComponentTest {
         assertThat(Component.valueOf("commands", "controller"), is(Component.COMMAND_CONTROLLER));
         assertThat(Component.valueOf("commands", "handler"), is(Component.COMMAND_HANDLER));
         assertThat(Component.valueOf("events", "listener"), is(Component.EVENT_LISTENER));
+        assertThat(Component.valueOf("events", "processor"), is(Component.EVENT_PROCESSOR));
         assertThat(Component.valueOf("queries", "api"), is(Component.QUERY_API));
     }
 
@@ -72,6 +82,4 @@ public class ComponentTest {
         Component.valueOf("commands", "invalidTier");
 
     }
-
-
 }

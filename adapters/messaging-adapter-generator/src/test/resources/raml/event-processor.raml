@@ -1,0 +1,8 @@
+#%RAML 0.8
+title: Event processor
+baseUri: message://processor
+version: v1
+/structure.events:
+  post:
+    body:
+        application/vnd.structure.events.eventbb+json:

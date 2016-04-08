@@ -1,6 +1,6 @@
 package uk.gov.justice.services.core.sender;
 
-import static uk.gov.justice.services.core.annotation.Component.*;
+import static uk.gov.justice.services.core.annotation.Component.componentFromServiceComponent;
 
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -39,10 +39,9 @@ public class SenderProducer {
      * @param injectionPoint injection point where the Sender is being injected into.
      * @return An implementation of the Sender.
      */
-    @SuppressWarnings({"rawtypes", "unchecked"})
     @Produces
     public Sender produce(final InjectionPoint injectionPoint) {
-        final Class targetClass = injectionPoint.getMember().getDeclaringClass();
+        final Class<?> targetClass = injectionPoint.getMember().getDeclaringClass();
 
         if (targetClass.isAnnotationPresent(ServiceComponent.class)) {
             return getSender(componentFromServiceComponent(targetClass));

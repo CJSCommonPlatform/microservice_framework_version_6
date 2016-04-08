@@ -1,14 +1,18 @@
 package uk.gov.justice.services.core.dispatcher;
 
-import static uk.gov.justice.services.core.annotation.Component.componentFromAdapter;
+import static java.lang.String.format;
 
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
+import uk.gov.justice.services.core.extension.BaseServiceComponentFoundEvent;
+import uk.gov.justice.services.core.extension.RemoteServiceComponentFoundEvent;
 import uk.gov.justice.services.core.extension.ServiceComponentFoundEvent;
 
+import java.lang.annotation.Annotation;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -52,7 +56,7 @@ public class DispatcherProducer {
      */
     @Produces
     public AsynchronousDispatcher produceAsynchronousDispatcher(final InjectionPoint injectionPoint) {
-        return produceDispatcher(injectionPoint)::asynchronousDispatch;
+        return createDispatcherIfAbsent(injectionPoint, Adapter.class, Component::componentFromAdapter)::asynchronousDispatch;
     }
 
     /**
@@ -64,13 +68,37 @@ public class DispatcherProducer {
      * @throws IllegalArgumentException if the injection point does not contain any adaptor
      *                                  annotations.
      */
-
     @Produces
     public SynchronousDispatcher produceSynchronousDispatcher(final InjectionPoint injectionPoint) {
-        return produceDispatcher(injectionPoint)::synchronousDispatch;
+        return createDispatcherIfAbsent(injectionPoint, Adapter.class, Component::componentFromAdapter)::synchronousDispatch;
+    }
+
+    /**
+     * Produces the correct implementation of a synchronous dispatcher depending on the {@link
+     * Adapter} annotation at the injection point.
+     *
+     * @param injectionPoint class where the {@link AsynchronousDispatcher} is being injected.
+     * @return the correct dispatcher instance.
+     * @throws IllegalArgumentException if the injection point does not contain any adaptor
+     *                                  annotations.
+     */
+    @Produces
+    public Requester produceRequester(final InjectionPoint injectionPoint) {
+        return createDispatcherIfAbsent(
+                injectionPoint,
+                ServiceComponent.class,
+                Component::componentFromServiceComponent)::synchronousDispatch;
     }
 
     void register(@Observes final ServiceComponentFoundEvent event) {
+        registerEventWithDispatcher(event);
+    }
+
+    void register(@Observes final RemoteServiceComponentFoundEvent event) {
+        registerEventWithDispatcher(event);
+    }
+
+    private void registerEventWithDispatcher(final BaseServiceComponentFoundEvent event) {
         getDispatcher(event.getComponent()).register(instantiateHandler(event.getHandlerBean()));
     }
 
@@ -88,13 +116,13 @@ public class DispatcherProducer {
         return dispatcherMap.computeIfAbsent(component, c -> new Dispatcher());
     }
 
-    private Dispatcher produceDispatcher(final InjectionPoint injectionPoint) {
+    private <A extends Annotation> Dispatcher createDispatcherIfAbsent(final InjectionPoint injectionPoint, final Class<A> clazz, final Function<Class<?>, Component> componentFunction) {
         final Class<?> targetClass = injectionPoint.getMember().getDeclaringClass();
 
-        if (targetClass.isAnnotationPresent(Adapter.class)) {
-            return getDispatcher(componentFromAdapter(targetClass));
+        if (targetClass.isAnnotationPresent(clazz)) {
+            return getDispatcher(componentFunction.apply(targetClass));
         } else {
-            throw new IllegalArgumentException("InjectionPoint class must be annotated with " + ServiceComponent.class);
+            throw new IllegalArgumentException(format("Injection point class must be annotated with %s", clazz));
         }
     }
 }

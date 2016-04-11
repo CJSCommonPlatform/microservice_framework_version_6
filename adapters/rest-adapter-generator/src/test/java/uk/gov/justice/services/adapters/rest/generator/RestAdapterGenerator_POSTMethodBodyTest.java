@@ -11,7 +11,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.services.adapter.rest.RestProcessor;
 import uk.gov.justice.services.adapters.test.utils.compiler.JavaCompilerUtil;
 import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
@@ -21,17 +20,11 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -39,7 +32,6 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
@@ -48,6 +40,10 @@ import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
+import static uk.gov.justice.services.adapters.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
+import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionUtil.firstMethodOf;
+import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionUtil.methodsOf;
+import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionUtil.setField;
 import static uk.gov.justice.services.messaging.DefaultEnvelope.envelopeFrom;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -86,7 +82,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest {
                         resource("/path")
                                 .with(action(POST).withDefaultRequestType())
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
         Object resourceObject = instantiate(resourceClass);
@@ -111,7 +107,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest {
                         resource("/path")
                                 .with(action(POST).withDefaultRequestType())
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
         Object resourceObject = instantiate(resourceClass);
@@ -140,7 +136,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest {
                         resource("/path")
                                 .with(action(POST).withDefaultRequestType())
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
         Object resourceObject = instantiate(resourceClass);
@@ -162,7 +158,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest {
                         resource("/path")
                                 .with(action(POST).withDefaultRequestType())
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
         Object resourceObject = instantiate(resourceClass);
@@ -185,7 +181,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest {
                         resource("/some/path/{paramA}", "paramA")
                                 .with(action(POST).withDefaultRequestType())
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamAResource");
 
@@ -215,7 +211,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest {
                         resource("/some/path/{p1}", "p1")
                                 .with(action(POST, "application/vnd.ctx.commands.cmd-aa+json", "application/vnd.ctx.commands.cmd-bb+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathP1Resource");
 
@@ -246,7 +242,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest {
                         resource("/some/path/{param1}/{param2}", "param1", "param2")
                                 .with(action(POST).withDefaultRequestType())
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParam1Param2Resource");
 
@@ -277,7 +273,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest {
                         .with(resource("/pathA").with(action(POST).withDefaultRequestType()))
                         .with(resource("/pathB").with(action(POST).withDefaultRequestType()))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Set<Class<?>> compiledClasses = compiler.compiledClassesOf(BASE_PACKAGE);
         Class<?> applicationClass = compiler.classOf(compiledClasses, BASE_PACKAGE, "CommandApiRestServiceApplication");
@@ -289,8 +285,8 @@ public class RestAdapterGenerator_POSTMethodBodyTest {
         Set<Class<?>> classes = (Set<Class<?>>) result;
         assertThat(classes, hasSize(2));
         assertThat(classes, containsInAnyOrder(
-                equalTo(compiler.classOf(compiledClasses, BASE_PACKAGE, "resource", "DefaultPathAResource" )),
-                equalTo(compiler.classOf(compiledClasses, BASE_PACKAGE, "resource", "DefaultPathBResource" ))));
+                equalTo(compiler.classOf(compiledClasses, BASE_PACKAGE, "resource", "DefaultPathAResource")),
+                equalTo(compiler.classOf(compiledClasses, BASE_PACKAGE, "resource", "DefaultPathBResource"))));
     }
 
     private Object instantiate(Class<?> resourceClass) throws InstantiationException, IllegalAccessException {
@@ -300,32 +296,5 @@ public class RestAdapterGenerator_POSTMethodBodyTest {
         return resourceObject;
     }
 
-    private Method firstMethodOf(Class<?> resourceClass) {
-        List<Method> methods = methodsOf(resourceClass);
-        return methods.get(0);
-    }
 
-    private void setField(Object resourceObject, String fieldName, Object object)
-            throws IllegalAccessException {
-        Field field = fieldOf(resourceObject.getClass(), fieldName);
-        field.setAccessible(true);
-        field.set(resourceObject, object);
-    }
-
-    private Field fieldOf(Class<?> clazz, String fieldName) {
-        Optional<Field> field = Arrays.stream(clazz.getDeclaredFields()).filter(f -> f.getName().equals(fieldName))
-                .findFirst();
-        assertTrue(field.isPresent());
-        return field.get();
-    }
-
-    private List<Method> methodsOf(Class<?> class1) {
-        return Arrays.stream(class1.getDeclaredMethods()).filter(m -> !m.getName().contains("jacoco"))
-                .collect(Collectors.toList());
-    }
-
-    private GeneratorConfig configurationWithBasePackage(String basePackageName) {
-        Path outputPath = Paths.get(outputFolder.getRoot().getAbsolutePath());
-        return new GeneratorConfig(outputPath, outputPath, basePackageName);
-    }
 }

@@ -17,6 +17,7 @@ public enum Component {
     COMMAND_CONTROLLER("commands", "controller", Queue.class),
     COMMAND_HANDLER("commands", "handler", Queue.class),
     EVENT_LISTENER("events", "listener", Topic.class),
+    EVENT_PROCESSOR("events", "processor", Topic.class),
     QUERY_API("queries", "api", null);
 
     private final String pillar;

@@ -31,13 +31,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
-import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -53,7 +50,6 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.StringStartsWith.startsWith;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -64,10 +60,12 @@ import static org.raml.model.ActionType.OPTIONS;
 import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
 import static org.raml.model.ActionType.TRACE;
-import static uk.gov.justice.services.adapters.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
+import static uk.gov.justice.services.adapters.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
+import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionUtil.methodsOf;
+import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionUtil.setField;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLLER;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 import static uk.gov.justice.services.messaging.DefaultEnvelope.envelopeFrom;
@@ -140,7 +138,7 @@ public class JmsEndpointGeneratorTest {
         File packageDir = new File(path);
         packageDir.mkdirs();
         Files.write(Paths.get(path + "/StructureControllerCommandsJmsListener.java"),
-                asList("Old file content"));
+                Collections.singletonList("Old file content"));
 
         generator.run(
                 raml()
@@ -183,6 +181,36 @@ public class JmsEndpointGeneratorTest {
     }
 
     @Test
+    public void shouldCreateJmsEventsProcessorNamedAfterResourceUriAndBaseUri() throws Exception {
+        generator.run(
+                raml()
+                        .withBaseUri("message://processor")
+                        .with(resource()
+                                .withRelativeUri("/structure.events")
+                                .withDefaultAction())
+                        .build(),
+                configurationWithBasePackage("uk.somepackage", outputFolder));
+
+        Class<?> compiledClass = compiler.compiledClassOf("uk.somepackage");
+        assertThat(compiledClass.getName(), is("uk.somepackage.StructureEventsProcessorJmsListener"));
+    }
+
+    @Test
+    public void shouldCreateJmsEventsListenerNamedAfterResourceUriAndBaseUri() throws Exception {
+        generator.run(
+                raml()
+                        .withBaseUri("message://listener")
+                        .with(resource()
+                                .withRelativeUri("/structure.events")
+                                .withDefaultAction())
+                        .build(),
+                configurationWithBasePackage("uk.somepackage", outputFolder));
+
+        Class<?> compiledClass = compiler.compiledClassOf("uk.somepackage");
+        assertThat(compiledClass.getName(), is("uk.somepackage.StructureEventsListenerJmsListener"));
+    }
+
+    @Test
     public void shouldCreateJmsEndpointAnnotatedWithCommandHandlerAdapter() throws Exception {
         generator.run(
                 raml()
@@ -219,6 +247,7 @@ public class JmsEndpointGeneratorTest {
     public void shouldCreateJmsEndpointAnnotatedWithEventListenerAdapter() throws Exception {
         generator.run(
                 raml()
+                        .withBaseUri("message://listener")
                         .with(resource()
                                 .withRelativeUri("/people.events")
                                 .with(action(POST, "application/vnd.people.events.abc+json")))
@@ -229,6 +258,24 @@ public class JmsEndpointGeneratorTest {
         Adapter adapterAnnotation = clazz.getAnnotation(Adapter.class);
         assertThat(adapterAnnotation, not(nullValue()));
         assertThat(adapterAnnotation.value(), is(Component.EVENT_LISTENER));
+
+    }
+
+    @Test
+    public void shouldCreateJmsEndpointAnnotatedWithEventProcessorAdapter() throws Exception {
+        generator.run(
+                raml()
+                        .withBaseUri("message://processor")
+                        .with(resource()
+                                .withRelativeUri("/people.events")
+                                .with(action(POST, "application/vnd.people.events.abc+json")))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        Adapter adapterAnnotation = clazz.getAnnotation(Adapter.class);
+        assertThat(adapterAnnotation, not(nullValue()));
+        assertThat(adapterAnnotation.value(), is(Component.EVENT_PROCESSOR));
 
     }
 
@@ -523,37 +570,6 @@ public class JmsEndpointGeneratorTest {
                 return actual.propertyValue();
             }
         };
-    }
-
-    private void setField(Object resourceObject, String fieldName, Object object)
-            throws IllegalAccessException {
-        Field field = fieldOf(resourceObject.getClass(), fieldName);
-        field.setAccessible(true);
-        field.set(resourceObject, object);
-    }
-
-    private Field fieldOf(Class<?> clazz, String fieldName) {
-        Optional<Field> field = Arrays.stream(clazz.getDeclaredFields()).filter(f -> f.getName().equals(fieldName))
-                .findFirst();
-        assertTrue(field.isPresent());
-        return field.get();
-    }
-
-    private Method firstMethodOf(Class<?> resourceClass) {
-        List<Method> methods = methodsOf(resourceClass);
-        return methods.get(0);
-    }
-
-    private List<Method> methodsOf(Class<?> class1) {
-        return Arrays.stream(class1.getDeclaredMethods()).filter(m -> !m.getName().contains("jacoco") && !m.getName().contains("lambda"))
-                .collect(Collectors.toList());
-    }
-
-    public static class DummyDispatcher implements AsynchronousDispatcher {
-        @Override
-        public void dispatch(Envelope envelope) {
-            // do nothing
-        }
     }
 
 }

@@ -6,12 +6,12 @@ import org.raml.model.ActionType;
 import org.raml.model.Raml;
 import org.raml.model.Resource;
 import uk.gov.justice.raml.common.validator.CompositeRamlValidator;
-import uk.gov.justice.raml.common.validator.RamlValidator;
-import uk.gov.justice.raml.core.Generator;
-import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.raml.common.validator.ContainsActionsRamlValidator;
 import uk.gov.justice.raml.common.validator.ContainsResourcesRamlValidator;
+import uk.gov.justice.raml.common.validator.RamlValidator;
 import uk.gov.justice.raml.common.validator.RequestContentTypeRamlValidator;
+import uk.gov.justice.raml.core.Generator;
+import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.raml.jms.validation.UriRamlValidator;
 import uk.gov.justice.services.core.annotation.Component;
 
@@ -27,9 +27,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.lang.String.format;
+import static java.net.URI.create;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;
 import static org.apache.commons.io.FileUtils.write;
+import static org.apache.commons.lang.StringUtils.contains;
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static uk.gov.justice.raml.jms.core.TemplateRenderer.render;
 
 /**
@@ -40,6 +43,7 @@ public class JmsEndpointGenerator implements Generator {
     private static final String UTF_8 = "UTF-8";
     private static final String EVENTS = "events";
     private static final String LISTENER = "listener";
+    private static final String PROCESSOR = "processor";
     private static final String TEMPLATE_LOADING_ERROR = "Failed to load template resource JmsListenerTemplate.tpm";
     private static final String OUTPUT_FILE_GENERATION_ERROR = "Failed to create output file for %s";
     private static final String FILENAME_POSTFIX = "JmsListener.java";
@@ -69,8 +73,8 @@ public class JmsEndpointGenerator implements Generator {
 
         final Collection<Resource> ramlResourceModels = raml.getResources().values();
         ramlResourceModels.stream()
-                .map(resource -> templateAttributesFrom(resource, configuration))
-                .forEach(attribute -> writeToTemplateFile(attribute, jmsListenerTemplate(),
+                .map(resource -> templateAttributesFrom(resource, raml.getBaseUri(), configuration))
+                .forEach(attribute -> writeToTemplateFile(attribute, raml.getBaseUri(), jmsListenerTemplate(),
                         packageOutputPathFrom(configuration)));
 
     }
@@ -89,8 +93,8 @@ public class JmsEndpointGenerator implements Generator {
         }
     }
 
-    private void writeToTemplateFile(final Attributes attributes, final String jmsTemplate, final Path outputPath) {
-        final Path filePath = outputPath.resolve(createJmsFilenameFrom(attributes.uri));
+    private void writeToTemplateFile(final Attributes attributes, final String baseUri, final String jmsTemplate, final Path outputPath) {
+        final Path filePath = outputPath.resolve(createJmsFilenameFrom(attributes.uri, baseUri));
         try {
             write(filePath.toFile(), render(jmsTemplate, attributes.attributesMap));
         } catch (IOException e) {
@@ -98,40 +102,42 @@ public class JmsEndpointGenerator implements Generator {
         }
     }
 
-    private String createJmsFilenameFrom(final String uri) {
-        return classNameOf(uri) + FILENAME_POSTFIX;
+    private String createJmsFilenameFrom(final String resourceUri, final String baseUri) {
+        return classNameOf(resourceUri, baseUri) + FILENAME_POSTFIX;
     }
 
     /**
      * Create Template Attributes from the RAML Resource and Configuration
      *
      * @param resource RAML Resource
-     * @param configuration Configuration information
-     * @return template attributes
+     * @param baseUri
+     *@param configuration Configuration information  @return template attributes
      */
-    private Attributes templateAttributesFrom(final Resource resource, final GeneratorConfig configuration) {
-        final String uri = resource.getUri();
+    private Attributes templateAttributesFrom(final Resource resource, final String baseUri, final GeneratorConfig configuration) {
+        final String resourceUri = resource.getUri();
         final HashMap<String, String> data = new HashMap<>();
-        Component component = componentOf(uri);
+        Component component = componentOf(resourceUri, baseUri);
 
         data.put("PACKAGE_NAME", configuration.getBasePackageName());
-        data.put("CLASS_NAME", classNameOf(uri));
+        data.put("CLASS_NAME", classNameOf(resourceUri, baseUri));
         data.put("ADAPTER_TYPE", component.name());
         data.put("DESTINATION_TYPE", component.destinationType().getName());
-        data.put("DESTINATION_LOOKUP", destinationNameOf(uri));
+        data.put("DESTINATION_LOOKUP", destinationNameOf(resourceUri));
         data.put("MESSAGE_SELECTOR", messageSelectorsFrom(resource.getActions()));
 
-        return new Attributes(data, uri);
+        return new Attributes(data, resourceUri);
     }
 
     /**
      * Convert given URI to a camel cased class name
      *
-     * @param uri URI String to convert
+     * @param resourceUri URI String to convert
+     * @param baseUri
      * @return camel case class name
      */
-    private String classNameOf(final String uri) {
-        return stream(uri.split("/|\\."))
+    private String classNameOf(final String resourceUri, final String baseUri) {
+        String combinedUri = format("%s.%s", resourceUri, isNotEmpty(baseUri) ? create(baseUri).getAuthority() : "");
+        return stream(combinedUri.split("/|\\."))
                 .map(StringUtils::capitalize)
                 .collect(joining(EMPTY));
     }
@@ -142,13 +148,16 @@ public class JmsEndpointGenerator implements Generator {
      * Takes the last and second to last parts of the URI as the pillar and tier
      * of the Component
      *
-     * @param uri URI String to convert
+     * @param resourceUri URI of the resource
+     * @param baseUri - base uri of the resource
      * @return component the value of the pillar and tier parts of the uri
      */
-    private Component componentOf(final String uri) {
-        final String[] uriParts = uri.split("\\.");
+    private Component componentOf(final String resourceUri, final String baseUri) {
+        final String[] uriParts = resourceUri.split("\\.");
         String pillar = uriParts[uriParts.length - 1];
-        String tier = EVENTS.equals(pillar) ? LISTENER : uriParts[uriParts.length - 2];
+        String tier = EVENTS.equals(pillar)
+                ? contains(baseUri, PROCESSOR) ? PROCESSOR : LISTENER
+                : uriParts[uriParts.length - 2];
         return Component.valueOf(pillar, tier);
     }
 

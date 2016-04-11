@@ -30,7 +30,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.lang.reflect.Modifier.isAbstract;
@@ -53,6 +52,8 @@ import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
+import static uk.gov.justice.services.adapters.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
+import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionUtil.methodsOf;
 
 public class RestAdapterGenerator_CodeStructureTest {
 
@@ -78,7 +79,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path")
                                 .with(action(POST, "application/vnd.ctx.commands.default+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceApplication");
 
@@ -92,7 +93,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path")
                                 .with(action(POST, "application/vnd.ctx.commands.default+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceApplication");
 
@@ -106,7 +107,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path")
                                 .with(action(POST, "application/vnd.ctx.commands.default+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceApplication");
 
@@ -121,7 +122,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path")
                                 .with(action(POST, "application/vnd.ctx.commands.default+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceApplication");
 
@@ -142,7 +143,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path")
                                 .with(action(POST, "application/vnd.ctx.commands.default+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
 
@@ -177,7 +178,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path")
                                 .with(action(POST, "application/vnd.ctx.commands.default+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
 
@@ -199,7 +200,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path/{p1}")
                                 .with(action(POST, "application/vnd.ctx.commands.cmd-a+json", "application/vnd.ctx.commands.cmd-b+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
 
@@ -229,7 +230,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path")
                                 .with(action(GET).withResponse("application/vnd.ctx.queries.query1+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
 
@@ -255,7 +256,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                                                 "application/vnd.ctx.queries.query2+json")
                                 )
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
 
@@ -279,7 +280,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path/no/path/params")
                                 .with(action(POST, "application/vnd.ctx.commands.default+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
 
@@ -298,7 +299,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path/{paramA}", "paramA")
                                 .with(action(POST, "application/vnd.ctx.commands.default+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
 
@@ -327,7 +328,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path/{paramA}/abc/{paramB}", "paramA", "paramB")
                                 .with(action(POST, "application/vnd.ctx.commands.default+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
 
@@ -361,7 +362,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path")
                                 .with(action(POST, "application/vnd.ctx.commands.default+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> resourceInterface = compiler.compiledInterfaceOf(BASE_PACKAGE);
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
@@ -379,7 +380,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path")
                                 .with(action(POST, "application/vnd.ctx.commands.default+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
@@ -396,7 +397,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path")
                                 .with(action(POST, "application/vnd.ctx.commands.default+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
@@ -418,7 +419,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                                         "application/vnd.ctx.commands.command-c+json",
                                         "application/vnd.ctx.commands.command-d+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathP1Resource");
 
@@ -434,7 +435,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path/{paramA}", "paramA")
                                 .with(action(POST, "application/vnd.ctx.commands.command-a+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamAResource");
 
@@ -460,7 +461,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path/{paramA}/{paramB}/{paramC}", "paramA", "paramB", "paramC")
                                 .with(action(POST, "application/vnd.ctx.commands.command-a+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamAParamBParamCResource");
 
@@ -514,7 +515,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path")
                                 .with(action(POST, "application/vnd.ctx.commands.default+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
         Class<?> resourceImplementation = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
         assertThat(resourceImplementation.getAnnotation(Stateless.class), not(nullValue()));
     }
@@ -526,7 +527,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path")
                                 .with(action(POST, "application/vnd.ctx.commands.default+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
         List<Method> methods = methodsOf(class1);
@@ -544,7 +545,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path")
                                 .with(action(POST, "application/vnd.ctx.commands.default+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
         Field dispatcher = resourceClass.getDeclaredField("asyncDispatcher");
@@ -563,7 +564,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                                         .withResponse("application/vnd.ctx.queries.query1+json")
                                 ))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
         assertFalse(stream(resourceClass.getDeclaredFields())
@@ -582,7 +583,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                                         .with(action(GET)
                                                 .withResponse("application/vnd.ctx.queries.query1+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
         Field dispatcher = resourceClass.getDeclaredField("syncDispatcher");
@@ -599,7 +600,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path")
                                 .with(action(POST, "application/vnd.ctx.commands.default+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
@@ -618,7 +619,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path")
                                 .with(action(POST, "application/vnd.ctx.commands.default+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
         Field dispatcher = resourceClass.getDeclaredField("headers");
@@ -635,7 +636,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path")
                                 .with(action(POST, "application/vnd.ctx.commands.default+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
@@ -646,10 +647,6 @@ public class RestAdapterGenerator_CodeStructureTest {
         assertThat(dispatcher.getModifiers(), is(0));
     }
 
-    private List<Method> methodsOf(Class<?> class1) {
-        return stream(class1.getDeclaredMethods()).filter(m -> !m.getName().contains("jacoco"))
-                .collect(Collectors.toList());
-    }
 
     private Method methodWithConsumesAnnotationOf(List<Method> methods, String mediaType) {
         return methods.stream().filter(m -> m.getAnnotation(Consumes.class)
@@ -659,8 +656,5 @@ public class RestAdapterGenerator_CodeStructureTest {
                 .orElseThrow(() -> new IllegalStateException(format("No method consuming %s found", mediaType)));
     }
 
-    private GeneratorConfig configurationWithBasePackage(String basePackageName) {
-        java.nio.file.Path outputPath = get(outputFolder.getRoot().getAbsolutePath());
-        return new GeneratorConfig(outputPath, outputPath, basePackageName);
-    }
+
 }

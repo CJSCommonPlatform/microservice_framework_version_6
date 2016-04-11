@@ -15,7 +15,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.gov.justice.api.StructureControllerCommandsJmsListener;
-import uk.gov.justice.api.StructureEventsJmsListener;
+import uk.gov.justice.api.StructureEventsListenerJmsListener;
+import uk.gov.justice.api.StructureEventsProcessorJmsListener;
 import uk.gov.justice.api.StructureHandlerCommandsJmsListener;
 import uk.gov.justice.services.adapter.messaging.JmsProcessor;
 import uk.gov.justice.services.adapters.test.utils.dispatcher.AsynchronousRecordingDispatcher;
@@ -63,7 +64,7 @@ public class JmsEndpointGenerationIT {
     private Queue commandControllerDestination;
 
     @Resource(name = "structure.events")
-    private Topic eventsListenerDestination;
+    private Topic eventsDestination;
 
     @Resource
     private ConnectionFactory factory;
@@ -90,7 +91,8 @@ public class JmsEndpointGenerationIT {
             JmsProcessor.class,
             AsynchronousRecordingDispatcher.class,
             StructureControllerCommandsJmsListener.class,
-            StructureEventsJmsListener.class,
+            StructureEventsListenerJmsListener.class,
+            StructureEventsProcessorJmsListener.class,
             StructureHandlerCommandsJmsListener.class,
             EnvelopeConverter.class,
             StringToJsonObjectConverter.class,
@@ -117,7 +119,7 @@ public class JmsEndpointGenerationIT {
 
 
     @Test
-    public void commandControllerHandlerShouldReceiveCommandA() throws JMSException {
+    public void commandControllerDispatcherShouldReceiveCommandA() throws JMSException {
 
         String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d65";
         String commandName = "structure.commands.commanda";
@@ -130,7 +132,7 @@ public class JmsEndpointGenerationIT {
     }
 
     @Test
-    public void commandControllerHandlerShouldReceiveCommandB() throws JMSException {
+    public void commandControllerDispatcherShouldReceiveCommandB() throws JMSException {
 
         String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d11";
         String commandName = "structure.commands.commandb";
@@ -144,7 +146,7 @@ public class JmsEndpointGenerationIT {
     }
 
     @Test
-    public void commandControllerHandlerShouldNotReceiveACommandUnspecifiedInMessageSelector()
+    public void commandControllerDispatcherShouldNotReceiveACommandUnspecifiedInMessageSelector()
             throws JMSException, InterruptedException {
 
         String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d12";
@@ -156,7 +158,7 @@ public class JmsEndpointGenerationIT {
     }
 
     @Test
-    public void commandHandlerHandlerShouldReceiveCommandA() throws JMSException {
+    public void commandHandlerDispatcherShouldReceiveCommandA() throws JMSException {
 
         String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d61";
         String commandName = "structure.commands.cmdaa";
@@ -169,7 +171,7 @@ public class JmsEndpointGenerationIT {
     }
 
     @Test
-    public void commandHandlerHandlerShouldNotReceiveACommandUnspecifiedInMessageSelector() throws JMSException {
+    public void commandHandlerDispatcherShouldNotReceiveACommandUnspecifiedInMessageSelector() throws JMSException {
 
         String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d13";
         String commandName = "structure.handler.cmdcc";
@@ -180,7 +182,7 @@ public class JmsEndpointGenerationIT {
     }
 
     @Test
-    public void eventListenerHandlerShouldReceiveEventA() throws JMSException, InterruptedException {
+    public void eventListenerDispatcherShouldReceiveEventA() throws JMSException, InterruptedException {
 
         //There's an issue in OpenEJB causing tests that involve JMS topics to fail.
         //On slower machines (e.g. travis) topic consumers tend to be registered after this test starts,
@@ -190,7 +192,7 @@ public class JmsEndpointGenerationIT {
         Thread.sleep(300);
         String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d20";
         String commandName = "structure.events.eventaa";
-        sendEnvelope(metadataId, commandName, eventsListenerDestination);
+        sendEnvelope(metadataId, commandName, eventsDestination);
 
         Envelope receivedEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
         assertThat(receivedEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
@@ -199,13 +201,33 @@ public class JmsEndpointGenerationIT {
     }
 
     @Test
-    public void eventListenerHandlerShouldNotReceiveACommandUnspecifiedInMessageSelector()
+    public void eventProcessorDispatcherShouldReceiveEventB() throws JMSException, InterruptedException {
+
+        //There's an issue in OpenEJB causing tests that involve JMS topics to fail.
+        //On slower machines (e.g. travis) topic consumers tend to be registered after this test starts,
+        //which means the message sent to the topic is lost, which in turn causes this test to fail occasionally.
+        //Delaying test execution (Thread.sleep) mitigates the issue.
+        //TODO: check OpenEJB code and investigate if we can't fix the issue.
+        Thread.sleep(300);
+        String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d30";
+        String commandName = "structure.events.eventbb";
+        sendEnvelope(metadataId, commandName, eventsDestination);
+
+        Envelope receivedEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
+        assertThat(receivedEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
+        assertThat(receivedEnvelope.metadata().name(), is(commandName));
+
+    }
+
+
+    @Test
+    public void eventListenerDispatcherShouldNotReceiveACommandUnspecifiedInMessageSelector()
             throws JMSException, InterruptedException {
 
         String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d21";
         String commandName = "structure.events.eventcc";
 
-        sendEnvelope(metadataId, commandName, eventsListenerDestination);
+        sendEnvelope(metadataId, commandName, eventsDestination);
         assertTrue(dispatcher.notFoundEnvelopeWithMetadataOf("id", metadataId));
 
     }

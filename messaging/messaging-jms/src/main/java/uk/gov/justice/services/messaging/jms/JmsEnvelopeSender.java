@@ -1,5 +1,7 @@
 package uk.gov.justice.services.messaging.jms;
 
+import static javax.jms.Session.AUTO_ACKNOWLEDGE;
+
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.jms.exception.JmsEnvelopeSenderException;
 
@@ -11,8 +13,6 @@ import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
-
-import static javax.jms.Session.AUTO_ACKNOWLEDGE;
 
 /**
  * An envelope producer that sends or publishes an envelope to a queue or topic respectively depending on the
@@ -33,13 +33,11 @@ public class JmsEnvelopeSender {
      * @param destination JMS destination for the envelope.
      */
     public void send(final Envelope envelope, final Destination destination) {
-        try {
-            try (Connection connection = connectionFactory.createConnection();
-                 Session session = connection.createSession(false, AUTO_ACKNOWLEDGE);
-                 MessageProducer producer = session.createProducer(destination)) {
+        try (Connection connection = connectionFactory.createConnection();
+             Session session = connection.createSession(false, AUTO_ACKNOWLEDGE);
+             MessageProducer producer = session.createProducer(destination)) {
 
-                producer.send(envelopeConverter.toMessage(envelope, session));
-            }
+            producer.send(envelopeConverter.toMessage(envelope, session));
         } catch (JMSException e) {
             throw new JmsEnvelopeSenderException(String.format("Exception while sending envelope with name %s", envelope.metadata().name()), e);
         }

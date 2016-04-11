@@ -45,7 +45,7 @@ public class AnnotationScanner implements Extension {
         fireAllCollectedEvents(beanManager);
     }
 
-    private void fireAllCollectedEvents(BeanManager beanManager) {
+    private void fireAllCollectedEvents(final BeanManager beanManager) {
         events.stream().forEach(beanManager::fireEvent);
     }
 

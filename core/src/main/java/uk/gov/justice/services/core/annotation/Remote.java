@@ -7,12 +7,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import javax.enterprise.context.ApplicationScoped;
-
 /**
- * Marks service components as being remote.
- * <p>
- * Usage: @Remote
+ * Marks service components as being remote. <p> Usage: @Remote
  */
 @Retention(RUNTIME)
 @Target(TYPE)

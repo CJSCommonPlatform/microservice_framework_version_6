@@ -1,16 +1,16 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
 
-import org.raml.model.Action;
-import org.raml.model.MimeType;
-import org.raml.model.Response;
+import static java.util.Collections.emptyList;
 
 import java.util.Collection;
 import java.util.Map;
 
-import static java.util.Collections.emptyList;
+import org.raml.model.Action;
+import org.raml.model.MimeType;
+import org.raml.model.Response;
 
-public class Actions {
+public final class Actions {
     private Actions() {
     }
 

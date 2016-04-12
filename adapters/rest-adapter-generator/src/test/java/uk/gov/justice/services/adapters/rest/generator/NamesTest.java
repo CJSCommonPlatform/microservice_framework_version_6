@@ -1,18 +1,20 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
+import static net.trajano.commons.testing.UtilityClassTestUtil.assertUtilityClassWellDefined;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
+import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
+
+import uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder;
+import uk.gov.justice.services.core.annotation.Component;
+
 import org.junit.Test;
 import org.raml.model.Action;
 import org.raml.model.ActionType;
 import org.raml.model.MimeType;
 import org.raml.model.Raml;
 import org.raml.model.Resource;
-import uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder;
-
-import static net.trajano.commons.testing.UtilityClassTestUtil.assertUtilityClassWellDefined;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
-import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 
 public class NamesTest {
 
@@ -110,5 +112,19 @@ public class NamesTest {
         Raml raml = RamlBuilder.restRamlWithDefaults().withBaseUri("http://localhost:8080/webcontext").build();
         String applicationName = Names.baseUriPathWithoutContext(raml);
         assertThat(applicationName, is("/webcontext"));
+    }
+
+    @Test
+    public void shouldReturnComponentFromBaseUriForCommandApi() throws Exception {
+        Raml raml = RamlBuilder.restRamlWithCommandApiDefaults().build();
+        Component component = Names.componentFromBaseUriIn(raml);
+        assertThat(component, is(Component.COMMAND_API));
+    }
+
+    @Test
+    public void shouldReturnComponentFromBaseUriForQueryApi() throws Exception {
+        Raml raml = RamlBuilder.restRamlWithQueryApiDefaults().build();
+        Component component = Names.componentFromBaseUriIn(raml);
+        assertThat(component, is(Component.QUERY_API));
     }
 }

@@ -1,19 +1,20 @@
 package uk.gov.justice.api;
 
-import org.junit.Test;
-import uk.gov.justice.api.resource.DefaultUsersUserIdResource;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 
+import uk.gov.justice.api.resource.DefaultUsersUserIdResource;
+
+import org.junit.Test;
+
 /**
- * Unit tests for the generated {@link RestApplication} class.
+ * Unit tests for the generated {@link QueryApiRestExampleApplication} class.
  */
-public class RestApplicationTest {
+public class QueryApiRestExampleApplicationTest {
 
     @Test
     public void shouldReturnCorrectClass() {
-        RestApplication application = new RestApplication();
+        QueryApiRestExampleApplication application = new QueryApiRestExampleApplication();
         assertThat(application.getClasses(), containsInAnyOrder(DefaultUsersUserIdResource.class));
     }
 }

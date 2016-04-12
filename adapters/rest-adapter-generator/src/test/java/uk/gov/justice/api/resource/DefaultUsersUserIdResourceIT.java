@@ -1,5 +1,26 @@
 package uk.gov.justice.api.resource;
 
+import static com.jayway.jsonassert.JsonAssert.with;
+import static javax.json.Json.createObjectBuilder;
+import static javax.ws.rs.client.Entity.entity;
+import static org.apache.cxf.jaxrs.client.WebClient.create;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+import static uk.gov.justice.services.messaging.DefaultEnvelope.envelopeFrom;
+
+import uk.gov.justice.api.QueryApiRestExampleApplication;
+import uk.gov.justice.services.adapter.rest.RestProcessor;
+import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
+import uk.gov.justice.services.adapters.test.utils.dispatcher.AsynchronousRecordingDispatcher;
+import uk.gov.justice.services.adapters.test.utils.dispatcher.SynchronousRecordingDispatcher;
+import uk.gov.justice.services.messaging.Envelope;
+
+import java.util.Properties;
+
+import javax.inject.Inject;
+import javax.ws.rs.core.Response;
+
 import org.apache.openejb.OpenEjbContainer;
 import org.apache.openejb.jee.Application;
 import org.apache.openejb.jee.WebApp;
@@ -14,25 +35,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import uk.gov.justice.api.RestApplication;
-import uk.gov.justice.services.adapter.rest.RestProcessor;
-import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
-import uk.gov.justice.services.adapters.test.utils.dispatcher.AsynchronousRecordingDispatcher;
-import uk.gov.justice.services.adapters.test.utils.dispatcher.SynchronousRecordingDispatcher;
-import uk.gov.justice.services.messaging.Envelope;
-
-import javax.inject.Inject;
-import javax.ws.rs.core.Response;
-import java.util.Properties;
-
-import static com.jayway.jsonassert.JsonAssert.with;
-import static javax.json.Json.createObjectBuilder;
-import static javax.ws.rs.client.Entity.entity;
-import static org.apache.cxf.jaxrs.client.WebClient.create;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static uk.gov.justice.services.messaging.DefaultEnvelope.envelopeFrom;
 
 
 /**
@@ -47,7 +49,7 @@ public class DefaultUsersUserIdResourceIT {
     private static int port = -1;
     private static String BASE_URI;
 
-    private static final String BASE_URI_PATTERN = "http://localhost:%d/rest-adapter-generator/rest";
+    private static final String BASE_URI_PATTERN = "http://localhost:%d/rest-adapter-generator/query/api/rest/example";
 
     private static final String JSON = "{\"userUrn\" : \"test\"}";
 
@@ -88,7 +90,7 @@ public class DefaultUsersUserIdResourceIT {
         return new WebApp()
                 .contextRoot("rest-adapter-generator")
                 .addServlet("TestApp", Application.class.getName())
-                .addInitParam("TestApp", "javax.ws.rs.Application", RestApplication.class.getName());
+                .addInitParam("TestApp", "javax.ws.rs.Application", QueryApiRestExampleApplication.class.getName());
     }
 
     @Test

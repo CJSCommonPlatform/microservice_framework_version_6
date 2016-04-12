@@ -1,36 +1,5 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
-import com.google.common.reflect.TypeToken;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import uk.gov.justice.raml.core.GeneratorConfig;
-import uk.gov.justice.services.adapter.rest.RestProcessor;
-import uk.gov.justice.services.adapters.test.utils.compiler.JavaCompilerUtil;
-import uk.gov.justice.services.core.annotation.Adapter;
-import uk.gov.justice.services.core.annotation.Component;
-import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
-import uk.gov.justice.services.core.dispatcher.SynchronousDispatcher;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.json.JsonObject;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Application;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.util.List;
-import java.util.Set;
-
 import static java.lang.String.format;
 import static java.lang.reflect.Modifier.isAbstract;
 import static java.lang.reflect.Modifier.isPublic;
@@ -50,10 +19,45 @@ import static org.junit.Assert.assertThat;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
+import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithCommandApiDefaults;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithDefaults;
+import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithQueryApiDefaults;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.adapters.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionUtil.methodsOf;
+
+import uk.gov.justice.raml.core.GeneratorConfig;
+import uk.gov.justice.services.adapter.rest.RestProcessor;
+import uk.gov.justice.services.adapters.test.utils.compiler.JavaCompilerUtil;
+import uk.gov.justice.services.core.annotation.Adapter;
+import uk.gov.justice.services.core.annotation.Component;
+import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
+import uk.gov.justice.services.core.dispatcher.SynchronousDispatcher;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.List;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.json.JsonObject;
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Application;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
+
+import com.google.common.reflect.TypeToken;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 public class RestAdapterGenerator_CodeStructureTest {
 
@@ -374,9 +378,9 @@ public class RestAdapterGenerator_CodeStructureTest {
     }
 
     @Test
-    public void shouldGenerateResourceClassContainingAdapterAnnotation() throws Exception {
+    public void shouldGenerateResourceClassContainingCommandApiAdapterAnnotation() throws Exception {
         generator.run(
-                restRamlWithDefaults().with(
+                restRamlWithCommandApiDefaults().with(
                         resource("/some/path")
                                 .with(action(POST, "application/vnd.ctx.commands.default+json"))
                 ).build(),
@@ -387,6 +391,24 @@ public class RestAdapterGenerator_CodeStructureTest {
         assertThat(resourceClass.isInterface(), is(false));
         assertThat(resourceClass.getAnnotation(Adapter.class), not(nullValue()));
         assertThat(resourceClass.getAnnotation(Adapter.class).value(), is(Component.COMMAND_API));
+
+    }
+
+    @Test
+    public void shouldGenerateResourceClassContainingQueryApiAdapterAnnotation() throws Exception {
+        generator.run(
+                restRamlWithQueryApiDefaults().with(
+                        resource("/some/path")
+                                .with(action(GET)
+                                        .withResponse("application/vnd.ctx.queries.query1+json"))
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+
+        assertThat(resourceClass.isInterface(), is(false));
+        assertThat(resourceClass.getAnnotation(Adapter.class), not(nullValue()));
+        assertThat(resourceClass.getAnnotation(Adapter.class).value(), is(Component.QUERY_API));
 
     }
 

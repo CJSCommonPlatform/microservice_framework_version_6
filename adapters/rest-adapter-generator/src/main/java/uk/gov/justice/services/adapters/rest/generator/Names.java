@@ -1,10 +1,13 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
-import org.apache.commons.lang.StringUtils;
-import org.raml.model.Action;
-import org.raml.model.MimeType;
-import org.raml.model.Raml;
-import org.raml.model.Resource;
+import static org.apache.commons.lang.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.remove;
+import static org.apache.commons.lang.StringUtils.substringAfter;
+import static org.apache.commons.lang.StringUtils.uncapitalize;
+import static org.apache.commons.lang.WordUtils.capitalize;
+
+import uk.gov.justice.services.core.annotation.Component;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -12,14 +15,15 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
-import static org.apache.commons.lang.StringUtils.defaultIfBlank;
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.remove;
-import static org.apache.commons.lang.StringUtils.substringAfter;
-import static org.apache.commons.lang.StringUtils.uncapitalize;
-import static org.apache.commons.lang.WordUtils.capitalize;
+import com.google.common.collect.ImmutableMap;
+import org.apache.commons.lang.StringUtils;
+import org.raml.model.Action;
+import org.raml.model.MimeType;
+import org.raml.model.Raml;
+import org.raml.model.Resource;
 
 final class Names {
 
@@ -108,4 +112,12 @@ final class Names {
 
     }
 
+    static Component componentFromBaseUriIn(final Raml raml) {
+        Map<String, String> conversion = ImmutableMap.of("command", "commands", "event", "events", "query", "queries");
+
+        String baseUri = baseUriPathWithoutContext(raml);
+        String[] sections = baseUri.split("/");
+
+        return Component.valueOf(conversion.get(sections[1]), sections[2]);
+    }
 }

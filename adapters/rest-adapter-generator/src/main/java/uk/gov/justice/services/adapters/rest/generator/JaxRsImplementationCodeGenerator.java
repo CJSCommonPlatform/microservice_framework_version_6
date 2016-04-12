@@ -1,5 +1,22 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
+import static com.sun.codemodel.JMod.PUBLIC;
+import static java.lang.String.format;
+
+import uk.gov.justice.services.adapter.rest.RestProcessor;
+import uk.gov.justice.services.core.annotation.Adapter;
+import uk.gov.justice.services.core.annotation.Component;
+import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
+import uk.gov.justice.services.core.dispatcher.SynchronousDispatcher;
+
+import java.lang.annotation.Annotation;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.ws.rs.core.HttpHeaders;
+
 import com.google.common.collect.ImmutableMap;
 import com.sun.codemodel.JAnnotationUse;
 import com.sun.codemodel.JBlock;
@@ -14,21 +31,6 @@ import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JPackage;
 import com.sun.codemodel.JType;
 import com.sun.codemodel.JVar;
-import uk.gov.justice.services.adapter.rest.RestProcessor;
-import uk.gov.justice.services.core.annotation.Adapter;
-import uk.gov.justice.services.core.annotation.Component;
-import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
-import uk.gov.justice.services.core.dispatcher.SynchronousDispatcher;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.ws.rs.core.HttpHeaders;
-import java.lang.annotation.Annotation;
-import java.util.List;
-import java.util.Map;
-
-import static com.sun.codemodel.JMod.PUBLIC;
-import static java.lang.String.format;
 
 /**
  * Internal code generation class for generating JAX-RS resource implementation classes.
@@ -48,12 +50,12 @@ class JaxRsImplementationCodeGenerator {
         this.codeModel = codeModel;
     }
 
-    JDefinedClass createImplementation(JDefinedClass resourceInterface) {
+    JDefinedClass createImplementation(JDefinedClass resourceInterface, final Component component) {
         final JPackage pkg = resourceInterface.getPackage();
         try {
             final JDefinedClass resourceImplementation = pkg._class("Default" + resourceInterface.name());
             resourceImplementation._implements(resourceInterface);
-            addAnnotations(resourceImplementation);
+            addAnnotations(resourceImplementation, component);
             addImplementationMethods(resourceImplementation, resourceInterface);
 
             if (containsResourcesOfType(resourceInterface, POST)) {
@@ -76,11 +78,11 @@ class JaxRsImplementationCodeGenerator {
         return resourceInterface.methods().stream().filter((interfaceMethod) -> isResourceOfType(interfaceMethod, methodType)).findAny().isPresent();
     }
 
-
-    private void addAnnotations(final JDefinedClass resourceImplementation) {
+    private void addAnnotations(final JDefinedClass resourceImplementation, final Component component) {
         resourceImplementation.annotate(Stateless.class);
         JAnnotationUse adapterAnnotation = resourceImplementation.annotate(Adapter.class);
-        adapterAnnotation.param("value", Component.COMMAND_API);
+
+        adapterAnnotation.param("value", component);
     }
 
     private void addImplementationMethods(final JDefinedClass resourceImplementation, JDefinedClass resourceInterface) {

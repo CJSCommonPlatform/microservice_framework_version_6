@@ -13,8 +13,8 @@
     <packaging>pom</packaging>
     <modules>
         <module>query-api</module>
-        <module>view-controller</module>
-        <module>data-view</module>
+        <module>query-controller</module>
+        <module>query-view</module>
     </modules>
 
 

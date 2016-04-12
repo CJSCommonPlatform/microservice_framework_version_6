@@ -19,6 +19,11 @@
         </dependency>
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
+            <artifactId>enveloper</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
             <artifactId>rest-adapter-core</artifactId>
             <version>${project.version}</version>
         </dependency>

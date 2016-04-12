@@ -72,14 +72,14 @@ public class Enveloper {
     }
 
     private Metadata buildMetaData(final Object eventObject, final Metadata metadata) {
+        if (!eventMap.containsKey(eventObject.getClass())) {
+            throw new InvalidEventException(format("Failed to map event. No event registered for %s", eventObject.getClass()));
+        }
+
         return buildMetaData(eventObject, metadata, eventMap.get(eventObject.getClass()));
     }
 
     private Metadata buildMetaData(final Object eventObject, final Metadata metadata, final String name) {
-
-        if (!eventMap.containsKey(eventObject.getClass())) {
-            throw new InvalidEventException(format("Failed to map event. No event registered for %s", eventObject.getClass()));
-        }
 
         JsonObjectBuilder metadataBuilder = JsonObjects.createObjectBuilderWithFilter(metadata.asJsonObject(),
                 x -> !Arrays.asList(ID, NAME, CAUSATION).contains(x));

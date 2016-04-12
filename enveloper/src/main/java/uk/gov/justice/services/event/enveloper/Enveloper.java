@@ -59,7 +59,23 @@ public class Enveloper {
         return x -> DefaultEnvelope.envelopeFrom(buildMetaData(x, envelope.metadata()), objectToJsonObjectConverter.convert(x));
     }
 
+    /**
+     * Provides a function that wraps the provided object into a new {@link Envelope} using metadata from the
+     * given envelope, except the name.
+     *
+     * @param envelope - the envelope containing source metadata.
+     * @param name     - name of the payload.
+     * @return a function that wraps objects into an envelope.
+     */
+    public Function<Object, Envelope> withMetadataFrom(final Envelope envelope, final String name) {
+        return x -> DefaultEnvelope.envelopeFrom(buildMetaData(x, envelope.metadata(), name), objectToJsonObjectConverter.convert(x));
+    }
+
     private Metadata buildMetaData(final Object eventObject, final Metadata metadata) {
+        return buildMetaData(eventObject, metadata, eventMap.get(eventObject.getClass()));
+    }
+
+    private Metadata buildMetaData(final Object eventObject, final Metadata metadata, final String name) {
 
         if (!eventMap.containsKey(eventObject.getClass())) {
             throw new InvalidEventException(format("Failed to map event. No event registered for %s", eventObject.getClass()));
@@ -70,7 +86,7 @@ public class Enveloper {
 
         final JsonObject jsonObject = metadataBuilder
                 .add(ID, UUID.randomUUID().toString())
-                .add(NAME, eventMap.get(eventObject.getClass()))
+                .add(NAME, name)
                 .add(CAUSATION, createCausation(metadata))
                 .build();
 

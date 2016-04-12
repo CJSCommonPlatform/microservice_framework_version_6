@@ -4,7 +4,6 @@ import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.core.annotation.Event;
 import uk.gov.justice.services.core.extension.EventFoundEvent;
 import uk.gov.justice.services.event.enveloper.exception.InvalidEventException;
-import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjects;
 import uk.gov.justice.services.messaging.Metadata;
@@ -23,13 +22,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 import static java.lang.String.format;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.CAUSATION;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
 
 /**
- * Enveloper of PoJo classes to the equivalent event envelopes using the event map registry built from {@link Event} annotated classes.
+ * Enveloper of POJO classes to the equivalent event envelopes using the event map registry built from {@link Event} annotated classes.
  */
 @ApplicationScoped
 public class Enveloper {
@@ -56,7 +56,19 @@ public class Enveloper {
      * @return a function that wraps objects into an envelope.
      */
     public Function<Object, JsonEnvelope> withMetadataFrom(final JsonEnvelope envelope) {
-        return x -> DefaultJsonEnvelope.envelopeFrom(buildMetaData(x, envelope.metadata()), objectToJsonValueConverter.convert(x));
+        return x -> envelopeFrom(buildMetaData(x, envelope.metadata()), objectToJsonValueConverter.convert(x));
+    }
+
+    /**
+     * Provides a function that wraps the provided object into a new {@link JsonEnvelope} using metadata from the
+     * given envelope, except the name.
+     *
+     * @param envelope - the envelope containing source metadata.
+     * @param name     - name of the payload.
+     * @return a function that wraps objects into an envelope.
+     */
+    public Function<Object, JsonEnvelope> withMetadataFrom(final JsonEnvelope envelope, final String name) {
+        return x -> envelopeFrom(buildMetaData(x, envelope.metadata(), name), objectToJsonValueConverter.convert(x));
     }
 
     private Metadata buildMetaData(final Object eventObject, final Metadata metadata) {
@@ -64,12 +76,17 @@ public class Enveloper {
             throw new InvalidEventException(format("Failed to map event. No event registered for %s", eventObject.getClass()));
         }
 
+        return buildMetaData(eventObject, metadata, eventMap.get(eventObject.getClass()));
+    }
+
+    private Metadata buildMetaData(final Object eventObject, final Metadata metadata, final String name) {
+
         JsonObjectBuilder metadataBuilder = JsonObjects.createObjectBuilderWithFilter(metadata.asJsonObject(),
                 x -> !Arrays.asList(ID, NAME, CAUSATION).contains(x));
 
         final JsonObject jsonObject = metadataBuilder
                 .add(ID, UUID.randomUUID().toString())
-                .add(NAME, eventMap.get(eventObject.getClass()))
+                .add(NAME, name)
                 .add(CAUSATION, createCausation(metadata))
                 .build();
 

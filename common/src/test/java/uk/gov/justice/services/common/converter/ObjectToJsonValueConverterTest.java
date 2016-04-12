@@ -1,5 +1,21 @@
 package uk.gov.justice.services.common.converter;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.isA;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
+
+import uk.gov.justice.services.common.converter.exception.ConverterException;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonValue;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Rule;
@@ -8,20 +24,6 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.justice.services.common.converter.exception.ConverterException;
-
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonValue;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.isA;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ObjectToJsonValueConverterTest {
@@ -51,7 +53,7 @@ public class ObjectToJsonValueConverterTest {
 
     @Test
     public void shouldConvertListToJsonValue() throws Exception {
-        List list = Arrays.asList(ATTRIBUTE_1, ATTRIBUTE_2);
+        List<String> list = Arrays.asList(ATTRIBUTE_1, ATTRIBUTE_2);
         ObjectToJsonValueConverter objectToJsonValueConverter = new ObjectToJsonValueConverter();
         objectToJsonValueConverter.mapper = new JacksonMapperProducer().objectMapper();
 

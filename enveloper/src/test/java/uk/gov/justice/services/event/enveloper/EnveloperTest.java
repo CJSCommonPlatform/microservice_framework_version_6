@@ -44,15 +44,16 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
 @RunWith(MockitoJUnitRunner.class)
 public class EnveloperTest {
 
-    public static final UUID CLIENT_ID_VALUE = UUID.randomUUID();
-    public static final UUID USER_ID_VALUE = UUID.randomUUID();
-    public static final UUID SESSION_ID_VALUE = UUID.randomUUID();
-    public static final UUID STREAM_ID_VALUE = UUID.randomUUID();
-    public static final int VERSION = 5;
+    private static final UUID CLIENT_ID_VALUE = UUID.randomUUID();
+    private static final UUID USER_ID_VALUE = UUID.randomUUID();
+    private static final UUID SESSION_ID_VALUE = UUID.randomUUID();
+    private static final UUID STREAM_ID_VALUE = UUID.randomUUID();
+    private static final int VERSION = 5;
     private static final String TEST_COMMAND_NAME = "test.commands.do-something";
     private static final String TEST_EVENT_NAME = "test.events.something-happened";
     private static final UUID COMMAND_UUID = UUID.randomUUID();
     private static final UUID OLD_CAUSATION_ID = UUID.randomUUID();
+    private static final String TEST_NAME = "test.queries.query-response";
 
     private Enveloper enveloper;
 
@@ -95,6 +96,22 @@ public class EnveloperTest {
         assertThat(event.payloadAsJsonObject(), equalTo(payload));
         assertThat(event.metadata().id(), notNullValue());
         assertThat(event.metadata().name(), equalTo(TEST_EVENT_NAME));
+        Assert.assertThat(event.metadata().causation().size(), equalTo(2));
+        Assert.assertThat(event.metadata().causation().get(0), equalTo(OLD_CAUSATION_ID));
+        Assert.assertThat(event.metadata().causation().get(1), equalTo(COMMAND_UUID));
+        verify(objectToJsonValueConverter, times(1)).convert(object);
+    }
+
+    @Test
+    public void shouldMapObjectToEnvelopeWithName() throws JsonProcessingException {
+        when(envelope.metadata()).thenReturn(metadata(true));
+        when(objectToJsonValueConverter.convert(object)).thenReturn(payload);
+
+        JsonEnvelope event = enveloper.withMetadataFrom(envelope, TEST_NAME).apply(object);
+
+        assertThat(event.payload(), equalTo(payload));
+        assertThat(event.metadata().id(), notNullValue());
+        assertThat(event.metadata().name(), equalTo(TEST_NAME));
         Assert.assertThat(event.metadata().causation().size(), equalTo(2));
         Assert.assertThat(event.metadata().causation().get(0), equalTo(OLD_CAUSATION_ID));
         Assert.assertThat(event.metadata().causation().get(1), equalTo(COMMAND_UUID));

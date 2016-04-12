@@ -11,6 +11,7 @@
 
     <artifactId>example-query-api</artifactId>
     <packaging>war</packaging>
+
     <build>
         <finalName>${project.artifactId}</finalName>
         <plugins>

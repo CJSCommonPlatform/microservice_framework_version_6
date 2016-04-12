@@ -14,8 +14,8 @@
 
     <modules>
         <module>example-query-api</module>
-        <module>example-view-controller</module>
-        <module>example-data-view</module>
+        <module>example-query-controller</module>
+        <module>example-query-view</module>
     </modules>
 
 </project>

@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>data-view</artifactId>
+    <artifactId>query-view</artifactId>
 
     <dependencies>
         <dependency>

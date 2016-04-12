@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>view-controller</artifactId>
+    <artifactId>query-controller</artifactId>
 
     <dependencies>
         <dependency>

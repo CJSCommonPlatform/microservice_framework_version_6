@@ -11,7 +11,6 @@ import uk.gov.justice.services.messaging.Envelope;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -56,7 +55,7 @@ public class EventStreamManager {
      */
     @Transactional
     public void append(final UUID id, final Stream<Envelope> events) throws EventStreamException {
-        append(id, events, Optional.empty());
+        appendTo(id, getCurrentVersion(id), validEnvelopesFrom(id, events));
     }
 
     /**
@@ -68,10 +67,7 @@ public class EventStreamManager {
      */
     @Transactional
     public void appendAfter(final UUID id, final Stream<Envelope> events, final Long version) throws EventStreamException {
-        if (version == null) {
-            throw new EventStreamException(String.format("Failed to append to stream %s. Version must not be null.", id));
-        }
-        append(id, events, Optional.of(version));
+        appendTo(id, validCurrentVersionFrom(id, version), validEnvelopesFrom(id, events));
     }
 
     /**
@@ -83,16 +79,36 @@ public class EventStreamManager {
         return eventRepository.getCurrentSequenceIdForStream(id);
     }
 
-    private void append(final UUID id, final Stream<Envelope> events, final Optional<Long> versionFrom) throws EventStreamException {
-        List<Envelope> envelopeList = events.collect(Collectors.<Envelope>toList());
+    private Long validCurrentVersionFrom(final UUID id, final Long version) throws EventStreamException {
+        final Long currentVersion = getCurrentVersion(id);
 
-        Long currentVersion = eventRepository.getCurrentSequenceIdForStream(id);
+        if (version == null) {
+            throw new EventStreamException(String.format("Failed to append to stream %s. Version must not be null.", id));
+        }
 
-        validateEvents(id, envelopeList, versionFrom, currentVersion);
+        if (!version.equals(currentVersion)) {
+            throw new EventStreamException(String.format("Failed to append to stream %s. Version mismatch. Expected %d, Found %d",
+                    id, version, eventRepository.getCurrentSequenceIdForStream(id)));
+        }
 
+        return currentVersion;
+    }
+
+    private List<Envelope> validEnvelopesFrom(final UUID id, final Stream<Envelope> events) throws EventStreamException {
+        final List<Envelope> envelopeList = events.collect(Collectors.toList());
+
+        if (envelopeList.stream().anyMatch(e -> e.metadata().version().isPresent())) {
+            throw new EventStreamException(String.format("Failed to append to stream %s. Version must be empty.", id));
+        }
+
+        return envelopeList;
+    }
+
+    private void appendTo(final UUID id, final Long currentVersion, final List<Envelope> envelopeList) throws EventStreamException {
+        Long version = currentVersion;
         for (final Envelope event : envelopeList) {
             try {
-                eventRepository.store(event, id, ++currentVersion);
+                eventRepository.store(event, id, ++version);
                 eventPublisher.publish(event);
             } catch (StoreEventRequestFailedException e) {
                 throw new EventStreamException(String.format("Failed to append event to Event Store %s", event.metadata().id()), e);
@@ -100,14 +116,4 @@ public class EventStreamManager {
         }
     }
 
-    private void validateEvents(final UUID id, final List<Envelope> envelopeList, final Optional<Long> versionFrom, final Long currentVersion) throws EventStreamException {
-        if (versionFrom.isPresent() && !versionFrom.get().equals(currentVersion)) {
-            throw new EventStreamException(String.format("Failed to append to stream %s. Version mismatch. Expected %d, Found %d",
-                    id, versionFrom.get(), currentVersion));
-        }
-
-        if (envelopeList.stream().anyMatch(e -> e.metadata().version().isPresent())) {
-            throw new EventStreamException(String.format("Failed to append to stream %s. Version must be empty.", id));
-        }
-    }
 }

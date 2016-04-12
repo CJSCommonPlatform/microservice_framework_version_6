@@ -1,12 +1,12 @@
 package uk.gov.justice.services.core.annotation;
 
-import static java.lang.String.format;
-import static java.util.Arrays.stream;
-
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.jms.Destination;
 import javax.jms.Queue;
 import javax.jms.Topic;
+
+import static java.lang.String.format;
+import static java.util.Arrays.stream;
 
 /**
  * Enum representing all the service components.
@@ -18,7 +18,9 @@ public enum Component {
     COMMAND_HANDLER("commands", "handler", Queue.class),
     EVENT_LISTENER("events", "listener", Topic.class),
     EVENT_PROCESSOR("events", "processor", Topic.class),
-    QUERY_API("queries", "api", null);
+    QUERY_API("queries", "api", null),
+    QUERY_CONTROLLER("queries", "controller", null),
+    QUERY_VIEW("queries", "view", null);
 
     private final String pillar;
     private final String tier;

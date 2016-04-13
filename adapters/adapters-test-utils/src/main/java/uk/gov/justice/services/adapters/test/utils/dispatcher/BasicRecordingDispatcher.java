@@ -1,6 +1,6 @@
 package uk.gov.justice.services.adapters.test.utils.dispatcher;
 
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,10 +13,10 @@ import static com.jayway.awaitility.Awaitility.await;
  * Created by Jacek on 2016-04-04.
  */
 public class BasicRecordingDispatcher {
-    private final List<Envelope> recordedEnvelopes = new CopyOnWriteArrayList<>();
+    private final List<JsonEnvelope> recordedJsonEnvelopes = new CopyOnWriteArrayList<>();
 
-    protected void record(Envelope envelope) {
-        this.recordedEnvelopes.add(envelope);
+    protected void record(JsonEnvelope jsonEnvelope) {
+        this.recordedJsonEnvelopes.add(jsonEnvelope);
     }
 
     /**
@@ -26,7 +26,7 @@ public class BasicRecordingDispatcher {
      * @param jsonElementValue - value of element in payload
      * @return - envelope matching given arguments
      */
-    public Envelope awaitForEnvelopeWithPayloadOf(String jsonElementName, String jsonElementValue) {
+    public JsonEnvelope awaitForEnvelopeWithPayloadOf(String jsonElementName, String jsonElementValue) {
         return awaitForEnvelopeContaining(payloadWith(jsonElementName, jsonElementValue));
     }
 
@@ -37,7 +37,7 @@ public class BasicRecordingDispatcher {
      * @param jsonElementValue - value of element in metadata
      * @return - envelope matching given arguments
      */
-    public Envelope awaitForEnvelopeWithMetadataOf(String jsonElementName, String jsonElementValue) {
+    public JsonEnvelope awaitForEnvelopeWithMetadataOf(String jsonElementName, String jsonElementValue) {
         return awaitForEnvelopeContaining(metadataWith(jsonElementName, jsonElementValue));
     }
 
@@ -71,20 +71,20 @@ public class BasicRecordingDispatcher {
         return !envelopeMatching(metadataWith(jsonElementName, jsonElementValue)).isPresent();
     }
 
-    private Envelope awaitForEnvelopeContaining(Predicate<Envelope> filterCondition) {
+    private JsonEnvelope awaitForEnvelopeContaining(Predicate<JsonEnvelope> filterCondition) {
         await().until(() -> envelopeMatching(filterCondition).isPresent());
         return envelopeMatching(filterCondition).get();
     }
 
-    private Optional<Envelope> envelopeMatching(Predicate<Envelope> filterCondition) {
-        return recordedEnvelopes.stream().filter(filterCondition).findFirst();
+    private Optional<JsonEnvelope> envelopeMatching(Predicate<JsonEnvelope> filterCondition) {
+        return recordedJsonEnvelopes.stream().filter(filterCondition).findFirst();
     }
 
-    private Predicate<Envelope> payloadWith(String elementName, String elementValue) {
-        return e -> e.payload().getString(elementName) != null && e.payload().getString(elementName).equals(elementValue);
+    private Predicate<JsonEnvelope> payloadWith(String elementName, String elementValue) {
+        return e -> e.payloadAsJsonObject().getString(elementName) != null && e.payloadAsJsonObject().getString(elementName).equals(elementValue);
     }
 
-    private Predicate<Envelope> metadataWith(String elementName, String elementValue) {
+    private Predicate<JsonEnvelope> metadataWith(String elementName, String elementValue) {
         return e -> e.metadata().asJsonObject().getString(elementName).equals(elementValue);
     }
 }

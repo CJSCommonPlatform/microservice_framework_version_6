@@ -7,7 +7,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.services.core.annotation.Component;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.justice.services.messaging.context.ContextName;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
@@ -32,14 +32,14 @@ public class JmsSenderTest {
     @Mock
     Destination destination;
     @Mock
-    private Envelope envelope;
+    private JsonEnvelope jsonEnvelope;
     @Mock
     private Metadata metadata;
 
     @Before
     public void setup() throws Exception {
 
-        when(envelope.metadata()).thenReturn(metadata);
+        when(jsonEnvelope.metadata()).thenReturn(metadata);
         when(metadata.name()).thenReturn(NAME);
 
     }
@@ -66,8 +66,8 @@ public class JmsSenderTest {
 
         when(jmsDestinations.getDestination(COMMAND_CONTROLLER, ContextName.fromName(QUEUE_NAME))).thenReturn(destination);
 
-        jmsSender.send(envelope);
-        verify(jmsEnvelopeSender).send(envelope, destination);
+        jmsSender.send(jsonEnvelope);
+        verify(jmsEnvelopeSender).send(jsonEnvelope, destination);
 
     }
 

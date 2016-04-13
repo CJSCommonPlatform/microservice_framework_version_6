@@ -7,7 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.core.dispatcher.Requester;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.UUID;
 
@@ -27,10 +27,10 @@ public class RecipesQueryApiTest {
     private static final UUID RECIPE_ID = UUID.randomUUID();
 
     @Mock
-    Envelope envelope;
+    JsonEnvelope jsonEnvelope;
 
     @Mock
-    Envelope response;
+    JsonEnvelope response;
 
     @Mock
     private Requester requester;
@@ -43,25 +43,25 @@ public class RecipesQueryApiTest {
 
     @Test
     public void shouldHandleRecipesQuery() throws Exception {
-        when(envelope.payload()).thenReturn(payload);
-        when(requester.request(envelope)).thenReturn(response);
+        when(jsonEnvelope.payloadAsJsonObject()).thenReturn(payload);
+        when(requester.request(jsonEnvelope)).thenReturn(response);
 
-        Envelope actualResponse = recipesQueryApi.listRecipes(envelope);
+        JsonEnvelope actualResponse = recipesQueryApi.listRecipes(jsonEnvelope);
 
-        verify(requester, times(1)).request(envelope);
+        verify(requester, times(1)).request(jsonEnvelope);
         assertThat(actualResponse, sameInstance(response));
     }
 
     @Test
     public void shouldHandleRecipeQuery() throws Exception {
-        when(envelope.payload()).thenReturn(payload);
+        when(jsonEnvelope.payloadAsJsonObject()).thenReturn(payload);
         when(payload.getString(FIELD_RECIPE_ID)).thenReturn(RECIPE_ID.toString());
-        when(requester.request(envelope)).thenReturn(response);
+        when(requester.request(jsonEnvelope)).thenReturn(response);
 
-        Envelope actualResponse = recipesQueryApi.recipe(envelope);
+        JsonEnvelope actualResponse = recipesQueryApi.recipe(jsonEnvelope);
 
         verify(payload, times(1)).getString(FIELD_RECIPE_ID);
-        verify(requester, times(1)).request(envelope);
+        verify(requester, times(1)).request(jsonEnvelope);
         assertThat(actualResponse, sameInstance(response));
     }
 }

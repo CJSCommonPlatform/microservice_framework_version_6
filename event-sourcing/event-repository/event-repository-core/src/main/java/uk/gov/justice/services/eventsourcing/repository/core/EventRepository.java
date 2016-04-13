@@ -2,7 +2,7 @@ package uk.gov.justice.services.eventsourcing.repository.core;
 
 
 import uk.gov.justice.services.eventsourcing.repository.core.exception.StoreEventRequestFailedException;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.transaction.Transactional;
 import java.util.UUID;
@@ -19,7 +19,7 @@ public interface EventRepository {
      * @param streamId the id of the stream to retrieve
      * @return the stream of envelopes. Never returns null.
      */
-    Stream<Envelope> getByStreamId(final UUID streamId);
+    Stream<JsonEnvelope> getByStreamId(final UUID streamId);
 
     /**
      * Get a stream of envelopes from a given version, ordered by sequence id.
@@ -28,18 +28,18 @@ public interface EventRepository {
      * @param sequenceId the sequence id to read the stream from
      * @return the stream of envelopes. Never returns null.
      */
-    Stream<Envelope> getByStreamIdAndSequenceId(final UUID streamId, final Long sequenceId);
+    Stream<JsonEnvelope> getByStreamIdAndSequenceId(final UUID streamId, final Long sequenceId);
 
     /**
-     * Stores the given envelope into the event stream.
+     * Stores the given jsonEnvelope into the event stream.
      *
-     * @param envelope the envelope containing the event and the metadata.
+     * @param jsonEnvelope the jsonEnvelope containing the event and the metadata.
      * @param streamId the stream id the event needs to be stored in.
      * @param version  the version at which the event is to be stored
      * @throws StoreEventRequestFailedException If there was a failure in storing the events, this will wrap the underlying cause.
      */
     @Transactional
-    void store(final Envelope envelope, final UUID streamId, final Long version) throws StoreEventRequestFailedException;
+    void store(final JsonEnvelope jsonEnvelope, final UUID streamId, final Long version) throws StoreEventRequestFailedException;
 
     /**
      * Returns the latest sequence Id for the given stream id.

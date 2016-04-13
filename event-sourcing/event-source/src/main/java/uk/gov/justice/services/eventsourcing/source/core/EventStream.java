@@ -2,7 +2,7 @@ package uk.gov.justice.services.eventsourcing.source.core;
 
 
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -17,14 +17,14 @@ public interface EventStream {
      *
      * @return the stream of events
      */
-    Stream<Envelope> read();
+    Stream<JsonEnvelope> read();
 
     /**
      * Get the stream of events from the given version.
      *
      * @return the stream of events
      */
-    Stream<Envelope> readFrom(final Long version);
+    Stream<JsonEnvelope> readFrom(final Long version);
 
     /**
      * Store a stream of events.
@@ -32,7 +32,7 @@ public interface EventStream {
      * @param events the stream of events to store
      * @throws EventStreamException if an event could not be appended
      */
-    void append(final Stream<Envelope> events) throws EventStreamException;
+    void append(final Stream<JsonEnvelope> events) throws EventStreamException;
 
     /**
      * Store a stream of events after the given version.
@@ -41,7 +41,7 @@ public interface EventStream {
      * @param version the version to append from
      * @throws EventStreamException if an event could not be appended
      */
-    void appendAfter(final Stream<Envelope> events, final Long version) throws EventStreamException;
+    void appendAfter(final Stream<JsonEnvelope> events, final Long version) throws EventStreamException;
 
     /**
      * Get the current (current maximum) sequence id (version number) for a stream

@@ -2,7 +2,7 @@ package uk.gov.justice.services.core.jms;
 
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.sender.Sender;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.context.ContextName;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
 
@@ -24,9 +24,9 @@ public class JmsSender implements Sender {
     }
 
     @Override
-    public void send(final Envelope envelope) {
-        final String contextName = ContextName.fromName(envelope.metadata().name());
-        jmsEnvelopeSender.send(envelope, jmsDestinations.getDestination(destinationComponent, contextName));
+    public void send(final JsonEnvelope jsonEnvelope) {
+        final String contextName = ContextName.fromName(jsonEnvelope.metadata().name());
+        jmsEnvelopeSender.send(jsonEnvelope, jmsDestinations.getDestination(destinationComponent, contextName));
     }
 
     @Override

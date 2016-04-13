@@ -6,7 +6,7 @@ import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.dispatcher.Requester;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.inject.Inject;
 
@@ -22,15 +22,15 @@ public class RecipesQueryApi {
     Requester requester;
 
     @Handles("cakeshop.queries.recipes")
-    public Envelope listRecipes(final Envelope query) {
+    public JsonEnvelope listRecipes(final JsonEnvelope query) {
         LOGGER.info("=============> Inside listRecipes Query API");
 
         return requester.request(query);
     }
 
     @Handles("cakeshop.queries.recipe")
-    public Envelope recipe(final Envelope query) {
-        LOGGER.info("=============> Inside recipe Query API. RecipeId: " + query.payload().getString(FIELD_RECIPE_ID));
+    public JsonEnvelope recipe(final JsonEnvelope query) {
+        LOGGER.info("=============> Inside recipe Query API. RecipeId: " + query.payloadAsJsonObject().getString(FIELD_RECIPE_ID));
 
         return requester.request(query);
     }

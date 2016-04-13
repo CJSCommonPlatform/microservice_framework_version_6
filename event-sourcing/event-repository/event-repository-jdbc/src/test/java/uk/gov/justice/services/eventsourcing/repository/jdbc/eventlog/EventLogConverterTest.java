@@ -8,8 +8,8 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import uk.gov.justice.services.common.converter.JsonObjectToStringConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidStreamIdException;
-import uk.gov.justice.services.messaging.DefaultEnvelope;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.Metadata;
 
@@ -49,9 +49,9 @@ public class EventLogConverterTest {
 
     @Test
     public void shouldCreateEventLog() throws Exception {
-        Envelope expectedEnvelope = createTestEnvelope();
-        String expectedPayloadAsJsonString = new JsonObjectToStringConverter().convert(expectedEnvelope.payload());
-        EventLog eventLog = eventLogConverter.createEventLog(expectedEnvelope, STREAM_ID, SEQUENCE_ID);
+        JsonEnvelope expectedJsonEnvelope = createTestEnvelope();
+        String expectedPayloadAsJsonString = new JsonObjectToStringConverter().convert(expectedJsonEnvelope.payloadAsJsonObject());
+        EventLog eventLog = eventLogConverter.createEventLog(expectedJsonEnvelope, STREAM_ID, SEQUENCE_ID);
 
         assertThat(eventLog.getId(), equalTo(ID));
         assertThat(eventLog.getName(), equalTo(NAME));
@@ -68,11 +68,11 @@ public class EventLogConverterTest {
 
     @Test
     public void shouldCreateEnvelope() throws Exception {
-        Envelope actualEnvelope = eventLogConverter.createEnvelope(createEventLog());
+        JsonEnvelope actualJsonEnvelope = eventLogConverter.createEnvelope(createEventLog());
 
-        assertThat(actualEnvelope.metadata().id(), equalTo(ID));
-        assertThat(actualEnvelope.metadata().name(), equalTo(NAME));
-        String actualPayload = new JsonObjectToStringConverter().convert(actualEnvelope.payload());
+        assertThat(actualJsonEnvelope.metadata().id(), equalTo(ID));
+        assertThat(actualJsonEnvelope.metadata().name(), equalTo(NAME));
+        String actualPayload = new JsonObjectToStringConverter().convert(actualJsonEnvelope.payloadAsJsonObject());
         JSONAssert.assertEquals(PAYLOAD_JSON, actualPayload, false);
     }
 
@@ -80,7 +80,7 @@ public class EventLogConverterTest {
         return new EventLog(ID, STREAM_ID, SEQUENCE_ID, NAME, METADATA_JSON, PAYLOAD_JSON);
     }
 
-    private Envelope createTestEnvelope() throws IOException {
+    private JsonEnvelope createTestEnvelope() throws IOException {
         final Metadata metadata = metadataFrom(Json.createObjectBuilder()
                 .add("id", ID.toString())
                 .add("name", NAME)
@@ -88,7 +88,7 @@ public class EventLogConverterTest {
 
         final JsonObject payload = Json.createObjectBuilder().add(PAYLOAD_FIELD_NAME, PAYLOAD_FIELD_VALUE).build();
 
-        return DefaultEnvelope.envelopeFrom(metadata, payload);
+        return DefaultJsonEnvelope.envelopeFrom(metadata, payload);
     }
 
 }

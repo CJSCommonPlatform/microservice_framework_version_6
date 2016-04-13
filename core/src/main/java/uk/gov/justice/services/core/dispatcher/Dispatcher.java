@@ -5,7 +5,7 @@ import static uk.gov.justice.services.core.handler.HandlerMethod.SYNCHRONOUS;
 
 import uk.gov.justice.services.core.handler.HandlerMethod;
 import uk.gov.justice.services.core.handler.registry.HandlerRegistry;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 /**
  * Dispatches messages synchronously or asynchronously to their corresponding handlers, which could
@@ -32,21 +32,21 @@ class Dispatcher {
      * away at this point to provide void method that can be exposed via the
      * {@link AsynchronousDispatcher} interface.
      *
-     * @param envelope the envelope to dispatch to a handler
+     * @param jsonEnvelope the jsonEnvelope to dispatch to a handler
      */
-    void asynchronousDispatch(final Envelope envelope) {
-        getMethod(envelope, ASYNCHRONOUS).execute(envelope);
+    void asynchronousDispatch(final JsonEnvelope jsonEnvelope) {
+        getMethod(jsonEnvelope, ASYNCHRONOUS).execute(jsonEnvelope);
     }
 
     /**
      * Synchronously dispatch message to its corresponding handler, which could be a command
      * handler, command controller, event processor, etc.
      *
-     * @param envelope the envelope to dispatch to a handler
-     * @return the envelope returned by the handler method
+     * @param jsonEnvelope the jsonEnvelope to dispatch to a handler
+     * @return the jsonEnvelope returned by the handler method
      */
-    Envelope synchronousDispatch(final Envelope envelope) {
-        return (Envelope) getMethod(envelope, SYNCHRONOUS).execute(envelope);
+    JsonEnvelope synchronousDispatch(final JsonEnvelope jsonEnvelope) {
+        return (JsonEnvelope) getMethod(jsonEnvelope, SYNCHRONOUS).execute(jsonEnvelope);
     }
 
     /**
@@ -61,13 +61,13 @@ class Dispatcher {
     }
 
     /**
-     * Get the handler method for handling this envelope or throw an exception.
+     * Get the handler method for handling this jsonEnvelope or throw an exception.
      *
-     * @param envelope the envelope to be handled
+     * @param jsonEnvelope the jsonEnvelope to be handled
      * @return the handler method
      */
-    private HandlerMethod getMethod(final Envelope envelope, final boolean isSynchronous) {
-        final String name = envelope.metadata().name();
+    private HandlerMethod getMethod(final JsonEnvelope jsonEnvelope, final boolean isSynchronous) {
+        final String name = jsonEnvelope.metadata().name();
         return handlerRegistry.get(name, isSynchronous);
     }
 }

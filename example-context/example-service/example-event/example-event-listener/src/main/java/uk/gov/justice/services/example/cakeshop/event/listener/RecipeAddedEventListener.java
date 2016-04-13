@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
@@ -15,9 +15,9 @@ public class RecipeAddedEventListener {
     private static final String FIELD_RECIPE_ID = "recipeId";
 
     @Handles("cakeshop.events.recipe-added")
-    public void handle(final Envelope envelope) {
+    public void handle(final JsonEnvelope jsonEnvelope) {
 
-        LOGGER.info("=============> Inside add-recipe Event Listener. RecipeId: " + envelope.payload().getString(FIELD_RECIPE_ID));
+        LOGGER.info("=============> Inside add-recipe Event Listener. RecipeId: " + jsonEnvelope.payloadAsJsonObject().getString(FIELD_RECIPE_ID));
         LOGGER.info("===============================================================================================");
 
     }

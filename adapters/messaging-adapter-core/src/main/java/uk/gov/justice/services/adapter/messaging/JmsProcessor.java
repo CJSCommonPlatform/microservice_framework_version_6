@@ -1,7 +1,7 @@
 package uk.gov.justice.services.adapter.messaging;
 
 import uk.gov.justice.services.adapter.messaging.exception.InvalildJmsMessageTypeException;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
 
 import javax.inject.Inject;
@@ -27,7 +27,7 @@ public class JmsProcessor {
      * @param consumer a consumer for the envelope
      * @param message  a message to be processed
      */
-    public void process(final Consumer<Envelope> consumer, final Message message) {
+    public void process(final Consumer<JsonEnvelope> consumer, final Message message) {
         if (!(message instanceof TextMessage)) {
             try {
                 throw new InvalildJmsMessageTypeException(String.format("Message is not an instance of TextMessage %s", message.getJMSMessageID()));

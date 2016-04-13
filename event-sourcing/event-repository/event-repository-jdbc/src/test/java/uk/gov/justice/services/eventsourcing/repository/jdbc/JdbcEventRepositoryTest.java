@@ -12,7 +12,7 @@ import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.JdbcEventL
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.EventLogRepositoryException;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidSequenceIdException;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidStreamIdException;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 
 import java.util.Arrays;
@@ -44,7 +44,7 @@ public class JdbcEventRepositoryTest {
     private EventLogConverter eventLogConverter;
 
     @Mock
-    private Envelope envelope;
+    private JsonEnvelope jsonEnvelope;
 
     @Mock
     private Metadata metadata;
@@ -58,23 +58,23 @@ public class JdbcEventRepositoryTest {
     @Test
     public void shouldGetByStreamId() throws Exception {
         when(jdbcEventLogRepository.findByStreamIdOrderBySequenceIdAsc(STREAM_ID)).thenReturn(Arrays.asList(eventLog).stream());
-        when(eventLogConverter.createEnvelope(eventLog)).thenReturn(envelope);
+        when(eventLogConverter.createEnvelope(eventLog)).thenReturn(jsonEnvelope);
 
-        Stream<Envelope> streamOfEnvelopes = jdbcEventRepository.getByStreamId(STREAM_ID);
+        Stream<JsonEnvelope> streamOfEnvelopes = jdbcEventRepository.getByStreamId(STREAM_ID);
 
         assertThat(streamOfEnvelopes, not(nullValue()));
-        assertThat(streamOfEnvelopes.findFirst().get(), equalTo(envelope));
+        assertThat(streamOfEnvelopes.findFirst().get(), equalTo(jsonEnvelope));
     }
 
     @Test
     public void shouldGetByStreamIdAndSequenceId() throws Exception {
         when(jdbcEventLogRepository.findByStreamIdFromSequenceIdOrderBySequenceIdAsc(STREAM_ID, VERSION_1)).thenReturn(Arrays.asList(eventLog).stream());
-        when(eventLogConverter.createEnvelope(eventLog)).thenReturn(envelope);
+        when(eventLogConverter.createEnvelope(eventLog)).thenReturn(jsonEnvelope);
 
-        Stream<Envelope> streamOfEnvelopes = jdbcEventRepository.getByStreamIdAndSequenceId(STREAM_ID, VERSION_1);
+        Stream<JsonEnvelope> streamOfEnvelopes = jdbcEventRepository.getByStreamIdAndSequenceId(STREAM_ID, VERSION_1);
 
         assertThat(streamOfEnvelopes, not(nullValue()));
-        assertThat(streamOfEnvelopes.findFirst().get(), equalTo(envelope));
+        assertThat(streamOfEnvelopes.findFirst().get(), equalTo(jsonEnvelope));
     }
 
     @Test(expected = InvalidStreamIdException.class)
@@ -94,23 +94,23 @@ public class JdbcEventRepositoryTest {
 
     @Test
     public void shouldStoreEnvelope() throws Exception {
-        when(eventLogConverter.createEventLog(envelope, STREAM_ID, VERSION_1)).thenReturn(eventLog);
+        when(eventLogConverter.createEventLog(jsonEnvelope, STREAM_ID, VERSION_1)).thenReturn(eventLog);
 
-        jdbcEventRepository.store(envelope, STREAM_ID, VERSION_1);
+        jdbcEventRepository.store(jsonEnvelope, STREAM_ID, VERSION_1);
 
         verify(jdbcEventLogRepository).insert(eventLog);
     }
 
     @Test(expected = StoreEventRequestFailedException.class)
     public void shouldThrowExceptionOnDuplicateVersion() throws Exception {
-        when(eventLogConverter.createEventLog(envelope, STREAM_ID, VERSION_1)).thenReturn(eventLog);
-        when(envelope.metadata()).thenReturn(metadata);
+        when(eventLogConverter.createEventLog(jsonEnvelope, STREAM_ID, VERSION_1)).thenReturn(eventLog);
+        when(jsonEnvelope.metadata()).thenReturn(metadata);
         when(metadata.streamId()).thenReturn(Optional.of(STREAM_ID));
         when(metadata.version()).thenReturn(Optional.of(VERSION_1));
 
         doThrow(InvalidSequenceIdException.class).when(jdbcEventLogRepository).insert(eventLog);
 
-        jdbcEventRepository.store(envelope, STREAM_ID, VERSION_1);
+        jdbcEventRepository.store(jsonEnvelope, STREAM_ID, VERSION_1);
     }
 
     @Test

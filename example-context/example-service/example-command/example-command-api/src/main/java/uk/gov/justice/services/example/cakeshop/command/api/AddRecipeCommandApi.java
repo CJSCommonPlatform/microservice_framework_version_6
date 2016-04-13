@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.sender.Sender;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.inject.Inject;
 
@@ -24,8 +24,8 @@ public class AddRecipeCommandApi {
     Sender sender;
 
     @Handles("cakeshop.commands.add-recipe")
-    public void addRecipe(final Envelope command) {
-        LOGGER.info("=============> Inside add-recipe Command API. RecipeId: " + command.payload().getString(FIELD_RECIPE_ID));
+    public void addRecipe(final JsonEnvelope command) {
+        LOGGER.info("=============> Inside add-recipe Command API. RecipeId: " + command.payloadAsJsonObject().getString(FIELD_RECIPE_ID));
 
         sender.send(command);
     }

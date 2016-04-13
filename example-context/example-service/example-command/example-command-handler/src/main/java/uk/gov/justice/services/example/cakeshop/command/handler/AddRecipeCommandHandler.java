@@ -8,7 +8,7 @@ import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.example.cakeshop.domain.Ingredient;
 import uk.gov.justice.services.example.cakeshop.domain.event.RecipeAdded;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.inject.Inject;
 import javax.json.JsonObject;
@@ -35,11 +35,11 @@ public class AddRecipeCommandHandler {
     Enveloper enveloper;
 
     @Handles("cakeshop.commands.add-recipe")
-    public void addRecipe(final Envelope command) throws EventStreamException {
+    public void addRecipe(final JsonEnvelope command) throws EventStreamException {
 
-        LOGGER.info("=============> Inside add-recipe Command Handler. RecipeId: " + command.payload().getString(FIELD_RECIPE_ID));
+        LOGGER.info("=============> Inside add-recipe Command Handler. RecipeId: " + command.payloadAsJsonObject().getString(FIELD_RECIPE_ID));
 
-        final UUID recipeId = getUUID(command.payload(), FIELD_RECIPE_ID).get();
+        final UUID recipeId = getUUID(command.payloadAsJsonObject(), FIELD_RECIPE_ID).get();
 
         final Stream<Object> events = streamOf(recipeAddedEventFrom(command));
 
@@ -47,8 +47,8 @@ public class AddRecipeCommandHandler {
 
     }
 
-    private Object recipeAddedEventFrom(final Envelope command) {
-        final JsonObject payload = command.payload();
+    private Object recipeAddedEventFrom(final JsonEnvelope command) {
+        final JsonObject payload = command.payloadAsJsonObject();
         return new RecipeAdded(
                 UUID.fromString(payload.getString("recipeId")),
                 payload.getString("name"),

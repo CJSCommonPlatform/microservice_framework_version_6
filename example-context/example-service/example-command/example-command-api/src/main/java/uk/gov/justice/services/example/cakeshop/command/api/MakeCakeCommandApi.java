@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.sender.Sender;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.inject.Inject;
 
@@ -20,9 +20,9 @@ public class MakeCakeCommandApi {
     Sender sender;
 
     @Handles("cakeshop.commands.make-cake")
-    public void handle(final Envelope envelope) {
+    public void handle(final JsonEnvelope jsonEnvelope) {
         LOGGER.info("=============> Inside make-cake Command API");
 
-        sender.send(envelope);
+        sender.send(jsonEnvelope);
     }
 }

@@ -7,14 +7,14 @@ import static org.apache.cxf.jaxrs.client.WebClient.create;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.justice.services.messaging.DefaultEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
 
 import uk.gov.justice.api.QueryApiRestExampleApplication;
 import uk.gov.justice.services.adapter.rest.RestProcessor;
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
 import uk.gov.justice.services.adapters.test.utils.dispatcher.AsynchronousRecordingDispatcher;
 import uk.gov.justice.services.adapters.test.utils.dispatcher.SynchronousRecordingDispatcher;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.Properties;
 
@@ -108,10 +108,10 @@ public class DefaultUsersUserIdResourceIT {
                 .path("/users/567-8910")
                 .post(entity("{\"userName\" : \"John Smith\"}", CREATE_USER_MEDIA_TYPE));
 
-        Envelope envelope = asyncDispatcher.awaitForEnvelopeWithPayloadOf("userId", "567-8910");
-        assertThat(envelope.metadata().name(), is("people.commands.create-user"));
-        assertThat(envelope.payload().getString("userId"), is("567-8910"));
-        assertThat(envelope.payload().getString("userName"), is("John Smith"));
+        JsonEnvelope jsonEnvelope = asyncDispatcher.awaitForEnvelopeWithPayloadOf("userId", "567-8910");
+        assertThat(jsonEnvelope.metadata().name(), is("people.commands.create-user"));
+        assertThat(jsonEnvelope.payloadAsJsonObject().getString("userId"), is("567-8910"));
+        assertThat(jsonEnvelope.payloadAsJsonObject().getString("userName"), is("John Smith"));
 
     }
 
@@ -131,10 +131,10 @@ public class DefaultUsersUserIdResourceIT {
                 .path("/users/4444-9876")
                 .post(entity("{\"userName\" : \"Peggy Brown\"}", UPDATE_USER_MEDIA_TYPE));
 
-        Envelope envelope = asyncDispatcher.awaitForEnvelopeWithPayloadOf("userId", "4444-9876");
-        assertThat(envelope.metadata().name(), is("people.commands.update-user"));
-        assertThat(envelope.payload().getString("userId"), is("4444-9876"));
-        assertThat(envelope.payload().getString("userName"), is("Peggy Brown"));
+        JsonEnvelope jsonEnvelope = asyncDispatcher.awaitForEnvelopeWithPayloadOf("userId", "4444-9876");
+        assertThat(jsonEnvelope.metadata().name(), is("people.commands.update-user"));
+        assertThat(jsonEnvelope.payloadAsJsonObject().getString("userId"), is("4444-9876"));
+        assertThat(jsonEnvelope.payloadAsJsonObject().getString("userName"), is("Peggy Brown"));
 
     }
 
@@ -144,9 +144,9 @@ public class DefaultUsersUserIdResourceIT {
                 .path("/users/4444-5555")
                 .header("Accept", "application/vnd.people.queries.get-user+json")
                 .get();
-        Envelope envelope = syncDispatcher.awaitForEnvelopeWithPayloadOf("userId", "4444-5555");
-        assertThat(envelope.payload().getString("userId"), is("4444-5555"));
-        assertThat(envelope.metadata().name(), is("people.queries.get-user"));
+        JsonEnvelope jsonEnvelope = syncDispatcher.awaitForEnvelopeWithPayloadOf("userId", "4444-5555");
+        assertThat(jsonEnvelope.payloadAsJsonObject().getString("userId"), is("4444-5555"));
+        assertThat(jsonEnvelope.metadata().name(), is("people.queries.get-user"));
 
     }
 
@@ -160,9 +160,9 @@ public class DefaultUsersUserIdResourceIT {
                 .get();
 
         assertThat(response.getStatus(), is(200));
-        Envelope envelope = syncDispatcher.awaitForEnvelopeWithPayloadOf("userId", "4444-5555");
-        assertThat(envelope.payload().getString("userId"), is("4444-5555"));
-        assertThat(envelope.metadata().name(), is("people.queries.get-user2"));
+        JsonEnvelope jsonEnvelope = syncDispatcher.awaitForEnvelopeWithPayloadOf("userId", "4444-5555");
+        assertThat(jsonEnvelope.payloadAsJsonObject().getString("userId"), is("4444-5555"));
+        assertThat(jsonEnvelope.metadata().name(), is("people.queries.get-user2"));
 
     }
 

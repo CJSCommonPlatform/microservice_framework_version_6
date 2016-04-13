@@ -25,7 +25,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class HandlerRegistryTest {
 
-    private static final String COMMAND_NAME = "test.commands.mock-command";
+    private static final String COMMAND_NAME = "test.command.mock-command";
 
     @Mock
     private TestCommandHandler commandHandler;

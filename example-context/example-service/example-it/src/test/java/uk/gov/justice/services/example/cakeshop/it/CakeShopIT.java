@@ -33,8 +33,8 @@ public class CakeShopIT {
     private static final int ACCEPTED = 202;
     private static final String RECIPES_RESOURCE_URI = "http://localhost:8080/example-command-api/command/api/rest/cakeshop/recipes/";
     private static final String CAKES_RESOURCE_URI = "http://localhost:8080/example-command-api/command/api/rest/cakeshop/cakes/";
-    private static final String ADD_RECIPE_MEDIA_TYPE = "application/vnd.cakeshop.commands.add-recipe+json";
-    private static final String MAKE_CAKE_MEDIA_TYPE = "application/vnd.cakeshop.commands.make-cake+json";
+    private static final String ADD_RECIPE_MEDIA_TYPE = "application/vnd.cakeshop.command.add-recipe+json";
+    private static final String MAKE_CAKE_MEDIA_TYPE = "application/vnd.cakeshop.command.make-cake+json";
     private static final String LIQUIBASE_EVENT_STORE_DB_CHANGELOG_XML = "liquibase/event-store-db-changelog.xml";
     private static final String H2_DRIVER = "org.h2.Driver";
     private static final String DB_URL = "db.url";
@@ -64,7 +64,7 @@ public class CakeShopIT {
         await().until(() -> eventsWithPayloadContaining(recipeId).count() == 1);
 
         EventLog event = eventsWithPayloadContaining(recipeId).findFirst().get();
-        assertThat(event.getName(), is("cakeshop.events.recipe-added"));
+        assertThat(event.getName(), is("cakeshop.event.recipe-added"));
         String eventPayload = event.getPayload();
         with(eventPayload)
                 .assertThat("$.recipeId", equalTo(recipeId))

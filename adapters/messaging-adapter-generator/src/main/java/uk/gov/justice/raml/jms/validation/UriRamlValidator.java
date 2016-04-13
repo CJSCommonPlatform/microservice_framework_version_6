@@ -18,7 +18,7 @@ public class UriRamlValidator extends AbstractResourceRamlValidator {
 
     private static final String ERROR_MSG = "Inavlid uri: %s";
     private static final Pattern URI_PATTERN = Pattern
-            .compile("\\S+\\.(api.commands|controller.commands|handler.commands|events)");
+            .compile("\\S+\\.(api.command|controller.command|handler.command|event)");
 
     @Override
     protected void validate(final Resource resource) {

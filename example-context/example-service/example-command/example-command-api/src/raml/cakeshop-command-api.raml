@@ -10,7 +10,7 @@ protocols: [ HTTP, HTTPS ]
     Add a new recipe
   post:
     body:
-        application/vnd.cakeshop.commands.add-recipe+json:
+        application/vnd.cakeshop.command.add-recipe+json:
             schema: !include json/schema/add-recipe.json
             example: !include json/add-recipe.json
 
@@ -21,6 +21,6 @@ protocols: [ HTTP, HTTPS ]
     Make a cake from recipeId in json
   post:
     body:
-        application/vnd.cakeshop.commands.make-cake+json:
+        application/vnd.cakeshop.command.make-cake+json:
             schema: !include json/schema/make-cake.json
             example: !include json/make-cake.json

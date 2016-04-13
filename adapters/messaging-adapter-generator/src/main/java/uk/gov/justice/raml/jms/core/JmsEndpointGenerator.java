@@ -41,7 +41,7 @@ import static uk.gov.justice.raml.jms.core.TemplateRenderer.render;
 public class JmsEndpointGenerator implements Generator {
 
     private static final String UTF_8 = "UTF-8";
-    private static final String EVENTS = "events";
+    private static final String EVENT = "event";
     private static final String LISTENER = "listener";
     private static final String PROCESSOR = "processor";
     private static final String TEMPLATE_LOADING_ERROR = "Failed to load template resource JmsListenerTemplate.tpm";
@@ -155,7 +155,7 @@ public class JmsEndpointGenerator implements Generator {
     private Component componentOf(final String resourceUri, final String baseUri) {
         final String[] uriParts = resourceUri.split("\\.");
         String pillar = uriParts[uriParts.length - 1];
-        String tier = EVENTS.equals(pillar)
+        String tier = EVENT.equals(pillar)
                 ? contains(baseUri, PROCESSOR) ? PROCESSOR : LISTENER
                 : uriParts[uriParts.length - 2];
         return Component.valueOf(pillar, tier);

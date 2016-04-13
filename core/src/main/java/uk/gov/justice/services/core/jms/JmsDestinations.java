@@ -26,9 +26,9 @@ public class JmsDestinations {
         initialContext = new InitialContext();
 
         this.destinationMap = new ConcurrentHashMap<>();
-        destinationMap.put(Component.COMMAND_CONTROLLER, "%s.controller.commands");
-        destinationMap.put(Component.COMMAND_HANDLER, "%s.handler.commands");
-        destinationMap.put(Component.EVENT_LISTENER, "%s.events");
+        destinationMap.put(Component.COMMAND_CONTROLLER, "%s.controller.command");
+        destinationMap.put(Component.COMMAND_HANDLER, "%s.handler.command");
+        destinationMap.put(Component.EVENT_LISTENER, "%s.event");
     }
 
     /**

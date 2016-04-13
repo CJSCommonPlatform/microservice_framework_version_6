@@ -17,7 +17,7 @@ public class ResourceBuilder {
     private final List<ActionBuilder> actionBuilders = new ArrayList<>();
 
     private String parentUri = "";
-    private String relativeUri = "/somecontext.controller.commands";
+    private String relativeUri = "/somecontext.controller.command";
     private Map<String, UriParameter> uriParameters = new HashMap<>();
 
     public static ResourceBuilder resource() {
@@ -39,7 +39,7 @@ public class ResourceBuilder {
     }
 
     public ResourceBuilder withDefaultAction() {
-        with(action(POST, "application/vnd.structure.commands.test-cmd+json"));
+        with(action(POST, "application/vnd.structure.command.test-cmd+json"));
         return this;
     }
 

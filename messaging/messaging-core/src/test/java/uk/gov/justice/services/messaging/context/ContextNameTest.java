@@ -16,7 +16,7 @@ public class ContextNameTest {
 
     @Test
     public void shouldReturnContextName() {
-        assertThat(ContextName.fromName("test-context.commands.test-command"), equalTo("test-context"));
+        assertThat(ContextName.fromName("test-context.command.test-command"), equalTo("test-context"));
     }
 
     @Test(expected = InvalidNameException.class)

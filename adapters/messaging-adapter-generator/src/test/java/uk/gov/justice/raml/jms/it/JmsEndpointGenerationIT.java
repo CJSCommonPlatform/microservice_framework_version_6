@@ -14,10 +14,10 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import uk.gov.justice.api.StructureControllerCommandsJmsListener;
-import uk.gov.justice.api.StructureEventsListenerJmsListener;
-import uk.gov.justice.api.StructureEventsProcessorJmsListener;
-import uk.gov.justice.api.StructureHandlerCommandsJmsListener;
+import uk.gov.justice.api.StructureControllerCommandJmsListener;
+import uk.gov.justice.api.StructureEventListenerJmsListener;
+import uk.gov.justice.api.StructureEventProcessorJmsListener;
+import uk.gov.justice.api.StructureHandlerCommandJmsListener;
 import uk.gov.justice.services.adapter.messaging.JmsProcessor;
 import uk.gov.justice.services.adapters.test.utils.dispatcher.AsynchronousRecordingDispatcher;
 import uk.gov.justice.services.common.converter.JsonObjectToStringConverter;
@@ -57,13 +57,13 @@ public class JmsEndpointGenerationIT {
     @Inject
     AsynchronousRecordingDispatcher dispatcher;
 
-    @Resource(name = "structure.handler.commands")
+    @Resource(name = "structure.handler.command")
     private Queue commandHandlerDestination;
 
-    @Resource(name = "structure.controller.commands")
+    @Resource(name = "structure.controller.command")
     private Queue commandControllerDestination;
 
-    @Resource(name = "structure.events")
+    @Resource(name = "structure.event")
     private Topic eventsDestination;
 
     @Resource
@@ -90,10 +90,10 @@ public class JmsEndpointGenerationIT {
     @Classes(cdi = true, value = {
             JmsProcessor.class,
             AsynchronousRecordingDispatcher.class,
-            StructureControllerCommandsJmsListener.class,
-            StructureEventsListenerJmsListener.class,
-            StructureEventsProcessorJmsListener.class,
-            StructureHandlerCommandsJmsListener.class,
+            StructureControllerCommandJmsListener.class,
+            StructureEventListenerJmsListener.class,
+            StructureEventProcessorJmsListener.class,
+            StructureHandlerCommandJmsListener.class,
             EnvelopeConverter.class,
             StringToJsonObjectConverter.class,
             JsonObjectToStringConverter.class,
@@ -122,7 +122,7 @@ public class JmsEndpointGenerationIT {
     public void commandControllerDispatcherShouldReceiveCommandA() throws JMSException {
 
         String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d65";
-        String commandName = "structure.commands.commanda";
+        String commandName = "structure.command.commanda";
         sendEnvelope(metadataId, commandName, commandControllerDestination);
 
         JsonEnvelope receivedJsonEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
@@ -135,7 +135,7 @@ public class JmsEndpointGenerationIT {
     public void commandControllerDispatcherShouldReceiveCommandB() throws JMSException {
 
         String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d11";
-        String commandName = "structure.commands.commandb";
+        String commandName = "structure.command.commandb";
 
         sendEnvelope(metadataId, commandName, commandControllerDestination);
 
@@ -150,7 +150,7 @@ public class JmsEndpointGenerationIT {
             throws JMSException, InterruptedException {
 
         String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d12";
-        String commandName = "structure.commands.commandc";
+        String commandName = "structure.command.commandc";
 
         sendEnvelope(metadataId, commandName, commandControllerDestination);
         assertTrue(dispatcher.notFoundEnvelopeWithMetadataOf("id", metadataId));
@@ -161,7 +161,7 @@ public class JmsEndpointGenerationIT {
     public void commandHandlerDispatcherShouldReceiveCommandA() throws JMSException {
 
         String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d61";
-        String commandName = "structure.commands.cmdaa";
+        String commandName = "structure.command.cmdaa";
         sendEnvelope(metadataId, commandName, commandHandlerDestination);
 
         JsonEnvelope receivedJsonEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
@@ -191,7 +191,7 @@ public class JmsEndpointGenerationIT {
         //TODO: check OpenEJB code and investigate if we can't fix the issue.
         Thread.sleep(300);
         String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d20";
-        String commandName = "structure.events.eventaa";
+        String commandName = "structure.event.eventaa";
         sendEnvelope(metadataId, commandName, eventsDestination);
 
         JsonEnvelope receivedJsonEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
@@ -210,7 +210,7 @@ public class JmsEndpointGenerationIT {
         //TODO: check OpenEJB code and investigate if we can't fix the issue.
         Thread.sleep(300);
         String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d30";
-        String commandName = "structure.events.eventbb";
+        String commandName = "structure.event.eventbb";
         sendEnvelope(metadataId, commandName, eventsDestination);
 
         JsonEnvelope receivedJsonEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
@@ -225,7 +225,7 @@ public class JmsEndpointGenerationIT {
             throws JMSException, InterruptedException {
 
         String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d21";
-        String commandName = "structure.events.eventcc";
+        String commandName = "structure.event.eventcc";
 
         sendEnvelope(metadataId, commandName, eventsDestination);
         assertTrue(dispatcher.notFoundEnvelopeWithMetadataOf("id", metadataId));

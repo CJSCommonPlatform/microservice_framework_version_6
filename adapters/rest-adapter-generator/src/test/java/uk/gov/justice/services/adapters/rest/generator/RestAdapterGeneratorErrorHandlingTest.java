@@ -107,7 +107,7 @@ public class RestAdapterGeneratorErrorHandlingTest {
                                 .with(action()
                                         .with(ActionType.POST)
                                         .withMediaType("application/vnd.people.commaods.command1+json")
-                                        .withMediaType("application/vnd.people.commands.command1+json")
+                                        .withMediaType("application/vnd.people.command.command1+json")
                                 ))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));

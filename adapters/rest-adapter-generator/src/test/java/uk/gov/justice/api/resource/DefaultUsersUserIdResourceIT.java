@@ -44,8 +44,8 @@ import org.junit.runner.RunWith;
 @RunWith(ApplicationComposer.class)
 public class DefaultUsersUserIdResourceIT {
 
-    private static final String CREATE_USER_MEDIA_TYPE = "application/vnd.people.commands.create-user+json";
-    private static final String UPDATE_USER_MEDIA_TYPE = "application/vnd.people.commands.update-user+json";
+    private static final String CREATE_USER_MEDIA_TYPE = "application/vnd.people.command.create-user+json";
+    private static final String UPDATE_USER_MEDIA_TYPE = "application/vnd.people.command.update-user+json";
     private static int port = -1;
     private static String BASE_URI;
 
@@ -109,7 +109,7 @@ public class DefaultUsersUserIdResourceIT {
                 .post(entity("{\"userName\" : \"John Smith\"}", CREATE_USER_MEDIA_TYPE));
 
         JsonEnvelope jsonEnvelope = asyncDispatcher.awaitForEnvelopeWithPayloadOf("userId", "567-8910");
-        assertThat(jsonEnvelope.metadata().name(), is("people.commands.create-user"));
+        assertThat(jsonEnvelope.metadata().name(), is("people.command.create-user"));
         assertThat(jsonEnvelope.payloadAsJsonObject().getString("userId"), is("567-8910"));
         assertThat(jsonEnvelope.payloadAsJsonObject().getString("userName"), is("John Smith"));
 
@@ -132,7 +132,7 @@ public class DefaultUsersUserIdResourceIT {
                 .post(entity("{\"userName\" : \"Peggy Brown\"}", UPDATE_USER_MEDIA_TYPE));
 
         JsonEnvelope jsonEnvelope = asyncDispatcher.awaitForEnvelopeWithPayloadOf("userId", "4444-9876");
-        assertThat(jsonEnvelope.metadata().name(), is("people.commands.update-user"));
+        assertThat(jsonEnvelope.metadata().name(), is("people.command.update-user"));
         assertThat(jsonEnvelope.payloadAsJsonObject().getString("userId"), is("4444-9876"));
         assertThat(jsonEnvelope.payloadAsJsonObject().getString("userName"), is("Peggy Brown"));
 
@@ -142,11 +142,11 @@ public class DefaultUsersUserIdResourceIT {
     public void shouldDispatchGetUserCommand() throws Exception {
         Response response = create(BASE_URI)
                 .path("/users/4444-5555")
-                .header("Accept", "application/vnd.people.queries.get-user+json")
+                .header("Accept", "application/vnd.people.query.get-user+json")
                 .get();
         JsonEnvelope jsonEnvelope = syncDispatcher.awaitForEnvelopeWithPayloadOf("userId", "4444-5555");
         assertThat(jsonEnvelope.payloadAsJsonObject().getString("userId"), is("4444-5555"));
-        assertThat(jsonEnvelope.metadata().name(), is("people.queries.get-user"));
+        assertThat(jsonEnvelope.metadata().name(), is("people.query.get-user"));
 
     }
 
@@ -156,13 +156,13 @@ public class DefaultUsersUserIdResourceIT {
 
         Response response = create(BASE_URI)
                 .path("/users/4444-5555")
-                .header("Accept", "application/vnd.people.queries.get-user2+json")
+                .header("Accept", "application/vnd.people.query.get-user2+json")
                 .get();
 
         assertThat(response.getStatus(), is(200));
         JsonEnvelope jsonEnvelope = syncDispatcher.awaitForEnvelopeWithPayloadOf("userId", "4444-5555");
         assertThat(jsonEnvelope.payloadAsJsonObject().getString("userId"), is("4444-5555"));
-        assertThat(jsonEnvelope.metadata().name(), is("people.queries.get-user2"));
+        assertThat(jsonEnvelope.metadata().name(), is("people.query.get-user2"));
 
     }
 
@@ -171,7 +171,7 @@ public class DefaultUsersUserIdResourceIT {
 
         Response response = create(BASE_URI)
                 .path("/users/4444-5555")
-                .header("Accept", "application/vnd.people.queries.unknown+json")
+                .header("Accept", "application/vnd.people.query.unknown+json")
                 .get();
 
         assertThat(response.getStatus(), is(406));
@@ -185,7 +185,7 @@ public class DefaultUsersUserIdResourceIT {
 
         Response response = create(BASE_URI)
                 .path("/users/4444-5556")
-                .header("Accept", "application/vnd.people.queries.get-user+json")
+                .header("Accept", "application/vnd.people.query.get-user+json")
                 .get();
 
         assertThat(response.getStatus(), is(200));
@@ -201,10 +201,10 @@ public class DefaultUsersUserIdResourceIT {
 
         Response response = create(BASE_URI)
                 .path("/users/4444-5556")
-                .header("Accept", "application/vnd.people.queries.get-user+json")
+                .header("Accept", "application/vnd.people.query.get-user+json")
                 .get();
 
-        assertThat(response.getMediaType().toString(), is("application/vnd.people.queries.get-user+json"));
+        assertThat(response.getMediaType().toString(), is("application/vnd.people.query.get-user+json"));
     }
 
     @Test
@@ -213,10 +213,10 @@ public class DefaultUsersUserIdResourceIT {
 
         Response response = create(BASE_URI)
                 .path("/users/4444-5556")
-                .header("Accept", "application/vnd.people.queries.get-user2+json")
+                .header("Accept", "application/vnd.people.query.get-user2+json")
                 .get();
         assertThat(response.getStatus(), is(200));
-        assertThat(response.getMediaType().toString(), is("application/vnd.people.queries.get-user2+json"));
+        assertThat(response.getMediaType().toString(), is("application/vnd.people.query.get-user2+json"));
     }
 
 }

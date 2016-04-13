@@ -50,8 +50,8 @@ public class RamlBuilder {
 
     public RamlBuilder withDefaults() {
         return this.with(resource()
-                .withRelativeUri("/somecontext.controller.commands")
-                .with(action(POST,"application/vnd.somecontext.commands.command1+json")));
+                .withRelativeUri("/somecontext.controller.command")
+                .with(action(POST,"application/vnd.somecontext.command.command1+json")));
     }
 
     public RamlBuilder withVersion(final String version) {

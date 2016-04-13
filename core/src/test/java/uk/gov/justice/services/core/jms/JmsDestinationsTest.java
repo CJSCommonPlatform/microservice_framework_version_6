@@ -26,9 +26,9 @@ import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 public class JmsDestinationsTest {
 
     private static final String CONTEXT_NAME = "test";
-    private static final String CONTROLLER_ENDPOINT = "test.controller.commands";
-    private static final String HANDLER_ENDPOINT = "test.handler.commands";
-    private static final String LISTENER_ENDPOINT = "test.events";
+    private static final String CONTROLLER_ENDPOINT = "test.controller.command";
+    private static final String HANDLER_ENDPOINT = "test.handler.command";
+    private static final String LISTENER_ENDPOINT = "test.event";
 
     @Mock
     Context initialContext;

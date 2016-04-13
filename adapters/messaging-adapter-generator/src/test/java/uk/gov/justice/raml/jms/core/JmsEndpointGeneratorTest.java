@@ -98,7 +98,7 @@ public class JmsEndpointGeneratorTest {
         generator.run(
                 raml()
                         .with(resource()
-                                .withRelativeUri("/structure.controller.commands")
+                                .withRelativeUri("/structure.controller.command")
                                 .withDefaultAction())
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
@@ -106,7 +106,7 @@ public class JmsEndpointGeneratorTest {
         File packageDir = new File(outputFolder.getRoot().getAbsolutePath() + BASE_PACKAGE_FOLDER);
         File[] files = packageDir.listFiles();
         assertThat(files.length, is(1));
-        assertThat(files[0].getName(), is("StructureControllerCommandsJmsListener.java"));
+        assertThat(files[0].getName(), is("StructureControllerCommandJmsListener.java"));
     }
 
     @SuppressWarnings("unchecked")
@@ -115,10 +115,10 @@ public class JmsEndpointGeneratorTest {
         generator.run(
                 raml()
                         .with(resource()
-                                .withRelativeUri("/structure.controller.commands")
+                                .withRelativeUri("/structure.controller.command")
                                 .withDefaultAction())
                         .with(resource()
-                                .withRelativeUri("/people.controller.commands")
+                                .withRelativeUri("/people.controller.command")
                                 .withDefaultAction())
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
@@ -127,8 +127,8 @@ public class JmsEndpointGeneratorTest {
         File[] files = packageDir.listFiles();
         assertThat(files.length, is(2));
         assertThat(files,
-                arrayContainingInAnyOrder(hasProperty("name", equalTo("PeopleControllerCommandsJmsListener.java")),
-                        hasProperty("name", equalTo("StructureControllerCommandsJmsListener.java"))));
+                arrayContainingInAnyOrder(hasProperty("name", equalTo("PeopleControllerCommandJmsListener.java")),
+                        hasProperty("name", equalTo("StructureControllerCommandJmsListener.java"))));
 
     }
 
@@ -137,18 +137,18 @@ public class JmsEndpointGeneratorTest {
         String path = outputFolder.getRoot().getAbsolutePath() + BASE_PACKAGE_FOLDER;
         File packageDir = new File(path);
         packageDir.mkdirs();
-        Files.write(Paths.get(path + "/StructureControllerCommandsJmsListener.java"),
+        Files.write(Paths.get(path + "/StructureControllerCommandJmsListener.java"),
                 Collections.singletonList("Old file content"));
 
         generator.run(
                 raml()
                         .with(resource()
-                                .withRelativeUri("/structure.controller.commands")
+                                .withRelativeUri("/structure.controller.command")
                                 .withDefaultAction())
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
-        List<String> lines = Files.readAllLines(Paths.get(path + "/StructureControllerCommandsJmsListener.java"));
+        List<String> lines = Files.readAllLines(Paths.get(path + "/StructureControllerCommandJmsListener.java"));
         assertThat(lines.get(0), not(containsString("Old file content")));
     }
 
@@ -157,13 +157,13 @@ public class JmsEndpointGeneratorTest {
         generator.run(
                 raml()
                         .with(resource()
-                                .withRelativeUri("/structure.controller.commands")
+                                .withRelativeUri("/structure.controller.command")
                                 .withDefaultAction())
                         .build(),
                 configurationWithBasePackage("uk.somepackage", outputFolder));
 
         Class<?> compiledClass = compiler.compiledClassOf("uk.somepackage");
-        assertThat(compiledClass.getName(), is("uk.somepackage.StructureControllerCommandsJmsListener"));
+        assertThat(compiledClass.getName(), is("uk.somepackage.StructureControllerCommandJmsListener"));
     }
 
     @Test
@@ -171,13 +171,13 @@ public class JmsEndpointGeneratorTest {
         generator.run(
                 raml()
                         .with(resource()
-                                .withRelativeUri("/structure.controller.commands")
+                                .withRelativeUri("/structure.controller.command")
                                 .withDefaultAction())
                         .build(),
                 configurationWithBasePackage("uk.package2", outputFolder));
 
         Class<?> clazz = compiler.compiledClassOf("uk.package2");
-        assertThat(clazz.getName(), is("uk.package2.StructureControllerCommandsJmsListener"));
+        assertThat(clazz.getName(), is("uk.package2.StructureControllerCommandJmsListener"));
     }
 
     @Test
@@ -186,13 +186,13 @@ public class JmsEndpointGeneratorTest {
                 raml()
                         .withBaseUri("message://processor")
                         .with(resource()
-                                .withRelativeUri("/structure.events")
+                                .withRelativeUri("/structure.event")
                                 .withDefaultAction())
                         .build(),
                 configurationWithBasePackage("uk.somepackage", outputFolder));
 
         Class<?> compiledClass = compiler.compiledClassOf("uk.somepackage");
-        assertThat(compiledClass.getName(), is("uk.somepackage.StructureEventsProcessorJmsListener"));
+        assertThat(compiledClass.getName(), is("uk.somepackage.StructureEventProcessorJmsListener"));
     }
 
     @Test
@@ -201,13 +201,13 @@ public class JmsEndpointGeneratorTest {
                 raml()
                         .withBaseUri("message://listener")
                         .with(resource()
-                                .withRelativeUri("/structure.events")
+                                .withRelativeUri("/structure.event")
                                 .withDefaultAction())
                         .build(),
                 configurationWithBasePackage("uk.somepackage", outputFolder));
 
         Class<?> compiledClass = compiler.compiledClassOf("uk.somepackage");
-        assertThat(compiledClass.getName(), is("uk.somepackage.StructureEventsListenerJmsListener"));
+        assertThat(compiledClass.getName(), is("uk.somepackage.StructureEventListenerJmsListener"));
     }
 
     @Test
@@ -215,8 +215,8 @@ public class JmsEndpointGeneratorTest {
         generator.run(
                 raml()
                         .with(resource()
-                                .withRelativeUri("/people.handler.commands")
-                                .with(action(POST, "application/vnd.people.commands.abc+json")))
+                                .withRelativeUri("/people.handler.command")
+                                .with(action(POST, "application/vnd.people.command.abc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
@@ -231,8 +231,8 @@ public class JmsEndpointGeneratorTest {
         generator.run(
                 raml()
                         .with(resource()
-                                .withRelativeUri("/people.controller.commands")
-                                .with(action(POST, "application/vnd.people.commands.abc+json")))
+                                .withRelativeUri("/people.controller.command")
+                                .with(action(POST, "application/vnd.people.command.abc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
@@ -249,8 +249,8 @@ public class JmsEndpointGeneratorTest {
                 raml()
                         .withBaseUri("message://listener")
                         .with(resource()
-                                .withRelativeUri("/people.events")
-                                .with(action(POST, "application/vnd.people.events.abc+json")))
+                                .withRelativeUri("/people.event")
+                                .with(action(POST, "application/vnd.people.event.abc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
@@ -267,8 +267,8 @@ public class JmsEndpointGeneratorTest {
                 raml()
                         .withBaseUri("message://processor")
                         .with(resource()
-                                .withRelativeUri("/people.events")
-                                .with(action(POST, "application/vnd.people.events.abc+json")))
+                                .withRelativeUri("/people.event")
+                                .with(action(POST, "application/vnd.people.event.abc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
@@ -317,8 +317,8 @@ public class JmsEndpointGeneratorTest {
         generator.run(
                 raml()
                         .with(resource()
-                                .withRelativeUri("/people.controller.commands")
-                                .with(action(ActionType.POST, "application/vnd.people.commands.abc+json")))
+                                .withRelativeUri("/people.controller.command")
+                                .with(action(ActionType.POST, "application/vnd.people.command.abc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
@@ -326,7 +326,7 @@ public class JmsEndpointGeneratorTest {
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("destinationLookup")),
-                        propertyValue(equalTo("people.controller.commands")))));
+                        propertyValue(equalTo("people.controller.command")))));
     }
 
     @Test
@@ -334,8 +334,8 @@ public class JmsEndpointGeneratorTest {
         generator.run(
                 raml()
                         .with(resource()
-                                .withRelativeUri("/structure.controller.commands")
-                                .with(action(POST, "application/vnd.structure.commands.abc+json")))
+                                .withRelativeUri("/structure.controller.command")
+                                .with(action(POST, "application/vnd.structure.command.abc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
@@ -343,7 +343,7 @@ public class JmsEndpointGeneratorTest {
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("destinationLookup")),
-                        propertyValue(equalTo("structure.controller.commands")))));
+                        propertyValue(equalTo("structure.controller.command")))));
     }
 
     @Test
@@ -351,8 +351,8 @@ public class JmsEndpointGeneratorTest {
         generator.run(
                 raml()
                         .with(resource()
-                                .withRelativeUri("/structure.handler.commands")
-                                .with(action(POST, "application/vnd.structure.commands.abc+json")))
+                                .withRelativeUri("/structure.handler.command")
+                                .with(action(POST, "application/vnd.structure.command.abc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
@@ -360,7 +360,7 @@ public class JmsEndpointGeneratorTest {
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("destinationLookup")),
-                        propertyValue(equalTo("structure.handler.commands")))));
+                        propertyValue(equalTo("structure.handler.command")))));
     }
 
     @Test
@@ -368,8 +368,8 @@ public class JmsEndpointGeneratorTest {
         generator.run(
                 raml()
                         .with(resource()
-                                .withRelativeUri("/structure.events")
-                                .with(action(POST, "application/vnd.structure.events.abc+json")))
+                                .withRelativeUri("/structure.event")
+                                .with(action(POST, "application/vnd.structure.event.abc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
@@ -377,15 +377,15 @@ public class JmsEndpointGeneratorTest {
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("destinationLookup")),
-                        propertyValue(equalTo("structure.events")))));
+                        propertyValue(equalTo("structure.event")))));
     }
 
     @Test
     public void shouldCreateAnnotatedCommandControllerEndpointWithQueueAsDestinationType() throws Exception {
         generator.run(raml()
                         .with(resource()
-                                .withRelativeUri("/structure.controller.commands")
-                                .with(action(POST, "application/vnd.structure.commands.abc+json")))
+                                .withRelativeUri("/structure.controller.command")
+                                .with(action(POST, "application/vnd.structure.command.abc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
@@ -400,8 +400,8 @@ public class JmsEndpointGeneratorTest {
     public void shouldCreateAnnotatedCommandHandlerEndpointWithQueueAsDestinationType() throws Exception {
         generator.run(raml()
                         .with(resource()
-                                .withRelativeUri("/lifecycle.handler.commands")
-                                .with(action(POST, "application/vnd.lifecycle.commands.abc+json")))
+                                .withRelativeUri("/lifecycle.handler.command")
+                                .with(action(POST, "application/vnd.lifecycle.command.abc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
@@ -416,8 +416,8 @@ public class JmsEndpointGeneratorTest {
     public void shouldCreateAnnotatedEventListenerEndpointWithQueueAsDestinationType() throws Exception {
         generator.run(raml()
                         .with(resource()
-                                .withRelativeUri("/people.events")
-                                .with(action(POST, "application/vnd.people.events.abc+json")))
+                                .withRelativeUri("/people.event")
+                                .with(action(POST, "application/vnd.people.event.abc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
@@ -433,10 +433,10 @@ public class JmsEndpointGeneratorTest {
         generator.run(
                 raml()
                         .with(resource()
-                                .withRelativeUri("/structure.controller.commands")
+                                .withRelativeUri("/structure.controller.command")
                                 .with(action()
                                         .with(ActionType.POST)
-                                        .withMediaType("application/vnd.structure.commands.test-cmd+json")))
+                                        .withMediaType("application/vnd.structure.command.test-cmd+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
@@ -444,7 +444,7 @@ public class JmsEndpointGeneratorTest {
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("messageSelector")),
-                        propertyValue(equalTo("CPPNAME in('structure.commands.test-cmd')")))));
+                        propertyValue(equalTo("CPPNAME in('structure.command.test-cmd')")))));
     }
 
     @Test
@@ -452,10 +452,10 @@ public class JmsEndpointGeneratorTest {
         generator.run(
                 raml()
                         .with(resource()
-                                .withRelativeUri("/structure.controller.commands")
+                                .withRelativeUri("/structure.controller.command")
                                 .with(action()
                                         .with(ActionType.POST)
-                                        .withMediaType("application/vnd.structure.events.test-event+json")))
+                                        .withMediaType("application/vnd.structure.event.test-event+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
@@ -463,7 +463,7 @@ public class JmsEndpointGeneratorTest {
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("messageSelector")),
-                        propertyValue(equalTo("CPPNAME in('structure.events.test-event')")))));
+                        propertyValue(equalTo("CPPNAME in('structure.event.test-event')")))));
     }
 
     @Test
@@ -471,14 +471,14 @@ public class JmsEndpointGeneratorTest {
         generator.run(
                 raml()
                         .with(resource()
-                                .withRelativeUri("/structure.controller.commands")
-                                .with(action(POST, "application/vnd.structure.commands.test-cmd1+json"))
-                                .with(action(GET, "application/vnd.structure.commands.test-cmd2+json"))
-                                .with(action(DELETE, "application/vnd.structure.commands.test-cmd3+json"))
-                                .with(action(HEAD, "application/vnd.structure.commands.test-cmd4+json"))
-                                .with(action(OPTIONS, "application/vnd.structure.commands.test-cmd5+json"))
-                                .with(action(PATCH, "application/vnd.structure.commands.test-cmd6+json"))
-                                .with(action(TRACE, "application/vnd.structure.commands.test-cmd7+json")))
+                                .withRelativeUri("/structure.controller.command")
+                                .with(action(POST, "application/vnd.structure.command.test-cmd1+json"))
+                                .with(action(GET, "application/vnd.structure.command.test-cmd2+json"))
+                                .with(action(DELETE, "application/vnd.structure.command.test-cmd3+json"))
+                                .with(action(HEAD, "application/vnd.structure.command.test-cmd4+json"))
+                                .with(action(OPTIONS, "application/vnd.structure.command.test-cmd5+json"))
+                                .with(action(PATCH, "application/vnd.structure.command.test-cmd6+json"))
+                                .with(action(TRACE, "application/vnd.structure.command.test-cmd7+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
@@ -486,7 +486,7 @@ public class JmsEndpointGeneratorTest {
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("messageSelector")),
-                        propertyValue(equalTo("CPPNAME in('structure.commands.test-cmd1')")))));
+                        propertyValue(equalTo("CPPNAME in('structure.command.test-cmd1')")))));
     }
 
     @Test
@@ -494,11 +494,11 @@ public class JmsEndpointGeneratorTest {
         generator.run(
                 raml()
                         .with(resource()
-                                .withRelativeUri("/people.controller.commands")
+                                .withRelativeUri("/people.controller.command")
                                 .with(action()
                                         .with(ActionType.POST)
-                                        .withMediaType("application/vnd.people.commands.command1+json")
-                                        .withMediaType("application/vnd.people.commands.command2+json")))
+                                        .withMediaType("application/vnd.people.command.command1+json")
+                                        .withMediaType("application/vnd.people.command.command2+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
@@ -507,8 +507,8 @@ public class JmsEndpointGeneratorTest {
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("messageSelector")),
                         propertyValue(startsWith("CPPNAME in")),
-                        propertyValue(allOf(containsString("'people.commands.command1'"),
-                                containsString("'people.commands.command2'"))))));
+                        propertyValue(allOf(containsString("'people.command.command1'"),
+                                containsString("'people.command.command2'"))))));
     }
 
     @Test

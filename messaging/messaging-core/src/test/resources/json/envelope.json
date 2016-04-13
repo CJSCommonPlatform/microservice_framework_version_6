@@ -1,7 +1,7 @@
 {
   "_metadata": {
     "id": "861c9430-7bc6-4bf0-b549-6534394b8d65",
-    "name": "test.commands.do-something",
+    "name": "test.command.do-something",
     "correlation": {
       "client": "d51597dc-2526-4c71-bd08-5031c79f11e1"
     },

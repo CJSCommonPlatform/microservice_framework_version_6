@@ -25,7 +25,7 @@ public class ResponseContentTypeRamlValidatorTest {
         validator.validate(
                 raml().with(
                         resource("/some/path")
-                                .with(action(GET).withResponse("application/vnd.ctx.queries.query1+json"))
+                                .with(action(GET).withResponse("application/vnd.ctx.query.query1+json"))
                 ).build());
     }
 
@@ -35,7 +35,7 @@ public class ResponseContentTypeRamlValidatorTest {
         validator.validate(
                 raml()
                         .with(resource("/some/path")
-                                .with(action(GET).withResponse("application/vnd.ctx.queries.query1+json")))
+                                .with(action(GET).withResponse("application/vnd.ctx.query.query1+json")))
                         .with(resource("/some/path")
                                 .with(action(POST).withResponse("application/vnd.ctx.invalid.aa+json")))
                         .build());
@@ -91,12 +91,12 @@ public class ResponseContentTypeRamlValidatorTest {
     public void shouldThrowExceptionIfMediaTypeDoesNotContainContext() throws Exception {
 
         exception.expect(RamlValidationException.class);
-        exception.expectMessage("Invalid response type: application/vnd.queries.query1+json");
+        exception.expectMessage("Invalid response type: application/vnd.query.query1+json");
 
         validator.validate(
                 raml().with(
                         resource("/some/path")
-                                .with(action(GET).withResponse("application/vnd.queries.query1+json"))
+                                .with(action(GET).withResponse("application/vnd.query.query1+json"))
                 ).build());
 
     }

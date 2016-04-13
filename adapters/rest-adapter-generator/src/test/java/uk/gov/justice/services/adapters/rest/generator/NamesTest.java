@@ -9,7 +9,9 @@ import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilde
 import uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder;
 import uk.gov.justice.services.core.annotation.Component;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.raml.model.Action;
 import org.raml.model.ActionType;
 import org.raml.model.MimeType;
@@ -126,5 +128,21 @@ public class NamesTest {
         Raml raml = RamlBuilder.restRamlWithQueryApiDefaults().build();
         Component component = Names.componentFromBaseUriIn(raml);
         assertThat(component, is(Component.QUERY_API));
+    }
+
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
+
+    @Test
+    public void shouldThrowExceptionIfNoValidPillarAndTier() throws Exception {
+        Raml raml = new RamlBuilder()
+                .withVersion("#%RAML 0.8")
+                .withTitle("Example Service")
+                .withBaseUri("http://localhost:8080/warname/event/listener/rest/service").build();
+
+        exception.expect(IllegalStateException.class);
+        exception.expectMessage("Base URI must contain valid pillar and tier: http://localhost:8080/warname/event/listener/rest/service");
+
+        Names.componentFromBaseUriIn(raml);
     }
 }

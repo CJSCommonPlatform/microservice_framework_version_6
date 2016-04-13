@@ -17,6 +17,8 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang.StringUtils;
@@ -35,10 +37,16 @@ final class Names {
                     "return", "short", "static", "strictfp", "super", "switch", "synchronized", "this", "throw",
                     "throws", "transient", "true", "try", "void", "volatile", "while")));
 
-    static final String GENERIC_PAYLOAD_ARGUMENT_NAME = "entity";
+    private static final Map<String, String> CONVERT_TO_PILLAR = ImmutableMap.of("command", "commands", "query", "queries");
+
+    private static final Pattern PILLAR_AND_TIER_PATTERN = Pattern
+            .compile("(command/api|command/controller|command/handler|query/api|query/controller|query/view)");
+
     private static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
     private static final String INTERFACE_NAME_SUFFIX = "Resource";
     private static final String APPLICATION_NAME_SUFFIX = "Application";
+
+    static final String GENERIC_PAYLOAD_ARGUMENT_NAME = "entity";
 
     private Names() {
     }
@@ -113,11 +121,14 @@ final class Names {
     }
 
     static Component componentFromBaseUriIn(final Raml raml) {
-        Map<String, String> conversion = ImmutableMap.of("command", "commands", "event", "events", "query", "queries");
+        final Matcher matcher = PILLAR_AND_TIER_PATTERN.matcher(baseUriPathWithoutContext(raml));
 
-        String baseUri = baseUriPathWithoutContext(raml);
-        String[] sections = baseUri.split("/");
-
-        return Component.valueOf(conversion.get(sections[1]), sections[2]);
+        if(matcher.find()) {
+            final String pillarAndTier = matcher.group(1);
+            final String[] sections = pillarAndTier.split("/");
+            return Component.valueOf(CONVERT_TO_PILLAR.get(sections[0]), sections[1]);
+        } else {
+            throw new IllegalStateException(String.format("Base URI must contain valid pillar and tier: %s", raml.getBaseUri()));
+        }
     }
 }

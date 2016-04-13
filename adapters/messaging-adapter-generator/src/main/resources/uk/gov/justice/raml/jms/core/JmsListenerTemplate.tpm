@@ -1,4 +1,4 @@
-package ${PACKAGE_NAME};
+package <PACKAGE_NAME>;
 
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
@@ -13,12 +13,11 @@ import javax.jms.MessageListener;
 import static uk.gov.justice.services.core.annotation.Component.*;
 
 @MessageDriven(activationConfig = {
-        @ActivationConfigProperty(propertyName = "destinationLookup", propertyValue = "${DESTINATION_LOOKUP}"),
-        @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "${DESTINATION_TYPE}"),
-        @ActivationConfigProperty(propertyName = "messageSelector", propertyValue = "CPPNAME in(${MESSAGE_SELECTOR})")
+        <ACTIVATION_CONFIG_PROPERTY:{ACP|
+        @ActivationConfigProperty(propertyName = "<ACP.NAME>", propertyValue = "<ACP.VALUE>")}; separator=", ">
 })
-@Adapter(${ADAPTER_TYPE})
-public class ${CLASS_NAME}JmsListener implements MessageListener {
+@Adapter(<ADAPTER_TYPE>)
+public class <CLASS_NAME>JmsListener implements MessageListener {
 
    @Inject
    AsynchronousDispatcher dispatcher;

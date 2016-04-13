@@ -1,0 +1,29 @@
+package uk.gov.justice.raml.jms.validator;
+
+import org.raml.model.Raml;
+import uk.gov.justice.raml.common.validator.RamlValidationException;
+import uk.gov.justice.raml.common.validator.RamlValidator;
+import uk.gov.justice.raml.jms.uri.BaseUri;
+
+import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+
+/**
+ * Checks if @Raml contain base uris that correctly adeheres to the framework's standard
+ *
+ */
+public class BaseUriRamlValidator implements RamlValidator {
+    private static final String ERROR_MSG = "Inavlid base uri: %s";
+    private static final String BASE_URI_NOT_SET_MSG = "Base uri not set";
+
+    @Override
+    public void validate(final Raml raml) {
+        if (isEmpty(raml.getBaseUri())) {
+            throw new RamlValidationException(BASE_URI_NOT_SET_MSG);
+        }
+        if (!BaseUri.valid(raml.getBaseUri())) {
+            throw new RamlValidationException(format(ERROR_MSG, raml.getBaseUri()));
+        }
+    }
+
+}

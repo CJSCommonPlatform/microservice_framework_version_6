@@ -1,16 +1,16 @@
 package uk.gov.justice.services.adapters.test.utils.builder;
 
-import static org.raml.model.ActionType.POST;
-import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
-import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
+import org.raml.model.Raml;
+import org.raml.model.Resource;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.raml.model.Raml;
-import org.raml.model.Resource;
+import static org.raml.model.ActionType.POST;
+import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
+import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 
 public class RamlBuilder {
     private final List<ResourceBuilder> resourceBuilders = new ArrayList<>();
@@ -20,6 +20,13 @@ public class RamlBuilder {
 
     public static RamlBuilder raml() {
         return new RamlBuilder();
+    }
+
+    public static RamlBuilder messagingRamlWithDefaults() {
+        return new RamlBuilder()
+                .withVersion("#%RAML 0.8")
+                .withTitle("Example Service")
+                .withDefaultMessagingBaseUri();
     }
 
     public static RamlBuilder restRamlWithDefaults() {
@@ -34,8 +41,10 @@ public class RamlBuilder {
         return this;
     }
 
-    public RamlBuilder withDefaults() {
-        return this.with(resource()
+    public RamlBuilder withDefaultMessagingResource() {
+        return this
+                .withDefaultMessagingBaseUri()
+                .with(resource()
                 .withRelativeUri("/somecontext.controller.commands")
                 .with(action(POST,"application/vnd.somecontext.commands.command1+json")));
     }
@@ -48,6 +57,10 @@ public class RamlBuilder {
     public RamlBuilder withTitle(final String title) {
         this.title = title;
         return this;
+    }
+
+    public RamlBuilder withDefaultMessagingBaseUri() {
+        return withBaseUri("message://event/listener/message/context");
     }
 
     public RamlBuilder withBaseUri(final String baseUri) {

@@ -14,10 +14,10 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import uk.gov.justice.api.StructureControllerCommandsJmsListener;
+import uk.gov.justice.api.StructureCommandsControllerJmsListener;
+import uk.gov.justice.api.StructureCommandsHandlerJmsListener;
 import uk.gov.justice.api.StructureEventsListenerJmsListener;
 import uk.gov.justice.api.StructureEventsProcessorJmsListener;
-import uk.gov.justice.api.StructureHandlerCommandsJmsListener;
 import uk.gov.justice.services.adapter.messaging.JmsProcessor;
 import uk.gov.justice.services.adapters.test.utils.dispatcher.AsynchronousRecordingDispatcher;
 import uk.gov.justice.services.common.converter.JsonObjectToStringConverter;
@@ -90,10 +90,10 @@ public class JmsEndpointGenerationIT {
     @Classes(cdi = true, value = {
             JmsProcessor.class,
             AsynchronousRecordingDispatcher.class,
-            StructureControllerCommandsJmsListener.class,
+            StructureCommandsControllerJmsListener.class,
             StructureEventsListenerJmsListener.class,
             StructureEventsProcessorJmsListener.class,
-            StructureHandlerCommandsJmsListener.class,
+            StructureCommandsHandlerJmsListener.class,
             EnvelopeConverter.class,
             StringToJsonObjectConverter.class,
             JsonObjectToStringConverter.class,

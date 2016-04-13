@@ -61,6 +61,7 @@ import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
 import static org.raml.model.ActionType.TRACE;
 import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
+import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.messagingRamlWithDefaults;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.adapters.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
@@ -96,7 +97,7 @@ public class JmsEndpointGeneratorTest {
     @Test
     public void shouldCreateJmsClass() throws Exception {
         generator.run(
-                raml()
+                messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/structure.controller.commands")
                                 .withDefaultAction())
@@ -106,14 +107,14 @@ public class JmsEndpointGeneratorTest {
         File packageDir = new File(outputFolder.getRoot().getAbsolutePath() + BASE_PACKAGE_FOLDER);
         File[] files = packageDir.listFiles();
         assertThat(files.length, is(1));
-        assertThat(files[0].getName(), is("StructureControllerCommandsJmsListener.java"));
+        assertThat(files[0].getName(), is("StructureCommandsControllerJmsListener.java"));
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void shouldCreateMultipleJmsClasses() throws Exception {
         generator.run(
-                raml()
+                messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/structure.controller.commands")
                                 .withDefaultAction())
@@ -127,8 +128,8 @@ public class JmsEndpointGeneratorTest {
         File[] files = packageDir.listFiles();
         assertThat(files.length, is(2));
         assertThat(files,
-                arrayContainingInAnyOrder(hasProperty("name", equalTo("PeopleControllerCommandsJmsListener.java")),
-                        hasProperty("name", equalTo("StructureControllerCommandsJmsListener.java"))));
+                arrayContainingInAnyOrder(hasProperty("name", equalTo("PeopleCommandsControllerJmsListener.java")),
+                        hasProperty("name", equalTo("StructureCommandsControllerJmsListener.java"))));
 
     }
 
@@ -141,21 +142,21 @@ public class JmsEndpointGeneratorTest {
                 Collections.singletonList("Old file content"));
 
         generator.run(
-                raml()
+                messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/structure.controller.commands")
                                 .withDefaultAction())
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
-        List<String> lines = Files.readAllLines(Paths.get(path + "/StructureControllerCommandsJmsListener.java"));
+        List<String> lines = Files.readAllLines(Paths.get(path + "/StructureCommandsControllerJmsListener.java"));
         assertThat(lines.get(0), not(containsString("Old file content")));
     }
 
     @Test
     public void shouldCreateJmsEndpointNamedAfterResourceUri() throws Exception {
         generator.run(
-                raml()
+                messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/structure.controller.commands")
                                 .withDefaultAction())
@@ -163,13 +164,13 @@ public class JmsEndpointGeneratorTest {
                 configurationWithBasePackage("uk.somepackage", outputFolder));
 
         Class<?> compiledClass = compiler.compiledClassOf("uk.somepackage");
-        assertThat(compiledClass.getName(), is("uk.somepackage.StructureControllerCommandsJmsListener"));
+        assertThat(compiledClass.getName(), is("uk.somepackage.StructureCommandsControllerJmsListener"));
     }
 
     @Test
     public void shouldCreateJmsEndpointInADifferentPackage() throws Exception {
         generator.run(
-                raml()
+                messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/structure.controller.commands")
                                 .withDefaultAction())
@@ -177,14 +178,14 @@ public class JmsEndpointGeneratorTest {
                 configurationWithBasePackage("uk.package2", outputFolder));
 
         Class<?> clazz = compiler.compiledClassOf("uk.package2");
-        assertThat(clazz.getName(), is("uk.package2.StructureControllerCommandsJmsListener"));
+        assertThat(clazz.getName(), is("uk.package2.StructureCommandsControllerJmsListener"));
     }
 
     @Test
     public void shouldCreateJmsEventsProcessorNamedAfterResourceUriAndBaseUri() throws Exception {
         generator.run(
                 raml()
-                        .withBaseUri("message://processor")
+                        .withBaseUri("message://event/processor/message/structure")
                         .with(resource()
                                 .withRelativeUri("/structure.events")
                                 .withDefaultAction())
@@ -199,7 +200,7 @@ public class JmsEndpointGeneratorTest {
     public void shouldCreateJmsEventsListenerNamedAfterResourceUriAndBaseUri() throws Exception {
         generator.run(
                 raml()
-                        .withBaseUri("message://listener")
+                        .withBaseUri("message://event/listener/message/structure")
                         .with(resource()
                                 .withRelativeUri("/structure.events")
                                 .withDefaultAction())
@@ -213,7 +214,7 @@ public class JmsEndpointGeneratorTest {
     @Test
     public void shouldCreateJmsEndpointAnnotatedWithCommandHandlerAdapter() throws Exception {
         generator.run(
-                raml()
+                messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/people.handler.commands")
                                 .with(action(POST, "application/vnd.people.commands.abc+json")))
@@ -229,7 +230,7 @@ public class JmsEndpointGeneratorTest {
     @Test
     public void shouldCreateJmsEndpointAnnotatedWithCommandControllerAdapter() throws Exception {
         generator.run(
-                raml()
+                messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/people.controller.commands")
                                 .with(action(POST, "application/vnd.people.commands.abc+json")))
@@ -247,7 +248,7 @@ public class JmsEndpointGeneratorTest {
     public void shouldCreateJmsEndpointAnnotatedWithEventListenerAdapter() throws Exception {
         generator.run(
                 raml()
-                        .withBaseUri("message://listener")
+                        .withBaseUri("message://event/listener/message/people")
                         .with(resource()
                                 .withRelativeUri("/people.events")
                                 .with(action(POST, "application/vnd.people.events.abc+json")))
@@ -265,7 +266,7 @@ public class JmsEndpointGeneratorTest {
     public void shouldCreateJmsEndpointAnnotatedWithEventProcessorAdapter() throws Exception {
         generator.run(
                 raml()
-                        .withBaseUri("message://processor")
+                        .withBaseUri("message://event/processor/message/people")
                         .with(resource()
                                 .withRelativeUri("/people.events")
                                 .with(action(POST, "application/vnd.people.events.abc+json")))
@@ -281,7 +282,7 @@ public class JmsEndpointGeneratorTest {
 
     @Test
     public void shouldCreateJmsEndpointImplementingMessageListener() throws Exception {
-        generator.run(raml().withDefaults().build(), configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+        generator.run(raml().withDefaultMessagingResource().build(), configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
         assertThat(clazz.getInterfaces().length, equalTo(1));
@@ -290,7 +291,7 @@ public class JmsEndpointGeneratorTest {
 
     @Test
     public void shouldCreateJmsEndpointWithAnnotatedDispatcherProperty() throws Exception {
-        generator.run(raml().withDefaults().build(), configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+        generator.run(raml().withDefaultMessagingResource().build(), configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
         Field dispatcherField = clazz.getDeclaredField("dispatcher");
@@ -302,7 +303,7 @@ public class JmsEndpointGeneratorTest {
 
     @Test
     public void shouldCreateJmsEndpointWithAnnotatedJmsProcessorProperty() throws Exception {
-        generator.run(raml().withDefaults().build(), configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+        generator.run(raml().withDefaultMessagingResource().build(), configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
         Field jmsProcessorField = clazz.getDeclaredField("jmsProcessor");
@@ -315,7 +316,7 @@ public class JmsEndpointGeneratorTest {
     @Test
     public void shouldCreateAnnotatedCommandControllerEndpointWithDestinationLookupProperty() throws Exception {
         generator.run(
-                raml()
+                messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/people.controller.commands")
                                 .with(action(ActionType.POST, "application/vnd.people.commands.abc+json")))
@@ -332,7 +333,7 @@ public class JmsEndpointGeneratorTest {
     @Test
     public void shouldCreateAnnotatedCommandControllerEndpointWithDestinationLookupProperty2() throws Exception {
         generator.run(
-                raml()
+                messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/structure.controller.commands")
                                 .with(action(POST, "application/vnd.structure.commands.abc+json")))
@@ -349,7 +350,7 @@ public class JmsEndpointGeneratorTest {
     @Test
     public void shouldCreateAnnotatedCommandHandlerEndpointWithDestinationLookupProperty3() throws Exception {
         generator.run(
-                raml()
+                messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/structure.handler.commands")
                                 .with(action(POST, "application/vnd.structure.commands.abc+json")))
@@ -366,7 +367,8 @@ public class JmsEndpointGeneratorTest {
     @Test
     public void shouldCreateAnnotatedEventListenerEndpointWithDestinationLookupProperty3() throws Exception {
         generator.run(
-                raml()
+                messagingRamlWithDefaults()
+                        .withDefaultMessagingBaseUri()
                         .with(resource()
                                 .withRelativeUri("/structure.events")
                                 .with(action(POST, "application/vnd.structure.events.abc+json")))
@@ -382,7 +384,7 @@ public class JmsEndpointGeneratorTest {
 
     @Test
     public void shouldCreateAnnotatedCommandControllerEndpointWithQueueAsDestinationType() throws Exception {
-        generator.run(raml()
+        generator.run(messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/structure.controller.commands")
                                 .with(action(POST, "application/vnd.structure.commands.abc+json")))
@@ -398,7 +400,7 @@ public class JmsEndpointGeneratorTest {
 
     @Test
     public void shouldCreateAnnotatedCommandHandlerEndpointWithQueueAsDestinationType() throws Exception {
-        generator.run(raml()
+        generator.run(messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/lifecycle.handler.commands")
                                 .with(action(POST, "application/vnd.lifecycle.commands.abc+json")))
@@ -414,7 +416,7 @@ public class JmsEndpointGeneratorTest {
 
     @Test
     public void shouldCreateAnnotatedEventListenerEndpointWithQueueAsDestinationType() throws Exception {
-        generator.run(raml()
+        generator.run(messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/people.events")
                                 .with(action(POST, "application/vnd.people.events.abc+json")))
@@ -431,7 +433,7 @@ public class JmsEndpointGeneratorTest {
     @Test
     public void shouldCreateAnnotatedJmsEndpointWithMessageSelectorContainingOneCommandWithAPost() throws Exception {
         generator.run(
-                raml()
+                messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/structure.controller.commands")
                                 .with(action()
@@ -450,7 +452,7 @@ public class JmsEndpointGeneratorTest {
     @Test
     public void shouldCreateAnnotatedJmsEndpointWithMessageSelectorContainingOneEvent() throws Exception {
         generator.run(
-                raml()
+                messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/structure.controller.commands")
                                 .with(action()
@@ -469,7 +471,7 @@ public class JmsEndpointGeneratorTest {
     @Test
     public void shouldOnlyCreateMessageSelectorForPostActionAndIgnoreAllOtherActions() throws Exception {
         generator.run(
-                raml()
+                messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/structure.controller.commands")
                                 .with(action(POST, "application/vnd.structure.commands.test-cmd1+json"))
@@ -492,7 +494,7 @@ public class JmsEndpointGeneratorTest {
     @Test
     public void shouldCreateAnnotatedJmsEndpointWithMessageSelectorContainingTwoCommands() throws Exception {
         generator.run(
-                raml()
+                messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/people.controller.commands")
                                 .with(action()
@@ -513,7 +515,7 @@ public class JmsEndpointGeneratorTest {
 
     @Test
     public void shouldCreateJmsEndpointWithOnMessage() throws Exception {
-        generator.run(raml().withDefaults().build(), configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+        generator.run(raml().withDefaultMessagingResource().build(), configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
 
@@ -528,7 +530,7 @@ public class JmsEndpointGeneratorTest {
     @Test
     @SuppressWarnings("unchecked")
     public void shouldCallJmsProcessorWhenOnMessageIsInvoked() throws Exception {
-        generator.run(raml().withDefaults().build(), configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+        generator.run(raml().withDefaultMessagingResource().build(), configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
         Object object = instantiate(clazz);
@@ -546,6 +548,51 @@ public class JmsEndpointGeneratorTest {
 
         verify(dispatcher).dispatch(envelope);
     }
+
+    @Test
+    public void shouldCreateDurableTopicSubscriber() throws Exception {
+        generator.run(raml()
+                        .withBaseUri("message://event/listener/message/people")
+                        .with(resource()
+                                .withRelativeUri("/people.events")
+                                .with(action(POST, "application/vnd.context1.events.abc+json")))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        ActivationConfigProperty[] activationConfig = clazz.getAnnotation(MessageDriven.class).activationConfig();
+        assertThat(activationConfig, hasItemInArray(
+                allOf(propertyName(equalTo("destinationType")), propertyValue(equalTo("javax.jms.Topic")))));
+        assertThat(activationConfig, hasItemInArray(
+                allOf(propertyName(equalTo("subscriptionDurability")), propertyValue(equalTo("Durable")))));
+        assertThat(activationConfig, hasItemInArray(
+                allOf(propertyName(equalTo("clientId")), propertyValue(equalTo("people.event.listener")))));
+        assertThat(activationConfig, hasItemInArray(
+                allOf(propertyName(equalTo("subscriptionName")), propertyValue(equalTo("people.event.listener.people.events")))));
+
+    }
+
+    @Test
+    public void shouldNotContainDurableSubscriberPropertiesIfItsNotTopic() throws Exception {
+        generator.run(raml()
+                        .withBaseUri("message://command/controller/message/people")
+                        .with(resource()
+                                .withRelativeUri("/people.controller.commands")
+                                .with(action(POST, "application/vnd.people.events.abc+json")))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        ActivationConfigProperty[] activationConfig = clazz.getAnnotation(MessageDriven.class).activationConfig();
+        assertThat(activationConfig, hasItemInArray(allOf(
+                propertyName(equalTo("destinationType")),
+                propertyValue(equalTo("javax.jms.Queue")))));
+        assertThat(activationConfig, not(hasItemInArray(allOf(
+                propertyName(equalTo("clientId")),
+                propertyName(equalTo("subscriptionName")),
+                propertyName(equalTo("subscriptionDurability"))))));
+    }
+
 
     private Object instantiate(Class<?> resourceClass) throws InstantiationException, IllegalAccessException {
         Object resourceObject = resourceClass.newInstance();

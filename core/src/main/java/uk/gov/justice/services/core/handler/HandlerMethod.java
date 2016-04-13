@@ -4,7 +4,7 @@ import static java.lang.String.format;
 
 import uk.gov.justice.services.core.handler.exception.HandlerExecutionException;
 import uk.gov.justice.services.core.handler.registry.exception.InvalidHandlerException;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -13,7 +13,7 @@ import java.lang.reflect.Method;
  * Encapsulates a handler class instance and a handler method.
  *
  * Asynchronous handler methods will return a null {@link Void} whereas synchronous handler methods
- * must return an {@link Envelope}.
+ * must return an {@link JsonEnvelope}.
  */
 public class HandlerMethod {
 
@@ -47,9 +47,9 @@ public class HandlerMethod {
             throw new InvalidHandlerException(
                     format("Handles method must have exactly one parameter; found %d", parameterTypes.length));
         }
-        if (parameterTypes[0] != Envelope.class) {
+        if (parameterTypes[0] != JsonEnvelope.class) {
             throw new IllegalArgumentException(
-                    format("Handler methods must take an Envelope as the argument, not a %s", parameterTypes[0]));
+                    format("Handler methods must take an JsonEnvelope as the argument, not a %s", parameterTypes[0]));
         }
 
         this.isSynchronous = !isVoid(expectedReturnType);
@@ -72,11 +72,11 @@ public class HandlerMethod {
      * Invokes the handler method passing the <code>envelope</code> to it.
      *
      * @param envelope the envelope that is passed to the handler method
-     * @return the result of invoking the handler, which will either be an {@link Envelope} or a
+     * @return the result of invoking the handler, which will either be an {@link JsonEnvelope} or a
      * null {@link Void}
      */
     @SuppressWarnings("unchecked")
-    public Object execute(final Envelope envelope) {
+    public Object execute(final JsonEnvelope envelope) {
         try {
             return handlerMethod.invoke(handlerInstance, envelope);
         } catch (IllegalAccessException | InvocationTargetException ex) {
@@ -106,6 +106,6 @@ public class HandlerMethod {
     }
 
     private static boolean isEnvelope(final Class<?> clazz) {
-        return Envelope.class.equals(clazz);
+        return JsonEnvelope.class.equals(clazz);
     }
 }

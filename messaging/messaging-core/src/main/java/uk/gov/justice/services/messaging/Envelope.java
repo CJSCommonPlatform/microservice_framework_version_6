@@ -1,14 +1,13 @@
 package uk.gov.justice.services.messaging;
 
-import javax.json.JsonObject;
-
 /**
  * Interface for a messaging envelope containing metadata and a payload.
+ * @param <T> the type of payload this envelope can contain
  */
-public interface Envelope {
+public interface Envelope<T> {
 
     Metadata metadata();
 
-    JsonObject payload();
+    T payload();
 
 }

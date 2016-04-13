@@ -12,7 +12,7 @@ import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.JdbcEventL
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.EventLogRepositoryException;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidSequenceIdException;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidStreamIdException;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 
 import java.util.Arrays;
@@ -44,7 +44,7 @@ public class JdbcEventRepositoryTest {
     private EventLogConverter eventLogConverter;
 
     @Mock
-    private Envelope envelope;
+    private JsonEnvelope envelope;
 
     @Mock
     private Metadata metadata;
@@ -60,7 +60,7 @@ public class JdbcEventRepositoryTest {
         when(jdbcEventLogRepository.findByStreamIdOrderBySequenceIdAsc(STREAM_ID)).thenReturn(Arrays.asList(eventLog).stream());
         when(eventLogConverter.createEnvelope(eventLog)).thenReturn(envelope);
 
-        Stream<Envelope> streamOfEnvelopes = jdbcEventRepository.getByStreamId(STREAM_ID);
+        Stream<JsonEnvelope> streamOfEnvelopes = jdbcEventRepository.getByStreamId(STREAM_ID);
 
         assertThat(streamOfEnvelopes, not(nullValue()));
         assertThat(streamOfEnvelopes.findFirst().get(), equalTo(envelope));
@@ -71,7 +71,7 @@ public class JdbcEventRepositoryTest {
         when(jdbcEventLogRepository.findByStreamIdFromSequenceIdOrderBySequenceIdAsc(STREAM_ID, VERSION_1)).thenReturn(Arrays.asList(eventLog).stream());
         when(eventLogConverter.createEnvelope(eventLog)).thenReturn(envelope);
 
-        Stream<Envelope> streamOfEnvelopes = jdbcEventRepository.getByStreamIdAndSequenceId(STREAM_ID, VERSION_1);
+        Stream<JsonEnvelope> streamOfEnvelopes = jdbcEventRepository.getByStreamIdAndSequenceId(STREAM_ID, VERSION_1);
 
         assertThat(streamOfEnvelopes, not(nullValue()));
         assertThat(streamOfEnvelopes.findFirst().get(), equalTo(envelope));

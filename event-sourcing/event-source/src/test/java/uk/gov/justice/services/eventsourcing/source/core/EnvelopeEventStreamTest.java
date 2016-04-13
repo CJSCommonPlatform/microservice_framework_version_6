@@ -5,7 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -23,7 +23,7 @@ public class EnvelopeEventStreamTest {
     EventStreamManager eventStreamManager;
 
     @Mock
-    Stream<Envelope> stream;
+    Stream<JsonEnvelope> stream;
 
     private EnvelopeEventStream envelopeEventStream;
 

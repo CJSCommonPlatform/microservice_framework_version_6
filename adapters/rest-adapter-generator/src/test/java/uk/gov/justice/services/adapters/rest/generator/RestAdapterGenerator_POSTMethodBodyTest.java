@@ -14,7 +14,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.services.adapter.rest.RestProcessor;
 import uk.gov.justice.services.adapters.test.utils.compiler.JavaCompilerUtil;
 import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -44,7 +44,7 @@ import static uk.gov.justice.services.adapters.test.utils.config.GeneratorConfig
 import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionUtil.methodsOf;
 import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionUtil.setField;
-import static uk.gov.justice.services.messaging.DefaultEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RestAdapterGenerator_POSTMethodBodyTest {
@@ -120,7 +120,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest {
         verify(restProcessor).processAsynchronously(consumerCaptor.capture(), any(JsonObject.class), any(HttpHeaders.class),
                 any(Map.class));
 
-        Envelope envelope = envelopeFrom(null, null);
+        JsonEnvelope envelope = envelopeFrom(null, null);
         consumerCaptor.getValue().accept(envelope);
 
         verify(dispatcher).dispatch(envelope);

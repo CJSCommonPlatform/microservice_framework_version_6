@@ -1,7 +1,7 @@
 package uk.gov.justice.services.adapter.rest;
 
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.inject.Inject;
 import javax.json.JsonObject;
@@ -35,12 +35,12 @@ public class RestProcessor {
      * @param pathParams     the path parameters from the REST request
      * @return the HTTP response to return to the client
      */
-    public Response processAsynchronously(final Consumer<Envelope> consumer,
+    public Response processAsynchronously(final Consumer<JsonEnvelope> consumer,
                                           final JsonObject initialPayload,
                                           final HttpHeaders headers,
                                           final Map<String, String> pathParams) {
 
-        Envelope envelope = envelopeBuilderFactory.builder()
+        JsonEnvelope envelope = envelopeBuilderFactory.builder()
                 .withInitialPayload(initialPayload)
                 .withHeaders(headers)
                 .withPathParams(pathParams)
@@ -51,15 +51,15 @@ public class RestProcessor {
         return Response.status(ACCEPTED).build();
     }
 
-    public Response processSynchronously(final Function<Envelope, Envelope> function,
+    public Response processSynchronously(final Function<JsonEnvelope, JsonEnvelope> function,
                                          final HttpHeaders headers,
                                          final Map<String, String> pathParams) {
-        Envelope envelope = envelopeBuilderFactory.builder()
+        JsonEnvelope envelope = envelopeBuilderFactory.builder()
                 .withHeaders(headers)
                 .withPathParams(pathParams)
                 .build();
 
-        Envelope result = function.apply(envelope);
+        JsonEnvelope result = function.apply(envelope);
         Response.ResponseBuilder response =
                 result != null ? Response.status(OK).entity(result.payload().toString()) : Response.status(NOT_FOUND);
         return response.build();

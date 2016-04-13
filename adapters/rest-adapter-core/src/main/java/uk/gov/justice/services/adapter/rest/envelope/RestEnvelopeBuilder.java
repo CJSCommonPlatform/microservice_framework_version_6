@@ -1,6 +1,6 @@
 package uk.gov.justice.services.adapter.rest.envelope;
 
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectMetadata;
 import uk.gov.justice.services.messaging.JsonObjects;
 import uk.gov.justice.services.messaging.Metadata;
@@ -8,6 +8,7 @@ import uk.gov.justice.services.messaging.Metadata;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
 import javax.ws.rs.core.HttpHeaders;
 import java.util.Map;
 import java.util.Optional;
@@ -17,7 +18,7 @@ import static java.util.Collections.emptyMap;
 import static uk.gov.justice.services.adapter.rest.HeaderConstants.CLIENT_CORRELATION_ID;
 import static uk.gov.justice.services.adapter.rest.HeaderConstants.SESSION_ID;
 import static uk.gov.justice.services.adapter.rest.HeaderConstants.USER_ID;
-import static uk.gov.justice.services.messaging.DefaultEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.CLIENT_ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.CONTEXT;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.CORRELATION;
@@ -77,7 +78,7 @@ public class RestEnvelopeBuilder {
      *
      * @return the envelope
      */
-    public Envelope build() {
+    public JsonEnvelope build() {
         return envelopeFrom(buildMetadata(), buildPayload());
     }
 

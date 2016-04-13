@@ -10,7 +10,7 @@ import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.handler.exception.HandlerExecutionException;
 import uk.gov.justice.services.core.handler.registry.exception.InvalidHandlerException;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 
 import java.io.IOException;
@@ -37,7 +37,7 @@ public class HandlerMethodTest {
     private SynchronousCommandHandler synchronousCommandHandler;
 
 
-    private Envelope envelope;
+    private JsonEnvelope envelope;
 
     @Before
     public void setup() throws Exception {
@@ -86,7 +86,7 @@ public class HandlerMethodTest {
 
     @Test(expected = InvalidHandlerException.class)
     public void shouldThrowExceptionWithAsynchronousMethod() {
-        new HandlerMethod(synchronousCommandHandler, method(new SynchronousCommandHandler(), "handlesAsync"), Envelope.class);
+        new HandlerMethod(synchronousCommandHandler, method(new SynchronousCommandHandler(), "handlesAsync"), JsonEnvelope.class);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -99,7 +99,7 @@ public class HandlerMethodTest {
     }
 
     private HandlerMethod syncHandlerInstance() {
-        return new HandlerMethod(synchronousCommandHandler, method(new SynchronousCommandHandler(), "handles"), Envelope.class);
+        return new HandlerMethod(synchronousCommandHandler, method(new SynchronousCommandHandler(), "handles"), JsonEnvelope.class);
     }
 
     private Method method(final Object object, final String methofName) {
@@ -109,7 +109,7 @@ public class HandlerMethodTest {
                 .orElseThrow(() -> new IllegalArgumentException(format("Cannot find method with name %s", methofName)));
     }
 
-    private Envelope testEnvelope(String fileName) throws IOException {
+    private JsonEnvelope testEnvelope(String fileName) throws IOException {
         String jsonString = Resources.toString(Resources.getResource("json/" + fileName), Charset.defaultCharset());
         return new JsonObjectEnvelopeConverter().asEnvelope(new StringToJsonObjectConverter().convert(jsonString));
     }
@@ -117,11 +117,11 @@ public class HandlerMethodTest {
     public static class AsynchronousCommandHandler {
 
         @Handles("test-context.commands.create-something")
-        public void handles(final Envelope envelope) {
+        public void handles(final JsonEnvelope envelope) {
         }
 
         @Handles("test-context.commands.create-something-else")
-        public Envelope handlesSync(final Envelope envelope) {
+        public JsonEnvelope handlesSync(final JsonEnvelope envelope) {
             return envelope;
         }
     }
@@ -129,12 +129,12 @@ public class HandlerMethodTest {
     public static class SynchronousCommandHandler {
 
         @Handles("test-context.commands.create-something")
-        public Envelope handles(final Envelope envelope) {
+        public JsonEnvelope handles(final JsonEnvelope envelope) {
             return envelope;
         }
 
         @Handles("test-context.commands.create-something-else")
-        public void handlesAsync(final Envelope envelope) {
+        public void handlesAsync(final JsonEnvelope envelope) {
         }
     }
 }

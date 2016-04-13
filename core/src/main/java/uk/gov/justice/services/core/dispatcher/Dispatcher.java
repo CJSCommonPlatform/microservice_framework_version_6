@@ -5,7 +5,7 @@ import static uk.gov.justice.services.core.handler.HandlerMethod.SYNCHRONOUS;
 
 import uk.gov.justice.services.core.handler.HandlerMethod;
 import uk.gov.justice.services.core.handler.registry.HandlerRegistry;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 /**
  * Dispatches messages synchronously or asynchronously to their corresponding handlers, which could
@@ -34,7 +34,7 @@ class Dispatcher {
      *
      * @param envelope the envelope to dispatch to a handler
      */
-    void asynchronousDispatch(final Envelope envelope) {
+    void asynchronousDispatch(final JsonEnvelope envelope) {
         getMethod(envelope, ASYNCHRONOUS).execute(envelope);
     }
 
@@ -45,8 +45,8 @@ class Dispatcher {
      * @param envelope the envelope to dispatch to a handler
      * @return the envelope returned by the handler method
      */
-    Envelope synchronousDispatch(final Envelope envelope) {
-        return (Envelope) getMethod(envelope, SYNCHRONOUS).execute(envelope);
+    JsonEnvelope synchronousDispatch(final JsonEnvelope envelope) {
+        return (JsonEnvelope) getMethod(envelope, SYNCHRONOUS).execute(envelope);
     }
 
     /**
@@ -66,7 +66,7 @@ class Dispatcher {
      * @param envelope the envelope to be handled
      * @return the handler method
      */
-    private HandlerMethod getMethod(final Envelope envelope, final boolean isSynchronous) {
+    private HandlerMethod getMethod(final JsonEnvelope envelope, final boolean isSynchronous) {
         final String name = envelope.metadata().name();
         return handlerRegistry.get(name, isSynchronous);
     }

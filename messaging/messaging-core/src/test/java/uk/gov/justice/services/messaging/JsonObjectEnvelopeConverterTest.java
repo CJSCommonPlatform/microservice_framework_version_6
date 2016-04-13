@@ -48,11 +48,11 @@ public class JsonObjectEnvelopeConverterTest {
     public void shouldReturnEnvelope() throws Exception {
         final JsonObjectEnvelopeConverter jsonObjectEnvelopeConverter = new JsonObjectEnvelopeConverter();
 
-        Envelope envelope = jsonObjectEnvelopeConverter.asEnvelope(new StringToJsonObjectConverter().convert(jsonFromFile("envelope")));
+        JsonEnvelope envelope = jsonObjectEnvelopeConverter.asEnvelope(new StringToJsonObjectConverter().convert(jsonFromFile("envelope")));
 
         assertThat(envelope, notNullValue());
         Metadata metadata = envelope.metadata();
-        JsonObject payload = envelope.payload();
+        JsonObject payload = envelope.payloadAsJsonObject();
         assertThat(metadata, notNullValue());
         assertThat(payload, notNullValue());
         assertThat(metadata.id().toString(), equalTo(ID));
@@ -77,7 +77,7 @@ public class JsonObjectEnvelopeConverterTest {
         final Metadata metadata = JsonObjectMetadata.metadataFrom(expectedEnvelope.getJsonObject(METADATA));
         final JsonObject payload = jsonObjectEnvelopeConverter.extractPayloadFromEnvelope(expectedEnvelope);
 
-        final Envelope envelope = DefaultEnvelope.envelopeFrom(metadata, payload);
+        final JsonEnvelope envelope = DefaultJsonEnvelope.envelopeFrom(metadata, payload);
 
         assertThat(jsonObjectEnvelopeConverter.fromEnvelope(envelope), equalTo(expectedEnvelope));
     }

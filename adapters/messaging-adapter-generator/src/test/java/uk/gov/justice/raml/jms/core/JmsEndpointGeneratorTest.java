@@ -19,7 +19,7 @@ import uk.gov.justice.services.adapters.test.utils.compiler.JavaCompilerUtil;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
@@ -68,7 +68,7 @@ import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionU
 import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionUtil.setField;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLLER;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
-import static uk.gov.justice.services.messaging.DefaultEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JmsEndpointGeneratorTest {
@@ -541,7 +541,7 @@ public class JmsEndpointGeneratorTest {
         ArgumentCaptor<Consumer> consumerCaptor = ArgumentCaptor.forClass(Consumer.class);
         verify(jmsProcessor).process(consumerCaptor.capture(), eq(message));
 
-        Envelope envelope = envelopeFrom(null, null);
+        JsonEnvelope envelope = envelopeFrom(null, null);
         consumerCaptor.getValue().accept(envelope);
 
         verify(dispatcher).dispatch(envelope);

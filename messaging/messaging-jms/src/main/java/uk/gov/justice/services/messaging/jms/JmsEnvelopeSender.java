@@ -2,7 +2,7 @@ package uk.gov.justice.services.messaging.jms;
 
 import static javax.jms.Session.AUTO_ACKNOWLEDGE;
 
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.exception.JmsEnvelopeSenderException;
 
 import javax.annotation.Resource;
@@ -32,7 +32,7 @@ public class JmsEnvelopeSender {
      * @param envelope    envelope to be sent.
      * @param destination JMS destination for the envelope.
      */
-    public void send(final Envelope envelope, final Destination destination) {
+    public void send(final JsonEnvelope envelope, final Destination destination) {
         try (Connection connection = connectionFactory.createConnection();
              Session session = connection.createSession(false, AUTO_ACKNOWLEDGE);
              MessageProducer producer = session.createProducer(destination)) {

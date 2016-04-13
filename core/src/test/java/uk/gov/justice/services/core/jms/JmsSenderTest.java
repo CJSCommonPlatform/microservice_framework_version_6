@@ -7,7 +7,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.services.core.annotation.Component;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.justice.services.messaging.context.ContextName;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
@@ -32,7 +32,7 @@ public class JmsSenderTest {
     @Mock
     Destination destination;
     @Mock
-    private Envelope envelope;
+    private JsonEnvelope envelope;
     @Mock
     private Metadata metadata;
 

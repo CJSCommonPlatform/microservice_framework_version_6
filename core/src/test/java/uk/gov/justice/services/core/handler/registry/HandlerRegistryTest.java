@@ -1,20 +1,19 @@
 package uk.gov.justice.services.core.handler.registry;
 
 import static java.util.Arrays.asList;
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsNull.nullValue;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
-import static uk.gov.justice.services.core.handler.HandlerMethod.*;
+import static uk.gov.justice.services.core.handler.HandlerMethod.ASYNCHRONOUS;
+import static uk.gov.justice.services.core.handler.HandlerMethod.SYNCHRONOUS;
 
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
-import uk.gov.justice.services.core.handler.HandlerMethod;
 import uk.gov.justice.services.core.handler.exception.MissingHandlerException;
 import uk.gov.justice.services.core.handler.registry.exception.DuplicateHandlerException;
 import uk.gov.justice.services.core.handler.registry.exception.InvalidHandlerException;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -103,7 +102,7 @@ public class HandlerRegistryTest {
     public static class TestCommandHandler {
 
         @Handles(COMMAND_NAME)
-        public void handle(Envelope envelope) {
+        public void handle(JsonEnvelope envelope) {
         }
 
     }
@@ -112,7 +111,7 @@ public class HandlerRegistryTest {
     public static class TestCommandHandlerDuplicate {
 
         @Handles(COMMAND_NAME)
-        public void handle(Envelope envelope) {
+        public void handle(JsonEnvelope envelope) {
         }
 
     }
@@ -121,7 +120,7 @@ public class HandlerRegistryTest {
     public static class TestCommandHandlerWithWrongHandler {
 
         @Handles(COMMAND_NAME)
-        public void handle1(Envelope envelope, Object invalidSecondArgument) {
+        public void handle1(JsonEnvelope envelope, Object invalidSecondArgument) {
         }
 
     }
@@ -130,7 +129,7 @@ public class HandlerRegistryTest {
     public static class TestCommandHandlerWithWrongSynchronousHandler {
 
         @Handles(COMMAND_NAME)
-        public Envelope handle1(Envelope envelope, Object invalidSecondArgument) {
+        public JsonEnvelope handle1(JsonEnvelope envelope, Object invalidSecondArgument) {
             return null;
         }
 
@@ -140,7 +139,7 @@ public class HandlerRegistryTest {
     public static class TestCommandHandlerWithSynchronousHandler {
 
         @Handles(COMMAND_NAME)
-        public Envelope handle1(Envelope envelope) {
+        public JsonEnvelope handle1(JsonEnvelope envelope) {
             return envelope;
         }
 
@@ -150,7 +149,7 @@ public class HandlerRegistryTest {
     public static class TestCommandHandlerWithSynchronousHandlerDuplicate {
 
         @Handles(COMMAND_NAME)
-        public Envelope handle1(Envelope envelope) {
+        public JsonEnvelope handle1(JsonEnvelope envelope) {
             return envelope;
         }
 
@@ -160,7 +159,7 @@ public class HandlerRegistryTest {
     public static class TestCommandHandlerWithAsynchronousHandler {
 
         @Handles(COMMAND_NAME)
-        public void handle1(Envelope envelope) {
+        public void handle1(JsonEnvelope envelope) {
 
         }
 

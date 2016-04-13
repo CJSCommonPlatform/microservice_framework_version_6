@@ -10,8 +10,8 @@ import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.example.cakeshop.domain.event.RecipeAdded;
-import uk.gov.justice.services.messaging.DefaultEnvelope;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -36,7 +36,7 @@ public class AddRecipeCommandHandlerTest {
     private static final String RECIPE_NAME = "Test Recipe";
 
     @Mock
-    Envelope envelope;
+    JsonEnvelope envelope;
 
     @Mock
     EventSource eventSource;
@@ -45,20 +45,20 @@ public class AddRecipeCommandHandlerTest {
     Enveloper enveloper;
 
     @Mock
-    Function<Object, Envelope> enveloperFunction;
+    Function<Object, JsonEnvelope> enveloperFunction;
 
     @Mock
     Stream<RecipeAdded> events;
 
     @Mock
-    Stream<Envelope> envelopes;
+    Stream<JsonEnvelope> envelopes;
 
     @InjectMocks
     private AddRecipeCommandHandler addRecipeCommandHandler;
 
     @Test
     public void shouldHandleAddRecipeCommand() throws Exception {
-        final Envelope command = createCommand();
+        final JsonEnvelope command = createCommand();
         final EventStreamStub eventStreamStub = new EventStreamStub();
 
         when(enveloper.withMetadataFrom(command)).thenReturn(enveloperFunction);
@@ -72,7 +72,7 @@ public class AddRecipeCommandHandlerTest {
 
     }
 
-    private Envelope createCommand() {
+    private JsonEnvelope createCommand() {
         final JsonObject metadataAsJsonObject = Json.createObjectBuilder()
                 .add(ID, UUID.randomUUID().toString())
                 .add(NAME, EVENT_NAME)
@@ -84,30 +84,30 @@ public class AddRecipeCommandHandlerTest {
                 .add("ingredients", Json.createArrayBuilder().build())
                 .build();
 
-        return DefaultEnvelope.envelopeFrom(metadataFrom(metadataAsJsonObject), payloadAsJsonObject);
+        return DefaultJsonEnvelope.envelopeFrom(metadataFrom(metadataAsJsonObject), payloadAsJsonObject);
     }
 
     private class EventStreamStub implements EventStream {
 
-        private Stream<Envelope> events;
+        private Stream<JsonEnvelope> events;
 
         @Override
-        public Stream<Envelope> read() {
+        public Stream<JsonEnvelope> read() {
             return null;
         }
 
         @Override
-        public Stream<Envelope> readFrom(Long version) {
+        public Stream<JsonEnvelope> readFrom(Long version) {
             return null;
         }
 
         @Override
-        public void append(Stream<Envelope> events) throws EventStreamException {
+        public void append(Stream<JsonEnvelope> events) throws EventStreamException {
             this.events = events;
         }
 
         @Override
-        public void appendAfter(Stream<Envelope> events, Long version) throws EventStreamException {
+        public void appendAfter(Stream<JsonEnvelope> events, Long version) throws EventStreamException {
 
         }
 

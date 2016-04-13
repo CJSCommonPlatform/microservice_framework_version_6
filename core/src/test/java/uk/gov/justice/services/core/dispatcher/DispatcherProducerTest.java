@@ -20,7 +20,7 @@ import uk.gov.justice.services.core.annotation.Remote;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.extension.ServiceComponentFoundEvent;
 import uk.gov.justice.services.core.handler.exception.MissingHandlerException;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 
 import java.lang.reflect.Member;
@@ -94,13 +94,13 @@ public class DispatcherProducerTest {
     private Context context;
 
     @Mock
-    private Envelope envelopeA;
+    private JsonEnvelope envelopeA;
 
     @Mock
-    private Envelope envelopeB;
+    private JsonEnvelope envelopeB;
 
     @Mock
-    private Envelope envelopeC;
+    private JsonEnvelope envelopeC;
 
     @Mock
     private Metadata metadataA;
@@ -171,7 +171,7 @@ public class DispatcherProducerTest {
 
         Requester requester = dispatcherProducer.produceRequester(queryApiInjectionPoint);
         assertThat(requester, notNullValue());
-        Envelope result = requester.request(envelopeA);
+        JsonEnvelope result = requester.request(envelopeA);
         assertThat(result, equalTo(envelopeA));
     }
 
@@ -242,15 +242,15 @@ public class DispatcherProducerTest {
     @ServiceComponent(COMMAND_API)
     public static class TestCommandApiHandler {
 
-        public Envelope envelope;
+        public JsonEnvelope envelope;
 
         @Handles(NAME_A)
-        public void doSomething(Envelope envelope) {
+        public void doSomething(JsonEnvelope envelope) {
             this.envelope = envelope;
         }
 
         @Handles(NAME_C)
-        public void doSomethingElse(Envelope envelope) {
+        public void doSomethingElse(JsonEnvelope envelope) {
             this.envelope = null;
         }
     }
@@ -258,16 +258,16 @@ public class DispatcherProducerTest {
     @ServiceComponent(COMMAND_CONTROLLER)
     public static class TestCommandControllerHandler {
 
-        public Envelope envelopeA;
-        public Envelope envelopeB;
+        public JsonEnvelope envelopeA;
+        public JsonEnvelope envelopeB;
 
         @Handles(NAME_A)
-        public void doSomethingA(Envelope envelope) {
+        public void doSomethingA(JsonEnvelope envelope) {
             this.envelopeA = envelope;
         }
 
         @Handles(NAME_B)
-        public Envelope doSomethingB(Envelope envelope) {
+        public JsonEnvelope doSomethingB(JsonEnvelope envelope) {
             this.envelopeB = envelope;
             return envelope;
         }
@@ -278,7 +278,7 @@ public class DispatcherProducerTest {
     public static class TestRemoteQueryApiHandler {
 
         @Handles(NAME_A)
-        public Envelope doSomething(Envelope envelope) {
+        public JsonEnvelope doSomething(JsonEnvelope envelope) {
             return envelope;
         }
     }

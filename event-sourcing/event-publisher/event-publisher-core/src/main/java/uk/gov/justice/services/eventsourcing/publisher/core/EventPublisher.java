@@ -1,7 +1,7 @@
 package uk.gov.justice.services.eventsourcing.publisher.core;
 
 
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 /**
  * Interface for a service that can publish events.
@@ -14,5 +14,5 @@ public interface EventPublisher {
      *
      * @param envelope containing metadata and event.
      */
-    void publish(final Envelope envelope);
+    void publish(final JsonEnvelope envelope);
 }

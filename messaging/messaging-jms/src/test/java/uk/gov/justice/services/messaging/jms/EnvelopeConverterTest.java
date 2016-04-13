@@ -7,8 +7,8 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.services.common.converter.JsonObjectToStringConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.exception.JmsConverterException;
-import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.Metadata;
 
@@ -44,7 +44,7 @@ public class EnvelopeConverterTest {
     private TextMessage textMessage;
 
     @Mock
-    private Envelope envelope;
+    private JsonEnvelope envelope;
 
     @Mock
     private Metadata metadata;
@@ -70,7 +70,7 @@ public class EnvelopeConverterTest {
         when(stringToJsonObjectConverter.convert(MESSAGE_TEXT)).thenReturn(messageAsJsonObject);
         when(jsonObjectEnvelopeConverter.asEnvelope(messageAsJsonObject)).thenReturn(envelope);
 
-        Envelope actualEnvelope = envelopeConverter.fromMessage(textMessage);
+        JsonEnvelope actualEnvelope = envelopeConverter.fromMessage(textMessage);
 
         assertThat(actualEnvelope, equalTo(envelope));
     }

@@ -8,7 +8,7 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.handler.exception.MissingHandlerException;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 
 import org.junit.Before;
@@ -23,7 +23,7 @@ public class DispatcherTest {
     private static final String NAME = "test.commands.do-something";
 
     @Mock
-    private Envelope envelope;
+    private JsonEnvelope envelope;
 
     @Mock
     private Metadata metadata;
@@ -51,10 +51,10 @@ public class DispatcherTest {
     @ServiceComponent(COMMAND_API)
     public static class TestHandler {
 
-        Envelope envelope;
+        JsonEnvelope envelope;
 
         @Handles(NAME)
-        public void handle(Envelope envelope) {
+        public void handle(JsonEnvelope envelope) {
             this.envelope = envelope;
         }
 

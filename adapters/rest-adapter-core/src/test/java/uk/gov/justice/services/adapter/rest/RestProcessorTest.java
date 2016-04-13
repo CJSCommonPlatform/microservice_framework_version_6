@@ -9,7 +9,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -27,7 +27,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.DefaultEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
 
 /**
  * Unit tests for the {@link RestProcessor} class.
@@ -46,10 +46,10 @@ public class RestProcessorTest {
     }
 
     @Mock
-    private Consumer<Envelope> consumer;
+    private Consumer<JsonEnvelope> consumer;
 
     @Mock
-    private Function<Envelope, Envelope> function;
+    private Function<JsonEnvelope, JsonEnvelope> function;
 
     private RestProcessor restProcessor;
 
@@ -74,13 +74,13 @@ public class RestProcessorTest {
 
         restProcessor.processAsynchronously(consumer, payload, NOT_USED_HEADERS, pathParams);
 
-        ArgumentCaptor<Envelope> envelopeCaptor = ArgumentCaptor.forClass(Envelope.class);
+        ArgumentCaptor<JsonEnvelope> envelopeCaptor = ArgumentCaptor.forClass(JsonEnvelope.class);
 
         verify(consumer).accept(envelopeCaptor.capture());
 
-        Envelope envelope = envelopeCaptor.getValue();
-        assertThat(envelope.payload().getString("key123"), is("value45678"));
-        assertThat(envelope.payload().getString("paramABC"), is("paramValueBCD"));
+        JsonEnvelope envelope = envelopeCaptor.getValue();
+        assertThat(envelope.payloadAsJsonObject().getString("key123"), is("value45678"));
+        assertThat(envelope.payloadAsJsonObject().getString("paramABC"), is("paramValueBCD"));
 
     }
 
@@ -91,17 +91,17 @@ public class RestProcessorTest {
         restProcessor.processAsynchronously(consumer, NOT_USED_PAYLOAD,
                 headersWith("Content-Type", "application/vnd.somecontext.commands.somecommand+json"), NOT_USED_PATH_PARAMS);
 
-        ArgumentCaptor<Envelope> envelopeCaptor = ArgumentCaptor.forClass(Envelope.class);
+        ArgumentCaptor<JsonEnvelope> envelopeCaptor = ArgumentCaptor.forClass(JsonEnvelope.class);
 
         verify(consumer).accept(envelopeCaptor.capture());
 
-        Envelope envelope = envelopeCaptor.getValue();
+        JsonEnvelope envelope = envelopeCaptor.getValue();
         assertThat(envelope.metadata().name(), is("somecontext.commands.somecommand"));
     }
 
     @Test
     public void shouldReturn200ResponseOnSyncProcessing() throws Exception {
-        when(function.apply(any(Envelope.class))).thenReturn(
+        when(function.apply(any(JsonEnvelope.class))).thenReturn(
                 envelopeFrom(null, Json.createObjectBuilder().build()));
         Response response = restProcessor.processSynchronously(function, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
 
@@ -110,7 +110,7 @@ public class RestProcessorTest {
 
     @Test
     public void shouldReturn404ResponseOnSyncProcessingIfFunctionReturnsNull() throws Exception {
-        when(function.apply(any(Envelope.class))).thenReturn(null);
+        when(function.apply(any(JsonEnvelope.class))).thenReturn(null);
         Response response = restProcessor.processSynchronously(function, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
 
         assertThat(response.getStatus(), equalTo(404));
@@ -121,10 +121,10 @@ public class RestProcessorTest {
         restProcessor.processSynchronously(function,
                 headersWith("Accept", "application/vnd.somecontext.queries.somequery+json"), NOT_USED_PATH_PARAMS);
 
-        ArgumentCaptor<Envelope> envelopeCaptor = ArgumentCaptor.forClass(Envelope.class);
+        ArgumentCaptor<JsonEnvelope> envelopeCaptor = ArgumentCaptor.forClass(JsonEnvelope.class);
         verify(function).apply(envelopeCaptor.capture());
 
-        Envelope envelope = envelopeCaptor.getValue();
+        JsonEnvelope envelope = envelopeCaptor.getValue();
         assertThat(envelope.metadata().name(), is("somecontext.queries.somequery"));
     }
 
@@ -135,17 +135,17 @@ public class RestProcessorTest {
 
         restProcessor.processSynchronously(function, NOT_USED_HEADERS, pathParams);
 
-        ArgumentCaptor<Envelope> envelopeCaptor = ArgumentCaptor.forClass(Envelope.class);
+        ArgumentCaptor<JsonEnvelope> envelopeCaptor = ArgumentCaptor.forClass(JsonEnvelope.class);
         verify(function).apply(envelopeCaptor.capture());
 
-        Envelope envelope = envelopeCaptor.getValue();
-        assertThat(envelope.payload().getString("param1"), is("paramValue345"));
+        JsonEnvelope envelope = envelopeCaptor.getValue();
+        assertThat(envelope.payloadAsJsonObject().getString("param1"), is("paramValue345"));
 
     }
 
     @Test
     public void shouldReturnPayloadOfEnvelopeReturnedByFunction() {
-        when(function.apply(any(Envelope.class))).thenReturn(
+        when(function.apply(any(JsonEnvelope.class))).thenReturn(
                 envelopeFrom(null, Json.createObjectBuilder().add("key11", "value33").add("key22", "value55").build()));
 
         Response response = restProcessor.processSynchronously(function, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);

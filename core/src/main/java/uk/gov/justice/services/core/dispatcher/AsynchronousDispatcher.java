@@ -1,7 +1,7 @@
 package uk.gov.justice.services.core.dispatcher;
 
 import uk.gov.justice.services.core.annotation.Adapter;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 /**
  * Dispatches command to the correct asynchronous handler.
@@ -13,7 +13,7 @@ public interface AsynchronousDispatcher {
     /**
      * Dispatches the {@code envelope} to the correct handler.
      *
-     * @param envelope The {@link Envelope} to be dispatched.
+     * @param envelope The {@link JsonEnvelope} to be dispatched.
      */
-    void dispatch(final Envelope envelope);
+    void dispatch(final JsonEnvelope envelope);
 }

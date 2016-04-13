@@ -10,7 +10,7 @@ import uk.gov.justice.services.eventsourcing.repository.core.EventRepository;
 import uk.gov.justice.services.eventsourcing.repository.core.exception.StoreEventRequestFailedException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.InvalidStreamVersionRuntimeException;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 
 import java.util.Collections;
@@ -38,10 +38,10 @@ public class EventStreamManagerTest {
     private EventPublisher eventPublisher;
 
     @Mock
-    private Stream<Envelope> eventStream;
+    private Stream<JsonEnvelope> eventStream;
 
     @Mock
-    private Envelope envelope;
+    private JsonEnvelope envelope;
 
     @Mock
     private Metadata metadata;
@@ -116,7 +116,7 @@ public class EventStreamManagerTest {
     public void shouldReadStream() {
         when(eventRepository.getByStreamId(STREAM_ID)).thenReturn(eventStream);
 
-        Stream<Envelope> actualEnvelopeEventStream = eventStreamManager.read(STREAM_ID);
+        Stream<JsonEnvelope> actualEnvelopeEventStream = eventStreamManager.read(STREAM_ID);
 
         assertThat(actualEnvelopeEventStream, equalTo(eventStream));
         verify(eventRepository).getByStreamId(STREAM_ID);
@@ -134,7 +134,7 @@ public class EventStreamManagerTest {
         when(eventRepository.getByStreamIdAndSequenceId(STREAM_ID, CURRENT_VERSION)).thenReturn(eventStream);
         when(eventRepository.getCurrentSequenceIdForStream(STREAM_ID)).thenReturn(CURRENT_VERSION);
 
-        Stream<Envelope> actualEnvelopeEventStream = eventStreamManager.readFrom(STREAM_ID, CURRENT_VERSION);
+        Stream<JsonEnvelope> actualEnvelopeEventStream = eventStreamManager.readFrom(STREAM_ID, CURRENT_VERSION);
 
         assertThat(actualEnvelopeEventStream, equalTo(eventStream));
         verify(eventRepository).getByStreamIdAndSequenceId(STREAM_ID, CURRENT_VERSION);

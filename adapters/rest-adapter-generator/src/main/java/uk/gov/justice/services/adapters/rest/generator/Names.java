@@ -1,11 +1,12 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
-import com.google.common.collect.ImmutableMap;
-import org.apache.commons.lang.StringUtils;
-import org.raml.model.Action;
-import org.raml.model.MimeType;
-import org.raml.model.Raml;
-import org.raml.model.Resource;
+import static org.apache.commons.lang.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.remove;
+import static org.apache.commons.lang.StringUtils.substringAfter;
+import static org.apache.commons.lang.StringUtils.uncapitalize;
+import static org.apache.commons.lang.WordUtils.capitalize;
+
 import uk.gov.justice.services.core.annotation.Component;
 
 import java.net.MalformedURLException;
@@ -14,17 +15,15 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.apache.commons.lang.StringUtils.defaultIfBlank;
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.remove;
-import static org.apache.commons.lang.StringUtils.substringAfter;
-import static org.apache.commons.lang.StringUtils.uncapitalize;
-import static org.apache.commons.lang.WordUtils.capitalize;
+import org.apache.commons.lang.StringUtils;
+import org.raml.model.Action;
+import org.raml.model.MimeType;
+import org.raml.model.Raml;
+import org.raml.model.Resource;
 
 final class Names {
 
@@ -35,8 +34,6 @@ final class Names {
                     "interface", "long", "native", "new", "null", "package", "private", "protected", "public",
                     "return", "short", "static", "strictfp", "super", "switch", "synchronized", "this", "throw",
                     "throws", "transient", "true", "try", "void", "volatile", "while")));
-
-    private static final Map<String, String> CONVERT_TO_PILLAR = ImmutableMap.of("command", "commands", "query", "queries");
 
     private static final Pattern PILLAR_AND_TIER_PATTERN = Pattern
             .compile("(command/api|command/controller|command/handler|query/api|query/controller|query/view)");
@@ -122,12 +119,12 @@ final class Names {
     static Component componentFromBaseUriIn(final Raml raml) {
         final Matcher matcher = PILLAR_AND_TIER_PATTERN.matcher(baseUriPathWithoutContext(raml));
 
-        if (!matcher.find()) {
+        if (matcher.find()) {
+            final String pillarAndTier = matcher.group(1);
+            final String[] sections = pillarAndTier.split("/");
+            return Component.valueOf(sections[0], sections[1]);
+        } else {
             throw new IllegalStateException(String.format("Base URI must contain valid pillar and tier: %s", raml.getBaseUri()));
         }
-
-        final String pillarAndTier = matcher.group(1);
-        final String[] sections = pillarAndTier.split("/");
-        return Component.valueOf(CONVERT_TO_PILLAR.get(sections[0]), sections[1]);
     }
 }

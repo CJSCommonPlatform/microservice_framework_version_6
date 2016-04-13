@@ -11,7 +11,7 @@ protocols: [ HTTP, HTTPS ]
     responses:
       200:
         body:
-          application/vnd.cakeshop.queries.recipes+json:
+          application/vnd.cakeshop.query.recipes+json:
             schema: !include json/schema/recipes.json
             example: !include json/recipes.json
 
@@ -21,6 +21,6 @@ protocols: [ HTTP, HTTPS ]
     responses:
       200:
         body:
-          application/vnd.cakeshop.queries.recipe+json:
+          application/vnd.cakeshop.query.recipe+json:
             schema: !include json/schema/recipe.json
             example: !include json/recipe.json

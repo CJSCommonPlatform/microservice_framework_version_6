@@ -15,7 +15,7 @@ import static uk.gov.justice.services.adapters.rest.generator.Actions.responseMi
 public class ResponseContentTypeRamlValidator extends AbstractContentTypeRamlValidator {
 
     public ResponseContentTypeRamlValidator() {
-        super(ActionType.GET, "response type", "queries");
+        super(ActionType.GET, "response type", "query");
     }
 
     @Override

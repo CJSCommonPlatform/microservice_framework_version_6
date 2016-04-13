@@ -14,7 +14,7 @@ public class RecipeAddedEventListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipeAddedEventListener.class);
     private static final String FIELD_RECIPE_ID = "recipeId";
 
-    @Handles("cakeshop.events.recipe-added")
+    @Handles("cakeshop.event.recipe-added")
     public void handle(final JsonEnvelope envelope) {
 
         LOGGER.info("=============> Inside add-recipe Event Listener. RecipeId: " + envelope.payloadAsJsonObject().getString(FIELD_RECIPE_ID));

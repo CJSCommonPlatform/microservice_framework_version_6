@@ -7,7 +7,7 @@ import static org.apache.commons.lang3.StringUtils.stripStart;
 
 public class ResourceUri {
     private static final Pattern MESSAGING_RESOURCE_URI_PATTERN =
-            Pattern.compile("^\\/?([a-zA-Z0-9]+)\\.(((api|controller|handler)\\.(commands))|(events))");
+            Pattern.compile("^\\/?([a-zA-Z0-9]+)\\.(((api|controller|handler)\\.(command))|(event))");
 
     private final String uriString;
     private final String tier;

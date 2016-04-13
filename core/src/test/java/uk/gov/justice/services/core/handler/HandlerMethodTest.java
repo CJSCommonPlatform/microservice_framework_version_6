@@ -116,11 +116,11 @@ public class HandlerMethodTest {
 
     public static class AsynchronousCommandHandler {
 
-        @Handles("test-context.commands.create-something")
+        @Handles("test-context.command.create-something")
         public void handles(final JsonEnvelope envelope) {
         }
 
-        @Handles("test-context.commands.create-something-else")
+        @Handles("test-context.command.create-something-else")
         public JsonEnvelope handlesSync(final JsonEnvelope envelope) {
             return envelope;
         }
@@ -128,12 +128,12 @@ public class HandlerMethodTest {
 
     public static class SynchronousCommandHandler {
 
-        @Handles("test-context.commands.create-something")
+        @Handles("test-context.command.create-something")
         public JsonEnvelope handles(final JsonEnvelope envelope) {
             return envelope;
         }
 
-        @Handles("test-context.commands.create-something-else")
+        @Handles("test-context.command.create-something-else")
         public void handlesAsync(final JsonEnvelope envelope) {
         }
     }

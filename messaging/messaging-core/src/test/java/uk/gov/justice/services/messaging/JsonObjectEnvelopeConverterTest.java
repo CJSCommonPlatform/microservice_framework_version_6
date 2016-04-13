@@ -21,7 +21,7 @@ import static uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter.META
 public class JsonObjectEnvelopeConverterTest {
 
     private static final String ID = "861c9430-7bc6-4bf0-b549-6534394b8d65";
-    private static final String NAME = "test.commands.do-something";
+    private static final String NAME = "test.command.do-something";
     private static final String CLIENT = "d51597dc-2526-4c71-bd08-5031c79f11e1";
     private static final String SESSION = "45b0c3fe-afe6-4652-882f-7882d79eadd9";
     private static final String USER = "72251abb-5872-46e3-9045-950ac5bae399";

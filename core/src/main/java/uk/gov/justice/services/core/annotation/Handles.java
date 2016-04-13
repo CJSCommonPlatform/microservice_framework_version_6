@@ -9,7 +9,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 /**
  * Identifies handler methods for commands, queries and events.
  * <p>
- * Usage: @Handles("context.commands.do-something")
+ * Usage: @Handles("context.command.do-something")
  */
 
 @Retention(RUNTIME)

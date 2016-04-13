@@ -24,7 +24,7 @@ public class RequestContentTypeRamlValidatorTest {
         validator.validate(
                 raml()
                         .with(resource()
-                                .with(action(POST, "application/vnd.people.commands.command1+json")))
+                                .with(action(POST, "application/vnd.people.command.command1+json")))
                         .build());
 
     }
@@ -36,7 +36,7 @@ public class RequestContentTypeRamlValidatorTest {
                 raml()
                         .with(resource()
                                 .with(action(GET, "application/vnd.structure.dummy.command1+json"))
-                                .with(action(POST, "application/vnd.structure.commands.command2+json"))
+                                .with(action(POST, "application/vnd.structure.command.command2+json"))
                                 .with(action(HEAD, "application/vnd.structure.dummy.command3+json"))
                                 .with(action(PUT, "application/vnd.structure.dummy.command4+json"))
                                 .with(action(OPTIONS, "application/vnd.structure.dummy.command5+json"))
@@ -79,12 +79,12 @@ public class RequestContentTypeRamlValidatorTest {
     public void shouldThrowExceptionIfNotvalidMediaType() throws Exception {
 
         exception.expect(RamlValidationException.class);
-        exception.expectMessage("Invalid request type: nd.people.commands.command1+json");
+        exception.expectMessage("Invalid request type: nd.people.command.command1+json");
 
         validator.validate(
                 raml()
                         .with(resource()
-                                .with(action(POST, "nd.people.commands.command1+json")))
+                                .with(action(POST, "nd.people.command.command1+json")))
                         .build());
 
     }

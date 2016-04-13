@@ -18,56 +18,56 @@ public class ResourceUriRamlValidatorTest {
 
     @Test
     public void shouldPassIfCorrectUri() {
-        validator.validate(raml().with(resource().withRelativeUri("/structure.api.commands")).build());
-        validator.validate(raml().with(resource().withRelativeUri("/people.controller.commands")).build());
-        validator.validate(raml().with(resource().withRelativeUri("/lifecycle.handler.commands")).build());
-        validator.validate(raml().with(resource().withRelativeUri("/structure.events")).build());
+        validator.validate(raml().with(resource().withRelativeUri("/structure.api.command")).build());
+        validator.validate(raml().with(resource().withRelativeUri("/people.controller.command")).build());
+        validator.validate(raml().with(resource().withRelativeUri("/lifecycle.handler.command")).build());
+        validator.validate(raml().with(resource().withRelativeUri("/structure.event")).build());
     }
 
     @Test
     public void shouldPassIfCorrectUriInMultipleResources() {
         validator.validate(raml()
-                .with(resource().withRelativeUri("/people.api.commands"))
-                .with(resource().withRelativeUri("/structure.handler.commands"))
-                .with(resource().withRelativeUri("/people.events"))
+                .with(resource().withRelativeUri("/people.api.command"))
+                .with(resource().withRelativeUri("/structure.handler.command"))
+                .with(resource().withRelativeUri("/people.event"))
                 .build());
     }
-    
-  
+
+
     @Test
     public void shouldThrowExceptionIfInvalidTierPassedInUri() throws Exception {
 
         exception.expect(RamlValidationException.class);
-        exception.expectMessage("Inavlid uri: /structure.unknowntier.commands");
+        exception.expectMessage("Invalid uri: /structure.unknowntier.command");
 
         validator.validate(raml()
                 .with(resource()
-                        .withRelativeUri("/structure.unknowntier.commands"))
+                        .withRelativeUri("/structure.unknowntier.command"))
                 .build());
 
     }
-    
+
     @Test
     public void shouldThrowExceptionIfOneOfResourcesContainsInvalidTierInUri() {
         exception.expect(RamlValidationException.class);
-        exception.expectMessage("Inavlid uri: /people.unknown.commands");
-        
+        exception.expectMessage("Invalid uri: /people.unknown.command");
+
         validator.validate(raml()
-                .with(resource().withRelativeUri("/structure.handler.commands"))
-                .with(resource().withRelativeUri("/people.unknown.commands"))
-                .with(resource().withRelativeUri("/people.events"))
+                .with(resource().withRelativeUri("/structure.handler.command"))
+                .with(resource().withRelativeUri("/people.unknown.command"))
+                .with(resource().withRelativeUri("/people.event"))
                 .build());
     }
-    
+
     @Test
     public void shouldThrowExceptionIfTooManyElementsInUri() throws Exception {
 
         exception.expect(RamlValidationException.class);
-        exception.expectMessage("Inavlid uri: /structure.handler.commands.abc");
+        exception.expectMessage("Invalid uri: /structure.handler.command.abc");
 
         validator.validate(raml()
                 .with(resource()
-                        .withRelativeUri("/structure.handler.commands.abc"))
+                        .withRelativeUri("/structure.handler.command.abc"))
                 .build());
 
     }

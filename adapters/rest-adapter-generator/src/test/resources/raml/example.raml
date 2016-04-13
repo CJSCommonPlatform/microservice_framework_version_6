@@ -10,18 +10,18 @@ protocols: [ HTTP, HTTPS ]
     Create user or Update user
   post:
     body:
-        application/vnd.people.commands.create-user+json:
+        application/vnd.people.command.create-user+json:
             schema: !include json/schema/create-user.json
             example: !include json/create-user.json
-        application/vnd.people.commands.update-user+json:
+        application/vnd.people.command.update-user+json:
             schema: !include json/schema/update-user.json
             example: !include json/update-user.json
   get:
     responses:
         200:
             body:
-                application/vnd.people.queries.get-user+json:
-                application/vnd.people.queries.get-user2+json:
+                application/vnd.people.query.get-user+json:
+                application/vnd.people.query.get-user2+json:
 
 /users:
   description: |
@@ -33,4 +33,4 @@ protocols: [ HTTP, HTTPS ]
     responses:
         200:
             body:
-                application/vnd.people.queries.search-users+json:
+                application/vnd.people.query.search-users+json:

@@ -29,7 +29,7 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class JmsEnvelopeSenderTest {
 
-    private static final String NAME = "test.events.something-done";
+    private static final String NAME = "test.event.something-done";
 
     @Mock
     private EnvelopeConverter envelopeConverter;

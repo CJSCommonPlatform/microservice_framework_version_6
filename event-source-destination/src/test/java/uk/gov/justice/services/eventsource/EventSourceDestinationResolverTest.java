@@ -18,7 +18,7 @@ import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 @RunWith(MockitoJUnitRunner.class)
 public class EventSourceDestinationResolverTest {
 
-    private static final String NAME = "test.events.listener";
+    private static final String NAME = "test.event.listener";
 
     @Mock
     private JmsDestinations jmsDestinations;

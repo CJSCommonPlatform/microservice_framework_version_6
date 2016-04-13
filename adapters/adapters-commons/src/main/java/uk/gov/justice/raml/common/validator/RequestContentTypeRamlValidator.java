@@ -12,7 +12,7 @@ import java.util.Collection;
 public class RequestContentTypeRamlValidator extends AbstractContentTypeRamlValidator {
 
     public RequestContentTypeRamlValidator() {
-        super(ActionType.POST, "request type", "commands", "events");
+        super(ActionType.POST, "request type", "command", "event");
     }
 
     @Override

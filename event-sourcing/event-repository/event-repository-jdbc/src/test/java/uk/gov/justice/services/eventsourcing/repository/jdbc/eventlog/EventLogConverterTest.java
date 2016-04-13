@@ -31,7 +31,7 @@ public class EventLogConverterTest {
     private final static UUID ID = UUID.randomUUID();
     private final static UUID STREAM_ID = UUID.randomUUID();
     private final static Long SEQUENCE_ID = 5L;
-    private final static String NAME = "test.events.did-something";
+    private final static String NAME = "test.event.did-something";
     private final static String METADATA_JSON = "{\"id\": \"" + ID.toString() + "\", " +
             "\"name\": \"" + NAME + "\"" +
             "}";

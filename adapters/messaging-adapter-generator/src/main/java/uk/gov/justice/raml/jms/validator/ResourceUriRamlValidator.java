@@ -13,7 +13,7 @@ import static java.lang.String.format;
  */
 public class ResourceUriRamlValidator extends AbstractResourceRamlValidator {
 
-    private static final String ERROR_MSG = "Inavlid uri: %s";
+    private static final String ERROR_MSG = "Invalid uri: %s";
 
     @Override
     protected void validate(final Resource resource) {

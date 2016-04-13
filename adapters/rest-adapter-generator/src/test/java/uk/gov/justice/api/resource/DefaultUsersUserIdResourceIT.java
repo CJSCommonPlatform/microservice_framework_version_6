@@ -44,8 +44,8 @@ import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom
 @RunWith(ApplicationComposer.class)
 public class DefaultUsersUserIdResourceIT {
 
-    private static final String CREATE_USER_MEDIA_TYPE = "application/vnd.people.commands.create-user+json";
-    private static final String UPDATE_USER_MEDIA_TYPE = "application/vnd.people.commands.update-user+json";
+    private static final String CREATE_USER_MEDIA_TYPE = "application/vnd.people.command.create-user+json";
+    private static final String UPDATE_USER_MEDIA_TYPE = "application/vnd.people.command.update-user+json";
     private static int port = -1;
     private static String BASE_URI;
 
@@ -108,10 +108,10 @@ public class DefaultUsersUserIdResourceIT {
                 .path("/users/567-8910")
                 .post(entity("{\"userName\" : \"John Smith\"}", CREATE_USER_MEDIA_TYPE));
 
-        JsonEnvelope envelope = asyncDispatcher.awaitForEnvelopeWithPayloadOf("userId", "567-8910");
-        assertThat(envelope.metadata().name(), is("people.commands.create-user"));
-        assertThat(envelope.payloadAsJsonObject().getString("userId"), is("567-8910"));
-        assertThat(envelope.payloadAsJsonObject().getString("userName"), is("John Smith"));
+        JsonEnvelope jsonEnvelope = asyncDispatcher.awaitForEnvelopeWithPayloadOf("userId", "567-8910");
+        assertThat(jsonEnvelope.metadata().name(), is("people.command.create-user"));
+        assertThat(jsonEnvelope.payloadAsJsonObject().getString("userId"), is("567-8910"));
+        assertThat(jsonEnvelope.payloadAsJsonObject().getString("userName"), is("John Smith"));
 
     }
 
@@ -132,7 +132,7 @@ public class DefaultUsersUserIdResourceIT {
 
         Response response = create(BASE_URI)
                 .path("/users/4444-5556")
-                .header("Accept", "application/vnd.people.queries.get-user+json")
+                .header("Accept", "application/vnd.people.query.get-user+json")
                 .get();
 
         assertThat(response.getStatus(), is(OK.getStatusCode()));
@@ -150,7 +150,7 @@ public class DefaultUsersUserIdResourceIT {
                 .post(entity("{\"userName\" : \"Peggy Brown\"}", UPDATE_USER_MEDIA_TYPE));
 
         JsonEnvelope envelope = asyncDispatcher.awaitForEnvelopeWithPayloadOf("userId", "4444-9876");
-        assertThat(envelope.metadata().name(), is("people.commands.update-user"));
+        assertThat(envelope.metadata().name(), is("people.command.update-user"));
         assertThat(envelope.payloadAsJsonObject().getString("userId"), is("4444-9876"));
         assertThat(envelope.payloadAsJsonObject().getString("userName"), is("Peggy Brown"));
 
@@ -160,11 +160,11 @@ public class DefaultUsersUserIdResourceIT {
     public void shouldDispatchGetUserCommand() throws Exception {
         Response response = create(BASE_URI)
                 .path("/users/4444-5555")
-                .header("Accept", "application/vnd.people.queries.get-user+json")
+                .header("Accept", "application/vnd.people.query.get-user+json")
                 .get();
         JsonEnvelope envelope = syncDispatcher.awaitForEnvelopeWithPayloadOf("userId", "4444-5555");
         assertThat(envelope.payloadAsJsonObject().getString("userId"), is("4444-5555"));
-        assertThat(envelope.metadata().name(), is("people.queries.get-user"));
+        assertThat(envelope.metadata().name(), is("people.query.get-user"));
 
     }
 
@@ -174,13 +174,13 @@ public class DefaultUsersUserIdResourceIT {
 
         Response response = create(BASE_URI)
                 .path("/users/4444-5555")
-                .header("Accept", "application/vnd.people.queries.get-user2+json")
+                .header("Accept", "application/vnd.people.query.get-user2+json")
                 .get();
 
         assertThat(response.getStatus(), is(OK.getStatusCode()));
         JsonEnvelope envelope = syncDispatcher.awaitForEnvelopeWithPayloadOf("userId", "4444-5555");
         assertThat(envelope.payloadAsJsonObject().getString("userId"), is("4444-5555"));
-        assertThat(envelope.metadata().name(), is("people.queries.get-user2"));
+        assertThat(envelope.metadata().name(), is("people.query.get-user2"));
 
     }
 
@@ -189,14 +189,28 @@ public class DefaultUsersUserIdResourceIT {
 
         Response response = create(BASE_URI)
                 .path("/users/4444-5555")
-                .header("Accept", "application/vnd.people.queries.unknown+json")
+                .header("Accept", "application/vnd.people.query.unknown+json")
                 .get();
 
         assertThat(response.getStatus(), is(NOT_ACCEPTABLE.getStatusCode()));
 
     }
 
+    @Test
+    public void shouldReturnUserDataReturnedByDispatcher() {
+        syncDispatcher.setupResponse("userId", "4444-5556", envelopeFrom(null, createObjectBuilder().add("userName", "userName").build()));
 
+        Response response = create(BASE_URI)
+                .path("/users/4444-5556")
+                .header("Accept", "application/vnd.people.query.get-user+json")
+                .get();
+
+        assertThat(response.getStatus(), is(OK.getStatusCode()));
+        String responseBody = response.readEntity(String.class);
+        with(responseBody)
+                .assertThat("userName", equalTo("userName"));
+
+    }
 
     @Test
     public void shouldReturnResponseWithContentType() {
@@ -204,10 +218,10 @@ public class DefaultUsersUserIdResourceIT {
 
         Response response = create(BASE_URI)
                 .path("/users/4444-5556")
-                .header("Accept", "application/vnd.people.queries.get-user+json")
+                .header("Accept", "application/vnd.people.query.get-user+json")
                 .get();
         assertThat(response.getStatus(), is(OK.getStatusCode()));
-        assertThat(response.getMediaType().toString(), is("application/vnd.people.queries.get-user+json"));
+        assertThat(response.getMediaType().toString(), is("application/vnd.people.query.get-user+json"));
     }
 
     @Test
@@ -216,10 +230,10 @@ public class DefaultUsersUserIdResourceIT {
 
         Response response = create(BASE_URI)
                 .path("/users/4444-5556")
-                .header("Accept", "application/vnd.people.queries.get-user2+json")
+                .header("Accept", "application/vnd.people.query.get-user2+json")
                 .get();
         assertThat(response.getStatus(), is(OK.getStatusCode()));
-        assertThat(response.getMediaType().toString(), is("application/vnd.people.queries.get-user2+json"));
+        assertThat(response.getMediaType().toString(), is("application/vnd.people.query.get-user2+json"));
     }
 
     @Test
@@ -229,12 +243,12 @@ public class DefaultUsersUserIdResourceIT {
         Response response = create(BASE_URI)
                 .path("/users")
                 .query("surname", "name")
-                .header("Accept", "application/vnd.people.queries.search-users+json")
+                .header("Accept", "application/vnd.people.query.search-users+json")
                 .get();
 
         assertThat(response.getStatus(), is(OK.getStatusCode()));
         JsonEnvelope jsonEnvelope = syncDispatcher.awaitForEnvelopeWithPayloadOf("surname", "name");
-        assertThat(jsonEnvelope.metadata().name(), is("people.queries.search-users"));
+        assertThat(jsonEnvelope.metadata().name(), is("people.query.search-users"));
 
     }
 

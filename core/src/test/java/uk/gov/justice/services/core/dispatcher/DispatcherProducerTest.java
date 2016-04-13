@@ -39,9 +39,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class DispatcherProducerTest {
 
-    private static final String NAME_A = "test.commands.do-somethingA";
-    private static final String NAME_B = "test.commands.do-somethingB";
-    private static final String NAME_C = "test.commands.do-somethingC";
+    private static final String NAME_A = "test.command.do-somethingA";
+    private static final String NAME_B = "test.command.do-somethingB";
+    private static final String NAME_C = "test.command.do-somethingC";
 
     private TestCommandApiHandler commandApiHandler;
 

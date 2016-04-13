@@ -330,9 +330,9 @@
                 <jms-queue name="ExpiryQueue" entries="java:/jms/queue/ExpiryQueue"/>
                 <jms-queue name="DLQ" entries="java:/jms/queue/DLQ"/>
                 <jms-queue name="testQueue" entries="java:/jms/queue/testQueue"/>
-                <jms-queue name="cakeshop.controller.commands" entries="cakeshop.controller.commands"/>
-                <jms-queue name="cakeshop.handler.commands" entries="cakeshop.handler.commands"/>
-                <jms-topic name="cakeshop.events" entries="cakeshop.events"/>
+                <jms-queue name="cakeshop.controller.command" entries="cakeshop.controller.command"/>
+                <jms-queue name="cakeshop.handler.command" entries="cakeshop.handler.command"/>
+                <jms-topic name="cakeshop.event" entries="cakeshop.event"/>
                 
                 <connection-factory name="InVmConnectionFactory" entries="java:/ConnectionFactory" connectors="in-vm"/>
                 <connection-factory name="RemoteConnectionFactory"

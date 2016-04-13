@@ -20,7 +20,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class DispatcherTest {
 
-    private static final String NAME = "test.commands.do-something";
+    private static final String NAME = "test.command.do-something";
 
     @Mock
     private JsonEnvelope envelope;

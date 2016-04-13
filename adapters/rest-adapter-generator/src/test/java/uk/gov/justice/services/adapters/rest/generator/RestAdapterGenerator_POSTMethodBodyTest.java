@@ -209,7 +209,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest {
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/some/path/{p1}", "p1")
-                                .with(action(POST, "application/vnd.ctx.commands.cmd-aa+json", "application/vnd.ctx.commands.cmd-bb+json"))
+                                .with(action(POST, "application/vnd.ctx.command.cmd-aa+json", "application/vnd.ctx.command.cmd-bb+json"))
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
 

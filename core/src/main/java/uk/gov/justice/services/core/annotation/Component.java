@@ -13,14 +13,14 @@ import static java.util.Arrays.stream;
  */
 public enum Component {
 
-    COMMAND_API("commands", "api", Queue.class),
-    COMMAND_CONTROLLER("commands", "controller", Queue.class),
-    COMMAND_HANDLER("commands", "handler", Queue.class),
-    EVENT_LISTENER("events", "listener", Topic.class),
-    EVENT_PROCESSOR("events", "processor", Topic.class),
-    QUERY_API("queries", "api", null),
-    QUERY_CONTROLLER("queries", "controller", null),
-    QUERY_VIEW("queries", "view", null);
+    COMMAND_API("command", "api", Queue.class),
+    COMMAND_CONTROLLER("command", "controller", Queue.class),
+    COMMAND_HANDLER("command", "handler", Queue.class),
+    EVENT_LISTENER("event", "listener", Topic.class),
+    EVENT_PROCESSOR("event", "processor", Topic.class),
+    QUERY_API("query", "api", null),
+    QUERY_CONTROLLER("query", "controller", null),
+    QUERY_VIEW("query", "view", null);
 
     private final String pillar;
     private final String tier;

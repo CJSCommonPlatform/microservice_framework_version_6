@@ -34,15 +34,15 @@ public class HandlersTest {
     }
 
     public static class CommandHandler {
-        @Handles("test-context.commands.create-something")
+        @Handles("test-context.command.create-something")
         public void handler1(String jsonString) {
         }
 
-        @Handles("test-context.commands.update-something")
+        @Handles("test-context.command.update-something")
         public void handler2(JsonObject envelopeAsJsonObject) {
         }
 
-        @Handles("test-context.commands.delete-something")
+        @Handles("test-context.command.delete-something")
         public void handler2(DeleteSomething deleteSomething) {
         }
 

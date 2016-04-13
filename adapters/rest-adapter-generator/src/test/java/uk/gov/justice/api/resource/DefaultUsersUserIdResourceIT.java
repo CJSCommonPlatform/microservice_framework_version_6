@@ -178,7 +178,6 @@ public class DefaultUsersUserIdResourceIT {
 
     }
 
-
     @Test
     public void shouldReturnUserDataReturnedByDispatcher() {
         syncDispatcher.setupResponse("userId", "4444-5556", envelopeFrom(null, createObjectBuilder().add("userName", "userName").build()));
@@ -217,6 +216,22 @@ public class DefaultUsersUserIdResourceIT {
                 .get();
         assertThat(response.getStatus(), is(200));
         assertThat(response.getMediaType().toString(), is("application/vnd.people.queries.get-user2+json"));
+    }
+
+    @Test
+    public void shouldDispatchUsersQueryWithQueryParam() throws Exception {
+        syncDispatcher.setupResponse("surname", "name", envelopeFrom(null, createObjectBuilder().add("userName", "userName").build()));
+
+        Response response = create(BASE_URI)
+                .path("/users")
+                .query("surname", "name")
+                .header("Accept", "application/vnd.people.queries.search-users+json")
+                .get();
+
+        assertThat(response.getStatus(), is(200));
+        JsonEnvelope jsonEnvelope = syncDispatcher.awaitForEnvelopeWithPayloadOf("surname", "name");
+        assertThat(jsonEnvelope.metadata().name(), is("people.queries.search-users"));
+
     }
 
 }

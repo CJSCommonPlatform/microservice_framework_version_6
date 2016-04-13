@@ -1,5 +1,26 @@
 package uk.gov.justice.api.resource;
 
+import static com.jayway.jsonassert.JsonAssert.with;
+import static javax.json.Json.createObjectBuilder;
+import static javax.ws.rs.client.Entity.entity;
+import static org.apache.cxf.jaxrs.client.WebClient.create;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
+
+import uk.gov.justice.api.QueryApiRestExampleApplication;
+import uk.gov.justice.services.adapter.rest.RestProcessor;
+import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
+import uk.gov.justice.services.adapters.test.utils.dispatcher.AsynchronousRecordingDispatcher;
+import uk.gov.justice.services.adapters.test.utils.dispatcher.SynchronousRecordingDispatcher;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+
+import java.util.Properties;
+
+import javax.inject.Inject;
+import javax.ws.rs.core.Response;
+
 import org.apache.openejb.OpenEjbContainer;
 import org.apache.openejb.jee.Application;
 import org.apache.openejb.jee.WebApp;
@@ -14,25 +35,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import uk.gov.justice.api.RestApplication;
-import uk.gov.justice.services.adapter.rest.RestProcessor;
-import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
-import uk.gov.justice.services.adapters.test.utils.dispatcher.AsynchronousRecordingDispatcher;
-import uk.gov.justice.services.adapters.test.utils.dispatcher.SynchronousRecordingDispatcher;
-import uk.gov.justice.services.messaging.Envelope;
-
-import javax.inject.Inject;
-import javax.ws.rs.core.Response;
-import java.util.Properties;
-
-import static com.jayway.jsonassert.JsonAssert.with;
-import static javax.json.Json.createObjectBuilder;
-import static javax.ws.rs.client.Entity.entity;
-import static org.apache.cxf.jaxrs.client.WebClient.create;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static uk.gov.justice.services.messaging.DefaultEnvelope.envelopeFrom;
 
 
 /**
@@ -47,7 +49,7 @@ public class DefaultUsersUserIdResourceIT {
     private static int port = -1;
     private static String BASE_URI;
 
-    private static final String BASE_URI_PATTERN = "http://localhost:%d/rest-adapter-generator/rest";
+    private static final String BASE_URI_PATTERN = "http://localhost:%d/rest-adapter-generator/query/api/rest/example";
 
     private static final String JSON = "{\"userUrn\" : \"test\"}";
 
@@ -88,7 +90,7 @@ public class DefaultUsersUserIdResourceIT {
         return new WebApp()
                 .contextRoot("rest-adapter-generator")
                 .addServlet("TestApp", Application.class.getName())
-                .addInitParam("TestApp", "javax.ws.rs.Application", RestApplication.class.getName());
+                .addInitParam("TestApp", "javax.ws.rs.Application", QueryApiRestExampleApplication.class.getName());
     }
 
     @Test
@@ -106,10 +108,10 @@ public class DefaultUsersUserIdResourceIT {
                 .path("/users/567-8910")
                 .post(entity("{\"userName\" : \"John Smith\"}", CREATE_USER_MEDIA_TYPE));
 
-        Envelope envelope = asyncDispatcher.awaitForEnvelopeWithPayloadOf("userId", "567-8910");
-        assertThat(envelope.metadata().name(), is("people.commands.create-user"));
-        assertThat(envelope.payload().getString("userId"), is("567-8910"));
-        assertThat(envelope.payload().getString("userName"), is("John Smith"));
+        JsonEnvelope jsonEnvelope = asyncDispatcher.awaitForEnvelopeWithPayloadOf("userId", "567-8910");
+        assertThat(jsonEnvelope.metadata().name(), is("people.commands.create-user"));
+        assertThat(jsonEnvelope.payloadAsJsonObject().getString("userId"), is("567-8910"));
+        assertThat(jsonEnvelope.payloadAsJsonObject().getString("userName"), is("John Smith"));
 
     }
 
@@ -129,10 +131,10 @@ public class DefaultUsersUserIdResourceIT {
                 .path("/users/4444-9876")
                 .post(entity("{\"userName\" : \"Peggy Brown\"}", UPDATE_USER_MEDIA_TYPE));
 
-        Envelope envelope = asyncDispatcher.awaitForEnvelopeWithPayloadOf("userId", "4444-9876");
-        assertThat(envelope.metadata().name(), is("people.commands.update-user"));
-        assertThat(envelope.payload().getString("userId"), is("4444-9876"));
-        assertThat(envelope.payload().getString("userName"), is("Peggy Brown"));
+        JsonEnvelope jsonEnvelope = asyncDispatcher.awaitForEnvelopeWithPayloadOf("userId", "4444-9876");
+        assertThat(jsonEnvelope.metadata().name(), is("people.commands.update-user"));
+        assertThat(jsonEnvelope.payloadAsJsonObject().getString("userId"), is("4444-9876"));
+        assertThat(jsonEnvelope.payloadAsJsonObject().getString("userName"), is("Peggy Brown"));
 
     }
 
@@ -142,9 +144,9 @@ public class DefaultUsersUserIdResourceIT {
                 .path("/users/4444-5555")
                 .header("Accept", "application/vnd.people.queries.get-user+json")
                 .get();
-        Envelope envelope = syncDispatcher.awaitForEnvelopeWithPayloadOf("userId", "4444-5555");
-        assertThat(envelope.payload().getString("userId"), is("4444-5555"));
-        assertThat(envelope.metadata().name(), is("people.queries.get-user"));
+        JsonEnvelope jsonEnvelope = syncDispatcher.awaitForEnvelopeWithPayloadOf("userId", "4444-5555");
+        assertThat(jsonEnvelope.payloadAsJsonObject().getString("userId"), is("4444-5555"));
+        assertThat(jsonEnvelope.metadata().name(), is("people.queries.get-user"));
 
     }
 
@@ -158,9 +160,9 @@ public class DefaultUsersUserIdResourceIT {
                 .get();
 
         assertThat(response.getStatus(), is(200));
-        Envelope envelope = syncDispatcher.awaitForEnvelopeWithPayloadOf("userId", "4444-5555");
-        assertThat(envelope.payload().getString("userId"), is("4444-5555"));
-        assertThat(envelope.metadata().name(), is("people.queries.get-user2"));
+        JsonEnvelope jsonEnvelope = syncDispatcher.awaitForEnvelopeWithPayloadOf("userId", "4444-5555");
+        assertThat(jsonEnvelope.payloadAsJsonObject().getString("userId"), is("4444-5555"));
+        assertThat(jsonEnvelope.metadata().name(), is("people.queries.get-user2"));
 
     }
 

@@ -22,7 +22,7 @@ import uk.gov.justice.services.adapter.messaging.JmsProcessor;
 import uk.gov.justice.services.adapters.test.utils.dispatcher.AsynchronousRecordingDispatcher;
 import uk.gov.justice.services.common.converter.JsonObjectToStringConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
 
@@ -125,9 +125,9 @@ public class JmsEndpointGenerationIT {
         String commandName = "structure.commands.commanda";
         sendEnvelope(metadataId, commandName, commandControllerDestination);
 
-        Envelope receivedEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
-        assertThat(receivedEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
-        assertThat(receivedEnvelope.metadata().name(), is(commandName));
+        JsonEnvelope receivedJsonEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
+        assertThat(receivedJsonEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
+        assertThat(receivedJsonEnvelope.metadata().name(), is(commandName));
 
     }
 
@@ -139,9 +139,9 @@ public class JmsEndpointGenerationIT {
 
         sendEnvelope(metadataId, commandName, commandControllerDestination);
 
-        Envelope receivedEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
-        assertThat(receivedEnvelope.metadata().name(), is(commandName));
-        assertThat(receivedEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
+        JsonEnvelope receivedJsonEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
+        assertThat(receivedJsonEnvelope.metadata().name(), is(commandName));
+        assertThat(receivedJsonEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
 
     }
 
@@ -164,9 +164,9 @@ public class JmsEndpointGenerationIT {
         String commandName = "structure.commands.cmdaa";
         sendEnvelope(metadataId, commandName, commandHandlerDestination);
 
-        Envelope receivedEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
-        assertThat(receivedEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
-        assertThat(receivedEnvelope.metadata().name(), is(commandName));
+        JsonEnvelope receivedJsonEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
+        assertThat(receivedJsonEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
+        assertThat(receivedJsonEnvelope.metadata().name(), is(commandName));
 
     }
 
@@ -194,9 +194,9 @@ public class JmsEndpointGenerationIT {
         String commandName = "structure.events.eventaa";
         sendEnvelope(metadataId, commandName, eventsDestination);
 
-        Envelope receivedEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
-        assertThat(receivedEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
-        assertThat(receivedEnvelope.metadata().name(), is(commandName));
+        JsonEnvelope receivedJsonEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
+        assertThat(receivedJsonEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
+        assertThat(receivedJsonEnvelope.metadata().name(), is(commandName));
 
     }
 
@@ -213,9 +213,9 @@ public class JmsEndpointGenerationIT {
         String commandName = "structure.events.eventbb";
         sendEnvelope(metadataId, commandName, eventsDestination);
 
-        Envelope receivedEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
-        assertThat(receivedEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
-        assertThat(receivedEnvelope.metadata().name(), is(commandName));
+        JsonEnvelope receivedJsonEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
+        assertThat(receivedJsonEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
+        assertThat(receivedJsonEnvelope.metadata().name(), is(commandName));
 
     }
 

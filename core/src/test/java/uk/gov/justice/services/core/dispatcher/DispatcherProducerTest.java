@@ -20,7 +20,7 @@ import uk.gov.justice.services.core.annotation.Remote;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.extension.ServiceComponentFoundEvent;
 import uk.gov.justice.services.core.handler.exception.MissingHandlerException;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 
 import java.lang.reflect.Member;
@@ -94,13 +94,13 @@ public class DispatcherProducerTest {
     private Context context;
 
     @Mock
-    private Envelope envelopeA;
+    private JsonEnvelope jsonEnvelopeA;
 
     @Mock
-    private Envelope envelopeB;
+    private JsonEnvelope jsonEnvelopeB;
 
     @Mock
-    private Envelope envelopeC;
+    private JsonEnvelope jsonEnvelopeC;
 
     @Mock
     private Metadata metadataA;
@@ -135,11 +135,11 @@ public class DispatcherProducerTest {
         when(context.get(eq(beanB), any())).thenReturn(commandControllerHandler);
         when(context.get(eq(beanD), any())).thenReturn(remoteQueryApiHandler);
 
-        when(envelopeA.metadata()).thenReturn(metadataA);
+        when(jsonEnvelopeA.metadata()).thenReturn(metadataA);
         when(metadataA.name()).thenReturn(NAME_A);
-        when(envelopeB.metadata()).thenReturn(metadataB);
+        when(jsonEnvelopeB.metadata()).thenReturn(metadataB);
         when(metadataB.name()).thenReturn(NAME_B);
-        when(envelopeC.metadata()).thenReturn(metadataC);
+        when(jsonEnvelopeC.metadata()).thenReturn(metadataC);
         when(metadataC.name()).thenReturn(NAME_C);
     }
 
@@ -161,8 +161,8 @@ public class DispatcherProducerTest {
 
         AsynchronousDispatcher dispatcher = dispatcherProducer.produceAsynchronousDispatcher(commandApiInjectionPoint);
         assertThat(dispatcher, notNullValue());
-        dispatcher.dispatch(envelopeA);
-        assertThat(commandApiHandler.envelope, equalTo(envelopeA));
+        dispatcher.dispatch(jsonEnvelopeA);
+        assertThat(commandApiHandler.jsonEnvelope, equalTo(jsonEnvelopeA));
     }
 
     @Test
@@ -171,8 +171,8 @@ public class DispatcherProducerTest {
 
         Requester requester = dispatcherProducer.produceRequester(queryApiInjectionPoint);
         assertThat(requester, notNullValue());
-        Envelope result = requester.request(envelopeA);
-        assertThat(result, equalTo(envelopeA));
+        JsonEnvelope result = requester.request(jsonEnvelopeA);
+        assertThat(result, equalTo(jsonEnvelopeA));
     }
 
     @Test(expected = MissingHandlerException.class)
@@ -181,7 +181,7 @@ public class DispatcherProducerTest {
         dispatcherProducer.register(new ServiceComponentFoundEvent(COMMAND_CONTROLLER, beanB, LOCAL));
 
         AsynchronousDispatcher controllerDispatcher = dispatcherProducer.produceAsynchronousDispatcher(commandControllerInjectionPoint1);
-        controllerDispatcher.dispatch(envelopeC);
+        controllerDispatcher.dispatch(jsonEnvelopeC);
     }
 
     @Test(expected = MissingHandlerException.class)
@@ -190,11 +190,11 @@ public class DispatcherProducerTest {
         dispatcherProducer.register(new ServiceComponentFoundEvent(COMMAND_CONTROLLER, beanB, LOCAL));
 
         SynchronousDispatcher syncDispatcher = dispatcherProducer.produceSynchronousDispatcher(commandControllerInjectionPoint1);
-        syncDispatcher.dispatch(envelopeB);
-        assertThat(commandControllerHandler.envelopeB, equalTo(envelopeB));
+        syncDispatcher.dispatch(jsonEnvelopeB);
+        assertThat(commandControllerHandler.jsonEnvelopeB, equalTo(jsonEnvelopeB));
 
         AsynchronousDispatcher asyncDispatcher = dispatcherProducer.produceAsynchronousDispatcher(commandControllerInjectionPoint1);
-        asyncDispatcher.dispatch(envelopeB);
+        asyncDispatcher.dispatch(jsonEnvelopeB);
     }
 
     @Test(expected = MissingHandlerException.class)
@@ -203,11 +203,11 @@ public class DispatcherProducerTest {
         dispatcherProducer.register(new ServiceComponentFoundEvent(COMMAND_CONTROLLER, beanB, LOCAL));
 
         AsynchronousDispatcher asyncDispatcher = dispatcherProducer.produceAsynchronousDispatcher(commandControllerInjectionPoint1);
-        asyncDispatcher.dispatch(envelopeA);
-        assertThat(commandControllerHandler.envelopeA, equalTo(envelopeA));
+        asyncDispatcher.dispatch(jsonEnvelopeA);
+        assertThat(commandControllerHandler.jsonEnvelopeA, equalTo(jsonEnvelopeA));
 
         SynchronousDispatcher syncDispatcher = dispatcherProducer.produceSynchronousDispatcher(commandControllerInjectionPoint1);
-        syncDispatcher.dispatch(envelopeA);
+        syncDispatcher.dispatch(jsonEnvelopeA);
     }
 
     @Test
@@ -216,15 +216,15 @@ public class DispatcherProducerTest {
         dispatcherProducer.register(new ServiceComponentFoundEvent(COMMAND_CONTROLLER, beanB, LOCAL));
 
         AsynchronousDispatcher apiDispatcher = dispatcherProducer.produceAsynchronousDispatcher(commandApiInjectionPoint);
-        apiDispatcher.dispatch(envelopeA);
-        assertThat(commandApiHandler.envelope, equalTo(envelopeA));
-        assertThat(commandControllerHandler.envelopeA, nullValue());
+        apiDispatcher.dispatch(jsonEnvelopeA);
+        assertThat(commandApiHandler.jsonEnvelope, equalTo(jsonEnvelopeA));
+        assertThat(commandControllerHandler.jsonEnvelopeA, nullValue());
 
-        commandApiHandler.envelope = null;
+        commandApiHandler.jsonEnvelope = null;
         AsynchronousDispatcher controllerDispatcher = dispatcherProducer.produceAsynchronousDispatcher(commandControllerInjectionPoint1);
-        controllerDispatcher.dispatch(envelopeA);
-        assertThat(commandControllerHandler.envelopeA, equalTo(envelopeA));
-        assertThat(commandApiHandler.envelope, nullValue());
+        controllerDispatcher.dispatch(jsonEnvelopeA);
+        assertThat(commandControllerHandler.jsonEnvelopeA, equalTo(jsonEnvelopeA));
+        assertThat(commandApiHandler.jsonEnvelope, nullValue());
     }
 
     @Adapter(COMMAND_API)
@@ -242,34 +242,34 @@ public class DispatcherProducerTest {
     @ServiceComponent(COMMAND_API)
     public static class TestCommandApiHandler {
 
-        public Envelope envelope;
+        public JsonEnvelope jsonEnvelope;
 
         @Handles(NAME_A)
-        public void doSomething(Envelope envelope) {
-            this.envelope = envelope;
+        public void doSomething(JsonEnvelope jsonEnvelope) {
+            this.jsonEnvelope = jsonEnvelope;
         }
 
         @Handles(NAME_C)
-        public void doSomethingElse(Envelope envelope) {
-            this.envelope = null;
+        public void doSomethingElse(JsonEnvelope jsonEnvelope) {
+            this.jsonEnvelope = null;
         }
     }
 
     @ServiceComponent(COMMAND_CONTROLLER)
     public static class TestCommandControllerHandler {
 
-        public Envelope envelopeA;
-        public Envelope envelopeB;
+        public JsonEnvelope jsonEnvelopeA;
+        public JsonEnvelope jsonEnvelopeB;
 
         @Handles(NAME_A)
-        public void doSomethingA(Envelope envelope) {
-            this.envelopeA = envelope;
+        public void doSomethingA(JsonEnvelope jsonEnvelope) {
+            this.jsonEnvelopeA = jsonEnvelope;
         }
 
         @Handles(NAME_B)
-        public Envelope doSomethingB(Envelope envelope) {
-            this.envelopeB = envelope;
-            return envelope;
+        public JsonEnvelope doSomethingB(JsonEnvelope jsonEnvelope) {
+            this.jsonEnvelopeB = jsonEnvelope;
+            return jsonEnvelope;
         }
     }
 
@@ -278,8 +278,8 @@ public class DispatcherProducerTest {
     public static class TestRemoteQueryApiHandler {
 
         @Handles(NAME_A)
-        public Envelope doSomething(Envelope envelope) {
-            return envelope;
+        public JsonEnvelope doSomething(JsonEnvelope jsonEnvelope) {
+            return jsonEnvelope;
         }
     }
 }

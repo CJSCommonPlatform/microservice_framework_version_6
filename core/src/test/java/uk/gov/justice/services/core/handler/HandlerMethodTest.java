@@ -10,7 +10,7 @@ import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.handler.exception.HandlerExecutionException;
 import uk.gov.justice.services.core.handler.registry.exception.InvalidHandlerException;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 
 import java.io.IOException;
@@ -37,31 +37,31 @@ public class HandlerMethodTest {
     private SynchronousCommandHandler synchronousCommandHandler;
 
 
-    private Envelope envelope;
+    private JsonEnvelope jsonEnvelope;
 
     @Before
     public void setup() throws Exception {
-        envelope = testEnvelope("envelope.json");
+        jsonEnvelope = testEnvelope("envelope.json");
     }
 
     @Test
     public void shouldExecuteAsynchronousHandlerMethod() throws Exception {
-        Object result = asyncHandlerInstance().execute(envelope);
-        verify(asynchronousCommandHandler).handles(envelope);
+        Object result = asyncHandlerInstance().execute(jsonEnvelope);
+        verify(asynchronousCommandHandler).handles(jsonEnvelope);
         assertThat(result, nullValue());
     }
 
     @Test
     public void shouldExecuteSynchronousHandlerMethod() throws Exception {
-        when(synchronousCommandHandler.handles(envelope)).thenReturn(envelope);
-        Object result = syncHandlerInstance().execute(envelope);
-        assertThat(result, sameInstance(envelope));
+        when(synchronousCommandHandler.handles(jsonEnvelope)).thenReturn(jsonEnvelope);
+        Object result = syncHandlerInstance().execute(jsonEnvelope);
+        assertThat(result, sameInstance(jsonEnvelope));
     }
 
     @Test(expected = HandlerExecutionException.class)
     public void shouldThrowHandlerExecutionExceptionIfExceptionThrown() throws Exception {
-        doThrow(new RuntimeException()).when(asynchronousCommandHandler).handles(envelope);
-        asyncHandlerInstance().execute(envelope);
+        doThrow(new RuntimeException()).when(asynchronousCommandHandler).handles(jsonEnvelope);
+        asyncHandlerInstance().execute(jsonEnvelope);
     }
 
     @Test
@@ -86,7 +86,7 @@ public class HandlerMethodTest {
 
     @Test(expected = InvalidHandlerException.class)
     public void shouldThrowExceptionWithAsynchronousMethod() {
-        new HandlerMethod(synchronousCommandHandler, method(new SynchronousCommandHandler(), "handlesAsync"), Envelope.class);
+        new HandlerMethod(synchronousCommandHandler, method(new SynchronousCommandHandler(), "handlesAsync"), JsonEnvelope.class);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -99,7 +99,7 @@ public class HandlerMethodTest {
     }
 
     private HandlerMethod syncHandlerInstance() {
-        return new HandlerMethod(synchronousCommandHandler, method(new SynchronousCommandHandler(), "handles"), Envelope.class);
+        return new HandlerMethod(synchronousCommandHandler, method(new SynchronousCommandHandler(), "handles"), JsonEnvelope.class);
     }
 
     private Method method(final Object object, final String methofName) {
@@ -109,7 +109,7 @@ public class HandlerMethodTest {
                 .orElseThrow(() -> new IllegalArgumentException(format("Cannot find method with name %s", methofName)));
     }
 
-    private Envelope testEnvelope(String fileName) throws IOException {
+    private JsonEnvelope testEnvelope(String fileName) throws IOException {
         String jsonString = Resources.toString(Resources.getResource("json/" + fileName), Charset.defaultCharset());
         return new JsonObjectEnvelopeConverter().asEnvelope(new StringToJsonObjectConverter().convert(jsonString));
     }
@@ -117,24 +117,24 @@ public class HandlerMethodTest {
     public static class AsynchronousCommandHandler {
 
         @Handles("test-context.commands.create-something")
-        public void handles(final Envelope envelope) {
+        public void handles(final JsonEnvelope jsonEnvelope) {
         }
 
         @Handles("test-context.commands.create-something-else")
-        public Envelope handlesSync(final Envelope envelope) {
-            return envelope;
+        public JsonEnvelope handlesSync(final JsonEnvelope jsonEnvelope) {
+            return jsonEnvelope;
         }
     }
 
     public static class SynchronousCommandHandler {
 
         @Handles("test-context.commands.create-something")
-        public Envelope handles(final Envelope envelope) {
-            return envelope;
+        public JsonEnvelope handles(final JsonEnvelope jsonEnvelope) {
+            return jsonEnvelope;
         }
 
         @Handles("test-context.commands.create-something-else")
-        public void handlesAsync(final Envelope envelope) {
+        public void handlesAsync(final JsonEnvelope jsonEnvelope) {
         }
     }
 }

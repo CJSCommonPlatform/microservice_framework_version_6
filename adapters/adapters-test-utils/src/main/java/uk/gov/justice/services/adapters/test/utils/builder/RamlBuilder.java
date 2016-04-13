@@ -23,10 +23,24 @@ public class RamlBuilder {
     }
 
     public static RamlBuilder restRamlWithDefaults() {
+        return restRamlWithTitleVersion()
+                .withBaseUri("http://localhost:8080/warname/command/api/rest/service");
+    }
+
+    public static RamlBuilder restRamlWithCommandApiDefaults() {
+        return restRamlWithTitleVersion()
+                .withBaseUri("http://localhost:8080/warname/command/api/rest/service");
+    }
+
+    public static RamlBuilder restRamlWithQueryApiDefaults() {
+        return restRamlWithTitleVersion()
+                .withBaseUri("http://localhost:8080/warname/query/api/rest/service");
+    }
+
+    public static RamlBuilder restRamlWithTitleVersion() {
         return new RamlBuilder()
                 .withVersion("#%RAML 0.8")
-                .withTitle("Example Service")
-                .withBaseUri("http://localhost:8080/warname/command/api/rest/service");
+                .withTitle("Example Service");
     }
 
     public RamlBuilder with(final ResourceBuilder resource) {

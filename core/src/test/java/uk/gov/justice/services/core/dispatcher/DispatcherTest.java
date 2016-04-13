@@ -8,7 +8,7 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.handler.exception.MissingHandlerException;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 
 import org.junit.Before;
@@ -23,14 +23,14 @@ public class DispatcherTest {
     private static final String NAME = "test.commands.do-something";
 
     @Mock
-    private Envelope envelope;
+    private JsonEnvelope jsonEnvelope;
 
     @Mock
     private Metadata metadata;
 
     @Before
     public void setup() {
-        when(envelope.metadata()).thenReturn(metadata);
+        when(jsonEnvelope.metadata()).thenReturn(metadata);
         when(metadata.name()).thenReturn(NAME);
     }
 
@@ -39,23 +39,23 @@ public class DispatcherTest {
         Dispatcher dispatcher = new Dispatcher();
         TestHandler testHandler = new TestHandler();
         dispatcher.register(testHandler);
-        dispatcher.asynchronousDispatch(envelope);
-        assertThat(testHandler.envelope, equalTo(envelope));
+        dispatcher.asynchronousDispatch(jsonEnvelope);
+        assertThat(testHandler.jsonEnvelope, equalTo(jsonEnvelope));
     }
 
     @Test(expected = MissingHandlerException.class)
     public void shouldThrowExceptionWithNoHandler() throws Exception {
-        new Dispatcher().asynchronousDispatch(envelope);
+        new Dispatcher().asynchronousDispatch(jsonEnvelope);
     }
 
     @ServiceComponent(COMMAND_API)
     public static class TestHandler {
 
-        Envelope envelope;
+        JsonEnvelope jsonEnvelope;
 
         @Handles(NAME)
-        public void handle(Envelope envelope) {
-            this.envelope = envelope;
+        public void handle(JsonEnvelope jsonEnvelope) {
+            this.jsonEnvelope = jsonEnvelope;
         }
 
     }

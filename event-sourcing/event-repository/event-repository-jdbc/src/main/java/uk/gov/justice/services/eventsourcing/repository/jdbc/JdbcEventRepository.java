@@ -8,7 +8,7 @@ import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.JdbcEventL
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.EventLogRepositoryException;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidSequenceIdException;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidStreamIdException;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -27,7 +27,7 @@ public class JdbcEventRepository implements EventRepository {
     JdbcEventLogRepository jdbcEventLogRepository;
 
     @Override
-    public Stream<Envelope> getByStreamId(final UUID streamId) {
+    public Stream<JsonEnvelope> getByStreamId(final UUID streamId) {
         if (streamId == null) {
             throw new InvalidStreamIdException("streamId is null.");
         }
@@ -37,7 +37,7 @@ public class JdbcEventRepository implements EventRepository {
     }
 
     @Override
-    public Stream<Envelope> getByStreamIdAndSequenceId(final UUID streamId, final Long sequenceId) {
+    public Stream<JsonEnvelope> getByStreamIdAndSequenceId(final UUID streamId, final Long sequenceId) {
         if (streamId == null) {
             throw new InvalidStreamIdException("streamId is null.");
         } else if (sequenceId == null) {
@@ -51,13 +51,13 @@ public class JdbcEventRepository implements EventRepository {
 
     @Override
     @Transactional
-    public void store(final Envelope envelope, final UUID streamId, final Long version) throws StoreEventRequestFailedException {
+    public void store(final JsonEnvelope jsonEnvelope, final UUID streamId, final Long version) throws StoreEventRequestFailedException {
         try {
-            final EventLog eventLog = eventLogConverter.createEventLog(envelope, streamId, version);
+            final EventLog eventLog = eventLogConverter.createEventLog(jsonEnvelope, streamId, version);
             jdbcEventLogRepository.insert(eventLog);
         } catch (InvalidSequenceIdException ex) {
             throw new StoreEventRequestFailedException(String.format("Could not store event for version %d of stream %s",
-                    envelope.metadata().version().orElse(null), envelope.metadata().streamId().orElse(null)), ex);
+                    jsonEnvelope.metadata().version().orElse(null), jsonEnvelope.metadata().streamId().orElse(null)), ex);
         }
     }
 

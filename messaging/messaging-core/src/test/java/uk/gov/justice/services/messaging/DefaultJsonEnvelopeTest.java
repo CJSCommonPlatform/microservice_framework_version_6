@@ -10,13 +10,13 @@ import javax.json.JsonObject;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
-import static uk.gov.justice.services.messaging.DefaultEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
 
 /**
- * Unit tests for the {@link DefaultEnvelope} class.
+ * Unit tests for the {@link DefaultJsonEnvelope} class.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class DefaultEnvelopeTest {
+public class DefaultJsonEnvelopeTest {
 
     @Mock
     private Metadata metadata;
@@ -24,20 +24,20 @@ public class DefaultEnvelopeTest {
     @Mock
     private JsonObject payload;
 
-    private Envelope envelope;
+    private JsonEnvelope jsonEnvelope;
 
     @Before
     public void setup() {
-        envelope = envelopeFrom(metadata, payload);
+        jsonEnvelope = envelopeFrom(metadata, payload);
     }
 
     @Test
     public void shouldReturnMetadata() throws Exception {
-        assertThat(envelope.metadata(), equalTo(metadata));
+        assertThat(jsonEnvelope.metadata(), equalTo(metadata));
     }
 
     @Test
     public void shouldReturnPayload() throws Exception {
-        assertThat(envelope.payload(), equalTo(payload));
+        assertThat(jsonEnvelope.payloadAsJsonObject(), equalTo(payload));
     }
 }

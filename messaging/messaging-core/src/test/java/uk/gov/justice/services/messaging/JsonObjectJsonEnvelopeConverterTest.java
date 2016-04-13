@@ -18,7 +18,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter.METADATA;
 
-public class JsonObjectEnvelopeConverterTest {
+public class JsonObjectJsonEnvelopeConverterTest {
 
     private static final String ID = "861c9430-7bc6-4bf0-b549-6534394b8d65";
     private static final String NAME = "test.commands.do-something";
@@ -48,11 +48,11 @@ public class JsonObjectEnvelopeConverterTest {
     public void shouldReturnEnvelope() throws Exception {
         final JsonObjectEnvelopeConverter jsonObjectEnvelopeConverter = new JsonObjectEnvelopeConverter();
 
-        Envelope envelope = jsonObjectEnvelopeConverter.asEnvelope(new StringToJsonObjectConverter().convert(jsonFromFile("envelope")));
+        JsonEnvelope jsonEnvelope = jsonObjectEnvelopeConverter.asEnvelope(new StringToJsonObjectConverter().convert(jsonFromFile("envelope")));
 
-        assertThat(envelope, notNullValue());
-        Metadata metadata = envelope.metadata();
-        JsonObject payload = envelope.payload();
+        assertThat(jsonEnvelope, notNullValue());
+        Metadata metadata = jsonEnvelope.metadata();
+        JsonObject payload = jsonEnvelope.payloadAsJsonObject();
         assertThat(metadata, notNullValue());
         assertThat(payload, notNullValue());
         assertThat(metadata.id().toString(), equalTo(ID));
@@ -77,9 +77,9 @@ public class JsonObjectEnvelopeConverterTest {
         final Metadata metadata = JsonObjectMetadata.metadataFrom(expectedEnvelope.getJsonObject(METADATA));
         final JsonObject payload = jsonObjectEnvelopeConverter.extractPayloadFromEnvelope(expectedEnvelope);
 
-        final Envelope envelope = DefaultEnvelope.envelopeFrom(metadata, payload);
+        final JsonEnvelope jsonEnvelope = DefaultJsonEnvelope.envelopeFrom(metadata, payload);
 
-        assertThat(jsonObjectEnvelopeConverter.fromEnvelope(envelope), equalTo(expectedEnvelope));
+        assertThat(jsonObjectEnvelopeConverter.fromEnvelope(jsonEnvelope), equalTo(expectedEnvelope));
     }
 
     private JsonObject envelopeAsJsonObject() {

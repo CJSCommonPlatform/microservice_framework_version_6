@@ -9,11 +9,11 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.core.annotation.Event;
 import uk.gov.justice.services.core.extension.EventFoundEvent;
 import uk.gov.justice.services.event.enveloper.exception.InvalidEventException;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectMetadata;
 import uk.gov.justice.services.messaging.Metadata;
 
@@ -44,15 +44,16 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
 @RunWith(MockitoJUnitRunner.class)
 public class EnveloperTest {
 
-    public static final UUID CLIENT_ID_VALUE = UUID.randomUUID();
-    public static final UUID USER_ID_VALUE = UUID.randomUUID();
-    public static final UUID SESSION_ID_VALUE = UUID.randomUUID();
-    public static final UUID STREAM_ID_VALUE = UUID.randomUUID();
-    public static final int VERSION = 5;
+    private static final UUID CLIENT_ID_VALUE = UUID.randomUUID();
+    private static final UUID USER_ID_VALUE = UUID.randomUUID();
+    private static final UUID SESSION_ID_VALUE = UUID.randomUUID();
+    private static final UUID STREAM_ID_VALUE = UUID.randomUUID();
+    private static final int VERSION = 5;
     private static final String TEST_COMMAND_NAME = "test.commands.do-something";
     private static final String TEST_EVENT_NAME = "test.events.something-happened";
     private static final UUID COMMAND_UUID = UUID.randomUUID();
     private static final UUID OLD_CAUSATION_ID = UUID.randomUUID();
+    private static final String TEST_NAME = "test.queries.query-response";
 
     private Enveloper enveloper;
 
@@ -62,10 +63,10 @@ public class EnveloperTest {
     public ExpectedException exception = ExpectedException.none();
 
     @Mock
-    private ObjectToJsonObjectConverter objectToJsonObjectConverter;
+    private ObjectToJsonValueConverter objectToJsonValueConverter;
 
     @Mock
-    private Envelope envelope;
+    private JsonEnvelope jsonEnvelope;
 
     @Mock
     private EventFoundEvent event;
@@ -76,44 +77,62 @@ public class EnveloperTest {
     @Before
     public void setup() throws JsonProcessingException {
         enveloper = new Enveloper();
-        enveloper.objectToJsonObjectConverter = objectToJsonObjectConverter;
+        enveloper.objectToJsonValueConverter = objectToJsonValueConverter;
         object = new TestEvent();
 
         doReturn(TestEvent.class).when(event).getClazz();
         when(event.getEventName()).thenReturn(TEST_EVENT_NAME);
 
-        enveloper.register(event);
+
     }
 
     @Test
     public void shouldMapObjectToEvent() throws JsonProcessingException {
-        when(envelope.metadata()).thenReturn(metadata(true));
-        when(objectToJsonObjectConverter.convert(object)).thenReturn(payload);
+		enveloper.register(event);
+        when(jsonEnvelope.metadata()).thenReturn(metadata(true));
+        when(objectToJsonValueConverter.convert(object)).thenReturn(payload);
 
-        Envelope event = enveloper.withMetadataFrom(envelope).apply(object);
+        JsonEnvelope event = enveloper.withMetadataFrom(jsonEnvelope).apply(object);
 
-        assertThat(event.payload(), equalTo(payload));
+        assertThat(event.payloadAsJsonObject(), equalTo(payload));
         assertThat(event.metadata().id(), notNullValue());
         assertThat(event.metadata().name(), equalTo(TEST_EVENT_NAME));
         Assert.assertThat(event.metadata().causation().size(), equalTo(2));
         Assert.assertThat(event.metadata().causation().get(0), equalTo(OLD_CAUSATION_ID));
         Assert.assertThat(event.metadata().causation().get(1), equalTo(COMMAND_UUID));
-        verify(objectToJsonObjectConverter, times(1)).convert(object);
+        verify(objectToJsonValueConverter, times(1)).convert(object);
+    }
+
+    @Test
+    public void shouldMapObjectToEnvelopeWithName() throws JsonProcessingException {
+        when(jsonEnvelope.metadata()).thenReturn(metadata(true));
+        when(objectToJsonValueConverter.convert(object)).thenReturn(payload);
+
+        JsonEnvelope event = enveloper.withMetadataFrom(jsonEnvelope, TEST_NAME).apply(object);
+
+        assertThat(event.payloadAsJsonObject(), equalTo(payload));
+        assertThat(event.metadata().id(), notNullValue());
+        assertThat(event.metadata().name(), equalTo(TEST_NAME));
+        Assert.assertThat(event.metadata().causation().size(), equalTo(2));
+        Assert.assertThat(event.metadata().causation().get(0), equalTo(OLD_CAUSATION_ID));
+        Assert.assertThat(event.metadata().causation().get(1), equalTo(COMMAND_UUID));
+        verify(objectToJsonValueConverter, times(1)).convert(object);
     }
 
     @Test
     public void shouldMapObjectToEventWithoutCausation() throws JsonProcessingException {
-        when(envelope.metadata()).thenReturn(metadata(false));
-        when(objectToJsonObjectConverter.convert(object)).thenReturn(payload);
+		enveloper.register(event);
+        when(jsonEnvelope.metadata()).thenReturn(metadata(false));
+        when(objectToJsonValueConverter.convert(object)).thenReturn(payload);
 
-        Envelope event = enveloper.withMetadataFrom(envelope).apply(object);
+        JsonEnvelope event = enveloper.withMetadataFrom(jsonEnvelope).apply(object);
 
-        assertThat(event.payload(), equalTo(payload));
+        assertThat(event.payloadAsJsonObject(), equalTo(payload));
         assertThat(event.metadata().id(), notNullValue());
         assertThat(event.metadata().name(), equalTo(TEST_EVENT_NAME));
         Assert.assertThat(event.metadata().causation().size(), equalTo(1));
         Assert.assertThat(event.metadata().causation().get(0), equalTo(COMMAND_UUID));
-        verify(objectToJsonObjectConverter, times(1)).convert(object);
+        verify(objectToJsonValueConverter, times(1)).convert(object);
     }
 
     @Test
@@ -121,7 +140,7 @@ public class EnveloperTest {
         exception.expect(InvalidEventException.class);
         exception.expectMessage("Failed to map event. No event registered for class java.lang.String");
 
-        enveloper.withMetadataFrom(envelope).apply("InvalidEventObject");
+        enveloper.withMetadataFrom(jsonEnvelope).apply("InvalidEventObject");
     }
 
     private Metadata metadata(boolean withCausation) {

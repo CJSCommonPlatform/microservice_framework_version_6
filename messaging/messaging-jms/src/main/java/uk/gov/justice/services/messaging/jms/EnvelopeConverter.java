@@ -2,8 +2,8 @@ package uk.gov.justice.services.messaging.jms;
 
 import uk.gov.justice.services.common.converter.JsonObjectToStringConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.exception.JmsConverterException;
-import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -13,10 +13,10 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 
 /**
- * Implementation of {@link MessageConverter} for {@link uk.gov.justice.services.messaging.Envelope}
+ * Implementation of {@link MessageConverter} for {@link JsonEnvelope}
  */
 @ApplicationScoped
-public class EnvelopeConverter implements MessageConverter<Envelope, TextMessage> {
+public class EnvelopeConverter implements MessageConverter<JsonEnvelope, TextMessage> {
 
     static final String JMS_HEADER_CPPNAME = "CPPNAME";
 
@@ -30,7 +30,7 @@ public class EnvelopeConverter implements MessageConverter<Envelope, TextMessage
     JsonObjectEnvelopeConverter jsonObjectEnvelopeConverter;
 
     @Override
-    public Envelope fromMessage(final TextMessage message) {
+    public JsonEnvelope fromMessage(final TextMessage message) {
         String messageAsString;
 
         try {
@@ -42,15 +42,15 @@ public class EnvelopeConverter implements MessageConverter<Envelope, TextMessage
     }
 
     @Override
-    public TextMessage toMessage(final Envelope envelope, final Session session) {
-        final String envelopeAsString = jsonObjectToStringConverter.convert(jsonObjectEnvelopeConverter.fromEnvelope(envelope));
+    public TextMessage toMessage(final JsonEnvelope jsonEnvelope, final Session session) {
+        final String envelopeAsString = jsonObjectToStringConverter.convert(jsonObjectEnvelopeConverter.fromEnvelope(jsonEnvelope));
 
         try {
             final TextMessage textMessage = session.createTextMessage(envelopeAsString);
-            textMessage.setStringProperty(JMS_HEADER_CPPNAME, envelope.metadata().name());
+            textMessage.setStringProperty(JMS_HEADER_CPPNAME, jsonEnvelope.metadata().name());
             return textMessage;
         } catch (JMSException e) {
-            throw new JmsConverterException(String.format("Exception while creating message from envelope %s", envelopeAsString), e);
+            throw new JmsConverterException(String.format("Exception while creating message from jsonEnvelope %s", envelopeAsString), e);
         }
     }
 

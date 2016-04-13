@@ -1,7 +1,7 @@
 package uk.gov.justice.services.adapters.test.utils.dispatcher;
 
 import uk.gov.justice.services.core.dispatcher.SynchronousDispatcher;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.inject.Singleton;
 import java.util.LinkedList;
@@ -14,37 +14,37 @@ public class SynchronousRecordingDispatcher extends BasicRecordingDispatcher imp
     private List<MockResponse> mockResponses = new LinkedList<>();
 
     @Override
-    public Envelope dispatch(final Envelope dispatchedEnvelope) {
-        record(dispatchedEnvelope);
-        return responseTo(dispatchedEnvelope);
+    public JsonEnvelope dispatch(final JsonEnvelope dispatchedJsonEnvelope) {
+        record(dispatchedJsonEnvelope);
+        return responseTo(dispatchedJsonEnvelope);
     }
 
-    public void setupResponse(String payloadElementNameCriteria, String payloadElementValueCriteria, Envelope envelopeToReturn) {
-        mockResponses.add(new MockResponse(payloadElementNameCriteria, payloadElementValueCriteria, envelopeToReturn));
+    public void setupResponse(String payloadElementNameCriteria, String payloadElementValueCriteria, JsonEnvelope jsonEnvelopeToReturn) {
+        mockResponses.add(new MockResponse(payloadElementNameCriteria, payloadElementValueCriteria, jsonEnvelopeToReturn));
     }
 
-    private Envelope responseTo(Envelope dispatchedEnvelope) {
-        Optional<MockResponse> response = mockResponses.stream().filter(r -> r.matches(dispatchedEnvelope)).findFirst();
+    private JsonEnvelope responseTo(JsonEnvelope dispatchedJsonEnvelope) {
+        Optional<MockResponse> response = mockResponses.stream().filter(r -> r.matches(dispatchedJsonEnvelope)).findFirst();
         return response.isPresent() ? response.get().envelopeToReturn() : null;
     }
 
     private static class MockResponse {
         private final String payloadElementName;
         private final String payloadElementValue;
-        private final Envelope envelopeToReturn;
+        private final JsonEnvelope jsonEnvelopeToReturn;
 
-        MockResponse(String payloadElementName, String payloadElementValue, Envelope envelopeToReturn) {
+        MockResponse(String payloadElementName, String payloadElementValue, JsonEnvelope jsonEnvelopeToReturn) {
             this.payloadElementName = payloadElementName;
             this.payloadElementValue = payloadElementValue;
-            this.envelopeToReturn = envelopeToReturn;
+            this.jsonEnvelopeToReturn = jsonEnvelopeToReturn;
         }
 
-        boolean matches(Envelope dispatchedEnvelope) {
-            return payloadElementValue.equals(dispatchedEnvelope.payload().getString(payloadElementName));
+        boolean matches(JsonEnvelope dispatchedJsonEnvelope) {
+            return payloadElementValue.equals(dispatchedJsonEnvelope.payloadAsJsonObject().getString(payloadElementName));
         }
 
-        Envelope envelopeToReturn() {
-            return envelopeToReturn;
+        JsonEnvelope envelopeToReturn() {
+            return jsonEnvelopeToReturn;
         }
     }
 }

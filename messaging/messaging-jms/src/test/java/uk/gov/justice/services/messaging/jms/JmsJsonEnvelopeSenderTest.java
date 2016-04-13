@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.justice.services.messaging.jms.exception.JmsEnvelopeSenderException;
 
@@ -27,7 +27,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class JmsEnvelopeSenderTest {
+public class JmsJsonEnvelopeSenderTest {
 
     private static final String NAME = "test.events.something-done";
 
@@ -59,7 +59,7 @@ public class JmsEnvelopeSenderTest {
     private TextMessage textMessage;
 
     @Mock
-    private Envelope envelope;
+    private JsonEnvelope jsonEnvelope;
 
     @Mock
     private Metadata metadata;
@@ -73,7 +73,7 @@ public class JmsEnvelopeSenderTest {
         jmsEnvelopeSender.envelopeConverter = envelopeConverter;
 
         when(connectionFactory.createConnection()).thenReturn(connection);
-        when(envelope.metadata()).thenReturn(metadata);
+        when(jsonEnvelope.metadata()).thenReturn(metadata);
         when(metadata.name()).thenReturn(NAME);
         when(session.createProducer(destination)).thenReturn(messageProducer);
         when(session.createTextMessage(anyString())).thenReturn(textMessage);
@@ -82,9 +82,9 @@ public class JmsEnvelopeSenderTest {
     @Test
     public void shouldPublishValidEnvelopeToTheTopic() throws Exception {
         when(connection.createSession(false, AUTO_ACKNOWLEDGE)).thenReturn(session);
-        when(envelopeConverter.toMessage(envelope, session)).thenReturn(textMessage);
+        when(envelopeConverter.toMessage(jsonEnvelope, session)).thenReturn(textMessage);
 
-        jmsEnvelopeSender.send(envelope, destination);
+        jmsEnvelopeSender.send(jsonEnvelope, destination);
 
         verify(session, times(1)).createProducer(destination);
         verify(messageProducer, times(1)).send(textMessage);
@@ -97,7 +97,7 @@ public class JmsEnvelopeSenderTest {
     public void shouldThrowExceptionOnJmsException() throws JMSException {
         doThrow(JMSException.class).when(connection).createSession(false, AUTO_ACKNOWLEDGE);
 
-        jmsEnvelopeSender.send(envelope, destination);
+        jmsEnvelopeSender.send(jsonEnvelope, destination);
     }
 
 }

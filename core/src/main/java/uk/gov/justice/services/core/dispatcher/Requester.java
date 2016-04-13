@@ -1,6 +1,6 @@
 package uk.gov.justice.services.core.dispatcher;
 
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 /**
  * Sends an request to the next layer.
@@ -9,11 +9,11 @@ import uk.gov.justice.services.messaging.Envelope;
 public interface Requester {
 
     /**
-     * Sends a request envelope to the next component. The correct requester is injected by the
+     * Sends a request jsonEnvelope to the next component. The correct requester is injected by the
      * framework.
      *
-     * @param envelope envelope containing the request that needs to be sent
-     * @return an envelope containing the response
+     * @param jsonEnvelope jsonEnvelope containing the request that needs to be sent
+     * @return an jsonEnvelope containing the response
      */
-    Envelope request(final Envelope envelope);
+    JsonEnvelope request(final JsonEnvelope jsonEnvelope);
 }

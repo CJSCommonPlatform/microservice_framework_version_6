@@ -2,7 +2,7 @@ package uk.gov.justice.services.messaging.jms;
 
 import static javax.jms.Session.AUTO_ACKNOWLEDGE;
 
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.exception.JmsEnvelopeSenderException;
 
 import javax.annotation.Resource;
@@ -27,19 +27,19 @@ public class JmsEnvelopeSender {
     EnvelopeConverter envelopeConverter;
 
     /**
-     * Sends envelope to the destination via JMS.
+     * Sends jsonEnvelope to the destination via JMS.
      *
-     * @param envelope    envelope to be sent.
-     * @param destination JMS destination for the envelope.
+     * @param jsonEnvelope    jsonEnvelope to be sent.
+     * @param destination JMS destination for the jsonEnvelope.
      */
-    public void send(final Envelope envelope, final Destination destination) {
+    public void send(final JsonEnvelope jsonEnvelope, final Destination destination) {
         try (Connection connection = connectionFactory.createConnection();
              Session session = connection.createSession(false, AUTO_ACKNOWLEDGE);
              MessageProducer producer = session.createProducer(destination)) {
 
-            producer.send(envelopeConverter.toMessage(envelope, session));
+            producer.send(envelopeConverter.toMessage(jsonEnvelope, session));
         } catch (JMSException e) {
-            throw new JmsEnvelopeSenderException(String.format("Exception while sending envelope with name %s", envelope.metadata().name()), e);
+            throw new JmsEnvelopeSenderException(String.format("Exception while sending jsonEnvelope with name %s", jsonEnvelope.metadata().name()), e);
         }
     }
 

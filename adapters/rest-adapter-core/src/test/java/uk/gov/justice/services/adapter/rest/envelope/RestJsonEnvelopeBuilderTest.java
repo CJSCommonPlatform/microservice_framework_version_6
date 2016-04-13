@@ -7,7 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.services.adapter.rest.HeaderConstants;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -24,7 +24,7 @@ import static uk.gov.justice.services.adapter.rest.HeaderConstants.CLIENT_CORREL
  * Unit tests for the {@link RestEnvelopeBuilder} class.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class RestEnvelopeBuilderTest {
+public class RestJsonEnvelopeBuilderTest {
 
     private static final UUID UUID_ID = UUID.randomUUID();
     private static final UUID UUID_CLIENT_CORRELATION_ID = UUID.randomUUID();
@@ -55,10 +55,10 @@ public class RestEnvelopeBuilderTest {
         headers.add("Content-Type", "application/vnd.blah+json");
         setupHttpHeaders(headers);
 
-        Envelope envelope = builder.build();
+        JsonEnvelope jsonEnvelope = builder.build();
 
-        assertThat(envelope.metadata().id(), equalTo(UUID_ID));
-        assertThat(envelope.metadata().name(), equalTo("blah"));
+        assertThat(jsonEnvelope.metadata().id(), equalTo(UUID_ID));
+        assertThat(jsonEnvelope.metadata().name(), equalTo("blah"));
     }
 
     @Test
@@ -68,9 +68,9 @@ public class RestEnvelopeBuilderTest {
         headers.add("Content-Type", "application/vnd.blah+json");
         setupHttpHeaders(headers);
 
-        Envelope envelope = builder.build();
+        JsonEnvelope jsonEnvelope = builder.build();
 
-        assertThat(envelope.metadata().name(), equalTo("blah"));
+        assertThat(jsonEnvelope.metadata().name(), equalTo("blah"));
 
     }
 
@@ -81,9 +81,9 @@ public class RestEnvelopeBuilderTest {
         headers.add("Accept", "application/vnd.blahblah+json");
         setupHttpHeaders(headers);
 
-        Envelope envelope = builder.build();
+        JsonEnvelope jsonEnvelope = builder.build();
 
-        assertThat(envelope.metadata().name(), equalTo("blahblah"));
+        assertThat(jsonEnvelope.metadata().name(), equalTo("blahblah"));
 
     }
 
@@ -95,9 +95,9 @@ public class RestEnvelopeBuilderTest {
         headers.add("Accept", "application/vnd.blahblah2+json");
         setupHttpHeaders(headers);
 
-        Envelope envelope = builder.build();
+        JsonEnvelope jsonEnvelope = builder.build();
 
-        assertThat(envelope.metadata().name(), equalTo("blahblah2"));
+        assertThat(jsonEnvelope.metadata().name(), equalTo("blahblah2"));
 
     }
 
@@ -111,9 +111,9 @@ public class RestEnvelopeBuilderTest {
                 .build();
         builder = builder.withInitialPayload(initialPayload);
 
-        Envelope envelope = builder.build();
+        JsonEnvelope jsonEnvelope = builder.build();
 
-        assertThat(envelope.payload(), equalTo(initialPayload));
+        assertThat(jsonEnvelope.payloadAsJsonObject(), equalTo(initialPayload));
     }
 
     @Test
@@ -125,14 +125,14 @@ public class RestEnvelopeBuilderTest {
         builder = builder.withInitialPayload(initialPayload);
         builder = builder.withPathParams(ImmutableMap.of("test2", "value2"));
 
-        Envelope envelope = builder.build();
+        JsonEnvelope jsonEnvelope = builder.build();
 
         JsonObject expectedPayload = Json.createObjectBuilder()
                 .add("test", "value")
                 .add("test2", "value2")
                 .build();
 
-        assertThat(envelope.payload(), equalTo(expectedPayload));
+        assertThat(jsonEnvelope.payloadAsJsonObject(), equalTo(expectedPayload));
     }
 
     @Test
@@ -140,10 +140,10 @@ public class RestEnvelopeBuilderTest {
         setupHttpHeaders(new MultivaluedHashMap<>(
                 ImmutableMap.of("Content-Type", "application/vnd.blah+json", CLIENT_CORRELATION_ID, UUID_CLIENT_CORRELATION_ID.toString())));
 
-        Envelope envelope = builder.build();
+        JsonEnvelope jsonEnvelope = builder.build();
 
-        assertThat(envelope.metadata().clientCorrelationId().isPresent(), is(true));
-        assertThat(envelope.metadata().clientCorrelationId().get(), equalTo(UUID_CLIENT_CORRELATION_ID.toString()));
+        assertThat(jsonEnvelope.metadata().clientCorrelationId().isPresent(), is(true));
+        assertThat(jsonEnvelope.metadata().clientCorrelationId().get(), equalTo(UUID_CLIENT_CORRELATION_ID.toString()));
     }
 
     @Test
@@ -151,10 +151,10 @@ public class RestEnvelopeBuilderTest {
         setupHttpHeaders(new MultivaluedHashMap<>(
                 ImmutableMap.of("Content-Type", "application/vnd.blah+json", HeaderConstants.USER_ID, UUID_USER_ID.toString())));
 
-        Envelope envelope = builder.build();
+        JsonEnvelope jsonEnvelope = builder.build();
 
-        assertThat(envelope.metadata().userId().isPresent(), is(true));
-        assertThat(envelope.metadata().userId().get(), equalTo(UUID_USER_ID.toString()));
+        assertThat(jsonEnvelope.metadata().userId().isPresent(), is(true));
+        assertThat(jsonEnvelope.metadata().userId().get(), equalTo(UUID_USER_ID.toString()));
     }
 
     @Test
@@ -162,10 +162,10 @@ public class RestEnvelopeBuilderTest {
         setupHttpHeaders(new MultivaluedHashMap<>(
                 ImmutableMap.of("Content-Type", "application/vnd.blah+json",HeaderConstants.SESSION_ID, UUID_SESSION_ID.toString())));
 
-        Envelope envelope = builder.build();
+        JsonEnvelope jsonEnvelope = builder.build();
 
-        assertThat(envelope.metadata().sessionId().isPresent(), is(true));
-        assertThat(envelope.metadata().sessionId().get(), equalTo(UUID_SESSION_ID.toString()));
+        assertThat(jsonEnvelope.metadata().sessionId().isPresent(), is(true));
+        assertThat(jsonEnvelope.metadata().sessionId().get(), equalTo(UUID_SESSION_ID.toString()));
     }
 
     private void setupHttpHeaders(final MultivaluedMap<String, String> headers) {

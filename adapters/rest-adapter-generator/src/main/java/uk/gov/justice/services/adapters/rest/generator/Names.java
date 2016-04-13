@@ -1,10 +1,13 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
-import org.apache.commons.lang.StringUtils;
-import org.raml.model.Action;
-import org.raml.model.MimeType;
-import org.raml.model.Raml;
-import org.raml.model.Resource;
+import static org.apache.commons.lang.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.remove;
+import static org.apache.commons.lang.StringUtils.substringAfter;
+import static org.apache.commons.lang.StringUtils.uncapitalize;
+import static org.apache.commons.lang.WordUtils.capitalize;
+
+import uk.gov.justice.services.core.annotation.Component;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -12,14 +15,17 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import static org.apache.commons.lang.StringUtils.defaultIfBlank;
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.remove;
-import static org.apache.commons.lang.StringUtils.substringAfter;
-import static org.apache.commons.lang.StringUtils.uncapitalize;
-import static org.apache.commons.lang.WordUtils.capitalize;
+import com.google.common.collect.ImmutableMap;
+import org.apache.commons.lang.StringUtils;
+import org.raml.model.Action;
+import org.raml.model.MimeType;
+import org.raml.model.Raml;
+import org.raml.model.Resource;
 
 final class Names {
 
@@ -31,10 +37,16 @@ final class Names {
                     "return", "short", "static", "strictfp", "super", "switch", "synchronized", "this", "throw",
                     "throws", "transient", "true", "try", "void", "volatile", "while")));
 
-    static final String GENERIC_PAYLOAD_ARGUMENT_NAME = "entity";
+    private static final Map<String, String> CONVERT_TO_PILLAR = ImmutableMap.of("command", "commands", "query", "queries");
+
+    private static final Pattern PILLAR_AND_TIER_PATTERN = Pattern
+            .compile("(command/api|command/controller|command/handler|query/api|query/controller|query/view)");
+
     private static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
     private static final String INTERFACE_NAME_SUFFIX = "Resource";
     private static final String APPLICATION_NAME_SUFFIX = "Application";
+
+    static final String GENERIC_PAYLOAD_ARGUMENT_NAME = "entity";
 
     private Names() {
     }
@@ -108,4 +120,15 @@ final class Names {
 
     }
 
+    static Component componentFromBaseUriIn(final Raml raml) {
+        final Matcher matcher = PILLAR_AND_TIER_PATTERN.matcher(baseUriPathWithoutContext(raml));
+
+        if(matcher.find()) {
+            final String pillarAndTier = matcher.group(1);
+            final String[] sections = pillarAndTier.split("/");
+            return Component.valueOf(CONVERT_TO_PILLAR.get(sections[0]), sections[1]);
+        } else {
+            throw new IllegalStateException(String.format("Base URI must contain valid pillar and tier: %s", raml.getBaseUri()));
+        }
+    }
 }

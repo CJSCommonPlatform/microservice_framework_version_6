@@ -6,7 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.services.core.sender.Sender;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.json.JsonObject;
 import java.util.UUID;
@@ -21,7 +21,7 @@ public class MakeCakeCommandApiTest {
     private static final UUID RECIPE_ID = UUID.randomUUID();
 
     @Mock
-    Envelope envelope;
+    JsonEnvelope jsonEnvelope;
 
     @Mock
     private Sender sender;
@@ -34,12 +34,12 @@ public class MakeCakeCommandApiTest {
 
     @Test
     public void shouldHandleMakeCakeCommand() throws Exception {
-        when(envelope.payload()).thenReturn(payload);
+        when(jsonEnvelope.payloadAsJsonObject()).thenReturn(payload);
         when(payload.getString(FIELD_RECIPE_ID)).thenReturn(RECIPE_ID.toString());
 
-        makeCakeCommandApi.handle(envelope);
+        makeCakeCommandApi.handle(jsonEnvelope);
 
-        verify(sender, times(1)).send(envelope);
+        verify(sender, times(1)).send(jsonEnvelope);
     }
 
 }

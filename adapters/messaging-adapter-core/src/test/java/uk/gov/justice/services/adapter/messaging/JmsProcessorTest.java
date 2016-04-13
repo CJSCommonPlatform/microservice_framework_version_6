@@ -6,7 +6,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.services.adapter.messaging.exception.InvalildJmsMessageTypeException;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
 
 import javax.jms.JMSException;
@@ -26,7 +26,7 @@ public class JmsProcessorTest {
     private TextMessage textMessage;
 
     @Mock
-    private Envelope expectedEnvelope;
+    private JsonEnvelope expectedJsonEnvelope;
 
     @Mock
     private EnvelopeConverter envelopeConverter;
@@ -44,9 +44,9 @@ public class JmsProcessorTest {
 
     @Test
     public void shouldPassValidMessageToConsumerFunction() throws Exception {
-        when(envelopeConverter.fromMessage(textMessage)).thenReturn(expectedEnvelope);
+        when(envelopeConverter.fromMessage(textMessage)).thenReturn(expectedJsonEnvelope);
 
-        jmsProcessor.process(envelope -> assertThat(envelope, is(expectedEnvelope)), textMessage);
+        jmsProcessor.process(envelope -> assertThat(envelope, is(expectedJsonEnvelope)), textMessage);
     }
 
     @Test(expected = InvalildJmsMessageTypeException.class)

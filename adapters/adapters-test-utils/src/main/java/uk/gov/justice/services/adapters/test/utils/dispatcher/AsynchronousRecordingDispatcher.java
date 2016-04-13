@@ -1,7 +1,7 @@
 package uk.gov.justice.services.adapters.test.utils.dispatcher;
 
 import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.inject.Singleton;
 
@@ -13,13 +13,13 @@ import javax.inject.Singleton;
 public class AsynchronousRecordingDispatcher extends BasicRecordingDispatcher implements AsynchronousDispatcher {
 
     /**
-     * Records the envelope
+     * Records the jsonEnvelope
      *
-     * @param envelope The {@link Envelope} to recorded.
+     * @param jsonEnvelope The {@link JsonEnvelope} to recorded.
      */
     @Override
-    public void dispatch(Envelope envelope) {
-        record(envelope);
+    public void dispatch(JsonEnvelope jsonEnvelope) {
+        record(jsonEnvelope);
     }
 
 

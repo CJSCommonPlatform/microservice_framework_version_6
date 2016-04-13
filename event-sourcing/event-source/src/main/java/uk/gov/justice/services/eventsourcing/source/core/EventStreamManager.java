@@ -6,7 +6,7 @@ import uk.gov.justice.services.eventsourcing.repository.core.EventRepository;
 import uk.gov.justice.services.eventsourcing.repository.core.exception.StoreEventRequestFailedException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.InvalidStreamVersionRuntimeException;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -32,7 +32,7 @@ public class EventStreamManager {
      *
      * @return the stream of events
      */
-    public Stream<Envelope> read(final UUID id) {
+    public Stream<JsonEnvelope> read(final UUID id) {
         return eventRepository.getByStreamId(id);
     }
 
@@ -41,7 +41,7 @@ public class EventStreamManager {
      *
      * @return the stream of events
      */
-    public Stream<Envelope> readFrom(final UUID id, final Long version) {
+    public Stream<JsonEnvelope> readFrom(final UUID id, final Long version) {
         if (version > eventRepository.getCurrentSequenceIdForStream(id)) {
             throw new InvalidStreamVersionRuntimeException(String.format("Failed to read from stream %s. Version %d does not exist.", id, version));
         }
@@ -55,7 +55,7 @@ public class EventStreamManager {
      * @throws EventStreamException if an event could not be appended
      */
     @Transactional
-    public void append(final UUID id, final Stream<Envelope> events) throws EventStreamException {
+    public void append(final UUID id, final Stream<JsonEnvelope> events) throws EventStreamException {
         append(id, events, Optional.empty());
     }
 
@@ -67,7 +67,7 @@ public class EventStreamManager {
      * @throws EventStreamException if an event could not be appended
      */
     @Transactional
-    public void appendAfter(final UUID id, final Stream<Envelope> events, final Long version) throws EventStreamException {
+    public void appendAfter(final UUID id, final Stream<JsonEnvelope> events, final Long version) throws EventStreamException {
         if (version == null) {
             throw new EventStreamException(String.format("Failed to append to stream %s. Version must not be null.", id));
         }
@@ -83,14 +83,14 @@ public class EventStreamManager {
         return eventRepository.getCurrentSequenceIdForStream(id);
     }
 
-    private void append(final UUID id, final Stream<Envelope> events, final Optional<Long> versionFrom) throws EventStreamException {
-        List<Envelope> envelopeList = events.collect(Collectors.<Envelope>toList());
+    private void append(final UUID id, final Stream<JsonEnvelope> events, final Optional<Long> versionFrom) throws EventStreamException {
+        List<JsonEnvelope> jsonEnvelopeList = events.collect(Collectors.<JsonEnvelope>toList());
 
         Long currentVersion = eventRepository.getCurrentSequenceIdForStream(id);
 
-        validateEvents(id, envelopeList, versionFrom, currentVersion);
+        validateEvents(id, jsonEnvelopeList, versionFrom, currentVersion);
 
-        for (final Envelope event : envelopeList) {
+        for (final JsonEnvelope event : jsonEnvelopeList) {
             try {
                 eventRepository.store(event, id, ++currentVersion);
                 eventPublisher.publish(event);
@@ -100,13 +100,13 @@ public class EventStreamManager {
         }
     }
 
-    private void validateEvents(final UUID id, final List<Envelope> envelopeList, final Optional<Long> versionFrom, final Long currentVersion) throws EventStreamException {
+    private void validateEvents(final UUID id, final List<JsonEnvelope> jsonEnvelopeList, final Optional<Long> versionFrom, final Long currentVersion) throws EventStreamException {
         if (versionFrom.isPresent() && !versionFrom.get().equals(currentVersion)) {
             throw new EventStreamException(String.format("Failed to append to stream %s. Version mismatch. Expected %d, Found %d",
                     id, versionFrom.get(), currentVersion));
         }
 
-        if (envelopeList.stream().anyMatch(e -> e.metadata().version().isPresent())) {
+        if (jsonEnvelopeList.stream().anyMatch(e -> e.metadata().version().isPresent())) {
             throw new EventStreamException(String.format("Failed to append to stream %s. Version must be empty.", id));
         }
     }

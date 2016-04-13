@@ -1,7 +1,7 @@
 package uk.gov.justice.services.eventsourcing.publisher.jms;
 
 import uk.gov.justice.services.eventsourcing.publisher.core.EventPublisher;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -20,8 +20,8 @@ public class JmsEventPublisher implements EventPublisher {
     MessagingDestinationResolver messagingDestinationResolver;
 
     @Override
-    public void publish(final Envelope envelope) {
-        jmsEnvelopeSender.send(envelope, messagingDestinationResolver.resolve(envelope.metadata().name()));
+    public void publish(final JsonEnvelope jsonEnvelope) {
+        jmsEnvelopeSender.send(jsonEnvelope, messagingDestinationResolver.resolve(jsonEnvelope.metadata().name()));
     }
 
 }

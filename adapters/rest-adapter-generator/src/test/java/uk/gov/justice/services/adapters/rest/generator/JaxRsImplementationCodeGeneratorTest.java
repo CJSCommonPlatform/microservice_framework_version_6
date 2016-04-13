@@ -1,5 +1,7 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
+import uk.gov.justice.services.core.annotation.Component;
+
 import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JDefinedClass;
 import org.junit.Test;
@@ -18,7 +20,7 @@ public class JaxRsImplementationCodeGeneratorTest {
 
         JaxRsImplementationCodeGenerator generator = new JaxRsImplementationCodeGenerator(codeModel);
 
-        generator.createImplementation(definedInterface);
-        generator.createImplementation(definedInterface);
+        generator.createImplementation(definedInterface, Component.COMMAND_API);
+        generator.createImplementation(definedInterface, Component.COMMAND_API);
     }
 }

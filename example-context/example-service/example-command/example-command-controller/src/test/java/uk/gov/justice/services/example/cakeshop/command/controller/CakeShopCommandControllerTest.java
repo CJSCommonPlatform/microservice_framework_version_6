@@ -6,7 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.services.core.sender.Sender;
-import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.json.JsonObject;
 import java.util.UUID;
@@ -22,7 +22,7 @@ public class CakeShopCommandControllerTest {
     private static final UUID RECIPE_ID = UUID.randomUUID();
 
     @Mock
-    Envelope envelope;
+    JsonEnvelope jsonEnvelope;
 
     @Mock
     private Sender sender;
@@ -35,21 +35,21 @@ public class CakeShopCommandControllerTest {
 
     @Test
     public void shouldHandleMakeCakeCommand() throws Exception {
-        when(envelope.payload()).thenReturn(payload);
+        when(jsonEnvelope.payloadAsJsonObject()).thenReturn(payload);
         when(payload.getString(FIELD_RECIPE_ID)).thenReturn(RECIPE_ID.toString());
-        cakeShopCommandController.makeCake(envelope);
+        cakeShopCommandController.makeCake(jsonEnvelope);
 
-        verify(sender, times(1)).send(envelope);
+        verify(sender, times(1)).send(jsonEnvelope);
     }
 
     @Test
     public void shouldHandleAddRecipeCommand() throws Exception {
-        when(envelope.payload()).thenReturn(payload);
+        when(jsonEnvelope.payloadAsJsonObject()).thenReturn(payload);
         when(payload.getString(FIELD_RECIPE_ID)).thenReturn(RECIPE_ID.toString());
 
-        cakeShopCommandController.addRecipe(envelope);
+        cakeShopCommandController.addRecipe(jsonEnvelope);
 
-        verify(sender, times(1)).send(envelope);
+        verify(sender, times(1)).send(jsonEnvelope);
     }
 
 }

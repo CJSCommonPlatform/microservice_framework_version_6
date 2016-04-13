@@ -10,7 +10,7 @@ import static org.junit.Assert.assertThat;
 /**
  * Unit tests for the {@link RestEnvelopeBuilderFactory} class.
  */
-public class RestEnvelopeBuilderFactoryTest {
+public class RestJsonEnvelopeBuilderFactoryTest {
 
     private RestEnvelopeBuilderFactory factory;
 

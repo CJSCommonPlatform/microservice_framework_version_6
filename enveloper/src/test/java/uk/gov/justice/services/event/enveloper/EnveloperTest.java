@@ -83,11 +83,12 @@ public class EnveloperTest {
         doReturn(TestEvent.class).when(event).getClazz();
         when(event.getEventName()).thenReturn(TEST_EVENT_NAME);
 
-        enveloper.register(event);
+
     }
 
     @Test
     public void shouldMapObjectToEvent() throws JsonProcessingException {
+        enveloper.register(event);
         when(envelope.metadata()).thenReturn(metadata(true));
         when(objectToJsonValueConverter.convert(object)).thenReturn(payload);
 
@@ -120,6 +121,7 @@ public class EnveloperTest {
 
     @Test
     public void shouldMapObjectToEventWithoutCausation() throws JsonProcessingException {
+        enveloper.register(event);
         when(envelope.metadata()).thenReturn(metadata(false));
         when(objectToJsonValueConverter.convert(object)).thenReturn(payload);
 

@@ -1,19 +1,23 @@
 package uk.gov.justice.services.adapters.test.utils.builder;
 
-import org.raml.model.Action;
-import org.raml.model.ActionType;
-import org.raml.model.MimeType;
-import org.raml.model.Response;
-
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.raml.model.Action;
+import org.raml.model.ActionType;
+import org.raml.model.MimeType;
+import org.raml.model.ParamType;
+import org.raml.model.Response;
+import org.raml.model.parameter.QueryParameter;
+
 public class ActionBuilder {
     private ActionType actionType;
     private final Map<String, MimeType> body = new HashMap<>();
     private List<Response> responses = new LinkedList<>();
+    private final Map<String, QueryParameter> queryParameters = new HashMap<>();
 
     public static ActionBuilder action() {
         return new ActionBuilder();
@@ -52,6 +56,17 @@ public class ActionBuilder {
         return this;
     }
 
+    public ActionBuilder withQueryParameters(final String... queryParameters) {
+        Arrays.stream(queryParameters).forEach(s -> {
+            QueryParameter queryParameter = new QueryParameter();
+            queryParameter.setDisplayName(s);
+            queryParameter.setType(ParamType.STRING);
+            this.queryParameters.put(s, queryParameter);
+        });
+
+        return this;
+    }
+
     public ActionBuilder withMediaType(final MimeType mimeType) {
         body.put(mimeType.toString(), mimeType);
         return this;
@@ -65,9 +80,13 @@ public class ActionBuilder {
         final Action action = new Action();
         action.setType(actionType);
         action.setBody(body);
+
         HashMap<String, Response> responsesMap = new HashMap<>();
         this.responses.forEach(r -> responsesMap.put("", r));
         action.setResponses(responsesMap);
+
+        action.setQueryParameters(queryParameters);
+
         return action;
     }
 

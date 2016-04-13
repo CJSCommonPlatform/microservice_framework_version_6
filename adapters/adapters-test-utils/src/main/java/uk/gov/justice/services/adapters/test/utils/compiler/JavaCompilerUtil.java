@@ -1,20 +1,8 @@
 package uk.gov.justice.services.adapters.test.utils.compiler;
 
-import com.google.common.collect.Sets;
-import org.apache.commons.io.FileUtils;
-import org.reflections.ReflectionUtils;
-import org.reflections.Reflections;
-import org.reflections.util.ClasspathHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.lang.String.join;
+import static java.text.MessageFormat.format;
 
-import javax.tools.Diagnostic;
-import javax.tools.DiagnosticCollector;
-import javax.tools.JavaCompiler;
-import javax.tools.JavaCompiler.CompilationTask;
-import javax.tools.JavaFileObject;
-import javax.tools.StandardJavaFileManager;
-import javax.tools.ToolProvider;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -30,8 +18,21 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static java.lang.String.join;
-import static java.text.MessageFormat.format;
+import javax.tools.Diagnostic;
+import javax.tools.DiagnosticCollector;
+import javax.tools.JavaCompiler;
+import javax.tools.JavaCompiler.CompilationTask;
+import javax.tools.JavaFileObject;
+import javax.tools.StandardJavaFileManager;
+import javax.tools.ToolProvider;
+
+import com.google.common.collect.Sets;
+import org.apache.commons.io.FileUtils;
+import org.reflections.ReflectionUtils;
+import org.reflections.Reflections;
+import org.reflections.util.ClasspathHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Compiles and loads classes and interfaces from the specified folders
@@ -76,6 +77,25 @@ public class JavaCompilerUtil {
     public Class<?> compiledClassOf(String basePackage, String... additionalFilterElements) throws MalformedURLException {
         Set<Class<?>> resourceClasses = compiledClassesAndInterfaces(
                 c -> !c.isInterface() && c.getName().equals(join(".", basePackage, join(".", additionalFilterElements))), basePackage);
+        if (resourceClasses.size() != 1) {
+            throw new IllegalStateException(format("Expected to find single class but found {0}", resourceClasses));
+        }
+        return resourceClasses.iterator().next();
+    }
+
+    /**
+     * Compiles then finds a single interface class.
+     *
+     * @param basePackage the base package
+     *
+     * @return the class
+     * @throws MalformedURLException
+     * @throws IllegalStateException
+     *             - if more or less than one classes found
+     */
+    public Class<?> compiledInterfaceClassOf(String basePackage, String... additionalFilterElements) throws MalformedURLException {
+        Set<Class<?>> resourceClasses = compiledClassesAndInterfaces(
+                c -> c.isInterface() && c.getName().equals(join(".", basePackage, join(".", additionalFilterElements))), basePackage);
         if (resourceClasses.size() != 1) {
             throw new IllegalStateException(format("Expected to find single class but found {0}", resourceClasses));
         }

@@ -22,3 +22,15 @@ protocols: [ HTTP, HTTPS ]
             body:
                 application/vnd.people.queries.get-user+json:
                 application/vnd.people.queries.get-user2+json:
+
+/users:
+  description: |
+    Search users
+  get:
+    queryParameters:
+        surname:
+            type: string
+    responses:
+        200:
+            body:
+                application/vnd.people.queries.search-users+json:

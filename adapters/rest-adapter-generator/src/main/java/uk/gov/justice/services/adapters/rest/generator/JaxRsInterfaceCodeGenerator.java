@@ -1,5 +1,34 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
+import static java.lang.String.join;
+import static org.apache.commons.lang.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang.StringUtils.strip;
+import static uk.gov.justice.services.adapters.rest.generator.Actions.responseMimeTypesOf;
+import static uk.gov.justice.services.adapters.rest.generator.Names.GENERIC_PAYLOAD_ARGUMENT_NAME;
+import static uk.gov.justice.services.adapters.rest.generator.Names.buildResourceMethodName;
+import static uk.gov.justice.services.adapters.rest.generator.Names.buildVariableName;
+import static uk.gov.justice.services.adapters.rest.generator.Names.resourceInterfaceNameOf;
+
+import uk.gov.justice.raml.core.GeneratorConfig;
+
+import java.lang.annotation.Annotation;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import javax.json.JsonObject;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+
 import com.google.common.collect.ImmutableList;
 import com.sun.codemodel.JAnnotatable;
 import com.sun.codemodel.JAnnotationArrayMember;
@@ -15,32 +44,6 @@ import org.raml.model.Action;
 import org.raml.model.MimeType;
 import org.raml.model.Resource;
 import org.raml.model.parameter.UriParameter;
-import uk.gov.justice.raml.core.GeneratorConfig;
-
-import javax.json.JsonObject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import java.lang.annotation.Annotation;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import static java.lang.String.join;
-import static org.apache.commons.lang.StringUtils.defaultIfBlank;
-import static org.apache.commons.lang.StringUtils.strip;
-import static uk.gov.justice.services.adapters.rest.generator.Actions.responseMimeTypesOf;
-import static uk.gov.justice.services.adapters.rest.generator.Names.GENERIC_PAYLOAD_ARGUMENT_NAME;
-import static uk.gov.justice.services.adapters.rest.generator.Names.buildResourceMethodName;
-import static uk.gov.justice.services.adapters.rest.generator.Names.buildVariableName;
-import static uk.gov.justice.services.adapters.rest.generator.Names.resourceInterfaceNameOf;
 
 class JaxRsInterfaceCodeGenerator {
 
@@ -133,6 +136,7 @@ class JaxRsInterfaceCodeGenerator {
         addProducesAnnotation(responseMimeTypes, method);
 
         addPathParameters(action, method);
+        addQueryParameters(action, method);
         addBodyParameters(bodyMimeType, method);
         return method;
     }
@@ -185,6 +189,12 @@ class JaxRsInterfaceCodeGenerator {
         argumentVariable.annotate(annotationClass).param(
                 DEFAULT_ANNOTATION_PARAMETER, name);
 
+    }
+
+    private void addQueryParameters(final Action action, final JMethod method) {
+        action.getQueryParameters().keySet().stream().forEach(name ->
+                addParameter(name, QueryParam.class, method)
+        );
     }
 
     private void addBodyParameters(final MimeType bodyMimeType,

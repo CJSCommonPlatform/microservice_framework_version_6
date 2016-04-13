@@ -34,6 +34,7 @@ import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
 import uk.gov.justice.services.core.dispatcher.SynchronousDispatcher;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -49,6 +50,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
@@ -508,6 +510,112 @@ public class RestAdapterGenerator_CodeStructureTest {
         Parameter bodyParam = method.getParameters()[3];
         assertThat(bodyParam.getType(), equalTo(JsonObject.class));
         assertThat(bodyParam.getAnnotations(), emptyArray());
+
+    }
+
+    @Test
+    public void classShouldContainQueryParam() throws Exception {
+        generator.run(
+                restRamlWithQueryApiDefaults().with(
+                        resource("/users").with(action(GET)
+                                .withQueryParameters("surname")
+                                .withResponse("application/vnd.people.queries.search-users+json"))
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder)
+        );
+
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultUsersResource");
+
+        assertThat(clazz.isInterface(), is(false));
+
+        List<Method> methods = methodsOf(clazz);
+        assertThat(methods, hasSize(1));
+        Method method = methods.get(0);
+        assertThat(method.getParameterCount(), is(1));
+
+        Parameter pathParam1 = method.getParameters()[0];
+        assertThat(pathParam1.getType(), equalTo(String.class));
+        assertThat(pathParam1.getAnnotations(), emptyArray());
+
+        Class<?> inter = compiler.compiledInterfaceClassOf(BASE_PACKAGE, "resource", "UsersResource");
+
+        assertThat(inter.isInterface(), is(true));
+        List<Method> interMethods = methodsOf(inter);
+        assertThat(methods, hasSize(1));
+        Method interMethod = interMethods.get(0);
+        assertThat(method.getParameterCount(), is(1));
+
+        Parameter interParam1 = interMethod.getParameters()[0];
+        assertThat(interParam1.getType(), equalTo(String.class));
+        assertThat(interParam1.getAnnotations().length, is(1));
+
+        Annotation annotation = interParam1.getAnnotations()[0];
+        assertThat(annotation.annotationType(), equalTo(QueryParam.class));
+
+    }
+
+    @Test
+    public void classShouldContain3QueryParams() throws Exception {
+        generator.run(
+                restRamlWithQueryApiDefaults().with(
+                        resource("/users").with(action(GET)
+                                .withQueryParameters("surname")
+                                .withQueryParameters("firstname")
+                                .withQueryParameters("middlename")
+                                .withResponse("application/vnd.people.queries.search-users+json"))
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder)
+        );
+
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultUsersResource");
+
+        assertThat(clazz.isInterface(), is(false));
+
+        List<Method> methods = methodsOf(clazz);
+        assertThat(methods, hasSize(1));
+        Method method = methods.get(0);
+        assertThat(method.getParameterCount(), is(3));
+
+        Parameter pathParam1 = method.getParameters()[0];
+        assertThat(pathParam1.getType(), equalTo(String.class));
+        assertThat(pathParam1.getAnnotations(), emptyArray());
+
+        Parameter pathParam2 = method.getParameters()[1];
+        assertThat(pathParam2.getType(), equalTo(String.class));
+        assertThat(pathParam2.getAnnotations(), emptyArray());
+
+        Parameter pathParam3 = method.getParameters()[2];
+        assertThat(pathParam3.getType(), equalTo(String.class));
+        assertThat(pathParam3.getAnnotations(), emptyArray());
+
+        Class<?> inter = compiler.compiledInterfaceClassOf(BASE_PACKAGE, "resource", "UsersResource");
+
+        assertThat(inter.isInterface(), is(true));
+        List<Method> interMethods = methodsOf(inter);
+        assertThat(methods, hasSize(1));
+        Method interMethod = interMethods.get(0);
+        assertThat(method.getParameterCount(), is(3));
+
+        Parameter interParam1 = interMethod.getParameters()[0];
+        assertThat(interParam1.getType(), equalTo(String.class));
+        assertThat(interParam1.getAnnotations().length, is(1));
+
+        Annotation annotation1 = interParam1.getAnnotations()[0];
+        assertThat(annotation1.annotationType(), equalTo(QueryParam.class));
+
+        Parameter interParam2 = interMethod.getParameters()[0];
+        assertThat(interParam2.getType(), equalTo(String.class));
+        assertThat(interParam2.getAnnotations().length, is(1));
+
+        Annotation annotation2 = interParam2.getAnnotations()[0];
+        assertThat(annotation2.annotationType(), equalTo(QueryParam.class));
+
+        Parameter interParam3 = interMethod.getParameters()[0];
+        assertThat(interParam3.getType(), equalTo(String.class));
+        assertThat(interParam3.getAnnotations().length, is(1));
+
+        Annotation annotation3 = interParam3.getAnnotations()[0];
+        assertThat(annotation3.annotationType(), equalTo(QueryParam.class));
 
     }
 

@@ -28,6 +28,9 @@ import java.util.Properties;
 import static com.jayway.jsonassert.JsonAssert.with;
 import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.client.Entity.entity;
+import static javax.ws.rs.core.Response.Status.ACCEPTED;
+import static javax.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
+import static javax.ws.rs.core.Response.Status.OK;
 import static org.apache.cxf.jaxrs.client.WebClient.create;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -96,7 +99,7 @@ public class DefaultUsersUserIdResourceIT {
                 .path("/users/1234")
                 .post(entity(JSON, CREATE_USER_MEDIA_TYPE));
 
-        assertThat(response.getStatus(), is(202));
+        assertThat(response.getStatus(), is(ACCEPTED.getStatusCode()));
     }
 
     @Test
@@ -119,8 +122,26 @@ public class DefaultUsersUserIdResourceIT {
                 .path("/users/1234")
                 .post(entity(JSON, UPDATE_USER_MEDIA_TYPE));
 
-        assertThat(response.getStatus(), is(202));
+        assertThat(response.getStatus(), is(ACCEPTED.getStatusCode()));
     }
+
+    @Test
+    public void shouldReturn200ResponseContainingUserDataReturnedByDispatcher() {
+        syncDispatcher.setupResponse("userId", "4444-5556",
+                envelopeFrom(null, createObjectBuilder().add("userName", "userName").build()));
+
+        Response response = create(BASE_URI)
+                .path("/users/4444-5556")
+                .header("Accept", "application/vnd.people.queries.get-user+json")
+                .get();
+
+        assertThat(response.getStatus(), is(OK.getStatusCode()));
+        String responseBody = response.readEntity(String.class);
+        with(responseBody)
+                .assertThat("userName", equalTo("userName"));
+
+    }
+
 
     @Test
     public void shouldDispatchUpdateUserCommand() throws Exception {
@@ -156,7 +177,7 @@ public class DefaultUsersUserIdResourceIT {
                 .header("Accept", "application/vnd.people.queries.get-user2+json")
                 .get();
 
-        assertThat(response.getStatus(), is(200));
+        assertThat(response.getStatus(), is(OK.getStatusCode()));
         JsonEnvelope envelope = syncDispatcher.awaitForEnvelopeWithPayloadOf("userId", "4444-5555");
         assertThat(envelope.payloadAsJsonObject().getString("userId"), is("4444-5555"));
         assertThat(envelope.metadata().name(), is("people.queries.get-user2"));
@@ -171,26 +192,11 @@ public class DefaultUsersUserIdResourceIT {
                 .header("Accept", "application/vnd.people.queries.unknown+json")
                 .get();
 
-        assertThat(response.getStatus(), is(406));
+        assertThat(response.getStatus(), is(NOT_ACCEPTABLE.getStatusCode()));
 
     }
 
 
-    @Test
-    public void shouldReturnUserDataReturnedByDispatcher() {
-        syncDispatcher.setupResponse("userId", "4444-5556", envelopeFrom(null, createObjectBuilder().add("userName", "userName").build()));
-
-        Response response = create(BASE_URI)
-                .path("/users/4444-5556")
-                .header("Accept", "application/vnd.people.queries.get-user+json")
-                .get();
-
-        assertThat(response.getStatus(), is(200));
-        String responseBody = response.readEntity(String.class);
-        with(responseBody)
-                .assertThat("userName", equalTo("userName"));
-
-    }
 
     @Test
     public void shouldReturnResponseWithContentType() {
@@ -200,7 +206,7 @@ public class DefaultUsersUserIdResourceIT {
                 .path("/users/4444-5556")
                 .header("Accept", "application/vnd.people.queries.get-user+json")
                 .get();
-
+        assertThat(response.getStatus(), is(OK.getStatusCode()));
         assertThat(response.getMediaType().toString(), is("application/vnd.people.queries.get-user+json"));
     }
 
@@ -212,7 +218,7 @@ public class DefaultUsersUserIdResourceIT {
                 .path("/users/4444-5556")
                 .header("Accept", "application/vnd.people.queries.get-user2+json")
                 .get();
-        assertThat(response.getStatus(), is(200));
+        assertThat(response.getStatus(), is(OK.getStatusCode()));
         assertThat(response.getMediaType().toString(), is("application/vnd.people.queries.get-user2+json"));
     }
 

@@ -9,10 +9,10 @@ import uk.gov.justice.raml.common.validator.RamlValidationException;
 import uk.gov.justice.raml.core.Generator;
 
 import static org.raml.model.ActionType.POST;
-import static uk.gov.justice.services.adapters.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
+import static uk.gov.justice.services.adapters.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 
 public class JmsEndpointGeneratorErrorHandlingTest {
 
@@ -158,6 +158,40 @@ public class JmsEndpointGeneratorErrorHandlingTest {
                                         ))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenBaseUriNotSetWhileGeneratingEventListener() throws Exception {
+        exception.expect(RamlValidationException.class);
+        exception.expectMessage("Base uri not set");
+
+        generator.run(
+                raml()
+                        .withBaseUri(null)
+                        .with(resource()
+                                .withRelativeUri("/structure.events")
+                                .withDefaultAction())
+                        .build(),
+                configurationWithBasePackage("uk.somepackage", outputFolder));
+
+
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenInvalidBaseUriWhileGeneratingEventListener() throws Exception {
+        exception.expect(RamlValidationException.class);
+        exception.expectMessage("Inavlid base uri: message://too/short/uri");
+
+        generator.run(
+                raml()
+                        .withBaseUri("message://too/short/uri")
+                        .with(resource()
+                                .withRelativeUri("/structure.events")
+                                .withDefaultAction())
+                        .build(),
+                configurationWithBasePackage("uk.somepackage", outputFolder));
+
 
     }
 

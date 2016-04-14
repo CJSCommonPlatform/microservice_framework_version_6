@@ -10,7 +10,7 @@ import java.util.Optional;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertTrue;
 
-public class ReflectionUtil {
+public final class ReflectionUtil {
     private ReflectionUtil() {
     }
 

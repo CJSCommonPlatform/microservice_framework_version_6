@@ -1,4 +1,4 @@
-package uk.gov.justice.raml.jms.validation;
+package uk.gov.justice.raml.jms.validator;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -9,9 +9,9 @@ import uk.gov.justice.raml.common.validator.RamlValidator;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 
-public class UriRamlValidatorTest {
+public class ResourceUriRamlValidatorTest {
 
-    private RamlValidator validator = new UriRamlValidator();
+    private RamlValidator validator = new ResourceUriRamlValidator();
 
     @Rule
     public ExpectedException exception = ExpectedException.none();

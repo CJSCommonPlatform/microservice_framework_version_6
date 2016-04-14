@@ -15,7 +15,7 @@
     <dependencies>
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
-            <artifactId>view-controller</artifactId>
+            <artifactId>query-controller</artifactId>
             <version>${project.version}</version>
         </dependency>
 

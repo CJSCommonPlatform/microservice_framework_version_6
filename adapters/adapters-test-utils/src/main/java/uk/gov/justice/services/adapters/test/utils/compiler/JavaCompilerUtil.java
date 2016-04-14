@@ -74,12 +74,21 @@ public class JavaCompilerUtil {
      *             - if more or less than one classes found
      */
     public Class<?> compiledClassOf(String basePackage, String... additionalFilterElements) throws MalformedURLException {
-        Set<Class<?>> resourceClasses = compiledClassesAndInterfaces(
-                c -> !c.isInterface() && c.getName().equals(join(".", basePackage, join(".", additionalFilterElements))), basePackage);
-        if (resourceClasses.size() != 1) {
-            throw new IllegalStateException(format("Expected to find single class but found {0}", resourceClasses));
-        }
-        return resourceClasses.iterator().next();
+        return compiledClassOf(basePackage, c -> !c.isInterface(), additionalFilterElements);
+    }
+
+    /**
+     * Compiles then finds a single interface class.
+     *
+     * @param basePackage the base package
+     *
+     * @return the class
+     * @throws MalformedURLException
+     * @throws IllegalStateException
+     *             - if more or less than one classes found
+     */
+    public Class<?> compiledInterfaceClassOf(String basePackage, String... additionalFilterElements) throws MalformedURLException {
+         return compiledClassOf(basePackage, Class::isInterface, additionalFilterElements);
     }
 
     public Class<?> classOf(Set<Class<?>> classes, String basePackage, String... additionalFilterElements) throws MalformedURLException {
@@ -133,6 +142,15 @@ public class JavaCompilerUtil {
     public Set<Class<?>> compiledInterfacesOf(String basePackage)
             throws MalformedURLException {
         return compiledClassesAndInterfaces(Class::isInterface, basePackage);
+    }
+
+    private Class<?> compiledClassOf(String basePackage, Predicate<Class<?>> predicate, String... additionalFilterElements) throws MalformedURLException {
+        Set<Class<?>> resourceClasses = compiledClassesAndInterfaces(
+                c -> predicate.test(c) && c.getName().equals(join(".", basePackage, join(".", additionalFilterElements))), basePackage);
+        if (resourceClasses.size() != 1) {
+            throw new IllegalStateException(format("Expected to find single class but found {0}", resourceClasses));
+        }
+        return resourceClasses.iterator().next();
     }
 
     private Set<Class<?>> compiledClassesAndInterfaces(Predicate<? super Class<?>> predicate,

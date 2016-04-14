@@ -38,22 +38,22 @@ class JaxRsImplementationCodeGenerator {
     private static final String ASYNC_DISPATCHER_BEAN_NAME = "asyncDispatcher";
     private static final String SYNC_DISPATCHER_BEAN_NAME = "syncDispatcher";
     private static final String HEADERS_CONTEXT = "headers";
-    private static final String PATH_PARAMS_ARGUMENT_NAME = "pathParams";
+    private static final String PARAMS_ARGUMENT_NAME = "params";
     private static final String REST_PROCESSOR_BEAN_NAME = "restProcessor";
     private static final String GET = "GET";
     private static final String POST = "POST";
     private final JCodeModel codeModel;
 
-    JaxRsImplementationCodeGenerator(JCodeModel codeModel) {
+    JaxRsImplementationCodeGenerator(final JCodeModel codeModel) {
         this.codeModel = codeModel;
     }
 
-    JDefinedClass createImplementation(JDefinedClass resourceInterface) {
+    JDefinedClass createImplementation(final JDefinedClass resourceInterface, final Component component) {
         final JPackage pkg = resourceInterface.getPackage();
         try {
             final JDefinedClass resourceImplementation = pkg._class("Default" + resourceInterface.name());
             resourceImplementation._implements(resourceInterface);
-            addAnnotations(resourceImplementation);
+            addAnnotations(resourceImplementation, component);
             addImplementationMethods(resourceImplementation, resourceInterface);
 
             if (containsResourcesOfType(resourceInterface, POST)) {
@@ -76,34 +76,34 @@ class JaxRsImplementationCodeGenerator {
         return resourceInterface.methods().stream().filter((interfaceMethod) -> isResourceOfType(interfaceMethod, methodType)).findAny().isPresent();
     }
 
-
-    private void addAnnotations(final JDefinedClass resourceImplementation) {
+    private void addAnnotations(final JDefinedClass resourceImplementation, final Component component) {
         resourceImplementation.annotate(Stateless.class);
-        JAnnotationUse adapterAnnotation = resourceImplementation.annotate(Adapter.class);
-        adapterAnnotation.param("value", Component.COMMAND_API);
+        final JAnnotationUse adapterAnnotation = resourceImplementation.annotate(Adapter.class);
+
+        adapterAnnotation.param("value", component);
     }
 
-    private void addImplementationMethods(final JDefinedClass resourceImplementation, JDefinedClass resourceInterface) {
-        JClass str = codeModel.ref("String");
+    private void addImplementationMethods(final JDefinedClass resourceImplementation, final JDefinedClass resourceInterface) {
+        final JClass str = codeModel.ref("String");
         resourceInterface.methods().forEach(interfaceMethod -> {
-            JMethod implementationMethod = resourceImplementation.method(PUBLIC, interfaceMethod.type(),
+            final JMethod implementationMethod = resourceImplementation.method(PUBLIC, interfaceMethod.type(),
                     interfaceMethod.name());
             implementationMethod.annotate(Override.class);
             addMethodParams(implementationMethod, interfaceMethod);
-            JBlock body = implementationMethod.body();
-            JType map = codeModel.ref(Map.class.getCanonicalName()).narrow(str, str);
-            JClass mapBuilderClass = codeModel.ref(ImmutableMap.Builder.class.getName()).narrow(str, str);
+            final JBlock body = implementationMethod.body();
+            final JType map = codeModel.ref(Map.class.getCanonicalName()).narrow(str, str);
+            final JClass mapBuilderClass = codeModel.ref(ImmutableMap.Builder.class.getName()).narrow(str, str);
 
             if (isResourceOfType(interfaceMethod, GET)) {
-                body.decl(map, PATH_PARAMS_ARGUMENT_NAME, pathParamsMapBuilderInvocation(mapBuilderClass,
+                body.decl(map, PARAMS_ARGUMENT_NAME, paramsMapBuilderInvocation(mapBuilderClass,
                         implementationMethod, false));
                 body.directStatement(format("return %s.processSynchronously(%s::dispatch, %s, %s);",
-                        REST_PROCESSOR_BEAN_NAME, SYNC_DISPATCHER_BEAN_NAME, HEADERS_CONTEXT, PATH_PARAMS_ARGUMENT_NAME));
+                        REST_PROCESSOR_BEAN_NAME, SYNC_DISPATCHER_BEAN_NAME, HEADERS_CONTEXT, PARAMS_ARGUMENT_NAME));
             } else {
-                body.decl(map, PATH_PARAMS_ARGUMENT_NAME, pathParamsMapBuilderInvocation(mapBuilderClass,
+                body.decl(map, PARAMS_ARGUMENT_NAME, paramsMapBuilderInvocation(mapBuilderClass,
                         implementationMethod, true));
                 body.directStatement(format("return %s.processAsynchronously(%s::dispatch, entity, %s, %s);",
-                        REST_PROCESSOR_BEAN_NAME, ASYNC_DISPATCHER_BEAN_NAME, HEADERS_CONTEXT, PATH_PARAMS_ARGUMENT_NAME));
+                        REST_PROCESSOR_BEAN_NAME, ASYNC_DISPATCHER_BEAN_NAME, HEADERS_CONTEXT, PARAMS_ARGUMENT_NAME));
             }
         });
     }
@@ -113,24 +113,24 @@ class JaxRsImplementationCodeGenerator {
                 .filter(a -> a.getAnnotationClass().name().contains(methodType)).findAny().isPresent();
     }
 
-    private void addAnnotatedProperty(final JDefinedClass resourceClass, Class<?> clazz, String name,
-                                      Class<? extends Annotation> annotation) {
-        JFieldVar dispatcherField = resourceClass.field(0, clazz, name);
+    private void addAnnotatedProperty(final JDefinedClass resourceClass, final Class<?> clazz, final String name,
+                                      final Class<? extends Annotation> annotation) {
+        final JFieldVar dispatcherField = resourceClass.field(0, clazz, name);
         dispatcherField.annotate(annotation);
     }
 
-    private void addMethodParams(JMethod implMethod, JMethod m) {
+    private void addMethodParams(final JMethod implMethod, final JMethod m) {
         m.params().forEach(p -> implMethod.param(p.type(), p.name()));
     }
 
-    private JInvocation pathParamsMapBuilderInvocation(final JClass mapBuilderClass,
-                                                       final JMethod implMethod,
-                                                       final boolean skipLastParam) {
+    private JInvocation paramsMapBuilderInvocation(final JClass mapBuilderClass,
+                                                   final JMethod implMethod,
+                                                   final boolean skipLastParam) {
         JInvocation builderInstance = JExpr._new(mapBuilderClass);
-        List<JVar> params = implMethod.params();
-        int paramsSize = params.size() - (skipLastParam ? 1 : 0);
+        final List<JVar> params = implMethod.params();
+        final int paramsSize = params.size() - (skipLastParam ? 1 : 0);
         for (int i = 0; i < paramsSize; i++) {
-            JVar p = params.get(i);
+            final JVar p = params.get(i);
             builderInstance = builderInstance.invoke("put").arg(JExpr.lit(p.name())).arg(p);
         }
         return builderInstance.invoke("build");

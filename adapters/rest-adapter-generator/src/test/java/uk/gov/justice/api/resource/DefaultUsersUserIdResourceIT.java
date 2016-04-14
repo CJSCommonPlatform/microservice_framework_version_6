@@ -14,7 +14,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import uk.gov.justice.api.RestApplication;
+import uk.gov.justice.api.QueryApiRestExampleApplication;
 import uk.gov.justice.services.adapter.rest.RestProcessor;
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
 import uk.gov.justice.services.adapters.test.utils.dispatcher.AsynchronousRecordingDispatcher;
@@ -49,7 +49,7 @@ public class DefaultUsersUserIdResourceIT {
     private static int port = -1;
     private static String BASE_URI;
 
-    private static final String BASE_URI_PATTERN = "http://localhost:%d/rest-adapter-generator/rest";
+    private static final String BASE_URI_PATTERN = "http://localhost:%d/rest-adapter-generator/query/api/rest/example";
 
     private static final String JSON = "{\"userUrn\" : \"test\"}";
 
@@ -90,7 +90,7 @@ public class DefaultUsersUserIdResourceIT {
         return new WebApp()
                 .contextRoot("rest-adapter-generator")
                 .addServlet("TestApp", Application.class.getName())
-                .addInitParam("TestApp", "javax.ws.rs.Application", RestApplication.class.getName());
+                .addInitParam("TestApp", "javax.ws.rs.Application", QueryApiRestExampleApplication.class.getName());
     }
 
     @Test
@@ -220,6 +220,22 @@ public class DefaultUsersUserIdResourceIT {
                 .get();
         assertThat(response.getStatus(), is(OK.getStatusCode()));
         assertThat(response.getMediaType().toString(), is("application/vnd.people.queries.get-user2+json"));
+    }
+
+    @Test
+    public void shouldDispatchUsersQueryWithQueryParam() throws Exception {
+        syncDispatcher.setupResponse("surname", "name", envelopeFrom(null, createObjectBuilder().add("userName", "userName").build()));
+
+        Response response = create(BASE_URI)
+                .path("/users")
+                .query("surname", "name")
+                .header("Accept", "application/vnd.people.queries.search-users+json")
+                .get();
+
+        assertThat(response.getStatus(), is(OK.getStatusCode()));
+        JsonEnvelope jsonEnvelope = syncDispatcher.awaitForEnvelopeWithPayloadOf("surname", "name");
+        assertThat(jsonEnvelope.metadata().name(), is("people.queries.search-users"));
+
     }
 
 }

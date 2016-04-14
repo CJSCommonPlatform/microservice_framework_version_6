@@ -8,7 +8,6 @@ import uk.gov.justice.services.messaging.Metadata;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import javax.json.JsonValue;
 import javax.ws.rs.core.HttpHeaders;
 import java.util.Map;
 import java.util.Optional;
@@ -34,7 +33,7 @@ public class RestEnvelopeBuilder {
 
     private Optional<JsonObject> initialPayload = Optional.empty();
     private Optional<HttpHeaders> headers = Optional.empty();
-    private Optional<Map<String, String>> pathParams = Optional.empty();
+    private Optional<Map<String, String>> params = Optional.empty();
 
     RestEnvelopeBuilder(final UUID id) {
         this.id = id;
@@ -63,13 +62,13 @@ public class RestEnvelopeBuilder {
     }
 
     /**
-     * With path parameters
+     * With path and query parameters
      *
-     * @param pathParams a map of parameter names to values
+     * @param params a map of parameter names to values
      * @return an updated builder
      */
-    public RestEnvelopeBuilder withPathParams(final Map<String, String> pathParams) {
-        this.pathParams = Optional.of(pathParams);
+    public RestEnvelopeBuilder withParams(final Map<String, String> params) {
+        this.params = Optional.of(params);
         return this;
     }
 
@@ -88,8 +87,7 @@ public class RestEnvelopeBuilder {
                 .map(JsonObjects::createObjectBuilder)
                 .orElse(Json.createObjectBuilder());
 
-        final Map<String, String> params = pathParams.orElse(emptyMap());
-        for (Map.Entry<String, String> entry : params.entrySet()) {
+        for (Map.Entry<String, String> entry : params.orElse(emptyMap()).entrySet()) {
             payloadBuilder = payloadBuilder.add(entry.getKey(), entry.getValue());
         }
 

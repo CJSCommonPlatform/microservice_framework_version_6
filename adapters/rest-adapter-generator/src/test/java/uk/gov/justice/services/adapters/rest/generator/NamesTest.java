@@ -1,12 +1,15 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.raml.model.Action;
 import org.raml.model.ActionType;
 import org.raml.model.MimeType;
 import org.raml.model.Raml;
 import org.raml.model.Resource;
 import uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder;
+import uk.gov.justice.services.core.annotation.Component;
 
 import static net.trajano.commons.testing.UtilityClassTestUtil.assertUtilityClassWellDefined;
 import static org.hamcrest.core.Is.is;
@@ -110,5 +113,35 @@ public class NamesTest {
         Raml raml = RamlBuilder.restRamlWithDefaults().withBaseUri("http://localhost:8080/webcontext").build();
         String applicationName = Names.baseUriPathWithoutContext(raml);
         assertThat(applicationName, is("/webcontext"));
+    }
+
+    @Test
+    public void shouldReturnComponentFromBaseUriForCommandApi() throws Exception {
+        Raml raml = RamlBuilder.restRamlWithCommandApiDefaults().build();
+        Component component = Names.componentFromBaseUriIn(raml);
+        assertThat(component, is(Component.COMMAND_API));
+    }
+
+    @Test
+    public void shouldReturnComponentFromBaseUriForQueryApi() throws Exception {
+        Raml raml = RamlBuilder.restRamlWithQueryApiDefaults().build();
+        Component component = Names.componentFromBaseUriIn(raml);
+        assertThat(component, is(Component.QUERY_API));
+    }
+
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
+
+    @Test
+    public void shouldThrowExceptionIfNoValidPillarAndTier() throws Exception {
+        Raml raml = new RamlBuilder()
+                .withVersion("#%RAML 0.8")
+                .withTitle("Example Service")
+                .withBaseUri("http://localhost:8080/warname/event/listener/rest/service").build();
+
+        exception.expect(IllegalStateException.class);
+        exception.expectMessage("Base URI must contain valid pillar and tier: http://localhost:8080/warname/event/listener/rest/service");
+
+        Names.componentFromBaseUriIn(raml);
     }
 }

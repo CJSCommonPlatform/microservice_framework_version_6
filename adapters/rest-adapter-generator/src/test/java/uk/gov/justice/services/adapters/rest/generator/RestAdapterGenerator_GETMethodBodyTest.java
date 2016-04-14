@@ -36,6 +36,7 @@ import static org.mockito.Mockito.when;
 import static org.raml.model.ActionType.GET;
 import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithDefaults;
+import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithQueryApiDefaults;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.adapters.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionUtil.firstMethodOf;
@@ -173,7 +174,6 @@ public class RestAdapterGenerator_GETMethodBodyTest {
 
     }
 
-
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void shouldPassMapWithTwoPathParamsToRestProcessor() throws Exception {
@@ -203,6 +203,109 @@ public class RestAdapterGenerator_GETMethodBodyTest {
 
         assertThat(pathParams.containsKey("param2"), is(true));
         assertThat(pathParams.get("param2"), is("paramValueDEF"));
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Test
+    public void shouldPassMapWithOneQueryParamToRestProcessor() throws Exception {
+        generator.run(
+                restRamlWithQueryApiDefaults().with(
+                        resource("/some/path")
+                                .with(action(GET)
+                                        .withQueryParameters("queryParam")
+                                        .withDefaultResponseType())
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+
+        Object resourceObject = instantiate(resourceClass);
+
+        Method method = firstMethodOf(resourceClass);
+        method.invoke(resourceObject, "paramValue1234");
+
+        ArgumentCaptor<Map> queryParamsCaptor = ArgumentCaptor.forClass(Map.class);
+
+        verify(restProcessor).processSynchronously(any(Function.class), any(HttpHeaders.class),
+                queryParamsCaptor.capture());
+
+        Map queryParams = queryParamsCaptor.getValue();
+        assertThat(queryParams.entrySet().size(), is(1));
+        assertThat(queryParams.containsKey("queryParam"), is(true));
+        assertThat(queryParams.get("queryParam"), is("paramValue1234"));
+
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Test
+    public void shouldPassMapWithTwoQueryParamsToRestProcessor() throws Exception {
+        generator.run(
+                restRamlWithQueryApiDefaults().with(
+                        resource("/some/path")
+                                .with(action(GET)
+                                        .withQueryParameters("queryParam1")
+                                        .withQueryParameters("queryParam2")
+                                        .withDefaultResponseType())
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+
+        Object resourceObject = instantiate(resourceClass);
+
+        Method method = firstMethodOf(resourceClass);
+
+        if(method.getParameters()[0].getName().equals("queryParam1")) {
+            method.invoke(resourceObject, "paramValueABC", "paramValueDEF");
+        } else {
+            method.invoke(resourceObject, "paramValueDEF", "paramValueABC");
+        }
+
+        ArgumentCaptor<Map> queryParamsCaptor = ArgumentCaptor.forClass(Map.class);
+
+        verify(restProcessor).processSynchronously(any(Function.class), any(HttpHeaders.class),
+                queryParamsCaptor.capture());
+
+        Map queryParams = queryParamsCaptor.getValue();
+        assertThat(queryParams.entrySet().size(), is(2));
+        assertThat(queryParams.containsKey("queryParam1"), is(true));
+        assertThat(queryParams.get("queryParam1"), is("paramValueABC"));
+
+        assertThat(queryParams.containsKey("queryParam2"), is(true));
+        assertThat(queryParams.get("queryParam2"), is("paramValueDEF"));
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Test
+    public void shouldPassMapWithOnePathParamAndOneQueryParamToRestProcessor() throws Exception {
+        generator.run(
+                restRamlWithQueryApiDefaults().with(
+                        resource("/some/path/{param}", "param")
+                                .with(action(GET)
+                                        .withQueryParameters("queryParam")
+                                        .withDefaultResponseType())
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamResource");
+
+        Object resourceObject = instantiate(resourceClass);
+
+        Method method = firstMethodOf(resourceClass);
+        method.invoke(resourceObject, "paramValueABC", "paramValueDEF");
+
+        ArgumentCaptor<Map> paramsCaptor = ArgumentCaptor.forClass(Map.class);
+
+        verify(restProcessor).processSynchronously(any(Function.class), any(HttpHeaders.class),
+                paramsCaptor.capture());
+
+        Map params = paramsCaptor.getValue();
+        assertThat(params.entrySet().size(), is(2));
+        assertThat(params.containsKey("param"), is(true));
+        assertThat(params.get("param"), is("paramValueABC"));
+
+        assertThat(params.containsKey("queryParam"), is(true));
+        assertThat(params.get("queryParam"), is("paramValueDEF"));
     }
 
     @SuppressWarnings("unchecked")

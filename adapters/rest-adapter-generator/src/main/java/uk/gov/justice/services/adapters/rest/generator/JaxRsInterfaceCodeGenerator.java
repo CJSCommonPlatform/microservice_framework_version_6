@@ -24,6 +24,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.HashMap;
@@ -133,6 +134,7 @@ class JaxRsInterfaceCodeGenerator {
         addProducesAnnotation(responseMimeTypes, method);
 
         addPathParameters(action, method);
+        addQueryParameters(action, method);
         addBodyParameters(bodyMimeType, method);
         return method;
     }
@@ -185,6 +187,12 @@ class JaxRsInterfaceCodeGenerator {
         argumentVariable.annotate(annotationClass).param(
                 DEFAULT_ANNOTATION_PARAMETER, name);
 
+    }
+
+    private void addQueryParameters(final Action action, final JMethod method) {
+        action.getQueryParameters().keySet().stream().forEach(name ->
+                addParameter(name, QueryParam.class, method)
+        );
     }
 
     private void addBodyParameters(final MimeType bodyMimeType,

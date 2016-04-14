@@ -22,9 +22,11 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -50,7 +52,9 @@ import static org.junit.Assert.assertThat;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
+import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithCommandApiDefaults;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithDefaults;
+import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithQueryApiDefaults;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.adapters.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionUtil.methodsOf;
@@ -374,9 +378,9 @@ public class RestAdapterGenerator_CodeStructureTest {
     }
 
     @Test
-    public void shouldGenerateResourceClassContainingAdapterAnnotation() throws Exception {
+    public void shouldGenerateResourceClassContainingCommandApiAdapterAnnotation() throws Exception {
         generator.run(
-                restRamlWithDefaults().with(
+                restRamlWithCommandApiDefaults().with(
                         resource("/some/path")
                                 .with(action(POST, "application/vnd.ctx.commands.default+json"))
                 ).build(),
@@ -387,6 +391,24 @@ public class RestAdapterGenerator_CodeStructureTest {
         assertThat(resourceClass.isInterface(), is(false));
         assertThat(resourceClass.getAnnotation(Adapter.class), not(nullValue()));
         assertThat(resourceClass.getAnnotation(Adapter.class).value(), is(Component.COMMAND_API));
+
+    }
+
+    @Test
+    public void shouldGenerateResourceClassContainingQueryApiAdapterAnnotation() throws Exception {
+        generator.run(
+                restRamlWithQueryApiDefaults().with(
+                        resource("/some/path")
+                                .with(action(GET)
+                                        .withResponse("application/vnd.ctx.queries.query1+json"))
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+
+        assertThat(resourceClass.isInterface(), is(false));
+        assertThat(resourceClass.getAnnotation(Adapter.class), not(nullValue()));
+        assertThat(resourceClass.getAnnotation(Adapter.class).value(), is(Component.QUERY_API));
 
     }
 
@@ -487,6 +509,91 @@ public class RestAdapterGenerator_CodeStructureTest {
         assertThat(bodyParam.getType(), equalTo(JsonObject.class));
         assertThat(bodyParam.getAnnotations(), emptyArray());
 
+    }
+
+    @Test
+    public void classShouldContainQueryParam() throws Exception {
+        generator.run(
+                restRamlWithQueryApiDefaults().with(
+                        resource("/users").with(action(GET)
+                                .withQueryParameters("surname")
+                                .withResponse("application/vnd.people.queries.search-users+json"))
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder)
+        );
+
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultUsersResource");
+
+        assertThat(clazz.isInterface(), is(false));
+
+        List<Method> methods = methodsOf(clazz);
+        assertThat(methods, hasSize(1));
+        Method method = methods.get(0);
+        assertThat(method.getParameterCount(), is(1));
+
+        Parameter param = method.getParameters()[0];
+        assertThat(param.getType(), equalTo(String.class));
+        assertThat(param.getAnnotations(), emptyArray());
+
+        Class<?> inter = compiler.compiledInterfaceClassOf(BASE_PACKAGE, "resource", "UsersResource");
+
+        assertThat(inter.isInterface(), is(true));
+        List<Method> interMethods = methodsOf(inter);
+        assertThat(methods, hasSize(1));
+        Method interMethod = interMethods.get(0);
+        assertThat(method.getParameterCount(), is(1));
+
+        Parameter interParam = interMethod.getParameters()[0];
+        assertThat(interParam.getType(), equalTo(String.class));
+        assertThat(interParam.getAnnotations().length, is(1));
+
+        Annotation annotation = interParam.getAnnotations()[0];
+        assertThat(annotation.annotationType(), equalTo(QueryParam.class));
+
+    }
+
+    @Test
+    public void classShouldContainThreeQueryParams() throws Exception {
+        generator.run(
+                restRamlWithQueryApiDefaults().with(
+                        resource("/users").with(action(GET)
+                                .withQueryParameters("surname")
+                                .withQueryParameters("firstname")
+                                .withQueryParameters("middlename")
+                                .withResponse("application/vnd.people.queries.search-users+json"))
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder)
+        );
+
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultUsersResource");
+
+        assertThat(clazz.isInterface(), is(false));
+
+        List<Method> methods = methodsOf(clazz);
+        assertThat(methods, hasSize(1));
+        Method method = methods.get(0);
+        assertThat(method.getParameterCount(), is(3));
+
+        stream(method.getParameters()).forEach(parameter -> {
+            assertThat(parameter.getType(), equalTo(String.class));
+            assertThat(parameter.getAnnotations(), emptyArray());
+        });
+
+        Class<?> inter = compiler.compiledInterfaceClassOf(BASE_PACKAGE, "resource", "UsersResource");
+
+        assertThat(inter.isInterface(), is(true));
+        List<Method> interMethods = methodsOf(inter);
+        assertThat(methods, hasSize(1));
+        Method interMethod = interMethods.get(0);
+        assertThat(method.getParameterCount(), is(3));
+
+        stream(interMethod.getParameters()).forEach(parameter -> {
+            assertThat(parameter.getType(), equalTo(String.class));
+            assertThat(parameter.getAnnotations().length, is(1));
+
+            Annotation annotation = parameter.getAnnotations()[0];
+            assertThat(annotation.annotationType(), equalTo(QueryParam.class));
+        });
     }
 
     @Test

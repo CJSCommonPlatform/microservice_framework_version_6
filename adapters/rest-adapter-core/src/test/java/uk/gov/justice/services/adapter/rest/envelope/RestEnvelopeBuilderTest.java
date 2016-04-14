@@ -123,7 +123,7 @@ public class RestEnvelopeBuilderTest {
                 .add("test", "value")
                 .build();
         builder = builder.withInitialPayload(initialPayload);
-        builder = builder.withPathParams(ImmutableMap.of("test2", "value2"));
+        builder = builder.withParams(ImmutableMap.of("test2", "value2"));
 
         JsonEnvelope envelope = builder.build();
 

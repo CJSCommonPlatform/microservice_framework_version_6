@@ -1,12 +1,15 @@
 package uk.gov.justice.services.messaging;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import javax.json.JsonArray;
+import javax.json.JsonNumber;
 import javax.json.JsonObject;
+import javax.json.JsonString;
+import javax.json.JsonValue;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
@@ -22,22 +25,48 @@ public class DefaultJsonEnvelopeTest {
     private Metadata metadata;
 
     @Mock
-    private JsonObject payload;
+    private JsonValue payloadAsJsonValue;
 
-    private JsonEnvelope envelope;
+    @Mock
+    private JsonObject payloadAsJsonObject;
 
-    @Before
-    public void setup() {
-        envelope = envelopeFrom(metadata, payload);
+    @Mock
+    private JsonArray payloadAsJsonArray;
+
+    @Mock
+    private JsonNumber payloadAsJsonNumber;
+
+    @Mock
+    private JsonString payloadAsJsonString;
+
+    @Test
+    public void shouldReturnMetadata() {
+        assertThat(envelopeFrom(metadata, payloadAsJsonObject).metadata(), equalTo(metadata));
     }
 
     @Test
-    public void shouldReturnMetadata() throws Exception {
-        assertThat(envelope.metadata(), equalTo(metadata));
+    public void shouldReturnPayloadAsJsonValue() {
+        assertThat(envelopeFrom(metadata, payloadAsJsonValue).payload(), equalTo(payloadAsJsonValue));
     }
 
     @Test
-    public void shouldReturnPayload() throws Exception {
-        assertThat(envelope.payloadAsJsonObject(), equalTo(payload));
+    public void shouldReturnPayloadAsJsonObject() {
+        assertThat(envelopeFrom(metadata, payloadAsJsonObject).payloadAsJsonObject(), equalTo(payloadAsJsonObject));
     }
+
+    @Test
+    public void shouldReturnPayloadAsJsonArray() {
+        assertThat(envelopeFrom(metadata, payloadAsJsonArray).payloadAsJsonArray(), equalTo(payloadAsJsonArray));
+    }
+
+    @Test
+    public void shouldReturnPayloadAsJsonNumber() {
+        assertThat(envelopeFrom(metadata, payloadAsJsonNumber).payloadAsJsonNumber(), equalTo(payloadAsJsonNumber));
+    }
+
+    @Test
+    public void shouldReturnPayloadAsJsonString() {
+        assertThat(envelopeFrom(metadata, payloadAsJsonString).payloadAsJsonString(), equalTo(payloadAsJsonString));
+    }
+
 }

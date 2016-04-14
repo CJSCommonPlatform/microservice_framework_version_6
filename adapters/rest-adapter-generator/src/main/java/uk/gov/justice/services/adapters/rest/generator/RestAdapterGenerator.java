@@ -9,7 +9,9 @@ import uk.gov.justice.raml.common.validator.RamlValidator;
 import uk.gov.justice.raml.common.validator.RequestContentTypeRamlValidator;
 import uk.gov.justice.raml.core.Generator;
 import uk.gov.justice.raml.core.GeneratorConfig;
+import uk.gov.justice.services.adapters.rest.validator.BaseUriRamlValidator;
 import uk.gov.justice.services.adapters.rest.validator.ResponseContentTypeRamlValidator;
+import uk.gov.justice.services.core.annotation.Component;
 
 import java.io.File;
 import java.util.Collection;
@@ -19,6 +21,7 @@ import static java.lang.String.format;
 import static org.apache.commons.lang.Validate.isTrue;
 import static org.apache.commons.lang.Validate.notEmpty;
 import static org.apache.commons.lang.Validate.notNull;
+import static uk.gov.justice.services.adapters.rest.generator.Names.componentFromBaseUriIn;
 
 public class RestAdapterGenerator implements Generator {
 
@@ -26,23 +29,23 @@ public class RestAdapterGenerator implements Generator {
             new ContainsResourcesRamlValidator(),
             new ContainsActionsRamlValidator(),
             new RequestContentTypeRamlValidator(),
-            new ResponseContentTypeRamlValidator()
+            new ResponseContentTypeRamlValidator(),
+            new BaseUriRamlValidator()
     );
-
-
 
     @Override
     public void run(final Raml raml, final GeneratorConfig configuration) {
         validate(configuration);
         validator.validate(raml);
 
-        Collection<Resource> resources = raml.getResources().values();
+        final Collection<Resource> resources = raml.getResources().values();
+        final Component component = componentFromBaseUriIn(raml);
 
-        JaxRsCodeGenerator codeGenerator = new JaxRsCodeGenerator(configuration);
-        Collection<String> implementationNames = resources.stream()
+        final JaxRsCodeGenerator codeGenerator = new JaxRsCodeGenerator(configuration);
+        final Collection<String> implementationNames = resources.stream()
                 .map(resource -> {
                     final String interfaceName = codeGenerator.createInterface(resource);
-                    return codeGenerator.createImplementation(interfaceName);
+                    return codeGenerator.createImplementation(interfaceName, component);
                 })
                 .collect(Collectors.toList());
         codeGenerator.createApplication(raml, implementationNames);

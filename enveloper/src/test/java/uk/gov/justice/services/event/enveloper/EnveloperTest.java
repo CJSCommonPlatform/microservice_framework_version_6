@@ -49,11 +49,11 @@ public class EnveloperTest {
     private static final UUID SESSION_ID_VALUE = UUID.randomUUID();
     private static final UUID STREAM_ID_VALUE = UUID.randomUUID();
     private static final int VERSION = 5;
-    private static final String TEST_COMMAND_NAME = "test.commands.do-something";
-    private static final String TEST_EVENT_NAME = "test.events.something-happened";
+    private static final String TEST_COMMAND_NAME = "test.command.do-something";
+    private static final String TEST_EVENT_NAME = "test.event.something-happened";
     private static final UUID COMMAND_UUID = UUID.randomUUID();
     private static final UUID OLD_CAUSATION_ID = UUID.randomUUID();
-    private static final String TEST_NAME = "test.queries.query-response";
+    private static final String TEST_NAME = "test.query.query-response";
 
     private Enveloper enveloper;
 

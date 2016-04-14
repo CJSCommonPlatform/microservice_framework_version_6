@@ -27,8 +27,8 @@ public class NamesTest {
 
     @Test
     public void shouldConvertMimetypeToShortMimeTypeString() throws Exception {
-        String shortMimeType = Names.getShortMimeType(new MimeType("application/vnd.commands.create-user+json"));
-        assertThat(shortMimeType, is("vndCommandsCreateUserJson"));
+        String shortMimeType = Names.getShortMimeType(new MimeType("application/vnd.command.create-user+json"));
+        assertThat(shortMimeType, is("vndCommandCreateUserJson"));
     }
 
     @Test
@@ -45,35 +45,35 @@ public class NamesTest {
 
     @Test
     public void shouldBuildMimeTypeInfix() throws Exception {
-        String shortMimeType = Names.buildMimeTypeInfix(new MimeType("application/vnd.commands.create-user+json"));
-        assertThat(shortMimeType, is("VndCommandsCreateUserJson"));
+        String shortMimeType = Names.buildMimeTypeInfix(new MimeType("application/vnd.command.create-user+json"));
+        assertThat(shortMimeType, is("VndCommandCreateUserJson"));
     }
 
     @Test
     public void shouldBuildMethodResourceName() throws Exception {
-        String shortMimeType = Names.buildMimeTypeInfix(new MimeType("application/vnd.commands.create-user+json"));
-        assertThat(shortMimeType, is("VndCommandsCreateUserJson"));
+        String shortMimeType = Names.buildMimeTypeInfix(new MimeType("application/vnd.command.create-user+json"));
+        assertThat(shortMimeType, is("VndCommandCreateUserJson"));
     }
 
     @Test
     public void shouldBuildResourceMethodName() throws Exception {
         Action action = action().with(ActionType.POST).build();
         action.setResource(resource().withRelativeUri("test").build());
-        String shortMimeType = Names.buildResourceMethodName(action, new MimeType("application/vnd.commands.create-user+json"));
-        assertThat(shortMimeType, is("postVndCommandsCreateUserJsonTest"));
+        String shortMimeType = Names.buildResourceMethodName(action, new MimeType("application/vnd.command.create-user+json"));
+        assertThat(shortMimeType, is("postVndCommandCreateUserJsonTest"));
     }
 
     @Test
     public void shouldBuildVariableName() throws Exception {
-        String variableName = Names.buildVariableName("somecontext.controller.commands");
-        assertThat(variableName, is("somecontextControllerCommands"));
+        String variableName = Names.buildVariableName("somecontext.controller.command");
+        assertThat(variableName, is("somecontextControllerCommand"));
     }
 
     @Test
     public void shouldReturnInterfaceName() throws Exception {
         Resource resource = resource().withDefaultAction().build();
         String interfaceName = Names.resourceInterfaceNameOf(resource);
-        assertThat(interfaceName, is("SomecontextControllerCommandsResource"));
+        assertThat(interfaceName, is("SomecontextControllerCommandResource"));
     }
 
     @Test

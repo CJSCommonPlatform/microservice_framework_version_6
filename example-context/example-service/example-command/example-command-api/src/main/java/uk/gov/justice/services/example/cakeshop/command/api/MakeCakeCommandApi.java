@@ -19,7 +19,7 @@ public class MakeCakeCommandApi {
     @Inject
     Sender sender;
 
-    @Handles("cakeshop.commands.make-cake")
+    @Handles("cakeshop.command.make-cake")
     public void handle(final JsonEnvelope jsonEnvelope) {
         LOGGER.info("=============> Inside make-cake Command API");
 

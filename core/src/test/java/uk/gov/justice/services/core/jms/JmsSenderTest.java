@@ -23,8 +23,8 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLL
 @RunWith(MockitoJUnitRunner.class)
 public class JmsSenderTest {
 
-    private static final String QUEUE_NAME = "test.controller.commands";
-    private static final String NAME = "test.commands.do-something";
+    private static final String QUEUE_NAME = "test.controller.command";
+    private static final String NAME = "test.command.do-something";
     @Mock
     JmsEnvelopeSender jmsEnvelopeSender;
     @Mock

@@ -14,9 +14,9 @@ import static org.junit.Assert.assertThat;
 
 public class ComponentTest {
 
-    private static final String PILLAR_COMMANDS = "commands";
-    private static final String PILLAR_QUERIES = "queries";
-    private static final String PILLAR_EVENTS = "events";
+    private static final String PILLAR_COMMAND = "command";
+    private static final String PILLAR_QUERY = "query";
+    private static final String PILLAR_EVENT = "event";
 
     private static final String TIER_API = "api";
     private static final String TIER_CONTROLLER = "controller";
@@ -29,12 +29,12 @@ public class ComponentTest {
 
     @Test
     public void shouldReturnPillar() throws Exception {
-        assertThat(Component.COMMAND_API.pillar(), equalTo(PILLAR_COMMANDS));
-        assertThat(Component.QUERY_API.pillar(), equalTo(PILLAR_QUERIES));
-        assertThat(Component.COMMAND_CONTROLLER.pillar(), equalTo(PILLAR_COMMANDS));
-        assertThat(Component.COMMAND_HANDLER.pillar(), equalTo(PILLAR_COMMANDS));
-        assertThat(Component.EVENT_LISTENER.pillar(), equalTo(PILLAR_EVENTS));
-        assertThat(Component.EVENT_PROCESSOR.pillar(), equalTo(PILLAR_EVENTS));
+        assertThat(Component.COMMAND_API.pillar(), equalTo(PILLAR_COMMAND));
+        assertThat(Component.QUERY_API.pillar(), equalTo(PILLAR_QUERY));
+        assertThat(Component.COMMAND_CONTROLLER.pillar(), equalTo(PILLAR_COMMAND));
+        assertThat(Component.COMMAND_HANDLER.pillar(), equalTo(PILLAR_COMMAND));
+        assertThat(Component.EVENT_LISTENER.pillar(), equalTo(PILLAR_EVENT));
+        assertThat(Component.EVENT_PROCESSOR.pillar(), equalTo(PILLAR_EVENT));
     }
 
     @Test
@@ -57,12 +57,12 @@ public class ComponentTest {
 
     @Test
     public void shouldConstructComponentByTierAndPillar() {
-        assertThat(Component.valueOf("commands", "api"), is(Component.COMMAND_API));
-        assertThat(Component.valueOf("commands", "controller"), is(Component.COMMAND_CONTROLLER));
-        assertThat(Component.valueOf("commands", "handler"), is(Component.COMMAND_HANDLER));
-        assertThat(Component.valueOf("events", "listener"), is(Component.EVENT_LISTENER));
-        assertThat(Component.valueOf("events", "processor"), is(Component.EVENT_PROCESSOR));
-        assertThat(Component.valueOf("queries", "api"), is(Component.QUERY_API));
+        assertThat(Component.valueOf("command", "api"), is(Component.COMMAND_API));
+        assertThat(Component.valueOf("command", "controller"), is(Component.COMMAND_CONTROLLER));
+        assertThat(Component.valueOf("command", "handler"), is(Component.COMMAND_HANDLER));
+        assertThat(Component.valueOf("event", "listener"), is(Component.EVENT_LISTENER));
+        assertThat(Component.valueOf("event", "processor"), is(Component.EVENT_PROCESSOR));
+        assertThat(Component.valueOf("query", "api"), is(Component.QUERY_API));
     }
 
     @Test

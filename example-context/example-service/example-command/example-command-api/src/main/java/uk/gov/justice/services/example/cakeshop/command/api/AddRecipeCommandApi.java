@@ -23,7 +23,7 @@ public class AddRecipeCommandApi {
     @Inject
     Sender sender;
 
-    @Handles("cakeshop.commands.add-recipe")
+    @Handles("cakeshop.command.add-recipe")
     public void addRecipe(final JsonEnvelope command) {
         LOGGER.info("=============> Inside add-recipe Command API. RecipeId: " + command.payloadAsJsonObject().getString(FIELD_RECIPE_ID));
 

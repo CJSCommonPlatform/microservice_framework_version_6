@@ -12,7 +12,7 @@ public class CakeMadeEventListener {
 
     Logger logger = LoggerFactory.getLogger(CakeMadeEventListener.class);
 
-    @Handles("cakeshop.events.cake-made")
+    @Handles("cakeshop.event.cake-made")
     public void handle(final JsonEnvelope jsonEnvelope) {
 
         logger.info("=============> Inside cake-made Event Listener");

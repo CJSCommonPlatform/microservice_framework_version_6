@@ -41,7 +41,7 @@ public class RestProcessorTest {
 
     static {
         MultivaluedMap<String,String> headersMap = new MultivaluedMapImpl<>();
-        headersMap.add("Content-Type", "application/vnd.context.commands.command+json");
+        headersMap.add("Content-Type", "application/vnd.context.command.command+json");
         NOT_USED_HEADERS = new ResteasyHttpHeaders(headersMap);
     }
 
@@ -89,14 +89,14 @@ public class RestProcessorTest {
         JsonObject payload = Json.createObjectBuilder().add("key123", "value45678").build();
 
         restProcessor.processAsynchronously(consumer, NOT_USED_PAYLOAD,
-                headersWith("Content-Type", "application/vnd.somecontext.commands.somecommand+json"), NOT_USED_PATH_PARAMS);
+                headersWith("Content-Type", "application/vnd.somecontext.command.somecommand+json"), NOT_USED_PATH_PARAMS);
 
         ArgumentCaptor<JsonEnvelope> envelopeCaptor = ArgumentCaptor.forClass(JsonEnvelope.class);
 
         verify(consumer).accept(envelopeCaptor.capture());
 
         JsonEnvelope jsonEnvelope = envelopeCaptor.getValue();
-        assertThat(jsonEnvelope.metadata().name(), is("somecontext.commands.somecommand"));
+        assertThat(jsonEnvelope.metadata().name(), is("somecontext.command.somecommand"));
     }
 
     @Test
@@ -119,13 +119,13 @@ public class RestProcessorTest {
     @Test
     public void shouldPassEnvelopeWithMetadataToFunctionOnSyncProcessing() throws Exception {
         restProcessor.processSynchronously(function,
-                headersWith("Accept", "application/vnd.somecontext.queries.somequery+json"), NOT_USED_PATH_PARAMS);
+                headersWith("Accept", "application/vnd.somecontext.query.somequery+json"), NOT_USED_PATH_PARAMS);
 
         ArgumentCaptor<JsonEnvelope> envelopeCaptor = ArgumentCaptor.forClass(JsonEnvelope.class);
         verify(function).apply(envelopeCaptor.capture());
 
         JsonEnvelope jsonEnvelope = envelopeCaptor.getValue();
-        assertThat(jsonEnvelope.metadata().name(), is("somecontext.queries.somequery"));
+        assertThat(jsonEnvelope.metadata().name(), is("somecontext.query.somequery"));
     }
 
     @Test

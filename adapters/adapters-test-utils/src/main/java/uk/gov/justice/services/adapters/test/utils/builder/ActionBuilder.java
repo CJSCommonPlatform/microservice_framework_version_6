@@ -38,11 +38,11 @@ public class ActionBuilder {
     }
 
     public ActionBuilder withDefaultRequestType() {
-        return withMediaType("application/vnd.ctx.commands.defcmd+json");
+        return withMediaType("application/vnd.ctx.command.defcmd+json");
     }
 
     public ActionBuilder withDefaultResponseType() {
-        return withResponse("application/vnd.ctx.queries.defquery+json");
+        return withResponse("application/vnd.ctx.query.defquery+json");
     }
 
     public ActionBuilder withResponse(final String... responseTypes) {

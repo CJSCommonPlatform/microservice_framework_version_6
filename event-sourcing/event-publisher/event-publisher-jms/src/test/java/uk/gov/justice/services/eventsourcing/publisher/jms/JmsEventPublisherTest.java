@@ -16,7 +16,7 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class JmsEventPublisherTest {
 
-    private static final String NAME = "test.events.listener";
+    private static final String NAME = "test.event.listener";
 
     @Mock
     private JmsEnvelopeSender jmsEnvelopeSender;

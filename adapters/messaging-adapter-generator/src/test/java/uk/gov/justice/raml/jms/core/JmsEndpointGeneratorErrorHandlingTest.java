@@ -30,12 +30,12 @@ public class JmsEndpointGeneratorErrorHandlingTest {
     public void shouldThrowExceptionIfInvalidTierPassedInUri() throws Exception {
 
         exception.expect(RamlValidationException.class);
-        exception.expectMessage("Inavlid uri: /structure.unknowntier.commands");
+        exception.expectMessage("Inavlid uri: /structure.unknowntier.command");
 
         generator.run(
                 raml()
                         .with(resource()
-                                .withRelativeUri("/structure.unknowntier.commands")
+                                .withRelativeUri("/structure.unknowntier.command")
                                 .withDefaultAction())
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
@@ -92,7 +92,7 @@ public class JmsEndpointGeneratorErrorHandlingTest {
         generator.run(
                 raml()
                         .with(resource()
-                                .withRelativeUri("/structure.controller.commands"))
+                                .withRelativeUri("/structure.controller.command"))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));
     }
@@ -146,15 +146,15 @@ public class JmsEndpointGeneratorErrorHandlingTest {
     public void shouldThrowExceptionIfOneOfMediaTypesNotValid() throws Exception {
 
         exception.expect(RamlValidationException.class);
-        exception.expectMessage("Invalid request type: application/vnd.people.commaods.command1+json");
+        exception.expectMessage("Invalid request type: application/vnd.people.commaod.command1+json");
 
         generator.run(
                 raml()
                         .with(resource()
                                 .with(action()
                                         .with(ActionType.POST)
-                                        .withMediaType("application/vnd.people.commaods.command1+json")
-                                        .withMediaType("application/vnd.people.commands.command1+json")
+                                        .withMediaType("application/vnd.people.commaod.command1+json")
+                                        .withMediaType("application/vnd.people.command.command1+json")
                                         ))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder));

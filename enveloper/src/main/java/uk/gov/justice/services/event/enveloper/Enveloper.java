@@ -16,6 +16,7 @@ import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
 import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -56,7 +57,7 @@ public class Enveloper {
      * @return a function that wraps objects into an envelope.
      */
     public Function<Object, JsonEnvelope> withMetadataFrom(final JsonEnvelope envelope) {
-        return x -> envelopeFrom(buildMetaData(x, envelope.metadata()), objectToJsonValueConverter.convert(x));
+        return x -> envelopeFrom(buildMetaData(x, envelope.metadata()), x == null ? JsonValue.NULL : objectToJsonValueConverter.convert(x));
     }
 
     /**
@@ -68,18 +69,22 @@ public class Enveloper {
      * @return a function that wraps objects into an envelope.
      */
     public Function<Object, JsonEnvelope> withMetadataFrom(final JsonEnvelope envelope, final String name) {
-        return x -> envelopeFrom(buildMetaData(x, envelope.metadata(), name), objectToJsonValueConverter.convert(x));
+        return x -> envelopeFrom(buildMetaData(envelope.metadata(), name), x == null ? JsonValue.NULL : objectToJsonValueConverter.convert(x));
     }
 
     private Metadata buildMetaData(final Object eventObject, final Metadata metadata) {
+        if (eventObject == null) {
+            throw new IllegalArgumentException("Event object should not be null");
+        }
+
         if (!eventMap.containsKey(eventObject.getClass())) {
             throw new InvalidEventException(format("Failed to map event. No event registered for %s", eventObject.getClass()));
         }
 
-        return buildMetaData(eventObject, metadata, eventMap.get(eventObject.getClass()));
+        return buildMetaData(metadata, eventMap.get(eventObject.getClass()));
     }
 
-    private Metadata buildMetaData(final Object eventObject, final Metadata metadata, final String name) {
+    private Metadata buildMetaData(final Metadata metadata, final String name) {
 
         JsonObjectBuilder metadataBuilder = JsonObjects.createObjectBuilderWithFilter(metadata.asJsonObject(),
                 x -> !Arrays.asList(ID, NAME, CAUSATION).contains(x));

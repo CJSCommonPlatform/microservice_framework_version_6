@@ -7,6 +7,8 @@ import javax.inject.Inject;
 import javax.json.JsonValue;
 import java.io.IOException;
 
+import static javax.json.JsonValue.NULL;
+
 /**
  * Converts a Pojo to a JsonValue
  */
@@ -18,6 +20,10 @@ public class ObjectToJsonValueConverter implements Converter<Object, JsonValue> 
     @Override
     public JsonValue convert(final Object source) {
         try {
+            if (source == null) {
+                return NULL;
+            }
+
             final JsonValue jsonValue = mapper.readValue(mapper.writeValueAsString(source), JsonValue.class);
 
             if (jsonValue == null) {

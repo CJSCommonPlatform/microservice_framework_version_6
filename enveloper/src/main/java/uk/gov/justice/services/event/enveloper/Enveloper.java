@@ -57,7 +57,7 @@ public class Enveloper {
      * @return a function that wraps objects into an envelope.
      */
     public Function<Object, JsonEnvelope> withMetadataFrom(final JsonEnvelope envelope) {
-        return x -> envelopeFrom(buildMetaData(x, envelope.metadata()), x == null ? JsonValue.NULL : objectToJsonValueConverter.convert(x));
+        return x -> envelopeFrom(buildMetaData(x, envelope.metadata()), objectToJsonValueConverter.convert(x));
     }
 
     /**

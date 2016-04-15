@@ -13,6 +13,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.json.Json;
 import javax.json.JsonObject;
+import javax.json.JsonValue;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -40,7 +41,7 @@ public class RestProcessorTest {
     private static final HttpHeaders NOT_USED_HEADERS;
 
     static {
-        MultivaluedMap<String,String> headersMap = new MultivaluedMapImpl<>();
+        MultivaluedMap<String, String> headersMap = new MultivaluedMapImpl<>();
         headersMap.add("Content-Type", "application/vnd.context.command.command+json");
         NOT_USED_HEADERS = new ResteasyHttpHeaders(headersMap);
     }
@@ -109,11 +110,19 @@ public class RestProcessorTest {
     }
 
     @Test
-    public void shouldReturn404ResponseOnSyncProcessingIfFunctionReturnsNull() throws Exception {
-        when(function.apply(any(JsonEnvelope.class))).thenReturn(null);
+    public void shouldReturn404ResponseOnSyncProcessingIfPayloadIsJsonValueNull() throws Exception {
+        when(function.apply(any(JsonEnvelope.class))).thenReturn(envelopeFrom(null, JsonValue.NULL));
         Response response = restProcessor.processSynchronously(function, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
 
         assertThat(response.getStatus(), equalTo(404));
+    }
+
+    @Test
+    public void shouldReturn500ResponseOnSyncProcessingIfEnvelopeIsNull() throws Exception {
+        when(function.apply(any(JsonEnvelope.class))).thenReturn(null);
+        Response response = restProcessor.processSynchronously(function, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
+
+        assertThat(response.getStatus(), equalTo(500));
     }
 
     @Test

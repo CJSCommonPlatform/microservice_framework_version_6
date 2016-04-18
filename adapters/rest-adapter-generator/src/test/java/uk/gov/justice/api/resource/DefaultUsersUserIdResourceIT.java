@@ -19,11 +19,17 @@ import uk.gov.justice.services.adapter.rest.RestProcessor;
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
 import uk.gov.justice.services.adapters.test.utils.dispatcher.AsynchronousRecordingDispatcher;
 import uk.gov.justice.services.adapters.test.utils.dispatcher.SynchronousRecordingDispatcher;
+import uk.gov.justice.services.common.converter.JsonObjectToStringConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
+import uk.gov.justice.services.messaging.JsonObjectMetadata;
+import uk.gov.justice.services.messaging.Metadata;
 
 import javax.inject.Inject;
+import javax.json.Json;
 import javax.ws.rs.core.Response;
 import java.util.Properties;
+import java.util.UUID;
 
 import static com.jayway.jsonassert.JsonAssert.with;
 import static javax.json.Json.createObjectBuilder;
@@ -36,6 +42,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
 
 /**
  * Integration tests for the generated JAX-RS classes.
@@ -53,6 +61,8 @@ public class DefaultUsersUserIdResourceIT {
 
     private static final String JSON = "{\"userUrn\" : \"test\"}";
 
+    private Metadata metadata;
+
     @Inject
     AsynchronousRecordingDispatcher asyncDispatcher;
 
@@ -68,6 +78,10 @@ public class DefaultUsersUserIdResourceIT {
 
     @Before
     public void before() {
+        metadata = JsonObjectMetadata.metadataFrom(Json.createObjectBuilder()
+                .add(ID, UUID.randomUUID().toString())
+                .add(NAME, "eventName")
+                .build());
 
     }
 
@@ -84,7 +98,9 @@ public class DefaultUsersUserIdResourceIT {
             RestProcessor.class,
             RestEnvelopeBuilderFactory.class,
             AsynchronousRecordingDispatcher.class,
-            SynchronousRecordingDispatcher.class
+            SynchronousRecordingDispatcher.class,
+            JsonObjectEnvelopeConverter.class,
+            JsonObjectToStringConverter.class
     })
     public WebApp war() {
         return new WebApp()
@@ -128,7 +144,7 @@ public class DefaultUsersUserIdResourceIT {
     @Test
     public void shouldReturn200ResponseContainingUserDataReturnedByDispatcher() {
         syncDispatcher.setupResponse("userId", "4444-5556",
-                envelopeFrom(null, createObjectBuilder().add("userName", "userName").build()));
+                envelopeFrom(metadata, createObjectBuilder().add("userName", "userName").build()));
 
         Response response = create(BASE_URI)
                 .path("/users/4444-5556")
@@ -139,7 +155,6 @@ public class DefaultUsersUserIdResourceIT {
         String responseBody = response.readEntity(String.class);
         with(responseBody)
                 .assertThat("userName", equalTo("userName"));
-
     }
 
 
@@ -170,7 +185,7 @@ public class DefaultUsersUserIdResourceIT {
 
     @Test
     public void shouldDispatchGetUserCommandWithOtherMediaType() throws Exception {
-        syncDispatcher.setupResponse("userId", "4444-5555", envelopeFrom(null, createObjectBuilder().add("userName", "userName").build()));
+        syncDispatcher.setupResponse("userId", "4444-5555", envelopeFrom(metadata, createObjectBuilder().add("userName", "userName").build()));
 
         Response response = create(BASE_URI)
                 .path("/users/4444-5555")
@@ -198,7 +213,7 @@ public class DefaultUsersUserIdResourceIT {
 
     @Test
     public void shouldReturnUserDataReturnedByDispatcher() {
-        syncDispatcher.setupResponse("userId", "4444-5556", envelopeFrom(null, createObjectBuilder().add("userName", "userName").build()));
+        syncDispatcher.setupResponse("userId", "4444-5556", envelopeFrom(metadata, createObjectBuilder().add("userName", "userName").build()));
 
         Response response = create(BASE_URI)
                 .path("/users/4444-5556")
@@ -214,7 +229,7 @@ public class DefaultUsersUserIdResourceIT {
 
     @Test
     public void shouldReturnResponseWithContentType() {
-        syncDispatcher.setupResponse("userId", "4444-5556", envelopeFrom(null, createObjectBuilder().add("userName", "userName").build()));
+        syncDispatcher.setupResponse("userId", "4444-5556", envelopeFrom(metadata, createObjectBuilder().add("userName", "userName").build()));
 
         Response response = create(BASE_URI)
                 .path("/users/4444-5556")
@@ -226,7 +241,7 @@ public class DefaultUsersUserIdResourceIT {
 
     @Test
     public void shouldReturnResponseWithSecondContentType() {
-        syncDispatcher.setupResponse("userId", "4444-5556", envelopeFrom(null, createObjectBuilder().add("userName", "userName").build()));
+        syncDispatcher.setupResponse("userId", "4444-5556", envelopeFrom(metadata, createObjectBuilder().add("userName", "userName").build()));
 
         Response response = create(BASE_URI)
                 .path("/users/4444-5556")
@@ -238,7 +253,7 @@ public class DefaultUsersUserIdResourceIT {
 
     @Test
     public void shouldDispatchUsersQueryWithQueryParam() throws Exception {
-        syncDispatcher.setupResponse("surname", "name", envelopeFrom(null, createObjectBuilder().add("userName", "userName").build()));
+        syncDispatcher.setupResponse("surname", "name", envelopeFrom(metadata, createObjectBuilder().add("userName", "userName").build()));
 
         Response response = create(BASE_URI)
                 .path("/users")

@@ -3,6 +3,7 @@ package uk.gov.justice.raml.jms.validator;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import uk.gov.justice.raml.common.validator.RamlValidationException;
 import uk.gov.justice.raml.common.validator.RamlValidator;
 
@@ -26,7 +27,7 @@ public class BaseUriRamlValidatorTest {
     @Test
     public void shouldThrowExceptionIfBaseUriNotvalid() throws Exception {
         exception.expect(RamlValidationException.class);
-        exception.expectMessage("Inavlid base uri: message://INVALID/handler/message/service1");
+        exception.expectMessage("Invalid base uri: message://INVALID/handler/message/service1");
 
         validator.validate(raml().withBaseUri("message://INVALID/handler/message/service1").build());
     }

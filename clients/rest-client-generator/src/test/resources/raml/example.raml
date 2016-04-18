@@ -1,0 +1,21 @@
+#%RAML 0.8
+title: Example Service
+baseUri: http://localhost:8080/rest-adapter-generator/query/api/rest/example
+
+/users/{userId}:
+  get:
+    responses:
+        200:
+            body:
+                application/vnd.people.query.get-user+json:
+                application/vnd.people.query.get-user2+json:
+
+/users:
+  get:
+    queryParameters:
+        surname:
+            type: string
+    responses:
+        200:
+            body:
+                application/vnd.people.query.search-users+json:

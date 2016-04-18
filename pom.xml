@@ -33,10 +33,11 @@
         <module>event-source-destination</module>
         <module>enveloper</module>
         <module>example-context</module>
+        <module>clients</module>
     </modules>
 
     <properties>
-        <raml-maven-plugin.version>1.0.0</raml-maven-plugin.version>
+        <raml-maven-plugin.version>1.1.0</raml-maven-plugin.version>
         <jersey.version>1.19</jersey.version>
     </properties>
 

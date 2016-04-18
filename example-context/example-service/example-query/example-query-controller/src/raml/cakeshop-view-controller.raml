@@ -14,6 +14,9 @@ protocols: [ HTTP, HTTPS ]
           application/vnd.cakeshop.query.recipes+json:
             schema: !include json/schema/recipes.json
             example: !include json/recipes.json
+          application/vnd.cakeshop.queries.recipes2+json:
+            schema: !include json/schema/recipes.json
+            example: !include json/recipes.json
 
 /recipes/{recipeId}:
   description: return a recipe

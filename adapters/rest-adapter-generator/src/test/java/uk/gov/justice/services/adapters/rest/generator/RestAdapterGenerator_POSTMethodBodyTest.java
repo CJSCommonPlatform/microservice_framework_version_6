@@ -1,5 +1,15 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
 
 import org.apache.cxf.jaxrs.impl.tl.ThreadLocalHttpHeaders;
 import org.junit.Before;
@@ -16,16 +26,7 @@ import uk.gov.justice.services.adapters.test.utils.compiler.JavaCompilerUtil;
 import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Consumer;
-
+import static java.util.Collections.emptyMap;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -38,6 +39,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
+import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.adapters.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
@@ -80,9 +82,9 @@ public class RestAdapterGenerator_POSTMethodBodyTest {
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/path")
-                                .with(action(POST).withDefaultRequestType())
+                                .with(action(POST).withActionOfDefaultRequestType())
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
         Object resourceObject = instantiate(resourceClass);
@@ -105,9 +107,9 @@ public class RestAdapterGenerator_POSTMethodBodyTest {
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/path")
-                                .with(action(POST).withDefaultRequestType())
+                                .with(action(POST).withActionOfDefaultRequestType())
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
         Object resourceObject = instantiate(resourceClass);
@@ -134,9 +136,9 @@ public class RestAdapterGenerator_POSTMethodBodyTest {
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/path")
-                                .with(action(POST).withDefaultRequestType())
+                                .with(action(POST).withActionOfDefaultRequestType())
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
         Object resourceObject = instantiate(resourceClass);
@@ -156,9 +158,9 @@ public class RestAdapterGenerator_POSTMethodBodyTest {
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/path")
-                                .with(action(POST).withDefaultRequestType())
+                                .with(action(POST).withActionOfDefaultRequestType())
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
         Object resourceObject = instantiate(resourceClass);
@@ -179,9 +181,9 @@ public class RestAdapterGenerator_POSTMethodBodyTest {
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/some/path/{paramA}", "paramA")
-                                .with(action(POST).withDefaultRequestType())
+                                .with(action(POST).withActionOfDefaultRequestType())
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamAResource");
 
@@ -211,7 +213,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest {
                         resource("/some/path/{p1}", "p1")
                                 .with(action(POST, "application/vnd.ctx.command.cmd-aa+json", "application/vnd.ctx.command.cmd-bb+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathP1Resource");
 
@@ -240,9 +242,9 @@ public class RestAdapterGenerator_POSTMethodBodyTest {
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/some/path/{param1}/{param2}", "param1", "param2")
-                                .with(action(POST).withDefaultRequestType())
+                                .with(action(POST).withActionOfDefaultRequestType())
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParam1Param2Resource");
 
@@ -269,11 +271,12 @@ public class RestAdapterGenerator_POSTMethodBodyTest {
     @Test
     public void shouldReturnSetOfResourceClasses() throws Exception {
         generator.run(
-                restRamlWithDefaults()
-                        .with(resource("/pathA").with(action(POST).withDefaultRequestType()))
-                        .with(resource("/pathB").with(action(POST).withDefaultRequestType()))
+                raml()
+                        .withBaseUri("http://localhost:8080/warname/command/api/rest/service")
+                        .with(resource("/pathA").with(action(POST).withActionOfDefaultRequestType()))
+                        .with(resource("/pathB").with(action(POST).withActionOfDefaultRequestType()))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Set<Class<?>> compiledClasses = compiler.compiledClassesOf(BASE_PACKAGE);
         Class<?> applicationClass = compiler.classOf(compiledClasses, BASE_PACKAGE, "CommandApiRestServiceApplication");

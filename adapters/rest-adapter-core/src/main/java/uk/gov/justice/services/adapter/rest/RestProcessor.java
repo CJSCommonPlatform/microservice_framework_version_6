@@ -2,7 +2,9 @@ package uk.gov.justice.services.adapter.rest;
 
 import org.slf4j.Logger;
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
+import uk.gov.justice.services.common.converter.JsonObjectToStringConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 
 import javax.inject.Inject;
 import javax.json.JsonObject;
@@ -32,6 +34,12 @@ public class RestProcessor {
 
     @Inject
     RestEnvelopeBuilderFactory envelopeBuilderFactory;
+
+    @Inject
+    JsonObjectEnvelopeConverter jsonObjectEnvelopeConverter;
+
+    @Inject
+    JsonObjectToStringConverter jsonObjectToStringConverter;
 
     /**
      * Process an incoming REST request by combining the payload, headers and path parameters into an envelope and
@@ -75,7 +83,7 @@ public class RestProcessor {
         } else if (result.payload() == NULL) {
             return status(NOT_FOUND).build();
         } else {
-            return status(OK).entity(result.payload().toString()).build();
+            return status(OK).entity(jsonObjectToStringConverter.convert(jsonObjectEnvelopeConverter.fromEnvelope(result))).build();
         }
     }
 }

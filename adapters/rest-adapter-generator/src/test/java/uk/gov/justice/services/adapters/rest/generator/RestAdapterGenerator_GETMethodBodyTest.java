@@ -23,20 +23,20 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.instanceOf;
+import static java.util.Collections.emptyMap;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.raml.model.ActionType.GET;
 import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
+import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithDefaults;
-import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithQueryApiDefaults;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.adapters.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionUtil.firstMethodOf;
@@ -77,7 +77,7 @@ public class RestAdapterGenerator_GETMethodBodyTest {
                         resource("/path")
                                 .with(action(GET).withDefaultResponseType())
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
         Object resourceObject = instantiate(resourceClass);
@@ -101,7 +101,7 @@ public class RestAdapterGenerator_GETMethodBodyTest {
                         resource("/path")
                                 .with(action(GET).withDefaultResponseType())
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
         Object resourceObject = instantiate(resourceClass);
@@ -129,7 +129,7 @@ public class RestAdapterGenerator_GETMethodBodyTest {
                         resource("/path")
                                 .with(action(GET).withDefaultResponseType())
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
         Object resourceObject = instantiate(resourceClass);
@@ -153,7 +153,7 @@ public class RestAdapterGenerator_GETMethodBodyTest {
                         resource("/some/path/{paramA}", "paramA")
                                 .with(action(GET).withDefaultResponseType())
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamAResource");
 
@@ -182,7 +182,7 @@ public class RestAdapterGenerator_GETMethodBodyTest {
                         resource("/some/path/{param1}/{param2}", "param1", "param2")
                                 .with(action(GET).withDefaultResponseType())
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParam1Param2Resource");
 
@@ -209,13 +209,13 @@ public class RestAdapterGenerator_GETMethodBodyTest {
     @Test
     public void shouldPassMapWithOneQueryParamToRestProcessor() throws Exception {
         generator.run(
-                restRamlWithQueryApiDefaults().with(
+                restRamlWithDefaults().with(
                         resource("/some/path")
                                 .with(action(GET)
                                         .withQueryParameters("queryParam")
                                         .withDefaultResponseType())
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
@@ -240,14 +240,14 @@ public class RestAdapterGenerator_GETMethodBodyTest {
     @Test
     public void shouldPassMapWithTwoQueryParamsToRestProcessor() throws Exception {
         generator.run(
-                restRamlWithQueryApiDefaults().with(
+                restRamlWithDefaults().with(
                         resource("/some/path")
                                 .with(action(GET)
                                         .withQueryParameters("queryParam1")
                                         .withQueryParameters("queryParam2")
                                         .withDefaultResponseType())
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
@@ -279,13 +279,13 @@ public class RestAdapterGenerator_GETMethodBodyTest {
     @Test
     public void shouldPassMapWithOnePathParamAndOneQueryParamToRestProcessor() throws Exception {
         generator.run(
-                restRamlWithQueryApiDefaults().with(
+                restRamlWithDefaults().with(
                         resource("/some/path/{param}", "param")
                                 .with(action(GET)
                                         .withQueryParameters("queryParam")
                                         .withDefaultResponseType())
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamResource");
 
@@ -312,11 +312,12 @@ public class RestAdapterGenerator_GETMethodBodyTest {
     @Test
     public void shouldReturnSetOfResourceClasses() throws Exception {
         generator.run(
-                restRamlWithDefaults()
+                raml()
+                        .withBaseUri("http://localhost:8080/warname/command/api/rest/service")
                         .with(resource("/pathA").with(action(GET).withDefaultResponseType()))
                         .with(resource("/pathB").with(action(GET).withDefaultResponseType()))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Set<Class<?>> compiledClasses = compiler.compiledClassesOf(BASE_PACKAGE);
         Class<?> applicationClass = compiler.classOf(compiledClasses, BASE_PACKAGE, "CommandApiRestServiceApplication");

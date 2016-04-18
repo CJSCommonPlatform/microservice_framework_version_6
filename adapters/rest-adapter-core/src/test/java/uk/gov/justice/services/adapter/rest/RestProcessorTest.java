@@ -9,7 +9,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
+import uk.gov.justice.services.common.converter.JsonObjectToStringConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
+import uk.gov.justice.services.messaging.JsonObjectMetadata;
+import uk.gov.justice.services.messaging.Metadata;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -18,6 +22,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -29,6 +34,8 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
 
 /**
  * Unit tests for the {@link RestProcessor} class.
@@ -54,10 +61,19 @@ public class RestProcessorTest {
 
     private RestProcessor restProcessor;
 
+    private Metadata metadata;
+
     @Before
     public void setup() {
         restProcessor = new RestProcessor();
         restProcessor.envelopeBuilderFactory = new RestEnvelopeBuilderFactory();
+        restProcessor.jsonObjectEnvelopeConverter = new JsonObjectEnvelopeConverter();
+        restProcessor.jsonObjectToStringConverter = new JsonObjectToStringConverter();
+
+        metadata = JsonObjectMetadata.metadataFrom(Json.createObjectBuilder()
+                .add(ID, UUID.randomUUID().toString())
+                .add(NAME, "eventName")
+                .build());
     }
 
     @Test
@@ -82,7 +98,6 @@ public class RestProcessorTest {
         JsonEnvelope envelope = envelopeCaptor.getValue();
         assertThat(envelope.payloadAsJsonObject().getString("key123"), is("value45678"));
         assertThat(envelope.payloadAsJsonObject().getString("paramABC"), is("paramValueBCD"));
-
     }
 
     @Test
@@ -103,7 +118,7 @@ public class RestProcessorTest {
     @Test
     public void shouldReturn200ResponseOnSyncProcessing() throws Exception {
         when(function.apply(any(JsonEnvelope.class))).thenReturn(
-                envelopeFrom(null, Json.createObjectBuilder().build()));
+                envelopeFrom(metadata, Json.createObjectBuilder().build()));
         Response response = restProcessor.processSynchronously(function, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
 
         assertThat(response.getStatus(), equalTo(200));
@@ -155,7 +170,7 @@ public class RestProcessorTest {
     @Test
     public void shouldReturnPayloadOfEnvelopeReturnedByFunction() {
         when(function.apply(any(JsonEnvelope.class))).thenReturn(
-                envelopeFrom(null, Json.createObjectBuilder().add("key11", "value33").add("key22", "value55").build()));
+                envelopeFrom(metadata, Json.createObjectBuilder().add("key11", "value33").add("key22", "value55").build()));
 
         Response response = restProcessor.processSynchronously(function, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
         String responseEntity = (String) response.getEntity();
@@ -163,7 +178,6 @@ public class RestProcessorTest {
                 .assertThat("key11", equalTo("value33"))
                 .assertThat("key22", equalTo("value55"));
     }
-
 
     private HttpHeaders headersWith(String headerName, String headerValue) {
         MultivaluedMapImpl headersMap = new MultivaluedMapImpl();

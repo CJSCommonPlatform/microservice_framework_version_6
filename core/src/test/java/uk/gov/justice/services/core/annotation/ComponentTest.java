@@ -10,7 +10,9 @@ import javax.jms.Topic;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class ComponentTest {
 
@@ -82,4 +84,29 @@ public class ComponentTest {
         Component.valueOf("commands", "invalidTier");
 
     }
+
+    @Test
+    public void shouldReturnTrueIfContainsGivenString() {
+
+        assertTrue(Component.contains("COMMAND_API"));
+        assertTrue(Component.contains("COMMAND_CONTROLLER"));
+        assertTrue(Component.contains("COMMAND_HANDLER"));
+        assertTrue(Component.contains("EVENT_LISTENER"));
+        assertTrue(Component.contains("EVENT_PROCESSOR"));
+        assertTrue(Component.contains("QUERY_API"));
+        assertTrue(Component.contains("QUERY_CONTROLLER"));
+        assertTrue(Component.contains("QUERY_VIEW"));
+    }
+
+    @Test
+    public void shouldReturnFalseIfDoesNotContainGivenString() {
+        assertFalse(Component.contains("COMMAND_API_aaa"));
+        assertFalse(Component.contains("UNKNOWN"));
+    }
+
+    @Test
+    public void shouldReturnStringContainingSeparatedNames() {
+        assertThat(Component.names(", "), is("COMMAND_API, COMMAND_CONTROLLER, COMMAND_HANDLER, EVENT_LISTENER, EVENT_PROCESSOR, QUERY_API, QUERY_CONTROLLER, QUERY_VIEW"));
+    }
+
 }

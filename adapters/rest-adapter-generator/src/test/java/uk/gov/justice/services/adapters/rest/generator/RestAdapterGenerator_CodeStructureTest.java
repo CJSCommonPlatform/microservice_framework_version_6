@@ -39,24 +39,23 @@ import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 import static java.nio.file.Paths.get;
 import static java.util.Arrays.stream;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.nullValue;
+import static java.util.Collections.emptyMap;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.Matchers.arrayContainingInAnyOrder;
 import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.emptyArray;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
-import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithCommandApiDefaults;
+import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithQueryApiDefaults;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.adapters.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
+import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionUtil.methodsOf;
 
 public class RestAdapterGenerator_CodeStructureTest {
@@ -79,11 +78,12 @@ public class RestAdapterGenerator_CodeStructureTest {
     @Test
     public void shouldGenerateApplicationClass() throws Exception {
         generator.run(
-                restRamlWithDefaults().with(
-                        resource("/some/path")
+                raml()
+                        .withBaseUri("http://localhost:8080/warname/command/api/rest/service")
+                        .with(resource("/some/path")
                                 .with(action(POST, "application/vnd.ctx.command.default+json"))
-                ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceApplication");
 
@@ -93,11 +93,13 @@ public class RestAdapterGenerator_CodeStructureTest {
     @Test
     public void shouldGenerateExtendingApplicationClass() throws Exception {
         generator.run(
-                restRamlWithDefaults().with(
-                        resource("/some/path")
-                                .with(action(POST, "application/vnd.ctx.command.default+json"))
-                ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                raml()
+                        .withBaseUri("http://localhost:8080/warname/command/api/rest/service")
+                        .with(
+                                resource("/some/path")
+                                        .with(action(POST, "application/vnd.ctx.command.default+json"))
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceApplication");
 
@@ -107,11 +109,13 @@ public class RestAdapterGenerator_CodeStructureTest {
     @Test
     public void shouldGenerateAnnotatedApplicationClass() throws Exception {
         generator.run(
-                restRamlWithDefaults().with(
-                        resource("/some/path")
-                                .with(action(POST, "application/vnd.ctx.command.default+json"))
-                ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                raml()
+                        .withBaseUri("http://localhost:8080/warname/command/api/rest/service")
+                        .with(
+                                resource("/some/path")
+                                        .with(action(POST, "application/vnd.ctx.command.default+json"))
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceApplication");
 
@@ -122,11 +126,12 @@ public class RestAdapterGenerator_CodeStructureTest {
     @Test
     public void shouldGenerateApplicationClassWithGetClassesMethod() throws Exception {
         generator.run(
-                restRamlWithDefaults().with(
-                        resource("/some/path")
+                raml()
+                        .withBaseUri("http://localhost:8080/warname/command/api/rest/service")
+                        .with(resource("/some/path")
                                 .with(action(POST, "application/vnd.ctx.command.default+json"))
-                ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceApplication");
 
@@ -147,7 +152,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path")
                                 .with(action(POST, "application/vnd.ctx.command.default+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
 
@@ -161,7 +166,7 @@ public class RestAdapterGenerator_CodeStructureTest {
         String basePackageName = "uk.gov.test1";
 
         java.nio.file.Path outputPath = get(outputFolder.getRoot().getAbsolutePath());
-        GeneratorConfig config = new GeneratorConfig(outputPath, outputPath, basePackageName);
+        GeneratorConfig config = new GeneratorConfig(outputPath, outputPath, basePackageName, emptyMap());
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/some/path")
@@ -182,7 +187,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path")
                                 .with(action(POST, "application/vnd.ctx.command.default+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
 
@@ -204,7 +209,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path/{p1}")
                                 .with(action(POST, "application/vnd.ctx.command.cmd-a+json", "application/vnd.ctx.command.cmd-b+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
 
@@ -232,9 +237,9 @@ public class RestAdapterGenerator_CodeStructureTest {
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/some/path")
-                                .with(action(GET).withResponse("application/vnd.ctx.query.query1+json"))
+                                .with(action(GET).withActionWithResponseTypes("application/vnd.ctx.query.query1+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
 
@@ -255,12 +260,12 @@ public class RestAdapterGenerator_CodeStructureTest {
                 restRamlWithDefaults().with(
                         resource("/some/path")
                                 .with(action(GET)
-                                        .withResponse(
+                                        .withActionWithResponseTypes(
                                                 "application/vnd.ctx.query.query1+json",
                                                 "application/vnd.ctx.query.query2+json")
                                 )
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
 
@@ -284,7 +289,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path/no/path/params")
                                 .with(action(POST, "application/vnd.ctx.command.default+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
 
@@ -303,7 +308,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path/{paramA}", "paramA")
                                 .with(action(POST, "application/vnd.ctx.command.default+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
 
@@ -332,7 +337,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path/{paramA}/abc/{paramB}", "paramA", "paramB")
                                 .with(action(POST, "application/vnd.ctx.command.default+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
 
@@ -366,7 +371,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path")
                                 .with(action(POST, "application/vnd.ctx.command.default+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceInterface = compiler.compiledInterfaceOf(BASE_PACKAGE);
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
@@ -378,13 +383,13 @@ public class RestAdapterGenerator_CodeStructureTest {
     }
 
     @Test
-    public void shouldGenerateResourceClassContainingCommandApiAdapterAnnotation() throws Exception {
+    public void shouldGenerateResourceClassContainingCommandAdapterAnnotation() throws Exception {
         generator.run(
-                restRamlWithCommandApiDefaults().with(
-                        resource("/some/path")
-                                .with(action(POST, "application/vnd.ctx.command.default+json"))
-                ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                restRamlWithDefaults()
+                        .withBaseUri("http://localhost:8080/warname/command/api/rest/service")
+                        .with(resource("/some/path").withDefaultAction()
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
@@ -395,14 +400,14 @@ public class RestAdapterGenerator_CodeStructureTest {
     }
 
     @Test
-    public void shouldGenerateResourceClassContainingQueryApiAdapterAnnotation() throws Exception {
+    public void shouldGenerateResourceClassContainingQueryAdapterAnnotation() throws Exception {
         generator.run(
-                restRamlWithQueryApiDefaults().with(
-                        resource("/some/path")
-                                .with(action(GET)
-                                        .withResponse("application/vnd.ctx.query.query1+json"))
-                ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                restRamlWithDefaults()
+                        .withBaseUri("http://localhost:8080/warname/query/api/rest/service")
+                        .with(resource("/some/path")
+                                .withDefaultAction()
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
@@ -412,6 +417,7 @@ public class RestAdapterGenerator_CodeStructureTest {
 
     }
 
+
     @Test
     public void shouldGenerateResourceClassContainingOneMethod() throws Exception {
         generator.run(
@@ -419,7 +425,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path")
                                 .with(action(POST, "application/vnd.ctx.command.default+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
@@ -441,7 +447,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                                         "application/vnd.ctx.command.command-c+json",
                                         "application/vnd.ctx.command.command-d+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathP1Resource");
 
@@ -457,7 +463,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path/{paramA}", "paramA")
                                 .with(action(POST, "application/vnd.ctx.command.command-a+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamAResource");
 
@@ -483,7 +489,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path/{paramA}/{paramB}/{paramC}", "paramA", "paramB", "paramC")
                                 .with(action(POST, "application/vnd.ctx.command.command-a+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamAParamBParamCResource");
 
@@ -512,96 +518,11 @@ public class RestAdapterGenerator_CodeStructureTest {
     }
 
     @Test
-    public void classShouldContainQueryParam() throws Exception {
-        generator.run(
-                restRamlWithQueryApiDefaults().with(
-                        resource("/users").with(action(GET)
-                                .withQueryParameters("surname")
-                                .withResponse("application/vnd.people.query.search-users+json"))
-                ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder)
-        );
-
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultUsersResource");
-
-        assertThat(clazz.isInterface(), is(false));
-
-        List<Method> methods = methodsOf(clazz);
-        assertThat(methods, hasSize(1));
-        Method method = methods.get(0);
-        assertThat(method.getParameterCount(), is(1));
-
-        Parameter param = method.getParameters()[0];
-        assertThat(param.getType(), equalTo(String.class));
-        assertThat(param.getAnnotations(), emptyArray());
-
-        Class<?> inter = compiler.compiledInterfaceClassOf(BASE_PACKAGE, "resource", "UsersResource");
-
-        assertThat(inter.isInterface(), is(true));
-        List<Method> interMethods = methodsOf(inter);
-        assertThat(methods, hasSize(1));
-        Method interMethod = interMethods.get(0);
-        assertThat(method.getParameterCount(), is(1));
-
-        Parameter interParam = interMethod.getParameters()[0];
-        assertThat(interParam.getType(), equalTo(String.class));
-        assertThat(interParam.getAnnotations().length, is(1));
-
-        Annotation annotation = interParam.getAnnotations()[0];
-        assertThat(annotation.annotationType(), equalTo(QueryParam.class));
-
-    }
-
-    @Test
-    public void classShouldContainThreeQueryParams() throws Exception {
-        generator.run(
-                restRamlWithQueryApiDefaults().with(
-                        resource("/users").with(action(GET)
-                                .withQueryParameters("surname")
-                                .withQueryParameters("firstname")
-                                .withQueryParameters("middlename")
-                                .withResponse("application/vnd.people.query.search-users+json"))
-                ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder)
-        );
-
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultUsersResource");
-
-        assertThat(clazz.isInterface(), is(false));
-
-        List<Method> methods = methodsOf(clazz);
-        assertThat(methods, hasSize(1));
-        Method method = methods.get(0);
-        assertThat(method.getParameterCount(), is(3));
-
-        stream(method.getParameters()).forEach(parameter -> {
-            assertThat(parameter.getType(), equalTo(String.class));
-            assertThat(parameter.getAnnotations(), emptyArray());
-        });
-
-        Class<?> inter = compiler.compiledInterfaceClassOf(BASE_PACKAGE, "resource", "UsersResource");
-
-        assertThat(inter.isInterface(), is(true));
-        List<Method> interMethods = methodsOf(inter);
-        assertThat(methods, hasSize(1));
-        Method interMethod = interMethods.get(0);
-        assertThat(method.getParameterCount(), is(3));
-
-        stream(interMethod.getParameters()).forEach(parameter -> {
-            assertThat(parameter.getType(), equalTo(String.class));
-            assertThat(parameter.getAnnotations().length, is(1));
-
-            Annotation annotation = parameter.getAnnotations()[0];
-            assertThat(annotation.annotationType(), equalTo(QueryParam.class));
-        });
-    }
-
-    @Test
     public void shouldGenerateClassInSpecifiedPackage() throws Exception {
         String basePackageName = "uk.gov.test2";
 
         java.nio.file.Path outputPath = get(outputFolder.getRoot().getAbsolutePath());
-        GeneratorConfig config = new GeneratorConfig(outputPath, outputPath, basePackageName);
+        GeneratorConfig config = new GeneratorConfig(outputPath, outputPath, basePackageName, emptyMap());
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/some/path")
@@ -622,7 +543,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path")
                                 .with(action(POST, "application/vnd.ctx.command.default+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
         Class<?> resourceImplementation = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
         assertThat(resourceImplementation.getAnnotation(Stateless.class), not(nullValue()));
     }
@@ -634,7 +555,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path")
                                 .with(action(POST, "application/vnd.ctx.command.default+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
         List<Method> methods = methodsOf(class1);
@@ -652,7 +573,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path")
                                 .with(action(POST, "application/vnd.ctx.command.default+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
         Field dispatcher = resourceClass.getDeclaredField("asyncDispatcher");
@@ -668,10 +589,10 @@ public class RestAdapterGenerator_CodeStructureTest {
                 restRamlWithDefaults().with(
                         resource("/some/path")
                                 .with(action(GET)
-                                        .withResponse("application/vnd.ctx.query.query1+json")
+                                        .withActionWithResponseTypes("application/vnd.ctx.query.query1+json")
                                 ))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
         assertFalse(stream(resourceClass.getDeclaredFields())
@@ -688,9 +609,9 @@ public class RestAdapterGenerator_CodeStructureTest {
                         .with(
                                 resource("/some/path")
                                         .with(action(GET)
-                                                .withResponse("application/vnd.ctx.query.query1+json")))
+                                                .withActionWithResponseTypes("application/vnd.ctx.query.query1+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
         Field dispatcher = resourceClass.getDeclaredField("syncDispatcher");
@@ -707,7 +628,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path")
                                 .with(action(POST, "application/vnd.ctx.command.default+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
@@ -726,7 +647,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path")
                                 .with(action(POST, "application/vnd.ctx.command.default+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
         Field dispatcher = resourceClass.getDeclaredField("headers");
@@ -743,7 +664,7 @@ public class RestAdapterGenerator_CodeStructureTest {
                         resource("/some/path")
                                 .with(action(POST, "application/vnd.ctx.command.default+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
@@ -753,6 +674,83 @@ public class RestAdapterGenerator_CodeStructureTest {
         assertThat(dispatcher.getAnnotation(Inject.class), not(nullValue()));
         assertThat(dispatcher.getModifiers(), is(0));
     }
+
+    @Test
+    public void classShouldContainQueryParam() throws Exception {
+        generator.run(
+                restRamlWithQueryApiDefaults().with(
+                        resource("/users").with(action(GET)
+                                .withQueryParameters("surname")
+                                .withActionWithResponseTypes("application/vnd.people.query.search-users+json"))
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap())
+        );
+
+        Class<?> implementation = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultUsersResource");
+
+        assertThat(implementation.isInterface(), is(false));
+
+
+        Method method = firstMethodOf(implementation);
+
+        Parameter param = method.getParameters()[0];
+        assertThat(param.getType(), equalTo(String.class));
+        assertThat(param.getAnnotations(), emptyArray());
+
+        Class<?> iface = compiler.compiledInterfaceClassOf(BASE_PACKAGE, "resource", "UsersResource");
+
+        Method interMethod = firstMethodOf(iface);
+
+        Parameter interParam = interMethod.getParameters()[0];
+        assertThat(interParam.getType(), equalTo(String.class));
+        assertThat(interParam.getAnnotations().length, is(1));
+
+        Annotation annotation = interParam.getAnnotations()[0];
+        assertThat(annotation.annotationType(), equalTo(QueryParam.class));
+
+    }
+
+    @Test
+    public void classShouldContainThreeQueryParams() throws Exception {
+        generator.run(
+                restRamlWithQueryApiDefaults().with(
+                        resource("/users").with(action(GET)
+                                .withQueryParameters("surname")
+                                .withQueryParameters("firstname")
+                                .withQueryParameters("middlename")
+                                .withActionWithResponseTypes("application/vnd.people.query.search-users+json"))
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap())
+        );
+
+        Class<?> implementation = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultUsersResource");
+
+        assertThat(implementation.isInterface(), is(false));
+
+        Method method = firstMethodOf(implementation);
+        assertThat(method.getParameterCount(), is(3));
+
+        stream(method.getParameters()).forEach(parameter -> {
+            assertThat(parameter.getType(), equalTo(String.class));
+            assertThat(parameter.getAnnotations(), emptyArray());
+        });
+
+        Class<?> iface = compiler.compiledInterfaceClassOf(BASE_PACKAGE, "resource", "UsersResource");
+
+        assertThat(iface.isInterface(), is(true));
+
+        Method interMethod = firstMethodOf(iface);
+        assertThat(interMethod.getParameterCount(), is(3));
+
+        stream(interMethod.getParameters()).forEach(parameter -> {
+            assertThat(parameter.getType(), equalTo(String.class));
+            assertThat(parameter.getAnnotations().length, is(1));
+
+            Annotation annotation = parameter.getAnnotations()[0];
+            assertThat(annotation.annotationType(), equalTo(QueryParam.class));
+        });
+    }
+
 
 
     private Method methodWithConsumesAnnotationOf(List<Method> methods, String mediaType) {

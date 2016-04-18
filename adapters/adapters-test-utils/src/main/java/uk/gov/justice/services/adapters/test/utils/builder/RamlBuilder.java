@@ -10,6 +10,8 @@ import java.util.Map;
 
 import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
+import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.defaultGetResource;
+import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.defaultPostResource;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 
 public class RamlBuilder {
@@ -55,12 +57,20 @@ public class RamlBuilder {
         return this;
     }
 
+    public RamlBuilder withDefaultPostResource() {
+        return this.with(defaultPostResource());
+    }
+
+    public RamlBuilder withDefaultGetResource() {
+        return this.with(defaultGetResource());
+    }
+
     public RamlBuilder withDefaultMessagingResource() {
         return this
                 .withDefaultMessagingBaseUri()
                 .with(resource()
-                .withRelativeUri("/somecontext.controller.command")
-                .with(action(POST,"application/vnd.somecontext.command.command1+json")));
+                        .withRelativeUri("/somecontext.controller.command")
+                        .with(action(POST, "application/vnd.somecontext.command.command1+json")));
     }
 
     public RamlBuilder withVersion(final String version) {

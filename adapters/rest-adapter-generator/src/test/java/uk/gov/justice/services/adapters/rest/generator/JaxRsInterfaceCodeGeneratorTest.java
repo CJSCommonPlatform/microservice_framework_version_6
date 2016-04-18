@@ -9,6 +9,7 @@ import org.raml.model.Resource;
 import uk.gov.justice.raml.core.GeneratorConfig;
 
 import static java.nio.file.Paths.get;
+import static java.util.Collections.emptyMap;
 import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithDefaults;
@@ -31,14 +32,14 @@ public class JaxRsInterfaceCodeGeneratorTest {
 
         Raml raml = restRamlWithDefaults().with(
                 resource("/some/path")
-                        .with(action(POST).withDefaultRequestType())
+                        .with(action(POST).withActionOfDefaultRequestType())
         ).build();
         Resource resource = raml.getResources().values().iterator().next();
 
         GeneratorConfig config = new GeneratorConfig(
                 get(outputFolder.getRoot().getAbsolutePath()),
                 get(outputFolder.getRoot().getAbsolutePath()),
-                BASE_PACKAGE);
+                BASE_PACKAGE, emptyMap());
 
         JaxRsInterfaceCodeGenerator generator = new JaxRsInterfaceCodeGenerator(codeModel, config);
         generator.createInterface(resource);

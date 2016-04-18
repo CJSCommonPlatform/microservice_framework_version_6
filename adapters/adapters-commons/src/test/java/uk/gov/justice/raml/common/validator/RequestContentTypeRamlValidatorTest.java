@@ -3,7 +3,6 @@ package uk.gov.justice.raml.common.validator;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.raml.model.ActionType;
 
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.HEAD;
@@ -56,7 +55,7 @@ public class RequestContentTypeRamlValidatorTest {
 
         validator.validate(raml()
                 .with(resource()
-                        .with(action().with(ActionType.POST)))
+                        .with(action().withActionType(POST)))
                 .build());
 
     }

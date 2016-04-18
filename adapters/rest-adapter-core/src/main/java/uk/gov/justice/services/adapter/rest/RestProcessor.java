@@ -1,5 +1,6 @@
 package uk.gov.justice.services.adapter.rest;
 
+import org.slf4j.Logger;
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
@@ -11,9 +12,14 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static java.lang.String.format;
+import static javax.json.JsonValue.NULL;
 import static javax.ws.rs.core.Response.Status.ACCEPTED;
+import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.OK;
+import static javax.ws.rs.core.Response.status;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * In order to minimise the amount of generated code in the JAX-RS implementation classes, this service encapsulates
@@ -21,6 +27,8 @@ import static javax.ws.rs.core.Response.Status.OK;
  * response. This allows testing of this logic independently from the automated generation code.
  */
 public class RestProcessor {
+
+    private static final Logger LOGGER = getLogger(RestProcessor.class);
 
     @Inject
     RestEnvelopeBuilderFactory envelopeBuilderFactory;
@@ -40,7 +48,7 @@ public class RestProcessor {
                                           final HttpHeaders headers,
                                           final Map<String, String> params) {
 
-        JsonEnvelope envelope = envelopeBuilderFactory.builder()
+        final JsonEnvelope envelope = envelopeBuilderFactory.builder()
                 .withInitialPayload(initialPayload)
                 .withHeaders(headers)
                 .withParams(params)
@@ -48,20 +56,26 @@ public class RestProcessor {
 
         consumer.accept(envelope);
 
-        return Response.status(ACCEPTED).build();
+        return status(ACCEPTED).build();
     }
 
     public Response processSynchronously(final Function<JsonEnvelope, JsonEnvelope> function,
                                          final HttpHeaders headers,
                                          final Map<String, String> params) {
-        JsonEnvelope envelope = envelopeBuilderFactory.builder()
+        final JsonEnvelope envelope = envelopeBuilderFactory.builder()
                 .withHeaders(headers)
                 .withParams(params)
                 .build();
 
-        JsonEnvelope result = function.apply(envelope);
-        Response.ResponseBuilder response =
-                result != null ? Response.status(OK).entity(result.payload().toString()) : Response.status(NOT_FOUND);
-        return response.build();
+        final JsonEnvelope result = function.apply(envelope);
+
+        if (result == null) {
+            LOGGER.error(format("Dispatcher returned a null envelope for %s", envelope.metadata().name()));
+            return status(INTERNAL_SERVER_ERROR).build();
+        } else if (result.payload() == NULL) {
+            return status(NOT_FOUND).build();
+        } else {
+            return status(OK).entity(result.payload().toString()).build();
+        }
     }
 }

@@ -20,6 +20,7 @@ import uk.gov.justice.services.messaging.Metadata;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
 import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -87,7 +88,7 @@ public class EnveloperTest {
     }
 
     @Test
-    public void shouldMapObjectToEvent() throws JsonProcessingException {
+    public void shouldEnvelopeEventObject() throws JsonProcessingException {
         enveloper.register(event);
         when(envelope.metadata()).thenReturn(metadata(true));
         when(objectToJsonValueConverter.convert(object)).thenReturn(payload);
@@ -103,8 +104,13 @@ public class EnveloperTest {
         verify(objectToJsonValueConverter, times(1)).convert(object);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionOnNullEvent() throws JsonProcessingException {
+        enveloper.withMetadataFrom(envelope).apply(null);
+    }
+
     @Test
-    public void shouldMapObjectToEnvelopeWithName() throws JsonProcessingException {
+    public void shouldEnvelopeObjectWithName() throws JsonProcessingException {
         when(envelope.metadata()).thenReturn(metadata(true));
         when(objectToJsonValueConverter.convert(object)).thenReturn(payload);
 
@@ -120,7 +126,22 @@ public class EnveloperTest {
     }
 
     @Test
-    public void shouldMapObjectToEventWithoutCausation() throws JsonProcessingException {
+    public void shouldEnvelopeMapNullObjectWithName() throws JsonProcessingException {
+        when(envelope.metadata()).thenReturn(metadata(true));
+
+        JsonEnvelope event = enveloper.withMetadataFrom(envelope, TEST_NAME).apply(null);
+
+        assertThat(event.payload(), equalTo(JsonValue.NULL));
+        assertThat(event.metadata().id(), notNullValue());
+        assertThat(event.metadata().name(), equalTo(TEST_NAME));
+        Assert.assertThat(event.metadata().causation().size(), equalTo(2));
+        Assert.assertThat(event.metadata().causation().get(0), equalTo(OLD_CAUSATION_ID));
+        Assert.assertThat(event.metadata().causation().get(1), equalTo(COMMAND_UUID));
+        verify(objectToJsonValueConverter, times(0)).convert(object);
+    }
+
+    @Test
+    public void shouldEnvelopeObjectWithoutCausation() throws JsonProcessingException {
         enveloper.register(event);
         when(envelope.metadata()).thenReturn(metadata(false));
         when(objectToJsonValueConverter.convert(object)).thenReturn(payload);

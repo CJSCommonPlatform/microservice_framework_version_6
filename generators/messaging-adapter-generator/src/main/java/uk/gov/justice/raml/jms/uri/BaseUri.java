@@ -10,15 +10,14 @@ import java.util.regex.Pattern;
  * Parses Raml base uri and exposes it's parts through accessor methods
  */
 public class BaseUri {
+
     private static final Pattern MESSAGING_BASE_URI_PATTERN
             = Pattern.compile("message://(event|command|query)/(api|controller|handler|listener|processor)/\\S+/(\\S+)");
-    private final String uriString;
     private final String tier;
     private final String pillar;
     private final String service;
 
     public BaseUri(final String uriString) {
-        this.uriString = uriString;
         final Matcher m = matcherOf(uriString);
         m.find();
         this.pillar = m.group(1);

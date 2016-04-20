@@ -24,7 +24,7 @@ public class GeneratorConfigUtil {
     public static GeneratorConfig configurationWithBasePackage(final String basePackageName,
                                                                final TemporaryFolder outputFolder,
                                                                final Map<String, String> generatorProperties) {
-        Path outputPath = Paths.get(outputFolder.getRoot().getAbsolutePath());
+        final Path outputPath = Paths.get(outputFolder.getRoot().getAbsolutePath());
         return new GeneratorConfig(outputPath, outputPath, basePackageName, generatorProperties, Collections.singletonList(outputPath.getParent()));
     }
 
@@ -32,7 +32,7 @@ public class GeneratorConfigUtil {
                                                                final TemporaryFolder outputFolder,
                                                                final Map<String, String> generatorProperties,
                                                                final List<Path> sourcePaths) {
-        Path outputPath = Paths.get(outputFolder.getRoot().getAbsolutePath());
+        final Path outputPath = Paths.get(outputFolder.getRoot().getAbsolutePath());
         return new GeneratorConfig(outputPath, outputPath, basePackageName, generatorProperties, sourcePaths);
     }
 

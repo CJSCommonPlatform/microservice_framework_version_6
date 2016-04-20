@@ -20,12 +20,13 @@ public class SynchronousRecordingDispatcher extends BasicRecordingDispatcher imp
         return responseTo(dispatchedEnvelope);
     }
 
-    public void setupResponse(String payloadElementNameCriteria, String payloadElementValueCriteria, JsonEnvelope envelopeToReturn) {
+    public void setupResponse(final String payloadElementNameCriteria, final String payloadElementValueCriteria,
+                              final JsonEnvelope envelopeToReturn) {
         mockResponses.add(new MockResponse(payloadElementNameCriteria, payloadElementValueCriteria, envelopeToReturn));
     }
 
-    private JsonEnvelope responseTo(JsonEnvelope dispatchedEnvelope) {
-        Optional<MockResponse> response = mockResponses.stream().filter(r -> r.matches(dispatchedEnvelope)).findFirst();
+    private JsonEnvelope responseTo(final JsonEnvelope dispatchedEnvelope) {
+        final Optional<MockResponse> response = mockResponses.stream().filter(r -> r.matches(dispatchedEnvelope)).findFirst();
         return response.isPresent() ? response.get().envelopeToReturn() : null;
     }
 
@@ -34,13 +35,13 @@ public class SynchronousRecordingDispatcher extends BasicRecordingDispatcher imp
         private final String payloadElementValue;
         private final JsonEnvelope envelopeToReturn;
 
-        MockResponse(String payloadElementName, String payloadElementValue, JsonEnvelope envelopeToReturn) {
+        MockResponse(final String payloadElementName, final String payloadElementValue, final JsonEnvelope envelopeToReturn) {
             this.payloadElementName = payloadElementName;
             this.payloadElementValue = payloadElementValue;
             this.envelopeToReturn = envelopeToReturn;
         }
 
-        boolean matches(JsonEnvelope dispatchedEnvelope) {
+        boolean matches(final JsonEnvelope dispatchedEnvelope) {
             return payloadElementValue.equals(dispatchedEnvelope.payloadAsJsonObject().getString(payloadElementName));
         }
 

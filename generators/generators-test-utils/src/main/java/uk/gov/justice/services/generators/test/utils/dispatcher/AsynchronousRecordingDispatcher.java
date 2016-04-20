@@ -19,7 +19,7 @@ public class AsynchronousRecordingDispatcher extends BasicRecordingDispatcher im
      * @param envelope The {@link JsonEnvelope} to recorded.
      */
     @Override
-    public void dispatch(JsonEnvelope envelope) {
+    public void dispatch(final JsonEnvelope envelope) {
         record(envelope);
     }
 

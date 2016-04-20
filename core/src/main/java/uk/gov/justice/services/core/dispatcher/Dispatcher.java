@@ -29,9 +29,9 @@ public class Dispatcher {
     private final AccessControlFailureMessageGenerator accessControlFailureMessageGenerator;
 
 
-    public Dispatcher(HandlerRegistry handlerRegistry,
-                      AccessControlService accessControlService,
-                      AccessControlFailureMessageGenerator accessControlFailureMessageGenerator) {
+    public Dispatcher(final HandlerRegistry handlerRegistry,
+                      final AccessControlService accessControlService,
+                      final AccessControlFailureMessageGenerator accessControlFailureMessageGenerator) {
         this.handlerRegistry = handlerRegistry;
         this.accessControlService = accessControlService;
         this.accessControlFailureMessageGenerator = accessControlFailureMessageGenerator;
@@ -93,12 +93,12 @@ public class Dispatcher {
     private void checkAccessControl(final JsonEnvelope jsonEnvelope) {
 
         final Optional<AccessControlViolation> accessControlViolation =
-                        accessControlService.checkAccessControl(jsonEnvelope);
+                accessControlService.checkAccessControl(jsonEnvelope);
 
-        if(accessControlViolation.isPresent()) {
+        if (accessControlViolation.isPresent()) {
             final String errorMessage = accessControlFailureMessageGenerator.errorMessageFrom(
-                            jsonEnvelope,
-                            accessControlViolation.get());
+                    jsonEnvelope,
+                    accessControlViolation.get());
 
             throw new AccessControlViolationException(errorMessage);
         }

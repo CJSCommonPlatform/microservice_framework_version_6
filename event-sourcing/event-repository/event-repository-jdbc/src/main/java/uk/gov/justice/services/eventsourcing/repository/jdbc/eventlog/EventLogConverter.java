@@ -1,6 +1,6 @@
 package uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog;
 
-import uk.gov.justice.services.common.converter.JsonObjectToStringConverter;
+import uk.gov.justice.services.common.converter.JsonValueToStringConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidStreamIdException;
 import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
@@ -24,7 +24,7 @@ public class EventLogConverter {
     JsonObjectEnvelopeConverter jsonObjectEnvelopeConverter;
 
     @Inject
-    JsonObjectToStringConverter jsonObjectToStringConverter;
+    JsonValueToStringConverter jsonValueToStringConverter;
 
     @Inject
     StringToJsonObjectConverter stringToJsonObjectConverter;
@@ -49,7 +49,7 @@ public class EventLogConverter {
                 streamId,
                 version,
                 eventMetadata.name(),
-                jsonObjectToStringConverter.convert(envelope.metadata().asJsonObject()),
+                jsonValueToStringConverter.convert(envelope.metadata().asJsonObject()),
                 extractPayloadAsString(envelope));
 
     }
@@ -79,7 +79,7 @@ public class EventLogConverter {
     }
 
     private String extractPayloadAsString(final JsonEnvelope envelope) {
-        return jsonObjectToStringConverter.convert(jsonObjectEnvelopeConverter.extractPayloadFromEnvelope(
+        return jsonValueToStringConverter.convert(jsonObjectEnvelopeConverter.extractPayloadFromEnvelope(
                 jsonObjectEnvelopeConverter.fromEnvelope(envelope)));
     }
 

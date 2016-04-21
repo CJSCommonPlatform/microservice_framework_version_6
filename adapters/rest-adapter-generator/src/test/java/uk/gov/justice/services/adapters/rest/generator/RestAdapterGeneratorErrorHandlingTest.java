@@ -5,9 +5,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
-import org.raml.model.ActionType;
 import uk.gov.justice.raml.common.validator.RamlValidationException;
 
+import static java.util.Collections.emptyMap;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
@@ -34,7 +34,7 @@ public class RestAdapterGeneratorErrorHandlingTest {
 
         generator.run(
                 raml().build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
     }
 
@@ -48,7 +48,7 @@ public class RestAdapterGeneratorErrorHandlingTest {
                 raml()
                         .with(resource("/path"))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
     }
 
     @Test
@@ -62,7 +62,7 @@ public class RestAdapterGeneratorErrorHandlingTest {
                         resource("/path")
                                 .with(action(POST))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
     }
 
     @Test
@@ -76,7 +76,7 @@ public class RestAdapterGeneratorErrorHandlingTest {
                         .with(resource()
                                 .with(action(POST, "application/vnd.people.unknown.command1+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
     }
 
@@ -91,7 +91,7 @@ public class RestAdapterGeneratorErrorHandlingTest {
                         .with(resource()
                                 .with(action(POST, "nd.people.unknown.command1+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
     }
 
@@ -105,12 +105,12 @@ public class RestAdapterGeneratorErrorHandlingTest {
                 raml()
                         .with(resource()
                                 .with(action()
-                                        .with(ActionType.POST)
+                                        .withActionType(POST)
                                         .withMediaType("application/vnd.people.commaods.command1+json")
                                         .withMediaType("application/vnd.people.command.command1+json")
                                 ))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
     }
 
@@ -125,7 +125,7 @@ public class RestAdapterGeneratorErrorHandlingTest {
                         resource("/path")
                                 .with(action(GET))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
     }
 
 }

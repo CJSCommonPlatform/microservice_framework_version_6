@@ -10,8 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.raml.model.ActionType.POST;
-import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
+import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.defaultGetAction;
+import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.defaultPostAction;
 
 public class ResourceBuilder {
     private final List<ActionBuilder> actionBuilders = new ArrayList<>();
@@ -33,13 +33,25 @@ public class ResourceBuilder {
         return resourceBuilder;
     }
 
+    public static ResourceBuilder defaultPostResource() {
+        return resource("/some/path/{recipeId}")
+                .with(defaultPostAction());
+
+    }
+
+    public static ResourceBuilder defaultGetResource() {
+        return resource("/some/path/{recipeId}")
+                .with(defaultGetAction());
+
+    }
+
     public ResourceBuilder with(final ActionBuilder action) {
         actionBuilders.add(action);
         return this;
     }
 
     public ResourceBuilder withDefaultAction() {
-        with(action(POST, "application/vnd.structure.command.test-cmd+json"));
+        with(defaultPostAction());
         return this;
     }
 

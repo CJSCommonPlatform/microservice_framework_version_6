@@ -6,6 +6,7 @@ import org.junit.rules.TemporaryFolder;
 import uk.gov.justice.raml.core.GeneratorConfig;
 
 import static java.nio.file.Paths.get;
+import static java.util.Collections.emptyMap;
 
 /**
  * Unit tests for the {@link JaxRsCodeGenerator} class.
@@ -23,7 +24,7 @@ public class JaxRsCodeGeneratorTest {
         GeneratorConfig config =  new GeneratorConfig(
                 get(outputFolder.getRoot().getAbsolutePath()),
                 get(outputFolder.getRoot().getAbsolutePath(), "blah"),
-                BASE_PACKAGE);
+                BASE_PACKAGE, emptyMap());
 
         JaxRsCodeGenerator generator = new JaxRsCodeGenerator(config);
         generator.generate();

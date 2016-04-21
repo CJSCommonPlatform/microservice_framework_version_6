@@ -4,18 +4,25 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.raml.model.Action;
-import org.raml.model.ActionType;
 import org.raml.model.MimeType;
 import org.raml.model.Raml;
 import org.raml.model.Resource;
+
 import uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder;
 import uk.gov.justice.services.core.annotation.Component;
 
 import static net.trajano.commons.testing.UtilityClassTestUtil.assertUtilityClassWellDefined;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static org.raml.model.ActionType.POST;
+import static uk.gov.justice.services.adapters.rest.generator.Names.applicationNameOf;
 import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
+import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithCommandApiDefaults;
+import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithDefaults;
+import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithQueryApiDefaults;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
+import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
+import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 
 public class NamesTest {
 
@@ -56,7 +63,7 @@ public class NamesTest {
 
     @Test
     public void shouldBuildResourceMethodName() throws Exception {
-        Action action = action().with(ActionType.POST).build();
+        Action action = action().withActionType(POST).build();
         action.setResource(resource().withRelativeUri("test").build());
         String shortMimeType = Names.buildResourceMethodName(action, new MimeType("application/vnd.command.create-user+json"));
         assertThat(shortMimeType, is("postVndCommandCreateUserJsonTest"));
@@ -77,56 +84,60 @@ public class NamesTest {
 
     @Test
     public void shouldReturnApplicationName() throws Exception {
-        Raml raml = RamlBuilder.restRamlWithDefaults().build();
-        String applicationName = Names.applicationNameOf(raml);
+        Raml raml = restRamlWithDefaults()
+                .withBaseUri("http://localhost:8080/warname/command/api/rest/service")
+                .build();
+        String applicationName = applicationNameOf(raml);
         assertThat(applicationName, is("CommandApiRestServiceApplication"));
     }
 
     @Test(expected = IllegalStateException.class)
     public void shouldThrowExceptionForMalformedUri() throws Exception {
-        Raml raml = RamlBuilder.restRamlWithDefaults().withBaseUri("blah").build();
-        Names.applicationNameOf(raml);
+        Raml raml = restRamlWithDefaults().withBaseUri("blah").build();
+        applicationNameOf(raml);
     }
 
     @Test
     public void shouldReturnPathIfNoContextFound() throws Exception {
-        Raml raml = RamlBuilder.restRamlWithDefaults().withBaseUri("http://localhost:8080/webcontext").build();
-        String applicationName = Names.applicationNameOf(raml);
+        Raml raml = restRamlWithDefaults().withBaseUri("http://localhost:8080/webcontext").build();
+        String applicationName = applicationNameOf(raml);
         assertThat(applicationName, is("WebcontextApplication"));
     }
 
     @Test
     public void shouldRemoveContextFromBaseUri() throws Exception {
-        Raml raml = RamlBuilder.restRamlWithDefaults().build();
+        Raml raml = restRamlWithDefaults()
+                .withBaseUri("http://localhost:8080/warname/command/api/rest/service")
+                .build();
         String applicationName = Names.baseUriPathWithoutContext(raml);
         assertThat(applicationName, is("/command/api/rest/service"));
     }
 
     @Test(expected = IllegalStateException.class)
     public void shouldThrowExceptionForMalformedBaseUri() throws Exception {
-        Raml raml = RamlBuilder.restRamlWithDefaults().withBaseUri("blah").build();
+        Raml raml = restRamlWithDefaults().withBaseUri("blah").build();
         Names.baseUriPathWithoutContext(raml);
     }
 
     @Test
     public void shouldThrowExceptionForBaseUriThatDoesNotHaveEnoughPathElements() throws Exception {
-        Raml raml = RamlBuilder.restRamlWithDefaults().withBaseUri("http://localhost:8080/webcontext").build();
+        Raml raml = restRamlWithDefaults().withBaseUri("http://localhost:8080/webcontext").build();
         String applicationName = Names.baseUriPathWithoutContext(raml);
         assertThat(applicationName, is("/webcontext"));
     }
 
     @Test
     public void shouldReturnComponentFromBaseUriForCommandApi() throws Exception {
-        Raml raml = RamlBuilder.restRamlWithCommandApiDefaults().build();
+        Raml raml = restRamlWithCommandApiDefaults().build();
         Component component = Names.componentFromBaseUriIn(raml);
-        assertThat(component, is(Component.COMMAND_API));
+        assertThat(component, is(COMMAND_API));
     }
 
     @Test
     public void shouldReturnComponentFromBaseUriForQueryApi() throws Exception {
-        Raml raml = RamlBuilder.restRamlWithQueryApiDefaults().build();
+        Raml raml = restRamlWithQueryApiDefaults().build();
         Component component = Names.componentFromBaseUriIn(raml);
-        assertThat(component, is(Component.QUERY_API));
+        assertThat(component, is(QUERY_API));
     }
 
     @Rule

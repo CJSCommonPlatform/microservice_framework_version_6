@@ -6,6 +6,7 @@ import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.skyscreamer.jsonassert.JSONAssert;
 import uk.gov.justice.services.common.converter.JsonObjectToStringConverter;
+import uk.gov.justice.services.common.converter.JsonValueToStringConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidStreamIdException;
 import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
@@ -42,7 +43,7 @@ public class EventLogConverterTest {
     @Before
     public void setup() {
         eventLogConverter = new EventLogConverter();
-        eventLogConverter.jsonObjectToStringConverter = new JsonObjectToStringConverter();
+        eventLogConverter.jsonValueToStringConverter = new JsonValueToStringConverter();
         eventLogConverter.stringToJsonObjectConverter = new StringToJsonObjectConverter();
         eventLogConverter.jsonObjectEnvelopeConverter = new JsonObjectEnvelopeConverter();
     }

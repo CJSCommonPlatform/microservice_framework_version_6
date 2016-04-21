@@ -4,15 +4,17 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
-import org.raml.model.ActionType;
+
 import uk.gov.justice.raml.common.validator.RamlValidationException;
 import uk.gov.justice.raml.core.Generator;
 
+import static java.util.Collections.emptyMap;
 import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.adapters.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
+
 
 public class JmsEndpointGeneratorErrorHandlingTest {
 
@@ -38,7 +40,7 @@ public class JmsEndpointGeneratorErrorHandlingTest {
                                 .withRelativeUri("/structure.unknowntier.command")
                                 .withDefaultAction())
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
     }
 
     @Test
@@ -51,9 +53,10 @@ public class JmsEndpointGeneratorErrorHandlingTest {
                 raml()
                         .with(resource()
                                 .withRelativeUri("/lifecycle.controller.unknown")
-                                .withDefaultAction())
+                                .withDefaultAction()
+                        )
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
     }
 
     @Test
@@ -68,7 +71,7 @@ public class JmsEndpointGeneratorErrorHandlingTest {
                                 .withRelativeUri("/structure.controller")
                                 .withDefaultAction())
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
     }
 
     @Test
@@ -79,7 +82,7 @@ public class JmsEndpointGeneratorErrorHandlingTest {
 
         generator.run(
                 raml().build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
     }
 
@@ -94,7 +97,7 @@ public class JmsEndpointGeneratorErrorHandlingTest {
                         .with(resource()
                                 .withRelativeUri("/structure.controller.command"))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
     }
 
     @Test
@@ -106,9 +109,9 @@ public class JmsEndpointGeneratorErrorHandlingTest {
         generator.run(
                 raml()
                         .with(resource()
-                                .with(action().with(ActionType.POST)))
+                                .with(action().withActionType(POST)))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
     }
 
@@ -123,7 +126,7 @@ public class JmsEndpointGeneratorErrorHandlingTest {
                         .with(resource()
                                 .with(action(POST, "application/vnd.people.unknown.command1+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
     }
 
@@ -138,7 +141,7 @@ public class JmsEndpointGeneratorErrorHandlingTest {
                         .with(resource()
                                 .with(action(POST, "nd.people.unknown.command1+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
     }
 
@@ -146,18 +149,18 @@ public class JmsEndpointGeneratorErrorHandlingTest {
     public void shouldThrowExceptionIfOneOfMediaTypesNotValid() throws Exception {
 
         exception.expect(RamlValidationException.class);
-        exception.expectMessage("Invalid request type: application/vnd.people.commaod.command1+json");
+        exception.expectMessage("Invalid request type: application/vnd.people.commaods.command1+json");
 
         generator.run(
                 raml()
                         .with(resource()
                                 .with(action()
-                                        .with(ActionType.POST)
-                                        .withMediaType("application/vnd.people.commaod.command1+json")
+                                        .withActionType(POST)
+                                        .withMediaType("application/vnd.people.commaods.command1+json")
                                         .withMediaType("application/vnd.people.command.command1+json")
                                         ))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
     }
 
@@ -173,7 +176,7 @@ public class JmsEndpointGeneratorErrorHandlingTest {
                                 .withRelativeUri("/structure.event")
                                 .withDefaultAction())
                         .build(),
-                configurationWithBasePackage("uk.somepackage", outputFolder));
+                configurationWithBasePackage("uk.somepackage", outputFolder, emptyMap()));
 
 
     }
@@ -181,7 +184,7 @@ public class JmsEndpointGeneratorErrorHandlingTest {
     @Test
     public void shouldThrowExceptionWhenInvalidBaseUriWhileGeneratingEventListener() throws Exception {
         exception.expect(RamlValidationException.class);
-        exception.expectMessage("Inavlid base uri: message://too/short/uri");
+        exception.expectMessage("Invalid base uri: message://too/short/uri");
 
         generator.run(
                 raml()
@@ -190,7 +193,7 @@ public class JmsEndpointGeneratorErrorHandlingTest {
                                 .withRelativeUri("/structure.event")
                                 .withDefaultAction())
                         .build(),
-                configurationWithBasePackage("uk.somepackage", outputFolder));
+                configurationWithBasePackage("uk.somepackage", outputFolder, emptyMap()));
 
 
     }

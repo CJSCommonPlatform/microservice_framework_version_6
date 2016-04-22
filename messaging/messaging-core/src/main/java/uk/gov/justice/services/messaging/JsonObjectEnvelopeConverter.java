@@ -7,7 +7,6 @@ import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
 
-import static javax.json.JsonValue.ValueType.ARRAY;
 import static javax.json.JsonValue.ValueType.OBJECT;
 
 /**
@@ -15,8 +14,7 @@ import static javax.json.JsonValue.ValueType.OBJECT;
  */
 public class JsonObjectEnvelopeConverter {
 
-    private static final String METADATA = "_metadata";
-    private static final String RESULTS = "results";
+    public static final String METADATA = "_metadata";
 
     /**
      * Converts a jsonObject into {@link JsonEnvelope}
@@ -43,15 +41,13 @@ public class JsonObjectEnvelopeConverter {
             throw new IllegalArgumentException("Failed to convert envelope, no metadata present.");
         }
 
-        JsonObjectBuilder builder = Json.createObjectBuilder();
+        final JsonObjectBuilder builder = Json.createObjectBuilder();
         builder.add(METADATA, metadata.asJsonObject());
 
         final ValueType payloadType = envelope.payload().getValueType();
         if (payloadType == OBJECT) {
             final JsonObject payloadAsJsonObject = envelope.payloadAsJsonObject();
             payloadAsJsonObject.keySet().stream().forEach(key -> builder.add(key, payloadAsJsonObject.get(key)));
-        } else if (payloadType == ARRAY) {
-            builder.add(RESULTS, envelope.payload());
         } else {
             throw new IllegalArgumentException(String.format("Payload type %s not supported.", payloadType));
         }
@@ -66,7 +62,7 @@ public class JsonObjectEnvelopeConverter {
      * @return the payload as {@link JsonValue}
      */
     public JsonValue extractPayloadFromEnvelope(final JsonObject envelope) {
-        JsonObjectBuilder builder = Json.createObjectBuilder();
+        final JsonObjectBuilder builder = Json.createObjectBuilder();
         envelope.keySet().stream().filter(key -> !METADATA.equals(key)).forEach(key -> builder.add(key, envelope.get(key)));
         return builder.build();
     }

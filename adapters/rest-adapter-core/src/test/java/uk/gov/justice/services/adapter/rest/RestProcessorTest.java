@@ -9,9 +9,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
-import uk.gov.justice.services.common.converter.JsonObjectToStringConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonObjectMetadata;
 import uk.gov.justice.services.messaging.Metadata;
 
@@ -65,10 +63,7 @@ public class RestProcessorTest {
 
     @Before
     public void setup() {
-        restProcessor = new RestProcessor();
-        restProcessor.envelopeBuilderFactory = new RestEnvelopeBuilderFactory();
-        restProcessor.jsonObjectEnvelopeConverter = new JsonObjectEnvelopeConverter();
-        restProcessor.jsonObjectToStringConverter = new JsonObjectToStringConverter();
+        restProcessor = new RestProcessor(new RestEnvelopeBuilderFactory(), envelope -> envelope.payload().toString());
 
         metadata = JsonObjectMetadata.metadataFrom(Json.createObjectBuilder()
                 .add(ID, UUID.randomUUID().toString())

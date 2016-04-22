@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.gov.justice.api.QueryApiRestExampleApplication;
 import uk.gov.justice.services.adapter.rest.RestProcessor;
+import uk.gov.justice.services.adapter.rest.RestProcessorProducer;
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
 import uk.gov.justice.services.adapters.test.utils.dispatcher.AsynchronousRecordingDispatcher;
 import uk.gov.justice.services.adapters.test.utils.dispatcher.SynchronousRecordingDispatcher;
@@ -96,6 +97,7 @@ public class DefaultUsersUserIdResourceIT {
     @Module
     @Classes(cdi = true, value = {
             RestProcessor.class,
+            RestProcessorProducer.class,
             RestEnvelopeBuilderFactory.class,
             AsynchronousRecordingDispatcher.class,
             SynchronousRecordingDispatcher.class,

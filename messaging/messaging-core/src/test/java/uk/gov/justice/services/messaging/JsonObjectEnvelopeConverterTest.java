@@ -5,7 +5,6 @@ import org.junit.Test;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 
 import javax.json.Json;
-import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -17,7 +16,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
@@ -85,29 +83,14 @@ public class JsonObjectEnvelopeConverterTest {
         assertThat(jsonObjectEnvelopeConverter.fromEnvelope(envelope), equalTo(expectedEnvelope));
     }
 
-    @Test
-    public void shouldReturnJsonObjectFromEnvelopeWithArrayPayload() throws IOException {
-        final JsonObjectEnvelopeConverter jsonObjectEnvelopeConverter = new JsonObjectEnvelopeConverter();
-
-        final JsonEnvelope envelope = envelopeWithArrayPayload();
-        JsonObject actualEnvelope = jsonObjectEnvelopeConverter.fromEnvelope(envelope);
-
-        assertThat(actualEnvelope, notNullValue());
-        JsonObject metadata = actualEnvelope.getJsonObject("_metadata");
-        assertThat(metadata.getString("id"), is(ID));
-        assertThat(metadata.getString("name"), is(NAME));
-
-        JsonArray array = actualEnvelope.getJsonArray("results");
-        assertThat(array.getString(0), is(ARRAY_ITEM_1));
-        assertThat(array.getString(1), is(ARRAY_ITEM_2));
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionOnArrayPayloadType() {
+        new JsonObjectEnvelopeConverter().fromEnvelope(envelopeWithArrayPayload());
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void shouldThrowExceptionOnInvalidPayloadType() throws IOException {
-        final JsonObjectEnvelopeConverter jsonObjectEnvelopeConverter = new JsonObjectEnvelopeConverter();
-
-        final JsonEnvelope envelope = envelopeWithNumberPayload();
-        jsonObjectEnvelopeConverter.fromEnvelope(envelope);
+    public void shouldThrowExceptionOnNumberPayloadType() {
+        new JsonObjectEnvelopeConverter().fromEnvelope(envelopeWithNumberPayload());
     }
 
     @Test(expected = IllegalArgumentException.class)

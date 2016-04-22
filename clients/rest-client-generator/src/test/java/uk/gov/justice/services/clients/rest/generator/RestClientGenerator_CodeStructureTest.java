@@ -31,6 +31,7 @@ import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithDefaults;
+import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithTitleVersion;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.adapters.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionUtil.firstMethodOf;
@@ -40,6 +41,8 @@ public class RestClientGenerator_CodeStructureTest {
 
     private static final String BASE_PACKAGE = "org.raml.test";
     private static final Map<String, String> NOT_USED_GENERATOR_PROPERTIES = ImmutableMap.of("serviceComponent", "QUERY_CONTROLLER");
+    private static final String BASE_URI_WITH_LESS_THAN_EIGHT_PARTS = "http://localhost:8080/command/api/rest/service";
+    private static final String BASE_URI_WITH_MORE_THAN_EIGHT_PARTS = "http://localhost:8080/warname/command/api/rest/service/extra";
 
     private RestClientGenerator restClientGenerator;
 
@@ -114,7 +117,7 @@ public class RestClientGenerator_CodeStructureTest {
     }
 
     @Test
-    public void shouldGenerateMethodAceptingEnvelope() throws MalformedURLException {
+    public void shouldGenerateMethodAcceptingEnvelope() throws MalformedURLException {
         restClientGenerator.run(
                 restRamlWithDefaults()
                         .with(resource("/some/path/{recipeId}")
@@ -162,6 +165,29 @@ public class RestClientGenerator_CodeStructureTest {
 
     }
 
+    @Test
+    public void shouldThrowExceptionIfBaseUriHasLessThanEightParts() {
+
+        exception.expect(IllegalArgumentException.class);
+        exception.expectMessage(containsString("baseUri must have 8 parts"));
+
+        restClientGenerator.run(
+                restRamlWithTitleVersion().withBaseUri(BASE_URI_WITH_LESS_THAN_EIGHT_PARTS).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, NOT_USED_GENERATOR_PROPERTIES));
+
+    }
+
+    @Test
+    public void shouldThrowExceptionIfBaseUriHasMoreThanEightParts() {
+
+        exception.expect(IllegalArgumentException.class);
+        exception.expectMessage(containsString("baseUri must have 8 parts"));
+
+        restClientGenerator.run(
+                restRamlWithTitleVersion().withBaseUri(BASE_URI_WITH_MORE_THAN_EIGHT_PARTS).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, NOT_USED_GENERATOR_PROPERTIES));
+
+    }
 
     private void assertBaseUriField(Field field) {
         assertThat(Modifier.isStatic(field.getModifiers()), is(true));

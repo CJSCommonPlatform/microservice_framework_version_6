@@ -1,8 +1,6 @@
 package uk.gov.justice.services.adapter.rest;
 
 import com.jayway.jsonassert.JsonAssert;
-import org.hamcrest.collection.IsCollectionWithSize;
-import org.hamcrest.core.IsCollectionContaining;
 import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
 import org.jboss.resteasy.specimpl.ResteasyHttpHeaders;
 import org.junit.Before;
@@ -12,7 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
-import uk.gov.justice.services.common.converter.JsonObjectToStringConverter;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -21,7 +18,6 @@ import uk.gov.justice.services.messaging.JsonObjectMetadata;
 
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.json.Json;
-import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.ws.rs.core.HttpHeaders;
@@ -85,7 +81,6 @@ public class RestProcessorProducerTest {
         doReturn(QueryControllerAdapter.class).when(queryControllerMember).getDeclaringClass();
 
         restProcessorProducer.envelopeBuilderFactory = new RestEnvelopeBuilderFactory();
-        restProcessorProducer.jsonObjectToStringConverter = new JsonObjectToStringConverter();
         restProcessorProducer.jsonObjectEnvelopeConverter = new JsonObjectEnvelopeConverter();
         restProcessorProducer.initialise();
     }

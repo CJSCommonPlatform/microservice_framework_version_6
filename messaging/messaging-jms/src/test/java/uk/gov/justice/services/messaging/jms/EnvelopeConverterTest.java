@@ -5,12 +5,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.justice.services.common.converter.JsonObjectToStringConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.jms.exception.JmsConverterException;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.Metadata;
+import uk.gov.justice.services.messaging.jms.exception.JmsConverterException;
 
 import javax.jms.JMSException;
 import javax.jms.Session;
@@ -35,9 +34,6 @@ public class EnvelopeConverterTest {
     private StringToJsonObjectConverter stringToJsonObjectConverter;
 
     @Mock
-    private JsonObjectToStringConverter jsonObjectToStringConverter;
-
-    @Mock
     private JsonObjectEnvelopeConverter jsonObjectEnvelopeConverter;
 
     @Mock
@@ -49,7 +45,6 @@ public class EnvelopeConverterTest {
     @Mock
     private Metadata metadata;
 
-
     @Mock
     private JsonObject messageAsJsonObject;
 
@@ -60,7 +55,6 @@ public class EnvelopeConverterTest {
     public void setup() {
         envelopeConverter = new EnvelopeConverter();
         envelopeConverter.stringToJsonObjectConverter = stringToJsonObjectConverter;
-        envelopeConverter.jsonObjectToStringConverter = jsonObjectToStringConverter;
         envelopeConverter.jsonObjectEnvelopeConverter = jsonObjectEnvelopeConverter;
     }
 
@@ -78,7 +72,7 @@ public class EnvelopeConverterTest {
     @Test
     public void shouldReturnMessage() throws Exception {
         when(jsonObjectEnvelopeConverter.fromEnvelope(envelope)).thenReturn(messageAsJsonObject);
-        when(jsonObjectToStringConverter.convert(messageAsJsonObject)).thenReturn(MESSAGE_TEXT);
+        when(messageAsJsonObject.toString()).thenReturn(MESSAGE_TEXT);
         when(session.createTextMessage(MESSAGE_TEXT)).thenReturn(textMessage);
         when(envelope.metadata()).thenReturn(metadata);
         when(metadata.name()).thenReturn(NAME);
@@ -107,7 +101,7 @@ public class EnvelopeConverterTest {
     @Test(expected = JmsConverterException.class)
     public void shouldThrowExceptionWhenFailToCreateTextMessage() throws JMSException {
         when(jsonObjectEnvelopeConverter.fromEnvelope(envelope)).thenReturn(messageAsJsonObject);
-        when(jsonObjectToStringConverter.convert(messageAsJsonObject)).thenReturn(MESSAGE_TEXT);
+        when(messageAsJsonObject.toString()).thenReturn(MESSAGE_TEXT);
         doThrow(JMSException.class).when(session).createTextMessage(MESSAGE_TEXT);
 
         envelopeConverter.toMessage(envelope, session);

@@ -1,10 +1,9 @@
 package uk.gov.justice.services.messaging.jms;
 
-import uk.gov.justice.services.common.converter.JsonObjectToStringConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.jms.exception.JmsConverterException;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
+import uk.gov.justice.services.messaging.jms.exception.JmsConverterException;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -24,9 +23,6 @@ public class EnvelopeConverter implements MessageConverter<JsonEnvelope, TextMes
     StringToJsonObjectConverter stringToJsonObjectConverter;
 
     @Inject
-    JsonObjectToStringConverter jsonObjectToStringConverter;
-
-    @Inject
     JsonObjectEnvelopeConverter jsonObjectEnvelopeConverter;
 
     @Override
@@ -43,7 +39,7 @@ public class EnvelopeConverter implements MessageConverter<JsonEnvelope, TextMes
 
     @Override
     public TextMessage toMessage(final JsonEnvelope envelope, final Session session) {
-        final String envelopeAsString = jsonObjectToStringConverter.convert(jsonObjectEnvelopeConverter.fromEnvelope(envelope));
+        final String envelopeAsString = jsonObjectEnvelopeConverter.fromEnvelope(envelope).toString();
 
         try {
             final TextMessage textMessage = session.createTextMessage(envelopeAsString);

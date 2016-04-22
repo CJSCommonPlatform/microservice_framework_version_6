@@ -1,7 +1,6 @@
 package uk.gov.justice.services.adapter.rest;
 
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
-import uk.gov.justice.services.common.converter.JsonObjectToStringConverter;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 
 import javax.annotation.PostConstruct;
@@ -20,9 +19,6 @@ import static uk.gov.justice.services.core.annotation.Component.componentFrom;
 public class RestProcessorProducer {
 
     @Inject
-    JsonObjectToStringConverter jsonObjectToStringConverter;
-
-    @Inject
     JsonObjectEnvelopeConverter jsonObjectEnvelopeConverter;
 
     @Inject
@@ -34,7 +30,7 @@ public class RestProcessorProducer {
 
     @PostConstruct
     void initialise() {
-        defaultRestProcessor = new RestProcessor(envelopeBuilderFactory, envelope -> jsonObjectToStringConverter.convert(jsonObjectEnvelopeConverter.fromEnvelope(envelope)));
+        defaultRestProcessor = new RestProcessor(envelopeBuilderFactory, envelope -> jsonObjectEnvelopeConverter.fromEnvelope(envelope).toString());
         payloadOnlyRestProcessor = new RestProcessor(envelopeBuilderFactory, envelope -> envelope.payloadAsJsonObject().toString());
     }
 

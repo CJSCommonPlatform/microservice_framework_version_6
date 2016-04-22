@@ -20,7 +20,6 @@ import uk.gov.justice.api.StructureEventListenerJmsListener;
 import uk.gov.justice.api.StructureEventProcessorJmsListener;
 import uk.gov.justice.services.adapter.messaging.JmsProcessor;
 import uk.gov.justice.services.adapters.test.utils.dispatcher.AsynchronousRecordingDispatcher;
-import uk.gov.justice.services.common.converter.JsonObjectToStringConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
@@ -96,7 +95,6 @@ public class JmsEndpointGenerationIT {
             StructureCommandHandlerJmsListener.class,
             EnvelopeConverter.class,
             StringToJsonObjectConverter.class,
-            JsonObjectToStringConverter.class,
             JsonObjectEnvelopeConverter.class
     })
     public WebApp war() {

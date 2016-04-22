@@ -5,8 +5,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.skyscreamer.jsonassert.JSONAssert;
-import uk.gov.justice.services.common.converter.JsonObjectToStringConverter;
-import uk.gov.justice.services.common.converter.JsonValueToStringConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidStreamIdException;
 import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
@@ -43,7 +41,6 @@ public class EventLogConverterTest {
     @Before
     public void setup() {
         eventLogConverter = new EventLogConverter();
-        eventLogConverter.jsonValueToStringConverter = new JsonValueToStringConverter();
         eventLogConverter.stringToJsonObjectConverter = new StringToJsonObjectConverter();
         eventLogConverter.jsonObjectEnvelopeConverter = new JsonObjectEnvelopeConverter();
     }
@@ -51,7 +48,7 @@ public class EventLogConverterTest {
     @Test
     public void shouldCreateEventLog() throws Exception {
         JsonEnvelope expectedEnvelope = createTestEnvelope();
-        String expectedPayloadAsJsonString = new JsonObjectToStringConverter().convert(expectedEnvelope.payloadAsJsonObject());
+        String expectedPayloadAsJsonString = expectedEnvelope.payloadAsJsonObject().toString();
         EventLog eventLog = eventLogConverter.createEventLog(expectedEnvelope, STREAM_ID, SEQUENCE_ID);
 
         assertThat(eventLog.getId(), equalTo(ID));
@@ -73,7 +70,7 @@ public class EventLogConverterTest {
 
         assertThat(actualEnvelope.metadata().id(), equalTo(ID));
         assertThat(actualEnvelope.metadata().name(), equalTo(NAME));
-        String actualPayload = new JsonObjectToStringConverter().convert(actualEnvelope.payloadAsJsonObject());
+        String actualPayload = actualEnvelope.payloadAsJsonObject().toString();
         JSONAssert.assertEquals(PAYLOAD_JSON, actualPayload, false);
     }
 

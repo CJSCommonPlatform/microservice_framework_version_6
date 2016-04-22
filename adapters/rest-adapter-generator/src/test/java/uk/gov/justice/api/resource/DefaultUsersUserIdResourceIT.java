@@ -20,7 +20,6 @@ import uk.gov.justice.services.adapter.rest.RestProcessorProducer;
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
 import uk.gov.justice.services.adapters.test.utils.dispatcher.AsynchronousRecordingDispatcher;
 import uk.gov.justice.services.adapters.test.utils.dispatcher.SynchronousRecordingDispatcher;
-import uk.gov.justice.services.common.converter.JsonObjectToStringConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonObjectMetadata;
@@ -101,8 +100,7 @@ public class DefaultUsersUserIdResourceIT {
             RestEnvelopeBuilderFactory.class,
             AsynchronousRecordingDispatcher.class,
             SynchronousRecordingDispatcher.class,
-            JsonObjectEnvelopeConverter.class,
-            JsonObjectToStringConverter.class
+            JsonObjectEnvelopeConverter.class
     })
     public WebApp war() {
         return new WebApp()

@@ -33,9 +33,6 @@ public class JsonObjectToObjectConverterTest {
     private static final String INVALID_JSON = "INVALID_JSON";
 
     @Mock
-    private JsonObjectToStringConverter jsonObjectToStringConverter;
-
-    @Mock
     private ObjectMapper mapper;
 
     @Test

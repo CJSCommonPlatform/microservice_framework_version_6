@@ -13,7 +13,7 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
 
-import uk.gov.justice.domain.Aggregate;
+import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Event;
 import uk.gov.justice.services.core.extension.EventFoundEvent;

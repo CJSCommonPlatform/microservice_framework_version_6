@@ -2,7 +2,7 @@ package uk.gov.justice.services.core.aggregate;
 
 import static java.lang.String.format;
 
-import uk.gov.justice.domain.Aggregate;
+import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.extension.EventFoundEvent;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
@@ -23,13 +23,18 @@ public class AggregateService {
 
     private ConcurrentHashMap<String, Class> eventMap = new ConcurrentHashMap<>();
 
+    /**
+     * Recreate an aggregate of the specified type by replaying the events from an event stream.
+     * @param stream the event stream to replay
+     * @param clazz the type of aggregate to recreate
+     * @param <T> the type of aggregate being recreated
+     * @return the recreated aggregate
+     */
     public <T extends Aggregate> T get(final EventStream stream, final Class<T> clazz) {
 
         try {
-            T aggregate = clazz.newInstance();
-            stream.read()
-                    .map(this::convertEnvelopeToEvent)
-                    .forEach(aggregate::apply);
+            final T aggregate = clazz.newInstance();
+            aggregate.apply(stream.read().map(this::convertEnvelopeToEvent));
             return aggregate;
 
         } catch (InstantiationException | IllegalAccessException ex) {

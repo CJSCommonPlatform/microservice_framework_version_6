@@ -7,11 +7,11 @@
     <parent>
         <groupId>uk.gov.justice.services</groupId>
         <artifactId>clients</artifactId>
-        <version>0.8.0</version>
+        <version>0.8.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>rest-client-core</artifactId>
-    <version>0.8.0</version>
+    <version>0.8.1-SNAPSHOT</version>
 
     <dependencies>
         <dependency>

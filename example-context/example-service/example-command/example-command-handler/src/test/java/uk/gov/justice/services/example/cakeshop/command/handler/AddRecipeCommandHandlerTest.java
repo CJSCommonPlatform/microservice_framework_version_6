@@ -1,32 +1,37 @@
 package uk.gov.justice.services.example.cakeshop.command.handler;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.justice.services.event.enveloper.Enveloper;
-import uk.gov.justice.services.eventsourcing.source.core.EventSource;
-import uk.gov.justice.services.eventsourcing.source.core.EventStream;
-import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
-import uk.gov.justice.services.example.cakeshop.domain.event.RecipeAdded;
-import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-
-import javax.json.Json;
-import javax.json.JsonObject;
-import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Stream;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyObject;
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.IsCollectionContaining.hasItems;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
+
+import uk.gov.justice.services.core.aggregate.AggregateService;
+import uk.gov.justice.services.event.enveloper.Enveloper;
+import uk.gov.justice.services.eventsourcing.source.core.EventSource;
+import uk.gov.justice.services.eventsourcing.source.core.EventStream;
+import uk.gov.justice.services.example.cakeshop.domain.aggregate.Recipe;
+import uk.gov.justice.services.example.cakeshop.domain.event.RecipeAdded;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+
+import java.util.UUID;
+import java.util.stream.Stream;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AddRecipeCommandHandlerTest {
@@ -42,16 +47,22 @@ public class AddRecipeCommandHandlerTest {
     EventSource eventSource;
 
     @Mock
+    EventStream eventStream;
+
+    @Mock
+    AggregateService aggregateService;
+
+    @Mock
     Enveloper enveloper;
 
     @Mock
-    Function<Object, JsonEnvelope> enveloperFunction;
+    Recipe recipe;
 
     @Mock
-    Stream<RecipeAdded> events;
+    RecipeAdded event;
 
-    @Mock
-    Stream<JsonEnvelope> envelopes;
+    @Captor
+    private ArgumentCaptor<Stream<JsonEnvelope>> streamCaptor;
 
     @InjectMocks
     private AddRecipeCommandHandler addRecipeCommandHandler;
@@ -59,17 +70,16 @@ public class AddRecipeCommandHandlerTest {
     @Test
     public void shouldHandleAddRecipeCommand() throws Exception {
         final JsonEnvelope command = createCommand();
-        final EventStreamStub eventStreamStub = new EventStreamStub();
 
-        when(enveloper.withMetadataFrom(command)).thenReturn(enveloperFunction);
-        when(enveloperFunction.apply(anyObject())).thenReturn(envelope);
-        when(eventSource.getStreamById(RECIPE_ID)).thenReturn(eventStreamStub);
+        when(eventSource.getStreamById(RECIPE_ID)).thenReturn(eventStream);
+        when(aggregateService.get(eventStream, Recipe.class)).thenReturn(recipe);
+        when(recipe.addRecipe(RECIPE_ID, RECIPE_NAME, emptyList())).thenReturn(Stream.of(event));
+        when(enveloper.withMetadataFrom(command)).thenReturn(x -> x.equals(event) ? envelope : null);
 
         addRecipeCommandHandler.addRecipe(command);
 
-        assertThat(eventStreamStub.events, notNullValue());
-        assertThat(eventStreamStub.events.findFirst().get(), equalTo(envelope));
-
+        verify(eventStream).append(streamCaptor.capture());
+        assertThat(streamCaptor.getValue().collect(toList()), hasItems(envelope));
     }
 
     private JsonEnvelope createCommand() {
@@ -84,42 +94,6 @@ public class AddRecipeCommandHandlerTest {
                 .add("ingredients", Json.createArrayBuilder().build())
                 .build();
 
-        return DefaultJsonEnvelope.envelopeFrom(metadataFrom(metadataAsJsonObject), payloadAsJsonObject);
+        return envelopeFrom(metadataFrom(metadataAsJsonObject), payloadAsJsonObject);
     }
-
-    private class EventStreamStub implements EventStream {
-
-        private Stream<JsonEnvelope> events;
-
-        @Override
-        public Stream<JsonEnvelope> read() {
-            return null;
-        }
-
-        @Override
-        public Stream<JsonEnvelope> readFrom(Long version) {
-            return null;
-        }
-
-        @Override
-        public void append(Stream<JsonEnvelope> events) throws EventStreamException {
-            this.events = events;
-        }
-
-        @Override
-        public void appendAfter(Stream<JsonEnvelope> events, Long version) throws EventStreamException {
-
-        }
-
-        @Override
-        public Long getCurrentVersion() {
-            return null;
-        }
-
-        @Override
-        public UUID getId() {
-            return null;
-        }
-    }
-
 }

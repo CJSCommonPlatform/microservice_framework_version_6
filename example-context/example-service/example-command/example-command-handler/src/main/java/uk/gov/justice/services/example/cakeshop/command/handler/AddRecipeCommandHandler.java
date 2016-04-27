@@ -1,14 +1,19 @@
 package uk.gov.justice.services.example.cakeshop.command.handler;
 
 import org.slf4j.Logger;
+
+import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.event.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
+import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.example.cakeshop.domain.Ingredient;
+import uk.gov.justice.services.example.cakeshop.domain.aggregate.Recipe;
 import uk.gov.justice.services.example.cakeshop.domain.event.RecipeAdded;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.JsonObjects;
 
 import javax.inject.Inject;
 import javax.json.JsonObject;
@@ -20,6 +25,8 @@ import java.util.stream.Stream;
 import static org.slf4j.LoggerFactory.getLogger;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 import static uk.gov.justice.services.eventsourcing.source.core.Events.streamOf;
+import static uk.gov.justice.services.messaging.JsonObjects.getJsonArray;
+import static uk.gov.justice.services.messaging.JsonObjects.getString;
 import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 
 @ServiceComponent(COMMAND_HANDLER)
@@ -27,9 +34,13 @@ public class AddRecipeCommandHandler {
 
     private static final Logger LOGGER = getLogger(MakeCakeCommandHandler.class);
     private static final String FIELD_RECIPE_ID = "recipeId";
+    private static final String FIELD_NAME = "name";
 
     @Inject
     EventSource eventSource;
+
+    @Inject
+    AggregateService aggregateService;
 
     @Inject
     Enveloper enveloper;
@@ -40,20 +51,15 @@ public class AddRecipeCommandHandler {
         LOGGER.info("=============> Inside add-recipe Command Handler. RecipeId: " + command.payloadAsJsonObject().getString(FIELD_RECIPE_ID));
 
         final UUID recipeId = getUUID(command.payloadAsJsonObject(), FIELD_RECIPE_ID).get();
+        final String name = getString(command.payloadAsJsonObject(), FIELD_NAME).get();
+        final List<Ingredient> ingredients = ingredientsFrom(command.payloadAsJsonObject());
 
-        final Stream<Object> events = streamOf(recipeAddedEventFrom(command));
+        final EventStream eventStream = eventSource.getStreamById(recipeId);
+        final Recipe recipe = aggregateService.get(eventStream, Recipe.class);
 
-        eventSource.getStreamById(recipeId).append(events.map(enveloper.withMetadataFrom(command)));
-
-    }
-
-    private Object recipeAddedEventFrom(final JsonEnvelope command) {
-        final JsonObject payload = command.payloadAsJsonObject();
-        return new RecipeAdded(
-                UUID.fromString(payload.getString("recipeId")),
-                payload.getString("name"),
-                ingredientsFrom(payload)
-        );
+        eventStream.append(
+                recipe.addRecipe(recipeId, name, ingredients)
+                        .map(enveloper.withMetadataFrom(command)));
     }
 
     private List<Ingredient> ingredientsFrom(final JsonObject payload) {

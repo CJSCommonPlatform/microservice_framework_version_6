@@ -1,23 +1,23 @@
 package uk.gov.justice.services.adapters.rest.validator;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import uk.gov.justice.raml.common.validator.RamlValidationException;
-import uk.gov.justice.raml.common.validator.RamlValidator;
-
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 
-public class ResponseContentTypeRamlValidatorTest {
+import uk.gov.justice.raml.common.validator.RamlValidationException;
+import uk.gov.justice.raml.common.validator.RamlValidator;
 
-    private RamlValidator validator = new ResponseContentTypeRamlValidator();
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+
+public class ResponseContentTypeRamlValidatorTest {
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
+    private RamlValidator validator = new ResponseContentTypeRamlValidator();
 
     @Test
     public void shouldPassIfResponseContentTypeContainsAValidQueryName() throws Exception {

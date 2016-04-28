@@ -25,9 +25,10 @@ public class AggregateService {
 
     /**
      * Recreate an aggregate of the specified type by replaying the events from an event stream.
+     *
      * @param stream the event stream to replay
-     * @param clazz the type of aggregate to recreate
-     * @param <T> the type of aggregate being recreated
+     * @param clazz  the type of aggregate to recreate
+     * @param <T>    the type of aggregate being recreated
      * @return the recreated aggregate
      */
     public <T extends Aggregate> T get(final EventStream stream, final Class<T> clazz) {

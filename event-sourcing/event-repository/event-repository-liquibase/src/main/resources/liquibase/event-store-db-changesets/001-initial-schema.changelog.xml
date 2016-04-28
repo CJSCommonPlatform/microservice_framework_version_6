@@ -4,7 +4,8 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
 
-    <changeSet id="event-store-001" author="TechPod" logicalFilePath="001-initial-schema.changelog.xml">
+    <changeSet id="event-store-001" author="TechPod"
+               logicalFilePath="001-initial-schema.changelog.xml">
 
         <createTable tableName="event_log">
             <column name="id" type="uuid">

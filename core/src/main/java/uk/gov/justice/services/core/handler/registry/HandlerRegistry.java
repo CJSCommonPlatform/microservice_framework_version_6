@@ -1,5 +1,8 @@
 package uk.gov.justice.services.core.handler.registry;
 
+import static java.lang.String.format;
+import static uk.gov.justice.services.core.handler.Handlers.handlerMethodsFrom;
+
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.handler.HandlerMethod;
 import uk.gov.justice.services.core.handler.exception.MissingHandlerException;
@@ -8,9 +11,6 @@ import uk.gov.justice.services.core.handler.registry.exception.DuplicateHandlerE
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-
-import static java.lang.String.format;
-import static uk.gov.justice.services.core.handler.Handlers.handlerMethodsFrom;
 
 /**
  * Service for storing a map of which command handlers handle which commands.

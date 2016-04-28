@@ -1,5 +1,22 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
+import static com.sun.codemodel.JMod.PUBLIC;
+import static java.lang.String.format;
+
+import uk.gov.justice.services.adapter.rest.RestProcessor;
+import uk.gov.justice.services.core.annotation.Adapter;
+import uk.gov.justice.services.core.annotation.Component;
+import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
+import uk.gov.justice.services.core.dispatcher.SynchronousDispatcher;
+
+import java.lang.annotation.Annotation;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.ws.rs.core.HttpHeaders;
+
 import com.google.common.collect.ImmutableMap;
 import com.sun.codemodel.JAnnotationUse;
 import com.sun.codemodel.JBlock;
@@ -14,21 +31,6 @@ import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JPackage;
 import com.sun.codemodel.JType;
 import com.sun.codemodel.JVar;
-import uk.gov.justice.services.adapter.rest.RestProcessor;
-import uk.gov.justice.services.core.annotation.Adapter;
-import uk.gov.justice.services.core.annotation.Component;
-import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
-import uk.gov.justice.services.core.dispatcher.SynchronousDispatcher;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.ws.rs.core.HttpHeaders;
-import java.lang.annotation.Annotation;
-import java.util.List;
-import java.util.Map;
-
-import static com.sun.codemodel.JMod.PUBLIC;
-import static java.lang.String.format;
 
 /**
  * Internal code generation class for generating JAX-RS resource implementation classes.

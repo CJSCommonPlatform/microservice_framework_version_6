@@ -1,14 +1,16 @@
 package uk.gov.justice.services.common.jpa.converter;
 
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
+import static java.sql.Timestamp.valueOf;
+
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
-import static java.sql.Timestamp.valueOf;
+import javax.persistence.AttributeConverter;
+import javax.persistence.Converter;
 
 /**
- * JPA {@link AttributeConverter} to manage date time field conversion between entities and database.
+ * JPA {@link AttributeConverter} to manage date time field conversion between entities and
+ * database.
  */
 @Converter(autoApply = true)
 public class LocalDateTimePersistenceConverter implements AttributeConverter<LocalDateTime, Timestamp> {

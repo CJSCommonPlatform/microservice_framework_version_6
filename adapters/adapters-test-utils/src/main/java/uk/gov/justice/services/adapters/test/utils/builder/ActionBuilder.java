@@ -1,26 +1,26 @@
 package uk.gov.justice.services.adapters.test.utils.builder;
 
-import org.raml.model.Action;
-import org.raml.model.ActionType;
-import org.raml.model.MimeType;
-import org.raml.model.Response;
-import org.raml.model.parameter.QueryParameter;
+import static java.util.Arrays.stream;
+import static org.raml.model.ActionType.GET;
+import static org.raml.model.ActionType.POST;
+import static org.raml.model.ParamType.STRING;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.Arrays.stream;
-import static org.raml.model.ActionType.GET;
-import static org.raml.model.ActionType.POST;
-import static org.raml.model.ParamType.STRING;
+import org.raml.model.Action;
+import org.raml.model.ActionType;
+import org.raml.model.MimeType;
+import org.raml.model.Response;
+import org.raml.model.parameter.QueryParameter;
 
 public class ActionBuilder {
-    private ActionType actionType;
     private final Map<String, MimeType> body = new HashMap<>();
-    private List<Response> responses = new LinkedList<>();
     private final Map<String, QueryParameter> queryParameters = new HashMap<>();
+    private ActionType actionType;
+    private List<Response> responses = new LinkedList<>();
 
     public static ActionBuilder action() {
         return new ActionBuilder();

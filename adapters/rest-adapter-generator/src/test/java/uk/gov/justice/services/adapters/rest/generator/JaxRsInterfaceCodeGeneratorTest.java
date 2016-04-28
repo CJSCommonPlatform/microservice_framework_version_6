@@ -1,19 +1,20 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
-import com.sun.codemodel.JCodeModel;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.raml.model.Raml;
-import org.raml.model.Resource;
-import uk.gov.justice.raml.core.GeneratorConfig;
-
 import static java.nio.file.Paths.get;
 import static java.util.Collections.emptyMap;
 import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
+
+import uk.gov.justice.raml.core.GeneratorConfig;
+
+import com.sun.codemodel.JCodeModel;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.raml.model.Raml;
+import org.raml.model.Resource;
 
 /**
  * Unit tests for the {@link JaxRsInterfaceCodeGenerator} class.

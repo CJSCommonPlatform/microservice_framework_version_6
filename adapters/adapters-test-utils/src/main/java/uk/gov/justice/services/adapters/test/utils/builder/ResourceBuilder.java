@@ -1,17 +1,17 @@
 package uk.gov.justice.services.adapters.test.utils.builder;
 
-import org.raml.model.Action;
-import org.raml.model.ActionType;
-import org.raml.model.Resource;
-import org.raml.model.parameter.UriParameter;
+import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.defaultGetAction;
+import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.defaultPostAction;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.defaultGetAction;
-import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.defaultPostAction;
+import org.raml.model.Action;
+import org.raml.model.ActionType;
+import org.raml.model.Resource;
+import org.raml.model.parameter.UriParameter;
 
 public class ResourceBuilder {
     private final List<ActionBuilder> actionBuilders = new ArrayList<>();

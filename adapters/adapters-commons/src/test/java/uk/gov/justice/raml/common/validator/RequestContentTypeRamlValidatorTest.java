@@ -1,9 +1,5 @@
 package uk.gov.justice.raml.common.validator;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.HEAD;
 import static org.raml.model.ActionType.OPTIONS;
@@ -13,8 +9,14 @@ import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+
 public class RequestContentTypeRamlValidatorTest {
 
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
     private RamlValidator validator = new RequestContentTypeRamlValidator();
 
     @Test
@@ -43,9 +45,6 @@ public class RequestContentTypeRamlValidatorTest {
                         .build());
 
     }
-
-    @Rule
-    public ExpectedException exception = ExpectedException.none();
 
     @Test
     public void shouldThrowExceptionIfMediaTypeNotSet() throws Exception {

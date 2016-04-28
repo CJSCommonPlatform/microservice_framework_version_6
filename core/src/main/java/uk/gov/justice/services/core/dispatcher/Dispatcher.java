@@ -11,10 +11,10 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
  * Dispatches messages synchronously or asynchronously to their corresponding handlers, which could
  * be a command handler, command controller, event processor, etc.
  *
- * This class handles both synchronous and asynchronous dispatching. Note that it does not
- * implement the {{@link SynchronousDispatcher} or {@link AsynchronousDispatcher} interfaces. This
- * is because the <code>dispatch</code> method names would clash. Instead, we expose the dispatcher
- * as a functional interface via the {@link DispatcherProducer}.
+ * This class handles both synchronous and asynchronous dispatching. Note that it does not implement
+ * the {{@link SynchronousDispatcher} or {@link AsynchronousDispatcher} interfaces. This is because
+ * the <code>dispatch</code> method names would clash. Instead, we expose the dispatcher as a
+ * functional interface via the {@link DispatcherProducer}.
  */
 class Dispatcher {
 
@@ -29,8 +29,8 @@ class Dispatcher {
      * handler, command controller, event processor, etc.
      *
      * The underlying {@link HandlerMethod} will have returned a null {@link Void}, which we throw
-     * away at this point to provide void method that can be exposed via the
-     * {@link AsynchronousDispatcher} interface.
+     * away at this point to provide void method that can be exposed via the {@link
+     * AsynchronousDispatcher} interface.
      *
      * @param envelope the envelope to dispatch to a handler
      */

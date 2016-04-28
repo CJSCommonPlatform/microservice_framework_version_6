@@ -1,29 +1,10 @@
 package uk.gov.justice.services.clients.rest.generator;
 
-import com.google.common.collect.ImmutableMap;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.rules.TemporaryFolder;
-import org.raml.model.ParamType;
-import org.raml.model.parameter.QueryParameter;
-import uk.gov.justice.services.adapters.test.utils.compiler.JavaCompilerUtil;
-import uk.gov.justice.services.core.annotation.Handles;
-import uk.gov.justice.services.core.annotation.Remote;
-import uk.gov.justice.services.core.annotation.ServiceComponent;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-
-import javax.inject.Inject;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.net.MalformedURLException;
-import java.util.List;
-import java.util.Map;
-
 import static java.util.Collections.emptyMap;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
@@ -37,19 +18,42 @@ import static uk.gov.justice.services.adapters.test.utils.config.GeneratorConfig
 import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionUtil.methodsOf;
 
+import uk.gov.justice.services.adapters.test.utils.compiler.JavaCompilerUtil;
+import uk.gov.justice.services.core.annotation.Handles;
+import uk.gov.justice.services.core.annotation.Remote;
+import uk.gov.justice.services.core.annotation.ServiceComponent;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.net.MalformedURLException;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import com.google.common.collect.ImmutableMap;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
+import org.raml.model.ParamType;
+import org.raml.model.parameter.QueryParameter;
+
 public class RestClientGenerator_CodeStructureTest {
 
     private static final String BASE_PACKAGE = "org.raml.test";
     private static final Map<String, String> NOT_USED_GENERATOR_PROPERTIES = ImmutableMap.of("serviceComponent", "QUERY_CONTROLLER");
     private static final String BASE_URI_WITH_LESS_THAN_EIGHT_PARTS = "http://localhost:8080/command/api/rest/service";
     private static final String BASE_URI_WITH_MORE_THAN_EIGHT_PARTS = "http://localhost:8080/warname/command/api/rest/service/extra";
-
-    private RestClientGenerator restClientGenerator;
-
-    private JavaCompilerUtil compiler;
-
     @Rule
     public TemporaryFolder outputFolder = new TemporaryFolder();
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
+    private RestClientGenerator restClientGenerator;
+    private JavaCompilerUtil compiler;
 
     @Before
     public void before() {
@@ -69,7 +73,6 @@ public class RestClientGenerator_CodeStructureTest {
                                         .withActionWithResponseTypes("application/vnd.cakeshop.commands.cmd1+json"))
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, ImmutableMap.of("serviceComponent", "QUERY_API")));
-
 
 
         Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceQueryApi");
@@ -128,11 +131,8 @@ public class RestClientGenerator_CodeStructureTest {
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
         Method method = firstMethodOf(clazz);
         assertThat(method.getParameterCount(), is(1));
-        assertThat(method.getParameters()[0].getType() , equalTo((JsonEnvelope.class)));
+        assertThat(method.getParameters()[0].getType(), equalTo((JsonEnvelope.class)));
     }
-
-    @Rule
-    public ExpectedException exception = ExpectedException.none();
 
     @Test
     public void shouldThrowExceptionIfServiceComponentPropertyNotSet() {
@@ -211,7 +211,6 @@ public class RestClientGenerator_CodeStructureTest {
         queryParameter1.setRequired(required);
         return queryParameter1;
     }
-
 
 
 }

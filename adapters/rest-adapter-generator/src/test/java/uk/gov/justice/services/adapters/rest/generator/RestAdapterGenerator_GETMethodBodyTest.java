@@ -1,34 +1,13 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
 
-import org.apache.cxf.jaxrs.impl.tl.ThreadLocalHttpHeaders;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.justice.services.adapter.rest.RestProcessor;
-import uk.gov.justice.services.adapters.test.utils.compiler.JavaCompilerUtil;
-import uk.gov.justice.services.core.dispatcher.SynchronousDispatcher;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-
 import static java.util.Collections.emptyMap;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
@@ -42,6 +21,30 @@ import static uk.gov.justice.services.adapters.test.utils.config.GeneratorConfig
 import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionUtil.setField;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
+
+import uk.gov.justice.services.adapter.rest.RestProcessor;
+import uk.gov.justice.services.adapters.test.utils.compiler.JavaCompilerUtil;
+import uk.gov.justice.services.core.dispatcher.SynchronousDispatcher;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
+
+import org.apache.cxf.jaxrs.impl.tl.ThreadLocalHttpHeaders;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RestAdapterGenerator_GETMethodBodyTest {
@@ -255,7 +258,7 @@ public class RestAdapterGenerator_GETMethodBodyTest {
 
         Method method = firstMethodOf(resourceClass);
 
-        if(method.getParameters()[0].getName().equals("queryParam1")) {
+        if (method.getParameters()[0].getName().equals("queryParam1")) {
             method.invoke(resourceObject, "paramValueABC", "paramValueDEF");
         } else {
             method.invoke(resourceObject, "paramValueDEF", "paramValueABC");

@@ -1,8 +1,8 @@
 package metrics;
 
-import com.codahale.metrics.servlets.AdminServlet;
-
 import javax.servlet.annotation.WebServlet;
+
+import com.codahale.metrics.servlets.AdminServlet;
 
 /**
  * Annotated extension of the standard metrics admin servlet.

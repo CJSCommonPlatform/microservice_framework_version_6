@@ -5,12 +5,13 @@ import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLog;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.JdbcEventLogRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.EventLogRepositoryException;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Stream;
+
+import javax.sql.DataSource;
 
 /**
  * Standalone repository class to access event streams. To be used in integration testing

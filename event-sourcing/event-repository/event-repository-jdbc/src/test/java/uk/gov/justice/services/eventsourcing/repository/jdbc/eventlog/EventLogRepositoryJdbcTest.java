@@ -1,26 +1,5 @@
 package uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog;
 
-import org.hamcrest.collection.IsCollectionWithSize;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.EventLogRepositoryException;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidSequenceIdException;
-
-import javax.naming.Context;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
@@ -39,6 +18,29 @@ import static uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.Jdb
 import static uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.JdbcEventLogRepository.SQL_FIND_BY_STREAM_ID_AND_SEQUENCE_ID;
 import static uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.JdbcEventLogRepository.SQL_FIND_LATEST_SEQUENCE_ID;
 import static uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.JdbcEventLogRepository.SQL_INSERT_EVENT_LOG;
+
+import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.EventLogRepositoryException;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidSequenceIdException;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.naming.Context;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
+
+import org.hamcrest.collection.IsCollectionWithSize;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EventLogRepositoryJdbcTest {

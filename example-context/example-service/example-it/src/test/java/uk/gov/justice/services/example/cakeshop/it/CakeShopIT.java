@@ -1,5 +1,25 @@
 package uk.gov.justice.services.example.cakeshop.it;
 
+import static com.jayway.awaitility.Awaitility.await;
+import static com.jayway.jsonassert.JsonAssert.with;
+import static javax.ws.rs.client.Entity.entity;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+
+import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLog;
+import uk.gov.justice.services.example.cakeshop.it.util.StandaloneJdbcEventLogRepository;
+import uk.gov.justice.services.example.cakeshop.it.util.TestProperties;
+
+import java.util.stream.Stream;
+
+import javax.json.Json;
+import javax.json.JsonObjectBuilder;
+import javax.sql.DataSource;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
+
 import liquibase.Liquibase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.resource.ClassLoaderResourceAccessor;
@@ -9,24 +29,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLog;
-import uk.gov.justice.services.example.cakeshop.it.util.StandaloneJdbcEventLogRepository;
-import uk.gov.justice.services.example.cakeshop.it.util.TestProperties;
-
-import javax.json.Json;
-import javax.json.JsonObjectBuilder;
-import javax.sql.DataSource;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Response;
-import java.util.stream.Stream;
-
-import static com.jayway.awaitility.Awaitility.await;
-import static com.jayway.jsonassert.JsonAssert.with;
-import static javax.ws.rs.client.Entity.entity;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
 
 public class CakeShopIT {
 
@@ -44,6 +46,28 @@ public class CakeShopIT {
     private static StandaloneJdbcEventLogRepository EVENT_LOG_REPOSITORY;
 
     private Client client;
+
+    @BeforeClass
+    public static void beforeClass() throws Exception {
+        DataSource dataSource = initDatabase();
+        EVENT_LOG_REPOSITORY = new StandaloneJdbcEventLogRepository(dataSource);
+
+    }
+
+    private static DataSource initDatabase() throws Exception {
+        BasicDataSource dataSource = new BasicDataSource();
+        dataSource.setDriverClassName(H2_DRIVER);
+        TestProperties properties = TestProperties.getInstance();
+        dataSource.setUrl(properties.value(DB_URL));
+        dataSource.setUsername(properties.value(DB_USER_NAME));
+        dataSource.setPassword(properties.value(DB_PASSWORD));
+
+        Liquibase liquibase = new Liquibase(LIQUIBASE_EVENT_STORE_DB_CHANGELOG_XML,
+                new ClassLoaderResourceAccessor(), new JdbcConnection(dataSource.getConnection()));
+        liquibase.dropAll();
+        liquibase.update("");
+        return dataSource;
+    }
 
     @Test
     public void shouldReturn202ResponseWhenAddingRecipe() throws Exception {
@@ -101,13 +125,6 @@ public class CakeShopIT {
         return client.target(url);
     }
 
-    @BeforeClass
-    public static void beforeClass() throws Exception {
-        DataSource dataSource = initDatabase();
-        EVENT_LOG_REPOSITORY = new StandaloneJdbcEventLogRepository(dataSource);
-
-    }
-
     @Before
     public void before() throws Exception {
         client = new ResteasyClientBuilder().build();
@@ -118,21 +135,6 @@ public class CakeShopIT {
     public void cleanup() throws Exception {
         client.close();
 
-    }
-
-    private static DataSource initDatabase() throws Exception {
-        BasicDataSource dataSource = new BasicDataSource();
-        dataSource.setDriverClassName(H2_DRIVER);
-        TestProperties properties = TestProperties.getInstance();
-        dataSource.setUrl(properties.value(DB_URL));
-        dataSource.setUsername(properties.value(DB_USER_NAME));
-        dataSource.setPassword(properties.value(DB_PASSWORD));
-
-        Liquibase liquibase = new Liquibase(LIQUIBASE_EVENT_STORE_DB_CHANGELOG_XML,
-                new ClassLoaderResourceAccessor(), new JdbcConnection(dataSource.getConnection()));
-        liquibase.dropAll();
-        liquibase.update("");
-        return dataSource;
     }
 
 }

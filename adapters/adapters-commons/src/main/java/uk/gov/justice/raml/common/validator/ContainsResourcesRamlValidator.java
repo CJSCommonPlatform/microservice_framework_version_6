@@ -4,7 +4,6 @@ import org.raml.model.Raml;
 
 /**
  * Checks if @Raml object contains any resources
- *
  */
 public class ContainsResourcesRamlValidator implements RamlValidator {
 

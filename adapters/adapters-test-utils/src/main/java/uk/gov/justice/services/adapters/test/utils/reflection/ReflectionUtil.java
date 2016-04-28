@@ -1,21 +1,20 @@
 package uk.gov.justice.services.adapters.test.utils.reflection;
 
 
+import static java.util.stream.Collectors.toList;
+import static org.junit.Assert.assertTrue;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static java.util.stream.Collectors.toList;
-import static org.junit.Assert.assertTrue;
-
 public final class ReflectionUtil {
     private ReflectionUtil() {
     }
 
     /**
-     * @param clazz
      * @return - list of methods of the clazz
      */
     public static List<Method> methodsOf(Class<?> clazz) {
@@ -29,7 +28,6 @@ public final class ReflectionUtil {
      * @param object     - object to modify
      * @param fieldName  - name of the field belonging to the object
      * @param fieldValue - value of the field to be set
-     * @throws IllegalAccessException
      */
     public static void setField(Object object, String fieldName, Object fieldValue)
             throws IllegalAccessException {
@@ -41,8 +39,6 @@ public final class ReflectionUtil {
     /**
      * Searches for a field in the given class by reflection
      *
-     * @param clazz
-     * @param fieldName
      * @return - field belonging to the given clazz with the given fieldName
      */
     public static Field fieldOf(Class<?> clazz, String fieldName) {
@@ -55,7 +51,6 @@ public final class ReflectionUtil {
     /**
      * returns first method of the given class
      *
-     * @param clazz
      * @return - first method of the given clazz
      */
     public static Method firstMethodOf(Class<?> clazz) {

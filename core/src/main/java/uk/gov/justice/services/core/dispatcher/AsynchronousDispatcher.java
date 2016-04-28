@@ -4,8 +4,8 @@ import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 /**
- * Dispatches command to the correct asynchronous handler.
- * The framework will inject the correct implementation based on the {@link Adapter} annotation.
+ * Dispatches command to the correct asynchronous handler. The framework will inject the correct
+ * implementation based on the {@link Adapter} annotation.
  */
 @FunctionalInterface
 public interface AsynchronousDispatcher {

@@ -1,17 +1,18 @@
 package uk.gov.justice.services.example.cakeshop.it.util;
 
+import static org.junit.Assert.fail;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import static org.junit.Assert.fail;
-
 /**
- * Loads test.properties files from classpath and makes property values available through an accessor method
+ * Loads test.properties files from classpath and makes property values available through an
+ * accessor method
  */
 public class TestProperties {
-    private static TestProperties instance;
     private static final String PROPERTY_FILE_NAME = "test.properties";
+    private static TestProperties instance;
     private final Properties properties = new Properties();
 
     private TestProperties() {

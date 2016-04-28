@@ -1,11 +1,12 @@
 package uk.gov.justice.services.common.jpa.converter;
 
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
+import static java.sql.Date.valueOf;
+
 import java.sql.Date;
 import java.time.LocalDate;
 
-import static java.sql.Date.valueOf;
+import javax.persistence.AttributeConverter;
+import javax.persistence.Converter;
 
 /**
  * JPA {@link AttributeConverter} to manage date field conversion between entities and database.

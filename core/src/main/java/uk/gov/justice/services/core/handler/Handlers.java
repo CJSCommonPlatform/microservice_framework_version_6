@@ -1,14 +1,14 @@
 package uk.gov.justice.services.core.handler;
 
 
+import static java.util.Arrays.stream;
+
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.handler.registry.exception.InvalidHandlerException;
 
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static java.util.Arrays.stream;
 
 public final class Handlers {
 

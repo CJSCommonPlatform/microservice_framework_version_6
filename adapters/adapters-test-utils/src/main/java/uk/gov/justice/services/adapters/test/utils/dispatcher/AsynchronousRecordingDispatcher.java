@@ -6,8 +6,9 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import javax.inject.Singleton;
 
 /**
- * Dummy dispatcher to be used in component level asynchronous integration testing.
- * Records received envelopes and exposes them through accessor methods that use polling to wait for a specific envelope to arrive.
+ * Dummy dispatcher to be used in component level asynchronous integration testing. Records received
+ * envelopes and exposes them through accessor methods that use polling to wait for a specific
+ * envelope to arrive.
  */
 @Singleton
 public class AsynchronousRecordingDispatcher extends BasicRecordingDispatcher implements AsynchronousDispatcher {

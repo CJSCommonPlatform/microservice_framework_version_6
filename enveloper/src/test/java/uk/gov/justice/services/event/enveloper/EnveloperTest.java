@@ -1,28 +1,5 @@
 package uk.gov.justice.services.event.enveloper;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
-import uk.gov.justice.services.core.annotation.Event;
-import uk.gov.justice.services.core.extension.EventFoundEvent;
-import uk.gov.justice.services.event.enveloper.exception.InvalidEventException;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjectMetadata;
-import uk.gov.justice.services.messaging.Metadata;
-
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonValue;
-import java.util.UUID;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
@@ -42,6 +19,31 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.STREAM_ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.USER_ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
 
+import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
+import uk.gov.justice.services.core.annotation.Event;
+import uk.gov.justice.services.core.extension.EventFoundEvent;
+import uk.gov.justice.services.event.enveloper.exception.InvalidEventException;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.JsonObjectMetadata;
+import uk.gov.justice.services.messaging.Metadata;
+
+import java.util.UUID;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+
 @RunWith(MockitoJUnitRunner.class)
 public class EnveloperTest {
 
@@ -55,14 +57,10 @@ public class EnveloperTest {
     private static final UUID COMMAND_UUID = UUID.randomUUID();
     private static final UUID OLD_CAUSATION_ID = UUID.randomUUID();
     private static final String TEST_NAME = "test.query.query-response";
-
-    private Enveloper enveloper;
-
-    private Object object;
-
     @Rule
     public ExpectedException exception = ExpectedException.none();
-
+    private Enveloper enveloper;
+    private Object object;
     @Mock
     private ObjectToJsonValueConverter objectToJsonValueConverter;
 

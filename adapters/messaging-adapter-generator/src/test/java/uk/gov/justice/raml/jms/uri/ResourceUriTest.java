@@ -1,18 +1,18 @@
 package uk.gov.justice.raml.jms.uri;
 
-import org.junit.Test;
-
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Test;
+
 public class ResourceUriTest {
 
     @Test
     public void shouldReturnContext() throws Exception {
-       assertThat(new ResourceUri("/contextAbc.handler.command").context(), is("contextAbc"));
+        assertThat(new ResourceUri("/contextAbc.handler.command").context(), is("contextAbc"));
         assertThat(new ResourceUri("/context2.event").context(), is("context2"));
     }
 

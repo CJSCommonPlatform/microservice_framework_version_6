@@ -1,9 +1,9 @@
 package uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog;
 
+import java.util.UUID;
+
 import com.google.common.testing.EqualsTester;
 import org.junit.Test;
-
-import java.util.UUID;
 
 public class EventLogTest {
 

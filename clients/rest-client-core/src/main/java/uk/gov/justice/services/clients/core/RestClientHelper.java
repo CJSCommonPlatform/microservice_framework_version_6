@@ -1,11 +1,11 @@
 package uk.gov.justice.services.clients.core;
 
+import static java.util.Arrays.stream;
+
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import static java.util.Arrays.stream;
 
 /**
  * Helper service for REST clients.
@@ -16,6 +16,7 @@ public class RestClientHelper {
 
     /**
      * Extracts the path parameters from a path.
+     *
      * @param path the path with parameter names wrapped in curly brackets
      * @return the set of parameter names found in the given path
      */

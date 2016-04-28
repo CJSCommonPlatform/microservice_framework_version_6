@@ -1,20 +1,20 @@
 package uk.gov.justice.raml.jms.validator;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import uk.gov.justice.raml.common.validator.RamlValidationException;
-import uk.gov.justice.raml.common.validator.RamlValidator;
-
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 
-public class ResourceUriRamlValidatorTest {
+import uk.gov.justice.raml.common.validator.RamlValidationException;
+import uk.gov.justice.raml.common.validator.RamlValidator;
 
-    private RamlValidator validator = new ResourceUriRamlValidator();
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+
+public class ResourceUriRamlValidatorTest {
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
+    private RamlValidator validator = new ResourceUriRamlValidator();
 
     @Test
     public void shouldPassIfCorrectUri() {
@@ -71,7 +71,6 @@ public class ResourceUriRamlValidatorTest {
                 .build());
 
     }
-
 
 
 }

@@ -1,12 +1,12 @@
 package metrics;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.hamcrest.core.IsNull.notNullValue;
+import static org.junit.Assert.assertThat;
 
 import javax.servlet.annotation.WebListener;
 
-import static org.hamcrest.core.IsNull.notNullValue;
-import static org.junit.Assert.assertThat;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Unit tests for the{@link HealthCheckServletContextListener} class.

@@ -1,7 +1,11 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
-import org.raml.model.Raml;
-import org.raml.model.Resource;
+import static java.lang.String.format;
+import static org.apache.commons.lang.Validate.isTrue;
+import static org.apache.commons.lang.Validate.notEmpty;
+import static org.apache.commons.lang.Validate.notNull;
+import static uk.gov.justice.services.adapters.rest.generator.Names.componentFromBaseUriIn;
+
 import uk.gov.justice.raml.common.validator.CompositeRamlValidator;
 import uk.gov.justice.raml.common.validator.ContainsActionsRamlValidator;
 import uk.gov.justice.raml.common.validator.ContainsResourcesRamlValidator;
@@ -17,11 +21,8 @@ import java.io.File;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-import static java.lang.String.format;
-import static org.apache.commons.lang.Validate.isTrue;
-import static org.apache.commons.lang.Validate.notEmpty;
-import static org.apache.commons.lang.Validate.notNull;
-import static uk.gov.justice.services.adapters.rest.generator.Names.componentFromBaseUriIn;
+import org.raml.model.Raml;
+import org.raml.model.Resource;
 
 public class RestAdapterGenerator implements Generator {
 

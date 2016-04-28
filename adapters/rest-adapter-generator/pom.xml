@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>adapters</artifactId>
@@ -122,9 +122,12 @@
                 <artifactId>raml-maven-plugin</artifactId>
                 <version>${raml-maven-plugin.version}</version>
                 <configuration>
-                    <generatorName>uk.gov.justice.services.adapters.rest.generator.RestAdapterGenerator</generatorName>
+                    <generatorName>
+                        uk.gov.justice.services.adapters.rest.generator.RestAdapterGenerator
+                    </generatorName>
                     <sourceDirectory>${basedir}/src/test/resources/raml</sourceDirectory>
-                    <outputDirectory>${project.build.directory}/generated-test-sources</outputDirectory>
+                    <outputDirectory>${project.build.directory}/generated-test-sources
+                    </outputDirectory>
                     <basePackageName>uk.gov.justice.api</basePackageName>
                 </configuration>
                 <executions>

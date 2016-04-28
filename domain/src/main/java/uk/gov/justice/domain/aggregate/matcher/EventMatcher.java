@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 /**
  * A combination of a rule for matching events and a consumer that can be used for consuming the
  * event if it matches.
+ *
  * @param <T> the type of event the consumer can handle
  */
 public class EventMatcher<T> {

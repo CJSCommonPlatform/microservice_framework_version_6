@@ -3,9 +3,7 @@ package uk.gov.justice.services.core.extension;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
-import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.*;
-
-import uk.gov.justice.services.core.annotation.ServiceComponentLocation;
+import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.LOCAL;
 
 import javax.enterprise.inject.spi.Bean;
 

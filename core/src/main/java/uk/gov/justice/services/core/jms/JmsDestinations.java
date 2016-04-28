@@ -3,13 +3,14 @@ package uk.gov.justice.services.core.jms;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.jms.exception.JmsSenderException;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.jms.Destination;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Generates endpoints based on the context.
@@ -32,7 +33,8 @@ public class JmsDestinations {
     }
 
     /**
-     * Retrieves the command controller destination based on the <code>component</code> and <code>contextName</code>
+     * Retrieves the command controller destination based on the <code>component</code> and
+     * <code>contextName</code>
      *
      * @param component   Component the endpoint is associated with.
      * @param contextName contextName the endpoint is associated with.

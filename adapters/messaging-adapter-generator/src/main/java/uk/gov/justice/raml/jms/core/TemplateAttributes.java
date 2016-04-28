@@ -1,9 +1,10 @@
 package uk.gov.justice.raml.jms.core;
 
-import org.apache.commons.lang3.tuple.Pair;
 import uk.gov.justice.raml.jms.uri.ResourceUri;
 
 import java.util.List;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 class TemplateAttributes {
     final List<Pair<String, String>> mainAttributes;

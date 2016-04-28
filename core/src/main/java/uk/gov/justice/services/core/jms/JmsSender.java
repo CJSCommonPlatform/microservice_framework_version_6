@@ -6,8 +6,9 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.context.ContextName;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
 
-import javax.enterprise.inject.Alternative;
 import java.util.Objects;
+
+import javax.enterprise.inject.Alternative;
 
 @Alternative
 public class JmsSender implements Sender {

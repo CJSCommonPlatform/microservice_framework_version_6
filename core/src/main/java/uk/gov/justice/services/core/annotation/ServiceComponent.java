@@ -9,9 +9,7 @@ import java.lang.annotation.Target;
 import javax.enterprise.context.ApplicationScoped;
 
 /**
- * Identifies service components.
- * <p>
- * Usage: @ServiceComponent({@link Component#COMMAND_API})
+ * Identifies service components. <p> Usage: @ServiceComponent({@link Component#COMMAND_API})
  */
 @Retention(RUNTIME)
 @Target(TYPE)

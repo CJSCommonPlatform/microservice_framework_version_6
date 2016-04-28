@@ -3,7 +3,8 @@ package uk.gov.justice.services.core.extension;
 import uk.gov.justice.services.core.annotation.Event;
 
 /**
- * Event representing the occurrence of a class with an {@link Event} annotation having been identified by the framework.
+ * Event representing the occurrence of a class with an {@link Event} annotation having been
+ * identified by the framework.
  */
 public class EventFoundEvent {
 

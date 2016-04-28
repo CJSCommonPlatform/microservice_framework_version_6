@@ -1,40 +1,5 @@
 package uk.gov.justice.raml.jms.core;
 
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.FeatureMatcher;
-import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.raml.model.ActionType;
-import uk.gov.justice.raml.core.Generator;
-import uk.gov.justice.services.adapter.messaging.JmsProcessor;
-import uk.gov.justice.services.adapters.test.utils.compiler.JavaCompilerUtil;
-import uk.gov.justice.services.core.annotation.Adapter;
-import uk.gov.justice.services.core.annotation.Component;
-import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-
-import javax.ejb.ActivationConfigProperty;
-import javax.ejb.MessageDriven;
-import javax.inject.Inject;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import java.io.File;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Consumer;
-
 import static java.util.Collections.emptyMap;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
@@ -72,22 +37,56 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLL
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
 
+import uk.gov.justice.raml.core.Generator;
+import uk.gov.justice.services.adapter.messaging.JmsProcessor;
+import uk.gov.justice.services.adapters.test.utils.compiler.JavaCompilerUtil;
+import uk.gov.justice.services.core.annotation.Adapter;
+import uk.gov.justice.services.core.annotation.Component;
+import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+
+import java.io.File;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Consumer;
+
+import javax.ejb.ActivationConfigProperty;
+import javax.ejb.MessageDriven;
+import javax.inject.Inject;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.FeatureMatcher;
+import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.raml.model.ActionType;
+
 @RunWith(MockitoJUnitRunner.class)
 public class JmsEndpointGeneratorTest {
 
     private static final String BASE_PACKAGE = "uk.test";
     private static final String BASE_PACKAGE_FOLDER = "/uk/test";
-
-    private Generator generator = new JmsEndpointGenerator();
-
+    @Rule
+    public TemporaryFolder outputFolder = new TemporaryFolder();
     @Mock
     JmsProcessor jmsProcessor;
 
     @Mock
     AsynchronousDispatcher dispatcher;
-
-    @Rule
-    public TemporaryFolder outputFolder = new TemporaryFolder();
+    private Generator generator = new JmsEndpointGenerator();
     private JavaCompilerUtil compiler;
 
     @Before

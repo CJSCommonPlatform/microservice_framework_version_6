@@ -1,15 +1,15 @@
 package uk.gov.justice.services.core.annotation;
 
+import static java.lang.String.format;
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.joining;
+
+import java.util.stream.Stream;
+
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.jms.Destination;
 import javax.jms.Queue;
 import javax.jms.Topic;
-
-import java.util.stream.Stream;
-
-import static java.lang.String.format;
-import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.joining;
 
 /**
  * Enum representing all the service components.
@@ -78,6 +78,7 @@ public enum Component {
 
     /**
      * Checks if enum contains component with given name
+     *
      * @param name - component name
      * @return true if the enum contains the given name, false otherwise
      */
@@ -87,6 +88,10 @@ public enum Component {
 
     private static Stream<Component> valuesStream() {
         return stream(Component.values());
+    }
+
+    public static String names(final String delimiter) {
+        return valuesStream().map(Component::name).collect(joining(delimiter));
     }
 
     public String pillar() {
@@ -99,9 +104,5 @@ public enum Component {
 
     public Class<? extends Destination> destinationType() {
         return destinationType;
-    }
-
-    public static String names(final String delimiter) {
-        return valuesStream().map(Component::name).collect(joining(delimiter));
     }
 }

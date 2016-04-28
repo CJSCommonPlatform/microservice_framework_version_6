@@ -1,24 +1,26 @@
 package uk.gov.justice.services.adapter.rest.envelope;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+import static uk.gov.justice.services.adapter.rest.HeaderConstants.CLIENT_CORRELATION_ID;
+
+import uk.gov.justice.services.adapter.rest.HeaderConstants;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+
+import java.util.UUID;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
+
 import com.google.common.collect.ImmutableMap;
 import org.jboss.resteasy.specimpl.ResteasyHttpHeaders;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.justice.services.adapter.rest.HeaderConstants;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
-import java.util.UUID;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-import static uk.gov.justice.services.adapter.rest.HeaderConstants.CLIENT_CORRELATION_ID;
 
 /**
  * Unit tests for the {@link RestEnvelopeBuilder} class.
@@ -102,7 +104,6 @@ public class RestEnvelopeBuilderTest {
     }
 
 
-
     @Test
     public void shouldAddInitialPayload() throws Exception {
         setupHttpHeaders(DEFAULT_HEADERS);
@@ -160,7 +161,7 @@ public class RestEnvelopeBuilderTest {
     @Test
     public void shouldSetSessionId() throws Exception {
         setupHttpHeaders(new MultivaluedHashMap<>(
-                ImmutableMap.of("Content-Type", "application/vnd.blah+json",HeaderConstants.SESSION_ID, UUID_SESSION_ID.toString())));
+                ImmutableMap.of("Content-Type", "application/vnd.blah+json", HeaderConstants.SESSION_ID, UUID_SESSION_ID.toString())));
 
         JsonEnvelope envelope = builder.build();
 

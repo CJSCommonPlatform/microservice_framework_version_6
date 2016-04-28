@@ -1,11 +1,12 @@
 package uk.gov.justice.api;
 
-import org.junit.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+
 import uk.gov.justice.api.resource.DefaultUsersResource;
 import uk.gov.justice.api.resource.DefaultUsersUserIdResource;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import org.junit.Test;
 
 /**
  * Unit tests for the generated {@link QueryApiRestExampleApplication} class.

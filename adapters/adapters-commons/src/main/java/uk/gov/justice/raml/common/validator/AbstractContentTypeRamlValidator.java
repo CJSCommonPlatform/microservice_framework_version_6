@@ -1,18 +1,18 @@
 package uk.gov.justice.raml.common.validator;
 
-import org.raml.model.Action;
-import org.raml.model.ActionType;
-import org.raml.model.MimeType;
-import org.raml.model.Resource;
+import static java.lang.String.format;
+import static java.util.Arrays.stream;
+import static org.apache.commons.lang.StringUtils.capitalize;
 
 import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static java.lang.String.format;
-import static java.util.Arrays.stream;
-import static org.apache.commons.lang.StringUtils.capitalize;
+import org.raml.model.Action;
+import org.raml.model.ActionType;
+import org.raml.model.MimeType;
+import org.raml.model.Resource;
 
 public abstract class AbstractContentTypeRamlValidator extends AbstractResourceRamlValidator {
     private final Pattern mediaTypePattern;

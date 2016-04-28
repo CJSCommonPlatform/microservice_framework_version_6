@@ -1,11 +1,11 @@
 package uk.gov.justice.services.common.converter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
-
 import static org.hamcrest.CoreMatchers.isA;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Test;
 
 public class JacksonMapperProducerTest {
 

@@ -1,9 +1,10 @@
 package uk.gov.justice.services.messaging;
 
-import javax.json.JsonObject;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import javax.json.JsonObject;
 
 /**
  * Interface for an envelope's metadata.
@@ -32,7 +33,8 @@ public interface Metadata {
     Optional<String> clientCorrelationId();
 
     /**
-     * Get a list of ids that indicate the sequence of commands or events that resulting in this message
+     * Get a list of ids that indicate the sequence of commands or events that resulting in this
+     * message
      *
      * @return the causation list
      */
@@ -60,7 +62,8 @@ public interface Metadata {
     Optional<UUID> streamId();
 
     /**
-     * Get the sequence id (or version) that indicates where in the stream this message is positioned, if one is specified.
+     * Get the sequence id (or version) that indicates where in the stream this message is
+     * positioned, if one is specified.
      *
      * @return the optional sequence id
      */

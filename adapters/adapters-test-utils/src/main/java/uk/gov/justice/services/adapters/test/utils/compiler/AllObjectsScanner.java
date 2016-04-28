@@ -4,7 +4,6 @@ import org.reflections.scanners.SubTypesScanner;
 
 /**
  * Extension of the reflection API to scan for all classes
- *
  */
 public class AllObjectsScanner extends SubTypesScanner {
 
@@ -15,7 +14,6 @@ public class AllObjectsScanner extends SubTypesScanner {
 
     /**
      * Accepts all classes and puts them in the store as subclasses of @Object
-     *
      */
     @SuppressWarnings({"unchecked"})
     public void scan(final Object cls) {

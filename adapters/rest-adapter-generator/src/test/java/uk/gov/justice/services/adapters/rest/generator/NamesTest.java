@@ -1,16 +1,5 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.raml.model.Action;
-import org.raml.model.MimeType;
-import org.raml.model.Raml;
-import org.raml.model.Resource;
-
-import uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder;
-import uk.gov.justice.services.core.annotation.Component;
-
 import static net.trajano.commons.testing.UtilityClassTestUtil.assertUtilityClassWellDefined;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -24,7 +13,21 @@ import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilde
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 
+import uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder;
+import uk.gov.justice.services.core.annotation.Component;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.raml.model.Action;
+import org.raml.model.MimeType;
+import org.raml.model.Raml;
+import org.raml.model.Resource;
+
 public class NamesTest {
+
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
 
     @Test
     public void shouldBeWellDefinedUtilityClass() {
@@ -139,9 +142,6 @@ public class NamesTest {
         Component component = Names.componentFromBaseUriIn(raml);
         assertThat(component, is(QUERY_API));
     }
-
-    @Rule
-    public ExpectedException exception = ExpectedException.none();
 
     @Test
     public void shouldThrowExceptionIfNoValidPillarAndTier() throws Exception {

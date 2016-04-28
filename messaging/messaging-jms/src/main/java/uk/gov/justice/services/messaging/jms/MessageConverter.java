@@ -17,7 +17,8 @@ public interface MessageConverter<T extends Object, M extends Message> {
     T fromMessage(final M message);
 
     /**
-     * Convert a Java object to a JMS Message using the supplied session to create the message object.
+     * Convert a Java object to a JMS Message using the supplied session to create the message
+     * object.
      *
      * @param object  to be converted.
      * @param session used to create the Message.

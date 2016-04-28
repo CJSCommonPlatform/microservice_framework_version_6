@@ -15,8 +15,8 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 
 /**
- * An envelope producer that sends or publishes an envelope to a queue or topic respectively depending on the
- * destination type.
+ * An envelope producer that sends or publishes an envelope to a queue or topic respectively
+ * depending on the destination type.
  */
 public class JmsEnvelopeSender {
 

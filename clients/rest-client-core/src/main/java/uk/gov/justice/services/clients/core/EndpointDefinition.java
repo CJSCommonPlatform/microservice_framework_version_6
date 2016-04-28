@@ -14,9 +14,10 @@ public class EndpointDefinition {
 
     /**
      * Constructor.
-     * @param baseUri the base URI for the endpoint
-     * @param path the path, with any path parameter names wrapped in curly brackets
-     * @param pathParams a set defining the path parameters to expect
+     *
+     * @param baseUri     the base URI for the endpoint
+     * @param path        the path, with any path parameter names wrapped in curly brackets
+     * @param pathParams  a set defining the path parameters to expect
      * @param queryParams a set defining the query parameters this endpoint can take
      */
     public EndpointDefinition(final String baseUri, final String path, final Set<String> pathParams,
@@ -29,6 +30,7 @@ public class EndpointDefinition {
 
     /**
      * Get the base URI.
+     *
      * @return the base URI
      */
     public String getBaseURi() {
@@ -37,6 +39,7 @@ public class EndpointDefinition {
 
     /**
      * Get the path.
+     *
      * @return the path
      */
     public String getPath() {
@@ -45,6 +48,7 @@ public class EndpointDefinition {
 
     /**
      * Get the path parameters as a set.
+     *
      * @return the set of path parameters
      */
     public Set<String> getPathParams() {
@@ -53,6 +57,7 @@ public class EndpointDefinition {
 
     /**
      * Get the query parameters as a set.
+     *
      * @return the ste of query paremeters
      */
     public Set<QueryParam> getQueryParams() {

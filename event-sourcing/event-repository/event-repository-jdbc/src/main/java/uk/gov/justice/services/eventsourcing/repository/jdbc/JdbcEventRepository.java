@@ -10,10 +10,11 @@ import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidSe
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidStreamIdException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
-import javax.inject.Inject;
-import javax.transaction.Transactional;
 import java.util.UUID;
 import java.util.stream.Stream;
+
+import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 /**
  * JDBC implementation of {@link EventRepository}

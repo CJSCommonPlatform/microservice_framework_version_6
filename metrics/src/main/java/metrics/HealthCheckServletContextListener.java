@@ -1,10 +1,10 @@
 package metrics;
 
-import com.codahale.metrics.health.HealthCheckRegistry;
+import static com.codahale.metrics.servlets.HealthCheckServlet.ContextListener;
 
 import javax.servlet.annotation.WebListener;
 
-import static com.codahale.metrics.servlets.HealthCheckServlet.ContextListener;
+import com.codahale.metrics.health.HealthCheckRegistry;
 
 /**
  * Annotated context listener for wiring up the health check servlet.

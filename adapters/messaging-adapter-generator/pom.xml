@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
@@ -98,7 +99,8 @@
                 <configuration>
                     <generatorName>uk.gov.justice.raml.jms.core.JmsEndpointGenerator</generatorName>
                     <sourceDirectory>${basedir}/src/test/resources/raml</sourceDirectory>
-                    <outputDirectory>${project.build.directory}/generated-test-sources</outputDirectory>
+                    <outputDirectory>${project.build.directory}/generated-test-sources
+                    </outputDirectory>
                     <basePackageName>uk.gov.justice.api</basePackageName>
                 </configuration>
                 <executions>

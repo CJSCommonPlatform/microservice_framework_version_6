@@ -1,5 +1,36 @@
 package uk.gov.justice.api;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static java.lang.String.format;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
+
+import uk.gov.justice.services.clients.core.RestClientHelper;
+import uk.gov.justice.services.clients.core.RestClientProcessor;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.core.annotation.ServiceComponent;
+import uk.gov.justice.services.core.dispatcher.DispatcherProducer;
+import uk.gov.justice.services.core.dispatcher.Requester;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
+
+import java.io.StringWriter;
+import java.util.Properties;
+import java.util.UUID;
+
+import javax.inject.Inject;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonWriter;
+
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.apache.openejb.OpenEjbContainer;
@@ -15,65 +46,39 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import uk.gov.justice.services.clients.core.RestClientHelper;
-import uk.gov.justice.services.clients.core.RestClientProcessor;
-import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
-import uk.gov.justice.services.core.annotation.ServiceComponent;
-import uk.gov.justice.services.core.dispatcher.DispatcherProducer;
-import uk.gov.justice.services.core.dispatcher.Requester;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
-
-import javax.inject.Inject;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonWriter;
-import java.io.StringWriter;
-import java.util.Properties;
-import java.util.UUID;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static java.lang.String.format;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
 
 @RunWith(ApplicationComposer.class)
 @ServiceComponent(QUERY_API)
 public class RemoteExampleQueryApiIT {
 
     private static final String BASE_PATH = "/rest-adapter-generator/query/api/rest/example";
-
-    private static int port = -1;
-
     private static final String METADATA = "_metadata";
-
     private static final JsonObject RESPONSE = Json.createObjectBuilder()
             .add(METADATA, Json.createObjectBuilder()
                     .add(NAME, "people.response.user")
                     .add(ID, UUID.randomUUID().toString()))
             .add("result", "SUCCESS")
             .build();
-
     private static final UUID QUERY_ID = UUID.randomUUID();
     private static final UUID USER_ID = UUID.randomUUID();
-
-    @Inject
-    Requester requester;
-
+    private static int port = -1;
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(8080);
+    @Inject
+    Requester requester;
 
     @BeforeClass
     public static void beforeClass() {
         port = NetworkUtil.getNextAvailablePort();
+    }
+
+    private static String jsonObjectToString(final JsonObject source) {
+        final StringWriter stringWriter = new StringWriter();
+        try (final JsonWriter writer = Json.createWriter(stringWriter)) {
+            writer.writeObject(source);
+        }
+
+        return stringWriter.getBuffer().toString();
     }
 
     @Configuration
@@ -128,14 +133,5 @@ public class RemoteExampleQueryApiIT {
                 Json.createObjectBuilder()
                         .add("result", "SUCCESS")
                         .build()));
-    }
-
-    private static String jsonObjectToString(final JsonObject source) {
-        final StringWriter stringWriter = new StringWriter();
-        try (final JsonWriter writer = Json.createWriter(stringWriter)) {
-            writer.writeObject(source);
-        }
-
-        return stringWriter.getBuffer().toString();
     }
 }

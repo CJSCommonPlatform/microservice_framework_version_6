@@ -1,15 +1,16 @@
 package uk.gov.justice.services.common.converter;
 
-import com.google.common.io.Resources;
-import org.junit.Test;
-
-import javax.json.JsonObject;
-import java.io.IOException;
-import java.nio.charset.Charset;
-
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+
+import java.io.IOException;
+import java.nio.charset.Charset;
+
+import javax.json.JsonObject;
+
+import com.google.common.io.Resources;
+import org.junit.Test;
 
 public class StringToJsonObjectConverterTest {
 

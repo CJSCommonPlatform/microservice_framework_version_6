@@ -1,17 +1,5 @@
 package uk.gov.justice.services.adapter.rest;
 
-import org.slf4j.Logger;
-import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-
-import javax.enterprise.inject.Alternative;
-import javax.json.JsonObject;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
 import static java.lang.String.format;
 import static javax.json.JsonValue.NULL;
 import static javax.ws.rs.core.Response.Status.ACCEPTED;
@@ -21,10 +9,25 @@ import static javax.ws.rs.core.Response.Status.OK;
 import static javax.ws.rs.core.Response.status;
 import static org.slf4j.LoggerFactory.getLogger;
 
+import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
+import javax.enterprise.inject.Alternative;
+import javax.json.JsonObject;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
+
+import org.slf4j.Logger;
+
 /**
- * In order to minimise the amount of generated code in the JAX-RS implementation classes, this service encapsulates
- * all the logic for building an envelope from the REST request, passing it to a consumer and building a suitable
- * response. This allows testing of this logic independently from the automated generation code.
+ * In order to minimise the amount of generated code in the JAX-RS implementation classes, this
+ * service encapsulates all the logic for building an envelope from the REST request, passing it to
+ * a consumer and building a suitable response. This allows testing of this logic independently from
+ * the automated generation code.
  */
 @Alternative
 public class RestProcessor {
@@ -41,8 +44,8 @@ public class RestProcessor {
     }
 
     /**
-     * Process an incoming REST request by combining the payload, headers and path parameters into an envelope and
-     * passing the envelope to the given consumer.
+     * Process an incoming REST request by combining the payload, headers and path parameters into
+     * an envelope and passing the envelope to the given consumer.
      *
      * @param consumer       a consumer for the envelope
      * @param initialPayload the payload from the REST request

@@ -1,12 +1,13 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
+import static java.nio.file.Paths.get;
+import static java.util.Collections.emptyMap;
+
+import uk.gov.justice.raml.core.GeneratorConfig;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import uk.gov.justice.raml.core.GeneratorConfig;
-
-import static java.nio.file.Paths.get;
-import static java.util.Collections.emptyMap;
 
 /**
  * Unit tests for the {@link JaxRsCodeGenerator} class.
@@ -21,7 +22,7 @@ public class JaxRsCodeGeneratorTest {
     @Test(expected = RuntimeException.class)
     public void shouldThrowExceptionIfOutputDirectoryDoesNotExist() throws Exception {
 
-        GeneratorConfig config =  new GeneratorConfig(
+        GeneratorConfig config = new GeneratorConfig(
                 get(outputFolder.getRoot().getAbsolutePath()),
                 get(outputFolder.getRoot().getAbsolutePath(), "blah"),
                 BASE_PACKAGE, emptyMap());

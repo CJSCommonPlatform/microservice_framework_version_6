@@ -50,19 +50,14 @@ public class RestClientGenerator_MethodBodyTest {
     private static final String BASE_PACKAGE = "org.raml.test";
     private static final JsonEnvelope NOT_USED_ENVELOPE = DefaultJsonEnvelope.envelopeFrom(null, null);
     private static final Map<String, String> NOT_USED_GENERATOR_PROPERTIES = ImmutableMap.of("serviceComponent", "QUERY_CONTROLLER");
-
-    private RestClientGenerator restClientGenerator;
-
-    private JavaCompilerUtil compiler;
-
-    @Mock
-    RestClientProcessor restClientProcessor;
-
-    @Mock
-    RestClientHelper restClientHelper;
-
     @Rule
     public TemporaryFolder outputFolder = new TemporaryFolder();
+    @Mock
+    RestClientProcessor restClientProcessor;
+    @Mock
+    RestClientHelper restClientHelper;
+    private RestClientGenerator restClientGenerator;
+    private JavaCompilerUtil compiler;
 
     @Before
     public void before() {

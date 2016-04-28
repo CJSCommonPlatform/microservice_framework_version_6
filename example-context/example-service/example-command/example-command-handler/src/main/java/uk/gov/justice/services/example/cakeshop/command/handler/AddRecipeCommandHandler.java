@@ -1,6 +1,9 @@
 package uk.gov.justice.services.example.cakeshop.command.handler;
 
-import org.slf4j.Logger;
+import static org.slf4j.LoggerFactory.getLogger;
+import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
+import static uk.gov.justice.services.messaging.JsonObjects.getString;
+import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 
 import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -11,23 +14,16 @@ import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.example.cakeshop.domain.Ingredient;
 import uk.gov.justice.services.example.cakeshop.domain.aggregate.Recipe;
-import uk.gov.justice.services.example.cakeshop.domain.event.RecipeAdded;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjects;
 
-import javax.inject.Inject;
-import javax.json.JsonObject;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static org.slf4j.LoggerFactory.getLogger;
-import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
-import static uk.gov.justice.services.eventsourcing.source.core.Events.streamOf;
-import static uk.gov.justice.services.messaging.JsonObjects.getJsonArray;
-import static uk.gov.justice.services.messaging.JsonObjects.getString;
-import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
+import javax.inject.Inject;
+import javax.json.JsonObject;
+
+import org.slf4j.Logger;
 
 @ServiceComponent(COMMAND_HANDLER)
 public class AddRecipeCommandHandler {

@@ -1,11 +1,13 @@
 package uk.gov.justice.services.common.converter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.justice.services.common.converter.exception.ConverterException;
+
+import java.io.IOException;
 
 import javax.inject.Inject;
 import javax.json.JsonObject;
-import java.io.IOException;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Converts JsonObject to the given Pojo type.

@@ -1,11 +1,11 @@
 package uk.gov.justice.raml.common.validator;
 
-import org.junit.Test;
-import org.raml.model.Raml;
-
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+
+import org.junit.Test;
+import org.raml.model.Raml;
 
 public class CompositeRamlValidatorTest {
 

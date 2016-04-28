@@ -1,13 +1,5 @@
 package uk.gov.justice.raml.jms.core;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.rules.TemporaryFolder;
-
-import uk.gov.justice.raml.common.validator.RamlValidationException;
-import uk.gov.justice.raml.core.Generator;
-
 import static java.util.Collections.emptyMap;
 import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
@@ -15,18 +7,23 @@ import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.ra
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.adapters.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 
+import uk.gov.justice.raml.common.validator.RamlValidationException;
+import uk.gov.justice.raml.core.Generator;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
+
 
 public class JmsEndpointGeneratorErrorHandlingTest {
 
     private static final String BASE_PACKAGE = "uk.test";
-
-    private Generator generator = new JmsEndpointGenerator();
-
     @Rule
     public TemporaryFolder outputFolder = new TemporaryFolder();
-
     @Rule
     public ExpectedException exception = ExpectedException.none();
+    private Generator generator = new JmsEndpointGenerator();
 
     @Test
     public void shouldThrowExceptionIfInvalidTierPassedInUri() throws Exception {
@@ -158,7 +155,7 @@ public class JmsEndpointGeneratorErrorHandlingTest {
                                         .withActionType(POST)
                                         .withMediaType("application/vnd.people.commaods.command1+json")
                                         .withMediaType("application/vnd.people.command.command1+json")
-                                        ))
+                                ))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 

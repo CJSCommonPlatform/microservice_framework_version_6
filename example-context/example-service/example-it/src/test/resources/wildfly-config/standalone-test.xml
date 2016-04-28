@@ -43,16 +43,19 @@
                     <properties path="mgmt-users.properties" relative-to="jboss.server.config.dir"/>
                 </authentication>
                 <authorization map-groups-to-roles="false">
-                    <properties path="mgmt-groups.properties" relative-to="jboss.server.config.dir"/>
+                    <properties path="mgmt-groups.properties"
+                                relative-to="jboss.server.config.dir"/>
                 </authorization>
             </security-realm>
             <security-realm name="ApplicationRealm">
                 <authentication>
                     <local default-user="$local" allowed-users="*" skip-group-loading="true"/>
-                    <properties path="application-users.properties" relative-to="jboss.server.config.dir"/>
+                    <properties path="application-users.properties"
+                                relative-to="jboss.server.config.dir"/>
                 </authentication>
                 <authorization>
-                    <properties path="application-roles.properties" relative-to="jboss.server.config.dir"/>
+                    <properties path="application-roles.properties"
+                                relative-to="jboss.server.config.dir"/>
                 </authorization>
             </security-realm>
         </security-realms>
@@ -137,31 +140,36 @@
             </thread-pool>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:bean-validation:1.0"/>
-       
+
         <subsystem xmlns="urn:jboss:domain:deployment-scanner:2.0">
-            <deployment-scanner path="deployments" relative-to="jboss.server.base.dir" scan-interval="5000"
+            <deployment-scanner path="deployments" relative-to="jboss.server.base.dir"
+                                scan-interval="5000"
                                 runtime-failure-causes-rollback="${jboss.deployment.scanner.rollback.on.failure:false}"/>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:ee:4.0">
             <spec-descriptor-property-replacement>false</spec-descriptor-property-replacement>
             <concurrent>
                 <context-services>
-                    <context-service name="default" jndi-name="java:jboss/ee/concurrency/context/default"
+                    <context-service name="default"
+                                     jndi-name="java:jboss/ee/concurrency/context/default"
                                      use-transaction-setup-provider="true"/>
                 </context-services>
                 <managed-thread-factories>
-                    <managed-thread-factory name="default" jndi-name="java:jboss/ee/concurrency/factory/default"
+                    <managed-thread-factory name="default"
+                                            jndi-name="java:jboss/ee/concurrency/factory/default"
                                             context-service="default"/>
                 </managed-thread-factories>
                 <managed-executor-services>
-                    <managed-executor-service name="default" jndi-name="java:jboss/ee/concurrency/executor/default"
+                    <managed-executor-service name="default"
+                                              jndi-name="java:jboss/ee/concurrency/executor/default"
                                               context-service="default" hung-task-threshold="60000"
                                               keepalive-time="5000"/>
                 </managed-executor-services>
                 <managed-scheduled-executor-services>
                     <managed-scheduled-executor-service name="default"
                                                         jndi-name="java:jboss/ee/concurrency/scheduler/default"
-                                                        context-service="default" hung-task-threshold="60000"
+                                                        context-service="default"
+                                                        hung-task-threshold="60000"
                                                         keepalive-time="3000"/>
                 </managed-scheduled-executor-services>
             </concurrent>
@@ -177,24 +185,29 @@
                 <stateless>
                     <bean-instance-pool-ref pool-name="slsb-strict-max-pool"/>
                 </stateless>
-                <stateful default-access-timeout="5000" cache-ref="simple" passivation-disabled-cache-ref="simple"/>
+                <stateful default-access-timeout="5000" cache-ref="simple"
+                          passivation-disabled-cache-ref="simple"/>
                 <singleton default-access-timeout="5000"/>
             </session-bean>
             <mdb>
-                <resource-adapter-ref resource-adapter-name="${ejb.resource-adapter-name:activemq-ra.rar}"/>
+                <resource-adapter-ref
+                        resource-adapter-name="${ejb.resource-adapter-name:activemq-ra.rar}"/>
                 <bean-instance-pool-ref pool-name="mdb-strict-max-pool"/>
             </mdb>
             <pools>
                 <bean-instance-pools>
                     <strict-max-pool name="slsb-strict-max-pool" derive-size="from-worker-pools"
-                                     instance-acquisition-timeout="5" instance-acquisition-timeout-unit="MINUTES"/>
+                                     instance-acquisition-timeout="5"
+                                     instance-acquisition-timeout-unit="MINUTES"/>
                     <strict-max-pool name="mdb-strict-max-pool" derive-size="from-cpu-count"
-                                     instance-acquisition-timeout="5" instance-acquisition-timeout-unit="MINUTES"/>
+                                     instance-acquisition-timeout="5"
+                                     instance-acquisition-timeout-unit="MINUTES"/>
                 </bean-instance-pools>
             </pools>
             <caches>
                 <cache name="simple"/>
-                <cache name="distributable" passivation-store-ref="infinispan" aliases="passivating clustered"/>
+                <cache name="distributable" passivation-store-ref="infinispan"
+                       aliases="passivating clustered"/>
             </caches>
             <passivation-stores>
                 <passivation-store name="infinispan" cache-container="ejb" max-size="10000"/>
@@ -223,12 +236,14 @@
             <buffer-pool name="default"/>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:infinispan:4.0">
-            <cache-container name="server" default-cache="default" module="org.wildfly.clustering.server">
+            <cache-container name="server" default-cache="default"
+                             module="org.wildfly.clustering.server">
                 <local-cache name="default">
                     <transaction mode="BATCH"/>
                 </local-cache>
             </cache-container>
-            <cache-container name="web" default-cache="passivation" module="org.wildfly.clustering.web.infinispan">
+            <cache-container name="web" default-cache="passivation"
+                             module="org.wildfly.clustering.web.infinispan">
                 <local-cache name="passivation">
                     <locking isolation="REPEATABLE_READ"/>
                     <transaction mode="BATCH"/>
@@ -253,7 +268,8 @@
                     <file-store passivation="false" purge="false"/>
                 </local-cache>
             </cache-container>
-            <cache-container name="hibernate" default-cache="local-query" module="org.hibernate.infinispan">
+            <cache-container name="hibernate" default-cache="local-query"
+                             module="org.hibernate.infinispan">
                 <local-cache name="entity">
                     <transaction mode="NON_XA"/>
                     <eviction strategy="LRU" max-entries="10000"/>
@@ -309,13 +325,16 @@
             <server name="default">
                 <journal type="NIO"/>
                 <security-setting name="#">
-                    <role name="guest" delete-non-durable-queue="true" create-non-durable-queue="true" consume="true"
+                    <role name="guest" delete-non-durable-queue="true"
+                          create-non-durable-queue="true" consume="true"
                           send="true"/>
                 </security-setting>
-                <address-setting name="#" message-counter-history-day-limit="10" page-size-bytes="2097152"
+                <address-setting name="#" message-counter-history-day-limit="10"
+                                 page-size-bytes="2097152"
                                  max-size-bytes="10485760" expiry-address="jms.queue.ExpiryQueue"
                                  dead-letter-address="jms.queue.DLQ"/>
-                <http-connector name="http-connector" endpoint="http-acceptor" socket-binding="http"/>
+                <http-connector name="http-connector" endpoint="http-acceptor"
+                                socket-binding="http"/>
                 <http-connector name="http-connector-throughput" endpoint="http-acceptor-throughput"
                                 socket-binding="http">
                     <param name="batch-delay" value="50"/>
@@ -330,11 +349,13 @@
                 <jms-queue name="ExpiryQueue" entries="java:/jms/queue/ExpiryQueue"/>
                 <jms-queue name="DLQ" entries="java:/jms/queue/DLQ"/>
                 <jms-queue name="testQueue" entries="java:/jms/queue/testQueue"/>
-                <jms-queue name="cakeshop.controller.command" entries="cakeshop.controller.command"/>
+                <jms-queue name="cakeshop.controller.command"
+                           entries="cakeshop.controller.command"/>
                 <jms-queue name="cakeshop.handler.command" entries="cakeshop.handler.command"/>
                 <jms-topic name="cakeshop.event" entries="cakeshop.event"/>
-                
-                <connection-factory name="InVmConnectionFactory" entries="java:/ConnectionFactory" connectors="in-vm"/>
+
+                <connection-factory name="InVmConnectionFactory" entries="java:/ConnectionFactory"
+                                    connectors="in-vm"/>
                 <connection-factory name="RemoteConnectionFactory"
                                     entries="java:jboss/exported/jms/RemoteConnectionFactory"
                                     connectors="http-connector"/>
@@ -343,9 +364,10 @@
                                            connectors="in-vm"/>
             </server>
         </subsystem>
-         <subsystem xmlns="urn:jboss:domain:datasources:4.0">
+        <subsystem xmlns="urn:jboss:domain:datasources:4.0">
             <datasources>
-                <datasource jndi-name="java:/app/example-command-handler/DS.EventStore" pool-name="DS.cakeshop.EventStore" enabled="true"
+                <datasource jndi-name="java:/app/example-command-handler/DS.EventStore"
+                            pool-name="DS.cakeshop.EventStore" enabled="true"
                             use-java-context="true">
                     <connection-url>${db.url}</connection-url>
                     <driver>h2</driver>
@@ -367,7 +389,8 @@
         <subsystem xmlns="urn:jboss:domain:pojo:1.0"/>
         <subsystem xmlns="urn:jboss:domain:remoting:3.0">
             <endpoint/>
-            <http-connector name="http-remoting-connector" connector-ref="default" security-realm="ApplicationRealm"/>
+            <http-connector name="http-remoting-connector" connector-ref="default"
+                            security-realm="ApplicationRealm"/>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:resource-adapters:4.0"/>
         <subsystem xmlns="urn:jboss:domain:request-controller:1.0"/>
@@ -417,7 +440,8 @@
                     <uuid/>
                 </process-id>
             </core-environment>
-            <recovery-environment socket-binding="txn-recovery-environment" status-socket-binding="txn-status-manager"/>
+            <recovery-environment socket-binding="txn-recovery-environment"
+                                  status-socket-binding="txn-status-manager"/>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:undertow:3.0">
             <buffer-cache name="default"/>
@@ -437,8 +461,10 @@
                 <file name="welcome-content" path="${jboss.home.dir}/welcome-content"/>
             </handlers>
             <filters>
-                <response-header name="server-header" header-name="Server" header-value="WildFly/10"/>
-                <response-header name="x-powered-by-header" header-name="X-Powered-By" header-value="Undertow/1"/>
+                <response-header name="server-header" header-name="Server"
+                                 header-value="WildFly/10"/>
+                <response-header name="x-powered-by-header" header-name="X-Powered-By"
+                                 header-value="Undertow/1"/>
             </filters>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:webservices:2.0">
@@ -447,7 +473,8 @@
             <endpoint-config name="Recording-Endpoint-Config">
                 <pre-handler-chain name="recording-handlers"
                                    protocol-bindings="##SOAP11_HTTP ##SOAP11_HTTP_MTOM ##SOAP12_HTTP ##SOAP12_HTTP_MTOM">
-                    <handler name="RecordingHandler" class="org.jboss.ws.common.invocation.RecordingServerHandler"/>
+                    <handler name="RecordingHandler"
+                             class="org.jboss.ws.common.invocation.RecordingServerHandler"/>
                 </pre-handler-chain>
             </endpoint-config>
             <client-config name="Standard-Client-Config"/>
@@ -469,8 +496,10 @@
 
     <socket-binding-group name="standard-sockets" default-interface="public"
                           port-offset="${jboss.socket.binding.port-offset:0}">
-        <socket-binding name="management-http" interface="management" port="${jboss.management.http.port:9990}"/>
-        <socket-binding name="management-https" interface="management" port="${jboss.management.https.port:9993}"/>
+        <socket-binding name="management-http" interface="management"
+                        port="${jboss.management.http.port:9990}"/>
+        <socket-binding name="management-https" interface="management"
+                        port="${jboss.management.https.port:9993}"/>
         <socket-binding name="ajp" port="${jboss.ajp.port:8009}"/>
         <socket-binding name="http" port="${jboss.http.port:8080}"/>
         <socket-binding name="https" port="${jboss.https.port:8443}"/>

@@ -1,10 +1,10 @@
 package uk.gov.justice.raml.jms.uri;
 
 
+import static java.lang.String.format;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static java.lang.String.format;
 
 /**
  * Parses Raml base uri and exposes it's parts through accessor methods
@@ -24,6 +24,20 @@ public class BaseUri {
         this.pillar = m.group(1);
         this.tier = m.group(2);
         this.service = m.group(3);
+    }
+
+    /**
+     * Checks if the uri adheres to framework's standard
+     *
+     * @param uriString - uri to validate
+     * @return true is uri adheres to framework's standard, false otherwise
+     */
+    public static boolean valid(final String uriString) {
+        return matcherOf(uriString).matches();
+    }
+
+    private static Matcher matcherOf(final String uriString) {
+        return MESSAGING_BASE_URI_PATTERN.matcher(uriString);
     }
 
     /**
@@ -47,7 +61,6 @@ public class BaseUri {
         return service;
     }
 
-
     /**
      * Constructs clientId used in durable JMS subscribers
      *
@@ -55,19 +68,5 @@ public class BaseUri {
      */
     public String adapterClientId() {
         return format("%s.%s.%s", service(), pillar(), tier());
-    }
-
-    /**
-     * Checks if the uri adheres to framework's standard
-     *
-     * @param uriString - uri to validate
-     * @return true is uri adheres to framework's standard, false otherwise
-     */
-    public static boolean valid(final String uriString) {
-        return matcherOf(uriString).matches();
-    }
-
-    private static Matcher matcherOf(final String uriString) {
-        return MESSAGING_BASE_URI_PATTERN.matcher(uriString);
     }
 }

@@ -1,13 +1,13 @@
 package uk.gov.justice.services.adapters.test.utils.dispatcher;
 
+import static com.jayway.awaitility.Awaitility.await;
+
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Predicate;
-
-import static com.jayway.awaitility.Awaitility.await;
 
 /**
  * Dispatcher for test purposes that records the envelopes it has been asked to dispatch.
@@ -42,7 +42,9 @@ public class BasicRecordingDispatcher {
     }
 
     /**
-     * Method for testing negative conditions. Checks whether an envelope containing specified element in the payload has (not) been dispatched.
+     * Method for testing negative conditions. Checks whether an envelope containing specified
+     * element in the payload has (not) been dispatched.
+     *
      * @param jsonElementName  - name of element in payload
      * @param jsonElementValue - value of element in payload
      * @return - true if the envelope has not been dispatched, false otherwise
@@ -57,7 +59,9 @@ public class BasicRecordingDispatcher {
     }
 
     /**
-     * Method for testing negative conditions. Checks whether an envelope containing specified element in the payload has (not) been dispatched.
+     * Method for testing negative conditions. Checks whether an envelope containing specified
+     * element in the payload has (not) been dispatched.
+     *
      * @param jsonElementName  - name of element in metadata
      * @param jsonElementValue - value of element in metadata
      * @return - true if the envelope has not been dispatched, false otherwise

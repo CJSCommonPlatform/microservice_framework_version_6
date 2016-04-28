@@ -1,11 +1,12 @@
 package uk.gov.justice.services.core.sender;
 
-import org.junit.Before;
-import org.junit.Test;
-import uk.gov.justice.services.core.annotation.Component;
-
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
+
+import uk.gov.justice.services.core.annotation.Component;
+
+import org.junit.Before;
+import org.junit.Test;
 
 public class ComponentDestinationTest {
 

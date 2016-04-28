@@ -1,11 +1,10 @@
 package uk.gov.justice.raml.jms.core;
 
-import org.apache.commons.lang3.tuple.Pair;
-import org.raml.model.Action;
-import org.raml.model.ActionType;
-import org.raml.model.Raml;
-import org.raml.model.Resource;
-import org.stringtemplate.v4.ST;
+import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
+import static org.apache.commons.io.FileUtils.write;
+import static org.apache.commons.lang.StringUtils.capitalize;
+
 import uk.gov.justice.raml.common.validator.CompositeRamlValidator;
 import uk.gov.justice.raml.common.validator.ContainsActionsRamlValidator;
 import uk.gov.justice.raml.common.validator.ContainsResourcesRamlValidator;
@@ -19,7 +18,6 @@ import uk.gov.justice.raml.jms.validator.BaseUriRamlValidator;
 import uk.gov.justice.raml.jms.validator.ResourceUriRamlValidator;
 import uk.gov.justice.services.core.annotation.Component;
 
-import javax.jms.Topic;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,10 +30,14 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static java.lang.String.format;
-import static java.util.stream.Collectors.joining;
-import static org.apache.commons.io.FileUtils.write;
-import static org.apache.commons.lang.StringUtils.capitalize;
+import javax.jms.Topic;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.raml.model.Action;
+import org.raml.model.ActionType;
+import org.raml.model.Raml;
+import org.raml.model.Resource;
+import org.stringtemplate.v4.ST;
 
 /**
  * Generates JMS endpoint classes out of RAML object
@@ -71,8 +73,7 @@ public class JmsEndpointGenerator implements Generator {
      * Generates JMS endpoint classes out of RAML object
      *
      * @param raml          - the RAML object
-     * @param configuration - contains package of generated sources, as well as
-     *                      source and
+     * @param configuration - contains package of generated sources, as well as source and
      *                      destination folders
      */
     @Override
@@ -153,7 +154,6 @@ public class JmsEndpointGenerator implements Generator {
      * Convert given URI and component to a camel cased class name
      *
      * @param resourceUri URI String to convert
-     * @param component
      * @return camel case class name
      */
     private String classNameOf(final ResourceUri resourceUri, final Component component) {
@@ -164,10 +164,8 @@ public class JmsEndpointGenerator implements Generator {
     }
 
     /**
-     * Convert given URI to a valid Component
-     * <p>
-     * Takes the last and second to last parts of the URI as the pillar and tier
-     * of the Component
+     * Convert given URI to a valid Component <p> Takes the last and second to last parts of the URI
+     * as the pillar and tier of the Component
      *
      * @param resourceUri URI of the resource
      * @param baseUri     base uri of the resource
@@ -204,10 +202,8 @@ public class JmsEndpointGenerator implements Generator {
     }
 
     /**
-     * Converts media type String to a command name
-     * <p>
-     * Command name is equal to everything between "application/vnd." and the
-     * first "+".
+     * Converts media type String to a command name <p> Command name is equal to everything between
+     * "application/vnd." and the first "+".
      *
      * @param mediaType String representation of the Media Type
      * @return command name

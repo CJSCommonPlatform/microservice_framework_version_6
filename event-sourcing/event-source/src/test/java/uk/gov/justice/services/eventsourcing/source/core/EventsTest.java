@@ -1,13 +1,13 @@
 package uk.gov.justice.services.eventsourcing.source.core;
 
-import org.hamcrest.collection.IsIterableContainingInOrder;
-import org.junit.Test;
+import static net.trajano.commons.testing.UtilityClassTestUtil.assertUtilityClassWellDefined;
+import static org.junit.Assert.assertThat;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static net.trajano.commons.testing.UtilityClassTestUtil.assertUtilityClassWellDefined;
-import static org.junit.Assert.assertThat;
+import org.hamcrest.collection.IsIterableContainingInOrder;
+import org.junit.Test;
 
 public class EventsTest {
 

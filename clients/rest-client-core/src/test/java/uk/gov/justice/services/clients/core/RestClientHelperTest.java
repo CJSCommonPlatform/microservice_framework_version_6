@@ -1,12 +1,12 @@
 package uk.gov.justice.services.clients.core;
 
-import org.hamcrest.collection.IsCollectionWithSize;
-import org.hamcrest.core.IsCollectionContaining;
-import org.junit.Test;
+import static org.junit.Assert.assertThat;
 
 import java.util.Set;
 
-import static org.junit.Assert.assertThat;
+import org.hamcrest.collection.IsCollectionWithSize;
+import org.hamcrest.core.IsCollectionContaining;
+import org.junit.Test;
 
 public class RestClientHelperTest {
 

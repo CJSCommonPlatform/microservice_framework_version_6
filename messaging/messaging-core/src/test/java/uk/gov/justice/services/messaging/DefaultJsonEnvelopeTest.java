@@ -1,9 +1,8 @@
 package uk.gov.justice.services.messaging;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
 
 import javax.json.JsonArray;
 import javax.json.JsonNumber;
@@ -11,9 +10,10 @@ import javax.json.JsonObject;
 import javax.json.JsonString;
 import javax.json.JsonValue;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * Unit tests for the {@link DefaultJsonEnvelope} class.

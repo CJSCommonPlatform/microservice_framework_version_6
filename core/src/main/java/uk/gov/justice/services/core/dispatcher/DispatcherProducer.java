@@ -25,8 +25,8 @@ import org.apache.commons.lang3.tuple.Pair;
 /**
  * CDI producer for dispatchers.
  *
- * This can produce both {@link SynchronousDispatcher} and {@link AsynchronousDispatcher} beans,
- * as well as {@link Requester} beans, based on the service component they are being injected into.
+ * This can produce both {@link SynchronousDispatcher} and {@link AsynchronousDispatcher} beans, as
+ * well as {@link Requester} beans, based on the service component they are being injected into.
  *
  * Internally, the same dispatcher is used for both synchronous and asynchronous handlers; the
  * injection point in fact gets a functional interface that provides the <code>dispatch</code>
@@ -46,12 +46,13 @@ public class DispatcherProducer {
     }
 
     /**
-     * Produces the correct implementation of an asynchronous dispatcher depending on the
-     * {@link Adapter} annotation at the injection point.
+     * Produces the correct implementation of an asynchronous dispatcher depending on the {@link
+     * Adapter} annotation at the injection point.
      *
      * @param injectionPoint class where the {@link AsynchronousDispatcher} is being injected
      * @return the correct dispatcher instance
-     * @throws IllegalStateException if the injection point does not have an {@link Adapter} annotation
+     * @throws IllegalStateException if the injection point does not have an {@link Adapter}
+     *                               annotation
      */
     @Produces
     public AsynchronousDispatcher produceAsynchronousDispatcher(final InjectionPoint injectionPoint) {
@@ -59,12 +60,13 @@ public class DispatcherProducer {
     }
 
     /**
-     * Produces the correct implementation of a synchronous dispatcher depending on the
-     * {@link Adapter} annotation at the injection point.
+     * Produces the correct implementation of a synchronous dispatcher depending on the {@link
+     * Adapter} annotation at the injection point.
      *
      * @param injectionPoint class where the {@link AsynchronousDispatcher} is being injected
      * @return the correct dispatcher instance
-     * @throws IllegalStateException if the injection point does not have an {@link Adapter} annotation
+     * @throws IllegalStateException if the injection point does not have an {@link Adapter}
+     *                               annotation
      */
     @Produces
     public SynchronousDispatcher produceSynchronousDispatcher(final InjectionPoint injectionPoint) {
@@ -78,7 +80,7 @@ public class DispatcherProducer {
      * @param injectionPoint class where the {@link Requester} is being injected
      * @return the correct requester instance
      * @throws IllegalStateException if the injection point does not have a {@link ServiceComponent}
-     * annotation
+     *                               annotation
      */
     @Produces
     public Requester produceRequester(final InjectionPoint injectionPoint) {

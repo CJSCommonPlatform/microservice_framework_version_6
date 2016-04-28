@@ -1,36 +1,5 @@
 package uk.gov.justice.api.resource;
 
-import org.apache.openejb.OpenEjbContainer;
-import org.apache.openejb.jee.Application;
-import org.apache.openejb.jee.WebApp;
-import org.apache.openejb.junit.ApplicationComposer;
-import org.apache.openejb.testing.Classes;
-import org.apache.openejb.testing.Configuration;
-import org.apache.openejb.testing.EnableServices;
-import org.apache.openejb.testing.Module;
-import org.apache.openejb.testng.PropertiesBuilder;
-import org.apache.openejb.util.NetworkUtil;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import uk.gov.justice.api.QueryApiRestExampleApplication;
-import uk.gov.justice.services.adapter.rest.RestProcessor;
-import uk.gov.justice.services.adapter.rest.RestProcessorProducer;
-import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
-import uk.gov.justice.services.adapters.test.utils.dispatcher.AsynchronousRecordingDispatcher;
-import uk.gov.justice.services.adapters.test.utils.dispatcher.SynchronousRecordingDispatcher;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
-import uk.gov.justice.services.messaging.JsonObjectMetadata;
-import uk.gov.justice.services.messaging.Metadata;
-
-import javax.inject.Inject;
-import javax.json.Json;
-import javax.ws.rs.core.Response;
-import java.util.Properties;
-import java.util.UUID;
-
 import static com.jayway.jsonassert.JsonAssert.with;
 import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.client.Entity.entity;
@@ -45,6 +14,39 @@ import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
 
+import uk.gov.justice.api.QueryApiRestExampleApplication;
+import uk.gov.justice.services.adapter.rest.RestProcessor;
+import uk.gov.justice.services.adapter.rest.RestProcessorProducer;
+import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
+import uk.gov.justice.services.adapters.test.utils.dispatcher.AsynchronousRecordingDispatcher;
+import uk.gov.justice.services.adapters.test.utils.dispatcher.SynchronousRecordingDispatcher;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
+import uk.gov.justice.services.messaging.JsonObjectMetadata;
+import uk.gov.justice.services.messaging.Metadata;
+
+import java.util.Properties;
+import java.util.UUID;
+
+import javax.inject.Inject;
+import javax.json.Json;
+import javax.ws.rs.core.Response;
+
+import org.apache.openejb.OpenEjbContainer;
+import org.apache.openejb.jee.Application;
+import org.apache.openejb.jee.WebApp;
+import org.apache.openejb.junit.ApplicationComposer;
+import org.apache.openejb.testing.Classes;
+import org.apache.openejb.testing.Configuration;
+import org.apache.openejb.testing.EnableServices;
+import org.apache.openejb.testing.Module;
+import org.apache.openejb.testng.PropertiesBuilder;
+import org.apache.openejb.util.NetworkUtil;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 /**
  * Integration tests for the generated JAX-RS classes.
  */
@@ -54,21 +56,15 @@ public class DefaultUsersUserIdResourceIT {
 
     private static final String CREATE_USER_MEDIA_TYPE = "application/vnd.people.command.create-user+json";
     private static final String UPDATE_USER_MEDIA_TYPE = "application/vnd.people.command.update-user+json";
+    private static final String BASE_URI_PATTERN = "http://localhost:%d/rest-adapter-generator/query/api/rest/example";
+    private static final String JSON = "{\"userUrn\" : \"test\"}";
     private static int port = -1;
     private static String BASE_URI;
-
-    private static final String BASE_URI_PATTERN = "http://localhost:%d/rest-adapter-generator/query/api/rest/example";
-
-    private static final String JSON = "{\"userUrn\" : \"test\"}";
-
-    private Metadata metadata;
-
     @Inject
     AsynchronousRecordingDispatcher asyncDispatcher;
-
     @Inject
     SynchronousRecordingDispatcher syncDispatcher;
-
+    private Metadata metadata;
 
     @BeforeClass
     public static void beforeClass() {

@@ -1,10 +1,11 @@
 package uk.gov.justice.raml.jms.uri;
 
-import org.junit.Test;
-
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
-import static org.junit.Assert.*;
+import org.junit.Test;
 
 public class BaseUriTest {
     @Test
@@ -12,6 +13,7 @@ public class BaseUriTest {
         assertThat(new BaseUri("message://event/listener/message/service1").tier(), is("listener"));
         assertThat(new BaseUri("message://event/processor/message/service2").tier(), is("processor"));
     }
+
     @Test
     public void shouldReturnPillar() throws Exception {
         assertThat(new BaseUri("message://event/listener/message/service1").pillar(), is("event"));
@@ -23,6 +25,7 @@ public class BaseUriTest {
         assertThat(new BaseUri("message://event/listener/message/service1").service(), is("service1"));
         assertThat(new BaseUri("message://command/handler/message/service2").service(), is("service2"));
     }
+
     @Test
     public void shouldReturnAdapterClientId() {
         assertThat(new BaseUri("message://event/listener/message/service1").adapterClientId(), is("service1.event.listener"));

@@ -3,10 +3,11 @@ package uk.gov.justice.services.adapters.test.utils.dispatcher;
 import uk.gov.justice.services.core.dispatcher.SynchronousDispatcher;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
-import javax.inject.Singleton;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+
+import javax.inject.Singleton;
 
 @Singleton
 public class SynchronousRecordingDispatcher extends BasicRecordingDispatcher implements SynchronousDispatcher {

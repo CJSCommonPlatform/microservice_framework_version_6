@@ -4,7 +4,6 @@ import org.raml.model.Resource;
 
 /**
  * Checks if all resources defined in @Raml contain actions
- *
  */
 public class ContainsActionsRamlValidator extends AbstractResourceRamlValidator {
 

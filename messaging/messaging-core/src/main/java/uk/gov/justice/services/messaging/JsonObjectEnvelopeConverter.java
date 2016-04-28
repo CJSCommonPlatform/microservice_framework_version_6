@@ -1,13 +1,13 @@
 package uk.gov.justice.services.messaging;
 
 
+import static javax.json.JsonValue.ValueType.OBJECT;
+
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
-
-import static javax.json.JsonValue.ValueType.OBJECT;
 
 /**
  * A converter class to convert between {@link JsonEnvelope} and {@link JsonObject}.

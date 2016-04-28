@@ -30,8 +30,10 @@ public class RestClientProcessor {
 
     /**
      * Make a request using the envelope provided to a specified endpoint.
+     *
      * @param definition the endpoint definition
-     * @param envelope the envelope containing the payload and/or parameters to pass in the request
+     * @param envelope   the envelope containing the payload and/or parameters to pass in the
+     *                   request
      * @return the response from that the endpoint returned for this request
      */
     public JsonEnvelope request(final EndpointDefinition definition, final JsonEnvelope envelope) {

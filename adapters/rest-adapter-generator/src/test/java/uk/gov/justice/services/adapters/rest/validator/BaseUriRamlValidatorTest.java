@@ -10,10 +10,9 @@ import org.junit.rules.ExpectedException;
 
 public class BaseUriRamlValidatorTest {
 
-    private RamlValidator validator = new BaseUriRamlValidator();
-
     @Rule
     public ExpectedException exception = ExpectedException.none();
+    private RamlValidator validator = new BaseUriRamlValidator();
 
     @Test
     public void shouldPassIfBaseUriContainsTheQueryPillarAndApiTier() throws Exception {
@@ -78,7 +77,7 @@ public class BaseUriRamlValidatorTest {
                 .withVersion("#%RAML 0.8")
                 .withTitle("Example Service")
                 .withBaseUri("http://localhost:8080/warname/api/rest/service")
-        .build());
+                .build());
     }
 
     @Test
@@ -90,7 +89,7 @@ public class BaseUriRamlValidatorTest {
                 .withVersion("#%RAML 0.8")
                 .withTitle("Example Service")
                 .withBaseUri("http://localhost:8080/warname/command/rest/service")
-        .build());
+                .build());
     }
 
     @Test
@@ -102,7 +101,7 @@ public class BaseUriRamlValidatorTest {
                 .withVersion("#%RAML 0.8")
                 .withTitle("Example Service")
                 .withBaseUri("http://localhost:8080/warname/event/listener/rest/service")
-        .build());
+                .build());
     }
 
 }

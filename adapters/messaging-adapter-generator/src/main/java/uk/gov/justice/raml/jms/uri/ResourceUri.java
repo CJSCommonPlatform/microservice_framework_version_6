@@ -1,9 +1,9 @@
 package uk.gov.justice.raml.jms.uri;
 
+import static org.apache.commons.lang3.StringUtils.stripStart;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static org.apache.commons.lang3.StringUtils.stripStart;
 
 public class ResourceUri {
     private static final Pattern MESSAGING_RESOURCE_URI_PATTERN =
@@ -21,6 +21,20 @@ public class ResourceUri {
         this.context = m.group(1);
         this.tier = m.group(4);
         this.pillar = m.group(5) != null ? m.group(5) : m.group(6);
+    }
+
+    private static Matcher matcherOf(final String uriString) {
+        return MESSAGING_RESOURCE_URI_PATTERN.matcher(uriString);
+    }
+
+    /**
+     * Checks if the uri adheres to framework's standard
+     *
+     * @param uriString - uri to validate
+     * @return true is uri adheres to framework's standard, false otherwise
+     */
+    public static boolean valid(final String uriString) {
+        return matcherOf(uriString).matches();
     }
 
     /**
@@ -56,20 +70,6 @@ public class ResourceUri {
     @Override
     public String toString() {
         return uriString;
-    }
-
-    private static Matcher matcherOf(final String uriString) {
-        return MESSAGING_RESOURCE_URI_PATTERN.matcher(uriString);
-    }
-
-    /**
-     * Checks if the uri adheres to framework's standard
-     *
-     * @param uriString - uri to validate
-     * @return true is uri adheres to framework's standard, false otherwise
-     */
-    public static boolean valid(final String uriString) {
-        return matcherOf(uriString).matches();
     }
 
 }

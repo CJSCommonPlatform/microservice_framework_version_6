@@ -1,8 +1,9 @@
 package uk.gov.justice.services.eventsourcing.source.core;
 
+import java.util.UUID;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import java.util.UUID;
 
 /**
  * Source of event streams.

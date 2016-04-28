@@ -1,5 +1,19 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
+import static com.sun.codemodel.JMod.PUBLIC;
+import static org.apache.commons.lang.StringUtils.defaultIfBlank;
+import static uk.gov.justice.services.adapters.rest.generator.Names.applicationNameOf;
+import static uk.gov.justice.services.adapters.rest.generator.Names.baseUriPathWithoutContext;
+
+import uk.gov.justice.raml.core.GeneratorConfig;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
+
 import com.sun.codemodel.JBlock;
 import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JCodeModel;
@@ -10,22 +24,10 @@ import com.sun.codemodel.JPackage;
 import com.sun.codemodel.JType;
 import com.sun.codemodel.JVar;
 import org.raml.model.Raml;
-import uk.gov.justice.raml.core.GeneratorConfig;
-
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
-import static com.sun.codemodel.JMod.PUBLIC;
-import static org.apache.commons.lang.StringUtils.defaultIfBlank;
-import static uk.gov.justice.services.adapters.rest.generator.Names.applicationNameOf;
-import static uk.gov.justice.services.adapters.rest.generator.Names.baseUriPathWithoutContext;
 
 /**
- * Internal code generation class for generating the JAX-RS {@link Application} that ties
- * the resources to a base URI.
+ * Internal code generation class for generating the JAX-RS {@link Application} that ties the
+ * resources to a base URI.
  */
 class JaxRsApplicationCodeGenerator {
 
@@ -39,7 +41,7 @@ class JaxRsApplicationCodeGenerator {
      *
      * @param codeModel the code model, which should already have the resource implementations and
      *                  interfaces created
-     * @param config the generator configuration
+     * @param config    the generator configuration
      */
     JaxRsApplicationCodeGenerator(final JCodeModel codeModel, final GeneratorConfig config) {
         this.codeModel = codeModel;
@@ -49,8 +51,9 @@ class JaxRsApplicationCodeGenerator {
     /**
      * Create an {@link Application} in the {@link JCodeModel}.
      *
-     * @param raml the RAML document being generated from
-     * @param implementationNames a collection of fully qualified class names of the resource implementation classes
+     * @param raml                the RAML document being generated from
+     * @param implementationNames a collection of fully qualified class names of the resource
+     *                            implementation classes
      * @return the fully defined application class
      */
     JDefinedClass createApplication(final Raml raml, final Collection<String> implementationNames) {

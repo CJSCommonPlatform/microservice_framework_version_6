@@ -1,17 +1,16 @@
 package uk.gov.justice.raml.jms.validator;
 
-import org.raml.model.Raml;
+import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import uk.gov.justice.raml.common.validator.RamlValidationException;
 import uk.gov.justice.raml.common.validator.RamlValidator;
 import uk.gov.justice.raml.jms.uri.BaseUri;
 
-import static java.lang.String.format;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
+import org.raml.model.Raml;
 
 /**
  * Checks if RAML contain base uris that correctly adheres to the framework's standard.
- *
  */
 public class BaseUriRamlValidator implements RamlValidator {
     private static final String ERROR_MSG = "Invalid base uri: %s";

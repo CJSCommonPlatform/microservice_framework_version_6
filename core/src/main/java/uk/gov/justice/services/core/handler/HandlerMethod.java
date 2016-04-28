@@ -68,6 +68,14 @@ public class HandlerMethod {
         this.handlerMethod = method;
     }
 
+    private static boolean isVoid(final Class<?> clazz) {
+        return Void.TYPE.equals(clazz);
+    }
+
+    private static boolean isEnvelope(final Class<?> clazz) {
+        return JsonEnvelope.class.equals(clazz);
+    }
+
     /**
      * Invokes the handler method passing the <code>envelope</code> to it.
      *
@@ -88,6 +96,7 @@ public class HandlerMethod {
 
     /**
      * Check if this handler method is synchronous.
+     *
      * @return true if the method returns a value
      */
     public boolean isSynchronous() {
@@ -99,13 +108,5 @@ public class HandlerMethod {
         return format("HandlerMethod[ Class: %s method: %s]",
                 handlerInstance != null ? handlerInstance.getClass().getName() : null,
                 handlerMethod != null ? handlerMethod.getName() : null);
-    }
-
-    private static boolean isVoid(final Class<?> clazz) {
-        return Void.TYPE.equals(clazz);
-    }
-
-    private static boolean isEnvelope(final Class<?> clazz) {
-        return JsonEnvelope.class.equals(clazz);
     }
 }

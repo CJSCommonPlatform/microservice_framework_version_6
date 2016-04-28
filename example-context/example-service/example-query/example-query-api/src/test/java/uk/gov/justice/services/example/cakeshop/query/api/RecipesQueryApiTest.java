@@ -1,21 +1,23 @@
 package uk.gov.justice.services.example.cakeshop.query.api;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.justice.services.core.dispatcher.Requester;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-
-import javax.json.JsonObject;
-import java.util.UUID;
-
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import uk.gov.justice.services.core.dispatcher.Requester;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+
+import java.util.UUID;
+
+import javax.json.JsonObject;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RecipesQueryApiTest {
@@ -28,13 +30,10 @@ public class RecipesQueryApiTest {
 
     @Mock
     JsonEnvelope response;
-
-    @Mock
-    private Requester requester;
-
     @Mock
     JsonObject payload;
-
+    @Mock
+    private Requester requester;
     @InjectMocks
     private RecipesQueryApi recipesQueryApi;
 

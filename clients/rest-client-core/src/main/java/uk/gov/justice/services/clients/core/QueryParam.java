@@ -10,7 +10,8 @@ public class QueryParam {
 
     /**
      * Constructor.
-     * @param name the name of the parameter
+     *
+     * @param name     the name of the parameter
      * @param required true if the parameter is required
      */
     public QueryParam(final String name, final boolean required) {
@@ -20,6 +21,7 @@ public class QueryParam {
 
     /**
      * Get the name of this parameter.
+     *
      * @return the name
      */
     public String getName() {
@@ -28,6 +30,7 @@ public class QueryParam {
 
     /**
      * Is this query parameter required
+     *
      * @return true if this parameter is mandatory
      */
     public boolean isRequired() {

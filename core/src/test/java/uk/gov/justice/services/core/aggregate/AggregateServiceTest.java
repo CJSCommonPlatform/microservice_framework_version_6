@@ -47,6 +47,16 @@ public class AggregateServiceTest {
 
     private AggregateService aggregateService;
 
+    private static JsonEnvelope createEnvelope(final String name, final JsonObject payload) {
+        return envelopeFrom(
+                metadataFrom(
+                        createObjectBuilder()
+                                .add(ID, UUID.randomUUID().toString())
+                                .add(NAME, name)
+                                .build()),
+                payload);
+    }
+
     @Before
     public void setup() {
         aggregateService = new AggregateService();
@@ -120,16 +130,6 @@ public class AggregateServiceTest {
         aggregateService.register(new EventFoundEvent(EventA.class, "eventA"));
 
         aggregateService.get(eventStream, PrivateAggregate.class);
-    }
-
-    private static JsonEnvelope createEnvelope(final String name, final JsonObject payload) {
-        return envelopeFrom(
-                metadataFrom(
-                        createObjectBuilder()
-                                .add(ID, UUID.randomUUID().toString())
-                                .add(NAME, name)
-                                .build()),
-                payload);
     }
 
     public static class RecordingAggregate implements Aggregate {

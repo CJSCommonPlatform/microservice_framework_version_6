@@ -1,16 +1,16 @@
 package uk.gov.justice.services.common.jpa.converter;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNull;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.Calendar;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertNull;
+import org.junit.Before;
+import org.junit.Test;
 
 public class LocalDateTimePersistenceConverterTest {
 

@@ -4,10 +4,6 @@ package uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.EventLogRepositoryException;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidSequenceIdException;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -16,6 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
 
 /**
  * JDBC based repository for event log records.
@@ -104,7 +105,8 @@ public class JdbcEventLogRepository {
     }
 
     /**
-     * Returns a Stream of {@link EventLog} for the given stream streamId starting from the given version.
+     * Returns a Stream of {@link EventLog} for the given stream streamId starting from the given
+     * version.
      *
      * @param streamId    streamId of the stream.
      * @param versionFrom the version to read from.
@@ -131,7 +133,8 @@ public class JdbcEventLogRepository {
      * Returns the latest sequence Id for the given stream streamId.
      *
      * @param streamId streamId of the stream.
-     * @return latest sequence streamId for the stream.  Returns 0 if stream doesn't exist. Never returns null.
+     * @return latest sequence streamId for the stream.  Returns 0 if stream doesn't exist. Never
+     * returns null.
      */
     public Long getLatestSequenceIdForStream(final UUID streamId) {
         try (Connection connection = getDataSource().getConnection();

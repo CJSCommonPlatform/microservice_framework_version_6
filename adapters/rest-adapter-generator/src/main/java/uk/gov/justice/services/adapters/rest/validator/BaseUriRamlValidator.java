@@ -1,13 +1,14 @@
 package uk.gov.justice.services.adapters.rest.validator;
 
-import org.raml.model.Raml;
+import static java.lang.String.format;
+
 import uk.gov.justice.raml.common.validator.RamlValidationException;
 import uk.gov.justice.raml.common.validator.RamlValidator;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static java.lang.String.format;
+import org.raml.model.Raml;
 
 public class BaseUriRamlValidator implements RamlValidator {
     private static final String ERROR_MSG = "Pillar and tier of service should be specified in the base uri: %s";

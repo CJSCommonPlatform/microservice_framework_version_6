@@ -4,16 +4,18 @@ import uk.gov.justice.services.adapter.messaging.exception.InvalildJmsMessageTyp
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
 
+import java.util.function.Consumer;
+
 import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.TextMessage;
-import java.util.function.Consumer;
 
 /**
- * In order to minimise the amount of generated code in the JMS Listener implementation classes, this service encapsulates
- * all the logic for validating a message and converting it to an envelope, passing it to a consumer.  This allows
- * testing of this logic independently from the automated generation code.
+ * In order to minimise the amount of generated code in the JMS Listener implementation classes,
+ * this service encapsulates all the logic for validating a message and converting it to an
+ * envelope, passing it to a consumer.  This allows testing of this logic independently from the
+ * automated generation code.
  */
 public class JmsProcessor {
 

@@ -1,12 +1,11 @@
 package uk.gov.justice.raml.common.validator;
 
-import org.raml.model.Raml;
-
 import static java.util.Arrays.stream;
 
+import org.raml.model.Raml;
+
 /**
- * Used to compose raml validators 
- *
+ * Used to compose raml validators
  */
 public class CompositeRamlValidator implements RamlValidator {
 

@@ -1,12 +1,6 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.rules.TemporaryFolder;
-import uk.gov.justice.raml.common.validator.RamlValidationException;
-
 import static java.util.Collections.emptyMap;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.POST;
@@ -16,15 +10,20 @@ import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.re
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.adapters.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 
-public class RestAdapterGeneratorErrorHandlingTest {
-    private RestAdapterGenerator generator = new RestAdapterGenerator();
-    private static final String BASE_PACKAGE = "uk.test";
+import uk.gov.justice.raml.common.validator.RamlValidationException;
 
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
+
+public class RestAdapterGeneratorErrorHandlingTest {
+    private static final String BASE_PACKAGE = "uk.test";
     @Rule
     public TemporaryFolder outputFolder = new TemporaryFolder();
-
     @Rule
     public ExpectedException exception = ExpectedException.none();
+    private RestAdapterGenerator generator = new RestAdapterGenerator();
 
     @Test
     public void shouldThrowExceptionIfNoResourcesInRaml() throws Exception {

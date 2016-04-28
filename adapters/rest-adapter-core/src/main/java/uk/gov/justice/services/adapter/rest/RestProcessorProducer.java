@@ -1,5 +1,8 @@
 package uk.gov.justice.services.adapter.rest;
 
+import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
+import static uk.gov.justice.services.core.annotation.Component.componentFrom;
+
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 
@@ -8,9 +11,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
-
-import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
-import static uk.gov.justice.services.core.annotation.Component.componentFrom;
 
 /**
  * Produces the correct implementation of RestProcessor depending on the Adapter's Component type.
@@ -35,8 +35,8 @@ public class RestProcessorProducer {
     }
 
     /**
-     * Produces the correct implementation of a {@link RestProcessor} depending on the
-     * Adapter annotation at the injection point.
+     * Produces the correct implementation of a {@link RestProcessor} depending on the Adapter
+     * annotation at the injection point.
      *
      * @param injectionPoint class where the {@link RestProcessor} is being injected
      * @return the correct RestProcessor instance

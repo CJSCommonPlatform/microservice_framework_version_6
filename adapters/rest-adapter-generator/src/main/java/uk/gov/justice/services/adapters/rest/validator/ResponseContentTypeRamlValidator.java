@@ -1,13 +1,14 @@
 package uk.gov.justice.services.adapters.rest.validator;
 
-import org.raml.model.Action;
-import org.raml.model.ActionType;
-import org.raml.model.MimeType;
+import static uk.gov.justice.services.adapters.rest.generator.Actions.responseMimeTypesOf;
+
 import uk.gov.justice.raml.common.validator.AbstractContentTypeRamlValidator;
 
 import java.util.Collection;
 
-import static uk.gov.justice.services.adapters.rest.generator.Actions.responseMimeTypesOf;
+import org.raml.model.Action;
+import org.raml.model.ActionType;
+import org.raml.model.MimeType;
 
 /**
  * Checks if response mediaType is valid and contains a valid query name.

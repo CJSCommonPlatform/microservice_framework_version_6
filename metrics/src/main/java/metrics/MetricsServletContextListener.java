@@ -1,10 +1,10 @@
 package metrics;
 
-import com.codahale.metrics.MetricRegistry;
+import static com.codahale.metrics.servlets.MetricsServlet.ContextListener;
 
 import javax.servlet.annotation.WebListener;
 
-import static com.codahale.metrics.servlets.MetricsServlet.ContextListener;
+import com.codahale.metrics.MetricRegistry;
 
 /**
  * Annotated context listener for wiring up the metrics servlet.

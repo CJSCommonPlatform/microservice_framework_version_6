@@ -1,13 +1,15 @@
 package uk.gov.justice.services.common.converter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static javax.json.JsonValue.NULL;
+
 import uk.gov.justice.services.common.converter.exception.ConverterException;
+
+import java.io.IOException;
 
 import javax.inject.Inject;
 import javax.json.JsonValue;
-import java.io.IOException;
 
-import static javax.json.JsonValue.NULL;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Converts a Pojo to a JsonValue

@@ -1,5 +1,37 @@
 package uk.gov.justice.raml.jms.it;
 
+import static javax.json.Json.createObjectBuilder;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
+import uk.gov.justice.api.StructureCommandControllerJmsListener;
+import uk.gov.justice.api.StructureCommandHandlerJmsListener;
+import uk.gov.justice.api.StructureEventListenerJmsListener;
+import uk.gov.justice.api.StructureEventProcessorJmsListener;
+import uk.gov.justice.services.adapter.messaging.JmsProcessor;
+import uk.gov.justice.services.adapters.test.utils.dispatcher.AsynchronousRecordingDispatcher;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
+import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
+
+import java.util.Properties;
+import java.util.UUID;
+
+import javax.annotation.Resource;
+import javax.inject.Inject;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.MessageProducer;
+import javax.jms.Queue;
+import javax.jms.Session;
+import javax.jms.TextMessage;
+import javax.jms.Topic;
+import javax.naming.NamingException;
+
 import org.apache.cxf.common.i18n.Exception;
 import org.apache.openejb.OpenEjbContainer;
 import org.apache.openejb.jee.WebApp;
@@ -14,36 +46,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import uk.gov.justice.api.StructureCommandControllerJmsListener;
-import uk.gov.justice.api.StructureCommandHandlerJmsListener;
-import uk.gov.justice.api.StructureEventListenerJmsListener;
-import uk.gov.justice.api.StructureEventProcessorJmsListener;
-import uk.gov.justice.services.adapter.messaging.JmsProcessor;
-import uk.gov.justice.services.adapters.test.utils.dispatcher.AsynchronousRecordingDispatcher;
-import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
-import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
-
-import javax.annotation.Resource;
-import javax.inject.Inject;
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.MessageProducer;
-import javax.jms.Queue;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-import javax.jms.Topic;
-import javax.naming.NamingException;
-import java.util.Properties;
-import java.util.UUID;
-
-import static javax.json.Json.createObjectBuilder;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Integration tests for the generated JAX-RS classes.

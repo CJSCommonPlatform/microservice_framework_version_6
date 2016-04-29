@@ -1,5 +1,7 @@
 package uk.gov.justice.services.common.converter;
 
+import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS;
+
 import javax.enterprise.inject.Produces;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,6 +23,8 @@ public class JacksonMapperProducer {
         mapper.registerModule(new JavaTimeModule());
         mapper.registerModule(new ParameterNamesModule());
         mapper.registerModule(new JSR353Module());
+
+        mapper.configure(WRITE_DATES_AS_TIMESTAMPS, false);
 
         return mapper;
     }

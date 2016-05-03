@@ -21,7 +21,7 @@ public class AggregateService {
     @Inject
     JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
-    private ConcurrentHashMap<String, Class> eventMap = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, Class<?>> eventMap = new ConcurrentHashMap<>();
 
     /**
      * Recreate an aggregate of the specified type by replaying the events from an event stream.

@@ -57,10 +57,14 @@ public class EnveloperTest {
     private static final UUID COMMAND_UUID = UUID.randomUUID();
     private static final UUID OLD_CAUSATION_ID = UUID.randomUUID();
     private static final String TEST_NAME = "test.query.query-response";
+
     @Rule
     public ExpectedException exception = ExpectedException.none();
+
     private Enveloper enveloper;
+
     private Object object;
+
     @Mock
     private ObjectToJsonValueConverter objectToJsonValueConverter;
 

@@ -32,7 +32,6 @@
         <module>adapters</module>
         <module>event-sourcing</module>
         <module>common</module>
-        <module>event-source-destination</module>
         <module>example-context</module>
         <module>clients</module>
         <module>domain</module>

@@ -1,7 +1,7 @@
 package uk.gov.justice.services.example.cakeshop.query.api;
 
 import static org.hamcrest.CoreMatchers.sameInstance;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -30,10 +30,13 @@ public class RecipesQueryApiTest {
 
     @Mock
     JsonEnvelope response;
+
     @Mock
     JsonObject payload;
+
     @Mock
     private Requester requester;
+
     @InjectMocks
     private RecipesQueryApi recipesQueryApi;
 

@@ -7,8 +7,6 @@ import static org.apache.commons.lang.StringUtils.substringAfter;
 import static org.apache.commons.lang.StringUtils.uncapitalize;
 import static org.apache.commons.lang.WordUtils.capitalize;
 
-import uk.gov.justice.services.core.annotation.Component;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
@@ -16,8 +14,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.raml.model.Action;
@@ -27,7 +23,10 @@ import org.raml.model.Resource;
 
 final class Names {
 
+    static final String DEFAULT_ANNOTATION_PARAMETER = "value";
     static final String GENERIC_PAYLOAD_ARGUMENT_NAME = "entity";
+    static final String RESOURCE_PACKAGE_NAME = ".resource";
+
     private static final Set<String> JAVA_KEYWORDS = Collections.unmodifiableSet(new HashSet<>(
             Arrays.asList("abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class",
                     "const", "continue", "default", "do", "double", "else", "enum", "extends", "false", "final",
@@ -35,8 +34,6 @@ final class Names {
                     "interface", "long", "native", "new", "null", "package", "private", "protected", "public",
                     "return", "short", "static", "strictfp", "super", "switch", "synchronized", "this", "throw",
                     "throws", "transient", "true", "try", "void", "volatile", "while")));
-    private static final Pattern PILLAR_AND_TIER_PATTERN = Pattern
-            .compile("(command/api|command/controller|command/handler|query/api|query/controller|query/view)");
     private static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
     private static final String INTERFACE_NAME_SUFFIX = "Resource";
     private static final String APPLICATION_NAME_SUFFIX = "Application";
@@ -44,7 +41,7 @@ final class Names {
     private Names() {
     }
 
-    static String applicationNameOf(final Raml raml) {
+    static String applicationNameFrom(final Raml raml) {
         return buildJavaFriendlyName(baseUriPathWithoutContext(raml))
                 .concat(APPLICATION_NAME_SUFFIX);
     }
@@ -53,10 +50,10 @@ final class Names {
         try {
             final URL url = new URL(raml.getBaseUri());
             final String path = url.getPath();
-            if (path.indexOf("/", 1) == -1) {
+            if (path.indexOf('/', 1) == -1) {
                 return path;
             }
-            return path.substring(path.indexOf("/", 1));
+            return path.substring(path.indexOf('/', 1));
         } catch (MalformedURLException ex) {
             throw new IllegalStateException("Base URI must be a valid URL", ex);
         }
@@ -78,6 +75,10 @@ final class Names {
     private static String buildJavaFriendlyName(final String source) {
         final String baseName = source.replaceAll("[\\W_]", " ");
         return capitalize(baseName).replaceAll("[\\W_]", "");
+    }
+
+    static String buildResourceMethodNameWithNoMimeType(final Action action) {
+        return buildResourceMethodName(action, null);
     }
 
     static String buildResourceMethodName(final Action action, final MimeType bodyMimeType) {
@@ -111,17 +112,5 @@ final class Names {
             return remove(remove(remove(subType, "x-www-"), "+"), "-");
         }
 
-    }
-
-    static Component componentFromBaseUriIn(final Raml raml) {
-        final Matcher matcher = PILLAR_AND_TIER_PATTERN.matcher(baseUriPathWithoutContext(raml));
-
-        if (matcher.find()) {
-            final String pillarAndTier = matcher.group(1);
-            final String[] sections = pillarAndTier.split("/");
-            return Component.valueOf(sections[0], sections[1]);
-        } else {
-            throw new IllegalStateException(String.format("Base URI must contain valid pillar and tier: %s", raml.getBaseUri()));
-        }
     }
 }

@@ -39,6 +39,7 @@ import uk.gov.justice.services.core.dispatcher.SynchronousDispatcher;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.List;
 import java.util.Set;
@@ -93,6 +94,22 @@ public class RestAdapterGenerator_CodeStructureTest {
         Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceApplication");
 
         assertThat(applicationClass.isInterface(), is(false));
+    }
+
+    @Test
+    public void shouldGenerateNonFinalPublicApplicationClass() throws Exception {
+        generator.run(
+                raml()
+                        .withBaseUri("http://localhost:8080/warname/command/api/rest/service")
+                        .with(resource("/some/path")
+                                .with(action(POST, "application/vnd.ctx.command.default+json"))
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceApplication");
+
+        assertThat(Modifier.isFinal(applicationClass.getModifiers()), is(false));
+        assertThat(Modifier.isPublic(applicationClass.getModifiers()), is(true));
     }
 
     @Test
@@ -385,6 +402,21 @@ public class RestAdapterGenerator_CodeStructureTest {
         assertThat(resourceClass.getGenericInterfaces(), arrayWithSize(1));
         assertThat(resourceClass.getGenericInterfaces()[0].getTypeName(), equalTo(resourceInterface.getTypeName()));
 
+    }
+
+    @Test
+    public void shouldGenerateANonFinalPublicResourceClass() throws Exception {
+        generator.run(
+                restRamlWithDefaults().with(
+                        resource("/some/path")
+                                .with(action(POST, "application/vnd.ctx.command.default+json"))
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+
+        assertThat(Modifier.isFinal(resourceClass.getModifiers()), is(false));
+        assertThat(Modifier.isPublic(resourceClass.getModifiers()), is(true));
     }
 
     @Test

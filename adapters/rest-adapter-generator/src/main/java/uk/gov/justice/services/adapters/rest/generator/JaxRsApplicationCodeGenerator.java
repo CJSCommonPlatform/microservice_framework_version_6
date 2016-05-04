@@ -1,8 +1,10 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
-import static com.sun.codemodel.JMod.PUBLIC;
+import static com.squareup.javapoet.TypeSpec.classBuilder;
+import static javax.lang.model.element.Modifier.PUBLIC;
 import static org.apache.commons.lang.StringUtils.defaultIfBlank;
-import static uk.gov.justice.services.adapters.rest.generator.Names.applicationNameOf;
+import static uk.gov.justice.services.adapters.rest.generator.Names.RESOURCE_PACKAGE_NAME;
+import static uk.gov.justice.services.adapters.rest.generator.Names.applicationNameFrom;
 import static uk.gov.justice.services.adapters.rest.generator.Names.baseUriPathWithoutContext;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
@@ -14,15 +16,13 @@ import java.util.Set;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
-import com.sun.codemodel.JBlock;
-import com.sun.codemodel.JClassAlreadyExistsException;
-import com.sun.codemodel.JCodeModel;
-import com.sun.codemodel.JDefinedClass;
-import com.sun.codemodel.JExpr;
-import com.sun.codemodel.JMethod;
-import com.sun.codemodel.JPackage;
-import com.sun.codemodel.JType;
-import com.sun.codemodel.JVar;
+import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.WildcardTypeName;
 import org.raml.model.Raml;
 
 /**
@@ -34,67 +34,91 @@ class JaxRsApplicationCodeGenerator {
     private static final String DEFAULT_ANNOTATION_PARAMETER = "value";
 
     private final GeneratorConfig config;
-    private final JCodeModel codeModel;
 
     /**
      * Constructor.
      *
-     * @param codeModel the code model, which should already have the resource implementations and
-     *                  interfaces created
-     * @param config    the generator configuration
+     * @param config the generator configuration
      */
-    JaxRsApplicationCodeGenerator(final JCodeModel codeModel, final GeneratorConfig config) {
-        this.codeModel = codeModel;
+    JaxRsApplicationCodeGenerator(final GeneratorConfig config) {
         this.config = config;
     }
 
     /**
-     * Create an {@link Application} in the {@link JCodeModel}.
+     * Create an implementation of the {@link Application}.
      *
-     * @param raml                the RAML document being generated from
      * @param implementationNames a collection of fully qualified class names of the resource
      *                            implementation classes
+     * @param raml                the RAML document being generated from
      * @return the fully defined application class
      */
-    JDefinedClass createApplication(final Raml raml, final Collection<String> implementationNames) {
-        final JPackage pkg = codeModel._package(config.getBasePackageName());
-        try {
-            final JDefinedClass application = pkg._class(applicationNameOf(raml));
-            addAnnotations(raml, application);
-            addSuperClass(application);
-            addMethods(application, implementationNames);
-
-            return application;
-        } catch (JClassAlreadyExistsException ex) {
-            throw new IllegalStateException("Class already exists", ex);
-        }
-
+    TypeSpec createApplication(final Collection<String> implementationNames, final Raml raml) {
+        return classSpecFrom(raml)
+                .addMethod(generateGetClassesMethod(implementationNames))
+                .build();
     }
 
-    private void addAnnotations(final Raml raml, final JDefinedClass application) {
-        application.annotate(ApplicationPath.class)
-                .param(DEFAULT_ANNOTATION_PARAMETER, defaultIfBlank(baseUriPathWithoutContext(raml), "/"));
+    /**
+     * Generate the implementation of {@link Application} and set the {@link ApplicationPath}.
+     *
+     * @param raml the RAML document being generated from
+     * @return the {@link TypeSpec.Builder} that defines the class
+     */
+    private TypeSpec.Builder classSpecFrom(final Raml raml) {
+        return classBuilder(applicationNameFrom(raml))
+                .addModifiers(PUBLIC)
+                .superclass(Application.class)
+                .addAnnotation(AnnotationSpec.builder(ApplicationPath.class)
+                        .addMember(DEFAULT_ANNOTATION_PARAMETER, "$S", defaultIfBlank(baseUriPathWithoutContext(raml), "/"))
+                        .build());
     }
 
-    private void addSuperClass(final JDefinedClass application) {
-        application._extends(Application.class);
+    /**
+     * Generate the getClasses method that returns the set of implemented resource classes.
+     *
+     * @param implementationNames the collection of implementation class names
+     * @return the {@link MethodSpec} that represents the getClasses method
+     */
+    private MethodSpec generateGetClassesMethod(final Collection<String> implementationNames) {
+        final ParameterizedTypeName wildcardClassType = ParameterizedTypeName.get(ClassName.get(Class.class), WildcardTypeName.subtypeOf(Object.class));
+        final ParameterizedTypeName classSetType = ParameterizedTypeName.get(ClassName.get(Set.class), wildcardClassType);
+        final ParameterizedTypeName classHashSetType = ParameterizedTypeName.get(ClassName.get(HashSet.class), wildcardClassType);
+
+        return MethodSpec.methodBuilder("getClasses")
+                .addModifiers(PUBLIC)
+                .addAnnotation(Override.class)
+                .addCode(CodeBlock.builder()
+                        .addStatement("$T classes = new $T()", classSetType, classHashSetType)
+                        .add(statementsToAddClassToSetForEach(implementationNames))
+                        .addStatement("return classes")
+                        .build())
+                .returns(classSetType)
+                .build();
     }
 
-    private void addMethods(final JDefinedClass application, final Collection<String> implementationNames) {
-        JType wildcardClassType = codeModel.ref(Class.class).narrow(codeModel.wildcard());
-        JType classSetType = codeModel.ref(Set.class).narrow(wildcardClassType);
+    /**
+     * Generate code to add each resource implementation class to the classes hash set.
+     *
+     * @param implementationNames the collection of implementation class names
+     * @return the {@link CodeBlock} that represents the generated statements
+     */
+    private CodeBlock statementsToAddClassToSetForEach(final Collection<String> implementationNames) {
+        final CodeBlock.Builder codeBlockBuilder = CodeBlock.builder();
 
-        JMethod getClassesMethod = application.method(PUBLIC, classSetType, "getClasses");
+        implementationNames.stream().forEach(implementationClassName ->
+                codeBlockBuilder.addStatement("classes.add($T.class)", classNameTypeOf(implementationClassName)));
 
-        getClassesMethod.annotate(Override.class);
+        return codeBlockBuilder.build();
+    }
 
-        JBlock body = getClassesMethod.body();
-
-        JVar classes = body.decl(classSetType, "classes");
-        classes.init(JExpr._new(codeModel.ref(HashSet.class).narrow(wildcardClassType)));
-        for (String className : implementationNames) {
-            body.invoke(classes, "add").arg(codeModel._getClass(className).dotclass());
-        }
-        body._return(classes);
+    /**
+     * Create {@link ClassName} that fully qualifies the implementation class
+     *
+     * @param className the class name to define
+     * @return the {@link ClassName} that represents the full package and class name of the
+     * implementation class
+     */
+    private ClassName classNameTypeOf(final String className) {
+        return ClassName.get(config.getBasePackageName() + RESOURCE_PACKAGE_NAME, className);
     }
 }

@@ -1,5 +1,7 @@
 package uk.gov.justice.services.messaging.jms;
 
+import static uk.gov.justice.services.messaging.jms.HeaderConstants.JMS_HEADER_CPPNAME;
+
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
@@ -16,8 +18,6 @@ import javax.jms.TextMessage;
  */
 @ApplicationScoped
 public class EnvelopeConverter implements MessageConverter<JsonEnvelope, TextMessage> {
-
-    static final String JMS_HEADER_CPPNAME = "CPPNAME";
 
     @Inject
     StringToJsonObjectConverter stringToJsonObjectConverter;

@@ -12,8 +12,11 @@ import uk.gov.justice.api.StructureEventProcessorJmsListener;
 import uk.gov.justice.services.adapter.messaging.JmsProcessor;
 import uk.gov.justice.services.adapters.test.utils.dispatcher.AsynchronousRecordingDispatcher;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.core.json.JsonSchemaLoader;
+import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
+import uk.gov.justice.services.messaging.JsonObjects;
 import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
 
 import java.util.Properties;
@@ -30,6 +33,7 @@ import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
+import javax.json.JsonObject;
 import javax.naming.NamingException;
 
 import org.apache.cxf.common.i18n.Exception;
@@ -97,7 +101,9 @@ public class JmsEndpointGenerationIT {
             StructureCommandHandlerJmsListener.class,
             EnvelopeConverter.class,
             StringToJsonObjectConverter.class,
-            JsonObjectEnvelopeConverter.class
+            JsonObjectEnvelopeConverter.class,
+            JsonSchemaValidator.class,
+            JsonSchemaLoader.class
     })
     public WebApp war() {
         return new WebApp()
@@ -154,7 +160,6 @@ public class JmsEndpointGenerationIT {
 
         sendEnvelope(metadataId, commandName, commandControllerDestination);
         assertTrue(dispatcher.notFoundEnvelopeWithMetadataOf("id", metadataId));
-
     }
 
     @Test
@@ -179,6 +184,16 @@ public class JmsEndpointGenerationIT {
         sendEnvelope(metadataId, commandName, commandHandlerDestination);
         assertTrue(dispatcher.notFoundEnvelopeWithMetadataOf("id", metadataId));
 
+    }
+
+    @Test
+    public void dispatcherShouldNotReceiveAMessageNotAdheringToSchema() throws JMSException {
+
+        String metadataId = "961c9430-7bc6-4bf0-b549-6534394b8d13";
+        String commandName = "people.command.create-user";
+
+        sendEnvelope(metadataId, commandName, commandHandlerDestination, createObjectBuilder().add("non_existent_field", "value").build());
+        assertTrue(dispatcher.notFoundEnvelopeWithMetadataOf("id", metadataId));
     }
 
     @Test
@@ -233,16 +248,19 @@ public class JmsEndpointGenerationIT {
     }
 
     private void sendEnvelope(String metadataId, String commandName, Destination queue) throws JMSException {
+        sendEnvelope(metadataId, commandName, queue, createObjectBuilder().build());
+    }
+    private void sendEnvelope(String metadataId, String commandName, Destination queue, JsonObject payload) throws JMSException {
         TextMessage message = session.createTextMessage();
-        message.setText(envelopeJsonWith(metadataId, commandName));
+        message.setText(envelopeJsonWith(metadataId, commandName, payload));
         message.setStringProperty("CPPNAME", commandName);
         try (MessageProducer producer = session.createProducer(queue)) {
             producer.send(message);
         }
     }
 
-    private String envelopeJsonWith(String metadataId, String commandName) {
-        return createObjectBuilder()
+    private String envelopeJsonWith(String metadataId, String commandName, JsonObject payload) {
+        return JsonObjects.createObjectBuilder(payload)
                 .add("_metadata", createObjectBuilder()
                         .add("id", metadataId)
                         .add("name", commandName))

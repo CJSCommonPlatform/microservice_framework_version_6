@@ -55,7 +55,6 @@ public class CakeShopIT {
     public static void beforeClass() throws Exception {
         DataSource dataSource = initDatabase();
         EVENT_LOG_REPOSITORY = new StandaloneJdbcEventLogRepository(dataSource);
-
     }
 
     private static DataSource initDatabase() throws Exception {
@@ -83,6 +82,15 @@ public class CakeShopIT {
     }
 
     @Test
+    public void shouldReturn400ResponseWhenJsonNotAdheringToSchemaIsSent() throws Exception {
+
+        String cakeId = "163af847-effb-46a9-96bc-32a0f7526f77";
+        Response response = sendTo(CAKES_RESOURCE_URI + cakeId).request()
+                .post(entity("{}", MAKE_CAKE_MEDIA_TYPE));
+        assertThat(response.getStatus(), is(BAD_REQUEST));
+    }
+
+    @Test
     public void shouldRegisterRecipeAddedEvent() {
         String recipeId = "163af847-effb-46a9-96bc-32a0f7526f99";
         sendTo(RECIPES_RESOURCE_URI + recipeId).request()
@@ -97,13 +105,22 @@ public class CakeShopIT {
         with(eventPayload)
                 .assertThat("$.recipeId", equalTo(recipeId))
                 .assertThat("$.name", equalTo("Chocolate muffin in six easy steps"));
-
     }
 
     private String addRecipeCommand() {
         return jsonObject()
                 .add("name", "Chocolate muffin in six easy steps")
-                .add("ingredients", Json.createArrayBuilder().build())
+                .add("ingredients", Json.createArrayBuilder()
+                        .add(Json.createObjectBuilder()
+                                .add("name", "chocolate")
+                                .add("quantity", 1)
+                        ).build())
+                .build().toString();
+    }
+
+    private String makeCakeCommand() {
+        return jsonObject()
+                .add("recipeId", "163af847-effb-46a9-96bc-32a0f7526f99")
                 .build().toString();
     }
 
@@ -112,9 +129,8 @@ public class CakeShopIT {
 
         String cakeId = "163af847-effb-46a9-96bc-32a0f7526f77";
         Response response = sendTo(CAKES_RESOURCE_URI + cakeId).request()
-                .post(entity("{}", MAKE_CAKE_MEDIA_TYPE));
+                .post(entity(makeCakeCommand(), MAKE_CAKE_MEDIA_TYPE));
         assertThat(response.getStatus(), is(ACCEPTED));
-
     }
 
     @Test

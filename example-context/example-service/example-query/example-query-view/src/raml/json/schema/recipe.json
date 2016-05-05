@@ -4,7 +4,7 @@
   "type": "object",
   "properties": {
     "name": {
-      "id": "/cakeName",
+      "id": "/name",
       "type": "string"
     },
     "ingredients": {
@@ -27,7 +27,7 @@
     }
   },
   "required": [
-    "cakeName",
+    "name",
     "ingredients"
   ]
 }

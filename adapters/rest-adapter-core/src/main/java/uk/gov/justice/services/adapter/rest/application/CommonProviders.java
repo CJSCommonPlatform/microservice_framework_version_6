@@ -1,6 +1,7 @@
 package uk.gov.justice.services.adapter.rest.application;
 
 
+import uk.gov.justice.services.adapter.rest.JsonSchemaValidationInterceptor;
 import uk.gov.justice.services.adapter.rest.mapper.BadRequestExceptionMapper;
 
 import java.util.HashSet;
@@ -15,6 +16,7 @@ public class CommonProviders {
     public Set<Class<?>> providers() {
         final HashSet<Class<?>> classes = new HashSet<>();
         classes.add(BadRequestExceptionMapper.class);
+        classes.add(JsonSchemaValidationInterceptor.class);
         return classes;
     }
 

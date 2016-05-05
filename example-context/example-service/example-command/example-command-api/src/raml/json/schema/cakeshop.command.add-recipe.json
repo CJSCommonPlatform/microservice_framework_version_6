@@ -3,8 +3,8 @@
   "id": "",
   "type": "object",
   "properties": {
-    "cakeName": {
-      "id": "/cakeName",
+    "name": {
+      "id": "/name",
       "type": "string",
       "description": "Uniquely identifies the cake to be produced from the recipe",
       "name": "Name of Cake",
@@ -27,42 +27,14 @@
               "type": "integer"
             }
           }
-        },
-        {
-          "id": "/ingredients/1",
-          "type": "object",
-          "properties": {
-            "name": {
-              "id": "/ingredients/1/name",
-              "type": "string"
-            },
-            "quantity": {
-              "id": "/ingredients/1/quantity",
-              "type": "integer"
-            }
-          }
-        },
-        {
-          "id": "/ingredients/2",
-          "type": "object",
-          "properties": {
-            "name": {
-              "id": "/ingredients/2/name",
-              "type": "string"
-            },
-            "quantity": {
-              "id": "/ingredients/2/quantity",
-              "type": "integer"
-            }
-          }
         }
       ],
-      "minItems": "1",
+      "minItems": 1,
       "description": "List ingredients and quantities for recipe"
     }
   },
   "required": [
-    "cakeName",
+    "name",
     "ingredients"
   ]
 }

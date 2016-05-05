@@ -39,6 +39,7 @@ import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom
 
 import uk.gov.justice.raml.core.Generator;
 import uk.gov.justice.services.adapter.messaging.JmsProcessor;
+import uk.gov.justice.services.adapter.messaging.JsonSchemaValidationInterceptor;
 import uk.gov.justice.services.adapters.test.utils.compiler.JavaCompilerUtil;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
@@ -58,6 +59,7 @@ import java.util.function.Consumer;
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
 import javax.inject.Inject;
+import javax.interceptor.Interceptors;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 
@@ -65,6 +67,7 @@ import org.hamcrest.CoreMatchers;
 import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
+import org.hamcrest.collection.IsArrayContaining;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -225,7 +228,6 @@ public class JmsEndpointGeneratorTest {
         Adapter adapterAnnotation = clazz.getAnnotation(Adapter.class);
         assertThat(adapterAnnotation, not(nullValue()));
         assertThat(adapterAnnotation.value(), is(COMMAND_HANDLER));
-
     }
 
     @Test
@@ -279,6 +281,21 @@ public class JmsEndpointGeneratorTest {
         assertThat(adapterAnnotation, not(nullValue()));
         assertThat(adapterAnnotation.value(), is(Component.EVENT_PROCESSOR));
 
+    }
+
+    @Test
+    public void shouldCreateJmsEndpointAnnotatedWithInterceptors() throws Exception {
+        generator.run(
+                messagingRamlWithDefaults()
+                        .with(resource()
+                                .withRelativeUri("/people.handler.command")
+                                .with(action(POST, "application/vnd.people.command.abc+json")))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+        Class<?> clazz = getJmsListenerClass(BASE_PACKAGE, "PeopleCommandHandlerJmsListener");
+        Interceptors interceptorsAnnotation = clazz.getAnnotation(Interceptors.class);
+        assertThat(interceptorsAnnotation, not(nullValue()));
+        assertThat(interceptorsAnnotation.value(), hasItemInArray(JsonSchemaValidationInterceptor.class));
     }
 
     @Test

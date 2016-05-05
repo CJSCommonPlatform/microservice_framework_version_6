@@ -4,6 +4,7 @@ import static com.jayway.jsonassert.JsonAssert.with;
 import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.client.Entity.entity;
 import static javax.ws.rs.core.Response.Status.ACCEPTED;
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.apache.cxf.jaxrs.client.WebClient.create;
@@ -18,6 +19,7 @@ import uk.gov.justice.api.QueryApiRestExampleApplication;
 import uk.gov.justice.services.adapter.rest.RestProcessor;
 import uk.gov.justice.services.adapter.rest.RestProcessorProducer;
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
+import uk.gov.justice.services.adapter.rest.mapper.BadRequestExceptionMapper;
 import uk.gov.justice.services.adapters.test.utils.dispatcher.AsynchronousRecordingDispatcher;
 import uk.gov.justice.services.adapters.test.utils.dispatcher.SynchronousRecordingDispatcher;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -96,7 +98,8 @@ public class DefaultUsersUserIdResourceIT {
             RestEnvelopeBuilderFactory.class,
             AsynchronousRecordingDispatcher.class,
             SynchronousRecordingDispatcher.class,
-            JsonObjectEnvelopeConverter.class
+            JsonObjectEnvelopeConverter.class,
+            BadRequestExceptionMapper.class
     })
     public WebApp war() {
         return new WebApp()
@@ -249,17 +252,44 @@ public class DefaultUsersUserIdResourceIT {
 
     @Test
     public void shouldDispatchUsersQueryWithQueryParam() throws Exception {
-        syncDispatcher.setupResponse("surname", "name", envelopeFrom(metadata, createObjectBuilder().add("userName", "userName").build()));
+        syncDispatcher.setupResponse("lastname", "lastname", envelopeFrom(metadata, createObjectBuilder().add("userName", "userName").build()));
 
         Response response = create(BASE_URI)
                 .path("/users")
-                .query("surname", "name")
+                .query("lastname", "lastname")
+                .query("firstname", "firstname")
                 .header("Accept", "application/vnd.people.query.search-users+json")
                 .get();
 
         assertThat(response.getStatus(), is(OK.getStatusCode()));
-        JsonEnvelope jsonEnvelope = syncDispatcher.awaitForEnvelopeWithPayloadOf("surname", "name");
+        JsonEnvelope jsonEnvelope = syncDispatcher.awaitForEnvelopeWithPayloadOf("lastname", "lastname");
         assertThat(jsonEnvelope.metadata().name(), is("people.query.search-users"));
+
+    }
+
+    @Test
+    public void shouldReturn400IfRequiredQueryParamIsNotProvided() throws Exception {
+
+        Response response = create(BASE_URI)
+                .path("/users")
+                .query("firstname", "firstname")
+                .header("Accept", "application/vnd.people.query.search-users+json")
+                .get();
+
+        assertThat(response.getStatus(), is(BAD_REQUEST.getStatusCode()));
+    }
+
+    @Test
+    public void shouldReturn200WhenOptionalParameterIsNotProvided() throws Exception {
+        syncDispatcher.setupResponse("lastname", "lastname", envelopeFrom(metadata, createObjectBuilder().add("userName", "userName").build()));
+
+        Response response = create(BASE_URI)
+                .path("/users")
+                .query("lastname", "lastname")
+                .header("Accept", "application/vnd.people.query.search-users+json")
+                .get();
+
+        assertThat(response.getStatus(), is(OK.getStatusCode()));
 
     }
 

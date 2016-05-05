@@ -34,6 +34,25 @@
         </dependency>
         <dependency>
             <groupId>uk.gov.justice.services.example</groupId>
+            <artifactId>example-query-api</artifactId>
+            <version>${project.version}</version>
+            <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.services.example</groupId>
+            <artifactId>example-query-controller</artifactId>
+            <version>${project.version}</version>
+            <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.services.example</groupId>
+            <artifactId>example-query-view</artifactId>
+            <version>${project.version}</version>
+            <type>war</type>
+        </dependency>
+
+        <dependency>
+            <groupId>uk.gov.justice.services.example</groupId>
             <artifactId>example-event-listener</artifactId>
             <version>${project.version}</version>
             <type>war</type>
@@ -167,6 +186,37 @@
                                     <outputDirectory>${jboss.home}/standalone/deployments
                                     </outputDirectory>
                                 </artifactItem>
+
+
+                                <artifactItem>
+                                    <groupId>uk.gov.justice.services.example</groupId>
+                                    <artifactId>example-query-api</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>war</type>
+                                    <destFileName>example-query-api.war</destFileName>
+                                    <outputDirectory>${jboss.home}/standalone/deployments
+                                    </outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>uk.gov.justice.services.example</groupId>
+                                    <artifactId>example-query-controller</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>war</type>
+                                    <destFileName>example-query-controller.war</destFileName>
+                                    <outputDirectory>${jboss.home}/standalone/deployments
+                                    </outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>uk.gov.justice.services.example</groupId>
+                                    <artifactId>example-query-view</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>war</type>
+                                    <destFileName>example-query-view.war</destFileName>
+                                    <outputDirectory>${jboss.home}/standalone/deployments
+                                    </outputDirectory>
+                                </artifactItem>
+
+
                             </artifactItems>
                         </configuration>
                     </execution>

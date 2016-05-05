@@ -1,9 +1,6 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
 import static java.lang.String.format;
-import static java.lang.reflect.Modifier.isAbstract;
-import static java.lang.reflect.Modifier.isPublic;
-import static java.lang.reflect.Modifier.isStatic;
 import static java.nio.file.Paths.get;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptyMap;
@@ -20,7 +17,6 @@ import static org.junit.Assert.assertThat;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
-import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithQueryApiDefaults;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
@@ -30,7 +26,6 @@ import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionU
 
 import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.services.adapter.rest.RestProcessor;
-import uk.gov.justice.services.adapters.test.utils.compiler.JavaCompilerUtil;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
@@ -42,130 +37,21 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.List;
-import java.util.Set;
 
-import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.json.JsonObject;
-import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Application;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
-import com.google.common.reflect.TypeToken;
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
-public class RestAdapterGenerator_CodeStructureTest {
-
-    private static final String BASE_PACKAGE = "org.raml.test";
-
-    @Rule
-    public TemporaryFolder outputFolder = new TemporaryFolder();
-
-    private JavaCompilerUtil compiler;
-
-    private RestAdapterGenerator generator;
-
-    @Before
-    public void before() {
-        generator = new RestAdapterGenerator();
-        compiler = new JavaCompilerUtil(outputFolder.getRoot(), outputFolder.getRoot());
-    }
-
-    @Test
-    public void shouldGenerateApplicationClass() throws Exception {
-        generator.run(
-                raml()
-                        .withBaseUri("http://localhost:8080/warname/command/api/rest/service")
-                        .with(resource("/some/path")
-                                .with(action(POST, "application/vnd.ctx.command.default+json"))
-                        ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-
-        Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceApplication");
-
-        assertThat(applicationClass.isInterface(), is(false));
-    }
-
-    @Test
-    public void shouldGenerateNonFinalPublicApplicationClass() throws Exception {
-        generator.run(
-                raml()
-                        .withBaseUri("http://localhost:8080/warname/command/api/rest/service")
-                        .with(resource("/some/path")
-                                .with(action(POST, "application/vnd.ctx.command.default+json"))
-                        ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-
-        Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceApplication");
-
-        assertThat(Modifier.isFinal(applicationClass.getModifiers()), is(false));
-        assertThat(Modifier.isPublic(applicationClass.getModifiers()), is(true));
-    }
-
-    @Test
-    public void shouldGenerateExtendingApplicationClass() throws Exception {
-        generator.run(
-                raml()
-                        .withBaseUri("http://localhost:8080/warname/command/api/rest/service")
-                        .with(
-                                resource("/some/path")
-                                        .with(action(POST, "application/vnd.ctx.command.default+json"))
-                        ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-
-        Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceApplication");
-
-        assertThat(Application.class.isAssignableFrom(applicationClass), is(true));
-    }
-
-    @Test
-    public void shouldGenerateAnnotatedApplicationClass() throws Exception {
-        generator.run(
-                raml()
-                        .withBaseUri("http://localhost:8080/warname/command/api/rest/service")
-                        .with(
-                                resource("/some/path")
-                                        .with(action(POST, "application/vnd.ctx.command.default+json"))
-                        ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-
-        Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceApplication");
-
-        assertThat(applicationClass.getAnnotation(ApplicationPath.class), not(nullValue()));
-        assertThat(applicationClass.getAnnotation(ApplicationPath.class).value(), is("/command/api/rest/service"));
-    }
-
-    @Test
-    public void shouldGenerateApplicationClassWithGetClassesMethod() throws Exception {
-        generator.run(
-                raml()
-                        .withBaseUri("http://localhost:8080/warname/command/api/rest/service")
-                        .with(resource("/some/path")
-                                .with(action(POST, "application/vnd.ctx.command.default+json"))
-                        ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-
-        Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceApplication");
-
-        Method method = applicationClass.getDeclaredMethod("getClasses");
-        assertThat(method, not(nullValue()));
-        assertThat(method.getParameterCount(), equalTo(0));
-        assertThat(isPublic(method.getModifiers()), is(true));
-        assertThat(isStatic(method.getModifiers()), is(false));
-        assertThat(isAbstract(method.getModifiers()), is(false));
-        assertThat(method.getGenericReturnType(), equalTo(new TypeToken<Set<Class<?>>>() {
-        }.getType()));
-    }
+public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGeneratorTest {
 
     @Test
     public void shouldGenerateAnnotatedResourceInterface() throws Exception {
@@ -571,18 +457,6 @@ public class RestAdapterGenerator_CodeStructureTest {
 
         assertThat(resourceImplementation.getPackage().getName(), is(basePackageName + ".resource"));
 
-    }
-
-    @Test
-    public void shouldGenerateEJBAnnotatedClass() throws Exception {
-        generator.run(
-                restRamlWithDefaults().with(
-                        resource("/some/path")
-                                .with(action(POST, "application/vnd.ctx.command.default+json"))
-                ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-        Class<?> resourceImplementation = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
-        assertThat(resourceImplementation.getAnnotation(Stateless.class), not(nullValue()));
     }
 
     @Test

@@ -33,8 +33,12 @@ import org.junit.Test;
 public class CakeShopIT {
 
     private static final int ACCEPTED = 202;
+    private static final int BAD_REQUEST = 400;
     private static final String RECIPES_RESOURCE_URI = "http://localhost:8080/example-command-api/command/api/rest/cakeshop/recipes/";
     private static final String CAKES_RESOURCE_URI = "http://localhost:8080/example-command-api/command/api/rest/cakeshop/cakes/";
+
+    private static final String RECIPES_RESOURCE_QUERY_URI = "http://localhost:8080/example-query-api/query/api/rest/cakeshop/recipes/";
+
     private static final String ADD_RECIPE_MEDIA_TYPE = "application/vnd.cakeshop.command.add-recipe+json";
     private static final String MAKE_CAKE_MEDIA_TYPE = "application/vnd.cakeshop.command.make-cake+json";
     private static final String LIQUIBASE_EVENT_STORE_DB_CHANGELOG_XML = "liquibase/event-store-db-changelog.xml";
@@ -112,6 +116,14 @@ public class CakeShopIT {
         assertThat(response.getStatus(), is(ACCEPTED));
 
     }
+
+    @Test
+    public void shouldReturn400WhenMandatoryQueryParamNotProvided() throws Exception {
+
+        Response response = sendTo(RECIPES_RESOURCE_QUERY_URI).request().get();
+        assertThat(response.getStatus(), is(BAD_REQUEST));
+    }
+
 
     private JsonObjectBuilder jsonObject() {
         return Json.createObjectBuilder();

@@ -8,7 +8,7 @@ import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.services.adapters.rest.generator.Generators.byMimeTypeOrder;
 import static uk.gov.justice.services.adapters.rest.generator.Names.DEFAULT_ANNOTATION_PARAMETER;
 import static uk.gov.justice.services.adapters.rest.generator.Names.GENERIC_PAYLOAD_ARGUMENT_NAME;
-import static uk.gov.justice.services.adapters.rest.generator.Names.RESOURCE_PACKAGE_NAME;
+import static uk.gov.justice.services.adapters.rest.generator.Names.RESOURCE_PACKAGE_NAME_WITH_DOT;
 import static uk.gov.justice.services.adapters.rest.generator.Names.buildResourceMethodName;
 import static uk.gov.justice.services.adapters.rest.generator.Names.buildResourceMethodNameWithNoMimeType;
 import static uk.gov.justice.services.adapters.rest.generator.Names.resourceInterfaceNameOf;
@@ -171,7 +171,7 @@ class JaxRsImplementationGenerator {
      * @return the {@link ClassName} of the interface
      */
     private ClassName interfaceClassNameFor(final Resource resource) {
-        return ClassName.get(configuration.getBasePackageName() + RESOURCE_PACKAGE_NAME, resourceInterfaceNameOf(resource));
+        return ClassName.get(configuration.getBasePackageName() + RESOURCE_PACKAGE_NAME_WITH_DOT, resourceInterfaceNameOf(resource));
     }
 
     /**

@@ -3,7 +3,7 @@ package uk.gov.justice.services.adapters.rest.generator;
 import static com.squareup.javapoet.TypeSpec.classBuilder;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static org.apache.commons.lang.StringUtils.defaultIfBlank;
-import static uk.gov.justice.services.adapters.rest.generator.Names.RESOURCE_PACKAGE_NAME;
+import static uk.gov.justice.services.adapters.rest.generator.Names.RESOURCE_PACKAGE_NAME_WITH_DOT;
 import static uk.gov.justice.services.adapters.rest.generator.Names.applicationNameFrom;
 import static uk.gov.justice.services.adapters.rest.generator.Names.baseUriPathWithoutContext;
 
@@ -119,6 +119,6 @@ class JaxRsApplicationCodeGenerator {
      * implementation class
      */
     private ClassName classNameTypeOf(final String className) {
-        return ClassName.get(config.getBasePackageName() + RESOURCE_PACKAGE_NAME, className);
+        return ClassName.get(config.getBasePackageName() + RESOURCE_PACKAGE_NAME_WITH_DOT, className);
     }
 }

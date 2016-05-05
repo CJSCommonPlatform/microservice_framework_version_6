@@ -25,7 +25,9 @@ final class Names {
 
     static final String DEFAULT_ANNOTATION_PARAMETER = "value";
     static final String GENERIC_PAYLOAD_ARGUMENT_NAME = "entity";
-    static final String RESOURCE_PACKAGE_NAME = ".resource";
+    static final String RESOURCE_PACKAGE_NAME = "resource";
+    static final String RESOURCE_PACKAGE_NAME_WITH_DOT = "." + RESOURCE_PACKAGE_NAME;
+    static final String JAVA_FILENAME_SUFFIX = ".java";
 
     private static final Set<String> JAVA_KEYWORDS = Collections.unmodifiableSet(new HashSet<>(
             Arrays.asList("abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class",

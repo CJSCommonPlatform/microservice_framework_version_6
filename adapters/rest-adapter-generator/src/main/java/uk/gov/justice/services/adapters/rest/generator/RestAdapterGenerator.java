@@ -5,7 +5,9 @@ import static org.apache.commons.lang.Validate.isTrue;
 import static org.apache.commons.lang.Validate.notEmpty;
 import static org.apache.commons.lang.Validate.notNull;
 import static uk.gov.justice.services.adapters.rest.generator.Generators.componentFromBaseUriIn;
+import static uk.gov.justice.services.adapters.rest.generator.Names.JAVA_FILENAME_SUFFIX;
 import static uk.gov.justice.services.adapters.rest.generator.Names.RESOURCE_PACKAGE_NAME;
+import static uk.gov.justice.services.adapters.rest.generator.Names.RESOURCE_PACKAGE_NAME_WITH_DOT;
 
 import uk.gov.justice.raml.common.validator.CompositeRamlValidator;
 import uk.gov.justice.raml.common.validator.ContainsActionsRamlValidator;
@@ -31,6 +33,8 @@ import org.raml.model.Raml;
 import org.raml.model.Resource;
 
 public class RestAdapterGenerator implements Generator {
+
+    private static final String JAVA_SRC_PATH = "\\main\\java\\";
 
     private final RamlValidator validator = new CompositeRamlValidator(
             new ContainsResourcesRamlValidator(),
@@ -86,7 +90,7 @@ public class RestAdapterGenerator implements Generator {
      * @return the list of class names written to file
      */
     private List<String> writeToResourcePackage(final List<TypeSpec> typeSpecs, final GeneratorConfig configuration) {
-        return writeToBasePackage(typeSpecs, configuration, RESOURCE_PACKAGE_NAME);
+        return writeToBasePackage(typeSpecs, configuration, RESOURCE_PACKAGE_NAME_WITH_DOT);
     }
 
     /**
@@ -103,18 +107,33 @@ public class RestAdapterGenerator implements Generator {
 
         final List<String> implementationNames = new ArrayList<>();
 
-        typeSpecs.stream().forEach(typeSpec -> {
-            try {
-                JavaFile.builder(configuration.getBasePackageName() + packageName, typeSpec)
-                        .build()
-                        .writeTo(configuration.getOutputDirectory());
-                implementationNames.add(typeSpec.name);
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
-            }
-        });
+        typeSpecs.stream()
+                .forEach(typeSpec -> {
+                    try {
+                        if (classDoesNotExist(configuration, typeSpec)) {
+                            JavaFile.builder(configuration.getBasePackageName() + packageName, typeSpec)
+                                    .build()
+                                    .writeTo(configuration.getOutputDirectory());
+                        }
+
+                        implementationNames.add(typeSpec.name);
+                    } catch (IOException e) {
+                        throw new IllegalStateException(e);
+                    }
+                });
 
         return implementationNames;
+    }
+
+    private boolean classDoesNotExist(final GeneratorConfig configuration, final TypeSpec typeSpec) {
+        final String relativeJavaSourcePath = configuration.getSourceDirectory().getParent().toString() + JAVA_SRC_PATH;
+        final String basePackagePath = configuration.getBasePackageName().replaceAll("\\.", "\\\\");
+
+        final String pathname = relativeJavaSourcePath + basePackagePath + "\\"
+                + RESOURCE_PACKAGE_NAME + "\\"
+                + typeSpec.name + JAVA_FILENAME_SUFFIX;
+
+        return !new File(pathname).exists();
     }
 
 }

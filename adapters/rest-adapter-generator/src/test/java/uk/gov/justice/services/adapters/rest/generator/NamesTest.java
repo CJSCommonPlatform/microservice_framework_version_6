@@ -4,17 +4,10 @@ import static net.trajano.commons.testing.UtilityClassTestUtil.assertUtilityClas
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.raml.model.ActionType.POST;
-import static uk.gov.justice.services.adapters.rest.generator.Names.applicationNameOf;
+import static uk.gov.justice.services.adapters.rest.generator.Names.applicationNameFrom;
 import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
-import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithCommandApiDefaults;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithDefaults;
-import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithQueryApiDefaults;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
-import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
-import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
-
-import uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder;
-import uk.gov.justice.services.core.annotation.Component;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -90,20 +83,20 @@ public class NamesTest {
         Raml raml = restRamlWithDefaults()
                 .withBaseUri("http://localhost:8080/warname/command/api/rest/service")
                 .build();
-        String applicationName = applicationNameOf(raml);
+        String applicationName = applicationNameFrom(raml);
         assertThat(applicationName, is("CommandApiRestServiceApplication"));
     }
 
     @Test(expected = IllegalStateException.class)
     public void shouldThrowExceptionForMalformedUri() throws Exception {
         Raml raml = restRamlWithDefaults().withBaseUri("blah").build();
-        applicationNameOf(raml);
+        applicationNameFrom(raml);
     }
 
     @Test
     public void shouldReturnPathIfNoContextFound() throws Exception {
         Raml raml = restRamlWithDefaults().withBaseUri("http://localhost:8080/webcontext").build();
-        String applicationName = applicationNameOf(raml);
+        String applicationName = applicationNameFrom(raml);
         assertThat(applicationName, is("WebcontextApplication"));
     }
 
@@ -129,30 +122,4 @@ public class NamesTest {
         assertThat(applicationName, is("/webcontext"));
     }
 
-    @Test
-    public void shouldReturnComponentFromBaseUriForCommandApi() throws Exception {
-        Raml raml = restRamlWithCommandApiDefaults().build();
-        Component component = Names.componentFromBaseUriIn(raml);
-        assertThat(component, is(COMMAND_API));
-    }
-
-    @Test
-    public void shouldReturnComponentFromBaseUriForQueryApi() throws Exception {
-        Raml raml = restRamlWithQueryApiDefaults().build();
-        Component component = Names.componentFromBaseUriIn(raml);
-        assertThat(component, is(QUERY_API));
-    }
-
-    @Test
-    public void shouldThrowExceptionIfNoValidPillarAndTier() throws Exception {
-        Raml raml = new RamlBuilder()
-                .withVersion("#%RAML 0.8")
-                .withTitle("Example Service")
-                .withBaseUri("http://localhost:8080/warname/event/listener/rest/service").build();
-
-        exception.expect(IllegalStateException.class);
-        exception.expectMessage("Base URI must contain valid pillar and tier: http://localhost:8080/warname/event/listener/rest/service");
-
-        Names.componentFromBaseUriIn(raml);
-    }
 }

@@ -4,7 +4,8 @@ import static java.lang.String.format;
 import static org.apache.commons.lang.Validate.isTrue;
 import static org.apache.commons.lang.Validate.notEmpty;
 import static org.apache.commons.lang.Validate.notNull;
-import static uk.gov.justice.services.adapters.rest.generator.Names.componentFromBaseUriIn;
+import static uk.gov.justice.services.adapters.rest.generator.Generators.componentFromBaseUriIn;
+import static uk.gov.justice.services.adapters.rest.generator.Names.RESOURCE_PACKAGE_NAME;
 
 import uk.gov.justice.raml.common.validator.CompositeRamlValidator;
 import uk.gov.justice.raml.common.validator.ContainsActionsRamlValidator;
@@ -18,9 +19,14 @@ import uk.gov.justice.services.adapters.rest.validator.ResponseContentTypeRamlVa
 import uk.gov.justice.services.core.annotation.Component;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.stream.Collectors;
+import java.util.Collections;
+import java.util.List;
 
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.TypeSpec;
 import org.raml.model.Raml;
 import org.raml.model.Resource;
 
@@ -42,15 +48,14 @@ public class RestAdapterGenerator implements Generator {
         final Collection<Resource> resources = raml.getResources().values();
         final Component component = componentFromBaseUriIn(raml);
 
-        final JaxRsCodeGenerator codeGenerator = new JaxRsCodeGenerator(configuration);
-        final Collection<String> implementationNames = resources.stream()
-                .map(resource -> {
-                    final String interfaceName = codeGenerator.createInterface(resource);
-                    return codeGenerator.createImplementation(interfaceName, component);
-                })
-                .collect(Collectors.toList());
-        codeGenerator.createApplication(raml, implementationNames);
-        codeGenerator.generate();
+        final JaxRsInterfaceGenerator interfaceGenerator = new JaxRsInterfaceGenerator();
+        final JaxRsImplementationGenerator implementationGenerator = new JaxRsImplementationGenerator(configuration);
+        final JaxRsApplicationCodeGenerator applicationGenerator = new JaxRsApplicationCodeGenerator(configuration);
+
+        writeToResourcePackage(interfaceGenerator.generateFor(resources), configuration);
+        final List<String> implementationNames = writeToResourcePackage(implementationGenerator.generateFor(resources, component), configuration);
+
+        writeToBasePackage(applicationGenerator.createApplication(implementationNames, raml), configuration);
     }
 
     private void validate(final GeneratorConfig configuration) {
@@ -61,6 +66,55 @@ public class RestAdapterGenerator implements Generator {
         notNull(outputDirectory, "OutputDirectory can't be null");
         isTrue(outputDirectory.isDirectory(), format("%s is not a pre-existing directory", outputDirectory));
         isTrue(outputDirectory.canWrite(), format("%s can't be written to", outputDirectory));
+    }
+
+    /**
+     * Write class to the base package provided in the configuration
+     *
+     * @param typeSpec      the typeSpec to write to file
+     * @param configuration the configuration that provides the base package name
+     */
+    private void writeToBasePackage(final TypeSpec typeSpec, final GeneratorConfig configuration) {
+        writeToBasePackage(Collections.singletonList(typeSpec), configuration, "");
+    }
+
+    /**
+     * Write a list of classes to the resource package.
+     *
+     * @param typeSpecs     the list of typeSpecs to write to file
+     * @param configuration the configuration that provides the base package name
+     * @return the list of class names written to file
+     */
+    private List<String> writeToResourcePackage(final List<TypeSpec> typeSpecs, final GeneratorConfig configuration) {
+        return writeToBasePackage(typeSpecs, configuration, RESOURCE_PACKAGE_NAME);
+    }
+
+    /**
+     * Write a list of classes to a specified package.
+     *
+     * @param typeSpecs     the list of typeSpecs to write to file
+     * @param configuration the configuration that provides the base package name
+     * @return the list of class names written to file
+     * @throws IllegalStateException if an IOException is thrown while writing to file
+     */
+    private List<String> writeToBasePackage(final List<TypeSpec> typeSpecs,
+                                            final GeneratorConfig configuration,
+                                            final String packageName) {
+
+        final List<String> implementationNames = new ArrayList<>();
+
+        typeSpecs.stream().forEach(typeSpec -> {
+            try {
+                JavaFile.builder(configuration.getBasePackageName() + packageName, typeSpec)
+                        .build()
+                        .writeTo(configuration.getOutputDirectory());
+                implementationNames.add(typeSpec.name);
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
+        });
+
+        return implementationNames;
     }
 
 }

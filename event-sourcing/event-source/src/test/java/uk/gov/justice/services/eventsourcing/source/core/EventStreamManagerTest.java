@@ -11,6 +11,7 @@ import uk.gov.justice.services.eventsourcing.repository.core.EventRepository;
 import uk.gov.justice.services.eventsourcing.repository.core.exception.StoreEventRequestFailedException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.InvalidStreamVersionRuntimeException;
+import uk.gov.justice.services.eventsourcing.source.core.exception.VersionMismatchException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 
@@ -104,7 +105,7 @@ public class EventStreamManagerTest {
         eventStreamManager.appendAfter(STREAM_ID, Collections.singletonList(envelope).stream(), null);
     }
 
-    @Test(expected = EventStreamException.class)
+    @Test(expected = VersionMismatchException.class)
     public void shouldThrowExceptionWhenFromVersionNotCorrect() throws Exception {
         when(envelope.metadata()).thenReturn(metadata);
         when(metadata.version()).thenReturn(Optional.empty());
@@ -149,11 +150,5 @@ public class EventStreamManagerTest {
         assertThat(actualCurrentVersion, equalTo(CURRENT_VERSION));
         verify(eventRepository).getCurrentSequenceIdForStream(STREAM_ID);
     }
-//
-//    @Test
-//    public void shouldGetId() {
-//        UUID actualId = eventStreamManager.getId();
-//
-//        assertThat(actualId, equalTo(STREAM_ID));
-//    }
+
 }

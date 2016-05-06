@@ -77,6 +77,19 @@ public class ActionBuilder {
             QueryParameter queryParameter = new QueryParameter();
             queryParameter.setDisplayName(paramName);
             queryParameter.setType(STRING);
+            queryParameter.setRequired(true);
+            this.queryParameters.put(paramName, queryParameter);
+        });
+
+        return this;
+    }
+
+    public ActionBuilder withOptionalQueryParameters(final String... paramNames) {
+        stream(paramNames).forEach(paramName -> {
+            QueryParameter queryParameter = new QueryParameter();
+            queryParameter.setDisplayName(paramName);
+            queryParameter.setType(STRING);
+            queryParameter.setRequired(false);
             this.queryParameters.put(paramName, queryParameter);
         });
 

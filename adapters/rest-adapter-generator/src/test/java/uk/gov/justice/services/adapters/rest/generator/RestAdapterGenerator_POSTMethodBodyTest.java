@@ -1,10 +1,6 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
 import static java.util.Collections.emptyMap;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
@@ -13,7 +9,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
-import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.adapters.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
@@ -22,15 +17,12 @@ import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionU
 import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionUtil.setField;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
 
-import uk.gov.justice.services.adapter.rest.RestProcessor;
-import uk.gov.justice.services.adapters.test.utils.compiler.JavaCompilerUtil;
 import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Consumer;
 
 import javax.json.Json;
@@ -39,43 +31,16 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 import org.apache.cxf.jaxrs.impl.tl.ThreadLocalHttpHeaders;
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
-@RunWith(MockitoJUnitRunner.class)
-public class RestAdapterGenerator_POSTMethodBodyTest {
+public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGeneratorTest {
 
     private static final JsonObject NOT_USED_JSONOBJECT = Json.createObjectBuilder().build();
 
-    private static final String BASE_PACKAGE = "org.raml.test";
-
-    @Rule
-    public TemporaryFolder outputFolder = new TemporaryFolder();
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-    private JavaCompilerUtil compiler;
-    private RestAdapterGenerator generator;
-
     @Mock
     private AsynchronousDispatcher dispatcher;
-
-    @Mock
-    private RestProcessor restProcessor;
-
-    @Before
-    public void before() {
-        generator = new RestAdapterGenerator();
-        compiler = new JavaCompilerUtil(outputFolder.getRoot(), outputFolder.getRoot());
-    }
 
     @SuppressWarnings("unchecked")
     @Test
@@ -268,30 +233,6 @@ public class RestAdapterGenerator_POSTMethodBodyTest {
         assertThat(pathParams.get("param2"), is("paramValueDEF"));
     }
 
-    @SuppressWarnings("unchecked")
-    @Test
-    public void shouldReturnSetOfResourceClasses() throws Exception {
-        generator.run(
-                raml()
-                        .withBaseUri("http://localhost:8080/warname/command/api/rest/service")
-                        .with(resource("/pathA").with(action(POST).withActionOfDefaultRequestType()))
-                        .with(resource("/pathB").with(action(POST).withActionOfDefaultRequestType()))
-                        .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-
-        Set<Class<?>> compiledClasses = compiler.compiledClassesOf(BASE_PACKAGE);
-        Class<?> applicationClass = compiler.classOf(compiledClasses, BASE_PACKAGE, "CommandApiRestServiceApplication");
-        Object application = applicationClass.newInstance();
-
-        Method method = applicationClass.getDeclaredMethod("getClasses");
-        Object result = method.invoke(application);
-        assertThat(result, is(instanceOf(Set.class)));
-        Set<Class<?>> classes = (Set<Class<?>>) result;
-        assertThat(classes, hasSize(2));
-        assertThat(classes, containsInAnyOrder(
-                equalTo(compiler.classOf(compiledClasses, BASE_PACKAGE, "resource", "DefaultPathAResource")),
-                equalTo(compiler.classOf(compiledClasses, BASE_PACKAGE, "resource", "DefaultPathBResource"))));
-    }
 
     private Object instantiate(Class<?> resourceClass) throws InstantiationException, IllegalAccessException {
         Object resourceObject = resourceClass.newInstance();

@@ -28,8 +28,12 @@ protocols: [ HTTP, HTTPS ]
     Search users
   get:
     queryParameters:
-        surname:
+        lastname:
             type: string
+            required: true
+        firstname:
+            type: string
+            required: false
     responses:
         200:
             body:

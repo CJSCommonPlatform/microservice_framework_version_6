@@ -15,6 +15,7 @@ import static uk.gov.justice.services.adapters.rest.generator.Names.resourceInte
 
 import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.services.adapter.rest.RestProcessor;
+import uk.gov.justice.services.adapter.rest.ValidParameterMapBuilder;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
@@ -24,10 +25,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.json.JsonObject;
 import javax.ws.rs.core.Context;
@@ -40,7 +41,6 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.raml.model.Action;
 import org.raml.model.ActionType;
@@ -54,9 +54,11 @@ import org.raml.model.parameter.UriParameter;
  */
 class JaxRsImplementationGenerator {
 
-    private static final String PARAMS_PUT_STATEMENT_FORMAT = "params.put($S, $N)";
-    private static final String SYNCHRONOUS_METHOD_STATEMENT = "return restProcessor.processSynchronously(syncDispatcher::dispatch, headers, params.build())";
-    private static final String ASYNCHRONOUS_METHOD_STATEMENT = "return restProcessor.processAsynchronously(asyncDispatcher::dispatch, entity, headers, params.build())";
+    private static final String VARIABLE_MAP_BUILDER = "validParameterMapBuilder";
+    private static final String PARAMS_PUT_REQUIRED_STATEMENT_FORMAT = "$L.putRequired($S, $N)";
+    private static final String PARAMS_PUT_OPTIONAL_STATEMENT_FORMAT = "$L.putOptional($S, $N)";
+    private static final String SYNCHRONOUS_METHOD_STATEMENT = "return restProcessor.processSynchronously(syncDispatcher::dispatch, headers, $L.validateAndBuildMap())";
+    private static final String ASYNCHRONOUS_METHOD_STATEMENT = "return restProcessor.processAsynchronously(asyncDispatcher::dispatch, entity, headers, $L.validateAndBuildMap())";
 
     private final GeneratorConfig configuration;
 
@@ -111,7 +113,6 @@ class JaxRsImplementationGenerator {
         return classBuilder("Default" + resourceInterfaceNameOf(resource))
                 .addSuperinterface(interfaceClassNameFor(resource))
                 .addModifiers(PUBLIC)
-                .addAnnotation(Stateless.class)
                 .addAnnotation(AnnotationSpec.builder(Adapter.class)
                         .addMember(DEFAULT_ANNOTATION_PARAMETER, "$T.$L", Component.class, component)
                         .build())
@@ -244,9 +245,9 @@ class JaxRsImplementationGenerator {
 
         if (actionType == GET) {
             methodBody = methodBody(pathParams, () -> methodBodyForGet(queryParams));
-        } else if(actionType == POST) {
+        } else if (actionType == POST) {
             methodBody = methodBody(pathParams, this::methodBodyForPost);
-        }  else {
+        } else {
             throw new IllegalStateException(String.format("Unsupported action type %s", actionType));
         }
 
@@ -267,8 +268,8 @@ class JaxRsImplementationGenerator {
      */
     private CodeBlock methodBodyForGet(final Map<String, QueryParameter> queryParams) {
         return CodeBlock.builder()
-                .add(putAllParamsInMap(queryParams.keySet()))
-                .addStatement(SYNCHRONOUS_METHOD_STATEMENT)
+                .add(putAllQueryParamsInMap(queryParams))
+                .addStatement(SYNCHRONOUS_METHOD_STATEMENT, VARIABLE_MAP_BUILDER)
                 .build();
     }
 
@@ -279,7 +280,7 @@ class JaxRsImplementationGenerator {
      */
     private CodeBlock methodBodyForPost() {
         return CodeBlock.builder()
-                .addStatement(ASYNCHRONOUS_METHOD_STATEMENT)
+                .addStatement(ASYNCHRONOUS_METHOD_STATEMENT, VARIABLE_MAP_BUILDER)
                 .build();
     }
 
@@ -289,28 +290,48 @@ class JaxRsImplementationGenerator {
      * @return the {@link CodeBlock} representing the general code
      */
     private CodeBlock methodBody(final Map<String, UriParameter> pathParams, final Supplier<CodeBlock> supplier) {
-        final ClassName classStringType = ClassName.get(String.class);
-        final ParameterizedTypeName classImmutableMapType = ParameterizedTypeName.get(
-                ClassName.get(com.google.common.collect.ImmutableMap.Builder.class), classStringType, classStringType);
+        final ClassName classMapBuilderType = ClassName.get(ValidParameterMapBuilder.class);
 
         return CodeBlock.builder()
-                .addStatement("$T params = new $T()", classImmutableMapType, classImmutableMapType)
-                .add(putAllParamsInMap(pathParams.keySet()))
+                .addStatement("$T $L = new $T()", classMapBuilderType, VARIABLE_MAP_BUILDER, classMapBuilderType)
+                .add(putAllPathParamsInMap(pathParams.keySet()))
                 .add(supplier.get())
                 .build();
     }
 
     /**
-     * Generate code to add all parameters to the params map.
+     * Generate code to add all path parameters to the params map.
      *
      * @param paramNames the params to add to the map
      * @return the {@link CodeBlock} that represents the generated code
      */
-    private CodeBlock putAllParamsInMap(final Collection<String> paramNames) {
+    private CodeBlock putAllPathParamsInMap(final Set<String> paramNames) {
         final CodeBlock.Builder builder = CodeBlock.builder();
 
         paramNames.stream().forEach(name ->
-                builder.addStatement(PARAMS_PUT_STATEMENT_FORMAT, name, name)
+                builder.addStatement(PARAMS_PUT_REQUIRED_STATEMENT_FORMAT, VARIABLE_MAP_BUILDER, name, name)
+        );
+
+        return builder.build();
+    }
+
+    /**
+     * Generate code to add all query parameters to the params map.
+     *
+     * @param parameters the params to add to the map
+     * @return the {@link CodeBlock} that represents the generated code
+     */
+    private CodeBlock putAllQueryParamsInMap(final Map<String, QueryParameter> parameters) {
+        final CodeBlock.Builder builder = CodeBlock.builder();
+
+        parameters.entrySet().stream().forEach(parameter -> {
+                    final String name = parameter.getKey();
+                    if (parameter.getValue().isRequired()) {
+                        builder.addStatement(PARAMS_PUT_REQUIRED_STATEMENT_FORMAT, VARIABLE_MAP_BUILDER, name, name);
+                    } else {
+                        builder.addStatement(PARAMS_PUT_OPTIONAL_STATEMENT_FORMAT, VARIABLE_MAP_BUILDER, name, name);
+                    }
+                }
         );
 
         return builder.build();

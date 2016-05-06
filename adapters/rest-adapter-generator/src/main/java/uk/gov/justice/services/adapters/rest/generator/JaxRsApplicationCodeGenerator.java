@@ -8,9 +8,9 @@ import static uk.gov.justice.services.adapters.rest.generator.Names.applicationN
 import static uk.gov.justice.services.adapters.rest.generator.Names.baseUriPathWithoutContext;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
+import uk.gov.justice.services.adapter.rest.application.CommonProviders;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.ws.rs.ApplicationPath;
@@ -19,6 +19,7 @@ import javax.ws.rs.core.Application;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
@@ -32,6 +33,7 @@ import org.raml.model.Raml;
 class JaxRsApplicationCodeGenerator {
 
     private static final String DEFAULT_ANNOTATION_PARAMETER = "value";
+    private static final String COMMON_PROVIDERS_FIELD = "commonProviders";
 
     private final GeneratorConfig config;
 
@@ -68,6 +70,9 @@ class JaxRsApplicationCodeGenerator {
         return classBuilder(applicationNameFrom(raml))
                 .addModifiers(PUBLIC)
                 .superclass(Application.class)
+                .addField(FieldSpec.builder(ClassName.get(CommonProviders.class), COMMON_PROVIDERS_FIELD)
+                        .initializer(CodeBlock.of("new $T()", CommonProviders.class))
+                        .build())
                 .addAnnotation(AnnotationSpec.builder(ApplicationPath.class)
                         .addMember(DEFAULT_ANNOTATION_PARAMETER, "$S", defaultIfBlank(baseUriPathWithoutContext(raml), "/"))
                         .build());
@@ -82,13 +87,12 @@ class JaxRsApplicationCodeGenerator {
     private MethodSpec generateGetClassesMethod(final Collection<String> implementationNames) {
         final ParameterizedTypeName wildcardClassType = ParameterizedTypeName.get(ClassName.get(Class.class), WildcardTypeName.subtypeOf(Object.class));
         final ParameterizedTypeName classSetType = ParameterizedTypeName.get(ClassName.get(Set.class), wildcardClassType);
-        final ParameterizedTypeName classHashSetType = ParameterizedTypeName.get(ClassName.get(HashSet.class), wildcardClassType);
 
         return MethodSpec.methodBuilder("getClasses")
                 .addModifiers(PUBLIC)
                 .addAnnotation(Override.class)
                 .addCode(CodeBlock.builder()
-                        .addStatement("$T classes = new $T()", classSetType, classHashSetType)
+                        .addStatement("$T classes = $L.providers()", classSetType, COMMON_PROVIDERS_FIELD)
                         .add(statementsToAddClassToSetForEach(implementationNames))
                         .addStatement("return classes")
                         .build())

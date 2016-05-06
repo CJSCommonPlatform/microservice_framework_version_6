@@ -8,6 +8,11 @@ protocols: [ HTTP, HTTPS ]
 /recipes:
   description: list all recipes
   get:
+    queryParameters:
+        pagesize:
+            type: string
+            required: true
+
     responses:
       200:
         body:

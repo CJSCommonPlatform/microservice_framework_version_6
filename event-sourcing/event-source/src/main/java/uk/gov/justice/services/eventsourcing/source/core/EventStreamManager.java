@@ -6,6 +6,7 @@ import uk.gov.justice.services.eventsourcing.repository.core.EventRepository;
 import uk.gov.justice.services.eventsourcing.repository.core.exception.StoreEventRequestFailedException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.InvalidStreamVersionRuntimeException;
+import uk.gov.justice.services.eventsourcing.source.core.exception.VersionMismatchException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.List;
@@ -103,7 +104,7 @@ public class EventStreamManager {
 
     private void validateEvents(final UUID id, final List<JsonEnvelope> envelopeList, final Optional<Long> versionFrom, final Long currentVersion) throws EventStreamException {
         if (versionFrom.isPresent() && !versionFrom.get().equals(currentVersion)) {
-            throw new EventStreamException(String.format("Failed to append to stream %s. Version mismatch. Expected %d, Found %d",
+            throw new VersionMismatchException(String.format("Failed to append to stream %s. Version mismatch. Expected %d, Found %d",
                     id, versionFrom.get(), currentVersion));
         }
 

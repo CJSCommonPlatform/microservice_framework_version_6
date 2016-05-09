@@ -7,19 +7,25 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static java.lang.String.format;
 import static java.util.Collections.emptySet;
+import static javax.json.JsonValue.NULL;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.event.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
+import uk.gov.justice.services.messaging.JsonObjectMetadata;
 import uk.gov.justice.services.messaging.Metadata;
 
 import java.util.Set;
+import java.util.UUID;
 
 import javax.json.Json;
 import javax.json.JsonObject;
+import javax.json.JsonValue;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
@@ -155,8 +161,8 @@ public class RestClientProcessorIT {
         assertThat(response, equalTo(responseEnvelope));
     }
 
-    @Test(expected = RuntimeException.class)
-    public void shouldThrowExceptionForNon200ResponseCode() throws Exception {
+    @Test
+    public void shouldReturnJsonNullPayloadFor404ResponseCode() throws Exception {
 
         final String path = "/my/resource";
         final String name = "context.query.myquery";
@@ -169,10 +175,44 @@ public class RestClientProcessorIT {
                         .withHeader("Content-Type", mimetype)
                         .withBody(RESPONSE_STRING)));
 
+        restClientProcessor.enveloper = new Enveloper();
+
+        when(requestEnvelope.metadata()).thenReturn(metadata());
+        when(responseEnvelope.payload()).thenReturn(JsonValue.NULL);
+
+        EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, emptySet(), emptySet());
+
+        JsonEnvelope response = restClientProcessor.request(endpointDefinition, requestEnvelope);
+
+        assertThat(response, notNullValue());
+        assertThat(response.payload(), equalTo(NULL));
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void shouldThrowExceptionFor500ResponseCode() throws Exception {
+
+        final String path = "/my/resource";
+        final String name = "context.query.myquery";
+        final String mimetype = format("application/vnd.%s+json", name);
+
+        stubFor(get(urlEqualTo(path))
+                .withHeader("Accept", WireMock.equalTo(mimetype))
+                .willReturn(aResponse()
+                        .withStatus(500)
+                        .withHeader("Content-Type", mimetype)
+                        .withBody(RESPONSE_STRING)));
+
         when(metadata.name()).thenReturn(name);
 
         EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, emptySet(), emptySet());
 
         restClientProcessor.request(endpointDefinition, requestEnvelope);
     }
+
+    private Metadata metadata() {
+        return JsonObjectMetadata.metadataFrom(Json.createObjectBuilder()
+                .add("name", "test.query.get-something")
+                .add("id", UUID.randomUUID().toString()).build());
+    }
+    
 }

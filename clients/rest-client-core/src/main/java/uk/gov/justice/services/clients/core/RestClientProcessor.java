@@ -1,9 +1,11 @@
 package uk.gov.justice.services.clients.core;
 
 import static java.lang.String.format;
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.OK;
 
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.event.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 
@@ -27,6 +29,10 @@ public class RestClientProcessor {
 
     @Inject
     JsonObjectEnvelopeConverter jsonObjectEnvelopeConverter;
+
+    @Inject
+    Enveloper enveloper;
+
 
     /**
      * Make a request using the envelope provided to a specified endpoint.
@@ -61,8 +67,11 @@ public class RestClientProcessor {
 
         final Invocation.Builder builder = target.request(format(MEDIA_TYPE_PATTERN, envelope.metadata().name()));
         final Response response = builder.get();
-        if (response.getStatus() != OK.getStatusCode()) {
-            throw new RuntimeException(format("Request Failed with code %s and reason \"%s\"", response.getStatus(),
+        final int status = response.getStatus();
+        if (status == NOT_FOUND.getStatusCode()) {
+            return enveloper.withMetadataFrom(envelope, envelope.metadata().name()).apply(null);
+        } else if (status != OK.getStatusCode()) {
+            throw new RuntimeException(format("Request Failed with code %s and reason \"%s\"", status,
                     response.getStatusInfo().getReasonPhrase()));
         }
 

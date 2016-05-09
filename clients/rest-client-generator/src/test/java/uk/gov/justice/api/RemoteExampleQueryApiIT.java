@@ -15,10 +15,12 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
 
 import uk.gov.justice.services.clients.core.RestClientHelper;
 import uk.gov.justice.services.clients.core.RestClientProcessor;
+import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.dispatcher.DispatcherProducer;
 import uk.gov.justice.services.core.dispatcher.Requester;
+import uk.gov.justice.services.event.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 
@@ -31,6 +33,7 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonWriter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.apache.openejb.OpenEjbContainer;
@@ -96,7 +99,10 @@ public class RemoteExampleQueryApiIT {
             RestClientHelper.class,
             DispatcherProducer.class,
             StringToJsonObjectConverter.class,
-            JsonObjectEnvelopeConverter.class
+            JsonObjectEnvelopeConverter.class,
+            ObjectToJsonValueConverter.class,
+            ObjectMapper.class,
+            Enveloper.class
     })
     public WebApp war() {
         return new WebApp()

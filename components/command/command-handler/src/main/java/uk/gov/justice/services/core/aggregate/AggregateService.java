@@ -10,12 +10,14 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
 /**
  * Service for replaying event streams on aggregates.
  */
+@ApplicationScoped
 public class AggregateService {
 
     @Inject

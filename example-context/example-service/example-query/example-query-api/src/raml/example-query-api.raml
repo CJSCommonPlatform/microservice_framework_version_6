@@ -12,7 +12,12 @@ protocols: [ HTTP, HTTPS ]
         pagesize:
             type: string
             required: true
-
+        name:
+          displayName: Name
+          type: string
+          description: A recipe name
+          example: Mess
+          required: false
     responses:
       200:
         body:

@@ -52,6 +52,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import javax.ejb.ActivationConfigProperty;
@@ -163,8 +164,8 @@ public class JmsEndpointGeneratorTest {
                         .build(),
                 configurationWithBasePackage("uk.somepackage", outputFolder, emptyMap()));
 
-        Class<?> compiledClass = compiler.compiledClassOf("uk.somepackage");
-        assertThat(compiledClass.getName(), is("uk.somepackage.StructureCommandControllerJmsListener"));
+        Class<?> clazz = getJmsListenerClass("uk.somepackage", "StructureCommandControllerJmsListener");
+        assertThat(clazz.getName(), is("uk.somepackage.StructureCommandControllerJmsListener"));
     }
 
     @Test
@@ -177,7 +178,7 @@ public class JmsEndpointGeneratorTest {
                         .build(),
                 configurationWithBasePackage("uk.package2", outputFolder, emptyMap()));
 
-        Class<?> clazz = compiler.compiledClassOf("uk.package2");
+        Class<?> clazz = getJmsListenerClass("uk.package2", "StructureCommandControllerJmsListener");
         assertThat(clazz.getName(), is("uk.package2.StructureCommandControllerJmsListener"));
     }
 
@@ -192,7 +193,7 @@ public class JmsEndpointGeneratorTest {
                         .build(),
                 configurationWithBasePackage("uk.somepackage", outputFolder, emptyMap()));
 
-        Class<?> compiledClass = compiler.compiledClassOf("uk.somepackage");
+        Class<?> compiledClass = getJmsListenerClass("uk.somepackage", "StructureEventProcessorJmsListener");
         assertThat(compiledClass.getName(), is("uk.somepackage.StructureEventProcessorJmsListener"));
     }
 
@@ -207,7 +208,7 @@ public class JmsEndpointGeneratorTest {
                         .build(),
                 configurationWithBasePackage("uk.somepackage", outputFolder, emptyMap()));
 
-        Class<?> compiledClass = compiler.compiledClassOf("uk.somepackage");
+        Class<?> compiledClass = getJmsListenerClass("uk.somepackage", "StructureEventListenerJmsListener");
         assertThat(compiledClass.getName(), is("uk.somepackage.StructureEventListenerJmsListener"));
     }
 
@@ -220,7 +221,7 @@ public class JmsEndpointGeneratorTest {
                                 .with(action(POST, "application/vnd.people.command.abc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> clazz = getJmsListenerClass(BASE_PACKAGE, "PeopleCommandHandlerJmsListener");
         Adapter adapterAnnotation = clazz.getAnnotation(Adapter.class);
         assertThat(adapterAnnotation, not(nullValue()));
         assertThat(adapterAnnotation.value(), is(COMMAND_HANDLER));
@@ -237,7 +238,7 @@ public class JmsEndpointGeneratorTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> clazz = getJmsListenerClass(BASE_PACKAGE, "PeopleCommandControllerJmsListener");
         Adapter adapterAnnotation = clazz.getAnnotation(Adapter.class);
         assertThat(adapterAnnotation, not(nullValue()));
         assertThat(adapterAnnotation.value(), is(COMMAND_CONTROLLER));
@@ -255,7 +256,7 @@ public class JmsEndpointGeneratorTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> clazz = getJmsListenerClass(BASE_PACKAGE, "PeopleEventListenerJmsListener");
         Adapter adapterAnnotation = clazz.getAnnotation(Adapter.class);
         assertThat(adapterAnnotation, not(nullValue()));
         assertThat(adapterAnnotation.value(), is(Component.EVENT_LISTENER));
@@ -273,7 +274,7 @@ public class JmsEndpointGeneratorTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> clazz = getJmsListenerClass(BASE_PACKAGE, "PeopleEventProcessorJmsListener");
         Adapter adapterAnnotation = clazz.getAnnotation(Adapter.class);
         assertThat(adapterAnnotation, not(nullValue()));
         assertThat(adapterAnnotation.value(), is(Component.EVENT_PROCESSOR));
@@ -284,7 +285,7 @@ public class JmsEndpointGeneratorTest {
     public void shouldCreateJmsEndpointImplementingMessageListener() throws Exception {
         generator.run(raml().withDefaultMessagingResource().build(), configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> clazz = getJmsListenerClass(BASE_PACKAGE, "SomecontextCommandControllerJmsListener");
         assertThat(clazz.getInterfaces().length, equalTo(1));
         assertThat(clazz.getInterfaces()[0], equalTo(MessageListener.class));
     }
@@ -293,7 +294,7 @@ public class JmsEndpointGeneratorTest {
     public void shouldCreateJmsEndpointWithAnnotatedDispatcherProperty() throws Exception {
         generator.run(raml().withDefaultMessagingResource().build(), configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> clazz = getJmsListenerClass(BASE_PACKAGE, "SomecontextCommandControllerJmsListener");
         Field dispatcherField = clazz.getDeclaredField("dispatcher");
         assertThat(dispatcherField, not(nullValue()));
         assertThat(dispatcherField.getType(), CoreMatchers.equalTo((AsynchronousDispatcher.class)));
@@ -305,7 +306,7 @@ public class JmsEndpointGeneratorTest {
     public void shouldCreateJmsEndpointWithAnnotatedJmsProcessorProperty() throws Exception {
         generator.run(raml().withDefaultMessagingResource().build(), configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> clazz = getJmsListenerClass(BASE_PACKAGE, "SomecontextCommandControllerJmsListener");
         Field jmsProcessorField = clazz.getDeclaredField("jmsProcessor");
         assertThat(jmsProcessorField, not(nullValue()));
         assertThat(jmsProcessorField.getType(), CoreMatchers.equalTo((JmsProcessor.class)));
@@ -323,7 +324,7 @@ public class JmsEndpointGeneratorTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> clazz = getJmsListenerClass(BASE_PACKAGE, "PeopleCommandControllerJmsListener");
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("destinationLookup")),
@@ -340,7 +341,7 @@ public class JmsEndpointGeneratorTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> clazz = getJmsListenerClass(BASE_PACKAGE, "StructureCommandControllerJmsListener");
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("destinationLookup")),
@@ -357,7 +358,7 @@ public class JmsEndpointGeneratorTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> clazz = getJmsListenerClass(BASE_PACKAGE, "StructureCommandHandlerJmsListener");
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("destinationLookup")),
@@ -375,7 +376,7 @@ public class JmsEndpointGeneratorTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> clazz = getJmsListenerClass(BASE_PACKAGE, "StructureEventListenerJmsListener");
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("destinationLookup")),
@@ -391,7 +392,7 @@ public class JmsEndpointGeneratorTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> clazz = getJmsListenerClass(BASE_PACKAGE, "StructureCommandControllerJmsListener");
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("destinationType")),
@@ -407,7 +408,7 @@ public class JmsEndpointGeneratorTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> clazz = getJmsListenerClass(BASE_PACKAGE, "LifecycleCommandHandlerJmsListener");
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("destinationType")),
@@ -423,7 +424,7 @@ public class JmsEndpointGeneratorTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> clazz = getJmsListenerClass(BASE_PACKAGE, "PeopleEventListenerJmsListener");
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("destinationType")),
@@ -442,7 +443,7 @@ public class JmsEndpointGeneratorTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> clazz = getJmsListenerClass(BASE_PACKAGE, "StructureCommandControllerJmsListener");
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("messageSelector")),
@@ -461,7 +462,7 @@ public class JmsEndpointGeneratorTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> clazz = getJmsListenerClass(BASE_PACKAGE, "StructureCommandControllerJmsListener");
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("messageSelector")),
@@ -484,7 +485,7 @@ public class JmsEndpointGeneratorTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> clazz = getJmsListenerClass(BASE_PACKAGE, "StructureCommandControllerJmsListener");
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("messageSelector")),
@@ -504,7 +505,7 @@ public class JmsEndpointGeneratorTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> clazz = getJmsListenerClass(BASE_PACKAGE, "PeopleCommandControllerJmsListener");
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("messageSelector")),
@@ -517,7 +518,7 @@ public class JmsEndpointGeneratorTest {
     public void shouldCreateJmsEndpointWithOnMessage() throws Exception {
         generator.run(raml().withDefaultMessagingResource().build(), configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> clazz = getJmsListenerClass(BASE_PACKAGE, "SomecontextCommandControllerJmsListener");
 
         List<Method> methods = methodsOf(clazz);
         assertThat(methods, hasSize(1));
@@ -532,7 +533,7 @@ public class JmsEndpointGeneratorTest {
     public void shouldCallJmsProcessorWhenOnMessageIsInvoked() throws Exception {
         generator.run(raml().withDefaultMessagingResource().build(), configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> clazz = getJmsListenerClass(BASE_PACKAGE, "SomecontextCommandControllerJmsListener");
         Object object = instantiate(clazz);
         assertThat(object, is(instanceOf(MessageListener.class)));
 
@@ -559,7 +560,7 @@ public class JmsEndpointGeneratorTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> clazz = getJmsListenerClass(BASE_PACKAGE, "PeopleEventListenerJmsListener");
         ActivationConfigProperty[] activationConfig = clazz.getAnnotation(MessageDriven.class).activationConfig();
         assertThat(activationConfig, hasItemInArray(
                 allOf(propertyName(equalTo("destinationType")), propertyValue(equalTo("javax.jms.Topic")))));
@@ -582,7 +583,7 @@ public class JmsEndpointGeneratorTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE);
+        Class<?> clazz = getJmsListenerClass(BASE_PACKAGE, "PeopleCommandControllerJmsListener");
         ActivationConfigProperty[] activationConfig = clazz.getAnnotation(MessageDriven.class).activationConfig();
         assertThat(activationConfig, hasItemInArray(allOf(
                 propertyName(equalTo("destinationType")),
@@ -619,4 +620,8 @@ public class JmsEndpointGeneratorTest {
         };
     }
 
+    private Class<?> getJmsListenerClass(final String packageName, final String className) throws Exception {
+        Set<Class<?>> compiledClasses = compiler.compiledClassesOf(packageName);
+        return compiler.classOf(compiledClasses, packageName, className);
+    }
 }

@@ -5,7 +5,7 @@ import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.OK;
 
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
-import uk.gov.justice.services.event.enveloper.Enveloper;
+import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 
@@ -32,7 +32,6 @@ public class RestClientProcessor {
 
     @Inject
     Enveloper enveloper;
-
 
     /**
      * Make a request using the envelope provided to a specified endpoint.

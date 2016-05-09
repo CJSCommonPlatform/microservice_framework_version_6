@@ -1,4 +1,4 @@
-package uk.gov.justice.services.event.enveloper;
+package uk.gov.justice.services.core.enveloper;
 
 import static java.lang.String.format;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
@@ -9,8 +9,8 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
 
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.core.annotation.Event;
+import uk.gov.justice.services.core.enveloper.exception.InvalidEventException;
 import uk.gov.justice.services.core.extension.EventFoundEvent;
-import uk.gov.justice.services.event.enveloper.exception.InvalidEventException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjects;
 import uk.gov.justice.services.messaging.Metadata;

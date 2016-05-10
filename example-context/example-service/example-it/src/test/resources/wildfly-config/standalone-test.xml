@@ -174,7 +174,7 @@
                 </managed-scheduled-executor-services>
             </concurrent>
             <default-bindings context-service="java:jboss/ee/concurrency/context/default"
-                              datasource="java:/app/example-command-handler/DS.EventStore"
+                              datasource="java:/app/example-command-handler/DS.eventstore"
                               jms-connection-factory="java:jboss/DefaultJMSConnectionFactory"
                               managed-executor-service="java:jboss/ee/concurrency/executor/default"
                               managed-scheduled-executor-service="java:jboss/ee/concurrency/scheduler/default"
@@ -366,8 +366,8 @@
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:datasources:4.0">
             <datasources>
-                <datasource jndi-name="java:/app/example-command-handler/DS.EventStore"
-                            pool-name="DS.cakeshop.EventStore" enabled="true"
+                <datasource jndi-name="java:/app/example-command-handler/DS.eventstore"
+                            pool-name="DS.cakeshop.eventstore" enabled="true"
                             use-java-context="true">
                     <connection-url>${db.url}</connection-url>
                     <driver>h2</driver>

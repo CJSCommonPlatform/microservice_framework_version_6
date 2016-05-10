@@ -6,14 +6,11 @@ import static org.raml.model.ActionType.OPTIONS;
 import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.PUT;
 import static org.raml.model.ActionType.TRACE;
-import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
+import static uk.gov.justice.services.adapters.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
-
-import java.util.Collections;
-import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -65,7 +62,7 @@ public class JaxRsImplementationGeneratorTest {
         jaxRsImplementationGenerator.generateFor(singleResourceWithActionType(TRACE), COMMAND_API);
     }
 
-    private List<Resource> singleResourceWithActionType(final ActionType actionType) {
-        return Collections.singletonList(resource().with(action(actionType)).build());
+    private Resource singleResourceWithActionType(final ActionType actionType) {
+        return resource().with(httpAction(actionType)).build();
     }
 }

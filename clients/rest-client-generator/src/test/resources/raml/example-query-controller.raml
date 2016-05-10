@@ -4,18 +4,33 @@ baseUri: http://localhost:8080/rest-client-generator/query/controller/rest/examp
 
 /users/{userId}:
   get:
+    description: |
+        ...
+        (mapping):
+            responseType: application/vnd.people.query.user1+json
+            name: people.get-user1
+        (mapping):
+            responseType: application/vnd.people.query.user2+json
+            name: people.get-user2
+        ...
     responses:
         200:
             body:
-                application/vnd.people.query.get-user+json:
-                application/vnd.people.query.get-user2+json:
+                application/vnd.people.query.user1+json:
+                application/vnd.people.query.user2+json:
 
 /users:
   get:
+    description: |
+        ...
+        (mapping):
+            responseType: application/vnd.people.users+json
+            name: people.search-users
+        ...
     queryParameters:
         surname:
             type: string
     responses:
         200:
             body:
-                application/vnd.people.query.search-users+json:
+                application/vnd.people.users+json:

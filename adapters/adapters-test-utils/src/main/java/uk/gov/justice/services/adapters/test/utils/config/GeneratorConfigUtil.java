@@ -2,6 +2,7 @@ package uk.gov.justice.services.adapters.test.utils.config;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -27,4 +28,7 @@ public class GeneratorConfigUtil {
         return new GeneratorConfig(outputPath, outputPath, basePackageName, generatorProperties, sourcePaths);
     }
 
+    public static GeneratorConfig emptyPathConfigurationWith(final Map<String, String> generatorProperties) {
+        return new GeneratorConfig(new File("").toPath(), new File("").toPath(), "", generatorProperties, Collections.emptyList());
+    }
 }

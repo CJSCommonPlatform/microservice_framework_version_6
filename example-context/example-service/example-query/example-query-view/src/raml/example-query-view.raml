@@ -8,6 +8,12 @@ protocols: [ HTTP, HTTPS ]
 /recipes:
   description: list all recipes
   get:
+    description: |
+        ...
+        (mapping):
+            responseType: application/vnd.cakeshop.recipes+json
+            name: cakeshop.search-recipes
+        ...
     queryParameters:
         pagesize:
             type: string
@@ -21,16 +27,22 @@ protocols: [ HTTP, HTTPS ]
     responses:
       200:
         body:
-          application/vnd.cakeshop.query.recipes+json:
-            schema: !include json/schema/recipes.json
+          application/vnd.cakeshop.recipes+json:
+            schema: !include json/schema/cakeshop.search-recipes.json
             example: !include json/recipes.json
 
 /recipes/{recipeId}:
   description: return a recipe
   get:
+    description: |
+        ...
+        (mapping):
+            responseType: application/vnd.cakeshop.recipe+json
+            name: cakeshop.get-recipe
+        ...
     responses:
       200:
         body:
-          application/vnd.cakeshop.query.recipe+json:
-            schema: !include json/schema/recipe.json
+          application/vnd.cakeshop.recipe+json:
+            schema: !include json/schema/cakeshop.get-recipe.json
             example: !include json/recipe.json

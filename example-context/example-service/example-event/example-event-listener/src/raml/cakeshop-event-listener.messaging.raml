@@ -5,10 +5,10 @@ version: v1
 /cakeshop.event:
   post:
     body:
-        application/vnd.cakeshop.events.recipe-added+json:
-            schema: !include json/schema/cakeshop.events.recipe-added.json
+        application/vnd.cakeshop.recipe-added+json:
+            schema: !include json/schema/cakeshop.recipe-added.json
             example: !include json/add-recipe.json
 
-        application/vnd.cakeshop.event.cake-made+json:
-            schema: !include json/schema/cakeshop.event.cake-made.json
+        application/vnd.cakeshop.cake-made+json:
+            schema: !include json/schema/cakeshop.cake-made.json
             example: !include json/make-cake.json

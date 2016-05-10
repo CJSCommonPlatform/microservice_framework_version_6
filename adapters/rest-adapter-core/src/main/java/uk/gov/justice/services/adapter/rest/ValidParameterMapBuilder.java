@@ -84,6 +84,10 @@ public class ValidParameterMapBuilder {
         }
     }
 
+    enum ParameterType {
+        REQUIRED, OPTIONAL
+    }
+
     private class Parameter {
         private final String name;
         private final String value;
@@ -94,9 +98,5 @@ public class ValidParameterMapBuilder {
             this.value = value;
             this.parameterType = parameterType;
         }
-    }
-
-    enum ParameterType {
-        REQUIRED, OPTIONAL
     }
 }

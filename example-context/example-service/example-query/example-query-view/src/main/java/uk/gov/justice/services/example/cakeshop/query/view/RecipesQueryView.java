@@ -17,8 +17,8 @@ import org.slf4j.Logger;
 @ServiceComponent(Component.QUERY_VIEW)
 public class RecipesQueryView {
 
-    static final String NAME_RESPONSE_RECIPE = "cakeshop.query.findRecipe-response";
-    static final String NAME_RESPONSE_RECIPE_LIST = "cakeshop.query.recipes-response";
+    static final String NAME_RESPONSE_RECIPE = "cakeshop.findRecipe-response";
+    static final String NAME_RESPONSE_RECIPE_LIST = "cakeshop.recipes-response";
     private static final Logger LOGGER = getLogger(RecipesQueryView.class);
     private static final String FIELD_RECIPE_ID = "recipeId";
     private static final String FIELD_NAME = "name";
@@ -29,7 +29,7 @@ public class RecipesQueryView {
     @Inject
     Enveloper enveloper;
 
-    @Handles("cakeshop.query.recipe")
+    @Handles("cakeshop.get-recipe")
     public JsonEnvelope findRecipe(final JsonEnvelope query) {
         LOGGER.info("=============> Inside findRecipe Query View. RecipeId: " + query.payloadAsJsonObject().getString(FIELD_RECIPE_ID));
 
@@ -37,7 +37,7 @@ public class RecipesQueryView {
                 recipeService.findRecipe(query.payloadAsJsonObject().getString(FIELD_RECIPE_ID)));
     }
 
-    @Handles("cakeshop.query.recipes")
+    @Handles("cakeshop.search-recipes")
     public JsonEnvelope listRecipes(final JsonEnvelope query) {
         LOGGER.info("=============> Inside listRecipes Query View");
 

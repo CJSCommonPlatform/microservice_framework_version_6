@@ -15,8 +15,10 @@ import org.raml.model.MimeType;
  */
 public class ResponseContentTypeRamlValidator extends AbstractContentTypeRamlValidator {
 
+    private static final String CONTENT_TYPE_DESCRIPTION = "response type";
+
     public ResponseContentTypeRamlValidator() {
-        super(ActionType.GET, "response type", "query");
+        super(ActionType.GET, CONTENT_TYPE_DESCRIPTION);
     }
 
     @Override

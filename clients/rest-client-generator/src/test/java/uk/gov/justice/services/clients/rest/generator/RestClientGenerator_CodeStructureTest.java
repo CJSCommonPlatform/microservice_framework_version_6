@@ -8,20 +8,21 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
+import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.POST;
-import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
+import static uk.gov.justice.services.adapters.test.utils.builder.HttpActionBuilder.httpAction;
+import static uk.gov.justice.services.adapters.test.utils.builder.HttpActionBuilder.httpActionWithNoMapping;
+import static uk.gov.justice.services.adapters.test.utils.builder.MappingBuilder.mapping;
+import static uk.gov.justice.services.adapters.test.utils.builder.MappingDescriptionBuilder.mappingDescriptionWith;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithTitleVersion;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.adapters.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
+import static uk.gov.justice.services.adapters.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
 import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionUtil.methodsOf;
 
-import org.hamcrest.Matchers;
-import org.junit.Assert;
-import org.slf4j.Logger;
-import uk.gov.justice.services.adapters.test.utils.compiler.JavaCompilerUtil;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.Remote;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -36,46 +37,60 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import com.google.common.collect.ImmutableMap;
-import org.junit.Before;
-import org.junit.Rule;
+import org.hamcrest.Matchers;
+import org.junit.Assert;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.rules.TemporaryFolder;
-import org.raml.model.ParamType;
-import org.raml.model.parameter.QueryParameter;
+import org.slf4j.Logger;
 
-public class RestClientGenerator_CodeStructureTest {
+public class RestClientGenerator_CodeStructureTest extends AbstractClientGeneratorTest {
+
+    private static final String GET_MAPPING_ANNOTATION = mappingDescriptionWith(
+            mapping()
+                    .withResponseType("application/vnd.cakeshop.query.recipe+json")
+                    .withName("cakeshop.get-recipe"))
+            .build();
+
+
+    private static final String POST_MAPPING_ANNOTATION = mappingDescriptionWith(
+            mapping()
+                    .withRequestType("application/vnd.cakeshop.command.update-recipe+json")
+                    .withName("cakeshop.update-recipe"))
+            .build();
 
     private static final String BASE_PACKAGE = "org.raml.test";
-    private static final Map<String, String> NOT_USED_GENERATOR_PROPERTIES = ImmutableMap.of("serviceComponent", "QUERY_CONTROLLER");
+    private static final Map<String, String> NOT_USED_GENERATOR_PROPERTIES = generatorProperties()
+            .withServiceComponentOf("QUERY_CONTROLLER")
+            .withActionMappingOf(true)
+            .build();
+
     private static final String BASE_URI_WITH_LESS_THAN_EIGHT_PARTS = "http://localhost:8080/command/api/rest/service";
     private static final String BASE_URI_WITH_MORE_THAN_EIGHT_PARTS = "http://localhost:8080/warname/command/api/rest/service/extra";
-    @Rule
-    public TemporaryFolder outputFolder = new TemporaryFolder();
-    @Rule
-    public ExpectedException exception = ExpectedException.none();
-    private RestClientGenerator restClientGenerator;
-    private JavaCompilerUtil compiler;
 
-    @Before
-    public void before() {
-        restClientGenerator = new RestClientGenerator();
-        compiler = new JavaCompilerUtil(outputFolder.getRoot(), outputFolder.getRoot());
-    }
+    private static final Map<String, String> GENERATOR_PROPERTIES = generatorProperties()
+            .withServiceComponentOf("QUERY_API")
+            .withActionMappingOf(true)
+            .build();
+
+    private static final Map<String, String> QUERY_CONTROLLER_GENERATOR_PROPERTIES = generatorProperties()
+            .withServiceComponentOf("QUERY_CONTROLLER")
+            .withActionMappingOf(true)
+            .build();
+
+    private static final Map<String, String> NO_MAPPING_GENERATOR_PROPERTIES = generatorProperties()
+            .withServiceComponentOf("QUERY_CONTROLLER")
+            .withActionMappingOf(false)
+            .build();
 
     @Test
     public void shouldGenerateClassWithAnnotations() throws Exception {
-
         restClientGenerator.run(
                 raml()
                         .withBaseUri("http://localhost:8080/warname/query/api/rest/service")
                         .with(resource("/some/path/{recipeId}")
-                                .with(action(POST, "application/vnd.cakeshop.commands.add-recipe+json")
-                                        .withQueryParameters(queryParameterOf("recipename", true), queryParameterOf("topingredient", false))
-                                        .withActionWithResponseTypes("application/vnd.cakeshop.commands.cmd1+json"))
+                                .with(httpAction(GET, "application/vnd.cakeshop.query.add-recipe+json")
+                                        .withQueryParameters(queryParameterOf("recipename", true), queryParameterOf("topingredient", false)))
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, ImmutableMap.of("serviceComponent", "QUERY_API")));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, GENERATOR_PROPERTIES));
 
 
         Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceQueryApi");
@@ -96,20 +111,20 @@ public class RestClientGenerator_CodeStructureTest {
                         .withBaseUri("http://localhost:8080/warname/query/api/rest/service")
                         .withDefaultPostResource()
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, ImmutableMap.of("serviceComponent", "QUERY_CONTROLLER")));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, QUERY_CONTROLLER_GENERATOR_PROPERTIES));
 
         Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceQueryApi");
         assertThat(applicationClass.getAnnotation(ServiceComponent.class).value().toString(), is("QUERY_CONTROLLER"));
     }
 
     @Test
-    public void shouldCreateLoggerConstant () throws Exception {
+    public void shouldCreateLoggerConstant() throws Exception {
         restClientGenerator.run(
                 raml()
                         .withBaseUri("http://localhost:8080/warname/query/api/rest/service")
                         .withDefaultPostResource()
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, ImmutableMap.of("serviceComponent", "QUERY_CONTROLLER")));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, QUERY_CONTROLLER_GENERATOR_PROPERTIES));
 
         Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceQueryApi");
 
@@ -122,11 +137,13 @@ public class RestClientGenerator_CodeStructureTest {
     }
 
     @Test
-    public void shouldGenerateMethodAnnotatedWithHandlesAnnotation() throws Exception {
+    public void shouldGenerateMethodAnnotatedWithHandlesAnnotationForGET() throws Exception {
         restClientGenerator.run(
                 restRamlWithDefaults()
                         .with(resource("/some/path/{recipeId}")
-                                .with(action(POST, "application/vnd.cakeshop.commands.update-recipe+json"))
+                                .with(httpAction(GET)
+                                        .withResponseTypes("application/vnd.cakeshop.query.recipe+json")
+                                        .withDescription(GET_MAPPING_ANNOTATION))
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, NOT_USED_GENERATOR_PROPERTIES));
 
@@ -137,7 +154,49 @@ public class RestClientGenerator_CodeStructureTest {
         Method method = methods.get(0);
         Handles handlesAnnotation = method.getAnnotation(Handles.class);
         assertThat(handlesAnnotation, not(nullValue()));
-        assertThat(handlesAnnotation.value(), is("cakeshop.commands.update-recipe"));
+        assertThat(handlesAnnotation.value(), is("cakeshop.get-recipe"));
+
+    }
+
+    @Test
+    public void shouldGenerateMethodAnnotatedWithHandlesAnnotationForGETWithNoMapping() throws Exception {
+        restClientGenerator.run(
+                restRamlWithDefaults()
+                        .with(resource("/some/path/{recipeId}")
+                                .with(httpActionWithNoMapping(GET)
+                                        .withResponseTypes("application/vnd.cakeshop.query.recipe+json"))
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, NO_MAPPING_GENERATOR_PROPERTIES));
+
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
+        List<Method> methods = methodsOf(clazz);
+        assertThat(methods, hasSize(1));
+
+        Method method = methods.get(0);
+        Handles handlesAnnotation = method.getAnnotation(Handles.class);
+        assertThat(handlesAnnotation, not(nullValue()));
+        assertThat(handlesAnnotation.value(), is("cakeshop.query.recipe"));
+
+    }
+
+    @Test
+    public void shouldGenerateMethodAnnotatedWithHandlesAnnotationForPOST() throws Exception {
+        restClientGenerator.run(
+                restRamlWithDefaults()
+                        .with(resource("/some/path/{recipeId}")
+                                .with(httpAction(POST, "application/vnd.cakeshop.command.update-recipe+json")
+                                        .withDescription(POST_MAPPING_ANNOTATION))
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, NOT_USED_GENERATOR_PROPERTIES));
+
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
+        List<Method> methods = methodsOf(clazz);
+        assertThat(methods, hasSize(1));
+
+        Method method = methods.get(0);
+        Handles handlesAnnotation = method.getAnnotation(Handles.class);
+        assertThat(handlesAnnotation, not(nullValue()));
+        assertThat(handlesAnnotation.value(), is("cakeshop.update-recipe"));
 
     }
 
@@ -146,7 +205,8 @@ public class RestClientGenerator_CodeStructureTest {
         restClientGenerator.run(
                 restRamlWithDefaults()
                         .with(resource("/some/path/{recipeId}")
-                                .with(action(POST, "application/vnd.cakeshop.commands.update-recipe+json"))
+                                .with(httpAction(POST, "application/vnd.cakeshop.command.update-recipe+json")
+                                        .withDescription(POST_MAPPING_ANNOTATION))
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, NOT_USED_GENERATOR_PROPERTIES));
 
@@ -178,7 +238,7 @@ public class RestClientGenerator_CodeStructureTest {
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage(containsString("serviceComponent generator property invalid. Expected one of: COMMAND_API, COMMAND_CONTROLLER"));
 
-        Map<String, String> generatorProperties = ImmutableMap.of("serviceComponent", "UNKNOWN");
+        Map<String, String> generatorProperties = generatorProperties().withServiceComponentOf("UNKNOWN").build();
         restClientGenerator.run(
                 restRamlWithDefaults()
                         .withDefaultPostResource()
@@ -224,15 +284,5 @@ public class RestClientGenerator_CodeStructureTest {
     private void assertRestClientHelperField(Field field) {
         assertThat(field.getAnnotation(Inject.class), not(nullValue()));
     }
-
-
-    private QueryParameter queryParameterOf(String name, boolean required) {
-        QueryParameter queryParameter1 = new QueryParameter();
-        queryParameter1.setDisplayName(name);
-        queryParameter1.setType(ParamType.STRING);
-        queryParameter1.setRequired(required);
-        return queryParameter1;
-    }
-
 
 }

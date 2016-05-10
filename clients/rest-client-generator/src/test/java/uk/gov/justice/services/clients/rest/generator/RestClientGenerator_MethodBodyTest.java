@@ -11,17 +11,17 @@ import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.raml.model.ActionType.GET;
-import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.defaultGetAction;
+import static uk.gov.justice.services.adapters.test.utils.builder.HttpActionBuilder.defaultGetAction;
+import static uk.gov.justice.services.adapters.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithQueryApiDefaults;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.defaultGetResource;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.adapters.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
+import static uk.gov.justice.services.adapters.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
 import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionUtil.setField;
 
-import uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder;
-import uk.gov.justice.services.adapters.test.utils.compiler.JavaCompilerUtil;
 import uk.gov.justice.services.clients.core.EndpointDefinition;
 import uk.gov.justice.services.clients.core.RestClientHelper;
 import uk.gov.justice.services.clients.core.RestClientProcessor;
@@ -32,39 +32,24 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.raml.model.ParamType;
-import org.raml.model.parameter.QueryParameter;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RestClientGenerator_MethodBodyTest {
+public class RestClientGenerator_MethodBodyTest extends AbstractClientGeneratorTest {
+
     private static final String BASE_PACKAGE = "org.raml.test";
     private static final JsonEnvelope NOT_USED_ENVELOPE = DefaultJsonEnvelope.envelopeFrom(null, null);
-    private static final Map<String, String> NOT_USED_GENERATOR_PROPERTIES = ImmutableMap.of("serviceComponent", "QUERY_CONTROLLER");
-    @Rule
-    public TemporaryFolder outputFolder = new TemporaryFolder();
+    private static final Map<String, String> NOT_USED_GENERATOR_PROPERTIES = generatorProperties().withServiceComponentOf("QUERY_CONTROLLER").build();
+
     @Mock
     RestClientProcessor restClientProcessor;
     @Mock
     RestClientHelper restClientHelper;
-    private RestClientGenerator restClientGenerator;
-    private JavaCompilerUtil compiler;
-
-    @Before
-    public void before() {
-
-        restClientGenerator = new RestClientGenerator();
-        compiler = new JavaCompilerUtil(outputFolder.getRoot(), outputFolder.getRoot());
-    }
 
     @Test
     public void shouldCallRestClientWithEndpointDefinitionContainingBaseUri() throws Exception {
@@ -87,7 +72,7 @@ public class RestClientGenerator_MethodBodyTest {
 
         restClientGenerator.run(
                 restRamlWithQueryApiDefaults()
-                        .with(resource("/pathabc/{anId}").with(ActionBuilder.action().withActionType(GET).withDefaultResponseType()))
+                        .with(resource("/pathabc/{anId}").with(httpAction().withHttpActionType(GET).withDefaultResponseType()))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, NOT_USED_GENERATOR_PROPERTIES));
 
@@ -102,7 +87,7 @@ public class RestClientGenerator_MethodBodyTest {
 
         restClientGenerator.run(
                 restRamlWithQueryApiDefaults()
-                        .with(resource("/pathabc").with(ActionBuilder.action().withActionType(GET).withDefaultResponseType()))
+                        .with(resource("/pathabc").with(httpAction().withHttpActionType(GET).withDefaultResponseType()))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, NOT_USED_GENERATOR_PROPERTIES));
 
@@ -195,14 +180,6 @@ public class RestClientGenerator_MethodBodyTest {
         setField(resourceObject, "restClientProcessor", restClientProcessor);
         setField(resourceObject, "restClientHelper", restClientHelper);
         return resourceObject;
-    }
-
-    private QueryParameter queryParameterOf(String name, boolean required) {
-        QueryParameter queryParameter1 = new QueryParameter();
-        queryParameter1.setDisplayName(name);
-        queryParameter1.setType(ParamType.STRING);
-        queryParameter1.setRequired(required);
-        return queryParameter1;
     }
 
 }

@@ -1,11 +1,11 @@
 package uk.gov.justice.services.clients.core;
 
 import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.toSet;
 
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * Helper service for REST clients.
@@ -25,7 +25,7 @@ public class RestClientHelper {
         return stream(path.split("/"))
                 .filter(pathSegment -> PATH_PARAM_PATTERN.matcher(pathSegment).matches())
                 .map(pathSegment -> getPathVariable(PATH_PARAM_PATTERN.matcher(pathSegment)))
-                .collect(Collectors.toSet());
+                .collect(toSet());
     }
 
     private String getPathVariable(final Matcher matcher) {

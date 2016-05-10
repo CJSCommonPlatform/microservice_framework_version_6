@@ -4,7 +4,7 @@ package uk.gov.justice.services.adapters.rest.generator;
 import static java.util.Collections.emptyMap;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.POST;
-import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
+import static uk.gov.justice.services.adapters.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
@@ -59,25 +59,11 @@ public class RestAdapterGeneratorErrorHandlingTest {
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/path")
-                                .with(action(POST))
+                                .with(httpAction(POST))
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
     }
 
-    @Test
-    public void shouldThrowExceptionIfIfRequestTypeDoesNotContainAValidCommand() throws Exception {
-
-        exception.expect(RamlValidationException.class);
-        exception.expectMessage("Invalid request type: application/vnd.people.unknown.command1+json");
-
-        generator.run(
-                raml()
-                        .with(resource()
-                                .with(action(POST, "application/vnd.people.unknown.command1+json")))
-                        .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-
-    }
 
     @Test
     public void shouldThrowExceptionIfNotvalidRequestType() throws Exception {
@@ -88,7 +74,7 @@ public class RestAdapterGeneratorErrorHandlingTest {
         generator.run(
                 raml()
                         .with(resource()
-                                .with(action(POST, "nd.people.unknown.command1+json")))
+                                .with(httpAction(POST, "nd.people.unknown.command1+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -98,15 +84,15 @@ public class RestAdapterGeneratorErrorHandlingTest {
     public void shouldThrowExceptionIfOneOfRequestTypesNotValid() throws Exception {
 
         exception.expect(RamlValidationException.class);
-        exception.expectMessage("Invalid request type: application/vnd.people.commaods.command1+json");
+        exception.expectMessage("Invalid request type: application/vnd.somemediatype");
 
         generator.run(
                 raml()
                         .with(resource()
-                                .with(action()
-                                        .withActionType(POST)
-                                        .withMediaType("application/vnd.people.commaods.command1+json")
-                                        .withMediaType("application/vnd.people.command.command1+json")
+                                .with(httpAction()
+                                        .withHttpActionType(POST)
+                                        .withMediaType("application/vnd.somemediatype")
+                                        .withMediaType("application/vnd.somemediatype+json")
                                 ))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
@@ -122,7 +108,7 @@ public class RestAdapterGeneratorErrorHandlingTest {
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/path")
-                                .with(action(GET))
+                                .with(httpAction(GET))
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
     }

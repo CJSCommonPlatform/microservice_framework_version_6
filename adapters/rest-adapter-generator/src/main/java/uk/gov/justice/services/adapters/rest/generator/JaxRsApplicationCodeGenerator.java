@@ -3,9 +3,10 @@ package uk.gov.justice.services.adapters.rest.generator;
 import static com.squareup.javapoet.TypeSpec.classBuilder;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static org.apache.commons.lang.StringUtils.defaultIfBlank;
-import static uk.gov.justice.services.adapters.rest.generator.Names.RESOURCE_PACKAGE_NAME_WITH_DOT;
-import static uk.gov.justice.services.adapters.rest.generator.Names.applicationNameFrom;
-import static uk.gov.justice.services.adapters.rest.generator.Names.baseUriPathWithoutContext;
+import static uk.gov.justice.raml.common.generator.Names.RESOURCE_PACKAGE_NAME;
+import static uk.gov.justice.raml.common.generator.Names.applicationNameFrom;
+import static uk.gov.justice.raml.common.generator.Names.baseUriPathWithoutContext;
+import static uk.gov.justice.raml.common.generator.Names.packageNameOf;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.services.adapter.rest.application.CommonProviders;
@@ -50,12 +51,12 @@ class JaxRsApplicationCodeGenerator {
     /**
      * Create an implementation of the {@link Application}.
      *
+     * @param raml                the RAML document being generated from
      * @param implementationNames a collection of fully qualified class names of the resource
      *                            implementation classes
-     * @param raml                the RAML document being generated from
      * @return the fully defined application class
      */
-    TypeSpec createApplication(final Collection<String> implementationNames, final Raml raml) {
+    TypeSpec generateFor(final Raml raml, final Collection<String> implementationNames) {
         return classSpecFrom(raml)
                 .addMethod(generateGetClassesMethod(implementationNames))
                 .build();
@@ -124,6 +125,6 @@ class JaxRsApplicationCodeGenerator {
      * implementation class
      */
     private ClassName classNameTypeOf(final String className) {
-        return ClassName.get(config.getBasePackageName() + RESOURCE_PACKAGE_NAME_WITH_DOT, className);
+        return ClassName.get(packageNameOf(config, RESOURCE_PACKAGE_NAME), className);
     }
 }

@@ -1,7 +1,7 @@
 package uk.gov.justice.services.adapters.test.utils.builder;
 
-import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.defaultGetAction;
-import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.defaultPostAction;
+import static uk.gov.justice.services.adapters.test.utils.builder.HttpActionBuilder.defaultGetAction;
+import static uk.gov.justice.services.adapters.test.utils.builder.HttpActionBuilder.defaultPostAction;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,7 +14,7 @@ import org.raml.model.Resource;
 import org.raml.model.parameter.UriParameter;
 
 public class ResourceBuilder {
-    private final List<ActionBuilder> actionBuilders = new ArrayList<>();
+    private final List<HttpActionBuilder> httpActionBuilders = new ArrayList<>();
 
     private String parentUri = "";
     private String relativeUri = "/somecontext.controller.command";
@@ -27,7 +27,7 @@ public class ResourceBuilder {
     public static ResourceBuilder resource(final String relativeUri, final String... pathParams) {
         ResourceBuilder resourceBuilder = new ResourceBuilder()
                 .withRelativeUri(relativeUri);
-        for (String pathParam : pathParams) {
+        for (final String pathParam : pathParams) {
             resourceBuilder = resourceBuilder.withPathParam(pathParam);
         }
         return resourceBuilder;
@@ -45,8 +45,8 @@ public class ResourceBuilder {
 
     }
 
-    public ResourceBuilder with(final ActionBuilder action) {
-        actionBuilders.add(action);
+    public ResourceBuilder with(final HttpActionBuilder action) {
+        httpActionBuilders.add(action);
         return this;
     }
 
@@ -71,9 +71,9 @@ public class ResourceBuilder {
         resource.setRelativeUri(relativeUri);
         resource.setUriParameters(uriParameters);
 
-        Map<ActionType, Action> actions = new HashMap<>();
-        for (ActionBuilder actionBuilder : actionBuilders) {
-            Action action = actionBuilder.build();
+        final Map<ActionType, Action> actions = new HashMap<>();
+        for (final HttpActionBuilder httpActionBuilder : httpActionBuilders) {
+            final Action action = httpActionBuilder.build();
             action.setResource(resource);
             actions.put(action.getType(), action);
         }

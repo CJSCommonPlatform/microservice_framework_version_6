@@ -25,6 +25,6 @@ public class DefaultPathAResource implements PathAResource {
   @Override
   public Response getPathA() {
     ValidParameterMapBuilder validParameterMapBuilder = new ValidParameterMapBuilder();
-    return restProcessor.processSynchronously(syncDispatcher::dispatch, headers, validParameterMapBuilder.validateAndBuildMap());
+    return restProcessor.processSynchronously(syncDispatcher::dispatch, null, headers, validParameterMapBuilder.validateAndBuildMap());
   }
 }

@@ -4,11 +4,14 @@ import static java.util.Collections.emptyMap;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.raml.model.ActionType.POST;
-import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
+import static uk.gov.justice.services.adapters.test.utils.builder.HeadersBuilder.headersWith;
+import static uk.gov.justice.services.adapters.test.utils.builder.HttpActionBuilder.httpAction;
+import static uk.gov.justice.services.adapters.test.utils.builder.MappingBuilder.mapping;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.adapters.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
@@ -17,6 +20,7 @@ import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionU
 import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionUtil.setField;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
 
+import uk.gov.justice.services.adapter.rest.BasicActionMapper;
 import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
@@ -41,6 +45,8 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
 
     @Mock
     private AsynchronousDispatcher dispatcher;
+    @Mock
+    private BasicActionMapper actionMapper;
 
     @SuppressWarnings("unchecked")
     @Test
@@ -48,15 +54,15 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/path")
-                                .with(action(POST).withActionOfDefaultRequestType())
+                                .with(httpAction(POST).withHttpActionOfDefaultRequestType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
-        Object resourceObject = instantiate(resourceClass);
+        Object resourceObject = instanceOf(resourceClass);
 
         Response processorResponse = Response.ok().build();
-        when(restProcessor.processAsynchronously(any(Consumer.class), any(JsonObject.class), any(HttpHeaders.class),
+        when(restProcessor.processAsynchronously(any(Consumer.class), anyString(), any(JsonObject.class), any(HttpHeaders.class),
                 any(Map.class))).thenReturn(processorResponse);
 
         Method method = firstMethodOf(resourceClass);
@@ -73,26 +79,25 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/path")
-                                .with(action(POST).withActionOfDefaultRequestType())
+                                .with(httpAction(POST).withHttpActionOfDefaultRequestType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
-        Object resourceObject = instantiate(resourceClass);
+        Object resourceObject = instanceOf(resourceClass);
 
         Method method = firstMethodOf(resourceClass);
 
         method.invoke(resourceObject, NOT_USED_JSONOBJECT);
 
         ArgumentCaptor<Consumer> consumerCaptor = ArgumentCaptor.forClass(Consumer.class);
-        verify(restProcessor).processAsynchronously(consumerCaptor.capture(), any(JsonObject.class), any(HttpHeaders.class),
+        verify(restProcessor).processAsynchronously(consumerCaptor.capture(), anyString(), any(JsonObject.class), any(HttpHeaders.class),
                 any(Map.class));
 
         JsonEnvelope envelope = envelopeFrom(null, null);
         consumerCaptor.getValue().accept(envelope);
 
         verify(dispatcher).dispatch(envelope);
-
     }
 
     @SuppressWarnings("unchecked")
@@ -102,20 +107,19 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/path")
-                                .with(action(POST).withActionOfDefaultRequestType())
+                                .with(httpAction(POST).withHttpActionOfDefaultRequestType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
-        Object resourceObject = instantiate(resourceClass);
+        Object resourceObject = instanceOf(resourceClass);
 
         JsonObject jsonObject = Json.createObjectBuilder().add("dummy", "abc").build();
 
         Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, jsonObject);
 
-        verify(restProcessor).processAsynchronously(any(Consumer.class), eq(jsonObject), any(HttpHeaders.class), any(Map.class));
-
+        verify(restProcessor).processAsynchronously(any(Consumer.class), anyString(), eq(jsonObject), any(HttpHeaders.class), any(Map.class));
     }
 
     @SuppressWarnings("unchecked")
@@ -124,12 +128,12 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/path")
-                                .with(action(POST).withActionOfDefaultRequestType())
+                                .with(httpAction(POST).withHttpActionOfDefaultRequestType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
-        Object resourceObject = instantiate(resourceClass);
+        Object resourceObject = instanceOf(resourceClass);
 
         HttpHeaders headers = new ThreadLocalHttpHeaders();
         setField(resourceObject, "headers", headers);
@@ -137,7 +141,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
         Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, NOT_USED_JSONOBJECT);
 
-        verify(restProcessor).processAsynchronously(any(Consumer.class), any(JsonObject.class), eq(headers), any(Map.class));
+        verify(restProcessor).processAsynchronously(any(Consumer.class), anyString(), any(JsonObject.class), eq(headers), any(Map.class));
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -147,43 +151,51 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/some/path/{paramA}", "paramA")
-                                .with(action(POST).withActionOfDefaultRequestType())
+                                .with(httpAction(POST).withHttpActionOfDefaultRequestType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamAResource");
 
-        Object resourceObject = instantiate(resourceClass);
+        Object resourceObject = instanceOf(resourceClass);
 
         Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, "paramValue1234", NOT_USED_JSONOBJECT);
 
         ArgumentCaptor<Map> pathParamsCaptor = ArgumentCaptor.forClass(Map.class);
 
-        verify(restProcessor).processAsynchronously(any(Consumer.class), any(JsonObject.class), any(HttpHeaders.class),
+        verify(restProcessor).processAsynchronously(any(Consumer.class), anyString(), any(JsonObject.class), any(HttpHeaders.class),
                 pathParamsCaptor.capture());
 
         Map pathParams = pathParamsCaptor.getValue();
         assertThat(pathParams.entrySet().size(), is(1));
         assertThat(pathParams.containsKey("paramA"), is(true));
         assertThat(pathParams.get("paramA"), is("paramValue1234"));
-
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
-    public void shouldPassMapWithOnePathParamToRestProcessorWhenInvoking2ndMethod() throws Exception {
+    public void shouldInvoke2ndMethodAndPassMapWithOnePathParamToRestProcessor() throws Exception {
 
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/some/path/{p1}", "p1")
-                                .with(action(POST, "application/vnd.ctx.command.cmd-aa+json", "application/vnd.ctx.command.cmd-bb+json"))
+                                .with(httpAction(POST,
+                                        "application/vnd.type-aa+json",
+                                        "application/vnd.type-bb+json")
+                                        .with(mapping()
+                                                .withName("cmd-aa")
+                                                .withRequestType("application/vnd.type-aa+json"))
+                                        .with(mapping()
+                                                .withName("cmd-bb")
+                                                .withRequestType("application/vnd.type-bb+json"))
+                                )
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathP1Resource");
 
-        Object resourceObject = instantiate(resourceClass);
+        Object resourceObject = instanceOf(resourceClass);
 
         List<Method> methods = methodsOf(resourceClass);
 
@@ -192,14 +204,13 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
 
         ArgumentCaptor<Map> pathParamsCaptor = ArgumentCaptor.forClass(Map.class);
 
-        verify(restProcessor).processAsynchronously(any(Consumer.class), any(JsonObject.class), any(HttpHeaders.class),
+        verify(restProcessor).processAsynchronously(any(Consumer.class), anyString(), any(JsonObject.class), any(HttpHeaders.class),
                 pathParamsCaptor.capture());
 
         Map pathParams = pathParamsCaptor.getValue();
         assertThat(pathParams.entrySet().size(), is(1));
         assertThat(pathParams.containsKey("p1"), is(true));
         assertThat(pathParams.get("p1"), is("paramValueXYZ"));
-
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -208,20 +219,20 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/some/path/{param1}/{param2}", "param1", "param2")
-                                .with(action(POST).withActionOfDefaultRequestType())
+                                .with(httpAction(POST).withHttpActionOfDefaultRequestType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParam1Param2Resource");
 
-        Object resourceObject = instantiate(resourceClass);
+        Object resourceObject = instanceOf(resourceClass);
 
         Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, "paramValueABC", "paramValueDEF", NOT_USED_JSONOBJECT);
 
         ArgumentCaptor<Map> pathParamsCaptor = ArgumentCaptor.forClass(Map.class);
 
-        verify(restProcessor).processAsynchronously(any(Consumer.class), any(JsonObject.class), any(HttpHeaders.class),
+        verify(restProcessor).processAsynchronously(any(Consumer.class), anyString(), any(JsonObject.class), any(HttpHeaders.class),
                 pathParamsCaptor.capture());
 
         Map pathParams = pathParamsCaptor.getValue();
@@ -233,11 +244,42 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
         assertThat(pathParams.get("param2"), is("paramValueDEF"));
     }
 
+    @SuppressWarnings("unchecked")
+    @Test
+    public void shouldPassActionToRestProcessor() throws Exception {
+        generator.run(
+                restRamlWithDefaults().with(
+                        resource("/user")
+                                .with(httpAction(POST)
+                                        .with(mapping()
+                                                .withName("contextA.someAction")
+                                                .withRequestType("application/vnd.somemediatype1+json"))
 
-    private Object instantiate(Class<?> resourceClass) throws InstantiationException, IllegalAccessException {
+                                        .withMediaType("application/vnd.somemediatype1+json")
+                                )
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, ACTION_MAPPING_TRUE));
+
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultUserResource");
+        Object resourceObject = instanceOf(resourceClass);
+
+        Class<?> actionMapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultUserResourceActionMapper");
+        Object actionMapperObject = actionMapperClass.newInstance();
+        setField(resourceObject, "actionMapper", actionMapperObject);
+
+        setField(resourceObject, "headers", headersWith("Content-Type", "application/vnd.somemediatype1+json"));
+        Method method = firstMethodOf(resourceClass);
+        method.invoke(resourceObject, NOT_USED_JSONOBJECT);
+
+        verify(restProcessor).processAsynchronously(any(Consumer.class), eq("contextA.someAction"), any(JsonObject.class), any(HttpHeaders.class), any(Map.class));
+    }
+
+
+    private Object instanceOf(Class<?> resourceClass) throws InstantiationException, IllegalAccessException {
         Object resourceObject = resourceClass.newInstance();
         setField(resourceObject, "restProcessor", restProcessor);
         setField(resourceObject, "asyncDispatcher", dispatcher);
+        setField(resourceObject, "actionMapper", actionMapper);
         return resourceObject;
     }
 

@@ -27,7 +27,6 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
@@ -47,13 +46,8 @@ public class RestProcessorTest {
 
     private static final JsonObject NOT_USED_PAYLOAD = Json.createObjectBuilder().build();
     private static final HashMap<String, String> NOT_USED_PATH_PARAMS = new HashMap<>();
-    private static final HttpHeaders NOT_USED_HEADERS;
-
-    static {
-        MultivaluedMap<String, String> headersMap = new MultivaluedMapImpl<>();
-        headersMap.add("Content-Type", "application/vnd.context.command.command+json");
-        NOT_USED_HEADERS = new ResteasyHttpHeaders(headersMap);
-    }
+    private static final HttpHeaders NOT_USED_HEADERS = new ResteasyHttpHeaders(new MultivaluedMapImpl<>());
+    private static final String NOT_USED_ACTION = "actionABC";
 
     @Mock
     private Consumer<JsonEnvelope> consumer;
@@ -77,7 +71,7 @@ public class RestProcessorTest {
 
     @Test
     public void shouldReturn202ResponseOnAsyncProcessing() throws Exception {
-        Response response = restProcessor.processAsynchronously(consumer, NOT_USED_PAYLOAD, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
+        Response response = restProcessor.processAsynchronously(consumer, NOT_USED_ACTION, NOT_USED_PAYLOAD, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
 
         assertThat(response.getStatus(), equalTo(202));
     }
@@ -88,7 +82,7 @@ public class RestProcessorTest {
         HashMap<String, String> pathParams = new HashMap<>();
         pathParams.put("paramABC", "paramValueBCD");
 
-        restProcessor.processAsynchronously(consumer, payload, NOT_USED_HEADERS, pathParams);
+        restProcessor.processAsynchronously(consumer, NOT_USED_ACTION, payload, NOT_USED_HEADERS, pathParams);
 
         ArgumentCaptor<JsonEnvelope> envelopeCaptor = ArgumentCaptor.forClass(JsonEnvelope.class);
 
@@ -101,24 +95,22 @@ public class RestProcessorTest {
 
     @Test
     public void shouldPassEnvelopeWithMetadataToConsumerOnAsyncProcessing() throws Exception {
-        JsonObject payload = Json.createObjectBuilder().add("key123", "value45678").build();
 
-        restProcessor.processAsynchronously(consumer, NOT_USED_PAYLOAD,
-                headersWith("Content-Type", "application/vnd.somecontext.command.somecommand+json"), NOT_USED_PATH_PARAMS);
+        restProcessor.processAsynchronously(consumer, "some.action", NOT_USED_PAYLOAD,NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
 
         ArgumentCaptor<JsonEnvelope> envelopeCaptor = ArgumentCaptor.forClass(JsonEnvelope.class);
 
         verify(consumer).accept(envelopeCaptor.capture());
 
         JsonEnvelope envelope = envelopeCaptor.getValue();
-        assertThat(envelope.metadata().name(), is("somecontext.command.somecommand"));
+        assertThat(envelope.metadata().name(), is("some.action"));
     }
 
     @Test
     public void shouldReturn200ResponseOnSyncProcessing() throws Exception {
         when(function.apply(any(JsonEnvelope.class))).thenReturn(
                 envelopeFrom(metadata, Json.createObjectBuilder().build()));
-        Response response = restProcessor.processSynchronously(function, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
+        Response response = restProcessor.processSynchronously(function, NOT_USED_ACTION, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
 
         assertThat(response.getStatus(), equalTo(200));
     }
@@ -126,7 +118,7 @@ public class RestProcessorTest {
     @Test
     public void shouldReturn404ResponseOnSyncProcessingIfPayloadIsJsonValueNull() throws Exception {
         when(function.apply(any(JsonEnvelope.class))).thenReturn(envelopeFrom(null, JsonValue.NULL));
-        Response response = restProcessor.processSynchronously(function, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
+        Response response = restProcessor.processSynchronously(function, NOT_USED_ACTION, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
 
         assertThat(response.getStatus(), equalTo(404));
     }
@@ -134,21 +126,21 @@ public class RestProcessorTest {
     @Test
     public void shouldReturn500ResponseOnSyncProcessingIfEnvelopeIsNull() throws Exception {
         when(function.apply(any(JsonEnvelope.class))).thenReturn(null);
-        Response response = restProcessor.processSynchronously(function, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
+        Response response = restProcessor.processSynchronously(function, NOT_USED_ACTION, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
 
         assertThat(response.getStatus(), equalTo(500));
     }
 
     @Test
     public void shouldPassEnvelopeWithMetadataToFunctionOnSyncProcessing() throws Exception {
-        restProcessor.processSynchronously(function,
-                headersWith("Accept", "application/vnd.somecontext.query.somequery+json"), NOT_USED_PATH_PARAMS);
+        String action = "somecontext.somequery";
+        restProcessor.processSynchronously(function, action, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
 
         ArgumentCaptor<JsonEnvelope> envelopeCaptor = ArgumentCaptor.forClass(JsonEnvelope.class);
         verify(function).apply(envelopeCaptor.capture());
 
         JsonEnvelope envelope = envelopeCaptor.getValue();
-        assertThat(envelope.metadata().name(), is("somecontext.query.somequery"));
+        assertThat(envelope.metadata().name(), is(action));
     }
 
     @Test
@@ -156,7 +148,7 @@ public class RestProcessorTest {
         HashMap<String, String> pathParams = new HashMap<>();
         pathParams.put("param1", "paramValue345");
 
-        restProcessor.processSynchronously(function, NOT_USED_HEADERS, pathParams);
+        restProcessor.processSynchronously(function, NOT_USED_ACTION, NOT_USED_HEADERS, pathParams);
 
         ArgumentCaptor<JsonEnvelope> envelopeCaptor = ArgumentCaptor.forClass(JsonEnvelope.class);
         verify(function).apply(envelopeCaptor.capture());
@@ -171,9 +163,9 @@ public class RestProcessorTest {
         when(function.apply(any(JsonEnvelope.class))).thenReturn(
                 envelopeFrom(metadata, Json.createObjectBuilder().add("key11", "value33").add("key22", "value55").build()));
 
-        Response response = restProcessor.processSynchronously(function, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
-
-        with((String) response.getEntity())
+        Response response = restProcessor.processSynchronously(function, NOT_USED_ACTION, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
+        String responseEntity = (String) response.getEntity();
+        with(responseEntity)
                 .assertThat("key11", equalTo("value33"))
                 .assertThat("key22", equalTo("value55"));
     }
@@ -185,17 +177,11 @@ public class RestProcessorTest {
         when(function.apply(any(JsonEnvelope.class))).thenReturn(
                 envelopeFrom(metadata, Json.createObjectBuilder().add("key11", "value33").add("key22", "value55").build()));
 
-        Response response = payLoadOnlyProcessor.processSynchronously(function, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
+        Response response = payLoadOnlyProcessor.processSynchronously(function, NOT_USED_ACTION, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
 
         with((String) response.getEntity())
                 .assertNotDefined(JsonEnvelope.METADATA);
         assertThat(response.getHeaderString(HeaderConstants.ID), equalTo(metadata.id().toString()));
-    }
-
-    private HttpHeaders headersWith(String headerName, String headerValue) {
-        MultivaluedMapImpl headersMap = new MultivaluedMapImpl();
-        headersMap.add(headerName, headerValue);
-        return new ResteasyHttpHeaders(headersMap);
     }
 
 }

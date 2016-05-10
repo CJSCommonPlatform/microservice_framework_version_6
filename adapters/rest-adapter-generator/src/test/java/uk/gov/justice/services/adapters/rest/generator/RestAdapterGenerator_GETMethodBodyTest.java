@@ -6,11 +6,14 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.Is.isA;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.raml.model.ActionType.GET;
-import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
+import static uk.gov.justice.services.adapters.test.utils.builder.HeadersBuilder.headersWith;
+import static uk.gov.justice.services.adapters.test.utils.builder.HttpActionBuilder.httpAction;
+import static uk.gov.justice.services.adapters.test.utils.builder.MappingBuilder.mapping;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.adapters.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
@@ -18,6 +21,7 @@ import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionU
 import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionUtil.setField;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
 
+import uk.gov.justice.services.adapter.rest.BasicActionMapper;
 import uk.gov.justice.services.adapter.rest.exception.BadRequestException;
 import uk.gov.justice.services.core.dispatcher.SynchronousDispatcher;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -40,9 +44,12 @@ import org.mockito.Mock;
 public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGeneratorTest {
 
     private static final String NULL_STRING_VALUE = null;
-
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
     @Mock
-    protected SynchronousDispatcher dispatcher;
+    private SynchronousDispatcher dispatcher;
+    @Mock
+    private BasicActionMapper actionMapper;
 
     @SuppressWarnings("unchecked")
     @Test
@@ -50,15 +57,15 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/path")
-                                .with(action(GET).withDefaultResponseType())
+                                .with(httpAction(GET).withDefaultResponseType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
-        Object resourceObject = instantiate(resourceClass);
+        Object resourceObject = instanceOf(resourceClass);
 
         Response processorResponse = Response.ok().build();
-        when(restProcessor.processSynchronously(any(Function.class), any(HttpHeaders.class), any(Map.class))).thenReturn(processorResponse);
+        when(restProcessor.processSynchronously(any(Function.class), anyString(), any(HttpHeaders.class), any(Map.class))).thenReturn(processorResponse);
 
         Method method = firstMethodOf(resourceClass);
 
@@ -74,19 +81,19 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/path")
-                                .with(action(GET).withDefaultResponseType())
+                                .with(httpAction(GET).withDefaultResponseType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
-        Object resourceObject = instantiate(resourceClass);
+        Object resourceObject = instanceOf(resourceClass);
 
         Method method = firstMethodOf(resourceClass);
 
         method.invoke(resourceObject);
 
         ArgumentCaptor<Function> consumerCaptor = ArgumentCaptor.forClass(Function.class);
-        verify(restProcessor).processSynchronously(consumerCaptor.capture(), any(HttpHeaders.class), any(Map.class));
+        verify(restProcessor).processSynchronously(consumerCaptor.capture(), anyString(), any(HttpHeaders.class), any(Map.class));
 
         JsonEnvelope envelope = envelopeFrom(null, null);
         consumerCaptor.getValue().apply(envelope);
@@ -95,19 +102,18 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
     }
 
-
     @SuppressWarnings("unchecked")
     @Test
     public void shouldPassHttpHeadersToRestProcessor() throws Exception {
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/path")
-                                .with(action(GET).withDefaultResponseType())
+                                .with(httpAction(GET).withDefaultResponseType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
-        Object resourceObject = instantiate(resourceClass);
+        Object resourceObject = instanceOf(resourceClass);
 
         HttpHeaders headers = new ThreadLocalHttpHeaders();
 
@@ -116,8 +122,83 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject);
 
-        verify(restProcessor).processSynchronously(any(Function.class), eq(headers), any(Map.class));
+        verify(restProcessor).processSynchronously(any(Function.class), anyString(), eq(headers), any(Map.class));
     }
+
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void shouldPassActionToRestProcessor() throws Exception {
+        generator.run(
+                restRamlWithDefaults().with(
+                        resource("/user")
+                                .with(httpAction(GET)
+                                        .with(mapping()
+                                                .withName("contextA.action1")
+                                                .withResponseType("application/vnd.ctx.query.somemediatype1+json"))
+                                        .with(mapping()
+                                                .withName("contextA.action1")
+                                                .withResponseType("application/vnd.ctx.query.somemediatype2+json"))
+                                        .with(mapping()
+                                                .withName("contextA.action2")
+                                                .withResponseType("application/vnd.ctx.query.somemediatype3+json"))
+                                        .withResponseTypes(
+                                                "application/vnd.ctx.query.somemediatype1+json",
+                                                "application/vnd.ctx.query.somemediatype2+json",
+                                                "application/vnd.ctx.query.somemediatype3+json"))
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, ACTION_MAPPING_TRUE));
+
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultUserResource");
+        Object resourceObject = instanceOf(resourceClass);
+
+        Class<?> actionMapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultUserResourceActionMapper");
+        Object actionMapperObject = actionMapperClass.newInstance();
+        setField(resourceObject, "actionMapper", actionMapperObject);
+
+        setField(resourceObject, "headers", headersWith("Accept", "application/vnd.ctx.query.somemediatype1+json"));
+
+        Method method = firstMethodOf(resourceClass);
+        method.invoke(resourceObject);
+
+
+        verify(restProcessor).processSynchronously(any(Function.class), eq("contextA.action1"),
+                any(HttpHeaders.class), any(Map.class));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void shouldPassActionToRestProcessor2() throws Exception {
+        generator.run(
+                restRamlWithDefaults().with(
+                        resource("/case")
+                                .with(httpAction(GET)
+                                        .with(mapping()
+                                                .withName("contextB.action1")
+                                                .withResponseType("application/vnd.ctx.query.mediatype1+json"))
+                                        .withResponseTypes("application/vnd.ctx.query.mediatype1+json"))
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, ACTION_MAPPING_TRUE));
+
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCaseResource");
+        Object resourceObject = instanceOf(resourceClass);
+
+
+        Class<?> actionMapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCaseResourceActionMapper");
+        Object actionMapperObject = actionMapperClass.newInstance();
+        setField(resourceObject, "actionMapper", actionMapperObject);
+
+        setField(resourceObject, "headers", headersWith("Accept", "application/vnd.ctx.query.mediatype1+json"));
+
+        Method method = firstMethodOf(resourceClass);
+        method.invoke(resourceObject);
+
+
+        verify(restProcessor).processSynchronously(any(Function.class), eq("contextB.action1"),
+                any(HttpHeaders.class), any(Map.class));
+    }
+
+
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
@@ -126,20 +207,20 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/some/path/{paramA}", "paramA")
-                                .with(action(GET).withDefaultResponseType())
+                                .with(httpAction(GET).withDefaultResponseType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamAResource");
 
-        Object resourceObject = instantiate(resourceClass);
+        Object resourceObject = instanceOf(resourceClass);
 
         Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, "paramValue1234");
 
         ArgumentCaptor<Map> pathParamsCaptor = ArgumentCaptor.forClass(Map.class);
 
-        verify(restProcessor).processSynchronously(any(Function.class), any(HttpHeaders.class),
+        verify(restProcessor).processSynchronously(any(Function.class), anyString(), any(HttpHeaders.class),
                 pathParamsCaptor.capture());
 
         Map pathParams = pathParamsCaptor.getValue();
@@ -155,20 +236,20 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/some/path/{param1}/{param2}", "param1", "param2")
-                                .with(action(GET).withDefaultResponseType())
+                                .with(httpAction(GET).withDefaultResponseType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParam1Param2Resource");
 
-        Object resourceObject = instantiate(resourceClass);
+        Object resourceObject = instanceOf(resourceClass);
 
         Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, "paramValueABC", "paramValueDEF");
 
         ArgumentCaptor<Map> pathParamsCaptor = ArgumentCaptor.forClass(Map.class);
 
-        verify(restProcessor).processSynchronously(any(Function.class), any(HttpHeaders.class),
+        verify(restProcessor).processSynchronously(any(Function.class), anyString(), any(HttpHeaders.class),
                 pathParamsCaptor.capture());
 
         Map pathParams = pathParamsCaptor.getValue();
@@ -186,7 +267,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/some/path")
-                                .with(action(GET)
+                                .with(httpAction(GET)
                                         .withQueryParameters("queryParam")
                                         .withDefaultResponseType())
                 ).build(),
@@ -194,14 +275,14 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
-        Object resourceObject = instantiate(resourceClass);
+        Object resourceObject = instanceOf(resourceClass);
 
         Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, "paramValue1234");
 
         ArgumentCaptor<Map> queryParamsCaptor = ArgumentCaptor.forClass(Map.class);
 
-        verify(restProcessor).processSynchronously(any(Function.class), any(HttpHeaders.class),
+        verify(restProcessor).processSynchronously(any(Function.class), anyString(), any(HttpHeaders.class),
                 queryParamsCaptor.capture());
 
         Map queryParams = queryParamsCaptor.getValue();
@@ -217,7 +298,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/some/path")
-                                .with(action(GET)
+                                .with(httpAction(GET)
                                         .withQueryParameters("queryParam1", "queryParam2")
                                         .withDefaultResponseType())
                 ).build(),
@@ -225,7 +306,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
-        Object resourceObject = instantiate(resourceClass);
+        Object resourceObject = instanceOf(resourceClass);
 
         Method method = firstMethodOf(resourceClass);
 
@@ -238,7 +319,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         ArgumentCaptor<Map> queryParamsCaptor = ArgumentCaptor.forClass(Map.class);
 
-        verify(restProcessor).processSynchronously(any(Function.class), any(HttpHeaders.class),
+        verify(restProcessor).processSynchronously(any(Function.class), anyString(), any(HttpHeaders.class),
                 queryParamsCaptor.capture());
 
         Map queryParams = queryParamsCaptor.getValue();
@@ -256,7 +337,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/some/path/{param}", "param")
-                                .with(action(GET)
+                                .with(httpAction(GET)
                                         .withQueryParameters("queryParam")
                                         .withDefaultResponseType())
                 ).build(),
@@ -264,14 +345,14 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamResource");
 
-        Object resourceObject = instantiate(resourceClass);
+        Object resourceObject = instanceOf(resourceClass);
 
         Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, "paramValueABC", "paramValueDEF");
 
         ArgumentCaptor<Map> paramsCaptor = ArgumentCaptor.forClass(Map.class);
 
-        verify(restProcessor).processSynchronously(any(Function.class), any(HttpHeaders.class),
+        verify(restProcessor).processSynchronously(any(Function.class), anyString(), any(HttpHeaders.class),
                 paramsCaptor.capture());
 
         Map params = paramsCaptor.getValue();
@@ -283,14 +364,13 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         assertThat(params.get("queryParam"), is("paramValueDEF"));
     }
 
-
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
     public void shouldRemoveOptionalQueryParamIfSetToNull() throws Exception {
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/some/path")
-                                .with(action(GET)
+                                .with(httpAction(GET)
                                         .withQueryParameters("queryParam1")
                                         .withOptionalQueryParameters("queryParam2")
                                         .withDefaultResponseType())
@@ -299,7 +379,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
-        Object resourceObject = instantiate(resourceClass);
+        Object resourceObject = instanceOf(resourceClass);
 
         Method method = firstMethodOf(resourceClass);
 
@@ -312,7 +392,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         ArgumentCaptor<Map> queryParamsCaptor = ArgumentCaptor.forClass(Map.class);
 
-        verify(restProcessor).processSynchronously(any(Function.class), any(HttpHeaders.class),
+        verify(restProcessor).processSynchronously(any(Function.class), anyString(), any(HttpHeaders.class),
                 queryParamsCaptor.capture());
 
         Map queryParams = queryParamsCaptor.getValue();
@@ -320,9 +400,6 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         assertThat(queryParams.containsKey("queryParam1"), is(true));
         assertThat(queryParams.get("queryParam1"), is("paramValueABC"));
     }
-
-    @Rule
-    public ExpectedException exception = ExpectedException.none();
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
@@ -333,7 +410,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/some/path")
-                                .with(action(GET)
+                                .with(httpAction(GET)
                                         .withQueryParameters("queryParam1")
                                         .withDefaultResponseType())
                 ).build(),
@@ -341,17 +418,18 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
-        Object resourceObject = instantiate(resourceClass);
+        Object resourceObject = instanceOf(resourceClass);
 
         Method method = firstMethodOf(resourceClass);
 
         method.invoke(resourceObject, NULL_STRING_VALUE);
     }
 
-    private Object instantiate(Class<?> resourceClass) throws InstantiationException, IllegalAccessException {
+    private Object instanceOf(Class<?> resourceClass) throws InstantiationException, IllegalAccessException {
         Object resourceObject = resourceClass.newInstance();
         setField(resourceObject, "restProcessor", restProcessor);
         setField(resourceObject, "syncDispatcher", dispatcher);
+        setField(resourceObject, "actionMapper", actionMapper);
         return resourceObject;
     }
 

@@ -1,6 +1,6 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
-import static uk.gov.justice.services.adapters.rest.generator.Names.baseUriPathWithoutContext;
+import static uk.gov.justice.raml.common.generator.Names.baseUriPathWithoutContext;
 
 import uk.gov.justice.services.core.annotation.Component;
 

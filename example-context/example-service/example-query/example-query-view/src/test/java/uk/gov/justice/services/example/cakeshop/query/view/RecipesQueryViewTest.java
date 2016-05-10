@@ -29,8 +29,8 @@ public class RecipesQueryViewTest {
 
     public static final String ID = UUID.randomUUID().toString();
     public static final String NAME = "Cake";
-    static final String NAME_RESPONSE_RECIPE = "cakeshop.query.findRecipe-response";
-    static final String NAME_RESPONSE_RECIPE_LIST = "cakeshop.query.recipes-response";
+    static final String NAME_RESPONSE_RECIPE = "cakeshop.findRecipe-response";
+    static final String NAME_RESPONSE_RECIPE_LIST = "cakeshop.recipes-response";
     private static final String FIELD_RECIPE_ID = "recipeId";
     private static final String FIELD_NAME = "name";
     @InjectMocks

@@ -2,7 +2,7 @@ package uk.gov.justice.raml.jms.core;
 
 import static java.util.Collections.emptyMap;
 import static org.raml.model.ActionType.POST;
-import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
+import static uk.gov.justice.services.adapters.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.adapters.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
@@ -106,22 +106,22 @@ public class JmsEndpointGeneratorErrorHandlingTest {
         generator.run(
                 raml()
                         .with(resource()
-                                .with(action().withActionType(POST)))
+                                .with(httpAction().withHttpActionType(POST)))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
     }
 
     @Test
-    public void shouldThrowExceptionIfMediaTypeDoesNotContainAValidCommand() throws Exception {
+    public void shouldThrowExceptionIfMediaTypeNotVendorSpecific() throws Exception {
 
         exception.expect(RamlValidationException.class);
-        exception.expectMessage("Invalid request type: application/vnd.people.unknown.command1+json");
+        exception.expectMessage("Invalid request type: application/json");
 
         generator.run(
                 raml()
                         .with(resource()
-                                .with(action(POST, "application/vnd.people.unknown.command1+json")))
+                                .with(httpAction(POST, "application/json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -136,7 +136,7 @@ public class JmsEndpointGeneratorErrorHandlingTest {
         generator.run(
                 raml()
                         .with(resource()
-                                .with(action(POST, "nd.people.unknown.command1+json")))
+                                .with(httpAction(POST, "nd.people.unknown.command1+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -146,15 +146,15 @@ public class JmsEndpointGeneratorErrorHandlingTest {
     public void shouldThrowExceptionIfOneOfMediaTypesNotValid() throws Exception {
 
         exception.expect(RamlValidationException.class);
-        exception.expectMessage("Invalid request type: application/vnd.people.commaods.command1+json");
+        exception.expectMessage("Invalid request type: application/json");
 
         generator.run(
                 raml()
                         .with(resource()
-                                .with(action()
-                                        .withActionType(POST)
-                                        .withMediaType("application/vnd.people.commaods.command1+json")
-                                        .withMediaType("application/vnd.people.command.command1+json")
+                                .with(httpAction()
+                                        .withHttpActionType(POST)
+                                        .withMediaType("application/json")
+                                        .withMediaType("application/vnd.command1+json")
                                 ))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));

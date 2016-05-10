@@ -2,6 +2,8 @@ package uk.gov.justice.services.adapters.rest.generator;
 
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.TypeSpec.interfaceBuilder;
+import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static org.apache.commons.lang.StringUtils.defaultIfBlank;
@@ -10,19 +12,17 @@ import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.services.adapters.rest.generator.Actions.responseMimeTypesOf;
 import static uk.gov.justice.services.adapters.rest.generator.Generators.byMimeTypeOrder;
-import static uk.gov.justice.services.adapters.rest.generator.Names.DEFAULT_ANNOTATION_PARAMETER;
-import static uk.gov.justice.services.adapters.rest.generator.Names.GENERIC_PAYLOAD_ARGUMENT_NAME;
-import static uk.gov.justice.services.adapters.rest.generator.Names.buildResourceMethodName;
-import static uk.gov.justice.services.adapters.rest.generator.Names.buildResourceMethodNameWithNoMimeType;
-import static uk.gov.justice.services.adapters.rest.generator.Names.resourceInterfaceNameOf;
+import static uk.gov.justice.raml.common.generator.Names.DEFAULT_ANNOTATION_PARAMETER;
+import static uk.gov.justice.raml.common.generator.Names.GENERIC_PAYLOAD_ARGUMENT_NAME;
+import static uk.gov.justice.raml.common.generator.Names.buildResourceMethodName;
+import static uk.gov.justice.raml.common.generator.Names.buildResourceMethodNameWithNoMimeType;
+import static uk.gov.justice.raml.common.generator.Names.resourceInterfaceNameOf;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.json.JsonObject;
 import javax.ws.rs.Consumes;
@@ -47,21 +47,9 @@ import org.raml.model.parameter.UriParameter;
 /**
  * Internal code generation class for generating the JAX-RS interface.
  */
-class JaxRsInterfaceGenerator {
+class JaxRsInterfaceGenerator extends AbstractInternalGenerator {
 
     private static final String ANNOTATION_FORMAT = "$S";
-
-    /**
-     * Generate a JaxRs interface for each resource.
-     *
-     * @param resources the collection of {@link Resource} to generate as implementation classes
-     * @return a list of {@link TypeSpec} that represent the implementation classes
-     */
-    List<TypeSpec> generateFor(final Collection<Resource> resources) {
-        return resources.stream()
-                .map(this::createInterfaceFor)
-                .collect(Collectors.toList());
-    }
 
     /**
      * Create an interface for the specified {@link Resource}
@@ -69,36 +57,37 @@ class JaxRsInterfaceGenerator {
      * @param resource the resource to generate as an implementation class
      * @return a {@link TypeSpec} that represents the implementation class
      */
-    private TypeSpec createInterfaceFor(final Resource resource) {
+    @Override
+    TypeSpec generateFor(final Resource resource) {
         final TypeSpec.Builder interfaceSpecBuilder = interfaceSpecFor(resource);
 
         resource.getActions().values().forEach(action ->
-                interfaceSpecBuilder.addMethods(forEach(action)));
+                interfaceSpecBuilder.addMethods(methodsOf(action)));
 
         return interfaceSpecBuilder.build();
     }
 
     /**
-     * Process the body or bodies for each action.
+     * Process the body or bodies for each httpAction.
      *
-     * @param action the action to forEach
-     * @return the list of {@link MethodSpec} that represents each method for the action
+     * @param action the httpAction to methodsOf
+     * @return the list of {@link MethodSpec} that represents each method for the httpAction
      */
-    private List<MethodSpec> forEach(final Action action) {
+    private List<MethodSpec> methodsOf(final Action action) {
         final Collection<MimeType> responseMimeTypes = responseMimeTypesOf(action);
 
         if (!action.hasBody()) {
-            return Collections.singletonList(processNoActionBody(action, responseMimeTypes));
+            return singletonList(processNoActionBody(action, responseMimeTypes));
         } else {
             return processOneOrMoreActionBodies(action, responseMimeTypes);
         }
     }
 
     /**
-     * Process an action with no body.
+     * Process an httpAction with no body.
      *
-     * @param action the action to process
-     * @return the {@link MethodSpec} that represents a method for the action
+     * @param action the httpAction to process
+     * @return the {@link MethodSpec} that represents a method for the httpAction
      */
     private MethodSpec processNoActionBody(final Action action,
                                            final Collection<MimeType> responseMimeTypes) {
@@ -107,10 +96,10 @@ class JaxRsInterfaceGenerator {
     }
 
     /**
-     * Process an action with one or more bodies.
+     * Process an httpAction with one or more bodies.
      *
-     * @param action the action to process
-     * @return the list of {@link MethodSpec} that represents each method for the action
+     * @param action the httpAction to process
+     * @return the list of {@link MethodSpec} that represents each method for the httpAction
      */
     private List<MethodSpec> processOneOrMoreActionBodies(final Action action,
                                                           final Collection<MimeType> responseMimeTypes) {
@@ -120,7 +109,7 @@ class JaxRsInterfaceGenerator {
                     final String resourceMethodName = buildResourceMethodName(action, bodyMimeType);
                     final MethodSpec.Builder methodBuilder = generateResourceMethod(action, resourceMethodName, responseMimeTypes);
                     return addToMethodWithMimeType(methodBuilder, bodyMimeType).build();
-                }).collect(Collectors.toList());
+                }).collect(toList());
     }
 
     /**
@@ -167,10 +156,10 @@ class JaxRsInterfaceGenerator {
     /**
      * Generate a method for each {@link Action}.
      *
-     * @param action             the action to generate as a method
+     * @param action             the httpAction to generate as a method
      * @param resourceMethodName the resource method name to generate
      * @return a {@link MethodSpec} that represents the generated method
-     * @throws IllegalStateException if action type is not GET or POST
+     * @throws IllegalStateException if httpAction type is not GET or POST
      */
     private MethodSpec.Builder generateResourceMethod(final Action action,
                                                       final String resourceMethodName,
@@ -186,7 +175,7 @@ class JaxRsInterfaceGenerator {
         } else if (actionType == POST) {
             actionTypeAnnotation = AnnotationSpec.builder(javax.ws.rs.POST.class).build();
         } else {
-            throw new IllegalStateException(String.format("Unsupported action type %s", actionType));
+            throw new IllegalStateException(String.format("Unsupported httpAction type %s", actionType));
         }
 
         return methodBuilder(resourceMethodName)
@@ -232,7 +221,7 @@ class JaxRsInterfaceGenerator {
                                 .addMember(DEFAULT_ANNOTATION_PARAMETER, ANNOTATION_FORMAT, name)
                                 .build())
                         .build()
-        ).collect(Collectors.toList());
+        ).collect(toList());
     }
 
     /**
@@ -255,5 +244,6 @@ class JaxRsInterfaceGenerator {
 
         return specs;
     }
+
 
 }

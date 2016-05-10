@@ -122,6 +122,9 @@
                     <outputDirectory>${project.build.directory}/generated-test-sources
                     </outputDirectory>
                     <basePackageName>uk.gov.justice.api</basePackageName>
+                    <generatorProperties>
+                        <actionMapping>true</actionMapping>
+                    </generatorProperties>
                 </configuration>
                 <executions>
                     <execution>
@@ -155,7 +158,9 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${basedir}/target/generated-test-resources/json/schema</outputDirectory>
+                            <outputDirectory>
+                                ${basedir}/target/generated-test-resources/json/schema
+                            </outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>src/test/resources/raml/json/schema</directory>

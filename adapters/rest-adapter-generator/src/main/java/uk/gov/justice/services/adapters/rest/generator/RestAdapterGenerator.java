@@ -1,66 +1,49 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
 import static java.lang.String.format;
+import static java.util.Collections.singletonList;
 import static org.apache.commons.lang.Validate.isTrue;
 import static org.apache.commons.lang.Validate.notEmpty;
 import static org.apache.commons.lang.Validate.notNull;
-import static uk.gov.justice.services.adapters.rest.generator.Generators.componentFromBaseUriIn;
-import static uk.gov.justice.services.adapters.rest.generator.Names.JAVA_FILENAME_SUFFIX;
-import static uk.gov.justice.services.adapters.rest.generator.Names.RESOURCE_PACKAGE_NAME;
-import static uk.gov.justice.services.adapters.rest.generator.Names.RESOURCE_PACKAGE_NAME_WITH_DOT;
+import static uk.gov.justice.raml.common.generator.Names.JAVA_FILENAME_SUFFIX;
+import static uk.gov.justice.raml.common.generator.Names.MAPPER_PACKAGE_NAME;
+import static uk.gov.justice.raml.common.generator.Names.RESOURCE_PACKAGE_NAME;
+import static uk.gov.justice.raml.common.generator.Names.packageNameOf;
 
-import uk.gov.justice.raml.common.validator.CompositeRamlValidator;
-import uk.gov.justice.raml.common.validator.ContainsActionsRamlValidator;
-import uk.gov.justice.raml.common.validator.ContainsResourcesRamlValidator;
-import uk.gov.justice.raml.common.validator.RamlValidator;
-import uk.gov.justice.raml.common.validator.RequestContentTypeRamlValidator;
 import uk.gov.justice.raml.core.Generator;
 import uk.gov.justice.raml.core.GeneratorConfig;
-import uk.gov.justice.services.adapters.rest.validator.BaseUriRamlValidator;
-import uk.gov.justice.services.adapters.rest.validator.ResponseContentTypeRamlValidator;
-import uk.gov.justice.services.core.annotation.Component;
+import uk.gov.justice.services.adapters.rest.generator.strategy.AdapterGenerationStrategy;
+import uk.gov.justice.services.adapters.rest.generator.strategy.AdapterGenerationStrategyFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 import org.raml.model.Raml;
-import org.raml.model.Resource;
 
 public class RestAdapterGenerator implements Generator {
 
-    private static final String PATH_SEPARATOR = "/";
-
-    private final RamlValidator validator = new CompositeRamlValidator(
-            new ContainsResourcesRamlValidator(),
-            new ContainsActionsRamlValidator(),
-            new RequestContentTypeRamlValidator(),
-            new ResponseContentTypeRamlValidator(),
-            new BaseUriRamlValidator()
-    );
-
     @Override
     public void run(final Raml raml, final GeneratorConfig configuration) {
-        validate(configuration);
-        validator.validate(raml);
+        final AdapterGenerationStrategy generationStrategy = AdapterGenerationStrategyFactory.createFrom(configuration);
 
-        final Collection<Resource> resources = raml.getResources().values();
-        final Component component = componentFromBaseUriIn(raml);
+        validate(configuration);
+        generationStrategy.validator().validate(raml);
 
         final JaxRsInterfaceGenerator interfaceGenerator = new JaxRsInterfaceGenerator();
         final JaxRsImplementationGenerator implementationGenerator = new JaxRsImplementationGenerator(configuration);
         final JaxRsApplicationCodeGenerator applicationGenerator = new JaxRsApplicationCodeGenerator(configuration);
 
-        writeToResourcePackage(interfaceGenerator.generateFor(resources), configuration);
-        final List<String> implementationNames = writeToResourcePackage(implementationGenerator.generateFor(resources, component), configuration);
+        writeToSubPackage(interfaceGenerator.generateFor(raml), configuration, RESOURCE_PACKAGE_NAME);
+        final List<String> implementationNames = writeToSubPackage(
+                implementationGenerator.generateFor(raml), configuration, RESOURCE_PACKAGE_NAME);
 
-        writeToBasePackage(applicationGenerator.createApplication(implementationNames, raml), configuration);
+        writeToBasePackage(applicationGenerator.generateFor(raml, implementationNames), configuration);
+        writeToSubPackage(generationStrategy.generateFor(raml), configuration, MAPPER_PACKAGE_NAME);
     }
 
     private void validate(final GeneratorConfig configuration) {
@@ -74,24 +57,28 @@ public class RestAdapterGenerator implements Generator {
     }
 
     /**
+     * Write a list of classes to a specified package.
+     *
+     * @param typeSpecs      the list of typeSpecs to write to file
+     * @param configuration  the configuration that provides the base package name
+     * @param subPackageName the sub package to append to the base package
+     * @return the list of class names written to file
+     * @throws IllegalStateException if an IOException is thrown while writing to file
+     */
+    private List<String> writeToSubPackage(final List<TypeSpec> typeSpecs,
+                                           final GeneratorConfig configuration,
+                                           final String subPackageName) {
+        return writeToPackage(typeSpecs, configuration, packageNameOf(configuration, subPackageName));
+    }
+
+    /**
      * Write class to the base package provided in the configuration
      *
      * @param typeSpec      the typeSpec to write to file
      * @param configuration the configuration that provides the base package name
      */
     private void writeToBasePackage(final TypeSpec typeSpec, final GeneratorConfig configuration) {
-        writeToBasePackage(Collections.singletonList(typeSpec), configuration, "");
-    }
-
-    /**
-     * Write a list of classes to the resource package.
-     *
-     * @param typeSpecs     the list of typeSpecs to write to file
-     * @param configuration the configuration that provides the base package name
-     * @return the list of class names written to file
-     */
-    private List<String> writeToResourcePackage(final List<TypeSpec> typeSpecs, final GeneratorConfig configuration) {
-        return writeToBasePackage(typeSpecs, configuration, RESOURCE_PACKAGE_NAME_WITH_DOT);
+        writeToPackage(singletonList(typeSpec), configuration, configuration.getBasePackageName());
     }
 
     /**
@@ -99,20 +86,20 @@ public class RestAdapterGenerator implements Generator {
      *
      * @param typeSpecs     the list of typeSpecs to write to file
      * @param configuration the configuration that provides the base package name
+     * @param packageName   the package name to write the classes
      * @return the list of class names written to file
      * @throws IllegalStateException if an IOException is thrown while writing to file
      */
-    private List<String> writeToBasePackage(final List<TypeSpec> typeSpecs,
-                                            final GeneratorConfig configuration,
-                                            final String packageName) {
-
-        final List<String> implementationNames = new ArrayList<>();
+    private List<String> writeToPackage(final List<TypeSpec> typeSpecs,
+                                        final GeneratorConfig configuration,
+                                        final String packageName) {
+        final List<String> implementationNames = new LinkedList<>();
 
         typeSpecs.stream()
                 .forEach(typeSpec -> {
                     try {
                         if (classDoesNotExist(configuration, typeSpec)) {
-                            JavaFile.builder(configuration.getBasePackageName() + packageName, typeSpec)
+                            JavaFile.builder(packageName, typeSpec)
                                     .build()
                                     .writeTo(configuration.getOutputDirectory());
                         }
@@ -129,8 +116,8 @@ public class RestAdapterGenerator implements Generator {
     private boolean classDoesNotExist(final GeneratorConfig configuration, final TypeSpec typeSpec) {
         for (final Path path : configuration.getSourcePaths()) {
 
-            final String pathname = path.toString() + PATH_SEPARATOR + getBasePackagePath(configuration)
-                    + PATH_SEPARATOR + getResourcePath(typeSpec);
+            final String pathname = format("%s/%s/%s", path.toString(),
+                    getBasePackagePath(configuration), getResourcePath(typeSpec));
 
             if (new File(pathname).exists()) {
                 return false;
@@ -140,11 +127,11 @@ public class RestAdapterGenerator implements Generator {
     }
 
     private String getResourcePath(final TypeSpec typeSpec) {
-        return RESOURCE_PACKAGE_NAME + PATH_SEPARATOR + typeSpec.name + JAVA_FILENAME_SUFFIX;
+        return format("%s/%s%s", RESOURCE_PACKAGE_NAME, typeSpec.name, JAVA_FILENAME_SUFFIX);
     }
 
     private String getBasePackagePath(final GeneratorConfig configuration) {
-        return configuration.getBasePackageName().replaceAll("\\.", PATH_SEPARATOR);
+        return configuration.getBasePackageName().replaceAll("\\.", "/");
     }
 
 }

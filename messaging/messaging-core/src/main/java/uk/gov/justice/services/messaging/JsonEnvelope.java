@@ -11,6 +11,8 @@ import javax.json.JsonValue;
  */
 public interface JsonEnvelope extends Envelope<JsonValue> {
 
+    String METADATA = "_metadata";
+
     JsonObject payloadAsJsonObject();
 
     JsonArray payloadAsJsonArray();

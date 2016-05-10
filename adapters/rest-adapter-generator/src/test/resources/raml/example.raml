@@ -11,10 +11,10 @@ protocols: [ HTTP, HTTPS ]
   post:
     body:
         application/vnd.people.command.create-user+json:
-            schema: !include json/schema/create-user.json
+            schema: !include json/schema/people.command.create-user.json
             example: !include json/create-user.json
         application/vnd.people.command.update-user+json:
-            schema: !include json/schema/update-user.json
+            schema: !include json/schema/people.command.update-user.json
             example: !include json/update-user.json
   get:
     responses:

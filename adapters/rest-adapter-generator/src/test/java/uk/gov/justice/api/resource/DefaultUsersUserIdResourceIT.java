@@ -16,12 +16,15 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
 
 import uk.gov.justice.api.QueryApiRestExampleApplication;
+import uk.gov.justice.services.adapter.rest.JsonSchemaValidationInterceptor;
 import uk.gov.justice.services.adapter.rest.RestProcessor;
 import uk.gov.justice.services.adapter.rest.RestProcessorProducer;
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
 import uk.gov.justice.services.adapter.rest.mapper.BadRequestExceptionMapper;
 import uk.gov.justice.services.adapters.test.utils.dispatcher.AsynchronousRecordingDispatcher;
 import uk.gov.justice.services.adapters.test.utils.dispatcher.SynchronousRecordingDispatcher;
+import uk.gov.justice.services.core.json.JsonSchemaLoader;
+import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonObjectMetadata;
@@ -99,7 +102,10 @@ public class DefaultUsersUserIdResourceIT {
             AsynchronousRecordingDispatcher.class,
             SynchronousRecordingDispatcher.class,
             JsonObjectEnvelopeConverter.class,
-            BadRequestExceptionMapper.class
+            BadRequestExceptionMapper.class,
+            JsonSchemaValidationInterceptor.class,
+            JsonSchemaValidator.class,
+            JsonSchemaLoader.class
     })
     public WebApp war() {
         return new WebApp()
@@ -121,15 +127,22 @@ public class DefaultUsersUserIdResourceIT {
     public void shouldDispatchCreateUserCommand() throws Exception {
         Response response = create(BASE_URI)
                 .path("/users/567-8910")
-                .post(entity("{\"userName\" : \"John Smith\"}", CREATE_USER_MEDIA_TYPE));
+                .post(entity("{\"userUrn\" : \"1234\"}", CREATE_USER_MEDIA_TYPE));
 
         JsonEnvelope jsonEnvelope = asyncDispatcher.awaitForEnvelopeWithPayloadOf("userId", "567-8910");
         assertThat(jsonEnvelope.metadata().name(), is("people.command.create-user"));
         assertThat(jsonEnvelope.payloadAsJsonObject().getString("userId"), is("567-8910"));
-        assertThat(jsonEnvelope.payloadAsJsonObject().getString("userName"), is("John Smith"));
-
+        assertThat(jsonEnvelope.payloadAsJsonObject().getString("userUrn"), is("1234"));
     }
 
+    @Test
+    public void shouldReturn400ForJsonNotAdheringToSchema() throws Exception {
+        Response response = create(BASE_URI)
+                .path("/users/1234")
+                .post(entity("{\"blah\" : \"1234\"}", CREATE_USER_MEDIA_TYPE));
+
+        assertThat(response.getStatus(), is(BAD_REQUEST.getStatusCode()));
+    }
 
     @Test
     public void shouldReturn202UpdatingUser() throws Exception {
@@ -161,12 +174,12 @@ public class DefaultUsersUserIdResourceIT {
     public void shouldDispatchUpdateUserCommand() throws Exception {
         Response response = create(BASE_URI)
                 .path("/users/4444-9876")
-                .post(entity("{\"userName\" : \"Peggy Brown\"}", UPDATE_USER_MEDIA_TYPE));
+                .post(entity("{\"userUrn\" : \"5678\"}", UPDATE_USER_MEDIA_TYPE));
 
         JsonEnvelope envelope = asyncDispatcher.awaitForEnvelopeWithPayloadOf("userId", "4444-9876");
         assertThat(envelope.metadata().name(), is("people.command.update-user"));
         assertThat(envelope.payloadAsJsonObject().getString("userId"), is("4444-9876"));
-        assertThat(envelope.payloadAsJsonObject().getString("userName"), is("Peggy Brown"));
+        assertThat(envelope.payloadAsJsonObject().getString("userUrn"), is("5678"));
 
     }
 

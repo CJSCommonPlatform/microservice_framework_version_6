@@ -36,7 +36,7 @@
           }
         }
       ],
-      "minItems": "1",
+      "minItems": 1,
       "description": "List ingredients and quantities for recipe"
     }
   },

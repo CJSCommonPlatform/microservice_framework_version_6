@@ -6,9 +6,9 @@ version: v1
   post:
     body:
         application/vnd.cakeshop.command.add-recipe+json:
-            schema: !include json/schema/add-recipe.json
+            schema: !include json/schema/cakeshop.command.add-recipe.json
             example: !include json/add-recipe.json
 
         application/vnd.cakeshop.command.make-cake+json:
-            schema: !include json/schema/make-cake.json
+            schema: !include json/schema/cakeshop.command.make-cake.json
             example: !include json/make-cake.json

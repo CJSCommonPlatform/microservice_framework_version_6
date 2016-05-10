@@ -5,6 +5,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.jms.HeaderConstants.JMS_HEADER_CPPNAME;
 
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -81,7 +82,7 @@ public class EnvelopeConverterTest {
         TextMessage actualTextMessage = envelopeConverter.toMessage(envelope, session);
 
         assertThat(actualTextMessage, equalTo(textMessage));
-        verify(textMessage).setStringProperty(EnvelopeConverter.JMS_HEADER_CPPNAME, NAME);
+        verify(textMessage).setStringProperty(JMS_HEADER_CPPNAME, NAME);
     }
 
     @Test(expected = JmsConverterException.class)

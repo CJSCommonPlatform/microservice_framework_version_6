@@ -1,7 +1,10 @@
 package uk.gov.justice.services.adapters.test.utils.compiler;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static java.lang.String.join;
 import static java.text.MessageFormat.format;
+import static java.util.stream.Collectors.toSet;
+import static org.reflections.ReflectionUtils.forNames;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,14 +12,13 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.tools.Diagnostic;
 import javax.tools.DiagnosticCollector;
@@ -26,11 +28,10 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
-import com.google.common.collect.Sets;
+import com.google.common.collect.Multimap;
 import org.apache.commons.io.FileUtils;
-import org.reflections.ReflectionUtils;
 import org.reflections.Reflections;
-import org.reflections.util.ClasspathHelper;
+import org.reflections.scanners.SubTypesScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -140,7 +141,7 @@ public class JavaCompilerUtil {
 
     private Set<Class<?>> classesMatching(Set<Class<?>> classes, Predicate<? super Class<?>> predicate)
             throws MalformedURLException {
-        return classes.stream().filter(predicate).collect(Collectors.toSet());
+        return classes.stream().filter(predicate).collect(toSet());
     }
 
     private Set<Class<?>> compile(String basePackage) throws MalformedURLException {
@@ -149,21 +150,17 @@ public class JavaCompilerUtil {
     }
 
     private Set<Class<?>> loadClasses(String basePackage) throws MalformedURLException {
-
-        ClassLoader initialClassLoader = Thread.currentThread().getContextClassLoader();
-        Set<Class<?>> rootResourceClasses = new HashSet<>();
         try (URLClassLoader resourceClassLoader = new URLClassLoader(new URL[]{compilationOutputDir.toURI().toURL()})) {
-            Thread.currentThread().setContextClassLoader(resourceClassLoader);
-            Reflections reflections = new Reflections(basePackage, ClasspathHelper.forClass(Object.class),
-                    new AllObjectsScanner());
-            Set<String> classNames = reflections.getStore().get(AllObjectsScanner.class, Object.class.getName());
-            rootResourceClasses.addAll(Sets.newHashSet(ReflectionUtils.forNames(classNames, reflections.getConfiguration().getClassLoaders())));
+            Reflections reflections = new Reflections(basePackage, new SubTypesScanner(false), resourceClassLoader);
+            return newHashSet(forNames(getClassNames(reflections), resourceClassLoader));
         } catch (IOException ex) {
             throw new RuntimeException("Error creating class loader", ex);
-        } finally {
-            Thread.currentThread().setContextClassLoader(initialClassLoader);
         }
-        return rootResourceClasses;
+    }
+
+    private Set<String> getClassNames(final Reflections reflections) {
+        Multimap<String, String> types = reflections.getStore().get(SubTypesScanner.class.getSimpleName());
+        return Stream.concat(types.values().stream(), types.keySet().stream()).collect(toSet());
     }
 
     private void compile() {

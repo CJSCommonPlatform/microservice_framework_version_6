@@ -2,6 +2,7 @@ package uk.gov.justice.services.messaging;
 
 
 import static javax.json.JsonValue.ValueType.OBJECT;
+import static uk.gov.justice.services.messaging.JsonEnvelope.METADATA;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -13,8 +14,6 @@ import javax.json.JsonValue.ValueType;
  * A converter class to convert between {@link JsonEnvelope} and {@link JsonObject}.
  */
 public class JsonObjectEnvelopeConverter {
-
-    public static final String METADATA = "_metadata";
 
     /**
      * Converts a jsonObject into {@link JsonEnvelope}

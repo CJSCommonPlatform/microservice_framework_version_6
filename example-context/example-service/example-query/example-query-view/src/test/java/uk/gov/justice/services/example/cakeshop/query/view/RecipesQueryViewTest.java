@@ -5,7 +5,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
-import uk.gov.justice.services.event.enveloper.Enveloper;
+import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.example.cakeshop.query.view.response.RecipeView;
 import uk.gov.justice.services.example.cakeshop.query.view.response.RecipesView;
 import uk.gov.justice.services.example.cakeshop.query.view.service.RecipeService;

@@ -5,7 +5,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
-import uk.gov.justice.services.event.enveloper.Enveloper;
+import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.example.cakeshop.query.view.response.RecipesView;
 import uk.gov.justice.services.example.cakeshop.query.view.service.RecipeService;
 import uk.gov.justice.services.messaging.JsonEnvelope;

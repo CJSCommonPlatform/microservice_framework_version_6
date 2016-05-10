@@ -20,8 +20,9 @@
     <modules>
         <module>example-command</module>
         <module>example-event</module>
-        <module>example-it</module>
         <module>example-query</module>
+        <module>example-it</module>
+        <module>example-liquibase</module>
     </modules>
 
 </project>

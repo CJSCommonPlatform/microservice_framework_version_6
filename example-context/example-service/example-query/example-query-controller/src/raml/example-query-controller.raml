@@ -1,6 +1,6 @@
 #%RAML 0.8
-title: Cakeshop Data View API
-baseUri: http://localhost:8080/example-data-view/data/view/rest/cakeshop
+title: Cakeshop View Controller API
+baseUri: http://localhost:8080/example-query-controller/query/controller/rest/cakeshop
 version: v0.1
 mediaType: application/json
 protocols: [ HTTP, HTTPS ]
@@ -12,6 +12,12 @@ protocols: [ HTTP, HTTPS ]
         pagesize:
             type: string
             required: true
+        name:
+          displayName: Name
+          type: string
+          description: A recipe name
+          example: Mess
+          required: false
     responses:
       200:
         body:

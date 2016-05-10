@@ -36,7 +36,7 @@ public class JdbcEventLogRepository {
     static final long INITIAL_VERSION = 0L;
 
     static final String JNDI_APP_NAME_LOOKUP = "java:app/AppName";
-    static final String JNDI_DS_EVENT_STORE_PATTERN = "java:/app/%s/DS.EventStore";
+    static final String JNDI_DS_EVENT_STORE_PATTERN = "java:/app/%s/DS.eventstore";
 
     /**
      * Statements

@@ -34,7 +34,7 @@ import org.raml.model.Resource;
 
 public class RestAdapterGenerator implements Generator {
 
-    private static final String JAVA_SRC_PATH = "\\main\\java\\";
+    private static final String JAVA_SRC_PATH = "/main/java/";
 
     private final RamlValidator validator = new CompositeRamlValidator(
             new ContainsResourcesRamlValidator(),
@@ -127,10 +127,10 @@ public class RestAdapterGenerator implements Generator {
 
     private boolean classDoesNotExist(final GeneratorConfig configuration, final TypeSpec typeSpec) {
         final String relativeJavaSourcePath = configuration.getSourceDirectory().getParent().toString() + JAVA_SRC_PATH;
-        final String basePackagePath = configuration.getBasePackageName().replaceAll("\\.", "\\\\");
+        final String basePackagePath = configuration.getBasePackageName().replaceAll("\\.", "/");
 
-        final String pathname = relativeJavaSourcePath + basePackagePath + "\\"
-                + RESOURCE_PACKAGE_NAME + "\\"
+        final String pathname = relativeJavaSourcePath + basePackagePath + "/"
+                + RESOURCE_PACKAGE_NAME + "/"
                 + typeSpec.name + JAVA_FILENAME_SUFFIX;
 
         return !new File(pathname).exists();

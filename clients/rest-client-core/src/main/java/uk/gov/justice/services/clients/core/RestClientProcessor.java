@@ -85,7 +85,7 @@ public class RestClientProcessor {
 
         final Response response = builder.get();
 
-        trace(LOGGER, () -> String.format("Sent REST request %s and received: %s", envelope.metadata().id().toString(), toResponseTrace(response)));
+        trace(LOGGER, () -> String.format("REST response for %s received: %s", envelope.metadata().id().toString(), toResponseTrace(response)));
 
         final int status = response.getStatus();
         if (status == NOT_FOUND.getStatusCode()) {

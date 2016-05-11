@@ -1,12 +1,11 @@
 package uk.gov.justice.services.messaging.logging;
 
-import static uk.gov.justice.services.common.http.HeaderConstants.ID;
-
-import java.util.Optional;
-
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import javax.ws.rs.core.Response;
+import java.util.Optional;
+
+import static uk.gov.justice.services.common.http.HeaderConstants.ID;
 
 public final class ResponseLoggerHelper {
 
@@ -20,7 +19,7 @@ public final class ResponseLoggerHelper {
 
         final JsonObjectBuilder builder = Json.createObjectBuilder();
 
-        responseCode.ifPresent(code -> builder.add("ResponseCode", code));
+        responseCode.ifPresent(integer -> builder.add("ResponseCode", integer));
         mediaType.ifPresent(s -> builder.add("MediaType", s));
         cppid.ifPresent(s -> builder.add(ID, s));
 

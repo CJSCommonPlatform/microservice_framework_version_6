@@ -27,22 +27,26 @@ import org.everit.json.schema.ValidationException;
 @Provider
 public class JsonSchemaValidationInterceptor implements ReaderInterceptor {
 
+    private static final String JSON_MEDIA_TYPE_FORMAT = "+json";
+
     @Inject
     JsonSchemaValidator validator;
 
     @Override
     public Object aroundReadFrom(final ReaderInterceptorContext context) throws IOException, WebApplicationException {
 
-        final String charset = extractCharset(context);
-        final String payload = IOUtils.toString(context.getInputStream(), charset);
+        if (context.getMediaType().getSubtype().endsWith(JSON_MEDIA_TYPE_FORMAT)) {
+            final String charset = extractCharset(context);
+            final String payload = IOUtils.toString(context.getInputStream(), charset);
 
-        try {
-            validator.validate(payload, extractName(context));
-        } catch (ValidationException ex) {
-            throw new BadRequestException(ex.getMessage(), ex);
+            try {
+                validator.validate(payload, extractName(context));
+            } catch (ValidationException ex) {
+                throw new BadRequestException(ex.getMessage(), ex);
+            }
+
+            context.setInputStream(new ByteArrayInputStream(payload.getBytes(charset)));
         }
-
-        context.setInputStream(new ByteArrayInputStream(payload.getBytes(charset)));
         return context.proceed();
     }
 

@@ -1,4 +1,4 @@
-package uk.gov.justice.services.core.annotation;
+package uk.gov.justice.domain.annotation;
 
 
 import static java.lang.annotation.ElementType.TYPE;

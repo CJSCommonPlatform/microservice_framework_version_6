@@ -3,7 +3,7 @@ package uk.gov.justice.services.core.extension;
 import static uk.gov.justice.services.core.annotation.Component.componentFrom;
 import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.componentLocationFrom;
 
-import uk.gov.justice.services.core.annotation.Event;
+import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 
 import java.util.ArrayList;

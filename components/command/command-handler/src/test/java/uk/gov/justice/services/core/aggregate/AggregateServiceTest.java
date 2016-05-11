@@ -15,7 +15,7 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
-import uk.gov.justice.services.core.annotation.Event;
+import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.core.extension.EventFoundEvent;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.messaging.JsonEnvelope;

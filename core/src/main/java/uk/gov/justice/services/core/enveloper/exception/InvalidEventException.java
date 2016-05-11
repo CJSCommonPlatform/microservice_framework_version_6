@@ -1,6 +1,6 @@
 package uk.gov.justice.services.core.enveloper.exception;
 
-import uk.gov.justice.services.core.annotation.Event;
+import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 
 /**

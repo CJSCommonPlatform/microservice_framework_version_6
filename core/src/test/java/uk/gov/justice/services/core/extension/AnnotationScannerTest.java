@@ -12,7 +12,7 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLL
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 
-import uk.gov.justice.services.core.annotation.Event;
+import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.core.annotation.Remote;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.annotation.ServiceComponentLocation;

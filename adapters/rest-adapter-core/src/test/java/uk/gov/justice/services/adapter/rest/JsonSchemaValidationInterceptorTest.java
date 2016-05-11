@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -38,6 +39,7 @@ public class JsonSchemaValidationInterceptorTest {
     private static final String NAME = "test-name";
     private static final String MEDIA_TYPE = "application";
     private static final String MEDIA_SUBTYPE = "vnd.test-name+json";
+    private static final String NON_JSON_MEDIA_SUBTYPE = "vnd.test-name+xml";
 
     @Mock
     private ReaderInterceptorContext context = mock(ReaderInterceptorContext.class);
@@ -73,6 +75,13 @@ public class JsonSchemaValidationInterceptorTest {
     public void shouldValidatePayloadAgainstSchema() throws Exception {
         interceptor.aroundReadFrom(context);
         verify(validator).validate(PAYLOAD, NAME);
+    }
+
+    @Test
+    public void shouldSkipValidationIfNonJsonPayloadType() throws Exception {
+        when(context.getMediaType()).thenReturn(new MediaType(MEDIA_TYPE, NON_JSON_MEDIA_SUBTYPE));
+        interceptor.aroundReadFrom(context);
+        verify(validator, never()).validate(PAYLOAD, NAME);
     }
 
     private InputStream inputStream(final String input) throws IOException {

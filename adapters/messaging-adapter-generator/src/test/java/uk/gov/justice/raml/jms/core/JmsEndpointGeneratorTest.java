@@ -37,6 +37,7 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLL
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
 
+import org.slf4j.Logger;
 import uk.gov.justice.raml.core.Generator;
 import uk.gov.justice.services.adapter.messaging.JmsProcessor;
 import uk.gov.justice.services.adapter.messaging.JsonSchemaValidationInterceptor;
@@ -49,6 +50,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -168,6 +170,26 @@ public class JmsEndpointGeneratorTest {
 
         Class<?> clazz = getJmsListenerClass("uk.somepackage", "StructureCommandControllerJmsListener");
         assertThat(clazz.getName(), is("uk.somepackage.StructureCommandControllerJmsListener"));
+    }
+
+    @Test
+    public void shouldCreateLoggerConstant() throws Exception {
+        generator.run(
+                messagingRamlWithDefaults()
+                        .with(resource()
+                                .withRelativeUri("/structure.controller.command")
+                                .withDefaultAction())
+                        .build(),
+                configurationWithBasePackage("uk.somepackage", outputFolder, emptyMap()));
+
+        Class<?> resourceClass = getJmsListenerClass("uk.somepackage", "StructureCommandControllerJmsListener");
+
+        Field logger = resourceClass.getDeclaredField("LOGGER");
+        assertThat(logger, CoreMatchers.not(nullValue()));
+        assertThat(logger.getType(), CoreMatchers.equalTo(Logger.class));
+        assertThat(Modifier.isPrivate(logger.getModifiers()), Matchers.is(true));
+        assertThat(Modifier.isStatic(logger.getModifiers()), Matchers.is(true));
+        assertThat(Modifier.isFinal(logger.getModifiers()), Matchers.is(true));
     }
 
     @Test

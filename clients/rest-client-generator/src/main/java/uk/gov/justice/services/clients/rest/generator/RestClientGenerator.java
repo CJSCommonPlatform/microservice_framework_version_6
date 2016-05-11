@@ -5,6 +5,7 @@ import static com.squareup.javapoet.TypeSpec.classBuilder;
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static javax.lang.model.element.Modifier.FINAL;
+import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.apache.commons.lang3.StringUtils.capitalize;
@@ -23,6 +24,8 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.Remote;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.logging.JsonEnvelopeLoggerHelper;
+import uk.gov.justice.services.messaging.logging.LoggerUtils;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -32,6 +35,8 @@ import javax.inject.Inject;
 import javax.lang.model.element.Modifier;
 
 import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
@@ -44,6 +49,8 @@ import org.raml.model.Raml;
 import org.raml.model.Resource;
 import org.raml.model.Response;
 import org.raml.model.parameter.QueryParameter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Generates code for a rest client.
@@ -84,15 +91,28 @@ public class RestClientGenerator implements Generator {
     }
 
     private TypeSpec.Builder classSpecOf(final Raml raml, final GeneratorConfig generatorConfig) {
-        return classBuilder(classNameOf(raml.getBaseUri()))
+        final String className = classNameOf(raml.getBaseUri());
+        return classBuilder(className)
                 .addModifiers(PUBLIC, FINAL)
                 .addAnnotation(Remote.class)
                 .addAnnotation(AnnotationSpec.builder(ServiceComponent.class)
                         .addMember("value", "$T.$L", Component.class, serviceComponentOf(generatorConfig))
                         .build())
+                .addField(loggerConstantField(className))
                 .addField(restClientFieldProcessor())
                 .addField(restClientHelperField())
                 .addField(baseUriStaticFieldOf(raml));
+    }
+
+    private FieldSpec loggerConstantField(final String className) {
+        final ClassName classLoggerFactory = ClassName.get(LoggerFactory.class);
+        return FieldSpec.builder(Logger.class, "LOGGER")
+                .addModifiers(PRIVATE, javax.lang.model.element.Modifier.STATIC, javax.lang.model.element.Modifier.FINAL)
+                .initializer(
+                        CodeBlock.builder()
+                                .add(format("$L.getLogger(%s.class)", className), classLoggerFactory).build()
+                )
+                .build();
     }
 
     private String serviceComponentOf(final GeneratorConfig generatorConfig) {
@@ -148,9 +168,12 @@ public class RestClientGenerator implements Generator {
     }
 
     private MethodSpec methodOf(Resource resource, Action action, MimeType mimeType) {
-        String header = headerOf(mimeType);
-        String methodName = methodNameOf(action.getType(), header);
-        Class<?> methodReturnType = action.getType().equals(ActionType.GET) ? JsonEnvelope.class : Void.class;
+        final ClassName classLoggerUtils = ClassName.get(LoggerUtils.class);
+        final ClassName classJsonEnvelopeLoggerHelper = ClassName.get(JsonEnvelopeLoggerHelper.class);
+
+        final String header = headerOf(mimeType);
+        final String methodName = methodNameOf(action.getType(), header);
+        final Class<?> methodReturnType = action.getType().equals(ActionType.GET) ? JsonEnvelope.class : Void.class;
 
         MethodSpec.Builder builder = methodBuilder(methodName)
                 .addModifiers(Modifier.PUBLIC)
@@ -160,6 +183,9 @@ public class RestClientGenerator implements Generator {
                         .addModifiers(Modifier.FINAL)
                         .build());
 
+
+        builder.addStatement("$T.trace(LOGGER, () -> String.format(\"Handling remote REST request: %s\", $T.toEnvelopeTraceString(envelope)))",
+                classLoggerUtils, classJsonEnvelopeLoggerHelper);
         builder.addStatement("final String path = \"$L\"", resource.getRelativeUri());
         builder.addStatement("final $T<$T> pathParams = $L.extractPathParametersFromPath(path)", Set.class, String.class, REST_CLIENT_HELPER);
 

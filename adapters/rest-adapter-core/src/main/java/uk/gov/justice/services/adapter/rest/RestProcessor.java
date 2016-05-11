@@ -8,7 +8,10 @@ import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.OK;
 import static javax.ws.rs.core.Response.status;
 import static org.slf4j.LoggerFactory.getLogger;
-import static uk.gov.justice.services.adapter.rest.HeaderConstants.ID;
+import static uk.gov.justice.services.common.http.HeaderConstants.ID;
+import static uk.gov.justice.services.messaging.logging.HttpMessageLoggerHelper.toHttpHeaderTrace;
+import static uk.gov.justice.services.messaging.logging.JsonEnvelopeLoggerHelper.toEnvelopeTraceString;
+import static uk.gov.justice.services.messaging.logging.LoggerUtils.trace;
 
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -64,13 +67,19 @@ public class RestProcessor {
                                           final HttpHeaders headers,
                                           final Map<String, String> params) {
 
+        trace(LOGGER, () -> format("Processing REST message: %s", toHttpHeaderTrace(headers)));
+
         final JsonEnvelope envelope = envelopeBuilderFactory.builder()
                 .withInitialPayload(initialPayload)
                 .withHeaders(headers)
                 .withParams(params)
                 .build();
 
+        trace(LOGGER, () -> format("REST message converted to envelope: %s", toEnvelopeTraceString(envelope)));
+
         consumer.accept(envelope);
+
+        trace(LOGGER, () -> format("REST message processed: %s", toEnvelopeTraceString(envelope)));
 
         return status(ACCEPTED).build();
     }
@@ -78,12 +87,20 @@ public class RestProcessor {
     public Response processSynchronously(final Function<JsonEnvelope, JsonEnvelope> function,
                                          final HttpHeaders headers,
                                          final Map<String, String> params) {
+
+        trace(LOGGER, () -> format("Processing REST message: %s", toHttpHeaderTrace(headers)));
+
         final JsonEnvelope envelope = envelopeBuilderFactory.builder()
                 .withHeaders(headers)
                 .withParams(params)
                 .build();
 
+        trace(LOGGER, () -> format("REST message converted to envelope: %s", toEnvelopeTraceString(envelope)));
+
         final JsonEnvelope result = function.apply(envelope);
+
+        trace(LOGGER, () -> format("REST message processed: %s", toEnvelopeTraceString(envelope)));
+        trace(LOGGER, () -> format("Responding to REST message with: %s", toEnvelopeTraceString(result)));
 
         if (result == null) {
             LOGGER.error(format("Dispatcher returned a null envelope for %s", envelope.metadata().name()));

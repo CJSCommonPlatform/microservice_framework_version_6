@@ -18,6 +18,9 @@ import static uk.gov.justice.services.adapters.test.utils.config.GeneratorConfig
 import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionUtil.methodsOf;
 
+import org.hamcrest.Matchers;
+import org.junit.Assert;
+import org.slf4j.Logger;
 import uk.gov.justice.services.adapters.test.utils.compiler.JavaCompilerUtil;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.Remote;
@@ -97,6 +100,25 @@ public class RestClientGenerator_CodeStructureTest {
 
         Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceQueryApi");
         assertThat(applicationClass.getAnnotation(ServiceComponent.class).value().toString(), is("QUERY_CONTROLLER"));
+    }
+
+    @Test
+    public void shouldCreateLoggerConstant () throws Exception {
+        restClientGenerator.run(
+                raml()
+                        .withBaseUri("http://localhost:8080/warname/query/api/rest/service")
+                        .withDefaultPostResource()
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, ImmutableMap.of("serviceComponent", "QUERY_CONTROLLER")));
+
+        Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceQueryApi");
+
+        Field logger = applicationClass.getDeclaredField("LOGGER");
+        Assert.assertThat(logger, not(nullValue()));
+        Assert.assertThat(logger.getType(), equalTo(Logger.class));
+        Assert.assertThat(Modifier.isPrivate(logger.getModifiers()), Matchers.is(true));
+        Assert.assertThat(Modifier.isStatic(logger.getModifiers()), Matchers.is(true));
+        Assert.assertThat(Modifier.isFinal(logger.getModifiers()), Matchers.is(true));
     }
 
     @Test

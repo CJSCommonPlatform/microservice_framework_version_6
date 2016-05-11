@@ -1,9 +1,9 @@
 package uk.gov.justice.services.adapter.rest.envelope;
 
 import static java.util.Collections.emptyMap;
-import static uk.gov.justice.services.adapter.rest.HeaderConstants.CLIENT_CORRELATION_ID;
-import static uk.gov.justice.services.adapter.rest.HeaderConstants.SESSION_ID;
-import static uk.gov.justice.services.adapter.rest.HeaderConstants.USER_ID;
+import static uk.gov.justice.services.common.http.HeaderConstants.CLIENT_CORRELATION_ID;
+import static uk.gov.justice.services.common.http.HeaderConstants.SESSION_ID;
+import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.CLIENT_ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.CONTEXT;

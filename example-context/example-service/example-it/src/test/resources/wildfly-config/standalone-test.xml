@@ -376,7 +376,7 @@
                         <password>${db.eventstore.password}</password>
                     </security>
                 </datasource>
-                <datasource jndi-name="java:/DS.Cakeshop" pool-name="DS.Cakeshop" enabled="true"
+                <datasource jndi-name="java:/DS.cakeshop" pool-name="DS.cakeshop" enabled="true"
                             use-java-context="true">
                     <connection-url>${db.cakeshop.url}</connection-url>
                     <driver>h2</driver>

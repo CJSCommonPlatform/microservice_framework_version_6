@@ -1,12 +1,7 @@
 package uk.gov.justice.services.clients.core;
 
-import static java.lang.String.format;
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
-import static javax.ws.rs.core.Response.Status.OK;
-import static uk.gov.justice.services.messaging.JsonEnvelope.METADATA;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
-import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -22,10 +17,22 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
+import static java.lang.String.format;
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import static javax.ws.rs.core.Response.Status.OK;
+import static uk.gov.justice.services.messaging.JsonEnvelope.METADATA;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
+import static uk.gov.justice.services.messaging.logging.JsonEnvelopeLoggerHelper.toEnvelopeTraceString;
+import static uk.gov.justice.services.messaging.logging.LoggerUtils.trace;
+import static uk.gov.justice.services.messaging.logging.ResponseLoggerHelper.toResponseTrace;
+
 /**
  * Helper service for processing requests for generating REST clients.
  */
 public class RestClientProcessor {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RestClientProcessor.class);
 
     private static final String MEDIA_TYPE_PATTERN = "application/vnd.%s+json";
     private static final String CPPID = "CPPID";
@@ -72,7 +79,14 @@ public class RestClientProcessor {
 
         final Invocation.Builder builder = target.request(format(MEDIA_TYPE_PATTERN, envelope.metadata().name()));
 
+        final WebTarget finalTarget = target;
+        trace(LOGGER, () -> String.format("Sending REST request to %s using message: %s", finalTarget.getUri().toString(),
+                toEnvelopeTraceString(envelope)));
+
         final Response response = builder.get();
+
+        trace(LOGGER, () -> String.format("REST response for %s received: %s", envelope.metadata().id().toString(), toResponseTrace(response)));
+
         final int status = response.getStatus();
         if (status == NOT_FOUND.getStatusCode()) {
             return enveloper.withMetadataFrom(envelope, envelope.metadata().name()).apply(null);

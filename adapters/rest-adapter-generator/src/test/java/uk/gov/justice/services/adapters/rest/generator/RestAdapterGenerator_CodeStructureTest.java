@@ -1,6 +1,10 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
 import static java.lang.String.format;
+import static java.lang.reflect.Modifier.isFinal;
+import static java.lang.reflect.Modifier.isPrivate;
+import static java.lang.reflect.Modifier.isPublic;
+import static java.lang.reflect.Modifier.isStatic;
 import static java.nio.file.Paths.get;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptyMap;
@@ -34,7 +38,6 @@ import uk.gov.justice.services.core.dispatcher.SynchronousDispatcher;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.Collections;
 import java.util.List;
@@ -51,6 +54,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 import org.junit.Test;
+import org.slf4j.Logger;
 
 public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGeneratorTest {
 
@@ -302,8 +306,8 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
-        assertThat(Modifier.isFinal(resourceClass.getModifiers()), is(false));
-        assertThat(Modifier.isPublic(resourceClass.getModifiers()), is(true));
+        assertThat(isFinal(resourceClass.getModifiers()), is(false));
+        assertThat(isPublic(resourceClass.getModifiers()), is(true));
     }
 
     @Test
@@ -493,6 +497,24 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
         assertThat(dispatcher.getType(), equalTo(AsynchronousDispatcher.class));
         assertThat(dispatcher.getAnnotation(Inject.class), not(nullValue()));
         assertThat(dispatcher.getModifiers(), is(0));
+    }
+
+    @Test
+    public void shouldAddLoggerConstant() throws Exception {
+        generator.run(
+                restRamlWithDefaults().with(
+                        resource("/some/path")
+                                .with(action(POST, "application/vnd.ctx.command.default+json"))
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+
+        Field logger = resourceClass.getDeclaredField("LOGGER");
+        assertThat(logger, not(nullValue()));
+        assertThat(logger.getType(), equalTo(Logger.class));
+        assertThat(isPrivate(logger.getModifiers()), is(true));
+        assertThat(isStatic(logger.getModifiers()), is(true));
+        assertThat(isFinal(logger.getModifiers()), is(true));
     }
 
     @Test

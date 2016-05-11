@@ -3,9 +3,9 @@ package uk.gov.justice.services.adapter.rest.envelope;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.justice.services.adapter.rest.HeaderConstants.CLIENT_CORRELATION_ID;
+import static uk.gov.justice.services.common.http.HeaderConstants.CLIENT_CORRELATION_ID;
 
-import uk.gov.justice.services.adapter.rest.HeaderConstants;
+import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.UUID;

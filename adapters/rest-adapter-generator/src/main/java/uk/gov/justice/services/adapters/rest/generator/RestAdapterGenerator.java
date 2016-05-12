@@ -22,6 +22,7 @@ import uk.gov.justice.services.core.annotation.Component;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -34,7 +35,7 @@ import org.raml.model.Resource;
 
 public class RestAdapterGenerator implements Generator {
 
-    private static final String JAVA_SRC_PATH = "/main/java/";
+    private static final String PATH_SEPARATOR = "/";
 
     private final RamlValidator validator = new CompositeRamlValidator(
             new ContainsResourcesRamlValidator(),
@@ -126,14 +127,24 @@ public class RestAdapterGenerator implements Generator {
     }
 
     private boolean classDoesNotExist(final GeneratorConfig configuration, final TypeSpec typeSpec) {
-        final String relativeJavaSourcePath = configuration.getSourceDirectory().getParent().toString() + JAVA_SRC_PATH;
-        final String basePackagePath = configuration.getBasePackageName().replaceAll("\\.", "/");
+        for (final Path path : configuration.getSourcePaths()) {
 
-        final String pathname = relativeJavaSourcePath + basePackagePath + "/"
-                + RESOURCE_PACKAGE_NAME + "/"
-                + typeSpec.name + JAVA_FILENAME_SUFFIX;
+            final String pathname = path.toString() + PATH_SEPARATOR + getBasePackagePath(configuration)
+                    + PATH_SEPARATOR + getResourcePath(typeSpec);
 
-        return !new File(pathname).exists();
+            if (new File(pathname).exists()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private String getResourcePath(final TypeSpec typeSpec) {
+        return RESOURCE_PACKAGE_NAME + PATH_SEPARATOR + typeSpec.name + JAVA_FILENAME_SUFFIX;
+    }
+
+    private String getBasePackagePath(final GeneratorConfig configuration) {
+        return configuration.getBasePackageName().replaceAll("\\.", PATH_SEPARATOR);
     }
 
 }

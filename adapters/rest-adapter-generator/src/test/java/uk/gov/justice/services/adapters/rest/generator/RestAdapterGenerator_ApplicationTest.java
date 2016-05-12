@@ -26,8 +26,13 @@ import static uk.gov.justice.services.adapters.test.utils.config.GeneratorConfig
 import uk.gov.justice.services.adapter.rest.application.CommonProviders;
 import uk.gov.justice.services.adapters.test.utils.reflection.ReflectionUtil;
 
+import java.io.File;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.Set;
 
 import javax.ws.rs.ApplicationPath;
@@ -37,6 +42,8 @@ import com.google.common.reflect.TypeToken;
 import org.junit.Test;
 
 public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGeneratorTest {
+
+    public static final String EXISTING_FILE_PATH = "org/raml/test/resource/DefaultPathAResource.java";
 
     @Test
     public void shouldGenerateApplicationClass() throws Exception {
@@ -172,8 +179,27 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
         assertThat(result, is(instanceOf(Set.class)));
         Set<Class<?>> classes = (Set<Class<?>>) result;
         assertThat(classes, hasItems(JaxRsProviderA.class, JaxRsProviderB.class));
+    }
 
+    @SuppressWarnings("unchecked")
+    @Test
+    public void shouldNotGenerateExistingClasses() throws Exception {
+        Path sourcePath = getTestSourcePath();
 
+        generator.run(
+                restRamlWithDefaults()
+                        .with(resource("/pathA").with(action(GET).withDefaultResponseType()))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap(), Collections.singletonList(sourcePath)));
+
+        Path outputPath = Paths.get(outputFolder.newFile().getAbsolutePath(), EXISTING_FILE_PATH);
+
+        assertThat(outputPath.toFile().exists(), equalTo(Boolean.FALSE));
+    }
+
+    private Path getTestSourcePath() {
+        URL resource = getClass().getClassLoader().getResource(EXISTING_FILE_PATH);
+        return Paths.get(new File(resource.getPath()).getPath()).getParent().getParent().getParent().getParent().getParent();
     }
 
     private static class JaxRsProviderA {

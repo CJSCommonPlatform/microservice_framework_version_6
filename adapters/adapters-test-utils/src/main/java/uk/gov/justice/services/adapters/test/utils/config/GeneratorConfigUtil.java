@@ -4,6 +4,8 @@ import uk.gov.justice.raml.core.GeneratorConfig;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.rules.TemporaryFolder;
@@ -14,7 +16,15 @@ public class GeneratorConfigUtil {
                                                                final TemporaryFolder outputFolder,
                                                                final Map<String, String> generatorProperties) {
         Path outputPath = Paths.get(outputFolder.getRoot().getAbsolutePath());
-        return new GeneratorConfig(outputPath, outputPath, basePackageName, generatorProperties);
+        return new GeneratorConfig(outputPath, outputPath, basePackageName, generatorProperties, Collections.singletonList(outputPath.getParent()));
+    }
+
+    public static GeneratorConfig configurationWithBasePackage(final String basePackageName,
+                                                               final TemporaryFolder outputFolder,
+                                                               final Map<String, String> generatorProperties,
+                                                               final List<Path> sourcePaths) {
+        Path outputPath = Paths.get(outputFolder.getRoot().getAbsolutePath());
+        return new GeneratorConfig(outputPath, outputPath, basePackageName, generatorProperties, sourcePaths);
     }
 
 }

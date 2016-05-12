@@ -36,6 +36,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -74,7 +75,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
         String basePackageName = "uk.gov.test1";
 
         java.nio.file.Path outputPath = get(outputFolder.getRoot().getAbsolutePath());
-        GeneratorConfig config = new GeneratorConfig(outputPath, outputPath, basePackageName, emptyMap());
+        GeneratorConfig config = new GeneratorConfig(outputPath, outputPath, basePackageName, emptyMap(), Collections.singletonList(outputPath.getParent()));
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/some/path")
@@ -445,7 +446,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
         String basePackageName = "uk.gov.test2";
 
         java.nio.file.Path outputPath = get(outputFolder.getRoot().getAbsolutePath());
-        GeneratorConfig config = new GeneratorConfig(outputPath, outputPath, basePackageName, emptyMap());
+        GeneratorConfig config = new GeneratorConfig(outputPath, outputPath, basePackageName, emptyMap(), Collections.singletonList(outputPath.getParent()));
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/some/path")

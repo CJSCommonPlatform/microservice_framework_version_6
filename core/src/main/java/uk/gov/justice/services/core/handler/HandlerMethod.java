@@ -90,7 +90,7 @@ public class HandlerMethod {
         } catch (IllegalAccessException | InvocationTargetException ex) {
             throw new HandlerExecutionException(
                     format("Error while invoking command handler method %s with parameter %s",
-                            handlerMethod, envelope), ex);
+                            handlerMethod, envelope), ex.getCause());
         }
     }
 

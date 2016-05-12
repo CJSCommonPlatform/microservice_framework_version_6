@@ -63,7 +63,6 @@ public class RecipesQueryViewTest {
     @Before
     public void setup() {
         when(envelope.payloadAsJsonObject()).thenReturn(payload);
-        when(payload.isEmpty()).thenReturn(false);
         when(payload.getString(FIELD_RECIPE_ID)).thenReturn(ID);
         when(payload.getString(FIELD_NAME)).thenReturn(NAME);
     }
@@ -96,6 +95,7 @@ public class RecipesQueryViewTest {
     public void shouldReturnRecipeViewByName() {
         RecipesView recipes = new RecipesView(Collections.singletonList(recipeView));
         when(service.findByName(NAME)).thenReturn(recipes);
+        when(payload.containsKey(FIELD_NAME)).thenReturn(true);
         when(enveloper.withMetadataFrom(envelope, NAME_RESPONSE_RECIPE_LIST)).thenReturn(function);
         when(function.apply(recipes)).thenReturn(updatedEnvelope);
 
@@ -107,7 +107,6 @@ public class RecipesQueryViewTest {
     @Test
     public void shouldReturnAllRecipes() {
         when(payload.getString(FIELD_NAME)).thenReturn(null);
-        when(payload.isEmpty()).thenReturn(true);
         RecipesView recipes = new RecipesView(Collections.singletonList(recipeView));
         when(service.getRecipes()).thenReturn(recipes);
         when(enveloper.withMetadataFrom(envelope, NAME_RESPONSE_RECIPE_LIST)).thenReturn(function);

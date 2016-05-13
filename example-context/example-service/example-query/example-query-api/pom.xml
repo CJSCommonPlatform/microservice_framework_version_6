@@ -34,8 +34,7 @@
                             <sourceDirectory>${basedir}/src/raml</sourceDirectory>
                             <outputDirectory>${project.build.directory}/generated-sources/api
                             </outputDirectory>
-                            <basePackageName>uk.gov.justice.services.example.query.gen.api.adapter
-                            </basePackageName>
+                            <basePackageName>uk.gov.justice.api</basePackageName>
                             <includes>
                                 <include>${artifactId}.raml</include>
                             </includes>
@@ -56,8 +55,7 @@
                             <outputDirectory>
                                 ${project.build.directory}/generated-sources/controller
                             </outputDirectory>
-                            <basePackageName>uk.gov.justice.services.example.query.gen.api.client
-                            </basePackageName>
+                            <basePackageName>uk.gov.justice.api</basePackageName>
                             <generatorProperties>
                                 <serviceComponent>QUERY_API</serviceComponent>
                             </generatorProperties>
@@ -85,40 +83,6 @@
             </plugin>
         </plugins>
     </build>
-
-    <!--<build>
-        <finalName>${project.artifactId}</finalName>
-        <plugins>
-            <plugin>
-                <groupId>uk.gov.justice.maven</groupId>
-                <artifactId>raml-maven-plugin</artifactId>
-                <version>${raml-maven-plugin.version}</version>
-                <configuration>
-                    <generatorName>
-                        uk.gov.justice.services.adapters.rest.generator.RestAdapterGenerator
-                    </generatorName>
-                    <sourceDirectory>${basedir}/src/raml</sourceDirectory>
-                    <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
-                    <basePackageName>uk.gov.justice.api</basePackageName>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <phase>generate-sources</phase>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>uk.gov.justice.services</groupId>
-                        <artifactId>rest-adapter-generator</artifactId>
-                        <version>${project.version}</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-        </plugins>
-    </build>-->
 
     <dependencies>
         <dependency>

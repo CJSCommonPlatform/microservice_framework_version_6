@@ -35,9 +35,7 @@
                             <outputDirectory>
                                 ${project.build.directory}/generated-sources/controller
                             </outputDirectory>
-                            <basePackageName>
-                                uk.gov.justice.services.example.query.gen.controller.adapter
-                            </basePackageName>
+                            <basePackageName>uk.gov.justice.api</basePackageName>
                             <includes>
                                 <include>${artifactId}.raml</include>
                             </includes>
@@ -57,9 +55,7 @@
                             </sourceDirectory>
                             <outputDirectory>${project.build.directory}/generated-sources/view
                             </outputDirectory>
-                            <basePackageName>
-                                uk.gov.justice.services.example.query.gen.controller.client
-                            </basePackageName>
+                            <basePackageName>uk.gov.justice.api</basePackageName>
                             <generatorProperties>
                                 <serviceComponent>QUERY_CONTROLLER</serviceComponent>
                             </generatorProperties>

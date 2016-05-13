@@ -72,8 +72,7 @@
                     </generatorName>
                     <sourceDirectory>${basedir}/src/raml</sourceDirectory>
                     <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
-                    <basePackageName>uk.gov.justice.services.example.query.gen.view.adapter
-                    </basePackageName>
+                    <basePackageName>uk.gov.justice.api</basePackageName>
                 </configuration>
                 <executions>
                     <execution>

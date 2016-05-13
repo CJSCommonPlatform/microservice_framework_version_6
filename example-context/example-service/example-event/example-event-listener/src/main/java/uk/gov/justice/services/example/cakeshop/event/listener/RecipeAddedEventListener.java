@@ -33,13 +33,14 @@ public class RecipeAddedEventListener {
     @Handles("cakeshop.event.recipe-added")
     public void recipeAdded(final JsonEnvelope event) {
 
-        LOGGER.info("=============> Inside add-recipe Event Listener. RecipeId: " + event.payloadAsJsonObject().getString(FIELD_RECIPE_ID));
-        LOGGER.info("===============================================================================================");
+        String recipeId = event.payloadAsJsonObject().getString(FIELD_RECIPE_ID);
+        LOGGER.info("=============> Inside add-recipe Event Listener. RecipeId: " + recipeId);
 
         recipeRepository.save(
                 recipeAddedConverter.convert(
                         jsonObjectConverter.convert(
                                 event.payloadAsJsonObject(),
                                 RecipeAdded.class)));
+        LOGGER.info("=====================================================> Recipe saved, RecipeId: " + recipeId);
     }
 }

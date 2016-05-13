@@ -45,7 +45,8 @@ public class RecipesQueryView {
     }
 
     private RecipesView fetchRecipes(final JsonEnvelope query) {
-        return query.payloadAsJsonObject().isEmpty() ? recipeService.getRecipes()
-                : recipeService.findByName(query.payloadAsJsonObject().getString(FIELD_NAME));
+        return query.payloadAsJsonObject().containsKey(FIELD_NAME)
+                ? recipeService.findByName(query.payloadAsJsonObject().getString(FIELD_NAME))
+                : recipeService.getRecipes();
     }
 }

@@ -36,7 +36,7 @@
                             </outputDirectory>
                             <basePackageName>uk.gov.justice.api</basePackageName>
                             <includes>
-                                <include>${artifactId}.raml</include>
+                                <include>${project.artifactId}.raml</include>
                             </includes>
                         </configuration>
                     </execution>

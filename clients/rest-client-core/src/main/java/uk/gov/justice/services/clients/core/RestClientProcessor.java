@@ -3,11 +3,16 @@ package uk.gov.justice.services.clients.core;
 import static java.lang.String.format;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.OK;
+import static uk.gov.justice.services.messaging.JsonEnvelope.METADATA;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
+import uk.gov.justice.services.messaging.JsonObjects;
+import uk.gov.justice.services.messaging.Metadata;
 
 import javax.inject.Inject;
 import javax.json.JsonObject;
@@ -23,6 +28,7 @@ import javax.ws.rs.core.Response;
 public class RestClientProcessor {
 
     private static final String MEDIA_TYPE_PATTERN = "application/vnd.%s+json";
+    private static final String CPPID = "CPPID";
 
     @Inject
     StringToJsonObjectConverter stringToJsonObjectConverter;
@@ -65,6 +71,7 @@ public class RestClientProcessor {
         }
 
         final Invocation.Builder builder = target.request(format(MEDIA_TYPE_PATTERN, envelope.metadata().name()));
+
         final Response response = builder.get();
         final int status = response.getStatus();
         if (status == NOT_FOUND.getStatusCode()) {
@@ -74,7 +81,22 @@ public class RestClientProcessor {
                     response.getStatusInfo().getReasonPhrase()));
         }
 
-        return jsonObjectEnvelopeConverter.asEnvelope(stringToJsonObjectConverter.convert(response.readEntity(String.class)));
+        final JsonObject responseAsJsonObject = stringToJsonObjectConverter.convert(response.readEntity(String.class));
+
+        return jsonObjectEnvelopeConverter.asEnvelope(addMetadataIfMissing(responseAsJsonObject, envelope.metadata(), response.getHeaderString(CPPID)));
+    }
+
+    private JsonObject addMetadataIfMissing(final JsonObject responseAsJsonObject, final Metadata requestMetadata, final String cppId) {
+        if (responseAsJsonObject.containsKey(METADATA)) {
+            return responseAsJsonObject;
+        }
+
+        final JsonObject metadata = JsonObjects.createObjectBuilderWithFilter(requestMetadata.asJsonObject(), x -> !ID.equals(x))
+                .add(ID, cppId)
+                .build();
+
+        return createObjectBuilder(responseAsJsonObject)
+                .add(METADATA, metadata).build();
     }
 
 }

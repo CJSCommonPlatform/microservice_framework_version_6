@@ -13,6 +13,7 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
 
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonObjectMetadata;
 import uk.gov.justice.services.messaging.Metadata;
 
@@ -65,7 +66,7 @@ public class RestProcessorTest {
 
     @Before
     public void setup() {
-        restProcessor = new RestProcessor(new RestEnvelopeBuilderFactory(), envelope -> envelope.payload().toString());
+        restProcessor = new RestProcessor(new RestEnvelopeBuilderFactory(), envelope -> new JsonObjectEnvelopeConverter().fromEnvelope(envelope).toString(), false);
 
         metadata = JsonObjectMetadata.metadataFrom(Json.createObjectBuilder()
                 .add(ID, UUID.randomUUID().toString())
@@ -170,10 +171,24 @@ public class RestProcessorTest {
                 envelopeFrom(metadata, Json.createObjectBuilder().add("key11", "value33").add("key22", "value55").build()));
 
         Response response = restProcessor.processSynchronously(function, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
-        String responseEntity = (String) response.getEntity();
-        with(responseEntity)
+
+        with((String) response.getEntity())
                 .assertThat("key11", equalTo("value33"))
                 .assertThat("key22", equalTo("value55"));
+    }
+
+    @Test
+    public void shouldReturnPayloadOnlyAndMetadataIdInHeader() {
+        RestProcessor payLoadOnlyProcessor = new RestProcessor(new RestEnvelopeBuilderFactory(), envelope -> envelope.payload().toString(), true);
+
+        when(function.apply(any(JsonEnvelope.class))).thenReturn(
+                envelopeFrom(metadata, Json.createObjectBuilder().add("key11", "value33").add("key22", "value55").build()));
+
+        Response response = payLoadOnlyProcessor.processSynchronously(function, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
+
+        with((String) response.getEntity())
+                .assertNotDefined(JsonEnvelope.METADATA);
+        assertThat(response.getHeaderString(HeaderConstants.ID), equalTo(metadata.id().toString()));
     }
 
     private HttpHeaders headersWith(String headerName, String headerValue) {
@@ -181,6 +196,5 @@ public class RestProcessorTest {
         headersMap.add(headerName, headerValue);
         return new ResteasyHttpHeaders(headersMap);
     }
-
 
 }

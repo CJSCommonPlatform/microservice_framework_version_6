@@ -56,6 +56,11 @@
             <artifactId>commons-testing</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.json</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>

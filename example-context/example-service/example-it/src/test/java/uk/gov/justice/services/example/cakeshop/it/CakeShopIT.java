@@ -100,6 +100,9 @@ public class CakeShopIT {
 
         EventLog event = eventsWithPayloadContaining(recipeId).findFirst().get();
         assertThat(event.getName(), is("cakeshop.events.recipe-added"));
+        with(event.getMetadata())
+                .assertEquals("stream.id", recipeId)
+                .assertEquals("stream.version", 1);
         String eventPayload = event.getPayload();
         with(eventPayload)
                 .assertThat("$.recipeId", equalTo(recipeId))
@@ -115,7 +118,6 @@ public class CakeShopIT {
         assertThat(response.getStatus(), is(OK));
     }
 
-
     @Test
     public void shouldReturn400WhenMandatoryQueryParamNotProvided() throws Exception {
 
@@ -123,14 +125,12 @@ public class CakeShopIT {
         assertThat(response.getStatus(), is(BAD_REQUEST));
     }
 
-
     @Test
     public void shouldReturn404IfRecipeDoesNotExist() {
         ApiResponse response = queryForRecipe("163af847-effb-46a9-96bc-32a0f7526f00");
         assertThat(response.httpCode(), is(NOT_FOUND));
 
     }
-
 
     @Test
     public void shouldReturnRecipeOfGivenId() {
@@ -157,7 +157,6 @@ public class CakeShopIT {
                 .assertThat("$.name", equalTo("Cheesy cheese cake"));
 
     }
-
 
     @Test
     public void shouldReturnRecipes() {
@@ -199,8 +198,8 @@ public class CakeShopIT {
         assertThat(response.httpCode(), is(OK));
 
         with(response.body())
-                .assertThat("$.recipes[?(@.id=='"+recipeId+"')].name", hasItem("Cheesy cheese cake"))
-                .assertThat("$.recipes[?(@.id=='"+recipeId2+"')].name", hasItem("Chocolate muffin"));
+                .assertThat("$.recipes[?(@.id=='" + recipeId + "')].name", hasItem("Cheesy cheese cake"))
+                .assertThat("$.recipes[?(@.id=='" + recipeId2 + "')].name", hasItem("Chocolate muffin"));
 
     }
 
@@ -212,8 +211,6 @@ public class CakeShopIT {
                 .post(entity(makeCakeCommand(), MAKE_CAKE_MEDIA_TYPE));
         assertThat(response.getStatus(), is(ACCEPTED));
     }
-
-
 
     private ApiResponse queryForRecipe(String recipeId) {
         Response jaxrsResponse = sendTo(RECIPES_RESOURCE_QUERY_URI + recipeId).request().accept(QUERY_RECIPE_MEDIA_TYPE).get();
@@ -264,7 +261,6 @@ public class CakeShopIT {
                 .build().toString();
     }
 
-
     private JsonObjectBuilder jsonObject() {
         return createObjectBuilder();
     }
@@ -274,7 +270,7 @@ public class CakeShopIT {
     }
 
     private WebTarget sendTo(String url) {
-        return  client.target(url);
+        return client.target(url);
     }
 
     @Before

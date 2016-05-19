@@ -95,7 +95,9 @@ public class RestProcessorProducerTest {
                 .processSynchronously(function, headersWith("Accept", "application/vnd.somecontext.query.somequery+json"), NOT_USED_PATH_PARAMS);
 
         assertThat(response, notNullValue());
+        assertThat(response.getHeaderString(HeaderConstants.ID), equalTo(ID_VALUE));
         JsonAssert.with(response.getEntity().toString())
+                .assertNotDefined(METADATA)
                 .assertThat("$." + FIELD_NAME, equalTo(FIELD_VALUE));
     }
 

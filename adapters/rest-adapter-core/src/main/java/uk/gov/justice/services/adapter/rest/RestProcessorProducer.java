@@ -30,8 +30,8 @@ public class RestProcessorProducer {
 
     @PostConstruct
     void initialise() {
-        defaultRestProcessor = new RestProcessor(envelopeBuilderFactory, envelope -> jsonObjectEnvelopeConverter.fromEnvelope(envelope).toString());
-        payloadOnlyRestProcessor = new RestProcessor(envelopeBuilderFactory, envelope -> envelope.payloadAsJsonObject().toString());
+        defaultRestProcessor = new RestProcessor(envelopeBuilderFactory, envelope -> jsonObjectEnvelopeConverter.fromEnvelope(envelope).toString(), false);
+        payloadOnlyRestProcessor = new RestProcessor(envelopeBuilderFactory, envelope -> envelope.payloadAsJsonObject().toString(), true);
     }
 
     /**

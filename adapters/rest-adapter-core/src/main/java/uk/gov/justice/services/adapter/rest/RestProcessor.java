@@ -8,6 +8,7 @@ import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.OK;
 import static javax.ws.rs.core.Response.status;
 import static org.slf4j.LoggerFactory.getLogger;
+import static uk.gov.justice.services.adapter.rest.HeaderConstants.ID;
 
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -38,9 +39,14 @@ public class RestProcessor {
 
     private final Function<JsonEnvelope, String> responseBodyGenerator;
 
-    RestProcessor(RestEnvelopeBuilderFactory envelopeBuilderFactory, Function<JsonEnvelope, String> responseBodyGenerator) {
+    private final boolean sendMetadataIdInHeader;
+
+    RestProcessor(final RestEnvelopeBuilderFactory envelopeBuilderFactory,
+                  final Function<JsonEnvelope, String> responseBodyGenerator,
+                  final boolean sendMetadataIdInHeader) {
         this.envelopeBuilderFactory = envelopeBuilderFactory;
         this.responseBodyGenerator = responseBodyGenerator;
+        this.sendMetadataIdInHeader = sendMetadataIdInHeader;
     }
 
     /**
@@ -85,7 +91,11 @@ public class RestProcessor {
         } else if (result.payload() == NULL) {
             return status(NOT_FOUND).build();
         } else {
-            return status(OK).entity(responseBodyGenerator.apply(result)).build();
+            final Response.ResponseBuilder response = status(OK);
+            if (sendMetadataIdInHeader) {
+                response.header(ID, result.metadata().id());
+            }
+            return response.entity(responseBodyGenerator.apply(result)).build();
         }
     }
 }

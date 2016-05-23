@@ -99,7 +99,7 @@ public class CakeShopIT {
         await().until(() -> eventsWithPayloadContaining(recipeId).count() == 1);
 
         EventLog event = eventsWithPayloadContaining(recipeId).findFirst().get();
-        assertThat(event.getName(), is("cakeshop.event.recipe-added"));
+        assertThat(event.getName(), is("cakeshop.events.recipe-added"));
         String eventPayload = event.getPayload();
         with(eventPayload)
                 .assertThat("$.recipeId", equalTo(recipeId))

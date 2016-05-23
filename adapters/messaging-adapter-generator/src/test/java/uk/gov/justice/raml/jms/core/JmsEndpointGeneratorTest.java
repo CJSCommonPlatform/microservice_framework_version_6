@@ -67,7 +67,6 @@ import org.hamcrest.CoreMatchers;
 import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
-import org.hamcrest.collection.IsArrayContaining;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -472,18 +471,37 @@ public class JmsEndpointGeneratorTest {
         generator.run(
                 messagingRamlWithDefaults()
                         .with(resource()
-                                .withRelativeUri("/structure.controller.command")
+                                .withRelativeUri("/structure.event")
                                 .with(action()
                                         .withActionType(ActionType.POST)
                                         .withMediaType("application/vnd.structure.event.test-event+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> clazz = getJmsListenerClass(BASE_PACKAGE, "StructureCommandControllerJmsListener");
+        Class<?> clazz = getJmsListenerClass(BASE_PACKAGE, "StructureEventListenerJmsListener");
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("messageSelector")),
                         propertyValue(equalTo("CPPNAME in('structure.event.test-event')")))));
+    }
+
+    @Test
+    public void shouldCreateAnnotatedJmsEndpointWithMessageSelectorContainingOneEvent_PluralPillarName() throws Exception {
+        generator.run(
+                messagingRamlWithDefaults()
+                        .with(resource()
+                                .withRelativeUri("/structure.event")
+                                .with(action()
+                                        .withActionType(ActionType.POST)
+                                        .withMediaType("application/vnd.structure.events.test-event+json")))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        Class<?> clazz = getJmsListenerClass(BASE_PACKAGE, "StructureEventListenerJmsListener");
+        assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
+        assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
+                hasItemInArray(allOf(propertyName(equalTo("messageSelector")),
+                        propertyValue(equalTo("CPPNAME in('structure.events.test-event')")))));
     }
 
     @Test

@@ -105,6 +105,10 @@ public class RestClientProcessor {
             return responseAsJsonObject;
         }
 
+        if (cppId == null) {
+            throw new RuntimeException(format("%s is required in request header", CPPID));
+        }
+
         final JsonObject metadata = JsonObjects.createObjectBuilderWithFilter(requestMetadata.asJsonObject(), x -> !ID.equals(x))
                 .add(ID, cppId)
                 .build();

@@ -173,6 +173,28 @@ public class RestClientProcessorIT {
         restClientProcessor.request(endpointDefinition, requestEnvelopeParamAParamB());
     }
 
+    @Test(expected = RuntimeException.class)
+    public void shouldThrowExceptionOnCPPIDMissing() throws Exception {
+
+        final String path = "/my/resource";
+        final String mimetype = format("application/vnd.%s+json", CONTEXT_QUERY_MY_QUERY);
+
+        stubFor(get(urlPathEqualTo(path))
+                .withHeader("Accept", WireMock.equalTo(mimetype))
+                .withQueryParam("paramA", WireMock.equalTo("valueA"))
+                .withQueryParam("paramC", WireMock.equalTo("valueC"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", mimetype)
+                        .withBody(envelopeWithoutMetadataAsJson)));
+
+        Set<QueryParam> queryParams = ImmutableSet.of(new QueryParam("paramA", true), new QueryParam("paramB", false), new QueryParam("paramC", true));
+
+        EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, emptySet(), queryParams);
+
+        restClientProcessor.request(endpointDefinition, requestEnvelopeParamAParamC());
+    }
+
     @Test
     public void shouldReturnJsonNullPayloadFor404ResponseCode() throws Exception {
 

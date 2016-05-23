@@ -15,6 +15,10 @@ public class RequestContentTypeRamlValidator extends AbstractContentTypeRamlVali
         super(ActionType.POST, "request type", "command", "event");
     }
 
+    public RequestContentTypeRamlValidator(ActionType actionType, String contentTypeDec, String... componentTypes) {
+        super(actionType, contentTypeDec, componentTypes);
+    }
+
     @Override
     protected Collection<MimeType> mediaTypesToValidate(final Action postAction) {
         return postAction.getBody().values();

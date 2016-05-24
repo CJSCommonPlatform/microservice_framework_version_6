@@ -1,13 +1,20 @@
 package uk.gov.justice.services.eventsourcing.source.core;
 
 
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.STREAM;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.STREAM_ID;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.VERSION;
+
 import uk.gov.justice.services.eventsourcing.publisher.core.EventPublisher;
 import uk.gov.justice.services.eventsourcing.repository.core.EventRepository;
 import uk.gov.justice.services.eventsourcing.repository.core.exception.StoreEventRequestFailedException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.InvalidStreamVersionRuntimeException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.VersionMismatchException;
+import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.JsonObjectMetadata;
+import uk.gov.justice.services.messaging.JsonObjects;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,6 +23,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
+import javax.json.Json;
+import javax.json.JsonObjectBuilder;
 import javax.transaction.Transactional;
 
 /**
@@ -86,7 +95,7 @@ public class EventStreamManager {
     }
 
     private void append(final UUID id, final Stream<JsonEnvelope> events, final Optional<Long> versionFrom) throws EventStreamException {
-        List<JsonEnvelope> envelopeList = events.collect(Collectors.toList());
+        final List<JsonEnvelope> envelopeList = events.collect(Collectors.toList());
 
         Long currentVersion = eventRepository.getCurrentSequenceIdForStream(id);
 
@@ -94,12 +103,24 @@ public class EventStreamManager {
 
         for (final JsonEnvelope event : envelopeList) {
             try {
-                eventRepository.store(event, id, ++currentVersion);
-                eventPublisher.publish(event);
+                final JsonEnvelope eventWithVersion = eventWithVersion(event, id, ++currentVersion);
+                eventRepository.store(eventWithVersion, id, currentVersion);
+                eventPublisher.publish(eventWithVersion);
             } catch (StoreEventRequestFailedException e) {
                 throw new EventStreamException(String.format("Failed to append event to Event Store %s", event.metadata().id()), e);
             }
         }
+    }
+
+    private JsonEnvelope eventWithVersion(final JsonEnvelope event, final UUID streamId, final Long version) {
+        final JsonObjectBuilder stream = Json.createObjectBuilder()
+                .add(STREAM_ID, streamId.toString())
+                .add(VERSION, version);
+
+        final JsonObjectBuilder metadata = JsonObjects.createObjectBuilderWithFilter(event.metadata().asJsonObject(), x -> !STREAM.equals(x))
+                .add(STREAM, stream.build());
+
+        return DefaultJsonEnvelope.envelopeFrom(JsonObjectMetadata.metadataFrom(metadata.build()), event.payloadAsJsonObject());
     }
 
     private void validateEvents(final UUID id, final List<JsonEnvelope> envelopeList, final Optional<Long> versionFrom, final Long currentVersion) throws EventStreamException {

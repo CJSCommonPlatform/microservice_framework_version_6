@@ -35,6 +35,7 @@
         <module>example-context</module>
         <module>clients</module>
         <module>domain</module>
+        <module>test-utils</module>
     </modules>
 
     <properties>

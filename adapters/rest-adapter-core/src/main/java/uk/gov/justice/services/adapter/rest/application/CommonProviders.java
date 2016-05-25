@@ -1,6 +1,6 @@
 package uk.gov.justice.services.adapter.rest.application;
 
-
+import uk.gov.justice.services.adapter.rest.cors.CorsFeature;
 import uk.gov.justice.services.adapter.rest.JsonSchemaValidationInterceptor;
 import uk.gov.justice.services.adapter.rest.mapper.BadRequestExceptionMapper;
 
@@ -17,6 +17,7 @@ public class CommonProviders {
         final HashSet<Class<?>> classes = new HashSet<>();
         classes.add(BadRequestExceptionMapper.class);
         classes.add(JsonSchemaValidationInterceptor.class);
+        classes.add(CorsFeature.class);
         return classes;
     }
 

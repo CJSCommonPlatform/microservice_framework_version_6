@@ -1,8 +1,5 @@
-package uk.gov.justice.services.adapter.rest;
+package uk.gov.justice.services.common.http;
 
-/**
- * Created by david on 16/11/15.
- */
 public final class HeaderConstants {
 
     public static final String ID = "CPPID";

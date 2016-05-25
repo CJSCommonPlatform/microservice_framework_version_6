@@ -2,7 +2,11 @@ package uk.gov.justice.services.adapters.rest.generator;
 
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.TypeSpec.classBuilder;
+import static java.lang.String.format;
+import static javax.lang.model.element.Modifier.FINAL;
+import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
+import static javax.lang.model.element.Modifier.STATIC;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.services.adapters.rest.generator.Generators.byMimeTypeOrder;
@@ -20,6 +24,8 @@ import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
 import uk.gov.justice.services.core.dispatcher.SynchronousDispatcher;
+import uk.gov.justice.services.messaging.logging.HttpMessageLoggerHelper;
+import uk.gov.justice.services.messaging.logging.LoggerUtils;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -47,6 +53,8 @@ import org.raml.model.ActionType;
 import org.raml.model.Resource;
 import org.raml.model.parameter.QueryParameter;
 import org.raml.model.parameter.UriParameter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Internal code generation class for generating the JAX-RS implementation class that implements the
@@ -110,12 +118,14 @@ class JaxRsImplementationGenerator {
      * @return a {@link TypeSpec.Builder} that represents the implementation class
      */
     private TypeSpec.Builder classSpecFor(final Resource resource, final Component component) {
-        return classBuilder("Default" + resourceInterfaceNameOf(resource))
+        final String className = "Default" + resourceInterfaceNameOf(resource);
+        return classBuilder(className)
                 .addSuperinterface(interfaceClassNameFor(resource))
                 .addModifiers(PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Adapter.class)
                         .addMember(DEFAULT_ANNOTATION_PARAMETER, "$T.$L", Component.class, component)
                         .build())
+                .addField(loggerConstantField(className))
                 .addField(FieldSpec.builder(RestProcessor.class, "restProcessor")
                         .addAnnotation(Inject.class)
                         .build())
@@ -176,6 +186,22 @@ class JaxRsImplementationGenerator {
     }
 
     /**
+     * Generate the Logger constant field.
+     *
+     * @return the {@link FieldSpec} that represents the generated field
+     */
+    private FieldSpec loggerConstantField(final String className) {
+        final ClassName classLoggerFactory = ClassName.get(LoggerFactory.class);
+        return FieldSpec.builder(Logger.class, "LOGGER")
+                .addModifiers(PRIVATE, STATIC, FINAL)
+                .initializer(
+                        CodeBlock.builder()
+                                .add(format("$L.getLogger(%s.class)", className), classLoggerFactory).build()
+                )
+                .build();
+    }
+
+    /**
      * Uses the type of {@link Action} to provide a {@link SynchronousDispatcher} or an {@link
      * AsynchronousDispatcher} and provides the correct field definition as a {@link FieldSpec}.
      *
@@ -191,7 +217,7 @@ class JaxRsImplementationGenerator {
         } else if (actionType == POST) {
             return asynchronousDispatcherField();
         } else {
-            throw new IllegalStateException(String.format("Unsupported action type %s", actionType));
+            throw new IllegalStateException(format("Unsupported action type %s", actionType));
         }
     }
 
@@ -248,7 +274,7 @@ class JaxRsImplementationGenerator {
         } else if (actionType == POST) {
             methodBody = methodBody(pathParams, this::methodBodyForPost);
         } else {
-            throw new IllegalStateException(String.format("Unsupported action type %s", actionType));
+            throw new IllegalStateException(format("Unsupported action type %s", actionType));
         }
 
         return methodBuilder(resourceMethodName)
@@ -291,9 +317,14 @@ class JaxRsImplementationGenerator {
      */
     private CodeBlock methodBody(final Map<String, UriParameter> pathParams, final Supplier<CodeBlock> supplier) {
         final ClassName classMapBuilderType = ClassName.get(ValidParameterMapBuilder.class);
+        final ClassName classLoggerUtils = ClassName.get(LoggerUtils.class);
+        final ClassName classHttpMessageLoggerHelper = ClassName.get(HttpMessageLoggerHelper.class);
+
 
         return CodeBlock.builder()
                 .addStatement("$T $L = new $T()", classMapBuilderType, VARIABLE_MAP_BUILDER, classMapBuilderType)
+                .addStatement("$T.trace(LOGGER, () -> String.format(\"Received REST request with headers: %s\", $T.toHttpHeaderTrace(headers)))",
+                        classLoggerUtils, classHttpMessageLoggerHelper)
                 .add(putAllPathParamsInMap(pathParams.keySet()))
                 .add(supplier.get())
                 .build();

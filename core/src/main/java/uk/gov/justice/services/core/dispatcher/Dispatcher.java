@@ -3,6 +3,8 @@ package uk.gov.justice.services.core.dispatcher;
 import static uk.gov.justice.services.core.handler.HandlerMethod.ASYNCHRONOUS;
 import static uk.gov.justice.services.core.handler.HandlerMethod.SYNCHRONOUS;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.core.handler.HandlerMethod;
 import uk.gov.justice.services.core.handler.registry.HandlerRegistry;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -19,6 +21,8 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 class Dispatcher {
 
     private HandlerRegistry handlerRegistry;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Dispatcher.class);
 
     Dispatcher() {
         handlerRegistry = new HandlerRegistry();

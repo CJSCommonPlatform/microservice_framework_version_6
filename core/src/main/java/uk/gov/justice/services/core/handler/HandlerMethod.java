@@ -1,6 +1,9 @@
 package uk.gov.justice.services.core.handler;
 
 import static java.lang.String.format;
+import static javafx.scene.input.KeyCode.T;
+import static uk.gov.justice.services.messaging.logging.JsonEnvelopeLoggerHelper.toEnvelopeTraceString;
+import static uk.gov.justice.services.messaging.logging.LoggerUtils.trace;
 
 import uk.gov.justice.services.core.handler.exception.HandlerExecutionException;
 import uk.gov.justice.services.core.handler.registry.exception.InvalidHandlerException;
@@ -8,6 +11,10 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Encapsulates a handler class instance and a handler method.
@@ -16,6 +23,8 @@ import java.lang.reflect.Method;
  * must return an {@link JsonEnvelope}.
  */
 public class HandlerMethod {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(HandlerMethod.class);
 
     public static final boolean SYNCHRONOUS = true;
     public static final boolean ASYNCHRONOUS = false;
@@ -85,8 +94,31 @@ public class HandlerMethod {
      */
     @SuppressWarnings("unchecked")
     public Object execute(final JsonEnvelope envelope) {
+        trace(LOGGER, () -> format("Dispatching to handler %s.%s : %s",
+                handlerInstance.getClass().toString(),
+                handlerMethod.getName(),
+                toEnvelopeTraceString(envelope)));
         try {
-            return handlerMethod.invoke(handlerInstance, envelope);
+            final Object obj = handlerMethod.invoke(handlerInstance, envelope);
+            trace(LOGGER, () -> {
+
+                final Optional<Object> response = Optional.ofNullable(obj);
+
+                if(response.isPresent() && response.get() instanceof JsonEnvelope) {
+                    return format("Response received from handler %s.%s : %s",
+                            handlerInstance.getClass().toString(),
+                            handlerMethod.getName(),
+                            toEnvelopeTraceString((JsonEnvelope) response.get()));
+                }
+
+                return format("Response from handler %s.%s with id %s was void",
+                        handlerInstance.getClass().toString(),
+                        handlerMethod.getName(),
+                        envelope.metadata().id().toString());
+            });
+
+            return obj;
+
         } catch (IllegalAccessException | InvocationTargetException ex) {
             throw new HandlerExecutionException(
                     format("Error while invoking command handler method %s with parameter %s",

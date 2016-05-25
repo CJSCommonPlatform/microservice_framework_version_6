@@ -12,6 +12,9 @@ import javax.inject.Inject;
 import javax.interceptor.Interceptors;
 import javax.jms.Message;
 import javax.jms.MessageListener;
+import org.slf4j.Logger;
+import uk.gov.justice.services.messaging.logging.LoggerUtils;
+import uk.gov.justice.services.messaging.logging.JmsMessageLoggerHelper;
 
 import static uk.gov.justice.services.core.annotation.Component.*;
 
@@ -23,6 +26,8 @@ import static uk.gov.justice.services.core.annotation.Component.*;
 @Adapter(<ADAPTER_TYPE>)
 public class <CLASS_NAME>JmsListener implements MessageListener {
 
+   private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(<CLASS_NAME>JmsListener.class);
+
    @Inject
    AsynchronousDispatcher dispatcher;
 
@@ -31,6 +36,7 @@ public class <CLASS_NAME>JmsListener implements MessageListener {
 
    @Override
    public void onMessage(Message message) {
+       LoggerUtils.trace(LOGGER, () -> String.format("Received JMS message: %s", JmsMessageLoggerHelper.toJmsTraceString(message)));
        jmsProcessor.process(dispatcher::dispatch, message);
    }
 }

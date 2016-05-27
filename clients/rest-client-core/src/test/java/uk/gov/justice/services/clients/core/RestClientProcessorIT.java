@@ -12,6 +12,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import uk.gov.justice.services.clients.core.exception.InvalidResponseException;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -173,7 +174,7 @@ public class RestClientProcessorIT {
         restClientProcessor.request(endpointDefinition, requestEnvelopeParamAParamB());
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test(expected = InvalidResponseException.class)
     public void shouldThrowExceptionOnCPPIDMissing() throws Exception {
 
         final String path = "/my/resource";

@@ -2,6 +2,7 @@ package uk.gov.justice.services.clients.core;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.justice.services.clients.core.exception.InvalidResponseException;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -106,7 +107,7 @@ public class RestClientProcessor {
         }
 
         if (cppId == null) {
-            throw new RuntimeException(format("%s is required in request header", CPPID));
+            throw new InvalidResponseException(format("Response received is missing %s header", CPPID));
         }
 
         final JsonObject metadata = JsonObjects.createObjectBuilderWithFilter(requestMetadata.asJsonObject(), x -> !ID.equals(x))

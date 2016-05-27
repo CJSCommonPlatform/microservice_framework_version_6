@@ -6,7 +6,26 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
+import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLLER;
+import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
+import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
+import static uk.gov.justice.services.core.annotation.Component.componentFrom;
+import static uk.gov.justice.services.core.annotation.Component.contains;
+import static uk.gov.justice.services.core.annotation.Component.names;
+import static uk.gov.justice.services.core.annotation.Component.valueOf;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Member;
+import java.lang.reflect.Type;
+import java.util.Set;
+
+import javax.enterprise.inject.spi.Annotated;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.InjectionPoint;
+import javax.inject.Inject;
 import javax.jms.Queue;
 import javax.jms.Topic;
 
@@ -25,46 +44,47 @@ public class ComponentTest {
     private static final String TIER_HANDLER = "handler";
     private static final String TIER_LISTENER = "listener";
     private static final String TIER_PROCESSOR = "processor";
+    private static final String FIELD_NAME = "field";
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
 
     @Test
     public void shouldReturnPillar() throws Exception {
-        assertThat(Component.COMMAND_API.pillar(), equalTo(PILLAR_COMMAND));
-        assertThat(Component.QUERY_API.pillar(), equalTo(PILLAR_QUERY));
-        assertThat(Component.COMMAND_CONTROLLER.pillar(), equalTo(PILLAR_COMMAND));
-        assertThat(Component.COMMAND_HANDLER.pillar(), equalTo(PILLAR_COMMAND));
-        assertThat(Component.EVENT_LISTENER.pillar(), equalTo(PILLAR_EVENT));
-        assertThat(Component.EVENT_PROCESSOR.pillar(), equalTo(PILLAR_EVENT));
+        assertThat(COMMAND_API.pillar(), equalTo(PILLAR_COMMAND));
+        assertThat(QUERY_API.pillar(), equalTo(PILLAR_QUERY));
+        assertThat(COMMAND_CONTROLLER.pillar(), equalTo(PILLAR_COMMAND));
+        assertThat(COMMAND_HANDLER.pillar(), equalTo(PILLAR_COMMAND));
+        assertThat(EVENT_LISTENER.pillar(), equalTo(PILLAR_EVENT));
+        assertThat(EVENT_PROCESSOR.pillar(), equalTo(PILLAR_EVENT));
     }
 
     @Test
     public void shouldReturnTier() throws Exception {
-        assertThat(Component.COMMAND_API.tier(), equalTo(TIER_API));
-        assertThat(Component.QUERY_API.tier(), equalTo(TIER_API));
-        assertThat(Component.COMMAND_CONTROLLER.tier(), equalTo(TIER_CONTROLLER));
-        assertThat(Component.COMMAND_HANDLER.tier(), equalTo(TIER_HANDLER));
-        assertThat(Component.EVENT_LISTENER.tier(), equalTo(TIER_LISTENER));
-        assertThat(Component.EVENT_PROCESSOR.tier(), equalTo(TIER_PROCESSOR));
+        assertThat(COMMAND_API.tier(), equalTo(TIER_API));
+        assertThat(QUERY_API.tier(), equalTo(TIER_API));
+        assertThat(COMMAND_CONTROLLER.tier(), equalTo(TIER_CONTROLLER));
+        assertThat(COMMAND_HANDLER.tier(), equalTo(TIER_HANDLER));
+        assertThat(EVENT_LISTENER.tier(), equalTo(TIER_LISTENER));
+        assertThat(EVENT_PROCESSOR.tier(), equalTo(TIER_PROCESSOR));
     }
 
     @Test
     public void shouldReturnDestinationType() throws Exception {
-        assertThat(Component.COMMAND_API.destinationType(), equalTo(Queue.class));
-        assertThat(Component.COMMAND_CONTROLLER.destinationType(), equalTo(Queue.class));
-        assertThat(Component.COMMAND_HANDLER.destinationType(), equalTo(Queue.class));
-        assertThat(Component.EVENT_LISTENER.destinationType(), equalTo(Topic.class));
+        assertThat(COMMAND_API.destinationType(), equalTo(Queue.class));
+        assertThat(COMMAND_CONTROLLER.destinationType(), equalTo(Queue.class));
+        assertThat(COMMAND_HANDLER.destinationType(), equalTo(Queue.class));
+        assertThat(EVENT_LISTENER.destinationType(), equalTo(Topic.class));
     }
 
     @Test
     public void shouldConstructComponentByTierAndPillar() {
-        assertThat(Component.valueOf("command", "api"), is(Component.COMMAND_API));
-        assertThat(Component.valueOf("command", "controller"), is(Component.COMMAND_CONTROLLER));
-        assertThat(Component.valueOf("command", "handler"), is(Component.COMMAND_HANDLER));
-        assertThat(Component.valueOf("event", "listener"), is(Component.EVENT_LISTENER));
-        assertThat(Component.valueOf("event", "processor"), is(Component.EVENT_PROCESSOR));
-        assertThat(Component.valueOf("query", "api"), is(Component.QUERY_API));
+        assertThat(valueOf("command", "api"), is(COMMAND_API));
+        assertThat(valueOf("command", "controller"), is(COMMAND_CONTROLLER));
+        assertThat(valueOf("command", "handler"), is(COMMAND_HANDLER));
+        assertThat(valueOf("event", "listener"), is(EVENT_LISTENER));
+        assertThat(valueOf("event", "processor"), is(EVENT_PROCESSOR));
+        assertThat(valueOf("query", "api"), is(QUERY_API));
     }
 
     @Test
@@ -72,7 +92,7 @@ public class ComponentTest {
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("No enum constant for pillar: invalidPillar, tier: api");
 
-        Component.valueOf("invalidPillar", "api");
+        valueOf("invalidPillar", "api");
 
     }
 
@@ -81,32 +101,144 @@ public class ComponentTest {
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("No enum constant for pillar: commands, tier: invalidTier");
 
-        Component.valueOf("commands", "invalidTier");
+        valueOf("commands", "invalidTier");
 
     }
 
     @Test
     public void shouldReturnTrueIfContainsGivenString() {
 
-        assertTrue(Component.contains("COMMAND_API"));
-        assertTrue(Component.contains("COMMAND_CONTROLLER"));
-        assertTrue(Component.contains("COMMAND_HANDLER"));
-        assertTrue(Component.contains("EVENT_LISTENER"));
-        assertTrue(Component.contains("EVENT_PROCESSOR"));
-        assertTrue(Component.contains("QUERY_API"));
-        assertTrue(Component.contains("QUERY_CONTROLLER"));
-        assertTrue(Component.contains("QUERY_VIEW"));
+        assertTrue(contains("COMMAND_API"));
+        assertTrue(contains("COMMAND_CONTROLLER"));
+        assertTrue(contains("COMMAND_HANDLER"));
+        assertTrue(contains("EVENT_LISTENER"));
+        assertTrue(contains("EVENT_PROCESSOR"));
+        assertTrue(contains("QUERY_API"));
+        assertTrue(contains("QUERY_CONTROLLER"));
+        assertTrue(contains("QUERY_VIEW"));
     }
 
     @Test
     public void shouldReturnFalseIfDoesNotContainGivenString() {
-        assertFalse(Component.contains("COMMAND_API_aaa"));
-        assertFalse(Component.contains("UNKNOWN"));
+        assertFalse(contains("COMMAND_API_aaa"));
+        assertFalse(contains("UNKNOWN"));
     }
 
     @Test
     public void shouldReturnStringContainingSeparatedNames() {
-        assertThat(Component.names(", "), is("COMMAND_API, COMMAND_CONTROLLER, COMMAND_HANDLER, EVENT_LISTENER, EVENT_PROCESSOR, QUERY_API, QUERY_CONTROLLER, QUERY_VIEW"));
+        assertThat(names(", "), is("COMMAND_API, COMMAND_CONTROLLER, COMMAND_HANDLER, EVENT_LISTENER, EVENT_PROCESSOR, QUERY_API, QUERY_CONTROLLER, QUERY_VIEW"));
     }
+
+    @Test
+    public void shouldReturnFieldLevelComponent() throws NoSuchFieldException {
+        assertThat(componentFrom(new TestInjectionPoint(FieldLevelAnnotation.class.getDeclaredField(FIELD_NAME))), equalTo(COMMAND_CONTROLLER));
+    }
+
+    @Test
+    public void shouldReturnClassLevelComponent() throws NoSuchFieldException {
+        assertThat(componentFrom(new TestInjectionPoint(ClassLevelAnnotation.class.getDeclaredField(FIELD_NAME))), equalTo(COMMAND_HANDLER));
+    }
+
+    @Test
+    public void shouldReturnClassLevelAdaptorComponent() throws NoSuchFieldException {
+        assertThat(componentFrom(new TestInjectionPoint(AdapterAnnotation.class.getDeclaredField(FIELD_NAME))), equalTo(EVENT_LISTENER));
+    }
+
+    @Test
+    public void shouldReturnClassLevelComponentForMethodInjectionPoint() throws NoSuchFieldException {
+        assertThat(componentFrom(new TestInjectionPoint(MethodAnnotation.class.getDeclaredMethods()[0])), equalTo(QUERY_API));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void shouldThrowExceptionOnMissingComponentAnnotation() throws NoSuchFieldException {
+        componentFrom(new TestInjectionPoint(NoAnnotation.class.getDeclaredField(FIELD_NAME)));
+    }
+
+
+    public static class FieldLevelAnnotation {
+
+        @Inject
+        @ServiceComponent(COMMAND_CONTROLLER)
+        Object field;
+
+    }
+
+    @ServiceComponent(COMMAND_HANDLER)
+    public static class ClassLevelAnnotation {
+
+        @Inject
+        Object field;
+
+    }
+
+    @Adapter(EVENT_LISTENER)
+    public static class AdapterAnnotation {
+
+        @Inject
+        Object field;
+
+    }
+
+    public static class NoAnnotation {
+
+        @Inject
+        Object field;
+
+    }
+
+    @ServiceComponent(QUERY_API)
+    public static class MethodAnnotation {
+
+        @Inject
+        public void test(Object field) {
+
+        }
+
+    }
+
+    public static class TestInjectionPoint implements InjectionPoint {
+
+        private final Member member;
+
+        public TestInjectionPoint(Member member) {
+            this.member = member;
+        }
+
+        @Override
+        public Type getType() {
+            return null;
+        }
+
+        @Override
+        public Set<Annotation> getQualifiers() {
+            return null;
+        }
+
+        @Override
+        public Bean<?> getBean() {
+            return null;
+        }
+
+        @Override
+        public Member getMember() {
+            return member;
+        }
+
+        @Override
+        public Annotated getAnnotated() {
+            return null;
+        }
+
+        @Override
+        public boolean isDelegate() {
+            return false;
+        }
+
+        @Override
+        public boolean isTransient() {
+            return false;
+        }
+    }
+
 
 }

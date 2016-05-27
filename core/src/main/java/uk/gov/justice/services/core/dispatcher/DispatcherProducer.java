@@ -8,6 +8,7 @@ import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.annotation.ServiceComponentLocation;
 import uk.gov.justice.services.core.extension.ServiceComponentFoundEvent;
+import uk.gov.justice.services.core.sender.Sender;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -56,6 +57,10 @@ public class DispatcherProducer {
      */
     @Produces
     public AsynchronousDispatcher produceAsynchronousDispatcher(final InjectionPoint injectionPoint) {
+        return dispatcherFor(injectionPoint)::asynchronousDispatch;
+    }
+
+    public Sender produceSender(final InjectionPoint injectionPoint) {
         return dispatcherFor(injectionPoint)::asynchronousDispatch;
     }
 

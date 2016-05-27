@@ -12,9 +12,11 @@ import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLLER;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.annotation.exception.MissingAnnotationException;
+import uk.gov.justice.services.core.dispatcher.DispatcherProducer;
 import uk.gov.justice.services.core.jms.JmsSender;
 import uk.gov.justice.services.core.jms.JmsSenderFactory;
 
@@ -44,6 +46,9 @@ public class SenderProducerTest {
     private InjectionPoint commandHandlerInjectionPoint;
 
     @Mock
+    private InjectionPoint eventProcessorInjectionPoint;
+
+    @Mock
     private InjectionPoint invalidInjectionPoint;
 
     @Mock
@@ -59,6 +64,9 @@ public class SenderProducerTest {
     private Member commandHandlerMember;
 
     @Mock
+    private Member eventProcessorMember;
+
+    @Mock
     private Member invalidMember;
 
     @Mock
@@ -72,6 +80,9 @@ public class SenderProducerTest {
 
     @Mock
     private JmsSender commandHandlerJmsSender;
+
+    @Mock
+    private DispatcherProducer dispatcherProducer;
 
     private SenderProducer senderProducer;
 
@@ -127,6 +138,16 @@ public class SenderProducerTest {
         verify(jmsSenderFactory, times(1)).createJmsSender(COMMAND_HANDLER);
     }
 
+    @Test
+    public void shouldReturnRestSenderForEventProcessor() throws Exception {
+        mockInjectionPoint(eventProcessorInjectionPoint, eventProcessorMember, TestEventProcessor.class);
+        senderProducer.dispatcherProducer = dispatcherProducer;
+
+        senderProducer.produce(eventProcessorInjectionPoint);
+
+        verify(dispatcherProducer, times(1)).produceSender(eventProcessorInjectionPoint);
+    }
+
     @Test(expected = MissingAnnotationException.class)
     public void shouldThrowExceptionWithInvalidHandler() throws Exception {
         mockInjectionPoint(invalidInjectionPoint, invalidMember, TestInvalidHandler.class);
@@ -160,6 +181,10 @@ public class SenderProducerTest {
 
     @ServiceComponent(COMMAND_HANDLER)
     public static class TestCommandHandler {
+    }
+
+    @ServiceComponent(EVENT_PROCESSOR)
+    public static class TestEventProcessor {
     }
 
     public static class TestInvalidHandler {

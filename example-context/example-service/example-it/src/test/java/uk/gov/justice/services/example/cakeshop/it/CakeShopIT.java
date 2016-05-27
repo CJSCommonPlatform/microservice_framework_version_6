@@ -15,6 +15,7 @@ import uk.gov.justice.services.example.cakeshop.it.util.ApiResponse;
 import uk.gov.justice.services.example.cakeshop.it.util.StandaloneJdbcEventLogRepository;
 import uk.gov.justice.services.example.cakeshop.it.util.TestProperties;
 
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import javax.json.JsonObjectBuilder;
@@ -44,6 +45,7 @@ public class CakeShopIT {
     private static final String CAKES_RESOURCE_URI = "http://localhost:8080/example-command-api/command/api/rest/cakeshop/cakes/";
     private static final String RECIPES_RESOURCE_QUERY_URI = "http://localhost:8080/example-query-api/query/api/rest/cakeshop/recipes/";
     private static final String ADD_RECIPE_MEDIA_TYPE = "application/vnd.cakeshop.command.add-recipe+json";
+    private static final String ADD_RECIPE_TRANSACTED_MEDIA_TYPE = "application/vnd.cakeshop.command.add-recipe-transacted+json";
     private static final String MAKE_CAKE_MEDIA_TYPE = "application/vnd.cakeshop.command.make-cake+json";
     private static final String QUERY_RECIPE_MEDIA_TYPE = "application/vnd.cakeshop.query.recipe+json";
     private static final String QUERY_RECIPES_MEDIA_TYPE = "application/vnd.cakeshop.query.recipes+json";
@@ -60,6 +62,21 @@ public class CakeShopIT {
 
         initDatabase("db.cakeshop.url", "db.cakeshop.userName", "db.cakeshop.password",
                 "liquibase/view-store-db-changelog.xml");
+    }
+
+    @Test
+    public void shouldNotCommitDuplicateRecipe() throws Exception {
+        String recipeId = UUID.randomUUID().toString();
+
+        // Attempt to add a recipe using the 'transacted' (test) endpoint, which attempts to save the recipe twice (in same request/transaction), hitting the unique constraint.
+        Response response = sendTo(RECIPES_RESOURCE_URI + "transacted/" + recipeId).request()
+                .post(entity(addRecipeCommand(), ADD_RECIPE_TRANSACTED_MEDIA_TYPE));
+        assertThat(response.getStatus(), is(ACCEPTED));
+        Thread.sleep(500);
+
+        // Neither message should be persisted
+        ApiResponse readResponse = queryForRecipe(recipeId);
+        assertThat(readResponse.httpCode(), is(NOT_FOUND));
     }
 
 

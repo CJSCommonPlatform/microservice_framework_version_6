@@ -29,6 +29,13 @@ public class CakeShopCommandController {
         sender.send(command);
     }
 
+    @Handles("cakeshop.command.add-recipe-transacted")
+    public void addRecipeTransacted(final JsonEnvelope command) {
+        LOGGER.info("=============> Inside add-recipe-transacted Command Controller. RecipeId: " + command.payloadAsJsonObject().getString(FIELD_RECIPE_ID));
+
+        sender.send(command);
+    }
+
     @Handles("cakeshop.command.make-cake")
     public void makeCake(final JsonEnvelope command) {
         LOGGER.info("=============> Inside make-cake Command Controller. CakeId: " + command.payloadAsJsonObject().getString(FIELD_CAKE_ID));

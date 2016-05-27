@@ -31,4 +31,10 @@ public class AddRecipeCommandApi {
         sender.send(command);
     }
 
+    @Handles("cakeshop.command.add-recipe-transacted")
+    public void addRecipeTransacted(final JsonEnvelope command) {
+        LOGGER.info("=============> Inside add-recipe-transacted Command API. RecipeId: " + command.payloadAsJsonObject().getString(FIELD_RECIPE_ID));
+
+        sender.send(command);
+    }
 }

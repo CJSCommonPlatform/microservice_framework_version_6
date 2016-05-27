@@ -58,6 +58,23 @@ public class AddRecipeCommandHandler {
                         .map(enveloper.withMetadataFrom(command)));
     }
 
+    @Handles("cakeshop.command.add-recipe-transacted")
+    public void addRecipeTransacted(final JsonEnvelope command) throws EventStreamException {
+
+        LOGGER.info("=============> Inside add-recipe-transacted Command Handler. RecipeId: " + command.payloadAsJsonObject().getString(FIELD_RECIPE_ID));
+
+        final UUID recipeId = getUUID(command.payloadAsJsonObject(), FIELD_RECIPE_ID).get();
+        final String name = getString(command.payloadAsJsonObject(), FIELD_NAME).get();
+        final List<Ingredient> ingredients = ingredientsFrom(command.payloadAsJsonObject());
+
+        final EventStream eventStream = eventSource.getStreamById(recipeId);
+        final Recipe recipe = aggregateService.get(eventStream, Recipe.class);
+
+        eventStream.append(
+                recipe.addRecipeTransacted(recipeId, name, ingredients)
+                        .map(enveloper.withMetadataFrom(command)));
+    }
+
     private List<Ingredient> ingredientsFrom(final JsonObject payload) {
         return payload.getJsonArray("ingredients").getValuesAs(JsonObject.class).stream()
                 .map(jo -> new Ingredient(jo.getString("name"), jo.getInt("quantity")))

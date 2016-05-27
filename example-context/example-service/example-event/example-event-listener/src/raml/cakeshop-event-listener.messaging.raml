@@ -9,6 +9,10 @@ version: v1
             schema: !include json/schema/cakeshop.events.recipe-added.json
             example: !include json/add-recipe.json
 
+        application/vnd.cakeshop.events.recipe-added-transacted+json:
+            schema: !include json/schema/cakeshop.events.recipe-added-transacted.json
+            example: !include json/add-recipe-transacted.json
+
         application/vnd.cakeshop.event.cake-made+json:
             schema: !include json/schema/cakeshop.event.cake-made.json
             example: !include json/make-cake.json

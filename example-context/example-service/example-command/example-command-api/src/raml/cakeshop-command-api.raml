@@ -14,6 +14,14 @@ protocols: [ HTTP, HTTPS ]
             schema: !include json/schema/cakeshop.command.add-recipe.json
             example: !include json/add-recipe.json
 
+/recipes/transacted/{recipeId}:
+  description: |
+    transaction test
+  post:
+    body:
+        application/vnd.cakeshop.command.add-recipe-transacted+json:
+            schema: !include json/schema/cakeshop.command.add-recipe-transacted.json
+            example: !include json/add-recipe-transacted.json
 
 
 /cakes/{cakeId}:

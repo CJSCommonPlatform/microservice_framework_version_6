@@ -7,14 +7,9 @@ import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 @Entity
-@NamedQueries({
-        @NamedQuery(name = "Recipe.findByNameIgnoreCase", query = "SELECT r FROM Recipe r WHERE LOWER(name) LIKE :name"),
-        @NamedQuery(name = "Recipe.getRecipes", query = "SELECT r FROM Recipe r")})
 @Table(name = "recipe")
 public class Recipe implements Serializable {
 

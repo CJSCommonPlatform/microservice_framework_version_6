@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.justice.services.common.converter.exception.ConverterException;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ListToJsonArraysConverterTest {
+public class ListToJsonArrayConverterTest {
 	private static final UUID ID_ONE = UUID.randomUUID();
 	private static final UUID ID_TWO = UUID.randomUUID();
 	private static final String NAME_ONE = "POJOONE";
@@ -39,7 +39,7 @@ public class ListToJsonArraysConverterTest {
 
 	@Test
 	public void shouldConvertListToJsonArray() {
-		ListToJsonArraysConverter<Pojo> listToJsonArraysConverter = new ListToJsonArraysConverter<Pojo>();
+		ListToJsonArrayConverter<Pojo> listToJsonArraysConverter = new ListToJsonArrayConverter<Pojo>();
 		listToJsonArraysConverter.mapper = new JacksonMapperProducer().objectMapper();
 		listToJsonArraysConverter.stringToJsonObjectConverter = new StringToJsonObjectConverter();
 
@@ -52,7 +52,7 @@ public class ListToJsonArraysConverterTest {
 
 	@Test
 	public void shouldThrowExceptionOnConversionError() {
-		ListToJsonArraysConverter<Pojo> listToJsonArraysConverter = new ListToJsonArraysConverter<Pojo>();
+		ListToJsonArrayConverter<Pojo> listToJsonArraysConverter = new ListToJsonArrayConverter<Pojo>();
 		exception.expect(ConverterException.class);
 		listToJsonArraysConverter.convert(null);
 
@@ -60,7 +60,7 @@ public class ListToJsonArraysConverterTest {
 
 	@Test
 	public void shouldThrowIllegalArgumentException() throws JsonProcessingException {
-		ListToJsonArraysConverter<Pojo> listToJsonArraysConverter = new ListToJsonArraysConverter<Pojo>();
+		ListToJsonArrayConverter<Pojo> listToJsonArraysConverter = new ListToJsonArrayConverter<Pojo>();
 		listToJsonArraysConverter.mapper = mapperMock;
 		listToJsonArraysConverter.stringToJsonObjectConverter = new StringToJsonObjectConverter();
 

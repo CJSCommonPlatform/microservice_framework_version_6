@@ -49,9 +49,8 @@ public class ResponseLoggerHelperTest {
     @Test
     public void shouldNotPrintMissingResponseParameters() {
         when(response.getHeaderString(ID)).thenReturn(CPP_ID);
-        when(response.getMediaType()).thenReturn(mediaType);
+        when(response.getMediaType()).thenReturn(null);
         when(response.getStatus()).thenReturn(404);
-        when(mediaType.getType()).thenReturn(null);
 
         JsonAssert.with(toResponseTrace(response))
                 .assertNotDefined("MediaType")

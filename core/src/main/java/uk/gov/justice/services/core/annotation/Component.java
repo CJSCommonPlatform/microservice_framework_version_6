@@ -2,8 +2,13 @@ package uk.gov.justice.services.core.annotation;
 
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
 
+import java.lang.reflect.Field;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -73,7 +78,18 @@ public enum Component {
      * @return the component from the provided injection point
      */
     public static Component componentFrom(final InjectionPoint injectionPoint) {
-        return componentFrom(injectionPoint.getMember().getDeclaringClass());
+        return fieldLevelComponent(injectionPoint)
+                .orElseGet(() -> componentFrom(injectionPoint.getMember().getDeclaringClass()));
+    }
+
+    private static Optional<Component> fieldLevelComponent(final InjectionPoint injectionPoint) {
+        if (injectionPoint.getMember() instanceof Field) {
+            return ofNullable(((Field) injectionPoint.getMember()).getAnnotation(ServiceComponent.class))
+                    .map(serviceComponent -> of(serviceComponent.value()))
+                    .orElse(empty());
+        }
+
+        return empty();
     }
 
     /**

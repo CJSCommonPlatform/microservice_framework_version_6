@@ -1,5 +1,6 @@
 package uk.gov.justice.services.core.annotation;
 
+import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
@@ -12,7 +13,7 @@ import javax.enterprise.context.ApplicationScoped;
  * Identifies service components. <p> Usage: @ServiceComponent({@link Component#COMMAND_API})
  */
 @Retention(RUNTIME)
-@Target(TYPE)
+@Target({TYPE, FIELD})
 @ApplicationScoped
 public @interface ServiceComponent {
 

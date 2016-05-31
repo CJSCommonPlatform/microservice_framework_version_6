@@ -14,6 +14,7 @@ import static uk.gov.justice.services.messaging.logging.JsonEnvelopeLoggerHelper
 import static uk.gov.justice.services.messaging.logging.LoggerUtils.trace;
 import static uk.gov.justice.services.messaging.logging.ResponseLoggerHelper.toResponseTrace;
 
+import uk.gov.justice.services.clients.core.exception.InvalidResponseException;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -149,6 +150,10 @@ public class RestClientProcessor {
     private JsonObject addMetadataIfMissing(final JsonObject responseAsJsonObject, final Metadata requestMetadata, final String cppId) {
         if (responseAsJsonObject.containsKey(METADATA)) {
             return responseAsJsonObject;
+        }
+
+        if (cppId == null) {
+            throw new InvalidResponseException(format("Response received is missing %s header", CPPID));
         }
 
         final JsonObject metadata = createObjectBuilderWithFilter(requestMetadata.asJsonObject(), x -> !ID.equals(x))

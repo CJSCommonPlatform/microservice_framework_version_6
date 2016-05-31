@@ -20,6 +20,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import uk.gov.justice.services.clients.core.exception.InvalidResponseException;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -204,6 +205,28 @@ public class RestClientProcessorIT {
         EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, emptySet(), queryParams);
 
         restClientProcessor.get(endpointDefinition, requestEnvelopeParamAParamB());
+    }
+
+    @Test(expected = InvalidResponseException.class)
+    public void shouldThrowExceptionWhenMissingCPPID() throws Exception {
+
+        final String path = "/my/resource";
+        final String mimetype = format("application/vnd.%s+json", QUERY_NAME);
+
+        stubFor(get(urlPathEqualTo(path))
+                .withHeader("Accept", WireMock.equalTo(mimetype))
+                .withQueryParam("paramA", WireMock.equalTo("valueA"))
+                .withQueryParam("paramC", WireMock.equalTo("valueC"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", mimetype)
+                        .withBody(envelopeWithoutMetadataAsJson)));
+
+        Set<QueryParam> queryParams = ImmutableSet.of(new QueryParam("paramA", true), new QueryParam("paramB", false), new QueryParam("paramC", true));
+
+        EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, emptySet(), queryParams);
+
+        restClientProcessor.get(endpointDefinition, requestEnvelopeParamAParamC());
     }
 
     @Test

@@ -17,3 +17,4 @@ A Java framework to support applications utilising CQRS and Event Sourcing archi
 * messaging-core - Internal messaging representations
 * messaging-jms - Communication with JMS queues/topics
 * metrics - Support for health checks in application components
+* persistence - Support for persistence layer, such as deltaspike.

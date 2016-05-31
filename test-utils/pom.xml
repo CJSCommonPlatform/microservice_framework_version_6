@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>test-utils</artifactId>
-    <description>Set of utility classes to be used to assist in testing the framework</description>
+    <description>Set of utility classes and dependencies to be used to assist in testing the framework</description>
     <packaging>jar</packaging>
 
     <dependencies>
@@ -21,6 +21,30 @@
         <dependency>
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-client</artifactId>
+        </dependency>
+
+        <!-- Database -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-entitymanager</artifactId>
+        </dependency>
+
+        <!-- deltaspike cdictrl and openEJB -->
+        <dependency>
+            <groupId>org.apache.deltaspike.cdictrl</groupId>
+            <artifactId>deltaspike-cdictrl-openejb</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.deltaspike.modules</groupId>
+            <artifactId>deltaspike-test-control-module-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tomee</groupId>
+            <artifactId>openejb-core</artifactId>
         </dependency>
 
         <!-- Test dependencies -->

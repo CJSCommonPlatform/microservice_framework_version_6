@@ -5,6 +5,7 @@
  http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd" version="1.0">
 
     <persistence-unit name="Cakeshop">
+        <provider>org.hibernate.ejb.HibernatePersistence</provider>
         <jta-data-source>java:/DS.cakeshop</jta-data-source>
         <class>uk.gov.justice.services.example.cakeshop.persistence.entity.Recipe</class>
         <class>uk.gov.justice.services.example.cakeshop.persistence.entity.RecipeIngredient</class>

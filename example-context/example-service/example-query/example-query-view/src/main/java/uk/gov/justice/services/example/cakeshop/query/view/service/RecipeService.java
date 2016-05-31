@@ -9,6 +9,7 @@ import uk.gov.justice.services.example.cakeshop.persistence.entity.Recipe;
 import uk.gov.justice.services.example.cakeshop.query.view.response.RecipeView;
 import uk.gov.justice.services.example.cakeshop.query.view.response.RecipesView;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -28,7 +29,9 @@ public class RecipeService {
      * @return {@link RecipeView} representation of the found recipe, or null.
      */
     public RecipeView findRecipe(final String id) {
-        return recipeRepository.findById(UUID.fromString(id)).map(RecipeView::new).orElse(null);
+        return Optional.ofNullable(recipeRepository.findBy(UUID.fromString(id)))
+                .map(RecipeView::new)
+                .orElse(null);
     }
 
     /**
@@ -49,7 +52,7 @@ public class RecipeService {
      * @return List of recipes encapsulated in an {@link RecipesView}.   Never returns null.
      */
     public RecipesView getRecipes() {
-        return new RecipesView(recipeRepository.getAllRecipes().stream().map(RecipeView::new).collect(toList()));
+        return new RecipesView(recipeRepository.findAll().stream().map(RecipeView::new).collect(toList()));
     }
 
 }

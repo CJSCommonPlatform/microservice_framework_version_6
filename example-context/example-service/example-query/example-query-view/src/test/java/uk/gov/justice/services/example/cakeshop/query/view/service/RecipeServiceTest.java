@@ -13,7 +13,6 @@ import uk.gov.justice.services.example.cakeshop.query.view.response.RecipeView;
 import uk.gov.justice.services.example.cakeshop.query.view.response.RecipesView;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.Test;
@@ -37,7 +36,7 @@ public class RecipeServiceTest {
     @Test
     public void shouldReturnRecipeById() {
         Recipe recipe = createRecipe(USER_ID);
-        given(recipeRepository.findById(USER_ID)).willReturn(Optional.of(recipe));
+        given(recipeRepository.findBy(USER_ID)).willReturn(recipe);
 
         RecipeView foundPerson = service.findRecipe(USER_ID.toString());
 
@@ -45,8 +44,8 @@ public class RecipeServiceTest {
         assertThat(foundPerson.getName(), equalTo(NAME));
     }
 
-    public void shouldThrowExceptionWhenRecipeNotFound() {
-        given(recipeRepository.findById(NON_EXISTENT_ID)).willReturn(Optional.empty());
+    public void shouldReturnNullWhenRecipeNotFound() {
+        given(recipeRepository.findBy(NON_EXISTENT_ID)).willReturn(null);
 
         assertNull(service.findRecipe(NON_EXISTENT_ID.toString()));
     }
@@ -80,7 +79,7 @@ public class RecipeServiceTest {
     @Test
     public void shouldGetAlLRecipes() {
         Recipe recipe = createRecipe(USER_ID);
-        given(recipeRepository.getAllRecipes()).willReturn(singletonList(recipe));
+        given(recipeRepository.findAll()).willReturn(singletonList(recipe));
         RecipesView recipes = service.getRecipes();
 
         List<RecipeView> firstRecipe = recipes.getRecipes();

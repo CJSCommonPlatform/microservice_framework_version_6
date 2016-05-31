@@ -20,6 +20,7 @@ import uk.gov.justice.services.core.annotation.Remote;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.extension.ServiceComponentFoundEvent;
 import uk.gov.justice.services.core.handler.exception.MissingHandlerException;
+import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 
@@ -147,6 +148,12 @@ public class DispatcherProducerTest {
     public void shouldReturnDispatcher() throws Exception {
         AsynchronousDispatcher dispatcher = dispatcherProducer.produceAsynchronousDispatcher(commandControllerInjectionPoint1);
         assertThat(dispatcher, notNullValue());
+    }
+
+    @Test
+    public void shouldReturnSender() throws Exception {
+        Sender sender = dispatcherProducer.produceSender(commandControllerInjectionPoint1);
+        assertThat(sender, notNullValue());
     }
 
     @Test(expected = IllegalStateException.class)

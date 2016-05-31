@@ -1,0 +1,9 @@
+#%RAML 0.8
+title: Example Service
+baseUri: http://localhost:8080/rest-client-generator/command/api/rest/example
+
+/users/{userId}:
+  post:
+    body:
+      application/vnd.people.command.update-user+json:
+

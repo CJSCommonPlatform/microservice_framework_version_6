@@ -106,16 +106,37 @@
                     <outputDirectory>${project.build.directory}/generated-test-sources
                     </outputDirectory>
                     <basePackageName>uk.gov.justice.api</basePackageName>
-                    <generatorProperties>
-                        <serviceComponent>QUERY_API</serviceComponent>
-                    </generatorProperties>
                 </configuration>
                 <executions>
                     <execution>
+                        <id>generate-for-query-api</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <phase>generate-test-sources</phase>
+                        <configuration>
+                            <includes>
+                                <include>**/*query-controller.raml</include>
+                            </includes>
+                            <generatorProperties>
+                                <serviceComponent>QUERY_API</serviceComponent>
+                            </generatorProperties>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-for-event-processor</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>generate-test-sources</phase>
+                        <configuration>
+                            <includes>
+                                <include>**/*command-api.raml</include>
+                            </includes>
+                            <generatorProperties>
+                                <serviceComponent>EVENT_PROCESSOR</serviceComponent>
+                            </generatorProperties>
+                        </configuration>
                     </execution>
                 </executions>
                 <dependencies>

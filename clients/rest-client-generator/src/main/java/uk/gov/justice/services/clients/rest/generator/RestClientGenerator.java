@@ -194,11 +194,16 @@ public class RestClientGenerator implements Generator {
         action.getQueryParameters().forEach((name, queryParameter) -> addQueryParam(builder, queryParameter, name));
         builder.addStatement("final $T def = new $T(BASE_URI, path, pathParams, queryParams)", EndpointDefinition.class, EndpointDefinition.class);
 
-        if (action.getType().equals(ActionType.GET)) {
-            builder.returns(methodReturnType);
-            builder.addStatement("return $L.request(def, envelope)", REST_CLIENT_PROCESSOR);
-        } else {
-            builder.addStatement("$L.request(def, envelope)", REST_CLIENT_PROCESSOR);
+        switch (action.getType()) {
+            case GET:
+                builder.returns(methodReturnType);
+                builder.addStatement("return $L.get(def, envelope)", REST_CLIENT_PROCESSOR);
+                break;
+            case POST:
+                builder.addStatement("$L.post(def, envelope)", REST_CLIENT_PROCESSOR);
+                break;
+            default:
+                throw new IllegalArgumentException(format("Action %s not supported in REST client generator", action.getType().toString()));
         }
 
         return builder.build();

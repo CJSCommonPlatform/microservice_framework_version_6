@@ -1,0 +1,9 @@
+{
+  "_metadata": {
+    "id": "861c9430-7bc6-4bf0-b549-6534394b8d65",
+    "name": "context.my-command"
+  },
+  "paramA": "valueA",
+  "paramB": "valueB",
+  "bodyParam": "myBodyParam"
+}

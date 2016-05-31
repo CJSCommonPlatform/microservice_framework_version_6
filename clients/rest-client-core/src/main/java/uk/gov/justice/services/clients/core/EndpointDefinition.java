@@ -7,7 +7,7 @@ import java.util.Set;
  */
 public class EndpointDefinition {
 
-    private final String baseURi;
+    private final String baseUri;
     private final String path;
     private final Set<String> pathParams;
     private final Set<QueryParam> queryParams;
@@ -22,7 +22,7 @@ public class EndpointDefinition {
      */
     public EndpointDefinition(final String baseUri, final String path, final Set<String> pathParams,
                               final Set<QueryParam> queryParams) {
-        this.baseURi = baseUri;
+        this.baseUri = baseUri;
         this.path = path;
         this.pathParams = pathParams;
         this.queryParams = queryParams;
@@ -33,8 +33,8 @@ public class EndpointDefinition {
      *
      * @return the base URI
      */
-    public String getBaseURi() {
-        return baseURi;
+    public String getBaseUri() {
+        return baseUri;
     }
 
     /**

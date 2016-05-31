@@ -79,7 +79,7 @@ public class RestClientGenerator_MethodBodyTest {
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteService1QueryApi");
         invokeFirstMethod(clazz);
 
-        assertThat(capturedEndpointDefinition().getBaseURi(), is("http://localhost:8080/contextabc/query/api/rest/service1"));
+        assertThat(capturedEndpointDefinition().getBaseUri(), is("http://localhost:8080/contextabc/query/api/rest/service1"));
     }
 
     @Test
@@ -155,7 +155,26 @@ public class RestClientGenerator_MethodBodyTest {
         JsonEnvelope envelope = DefaultJsonEnvelope.envelopeFrom(null, null);
         method.invoke(remoteClient, envelope);
 
-        verify(restClientProcessor).request(any(EndpointDefinition.class), same(envelope));
+        verify(restClientProcessor).get(any(EndpointDefinition.class), same(envelope));
+    }
+
+    @Test
+    public void shouldPassPostEnvelopeToRestClient() throws Exception {
+
+        restClientGenerator.run(
+                restRamlWithQueryApiDefaults()
+                        .withDefaultPostResource()
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, NOT_USED_GENERATOR_PROPERTIES));
+
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceQueryApi");
+        Object remoteClient = instanceOf(clazz);
+        Method method = firstMethodOf(clazz);
+
+        JsonEnvelope envelope = DefaultJsonEnvelope.envelopeFrom(null, null);
+        method.invoke(remoteClient, envelope);
+
+        verify(restClientProcessor).post(any(EndpointDefinition.class), same(envelope));
     }
 
     private void invokeFirstMethod(final Class<?> clazz) throws InstantiationException, IllegalAccessException, InvocationTargetException {
@@ -167,7 +186,7 @@ public class RestClientGenerator_MethodBodyTest {
     private EndpointDefinition capturedEndpointDefinition() {
         ArgumentCaptor<EndpointDefinition> endpointDefCaptor = ArgumentCaptor.forClass(EndpointDefinition.class);
 
-        verify(restClientProcessor).request(endpointDefCaptor.capture(), any(JsonEnvelope.class));
+        verify(restClientProcessor).get(endpointDefCaptor.capture(), any(JsonEnvelope.class));
         return endpointDefCaptor.getValue();
     }
 

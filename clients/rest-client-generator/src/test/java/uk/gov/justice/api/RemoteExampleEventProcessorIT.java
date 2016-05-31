@@ -1,13 +1,18 @@
 package uk.gov.justice.api;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.lang.String.format;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
+import static javax.json.Json.createObjectBuilder;
+import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
+import static javax.ws.rs.core.Response.Status.ACCEPTED;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
@@ -19,22 +24,24 @@ import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.dispatcher.DispatcherProducer;
-import uk.gov.justice.services.core.dispatcher.Requester;
 import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.core.jms.JmsDestinations;
+import uk.gov.justice.services.core.jms.JmsSenderFactory;
+import uk.gov.justice.services.core.sender.ComponentDestination;
+import uk.gov.justice.services.core.sender.Sender;
+import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
+import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
+import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
 
-import java.io.StringWriter;
 import java.util.Properties;
 import java.util.UUID;
 
 import javax.inject.Inject;
-import javax.json.Json;
 import javax.json.JsonObject;
-import javax.json.JsonWriter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.apache.openejb.OpenEjbContainer;
 import org.apache.openejb.jee.Application;
@@ -51,37 +58,25 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(ApplicationComposer.class)
-@ServiceComponent(QUERY_API)
-public class RemoteExampleQueryApiIT {
+@ServiceComponent(EVENT_PROCESSOR)
+public class RemoteExampleEventProcessorIT {
 
-    private static final String BASE_PATH = "/rest-client-generator/query/controller/rest/example";
-    private static final String METADATA = "_metadata";
-    private static final JsonObject RESPONSE = Json.createObjectBuilder()
-            .add(METADATA, Json.createObjectBuilder()
-                    .add(NAME, "people.response.user")
-                    .add(ID, UUID.randomUUID().toString()))
-            .add("result", "SUCCESS")
-            .build();
+    private static final String BASE_PATH = "/rest-client-generator/command/api/rest/example";
     private static final UUID QUERY_ID = UUID.randomUUID();
     private static final UUID USER_ID = UUID.randomUUID();
+    private static final String USER_NAME = "John Smith";
+
     private static int port = -1;
+
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(8080);
+
     @Inject
-    Requester requester;
+    Sender sender;
 
     @BeforeClass
     public static void beforeClass() {
         port = NetworkUtil.getNextAvailablePort();
-    }
-
-    private static String jsonObjectToString(final JsonObject source) {
-        final StringWriter stringWriter = new StringWriter();
-        try (final JsonWriter writer = Json.createWriter(stringWriter)) {
-            writer.writeObject(source);
-        }
-
-        return stringWriter.getBuffer().toString();
     }
 
     @Configuration
@@ -94,10 +89,19 @@ public class RemoteExampleQueryApiIT {
 
     @Module
     @Classes(cdi = true, value = {
-            RemoteExampleQueryController.class,
+            RemoteExampleCommandApi.class,
             RestClientProcessor.class,
             RestClientHelper.class,
             DispatcherProducer.class,
+
+            // TODO: Remove the next 6 classes when sender is migrated fully to dispatcher system
+            SenderProducer.class,
+            JmsSenderFactory.class,
+            ComponentDestination.class,
+            JmsEnvelopeSender.class,
+            JmsDestinations.class,
+            EnvelopeConverter.class,
+
             StringToJsonObjectConverter.class,
             JsonObjectEnvelopeConverter.class,
             ObjectToJsonValueConverter.class,
@@ -111,33 +115,34 @@ public class RemoteExampleQueryApiIT {
     }
 
     @Test
-    public void shouldSendQueryRemoteServiceAndReturnResponse() {
+    public void shouldSendCommandToRemoteService() {
 
-        final String name = "people.query.get-user";
-        final JsonObject metadata = Json.createObjectBuilder()
+        final String name = "people.command.update-user";
+        final JsonObject metadata = createObjectBuilder()
                 .add(NAME, name)
                 .add(ID, QUERY_ID.toString())
                 .build();
-        final JsonObject payload = Json.createObjectBuilder()
+        final JsonObject payload = createObjectBuilder()
                 .add("userId", USER_ID.toString())
+                .add("userName", USER_NAME)
                 .build();
+        final String bodyPayload = createObjectBuilder().add("userName", USER_NAME).build().toString();
 
-        final JsonEnvelope query = envelopeFrom(metadataFrom(metadata), payload);
+        final JsonEnvelope command = envelopeFrom(metadataFrom(metadata), payload);
 
         final String path = format("/users/%s", USER_ID.toString());
         final String mimeType = format("application/vnd.%s+json", name);
 
-        stubFor(get(urlEqualTo(BASE_PATH + path))
-                .withHeader("Accept", WireMock.equalTo(mimeType))
+        stubFor(post(urlEqualTo(BASE_PATH + path))
+                .withRequestBody(equalToJson(bodyPayload))
                 .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", mimeType)
-                        .withBody(jsonObjectToString(RESPONSE))));
+                        .withStatus(ACCEPTED.getStatusCode())));
 
-        JsonEnvelope response = requester.request(query);
-        assertThat(response.payloadAsJsonObject(), equalTo(
-                Json.createObjectBuilder()
-                        .add("result", "SUCCESS")
-                        .build()));
+        sender.send(command);
+
+        verify(postRequestedFor(urlEqualTo(BASE_PATH + path))
+                .withHeader(CONTENT_TYPE, equalTo(mimeType))
+                .withRequestBody(equalToJson(bodyPayload))
+        );
     }
 }

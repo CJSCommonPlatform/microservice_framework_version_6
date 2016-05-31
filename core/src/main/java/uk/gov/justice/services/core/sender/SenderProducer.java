@@ -49,7 +49,7 @@ public class SenderProducer {
         final Class<?> targetClass = injectionPoint.getMember().getDeclaringClass();
 
         if (targetClass.isAnnotationPresent(ServiceComponent.class)) {
-            return getSender(componentFrom(targetClass), injectionPoint);
+            return getSender(componentFrom(injectionPoint), injectionPoint);
         } else {
             throw new MissingAnnotationException("InjectionPoint class must be annotated with " + ServiceComponent.class);
         }

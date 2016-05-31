@@ -8,4 +8,8 @@ public class ConverterException extends RuntimeException {
         super(message);
     }
 
+    public ConverterException(final String message, Throwable cause) {
+        super(message, cause);
+    }
+
 }

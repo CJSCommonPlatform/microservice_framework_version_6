@@ -6,6 +6,7 @@ import static javax.ws.rs.client.Entity.entity;
 import static javax.ws.rs.core.Response.Status.ACCEPTED;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.OK;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static uk.gov.justice.services.messaging.JsonEnvelope.METADATA;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
@@ -43,6 +44,7 @@ public class RestClientProcessor {
 
     private static final String MEDIA_TYPE_PATTERN = "application/vnd.%s+json";
     private static final String CPPID = "CPPID";
+    private static final String MOCK_SERVER_PORT = "mock.server.port";
 
     @Inject
     StringToJsonObjectConverter stringToJsonObjectConverter;
@@ -52,6 +54,12 @@ public class RestClientProcessor {
 
     @Inject
     Enveloper enveloper;
+
+    private final String port;
+
+    public RestClientProcessor() {
+        port = System.getProperty(MOCK_SERVER_PORT);
+    }
 
     /**
      * Make a GET request using the envelope provided to a specified endpoint.
@@ -91,7 +99,8 @@ public class RestClientProcessor {
      * Make a POST request using the envelope provided to a specified endpoint.
      *
      * @param definition the endpoint definition
-     * @param envelope the envelope containing the payload and/or parameters to pass in the request
+     * @param envelope   the envelope containing the payload and/or parameters to pass in the
+     *                   request
      */
     public void post(final EndpointDefinition definition, final JsonEnvelope envelope) {
         final WebTarget target = createWebTarget(definition, envelope);
@@ -118,7 +127,7 @@ public class RestClientProcessor {
         final Client client = ClientBuilder.newClient();
 
         WebTarget target = client
-                .target(definition.getBaseUri())
+                .target(createBaseUri(definition))
                 .path(definition.getPath());
 
         for (String pathParam : definition.getPathParams()) {
@@ -136,6 +145,10 @@ public class RestClientProcessor {
             }
         }
         return target;
+    }
+
+    private String createBaseUri(final EndpointDefinition definition) {
+        return isEmpty(port) ? definition.getBaseUri() : definition.getBaseUri().replace(":8080", ":" + port);
     }
 
     private JsonObject stripParamsFromPayload(final EndpointDefinition definition, final JsonEnvelope envelope) {

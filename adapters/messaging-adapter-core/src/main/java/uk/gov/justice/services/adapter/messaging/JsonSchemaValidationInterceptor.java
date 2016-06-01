@@ -1,7 +1,10 @@
 package uk.gov.justice.services.adapter.messaging;
 
 import static java.lang.String.format;
+import static org.slf4j.LoggerFactory.getLogger;
+import static uk.gov.justice.services.core.json.JsonValidationLogger.toValidationTrace;
 import static uk.gov.justice.services.messaging.jms.HeaderConstants.JMS_HEADER_CPPNAME;
+import static uk.gov.justice.services.messaging.logging.JmsMessageLoggerHelper.toJmsTraceString;
 
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
 
@@ -10,10 +13,15 @@ import javax.interceptor.AroundInvoke;
 import javax.interceptor.InvocationContext;
 import javax.jms.TextMessage;
 
+import org.everit.json.schema.ValidationException;
+import org.slf4j.Logger;
+
 /**
  * Interceptor for validating messages against a JSON schema.
  */
 public class JsonSchemaValidationInterceptor {
+
+    private static final Logger LOGGER = getLogger(JsonSchemaValidationInterceptor.class);
 
     @Inject
     JsonSchemaValidator validator;
@@ -32,7 +40,15 @@ public class JsonSchemaValidationInterceptor {
         }
 
         final TextMessage message = (TextMessage) parameters[0];
-        validator.validate(message.getText(), message.getStringProperty(JMS_HEADER_CPPNAME));
+        try {
+            validator.validate(message.getText(), message.getStringProperty(JMS_HEADER_CPPNAME));
+        } catch (ValidationException validationException) {
+            LOGGER.debug(format("JSON schema validation has failed for %s due to %s",
+                    toJmsTraceString(message),
+                    toValidationTrace(validationException)));
+            throw validationException;
+        }
+
 
         return context.proceed();
     }

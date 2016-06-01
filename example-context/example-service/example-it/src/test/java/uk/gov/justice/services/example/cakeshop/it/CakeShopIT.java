@@ -72,11 +72,12 @@ public class CakeShopIT {
         Response response = sendTo(RECIPES_RESOURCE_URI + "transacted/" + recipeId).request()
                 .post(entity(addRecipeCommand(), ADD_RECIPE_TRANSACTED_MEDIA_TYPE));
         assertThat(response.getStatus(), is(ACCEPTED));
-        Thread.sleep(500);
+        Thread.sleep(5000);
 
         // Neither message should be persisted
         ApiResponse readResponse = queryForRecipe(recipeId);
         assertThat(readResponse.httpCode(), is(NOT_FOUND));
+        assertThat(eventsWithPayloadContaining(recipeId).count(), is(0));
     }
 
 

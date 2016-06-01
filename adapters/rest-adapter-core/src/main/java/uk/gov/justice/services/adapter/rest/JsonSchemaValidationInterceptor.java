@@ -6,6 +6,7 @@ import static javax.ws.rs.core.MediaType.CHARSET_PARAMETER;
 import uk.gov.justice.services.adapter.rest.exception.BadRequestException;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.messaging.Name;
+import uk.gov.justice.services.messaging.exception.InvalidMediaTypeException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -41,7 +42,7 @@ public class JsonSchemaValidationInterceptor implements ReaderInterceptor {
 
             try {
                 validator.validate(payload, extractName(context));
-            } catch (ValidationException ex) {
+            } catch (ValidationException | InvalidMediaTypeException ex) {
                 throw new BadRequestException(ex.getMessage(), ex);
             }
 
@@ -51,7 +52,7 @@ public class JsonSchemaValidationInterceptor implements ReaderInterceptor {
     }
 
     private String extractName(final ReaderInterceptorContext context) {
-        return Name.fromMediaType(context.getMediaType()).toString();
+        return Name.fromMediaType(context.getMediaType().toString()).toString();
     }
 
     private String extractCharset(final ReaderInterceptorContext context) {

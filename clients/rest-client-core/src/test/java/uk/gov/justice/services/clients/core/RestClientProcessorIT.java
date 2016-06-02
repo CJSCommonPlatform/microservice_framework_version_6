@@ -19,6 +19,9 @@ import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static uk.gov.justice.services.common.http.HeaderConstants.CLIENT_CORRELATION_ID;
+import static uk.gov.justice.services.common.http.HeaderConstants.SESSION_ID;
+import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 
 import uk.gov.justice.services.clients.core.exception.InvalidResponseException;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
@@ -52,6 +55,7 @@ public class RestClientProcessorIT {
     private static final String POST_REQUEST_BODY_ONLY_FILE_NAME = "post-request-body-only";
 
     private static final String BASE_URI = "http://localhost:8089";
+    private static final String BASE_URI_WITH_DIFFERENT_PORT = "http://localhost:8080";
     private static final String QUERY_NAME = "context.query.myquery";
     private static final String COMMAND_NAME = "context.my-command";
     private static final String PAYLOAD_ID_NAME = "payloadId";
@@ -62,6 +66,10 @@ public class RestClientProcessorIT {
     private static final String PAYLOAD_NAME_VALUE = "Name of the Payload";
     private static final String METADATA_ID_VALUE = "861c9430-7bc6-4bf0-b549-6534394b8d65";
     private static final String METADATA_ID = "CPPID";
+    private static final String MOCK_SERVER_PORT = "mock.server.port";
+    private static final String CLIENT_CORRELATION_ID_VALUE = "d51597dc-2526-4c71-bd08-5031c79f11e1";
+    private static final String USER_ID_VALUE = "72251abb-5872-46e3-9045-950ac5bae399";
+    private static final String SESSION_ID_VALUE = "45b0c3fe-afe6-4652-882f-7882d79eadd9";
 
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(8089);
@@ -73,10 +81,8 @@ public class RestClientProcessorIT {
 
     @Before
     public void setup() throws IOException {
-        restClientProcessor = new RestClientProcessor();
-        restClientProcessor.stringToJsonObjectConverter = new StringToJsonObjectConverter();
-        restClientProcessor.jsonObjectEnvelopeConverter = new JsonObjectEnvelopeConverter();
-        restClientProcessor.enveloper = new Enveloper();
+        System.clearProperty(MOCK_SERVER_PORT);
+        initialiseRestClientProcessor();
         envelopeWithMetadataAsJson = responseWithMetadata();
         envelopeWithoutMetadataAsJson = jsonFromFile(RESPONSE_WITHOUT_METADATA_FILE_NAME);
     }
@@ -89,9 +95,12 @@ public class RestClientProcessorIT {
 
         stubFor(get(urlEqualTo(path))
                 .withHeader(ACCEPT, WireMock.equalTo(mimetype))
+                .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
+                .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
+                .withHeader(SESSION_ID, WireMock.equalTo(SESSION_ID_VALUE))
                 .willReturn(aResponse()
                         .withStatus(200)
-                        .withHeader("Content-Type", mimetype)
+                        .withHeader(CONTENT_TYPE, mimetype)
                         .withBody(responseWithMetadata())));
 
         EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, emptySet(), emptySet());
@@ -102,18 +111,43 @@ public class RestClientProcessorIT {
 
     @Test
     public void shouldDoGetWithPathParameters() throws Exception {
-
         final String path = "/my/resource/{paramA}/{paramB}";
         final String mimetype = format("application/vnd.%s+json", QUERY_NAME);
 
         stubFor(get(urlEqualTo("/my/resource/valueA/valueB"))
                 .withHeader(ACCEPT, WireMock.equalTo(mimetype))
+                .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
+                .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
+                .withHeader(SESSION_ID, WireMock.equalTo(SESSION_ID_VALUE))
                 .willReturn(aResponse()
                         .withStatus(200)
-                        .withHeader("Content-Type", mimetype)
+                        .withHeader(CONTENT_TYPE, mimetype)
                         .withBody(responseWithMetadata())));
 
         EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, ImmutableSet.of("paramA", "paramB"), emptySet());
+
+        validateResponse(restClientProcessor.get(endpointDefinition, requestEnvelopeParamAParamB()), envelopeWithMetadataAsJson);
+    }
+
+    @Test
+    public void shouldDoGetWithPortFromSystemProperty() throws Exception {
+        System.setProperty(MOCK_SERVER_PORT, "8089");
+        initialiseRestClientProcessor();
+
+        final String path = "/my/resource";
+        final String mimetype = format("application/vnd.%s+json", QUERY_NAME);
+
+        stubFor(get(urlEqualTo(path))
+                .withHeader(ACCEPT, WireMock.equalTo(mimetype))
+                .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
+                .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
+                .withHeader(SESSION_ID, WireMock.equalTo(SESSION_ID_VALUE))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader(CONTENT_TYPE, mimetype)
+                        .withBody(responseWithMetadata())));
+
+        EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI_WITH_DIFFERENT_PORT, path, emptySet(), emptySet());
 
         validateResponse(restClientProcessor.get(endpointDefinition, requestEnvelopeParamAParamB()), envelopeWithMetadataAsJson);
     }
@@ -127,6 +161,9 @@ public class RestClientProcessorIT {
 
         stubFor(post(urlEqualTo("/my/resource/valueA/valueB"))
                 .withHeader(CONTENT_TYPE, WireMock.equalTo(mimetype))
+                .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
+                .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
+                .withHeader(SESSION_ID, WireMock.equalTo(SESSION_ID_VALUE))
                 .withRequestBody(equalToJson(bodyWithoutParams))
                 .willReturn(aResponse()
                         .withStatus(ACCEPTED.getStatusCode())));
@@ -148,11 +185,14 @@ public class RestClientProcessorIT {
 
         stubFor(get(urlPathEqualTo(path))
                 .withHeader(ACCEPT, WireMock.equalTo(mimetype))
+                .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
+                .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
+                .withHeader(SESSION_ID, WireMock.equalTo(SESSION_ID_VALUE))
                 .withQueryParam("paramA", WireMock.equalTo("valueA"))
                 .withQueryParam("paramC", WireMock.equalTo("valueC"))
                 .willReturn(aResponse()
                         .withStatus(200)
-                        .withHeader("Content-Type", mimetype)
+                        .withHeader(CONTENT_TYPE, mimetype)
                         .withBody(responseWithMetadata())));
 
         Set<QueryParam> queryParams = ImmutableSet.of(new QueryParam("paramA", true), new QueryParam("paramB", false), new QueryParam("paramC", true));
@@ -170,11 +210,14 @@ public class RestClientProcessorIT {
 
         stubFor(get(urlPathEqualTo(path))
                 .withHeader(ACCEPT, WireMock.equalTo(mimetype))
+                .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
+                .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
+                .withHeader(SESSION_ID, WireMock.equalTo(SESSION_ID_VALUE))
                 .withQueryParam("paramA", WireMock.equalTo("valueA"))
                 .withQueryParam("paramC", WireMock.equalTo("valueC"))
                 .willReturn(aResponse()
                         .withStatus(200)
-                        .withHeader("Content-Type", mimetype)
+                        .withHeader(CONTENT_TYPE, mimetype)
                         .withHeader(METADATA_ID, METADATA_ID_VALUE)
                         .withBody(envelopeWithoutMetadataAsJson)));
 
@@ -193,11 +236,14 @@ public class RestClientProcessorIT {
 
         stubFor(get(urlPathEqualTo(path))
                 .withHeader(ACCEPT, WireMock.equalTo(mimetype))
+                .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
+                .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
+                .withHeader(SESSION_ID, WireMock.equalTo(SESSION_ID_VALUE))
                 .withQueryParam("paramA", WireMock.equalTo("valueA"))
                 .withQueryParam("paramC", WireMock.equalTo("valueC"))
                 .willReturn(aResponse()
                         .withStatus(200)
-                        .withHeader("Content-Type", mimetype)
+                        .withHeader(CONTENT_TYPE, mimetype)
                         .withBody(responseWithMetadata())));
 
         Set<QueryParam> queryParams = ImmutableSet.of(new QueryParam("paramA", true), new QueryParam("paramC", true));
@@ -215,11 +261,14 @@ public class RestClientProcessorIT {
 
         stubFor(get(urlPathEqualTo(path))
                 .withHeader("Accept", WireMock.equalTo(mimetype))
+                .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
+                .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
+                .withHeader(SESSION_ID, WireMock.equalTo(SESSION_ID_VALUE))
                 .withQueryParam("paramA", WireMock.equalTo("valueA"))
                 .withQueryParam("paramC", WireMock.equalTo("valueC"))
                 .willReturn(aResponse()
                         .withStatus(200)
-                        .withHeader("Content-Type", mimetype)
+                        .withHeader(CONTENT_TYPE, mimetype)
                         .withBody(envelopeWithoutMetadataAsJson)));
 
         Set<QueryParam> queryParams = ImmutableSet.of(new QueryParam("paramA", true), new QueryParam("paramB", false), new QueryParam("paramC", true));
@@ -237,9 +286,12 @@ public class RestClientProcessorIT {
 
         stubFor(get(urlEqualTo(path))
                 .withHeader(ACCEPT, WireMock.equalTo(mimetype))
+                .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
+                .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
+                .withHeader(SESSION_ID, WireMock.equalTo(SESSION_ID_VALUE))
                 .willReturn(aResponse()
                         .withStatus(404)
-                        .withHeader("Content-Type", mimetype)
+                        .withHeader(CONTENT_TYPE, mimetype)
                         .withBody(responseWithMetadata())));
 
         restClientProcessor.enveloper = new Enveloper();
@@ -260,9 +312,12 @@ public class RestClientProcessorIT {
 
         stubFor(get(urlEqualTo(path))
                 .withHeader(ACCEPT, WireMock.equalTo(mimetype))
+                .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
+                .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
+                .withHeader(SESSION_ID, WireMock.equalTo(SESSION_ID_VALUE))
                 .willReturn(aResponse()
                         .withStatus(500)
-                        .withHeader("Content-Type", mimetype)
+                        .withHeader(CONTENT_TYPE, mimetype)
                         .withBody(responseWithMetadata())));
 
         EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, emptySet(), emptySet());
@@ -279,6 +334,9 @@ public class RestClientProcessorIT {
 
         stubFor(post(urlEqualTo("/my/resource/valueA/valueB"))
                 .withHeader(CONTENT_TYPE, WireMock.equalTo(mimetype))
+                .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
+                .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
+                .withHeader(SESSION_ID, WireMock.equalTo(SESSION_ID_VALUE))
                 .withRequestBody(equalToJson(bodyWithoutParams))
                 .willReturn(aResponse()
                         .withStatus(INTERNAL_SERVER_ERROR.getStatusCode())));
@@ -286,6 +344,13 @@ public class RestClientProcessorIT {
         EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, ImmutableSet.of("paramA", "paramB"), emptySet());
 
         restClientProcessor.post(endpointDefinition, postRequestEnvelope());
+    }
+
+    private void initialiseRestClientProcessor() {
+        restClientProcessor = new RestClientProcessor();
+        restClientProcessor.stringToJsonObjectConverter = new StringToJsonObjectConverter();
+        restClientProcessor.jsonObjectEnvelopeConverter = new JsonObjectEnvelopeConverter();
+        restClientProcessor.enveloper = new Enveloper();
     }
 
     private String jsonFromFile(String jsonFileName) throws IOException {

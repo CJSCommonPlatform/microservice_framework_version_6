@@ -9,6 +9,10 @@ version: v1
             schema: !include json/schema/cakeshop.command.add-recipe.json
             example: !include json/add-recipe.json
 
+        application/vnd.cakeshop.command.add-recipe-transacted+json:
+            schema: !include json/schema/cakeshop.command.add-recipe-transacted.json
+            example: !include json/add-recipe-transacted.json
+
         application/vnd.cakeshop.command.make-cake+json:
             schema: !include json/schema/cakeshop.command.make-cake.json
             example: !include json/make-cake.json

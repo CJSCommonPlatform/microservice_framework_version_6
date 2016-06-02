@@ -7,6 +7,7 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.services.example.cakeshop.domain.Ingredient;
 import uk.gov.justice.services.example.cakeshop.domain.event.RecipeAdded;
+import uk.gov.justice.services.example.cakeshop.domain.event.TransactedRecipeAdded;
 
 import java.util.List;
 import java.util.UUID;
@@ -25,9 +26,15 @@ public class Recipe implements Aggregate {
         return apply(Stream.of(new RecipeAdded(recipeId, name, ingredients)));
     }
 
+    public Stream<Object> addRecipeTransacted(final UUID recipeId, final String name, final List<Ingredient> ingredients) {
+        return apply(Stream.of(new TransactedRecipeAdded(recipeId, name, ingredients)));
+    }
+
     @Override
     public Object apply(final Object event) {
         return match(event).with(
-                when(RecipeAdded.class).apply(x -> recipeId = x.getRecipeId()));
+                when(RecipeAdded.class).apply(x -> recipeId = x.getRecipeId()),
+                when(TransactedRecipeAdded.class).apply(x -> x.getRecipeId())
+        );
     }
 }

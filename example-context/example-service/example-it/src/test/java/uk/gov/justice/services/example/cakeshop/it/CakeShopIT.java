@@ -15,9 +15,24 @@ import uk.gov.justice.services.example.cakeshop.it.util.ApiResponse;
 import uk.gov.justice.services.example.cakeshop.it.util.StandaloneJdbcEventLogRepository;
 import uk.gov.justice.services.example.cakeshop.it.util.TestProperties;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Properties;
 import java.util.stream.Stream;
 
+import javax.jms.JMSException;
+import javax.jms.Queue;
+import javax.jms.QueueConnection;
+import javax.jms.QueueConnectionFactory;
+import javax.jms.QueueReceiver;
+import javax.jms.QueueSession;
+import javax.jms.Session;
+import javax.jms.TextMessage;
 import javax.json.JsonObjectBuilder;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.sql.DataSource;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
@@ -48,18 +63,22 @@ public class CakeShopIT {
     private static final String QUERY_RECIPE_MEDIA_TYPE = "application/vnd.cakeshop.query.recipe+json";
     private static final String QUERY_RECIPES_MEDIA_TYPE = "application/vnd.cakeshop.query.recipes+json";
 
+    public final static String JMS_CONNECTION_FACTORY_JNDI = "jms/RemoteConnectionFactory";
+    public final static String DLQ_JNDI = "jms/queue/DLQ";
+    public final static String JMS_USERNAME = "jmsuser";
+    public final static String JMS_PASSWORD = "jms@user123";
+    public final static String WILDFLY_REMOTING_URL = "http-remoting://localhost:8080";
+
     private static StandaloneJdbcEventLogRepository EVENT_LOG_REPOSITORY;
+    private static DataSource CAKE_SHOP_DS;
 
     private Client client;
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        DataSource eventStoredataSource = initDatabase("db.eventstore.url", "db.eventstore.userName",
-                "db.eventstore.password", "liquibase/event-store-db-changelog.xml");
+        DataSource eventStoredataSource = initEventStoreDb();
         EVENT_LOG_REPOSITORY = new StandaloneJdbcEventLogRepository(eventStoredataSource);
-
-        initDatabase("db.cakeshop.url", "db.cakeshop.userName", "db.cakeshop.password",
-                "liquibase/view-store-db-changelog.xml");
+        initCakeShopDb();
     }
 
 
@@ -159,6 +178,41 @@ public class CakeShopIT {
     }
 
     @Test
+    public void shouldFailTransactionOnDBFailureAndRedirectEventToDLQ() throws Exception {
+
+        final QueueReceiver dlqReceiver = queueReceiverOf(initialContext(), DLQ_JNDI);
+        clear(dlqReceiver);
+
+        //closing db to cause transaction error
+        closeCakeShopDb();
+
+        String recipeId = "363af847-effb-46a9-96bc-32a0f7526f12";
+        sendTo(RECIPES_RESOURCE_URI + recipeId).request()
+                .post(entity(
+                        jsonObject()
+                                .add("name", "Cheesy cheese cake")
+                                .add("ingredients", createArrayBuilder()
+                                        .add(createObjectBuilder()
+                                                .add("name", "cheese")
+                                                .add("quantity", 1)
+                                        ).build()
+                                ).build().toString(),
+                        ADD_RECIPE_MEDIA_TYPE));
+
+        final TextMessage messageFromDLQ = (TextMessage) dlqReceiver.receive();
+
+        with(messageFromDLQ.getText())
+                .assertThat("$._metadata.name", equalTo("cakeshop.events.recipe-added"))
+                .assertThat("$.recipeId", equalTo(recipeId));
+
+        initCakeShopDb();
+
+        assertThat(queryForRecipe(recipeId).httpCode(), is(NOT_FOUND));
+
+    }
+
+
+    @Test
     public void shouldReturnRecipes() {
 
         //adding 2 recipes
@@ -211,6 +265,24 @@ public class CakeShopIT {
                 .post(entity(makeCakeCommand(), MAKE_CAKE_MEDIA_TYPE));
         assertThat(response.getStatus(), is(ACCEPTED));
     }
+
+    private static void initCakeShopDb() throws Exception {
+        CAKE_SHOP_DS = initDatabase("db.cakeshop.url", "db.cakeshop.userName", "db.cakeshop.password",
+                "liquibase/view-store-db-changelog.xml");
+    }
+
+    private static DataSource initEventStoreDb() throws Exception {
+        return initDatabase("db.eventstore.url", "db.eventstore.userName",
+                "db.eventstore.password", "liquibase/event-store-db-changelog.xml");
+    }
+
+    private void closeCakeShopDb() throws SQLException {
+        final Connection connection = CAKE_SHOP_DS.getConnection();
+        final Statement statement = connection.createStatement();
+        statement.execute("SHUTDOWN");
+        connection.close();
+    }
+
 
     private ApiResponse queryForRecipe(String recipeId) {
         Response jaxrsResponse = sendTo(RECIPES_RESOURCE_QUERY_URI + recipeId).request().accept(QUERY_RECIPE_MEDIA_TYPE).get();
@@ -271,6 +343,34 @@ public class CakeShopIT {
 
     private WebTarget sendTo(String url) {
         return client.target(url);
+    }
+
+    private InitialContext initialContext() throws NamingException {
+        Properties props = new Properties();
+        props.put(Context.INITIAL_CONTEXT_FACTORY, "org.jboss.naming.remote.client.InitialContextFactory");
+        props.put(Context.PROVIDER_URL, WILDFLY_REMOTING_URL);
+        props.put(Context.SECURITY_PRINCIPAL, JMS_USERNAME);
+        props.put(Context.SECURITY_CREDENTIALS, JMS_PASSWORD);
+        return new InitialContext(props);
+    }
+
+    private QueueReceiver queueReceiverOf(Context ctx, String queueName) throws NamingException, JMSException {
+        QueueConnectionFactory qconFactory = (QueueConnectionFactory) ctx.lookup(JMS_CONNECTION_FACTORY_JNDI);
+
+        QueueConnection qcon = qconFactory.createQueueConnection(JMS_USERNAME, JMS_PASSWORD);
+
+        QueueSession qsession = qcon.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
+        Queue queue = (Queue) ctx.lookup(queueName);
+        QueueReceiver qReceiver = qsession.createReceiver(queue);
+
+        qcon.start();
+
+        return qReceiver;
+    }
+
+    private void clear(QueueReceiver dlqReceiver) throws JMSException {
+        while (dlqReceiver.receiveNoWait() != null) {
+        }
     }
 
     @Before

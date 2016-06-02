@@ -15,6 +15,7 @@ import uk.gov.justice.services.common.http.HeaderConstants;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 
 import org.junit.Test;
@@ -33,9 +34,6 @@ public class HttpMessageLoggerHelperTest {
     private static final String ID_VALUE = randomUUID().toString();
 
     @Mock
-    MultivaluedMap<String, String> map;
-
-    @Mock
     HttpHeaders httpHeaders;
 
     @Mock
@@ -51,18 +49,16 @@ public class HttpMessageLoggerHelperTest {
         when(httpHeaders.getMediaType()).thenReturn(mediaType);
         when(mediaType.toString()).thenReturn("media.type.test");
 
-        when(httpHeaders.getHeaderString(CLIENT_CORRELATION_ID)).thenReturn(CORRELATION_ID_VALUE);
-        when(httpHeaders.getHeaderString(SESSION_ID)).thenReturn(SESSION_ID_VALUE);
-        when(httpHeaders.getHeaderString(NAME)).thenReturn(NAME_VALUE);
-        when(httpHeaders.getHeaderString(USER_ID)).thenReturn(USER_ID_VALUE);
-        when(httpHeaders.getHeaderString(ID)).thenReturn(ID_VALUE);
-        when(httpHeaders.getRequestHeaders()).thenReturn(map);
+        final MultivaluedMap<String, String> map = new MultivaluedHashMap<>();
 
-        when(map.containsKey(ID)).thenReturn(true);
-        when(map.containsKey(CLIENT_CORRELATION_ID)).thenReturn(true);
-        when(map.containsKey(SESSION_ID)).thenReturn(true);
-        when(map.containsKey(NAME)).thenReturn(true);
-        when(map.containsKey(USER_ID)).thenReturn(true);
+        map.add(CLIENT_CORRELATION_ID, CORRELATION_ID_VALUE);
+        map.add(SESSION_ID, SESSION_ID_VALUE);
+        map.add(NAME, NAME_VALUE);
+        map.add(USER_ID, USER_ID_VALUE);
+        map.add(ID, ID_VALUE);
+        map.add(HttpHeaders.CONTENT_TYPE, "media.type.test");
+
+        when(httpHeaders.getRequestHeaders()).thenReturn(map);
 
         with(toHttpHeaderTrace(httpHeaders))
                 .assertEquals(HeaderConstants.ID, ID_VALUE)
@@ -74,17 +70,13 @@ public class HttpMessageLoggerHelperTest {
 
     @Test
     public void shouldNotFailDueToMissingFields() {
-        when(httpHeaders.getMediaType()).thenReturn(mediaType);
-        when(mediaType.toString()).thenReturn("media.type.test");
 
-        when(httpHeaders.getHeaderString(ID)).thenReturn(ID_VALUE);
-        when(httpHeaders.getHeaderString(CLIENT_CORRELATION_ID)).thenReturn(CORRELATION_ID_VALUE);
-        when(httpHeaders.getHeaderString(NAME)).thenReturn(NAME_VALUE);
+        final MultivaluedMap<String, String> map = new MultivaluedHashMap<>();
+        map.add(CLIENT_CORRELATION_ID, CORRELATION_ID_VALUE);
+        map.add(NAME, NAME_VALUE);
+        map.add(ID, ID_VALUE);
+
         when(httpHeaders.getRequestHeaders()).thenReturn(map);
-
-        when(map.containsKey(ID)).thenReturn(true);
-        when(map.containsKey(CLIENT_CORRELATION_ID)).thenReturn(true);
-        when(map.containsKey(NAME)).thenReturn(true);
 
         with(toHttpHeaderTrace(httpHeaders))
                 .assertEquals(HeaderConstants.ID, ID_VALUE)

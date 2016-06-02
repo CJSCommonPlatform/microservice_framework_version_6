@@ -2,6 +2,9 @@ package uk.gov.justice.services.adapter.rest;
 
 import static java.nio.charset.Charset.defaultCharset;
 import static javax.ws.rs.core.MediaType.CHARSET_PARAMETER;
+import static org.slf4j.LoggerFactory.getLogger;
+import static uk.gov.justice.services.core.json.JsonValidationLogger.toValidationTrace;
+import static uk.gov.justice.services.messaging.logging.HttpMessageLoggerHelper.toHttpHeaderTrace;
 
 import uk.gov.justice.services.adapter.rest.exception.BadRequestException;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
@@ -20,6 +23,7 @@ import javax.ws.rs.ext.ReaderInterceptorContext;
 
 import org.apache.commons.io.IOUtils;
 import org.everit.json.schema.ValidationException;
+import org.slf4j.Logger;
 
 /**
  * Intercepts incoming REST requests and if they are POSTs, check that the JSON payload is valid
@@ -28,8 +32,8 @@ import org.everit.json.schema.ValidationException;
 @Provider
 public class JsonSchemaValidationInterceptor implements ReaderInterceptor {
 
+    private static final Logger LOGGER = getLogger(JsonSchemaValidationInterceptor.class.getName());
     private static final String JSON_MEDIA_TYPE_FORMAT = "+json";
-
     @Inject
     JsonSchemaValidator validator;
 
@@ -39,13 +43,19 @@ public class JsonSchemaValidationInterceptor implements ReaderInterceptor {
         if (context.getMediaType().getSubtype().endsWith(JSON_MEDIA_TYPE_FORMAT)) {
             final String charset = extractCharset(context);
             final String payload = IOUtils.toString(context.getInputStream(), charset);
-
             try {
                 validator.validate(payload, extractName(context));
             } catch (ValidationException | InvalidMediaTypeException ex) {
+
+                if(ex instanceof ValidationException) {
+                    final String message = String.format("JSON schema validation has failed on %s due to %s ",
+                            toHttpHeaderTrace(context.getHeaders()),
+                            toValidationTrace((ValidationException) ex));
+                    LOGGER.debug(message);
+                    throw new BadRequestException(message, ex);
+                }
                 throw new BadRequestException(ex.getMessage(), ex);
             }
-
             context.setInputStream(new ByteArrayInputStream(payload.getBytes(charset)));
         }
         return context.proceed();

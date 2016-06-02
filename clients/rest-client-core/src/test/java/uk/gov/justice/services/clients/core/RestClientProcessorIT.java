@@ -19,6 +19,9 @@ import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static uk.gov.justice.services.common.http.HeaderConstants.CLIENT_CORRELATION_ID;
+import static uk.gov.justice.services.common.http.HeaderConstants.SESSION_ID;
+import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 
 import uk.gov.justice.services.clients.core.exception.InvalidResponseException;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
@@ -64,6 +67,9 @@ public class RestClientProcessorIT {
     private static final String METADATA_ID_VALUE = "861c9430-7bc6-4bf0-b549-6534394b8d65";
     private static final String METADATA_ID = "CPPID";
     private static final String MOCK_SERVER_PORT = "mock.server.port";
+    private static final String CLIENT_CORRELATION_ID_VALUE = "d51597dc-2526-4c71-bd08-5031c79f11e1";
+    private static final String USER_ID_VALUE = "72251abb-5872-46e3-9045-950ac5bae399";
+    private static final String SESSION_ID_VALUE = "45b0c3fe-afe6-4652-882f-7882d79eadd9";
 
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(8089);
@@ -89,6 +95,9 @@ public class RestClientProcessorIT {
 
         stubFor(get(urlEqualTo(path))
                 .withHeader(ACCEPT, WireMock.equalTo(mimetype))
+                .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
+                .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
+                .withHeader(SESSION_ID, WireMock.equalTo(SESSION_ID_VALUE))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader(CONTENT_TYPE, mimetype)
@@ -107,6 +116,9 @@ public class RestClientProcessorIT {
 
         stubFor(get(urlEqualTo("/my/resource/valueA/valueB"))
                 .withHeader(ACCEPT, WireMock.equalTo(mimetype))
+                .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
+                .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
+                .withHeader(SESSION_ID, WireMock.equalTo(SESSION_ID_VALUE))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader(CONTENT_TYPE, mimetype)
@@ -127,6 +139,9 @@ public class RestClientProcessorIT {
 
         stubFor(get(urlEqualTo(path))
                 .withHeader(ACCEPT, WireMock.equalTo(mimetype))
+                .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
+                .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
+                .withHeader(SESSION_ID, WireMock.equalTo(SESSION_ID_VALUE))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader(CONTENT_TYPE, mimetype)
@@ -146,6 +161,9 @@ public class RestClientProcessorIT {
 
         stubFor(post(urlEqualTo("/my/resource/valueA/valueB"))
                 .withHeader(CONTENT_TYPE, WireMock.equalTo(mimetype))
+                .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
+                .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
+                .withHeader(SESSION_ID, WireMock.equalTo(SESSION_ID_VALUE))
                 .withRequestBody(equalToJson(bodyWithoutParams))
                 .willReturn(aResponse()
                         .withStatus(ACCEPTED.getStatusCode())));
@@ -167,6 +185,9 @@ public class RestClientProcessorIT {
 
         stubFor(get(urlPathEqualTo(path))
                 .withHeader(ACCEPT, WireMock.equalTo(mimetype))
+                .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
+                .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
+                .withHeader(SESSION_ID, WireMock.equalTo(SESSION_ID_VALUE))
                 .withQueryParam("paramA", WireMock.equalTo("valueA"))
                 .withQueryParam("paramC", WireMock.equalTo("valueC"))
                 .willReturn(aResponse()
@@ -189,6 +210,9 @@ public class RestClientProcessorIT {
 
         stubFor(get(urlPathEqualTo(path))
                 .withHeader(ACCEPT, WireMock.equalTo(mimetype))
+                .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
+                .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
+                .withHeader(SESSION_ID, WireMock.equalTo(SESSION_ID_VALUE))
                 .withQueryParam("paramA", WireMock.equalTo("valueA"))
                 .withQueryParam("paramC", WireMock.equalTo("valueC"))
                 .willReturn(aResponse()
@@ -212,6 +236,9 @@ public class RestClientProcessorIT {
 
         stubFor(get(urlPathEqualTo(path))
                 .withHeader(ACCEPT, WireMock.equalTo(mimetype))
+                .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
+                .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
+                .withHeader(SESSION_ID, WireMock.equalTo(SESSION_ID_VALUE))
                 .withQueryParam("paramA", WireMock.equalTo("valueA"))
                 .withQueryParam("paramC", WireMock.equalTo("valueC"))
                 .willReturn(aResponse()
@@ -234,6 +261,9 @@ public class RestClientProcessorIT {
 
         stubFor(get(urlPathEqualTo(path))
                 .withHeader("Accept", WireMock.equalTo(mimetype))
+                .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
+                .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
+                .withHeader(SESSION_ID, WireMock.equalTo(SESSION_ID_VALUE))
                 .withQueryParam("paramA", WireMock.equalTo("valueA"))
                 .withQueryParam("paramC", WireMock.equalTo("valueC"))
                 .willReturn(aResponse()
@@ -256,6 +286,9 @@ public class RestClientProcessorIT {
 
         stubFor(get(urlEqualTo(path))
                 .withHeader(ACCEPT, WireMock.equalTo(mimetype))
+                .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
+                .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
+                .withHeader(SESSION_ID, WireMock.equalTo(SESSION_ID_VALUE))
                 .willReturn(aResponse()
                         .withStatus(404)
                         .withHeader(CONTENT_TYPE, mimetype)
@@ -279,6 +312,9 @@ public class RestClientProcessorIT {
 
         stubFor(get(urlEqualTo(path))
                 .withHeader(ACCEPT, WireMock.equalTo(mimetype))
+                .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
+                .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
+                .withHeader(SESSION_ID, WireMock.equalTo(SESSION_ID_VALUE))
                 .willReturn(aResponse()
                         .withStatus(500)
                         .withHeader(CONTENT_TYPE, mimetype)
@@ -298,6 +334,9 @@ public class RestClientProcessorIT {
 
         stubFor(post(urlEqualTo("/my/resource/valueA/valueB"))
                 .withHeader(CONTENT_TYPE, WireMock.equalTo(mimetype))
+                .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
+                .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
+                .withHeader(SESSION_ID, WireMock.equalTo(SESSION_ID_VALUE))
                 .withRequestBody(equalToJson(bodyWithoutParams))
                 .willReturn(aResponse()
                         .withStatus(INTERNAL_SERVER_ERROR.getStatusCode())));

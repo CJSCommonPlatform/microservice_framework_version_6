@@ -7,6 +7,9 @@ import static javax.ws.rs.core.Response.Status.ACCEPTED;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static uk.gov.justice.services.common.http.HeaderConstants.CLIENT_CORRELATION_ID;
+import static uk.gov.justice.services.common.http.HeaderConstants.SESSION_ID;
+import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.messaging.JsonEnvelope.METADATA;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
@@ -22,6 +25,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.Metadata;
 
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -74,6 +78,7 @@ public class RestClientProcessor {
         final WebTarget target = createWebTarget(definition, envelope);
 
         final Builder builder = target.request(format(MEDIA_TYPE_PATTERN, envelope.metadata().name()));
+        populateHeadersFromMetadata(builder, envelope.metadata());
 
         trace(LOGGER, () -> String.format("Sending GET request to %s using message: %s", target.getUri().toString(), toEnvelopeTraceString(envelope)));
 
@@ -106,6 +111,7 @@ public class RestClientProcessor {
         final WebTarget target = createWebTarget(definition, envelope);
 
         final Builder builder = target.request(format(MEDIA_TYPE_PATTERN, envelope.metadata().name()));
+        populateHeadersFromMetadata(builder, envelope.metadata());
 
         trace(LOGGER, () -> String.format("Sending POST request to %s using message: %s", target.getUri().toString(), toEnvelopeTraceString(envelope)));
 
@@ -119,6 +125,18 @@ public class RestClientProcessor {
             throw new RuntimeException(format("POST request %s failed; expected 202 response but got %s with reason \"%s\"",
                     envelope.metadata().id().toString(), status,
                     response.getStatusInfo().getReasonPhrase()));
+        }
+    }
+
+    private void populateHeadersFromMetadata(final Builder builder, final Metadata metadata) {
+        setHeaderIfPresent(builder, CLIENT_CORRELATION_ID, metadata.clientCorrelationId());
+        setHeaderIfPresent(builder, USER_ID, metadata.userId());
+        setHeaderIfPresent(builder, SESSION_ID, metadata.sessionId());
+    }
+
+    private void setHeaderIfPresent(final Builder builder, final String name, final Optional<String> value) {
+        if (value.isPresent()) {
+            builder.header(name, value.get());
         }
     }
 

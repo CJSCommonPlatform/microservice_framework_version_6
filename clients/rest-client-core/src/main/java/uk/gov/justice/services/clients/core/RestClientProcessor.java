@@ -59,6 +59,7 @@ public class RestClientProcessor {
     @Inject
     Enveloper enveloper;
 
+    //TODO To be removed in the near future, when WireMock library is implemented.
     private final String port;
 
     public RestClientProcessor() {

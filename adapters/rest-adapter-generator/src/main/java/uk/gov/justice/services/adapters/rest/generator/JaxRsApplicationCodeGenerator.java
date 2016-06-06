@@ -13,6 +13,7 @@ import uk.gov.justice.services.adapter.rest.application.CommonProviders;
 import java.util.Collection;
 import java.util.Set;
 
+import javax.inject.Inject;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
@@ -71,7 +72,7 @@ class JaxRsApplicationCodeGenerator {
                 .addModifiers(PUBLIC)
                 .superclass(Application.class)
                 .addField(FieldSpec.builder(ClassName.get(CommonProviders.class), COMMON_PROVIDERS_FIELD)
-                        .initializer(CodeBlock.of("new $T()", CommonProviders.class))
+                        .addAnnotation(Inject.class)
                         .build())
                 .addAnnotation(AnnotationSpec.builder(ApplicationPath.class)
                         .addMember(DEFAULT_ANNOTATION_PARAMETER, "$S", defaultIfBlank(baseUriPathWithoutContext(raml), "/"))

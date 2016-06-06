@@ -7,10 +7,13 @@ import uk.gov.justice.services.adapter.rest.mapper.BadRequestExceptionMapper;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.enterprise.inject.Default;
+
 /**
  * Configuration class containing common JAX-RS providers to be included in service level JAX-RS
  * application classes.
  */
+@Default
 public class CommonProviders {
 
     public Set<Class<?>> providers() {
@@ -20,5 +23,4 @@ public class CommonProviders {
         classes.add(CorsFeature.class);
         return classes;
     }
-
 }

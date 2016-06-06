@@ -146,6 +146,11 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
         Class<?> applicationClass = compiler.classOf(compiledClasses, BASE_PACKAGE, "CommandApiRestServiceApplication");
         Object application = applicationClass.newInstance();
 
+        CommonProviders commonProviders = mock(CommonProviders.class);
+        when(commonProviders.providers()).thenReturn(newHashSet(JaxRsProviderA.class));
+
+        ReflectionUtil.setField(application, "commonProviders", commonProviders);
+
         Method method = applicationClass.getDeclaredMethod("getClasses");
         Object result = method.invoke(application);
         assertThat(result, is(instanceOf(Set.class)));

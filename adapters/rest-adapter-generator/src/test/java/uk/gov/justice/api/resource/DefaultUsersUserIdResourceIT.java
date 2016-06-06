@@ -19,6 +19,7 @@ import uk.gov.justice.api.QueryApiRestExampleApplication;
 import uk.gov.justice.services.adapter.rest.JsonSchemaValidationInterceptor;
 import uk.gov.justice.services.adapter.rest.RestProcessor;
 import uk.gov.justice.services.adapter.rest.RestProcessorProducer;
+import uk.gov.justice.services.adapter.rest.application.CommonProviders;
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
 import uk.gov.justice.services.adapter.rest.mapper.BadRequestExceptionMapper;
 import uk.gov.justice.services.adapters.test.utils.dispatcher.AsynchronousRecordingDispatcher;
@@ -65,10 +66,16 @@ public class DefaultUsersUserIdResourceIT {
     private static final String JSON = "{\"userUrn\" : \"test\"}";
     private static int port = -1;
     private static String BASE_URI;
+
     @Inject
     AsynchronousRecordingDispatcher asyncDispatcher;
+
     @Inject
     SynchronousRecordingDispatcher syncDispatcher;
+
+    @Inject
+    CommonProviders commonProviders;
+
     private Metadata metadata;
 
     @BeforeClass
@@ -102,10 +109,12 @@ public class DefaultUsersUserIdResourceIT {
             AsynchronousRecordingDispatcher.class,
             SynchronousRecordingDispatcher.class,
             JsonObjectEnvelopeConverter.class,
+            CommonProviders.class,
+            DummyCommonProviders.class,
             BadRequestExceptionMapper.class,
             JsonSchemaValidationInterceptor.class,
             JsonSchemaValidator.class,
-            JsonSchemaLoader.class
+            JsonSchemaLoader.class,
     })
     public WebApp war() {
         return new WebApp()
@@ -303,7 +312,10 @@ public class DefaultUsersUserIdResourceIT {
                 .get();
 
         assertThat(response.getStatus(), is(OK.getStatusCode()));
-
     }
 
+    @Test
+    public void shouldAllowDependencyInjectionToOverrideCommonProviders() {
+        assertThat(commonProviders.getClass() == DummyCommonProviders.class, is(true));
+    }
 }

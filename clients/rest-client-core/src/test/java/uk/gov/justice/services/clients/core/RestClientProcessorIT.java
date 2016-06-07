@@ -1,6 +1,7 @@
 package uk.gov.justice.services.clients.core;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -54,8 +55,13 @@ public class RestClientProcessorIT {
     private static final String POST_REQUEST_WITH_METADATA_FILE_NAME = "post-request-with-metadata";
     private static final String POST_REQUEST_BODY_ONLY_FILE_NAME = "post-request-body-only";
 
-    private static final String BASE_URI = "http://localhost:8089";
-    private static final String BASE_URI_WITH_DIFFERENT_PORT = "http://localhost:8080";
+    private static final String BASE_PATH = "/example-command-api/rest/command/api";
+    private static final String REMOTE_BASE_PATH = "/external-command-api/rest/command/api";
+    private static final String BASE_URI = "http://localhost:8089" + REMOTE_BASE_PATH;
+    private static final String BASE_URI_WITH_DIFFERENT_PORT = "http://localhost:8080" + REMOTE_BASE_PATH;
+    private static final String LOCAL_BASE_URI_WITH_DIFFERENT_PORT = "http://localhost:8080" + BASE_PATH;
+    private static final String APP_NAME = "example-command-api";
+
     private static final String QUERY_NAME = "context.query.myquery";
     private static final String COMMAND_NAME = "context.my-command";
     private static final String PAYLOAD_ID_NAME = "payloadId";
@@ -72,7 +78,10 @@ public class RestClientProcessorIT {
     private static final String SESSION_ID_VALUE = "45b0c3fe-afe6-4652-882f-7882d79eadd9";
 
     @Rule
-    public WireMockRule wireMockRule = new WireMockRule(8089);
+    public WireMockRule wireMock8089 = new WireMockRule(8089);
+
+    @Rule
+    public WireMockRule wireMock8080 = new WireMockRule(8080);
 
     private RestClientProcessor restClientProcessor;
 
@@ -82,6 +91,7 @@ public class RestClientProcessorIT {
     @Before
     public void setup() throws IOException {
         System.clearProperty(MOCK_SERVER_PORT);
+        configureFor(8089);
         initialiseRestClientProcessor();
         envelopeWithMetadataAsJson = responseWithMetadata();
         envelopeWithoutMetadataAsJson = jsonFromFile(RESPONSE_WITHOUT_METADATA_FILE_NAME);
@@ -93,7 +103,7 @@ public class RestClientProcessorIT {
         final String path = "/my/resource";
         final String mimetype = format("application/vnd.%s+json", QUERY_NAME);
 
-        stubFor(get(urlEqualTo(path))
+        stubFor(get(urlEqualTo(REMOTE_BASE_PATH + path))
                 .withHeader(ACCEPT, WireMock.equalTo(mimetype))
                 .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
                 .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
@@ -114,7 +124,7 @@ public class RestClientProcessorIT {
         final String path = "/my/resource/{paramA}/{paramB}";
         final String mimetype = format("application/vnd.%s+json", QUERY_NAME);
 
-        stubFor(get(urlEqualTo("/my/resource/valueA/valueB"))
+        stubFor(get(urlEqualTo(REMOTE_BASE_PATH + "/my/resource/valueA/valueB"))
                 .withHeader(ACCEPT, WireMock.equalTo(mimetype))
                 .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
                 .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
@@ -130,14 +140,14 @@ public class RestClientProcessorIT {
     }
 
     @Test
-    public void shouldDoGetWithPortFromSystemProperty() throws Exception {
+    public void shouldDoRemoteGetWithPortFromSystemProperty() throws Exception {
         System.setProperty(MOCK_SERVER_PORT, "8089");
         initialiseRestClientProcessor();
 
         final String path = "/my/resource";
         final String mimetype = format("application/vnd.%s+json", QUERY_NAME);
 
-        stubFor(get(urlEqualTo(path))
+        stubFor(get(urlEqualTo(REMOTE_BASE_PATH + path))
                 .withHeader(ACCEPT, WireMock.equalTo(mimetype))
                 .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
                 .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
@@ -153,13 +163,37 @@ public class RestClientProcessorIT {
     }
 
     @Test
+    public void shouldDoLocalGetIgnoringPortFromSystemProperty() throws Exception {
+        System.setProperty(MOCK_SERVER_PORT, "10000");
+        configureFor(8080);
+        initialiseRestClientProcessor();
+
+        final String path = "/my/resource";
+        final String mimetype = format("application/vnd.%s+json", QUERY_NAME);
+
+        stubFor(get(urlEqualTo(BASE_PATH + path))
+                .withHeader(ACCEPT, WireMock.equalTo(mimetype))
+                .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
+                .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
+                .withHeader(SESSION_ID, WireMock.equalTo(SESSION_ID_VALUE))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader(CONTENT_TYPE, mimetype)
+                        .withBody(responseWithMetadata())));
+
+        EndpointDefinition endpointDefinition = new EndpointDefinition(LOCAL_BASE_URI_WITH_DIFFERENT_PORT, path, emptySet(), emptySet());
+
+        validateResponse(restClientProcessor.get(endpointDefinition, requestEnvelopeParamAParamB()), envelopeWithMetadataAsJson);
+    }
+
+    @Test
     public void shouldDoPostWithPathParameters() throws Exception {
 
         final String path = "/my/resource/{paramA}/{paramB}";
         final String mimetype = format("application/vnd.%s+json", COMMAND_NAME);
         final String bodyWithoutParams = jsonFromFile(POST_REQUEST_BODY_ONLY_FILE_NAME);
 
-        stubFor(post(urlEqualTo("/my/resource/valueA/valueB"))
+        stubFor(post(urlEqualTo(REMOTE_BASE_PATH + "/my/resource/valueA/valueB"))
                 .withHeader(CONTENT_TYPE, WireMock.equalTo(mimetype))
                 .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
                 .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
@@ -172,7 +206,7 @@ public class RestClientProcessorIT {
 
         restClientProcessor.post(endpointDefinition, postRequestEnvelope());
 
-        verify(postRequestedFor(urlEqualTo("/my/resource/valueA/valueB"))
+        verify(postRequestedFor(urlEqualTo(REMOTE_BASE_PATH + "/my/resource/valueA/valueB"))
                 .withHeader(CONTENT_TYPE, WireMock.equalTo(mimetype))
                 .withRequestBody(equalToJson(bodyWithoutParams)));
     }
@@ -183,7 +217,7 @@ public class RestClientProcessorIT {
         final String path = "/my/resource";
         final String mimetype = format("application/vnd.%s+json", QUERY_NAME);
 
-        stubFor(get(urlPathEqualTo(path))
+        stubFor(get(urlPathEqualTo(REMOTE_BASE_PATH + path))
                 .withHeader(ACCEPT, WireMock.equalTo(mimetype))
                 .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
                 .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
@@ -208,7 +242,7 @@ public class RestClientProcessorIT {
         final String path = "/my/resource";
         final String mimetype = format("application/vnd.%s+json", QUERY_NAME);
 
-        stubFor(get(urlPathEqualTo(path))
+        stubFor(get(urlPathEqualTo(REMOTE_BASE_PATH + path))
                 .withHeader(ACCEPT, WireMock.equalTo(mimetype))
                 .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
                 .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
@@ -234,7 +268,7 @@ public class RestClientProcessorIT {
         final String path = "/my/resource";
         final String mimetype = format("application/vnd.%s+json", QUERY_NAME);
 
-        stubFor(get(urlPathEqualTo(path))
+        stubFor(get(urlPathEqualTo(REMOTE_BASE_PATH + path))
                 .withHeader(ACCEPT, WireMock.equalTo(mimetype))
                 .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
                 .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
@@ -259,7 +293,7 @@ public class RestClientProcessorIT {
         final String path = "/my/resource";
         final String mimetype = format("application/vnd.%s+json", QUERY_NAME);
 
-        stubFor(get(urlPathEqualTo(path))
+        stubFor(get(urlPathEqualTo(REMOTE_BASE_PATH + path))
                 .withHeader("Accept", WireMock.equalTo(mimetype))
                 .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
                 .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
@@ -310,7 +344,7 @@ public class RestClientProcessorIT {
         final String path = "/my/resource";
         final String mimetype = format("application/vnd.%s+json", QUERY_NAME);
 
-        stubFor(get(urlEqualTo(path))
+        stubFor(get(urlEqualTo(REMOTE_BASE_PATH + path))
                 .withHeader(ACCEPT, WireMock.equalTo(mimetype))
                 .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
                 .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
@@ -332,7 +366,7 @@ public class RestClientProcessorIT {
         final String mimetype = format("application/vnd.%s+json", COMMAND_NAME);
         final String bodyWithoutParams = jsonFromFile(POST_REQUEST_BODY_ONLY_FILE_NAME);
 
-        stubFor(post(urlEqualTo("/my/resource/valueA/valueB"))
+        stubFor(post(urlEqualTo(REMOTE_BASE_PATH + "/my/resource/valueA/valueB"))
                 .withHeader(CONTENT_TYPE, WireMock.equalTo(mimetype))
                 .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
                 .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
@@ -351,6 +385,7 @@ public class RestClientProcessorIT {
         restClientProcessor.stringToJsonObjectConverter = new StringToJsonObjectConverter();
         restClientProcessor.jsonObjectEnvelopeConverter = new JsonObjectEnvelopeConverter();
         restClientProcessor.enveloper = new Enveloper();
+        restClientProcessor.appName = APP_NAME;
     }
 
     private String jsonFromFile(String jsonFileName) throws IOException {

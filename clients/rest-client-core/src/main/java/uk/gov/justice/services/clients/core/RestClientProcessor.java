@@ -28,6 +28,7 @@ import uk.gov.justice.services.messaging.Metadata;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 import javax.json.JsonObject;
 import javax.ws.rs.client.Client;
@@ -49,6 +50,8 @@ public class RestClientProcessor {
     private static final String MEDIA_TYPE_PATTERN = "application/vnd.%s+json";
     private static final String CPPID = "CPPID";
     private static final String MOCK_SERVER_PORT = "mock.server.port";
+    public static final int SERVICE_NAME_POSITION = 0;
+    public static final int WEB_CONTEXT_POSITION = 3;
 
     @Inject
     StringToJsonObjectConverter stringToJsonObjectConverter;
@@ -59,8 +62,10 @@ public class RestClientProcessor {
     @Inject
     Enveloper enveloper;
 
-    //TODO To be removed in the near future, when WireMock library is implemented.
+    //TODO Port and appName to be removed in the near future, when WireMock library is implemented.
     private final String port;
+    @Resource(lookup = "java:app/AppName")
+    String appName;
 
     public RestClientProcessor() {
         port = System.getProperty(MOCK_SERVER_PORT);
@@ -167,7 +172,22 @@ public class RestClientProcessor {
     }
 
     private String createBaseUri(final EndpointDefinition definition) {
-        return isEmpty(port) ? definition.getBaseUri() : definition.getBaseUri().replace(":8080", ":" + port);
+        // TODO: Port and same service check and temporary solutions
+        return isEmpty(port) || isSameService(definition) ? definition.getBaseUri() : definition.getBaseUri().replace(":8080", ":" + port);
+    }
+
+    private boolean isSameService(final EndpointDefinition definition) {
+        final String currentServiceName = extractServiceFromContext(appName);
+        final String remoteServiceName = extractServiceFromContext(extractContextFromUri(definition.getBaseUri()));
+        return currentServiceName.equals(remoteServiceName);
+    }
+
+    private String extractServiceFromContext(final String contextName) {
+        return contextName.split("-")[SERVICE_NAME_POSITION];
+    }
+
+    private String extractContextFromUri(final String baseUri) {
+        return baseUri.split("/")[WEB_CONTEXT_POSITION];
     }
 
     private JsonObject stripParamsFromPayload(final EndpointDefinition definition, final JsonEnvelope envelope) {

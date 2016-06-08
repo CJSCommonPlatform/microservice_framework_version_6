@@ -1,6 +1,7 @@
 package uk.gov.justice.services.test.utils.rest;
 
 import static javax.ws.rs.client.Entity.entity;
+import static javax.ws.rs.core.HttpHeaders.ACCEPT;
 
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -74,8 +75,9 @@ public class RestClient {
     public Response query(final String url, final String contentTypes, final MultivaluedMap<String, Object> headers) {
         return ClientBuilder.newClient()
                 .target(url)
-                .request(MediaType.valueOf(contentTypes))
+                .request()
                 .headers(headers)
+                .header(ACCEPT, contentTypes)
                 .get();
     }
 }

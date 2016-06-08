@@ -31,7 +31,6 @@ public class RestClientTest {
     private static final int OK_STATUS_CODE = OK.getStatusCode();
     private static final String HEADER = "Header";
     private static final String HEADER_VALUE = "HeaderValue";
-    private static final String BODY_RESPONSE = "<response>Some content</response>";
 
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(PORT);
@@ -41,41 +40,16 @@ public class RestClientTest {
     @Before
     public void setup() {
         restClient = new RestClient();
-
-        stubFor(get(urlEqualTo(RESOURCE_PATH))
-                .withHeader(HEADER, equalTo(HEADER_VALUE))
-                .willReturn(aResponse()
-                        .withStatus(OK.getStatusCode())
-                        .withHeader(CONTENT_TYPE, CONTENT_TYPE_VALUE)
-                        .withBody(BODY_RESPONSE)));
-
-        stubFor(get(urlEqualTo(RESOURCE_PATH))
-                .withHeader(ACCEPT, equalTo(CONTENT_TYPE_VALUE))
-                .willReturn(aResponse()
-                        .withStatus(OK.getStatusCode())
-                        .withHeader(CONTENT_TYPE, CONTENT_TYPE_VALUE)
-                        .withBody(BODY_RESPONSE)));
-
-        stubFor(post(urlEqualTo(RESOURCE_PATH))
-                .withHeader(CONTENT_TYPE, equalTo(CONTENT_TYPE_VALUE))
-                .withRequestBody(matching(REQUEST_BODY))
-                .willReturn(aResponse()
-                        .withStatus(OK_STATUS_CODE)
-                        .withHeader(CONTENT_TYPE, CONTENT_TYPE_VALUE)
-                        .withBody(BODY_RESPONSE)));
-
-        stubFor(post(urlEqualTo(RESOURCE_PATH))
-                .withHeader(CONTENT_TYPE, equalTo(CONTENT_TYPE_VALUE))
-                .withHeader(HEADER, equalTo(HEADER_VALUE))
-                .withRequestBody(matching(REQUEST_BODY))
-                .willReturn(aResponse()
-                        .withStatus(OK_STATUS_CODE)
-                        .withHeader(CONTENT_TYPE, CONTENT_TYPE_VALUE)
-                        .withBody(BODY_RESPONSE)));
     }
 
     @Test
     public void shouldSendCommand() {
+
+        stubFor(post(urlEqualTo(RESOURCE_PATH))
+                .withHeader(CONTENT_TYPE, equalTo(CONTENT_TYPE_VALUE))
+                .withRequestBody(matching(REQUEST_BODY))
+                .willReturn(aResponse().withStatus(OK_STATUS_CODE)));
+
         Response response = restClient.postCommand(URL, CONTENT_TYPE_VALUE, REQUEST_BODY);
 
         assertThat(response.getStatus(), org.hamcrest.CoreMatchers.equalTo(OK_STATUS_CODE));
@@ -83,6 +57,13 @@ public class RestClientTest {
 
     @Test
     public void shouldSendCommandWithHeaders() {
+
+        stubFor(post(urlEqualTo(RESOURCE_PATH))
+                .withHeader(CONTENT_TYPE, equalTo(CONTENT_TYPE_VALUE))
+                .withHeader(HEADER, equalTo(HEADER_VALUE))
+                .withRequestBody(matching(REQUEST_BODY))
+                .willReturn(aResponse().withStatus(OK_STATUS_CODE)));
+
         Response response = restClient.postCommand(URL, CONTENT_TYPE_VALUE, REQUEST_BODY, getHeaders());
 
         assertThat(response.getStatus(), org.hamcrest.CoreMatchers.equalTo(OK_STATUS_CODE));
@@ -90,6 +71,11 @@ public class RestClientTest {
 
     @Test
     public void shouldSendQuery() {
+
+        stubFor(get(urlEqualTo(RESOURCE_PATH))
+                .withHeader(ACCEPT, equalTo(CONTENT_TYPE_VALUE))
+                .willReturn(aResponse().withStatus(OK_STATUS_CODE)));
+
         Response response = restClient.query(URL, CONTENT_TYPE_VALUE);
 
         assertThat(response.getStatus(), org.hamcrest.CoreMatchers.equalTo(OK_STATUS_CODE));
@@ -97,6 +83,12 @@ public class RestClientTest {
 
     @Test
     public void shouldSendQueryWithHeaders() {
+
+        stubFor(get(urlEqualTo(RESOURCE_PATH))
+                .withHeader(ACCEPT, equalTo(CONTENT_TYPE_VALUE))
+                .withHeader(HEADER, equalTo(HEADER_VALUE))
+                .willReturn(aResponse().withStatus(OK_STATUS_CODE)));
+
         Response response = restClient.query(URL, CONTENT_TYPE_VALUE, getHeaders());
 
         assertThat(response.getStatus(), org.hamcrest.CoreMatchers.equalTo(OK_STATUS_CODE));

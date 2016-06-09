@@ -19,6 +19,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import javax.jms.JMSException;
@@ -272,6 +273,25 @@ public class CakeShopIT {
         Response response = sendTo(CAKES_RESOURCE_URI + cakeId).request()
                 .post(entity(makeCakeCommand(), MAKE_CAKE_MEDIA_TYPE));
         assertThat(response.getStatus(), is(ACCEPTED));
+    }
+
+    @Test
+    public void shouldNotPersistRecipeWhenIngredientPersistenceFailsDueToSharedTransaction() {
+        final String recipeId = UUID.randomUUID().toString();
+
+        sendTo(RECIPES_RESOURCE_URI + recipeId).request()
+                .post(entity(
+                        jsonObject()
+                                .add("name", "Transaction Failure Recipe Rollback Cake")
+                                .add("ingredients", createArrayBuilder()
+                                        .add(createObjectBuilder()
+                                                .add("name", "ingredient-with-long-name-to-exceed-database-column-length")
+                                                .add("quantity", 1)
+                                        ).build()
+                                ).build().toString(),
+                        ADD_RECIPE_MEDIA_TYPE));
+
+        assertThat(queryForRecipe(recipeId).httpCode(), is(NOT_FOUND));
     }
 
     private static void initCakeShopDb() throws Exception {

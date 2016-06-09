@@ -2,6 +2,7 @@ package uk.gov.justice.services.example.cakeshop.command.handler;
 
 import static org.slf4j.LoggerFactory.getLogger;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
+import static uk.gov.justice.services.messaging.JsonObjects.getBoolean;
 import static uk.gov.justice.services.messaging.JsonObjects.getString;
 import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 
@@ -31,6 +32,7 @@ public class AddRecipeCommandHandler {
     private static final Logger LOGGER = getLogger(MakeCakeCommandHandler.class);
     private static final String FIELD_RECIPE_ID = "recipeId";
     private static final String FIELD_NAME = "name";
+    private static final String FIELD_GLUTEN_FREE = "glutenFree";
 
     @Inject
     EventSource eventSource;
@@ -48,13 +50,14 @@ public class AddRecipeCommandHandler {
 
         final UUID recipeId = getUUID(command.payloadAsJsonObject(), FIELD_RECIPE_ID).get();
         final String name = getString(command.payloadAsJsonObject(), FIELD_NAME).get();
+        final Boolean glutenFree = getBoolean(command.payloadAsJsonObject(), FIELD_GLUTEN_FREE).get();
         final List<Ingredient> ingredients = ingredientsFrom(command.payloadAsJsonObject());
 
         final EventStream eventStream = eventSource.getStreamById(recipeId);
         final Recipe recipe = aggregateService.get(eventStream, Recipe.class);
 
         eventStream.append(
-                recipe.addRecipe(recipeId, name, ingredients)
+                recipe.addRecipe(recipeId, name, glutenFree, ingredients)
                         .map(enveloper.withMetadataFrom(command)));
     }
 

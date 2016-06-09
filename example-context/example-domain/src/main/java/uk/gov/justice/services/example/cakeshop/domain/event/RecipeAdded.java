@@ -12,10 +12,12 @@ public class RecipeAdded {
     private final UUID recipeId;
     private final String name;
     private final List<Ingredient> ingredients;
+    private final Boolean glutenFree;
 
-    public RecipeAdded(final UUID recipeId, final String name, final List<Ingredient> ingredients) {
+    public RecipeAdded(final UUID recipeId, final String name, final Boolean glutenFree, final List<Ingredient> ingredients) {
         this.recipeId = recipeId;
         this.name = name;
+        this.glutenFree = glutenFree;
         this.ingredients = ingredients;
     }
 
@@ -31,4 +33,7 @@ public class RecipeAdded {
         return ingredients;
     }
 
+    public Boolean isGlutenFree() {
+        return glutenFree;
+    }
 }

@@ -1,120 +1,171 @@
 package uk.gov.justice.services.example.cakeshop.query.view;
 
-import static javax.json.JsonValue.NULL;
-import static org.hamcrest.CoreMatchers.equalTo;
+
+import static java.util.Arrays.asList;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
+import uk.gov.justice.services.common.converter.JacksonMapperProducer;
+import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.example.cakeshop.query.view.response.RecipeView;
 import uk.gov.justice.services.example.cakeshop.query.view.response.RecipesView;
 import uk.gov.justice.services.example.cakeshop.query.view.service.RecipeService;
+import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.JsonObjectMetadata;
+import uk.gov.justice.services.messaging.Metadata;
 
-import java.util.Collections;
+import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Function;
 
-import javax.json.JsonObject;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObjectBuilder;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RecipesQueryViewTest {
 
-    public static final String ID = UUID.randomUUID().toString();
-    public static final String NAME = "Cake";
-    static final String NAME_RESPONSE_RECIPE = "cakeshop.findRecipe-response";
-    static final String NAME_RESPONSE_RECIPE_LIST = "cakeshop.recipes-response";
-    private static final String FIELD_RECIPE_ID = "recipeId";
-    private static final String FIELD_NAME = "name";
-    @InjectMocks
     private RecipesQueryView queryView;
 
     @Mock
     private RecipeService service;
 
-    @Mock
-    private Enveloper enveloper;
-
-    @Mock
-    private JsonEnvelope envelope;
-
-    @Mock
-    private JsonObject payload;
-
-    @Mock
-    private RecipeView recipeView;
-
-    @Mock
-    private Function<Object, JsonEnvelope> function;
-
-    @Mock
-    private JsonEnvelope updatedEnvelope;
-
-    @Mock
-    private JsonEnvelope envelopeWithNullPayload;
 
     @Before
     public void setup() {
-        when(envelope.payloadAsJsonObject()).thenReturn(payload);
-        when(payload.getString(FIELD_RECIPE_ID)).thenReturn(ID);
-        when(payload.getString(FIELD_NAME)).thenReturn(NAME);
+        final Enveloper enveloper = new Enveloper(new ObjectToJsonValueConverter(new JacksonMapperProducer().objectMapper()));
+        queryView = new RecipesQueryView(service, enveloper);
     }
 
     @Test
-    public void shouldReturnRecipeView() {
-        when(service.findRecipe(ID)).thenReturn(recipeView);
-        when(enveloper.withMetadataFrom(envelope, NAME_RESPONSE_RECIPE)).thenReturn(function);
-        when(function.apply(recipeView)).thenReturn(updatedEnvelope);
+    public void shouldReturnRecipe() {
 
-        JsonEnvelope actualEnvelope = queryView.findRecipe(envelope);
+        final UUID recipeId = UUID.randomUUID();
+        final String recipeName = "some recipe name";
+        when(service.findRecipe(recipeId.toString())).thenReturn(new RecipeView(recipeId, recipeName, false));
 
-        assertThat(updatedEnvelope, equalTo(actualEnvelope));
+        final JsonEnvelope response = queryView.findRecipe(envelopeWith(jsonPayload().add("recipeId", recipeId.toString())));
+
+        assertThat(response.payloadAsJsonObject().getString("id"), is(recipeId.toString()));
+        assertThat(response.payloadAsJsonObject().getString("name"), is(recipeName));
+
     }
 
     @Test
-    public void shouldReturnEnevlopeWithNullPayload() {
-        when(service.findRecipe(ID)).thenReturn(null);
-        when(enveloper.withMetadataFrom(envelope, NAME_RESPONSE_RECIPE)).thenReturn(function);
-        when(function.apply(null)).thenReturn(envelopeWithNullPayload);
-        when(envelopeWithNullPayload.payload()).thenReturn(NULL);
+    public void shouldReturnResponseWithMetadataWhenQueryingForRecipe() {
 
-        JsonEnvelope actualEnvelope = queryView.findRecipe(envelope);
+        final JsonEnvelope response = queryView.findRecipe(
+                envelopeWith(jsonPayload().add("recipeId", "123")));
 
-        assertThat(actualEnvelope, equalTo(envelopeWithNullPayload));
-        assertThat(actualEnvelope.payload(), equalTo(NULL));
+        assertThat(response.metadata().name(), is("cakeshop.findRecipe-response"));
+
     }
 
     @Test
-    public void shouldReturnRecipeViewByName() {
-        RecipesView recipes = new RecipesView(Collections.singletonList(recipeView));
-        when(service.findByName(NAME)).thenReturn(recipes);
-        when(payload.containsKey(FIELD_NAME)).thenReturn(true);
-        when(enveloper.withMetadataFrom(envelope, NAME_RESPONSE_RECIPE_LIST)).thenReturn(function);
-        when(function.apply(recipes)).thenReturn(updatedEnvelope);
+    public void shouldReturnRecipes() throws Exception {
 
-        JsonEnvelope actualEnvelope = queryView.listRecipes(envelope);
+        final UUID recipeId = UUID.randomUUID();
+        final UUID recipeId2 = UUID.randomUUID();
+        final String recipeName = "some recipe name";
+        final String recipeName2 = "some other recipe name";
 
-        assertThat(actualEnvelope, equalTo(updatedEnvelope));
+        final int pageSize = 5;
+        when(service.getRecipes(pageSize, Optional.empty(), Optional.empty()))
+                .thenReturn(new RecipesView(asList(new RecipeView(recipeId, recipeName, false), new RecipeView(recipeId2, recipeName2, false))));
+
+        final JsonEnvelope response = queryView.listRecipes(envelopeWith(jsonPayload().add("pagesize", pageSize)));
+
+
+        final JsonArray recipesArray = response.payloadAsJsonObject().getJsonArray("recipes");
+        assertThat(recipesArray.getJsonObject(0).getString("id"), is(recipeId.toString()));
+        assertThat(recipesArray.getJsonObject(0).getString("name"), is(recipeName));
+
+        assertThat(recipesArray.getJsonObject(1).getString("id"), is(recipeId2.toString()));
+        assertThat(recipesArray.getJsonObject(1).getString("name"), is(recipeName2));
+
+    }
+
+
+    @Test
+    public void shouldQueryForRecipesOfGivenName() throws Exception {
+
+        final UUID recipeId = UUID.randomUUID();
+        final String recipeName = "some recipe name";
+
+        final String nameUsedInQuery = "some recipe";
+
+        final int pagesize = 5;
+        when(service.getRecipes(pagesize, Optional.of(nameUsedInQuery), Optional.empty())).thenReturn(new RecipesView(asList(new RecipeView(recipeId, recipeName, false))));
+
+        final JsonEnvelope response = queryView.listRecipes(
+                envelopeWith(jsonPayload()
+                        .add("pagesize", pagesize)
+                        .add("name", nameUsedInQuery)));
+
+
+        final JsonArray recipesArray = response.payloadAsJsonObject().getJsonArray("recipes");
+        assertThat(recipesArray.getJsonObject(0).getString("id"), is(recipeId.toString()));
+        assertThat(recipesArray.getJsonObject(0).getString("name"), is(recipeName));
+
     }
 
     @Test
-    public void shouldReturnAllRecipes() {
-        when(payload.getString(FIELD_NAME)).thenReturn(null);
-        RecipesView recipes = new RecipesView(Collections.singletonList(recipeView));
-        when(service.getRecipes()).thenReturn(recipes);
-        when(enveloper.withMetadataFrom(envelope, NAME_RESPONSE_RECIPE_LIST)).thenReturn(function);
-        when(function.apply(recipes)).thenReturn(updatedEnvelope);
+    public void shouldQueryForGlutenFreeRecipes() throws Exception {
 
-        JsonEnvelope actualEnvelope = queryView.listRecipes(envelope);
+        final UUID recipeId = UUID.randomUUID();
+        final String recipeName = "some recipe name";
 
-        assertThat(actualEnvelope, equalTo(updatedEnvelope));
+
+        final int pagesize = 5;
+        final boolean glutenFree = true;
+
+        when(service.getRecipes(pagesize, Optional.empty(), Optional.of(glutenFree))).thenReturn(
+                new RecipesView(asList(new RecipeView(recipeId, recipeName, glutenFree))));
+
+        final JsonEnvelope response = queryView.listRecipes(
+                envelopeWith(jsonPayload()
+                        .add("pagesize", pagesize)
+                        .add("glutenFree", glutenFree)));
+
+
+        final JsonArray recipesArray = response.payloadAsJsonObject().getJsonArray("recipes");
+        assertThat(recipesArray.getJsonObject(0).getString("id"), is(recipeId.toString()));
+        assertThat(recipesArray.getJsonObject(0).getString("name"), is(recipeName));
+        assertThat(recipesArray.getJsonObject(0).getBoolean("glutenFree"), is(glutenFree));
+
     }
 
+
+
+    @Test
+    public void shouldReturnResponseWithMetadataWhenQueryingForRecipes() {
+
+        final JsonEnvelope response = queryView.listRecipes(envelopeWith(jsonPayload().add("pagesize", 1)));
+
+        assertThat(response.metadata().name(), is("cakeshop.recipes-response"));
+
+    }
+
+    private JsonEnvelope envelopeWith(JsonObjectBuilder jsonPayload) {
+        return DefaultJsonEnvelope.envelopeFrom(metadata(), jsonPayload.build());
+    }
+
+    private JsonObjectBuilder jsonPayload() {
+        return Json.createObjectBuilder();
+    }
+
+    private Metadata metadata() {
+        return JsonObjectMetadata.metadataFrom(jsonPayload()
+                .add("id", UUID.randomUUID().toString())
+                .add("name", "name123")
+                .build());
+    }
 }

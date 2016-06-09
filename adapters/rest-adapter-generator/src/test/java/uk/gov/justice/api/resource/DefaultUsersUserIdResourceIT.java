@@ -18,12 +18,12 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
 import uk.gov.justice.api.QueryApiRestExampleApplication;
 import uk.gov.justice.api.mapper.DefaultUsersResourceActionMapper;
 import uk.gov.justice.api.mapper.DefaultUsersUserIdResourceActionMapper;
-import uk.gov.justice.services.adapter.rest.JsonSchemaValidationInterceptor;
-import uk.gov.justice.services.adapter.rest.RestProcessor;
-import uk.gov.justice.services.adapter.rest.RestProcessorProducer;
 import uk.gov.justice.services.adapter.rest.application.CommonProviders;
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
+import uk.gov.justice.services.adapter.rest.interceptor.JsonSchemaValidationInterceptor;
 import uk.gov.justice.services.adapter.rest.mapper.BadRequestExceptionMapper;
+import uk.gov.justice.services.adapter.rest.processor.RestProcessor;
+import uk.gov.justice.services.adapter.rest.processor.RestProcessorProducer;
 import uk.gov.justice.services.adapters.test.utils.dispatcher.AsynchronousRecordingDispatcher;
 import uk.gov.justice.services.adapters.test.utils.dispatcher.SynchronousRecordingDispatcher;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
@@ -33,11 +33,13 @@ import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonObjectMetadata;
 import uk.gov.justice.services.messaging.Metadata;
 
+import java.math.BigDecimal;
 import java.util.Properties;
 import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.json.Json;
+import javax.json.JsonObject;
 import javax.ws.rs.core.Response;
 
 import org.apache.openejb.OpenEjbContainer;
@@ -138,7 +140,7 @@ public class DefaultUsersUserIdResourceIT {
 
     @Test
     public void shouldDispatchCreateUserCommand() throws Exception {
-        Response response = create(BASE_URI)
+        create(BASE_URI)
                 .path("/users/567-8910")
                 .post(entity("{\"userUrn\" : \"1234\"}", CREATE_USER_MEDIA_TYPE));
 
@@ -184,7 +186,7 @@ public class DefaultUsersUserIdResourceIT {
 
     @Test
     public void shouldDispatchUpdateUserCommand() throws Exception {
-        Response response = create(BASE_URI)
+        create(BASE_URI)
                 .path("/users/4444-9876")
                 .post(entity("{\"userUrn\" : \"5678\"}", UPDATE_USER_MEDIA_TYPE));
 
@@ -197,7 +199,7 @@ public class DefaultUsersUserIdResourceIT {
 
     @Test
     public void shouldDispatchGetUserCommand() throws Exception {
-        Response response = create(BASE_URI)
+        create(BASE_URI)
                 .path("/users/4444-5555")
                 .header("Accept", "application/vnd.people.user+json")
                 .get();
@@ -276,20 +278,29 @@ public class DefaultUsersUserIdResourceIT {
     }
 
     @Test
-    public void shouldDispatchUsersQueryWithQueryParam() throws Exception {
-        syncDispatcher.setupResponse("lastname", "lastname", envelopeFrom(metadata, createObjectBuilder().add("userName", "userName").build()));
+    public void shouldDispatchUsersQueryWithQueryParams() throws Exception {
+        syncDispatcher.setupResponse("lastname", "Smith", envelopeFrom(metadata, createObjectBuilder().add("userName", "userName").build()));
 
         Response response = create(BASE_URI)
                 .path("/users")
-                .query("lastname", "lastname")
-                .query("firstname", "firstname")
+                .query("lastname", "Smith")
+                .query("firstname", "John")
+                .query("height", 175.5)
+                .query("married", true)
+                .query("age", 34)
                 .header("Accept", "application/vnd.people.users+json")
                 .get();
 
         assertThat(response.getStatus(), is(OK.getStatusCode()));
-        JsonEnvelope jsonEnvelope = syncDispatcher.awaitForEnvelopeWithPayloadOf("lastname", "lastname");
+        JsonEnvelope jsonEnvelope = syncDispatcher.awaitForEnvelopeWithPayloadOf("lastname", "Smith");
         assertThat(jsonEnvelope.metadata().name(), is("people.search-users"));
 
+        final JsonObject payload = (JsonObject) jsonEnvelope.payload();
+        assertThat(payload.getString("lastname"), is("Smith"));
+        assertThat(payload.getString("firstname"), is("John"));
+        assertThat(payload.getInt("age"), is(34));
+        assertThat(payload.getJsonNumber("height").bigDecimalValue(), is(BigDecimal.valueOf(175.5)));
+        assertThat(payload.getBoolean("married"), is(true));
     }
 
     @Test

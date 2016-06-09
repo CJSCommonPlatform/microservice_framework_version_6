@@ -17,6 +17,10 @@
       "name": "Name of Cake",
       "title": "Name of Cake"
     },
+    "glutenFree": {
+      "id": "/glutenFree",
+      "type": "boolean"
+    },
     "ingredients": {
       "id": "/ingredients",
       "type": "array",

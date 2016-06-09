@@ -108,6 +108,35 @@ public class JsonObjectsTest {
         assertThat(string.get(), equalTo("test"));
     }
 
+    @Test
+    public void shouldReturnBoolean() {
+        JsonObject object = Json.createObjectBuilder()
+                .add("someBoolean", true)
+                .build();
+        Optional<Boolean> someBoolean = JsonObjects.getBoolean(object, "someBoolean");
+
+        assertThat(someBoolean.isPresent(), is(true));
+        assertThat(someBoolean.get(), is(true));
+    }
+
+
+    @Test
+    public void shouldReturnEmptyIfBooleanFieldUnknown() {
+        JsonObject object = Json.createObjectBuilder()
+                .build();
+        Optional<Boolean> someBoolean = JsonObjects.getBoolean(object, "someBoolean");
+
+        assertThat(someBoolean.isPresent(), is(false));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void shouldThrowExceptionForNonBoolean() {
+        JsonObject object = Json.createObjectBuilder()
+                .add("someBool", 99L)
+                .build();
+        JsonObjects.getBoolean(object, "someBool");
+    }
+
     @Test(expected = IllegalStateException.class)
     public void shouldThrowExceptionForNonString() {
         JsonObject object = Json.createObjectBuilder()

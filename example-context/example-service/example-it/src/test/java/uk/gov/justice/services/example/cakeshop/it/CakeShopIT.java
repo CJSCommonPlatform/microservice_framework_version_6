@@ -1,7 +1,9 @@
 package uk.gov.justice.services.example.cakeshop.it;
 
 import static com.jayway.awaitility.Awaitility.await;
+import static com.jayway.jsonassert.JsonAssert.emptyCollection;
 import static com.jayway.jsonassert.JsonAssert.with;
+import static java.util.Arrays.asList;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.client.Entity.entity;
@@ -9,15 +11,18 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLog;
 import uk.gov.justice.services.example.cakeshop.it.util.ApiResponse;
 import uk.gov.justice.services.example.cakeshop.it.util.StandaloneJdbcEventLogRepository;
 import uk.gov.justice.services.example.cakeshop.it.util.TestProperties;
 
+import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -36,6 +41,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import javax.ws.rs.client.Client;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
@@ -43,6 +49,9 @@ import liquibase.Liquibase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.message.BasicNameValuePair;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.junit.After;
 import org.junit.Before;
@@ -108,6 +117,7 @@ public class CakeShopIT {
                 .post(entity(
                         jsonObject()
                                 .add("name", "Vanilla cake")
+                                .add("glutenFree", false)
                                 .add("ingredients", createArrayBuilder()
                                         .add(createObjectBuilder()
                                                 .add("name", "vanilla")
@@ -127,6 +137,7 @@ public class CakeShopIT {
         with(eventPayload)
                 .assertThat("$.recipeId", equalTo(recipeId))
                 .assertThat("$.name", equalTo("Vanilla cake"))
+                .assertThat("$.glutenFree", equalTo(false))
                 .assertThat("$.ingredients[0].name", equalTo("vanilla"))
                 .assertThat("$.ingredients[0].quantity", equalTo(2));
     }
@@ -163,17 +174,9 @@ public class CakeShopIT {
     @Test
     public void shouldReturnRecipeOfGivenId() {
         String recipeId = "163af847-effb-46a9-96bc-32a0f7526f22";
+        final String recipeName = "Cheesy cheese cake";
         sendTo(RECIPES_RESOURCE_URI + recipeId).request()
-                .post(entity(
-                        jsonObject()
-                                .add("name", "Cheesy cheese cake")
-                                .add("ingredients", createArrayBuilder()
-                                        .add(createObjectBuilder()
-                                                .add("name", "cheese")
-                                                .add("quantity", 1)
-                                        ).build()
-                                ).build().toString(),
-                        ADD_RECIPE_MEDIA_TYPE));
+                .post(recipeEntity(recipeName));
 
 
         await().until(() -> queryForRecipe(recipeId).httpCode() == OK);
@@ -182,7 +185,7 @@ public class CakeShopIT {
 
         with(response.body())
                 .assertThat("$.id", equalTo(recipeId))
-                .assertThat("$.name", equalTo("Cheesy cheese cake"));
+                .assertThat("$.name", equalTo(recipeName));
 
     }
 
@@ -197,16 +200,7 @@ public class CakeShopIT {
 
         String recipeId = "363af847-effb-46a9-96bc-32a0f7526f12";
         sendTo(RECIPES_RESOURCE_URI + recipeId).request()
-                .post(entity(
-                        jsonObject()
-                                .add("name", "Cheesy cheese cake")
-                                .add("ingredients", createArrayBuilder()
-                                        .add(createObjectBuilder()
-                                                .add("name", "cheese")
-                                                .add("quantity", 1)
-                                        ).build()
-                                ).build().toString(),
-                        ADD_RECIPE_MEDIA_TYPE));
+                .post(recipeEntity("Cheesy cheese cake"));
 
         final TextMessage messageFromDLQ = (TextMessage) dlqReceiver.receive();
 
@@ -225,35 +219,17 @@ public class CakeShopIT {
     public void shouldReturnRecipes() {
 
         //adding 2 recipes
-        String recipeId = "263af847-effb-46a9-96bc-32a0f7526e44";
+        String recipeId = "163af847-effb-46a9-96bc-32a0f7526e14";
         sendTo(RECIPES_RESOURCE_URI + recipeId).request()
-                .post(entity(
-                        jsonObject()
-                                .add("name", "Cheesy cheese cake")
-                                .add("ingredients", createArrayBuilder()
-                                        .add(createObjectBuilder()
-                                                .add("name", "cheese")
-                                                .add("quantity", 1)
-                                        ).build()
-                                ).build().toString(),
-                        ADD_RECIPE_MEDIA_TYPE));
+                .post(recipeEntity("Cheesy cheese cake"));
 
-        String recipeId2 = "263af847-effb-46a9-96bc-32a0f7526e55";
+        String recipeId2 = "163af847-effb-46a9-96bc-32a0f7526e15";
         sendTo(RECIPES_RESOURCE_URI + recipeId2).request()
-                .post(entity(
-                        jsonObject()
-                                .add("name", "Chocolate muffin")
-                                .add("ingredients", createArrayBuilder()
-                                        .add(createObjectBuilder()
-                                                .add("name", "chocolate")
-                                                .add("quantity", 3)
-                                        ).build()
-                                ).build().toString(),
-                        ADD_RECIPE_MEDIA_TYPE));
+                .post(recipeEntity("Chocolate muffin"));
 
 
         await().until(() -> {
-            String responseBody = queryForRecipes().body();
+            String responseBody = queryForRecipes(asList(new BasicNameValuePair("pagesize", "30"))).body();
             return responseBody.contains(recipeId) && responseBody.contains(recipeId2);
         });
 
@@ -267,6 +243,77 @@ public class CakeShopIT {
     }
 
     @Test
+    public void shouldFilterRecipesUsingPageSize() {
+
+        //adding 2 recipes
+        String recipeId = "263af847-effb-46a9-96bc-32a0f7526e44";
+        sendTo(RECIPES_RESOURCE_URI + recipeId).request()
+                .post(recipeEntity("Absolutely cheesy cheese cake"));
+
+        String recipeId2 = "263af847-effb-46a9-96bc-32a0f7526e55";
+        sendTo(RECIPES_RESOURCE_URI + recipeId2).request()
+                .post(recipeEntity("Chocolate muffin"));
+
+
+        final int pageSize = 1;
+        await().until(() -> queryForRecipes().body().contains(recipeId));
+
+        ApiResponse response = queryForRecipes(asList(new BasicNameValuePair("pagesize", "1")));
+        assertThat(response.httpCode(), is(OK));
+
+        with(response.body())
+                .assertThat("$.recipes[?(@.id=='" + recipeId2 + "')]", emptyCollection())
+                .assertThat("$.recipes[?(@.id=='" + recipeId + "')].name", hasItem("Absolutely cheesy cheese cake"));
+
+    }
+
+    @Test
+    public void shouldFilterGlutenFreeRecipes() {
+
+        //adding 2 recipes
+        String recipeId = "163af847-effb-46a9-96bc-32a0f7526e66";
+        sendTo(RECIPES_RESOURCE_URI + recipeId).request()
+                .post(recipeEntity("Muffin", false));
+
+        String recipeId2 = "163af847-effb-46a9-96bc-32a0f7526e77";
+        sendTo(RECIPES_RESOURCE_URI + recipeId2).request()
+                .post(recipeEntity("Oat cake", true));
+
+        await().until(() -> queryForRecipes().body().contains(recipeId2));
+
+        ApiResponse response = queryForRecipes(asList(
+                new BasicNameValuePair("pagesize", "30"),
+                new BasicNameValuePair("glutenFree", "true")));
+
+        assertThat(response.httpCode(), is(OK));
+
+        with(response.body())
+                .assertThat("$.recipes[?(@.id=='" + recipeId + "')]", emptyCollection())
+                .assertThat("$.recipes[?(@.id=='" + recipeId2 + "')].name", hasItem("Oat cake"));
+
+    }
+
+    @Test
+    public void shouldReturn400WhenInvalidNumericParamPassed() {
+        ApiResponse response = queryForRecipes(asList(
+                new BasicNameValuePair("pagesize", "invalid")));
+
+        assertThat(response.httpCode(), is(BAD_REQUEST));
+
+    }
+
+
+    @Test
+    public void shouldReturn400WhenInvalidBooleanParamPassed() {
+        ApiResponse response = queryForRecipes(asList(
+                new BasicNameValuePair("pagesize", "30"),
+                new BasicNameValuePair("glutenFree", "invalid")));
+
+        assertThat(response.httpCode(), is(BAD_REQUEST));
+
+    }
+
+    @Test
     public void shouldReturn202ResponseWhenMakingCake() throws Exception {
 
         String cakeId = "163af847-effb-46a9-96bc-32a0f7526f11";
@@ -276,7 +323,7 @@ public class CakeShopIT {
     }
 
     @Test
-    public void shouldNotPersistRecipeWhenIngredientPersistenceFailsDueToSharedTransaction() {
+    public void shouldNotPersistRecipeWhenIngredientPersistenceFailsDueToSharedTransaction() throws InterruptedException {
         final String recipeId = UUID.randomUUID().toString();
 
         sendTo(RECIPES_RESOURCE_URI + recipeId).request()
@@ -290,6 +337,8 @@ public class CakeShopIT {
                                         ).build()
                                 ).build().toString(),
                         ADD_RECIPE_MEDIA_TYPE));
+
+        Thread.sleep(500);
 
         assertThat(queryForRecipe(recipeId).httpCode(), is(NOT_FOUND));
     }
@@ -320,15 +369,27 @@ public class CakeShopIT {
     }
 
     private ApiResponse queryForRecipes() {
-        Response jaxrRsResponse = sendTo(RECIPES_RESOURCE_QUERY_URI + "?pagesize=5").request().accept(QUERY_RECIPES_MEDIA_TYPE).get();
-        ApiResponse apiResponse = ApiResponse.from(jaxrRsResponse);
-        jaxrRsResponse.close();
-        return apiResponse;
+        return queryForRecipes(asList(new BasicNameValuePair("pagesize", "50")));
+    }
+
+    private ApiResponse queryForRecipes(List<NameValuePair> queryParams) {
+        try {
+            URIBuilder uri = new URIBuilder(RECIPES_RESOURCE_QUERY_URI);
+            uri.addParameters(queryParams);
+            Response jaxrRsResponse = sendTo(uri.toString()).request().accept(QUERY_RECIPES_MEDIA_TYPE).get();
+            ApiResponse apiResponse = ApiResponse.from(jaxrRsResponse);
+            jaxrRsResponse.close();
+            return apiResponse;
+        } catch (URISyntaxException e) {
+            fail(e.getMessage());
+            return null;
+        }
     }
 
     private String addRecipeCommand() {
         return jsonObject()
                 .add("name", "Chocolate muffin in six easy steps")
+                .add("glutenFree", false)
                 .add("ingredients", createArrayBuilder()
                         .add(createObjectBuilder()
                                 .add("name", "chocolate")
@@ -372,6 +433,25 @@ public class CakeShopIT {
     private WebTarget sendTo(String url) {
         return client.target(url);
     }
+
+    private Entity<String> recipeEntity(final String recipeName) {
+        return recipeEntity(recipeName, false);
+    }
+
+    private Entity<String> recipeEntity(String recipeName, boolean glutenFree) {
+        return entity(
+                jsonObject()
+                        .add("name", recipeName)
+                        .add("glutenFree", glutenFree)
+                        .add("ingredients", createArrayBuilder()
+                                .add(createObjectBuilder()
+                                        .add("name", "someIngredient")
+                                        .add("quantity", 1)
+                                ).build()
+                        ).build().toString(),
+                ADD_RECIPE_MEDIA_TYPE);
+    }
+
 
     private InitialContext initialContext() throws NamingException {
         Properties props = new Properties();

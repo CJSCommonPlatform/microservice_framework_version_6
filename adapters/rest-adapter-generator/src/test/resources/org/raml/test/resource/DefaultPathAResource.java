@@ -5,8 +5,9 @@ import javax.inject.Inject;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
-import uk.gov.justice.services.adapter.rest.RestProcessor;
-import uk.gov.justice.services.adapter.rest.ValidParameterMapBuilder;
+
+import uk.gov.justice.services.adapter.rest.parameter.ValidParameterCollectionBuilder;
+import uk.gov.justice.services.adapter.rest.processor.RestProcessor;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.dispatcher.SynchronousDispatcher;
@@ -24,7 +25,7 @@ public class DefaultPathAResource implements PathAResource {
 
   @Override
   public Response getPathA() {
-    ValidParameterMapBuilder validParameterMapBuilder = new ValidParameterMapBuilder();
-    return restProcessor.processSynchronously(syncDispatcher::dispatch, null, headers, validParameterMapBuilder.validateAndBuildMap());
+    ValidParameterCollectionBuilder validParameterCollectionBuilder = new ValidParameterCollectionBuilder();
+    return restProcessor.processSynchronously(syncDispatcher::dispatch, null, headers, validParameterCollectionBuilder.parameters());
   }
 }

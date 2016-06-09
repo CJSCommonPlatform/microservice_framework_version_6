@@ -1,5 +1,6 @@
-package uk.gov.justice.services.adapter.rest;
+package uk.gov.justice.services.adapter.rest.processor;
 
+import static java.util.Collections.emptyList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
@@ -14,6 +15,7 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
 
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
+import uk.gov.justice.services.adapter.rest.parameter.Parameter;
 import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
@@ -22,7 +24,7 @@ import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonObjectMetadata;
 
 import java.lang.reflect.Member;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.function.Function;
 
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -45,9 +47,7 @@ public class RestProcessorProducerTest {
 
     private static final String ID_VALUE = "861c9430-7bc6-4bf0-b549-6534394b8d65";
     private static final String NAME_VALUE = "test.command.do-something";
-    private static final String ARRAY_ITEM_1 = "Array Item 1";
-    private static final String ARRAY_ITEM_2 = "Array Item 2";
-    private static final HashMap<String, String> NOT_USED_PATH_PARAMS = new HashMap<>();
+    private static final Collection<Parameter> NOT_USED_PATH_PARAMS = emptyList();
     private static final String FIELD_NAME = "name";
     private static final String FIELD_VALUE = "TEST NAME";
 

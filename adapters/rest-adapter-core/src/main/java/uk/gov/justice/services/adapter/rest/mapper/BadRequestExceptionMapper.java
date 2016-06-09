@@ -5,7 +5,6 @@ import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.status;
 import static org.slf4j.LoggerFactory.getLogger;
 import static uk.gov.justice.services.core.json.JsonValidationLogger.toJsonObject;
-import static uk.gov.justice.services.core.json.JsonValidationLogger.toValidationTrace;
 
 import uk.gov.justice.services.adapter.rest.exception.BadRequestException;
 

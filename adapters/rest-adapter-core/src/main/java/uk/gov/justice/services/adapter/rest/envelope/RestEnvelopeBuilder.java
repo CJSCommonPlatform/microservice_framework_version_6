@@ -1,6 +1,6 @@
 package uk.gov.justice.services.adapter.rest.envelope;
 
-import static java.util.Collections.emptyMap;
+import static java.util.Collections.emptyList;
 import static uk.gov.justice.services.common.http.HeaderConstants.CLIENT_CORRELATION_ID;
 import static uk.gov.justice.services.common.http.HeaderConstants.SESSION_ID;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
@@ -12,12 +12,13 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
 
+import uk.gov.justice.services.adapter.rest.parameter.Parameter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectMetadata;
 import uk.gov.justice.services.messaging.JsonObjects;
 import uk.gov.justice.services.messaging.Metadata;
 
-import java.util.Map;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -35,7 +36,7 @@ public class RestEnvelopeBuilder {
 
     private Optional<JsonObject> initialPayload = Optional.empty();
     private Optional<HttpHeaders> headers = Optional.empty();
-    private Optional<Map<String, String>> params = Optional.empty();
+    private Optional<Collection<Parameter>> params = Optional.empty();
     private String action;
 
     RestEnvelopeBuilder(final UUID id) {
@@ -70,7 +71,7 @@ public class RestEnvelopeBuilder {
      * @param params a map of parameter names to values
      * @return an updated builder
      */
-    public RestEnvelopeBuilder withParams(final Map<String, String> params) {
+    public RestEnvelopeBuilder withParams(final Collection<Parameter> params) {
         this.params = Optional.of(params);
         return this;
     }
@@ -101,8 +102,17 @@ public class RestEnvelopeBuilder {
                 .map(JsonObjects::createObjectBuilder)
                 .orElse(Json.createObjectBuilder());
 
-        for (Map.Entry<String, String> entry : params.orElse(emptyMap()).entrySet()) {
-            payloadBuilder = payloadBuilder.add(entry.getKey(), entry.getValue());
+        for (Parameter param : params.orElse(emptyList())) {
+            switch (param.getType()) {
+                case NUMERIC:
+                    payloadBuilder = payloadBuilder.add(param.getName(), param.getNumericValue());
+                    break;
+                case BOOLEAN:
+                    payloadBuilder = payloadBuilder.add(param.getName(), param.getBooleanValue());
+                    break;
+                default:
+                    payloadBuilder = payloadBuilder.add(param.getName(), param.getStringValue());
+            }
         }
 
         return payloadBuilder.build();

@@ -163,9 +163,17 @@ public class RestClientProcessor {
             if (!payload.containsKey(paramName) && queryParam.isRequired()) {
                 throw new IllegalStateException(format("Query parameter %s is required, but not present in envelope", paramName));
             }
-
             if (payload.containsKey(paramName)) {
-                target = target.queryParam(paramName, payload.getString(paramName));
+                switch (queryParam.getType()) {
+                    case NUMERIC:
+                        target = target.queryParam(paramName, payload.getJsonNumber(paramName));
+                        break;
+                    case BOOLEAN:
+                        target = target.queryParam(paramName, payload.getBoolean(paramName));
+                        break;
+                    default:
+                        target = target.queryParam(paramName, payload.getString(paramName));
+                }
             }
         }
         return target;

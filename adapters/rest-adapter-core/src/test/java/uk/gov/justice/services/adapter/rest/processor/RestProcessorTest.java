@@ -1,24 +1,30 @@
-package uk.gov.justice.services.adapter.rest;
+package uk.gov.justice.services.adapter.rest.processor;
 
 import static com.jayway.jsonassert.JsonAssert.with;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.adapter.rest.parameter.ParameterType.BOOLEAN;
+import static uk.gov.justice.services.adapter.rest.parameter.ParameterType.NUMERIC;
+import static uk.gov.justice.services.adapter.rest.parameter.ParameterType.STRING;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
 
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
+import uk.gov.justice.services.adapter.rest.parameter.Parameter;
 import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonObjectMetadata;
 import uk.gov.justice.services.messaging.Metadata;
 
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -45,7 +51,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class RestProcessorTest {
 
     private static final JsonObject NOT_USED_PAYLOAD = Json.createObjectBuilder().build();
-    private static final HashMap<String, String> NOT_USED_PATH_PARAMS = new HashMap<>();
+    private static final Collection<Parameter> NOT_USED_PATH_PARAMS = emptyList();
     private static final HttpHeaders NOT_USED_HEADERS = new ResteasyHttpHeaders(new MultivaluedMapImpl<>());
     private static final String NOT_USED_ACTION = "actionABC";
 
@@ -79,10 +85,8 @@ public class RestProcessorTest {
     @Test
     public void shouldPassEnvelopeWithPayloadToConsumerOnAsyncProcessing() throws Exception {
         JsonObject payload = Json.createObjectBuilder().add("key123", "value45678").build();
-        HashMap<String, String> pathParams = new HashMap<>();
-        pathParams.put("paramABC", "paramValueBCD");
 
-        restProcessor.processAsynchronously(consumer, NOT_USED_ACTION, payload, NOT_USED_HEADERS, pathParams);
+        restProcessor.processAsynchronously(consumer, NOT_USED_ACTION, payload, NOT_USED_HEADERS, asList(Parameter.valueOf("paramABC", "paramValueBCD", STRING)));
 
         ArgumentCaptor<JsonEnvelope> envelopeCaptor = ArgumentCaptor.forClass(JsonEnvelope.class);
 
@@ -96,7 +100,7 @@ public class RestProcessorTest {
     @Test
     public void shouldPassEnvelopeWithMetadataToConsumerOnAsyncProcessing() throws Exception {
 
-        restProcessor.processAsynchronously(consumer, "some.action", NOT_USED_PAYLOAD,NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
+        restProcessor.processAsynchronously(consumer, "some.action", NOT_USED_PAYLOAD, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
 
         ArgumentCaptor<JsonEnvelope> envelopeCaptor = ArgumentCaptor.forClass(JsonEnvelope.class);
 
@@ -145,16 +149,20 @@ public class RestProcessorTest {
 
     @Test
     public void shouldPassEnvelopeWithPayloadToFunctionOnSyncProcessing() throws Exception {
-        HashMap<String, String> pathParams = new HashMap<>();
-        pathParams.put("param1", "paramValue345");
 
-        restProcessor.processSynchronously(function, NOT_USED_ACTION, NOT_USED_HEADERS, pathParams);
+        restProcessor.processSynchronously(function, NOT_USED_ACTION, NOT_USED_HEADERS,
+                asList(Parameter.valueOf("param1", "paramValue345", STRING),
+                        Parameter.valueOf("param2", "5555", NUMERIC),
+                        Parameter.valueOf("param3", "true", BOOLEAN)
+                ));
 
         ArgumentCaptor<JsonEnvelope> envelopeCaptor = ArgumentCaptor.forClass(JsonEnvelope.class);
         verify(function).apply(envelopeCaptor.capture());
 
         JsonEnvelope envelope = envelopeCaptor.getValue();
         assertThat(envelope.payloadAsJsonObject().getString("param1"), is("paramValue345"));
+        assertThat(envelope.payloadAsJsonObject().getInt("param2"), is(5555));
+        assertThat(envelope.payloadAsJsonObject().getBoolean("param3"), is(true));
 
     }
 

@@ -4,8 +4,12 @@ import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static uk.gov.justice.services.adapter.rest.parameter.ParameterType.BOOLEAN;
+import static uk.gov.justice.services.adapter.rest.parameter.ParameterType.NUMERIC;
+import static uk.gov.justice.services.adapter.rest.parameter.ParameterType.STRING;
 import static uk.gov.justice.services.common.http.HeaderConstants.CLIENT_CORRELATION_ID;
 
+import uk.gov.justice.services.adapter.rest.parameter.Parameter;
 import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
@@ -16,6 +20,7 @@ import javax.json.JsonObject;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedHashMap;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.jboss.resteasy.specimpl.ResteasyHttpHeaders;
 import org.junit.Test;
@@ -67,15 +72,35 @@ public class RestEnvelopeBuilderTest {
                         createObjectBuilder()
                                 .add("test", "value")
                                 .build())
-                .withParams(ImmutableMap.of("test2", "value2"))
                 .build();
 
         JsonObject expectedPayload = createObjectBuilder()
                 .add("test", "value")
-                .add("test2", "value2")
                 .build();
 
         assertThat(envelope.payloadAsJsonObject(), equalTo(expectedPayload));
+    }
+
+
+    @Test
+    public void shouldAddStringParam() {
+        final RestEnvelopeBuilder builder = builderWithDefaultAction().withParams(ImmutableList.of(Parameter.valueOf("test2", "value2", STRING)));
+        JsonEnvelope envelope = builder.build();
+        assertThat(envelope.payloadAsJsonObject().getString("test2"), is("value2"));
+    }
+
+    @Test
+    public void shouldAddNumericParams() {
+        final RestEnvelopeBuilder builder = builderWithDefaultAction().withParams(ImmutableList.of(Parameter.valueOf("param1", "3", NUMERIC)));
+        JsonEnvelope envelope = builder.build();
+        assertThat(envelope.payloadAsJsonObject().getInt("param1"), is(3));
+    }
+
+    @Test
+    public void shouldAddBooleanParams() {
+        final RestEnvelopeBuilder builder = builderWithDefaultAction().withParams(ImmutableList.of(Parameter.valueOf("param1", "true", BOOLEAN)));
+        JsonEnvelope envelope = builder.build();
+        assertThat(envelope.payloadAsJsonObject().getBoolean("param1"), is(true));
     }
 
 

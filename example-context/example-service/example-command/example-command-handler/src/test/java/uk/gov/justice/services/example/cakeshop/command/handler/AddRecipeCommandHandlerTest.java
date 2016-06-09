@@ -39,6 +39,7 @@ public class AddRecipeCommandHandlerTest {
     private static final String EVENT_NAME = "cakeshop.recipe-added";
     private static final UUID RECIPE_ID = UUID.randomUUID();
     private static final String RECIPE_NAME = "Test Recipe";
+    private static final Boolean GULTEN_FREE = true;
 
     @Mock
     JsonEnvelope envelope;
@@ -73,7 +74,7 @@ public class AddRecipeCommandHandlerTest {
 
         when(eventSource.getStreamById(RECIPE_ID)).thenReturn(eventStream);
         when(aggregateService.get(eventStream, Recipe.class)).thenReturn(recipe);
-        when(recipe.addRecipe(RECIPE_ID, RECIPE_NAME, emptyList())).thenReturn(Stream.of(event));
+        when(recipe.addRecipe(RECIPE_ID, RECIPE_NAME, GULTEN_FREE, emptyList())).thenReturn(Stream.of(event));
         when(enveloper.withMetadataFrom(command)).thenReturn(x -> x.equals(event) ? envelope : null);
 
         addRecipeCommandHandler.addRecipe(command);
@@ -91,6 +92,7 @@ public class AddRecipeCommandHandlerTest {
         final JsonObject payloadAsJsonObject = Json.createObjectBuilder()
                 .add("recipeId", RECIPE_ID.toString())
                 .add("name", RECIPE_NAME)
+                .add("glutenFree", GULTEN_FREE)
                 .add("ingredients", Json.createArrayBuilder().build())
                 .build();
 

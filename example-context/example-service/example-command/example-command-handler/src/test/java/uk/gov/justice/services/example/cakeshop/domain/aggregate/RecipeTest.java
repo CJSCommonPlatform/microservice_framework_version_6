@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
@@ -50,7 +51,7 @@ public class RecipeTest {
     @Test
     public void shouldReturnRecipeAddedEvent() {
 
-        Stream<Object> events = recipe.addRecipe(RECIPE_ID, NAME, INGREDIENTS);
+        Stream<Object> events = recipe.addRecipe(RECIPE_ID, NAME, true, INGREDIENTS);
 
         List<Object> eventList = events.collect(toList());
         assertThat(eventList, hasSize(1));
@@ -62,16 +63,17 @@ public class RecipeTest {
         assertThat(recipeAdded.getRecipeId(), equalTo(RECIPE_ID));
         assertThat(recipeAdded.getName(), equalTo(NAME));
         assertThat(recipeAdded.getIngredients(), equalTo(INGREDIENTS));
+        assertThat(recipeAdded.isGlutenFree(), is(true));
     }
 
     @Test(expected = RuntimeException.class)
     public void shouldNotAddRecipeIfAlreadyAdded() {
         try {
-            recipe.addRecipe(RECIPE_ID, NAME, INGREDIENTS);
+            recipe.addRecipe(RECIPE_ID, NAME, false, INGREDIENTS);
         } catch (Exception ex) {
             // Make sure we don't throw an exception the first time.
             fail();
         }
-        recipe.addRecipe(RECIPE_ID, NAME, INGREDIENTS);
+        recipe.addRecipe(RECIPE_ID, NAME, false, INGREDIENTS);
     }
 }

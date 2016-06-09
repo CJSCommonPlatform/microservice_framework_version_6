@@ -1,6 +1,6 @@
 {
   "_metadata": {
-    "id": "861c9430-7bc6-4bf0-b549-6534394b8d65",
+    "id": "861c9430-7bc6-4bf0-b549-6534394b8d11",
     "name": "context.myaction",
     "correlation": {
       "client": "d51597dc-2526-4c71-bd08-5031c79f11e1"
@@ -15,5 +15,7 @@
     }
   },
   "paramA": "valueA",
-  "paramC": "valueC"
+  "paramC": 3,
+  "paramD": true,
+  "paramE": 4.44
 }

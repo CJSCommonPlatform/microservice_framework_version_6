@@ -34,6 +34,7 @@ public class ObjectToJsonValueConverterTest {
     private static final List<String> ATTRIBUTES = Arrays.asList("Attribute 1", "Attribute 2");
     private static final String ATTRIBUTE_1 = "Attribute 1";
     private static final String ATTRIBUTE_2 = "Attribute 2";
+    private static final Boolean BOOL_FLAG = true;
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
@@ -43,18 +44,30 @@ public class ObjectToJsonValueConverterTest {
 
     @Test
     public void shouldConvertPojoToJsonValue() throws Exception {
-        Pojo pojo = new Pojo(ID, NAME, ATTRIBUTES);
-        ObjectToJsonValueConverter objectToJsonValueConverter = new ObjectToJsonValueConverter();
-        objectToJsonValueConverter.mapper = new JacksonMapperProducer().objectMapper();
-
+        Pojo pojo = new Pojo(ID, NAME, BOOL_FLAG, ATTRIBUTES);
+        ObjectToJsonValueConverter objectToJsonValueConverter =
+                new ObjectToJsonValueConverter(new JacksonMapperProducer().objectMapper());
         JsonValue jsonValue = objectToJsonValueConverter.convert(pojo);
 
         assertThat(jsonValue, equalTo(expectedJsonValue()));
     }
 
     @Test
+    public void shouldConvertPojoToJsonValue2() throws Exception {
+        Pojo pojo = new Pojo(ID, NAME, BOOL_FLAG, ATTRIBUTES);
+        ObjectToJsonValueConverter objectToJsonValueConverter =
+                new ObjectToJsonValueConverter(new JacksonMapperProducer().objectMapper());
+
+        JsonValue jsonValue = objectToJsonValueConverter.convert(pojo);
+
+        assertThat(jsonValue, equalTo(expectedJsonValue()));
+    }
+
+
+    @Test
     public void shouldConvertNullToJsonValueNull() throws Exception {
-        ObjectToJsonValueConverter objectToJsonValueConverter = new ObjectToJsonValueConverter();
+        ObjectToJsonValueConverter objectToJsonValueConverter =
+                new ObjectToJsonValueConverter(new JacksonMapperProducer().objectMapper());
 
         JsonValue jsonValue = objectToJsonValueConverter.convert(null);
 
@@ -64,9 +77,8 @@ public class ObjectToJsonValueConverterTest {
     @Test
     public void shouldConvertListToJsonValue() throws Exception {
         List<String> list = Arrays.asList(ATTRIBUTE_1, ATTRIBUTE_2);
-        ObjectToJsonValueConverter objectToJsonValueConverter = new ObjectToJsonValueConverter();
-        objectToJsonValueConverter.mapper = new JacksonMapperProducer().objectMapper();
-
+        ObjectToJsonValueConverter objectToJsonValueConverter =
+                new ObjectToJsonValueConverter(new JacksonMapperProducer().objectMapper());
         JsonValue jsonValue = objectToJsonValueConverter.convert(list);
 
         assertThat(jsonValue, equalTo(expectedJsonArray()));
@@ -74,10 +86,9 @@ public class ObjectToJsonValueConverterTest {
 
     @Test
     public void shouldThrowExceptionOnConversionError() throws JsonProcessingException {
-        ObjectToJsonValueConverter objectToJsonValueConverter = new ObjectToJsonValueConverter();
-        objectToJsonValueConverter.mapper = mapper;
+        ObjectToJsonValueConverter objectToJsonValueConverter = new ObjectToJsonValueConverter(mapper);
 
-        Pojo pojo = new Pojo(ID, NAME, ATTRIBUTES);
+        Pojo pojo = new Pojo(ID, NAME, false, ATTRIBUTES);
         doThrow(JsonProcessingException.class).when(mapper).writeValueAsString(pojo);
 
         exception.expect(IllegalArgumentException.class);
@@ -88,10 +99,10 @@ public class ObjectToJsonValueConverterTest {
 
     @Test(expected = ConverterException.class)
     public void shouldThrowExceptionOnNullResult() throws JsonProcessingException {
-        ObjectToJsonValueConverter objectToJsonValueConverter = new ObjectToJsonValueConverter();
-        objectToJsonValueConverter.mapper = mapper;
+        ObjectToJsonValueConverter objectToJsonValueConverter = new ObjectToJsonValueConverter(mapper);
 
-        Pojo pojo = new Pojo(ID, NAME, ATTRIBUTES);
+
+        Pojo pojo = new Pojo(ID, NAME, false, ATTRIBUTES);
         when(mapper.writeValueAsString(pojo)).thenReturn(null);
 
         objectToJsonValueConverter.convert(pojo);
@@ -105,6 +116,7 @@ public class ObjectToJsonValueConverterTest {
         return Json.createObjectBuilder()
                 .add("id", ID.toString())
                 .add("name", NAME)
+                .add("boolFlag", BOOL_FLAG)
                 .add("attributes", array).build();
     }
 
@@ -118,12 +130,18 @@ public class ObjectToJsonValueConverterTest {
 
         private final UUID id;
         private final String name;
+        private final Boolean boolFlag;
         private final List<String> attributes;
 
-        public Pojo(UUID id, String name, List<String> attributes) {
+        public Pojo(UUID id, String name, final Boolean boolFlag, List<String> attributes) {
             this.id = id;
             this.name = name;
+            this.boolFlag = boolFlag;
             this.attributes = attributes;
+        }
+
+        public Boolean getBoolFlag() {
+            return boolFlag;
         }
 
         public UUID getId() {

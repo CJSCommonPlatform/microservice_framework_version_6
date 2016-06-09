@@ -12,6 +12,6 @@ public class RecipeAddedToRecipeConverter implements Converter<RecipeAdded, Reci
 
     @Override
     public Recipe convert(final RecipeAdded source) {
-        return new Recipe(source.getRecipeId(), source.getName());
+        return new Recipe(source.getRecipeId(), source.getName(), source.isGlutenFree());
     }
 }

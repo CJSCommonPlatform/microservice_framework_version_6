@@ -15,12 +15,12 @@ public class RecipesViewTest {
     @SuppressWarnings({"squid:MethodCyclomaticComplexity", "squid:S1067", "squid:S00122"})
     @Test
     public void equalsAndHashCode() {
-        List<RecipeView> recipes = Collections.singletonList(new RecipeView(ID, NAME));
+        List<RecipeView> recipes = Collections.singletonList(new RecipeView(ID, NAME, false));
 
         RecipesView item1 = new RecipesView(recipes);
         RecipesView item2 = new RecipesView(recipes);
         RecipesView item3 = new RecipesView(Collections.emptyList());
-        RecipesView item4 = new RecipesView(Collections.singletonList(new RecipeView(UUID.randomUUID(), NAME)));
+        RecipesView item4 = new RecipesView(Collections.singletonList(new RecipeView(UUID.randomUUID(), NAME, false)));
 
         new EqualsTester()
                 .addEqualityGroup(item1, item2)

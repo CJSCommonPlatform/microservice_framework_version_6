@@ -1,7 +1,7 @@
 package uk.gov.justice.services.adapter.rest.application;
 
 import uk.gov.justice.services.adapter.rest.cors.CorsFeature;
-import uk.gov.justice.services.adapter.rest.JsonSchemaValidationInterceptor;
+import uk.gov.justice.services.adapter.rest.interceptor.JsonSchemaValidationInterceptor;
 import uk.gov.justice.services.adapter.rest.mapper.BadRequestExceptionMapper;
 
 import java.util.HashSet;

@@ -16,8 +16,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class ObjectToJsonValueConverter implements Converter<Object, JsonValue> {
 
+    private final ObjectMapper mapper;
+
     @Inject
-    ObjectMapper mapper;
+    public ObjectToJsonValueConverter(final ObjectMapper mapper) {
+        this.mapper = mapper;
+    }
 
     @Override
     public JsonValue convert(final Object source) {

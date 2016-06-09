@@ -2,6 +2,7 @@ package uk.gov.justice.services.example.cakeshop.query.view.service;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertNull;
@@ -13,6 +14,7 @@ import uk.gov.justice.services.example.cakeshop.query.view.response.RecipeView;
 import uk.gov.justice.services.example.cakeshop.query.view.response.RecipesView;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.Test;
@@ -27,6 +29,7 @@ public class RecipeServiceTest {
     public static final String NAME = "name";
     private static final UUID USER_ID = UUID.randomUUID();
     private static final UUID NON_EXISTENT_ID = UUID.randomUUID();
+    private static final boolean GLUTEN_FREE = true;
     @InjectMocks
     private RecipeService service;
 
@@ -35,8 +38,7 @@ public class RecipeServiceTest {
 
     @Test
     public void shouldReturnRecipeById() {
-        Recipe recipe = createRecipe(USER_ID);
-        given(recipeRepository.findBy(USER_ID)).willReturn(recipe);
+        given(recipeRepository.findBy(USER_ID)).willReturn(new Recipe(USER_ID, NAME, GLUTEN_FREE));
 
         RecipeView foundPerson = service.findRecipe(USER_ID.toString());
 
@@ -51,45 +53,38 @@ public class RecipeServiceTest {
     }
 
     @Test
-    public void shouldReturnRecipeFoundByName() {
-        Recipe recipe = createRecipe(USER_ID);
-        given(recipeRepository.findByNameIgnoreCase(NAME)).willReturn(singletonList(recipe));
-
-        RecipesView foundRecipes = service.findByName(NAME);
-
-        assertThat(foundRecipes.getRecipes(), hasSize(1));
-        assertThat(foundRecipes.getRecipes().get(0).getId(), equalTo(USER_ID));
-        assertThat(foundRecipes.getRecipes().get(0).getName(), equalTo(NAME));
-    }
-
-    @Test
-    public void shouldReturnEmptyListOfNoMatchesOnInvalidName() {
-        RecipesView foundRecipes = service.findByName("Invalid Name");
-
-        assertThat(foundRecipes.getRecipes(), hasSize(0));
-    }
-
-    @Test
-    public void shouldReturnEmptyListOfNoMatchesOnEmptyName() {
-        RecipesView foundRecipes = service.findByName("");
-
-        assertThat(foundRecipes.getRecipes(), hasSize(0));
-    }
-
-    @Test
-    public void shouldGetAlLRecipes() {
-        Recipe recipe = createRecipe(USER_ID);
-        given(recipeRepository.findAll()).willReturn(singletonList(recipe));
-        RecipesView recipes = service.getRecipes();
+    public void shouldGetRecipes() {
+        int pageSize = 20;
+        Optional<String> nameQueryParam = Optional.of("name123");
+        Optional<Boolean> glutenFreeQueryParam = Optional.of(false);
+        given(recipeRepository.findBy(pageSize, nameQueryParam, glutenFreeQueryParam))
+                .willReturn(singletonList(new Recipe(USER_ID, NAME, GLUTEN_FREE)));
+        RecipesView recipes = service.getRecipes(pageSize, nameQueryParam, glutenFreeQueryParam);
 
         List<RecipeView> firstRecipe = recipes.getRecipes();
         assertThat(firstRecipe, hasSize(1));
         assertThat(firstRecipe.get(0).getId(), equalTo(USER_ID));
         assertThat(firstRecipe.get(0).getName(), equalTo(NAME));
+        assertThat(firstRecipe.get(0).isGlutenFree(), is(GLUTEN_FREE));
     }
 
-    private Recipe createRecipe(final UUID id) {
-        return new Recipe(id, NAME);
+    @Test
+    public void shouldGetRecipes2() {
+        int pageSize = 10;
+
+        Optional<String> nameQueryParam = Optional.of("other name");
+        Optional<Boolean> glutenFreeQueryParam = Optional.empty();
+
+        given(recipeRepository.findBy(pageSize, nameQueryParam, glutenFreeQueryParam))
+                .willReturn(singletonList(new Recipe(USER_ID, NAME, GLUTEN_FREE)));
+
+        RecipesView recipes = service.getRecipes(pageSize, nameQueryParam, glutenFreeQueryParam);
+
+        List<RecipeView> firstRecipe = recipes.getRecipes();
+        assertThat(firstRecipe, hasSize(1));
+        assertThat(firstRecipe.get(0).getId(), equalTo(USER_ID));
+        assertThat(firstRecipe.get(0).getName(), equalTo(NAME));
+        assertThat(firstRecipe.get(0).isGlutenFree(), is(GLUTEN_FREE));
     }
 
 }

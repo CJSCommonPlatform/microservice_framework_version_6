@@ -24,6 +24,7 @@ import static uk.gov.justice.services.adapters.test.utils.builder.HttpActionBuil
 import static uk.gov.justice.services.adapters.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.adapters.test.utils.builder.HttpActionBuilder.httpActionWithNoMapping;
 import static uk.gov.justice.services.adapters.test.utils.builder.MappingBuilder.mapping;
+import static uk.gov.justice.services.adapters.test.utils.builder.QueryParamBuilder.queryParam;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithQueryApiDefaults;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.defaultGetResource;
@@ -35,7 +36,7 @@ import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionU
 
 import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.services.adapter.rest.BasicActionMapper;
-import uk.gov.justice.services.adapter.rest.RestProcessor;
+import uk.gov.justice.services.adapter.rest.processor.RestProcessor;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
@@ -700,11 +701,11 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     @Test
     public void classShouldContainQueryParam() throws Exception {
         generator.run(
-                restRamlWithQueryApiDefaults()
-                        .with(resource("/users").with(
-                                defaultGetAction()
-                                        .withQueryParameters("surname"))
-                        ).build(),
+                restRamlWithQueryApiDefaults().with(
+                        resource("/users").with(httpAction(GET)
+                                .with(queryParam("surname"))
+                                .withResponseTypes("application/vnd.people.query.search-users+json"))
+                ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap())
         );
 
@@ -737,9 +738,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithQueryApiDefaults().with(
                         resource("/users").with(httpAction(GET)
-                                .withQueryParameters("surname")
-                                .withQueryParameters("firstname")
-                                .withQueryParameters("middlename")
+                                .with(queryParam("surname"), queryParam("firstname"), queryParam("middlename"))
                                 .withResponseTypes("application/vnd.people.query.search-users+json")
                                 .with(mapping()
                                         .withName("blah")

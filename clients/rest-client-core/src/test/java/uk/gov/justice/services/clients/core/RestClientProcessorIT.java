@@ -24,6 +24,7 @@ import static uk.gov.justice.services.common.http.HeaderConstants.CLIENT_CORRELA
 import static uk.gov.justice.services.common.http.HeaderConstants.SESSION_ID;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 
+import uk.gov.justice.services.adapter.rest.parameter.ParameterType;
 import uk.gov.justice.services.clients.core.exception.InvalidResponseException;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -49,7 +50,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 public class RestClientProcessorIT {
 
     private static final String REQUEST_PARAM_A_PARAM_B_FILE_NAME = "request-envelope-a-b";
-    private static final String REQUEST_PARAM_A_PARAM_C_FILE_NAME = "request-envelope-a-c";
+    private static final String REQUEST_PARAM_A_PARAM_C_PARAM_D_PARAM_E_FILE_NAME = "request-envelope-a-c-d-e";
     private static final String RESPONSE_WITH_METADATA_FILE_NAME = "response-with-metadata";
     private static final String RESPONSE_WITHOUT_METADATA_FILE_NAME = "response-without-metadata";
     private static final String POST_REQUEST_WITH_METADATA_FILE_NAME = "post-request-with-metadata";
@@ -224,17 +225,25 @@ public class RestClientProcessorIT {
                 .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
                 .withHeader(SESSION_ID, WireMock.equalTo(SESSION_ID_VALUE))
                 .withQueryParam("paramA", WireMock.equalTo("valueA"))
-                .withQueryParam("paramC", WireMock.equalTo("valueC"))
+                .withQueryParam("paramC", WireMock.equalTo("3"))
+                .withQueryParam("paramD", WireMock.equalTo("true"))
+                .withQueryParam("paramE", WireMock.equalTo("4.44"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader(CONTENT_TYPE, mimetype)
                         .withBody(responseWithMetadata())));
 
-        Set<QueryParam> queryParams = ImmutableSet.of(new QueryParam("paramA", true), new QueryParam("paramB", false), new QueryParam("paramC", true));
+        Set<QueryParam> queryParams = ImmutableSet.of(
+                new QueryParam("paramA", true, ParameterType.STRING),
+                new QueryParam("paramB", false, ParameterType.STRING),
+                new QueryParam("paramC", true, ParameterType.NUMERIC),
+                new QueryParam("paramD", true, ParameterType.BOOLEAN),
+                new QueryParam("paramE", true, ParameterType.NUMERIC)
+        );
 
         EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, emptySet(), queryParams, QUERY_NAME);
 
-        validateResponse(restClientProcessor.get(endpointDefinition, requestEnvelopeParamAParamC()), envelopeWithMetadataAsJson);
+        validateResponse(restClientProcessor.get(endpointDefinition, requestEnvelopeParamAParamCParamDParamE()), envelopeWithMetadataAsJson);
     }
 
     @Test
@@ -249,18 +258,21 @@ public class RestClientProcessorIT {
                 .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
                 .withHeader(SESSION_ID, WireMock.equalTo(SESSION_ID_VALUE))
                 .withQueryParam("paramA", WireMock.equalTo("valueA"))
-                .withQueryParam("paramC", WireMock.equalTo("valueC"))
+                .withQueryParam("paramC", WireMock.equalTo("3"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader(CONTENT_TYPE, mimetype)
                         .withHeader(METADATA_ID, METADATA_ID_VALUE)
                         .withBody(envelopeWithoutMetadataAsJson)));
 
-        Set<QueryParam> queryParams = ImmutableSet.of(new QueryParam("paramA", true), new QueryParam("paramB", false), new QueryParam("paramC", true));
+        Set<QueryParam> queryParams = ImmutableSet.of(
+                new QueryParam("paramA", true, ParameterType.STRING),
+                new QueryParam("paramB", false, ParameterType.STRING),
+                new QueryParam("paramC", true, ParameterType.NUMERIC));
 
         EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, emptySet(), queryParams, QUERY_NAME);
 
-        validateResponse(restClientProcessor.get(endpointDefinition, requestEnvelopeParamAParamC()), envelopeWithMetadataAsJson);
+        validateResponse(restClientProcessor.get(endpointDefinition, requestEnvelopeParamAParamCParamDParamE()), envelopeWithMetadataAsJson);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -281,7 +293,9 @@ public class RestClientProcessorIT {
                         .withHeader(CONTENT_TYPE, mimetype)
                         .withBody(responseWithMetadata())));
 
-        Set<QueryParam> queryParams = ImmutableSet.of(new QueryParam("paramA", true), new QueryParam("paramC", true));
+        Set<QueryParam> queryParams = ImmutableSet.of(
+                new QueryParam("paramA", true, ParameterType.STRING),
+                new QueryParam("paramC", true, ParameterType.STRING));
 
         EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, emptySet(), queryParams, QUERY_NAME);
 
@@ -300,17 +314,17 @@ public class RestClientProcessorIT {
                 .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
                 .withHeader(SESSION_ID, WireMock.equalTo(SESSION_ID_VALUE))
                 .withQueryParam("paramA", WireMock.equalTo("valueA"))
-                .withQueryParam("paramC", WireMock.equalTo("valueC"))
+                .withQueryParam("paramC", WireMock.equalTo("3"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader(CONTENT_TYPE, mimetype)
                         .withBody(envelopeWithoutMetadataAsJson)));
 
-        Set<QueryParam> queryParams = ImmutableSet.of(new QueryParam("paramA", true), new QueryParam("paramB", false), new QueryParam("paramC", true));
+        Set<QueryParam> queryParams = ImmutableSet.of(new QueryParam("paramA", true, ParameterType.STRING), new QueryParam("paramB", false, ParameterType.STRING), new QueryParam("paramC", true, ParameterType.NUMERIC));
 
         EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, emptySet(), queryParams, QUERY_NAME);
 
-        restClientProcessor.get(endpointDefinition, requestEnvelopeParamAParamC());
+        restClientProcessor.get(endpointDefinition, requestEnvelopeParamAParamCParamDParamE());
     }
 
     @Test
@@ -329,7 +343,7 @@ public class RestClientProcessorIT {
                         .withHeader(CONTENT_TYPE, mimetype)
                         .withBody(responseWithMetadata())));
 
-        restClientProcessor.enveloper = new Enveloper();
+        restClientProcessor.enveloper = new Enveloper(null);
 
         EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, emptySet(), emptySet(), QUERY_NAME);
 
@@ -384,8 +398,8 @@ public class RestClientProcessorIT {
     private void initialiseRestClientProcessor() {
         restClientProcessor = new RestClientProcessor();
         restClientProcessor.stringToJsonObjectConverter = new StringToJsonObjectConverter();
-        restClientProcessor.jsonObjectEnvelopeConverter = new JsonObjectEnvelopeConverter();
-        restClientProcessor.enveloper = new Enveloper();
+        restClientProcessor.jsonObjectEnvelopeConverter =  new JsonObjectEnvelopeConverter();
+        restClientProcessor.enveloper = new Enveloper(null);
         restClientProcessor.appName = APP_NAME;
     }
 
@@ -397,8 +411,8 @@ public class RestClientProcessorIT {
         return new JsonObjectEnvelopeConverter().asEnvelope(new StringToJsonObjectConverter().convert(jsonFromFile(REQUEST_PARAM_A_PARAM_B_FILE_NAME)));
     }
 
-    private JsonEnvelope requestEnvelopeParamAParamC() throws IOException {
-        return new JsonObjectEnvelopeConverter().asEnvelope(new StringToJsonObjectConverter().convert(jsonFromFile(REQUEST_PARAM_A_PARAM_C_FILE_NAME)));
+    private JsonEnvelope requestEnvelopeParamAParamCParamDParamE() throws IOException {
+        return new JsonObjectEnvelopeConverter().asEnvelope(new StringToJsonObjectConverter().convert(jsonFromFile(REQUEST_PARAM_A_PARAM_C_PARAM_D_PARAM_E_FILE_NAME)));
     }
 
     private String responseWithMetadata() throws IOException {

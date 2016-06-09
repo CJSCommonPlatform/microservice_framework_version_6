@@ -13,6 +13,10 @@
       "recipeId": {
         "id": "recipeId",
         "type": "string"
+      },
+      "glutenFree": {
+        "id": "glutenFree",
+        "type": "boolean"
       }
     },
     "required": [

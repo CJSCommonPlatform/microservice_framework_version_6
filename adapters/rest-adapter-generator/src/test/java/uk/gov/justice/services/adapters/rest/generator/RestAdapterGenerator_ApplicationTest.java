@@ -16,10 +16,10 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.raml.model.ActionType.GET;
-import static org.raml.model.ActionType.POST;
-import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
+import static uk.gov.justice.services.adapters.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithDefaults;
+import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.defaultPostResource;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.adapters.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 
@@ -50,9 +50,7 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
         generator.run(
                 raml()
                         .withBaseUri("http://localhost:8080/warname/command/api/rest/service")
-                        .with(resource("/some/path")
-                                .with(action(POST, "application/vnd.ctx.command.default+json"))
-                        ).build(),
+                        .with(defaultPostResource()).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceApplication");
@@ -65,9 +63,7 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
         generator.run(
                 raml()
                         .withBaseUri("http://localhost:8080/warname/command/api/rest/service")
-                        .with(resource("/some/path")
-                                .with(action(POST, "application/vnd.ctx.command.default+json"))
-                        ).build(),
+                        .with(defaultPostResource()).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceApplication");
@@ -81,9 +77,7 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
         generator.run(
                 raml()
                         .withBaseUri("http://localhost:8080/warname/command/api/rest/service")
-                        .with(
-                                resource("/some/path")
-                                        .with(action(POST, "application/vnd.ctx.command.default+json"))
+                        .with(defaultPostResource()
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -96,9 +90,7 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
         generator.run(
                 raml()
                         .withBaseUri("http://localhost:8080/warname/command/api/rest/service")
-                        .with(
-                                resource("/some/path")
-                                        .with(action(POST, "application/vnd.ctx.command.default+json"))
+                        .with(defaultPostResource()
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -114,9 +106,7 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
         generator.run(
                 raml()
                         .withBaseUri("http://localhost:8080/warname/command/api/rest/service")
-                        .with(resource("/some/path")
-                                .with(action(POST, "application/vnd.ctx.command.default+json"))
-                        ).build(),
+                        .with(defaultPostResource()).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceApplication");
@@ -137,8 +127,8 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
         generator.run(
                 raml()
                         .withBaseUri("http://localhost:8080/warname/command/api/rest/service")
-                        .with(resource("/pathA").with(action(GET).withDefaultResponseType()))
-                        .with(resource("/pathB").with(action(GET).withDefaultResponseType()))
+                        .with(resource("/pathA").with(httpAction(GET).withDefaultResponseType()))
+                        .with(resource("/pathB").with(httpAction(GET).withDefaultResponseType()))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -166,7 +156,7 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
 
         generator.run(
                 restRamlWithDefaults()
-                        .with(resource("/pathA").with(action(GET).withDefaultResponseType()))
+                        .with(resource("/pathA").with(httpAction(GET).withDefaultResponseType()))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -193,7 +183,7 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
 
         generator.run(
                 restRamlWithDefaults()
-                        .with(resource("/pathA").with(action(GET).withDefaultResponseType()))
+                        .with(resource("/pathA").with(httpAction(GET).withDefaultResponseType()))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap(), Collections.singletonList(sourcePath)));
 

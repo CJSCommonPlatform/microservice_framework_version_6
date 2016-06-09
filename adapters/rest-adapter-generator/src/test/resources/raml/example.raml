@@ -9,24 +9,48 @@ protocols: [ HTTP, HTTPS ]
   description: |
     Create user or Update user
   post:
+    description: |
+        ...
+        (mapping):
+            requestType: application/vnd.people.user+json
+            name: people.create-user
+        (mapping):
+            requestType: application/vnd.people.modified-user+json
+            name: people.update-user
+        ...
     body:
-        application/vnd.people.command.create-user+json:
-            schema: !include json/schema/people.command.create-user.json
+        application/vnd.people.user+json:
+            schema: !include json/schema/people.user.json
             example: !include json/create-user.json
-        application/vnd.people.command.update-user+json:
-            schema: !include json/schema/people.command.update-user.json
+        application/vnd.people.modified-user+json:
+            schema: !include json/schema/people.modified-user.json
             example: !include json/update-user.json
   get:
+    description: |
+        ...
+        (mapping):
+            responseType: application/vnd.people.user+json
+            name: people.get-user
+        (mapping):
+            responseType: application/vnd.people.user-summary+json
+            name: people.get-user-summary
+        ...
     responses:
         200:
             body:
-                application/vnd.people.query.get-user+json:
-                application/vnd.people.query.get-user2+json:
+                application/vnd.people.user+json:
+                application/vnd.people.user-summary+json:
 
 /users:
   description: |
     Search users
   get:
+    description: |
+          ...
+          (mapping):
+              responseType: application/vnd.people.users+json
+              name: people.search-users
+          ...
     queryParameters:
         lastname:
             type: string
@@ -37,4 +61,4 @@ protocols: [ HTTP, HTTPS ]
     responses:
         200:
             body:
-                application/vnd.people.query.search-users+json:
+                application/vnd.people.users+json:

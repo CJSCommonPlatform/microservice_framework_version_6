@@ -58,7 +58,7 @@ public class RemoteExampleQueryApiIT {
     private static final String METADATA = "_metadata";
     private static final JsonObject RESPONSE = Json.createObjectBuilder()
             .add(METADATA, Json.createObjectBuilder()
-                    .add(NAME, "people.response.user")
+                    .add(NAME, "people.get-user1")
                     .add(ID, UUID.randomUUID().toString()))
             .add("result", "SUCCESS")
             .build();
@@ -113,7 +113,8 @@ public class RemoteExampleQueryApiIT {
     @Test
     public void shouldSendQueryRemoteServiceAndReturnResponse() {
 
-        final String name = "people.query.get-user";
+        final String name = "people.get-user1";
+        final String responseType = "people.query.user1";
         final JsonObject metadata = Json.createObjectBuilder()
                 .add(NAME, name)
                 .add(ID, QUERY_ID.toString())
@@ -125,7 +126,7 @@ public class RemoteExampleQueryApiIT {
         final JsonEnvelope query = envelopeFrom(metadataFrom(metadata), payload);
 
         final String path = format("/users/%s", USER_ID.toString());
-        final String mimeType = format("application/vnd.%s+json", name);
+        final String mimeType = format("application/vnd.%s+json", responseType);
 
         stubFor(get(urlEqualTo(BASE_PATH + path))
                 .withHeader("Accept", WireMock.equalTo(mimeType))

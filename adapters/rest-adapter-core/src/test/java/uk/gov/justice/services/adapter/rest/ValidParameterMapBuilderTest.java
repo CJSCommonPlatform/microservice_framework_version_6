@@ -23,10 +23,9 @@ public class ValidParameterMapBuilderTest {
     private static final String OPTIONAL_PARAM_NAME_2 = "OptionalName2";
     private static final String OPTIONAL_PARAM_VALUE_2 = "OptionalValue2";
     private static final String NULL_VALUE = null;
-    private ValidParameterMapBuilder validParameterMapBuilder;
-
     @Rule
     public ExpectedException exception = ExpectedException.none();
+    private ValidParameterMapBuilder validParameterMapBuilder;
 
     @Before
     public void setup() {

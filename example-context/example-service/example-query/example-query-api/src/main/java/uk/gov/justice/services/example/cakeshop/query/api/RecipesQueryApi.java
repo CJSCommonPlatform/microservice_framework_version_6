@@ -21,15 +21,15 @@ public class RecipesQueryApi {
     @Inject
     Requester requester;
 
-    @Handles("cakeshop.query.recipes")
-    public JsonEnvelope listRecipes(final JsonEnvelope query) {
+    @Handles("cakeshop.search-recipes")
+    public JsonEnvelope searchRecipes(final JsonEnvelope query) {
         LOGGER.info("=============> Inside listRecipes Query API");
 
         return requester.request(query);
     }
 
-    @Handles("cakeshop.query.recipe")
-    public JsonEnvelope recipe(final JsonEnvelope query) {
+    @Handles("cakeshop.get-recipe")
+    public JsonEnvelope getRecipe(final JsonEnvelope query) {
         LOGGER.info("=============> Inside recipe Query API. RecipeId: " + query.payloadAsJsonObject().getString(FIELD_RECIPE_ID));
 
         return requester.request(query);

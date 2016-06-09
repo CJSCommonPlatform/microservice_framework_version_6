@@ -1,6 +1,6 @@
 package uk.gov.justice.raml.common.validator;
 
-import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
+import static uk.gov.justice.services.adapters.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 
@@ -16,7 +16,7 @@ public class ContainsActionsRamlValidatorTest {
 
     @Test
     public void shouldPassIfThereIsAnActionInRaml() {
-        validator.validate(raml().with(resource().with(action())).build());
+        validator.validate(raml().with(resource().with(httpAction())).build());
     }
 
     @Test

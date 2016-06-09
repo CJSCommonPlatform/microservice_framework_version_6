@@ -7,4 +7,7 @@ public class RamlValidationException extends RuntimeException {
         super(message);
     }
 
+    public RamlValidationException(final String message, final Throwable cause) {
+        super(message, cause);
+    }
 }

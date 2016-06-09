@@ -128,7 +128,8 @@ public class JmsEndpointGenerationIT {
     public void commandControllerDispatcherShouldReceiveCommandA() throws JMSException {
 
         String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d65";
-        String commandName = "structure.command.commanda";
+        String commandName = "structure.commanda";
+
         sendEnvelope(metadataId, commandName, commandControllerDestination);
 
         JsonEnvelope receivedEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
@@ -141,7 +142,7 @@ public class JmsEndpointGenerationIT {
     public void commandControllerDispatcherShouldReceiveCommandB() throws JMSException {
 
         String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d11";
-        String commandName = "structure.command.commandb";
+        String commandName = "structure.commandb";
 
         sendEnvelope(metadataId, commandName, commandControllerDestination);
 
@@ -156,7 +157,7 @@ public class JmsEndpointGenerationIT {
             throws JMSException, InterruptedException {
 
         String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d12";
-        String commandName = "structure.command.commandc";
+        String commandName = "structure.commandc";
 
         sendEnvelope(metadataId, commandName, commandControllerDestination);
         assertTrue(dispatcher.notFoundEnvelopeWithMetadataOf("id", metadataId));
@@ -166,7 +167,8 @@ public class JmsEndpointGenerationIT {
     public void commandHandlerDispatcherShouldReceiveCommandA() throws JMSException {
 
         String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d61";
-        String commandName = "structure.command.cmdaa";
+        String commandName = "structure.cmdaa";
+
         sendEnvelope(metadataId, commandName, commandHandlerDestination);
 
         JsonEnvelope receivedEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
@@ -179,7 +181,7 @@ public class JmsEndpointGenerationIT {
     public void commandHandlerDispatcherShouldNotReceiveACommandUnspecifiedInMessageSelector() throws JMSException {
 
         String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d13";
-        String commandName = "structure.handler.cmdcc";
+        String commandName = "structure.cmdcc";
 
         sendEnvelope(metadataId, commandName, commandHandlerDestination);
         assertTrue(dispatcher.notFoundEnvelopeWithMetadataOf("id", metadataId));
@@ -190,7 +192,7 @@ public class JmsEndpointGenerationIT {
     public void dispatcherShouldNotReceiveAMessageNotAdheringToSchema() throws JMSException {
 
         String metadataId = "961c9430-7bc6-4bf0-b549-6534394b8d13";
-        String commandName = "people.command.create-user";
+        String commandName = "people.create-user";
 
         sendEnvelope(metadataId, commandName, commandHandlerDestination, createObjectBuilder().add("non_existent_field", "value").build());
         assertTrue(dispatcher.notFoundEnvelopeWithMetadataOf("id", metadataId));
@@ -206,7 +208,8 @@ public class JmsEndpointGenerationIT {
         //TODO: check OpenEJB code and investigate if we can't fix the issue.
         Thread.sleep(300);
         String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d20";
-        String commandName = "structure.event.eventaa";
+        String commandName = "structure.eventaa";
+
         sendEnvelope(metadataId, commandName, eventsDestination);
 
         JsonEnvelope receivedEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
@@ -225,7 +228,8 @@ public class JmsEndpointGenerationIT {
         //TODO: check OpenEJB code and investigate if we can't fix the issue.
         Thread.sleep(300);
         String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d30";
-        String commandName = "structure.event.eventbb";
+        String commandName = "structure.eventbb";
+
         sendEnvelope(metadataId, commandName, eventsDestination);
 
         JsonEnvelope receivedEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
@@ -240,7 +244,7 @@ public class JmsEndpointGenerationIT {
             throws JMSException, InterruptedException {
 
         String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d21";
-        String commandName = "structure.event.eventcc";
+        String commandName = "structure.eventcc";
 
         sendEnvelope(metadataId, commandName, eventsDestination);
         assertTrue(dispatcher.notFoundEnvelopeWithMetadataOf("id", metadataId));

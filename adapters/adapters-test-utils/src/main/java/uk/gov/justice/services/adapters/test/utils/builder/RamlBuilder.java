@@ -1,7 +1,7 @@
 package uk.gov.justice.services.adapters.test.utils.builder;
 
 import static org.raml.model.ActionType.POST;
-import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
+import static uk.gov.justice.services.adapters.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.defaultGetResource;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.defaultPostResource;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
@@ -70,7 +70,7 @@ public class RamlBuilder {
                 .withDefaultMessagingBaseUri()
                 .with(resource()
                         .withRelativeUri("/somecontext.controller.command")
-                        .with(action(POST, "application/vnd.somecontext.command.command1+json")));
+                        .with(httpAction(POST, "application/vnd.somecontext.command1+json")));
     }
 
     public RamlBuilder withVersion(final String version) {
@@ -93,14 +93,14 @@ public class RamlBuilder {
     }
 
     public Raml build() {
-        Raml raml = new Raml();
+        final Raml raml = new Raml();
 
         raml.setBaseUri(baseUri);
         raml.setVersion(version);
         raml.setTitle(title);
 
-        Map<String, Resource> resources = new HashMap<>();
-        for (ResourceBuilder resourceBuilder : resourceBuilders) {
+        final Map<String, Resource> resources = new HashMap<>();
+        for (final ResourceBuilder resourceBuilder : resourceBuilders) {
             Resource resource = resourceBuilder.build();
             resources.put(resource.getRelativeUri(), resource);
         }

@@ -26,6 +26,9 @@
                     <sourceDirectory>${basedir}/src/raml</sourceDirectory>
                     <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
                     <basePackageName>uk.gov.justice.api</basePackageName>
+                    <generatorProperties>
+                        <actionMapping>true</actionMapping>
+                    </generatorProperties>
                 </configuration>
                 <executions>
                     <execution>

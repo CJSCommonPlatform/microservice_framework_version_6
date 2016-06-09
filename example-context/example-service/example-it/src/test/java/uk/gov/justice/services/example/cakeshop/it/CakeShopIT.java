@@ -58,10 +58,10 @@ public class CakeShopIT {
     private static final String RECIPES_RESOURCE_URI = "http://localhost:8080/example-command-api/command/api/rest/cakeshop/recipes/";
     private static final String CAKES_RESOURCE_URI = "http://localhost:8080/example-command-api/command/api/rest/cakeshop/cakes/";
     private static final String RECIPES_RESOURCE_QUERY_URI = "http://localhost:8080/example-query-api/query/api/rest/cakeshop/recipes/";
-    private static final String ADD_RECIPE_MEDIA_TYPE = "application/vnd.cakeshop.command.add-recipe+json";
-    private static final String MAKE_CAKE_MEDIA_TYPE = "application/vnd.cakeshop.command.make-cake+json";
-    private static final String QUERY_RECIPE_MEDIA_TYPE = "application/vnd.cakeshop.query.recipe+json";
-    private static final String QUERY_RECIPES_MEDIA_TYPE = "application/vnd.cakeshop.query.recipes+json";
+    private static final String ADD_RECIPE_MEDIA_TYPE = "application/vnd.cakeshop.add-recipe+json";
+    private static final String MAKE_CAKE_MEDIA_TYPE = "application/vnd.cakeshop.make-cake+json";
+    private static final String QUERY_RECIPE_MEDIA_TYPE = "application/vnd.cakeshop.recipe+json";
+    private static final String QUERY_RECIPES_MEDIA_TYPE = "application/vnd.cakeshop.recipes+json";
 
     public final static String JMS_CONNECTION_FACTORY_JNDI = "jms/RemoteConnectionFactory";
     public final static String DLQ_JNDI = "jms/queue/DLQ";
@@ -118,7 +118,7 @@ public class CakeShopIT {
         await().until(() -> eventsWithPayloadContaining(recipeId).count() == 1);
 
         EventLog event = eventsWithPayloadContaining(recipeId).findFirst().get();
-        assertThat(event.getName(), is("cakeshop.events.recipe-added"));
+        assertThat(event.getName(), is("cakeshop.recipe-added"));
         with(event.getMetadata())
                 .assertEquals("stream.id", recipeId)
                 .assertEquals("stream.version", 1);
@@ -140,9 +140,17 @@ public class CakeShopIT {
     @Test
     public void shouldReturn400WhenMandatoryQueryParamNotProvided() throws Exception {
 
-        Response response = sendTo(RECIPES_RESOURCE_QUERY_URI).request().get();
+        Response response = sendTo(RECIPES_RESOURCE_QUERY_URI).request().accept(QUERY_RECIPES_MEDIA_TYPE).get();
         assertThat(response.getStatus(), is(BAD_REQUEST));
     }
+
+    @Test
+    public void shouldReturn400WhenIncorrectMediaTypeInAccept() throws Exception {
+
+        Response response = sendTo(RECIPES_RESOURCE_QUERY_URI).request().accept("*/*").get();
+        assertThat(response.getStatus(), is(BAD_REQUEST));
+    }
+
 
     @Test
     public void shouldReturn404IfRecipeDoesNotExist() {
@@ -202,7 +210,7 @@ public class CakeShopIT {
         final TextMessage messageFromDLQ = (TextMessage) dlqReceiver.receive();
 
         with(messageFromDLQ.getText())
-                .assertThat("$._metadata.name", equalTo("cakeshop.events.recipe-added"))
+                .assertThat("$._metadata.name", equalTo("cakeshop.recipe-added"))
                 .assertThat("$.recipeId", equalTo(recipeId));
 
         initCakeShopDb();

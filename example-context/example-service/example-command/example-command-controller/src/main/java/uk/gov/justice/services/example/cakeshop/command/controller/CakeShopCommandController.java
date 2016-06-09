@@ -22,14 +22,14 @@ public class CakeShopCommandController {
     @Inject
     Sender sender;
 
-    @Handles("cakeshop.command.add-recipe")
+    @Handles("cakeshop.add-recipe")
     public void addRecipe(final JsonEnvelope command) {
         LOGGER.info("=============> Inside add-recipe Command Controller. RecipeId: " + command.payloadAsJsonObject().getString(FIELD_RECIPE_ID));
 
         sender.send(command);
     }
 
-    @Handles("cakeshop.command.make-cake")
+    @Handles("cakeshop.make-cake")
     public void makeCake(final JsonEnvelope command) {
         LOGGER.info("=============> Inside make-cake Command Controller. CakeId: " + command.payloadAsJsonObject().getString(FIELD_CAKE_ID));
 

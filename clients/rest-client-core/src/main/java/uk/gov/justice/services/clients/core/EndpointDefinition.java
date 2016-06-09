@@ -11,6 +11,7 @@ public class EndpointDefinition {
     private final String path;
     private final Set<String> pathParams;
     private final Set<QueryParam> queryParams;
+    private final String responseMediaType;
 
     /**
      * Constructor.
@@ -21,11 +22,12 @@ public class EndpointDefinition {
      * @param queryParams a set defining the query parameters this endpoint can take
      */
     public EndpointDefinition(final String baseUri, final String path, final Set<String> pathParams,
-                              final Set<QueryParam> queryParams) {
+                              final Set<QueryParam> queryParams, final String responseMediaType) {
         this.baseUri = baseUri;
         this.path = path;
         this.pathParams = pathParams;
         this.queryParams = queryParams;
+        this.responseMediaType = responseMediaType;
     }
 
     /**
@@ -62,5 +64,14 @@ public class EndpointDefinition {
      */
     public Set<QueryParam> getQueryParams() {
         return queryParams;
+    }
+
+    /**
+     * Get the response media type for the request to next tier
+     *
+     * @return the media type as a String
+     */
+    public String getResponseMediaType() {
+        return responseMediaType;
     }
 }

@@ -9,6 +9,7 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.CLIENT_ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.CONTEXT;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.CORRELATION;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -35,6 +36,7 @@ public class RestEnvelopeBuilder {
     private Optional<JsonObject> initialPayload = Optional.empty();
     private Optional<HttpHeaders> headers = Optional.empty();
     private Optional<Map<String, String>> params = Optional.empty();
+    private String action;
 
     RestEnvelopeBuilder(final UUID id) {
         this.id = id;
@@ -74,6 +76,17 @@ public class RestEnvelopeBuilder {
     }
 
     /**
+     * Define action.
+     *
+     * @param action name of the action
+     * @return an updated builder
+     */
+    public RestEnvelopeBuilder withAction(final String action) {
+        this.action = action;
+        return this;
+    }
+
+    /**
      * Build the completed envelope.
      *
      * @return the envelope
@@ -99,33 +112,26 @@ public class RestEnvelopeBuilder {
         JsonObjectBuilder metadataBuilder = Json.createObjectBuilder();
 
         metadataBuilder = metadataBuilder.add(ID, id.toString());
+        metadataBuilder = metadataBuilder.add(NAME, this.action);
 
-        HttpHeaders httpHeaders = headers.orElseThrow(() ->
-                new IllegalStateException("Cannot get name from empty headers"));
-
-        StructuredMediaType mediaType = new StructuredMediaType(
-                httpHeaders.getMediaType() != null
-                        && httpHeaders.getMediaType().toString().startsWith("application/vnd.")
-                        ? httpHeaders.getMediaType()
-                        : httpHeaders.getAcceptableMediaTypes().get(0));
-
-        metadataBuilder = metadataBuilder.add(JsonObjectMetadata.NAME, mediaType.getName());
-
-        if (contains(CLIENT_CORRELATION_ID, httpHeaders)) {
-            metadataBuilder = metadataBuilder
-                    .add(CORRELATION, Json.createObjectBuilder()
-                            .add(CLIENT_ID, getHeader(CLIENT_CORRELATION_ID, httpHeaders)));
-        }
-
-        if (contains(USER_ID, httpHeaders) || contains(SESSION_ID, httpHeaders)) {
-            JsonObjectBuilder contextBuilder = Json.createObjectBuilder();
-            if (contains(USER_ID, httpHeaders)) {
-                contextBuilder = contextBuilder.add(JsonObjectMetadata.USER_ID, getHeader(USER_ID, httpHeaders));
+        if (headers.isPresent()) {
+            HttpHeaders httpHeaders = headers.get();
+            if (contains(CLIENT_CORRELATION_ID, httpHeaders)) {
+                metadataBuilder = metadataBuilder
+                        .add(CORRELATION, Json.createObjectBuilder()
+                                .add(CLIENT_ID, getHeader(CLIENT_CORRELATION_ID, httpHeaders)));
             }
-            if (contains(SESSION_ID, httpHeaders)) {
-                contextBuilder = contextBuilder.add(JsonObjectMetadata.SESSION_ID, getHeader(SESSION_ID, httpHeaders));
+
+            if (contains(USER_ID, httpHeaders) || contains(SESSION_ID, httpHeaders)) {
+                JsonObjectBuilder contextBuilder = Json.createObjectBuilder();
+                if (contains(USER_ID, httpHeaders)) {
+                    contextBuilder = contextBuilder.add(JsonObjectMetadata.USER_ID, getHeader(USER_ID, httpHeaders));
+                }
+                if (contains(SESSION_ID, httpHeaders)) {
+                    contextBuilder = contextBuilder.add(JsonObjectMetadata.SESSION_ID, getHeader(SESSION_ID, httpHeaders));
+                }
+                metadataBuilder = metadataBuilder.add(CONTEXT, contextBuilder);
             }
-            metadataBuilder = metadataBuilder.add(CONTEXT, contextBuilder);
         }
 
         return metadataFrom(metadataBuilder.build());
@@ -138,4 +144,6 @@ public class RestEnvelopeBuilder {
     private String getHeader(final String header, final HttpHeaders headers) {
         return headers.getHeaderString(header);
     }
+
+
 }

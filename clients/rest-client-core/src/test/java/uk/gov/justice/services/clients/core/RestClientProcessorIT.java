@@ -63,6 +63,7 @@ public class RestClientProcessorIT {
     private static final String APP_NAME = "example-command-api";
 
     private static final String QUERY_NAME = "context.query.myquery";
+    private static final String QUERY_ACTION = "context.myaction";
     private static final String COMMAND_NAME = "context.my-command";
     private static final String PAYLOAD_ID_NAME = "payloadId";
     private static final String PAYLOAD_ID_VALUE = "c3f7182b-bd20-4678-ba8b-e7e5ea8629c3";
@@ -113,7 +114,7 @@ public class RestClientProcessorIT {
                         .withHeader(CONTENT_TYPE, mimetype)
                         .withBody(responseWithMetadata())));
 
-        EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, emptySet(), emptySet());
+        EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, emptySet(), emptySet(), QUERY_NAME);
 
         validateResponse(restClientProcessor.get(endpointDefinition, requestEnvelopeParamAParamB()), envelopeWithMetadataAsJson);
     }
@@ -134,7 +135,7 @@ public class RestClientProcessorIT {
                         .withHeader(CONTENT_TYPE, mimetype)
                         .withBody(responseWithMetadata())));
 
-        EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, ImmutableSet.of("paramA", "paramB"), emptySet());
+        EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, ImmutableSet.of("paramA", "paramB"), emptySet(), QUERY_NAME);
 
         validateResponse(restClientProcessor.get(endpointDefinition, requestEnvelopeParamAParamB()), envelopeWithMetadataAsJson);
     }
@@ -157,7 +158,7 @@ public class RestClientProcessorIT {
                         .withHeader(CONTENT_TYPE, mimetype)
                         .withBody(responseWithMetadata())));
 
-        EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI_WITH_DIFFERENT_PORT, path, emptySet(), emptySet());
+        EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI_WITH_DIFFERENT_PORT, path, emptySet(), emptySet(), QUERY_NAME);
 
         validateResponse(restClientProcessor.get(endpointDefinition, requestEnvelopeParamAParamB()), envelopeWithMetadataAsJson);
     }
@@ -181,7 +182,7 @@ public class RestClientProcessorIT {
                         .withHeader(CONTENT_TYPE, mimetype)
                         .withBody(responseWithMetadata())));
 
-        EndpointDefinition endpointDefinition = new EndpointDefinition(LOCAL_BASE_URI_WITH_DIFFERENT_PORT, path, emptySet(), emptySet());
+        EndpointDefinition endpointDefinition = new EndpointDefinition(LOCAL_BASE_URI_WITH_DIFFERENT_PORT, path, emptySet(), emptySet(), QUERY_NAME);
 
         validateResponse(restClientProcessor.get(endpointDefinition, requestEnvelopeParamAParamB()), envelopeWithMetadataAsJson);
     }
@@ -202,7 +203,7 @@ public class RestClientProcessorIT {
                 .willReturn(aResponse()
                         .withStatus(ACCEPTED.getStatusCode())));
 
-        EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, ImmutableSet.of("paramA", "paramB"), emptySet());
+        EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, ImmutableSet.of("paramA", "paramB"), emptySet(), COMMAND_NAME);
 
         restClientProcessor.post(endpointDefinition, postRequestEnvelope());
 
@@ -231,7 +232,7 @@ public class RestClientProcessorIT {
 
         Set<QueryParam> queryParams = ImmutableSet.of(new QueryParam("paramA", true), new QueryParam("paramB", false), new QueryParam("paramC", true));
 
-        EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, emptySet(), queryParams);
+        EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, emptySet(), queryParams, QUERY_NAME);
 
         validateResponse(restClientProcessor.get(endpointDefinition, requestEnvelopeParamAParamC()), envelopeWithMetadataAsJson);
     }
@@ -257,7 +258,7 @@ public class RestClientProcessorIT {
 
         Set<QueryParam> queryParams = ImmutableSet.of(new QueryParam("paramA", true), new QueryParam("paramB", false), new QueryParam("paramC", true));
 
-        EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, emptySet(), queryParams);
+        EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, emptySet(), queryParams, QUERY_NAME);
 
         validateResponse(restClientProcessor.get(endpointDefinition, requestEnvelopeParamAParamC()), envelopeWithMetadataAsJson);
     }
@@ -282,7 +283,7 @@ public class RestClientProcessorIT {
 
         Set<QueryParam> queryParams = ImmutableSet.of(new QueryParam("paramA", true), new QueryParam("paramC", true));
 
-        EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, emptySet(), queryParams);
+        EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, emptySet(), queryParams, QUERY_NAME);
 
         restClientProcessor.get(endpointDefinition, requestEnvelopeParamAParamB());
     }
@@ -307,7 +308,7 @@ public class RestClientProcessorIT {
 
         Set<QueryParam> queryParams = ImmutableSet.of(new QueryParam("paramA", true), new QueryParam("paramB", false), new QueryParam("paramC", true));
 
-        EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, emptySet(), queryParams);
+        EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, emptySet(), queryParams, QUERY_NAME);
 
         restClientProcessor.get(endpointDefinition, requestEnvelopeParamAParamC());
     }
@@ -330,7 +331,7 @@ public class RestClientProcessorIT {
 
         restClientProcessor.enveloper = new Enveloper();
 
-        EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, emptySet(), emptySet());
+        EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, emptySet(), emptySet(), QUERY_NAME);
 
         JsonEnvelope response = restClientProcessor.get(endpointDefinition, requestEnvelopeParamAParamB());
 
@@ -354,7 +355,7 @@ public class RestClientProcessorIT {
                         .withHeader(CONTENT_TYPE, mimetype)
                         .withBody(responseWithMetadata())));
 
-        EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, emptySet(), emptySet());
+        EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, emptySet(), emptySet(), QUERY_NAME);
 
         restClientProcessor.get(endpointDefinition, requestEnvelopeParamAParamB());
     }
@@ -375,7 +376,7 @@ public class RestClientProcessorIT {
                 .willReturn(aResponse()
                         .withStatus(INTERNAL_SERVER_ERROR.getStatusCode())));
 
-        EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, ImmutableSet.of("paramA", "paramB"), emptySet());
+        EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, ImmutableSet.of("paramA", "paramB"), emptySet(), COMMAND_NAME);
 
         restClientProcessor.post(endpointDefinition, postRequestEnvelope());
     }
@@ -411,7 +412,7 @@ public class RestClientProcessorIT {
     private void validateResponse(JsonEnvelope response, String expectedResponseJson) {
         assertThat(response.metadata(), notNullValue());
         assertThat(response.metadata().id().toString(), equalTo(METADATA_ID_VALUE));
-        assertThat(response.metadata().name(), equalTo(QUERY_NAME));
+        assertThat(response.metadata().name(), equalTo(QUERY_ACTION));
 
         JSONAssert.assertEquals(expectedResponseJson, new JsonObjectEnvelopeConverter().fromEnvelope(response).toString(), false);
 

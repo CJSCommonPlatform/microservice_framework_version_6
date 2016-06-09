@@ -9,12 +9,12 @@ import uk.gov.justice.raml.common.validator.CompositeRamlValidator;
 import uk.gov.justice.raml.common.validator.ContainsActionsRamlValidator;
 import uk.gov.justice.raml.common.validator.ContainsResourcesRamlValidator;
 import uk.gov.justice.raml.common.validator.RamlValidator;
+import uk.gov.justice.raml.common.validator.RequestContentTypeRamlValidator;
 import uk.gov.justice.raml.core.Generator;
 import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.raml.jms.uri.BaseUri;
 import uk.gov.justice.raml.jms.uri.ResourceUri;
 import uk.gov.justice.raml.jms.validator.BaseUriRamlValidator;
-import uk.gov.justice.raml.jms.validator.MessagingRequestTypeRamlValidator;
 import uk.gov.justice.raml.jms.validator.ResourceUriRamlValidator;
 import uk.gov.justice.services.core.annotation.Component;
 
@@ -65,7 +65,7 @@ public class JmsEndpointGenerator implements Generator {
             new ResourceUriRamlValidator(),
             new ContainsResourcesRamlValidator(),
             new ContainsActionsRamlValidator(),
-            new MessagingRequestTypeRamlValidator(),
+            new RequestContentTypeRamlValidator(),
             new BaseUriRamlValidator()
     );
 

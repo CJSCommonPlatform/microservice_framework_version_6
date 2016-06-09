@@ -5,7 +5,7 @@ import static org.raml.model.ActionType.HEAD;
 import static org.raml.model.ActionType.OPTIONS;
 import static org.raml.model.ActionType.POST;
 import static org.raml.model.ActionType.PUT;
-import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
+import static uk.gov.justice.services.adapters.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 
@@ -17,6 +17,7 @@ public class RequestContentTypeRamlValidatorTest {
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
+
     private RamlValidator validator = new RequestContentTypeRamlValidator();
 
     @Test
@@ -25,7 +26,7 @@ public class RequestContentTypeRamlValidatorTest {
         validator.validate(
                 raml()
                         .with(resource()
-                                .with(action(POST, "application/vnd.people.command.command1+json")))
+                                .with(httpAction(POST, "application/vnd.command1+json")))
                         .build());
 
     }
@@ -36,11 +37,11 @@ public class RequestContentTypeRamlValidatorTest {
         validator.validate(
                 raml()
                         .with(resource()
-                                .with(action(GET, "application/vnd.structure.dummy.command1+json"))
-                                .with(action(POST, "application/vnd.structure.command.command2+json"))
-                                .with(action(HEAD, "application/vnd.structure.dummy.command3+json"))
-                                .with(action(PUT, "application/vnd.structure.dummy.command4+json"))
-                                .with(action(OPTIONS, "application/vnd.structure.dummy.command5+json"))
+                                .with(httpAction(GET, "application/vnd.command1+json"))
+                                .with(httpAction(POST, "application/vnd.command2+json"))
+                                .with(httpAction(HEAD, "application/vnd.command3+json"))
+                                .with(httpAction(PUT, "application/vnd.command4+json"))
+                                .with(httpAction(OPTIONS, "application/vnd.command5+json"))
                         )
                         .build());
 
@@ -54,63 +55,63 @@ public class RequestContentTypeRamlValidatorTest {
 
         validator.validate(raml()
                 .with(resource()
-                        .with(action().withActionType(POST)))
+                        .with(httpAction().withHttpActionType(POST)))
                 .build());
 
     }
 
     @Test
-    public void shouldThrowExceptionIfMediaTypeDoesNotContainAValidCommand() throws Exception {
+    public void shouldThrowExceptionIfMediaTypeDoesNotContainFormat() throws Exception {
 
         exception.expect(RamlValidationException.class);
-        exception.expectMessage("Invalid request type: application/vnd.people.invalid.command1+json");
+        exception.expectMessage("Invalid request type: application/vnd.command1");
 
         validator.validate(
                 raml()
                         .with(resource()
-                                .with(action(POST, "application/vnd.people.invalid.command1+json")))
+                                .with(httpAction(POST, "application/vnd.command1")))
                         .build());
 
     }
 
     @Test
-    public void shouldThrowExceptionIfNotvalidMediaType() throws Exception {
+    public void shouldThrowExceptionIfNotAVendorMediaType() throws Exception {
 
         exception.expect(RamlValidationException.class);
-        exception.expectMessage("Invalid request type: nd.people.command.command1+json");
+        exception.expectMessage("Invalid request type: application/json");
 
         validator.validate(
                 raml()
                         .with(resource()
-                                .with(action(POST, "nd.people.command.command1+json")))
+                                .with(httpAction(POST, "application/json")))
                         .build());
 
     }
 
     @Test
-    public void shouldThrowExceptionIfNotvalidMediaType2() throws Exception {
+    public void shouldThrowExceptionIfNotValidMediaType2() throws Exception {
 
         exception.expect(RamlValidationException.class);
-        exception.expectMessage("Invalid request type: nd.people.unknown.command1+nonjson");
+        exception.expectMessage("Invalid request type: nd.command1+nonjson");
 
         validator.validate(
                 raml()
                         .with(resource()
-                                .with(action(POST, "nd.people.unknown.command1+nonjson")))
+                                .with(httpAction(POST, "nd.command1+nonjson")))
                         .build());
 
     }
 
     @Test
-    public void shouldThrowExceptionIfMediaTypeDoesNotContainContext() throws Exception {
+    public void shouldThrowExceptionForXMLMediaType() throws Exception {
 
         exception.expect(RamlValidationException.class);
-        exception.expectMessage("Invalid request type: application/vnd.handlers.command1+json");
+        exception.expectMessage("Invalid request type: application/vnd.command1+xml");
 
         validator.validate(
                 raml()
                         .with(resource()
-                                .with(action(POST, "application/vnd.handlers.command1+json")))
+                                .with(httpAction(POST, "application/vnd.command1+xml")))
                         .build());
 
     }

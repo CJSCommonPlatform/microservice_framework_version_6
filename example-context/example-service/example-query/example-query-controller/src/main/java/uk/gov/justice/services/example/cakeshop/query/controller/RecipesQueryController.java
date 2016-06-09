@@ -21,14 +21,14 @@ public class RecipesQueryController {
     @Inject
     Requester requester;
 
-    @Handles("cakeshop.query.recipes")
+    @Handles("cakeshop.search-recipes")
     public JsonEnvelope listRecipes(final JsonEnvelope query) {
         LOGGER.info("=============> Inside listRecipes Query Controller");
 
         return requester.request(query);
     }
 
-    @Handles("cakeshop.query.recipe")
+    @Handles("cakeshop.get-recipe")
     public JsonEnvelope recipe(final JsonEnvelope query) {
         LOGGER.info("=============> Inside recipe Query Controller. RecipeId: " + query.payloadAsJsonObject().getString(FIELD_RECIPE_ID));
 

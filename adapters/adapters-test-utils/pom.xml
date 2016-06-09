@@ -22,6 +22,10 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-jaxrs</artifactId>
+        </dependency>
+        <dependency>
             <groupId>uk.gov.justice.services</groupId>
             <artifactId>messaging-core</artifactId>
             <version>${project.version}</version>

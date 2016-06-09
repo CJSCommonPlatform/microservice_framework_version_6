@@ -53,16 +53,18 @@ public class RestProcessor {
     }
 
     /**
-     * Process an incoming REST request by combining the payload, headers and path parameters into
+     * Process an incoming REST request asynchronously by combining the payload, headers and path parameters into
      * an envelope and passing the envelope to the given consumer.
      *
      * @param consumer       a consumer for the envelope
+     * @param action         the action name for this request
      * @param initialPayload the payload from the REST request
      * @param headers        the headers from the REST request
      * @param params         the parameters from the REST request
      * @return the HTTP response to return to the client
      */
     public Response processAsynchronously(final Consumer<JsonEnvelope> consumer,
+                                          final String action,
                                           final JsonObject initialPayload,
                                           final HttpHeaders headers,
                                           final Map<String, String> params) {
@@ -71,6 +73,7 @@ public class RestProcessor {
 
         final JsonEnvelope envelope = envelopeBuilderFactory.builder()
                 .withInitialPayload(initialPayload)
+                .withAction(action)
                 .withHeaders(headers)
                 .withParams(params)
                 .build();
@@ -84,7 +87,17 @@ public class RestProcessor {
         return status(ACCEPTED).build();
     }
 
+    /**
+     * Process an incoming REST request synchronously by combining the payload, headers and path parameters into
+     * an envelope and passing the envelope to the given consumer.
+     *
+     * @param action  the action name for this request
+     * @param headers the headers from the REST request
+     * @param params  the parameters from the REST request
+     * @return the HTTP response to return to the client
+     */
     public Response processSynchronously(final Function<JsonEnvelope, JsonEnvelope> function,
+                                         final String action,
                                          final HttpHeaders headers,
                                          final Map<String, String> params) {
 
@@ -93,6 +106,7 @@ public class RestProcessor {
         final JsonEnvelope envelope = envelopeBuilderFactory.builder()
                 .withHeaders(headers)
                 .withParams(params)
+                .withAction(action)
                 .build();
 
         trace(LOGGER, () -> format("REST message converted to envelope: %s", toEnvelopeTraceString(envelope)));

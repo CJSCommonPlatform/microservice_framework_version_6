@@ -36,7 +36,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class AddRecipeCommandHandlerTest {
 
-    private static final String EVENT_NAME = "cakeshop.events.recipe-added";
+    private static final String EVENT_NAME = "cakeshop.recipe-added";
     private static final UUID RECIPE_ID = UUID.randomUUID();
     private static final String RECIPE_NAME = "Test Recipe";
 

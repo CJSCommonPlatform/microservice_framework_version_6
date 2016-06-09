@@ -10,14 +10,18 @@ import static javax.lang.model.element.Modifier.STATIC;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.services.adapters.rest.generator.Generators.byMimeTypeOrder;
-import static uk.gov.justice.services.adapters.rest.generator.Names.DEFAULT_ANNOTATION_PARAMETER;
-import static uk.gov.justice.services.adapters.rest.generator.Names.GENERIC_PAYLOAD_ARGUMENT_NAME;
-import static uk.gov.justice.services.adapters.rest.generator.Names.RESOURCE_PACKAGE_NAME_WITH_DOT;
-import static uk.gov.justice.services.adapters.rest.generator.Names.buildResourceMethodName;
-import static uk.gov.justice.services.adapters.rest.generator.Names.buildResourceMethodNameWithNoMimeType;
-import static uk.gov.justice.services.adapters.rest.generator.Names.resourceInterfaceNameOf;
+import static uk.gov.justice.services.adapters.rest.generator.Generators.componentFromBaseUriIn;
+import static uk.gov.justice.raml.common.generator.Names.DEFAULT_ANNOTATION_PARAMETER;
+import static uk.gov.justice.raml.common.generator.Names.GENERIC_PAYLOAD_ARGUMENT_NAME;
+import static uk.gov.justice.raml.common.generator.Names.RESOURCE_PACKAGE_NAME;
+import static uk.gov.justice.raml.common.generator.Names.buildResourceMethodName;
+import static uk.gov.justice.raml.common.generator.Names.buildResourceMethodNameWithNoMimeType;
+import static uk.gov.justice.raml.common.generator.Names.packageNameOf;
+import static uk.gov.justice.raml.common.generator.Names.resourceImplementationNameOf;
+import static uk.gov.justice.raml.common.generator.Names.resourceInterfaceNameOf;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
+import uk.gov.justice.services.adapter.rest.BasicActionMapper;
 import uk.gov.justice.services.adapter.rest.RestProcessor;
 import uk.gov.justice.services.adapter.rest.ValidParameterMapBuilder;
 import uk.gov.justice.services.core.annotation.Adapter;
@@ -36,6 +40,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.json.JsonObject;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
@@ -50,6 +55,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 import org.raml.model.Action;
 import org.raml.model.ActionType;
+import org.raml.model.Raml;
 import org.raml.model.Resource;
 import org.raml.model.parameter.QueryParameter;
 import org.raml.model.parameter.UriParameter;
@@ -65,8 +71,11 @@ class JaxRsImplementationGenerator {
     private static final String VARIABLE_MAP_BUILDER = "validParameterMapBuilder";
     private static final String PARAMS_PUT_REQUIRED_STATEMENT_FORMAT = "$L.putRequired($S, $N)";
     private static final String PARAMS_PUT_OPTIONAL_STATEMENT_FORMAT = "$L.putOptional($S, $N)";
-    private static final String SYNCHRONOUS_METHOD_STATEMENT = "return restProcessor.processSynchronously(syncDispatcher::dispatch, headers, $L.validateAndBuildMap())";
-    private static final String ASYNCHRONOUS_METHOD_STATEMENT = "return restProcessor.processAsynchronously(asyncDispatcher::dispatch, entity, headers, $L.validateAndBuildMap())";
+    private static final String ACTION_MAPPER_VARIABLE = "actionMapper";
+    private static final String SYNCHRONOUS_METHOD_STATEMENT =
+            "return restProcessor.processSynchronously(syncDispatcher::dispatch, $L.actionOf($S, \"GET\", headers), headers, $L.validateAndBuildMap())";
+    private static final String ASYNCHRONOUS_METHOD_STATEMENT =
+            "return restProcessor.processAsynchronously(asyncDispatcher::dispatch, $L.actionOf($S, \"POST\", headers), entity, headers, $L.validateAndBuildMap())";
 
     private final GeneratorConfig configuration;
 
@@ -80,26 +89,26 @@ class JaxRsImplementationGenerator {
     }
 
     /**
-     * Generate an implementation class for each resource.
+     * Generate an implementation class for each resource in raml.
      *
-     * @param resources the collection of {@link Resource} to generate as implementation classes
-     * @param component specifies the type of framework {@link Component} that is being implemented
+     * @param raml to generate as implementation classes
      * @return a list of {@link TypeSpec} that represent the implementation classes
      */
-    List<TypeSpec> generateFor(final Collection<Resource> resources, final Component component) {
+    List<TypeSpec> generateFor(final Raml raml) {
+        final Component component = componentFromBaseUriIn(raml);
+        final Collection<Resource> resources = raml.getResources().values();
         return resources.stream()
-                .map(resource -> createClassFor(resource, component))
+                .map(resource -> generateFor(resource, component))
                 .collect(Collectors.toList());
     }
 
     /**
      * Create an implementation class for the specified {@link Resource}
      *
-     * @param resource  the resource to generate as an implementation class
-     * @param component specifies the type of framework {@link Component} that is being implemented
+     * @param resource the resource to generate as an implementation class
      * @return a {@link TypeSpec} that represents the implementation class
      */
-    private TypeSpec createClassFor(final Resource resource, final Component component) {
+    TypeSpec generateFor(final Resource resource, final Component component) {
         final TypeSpec.Builder classSpecBuilder = classSpecFor(resource, component);
 
         resource.getActions().values().forEach(action -> {
@@ -118,7 +127,7 @@ class JaxRsImplementationGenerator {
      * @return a {@link TypeSpec.Builder} that represents the implementation class
      */
     private TypeSpec.Builder classSpecFor(final Resource resource, final Component component) {
-        final String className = "Default" + resourceInterfaceNameOf(resource);
+        final String className = resourceImplementationNameOf(resource);
         return classBuilder(className)
                 .addSuperinterface(interfaceClassNameFor(resource))
                 .addModifiers(PUBLIC)
@@ -129,16 +138,23 @@ class JaxRsImplementationGenerator {
                 .addField(FieldSpec.builder(RestProcessor.class, "restProcessor")
                         .addAnnotation(Inject.class)
                         .build())
+                .addField(FieldSpec.builder(BasicActionMapper.class, ACTION_MAPPER_VARIABLE)
+                        .addAnnotation(Inject.class)
+                        .addAnnotation(AnnotationSpec.builder(Named.class)
+                                .addMember(DEFAULT_ANNOTATION_PARAMETER, "$S", className + "ActionMapper").build())
+                        .build())
                 .addField(FieldSpec.builder(HttpHeaders.class, "headers")
                         .addAnnotation(Context.class)
                         .build());
     }
 
+
+
     /**
-     * Process the body or bodies for each action.
+     * Process the body or bodies for each httpAction.
      *
-     * @param action the action to process
-     * @return the list of {@link MethodSpec} that represents each method for the action
+     * @param action the httpAction to process
+     * @return the list of {@link MethodSpec} that represents each method for the httpAction
      */
     private List<MethodSpec> forEach(final Action action) {
         if (!action.hasBody()) {
@@ -149,10 +165,10 @@ class JaxRsImplementationGenerator {
     }
 
     /**
-     * Process an action with no body.
+     * Process an httpAction with no body.
      *
-     * @param action the action to process
-     * @return the {@link MethodSpec} that represents the method for the action
+     * @param action the httpAction to process
+     * @return the {@link MethodSpec} that represents the method for the httpAction
      */
     private MethodSpec processNoActionBody(final Action action) {
         final String resourceMethodName = buildResourceMethodNameWithNoMimeType(action);
@@ -160,10 +176,10 @@ class JaxRsImplementationGenerator {
     }
 
     /**
-     * Process an action with one or more bodies.
+     * Process an httpAction with one or more bodies.
      *
-     * @param action the action to process
-     * @return the list of {@link MethodSpec} that represents each method for the action
+     * @param action the httpAction to process
+     * @return the list of {@link MethodSpec} that represents each method for the httpAction
      */
     private List<MethodSpec> processOneOrMoreActionBodies(final Action action) {
         return action.getBody().values().stream()
@@ -182,7 +198,7 @@ class JaxRsImplementationGenerator {
      * @return the {@link ClassName} of the interface
      */
     private ClassName interfaceClassNameFor(final Resource resource) {
-        return ClassName.get(configuration.getBasePackageName() + RESOURCE_PACKAGE_NAME_WITH_DOT, resourceInterfaceNameOf(resource));
+        return ClassName.get(packageNameOf(configuration, RESOURCE_PACKAGE_NAME), resourceInterfaceNameOf(resource));
     }
 
     /**
@@ -205,9 +221,9 @@ class JaxRsImplementationGenerator {
      * Uses the type of {@link Action} to provide a {@link SynchronousDispatcher} or an {@link
      * AsynchronousDispatcher} and provides the correct field definition as a {@link FieldSpec}.
      *
-     * @param action the action to forEach
+     * @param action the httpAction to forEach
      * @return a {@link FieldSpec} representing the field definition.
-     * @throws IllegalStateException if action type is not GET or POST
+     * @throws IllegalStateException if httpAction type is not GET or POST
      */
     private FieldSpec dispatcherFieldFor(final Action action) {
         final ActionType actionType = action.getType();
@@ -217,7 +233,7 @@ class JaxRsImplementationGenerator {
         } else if (actionType == POST) {
             return asynchronousDispatcherField();
         } else {
-            throw new IllegalStateException(format("Unsupported action type %s", actionType));
+            throw new IllegalStateException(format("Unsupported httpAction type %s", actionType));
         }
     }
 
@@ -258,7 +274,7 @@ class JaxRsImplementationGenerator {
     /**
      * Generate a method for each {@link Action}.
      *
-     * @param action             the action to generate as a method
+     * @param action             the httpAction to generate as a method
      * @param resourceMethodName the resource method name to generate
      * @return a {@link MethodSpec} that represents the generated method
      */
@@ -270,11 +286,11 @@ class JaxRsImplementationGenerator {
         final CodeBlock methodBody;
 
         if (actionType == GET) {
-            methodBody = methodBody(pathParams, () -> methodBodyForGet(queryParams));
+            methodBody = methodBody(pathParams, () -> methodBodyForGet(queryParams, resourceMethodName));
         } else if (actionType == POST) {
-            methodBody = methodBody(pathParams, this::methodBodyForPost);
+            methodBody = methodBody(pathParams, () -> methodBodyForPost(resourceMethodName));
         } else {
-            throw new IllegalStateException(format("Unsupported action type %s", actionType));
+            throw new IllegalStateException(format("Unsupported httpAction type %s", actionType));
         }
 
         return methodBuilder(resourceMethodName)
@@ -287,31 +303,35 @@ class JaxRsImplementationGenerator {
     }
 
     /**
-     * Produce code specific to the GET action type.
+     * Produce code specific to the GET httpAction type.
      *
-     * @param queryParams the query parameters to add to a map
+     * @param queryParams        the query parameters to add to a map
+     * @param resourceMethodName name of the resource method
      * @return the {@link CodeBlock} representing the GET specific code
      */
-    private CodeBlock methodBodyForGet(final Map<String, QueryParameter> queryParams) {
+    private CodeBlock methodBodyForGet(final Map<String, QueryParameter> queryParams, final String resourceMethodName) {
         return CodeBlock.builder()
                 .add(putAllQueryParamsInMap(queryParams))
-                .addStatement(SYNCHRONOUS_METHOD_STATEMENT, VARIABLE_MAP_BUILDER)
+                .addStatement(SYNCHRONOUS_METHOD_STATEMENT,
+                        ACTION_MAPPER_VARIABLE, resourceMethodName, VARIABLE_MAP_BUILDER)
                 .build();
     }
 
     /**
-     * Produce code specific to the POST action type.
+     * Produce code specific to the POST httpAction type.
      *
+     * @param resourceMethodName name of the resource method
      * @return the {@link CodeBlock} representing the POST specific code
      */
-    private CodeBlock methodBodyForPost() {
+    private CodeBlock methodBodyForPost(final String resourceMethodName) {
         return CodeBlock.builder()
-                .addStatement(ASYNCHRONOUS_METHOD_STATEMENT, VARIABLE_MAP_BUILDER)
+                .addStatement(ASYNCHRONOUS_METHOD_STATEMENT,
+                        ACTION_MAPPER_VARIABLE, resourceMethodName, VARIABLE_MAP_BUILDER)
                 .build();
     }
 
     /**
-     * General code that is for both GET and POST action type methods.
+     * General code that is for both GET and POST httpAction type methods.
      *
      * @return the {@link CodeBlock} representing the general code
      */

@@ -26,7 +26,7 @@ import static org.raml.model.ActionType.OPTIONS;
 import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
 import static org.raml.model.ActionType.TRACE;
-import static uk.gov.justice.services.adapters.test.utils.builder.ActionBuilder.action;
+import static uk.gov.justice.services.adapters.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.messagingRamlWithDefaults;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
@@ -77,7 +77,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.raml.model.ActionType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JmsEndpointGeneratorTest {
@@ -242,7 +241,7 @@ public class JmsEndpointGeneratorTest {
                 messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/people.handler.command")
-                                .with(action(POST, "application/vnd.people.command.abc+json")))
+                                .with(httpAction(POST, "application/vnd.people.abc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
         Class<?> clazz = getJmsListenerClass(BASE_PACKAGE, "PeopleCommandHandlerJmsListener");
@@ -257,7 +256,7 @@ public class JmsEndpointGeneratorTest {
                 messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/people.controller.command")
-                                .with(action(POST, "application/vnd.people.command.abc+json")))
+                                .with(httpAction(POST, "application/vnd.people.abc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -275,7 +274,7 @@ public class JmsEndpointGeneratorTest {
                         .withBaseUri("message://event/listener/message/people")
                         .with(resource()
                                 .withRelativeUri("/people.event")
-                                .with(action(POST, "application/vnd.people.event.abc+json")))
+                                .with(httpAction(POST, "application/vnd.people.abc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -293,7 +292,7 @@ public class JmsEndpointGeneratorTest {
                         .withBaseUri("message://event/processor/message/people")
                         .with(resource()
                                 .withRelativeUri("/people.event")
-                                .with(action(POST, "application/vnd.people.event.abc+json")))
+                                .with(httpAction(POST, "application/vnd.people.abc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -310,7 +309,7 @@ public class JmsEndpointGeneratorTest {
                 messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/people.handler.command")
-                                .with(action(POST, "application/vnd.people.command.abc+json")))
+                                .with(httpAction(POST, "application/vnd.people.abc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
         Class<?> clazz = getJmsListenerClass(BASE_PACKAGE, "PeopleCommandHandlerJmsListener");
@@ -358,7 +357,7 @@ public class JmsEndpointGeneratorTest {
                 messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/people.controller.command")
-                                .with(action(ActionType.POST, "application/vnd.people.command.abc+json")))
+                                .with(httpAction(POST, "application/vnd.people.abc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -375,7 +374,7 @@ public class JmsEndpointGeneratorTest {
                 messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/structure.controller.command")
-                                .with(action(POST, "application/vnd.structure.command.abc+json")))
+                                .with(httpAction(POST, "application/vnd.structure.abc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -392,7 +391,7 @@ public class JmsEndpointGeneratorTest {
                 messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/structure.handler.command")
-                                .with(action(POST, "application/vnd.structure.command.abc+json")))
+                                .with(httpAction(POST, "application/vnd.structure.abc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -410,7 +409,7 @@ public class JmsEndpointGeneratorTest {
                         .withDefaultMessagingBaseUri()
                         .with(resource()
                                 .withRelativeUri("/structure.event")
-                                .with(action(POST, "application/vnd.structure.event.abc+json")))
+                                .with(httpAction(POST, "application/vnd.structure.abc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -426,7 +425,7 @@ public class JmsEndpointGeneratorTest {
         generator.run(messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/structure.controller.command")
-                                .with(action(POST, "application/vnd.structure.command.abc+json")))
+                                .with(httpAction(POST, "application/vnd.structure.abc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -442,7 +441,7 @@ public class JmsEndpointGeneratorTest {
         generator.run(messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/lifecycle.handler.command")
-                                .with(action(POST, "application/vnd.lifecycle.command.abc+json")))
+                                .with(httpAction(POST, "application/vnd.lifecycle.abc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -458,7 +457,7 @@ public class JmsEndpointGeneratorTest {
         generator.run(messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/people.event")
-                                .with(action(POST, "application/vnd.people.event.abc+json")))
+                                .with(httpAction(POST, "application/vnd.people.abc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -475,9 +474,9 @@ public class JmsEndpointGeneratorTest {
                 messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/structure.controller.command")
-                                .with(action()
-                                        .withActionType(ActionType.POST)
-                                        .withMediaType("application/vnd.structure.command.test-cmd+json")))
+                                .with(httpAction()
+                                        .withHttpActionType(POST)
+                                        .withMediaType("application/vnd.structure.test-cmd+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -485,7 +484,26 @@ public class JmsEndpointGeneratorTest {
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("messageSelector")),
-                        propertyValue(equalTo("CPPNAME in('structure.command.test-cmd')")))));
+                        propertyValue(equalTo("CPPNAME in('structure.test-cmd')")))));
+    }
+
+    @Test
+    public void shouldCreateAnnotatedJmsEndpointFromMediaTypeWithoutPillar() throws Exception {
+        generator.run(
+                messagingRamlWithDefaults()
+                        .with(resource()
+                                .withRelativeUri("/structure.controller.command")
+                                .with(httpAction()
+                                        .withHttpActionType(POST)
+                                        .withMediaType("application/vnd.structure.test-cmd+json")))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        Class<?> clazz = getJmsListenerClass(BASE_PACKAGE, "StructureCommandControllerJmsListener");
+        assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
+        assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
+                hasItemInArray(allOf(propertyName(equalTo("messageSelector")),
+                        propertyValue(equalTo("CPPNAME in('structure.test-cmd')")))));
     }
 
     @Test
@@ -494,9 +512,9 @@ public class JmsEndpointGeneratorTest {
                 messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/structure.event")
-                                .with(action()
-                                        .withActionType(ActionType.POST)
-                                        .withMediaType("application/vnd.structure.event.test-event+json")))
+                                .with(httpAction()
+                                        .withHttpActionType(POST)
+                                        .withMediaType("application/vnd.structure.test-event+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -504,7 +522,7 @@ public class JmsEndpointGeneratorTest {
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("messageSelector")),
-                        propertyValue(equalTo("CPPNAME in('structure.event.test-event')")))));
+                        propertyValue(equalTo("CPPNAME in('structure.test-event')")))));
     }
 
     @Test
@@ -513,8 +531,8 @@ public class JmsEndpointGeneratorTest {
                 messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/structure.event")
-                                .with(action()
-                                        .withActionType(ActionType.POST)
+                                .with(httpAction()
+                                        .withHttpActionType(POST)
                                         .withMediaType("application/vnd.structure.events.test-event+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
@@ -532,13 +550,13 @@ public class JmsEndpointGeneratorTest {
                 messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/structure.controller.command")
-                                .with(action(POST, "application/vnd.structure.command.test-cmd1+json"))
-                                .with(action(GET, "application/vnd.structure.command.test-cmd2+json"))
-                                .with(action(DELETE, "application/vnd.structure.command.test-cmd3+json"))
-                                .with(action(HEAD, "application/vnd.structure.command.test-cmd4+json"))
-                                .with(action(OPTIONS, "application/vnd.structure.command.test-cmd5+json"))
-                                .with(action(PATCH, "application/vnd.structure.command.test-cmd6+json"))
-                                .with(action(TRACE, "application/vnd.structure.command.test-cmd7+json")))
+                                .with(httpAction(POST, "application/vnd.structure.test-cmd1+json"))
+                                .with(httpAction(GET, "application/vnd.structure.test-cmd2+json"))
+                                .with(httpAction(DELETE, "application/vnd.structure.test-cmd3+json"))
+                                .with(httpAction(HEAD, "application/vnd.structure.test-cmd4+json"))
+                                .with(httpAction(OPTIONS, "application/vnd.structure.test-cmd5+json"))
+                                .with(httpAction(PATCH, "application/vnd.structure.test-cmd6+json"))
+                                .with(httpAction(TRACE, "application/vnd.structure.test-cmd7+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -546,7 +564,7 @@ public class JmsEndpointGeneratorTest {
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("messageSelector")),
-                        propertyValue(equalTo("CPPNAME in('structure.command.test-cmd1')")))));
+                        propertyValue(equalTo("CPPNAME in('structure.test-cmd1')")))));
     }
 
     @Test
@@ -555,10 +573,10 @@ public class JmsEndpointGeneratorTest {
                 messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/people.controller.command")
-                                .with(action()
-                                        .withActionType(ActionType.POST)
-                                        .withMediaType("application/vnd.people.command.command1+json")
-                                        .withMediaType("application/vnd.people.command.command2+json")))
+                                .with(httpAction()
+                                        .withHttpActionType(POST)
+                                        .withMediaType("application/vnd.people.command1+json")
+                                        .withMediaType("application/vnd.people.command2+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -567,8 +585,8 @@ public class JmsEndpointGeneratorTest {
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("messageSelector")),
                         propertyValue(startsWith("CPPNAME in")),
-                        propertyValue(allOf(containsString("'people.command.command1'"),
-                                containsString("'people.command.command2'"))))));
+                        propertyValue(allOf(containsString("'people.command1'"),
+                                containsString("'people.command2'"))))));
     }
 
     @Test
@@ -613,7 +631,7 @@ public class JmsEndpointGeneratorTest {
                         .withBaseUri("message://event/listener/message/people")
                         .with(resource()
                                 .withRelativeUri("/people.event")
-                                .with(action(POST, "application/vnd.context1.event.abc+json")))
+                                .with(httpAction(POST, "application/vnd.context1.event.abc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -636,7 +654,7 @@ public class JmsEndpointGeneratorTest {
                         .withBaseUri("message://command/controller/message/people")
                         .with(resource()
                                 .withRelativeUri("/people.controller.command")
-                                .with(action(POST, "application/vnd.people.event.abc+json")))
+                                .with(httpAction(POST, "application/vnd.people.event.abc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 

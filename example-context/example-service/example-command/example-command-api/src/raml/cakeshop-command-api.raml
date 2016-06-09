@@ -9,9 +9,15 @@ protocols: [ HTTP, HTTPS ]
   description: |
     Add a new recipe
   post:
+    description: |
+        ...
+        (mapping):
+            requestType: application/vnd.cakeshop.add-recipe+json
+            name: cakeshop.add-recipe
+        ...
     body:
-        application/vnd.cakeshop.command.add-recipe+json:
-            schema: !include json/schema/cakeshop.command.add-recipe.json
+        application/vnd.cakeshop.add-recipe+json:
+            schema: !include json/schema/cakeshop.add-recipe.json
             example: !include json/add-recipe.json
 
 
@@ -20,7 +26,13 @@ protocols: [ HTTP, HTTPS ]
   description: |
     Make a cake from id in json
   post:
+    description: |
+        ...
+        (mapping):
+            requestType: application/vnd.cakeshop.make-cake+json
+            name: cakeshop.make-cake
+        ...
     body:
-        application/vnd.cakeshop.command.make-cake+json:
-            schema: !include json/schema/cakeshop.command.make-cake.json
+        application/vnd.cakeshop.make-cake+json:
+            schema: !include json/schema/cakeshop.make-cake.json
             example: !include json/make-cake.json

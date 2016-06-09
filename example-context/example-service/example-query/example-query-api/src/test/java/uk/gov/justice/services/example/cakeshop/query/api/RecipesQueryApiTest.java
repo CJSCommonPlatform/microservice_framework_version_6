@@ -45,7 +45,7 @@ public class RecipesQueryApiTest {
         when(envelope.payloadAsJsonObject()).thenReturn(payload);
         when(requester.request(envelope)).thenReturn(response);
 
-        JsonEnvelope actualResponse = recipesQueryApi.listRecipes(envelope);
+        JsonEnvelope actualResponse = recipesQueryApi.searchRecipes(envelope);
 
         verify(requester, times(1)).request(envelope);
         assertThat(actualResponse, sameInstance(response));
@@ -57,7 +57,7 @@ public class RecipesQueryApiTest {
         when(payload.getString(FIELD_RECIPE_ID)).thenReturn(RECIPE_ID.toString());
         when(requester.request(envelope)).thenReturn(response);
 
-        JsonEnvelope actualResponse = recipesQueryApi.recipe(envelope);
+        JsonEnvelope actualResponse = recipesQueryApi.getRecipe(envelope);
 
         verify(payload, times(1)).getString(FIELD_RECIPE_ID);
         verify(requester, times(1)).request(envelope);

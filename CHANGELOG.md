@@ -3,16 +3,17 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to 
 [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [0.8.12] - 2016-06-13
 
 ### Added
 
-- Implement support for typed query params
-- Implement action mapping
+- Support for [types](https://github.com/raml-org/raml-spec/blob/master/versions/raml-08/raml-08.md#type) on query parameters in the REST adapter generator
+- Initial [action mapping](https://github.com/CJSCommonPlatform/microservice_framework/wiki/User-Guide#rest-adapter-generator) support for the REST adapter generator,
+turned off by default
 
 ### Fixed
 
-- Fix REST client media type handling
+- Fix media type handling in the test utilities REST client
 
 ## [0.8.11] - 2016-06-07
 

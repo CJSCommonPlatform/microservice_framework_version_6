@@ -79,8 +79,7 @@ public class EnveloperTest {
 
     @Before
     public void setup() throws JsonProcessingException {
-        enveloper = new Enveloper();
-        enveloper.objectToJsonValueConverter = objectToJsonValueConverter;
+        enveloper = new Enveloper(objectToJsonValueConverter);
         object = new TestEvent();
 
         doReturn(TestEvent.class).when(event).getClazz();

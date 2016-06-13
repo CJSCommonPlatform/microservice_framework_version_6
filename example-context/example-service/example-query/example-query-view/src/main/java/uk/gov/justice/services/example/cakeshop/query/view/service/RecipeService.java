@@ -1,8 +1,6 @@
 package uk.gov.justice.services.example.cakeshop.query.view.service;
 
-import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import uk.gov.justice.services.example.cakeshop.persistence.RecipeRepository;
 import uk.gov.justice.services.example.cakeshop.persistence.entity.Recipe;
@@ -34,25 +32,17 @@ public class RecipeService {
                 .orElse(null);
     }
 
-    /**
-     * Find recipes by their name.
-     *
-     * @param name of the findRecipe to search for.
-     * @return List of recipes encapsulated in an {@link RecipesView}.  Never returns null.
-     */
-    public RecipesView findByName(final String name) {
-        return new RecipesView(isEmpty(name) ? emptyList() : recipeRepository.findByNameIgnoreCase(name).stream()
-                .map(RecipeView::new)
-                .collect(toList()));
-    }
 
     /**
-     * Get all recipes available.
+     * Get recipes by criteria.
      *
      * @return List of recipes encapsulated in an {@link RecipesView}.   Never returns null.
+     * @param pageSize
+     * @param recipeName
+     * @param glutenFree
      */
-    public RecipesView getRecipes() {
-        return new RecipesView(recipeRepository.findAll().stream().map(RecipeView::new).collect(toList()));
+    public RecipesView getRecipes(final int pageSize, final Optional<String> recipeName, Optional<Boolean> glutenFree) {
+        return new RecipesView(recipeRepository.findBy(pageSize, recipeName, glutenFree).stream().map(RecipeView::new).collect(toList()));
     }
 
 }

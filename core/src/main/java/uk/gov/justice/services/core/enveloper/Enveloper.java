@@ -7,8 +7,8 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
 
-import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.domain.annotation.Event;
+import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.core.enveloper.exception.InvalidEventException;
 import uk.gov.justice.services.core.extension.EventFoundEvent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -37,8 +37,17 @@ import javax.json.JsonValue;
 @ApplicationScoped
 public class Enveloper {
 
+    private final ObjectToJsonValueConverter objectToJsonValueConverter;
+
+    //for CDI proxying only
+    protected Enveloper() {
+        this.objectToJsonValueConverter = null;
+    }
+
     @Inject
-    ObjectToJsonValueConverter objectToJsonValueConverter;
+    public Enveloper(final ObjectToJsonValueConverter objectToJsonValueConverter) {
+        this.objectToJsonValueConverter = objectToJsonValueConverter;
+    }
 
     private ConcurrentHashMap<Class, String> eventMap = new ConcurrentHashMap<>();
 

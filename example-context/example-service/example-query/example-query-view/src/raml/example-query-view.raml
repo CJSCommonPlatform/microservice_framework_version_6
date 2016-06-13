@@ -16,13 +16,16 @@ protocols: [ HTTP, HTTPS ]
         ...
     queryParameters:
         pagesize:
-            type: string
+            type: integer
             required: true
         name:
             displayName: Name
             type: string
             description: A recipe name
             example: Mess
+            required: false
+        glutenFree:
+            type: boolean
             required: false
     responses:
       200:

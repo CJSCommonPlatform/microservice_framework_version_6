@@ -11,8 +11,11 @@ import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.raml.model.ActionType.GET;
+import static org.raml.model.ParamType.BOOLEAN;
+import static org.raml.model.ParamType.INTEGER;
 import static uk.gov.justice.services.adapters.test.utils.builder.HttpActionBuilder.defaultGetAction;
 import static uk.gov.justice.services.adapters.test.utils.builder.HttpActionBuilder.httpAction;
+import static uk.gov.justice.services.adapters.test.utils.builder.QueryParamBuilder.queryParam;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithQueryApiDefaults;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.defaultGetResource;
@@ -22,6 +25,7 @@ import static uk.gov.justice.services.adapters.test.utils.config.GeneratorProper
 import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.adapters.test.utils.reflection.ReflectionUtil.setField;
 
+import uk.gov.justice.services.adapter.rest.parameter.ParameterType;
 import uk.gov.justice.services.clients.core.EndpointDefinition;
 import uk.gov.justice.services.clients.core.RestClientHelper;
 import uk.gov.justice.services.clients.core.RestClientProcessor;
@@ -107,7 +111,12 @@ public class RestClientGenerator_MethodBodyTest extends AbstractClientGeneratorT
                 restRamlWithQueryApiDefaults()
                         .with(defaultGetResource()
                                 .with(defaultGetAction()
-                                        .withQueryParameters(queryParameterOf("qparam1", true), queryParameterOf("qparam2", false))))
+                                        .with(
+                                                queryParam("qparam1").required(true),
+                                                queryParam("qparam2").required(false),
+                                                queryParam("qparam3").required(false).withType(INTEGER),
+                                                queryParam("qparam4").required(false).withType(BOOLEAN))
+                                ))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, NOT_USED_GENERATOR_PROPERTIES));
 
@@ -117,10 +126,12 @@ public class RestClientGenerator_MethodBodyTest extends AbstractClientGeneratorT
 
         EndpointDefinition endpointDefinition = capturedEndpointDefinition();
 
-        assertThat(endpointDefinition.getQueryParams(), hasSize(2));
+        assertThat(endpointDefinition.getQueryParams(), hasSize(4));
         assertThat(endpointDefinition.getQueryParams(), hasItems(
-                allOf(hasProperty("name", is("qparam1")), hasProperty("required", is(true))),
-                allOf(hasProperty("name", is("qparam2")), hasProperty("required", is(false)))
+                allOf(hasProperty("name", is("qparam1")), hasProperty("required", is(true)), hasProperty("type", is(ParameterType.STRING))),
+                allOf(hasProperty("name", is("qparam2")), hasProperty("required", is(false)), hasProperty("type", is(ParameterType.STRING))),
+                allOf(hasProperty("name", is("qparam3")), hasProperty("required", is(false)), hasProperty("type", is(ParameterType.NUMERIC))),
+                allOf(hasProperty("name", is("qparam4")), hasProperty("required", is(false)), hasProperty("type", is(ParameterType.BOOLEAN)))
         ));
     }
 

@@ -19,10 +19,10 @@ public class Recipe implements Aggregate {
 
     private UUID recipeId;
 
-    public Stream<Object> addRecipe(final UUID recipeId, final String name, final List<Ingredient> ingredients) {
+    public Stream<Object> addRecipe(final UUID recipeId, final String name, final Boolean glutenFree, final List<Ingredient> ingredients) {
         assertPrecondition(this.recipeId == null).orElseThrow("Recipe already added");
 
-        return apply(Stream.of(new RecipeAdded(recipeId, name, ingredients)));
+        return apply(Stream.of(new RecipeAdded(recipeId, name, glutenFree, ingredients)));
     }
 
     @Override

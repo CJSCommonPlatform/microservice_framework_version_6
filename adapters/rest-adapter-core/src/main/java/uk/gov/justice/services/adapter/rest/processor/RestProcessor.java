@@ -1,4 +1,4 @@
-package uk.gov.justice.services.adapter.rest;
+package uk.gov.justice.services.adapter.rest.processor;
 
 import static java.lang.String.format;
 import static javax.json.JsonValue.NULL;
@@ -14,9 +14,10 @@ import static uk.gov.justice.services.messaging.logging.JsonEnvelopeLoggerHelper
 import static uk.gov.justice.services.messaging.logging.LoggerUtils.trace;
 
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
+import uk.gov.justice.services.adapter.rest.parameter.Parameter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
-import java.util.Map;
+import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -67,7 +68,7 @@ public class RestProcessor {
                                           final String action,
                                           final JsonObject initialPayload,
                                           final HttpHeaders headers,
-                                          final Map<String, String> params) {
+                                          final Collection<Parameter> params) {
 
         trace(LOGGER, () -> format("Processing REST message: %s", toHttpHeaderTrace(headers)));
 
@@ -99,7 +100,7 @@ public class RestProcessor {
     public Response processSynchronously(final Function<JsonEnvelope, JsonEnvelope> function,
                                          final String action,
                                          final HttpHeaders headers,
-                                         final Map<String, String> params) {
+                                         final Collection<Parameter> params) {
 
         trace(LOGGER, () -> format("Processing REST message: %s", toHttpHeaderTrace(headers)));
 

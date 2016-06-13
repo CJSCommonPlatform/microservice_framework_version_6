@@ -1,4 +1,4 @@
-package uk.gov.justice.services.adapter.rest;
+package uk.gov.justice.services.adapter.rest.processor;
 
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 import static uk.gov.justice.services.core.annotation.Component.componentFrom;

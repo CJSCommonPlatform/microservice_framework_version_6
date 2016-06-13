@@ -26,6 +26,8 @@ import com.google.common.collect.ImmutableList;
  */
 public final class JsonObjects {
 
+    private static final String FIELD_IS_NOT_A_TYPE = "Field %s is not a %s";
+
     /**
      * Private constructor to prevent misuse of utility class.
      */
@@ -112,7 +114,7 @@ public final class JsonObjects {
             }
 
             if (!valueType.equals(actualValueType)) {
-                throw new IllegalStateException(String.format("Field %s is not a %s", names[0], valueType.toString()));
+                throw new IllegalStateException(String.format(FIELD_IS_NOT_A_TYPE, names[0], valueType.toString()));
             }
 
             return Optional.of(function.apply(object, names[0]));
@@ -168,6 +170,24 @@ public final class JsonObjects {
         return getJsonValue(object, ValueType.NUMBER, JsonObject::getJsonNumber, names)
                 .map(JsonNumber::longValue);
     }
+
+    /**
+     * A convenience method to retrieve a Boolean value
+     *
+     * @param object the JsonObject from which to retrieve the value
+     * @param name  whose associated value is to be returned as Long
+     * @return the Boolean value to which the specified name is mapped
+     * @throws IllegalStateException if the value is not assignable to a Boolean
+     */
+    public static Optional<Boolean> getBoolean(final JsonObject object, final String name) {
+        try {
+            return object.containsKey(name) ? Optional.of(object.getBoolean(name)) : Optional.empty();
+        } catch (ClassCastException e) {
+            throw new IllegalStateException(String.format(FIELD_IS_NOT_A_TYPE, name, "Boolean"));
+        }
+    }
+
+
 
     /**
      * A convenience method for getting a JsonArray as a List of a specific JsonValue type.
@@ -260,4 +280,6 @@ public final class JsonObjects {
             throw new IllegalArgumentException("Field name cannot be null or empty");
         }
     }
+
+
 }

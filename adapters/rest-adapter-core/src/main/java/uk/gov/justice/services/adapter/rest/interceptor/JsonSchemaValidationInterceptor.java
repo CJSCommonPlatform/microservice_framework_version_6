@@ -1,4 +1,4 @@
-package uk.gov.justice.services.adapter.rest;
+package uk.gov.justice.services.adapter.rest.interceptor;
 
 import static java.nio.charset.Charset.defaultCharset;
 import static javax.ws.rs.core.MediaType.CHARSET_PARAMETER;

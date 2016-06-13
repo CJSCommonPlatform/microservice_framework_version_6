@@ -13,10 +13,10 @@ public class RecipeTest {
     @SuppressWarnings({"squid:MethodCyclomaticComplexity", "squid:S1067", "squid:S00122"})
     @Test
     public void equalsAndHashCode() {
-        Recipe item1 = new Recipe(ID, NAME);
-        Recipe item2 = new Recipe(ID, NAME);
-        Recipe item3 = new Recipe(UUID.randomUUID(), NAME);
-        Recipe item4 = new Recipe(ID, null);
+        Recipe item1 = new Recipe(ID, NAME, false);
+        Recipe item2 = new Recipe(ID, NAME, false);
+        Recipe item3 = new Recipe(UUID.randomUUID(), NAME, true);
+        Recipe item4 = new Recipe(ID, null, false);
 
         new EqualsTester()
                 .addEqualityGroup(item1, item2)

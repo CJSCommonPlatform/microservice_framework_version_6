@@ -2,8 +2,13 @@ package uk.gov.justice.services.adapters.rest.generator;
 
 
 import static java.util.Collections.emptyMap;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.Is.isA;
+import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -11,9 +16,13 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.raml.model.ActionType.GET;
+import static org.raml.model.ParamType.BOOLEAN;
+import static org.raml.model.ParamType.INTEGER;
+import static org.raml.model.ParamType.STRING;
 import static uk.gov.justice.services.adapters.test.utils.builder.HeadersBuilder.headersWith;
 import static uk.gov.justice.services.adapters.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.adapters.test.utils.builder.MappingBuilder.mapping;
+import static uk.gov.justice.services.adapters.test.utils.builder.QueryParamBuilder.queryParam;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.adapters.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.adapters.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
@@ -23,12 +32,14 @@ import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom
 
 import uk.gov.justice.services.adapter.rest.BasicActionMapper;
 import uk.gov.justice.services.adapter.rest.exception.BadRequestException;
+import uk.gov.justice.services.adapter.rest.parameter.Parameter;
 import uk.gov.justice.services.core.dispatcher.SynchronousDispatcher;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.function.Function;
 
 import javax.ws.rs.core.HttpHeaders;
@@ -65,7 +76,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         Object resourceObject = instanceOf(resourceClass);
 
         Response processorResponse = Response.ok().build();
-        when(restProcessor.processSynchronously(any(Function.class), anyString(), any(HttpHeaders.class), any(Map.class))).thenReturn(processorResponse);
+        when(restProcessor.processSynchronously(any(Function.class), anyString(), any(HttpHeaders.class), any(Collection.class))).thenReturn(processorResponse);
 
         Method method = firstMethodOf(resourceClass);
 
@@ -93,7 +104,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         method.invoke(resourceObject);
 
         ArgumentCaptor<Function> consumerCaptor = ArgumentCaptor.forClass(Function.class);
-        verify(restProcessor).processSynchronously(consumerCaptor.capture(), anyString(), any(HttpHeaders.class), any(Map.class));
+        verify(restProcessor).processSynchronously(consumerCaptor.capture(), anyString(), any(HttpHeaders.class), any(Collection.class));
 
         JsonEnvelope envelope = envelopeFrom(null, null);
         consumerCaptor.getValue().apply(envelope);
@@ -122,7 +133,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject);
 
-        verify(restProcessor).processSynchronously(any(Function.class), anyString(), eq(headers), any(Map.class));
+        verify(restProcessor).processSynchronously(any(Function.class), anyString(), eq(headers), any(Collection.class));
     }
 
 
@@ -163,7 +174,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
 
         verify(restProcessor).processSynchronously(any(Function.class), eq("contextA.action1"),
-                any(HttpHeaders.class), any(Map.class));
+                any(HttpHeaders.class), any(Collection.class));
     }
 
     @SuppressWarnings("unchecked")
@@ -195,14 +206,14 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
 
         verify(restProcessor).processSynchronously(any(Function.class), eq("contextB.action1"),
-                any(HttpHeaders.class), any(Map.class));
+                any(HttpHeaders.class), any(Collection.class));
     }
 
 
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
-    public void shouldPassMapWithOnePathParamToRestProcessor() throws Exception {
+    public void shouldPassOnePathParamToRestProcessor() throws Exception {
 
         generator.run(
                 restRamlWithDefaults().with(
@@ -218,21 +229,22 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, "paramValue1234");
 
-        ArgumentCaptor<Map> pathParamsCaptor = ArgumentCaptor.forClass(Map.class);
+        ArgumentCaptor<Collection> pathParamsCaptor = ArgumentCaptor.forClass(Collection.class);
 
         verify(restProcessor).processSynchronously(any(Function.class), anyString(), any(HttpHeaders.class),
                 pathParamsCaptor.capture());
 
-        Map pathParams = pathParamsCaptor.getValue();
-        assertThat(pathParams.entrySet().size(), is(1));
-        assertThat(pathParams.containsKey("paramA"), is(true));
-        assertThat(pathParams.get("paramA"), is("paramValue1234"));
+        Collection<Parameter> pathParams = pathParamsCaptor.getValue();
+        assertThat(pathParams, hasSize(1));
+        final Parameter pathParam = (Parameter) pathParams.iterator().next();
+        assertThat(pathParam.getName(), equalTo("paramA"));
+        assertThat(pathParam.getStringValue(), equalTo("paramValue1234"));
 
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
-    public void shouldPassMapWithTwoPathParamsToRestProcessor() throws Exception {
+    public void shouldPassTwoPathParamsToRestProcessor() throws Exception {
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/some/path/{param1}/{param2}", "param1", "param2")
@@ -247,28 +259,28 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, "paramValueABC", "paramValueDEF");
 
-        ArgumentCaptor<Map> pathParamsCaptor = ArgumentCaptor.forClass(Map.class);
+        ArgumentCaptor<Collection> pathParamsCaptor = ArgumentCaptor.forClass(Collection.class);
 
         verify(restProcessor).processSynchronously(any(Function.class), anyString(), any(HttpHeaders.class),
                 pathParamsCaptor.capture());
 
-        Map pathParams = pathParamsCaptor.getValue();
-        assertThat(pathParams.entrySet().size(), is(2));
-        assertThat(pathParams.containsKey("param1"), is(true));
-        assertThat(pathParams.get("param1"), is("paramValueABC"));
+        Collection<Parameter> pathParams = pathParamsCaptor.getValue();
+        assertThat(pathParams, hasSize(2));
 
-        assertThat(pathParams.containsKey("param2"), is(true));
-        assertThat(pathParams.get("param2"), is("paramValueDEF"));
+        assertThat(pathParams, hasItems(
+                allOf(hasProperty("name", equalTo("param1")), hasProperty("stringValue", equalTo("paramValueABC"))),
+                allOf(hasProperty("name", equalTo("param2")), hasProperty("stringValue", equalTo("paramValueDEF")))
+        ));
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
-    public void shouldPassMapWithOneQueryParamToRestProcessor() throws Exception {
+    public void shouldPassOneQueryParamToRestProcessor() throws Exception {
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/some/path")
                                 .with(httpAction(GET)
-                                        .withQueryParameters("queryParam")
+                                        .with(queryParam("queryParam"))
                                         .withDefaultResponseType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
@@ -280,26 +292,32 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, "paramValue1234");
 
-        ArgumentCaptor<Map> queryParamsCaptor = ArgumentCaptor.forClass(Map.class);
+        ArgumentCaptor<Collection> queryParamsCaptor = ArgumentCaptor.forClass(Collection.class);
 
         verify(restProcessor).processSynchronously(any(Function.class), anyString(), any(HttpHeaders.class),
                 queryParamsCaptor.capture());
 
-        Map queryParams = queryParamsCaptor.getValue();
-        assertThat(queryParams.entrySet().size(), is(1));
-        assertThat(queryParams.containsKey("queryParam"), is(true));
-        assertThat(queryParams.get("queryParam"), is("paramValue1234"));
+        Collection<Parameter> queryParams = queryParamsCaptor.getValue();
+
+        assertThat(queryParams, hasSize(1));
+        assertThat(queryParams, hasItems(
+                allOf(hasProperty("name", equalTo("queryParam")), hasProperty("stringValue", equalTo("paramValue1234")))
+        ));
+
 
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
-    public void shouldPassMapWithTwoQueryParamsToRestProcessor() throws Exception {
+    public void shouldPassStringAndNumericParamsToRestProcessor() throws Exception {
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/some/path")
                                 .with(httpAction(GET)
-                                        .withQueryParameters("queryParam1", "queryParam2")
+                                        .with(
+                                                queryParam("queryParam1").withType(STRING),
+                                                queryParam("queryParam2").withType(INTEGER)
+                                        )
                                         .withDefaultResponseType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
@@ -312,33 +330,72 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         boolean queryParam1IsFirstMethodParameter = method.getParameters()[0].getName().equals("queryParam1");
         if (queryParam1IsFirstMethodParameter) {
-            method.invoke(resourceObject, "paramValueABC", "paramValueDEF");
+            method.invoke(resourceObject, "paramValueABC", "2");
         } else {
-            method.invoke(resourceObject, "paramValueDEF", "paramValueABC");
+            method.invoke(resourceObject, "2", "paramValueABC");
         }
 
-        ArgumentCaptor<Map> queryParamsCaptor = ArgumentCaptor.forClass(Map.class);
+        ArgumentCaptor<Collection> queryParamsCaptor = ArgumentCaptor.forClass(Collection.class);
 
         verify(restProcessor).processSynchronously(any(Function.class), anyString(), any(HttpHeaders.class),
                 queryParamsCaptor.capture());
 
-        Map queryParams = queryParamsCaptor.getValue();
-        assertThat(queryParams.entrySet().size(), is(2));
-        assertThat(queryParams.containsKey("queryParam1"), is(true));
-        assertThat(queryParams.get("queryParam1"), is("paramValueABC"));
+        Collection<Parameter> queryParams = queryParamsCaptor.getValue();
 
-        assertThat(queryParams.containsKey("queryParam2"), is(true));
-        assertThat(queryParams.get("queryParam2"), is("paramValueDEF"));
+        assertThat(queryParams, hasSize(2));
+        assertThat(queryParams, hasItems(
+                allOf(hasProperty("name", equalTo("queryParam1")), hasProperty("stringValue", equalTo("paramValueABC"))),
+                allOf(hasProperty("name", equalTo("queryParam2")), hasProperty("numericValue", equalTo(BigDecimal.valueOf(2))))
+        ));
+
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
-    public void shouldPassMapWithOnePathParamAndOneQueryParamToRestProcessor() throws Exception {
+    public void shouldPassBooleanParamToRestProcessor() throws Exception {
+        generator.run(
+                restRamlWithDefaults().with(
+                        resource("/some/path")
+                                .with(httpAction(GET)
+                                        .with(
+                                                queryParam("queryParam").withType(BOOLEAN)
+                                        )
+                                        .withDefaultResponseType())
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+
+        Object resourceObject = instanceOf(resourceClass);
+
+        Method method = firstMethodOf(resourceClass);
+
+        method.invoke(resourceObject, "false");
+
+        ArgumentCaptor<Collection> queryParamsCaptor = ArgumentCaptor.forClass(Collection.class);
+
+        verify(restProcessor).processSynchronously(any(Function.class), anyString(), any(HttpHeaders.class),
+                queryParamsCaptor.capture());
+
+        Collection<Parameter> queryParams = queryParamsCaptor.getValue();
+
+        assertThat(queryParams, hasSize(1));
+        assertThat(queryParams, hasItems(
+                allOf(hasProperty("name", equalTo("queryParam")), hasProperty("booleanValue", equalTo(false)))
+        ));
+
+
+    }
+
+
+        @SuppressWarnings({"unchecked", "rawtypes"})
+    @Test
+    public void shouldPassOnePathParamAndOneQueryParamToRestProcessor() throws Exception {
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/some/path/{param}", "param")
                                 .with(httpAction(GET)
-                                        .withQueryParameters("queryParam")
+                                        .with(queryParam("queryParam"))
                                         .withDefaultResponseType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
@@ -350,18 +407,20 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, "paramValueABC", "paramValueDEF");
 
-        ArgumentCaptor<Map> paramsCaptor = ArgumentCaptor.forClass(Map.class);
+        ArgumentCaptor<Collection> paramsCaptor = ArgumentCaptor.forClass(Collection.class);
 
         verify(restProcessor).processSynchronously(any(Function.class), anyString(), any(HttpHeaders.class),
                 paramsCaptor.capture());
 
-        Map params = paramsCaptor.getValue();
-        assertThat(params.entrySet().size(), is(2));
-        assertThat(params.containsKey("param"), is(true));
-        assertThat(params.get("param"), is("paramValueABC"));
+        Collection<Parameter> params = paramsCaptor.getValue();
 
-        assertThat(params.containsKey("queryParam"), is(true));
-        assertThat(params.get("queryParam"), is("paramValueDEF"));
+        assertThat(params, hasSize(2));
+        assertThat(params, hasItems(
+                allOf(hasProperty("name", equalTo("param")), hasProperty("stringValue", equalTo("paramValueABC"))),
+                allOf(hasProperty("name", equalTo("queryParam")), hasProperty("stringValue", equalTo("paramValueDEF")))
+        ));
+
+
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -371,8 +430,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                 restRamlWithDefaults().with(
                         resource("/some/path")
                                 .with(httpAction(GET)
-                                        .withQueryParameters("queryParam1")
-                                        .withOptionalQueryParameters("queryParam2")
+                                        .with(queryParam("queryParam1").required(true), queryParam("queryParam2").required(false))
                                         .withDefaultResponseType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
@@ -390,15 +448,18 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
             method.invoke(resourceObject, NULL_STRING_VALUE, "paramValueABC");
         }
 
-        ArgumentCaptor<Map> queryParamsCaptor = ArgumentCaptor.forClass(Map.class);
+        ArgumentCaptor<Collection> queryParamsCaptor = ArgumentCaptor.forClass(Collection.class);
 
         verify(restProcessor).processSynchronously(any(Function.class), anyString(), any(HttpHeaders.class),
                 queryParamsCaptor.capture());
 
-        Map queryParams = queryParamsCaptor.getValue();
-        assertThat(queryParams.entrySet().size(), is(1));
-        assertThat(queryParams.containsKey("queryParam1"), is(true));
-        assertThat(queryParams.get("queryParam1"), is("paramValueABC"));
+        Collection<Parameter> queryParams = queryParamsCaptor.getValue();
+
+        assertThat(queryParams, hasSize(1));
+        assertThat(queryParams, hasItems(
+                allOf(hasProperty("name", equalTo("queryParam1")), hasProperty("stringValue", equalTo("paramValueABC")))
+        ));
+
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -411,7 +472,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                 restRamlWithDefaults().with(
                         resource("/some/path")
                                 .with(httpAction(GET)
-                                        .withQueryParameters("queryParam1")
+                                        .with(queryParam("queryParam1").required(true))
                                         .withDefaultResponseType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));

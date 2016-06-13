@@ -18,6 +18,7 @@ import static uk.gov.justice.raml.common.generator.Names.nameFrom;
 import uk.gov.justice.raml.common.mapper.ActionMapping;
 import uk.gov.justice.raml.core.Generator;
 import uk.gov.justice.raml.core.GeneratorConfig;
+import uk.gov.justice.services.adapter.rest.parameter.ParameterType;
 import uk.gov.justice.services.clients.core.EndpointDefinition;
 import uk.gov.justice.services.clients.core.QueryParam;
 import uk.gov.justice.services.clients.core.RestClientHelper;
@@ -233,7 +234,7 @@ public class RestClientGenerator implements Generator {
     }
 
     private void addQueryParam(final MethodSpec.Builder builder, final QueryParameter parameter, String name) {
-        builder.addStatement("queryParams.add(new QueryParam(\"$L\", $L))", name, parameter.isRequired());
+        builder.addStatement("queryParams.add(new QueryParam(\"$L\", $L, $T.$L))", name, parameter.isRequired(), ParameterType.class, ParameterType.valueOf(parameter.getType()).name());
     }
 
     private String methodNameOf(final ActionType actionType, final String header) {

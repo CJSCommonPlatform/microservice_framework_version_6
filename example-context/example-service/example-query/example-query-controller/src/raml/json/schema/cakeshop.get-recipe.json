@@ -7,6 +7,10 @@
       "id": "/name",
       "type": "string"
     },
+    "glutenFree": {
+      "id": "/glutenFree",
+      "type": "boolean"
+    },
     "ingredients": {
       "id": "/ingredients",
       "type": "array",

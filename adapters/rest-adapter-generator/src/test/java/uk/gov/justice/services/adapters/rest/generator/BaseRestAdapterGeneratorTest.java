@@ -3,7 +3,7 @@ package uk.gov.justice.services.adapters.rest.generator;
 
 import static uk.gov.justice.services.adapters.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
 
-import uk.gov.justice.services.adapter.rest.RestProcessor;
+import uk.gov.justice.services.adapter.rest.processor.RestProcessor;
 import uk.gov.justice.services.adapters.test.utils.compiler.JavaCompilerUtil;
 
 import java.util.Map;

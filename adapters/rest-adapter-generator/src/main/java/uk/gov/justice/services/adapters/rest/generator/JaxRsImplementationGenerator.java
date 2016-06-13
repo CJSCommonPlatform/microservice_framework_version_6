@@ -9,8 +9,6 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.POST;
-import static uk.gov.justice.services.adapters.rest.generator.Generators.byMimeTypeOrder;
-import static uk.gov.justice.services.adapters.rest.generator.Generators.componentFromBaseUriIn;
 import static uk.gov.justice.raml.common.generator.Names.DEFAULT_ANNOTATION_PARAMETER;
 import static uk.gov.justice.raml.common.generator.Names.GENERIC_PAYLOAD_ARGUMENT_NAME;
 import static uk.gov.justice.raml.common.generator.Names.RESOURCE_PACKAGE_NAME;
@@ -19,11 +17,14 @@ import static uk.gov.justice.raml.common.generator.Names.buildResourceMethodName
 import static uk.gov.justice.raml.common.generator.Names.packageNameOf;
 import static uk.gov.justice.raml.common.generator.Names.resourceImplementationNameOf;
 import static uk.gov.justice.raml.common.generator.Names.resourceInterfaceNameOf;
+import static uk.gov.justice.services.adapters.rest.generator.Generators.byMimeTypeOrder;
+import static uk.gov.justice.services.adapters.rest.generator.Generators.componentFromBaseUriIn;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.services.adapter.rest.BasicActionMapper;
-import uk.gov.justice.services.adapter.rest.RestProcessor;
-import uk.gov.justice.services.adapter.rest.ValidParameterMapBuilder;
+import uk.gov.justice.services.adapter.rest.parameter.ParameterType;
+import uk.gov.justice.services.adapter.rest.parameter.ValidParameterCollectionBuilder;
+import uk.gov.justice.services.adapter.rest.processor.RestProcessor;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
@@ -68,14 +69,12 @@ import org.slf4j.LoggerFactory;
  */
 class JaxRsImplementationGenerator {
 
-    private static final String VARIABLE_MAP_BUILDER = "validParameterMapBuilder";
-    private static final String PARAMS_PUT_REQUIRED_STATEMENT_FORMAT = "$L.putRequired($S, $N)";
-    private static final String PARAMS_PUT_OPTIONAL_STATEMENT_FORMAT = "$L.putOptional($S, $N)";
+    private static final String VARIABLE_PARAMS_COLLECTION_BUILDER = "validParameterCollectionBuilder";
+    private static final String PARAMS_PUT_REQUIRED_STATEMENT_FORMAT = "$L.putRequired($S, $N, $T.$L)";
+    private static final String PARAMS_PUT_OPTIONAL_STATEMENT_FORMAT = "$L.putOptional($S, $N, $T.$L)";
+    private static final String SYNCHRONOUS_METHOD_STATEMENT = "return restProcessor.processSynchronously(syncDispatcher::dispatch, $L.actionOf($S, \"GET\", headers), headers, $L.parameters())";
+    private static final String ASYNCHRONOUS_METHOD_STATEMENT = "return restProcessor.processAsynchronously(asyncDispatcher::dispatch, $L.actionOf($S, \"POST\", headers), entity, headers, $L.parameters())";
     private static final String ACTION_MAPPER_VARIABLE = "actionMapper";
-    private static final String SYNCHRONOUS_METHOD_STATEMENT =
-            "return restProcessor.processSynchronously(syncDispatcher::dispatch, $L.actionOf($S, \"GET\", headers), headers, $L.validateAndBuildMap())";
-    private static final String ASYNCHRONOUS_METHOD_STATEMENT =
-            "return restProcessor.processAsynchronously(asyncDispatcher::dispatch, $L.actionOf($S, \"POST\", headers), entity, headers, $L.validateAndBuildMap())";
 
     private final GeneratorConfig configuration;
 
@@ -311,9 +310,9 @@ class JaxRsImplementationGenerator {
      */
     private CodeBlock methodBodyForGet(final Map<String, QueryParameter> queryParams, final String resourceMethodName) {
         return CodeBlock.builder()
-                .add(putAllQueryParamsInMap(queryParams))
+                .add(putAllQueryParamsInCollectionBuilder(queryParams))
                 .addStatement(SYNCHRONOUS_METHOD_STATEMENT,
-                        ACTION_MAPPER_VARIABLE, resourceMethodName, VARIABLE_MAP_BUILDER)
+                        ACTION_MAPPER_VARIABLE, resourceMethodName, VARIABLE_PARAMS_COLLECTION_BUILDER)
                 .build();
     }
 
@@ -326,7 +325,7 @@ class JaxRsImplementationGenerator {
     private CodeBlock methodBodyForPost(final String resourceMethodName) {
         return CodeBlock.builder()
                 .addStatement(ASYNCHRONOUS_METHOD_STATEMENT,
-                        ACTION_MAPPER_VARIABLE, resourceMethodName, VARIABLE_MAP_BUILDER)
+                        ACTION_MAPPER_VARIABLE, resourceMethodName, VARIABLE_PARAMS_COLLECTION_BUILDER)
                 .build();
     }
 
@@ -336,16 +335,16 @@ class JaxRsImplementationGenerator {
      * @return the {@link CodeBlock} representing the general code
      */
     private CodeBlock methodBody(final Map<String, UriParameter> pathParams, final Supplier<CodeBlock> supplier) {
-        final ClassName classMapBuilderType = ClassName.get(ValidParameterMapBuilder.class);
+        final ClassName classMapBuilderType = ClassName.get(ValidParameterCollectionBuilder.class);
         final ClassName classLoggerUtils = ClassName.get(LoggerUtils.class);
         final ClassName classHttpMessageLoggerHelper = ClassName.get(HttpMessageLoggerHelper.class);
 
 
         return CodeBlock.builder()
-                .addStatement("$T $L = new $T()", classMapBuilderType, VARIABLE_MAP_BUILDER, classMapBuilderType)
+                .addStatement("$T $L = new $T()", classMapBuilderType, VARIABLE_PARAMS_COLLECTION_BUILDER, classMapBuilderType)
                 .addStatement("$T.trace(LOGGER, () -> String.format(\"Received REST request with headers: %s\", $T.toHttpHeaderTrace(headers)))",
                         classLoggerUtils, classHttpMessageLoggerHelper)
-                .add(putAllPathParamsInMap(pathParams.keySet()))
+                .add(putAllPathParamsInCollectionBuilder(pathParams.keySet()))
                 .add(supplier.get())
                 .build();
     }
@@ -356,11 +355,11 @@ class JaxRsImplementationGenerator {
      * @param paramNames the params to add to the map
      * @return the {@link CodeBlock} that represents the generated code
      */
-    private CodeBlock putAllPathParamsInMap(final Set<String> paramNames) {
+    private CodeBlock putAllPathParamsInCollectionBuilder(final Set<String> paramNames) {
         final CodeBlock.Builder builder = CodeBlock.builder();
 
         paramNames.stream().forEach(name ->
-                builder.addStatement(PARAMS_PUT_REQUIRED_STATEMENT_FORMAT, VARIABLE_MAP_BUILDER, name, name)
+                builder.addStatement(PARAMS_PUT_REQUIRED_STATEMENT_FORMAT, VARIABLE_PARAMS_COLLECTION_BUILDER, name, name, ParameterType.class, "STRING")
         );
 
         return builder.build();
@@ -372,22 +371,22 @@ class JaxRsImplementationGenerator {
      * @param parameters the params to add to the map
      * @return the {@link CodeBlock} that represents the generated code
      */
-    private CodeBlock putAllQueryParamsInMap(final Map<String, QueryParameter> parameters) {
+    private CodeBlock putAllQueryParamsInCollectionBuilder(final Map<String, QueryParameter> parameters) {
         final CodeBlock.Builder builder = CodeBlock.builder();
 
-        parameters.entrySet().stream().forEach(parameter -> {
-                    final String name = parameter.getKey();
-                    if (parameter.getValue().isRequired()) {
-                        builder.addStatement(PARAMS_PUT_REQUIRED_STATEMENT_FORMAT, VARIABLE_MAP_BUILDER, name, name);
+        parameters.entrySet().stream().forEach(paramEntry -> {
+            final String name = paramEntry.getKey();
+            final ParameterType parameterType = ParameterType.valueOf(paramEntry.getValue().getType());
+            if (paramEntry.getValue().isRequired()) {
+                        builder.addStatement(PARAMS_PUT_REQUIRED_STATEMENT_FORMAT, VARIABLE_PARAMS_COLLECTION_BUILDER, name, name, ParameterType.class, parameterType.name());
                     } else {
-                        builder.addStatement(PARAMS_PUT_OPTIONAL_STATEMENT_FORMAT, VARIABLE_MAP_BUILDER, name, name);
+                        builder.addStatement(PARAMS_PUT_OPTIONAL_STATEMENT_FORMAT, VARIABLE_PARAMS_COLLECTION_BUILDER, name, name, ParameterType.class, parameterType.name());
                     }
                 }
         );
 
         return builder.build();
     }
-
 
     /**
      * Generate method parameters for all the path params.

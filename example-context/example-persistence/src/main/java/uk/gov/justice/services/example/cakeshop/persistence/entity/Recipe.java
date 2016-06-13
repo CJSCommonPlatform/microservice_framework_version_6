@@ -19,9 +19,13 @@ public class Recipe implements Serializable {
     @Column(name = "name", nullable = false, insertable = true, updatable = true)
     private String name;
 
-    public Recipe(final UUID id, final String name) {
+    @Column(name = "glutenFree", nullable = false, insertable = true, updatable = true)
+    private boolean glutenFree;
+
+    public Recipe(final UUID id, final String name, final boolean glutenFree) {
         this.id = id;
         this.name = name;
+        this.glutenFree = glutenFree;
     }
 
     public Recipe() {
@@ -36,17 +40,22 @@ public class Recipe implements Serializable {
         return name;
     }
 
+    public boolean isGlutenFree() {
+        return glutenFree;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Recipe recipe = (Recipe) o;
         return Objects.equals(getId(), recipe.getId()) &&
-                Objects.equals(getName(), recipe.getName());
+                Objects.equals(getName(), recipe.getName()) &&
+                isGlutenFree() == recipe.isGlutenFree();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getName());
+        return Objects.hash(getId(), getName(), isGlutenFree());
     }
 }

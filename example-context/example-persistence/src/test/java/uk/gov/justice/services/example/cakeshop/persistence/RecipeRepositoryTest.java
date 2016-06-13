@@ -11,6 +11,7 @@ import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import uk.gov.justice.services.example.cakeshop.persistence.entity.Recipe;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -29,6 +30,7 @@ public class RecipeRepositoryTest {
     private static final String RECIPE_NAME_B = "Sponge Cake";
     private static final UUID RECIPE_ID_C = UUID.randomUUID();
     private static final String RECIPE_NAME_C = "Muffin";
+    private static final boolean RECIPE_GLUTEN_FREE_A = true;
 
     @Inject
     private RecipeRepository recipeRepository;
@@ -39,11 +41,11 @@ public class RecipeRepositoryTest {
 
     @Before
     public void setup() {
-        recipeA = createRecipe(RECIPE_ID_A, RECIPE_NAME_A);
+        recipeA = createRecipe(RECIPE_ID_A, RECIPE_NAME_A, RECIPE_GLUTEN_FREE_A);
         recipeRepository.save(recipeA);
-        recipeB = createRecipe(RECIPE_ID_B, RECIPE_NAME_B);
+        recipeB = createRecipe(RECIPE_ID_B, RECIPE_NAME_B, false);
         recipeRepository.save(recipeB);
-        recipeC = createRecipe(RECIPE_ID_C, RECIPE_NAME_C);
+        recipeC = createRecipe(RECIPE_ID_C, RECIPE_NAME_C, true);
         recipeRepository.save(recipeC);
     }
 
@@ -54,6 +56,17 @@ public class RecipeRepositoryTest {
         assertThat(recipe, is(notNullValue()));
         assertThat(recipe.getId(), equalTo(RECIPE_ID_A));
         assertThat(recipe.getName(), equalTo(RECIPE_NAME_A));
+        assertThat(recipe.isGlutenFree(), is(RECIPE_GLUTEN_FREE_A));
+    }
+
+    @Test
+    public void shouldReturnPage() throws Exception {
+        final int pageSize = 2;
+        List<Recipe> recipeList = recipeRepository.findBy(pageSize, Optional.empty(), Optional.empty());
+
+        assertThat(recipeList, hasSize(2));
+        assertThat(recipeList, hasItems(recipeA, recipeC));
+
     }
 
     @Test
@@ -63,27 +76,28 @@ public class RecipeRepositoryTest {
         assertThat(recipe, is(nullValue()));
     }
 
-    @Test
-    public void shouldReturnRecipesMatchingName() {
-        List<Recipe> recipeList = recipeRepository.findByNameIgnoreCase(RECIPE_NAME_A);
-
-        assertThat(recipeList, hasSize(1));
-        assertThat(recipeList.get(0).getId(), equalTo(RECIPE_ID_A));
-        assertThat(recipeList.get(0).getName(), equalTo(RECIPE_NAME_A));
-    }
 
     @Test
     public void shouldReturnListOfRecipesMatchingName() {
-        List<Recipe> recipeList = recipeRepository.findByNameIgnoreCase("%Cake%");
+        List<Recipe> recipeList = recipeRepository.findBy(10, Optional.of("Cake"), Optional.empty());
 
         assertThat(recipeList, hasSize(2));
-        assertThat(recipeList, hasItems(recipeA));
-        assertThat(recipeList, hasItems(recipeB));
+        assertThat(recipeList, hasItems(recipeA, recipeB));
+
     }
 
     @Test
+    public void shouldReturnListOfGlutenFreeOfRecipes() {
+        List<Recipe> recipeList = recipeRepository.findBy(10, Optional.empty(), Optional.of(true));
+
+        assertThat(recipeList, hasSize(2));
+        assertThat(recipeList, hasItems(recipeA, recipeC));
+    }
+
+
+    @Test
     public void shouldReturnEmptyListOfRecipesIfSearchDoesNotMatch() {
-        List<Recipe> recipeList = recipeRepository.findByNameIgnoreCase("InvalidName");
+        List<Recipe> recipeList = recipeRepository.findBy(10, Optional.of("InvalidName"), Optional.empty());
 
         assertThat(recipeList, hasSize(0));
     }
@@ -98,7 +112,7 @@ public class RecipeRepositoryTest {
         assertThat(recipeList, hasItems(recipeC));
     }
 
-    private Recipe createRecipe(UUID id, String name) {
-        return new Recipe(id, name);
+    private Recipe createRecipe(final UUID id, final String name, final boolean glutenFree) {
+        return new Recipe(id, name, glutenFree);
     }
 }

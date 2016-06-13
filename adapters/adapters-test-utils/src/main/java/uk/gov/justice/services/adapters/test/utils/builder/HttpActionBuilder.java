@@ -5,7 +5,6 @@ import static java.util.Arrays.stream;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.POST;
-import static org.raml.model.ParamType.STRING;
 import static uk.gov.justice.services.adapters.test.utils.builder.MappingBuilder.defaultMapping;
 import static uk.gov.justice.services.adapters.test.utils.builder.MappingBuilder.mapping;
 import static uk.gov.justice.services.adapters.test.utils.builder.MappingDescriptionBuilder.mappingDescription;
@@ -106,13 +105,11 @@ public class HttpActionBuilder {
         return this;
     }
 
-    public HttpActionBuilder withQueryParameters(final String... paramNames) {
-        withQueryParameters(true, paramNames);
-        return this;
-    }
-
-    public HttpActionBuilder withOptionalQueryParameters(final String... paramNames) {
-        withQueryParameters(false, paramNames);
+    public HttpActionBuilder with(final QueryParamBuilder... params) {
+        for (QueryParamBuilder param : params) {
+            final QueryParameter p = param.build();
+            this.queryParameters.put(p.getDisplayName(), p);
+        }
         return this;
     }
 
@@ -160,13 +157,4 @@ public class HttpActionBuilder {
         return action;
     }
 
-    private void withQueryParameters(final boolean required, final String... paramNames) {
-        stream(paramNames).forEach(paramName -> {
-            final QueryParameter queryParameter = new QueryParameter();
-            queryParameter.setDisplayName(paramName);
-            queryParameter.setType(STRING);
-            queryParameter.setRequired(required);
-            this.queryParameters.put(paramName, queryParameter);
-        });
-    }
 }

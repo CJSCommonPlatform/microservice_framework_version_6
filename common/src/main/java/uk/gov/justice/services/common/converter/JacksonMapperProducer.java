@@ -17,7 +17,7 @@ import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 public class JacksonMapperProducer {
 
     @Produces
-    ObjectMapper objectMapper() {
+    public ObjectMapper objectMapper() {
         ObjectMapper mapper = new ObjectMapper();
 
         mapper.registerModule(new Jdk8Module());

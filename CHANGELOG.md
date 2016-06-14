@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to 
 [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+
+- Fix RAML action mapping description to allow other description text surrounding the mapping
+
 ## [0.8.12] - 2016-06-13
 
 ### Added

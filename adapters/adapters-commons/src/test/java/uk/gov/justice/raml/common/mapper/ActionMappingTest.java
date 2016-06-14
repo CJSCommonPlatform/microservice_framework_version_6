@@ -73,6 +73,38 @@ public class ActionMappingTest {
                 allOf(hasProperty("requestType", equalTo("application/vnd.bbbbb+json")), hasProperty("name", equalTo("actionB")))));
     }
 
+    @Test
+    public void shouldCreateMappingIfPrefixedByOtherText() throws Exception {
+
+        List<ActionMapping> mappings = listOf("test" + mappingDescriptionWith(
+                mapping()
+                        .withRequestType("application/vnd.aaaa+json")
+                        .withName("actionA"))
+                .build());
+
+        assertThat(mappings, hasSize(1));
+        ActionMapping mapping = mappings.get(0);
+        assertThat(mapping.getRequestType(), is("application/vnd.aaaa+json"));
+        assertThat(mapping.mimeTypeFor(POST), is("application/vnd.aaaa+json"));
+        assertThat(mapping.getName(), is("actionA"));
+    }
+
+    @Test
+    public void shouldCreateMappingIfSuffixedByOtherText() throws Exception {
+
+        List<ActionMapping> mappings = listOf(mappingDescriptionWith(
+                mapping()
+                        .withRequestType("application/vnd.aaaa+json")
+                        .withName("actionA"))
+                .build() + "test");
+
+        assertThat(mappings, hasSize(1));
+        ActionMapping mapping = mappings.get(0);
+        assertThat(mapping.getRequestType(), is("application/vnd.aaaa+json"));
+        assertThat(mapping.mimeTypeFor(POST), is("application/vnd.aaaa+json"));
+        assertThat(mapping.getName(), is("actionA"));
+    }
+
     @Test(expected = RamlValidationException.class)
     public void shouldFailWithNoMapping() throws Exception {
         listOf(MAPPING_BOUNDARY + "\n" +
@@ -92,6 +124,22 @@ public class ActionMappingTest {
                 REQUEST_TYPE_KEY + ": application/vnd.aaaa+json\n" +
                 NAME_KEY + ": actionA\n" +
                 MAPPING_BOUNDARY + "\n");
+    }
+
+    @Test(expected = RamlValidationException.class)
+    public void shouldFailWithStartMappingBoundaryMissing() throws Exception {
+        listOf(MAPPING_SEPARATOR + "\n" +
+                REQUEST_TYPE_KEY + ": application/vnd.aaaa+json\n" +
+                NAME_KEY + ": actionA\n" +
+                MAPPING_BOUNDARY + "\n");
+    }
+
+    @Test(expected = RamlValidationException.class)
+    public void shouldFailWithEndMappingBoundaryMissing() throws Exception {
+        listOf(MAPPING_BOUNDARY + "\n" +
+                MAPPING_SEPARATOR + "\n" +
+                REQUEST_TYPE_KEY + ": application/vnd.aaaa+json\n" +
+                NAME_KEY + ": actionA\n");
     }
 
     @Test(expected = RamlValidationException.class)

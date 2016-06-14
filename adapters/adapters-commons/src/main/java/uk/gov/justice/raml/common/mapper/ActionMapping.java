@@ -92,17 +92,17 @@ public class ActionMapping {
     }
 
     private static String extractMappingFrom(final String mappingString) {
-        return removeUpToIncludingMappingBoundary(removeAfterIncludingMappingBoundary(mappingString));
+        return trimPreMappingDescription(trimPostMappingDescription(mappingString));
     }
 
-    private static String removeUpToIncludingMappingBoundary(final String source) {
+    private static String trimPreMappingDescription(final String source) {
         if (isNotEmpty(source)) {
             return source.substring(source.indexOf(MAPPING_BOUNDARY) + MAPPING_BOUNDARY.length(), source.length());
         }
         return source;
     }
 
-    private static String removeAfterIncludingMappingBoundary(final String source) {
+    private static String trimPostMappingDescription(final String source) {
         return source.substring(0, source.lastIndexOf(MAPPING_BOUNDARY));
     }
 

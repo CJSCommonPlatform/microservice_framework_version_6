@@ -9,10 +9,12 @@ import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.junit.Assert.assertThat;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.POST;
-import static uk.gov.justice.raml.common.mapper.ActionMapping.*;
 import static uk.gov.justice.raml.common.mapper.ActionMapping.MAPPING_BOUNDARY;
 import static uk.gov.justice.raml.common.mapper.ActionMapping.MAPPING_SEPARATOR;
+import static uk.gov.justice.raml.common.mapper.ActionMapping.NAME_KEY;
 import static uk.gov.justice.raml.common.mapper.ActionMapping.REQUEST_TYPE_KEY;
+import static uk.gov.justice.raml.common.mapper.ActionMapping.RESPONSE_TYPE_KEY;
+import static uk.gov.justice.raml.common.mapper.ActionMapping.listOf;
 import static uk.gov.justice.services.adapters.test.utils.builder.MappingBuilder.mapping;
 import static uk.gov.justice.services.adapters.test.utils.builder.MappingDescriptionBuilder.mappingDescriptionWith;
 
@@ -76,11 +78,12 @@ public class ActionMappingTest {
     @Test
     public void shouldCreateMappingIfPrefixedByOtherText() throws Exception {
 
-        List<ActionMapping> mappings = listOf("test" + mappingDescriptionWith(
-                mapping()
-                        .withRequestType("application/vnd.aaaa+json")
-                        .withName("actionA"))
-                .build());
+        List<ActionMapping> mappings = listOf("Pre description of action" +
+                mappingDescriptionWith(
+                        mapping()
+                                .withRequestType("application/vnd.aaaa+json")
+                                .withName("actionA"))
+                        .build());
 
         assertThat(mappings, hasSize(1));
         ActionMapping mapping = mappings.get(0);
@@ -96,7 +99,7 @@ public class ActionMappingTest {
                 mapping()
                         .withRequestType("application/vnd.aaaa+json")
                         .withName("actionA"))
-                .build() + "test");
+                .build() + "Post description of action");
 
         assertThat(mappings, hasSize(1));
         ActionMapping mapping = mappings.get(0);

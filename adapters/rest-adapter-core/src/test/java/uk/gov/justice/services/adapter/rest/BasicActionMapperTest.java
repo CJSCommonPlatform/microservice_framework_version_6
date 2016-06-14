@@ -43,7 +43,23 @@ public class BasicActionMapperTest {
         assertThat(mapping.actionOf("methodB", "POST",
                 headersWith("Content-Type", "application/vnd.blah+json")), is("actionNameC"));
     }
+
+    @Test
+    public void shouldReturnActionForGetRequestIfCharsetIncludedInMediaType() throws Exception {
+        TestActionMapper mapping = new TestActionMapper();
+
+        assertThat(mapping.actionOf("methodA", "GET",
+                headersWith("Accept", "application/vnd.blah+json; charset=ISO-8859-1")), is("actionNameA"));
+    }
     
+    @Test
+    public void shouldReturnActionForPOSTRequestIfCharsetIncludedInMediaType() throws Exception {
+        TestActionMapper mapping = new TestActionMapper();
+
+        assertThat(mapping.actionOf("methodA", "POST",
+                headersWith("Content-Type", "application/vnd.blah+json; charset=ISO-8859-1")), is("actionNameA"));
+    }
+
     @Test
     public void shouldThrowExceptionIfGetRequestMediaTypeDoesNotMatch() throws Exception {
         exception.expect(BadRequestException.class);

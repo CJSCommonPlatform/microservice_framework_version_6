@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Changed
+
+- Messaging adapter generator now uses Java Poet for code generation instead of a template
+
 ### Fixed
 
 - Fix RAML action mapping description to allow other description text surrounding the mapping

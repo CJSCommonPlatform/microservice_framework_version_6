@@ -20,6 +20,8 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.json.JsonObject;
+import javax.naming.Context;
+import javax.naming.NamingException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -65,6 +67,9 @@ public class JmsEnvelopeSenderTest {
     @Mock
     private Metadata metadata;
 
+    @Mock
+    private Context namingContext;
+
     private JmsEnvelopeSender jmsEnvelopeSender;
 
     @Before
@@ -72,6 +77,7 @@ public class JmsEnvelopeSenderTest {
         jmsEnvelopeSender = new JmsEnvelopeSender();
         jmsEnvelopeSender.connectionFactory = connectionFactory;
         jmsEnvelopeSender.envelopeConverter = envelopeConverter;
+        jmsEnvelopeSender.namingContext = namingContext;
 
         when(connectionFactory.createConnection()).thenReturn(connection);
         when(envelope.metadata()).thenReturn(metadata);
@@ -81,7 +87,7 @@ public class JmsEnvelopeSenderTest {
     }
 
     @Test
-    public void shouldPublishValidEnvelopeToTheTopic() throws Exception {
+    public void shouldPublishValidEnvelopeToDestination() throws Exception {
         when(connection.createSession(false, AUTO_ACKNOWLEDGE)).thenReturn(session);
         when(envelopeConverter.toMessage(envelope, session)).thenReturn(textMessage);
 
@@ -93,6 +99,34 @@ public class JmsEnvelopeSenderTest {
         verify(connection, times(1)).close();
         verify(messageProducer, times(1)).close();
     }
+
+
+    @Test
+    public void shouldPublishValidEnvelopeToNamedDestination() throws Exception {
+        when(connection.createSession(false, AUTO_ACKNOWLEDGE)).thenReturn(session);
+        when(envelopeConverter.toMessage(envelope, session)).thenReturn(textMessage);
+        final String destinationName = "some.queue.name";
+        when(namingContext.lookup(destinationName)).thenReturn(destination);
+
+        jmsEnvelopeSender.send(envelope, destinationName);
+
+        verify(session, times(1)).createProducer(destination);
+        verify(messageProducer, times(1)).send(textMessage);
+        verify(session, times(1)).close();
+        verify(connection, times(1)).close();
+        verify(messageProducer, times(1)).close();
+
+
+    }
+    @Test(expected = JmsEnvelopeSenderException.class)
+    public void shouldThrowExceptionOnNaminfException() throws JMSException, NamingException {
+        final String destinationName = "some.queue.name";
+        when(namingContext.lookup(destinationName)).thenThrow(new NamingException());
+
+        jmsEnvelopeSender.send(envelope, destinationName);
+    }
+
+
 
     @Test(expected = JmsEnvelopeSenderException.class)
     public void shouldThrowExceptionOnJmsException() throws JMSException {

@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to 
 [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [0.9.0] - 2016-06-15
 
 ### Changed
 
@@ -12,6 +12,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ### Fixed
 
 - Fix RAML action mapping description to allow other description text surrounding the mapping
+- Fix action mapper to support media types with different character sets
 
 ## [0.8.12] - 2016-06-13
 

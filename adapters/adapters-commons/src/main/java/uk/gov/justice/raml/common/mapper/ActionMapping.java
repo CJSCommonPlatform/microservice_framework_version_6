@@ -6,8 +6,7 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.removeEnd;
-import static org.apache.commons.lang3.StringUtils.removeStart;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.trim;
 import static org.raml.model.ActionType.POST;
 
@@ -64,10 +63,25 @@ public class ActionMapping {
         return actionMappings;
     }
 
+    public String getRequestType() {
+        return requestType;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getResponseType() {
+        return responseType;
+    }
+
+    public String mimeTypeFor(final ActionType httpMethod) {
+        return POST.equals(httpMethod) ? getRequestType() : getResponseType();
+    }
+
     private static List<ActionMapping> actionMappingsOf(final String mappingString) {
-        if (mappingString != null && mappingString.startsWith(MAPPING_BOUNDARY)
-                && mappingString.endsWith(MAPPING_BOUNDARY)) {
-            return stream(removeStart(removeEnd(mappingString, MAPPING_BOUNDARY), MAPPING_BOUNDARY)
+        if (isNotEmpty(mappingString) && mappingString.contains(MAPPING_BOUNDARY)) {
+            return stream(extractMappingFrom(mappingString)
                     .split(MAPPING_SEPARATOR_PATTERN))
                     .filter(StringUtils::isNotBlank)
                     .map(ActionMapping::valueOf)
@@ -75,6 +89,21 @@ public class ActionMapping {
 
         }
         return emptyList();
+    }
+
+    private static String extractMappingFrom(final String mappingString) {
+        return trimPreMappingDescription(trimPostMappingDescription(mappingString));
+    }
+
+    private static String trimPreMappingDescription(final String source) {
+        if (isNotEmpty(source)) {
+            return source.substring(source.indexOf(MAPPING_BOUNDARY) + MAPPING_BOUNDARY.length(), source.length());
+        }
+        return source;
+    }
+
+    private static String trimPostMappingDescription(final String source) {
+        return source.substring(0, source.lastIndexOf(MAPPING_BOUNDARY));
     }
 
     private static ActionMapping valueOf(final String mappingString) {
@@ -110,21 +139,5 @@ public class ActionMapping {
         if (actionMappings.stream().anyMatch(actionMappingPredicate)) {
             throw new RamlValidationException(errorMessage);
         }
-    }
-
-    public String getRequestType() {
-        return requestType;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getResponseType() {
-        return responseType;
-    }
-
-    public String mimeTypeFor(final ActionType httpMethod) {
-        return POST.equals(httpMethod) ? getRequestType() : getResponseType();
     }
 }

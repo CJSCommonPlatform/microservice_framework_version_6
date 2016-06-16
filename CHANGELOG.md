@@ -12,6 +12,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ### Changed
 
 - Object mapper configured to exclude nulls from JSON
+- Ensure dates are stored and retrieved in UTC format
 
 ## [0.9.0] - 2016-06-15
 

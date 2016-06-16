@@ -1,5 +1,6 @@
 package uk.gov.justice.services.example.cakeshop.query.api;
 
+
 import static org.slf4j.LoggerFactory.getLogger;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 
@@ -13,28 +14,18 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 
 @ServiceComponent(QUERY_API)
-public class RecipesQueryApi {
+public class CakeOrdersQueryApi {
+    private static final Logger LOGGER = getLogger(CakeOrdersQueryApi.class);
 
-    private static final Logger LOGGER = getLogger(RecipesQueryApi.class);
-    private static final String FIELD_RECIPE_ID = "recipeId";
     private static final String FIELD_ORDER_ID = "orderId";
 
     @Inject
     Requester requester;
 
-    @Handles("cakeshop.search-recipes")
-    public JsonEnvelope searchRecipes(final JsonEnvelope query) {
-        LOGGER.info("=============> Inside listRecipes Query API");
+    @Handles("cakeshop.get-order")
+    public JsonEnvelope getOrder(final JsonEnvelope query) {
+        LOGGER.info("=============> Inside cake order Query API. OrderId: " + query.payloadAsJsonObject().getString(FIELD_ORDER_ID));
 
         return requester.request(query);
     }
-
-    @Handles("cakeshop.get-recipe")
-    public JsonEnvelope getRecipe(final JsonEnvelope query) {
-        LOGGER.info("=============> Inside recipe Query API. RecipeId: " + query.payloadAsJsonObject().getString(FIELD_RECIPE_ID));
-
-        return requester.request(query);
-    }
-
-
 }

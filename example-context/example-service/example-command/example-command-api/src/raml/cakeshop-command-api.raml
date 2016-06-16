@@ -36,3 +36,20 @@ protocols: [ HTTP, HTTPS ]
         application/vnd.cakeshop.make-cake+json:
             schema: !include json/schema/cakeshop.make-cake.json
             example: !include json/make-cake.json
+
+
+
+/orders/{orderId}:
+  description: |
+    Order a cake
+  post:
+    description: |
+        ...
+        (mapping):
+            requestType: application/vnd.cakeshop.order-cake+json
+            name: cakeshop.order-cake
+        ...
+    body:
+        application/vnd.cakeshop.order-cake+json:
+            schema: !include json/schema/cakeshop.order-cake.json
+            example: !include json/order-cake.json

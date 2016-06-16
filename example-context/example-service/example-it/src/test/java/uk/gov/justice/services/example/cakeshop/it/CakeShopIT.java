@@ -67,11 +67,15 @@ public class CakeShopIT {
     private static final String H2_DRIVER = "org.h2.Driver";
     private static final String RECIPES_RESOURCE_URI = "http://localhost:8080/example-command-api/command/api/rest/cakeshop/recipes/";
     private static final String CAKES_RESOURCE_URI = "http://localhost:8080/example-command-api/command/api/rest/cakeshop/cakes/";
+    private static final String ORDERS_RESOURCE_URI = "http://localhost:8080/example-command-api/command/api/rest/cakeshop/orders/";
     private static final String RECIPES_RESOURCE_QUERY_URI = "http://localhost:8080/example-query-api/query/api/rest/cakeshop/recipes/";
+    private static final String ORDERS_RESOURCE_QUERY_URI = "http://localhost:8080/example-query-api/query/api/rest/cakeshop/orders/";
     private static final String ADD_RECIPE_MEDIA_TYPE = "application/vnd.cakeshop.add-recipe+json";
     private static final String MAKE_CAKE_MEDIA_TYPE = "application/vnd.cakeshop.make-cake+json";
+    private static final String ORDER_CAKE_MEDIA_TYPE = "application/vnd.cakeshop.order-cake+json";
     private static final String QUERY_RECIPE_MEDIA_TYPE = "application/vnd.cakeshop.recipe+json";
     private static final String QUERY_RECIPES_MEDIA_TYPE = "application/vnd.cakeshop.recipes+json";
+    private static final String QUERY_ORDER_MEDIA_TYPE = "application/vnd.cakeshop.order+json";
 
     public final static String JMS_CONNECTION_FACTORY_JNDI = "jms/RemoteConnectionFactory";
     public final static String DLQ_JNDI = "jms/queue/DLQ";
@@ -343,6 +347,34 @@ public class CakeShopIT {
         assertThat(queryForRecipe(recipeId).httpCode(), is(NOT_FOUND));
     }
 
+
+    @Test
+    public void shouldReturnOrderWithUTCOrderDate() {
+
+        final String orderId = "263af847-effb-46a9-96bc-32a0f7526e12";
+
+        final Response commandResponse =
+                sendTo(ORDERS_RESOURCE_URI + orderId).request()
+                        .post(entity(
+                                jsonObject()
+                                        .add("recipeId", "163af847-effb-46a9-96bc-32a0f7526f11")
+                                        .add("deliveryDate", "2016-07-25T23:09:01.0+05:00")
+                                        .build().toString(),
+                                ORDER_CAKE_MEDIA_TYPE));
+
+        assertThat(commandResponse.getStatus(), is(ACCEPTED));
+
+        await().until(() -> queryForOrder(orderId).httpCode() == OK);
+
+        final ApiResponse queryResponse = queryForOrder(orderId);
+
+        with(queryResponse.body())
+                .assertThat("$.orderId", equalTo(orderId))
+                .assertThat("$.deliveryDate", equalTo("2016-07-25T18:09:01Z"));
+
+
+    }
+
     private static void initCakeShopDb() throws Exception {
         CAKE_SHOP_DS = initDatabase("db.cakeshop.url", "db.cakeshop.userName", "db.cakeshop.password",
                 "liquibase/view-store-db-changelog.xml");
@@ -361,25 +393,26 @@ public class CakeShopIT {
     }
 
 
-    private ApiResponse queryForRecipe(String recipeId) {
-        Response jaxrsResponse = sendTo(RECIPES_RESOURCE_QUERY_URI + recipeId).request().accept(QUERY_RECIPE_MEDIA_TYPE).get();
-        ApiResponse response = ApiResponse.from(jaxrsResponse);
-        jaxrsResponse.close();
-        return response;
+    private ApiResponse queryForRecipe(final String recipeId) {
+        final Response jaxrsResponse = sendTo(RECIPES_RESOURCE_QUERY_URI + recipeId).request().accept(QUERY_RECIPE_MEDIA_TYPE).get();
+        return ApiResponse.from(jaxrsResponse);
+    }
+
+    private ApiResponse queryForOrder(final String orderId) {
+        final Response jaxrsResponse = sendTo(ORDERS_RESOURCE_QUERY_URI + orderId).request().accept(QUERY_ORDER_MEDIA_TYPE).get();
+        return ApiResponse.from(jaxrsResponse);
     }
 
     private ApiResponse queryForRecipes() {
         return queryForRecipes(asList(new BasicNameValuePair("pagesize", "50")));
     }
 
-    private ApiResponse queryForRecipes(List<NameValuePair> queryParams) {
+    private ApiResponse queryForRecipes(final List<NameValuePair> queryParams) {
         try {
             URIBuilder uri = new URIBuilder(RECIPES_RESOURCE_QUERY_URI);
             uri.addParameters(queryParams);
             Response jaxrRsResponse = sendTo(uri.toString()).request().accept(QUERY_RECIPES_MEDIA_TYPE).get();
-            ApiResponse apiResponse = ApiResponse.from(jaxrRsResponse);
-            jaxrRsResponse.close();
-            return apiResponse;
+            return ApiResponse.from(jaxrRsResponse);
         } catch (URISyntaxException e) {
             fail(e.getMessage());
             return null;
@@ -398,10 +431,10 @@ public class CakeShopIT {
                 .build().toString();
     }
 
-    private static DataSource initDatabase(String dbUrlPropertyName,
-                                           String dbUserNamePropertyName,
-                                           String dbPasswordPropertyName,
-                                           String liquibaseEventStoreDbChangelogXml) throws Exception {
+    private static DataSource initDatabase(final String dbUrlPropertyName,
+                                           final String dbUserNamePropertyName,
+                                           final String dbPasswordPropertyName,
+                                           final String liquibaseEventStoreDbChangelogXml) throws Exception {
         BasicDataSource dataSource = new BasicDataSource();
         dataSource.setDriverClassName(H2_DRIVER);
         TestProperties properties = TestProperties.getInstance();
@@ -426,7 +459,7 @@ public class CakeShopIT {
         return createObjectBuilder();
     }
 
-    private Stream<EventLog> eventsWithPayloadContaining(String string) {
+    private Stream<EventLog> eventsWithPayloadContaining(final String string) {
         return EVENT_LOG_REPOSITORY.findAll().filter(e -> e.getPayload().contains(string));
     }
 
@@ -462,7 +495,7 @@ public class CakeShopIT {
         return new InitialContext(props);
     }
 
-    private QueueReceiver queueReceiverOf(Context ctx, String queueName) throws NamingException, JMSException {
+    private QueueReceiver queueReceiverOf(final Context ctx, final String queueName) throws NamingException, JMSException {
         QueueConnectionFactory qconFactory = (QueueConnectionFactory) ctx.lookup(JMS_CONNECTION_FACTORY_JNDI);
 
         QueueConnection qcon = qconFactory.createQueueConnection(JMS_USERNAME, JMS_PASSWORD);
@@ -476,7 +509,7 @@ public class CakeShopIT {
         return qReceiver;
     }
 
-    private void clear(QueueReceiver dlqReceiver) throws JMSException {
+    private void clear(final QueueReceiver dlqReceiver) throws JMSException {
         while (dlqReceiver.receiveNoWait() != null) {
         }
     }

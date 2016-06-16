@@ -11,6 +11,8 @@ import uk.gov.justice.services.common.converter.exception.ConverterException;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 
 import java.io.IOException;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,6 +20,7 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,7 +36,6 @@ public class JsonObjectToObjectConverterTest {
     private static final String ATTRIBUTE_1 = "Attribute 1";
     private static final String ATTRIBUTE_2 = "Attribute 2";
     private static final String INTERNAL_NAME = "internalName";
-    private static final String INVALID_JSON = "INVALID_JSON";
 
     @Mock
     private ObjectMapper mapper;
@@ -52,6 +54,22 @@ public class JsonObjectToObjectConverterTest {
         assertThat(pojo.getAttributes(), hasItems(ATTRIBUTE_1, ATTRIBUTE_2));
         assertThat(pojo.getInternalPojo().getInternalId(), equalTo(INTERNAL_ID));
         assertThat(pojo.getInternalPojo().getInternalName(), equalTo(INTERNAL_NAME));
+    }
+
+    @Test
+    public void shouldConvertToPojoWithUTCDateTime() throws Exception {
+        JsonObjectToObjectConverter converter = new JsonObjectToObjectConverter();
+        converter.mapper = new ObjectMapperProducer().objectMapper();
+
+        assertThat(converter.convert(Json.createObjectBuilder().add("dateTime", "2016-07-25T13:09:01.0+00:00").build(), PojoWithDateTime.class).getDateTime(),
+                equalTo(ZonedDateTime.of(2016, 7, 25, 13, 9, 1, 0, ZoneId.of("UTC"))));
+        assertThat(converter.convert(Json.createObjectBuilder().add("dateTime", "2016-07-25T13:09:01.0Z").build(), PojoWithDateTime.class).getDateTime(),
+                equalTo(ZonedDateTime.of(2016, 7, 25, 13, 9, 1, 0, ZoneId.of("UTC"))));
+        assertThat(converter.convert(Json.createObjectBuilder().add("dateTime", "2016-07-25T13:09:01Z").build(), PojoWithDateTime.class).getDateTime(),
+                equalTo(ZonedDateTime.of(2016, 7, 25, 13, 9, 1, 0, ZoneId.of("UTC"))));
+        assertThat(converter.convert(Json.createObjectBuilder().add("dateTime", "2016-07-25T16:09:01.0+03:00").build(), PojoWithDateTime.class).getDateTime(),
+                equalTo(ZonedDateTime.of(2016, 7, 25, 13, 9, 1, 0, ZoneId.of("UTC"))));
+
     }
 
     @Test(expected = ConverterException.class)
@@ -138,6 +156,18 @@ public class JsonObjectToObjectConverterTest {
 
         public String getInternalName() {
             return internalName;
+        }
+    }
+
+    public static class PojoWithDateTime {
+        private final ZonedDateTime dateTime;
+
+        public PojoWithDateTime(@JsonProperty("dateTime") final ZonedDateTime dateTime) {
+            this.dateTime = dateTime;
+        }
+
+        public ZonedDateTime getDateTime() {
+            return dateTime;
         }
     }
 

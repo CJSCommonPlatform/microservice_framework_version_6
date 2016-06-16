@@ -46,6 +46,16 @@
             <groupId>org.apache.tomee</groupId>
             <artifactId>openejb-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.json</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>messaging-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
 
         <!-- Test dependencies -->
         <dependency>

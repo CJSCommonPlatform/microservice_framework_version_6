@@ -7,6 +7,9 @@ import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_NULL_MAP
 
 import uk.gov.justice.services.common.converter.jackson.jsr353.InclusionAwareJSR353Module;
 
+import java.text.SimpleDateFormat;
+import java.util.TimeZone;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 
@@ -21,6 +24,9 @@ import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 @ApplicationScoped
 public class ObjectMapperProducer {
 
+    private static final String UTC = "UTC";
+    private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+
     @Produces
     public ObjectMapper objectMapper() {
         return new ObjectMapper()
@@ -29,8 +35,10 @@ public class ObjectMapperProducer {
                 .registerModule(new ParameterNamesModule())
                 .registerModule(new InclusionAwareJSR353Module())
                 .configure(WRITE_DATES_AS_TIMESTAMPS, false)
-                .configure(WRITE_DATES_WITH_ZONE_ID, true)
+                .configure(WRITE_DATES_WITH_ZONE_ID, false)
                 .configure(WRITE_NULL_MAP_VALUES, false)
+                .setDateFormat(new SimpleDateFormat(DATE_FORMAT))
+                .setTimeZone(TimeZone.getTimeZone(UTC))
                 .setSerializationInclusion(NON_ABSENT);
     }
 }

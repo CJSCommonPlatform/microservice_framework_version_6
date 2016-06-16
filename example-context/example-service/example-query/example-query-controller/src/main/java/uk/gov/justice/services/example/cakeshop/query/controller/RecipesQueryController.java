@@ -17,6 +17,7 @@ public class RecipesQueryController {
 
     private static final Logger LOGGER = getLogger(RecipesQueryController.class);
     private static final String FIELD_RECIPE_ID = "recipeId";
+    private static final String FIELD_ORDER_ID = "odrerId";
 
     @Inject
     Requester requester;
@@ -34,4 +35,5 @@ public class RecipesQueryController {
 
         return requester.request(query);
     }
+
 }

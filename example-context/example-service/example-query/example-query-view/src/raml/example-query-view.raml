@@ -49,3 +49,19 @@ protocols: [ HTTP, HTTPS ]
           application/vnd.cakeshop.recipe+json:
             schema: !include json/schema/cakeshop.get-recipe.json
             example: !include json/recipe.json
+
+/orders/{orderId}:
+  description: return a recipe
+  get:
+    description: |
+        ...
+        (mapping):
+            responseType: application/vnd.cakeshop.order+json
+            name: cakeshop.get-order
+        ...
+    responses:
+      200:
+        body:
+          application/vnd.cakeshop.order+json:
+            schema: !include json/schema/cakeshop.get-order.json
+            example: !include json/order.json

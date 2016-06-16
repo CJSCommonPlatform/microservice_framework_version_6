@@ -14,6 +14,7 @@ import static uk.gov.justice.services.adapters.test.utils.builder.HttpActionBuil
 import static uk.gov.justice.services.adapters.test.utils.builder.HttpActionBuilder.httpActionWithNoMapping;
 import static uk.gov.justice.services.adapters.test.utils.builder.MappingBuilder.mapping;
 import static uk.gov.justice.services.adapters.test.utils.builder.MappingDescriptionBuilder.mappingDescriptionWith;
+import static uk.gov.justice.services.adapters.test.utils.builder.QueryParamBuilder.queryParam;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.adapters.test.utils.builder.RamlBuilder.restRamlWithTitleVersion;
@@ -88,7 +89,7 @@ public class RestClientGenerator_CodeStructureTest extends AbstractClientGenerat
                         .withBaseUri("http://localhost:8080/warname/query/api/rest/service")
                         .with(resource("/some/path/{recipeId}")
                                 .with(httpAction(GET, "application/vnd.cakeshop.query.add-recipe+json")
-                                        .withQueryParameters(queryParameterOf("recipename", true), queryParameterOf("topingredient", false)))
+                                        .with(queryParam("recipename").required(true), queryParam("topingredient").required(false)))
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, GENERATOR_PROPERTIES));
 

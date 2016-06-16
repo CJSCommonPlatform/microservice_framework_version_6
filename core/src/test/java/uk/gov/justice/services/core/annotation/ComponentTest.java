@@ -17,14 +17,8 @@ import static uk.gov.justice.services.core.annotation.Component.contains;
 import static uk.gov.justice.services.core.annotation.Component.names;
 import static uk.gov.justice.services.core.annotation.Component.valueOf;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Member;
-import java.lang.reflect.Type;
-import java.util.Set;
+import uk.gov.justice.services.core.util.TestInjectionPoint;
 
-import javax.enterprise.inject.spi.Annotated;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 import javax.jms.Queue;
 import javax.jms.Topic;
@@ -194,50 +188,6 @@ public class ComponentTest {
 
         }
 
-    }
-
-    public static class TestInjectionPoint implements InjectionPoint {
-
-        private final Member member;
-
-        public TestInjectionPoint(Member member) {
-            this.member = member;
-        }
-
-        @Override
-        public Type getType() {
-            return null;
-        }
-
-        @Override
-        public Set<Annotation> getQualifiers() {
-            return null;
-        }
-
-        @Override
-        public Bean<?> getBean() {
-            return null;
-        }
-
-        @Override
-        public Member getMember() {
-            return member;
-        }
-
-        @Override
-        public Annotated getAnnotated() {
-            return null;
-        }
-
-        @Override
-        public boolean isDelegate() {
-            return false;
-        }
-
-        @Override
-        public boolean isTransient() {
-            return false;
-        }
     }
 
 

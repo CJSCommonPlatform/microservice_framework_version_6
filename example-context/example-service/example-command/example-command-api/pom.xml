@@ -19,29 +19,51 @@
                 <groupId>uk.gov.justice.maven</groupId>
                 <artifactId>raml-maven-plugin</artifactId>
                 <version>${raml-maven-plugin.version}</version>
-                <configuration>
-                    <generatorName>
-                        uk.gov.justice.services.adapters.rest.generator.RestAdapterGenerator
-                    </generatorName>
-                    <sourceDirectory>${basedir}/src/raml</sourceDirectory>
-                    <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
-                    <basePackageName>uk.gov.justice.api</basePackageName>
-                    <generatorProperties>
-                        <actionMapping>true</actionMapping>
-                    </generatorProperties>
-                </configuration>
                 <executions>
                     <execution>
+                        <id>generate-adapter</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <phase>generate-sources</phase>
+                        <configuration>
+                            <generatorName>
+                                uk.gov.justice.services.adapters.rest.generator.RestAdapterGenerator
+                            </generatorName>
+                            <sourceDirectory>${basedir}/src/raml</sourceDirectory>
+                            <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
+                            <basePackageName>uk.gov.justice.api</basePackageName>
+                            <generatorProperties>
+                                <actionMapping>true</actionMapping>
+                            </generatorProperties>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-client</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <generatorName>uk.gov.justice.services.clients.messaging.generator.MessagingClientGenerator</generatorName>
+                            <sourceDirectory>${basedir}/../example-command-controller/src/raml</sourceDirectory>
+                            <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
+                            <basePackageName>uk.gov.justice.api.controller</basePackageName>
+                            <generatorProperties>
+                                <serviceComponent>COMMAND_API</serviceComponent>
+                            </generatorProperties>
+                        </configuration>
                     </execution>
                 </executions>
                 <dependencies>
                     <dependency>
                         <groupId>uk.gov.justice.services</groupId>
                         <artifactId>rest-adapter-generator</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>uk.gov.justice.services</groupId>
+                        <artifactId>messaging-client-generator</artifactId>
                         <version>${project.version}</version>
                     </dependency>
                 </dependencies>

@@ -70,11 +70,11 @@ public class JmsEnvelopeSenderTest {
     @Mock
     private Context namingContext;
 
-    private JmsEnvelopeSender jmsEnvelopeSender;
+    private DefaultJmsEnvelopeSender jmsEnvelopeSender;
 
     @Before
     public void setup() throws Exception {
-        jmsEnvelopeSender = new JmsEnvelopeSender();
+        jmsEnvelopeSender = new DefaultJmsEnvelopeSender();
         jmsEnvelopeSender.connectionFactory = connectionFactory;
         jmsEnvelopeSender.envelopeConverter = envelopeConverter;
         jmsEnvelopeSender.namingContext = namingContext;

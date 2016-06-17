@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>microservice-framework</artifactId>
+        <groupId>uk.gov.justice.services</groupId>
+        <version>0.10.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <packaging>pom</packaging>
+    <modules>
+        <module>generators-commons</module>
+        <module>generators-test-utils</module>
+        <module>messaging-adapter-core</module>
+        <module>messaging-adapter-generator</module>
+        <module>messaging-client-generator</module>
+        <module>rest-adapter-core</module>
+        <module>rest-adapter-generator</module>
+        <module>rest-client-core</module>
+        <module>rest-client-generator</module>
+
+    </modules>
+
+    <artifactId>generators</artifactId>
+
+
+</project>

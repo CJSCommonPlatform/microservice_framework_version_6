@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file, which follows the guidelines 
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to 
 [Semantic Versioning](http://semver.org/).
+## [Unreleased]
+
+### Added
+
+- Support for generating messaging clients from RAML
 
 ## [0.9.0] - 2016-06-15
 

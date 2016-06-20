@@ -8,6 +8,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.common.converter.exception.ConverterException;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 
 import java.io.IOException;
 import java.util.List;
@@ -40,7 +41,7 @@ public class JsonObjectToObjectConverterTest {
     @Test
     public void shouldConvertPojoToJsonObject() throws Exception {
         JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectToObjectConverter();
-        jsonObjectToObjectConverter.mapper = new JacksonMapperProducer().objectMapper();
+        jsonObjectToObjectConverter.mapper = new ObjectMapperProducer().objectMapper();
 
         JsonObject jsonObject = jsonObject();
         Pojo pojo = jsonObjectToObjectConverter.convert(jsonObject, Pojo.class);

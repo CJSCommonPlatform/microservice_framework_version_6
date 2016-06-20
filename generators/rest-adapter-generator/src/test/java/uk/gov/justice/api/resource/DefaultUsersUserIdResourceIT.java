@@ -24,6 +24,7 @@ import uk.gov.justice.services.adapter.rest.interceptor.JsonSchemaValidationInte
 import uk.gov.justice.services.adapter.rest.mapper.BadRequestExceptionMapper;
 import uk.gov.justice.services.adapter.rest.processor.RestProcessor;
 import uk.gov.justice.services.adapter.rest.processor.RestProcessorProducer;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.generators.test.utils.dispatcher.AsynchronousRecordingDispatcher;
@@ -112,6 +113,7 @@ public class DefaultUsersUserIdResourceIT {
             RestEnvelopeBuilderFactory.class,
             AsynchronousRecordingDispatcher.class,
             SynchronousRecordingDispatcher.class,
+            ObjectMapperProducer.class,
             JsonObjectEnvelopeConverter.class,
             CommonProviders.class,
             DummyCommonProviders.class,

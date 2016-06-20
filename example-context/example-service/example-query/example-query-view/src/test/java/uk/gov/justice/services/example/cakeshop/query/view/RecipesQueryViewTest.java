@@ -6,7 +6,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
-import uk.gov.justice.services.common.converter.JacksonMapperProducer;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.example.cakeshop.query.view.response.RecipeView;
@@ -41,7 +41,7 @@ public class RecipesQueryViewTest {
 
     @Before
     public void setup() {
-        final Enveloper enveloper = new Enveloper(new ObjectToJsonValueConverter(new JacksonMapperProducer().objectMapper()));
+        final Enveloper enveloper = new Enveloper(new ObjectToJsonValueConverter(new ObjectMapperProducer().objectMapper()));
         queryView = new RecipesQueryView(service, enveloper);
     }
 

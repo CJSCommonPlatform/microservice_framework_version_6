@@ -1,5 +1,7 @@
 package uk.gov.justice.services.common.converter;
 
+import static javax.json.Json.createArrayBuilder;
+import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.isA;
 import static org.junit.Assert.assertThat;
@@ -7,6 +9,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.common.converter.exception.ConverterException;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 
 import java.util.Arrays;
 import java.util.List;
@@ -42,7 +45,7 @@ public class ObjectToJsonObjectConverterTest {
     public void shouldConvertPojoToJsonObject() throws Exception {
         Pojo pojo = new Pojo(ID, NAME, ATTRIBUTES);
         ObjectToJsonObjectConverter objectToJsonObjectConverter = new ObjectToJsonObjectConverter();
-        objectToJsonObjectConverter.mapper = new JacksonMapperProducer().objectMapper();
+        objectToJsonObjectConverter.mapper = new ObjectMapperProducer().objectMapper();
 
         JsonObject jsonObject = objectToJsonObjectConverter.convert(pojo);
 
@@ -75,11 +78,11 @@ public class ObjectToJsonObjectConverterTest {
     }
 
     private JsonObject expectedJsonObject() {
-        JsonArray array = Json.createArrayBuilder()
+        JsonArray array = createArrayBuilder()
                 .add("Attribute 1")
                 .add("Attribute 2").build();
 
-        return Json.createObjectBuilder()
+        return createObjectBuilder()
                 .add("id", ID.toString())
                 .add("name", NAME)
                 .add("attributes", array).build();
@@ -108,7 +111,5 @@ public class ObjectToJsonObjectConverterTest {
         public List<String> getAttributes() {
             return attributes;
         }
-
     }
-
 }

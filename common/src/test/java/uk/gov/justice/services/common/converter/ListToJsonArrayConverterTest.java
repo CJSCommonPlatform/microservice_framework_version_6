@@ -6,6 +6,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.doThrow;
 
 import uk.gov.justice.services.common.converter.exception.ConverterException;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -26,6 +27,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ListToJsonArrayConverterTest {
+
     private static final UUID ID_ONE = UUID.randomUUID();
     private static final UUID ID_TWO = UUID.randomUUID();
     private static final String NAME_ONE = "POJOONE";
@@ -40,7 +42,7 @@ public class ListToJsonArrayConverterTest {
     @Test
     public void shouldConvertListToJsonArray() {
         ListToJsonArrayConverter<Pojo> listToJsonArraysConverter = new ListToJsonArrayConverter<Pojo>();
-        listToJsonArraysConverter.mapper = new JacksonMapperProducer().objectMapper();
+        listToJsonArraysConverter.mapper = new ObjectMapperProducer().objectMapper();
         listToJsonArraysConverter.stringToJsonObjectConverter = new StringToJsonObjectConverter();
 
         Pojo pojoOne = new Pojo(ID_ONE, NAME_ONE);

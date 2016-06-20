@@ -1,12 +1,20 @@
 package uk.gov.justice.services.messaging;
 
+import static javax.json.Json.createArrayBuilder;
+import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
 
-import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Optional;
@@ -16,9 +24,14 @@ import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonReader;
 import javax.json.JsonValue;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
+import org.junit.Before;
 import org.junit.Test;
 
 public class JsonObjectEnvelopeConverterTest {
@@ -35,23 +48,18 @@ public class JsonObjectEnvelopeConverterTest {
     private static final String FIELD_NUMBER = "number";
     private static final String METADATA = "_metadata";
 
-    @Test(expected = IllegalArgumentException.class)
-    public void shouldThrowExceptionOnMissingId() throws Exception {
-        final JsonObject joEnvelope = new StringToJsonObjectConverter().convert(jsonFromFile("json/envelope-missing-id.json"));
-        JsonObjectMetadata.metadataFrom(joEnvelope.getJsonObject(METADATA));
-    }
+    private JsonObjectEnvelopeConverter jsonObjectEnvelopeConverter;
 
-    @Test(expected = IllegalArgumentException.class)
-    public void shouldThrowExceptionOnMissingName() throws Exception {
-        final JsonObject joEnvelope = new StringToJsonObjectConverter().convert(jsonFromFile("envelope-missing-name"));
-        JsonObjectMetadata.metadataFrom(joEnvelope.getJsonObject(METADATA));
+    @Before
+    public void setup() {
+        jsonObjectEnvelopeConverter = new JsonObjectEnvelopeConverter();
+        jsonObjectEnvelopeConverter.objectMapper = new ObjectMapperProducer().objectMapper();
     }
 
     @Test
     public void shouldReturnEnvelope() throws Exception {
-        final JsonObjectEnvelopeConverter jsonObjectEnvelopeConverter = new JsonObjectEnvelopeConverter();
 
-        JsonEnvelope envelope = jsonObjectEnvelopeConverter.asEnvelope(new StringToJsonObjectConverter().convert(jsonFromFile("envelope")));
+        final JsonEnvelope envelope = jsonObjectEnvelopeConverter.asEnvelope(jsonObjectFromFile("envelope"));
 
         assertThat(envelope, notNullValue());
         Metadata metadata = envelope.metadata();
@@ -70,63 +78,95 @@ public class JsonObjectEnvelopeConverterTest {
         assertThat(causation.size(), equalTo(2));
         assertThat(causation.get(0).toString(), equalTo(CAUSATION_1));
         assertThat(causation.get(1).toString(), equalTo(CAUSATION_2));
+    }
 
+    @Test
+    public void shouldReturnJsonStringFromEnvelope() throws Exception {
+        final JsonObject input = jsonObjectFromFile("envelope");
+        final Metadata metadata = metadataFrom(input.getJsonObject(METADATA));
+        final JsonValue payload = jsonObjectEnvelopeConverter.extractPayloadFromEnvelope(input);
+
+        final JsonEnvelope envelope = envelopeFrom(metadata, payload);
+
+        assertEquals(jsonFromFile("envelope"), jsonObjectEnvelopeConverter.asJsonString(envelope), true);
+    }
+
+    @Test
+    public void shouldRemoveNullsInJsonString() throws Exception {
+        final JsonObject input = jsonObjectFromFile("envelope-with-null");
+        final Metadata metadata = metadataFrom(input.getJsonObject(METADATA));
+        final JsonValue payload = jsonObjectEnvelopeConverter.extractPayloadFromEnvelope(input);
+
+        final JsonEnvelope envelope = envelopeFrom(metadata, payload);
+
+        assertEquals(jsonFromFile("envelope-with-field-not-present"), jsonObjectEnvelopeConverter.asJsonString(envelope), true);
     }
 
     @Test
     public void shouldReturnJsonObjectFromEnvelopeWithObjectPayload() throws IOException {
-        final JsonObjectEnvelopeConverter jsonObjectEnvelopeConverter = new JsonObjectEnvelopeConverter();
-        final JsonObject expectedEnvelope = new StringToJsonObjectConverter().convert(jsonFromFile("envelope"));
-        final Metadata metadata = JsonObjectMetadata.metadataFrom(expectedEnvelope.getJsonObject(METADATA));
+        final JsonObject expectedEnvelope = jsonObjectFromFile("envelope");
+        final Metadata metadata = metadataFrom(expectedEnvelope.getJsonObject(METADATA));
         final JsonValue payload = jsonObjectEnvelopeConverter.extractPayloadFromEnvelope(expectedEnvelope);
 
-        final JsonEnvelope envelope = DefaultJsonEnvelope.envelopeFrom(metadata, payload);
+        final JsonEnvelope envelope = envelopeFrom(metadata, payload);
 
         assertThat(jsonObjectEnvelopeConverter.fromEnvelope(envelope), equalTo(expectedEnvelope));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionOnArrayPayloadType() {
-        new JsonObjectEnvelopeConverter().fromEnvelope(envelopeWithArrayPayload());
+        jsonObjectEnvelopeConverter.fromEnvelope(envelopeWithArrayPayload());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionOnNumberPayloadType() {
-        new JsonObjectEnvelopeConverter().fromEnvelope(envelopeWithNumberPayload());
+        jsonObjectEnvelopeConverter.fromEnvelope(envelopeWithNumberPayload());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionWhenProvidedEnvelopeWithoutMetadata() throws IOException {
-        final JsonObjectEnvelopeConverter jsonObjectEnvelopeConverter = new JsonObjectEnvelopeConverter();
-        final JsonObject expectedEnvelope = new StringToJsonObjectConverter().convert(jsonFromFile("envelope"));
+        final JsonObject expectedEnvelope = jsonObjectFromFile("envelope");
         final JsonValue payload = jsonObjectEnvelopeConverter.extractPayloadFromEnvelope(expectedEnvelope);
 
-        final JsonEnvelope envelope = DefaultJsonEnvelope.envelopeFrom(null, payload);
+        final JsonEnvelope envelope = envelopeFrom(null, payload);
 
         jsonObjectEnvelopeConverter.fromEnvelope(envelope);
     }
 
+    @Test(expected = RuntimeException.class)
+    public void shouldThrowExceptionIfObjectMapperFails() throws Exception {
+
+        final JsonObject envelopeJsonObject = jsonObjectFromFile("envelope");
+
+        jsonObjectEnvelopeConverter.objectMapper = mock(ObjectMapper.class);
+        when(jsonObjectEnvelopeConverter.objectMapper.writeValueAsString(envelopeJsonObject)).thenThrow(new JsonGenerationException("failed"));
+
+        final JsonEnvelope envelope = jsonObjectEnvelopeConverter.asEnvelope(envelopeJsonObject);
+
+        jsonObjectEnvelopeConverter.asJsonString(envelope);
+    }
+
     private JsonEnvelope envelopeWithArrayPayload() {
-        JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
+        JsonArrayBuilder jsonArrayBuilder = createArrayBuilder();
         jsonArrayBuilder.add(ARRAY_ITEM_1);
         jsonArrayBuilder.add(ARRAY_ITEM_2);
 
-        return DefaultJsonEnvelope.envelopeFrom(JsonObjectMetadata.metadataFrom(metadata()), jsonArrayBuilder.build());
+        return envelopeFrom(metadataFrom(metadata()), jsonArrayBuilder.build());
     }
 
     private JsonEnvelope envelopeWithNumberPayload() {
 
-        JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
+        JsonObjectBuilder jsonObjectBuilder = createObjectBuilder();
         jsonObjectBuilder.add(FIELD_NUMBER, 100);
 
-        return DefaultJsonEnvelope.envelopeFrom(
-                JsonObjectMetadata.metadataFrom(metadata()),
+        return envelopeFrom(
+                metadataFrom(metadata()),
                 jsonObjectBuilder.build().getJsonNumber(FIELD_NUMBER)
         );
     }
 
     private JsonObject metadata() {
-        JsonObjectBuilder metadataBuilder = Json.createObjectBuilder();
+        JsonObjectBuilder metadataBuilder = createObjectBuilder();
         metadataBuilder.add(JsonObjectMetadata.ID, ID);
         metadataBuilder.add(JsonObjectMetadata.NAME, NAME);
 
@@ -137,4 +177,9 @@ public class JsonObjectEnvelopeConverterTest {
         return Resources.toString(Resources.getResource(String.format("json/%s.json", name)), Charset.defaultCharset());
     }
 
+    private JsonObject jsonObjectFromFile(final String name) throws IOException {
+        try (final JsonReader reader = Json.createReader(new StringReader(jsonFromFile(name)))) {
+            return reader.readObject();
+        }
+    }
 }

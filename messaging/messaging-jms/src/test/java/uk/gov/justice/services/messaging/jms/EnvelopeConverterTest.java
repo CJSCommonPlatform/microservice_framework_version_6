@@ -73,8 +73,7 @@ public class EnvelopeConverterTest {
 
     @Test
     public void shouldReturnMessage() throws Exception {
-        when(jsonObjectEnvelopeConverter.fromEnvelope(envelope)).thenReturn(messageAsJsonObject);
-        when(messageAsJsonObject.toString()).thenReturn(MESSAGE_TEXT);
+        when(jsonObjectEnvelopeConverter.asJsonString(envelope)).thenReturn(MESSAGE_TEXT);
         when(session.createTextMessage(MESSAGE_TEXT)).thenReturn(textMessage);
         when(envelope.metadata()).thenReturn(metadata);
         when(metadata.name()).thenReturn(NAME);
@@ -102,11 +101,9 @@ public class EnvelopeConverterTest {
 
     @Test(expected = JmsConverterException.class)
     public void shouldThrowExceptionWhenFailToCreateTextMessage() throws JMSException {
-        when(jsonObjectEnvelopeConverter.fromEnvelope(envelope)).thenReturn(messageAsJsonObject);
-        when(messageAsJsonObject.toString()).thenReturn(MESSAGE_TEXT);
+        when(jsonObjectEnvelopeConverter.asJsonString(envelope)).thenReturn(MESSAGE_TEXT);
         doThrow(JMSException.class).when(session).createTextMessage(MESSAGE_TEXT);
 
         envelopeConverter.toMessage(envelope, session);
     }
-
 }

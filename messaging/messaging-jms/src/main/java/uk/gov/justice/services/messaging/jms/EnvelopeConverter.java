@@ -39,7 +39,7 @@ public class EnvelopeConverter implements MessageConverter<JsonEnvelope, TextMes
 
     @Override
     public TextMessage toMessage(final JsonEnvelope envelope, final Session session) {
-        final String envelopeAsString = jsonObjectEnvelopeConverter.fromEnvelope(envelope).toString();
+        final String envelopeAsString = jsonObjectEnvelopeConverter.asJsonString(envelope);
 
         try {
             final TextMessage textMessage = session.createTextMessage(envelopeAsString);

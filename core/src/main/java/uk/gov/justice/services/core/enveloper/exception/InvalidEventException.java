@@ -8,6 +8,8 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
  */
 public class InvalidEventException extends RuntimeException {
 
+    private static final long serialVersionUID = 4943839098543355539L;
+
     public InvalidEventException(final String message) {
         super(message);
     }

@@ -49,7 +49,7 @@ public class Enveloper {
         this.objectToJsonValueConverter = objectToJsonValueConverter;
     }
 
-    private ConcurrentHashMap<Class, String> eventMap = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<Class<?>, String> eventMap = new ConcurrentHashMap<>();
 
     /**
      * Register method, invoked automatically to register all event classes into the eventMap.

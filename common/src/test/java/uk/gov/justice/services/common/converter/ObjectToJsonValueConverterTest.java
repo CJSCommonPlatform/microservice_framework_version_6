@@ -8,6 +8,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.common.converter.exception.ConverterException;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 
 import java.util.Arrays;
 import java.util.List;
@@ -46,7 +47,7 @@ public class ObjectToJsonValueConverterTest {
     public void shouldConvertPojoToJsonValue() throws Exception {
         Pojo pojo = new Pojo(ID, NAME, BOOL_FLAG, ATTRIBUTES);
         ObjectToJsonValueConverter objectToJsonValueConverter =
-                new ObjectToJsonValueConverter(new JacksonMapperProducer().objectMapper());
+                new ObjectToJsonValueConverter(new ObjectMapperProducer().objectMapper());
         JsonValue jsonValue = objectToJsonValueConverter.convert(pojo);
 
         assertThat(jsonValue, equalTo(expectedJsonValue()));
@@ -56,7 +57,7 @@ public class ObjectToJsonValueConverterTest {
     public void shouldConvertPojoToJsonValue2() throws Exception {
         Pojo pojo = new Pojo(ID, NAME, BOOL_FLAG, ATTRIBUTES);
         ObjectToJsonValueConverter objectToJsonValueConverter =
-                new ObjectToJsonValueConverter(new JacksonMapperProducer().objectMapper());
+                new ObjectToJsonValueConverter(new ObjectMapperProducer().objectMapper());
 
         JsonValue jsonValue = objectToJsonValueConverter.convert(pojo);
 
@@ -67,7 +68,7 @@ public class ObjectToJsonValueConverterTest {
     @Test
     public void shouldConvertNullToJsonValueNull() throws Exception {
         ObjectToJsonValueConverter objectToJsonValueConverter =
-                new ObjectToJsonValueConverter(new JacksonMapperProducer().objectMapper());
+                new ObjectToJsonValueConverter(new ObjectMapperProducer().objectMapper());
 
         JsonValue jsonValue = objectToJsonValueConverter.convert(null);
 
@@ -78,7 +79,7 @@ public class ObjectToJsonValueConverterTest {
     public void shouldConvertListToJsonValue() throws Exception {
         List<String> list = Arrays.asList(ATTRIBUTE_1, ATTRIBUTE_2);
         ObjectToJsonValueConverter objectToJsonValueConverter =
-                new ObjectToJsonValueConverter(new JacksonMapperProducer().objectMapper());
+                new ObjectToJsonValueConverter(new ObjectMapperProducer().objectMapper());
         JsonValue jsonValue = objectToJsonValueConverter.convert(list);
 
         assertThat(jsonValue, equalTo(expectedJsonArray()));

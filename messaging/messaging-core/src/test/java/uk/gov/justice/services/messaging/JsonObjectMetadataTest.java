@@ -4,6 +4,7 @@ import static javax.json.JsonValue.NULL;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static uk.gov.justice.services.messaging.JsonEnvelope.METADATA;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.CAUSATION;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.CLIENT_ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.CONTEXT;
@@ -17,12 +18,17 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.USER_ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.VERSION;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
 
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.UUID;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.io.Resources;
 import com.google.common.testing.EqualsTester;
 import org.junit.Before;
 import org.junit.Test;
@@ -65,6 +71,18 @@ public class JsonObjectMetadataTest {
                 )
                 .build();
         metadata = metadataFrom(jsonObject);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionOnMissingId() throws Exception {
+        final JsonObject joEnvelope = new StringToJsonObjectConverter().convert(jsonFromFile("json/envelope-missing-id.json"));
+        JsonObjectMetadata.metadataFrom(joEnvelope.getJsonObject(METADATA));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionOnMissingName() throws Exception {
+        final JsonObject joEnvelope = new StringToJsonObjectConverter().convert(jsonFromFile("json/envelope-missing-name"));
+        JsonObjectMetadata.metadataFrom(joEnvelope.getJsonObject(METADATA));
     }
 
     @Test
@@ -215,5 +233,9 @@ public class JsonObjectMetadataTest {
                 )
                 .build());
 
+    }
+
+    private String jsonFromFile(final String name) throws IOException {
+        return Resources.toString(Resources.getResource(String.format("json/%s.json", name)), Charset.defaultCharset());
     }
 }

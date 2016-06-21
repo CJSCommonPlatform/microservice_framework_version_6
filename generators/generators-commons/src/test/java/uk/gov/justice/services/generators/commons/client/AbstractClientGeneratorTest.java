@@ -9,7 +9,12 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
+import static org.raml.model.ActionType.GET;
+import static org.raml.model.ActionType.POST;
+import static org.raml.model.ActionType.PUT;
+import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.messagingRamlWithDefaults;
+import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
@@ -28,7 +33,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
@@ -58,7 +62,10 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
     public void shouldGenerateRemoteController() throws Exception {
 
         generator.run(
-                messagingRamlWithDefaults().withDefaultMessagingResource().build(),
+                messagingRamlWithDefaults()
+                        .with(resource()
+                                .with(httpAction(POST, "application/vnd.cakeshop.actionabc+json")))
+                        .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_API")));
 
 
@@ -70,6 +77,30 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
         assertThat(generatedClass.getAnnotation(ServiceComponent.class).value().toString(), is("COMMAND_API"));
 
     }
+
+    @Test
+    public void shouldGenerateRemoteHandler() throws Exception {
+
+        generator.run(
+                messagingRamlWithDefaults()
+                        .with(resource()
+                                .with(httpAction(GET)
+                                        .withResponseTypes("application/vnd.cakeshop.actionabc+json")))
+
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_CONTROLLER")));
+
+
+        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteABCController");
+
+        assertThat(generatedClass.getCanonicalName(), is("org.raml.test.RemoteABCController"));
+        assertThat(generatedClass.getAnnotation(Remote.class), not(nullValue()));
+        assertThat(generatedClass.getAnnotation(ServiceComponent.class), not(nullValue()));
+        assertThat(generatedClass.getAnnotation(ServiceComponent.class).value().toString(), is("COMMAND_CONTROLLER"));
+
+    }
+
+
 
     @Test
     public void shouldContainLoggerConstant() throws Exception {
@@ -169,7 +200,18 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("UNKNOWN")));
 
     }
+    @Test
+    public void shouldThrowExceptionIfActionOtherThanPOSTorGET() {
+        exception.expect(IllegalStateException.class);
+        exception.expectMessage(containsString("Unsupported httpAction type PUT"));
+        generator.run(
+                messagingRamlWithDefaults()
+                        .with(resource()
+                                .with(httpAction(PUT, "application/vnd.cakeshop.actionabc+json")))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
 
+    }
 
     static class TestClientGenerator extends AbstractClientGenerator {
 
@@ -189,10 +231,6 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
             return TypeName.INT;
         }
 
-        @Override
-        protected Stream<MimeType> mediaTypesOf(final Action ramlAction) {
-            return Stream.of(new MimeType("application/vnd.some.mdediatype+json"));
-        }
 
         @Override
         protected CodeBlock methodBodyOf(final Resource resource, final Action ramlAction, final MimeType mimeType) {

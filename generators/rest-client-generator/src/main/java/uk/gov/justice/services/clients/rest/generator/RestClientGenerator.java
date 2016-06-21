@@ -1,9 +1,7 @@
 package uk.gov.justice.services.clients.rest.generator;
 
 import static java.lang.String.format;
-import static java.lang.String.valueOf;
 import static javax.lang.model.element.Modifier.FINAL;
-import static javax.ws.rs.core.Response.Status.OK;
 import static org.apache.commons.lang3.StringUtils.capitalize;
 import static org.raml.model.ActionType.GET;
 import static uk.gov.justice.services.generators.commons.helper.Names.nameFrom;
@@ -25,7 +23,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.lang.model.element.Modifier;
@@ -38,7 +35,6 @@ import org.raml.model.Action;
 import org.raml.model.MimeType;
 import org.raml.model.Raml;
 import org.raml.model.Resource;
-import org.raml.model.Response;
 
 /**
  * Generates code for a rest client.
@@ -106,24 +102,6 @@ public class RestClientGenerator extends AbstractClientGenerator {
     protected TypeName methodReturnTypeOf(final Action ramlAction) {
         return ramlAction.getType().equals(GET) ? TypeName.get(JsonEnvelope.class) : TypeName.VOID;
     }
-
-    @Override
-    protected Stream<MimeType> mediaTypesOf(Action ramlAction) {
-        switch (ramlAction.getType()) {
-            case GET:
-                final Response response = ramlAction.getResponses().get(valueOf(OK.getStatusCode()));
-                if (response != null) {
-                    return response.getBody().values().stream();
-                } else {
-                    return Stream.empty();
-                }
-            case POST:
-                return ramlAction.getBody().values().stream();
-            default:
-                throw new IllegalStateException(format("Unsupported httpAction type %s", ramlAction.getType()));
-        }
-    }
-
 
     @Override
     protected String handlesAnnotationValueOf(final Action ramlAction, final MimeType mimeType, final GeneratorConfig generatorConfig) {

@@ -23,22 +23,16 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
-import java.util.Properties;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 import javax.jms.JMSException;
+import javax.jms.MessageConsumer;
 import javax.jms.Queue;
-import javax.jms.QueueConnection;
-import javax.jms.QueueConnectionFactory;
-import javax.jms.QueueReceiver;
-import javax.jms.QueueSession;
 import javax.jms.Session;
 import javax.jms.TextMessage;
+import javax.jms.Topic;
 import javax.json.JsonObjectBuilder;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.sql.DataSource;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
@@ -48,6 +42,7 @@ import javax.ws.rs.core.Response;
 import liquibase.Liquibase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.resource.ClassLoaderResourceAccessor;
+import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIBuilder;
@@ -77,21 +72,21 @@ public class CakeShopIT {
     private static final String QUERY_RECIPES_MEDIA_TYPE = "application/vnd.cakeshop.recipes+json";
     private static final String QUERY_ORDER_MEDIA_TYPE = "application/vnd.cakeshop.order+json";
 
-    public final static String JMS_CONNECTION_FACTORY_JNDI = "jms/RemoteConnectionFactory";
-    public final static String DLQ_JNDI = "jms/queue/DLQ";
     public final static String JMS_USERNAME = "jmsuser";
     public final static String JMS_PASSWORD = "jms@user123";
-    public final static String WILDFLY_REMOTING_URL = "http-remoting://localhost:8080";
+    private static final String JMS_BROKER_URL = "tcp://localhost:61616";
 
     private static StandaloneJdbcEventLogRepository EVENT_LOG_REPOSITORY;
+    private static ActiveMQConnectionFactory JMS_CONNECTION_FACTORY;
     private static DataSource CAKE_SHOP_DS;
 
     private Client client;
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        DataSource eventStoredataSource = initEventStoreDb();
-        EVENT_LOG_REPOSITORY = new StandaloneJdbcEventLogRepository(eventStoredataSource);
+        DataSource eventStoreDataSource = initEventStoreDb();
+        EVENT_LOG_REPOSITORY = new StandaloneJdbcEventLogRepository(eventStoreDataSource);
+        JMS_CONNECTION_FACTORY = new ActiveMQConnectionFactory(JMS_BROKER_URL);
         initCakeShopDb();
     }
 
@@ -196,8 +191,9 @@ public class CakeShopIT {
     @Test
     public void shouldFailTransactionOnDBFailureAndRedirectEventToDLQ() throws Exception {
 
-        final QueueReceiver dlqReceiver = queueReceiverOf(initialContext(), DLQ_JNDI);
-        clear(dlqReceiver);
+        Session jmsSession = jmsSession();
+        final MessageConsumer dlqConsumer = queueConsumerOf(jmsSession, "DLQ");
+        clear(dlqConsumer);
 
         //closing db to cause transaction error
         closeCakeShopDb();
@@ -206,7 +202,7 @@ public class CakeShopIT {
         sendTo(RECIPES_RESOURCE_URI + recipeId).request()
                 .post(recipeEntity("Cheesy cheese cake"));
 
-        final TextMessage messageFromDLQ = (TextMessage) dlqReceiver.receive();
+        final TextMessage messageFromDLQ = (TextMessage) dlqConsumer.receive();
 
         with(messageFromDLQ.getText())
                 .assertThat("$._metadata.name", equalTo("cakeshop.recipe-added"))
@@ -215,7 +211,7 @@ public class CakeShopIT {
         initCakeShopDb();
 
         assertThat(queryForRecipe(recipeId).httpCode(), is(NOT_FOUND));
-
+        jmsSession.close();
     }
 
 
@@ -345,6 +341,41 @@ public class CakeShopIT {
         Thread.sleep(500);
 
         assertThat(queryForRecipe(recipeId).httpCode(), is(NOT_FOUND));
+    }
+
+    @Test
+    public void shouldPublishEventToPublicTopic() throws Exception {
+
+        Session jmsSession = jmsSession();
+        final MessageConsumer publicTopicConsumer = topicConsumerOf(jmsSession, "public.event");
+
+        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526e13";
+        sendTo(RECIPES_RESOURCE_URI + recipeId).request()
+                .post(recipeEntity("Apple pie", false));
+
+        final TextMessage message = (TextMessage) publicTopicConsumer.receive();
+        with(message.getText())
+                .assertThat("$._metadata.name", equalTo("cakeshop.recipe-added"))
+                .assertThat("$.recipeId", equalTo(recipeId))
+                .assertThat("$.name", equalTo("Apple pie"));
+
+        jmsSession.close();
+
+    }
+
+    private MessageConsumer topicConsumerOf(final Session session, final String topicName) throws JMSException {
+        final Topic topic = session.createTopic(topicName);
+        return session.createConsumer(topic);
+    }
+
+    private MessageConsumer queueConsumerOf(final Session session, final String queueName) throws JMSException {
+        final Queue queue = session.createQueue(queueName);
+        return session.createConsumer(queue);
+    }
+    private Session jmsSession() throws JMSException {
+        final javax.jms.Connection connection = JMS_CONNECTION_FACTORY.createConnection(JMS_USERNAME, JMS_PASSWORD);
+        connection.start();
+        return connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
     }
 
 
@@ -485,32 +516,8 @@ public class CakeShopIT {
                 ADD_RECIPE_MEDIA_TYPE);
     }
 
-
-    private InitialContext initialContext() throws NamingException {
-        Properties props = new Properties();
-        props.put(Context.INITIAL_CONTEXT_FACTORY, "org.jboss.naming.remote.client.InitialContextFactory");
-        props.put(Context.PROVIDER_URL, WILDFLY_REMOTING_URL);
-        props.put(Context.SECURITY_PRINCIPAL, JMS_USERNAME);
-        props.put(Context.SECURITY_CREDENTIALS, JMS_PASSWORD);
-        return new InitialContext(props);
-    }
-
-    private QueueReceiver queueReceiverOf(final Context ctx, final String queueName) throws NamingException, JMSException {
-        QueueConnectionFactory qconFactory = (QueueConnectionFactory) ctx.lookup(JMS_CONNECTION_FACTORY_JNDI);
-
-        QueueConnection qcon = qconFactory.createQueueConnection(JMS_USERNAME, JMS_PASSWORD);
-
-        QueueSession qsession = qcon.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
-        Queue queue = (Queue) ctx.lookup(queueName);
-        QueueReceiver qReceiver = qsession.createReceiver(queue);
-
-        qcon.start();
-
-        return qReceiver;
-    }
-
-    private void clear(final QueueReceiver dlqReceiver) throws JMSException {
-        while (dlqReceiver.receiveNoWait() != null) {
+    private void clear(MessageConsumer msgConsumer) throws JMSException {
+        while (msgConsumer.receiveNoWait() != null) {
         }
     }
 

@@ -9,6 +9,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
+import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.messagingRamlWithDefaults;
@@ -149,6 +150,28 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
 
         Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCakeshopCommandController");
+
+        List<Method> methods = methodsOf(generatedClass);
+        assertThat(methods, hasSize(1));
+
+        Method method = methods.get(0);
+        Handles handlesAnnotation = method.getAnnotation(Handles.class);
+        assertThat(handlesAnnotation, not(nullValue()));
+        assertThat(handlesAnnotation.value(), is("cakeshop.actionabc"));
+    }
+
+    @Test
+    public void shouldGenerateMethodAnnotatedWithHandlesAnnotationForGET() throws Exception {
+        generator.run(
+                messagingRamlWithDefaults()
+                        .with(resource()
+                                .withRelativeUri("/cakeshop.handler.command")
+                                .with(httpAction(GET)
+                                        .withResponseTypes("application/vnd.cakeshop.actionabc+json")))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
+
+        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCakeshopCommandHandler");
 
         List<Method> methods = methodsOf(generatedClass);
         assertThat(methods, hasSize(1));

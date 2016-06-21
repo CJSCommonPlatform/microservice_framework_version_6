@@ -32,7 +32,7 @@ public class MessagingClientGenerator extends AbstractClientGenerator {
         return String.format("Remote%s%s%s",
                 capitalize(uri.context()),
                 capitalize(uri.pillar()),
-                capitalize(uri.tier()));
+                capitalize(uri.tier() != null ? uri.tier() : ""));
     }
 
     @Override

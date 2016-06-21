@@ -84,6 +84,21 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
     }
 
     @Test
+    public void shouldGenerateClientForEventTopic() throws Exception {
+        generator.run(
+                messagingRamlWithDefaults()
+                        .with(resource()
+                                .withRelativeUri("/public.event")
+                                .withDefaultAction())
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("EVENT_PROCESSOR")));
+
+        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemotePublicEvent");
+
+        assertThat(generatedClass.getAnnotation(ServiceComponent.class).value().toString(), is("EVENT_PROCESSOR"));
+    }
+
+    @Test
     public void shouldCreateLoggerConstant() throws Exception {
         generator.run(
                 messagingRamlWithDefaults()

@@ -35,7 +35,6 @@ import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

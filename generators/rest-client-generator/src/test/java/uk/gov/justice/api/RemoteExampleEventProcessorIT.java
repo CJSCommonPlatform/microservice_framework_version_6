@@ -22,7 +22,22 @@ import uk.gov.justice.services.clients.core.RestClientHelper;
 import uk.gov.justice.services.clients.core.RestClientProcessor;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
+import uk.gov.justice.services.core.accesscontrol.AccessControlService;
+import uk.gov.justice.services.core.accesscontrol.AllowAllPolicyEvaluator;
+import uk.gov.justice.services.core.accesscontrol.PolicyEvaluator;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
+import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcherProducer;
+import uk.gov.justice.services.core.dispatcher.DispatcherCache;
+import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
+import uk.gov.justice.services.core.dispatcher.RequesterProducer;
+import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
+import uk.gov.justice.services.core.dispatcher.SynchronousDispatcherProducer;
+import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcherProducer;
+import uk.gov.justice.services.core.dispatcher.DispatcherCache;
+import uk.gov.justice.services.core.dispatcher.RequesterProducer;
+import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
+import uk.gov.justice.services.core.dispatcher.SynchronousDispatcherProducer;
 import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcherProducer;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.dispatcher.RequesterProducer;
@@ -38,6 +53,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.DefaultJmsEnvelopeSender;
 import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
+import uk.gov.justice.services.messaging.logging.JsonEnvelopeLoggerHelper;
 
 import java.util.Properties;
 import java.util.UUID;
@@ -114,7 +130,15 @@ public class RemoteExampleEventProcessorIT {
             JsonObjectEnvelopeConverter.class,
             ObjectToJsonValueConverter.class,
             ObjectMapper.class,
-            Enveloper.class
+            Enveloper.class,
+
+            AccessControlFailureMessageGenerator.class,
+            AllowAllPolicyEvaluator.class,
+            AccessControlService.class,
+            DispatcherCache.class,
+            DispatcherFactory.class,
+            JsonEnvelopeLoggerHelper.class,
+            PolicyEvaluator.class
     })
     public WebApp war() {
         return new WebApp()

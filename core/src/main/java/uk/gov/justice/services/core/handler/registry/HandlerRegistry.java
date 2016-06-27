@@ -15,6 +15,7 @@ import java.util.Map;
 /**
  * Service for storing a map of which command handlers handle which commands.
  */
+
 public class HandlerRegistry {
 
     private final Map<String, HandlerMethod> handlerMethods = new HashMap<>();

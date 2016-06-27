@@ -15,12 +15,13 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.USER_ID;
 /**
  * Helper class to provide trace string for logging of JsonEnvelopes
  */
-public final class JsonEnvelopeLoggerHelper {
-
-    private JsonEnvelopeLoggerHelper() {}
+public class JsonEnvelopeLoggerHelper {
 
     public static String toEnvelopeTraceString(final JsonEnvelope envelope) {
+        return new JsonEnvelopeLoggerHelper().toTraceString(envelope);
+    }
 
+    public String toTraceString(final JsonEnvelope envelope) {
         final JsonObjectBuilder builder = Json.createObjectBuilder();
 
         builder.add("id", String.valueOf(envelope.metadata().id()))

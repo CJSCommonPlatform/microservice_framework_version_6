@@ -3,9 +3,15 @@ package uk.gov.justice.services.core.dispatcher;
 import static uk.gov.justice.services.core.handler.HandlerMethod.ASYNCHRONOUS;
 import static uk.gov.justice.services.core.handler.HandlerMethod.SYNCHRONOUS;
 
+import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
+import uk.gov.justice.services.core.accesscontrol.AccessControlService;
+import uk.gov.justice.services.core.accesscontrol.AccessControlViolation;
+import uk.gov.justice.services.core.accesscontrol.AccessControlViolationException;
 import uk.gov.justice.services.core.handler.HandlerMethod;
 import uk.gov.justice.services.core.handler.registry.HandlerRegistry;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+
+import java.util.Optional;
 
 /**
  * Dispatches messages synchronously or asynchronously to their corresponding handlers, which could
@@ -18,10 +24,17 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
  */
 public class Dispatcher {
 
-    private HandlerRegistry handlerRegistry;
+    private final HandlerRegistry handlerRegistry;
+    private final AccessControlService accessControlService;
+    private final AccessControlFailureMessageGenerator accessControlFailureMessageGenerator;
 
-    Dispatcher() {
-        handlerRegistry = new HandlerRegistry();
+
+    public Dispatcher(HandlerRegistry handlerRegistry,
+                      AccessControlService accessControlService,
+                      AccessControlFailureMessageGenerator accessControlFailureMessageGenerator) {
+        this.handlerRegistry = handlerRegistry;
+        this.accessControlService = accessControlService;
+        this.accessControlFailureMessageGenerator = accessControlFailureMessageGenerator;
     }
 
     /**
@@ -35,7 +48,7 @@ public class Dispatcher {
      * @param envelope the envelope to dispatch to a handler
      */
     public void asynchronousDispatch(final JsonEnvelope envelope) {
-        getMethod(envelope, ASYNCHRONOUS).execute(envelope);
+        doDispatch(envelope, ASYNCHRONOUS);
     }
 
     /**
@@ -46,7 +59,7 @@ public class Dispatcher {
      * @return the envelope returned by the handler method
      */
     public JsonEnvelope synchronousDispatch(final JsonEnvelope envelope) {
-        return (JsonEnvelope) getMethod(envelope, SYNCHRONOUS).execute(envelope);
+        return doDispatch(envelope, SYNCHRONOUS);
     }
 
     /**
@@ -61,6 +74,11 @@ public class Dispatcher {
         handlerRegistry.register(handler);
     }
 
+    private JsonEnvelope doDispatch(final JsonEnvelope envelope, final boolean isSynchronous) {
+        checkAccessControl(envelope);
+        return (JsonEnvelope) getMethod(envelope, isSynchronous).execute(envelope);
+    }
+
     /**
      * Get the handler method for handling this envelope or throw an exception.
      *
@@ -70,5 +88,19 @@ public class Dispatcher {
     private HandlerMethod getMethod(final JsonEnvelope envelope, final boolean isSynchronous) {
         final String name = envelope.metadata().name();
         return handlerRegistry.get(name, isSynchronous);
+    }
+
+    private void checkAccessControl(final JsonEnvelope jsonEnvelope) {
+
+        final Optional<AccessControlViolation> accessControlViolation =
+                        accessControlService.checkAccessControl(jsonEnvelope);
+
+        if(accessControlViolation.isPresent()) {
+            final String errorMessage = accessControlFailureMessageGenerator.errorMessageFrom(
+                            jsonEnvelope,
+                            accessControlViolation.get());
+
+            throw new AccessControlViolationException(errorMessage);
+        }
     }
 }

@@ -8,7 +8,22 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
 
+import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
+import uk.gov.justice.services.core.accesscontrol.AccessControlService;
+import uk.gov.justice.services.core.accesscontrol.AllowAllPolicyEvaluator;
+import uk.gov.justice.services.core.accesscontrol.PolicyEvaluator;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
+import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcherProducer;
+import uk.gov.justice.services.core.dispatcher.DispatcherCache;
+import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
+import uk.gov.justice.services.core.dispatcher.RequesterProducer;
+import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
+import uk.gov.justice.services.core.dispatcher.SynchronousDispatcherProducer;
+import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcherProducer;
+import uk.gov.justice.services.core.dispatcher.DispatcherCache;
+import uk.gov.justice.services.core.dispatcher.RequesterProducer;
+import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
+import uk.gov.justice.services.core.dispatcher.SynchronousDispatcherProducer;
 import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcherProducer;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.dispatcher.RequesterProducer;
@@ -21,6 +36,7 @@ import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.logging.JsonEnvelopeLoggerHelper;
 import uk.gov.justice.test.util.RecordingJmsEnvelopeSender;
 
 import java.util.List;
@@ -68,17 +84,23 @@ public class RemoteCommandControllerIT {
 
     @Module
     @Classes(cdi = true, value = {
-            RecordingJmsEnvelopeSender.class,
-            SenderProducer.class,
-            ComponentDestination.class,
-            JmsSenderFactory.class,
-            DispatcherCache.class,
+            AccessControlFailureMessageGenerator.class,
+            AccessControlService.class,
+            AllowAllPolicyEvaluator.class,
             AsynchronousDispatcherProducer.class,
-            SynchronousDispatcherProducer.class,
-            RequesterProducer.class,
-            ServiceComponentObserver.class,
+            ComponentDestination.class,
+            DispatcherCache.class,
+            DispatcherFactory.class,
+            JsonEnvelopeLoggerHelper.class,
             JmsDestinations.class,
-            RemoteContextaCommandController.class
+            JmsSenderFactory.class,
+            PolicyEvaluator.class,
+            RecordingJmsEnvelopeSender.class,
+            RemoteContextaCommandController.class,
+            RequesterProducer.class,
+            SenderProducer.class,
+            ServiceComponentObserver.class,
+            SynchronousDispatcherProducer.class
     })
     public WebApp war() {
         return new WebApp()

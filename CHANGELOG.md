@@ -8,6 +8,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ### Added
 
 - Support for generating messaging clients from RAML
+- Support for simple access control with a default implementation that allows all requests
 
 ### Changed
 

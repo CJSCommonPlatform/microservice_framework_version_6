@@ -5,6 +5,7 @@ import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.test.utils.builder.JsonEnvelopeBuilder.envelopeWithDefaultMetadata;
 
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
@@ -12,17 +13,12 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.example.cakeshop.query.view.response.RecipeView;
 import uk.gov.justice.services.example.cakeshop.query.view.response.RecipesView;
 import uk.gov.justice.services.example.cakeshop.query.view.service.RecipeService;
-import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjectMetadata;
-import uk.gov.justice.services.messaging.Metadata;
 
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.json.Json;
 import javax.json.JsonArray;
-import javax.json.JsonObjectBuilder;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -52,7 +48,7 @@ public class RecipesQueryViewTest {
         final String recipeName = "some recipe name";
         when(service.findRecipe(recipeId.toString())).thenReturn(new RecipeView(recipeId, recipeName, false));
 
-        final JsonEnvelope response = queryView.findRecipe(envelopeWith(jsonPayload().add("recipeId", recipeId.toString())));
+        final JsonEnvelope response = queryView.findRecipe(envelopeWithDefaultMetadata().withPayloadOf("recipeId", recipeId.toString()).build());
 
         assertThat(response.payloadAsJsonObject().getString("id"), is(recipeId.toString()));
         assertThat(response.payloadAsJsonObject().getString("name"), is(recipeName));
@@ -62,8 +58,7 @@ public class RecipesQueryViewTest {
     @Test
     public void shouldReturnResponseWithMetadataWhenQueryingForRecipe() {
 
-        final JsonEnvelope response = queryView.findRecipe(
-                envelopeWith(jsonPayload().add("recipeId", "123")));
+        final JsonEnvelope response = queryView.findRecipe(envelopeWithDefaultMetadata().withPayloadOf("recipeId", "123").build());
 
         assertThat(response.metadata().name(), is("cakeshop.findRecipe-response"));
 
@@ -81,7 +76,7 @@ public class RecipesQueryViewTest {
         when(service.getRecipes(pageSize, Optional.empty(), Optional.empty()))
                 .thenReturn(new RecipesView(asList(new RecipeView(recipeId, recipeName, false), new RecipeView(recipeId2, recipeName2, false))));
 
-        final JsonEnvelope response = queryView.listRecipes(envelopeWith(jsonPayload().add("pagesize", pageSize)));
+        final JsonEnvelope response = queryView.listRecipes(envelopeWithDefaultMetadata().withPayloadOf("pagesize", pageSize).build());
 
 
         final JsonArray recipesArray = response.payloadAsJsonObject().getJsonArray("recipes");
@@ -106,9 +101,10 @@ public class RecipesQueryViewTest {
         when(service.getRecipes(pagesize, Optional.of(nameUsedInQuery), Optional.empty())).thenReturn(new RecipesView(asList(new RecipeView(recipeId, recipeName, false))));
 
         final JsonEnvelope response = queryView.listRecipes(
-                envelopeWith(jsonPayload()
-                        .add("pagesize", pagesize)
-                        .add("name", nameUsedInQuery)));
+                envelopeWithDefaultMetadata()
+                        .withPayloadOf("pagesize", pagesize)
+                        .withPayloadOf("name", nameUsedInQuery)
+                        .build());
 
 
         final JsonArray recipesArray = response.payloadAsJsonObject().getJsonArray("recipes");
@@ -131,9 +127,10 @@ public class RecipesQueryViewTest {
                 new RecipesView(asList(new RecipeView(recipeId, recipeName, glutenFree))));
 
         final JsonEnvelope response = queryView.listRecipes(
-                envelopeWith(jsonPayload()
-                        .add("pagesize", pagesize)
-                        .add("glutenFree", glutenFree)));
+                envelopeWithDefaultMetadata()
+                        .withPayloadOf("pagesize", pagesize)
+                        .withPayloadOf("glutenFree", glutenFree)
+                        .build());
 
 
         final JsonArray recipesArray = response.payloadAsJsonObject().getJsonArray("recipes");
@@ -143,29 +140,14 @@ public class RecipesQueryViewTest {
 
     }
 
-
-
     @Test
     public void shouldReturnResponseWithMetadataWhenQueryingForRecipes() {
 
-        final JsonEnvelope response = queryView.listRecipes(envelopeWith(jsonPayload().add("pagesize", 1)));
+        final JsonEnvelope response = queryView.listRecipes(envelopeWithDefaultMetadata().withPayloadOf("pagesize", 1).build());
 
         assertThat(response.metadata().name(), is("cakeshop.recipes-response"));
 
     }
 
-    private JsonEnvelope envelopeWith(JsonObjectBuilder jsonPayload) {
-        return DefaultJsonEnvelope.envelopeFrom(metadata(), jsonPayload.build());
-    }
 
-    private JsonObjectBuilder jsonPayload() {
-        return Json.createObjectBuilder();
-    }
-
-    private Metadata metadata() {
-        return JsonObjectMetadata.metadataFrom(jsonPayload()
-                .add("id", UUID.randomUUID().toString())
-                .add("name", "name123")
-                .build());
-    }
 }

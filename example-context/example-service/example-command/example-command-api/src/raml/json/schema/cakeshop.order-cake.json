@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "recipeId": {
+      "type": "string"
+    },
+    "deliveryDate": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "recipeId",
+    "deliveryDate"
+  ]
+}

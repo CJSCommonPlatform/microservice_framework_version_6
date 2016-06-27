@@ -11,7 +11,7 @@ public class ApiResponse {
     private final int httpCode;
     private final String body;
 
-    private ApiResponse(int httpCode, String body) {
+    private ApiResponse(final int httpCode, final String body) {
         this.httpCode = httpCode;
         this.body = body;
     }
@@ -20,8 +20,10 @@ public class ApiResponse {
      * @param jaxsRsResponse - JAX-RS response
      * @return API response containig body and httpCode
      */
-    public static ApiResponse from(Response jaxsRsResponse) {
-        return new ApiResponse(jaxsRsResponse.getStatus(), jaxsRsResponse.readEntity(String.class));
+    public static ApiResponse from(final Response jaxsRsResponse) {
+        final String responseBody = jaxsRsResponse.readEntity(String.class);
+        jaxsRsResponse.close();
+        return new ApiResponse(jaxsRsResponse.getStatus(), responseBody);
     }
 
     public int httpCode() {

@@ -23,7 +23,11 @@ import uk.gov.justice.services.clients.core.RestClientProcessor;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
-import uk.gov.justice.services.core.dispatcher.DispatcherProducer;
+import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcherProducer;
+import uk.gov.justice.services.core.dispatcher.DispatcherCache;
+import uk.gov.justice.services.core.dispatcher.RequesterProducer;
+import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
+import uk.gov.justice.services.core.dispatcher.SynchronousDispatcherProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.jms.JmsDestinations;
 import uk.gov.justice.services.core.jms.JmsSenderFactory;
@@ -92,7 +96,11 @@ public class RemoteExampleEventProcessorIT {
             RemoteExampleCommandApi.class,
             RestClientProcessor.class,
             RestClientHelper.class,
-            DispatcherProducer.class,
+            DispatcherCache.class,
+            AsynchronousDispatcherProducer.class,
+            SynchronousDispatcherProducer.class,
+            RequesterProducer.class,
+            ServiceComponentObserver.class,
 
             // TODO: Remove the next 6 classes when sender is migrated fully to dispatcher system
             SenderProducer.class,

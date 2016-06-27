@@ -13,7 +13,8 @@ import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.annotation.exception.MissingAnnotationException;
-import uk.gov.justice.services.core.dispatcher.DispatcherProducer;
+import uk.gov.justice.services.core.dispatcher.Dispatcher;
+import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.handler.exception.MissingHandlerException;
 import uk.gov.justice.services.core.jms.JmsSender;
 import uk.gov.justice.services.core.jms.JmsSenderFactory;
@@ -34,13 +35,13 @@ public class SenderProducerTest {
     private JmsSenderFactory jmsSenderFactory;
 
     @Mock
-    private JmsSender primaryJmsSender;
-
-    @Mock
     private JmsSender legacyJmsSender;
 
     @Mock
-    private DispatcherProducer dispatcherProducer;
+    Dispatcher dispatcher;
+
+    @Mock
+    private DispatcherCache dispatcherCache;
 
     private SenderProducer senderProducer;
 
@@ -48,7 +49,7 @@ public class SenderProducerTest {
     public void setup() {
         senderProducer = new SenderProducer();
         senderProducer.jmsSenderFactory = jmsSenderFactory;
-        senderProducer.dispatcherProducer = dispatcherProducer;
+        senderProducer.dispatcherCache = dispatcherCache;
         senderProducer.componentDestination = new ComponentDestination();
     }
 
@@ -56,7 +57,7 @@ public class SenderProducerTest {
     public void shouldReturnSenderWrapper() throws Exception {
         final TestInjectionPoint injectionPoint = new TestInjectionPoint(TestCommandApi.class);
 
-        when(dispatcherProducer.produceSender(injectionPoint)).thenReturn(primaryJmsSender);
+        when(dispatcherCache.dispatcherFor(injectionPoint)).thenReturn(dispatcher);
         when(jmsSenderFactory.createJmsSender(COMMAND_CONTROLLER)).thenReturn(legacyJmsSender);
 
         final Sender returnedSender = senderProducer.produce(injectionPoint);
@@ -67,18 +68,15 @@ public class SenderProducerTest {
 
         returnedSender.send(envelope);
 
-        verify(primaryJmsSender).send(envelope);
+        verify(dispatcher).asynchronousDispatch(envelope);
         verifyZeroInteractions(legacyJmsSender);
-
-
     }
 
     @Test
     public void shouldReturnSenderWrapper2() throws Exception {
         final TestInjectionPoint injectionPoint = new TestInjectionPoint(TestEventProcessor.class);
 
-        when(dispatcherProducer.produceSender(injectionPoint)).thenReturn(primaryJmsSender);
-
+        when(dispatcherCache.dispatcherFor(injectionPoint)).thenReturn(dispatcher);
 
         final Sender returnedSender = senderProducer.produce(injectionPoint);
 
@@ -88,39 +86,38 @@ public class SenderProducerTest {
 
         returnedSender.send(envelope);
 
-        verify(primaryJmsSender).send(envelope);
-
+        verify(dispatcher).asynchronousDispatch(envelope);
     }
 
     @Test
     public void senderWrapperShouldRedirectToLegacySenderWhenPrimaryThrowsException() throws Exception {
         final TestInjectionPoint injectionPoint = new TestInjectionPoint(TestCommandApi.class);
 
-        when(dispatcherProducer.produceSender(injectionPoint)).thenReturn(primaryJmsSender);
+        when(dispatcherCache.dispatcherFor(injectionPoint)).thenReturn(dispatcher);
         when(jmsSenderFactory.createJmsSender(COMMAND_CONTROLLER)).thenReturn(legacyJmsSender);
         final JsonEnvelope envelope = DefaultJsonEnvelope.envelopeFrom(null, null);
-        doThrow(new MissingHandlerException("")).when(primaryJmsSender).send(envelope);
+        doThrow(new MissingHandlerException("")).when(dispatcher).asynchronousDispatch(envelope);
 
         final Sender returnedSender = senderProducer.produce(injectionPoint);
 
         returnedSender.send(envelope);
 
         verify(legacyJmsSender).send(envelope);
-
     }
-
 
     @Test(expected = MissingAnnotationException.class)
     public void shouldThrowExceptionWithInvalidHandler() throws Exception {
-        senderProducer.produce(new TestInjectionPoint(TestInvalidHandler.class));
+        final TestInjectionPoint injectionPoint = new TestInjectionPoint(TestInvalidHandler.class);
+        when(dispatcherCache.dispatcherFor(injectionPoint)).thenReturn(dispatcher);
+        senderProducer.produce(injectionPoint);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionWithInvalidComponent() throws Exception {
-
-        senderProducer.produce(new TestInjectionPoint(TestCommandHandler.class));
+        final TestInjectionPoint injectionPoint = new TestInjectionPoint(TestCommandHandler.class);
+        when(dispatcherCache.dispatcherFor(injectionPoint)).thenReturn(dispatcher);
+        senderProducer.produce(injectionPoint);
     }
-
 
     @ServiceComponent(COMMAND_API)
     public static class TestCommandApi {
@@ -128,7 +125,6 @@ public class SenderProducerTest {
 
         }
     }
-
 
     @ServiceComponent(COMMAND_HANDLER)
     public static class TestCommandHandler {

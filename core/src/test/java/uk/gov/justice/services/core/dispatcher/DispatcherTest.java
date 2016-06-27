@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
+import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -35,11 +36,20 @@ public class DispatcherTest {
     }
 
     @Test
-    public void shouldDispatchToAValidHandler() throws Exception {
+    public void shouldDispatchToAValidAsynchronousDispatcherHandler() throws Exception {
         Dispatcher dispatcher = new Dispatcher();
-        TestHandler testHandler = new TestHandler();
+        TestCommandHandler testHandler = new TestCommandHandler();
         dispatcher.register(testHandler);
         dispatcher.asynchronousDispatch(envelope);
+        assertThat(testHandler.envelope, equalTo(envelope));
+    }
+
+    @Test
+    public void shouldDispatchToAValidSynchronousDispatcherHandler() throws Exception {
+        Dispatcher dispatcher = new Dispatcher();
+        TestQueryHandler testHandler = new TestQueryHandler();
+        dispatcher.register(testHandler);
+        dispatcher.synchronousDispatch(envelope);
         assertThat(testHandler.envelope, equalTo(envelope));
     }
 
@@ -49,13 +59,26 @@ public class DispatcherTest {
     }
 
     @ServiceComponent(COMMAND_API)
-    public static class TestHandler {
+    public static class TestCommandHandler {
 
         JsonEnvelope envelope;
 
         @Handles(NAME)
         public void handle(JsonEnvelope envelope) {
             this.envelope = envelope;
+        }
+
+    }
+
+    @ServiceComponent(QUERY_API)
+    public static class TestQueryHandler {
+
+        JsonEnvelope envelope;
+
+        @Handles(NAME)
+        public JsonEnvelope handle(JsonEnvelope envelope) {
+            this.envelope = envelope;
+            return envelope;
         }
 
     }

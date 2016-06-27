@@ -9,7 +9,11 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
 
 import uk.gov.justice.services.core.annotation.ServiceComponent;
-import uk.gov.justice.services.core.dispatcher.DispatcherProducer;
+import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcherProducer;
+import uk.gov.justice.services.core.dispatcher.DispatcherCache;
+import uk.gov.justice.services.core.dispatcher.RequesterProducer;
+import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
+import uk.gov.justice.services.core.dispatcher.SynchronousDispatcherProducer;
 import uk.gov.justice.services.core.jms.JmsDestinations;
 import uk.gov.justice.services.core.jms.JmsSenderFactory;
 import uk.gov.justice.services.core.sender.ComponentDestination;
@@ -55,7 +59,7 @@ public class RemoteCommandControllerIT {
                 .property(OpenEjbContainer.OPENEJB_EMBEDDED_REMOTABLE, "true")
                 .build();
     }
-    
+
     @Inject
     Sender sender;
 
@@ -68,7 +72,11 @@ public class RemoteCommandControllerIT {
             SenderProducer.class,
             ComponentDestination.class,
             JmsSenderFactory.class,
-            DispatcherProducer.class,
+            DispatcherCache.class,
+            AsynchronousDispatcherProducer.class,
+            SynchronousDispatcherProducer.class,
+            RequesterProducer.class,
+            ServiceComponentObserver.class,
             JmsDestinations.class,
             RemoteContextaCommandController.class
     })
@@ -90,7 +98,7 @@ public class RemoteCommandControllerIT {
                 createObjectBuilder()
                         .add(ID, id.toString())
                         .add("name", name)
-                        .build()),null));
+                        .build()), null));
 
         final List<JsonEnvelope> sentEnvelopes = envelopeSender.envelopesSentTo("contexta.controller.command");
         assertThat(sentEnvelopes, hasSize(1));

@@ -14,6 +14,18 @@
 
     <modules>
         <module>example-event-listener</module>
+        <module>example-event-processor</module>
     </modules>
-
+    <dependencies>
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>event-processor</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 </project>

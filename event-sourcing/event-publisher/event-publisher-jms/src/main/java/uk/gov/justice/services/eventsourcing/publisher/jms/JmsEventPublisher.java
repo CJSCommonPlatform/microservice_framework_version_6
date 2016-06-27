@@ -17,11 +17,11 @@ public class JmsEventPublisher implements EventPublisher {
     JmsEnvelopeSender jmsEnvelopeSender;
 
     @Inject
-    MessagingDestinationResolver messagingDestinationResolver;
+    EventDestinationResolver eventDestinationResolver;
 
     @Override
     public void publish(final JsonEnvelope envelope) {
-        jmsEnvelopeSender.send(envelope, messagingDestinationResolver.resolve(envelope.metadata().name()));
+        jmsEnvelopeSender.send(envelope, eventDestinationResolver.destinationNameOf(envelope.metadata().name()));
     }
 
 }

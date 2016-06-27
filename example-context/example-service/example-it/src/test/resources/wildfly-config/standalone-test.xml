@@ -357,6 +357,7 @@
                            entries="cakeshop.controller.command"/>
                 <jms-queue name="cakeshop.handler.command" entries="cakeshop.handler.command"/>
                 <jms-topic name="cakeshop.event" entries="cakeshop.event"/>
+                <jms-topic name="public.event" entries="public.event"/>
 
                 <connection-factory name="InVmConnectionFactory" entries="java:/ConnectionFactory"
                                     connectors="in-vm"/>
@@ -366,6 +367,7 @@
                 <pooled-connection-factory name="activemq-ra" transaction="xa"
                                            entries="java:/JmsXA java:jboss/DefaultJMSConnectionFactory"
                                            connectors="in-vm"/>
+                <remote-acceptor name="activemq-5x-acceptor" socket-binding="activemq-5x"/>
             </server>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:datasources:4.0">
@@ -523,6 +525,7 @@
         <socket-binding name="iiop-ssl" interface="unsecure" port="3529"/>
         <socket-binding name="txn-recovery-environment" port="4712"/>
         <socket-binding name="txn-status-manager" port="4713"/>
+        <socket-binding name="activemq-5x" port="61616"/>
         <outbound-socket-binding name="mail-smtp">
             <remote-destination host="localhost" port="25"/>
         </outbound-socket-binding>

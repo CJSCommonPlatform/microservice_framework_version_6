@@ -9,8 +9,6 @@ import uk.gov.justice.services.generators.commons.client.AbstractClientGenerator
 import uk.gov.justice.services.generators.commons.helper.MessagingResourceUri;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
 
-import java.util.stream.Stream;
-
 import javax.inject.Inject;
 
 import com.google.common.collect.ImmutableList;
@@ -32,7 +30,7 @@ public class MessagingClientGenerator extends AbstractClientGenerator {
         return String.format("Remote%s%s%s",
                 capitalize(uri.context()),
                 capitalize(uri.pillar()),
-                capitalize(uri.tier()));
+                capitalize(uri.tier() != null ? uri.tier() : ""));
     }
 
     @Override
@@ -45,11 +43,6 @@ public class MessagingClientGenerator extends AbstractClientGenerator {
     @Override
     protected TypeName methodReturnTypeOf(final Action ramlAction) {
         return VOID;
-    }
-
-    @Override
-    protected Stream<MimeType> mediaTypesOf(final Action ramlAction) {
-        return ramlAction.getBody().values().stream();
     }
 
     @Override

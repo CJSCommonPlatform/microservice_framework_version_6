@@ -9,13 +9,13 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static uk.gov.justice.services.generators.commons.helper.Names.camelCase;
 import static uk.gov.justice.services.generators.commons.helper.Names.nameFrom;
 
-import uk.gov.justice.services.generators.commons.config.GeneratorProperties;
 import uk.gov.justice.raml.core.Generator;
 import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.Remote;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
+import uk.gov.justice.services.generators.commons.config.GeneratorProperties;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.logging.JsonEnvelopeLoggerHelper;
 import uk.gov.justice.services.messaging.logging.LoggerUtils;
@@ -38,12 +38,14 @@ import org.raml.model.ActionType;
 import org.raml.model.MimeType;
 import org.raml.model.Raml;
 import org.raml.model.Resource;
+import org.raml.model.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractClientGenerator implements Generator {
 
     protected static final String ENVELOPE = "envelope";
+    private static final String OK = "200";
 
     @Override
     public void run(final Raml raml, final GeneratorConfig generatorConfig) {
@@ -97,10 +99,27 @@ public abstract class AbstractClientGenerator implements Generator {
                         classLoggerUtils, classJsonEnvelopeLoggerHelper);
     }
 
+    protected Stream<MimeType> mediaTypesOf(Action ramlAction) {
+        switch (ramlAction.getType()) {
+            case GET:
+                final Response response = ramlAction.getResponses().get(OK);
+                if (response != null) {
+                    return response.getBody().values().stream();
+                } else {
+                    return Stream.empty();
+                }
+            case POST:
+                return ramlAction.getBody().values().stream();
+            default:
+                throw new IllegalStateException(format("Unsupported httpAction type %s", ramlAction.getType()));
+        }
+    }
+
     protected String methodNameOf(final ActionType actionType, final MimeType mimeType) {
         final String actionTypeStr = actionType.name().toLowerCase();
         return camelCase(format("%s.%s", actionTypeStr, nameFrom(mimeType)));
     }
+
 
 
     private List<MethodSpec> methodsOf(final Raml raml, final GeneratorConfig generatorConfig) {
@@ -146,7 +165,6 @@ public abstract class AbstractClientGenerator implements Generator {
     protected abstract String classNameOf(final Raml raml);
     protected abstract Iterable<FieldSpec> fieldsOf(final Raml raml);
     protected abstract TypeName methodReturnTypeOf(Action ramlAction);
-    protected abstract Stream<MimeType> mediaTypesOf(Action ramlAction);
     protected abstract CodeBlock methodBodyOf(Resource resource, Action ramlAction, MimeType mimeType);
     protected abstract String handlesAnnotationValueOf(Action ramlAction, MimeType mimeType, GeneratorConfig generatorConfig);
 

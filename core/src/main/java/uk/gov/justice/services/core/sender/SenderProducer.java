@@ -6,7 +6,7 @@ import static uk.gov.justice.services.core.annotation.Component.componentFrom;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.annotation.exception.MissingAnnotationException;
-import uk.gov.justice.services.core.dispatcher.DispatcherProducer;
+import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.jms.JmsSenderFactory;
 import uk.gov.justice.services.core.jms.JmsSenderWrapper;
 
@@ -31,7 +31,7 @@ public class SenderProducer {
     ComponentDestination componentDestination;
 
     @Inject
-    DispatcherProducer dispatcherProducer;
+    DispatcherCache dispatcherCache;
 
     private Map<Component, Sender> senderMap;
 
@@ -57,10 +57,14 @@ public class SenderProducer {
     }
 
     private Sender getSender(final Component component, final InjectionPoint injectionPoint) {
-        final Sender primarySender = dispatcherProducer.produceSender(injectionPoint);
+        final Sender primarySender = produceSender(injectionPoint);
         final Sender legacySender = component != EVENT_PROCESSOR ?
                 senderMap.computeIfAbsent(component, c -> jmsSenderFactory.createJmsSender(componentDestination.getDefault(c))) : null;
         return new JmsSenderWrapper(primarySender, legacySender);
+    }
+
+    private Sender produceSender(final InjectionPoint injectionPoint) {
+        return dispatcherCache.dispatcherFor(injectionPoint)::asynchronousDispatch;
     }
 
 }

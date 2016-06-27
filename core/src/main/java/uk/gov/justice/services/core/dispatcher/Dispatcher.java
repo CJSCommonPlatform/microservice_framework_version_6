@@ -3,8 +3,6 @@ package uk.gov.justice.services.core.dispatcher;
 import static uk.gov.justice.services.core.handler.HandlerMethod.ASYNCHRONOUS;
 import static uk.gov.justice.services.core.handler.HandlerMethod.SYNCHRONOUS;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.core.handler.HandlerMethod;
 import uk.gov.justice.services.core.handler.registry.HandlerRegistry;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -16,13 +14,11 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
  * This class handles both synchronous and asynchronous dispatching. Note that it does not implement
  * the {{@link SynchronousDispatcher} or {@link AsynchronousDispatcher} interfaces. This is because
  * the <code>dispatch</code> method names would clash. Instead, we expose the dispatcher as a
- * functional interface via the {@link DispatcherProducer}.
+ * functional interface via the {@link ServiceComponentObserver}.
  */
-class Dispatcher {
+public class Dispatcher {
 
     private HandlerRegistry handlerRegistry;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(Dispatcher.class);
 
     Dispatcher() {
         handlerRegistry = new HandlerRegistry();
@@ -38,7 +34,7 @@ class Dispatcher {
      *
      * @param envelope the envelope to dispatch to a handler
      */
-    void asynchronousDispatch(final JsonEnvelope envelope) {
+    public void asynchronousDispatch(final JsonEnvelope envelope) {
         getMethod(envelope, ASYNCHRONOUS).execute(envelope);
     }
 
@@ -49,14 +45,15 @@ class Dispatcher {
      * @param envelope the envelope to dispatch to a handler
      * @return the envelope returned by the handler method
      */
-    JsonEnvelope synchronousDispatch(final JsonEnvelope envelope) {
+    public JsonEnvelope synchronousDispatch(final JsonEnvelope envelope) {
         return (JsonEnvelope) getMethod(envelope, SYNCHRONOUS).execute(envelope);
     }
 
     /**
      * Registers the handler instance.
      *
-     * This is only called by the {@link DispatcherProducer} to populate the handler registry.
+     * This is only called by the {@link ServiceComponentObserver} to populate the handler
+     * registry.
      *
      * @param handler handler instance to be registered.
      */

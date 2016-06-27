@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.spi.InjectionPoint;
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -22,11 +23,10 @@ import org.apache.commons.lang3.tuple.Pair;
 @ApplicationScoped
 public class DispatcherCache {
 
-    private final Map<Pair<Component, ServiceComponentLocation>, Dispatcher> dispatcherMap;
+    @Inject
+    private DispatcherFactory dispatcherFactory;
 
-    DispatcherCache() {
-        dispatcherMap = new ConcurrentHashMap<>();
-    }
+    private final Map<Pair<Component, ServiceComponentLocation>, Dispatcher> dispatcherMap = new ConcurrentHashMap<>();
 
     /**
      * Return a {@link Dispatcher} for the given {@link InjectionPoint}.
@@ -51,6 +51,6 @@ public class DispatcherCache {
     }
 
     private Dispatcher createDispatcherIfAbsent(final Pair<Component, ServiceComponentLocation> component) {
-        return dispatcherMap.computeIfAbsent(component, c -> new Dispatcher());
+        return dispatcherMap.computeIfAbsent(component, c -> dispatcherFactory.createNew());
     }
 }

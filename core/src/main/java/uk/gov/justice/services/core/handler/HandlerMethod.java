@@ -1,7 +1,6 @@
 package uk.gov.justice.services.core.handler;
 
 import static java.lang.String.format;
-import static javafx.scene.input.KeyCode.T;
 import static uk.gov.justice.services.messaging.logging.JsonEnvelopeLoggerHelper.toEnvelopeTraceString;
 import static uk.gov.justice.services.messaging.logging.LoggerUtils.trace;
 

@@ -1,9 +1,12 @@
 package uk.gov.justice.services.messaging.logging;
 
-import static com.jayway.jsonassert.JsonAssert.with;
-import static net.trajano.commons.testing.UtilityClassTestUtil.assertUtilityClassWellDefined;
-import static org.mockito.Mockito.when;
-
+import org.hamcrest.collection.IsEmptyCollection;
+import org.hamcrest.core.IsCollectionContaining;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectMetadata;
 import uk.gov.justice.services.messaging.Metadata;
@@ -13,13 +16,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.hamcrest.collection.IsEmptyCollection;
-import org.hamcrest.core.IsCollectionContaining;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import static com.jayway.jsonassert.JsonAssert.with;
+import static org.mockito.Mockito.when;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -87,11 +85,6 @@ public class JsonEnvelopeLoggerHelperTest {
         when(metadataWithoutOptionals.sessionId()).thenReturn(Optional.empty());
         when(metadataWithoutOptionals.userId()).thenReturn(Optional.empty());
 
-    }
-
-    @Test
-    public void shouldBeWellDefinedUtilityClass() {
-        assertUtilityClassWellDefined(JsonEnvelopeLoggerHelper.class);
     }
 
     @Test

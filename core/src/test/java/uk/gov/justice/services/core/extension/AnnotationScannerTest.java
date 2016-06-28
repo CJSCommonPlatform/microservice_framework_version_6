@@ -13,6 +13,7 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 
 import uk.gov.justice.domain.annotation.Event;
+import uk.gov.justice.services.core.annotation.Provider;
 import uk.gov.justice.services.core.annotation.Remote;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.annotation.ServiceComponentLocation;
@@ -54,6 +55,9 @@ public class AnnotationScannerTest {
 
     @Mock
     private EventFoundEvent eventFoundEvent;
+
+    @Mock
+    private ProviderFoundEvent providerFoundEvent;
 
     @Mock
     private Bean<Object> beanMockCommandApiHandler;
@@ -117,6 +121,11 @@ public class AnnotationScannerTest {
         verify(beanManager, never()).fireEvent(any());
     }
 
+    @Test
+    public void shouldFireProviderEvent() throws Exception {
+        verifyIfProviderEventFoundEventFiredWith(processAnnotatedType);
+    }
+
     @SuppressWarnings("serial")
     private void mockBeanManagerGetBeansWith(Bean<Object> handler) {
         doReturn(new HashSet<Bean<Object>>() {
@@ -131,6 +140,13 @@ public class AnnotationScannerTest {
         doReturn(true).when(annotatedType).isAnnotationPresent(Event.class);
         doReturn(TestEvent.class).when(annotatedType).getJavaClass();
         doReturn(TestEvent.class.getAnnotation(Event.class)).when(annotatedType).getAnnotation(Event.class);
+    }
+
+    private void mockProcessProviderAnnotatedType() {
+        doReturn(annotatedType).when(processAnnotatedType).getAnnotatedType();
+        doReturn(true).when(annotatedType).isAnnotationPresent(Provider.class);
+        doReturn(TestProvider.class).when(annotatedType).getJavaClass();
+        doReturn(TestProvider.class.getAnnotation(Provider.class)).when(annotatedType).getAnnotation(Provider.class);
     }
 
     private void verifyIfServiceComponentFoundEventFiredWith(Bean<Object> handler) {
@@ -166,6 +182,17 @@ public class AnnotationScannerTest {
         assertThat(captor.getValue(), instanceOf(EventFoundEvent.class));
     }
 
+    private void verifyIfProviderEventFoundEventFiredWith(ProcessAnnotatedType processAnnotatedType) {
+        ArgumentCaptor<ProviderFoundEvent> captor = ArgumentCaptor.forClass(ProviderFoundEvent.class);
+        mockProcessProviderAnnotatedType();
+
+        annotationScanner.processAnnotatedType(processAnnotatedType);
+        annotationScanner.afterDeploymentValidation(afterDeploymentValidation, beanManager);
+
+        verify(beanManager).fireEvent(captor.capture());
+        assertThat(captor.getValue(), instanceOf(ProviderFoundEvent.class));
+    }
+
     @ServiceComponent(COMMAND_API)
     public static class TestCommandApiHandler {
     }
@@ -183,7 +210,13 @@ public class AnnotationScannerTest {
     public static class TestRemoteQueryApiHandler {
     }
 
+
     @Event(TEST_EVENT_NAME)
     public static class TestEvent {
+    }
+
+    @Provider
+    public static class TestProvider {
+
     }
 }

@@ -4,11 +4,13 @@ import static uk.gov.justice.services.core.annotation.Component.componentFrom;
 import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.componentLocationFrom;
 
 import uk.gov.justice.domain.annotation.Event;
+import uk.gov.justice.services.core.annotation.Provider;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
@@ -26,12 +28,15 @@ import javax.enterprise.util.AnnotationLiteral;
 public class AnnotationScanner implements Extension {
 
     private List<Object> events = Collections.synchronizedList(new ArrayList<>());
+    private List<Object> providers = Collections.synchronizedList(new ArrayList<>());
 
     @SuppressWarnings("unused")
     <T> void processAnnotatedType(@Observes final ProcessAnnotatedType<T> pat) {
         final AnnotatedType<T> annotatedType = pat.getAnnotatedType();
         if (annotatedType.isAnnotationPresent(Event.class)) {
             events.add(new EventFoundEvent(annotatedType.getJavaClass(), annotatedType.getAnnotation(Event.class).value()));
+        } else if (annotatedType.isAnnotationPresent(Provider.class)) {
+            providers.add(new ProviderFoundEvent(annotatedType.getJavaClass()));
         }
     }
 
@@ -46,7 +51,7 @@ public class AnnotationScanner implements Extension {
     }
 
     private void fireAllCollectedEvents(final BeanManager beanManager) {
-        events.stream().forEach(beanManager::fireEvent);
+        Stream.concat(events.stream(), providers.stream()).forEach(beanManager::fireEvent);
     }
 
     private AnnotationLiteral<Any> annotationLiteral() {

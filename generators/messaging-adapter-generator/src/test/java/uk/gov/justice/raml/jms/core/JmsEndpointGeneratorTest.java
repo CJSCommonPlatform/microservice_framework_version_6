@@ -200,7 +200,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
     }
 
     @Test
-    public void shouldCreateJmseventProcessorNamedAfterResourceUriAndBaseUri() throws Exception {
+    public void shouldCreateJmsEventProcessorNamedAfterResourceUriAndBaseUri() throws Exception {
         generator.run(
                 raml()
                         .withBaseUri("message://event/processor/message/structure")
@@ -215,7 +215,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
     }
 
     @Test
-    public void shouldCreateJmseventListenerNamedAfterResourceUriAndBaseUri() throws Exception {
+    public void shouldCreateJmsEventListenerNamedAfterResourceUriAndBaseUri() throws Exception {
         generator.run(
                 raml()
                         .withBaseUri("message://event/listener/message/structure")

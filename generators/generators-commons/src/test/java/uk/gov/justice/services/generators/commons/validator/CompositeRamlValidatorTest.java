@@ -1,24 +1,34 @@
 package uk.gov.justice.services.generators.commons.validator;
 
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.raml.model.Raml;
 
+@RunWith(MockitoJUnitRunner.class)
 public class CompositeRamlValidatorTest {
+
+    @Mock
+    private RamlValidator element1;
+    @Mock
+    private RamlValidator element2;
+
+    private RamlValidator validator;
+    private Raml raml;
+
+    @Before
+    public void setup() {
+        validator = new CompositeRamlValidator(element1, element2);
+        raml = new Raml();
+    }
 
     @Test
     public void shouldCallAllElementsOfComposite() throws Exception {
-
-        RamlValidator element1 = mock(RamlValidator.class);
-        RamlValidator element2 = mock(RamlValidator.class);
-
-        RamlValidator validator = new CompositeRamlValidator(element1, element2);
-
-        Raml raml = new Raml();
         validator.validate(raml);
 
         verify(element1).validate(raml);
@@ -27,12 +37,6 @@ public class CompositeRamlValidatorTest {
 
     @Test
     public void shouldCallAllElementsOfCompositeMultipleTimes() throws Exception {
-        RamlValidator element1 = mock(RamlValidator.class);
-        RamlValidator element2 = mock(RamlValidator.class);
-
-        RamlValidator validator = new CompositeRamlValidator(element1, element2);
-
-        Raml raml = new Raml();
         validator.validate(raml);
         validator.validate(raml);
 

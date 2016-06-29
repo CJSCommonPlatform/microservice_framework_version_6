@@ -15,7 +15,7 @@ import java.util.function.Predicate;
 public class BasicRecordingDispatcher {
     private final List<JsonEnvelope> recordedEnvelopes = new CopyOnWriteArrayList<>();
 
-    protected void record(JsonEnvelope envelope) {
+    protected void record(final JsonEnvelope envelope) {
         recordedEnvelopes.add(envelope);
     }
 
@@ -26,7 +26,7 @@ public class BasicRecordingDispatcher {
      * @param jsonElementValue - value of element in payload
      * @return - envelope matching given arguments
      */
-    public JsonEnvelope awaitForEnvelopeWithPayloadOf(String jsonElementName, String jsonElementValue) {
+    public JsonEnvelope awaitForEnvelopeWithPayloadOf(final String jsonElementName, final String jsonElementValue) {
         return awaitForEnvelopeContaining(payloadWith(jsonElementName, jsonElementValue));
     }
 
@@ -37,7 +37,7 @@ public class BasicRecordingDispatcher {
      * @param jsonElementValue - value of element in metadata
      * @return - envelope matching given arguments
      */
-    public JsonEnvelope awaitForEnvelopeWithMetadataOf(String jsonElementName, String jsonElementValue) {
+    public JsonEnvelope awaitForEnvelopeWithMetadataOf(final String jsonElementName, final String jsonElementValue) {
         return awaitForEnvelopeContaining(metadataWith(jsonElementName, jsonElementValue));
     }
 
@@ -49,7 +49,7 @@ public class BasicRecordingDispatcher {
      * @param jsonElementValue - value of element in payload
      * @return - true if the envelope has not been dispatched, false otherwise
      */
-    public boolean notFoundEnvelopeWithPayloadOf(String jsonElementName, String jsonElementValue) {
+    public boolean notFoundEnvelopeWithPayloadOf(final String jsonElementName, final String jsonElementValue) {
         try {
             Thread.sleep(300);
         } catch (InterruptedException e) {
@@ -66,7 +66,7 @@ public class BasicRecordingDispatcher {
      * @param jsonElementValue - value of element in metadata
      * @return - true if the envelope has not been dispatched, false otherwise
      */
-    public boolean notFoundEnvelopeWithMetadataOf(String jsonElementName, String jsonElementValue) {
+    public boolean notFoundEnvelopeWithMetadataOf(final String jsonElementName, final String jsonElementValue) {
         try {
             Thread.sleep(300);
         } catch (InterruptedException e) {
@@ -75,20 +75,20 @@ public class BasicRecordingDispatcher {
         return !envelopeMatching(metadataWith(jsonElementName, jsonElementValue)).isPresent();
     }
 
-    private JsonEnvelope awaitForEnvelopeContaining(Predicate<JsonEnvelope> filterCondition) {
+    private JsonEnvelope awaitForEnvelopeContaining(final Predicate<JsonEnvelope> filterCondition) {
         await().until(() -> envelopeMatching(filterCondition).isPresent());
         return envelopeMatching(filterCondition).get();
     }
 
-    private Optional<JsonEnvelope> envelopeMatching(Predicate<JsonEnvelope> filterCondition) {
+    private Optional<JsonEnvelope> envelopeMatching(final Predicate<JsonEnvelope> filterCondition) {
         return recordedEnvelopes.stream().filter(filterCondition).findFirst();
     }
 
-    private Predicate<JsonEnvelope> payloadWith(String elementName, String elementValue) {
+    private Predicate<JsonEnvelope> payloadWith(final String elementName, final String elementValue) {
         return e -> e.payloadAsJsonObject().getString(elementName) != null && e.payloadAsJsonObject().getString(elementName).equals(elementValue);
     }
 
-    private Predicate<JsonEnvelope> metadataWith(String elementName, String elementValue) {
+    private Predicate<JsonEnvelope> metadataWith(final String elementName, final String elementValue) {
         return e -> e.metadata().asJsonObject().getString(elementName).equals(elementValue);
     }
 }

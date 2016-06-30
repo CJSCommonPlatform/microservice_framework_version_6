@@ -6,11 +6,14 @@ import static uk.gov.justice.services.messaging.JsonObjects.getString;
 import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 import static uk.gov.justice.services.messaging.JsonObjects.getUUIDs;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonString;
 
@@ -31,11 +34,11 @@ public class JsonObjectMetadata implements Metadata {
     public static final String VERSION = "version";
     public static final String CAUSATION = "causation";
 
-    private static final String[] USER_ID_PATH = new String[]{CONTEXT, USER_ID};
-    private static final String[] CLIENT_CORRELATION_PATH = new String[]{CORRELATION, CLIENT_ID};
-    private static final String[] VERSION_PATH = new String[]{STREAM, VERSION};
-    private static final String[] SESSION_ID_PATH = new String[]{CONTEXT, SESSION_ID};
-    private static final String[] STREAM_ID_PATH = new String[]{STREAM, STREAM_ID};
+    private static final String[] USER_ID_PATH = {CONTEXT, USER_ID};
+    private static final String[] CLIENT_CORRELATION_PATH = {CORRELATION, CLIENT_ID};
+    private static final String[] VERSION_PATH = {STREAM, VERSION};
+    private static final String[] SESSION_ID_PATH = {CONTEXT, SESSION_ID};
+    private static final String[] STREAM_ID_PATH = {STREAM, STREAM_ID};
 
     private final JsonObject metadata;
 
@@ -62,6 +65,15 @@ public class JsonObjectMetadata implements Metadata {
         }
 
         return new JsonObjectMetadata(jsonObject);
+    }
+
+    /**
+     * Create metadata builder
+     *
+     * @return metadata builder
+     */
+    public static Builder metadataOf(final UUID id, final String name) {
+        return new Builder().withId(id).withName(name);
     }
 
     @Override
@@ -123,5 +135,96 @@ public class JsonObjectMetadata implements Metadata {
     @Override
     public int hashCode() {
         return Objects.hash(metadata);
+    }
+
+
+    public static class Builder {
+
+        private JsonObjectBuilderWrapper json = new JsonObjectBuilderWrapper();
+
+        private Builder() {
+        }
+
+        /**
+         * @param id unique id used to definitively identify the payload within the system
+         * @return metadata builder
+         */
+        public Builder withId(final UUID id) {
+            json.add(id.toString(), ID);
+            return this;
+        }
+
+        /**
+         * @param name logical type name of the message payload
+         * @return metadata builder
+         */
+        public Builder withName(final String name) {
+            json.add(name, NAME);
+            return this;
+        }
+
+        /**
+         * @param uuid ids that indicate the sequence of commands or events that resulting in this
+         * message
+         * @return metadata builder
+         */
+        public Builder withCausation(final UUID... uuid) {
+            final JsonArrayBuilder causationArray = Json.createArrayBuilder();
+            for (UUID id : uuid) {
+                causationArray.add(id.toString());
+            }
+            json.add(causationArray, CAUSATION);
+            return this;
+        }
+
+        /**
+         * @param clientId correlation id supplied by the client
+         * @return metadata builder
+         */
+        public Builder withClientCorrelationId(final String clientId) {
+            json.add(clientId, CLIENT_CORRELATION_PATH);
+            return this;
+        }
+
+        /**
+         * @param userId id of the user that initiated this message
+         * @return metadata builder
+         */
+        public Builder withUserId(final String userId) {
+            json.add(userId, USER_ID_PATH);
+            return this;
+        }
+
+        /**
+         * @param sessionId id of the user's session that initiated this message
+         * @return metadata builder
+         */
+        public Builder withSessionId(final String sessionId) {
+            json.add(sessionId, SESSION_ID_PATH);
+            return this;
+        }
+
+        /**
+         * @param streamId UUID of the stream this message belongs to
+         * @return metadata builder
+         */
+        public Builder withStreamId(final UUID streamId) {
+            json.add(streamId.toString(), STREAM_ID_PATH);
+            return this;
+        }
+        /**
+         * @param version sequence id (or version) that indicates where in the stream this message is
+         * positioned
+         * @return metadata builder
+         */
+        public Builder withVersion(final Long version) {
+            json.add(BigDecimal.valueOf(version), VERSION_PATH);
+            return this;
+        }
+
+        public Metadata build() {
+            return metadataFrom(json.build());
+        }
+
     }
 }

@@ -11,14 +11,15 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 - Added EVENT_API service component type
 - Updated COMMAND_API service component type to an http default input
 - Support for simple access control with a default implementation that allows all requests
-- Added ZonedDateTimes utility class for converting JSON strings to UTC date times
+- New ZonedDateTimes utility class for converting JSON strings to UTC date times
+- New JsonEnvelopeBuilder test utility class for building envelopes
 
 ### Changed
 
 - Object mapper configured to exclude nulls from JSON
 - Ensure dates are stored and retrieved in UTC format
 - Refactor DispatcherProvider into component parts
-- Updated USER_ID constant in repsonse to change by IDAM
+- Updated USER_ID constant in response to change by IDAM
 
 ## [0.9.0] - 2016-06-15
 

@@ -9,6 +9,7 @@ import static org.junit.Assert.assertTrue;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLLER;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_API;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
@@ -51,6 +52,7 @@ public class ComponentTest {
         assertThat(COMMAND_HANDLER.pillar(), equalTo(PILLAR_COMMAND));
         assertThat(EVENT_LISTENER.pillar(), equalTo(PILLAR_EVENT));
         assertThat(EVENT_PROCESSOR.pillar(), equalTo(PILLAR_EVENT));
+        assertThat(EVENT_API.pillar(), equalTo(PILLAR_EVENT));
     }
 
     @Test
@@ -61,14 +63,16 @@ public class ComponentTest {
         assertThat(COMMAND_HANDLER.tier(), equalTo(TIER_HANDLER));
         assertThat(EVENT_LISTENER.tier(), equalTo(TIER_LISTENER));
         assertThat(EVENT_PROCESSOR.tier(), equalTo(TIER_PROCESSOR));
+        assertThat(EVENT_API.tier(), equalTo(TIER_API));
     }
 
     @Test
     public void shouldReturnDestinationType() throws Exception {
-        assertThat(COMMAND_API.destinationType(), equalTo(Queue.class));
-        assertThat(COMMAND_CONTROLLER.destinationType(), equalTo(Queue.class));
-        assertThat(COMMAND_HANDLER.destinationType(), equalTo(Queue.class));
-        assertThat(EVENT_LISTENER.destinationType(), equalTo(Topic.class));
+        assertThat(COMMAND_API.inputDestinationType(), equalTo(Queue.class));
+        assertThat(COMMAND_CONTROLLER.inputDestinationType(), equalTo(Queue.class));
+        assertThat(COMMAND_HANDLER.inputDestinationType(), equalTo(Queue.class));
+        assertThat(EVENT_LISTENER.inputDestinationType(), equalTo(Topic.class));
+        assertThat(EVENT_API.inputDestinationType(), equalTo(null));
     }
 
     @Test
@@ -79,6 +83,7 @@ public class ComponentTest {
         assertThat(valueOf("event", "listener"), is(EVENT_LISTENER));
         assertThat(valueOf("event", "processor"), is(EVENT_PROCESSOR));
         assertThat(valueOf("query", "api"), is(QUERY_API));
+        assertThat(valueOf("event", "api"), is(EVENT_API));
     }
 
     @Test
@@ -110,6 +115,7 @@ public class ComponentTest {
         assertTrue(contains("QUERY_API"));
         assertTrue(contains("QUERY_CONTROLLER"));
         assertTrue(contains("QUERY_VIEW"));
+        assertTrue(contains("EVENT_API"));
     }
 
     @Test
@@ -120,7 +126,7 @@ public class ComponentTest {
 
     @Test
     public void shouldReturnStringContainingSeparatedNames() {
-        assertThat(names(", "), is("COMMAND_API, COMMAND_CONTROLLER, COMMAND_HANDLER, EVENT_LISTENER, EVENT_PROCESSOR, QUERY_API, QUERY_CONTROLLER, QUERY_VIEW"));
+        assertThat(names(", "), is("COMMAND_API, COMMAND_CONTROLLER, COMMAND_HANDLER, EVENT_LISTENER, EVENT_PROCESSOR, EVENT_API, QUERY_API, QUERY_CONTROLLER, QUERY_VIEW"));
     }
 
     @Test

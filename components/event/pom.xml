@@ -15,6 +15,7 @@
     <modules>
         <module>event-listener</module>
         <module>event-processor</module>
+        <module>event-api</module>
     </modules>
 
 </project>

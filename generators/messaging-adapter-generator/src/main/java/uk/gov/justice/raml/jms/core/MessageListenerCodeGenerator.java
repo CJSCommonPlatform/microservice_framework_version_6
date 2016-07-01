@@ -145,13 +145,13 @@ class MessageListenerCodeGenerator {
 
         AnnotationSpec.Builder builder = AnnotationSpec.builder(MessageDriven.class)
             .addMember(ACTIVATION_CONFIG_PARAMETER, "$L",
-                    generateActivationConfigPropertyAnnotation(DESTINATION_TYPE, component.destinationType().getName()))
+                    generateActivationConfigPropertyAnnotation(DESTINATION_TYPE, component.inputDestinationType().getName()))
             .addMember(ACTIVATION_CONFIG_PARAMETER, "$L",
                     generateActivationConfigPropertyAnnotation(DESTINATION_LOOKUP, resourceUri.destinationName()))
             .addMember(ACTIVATION_CONFIG_PARAMETER, "$L",
                     generateActivationConfigPropertyAnnotation(MESSAGE_SELECTOR, messageSelectorsFrom(actions)));
 
-        if (Topic.class.equals(component.destinationType())) {
+        if (Topic.class.equals(component.inputDestinationType())) {
             final String clientId = baseUri.adapterClientId();
             builder = builder
                     .addMember(ACTIVATION_CONFIG_PARAMETER, "$L",

@@ -26,18 +26,19 @@ public enum Component {
     COMMAND_HANDLER("command", "handler", Queue.class),
     EVENT_LISTENER("event", "listener", Topic.class),
     EVENT_PROCESSOR("event", "processor", Topic.class),
+    EVENT_API("event", "api", null),
     QUERY_API("query", "api", null),
     QUERY_CONTROLLER("query", "controller", null),
     QUERY_VIEW("query", "view", null);
 
     private final String pillar;
     private final String tier;
-    private final Class<? extends Destination> destinationType;
+    private final Class<? extends Destination> inputDestinationType;
 
-    Component(final String pillar, final String tier, final Class<? extends Destination> destinationType) {
+    Component(final String pillar, final String tier, final Class<? extends Destination> inputDestinationType) {
         this.pillar = pillar;
         this.tier = tier;
-        this.destinationType = destinationType;
+        this.inputDestinationType = inputDestinationType;
     }
 
     /**
@@ -118,7 +119,7 @@ public enum Component {
         return tier;
     }
 
-    public Class<? extends Destination> destinationType() {
-        return destinationType;
+    public Class<? extends Destination> inputDestinationType() {
+        return inputDestinationType;
     }
 }

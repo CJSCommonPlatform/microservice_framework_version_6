@@ -8,6 +8,8 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ### Added
 
 - Support for generating messaging clients from RAML
+- Added EVENT_API service component type
+- Updated COMMAND_API service component type to an http default input
 - Support for simple access control with a default implementation that allows all requests
 - Added ZonedDateTimes utility class for converting JSON strings to UTC date times
 

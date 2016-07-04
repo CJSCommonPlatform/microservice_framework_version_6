@@ -36,6 +36,7 @@
         <module>generators</module>
         <module>example-context</module>
         <module>test-utils</module>
+        <module>framework-bom</module>
     </modules>
 
     <properties>

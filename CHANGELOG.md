@@ -9,10 +9,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 - Support for generating messaging clients from RAML
 - Added EVENT_API service component type
-- Updated COMMAND_API service component type to an http default input
 - Support for simple access control with a default implementation that allows all requests
 - New ZonedDateTimes utility class for converting JSON strings to UTC date times
 - New JsonEnvelopeBuilder test utility class for building envelopes
+- Bill of materials (BOM) for easier framework module dependency management in other Maven projects
 
 ### Changed
 
@@ -20,6 +20,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 - Ensure dates are stored and retrieved in UTC format
 - Refactor DispatcherProvider into component parts
 - Updated USER_ID constant in response to change by IDAM
+- Updated COMMAND_API service component type to an http default input
 
 ## [0.9.0] - 2016-06-15
 

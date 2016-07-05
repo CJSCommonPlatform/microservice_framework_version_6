@@ -3,8 +3,6 @@ package uk.gov.justice.services.generators.commons.config;
 import static java.lang.Boolean.parseBoolean;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static uk.gov.justice.services.core.annotation.Component.contains;
-import static uk.gov.justice.services.core.annotation.Component.names;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
 
@@ -31,9 +29,6 @@ public final class GeneratorProperties {
             throw new IllegalArgumentException(format(NOT_SET_MESSAGE, SERVICE_COMPONENT_PROPERTY));
         }
 
-        if (!contains(serviceComponentProperty)) {
-            throw new IllegalArgumentException(format(INVALID_MESSAGE, SERVICE_COMPONENT_PROPERTY, names(", ")));
-        }
         return serviceComponentProperty;
     }
 

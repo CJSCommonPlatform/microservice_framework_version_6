@@ -21,9 +21,9 @@ import static uk.gov.justice.services.generators.test.utils.reflection.Reflectio
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.methodsOf;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
+import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.Remote;
-import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -73,8 +73,8 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
 
         assertThat(generatedClass.getCanonicalName(), is("org.raml.test.RemoteABCController"));
         assertThat(generatedClass.getAnnotation(Remote.class), not(nullValue()));
-        assertThat(generatedClass.getAnnotation(ServiceComponent.class), not(nullValue()));
-        assertThat(generatedClass.getAnnotation(ServiceComponent.class).value().toString(), is("COMMAND_API"));
+        assertThat(generatedClass.getAnnotation(FrameworkComponent.class), not(nullValue()));
+        assertThat(generatedClass.getAnnotation(FrameworkComponent.class).value(), is("COMMAND_API"));
 
     }
 
@@ -95,8 +95,8 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
 
         assertThat(generatedClass.getCanonicalName(), is("org.raml.test.RemoteABCController"));
         assertThat(generatedClass.getAnnotation(Remote.class), not(nullValue()));
-        assertThat(generatedClass.getAnnotation(ServiceComponent.class), not(nullValue()));
-        assertThat(generatedClass.getAnnotation(ServiceComponent.class).value().toString(), is("COMMAND_CONTROLLER"));
+        assertThat(generatedClass.getAnnotation(FrameworkComponent.class), not(nullValue()));
+        assertThat(generatedClass.getAnnotation(FrameworkComponent.class).value(), is("COMMAND_CONTROLLER"));
 
     }
 
@@ -189,17 +189,7 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
 
     }
 
-    @Test
-    public void shouldThrowExceptionIfServiceComponentPropertyNotValid() {
 
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage(containsString("serviceComponent generator property invalid. Expected one of: COMMAND_API, COMMAND_CONTROLLER"));
-
-        generator.run(
-                messagingRamlWithDefaults().withDefaultMessagingResource().build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("UNKNOWN")));
-
-    }
     @Test
     public void shouldThrowExceptionIfActionOtherThanPOSTorGET() {
         exception.expect(IllegalStateException.class);

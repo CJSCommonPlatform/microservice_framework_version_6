@@ -1,7 +1,7 @@
 package uk.gov.justice.services.core.sender;
 
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
-import static uk.gov.justice.services.core.annotation.Component.componentFrom;
+import static uk.gov.justice.services.core.annotation.ComponentNameUtil.componentFrom;
 
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -33,7 +33,7 @@ public class SenderProducer {
     @Inject
     DispatcherCache dispatcherCache;
 
-    private Map<Component, Sender> senderMap;
+    private Map<String, Sender> senderMap;
 
     public SenderProducer() {
         senderMap = new ConcurrentHashMap<>();
@@ -56,10 +56,11 @@ public class SenderProducer {
         }
     }
 
-    private Sender getSender(final Component component, final InjectionPoint injectionPoint) {
+    private Sender getSender(final String componentName
+            , final InjectionPoint injectionPoint) {
         final Sender primarySender = produceSender(injectionPoint);
-        final Sender legacySender = component != EVENT_PROCESSOR ?
-                senderMap.computeIfAbsent(component, c -> jmsSenderFactory.createJmsSender(componentDestination.getDefault(c))) : null;
+        final Sender legacySender = !componentName.equals(EVENT_PROCESSOR.name()) ?
+                senderMap.computeIfAbsent(componentName, c -> jmsSenderFactory.createJmsSender(componentDestination.getDefault(Component.valueOf(c)))) : null;
         return new JmsSenderWrapper(primarySender, legacySender);
     }
 

@@ -2,102 +2,132 @@ package uk.gov.justice.services.core.dispatcher;
 
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
+import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.LOCAL;
+import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.REMOTE;
 
 import uk.gov.justice.services.core.annotation.Adapter;
+import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.extension.ServiceComponentFoundEvent;
+import uk.gov.justice.services.core.util.TestInjectionPoint;
 
-import java.lang.reflect.Member;
-
-import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DispatcherCacheTest {
 
-    @Mock
-    DispatcherFactory dispatcherFactory;
+    private InjectionPoint adaptorCommandApiInjectionPointA = new TestInjectionPoint(TestCommandApiAdaptorA.class);
 
-    @Mock
-    InjectionPoint commandApiInjectionPointA;
 
-    @Mock
-    InjectionPoint commandApiInjectionPointB;
+    private InjectionPoint adaptorCommandApiInjectionPointB = new TestInjectionPoint(TestCommandApiAdaptorB.class);
 
-    @Mock
-    Member commandApiMember;
+    private InjectionPoint adaptorQueryApiInjectionPoint = new TestInjectionPoint(TestQueryApiAdaptor.class);
 
-    @Mock
-    private Bean<Object> bean;
+    private DispatcherCache dispatcherCache = new DispatcherCache();
 
-    @InjectMocks
-    private DispatcherCache dispatcherCache;
 
-    @Test
-    public void shouldCreateDispatcherForInjectionPoint() throws Exception {
-
-        final Dispatcher dispatcher = mock(Dispatcher.class);
-
-        when(dispatcherFactory.createNew()).thenReturn(dispatcher);
-        when(commandApiInjectionPointA.getMember()).thenReturn(commandApiMember);
-        doReturn(DispatcherCacheTest.TestCommandApiAdaptorA.class).when(commandApiMember).getDeclaringClass();
-
-        assertThat(dispatcherCache.dispatcherFor(commandApiInjectionPointA), is(sameInstance(dispatcher)));
+    @Before
+    public void setUp() throws Exception {
+        dispatcherCache = new DispatcherCache();
+        dispatcherCache.dispatcherFactory = new DispatcherFactory();
     }
 
     @Test
     public void shouldReturnTheSameDispatcherForTwoInjectionPoints() throws Exception {
 
-        final Dispatcher dispatcher = mock(Dispatcher.class);
-
-        when(dispatcherFactory.createNew()).thenReturn(dispatcher);
-        when(commandApiInjectionPointA.getMember()).thenReturn(commandApiMember);
-        doReturn(DispatcherCacheTest.TestCommandApiAdaptorA.class).when(commandApiMember).getDeclaringClass();
-        when(commandApiInjectionPointB.getMember()).thenReturn(commandApiMember);
-        doReturn(DispatcherCacheTest.TestCommandApiAdaptorB.class).when(commandApiMember).getDeclaringClass();
-
-        Dispatcher resultA = dispatcherCache.dispatcherFor(commandApiInjectionPointA);
-        Dispatcher resultB = dispatcherCache.dispatcherFor(commandApiInjectionPointB);
-        assertThat(resultA, is(resultB));
+        Dispatcher resultA = dispatcherCache.dispatcherFor(adaptorCommandApiInjectionPointA);
+        Dispatcher resultB = dispatcherCache.dispatcherFor(adaptorCommandApiInjectionPointB);
+        assertThat(resultA, is(sameInstance(resultB)));
     }
 
     @Test
-    public void shouldCreateDispatcherForEvent() throws Exception {
+    public void shouldReturnDifferentDispatchersForCommandApiAndQueryApiInjectionPoints() throws Exception {
 
-        final Dispatcher dispatcher = mock(Dispatcher.class);
-
-        when(dispatcherFactory.createNew()).thenReturn(dispatcher);
-
-        final ServiceComponentFoundEvent foundEvent = new ServiceComponentFoundEvent(COMMAND_API, bean, LOCAL);
-
-        assertThat(dispatcherCache.dispatcherFor(foundEvent), sameInstance(dispatcher));
+        Dispatcher resultA = dispatcherCache.dispatcherFor(adaptorCommandApiInjectionPointA);
+        Dispatcher resultB = dispatcherCache.dispatcherFor(adaptorQueryApiInjectionPoint);
+        assertThat(resultA, is(not(sameInstance(resultB))));
     }
+
+    @Test
+    public void shouldReturnTheSameDispatcherForTwoEventsConcerningSameComponent() throws Exception {
+
+        final ServiceComponentFoundEvent foundEvent = new ServiceComponentFoundEvent("COMMAND_API", null, LOCAL);
+        final ServiceComponentFoundEvent foundEvent2 = new ServiceComponentFoundEvent("COMMAND_API", null, LOCAL);
+
+        final Dispatcher dispatcher1 = dispatcherCache.dispatcherFor(foundEvent);
+        final Dispatcher dispatcher2 = dispatcherCache.dispatcherFor(foundEvent2);
+        assertThat(dispatcher1, is(sameInstance(dispatcher2)));
+    }
+
+    @Test
+    public void shouldReturnDifferentDispatchersForLocalAndRemoteEvent() throws Exception {
+
+        final ServiceComponentFoundEvent foundEvent = new ServiceComponentFoundEvent("COMMAND_API", null, LOCAL);
+        final ServiceComponentFoundEvent foundEvent2 = new ServiceComponentFoundEvent("COMMAND_API", null, REMOTE);
+
+        final Dispatcher dispatcher1 = dispatcherCache.dispatcherFor(foundEvent);
+        final Dispatcher dispatcher2 = dispatcherCache.dispatcherFor(foundEvent2);
+        assertThat(dispatcher1, is(not(sameInstance(dispatcher2))));
+    }
+
+    @Test
+    public void shouldReturnDifferentDispatchersForDifferentComponents() throws Exception {
+
+        final ServiceComponentFoundEvent foundEvent = new ServiceComponentFoundEvent("COMMAND_API", null, LOCAL);
+        final ServiceComponentFoundEvent foundEvent2 = new ServiceComponentFoundEvent("QUERY_API", null, LOCAL);
+
+        final Dispatcher dispatcher1 = dispatcherCache.dispatcherFor(foundEvent);
+        final Dispatcher dispatcher2 = dispatcherCache.dispatcherFor(foundEvent2);
+        assertThat(dispatcher1, is(not(sameInstance(dispatcher2))));
+    }
+
 
     @Adapter(COMMAND_API)
     public static class TestCommandApiAdaptorA {
         @Inject
         AsynchronousDispatcher asyncDispatcher;
+
+        public void dummyMethod() {
+
+        }
     }
 
     @Adapter(COMMAND_API)
     public static class TestCommandApiAdaptorB {
         @Inject
         AsynchronousDispatcher asyncDispatcher;
+
+        public void dummyMethod() {
+
+        }
+    }
+
+    @Adapter(QUERY_API)
+    public static class TestQueryApiAdaptor {
+        @Inject
+        AsynchronousDispatcher asyncDispatcher;
+
+        public void dummyMethod() {
+
+        }
+    }
+
+    @FrameworkComponent("componentNameABC")
+    public static class TestCommandApiFrameworkComponentA {
+        @Inject
+        AsynchronousDispatcher asyncDispatcher;
+
+        public void dummyMethod() {
+
+        }
     }
 }

@@ -2,16 +2,10 @@ package uk.gov.justice.services.core.annotation;
 
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
-import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
 
-import java.lang.reflect.Field;
-import java.util.Optional;
 import java.util.stream.Stream;
 
-import javax.enterprise.inject.spi.InjectionPoint;
 import javax.jms.Destination;
 import javax.jms.Queue;
 import javax.jms.Topic;
@@ -56,42 +50,6 @@ public enum Component {
                         format("No enum constant for pillar: %s, tier: %s", pillar, tier)));
     }
 
-    /**
-     * Retrieves the component of the provided {@link ServiceComponent} or {@link Adapter}.
-     *
-     * @param clazz The service component to be analysed
-     * @return the component from the provided {@link ServiceComponent} or {@link Adapter}
-     */
-    public static Component componentFrom(final Class<?> clazz) {
-        if (clazz.isAnnotationPresent(ServiceComponent.class)) {
-            return clazz.getAnnotation(ServiceComponent.class).value();
-        } else if (clazz.isAnnotationPresent(Adapter.class)) {
-            return clazz.getAnnotation(Adapter.class).value();
-        } else {
-            throw new IllegalStateException(format("No annotation found to define component for class %s", clazz));
-        }
-    }
-
-    /**
-     * Retrieves the component of the provided injection point.
-     *
-     * @param injectionPoint the injection point to be analysed
-     * @return the component from the provided injection point
-     */
-    public static Component componentFrom(final InjectionPoint injectionPoint) {
-        return fieldLevelComponent(injectionPoint)
-                .orElseGet(() -> componentFrom(injectionPoint.getMember().getDeclaringClass()));
-    }
-
-    private static Optional<Component> fieldLevelComponent(final InjectionPoint injectionPoint) {
-        if (injectionPoint.getMember() instanceof Field) {
-            return ofNullable(((Field) injectionPoint.getMember()).getAnnotation(ServiceComponent.class))
-                    .map(serviceComponent -> of(serviceComponent.value()))
-                    .orElse(empty());
-        }
-
-        return empty();
-    }
 
     /**
      * Checks if enum contains component with given name

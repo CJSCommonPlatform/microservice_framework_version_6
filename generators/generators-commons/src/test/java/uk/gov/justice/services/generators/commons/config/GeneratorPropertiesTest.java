@@ -2,7 +2,6 @@ package uk.gov.justice.services.generators.commons.config;
 
 import static java.util.Collections.emptyMap;
 import static net.trajano.commons.testing.UtilityClassTestUtil.assertUtilityClassWellDefined;
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
@@ -100,16 +99,6 @@ public class GeneratorPropertiesTest {
         exception.expectMessage("serviceComponent generator property not set in the plugin config");
 
         serviceComponentOf(emptyPathConfigurationWith(emptyMap()));
-    }
-
-    @Test
-    public void shouldThrowExceptionIfServiceComponentPropertyNotValid() {
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage(containsString("serviceComponent generator property invalid. Expected one of: COMMAND_API, COMMAND_CONTROLLER"));
-
-        serviceComponentOf(emptyPathConfigurationWith(generatorProperties()
-                .withServiceComponentOf("UNKNOWN")
-                .build()));
     }
 
     @Test

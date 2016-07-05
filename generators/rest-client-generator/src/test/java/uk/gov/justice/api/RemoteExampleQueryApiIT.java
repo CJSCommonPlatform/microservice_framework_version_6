@@ -7,7 +7,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
@@ -21,14 +20,10 @@ import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGen
 import uk.gov.justice.services.core.accesscontrol.AccessControlService;
 import uk.gov.justice.services.core.accesscontrol.AllowAllPolicyEvaluator;
 import uk.gov.justice.services.core.accesscontrol.PolicyEvaluator;
-import uk.gov.justice.services.core.annotation.ServiceComponent;
+import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcherProducer;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
-import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcherProducer;
-import uk.gov.justice.services.core.dispatcher.DispatcherCache;
-import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcherProducer;
-import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.dispatcher.Requester;
 import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
@@ -65,7 +60,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(ApplicationComposer.class)
-@ServiceComponent(QUERY_API)
+@FrameworkComponent("COMPONENT_ABC")
 public class RemoteExampleQueryApiIT {
 
     private static final String BASE_PATH = "/rest-client-generator/query/controller/rest/example";
@@ -81,6 +76,7 @@ public class RemoteExampleQueryApiIT {
     private static int port = -1;
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(8080);
+
     @Inject
     Requester requester;
 

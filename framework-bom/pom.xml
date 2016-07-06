@@ -90,11 +90,44 @@
                 <artifactId>persistence-deltaspike</artifactId>
                 <version>${cpp.framework.version}</version>
             </dependency>
+
             <dependency>
                 <groupId>uk.gov.justice.services</groupId>
                 <artifactId>rest-client-core</artifactId>
                 <version>${cpp.framework.version}</version>
             </dependency>
+            <dependency>
+                <groupId>uk.gov.justice.services</groupId>
+                <artifactId>rest-adapter-core</artifactId>
+                <version>${cpp.framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>uk.gov.justice.services</groupId>
+                <artifactId>messaging-adapter-core</artifactId>
+                <version>${cpp.framework.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>uk.gov.justice.services</groupId>
+                <artifactId>rest-client-generator</artifactId>
+                <version>${cpp.framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>uk.gov.justice.services</groupId>
+                <artifactId>messaging-client-generator</artifactId>
+                <version>${cpp.framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>uk.gov.justice.services</groupId>
+                <artifactId>rest-adapter-generator</artifactId>
+                <version>${cpp.framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>uk.gov.justice.services</groupId>
+                <artifactId>messaging-adapter-generator</artifactId>
+                <version>${cpp.framework.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>uk.gov.justice.services</groupId>
                 <artifactId>test-utils</artifactId>

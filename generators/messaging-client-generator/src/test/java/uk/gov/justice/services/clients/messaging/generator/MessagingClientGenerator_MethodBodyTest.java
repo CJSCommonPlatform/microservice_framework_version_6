@@ -7,9 +7,9 @@ import static uk.gov.justice.services.generators.test.utils.config.GeneratorConf
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.setField;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
-import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
 
@@ -46,7 +46,7 @@ public class MessagingClientGenerator_MethodBodyTest extends BaseGeneratorTest {
         Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCakeshopCommandController");
         final Object instance = instanceOf(generatedClass);
 
-        JsonEnvelope envelope = DefaultJsonEnvelope.envelopeFrom(null, null);
+        JsonEnvelope envelope = envelope().build();
         Method method = firstMethodOf(generatedClass);
         method.invoke(instance, envelope);
 

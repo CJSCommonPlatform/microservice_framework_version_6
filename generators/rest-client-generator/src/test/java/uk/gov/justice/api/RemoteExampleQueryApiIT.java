@@ -7,10 +7,9 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 
 import uk.gov.justice.services.clients.core.RestClientHelper;
 import uk.gov.justice.services.clients.core.RestClientProcessor;
@@ -66,9 +65,7 @@ public class RemoteExampleQueryApiIT {
     private static final String BASE_PATH = "/rest-client-generator/query/controller/rest/example";
     private static final String METADATA = "_metadata";
     private static final JsonObject RESPONSE = Json.createObjectBuilder()
-            .add(METADATA, Json.createObjectBuilder()
-                    .add(NAME, "people.get-user1")
-                    .add(ID, UUID.randomUUID().toString()))
+            .add(METADATA, metadataWithRandomUUID("people.get-user1").build().asJsonObject())
             .add("result", "SUCCESS")
             .build();
     private static final UUID QUERY_ID = UUID.randomUUID();
@@ -136,15 +133,12 @@ public class RemoteExampleQueryApiIT {
 
         final String name = "people.get-user1";
         final String responseType = "people.query.user1";
-        final JsonObject metadata = Json.createObjectBuilder()
-                .add(NAME, name)
-                .add(ID, QUERY_ID.toString())
-                .build();
-        final JsonObject payload = Json.createObjectBuilder()
-                .add("userId", USER_ID.toString())
+
+        final JsonEnvelope query = envelope()
+                .with(metadataOf(QUERY_ID, name))
+                .withPayloadOf(USER_ID.toString(), "userId")
                 .build();
 
-        final JsonEnvelope query = envelopeFrom(metadataFrom(metadata), payload);
 
         final String path = format("/users/%s", USER_ID.toString());
         final String mimeType = format("application/vnd.%s+json", responseType);

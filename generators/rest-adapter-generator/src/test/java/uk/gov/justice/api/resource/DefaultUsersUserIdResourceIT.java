@@ -1,7 +1,6 @@
 package uk.gov.justice.api.resource;
 
 import static com.jayway.jsonassert.JsonAssert.with;
-import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.client.Entity.entity;
 import static javax.ws.rs.core.Response.Status.ACCEPTED;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
@@ -11,9 +10,8 @@ import static org.apache.cxf.jaxrs.client.WebClient.create;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
 
 import uk.gov.justice.api.QueryApiRestExampleApplication;
 import uk.gov.justice.api.mapper.DefaultUsersResourceActionMapper;
@@ -31,15 +29,11 @@ import uk.gov.justice.services.generators.test.utils.dispatcher.AsynchronousReco
 import uk.gov.justice.services.generators.test.utils.dispatcher.SynchronousRecordingDispatcher;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
-import uk.gov.justice.services.messaging.JsonObjectMetadata;
-import uk.gov.justice.services.messaging.Metadata;
 
 import java.math.BigDecimal;
 import java.util.Properties;
-import java.util.UUID;
 
 import javax.inject.Inject;
-import javax.json.Json;
 import javax.json.JsonObject;
 import javax.ws.rs.core.Response;
 
@@ -53,7 +47,6 @@ import org.apache.openejb.testing.EnableServices;
 import org.apache.openejb.testing.Module;
 import org.apache.openejb.testng.PropertiesBuilder;
 import org.apache.openejb.util.NetworkUtil;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -81,22 +74,12 @@ public class DefaultUsersUserIdResourceIT {
     @Inject
     CommonProviders commonProviders;
 
-    private Metadata metadata;
-
     @BeforeClass
     public static void beforeClass() {
         port = NetworkUtil.getNextAvailablePort();
         BASE_URI = String.format(BASE_URI_PATTERN, port);
     }
 
-    @Before
-    public void before() {
-        metadata = JsonObjectMetadata.metadataFrom(Json.createObjectBuilder()
-                .add(ID, UUID.randomUUID().toString())
-                .add(NAME, "eventName")
-                .build());
-
-    }
 
     @Configuration
     public Properties properties() {
@@ -173,7 +156,8 @@ public class DefaultUsersUserIdResourceIT {
     @Test
     public void shouldReturn200ResponseContainingUserDataReturnedByDispatcher() {
         syncDispatcher.setupResponse("userId", "4444-5556",
-                envelopeFrom(metadata, createObjectBuilder().add("userName", "userName").build()));
+                envelope().with(metadataWithDefaults()).withPayloadOf("user1234", "userName").build());
+
 
         Response response = create(BASE_URI)
                 .path("/users/4444-5556")
@@ -183,7 +167,7 @@ public class DefaultUsersUserIdResourceIT {
         assertThat(response.getStatus(), is(OK.getStatusCode()));
         String responseBody = response.readEntity(String.class);
         with(responseBody)
-                .assertThat("userName", equalTo("userName"));
+                .assertThat("userName", equalTo("user1234"));
     }
 
     @Test
@@ -213,7 +197,7 @@ public class DefaultUsersUserIdResourceIT {
 
     @Test
     public void shouldDispatchGetUserCommandWithOtherMediaType() throws Exception {
-        syncDispatcher.setupResponse("userId", "4444-5555", envelopeFrom(metadata, createObjectBuilder().add("userName", "userName").build()));
+        syncDispatcher.setupResponse("userId", "4444-5555", envelope().with(metadataWithDefaults()).build());
 
         Response response = create(BASE_URI)
                 .path("/users/4444-5555")
@@ -241,7 +225,7 @@ public class DefaultUsersUserIdResourceIT {
 
     @Test
     public void shouldReturnUserDataReturnedByDispatcher() {
-        syncDispatcher.setupResponse("userId", "4444-5556", envelopeFrom(metadata, createObjectBuilder().add("userName", "userName").build()));
+        syncDispatcher.setupResponse("userId", "4444-5556", envelope().with(metadataWithDefaults()).withPayloadOf("user1234", "userName").build());
 
         Response response = create(BASE_URI)
                 .path("/users/4444-5556")
@@ -251,13 +235,13 @@ public class DefaultUsersUserIdResourceIT {
         assertThat(response.getStatus(), is(OK.getStatusCode()));
         String responseBody = response.readEntity(String.class);
         with(responseBody)
-                .assertThat("userName", equalTo("userName"));
+                .assertThat("userName", equalTo("user1234"));
 
     }
 
     @Test
     public void shouldReturnResponseWithContentType() {
-        syncDispatcher.setupResponse("userId", "4444-5556", envelopeFrom(metadata, createObjectBuilder().add("userName", "userName").build()));
+        syncDispatcher.setupResponse("userId", "4444-5556", envelope().with(metadataWithDefaults()).build());
 
         Response response = create(BASE_URI)
                 .path("/users/4444-5556")
@@ -269,7 +253,7 @@ public class DefaultUsersUserIdResourceIT {
 
     @Test
     public void shouldReturnResponseWithSecondContentType() {
-        syncDispatcher.setupResponse("userId", "4444-5556", envelopeFrom(metadata, createObjectBuilder().add("userName", "userName").build()));
+        syncDispatcher.setupResponse("userId", "4444-5556", envelope().with(metadataWithDefaults()).build());
 
         Response response = create(BASE_URI)
                 .path("/users/4444-5556")
@@ -281,7 +265,7 @@ public class DefaultUsersUserIdResourceIT {
 
     @Test
     public void shouldDispatchUsersQueryWithQueryParams() throws Exception {
-        syncDispatcher.setupResponse("lastname", "Smith", envelopeFrom(metadata, createObjectBuilder().add("userName", "userName").build()));
+        syncDispatcher.setupResponse("lastname", "Smith",envelope().with(metadataWithDefaults()).build());
 
         Response response = create(BASE_URI)
                 .path("/users")
@@ -319,7 +303,7 @@ public class DefaultUsersUserIdResourceIT {
 
     @Test
     public void shouldReturn200WhenOptionalParameterIsNotProvided() throws Exception {
-        syncDispatcher.setupResponse("lastname", "lastname", envelopeFrom(metadata, createObjectBuilder().add("userName", "userName").build()));
+        syncDispatcher.setupResponse("lastname", "lastname", envelope().with(metadataWithDefaults()).build());
 
         Response response = create(BASE_URI)
                 .path("/users")

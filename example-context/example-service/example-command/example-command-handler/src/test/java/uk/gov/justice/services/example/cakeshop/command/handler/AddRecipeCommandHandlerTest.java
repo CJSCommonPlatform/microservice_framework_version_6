@@ -6,10 +6,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 
 import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -21,9 +19,6 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.UUID;
 import java.util.stream.Stream;
-
-import javax.json.Json;
-import javax.json.JsonObject;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -70,7 +65,13 @@ public class AddRecipeCommandHandlerTest {
 
     @Test
     public void shouldHandleAddRecipeCommand() throws Exception {
-        final JsonEnvelope command = createCommand();
+        final JsonEnvelope command = envelope()
+                .with(metadataWithRandomUUID(EVENT_NAME))
+                .withPayloadOf(RECIPE_ID.toString(), "recipeId")
+                .withPayloadOf(RECIPE_NAME, "name")
+                .withPayloadOf(GULTEN_FREE, "glutenFree")
+                .withPayloadOf(new String[]{}, "ingredients")
+                .build();
 
         when(eventSource.getStreamById(RECIPE_ID)).thenReturn(eventStream);
         when(aggregateService.get(eventStream, Recipe.class)).thenReturn(recipe);
@@ -83,19 +84,4 @@ public class AddRecipeCommandHandlerTest {
         assertThat(streamCaptor.getValue().collect(toList()), hasItems(envelope));
     }
 
-    private JsonEnvelope createCommand() {
-        final JsonObject metadataAsJsonObject = Json.createObjectBuilder()
-                .add(ID, UUID.randomUUID().toString())
-                .add(NAME, EVENT_NAME)
-                .build();
-
-        final JsonObject payloadAsJsonObject = Json.createObjectBuilder()
-                .add("recipeId", RECIPE_ID.toString())
-                .add("name", RECIPE_NAME)
-                .add("glutenFree", GULTEN_FREE)
-                .add("ingredients", Json.createArrayBuilder().build())
-                .build();
-
-        return envelopeFrom(metadataFrom(metadataAsJsonObject), payloadAsJsonObject);
-    }
 }

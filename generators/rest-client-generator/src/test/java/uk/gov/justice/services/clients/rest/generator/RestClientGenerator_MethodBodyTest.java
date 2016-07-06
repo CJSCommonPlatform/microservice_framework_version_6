@@ -24,13 +24,13 @@ import static uk.gov.justice.services.generators.test.utils.config.GeneratorConf
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.setField;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
 import uk.gov.justice.services.adapter.rest.parameter.ParameterType;
 import uk.gov.justice.services.clients.core.EndpointDefinition;
 import uk.gov.justice.services.clients.core.RestClientHelper;
 import uk.gov.justice.services.clients.core.RestClientProcessor;
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
-import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.lang.reflect.InvocationTargetException;
@@ -48,7 +48,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
 
-    private static final JsonEnvelope NOT_USED_ENVELOPE = DefaultJsonEnvelope.envelopeFrom(null, null);
+    private static final JsonEnvelope NOT_USED_ENVELOPE = envelope().build();
     private static final Map<String, String> NOT_USED_GENERATOR_PROPERTIES = generatorProperties().withServiceComponentOf("QUERY_CONTROLLER").build();
 
     @Mock
@@ -155,7 +155,7 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
         Object remoteClient = instanceOf(clazz);
         Method method = firstMethodOf(clazz);
 
-        JsonEnvelope envelope = DefaultJsonEnvelope.envelopeFrom(null, null);
+        JsonEnvelope envelope = envelope().build();
         method.invoke(remoteClient, envelope);
 
         verify(restClientProcessor).get(any(EndpointDefinition.class), same(envelope));
@@ -174,7 +174,7 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
         Object remoteClient = instanceOf(clazz);
         Method method = firstMethodOf(clazz);
 
-        JsonEnvelope envelope = DefaultJsonEnvelope.envelopeFrom(null, null);
+        JsonEnvelope envelope = envelope().build();
         method.invoke(remoteClient, envelope);
 
         verify(restClientProcessor).post(any(EndpointDefinition.class), same(envelope));

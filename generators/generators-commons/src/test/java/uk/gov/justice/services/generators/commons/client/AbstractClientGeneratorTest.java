@@ -19,13 +19,13 @@ import static uk.gov.justice.services.generators.test.utils.config.GeneratorConf
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.methodsOf;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.Remote;
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
-import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.lang.reflect.Field;
@@ -166,9 +166,8 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
         List<Method> methods = methodsOf(generatedClass);
         assertThat(methods, hasSize(1));
         final Object instance = generatedClass.newInstance();
-        JsonEnvelope envelope = DefaultJsonEnvelope.envelopeFrom(null, null);
         Method method = firstMethodOf(generatedClass);
-        final Object result = method.invoke(instance, envelope);
+        final Object result = method.invoke(instance, envelope().build());
         assertThat(result, is(12345678));
     }
 

@@ -1,5 +1,6 @@
 package uk.gov.justice.services.messaging;
 
+import static java.util.UUID.randomUUID;
 import static uk.gov.justice.services.messaging.JsonObjects.getJsonString;
 import static uk.gov.justice.services.messaging.JsonObjects.getLong;
 import static uk.gov.justice.services.messaging.JsonObjects.getString;
@@ -74,6 +75,25 @@ public class JsonObjectMetadata implements Metadata {
      */
     public static Builder metadataOf(final UUID id, final String name) {
         return new Builder().withId(id).withName(name);
+    }
+
+    /**
+     * Create metadata builder with random id
+     *
+     * @return metadata builder
+     */
+    public static Builder metadataWithRandomUUID(final String name) {
+        return metadataOf(randomUUID(), name);
+    }
+
+    /**
+     * Create metadata builder with random id and dummy name
+     * To be used in unit tests
+     *
+     * @return metadata builder
+     */
+    public static Builder metadataWithDefaults() {
+        return metadataOf(randomUUID(), "dummyName");
     }
 
     @Override
@@ -225,6 +245,7 @@ public class JsonObjectMetadata implements Metadata {
         public Metadata build() {
             return metadataFrom(json.build());
         }
+
 
     }
 }

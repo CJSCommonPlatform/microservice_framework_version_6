@@ -5,12 +5,7 @@ import static uk.gov.justice.services.common.http.HeaderConstants.CLIENT_CORRELA
 import static uk.gov.justice.services.common.http.HeaderConstants.SESSION_ID;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.CLIENT_ID;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.CONTEXT;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.CORRELATION;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 
 import uk.gov.justice.services.adapter.rest.parameter.Parameter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -93,10 +88,10 @@ public class RestEnvelopeBuilder {
      * @return the envelope
      */
     public JsonEnvelope build() {
-        return envelopeFrom(buildMetadata(), buildPayload());
+        return envelopeFrom(buildMetadata(), payload());
     }
 
-    private JsonObject buildPayload() {
+    private JsonObject payload() {
 
         JsonObjectBuilder payloadBuilder = initialPayload
                 .map(JsonObjects::createObjectBuilder)
@@ -119,41 +114,23 @@ public class RestEnvelopeBuilder {
     }
 
     private Metadata buildMetadata() {
-        JsonObjectBuilder metadataBuilder = Json.createObjectBuilder();
+        JsonObjectMetadata.Builder metadata = metadataOf(id, this.action);
 
-        metadataBuilder = metadataBuilder.add(ID, id.toString());
-        metadataBuilder = metadataBuilder.add(NAME, this.action);
+        if (headers.isPresent() && headers.get().getRequestHeaders() != null) {
+            final HttpHeaders httpHeaders = this.headers.get();
 
-        if (headers.isPresent()) {
-            HttpHeaders httpHeaders = headers.get();
-            if (contains(CLIENT_CORRELATION_ID, httpHeaders)) {
-                metadataBuilder = metadataBuilder
-                        .add(CORRELATION, Json.createObjectBuilder()
-                                .add(CLIENT_ID, getHeader(CLIENT_CORRELATION_ID, httpHeaders)));
+            if (httpHeaders.getHeaderString(CLIENT_CORRELATION_ID) != null) {
+                metadata = metadata.withClientCorrelationId(httpHeaders.getHeaderString(CLIENT_CORRELATION_ID));
             }
 
-            if (contains(USER_ID, httpHeaders) || contains(SESSION_ID, httpHeaders)) {
-                JsonObjectBuilder contextBuilder = Json.createObjectBuilder();
-                if (contains(USER_ID, httpHeaders)) {
-                    contextBuilder = contextBuilder.add(JsonObjectMetadata.USER_ID, getHeader(USER_ID, httpHeaders));
-                }
-                if (contains(SESSION_ID, httpHeaders)) {
-                    contextBuilder = contextBuilder.add(JsonObjectMetadata.SESSION_ID, getHeader(SESSION_ID, httpHeaders));
-                }
-                metadataBuilder = metadataBuilder.add(CONTEXT, contextBuilder);
+            if (httpHeaders.getHeaderString(USER_ID) != null) {
+                metadata = metadata.withUserId(httpHeaders.getHeaderString(USER_ID));
+            }
+            if (httpHeaders.getHeaderString(SESSION_ID) != null) {
+                metadata = metadata.withSessionId(httpHeaders.getHeaderString(SESSION_ID));
             }
         }
-
-        return metadataFrom(metadataBuilder.build());
+        return metadata.build();
     }
-
-    private boolean contains(final String header, final HttpHeaders headers) {
-        return headers.getRequestHeaders() != null && headers.getRequestHeaders().containsKey(header);
-    }
-
-    private String getHeader(final String header, final HttpHeaders headers) {
-        return headers.getHeaderString(header);
-    }
-
 
 }

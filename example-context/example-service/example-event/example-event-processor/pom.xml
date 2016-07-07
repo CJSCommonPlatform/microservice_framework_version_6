@@ -10,7 +10,35 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>example-event-processor</artifactId>
     <packaging>war</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>event-listener</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Test Dependencies -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+
     <build>
+        <finalName>${project.artifactId}</finalName>
         <plugins>
             <plugin>
                 <groupId>uk.gov.justice.maven</groupId>
@@ -64,6 +92,12 @@
                         <groupId>uk.gov.justice.services</groupId>
                         <artifactId>messaging-client-generator</artifactId>
                         <version>${project.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>javax</groupId>
+                        <artifactId>javaee-api</artifactId>
+                        <version>7.0</version>
+                        <scope>runtime</scope>
                     </dependency>
                 </dependencies>
             </plugin>

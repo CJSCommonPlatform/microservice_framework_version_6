@@ -19,6 +19,7 @@
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Test Dependencies -->
@@ -98,6 +99,12 @@
                         <groupId>uk.gov.justice.services</groupId>
                         <artifactId>messaging-client-generator</artifactId>
                         <version>${project.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>javax</groupId>
+                        <artifactId>javaee-api</artifactId>
+                        <version>7.0</version>
+                        <scope>runtime</scope>
                     </dependency>
                 </dependencies>
             </plugin>

@@ -34,6 +34,7 @@
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -138,6 +139,12 @@
                         <groupId>uk.gov.justice.services</groupId>
                         <artifactId>rest-client-generator</artifactId>
                         <version>${project.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>javax</groupId>
+                        <artifactId>javaee-api</artifactId>
+                        <version>7.0</version>
+                        <scope>runtime</scope>
                     </dependency>
                 </dependencies>
             </plugin>

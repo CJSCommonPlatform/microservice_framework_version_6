@@ -35,23 +35,20 @@ public class AnnotationScanner implements Extension {
         final AnnotatedType<T> annotatedType = pat.getAnnotatedType();
         if (annotatedType.isAnnotationPresent(Event.class)) {
             events.add(new EventFoundEvent(annotatedType.getJavaClass(), annotatedType.getAnnotation(Event.class).value()));
-        } else if (annotatedType.isAnnotationPresent(Provider.class)) {
-            providers.add(new ProviderFoundEvent(annotatedType.getJavaClass()));
         }
     }
 
     @SuppressWarnings("unused")
     void afterDeploymentValidation(@Observes final AfterDeploymentValidation event, final BeanManager beanManager) {
-
         beanManager.getBeans(Object.class, annotationLiteral()).stream()
                 .filter(b -> b.getBeanClass().isAnnotationPresent(ServiceComponent.class))
                 .forEach(this::processServiceComponentsForEvents);
 
-        fireAllCollectedEvents(beanManager);
-    }
+        beanManager.getBeans(Object.class, annotationLiteral()).stream()
+                .filter(b -> b.getBeanClass().isAnnotationPresent(Provider.class))
+                .forEach(this::processProviderForEvents);
 
-    private void fireAllCollectedEvents(final BeanManager beanManager) {
-        Stream.concat(events.stream(), providers.stream()).forEach(beanManager::fireEvent);
+        fireAllCollectedEvents(beanManager);
     }
 
     private AnnotationLiteral<Any> annotationLiteral() {
@@ -68,5 +65,13 @@ public class AnnotationScanner implements Extension {
     private void processServiceComponentsForEvents(final Bean<?> bean) {
         final Class<?> clazz = bean.getBeanClass();
         events.add(new ServiceComponentFoundEvent(componentFrom(clazz), bean, componentLocationFrom(clazz)));
+    }
+
+    private void processProviderForEvents(final Bean<?> bean) {
+        providers.add(new ProviderFoundEvent(bean));
+    }
+
+    private void fireAllCollectedEvents(final BeanManager beanManager) {
+        Stream.concat(events.stream(), providers.stream()).forEach(beanManager::fireEvent);
     }
 }

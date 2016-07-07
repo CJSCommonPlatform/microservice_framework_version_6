@@ -114,7 +114,6 @@
                             </includes>
                             <generatorProperties>
                                 <serviceComponent>COMPONENT_ABC</serviceComponent>
-                                <actionMapping>true</actionMapping>
                             </generatorProperties>
                         </configuration>
                     </execution>

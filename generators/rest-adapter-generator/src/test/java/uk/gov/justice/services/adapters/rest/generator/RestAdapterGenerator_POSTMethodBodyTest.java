@@ -20,6 +20,7 @@ import static uk.gov.justice.services.generators.test.utils.builder.MappingBuild
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
+import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.methodsOf;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.setField;
@@ -271,7 +272,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
                                         .withMediaType("application/vnd.somemediatype1+json")
                                 )
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, ACTION_MAPPING_TRUE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultUserResource");
         Object resourceObject = instanceOf(resourceClass);

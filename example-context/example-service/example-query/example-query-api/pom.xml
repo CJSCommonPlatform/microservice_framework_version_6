@@ -35,9 +35,6 @@
                             <outputDirectory>${project.build.directory}/generated-sources/api
                             </outputDirectory>
                             <basePackageName>uk.gov.justice.api</basePackageName>
-                            <generatorProperties>
-                                <actionMapping>true</actionMapping>
-                            </generatorProperties>
                             <includes>
                                 <include>${project.artifactId}.raml</include>
                             </includes>
@@ -61,7 +58,6 @@
                             <basePackageName>uk.gov.justice.api</basePackageName>
                             <generatorProperties>
                                 <serviceComponent>QUERY_API</serviceComponent>
-                                <actionMapping>true</actionMapping>
                             </generatorProperties>
                         </configuration>
                     </execution>

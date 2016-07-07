@@ -135,7 +135,7 @@ public class RemoteExampleEventProcessorIT {
     @Test
     public void shouldSendCommandToRemoteService() {
 
-        final String name = "people.command.update-user";
+        final String name = "people.update-user";
 
 
         final String path = format("/users/%s", USER_ID.toString());

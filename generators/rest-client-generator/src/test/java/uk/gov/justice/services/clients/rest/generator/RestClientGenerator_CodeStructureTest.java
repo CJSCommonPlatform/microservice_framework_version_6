@@ -11,7 +11,6 @@ import static org.hamcrest.core.Is.is;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
-import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpActionWithNoMapping;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.mapping;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingDescriptionBuilder.mappingDescriptionWith;
 import static uk.gov.justice.services.generators.test.utils.builder.QueryParamBuilder.queryParam;
@@ -74,8 +73,10 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
     private static final String BASE_PACKAGE = "org.raml.test";
 
 
+
     private static final String BASE_URI_WITH_LESS_THAN_EIGHT_PARTS = "http://localhost:8080/command/api/rest/service";
     private static final String BASE_URI_WITH_MORE_THAN_EIGHT_PARTS = "http://localhost:8080/warname/command/api/rest/service/extra";
+
 
 
     @Test
@@ -142,7 +143,7 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
                                         .withResponseTypes("application/vnd.cakeshop.query.recipe+json")
                                         .withDescription(GET_MAPPING_ANNOTATION))
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent().withActionMappingOf(true)));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
         List<Method> methods = methodsOf(clazz);
@@ -156,27 +157,6 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
     }
 
     @Test
-    public void shouldGenerateMethodAnnotatedWithHandlesAnnotationForGETWithNoMapping() throws Exception {
-        generator.run(
-                restRamlWithDefaults()
-                        .with(resource("/some/path/{recipeId}")
-                                .with(httpActionWithNoMapping(GET)
-                                        .withResponseTypes("application/vnd.cakeshop.query.recipe+json"))
-                        ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
-
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
-        List<Method> methods = methodsOf(clazz);
-        assertThat(methods, hasSize(1));
-
-        Method method = methods.get(0);
-        Handles handlesAnnotation = method.getAnnotation(Handles.class);
-        assertThat(handlesAnnotation, not(nullValue()));
-        assertThat(handlesAnnotation.value(), is("cakeshop.query.recipe"));
-
-    }
-
-    @Test
     public void shouldGenerateMethodAnnotatedWithHandlesAnnotationForPOST() throws Exception {
         generator.run(
                 restRamlWithDefaults()
@@ -184,7 +164,7 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
                                 .with(httpAction(POST, "application/vnd.cakeshop.command.update-recipe+json")
                                         .withDescription(POST_MAPPING_ANNOTATION))
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent().withActionMappingOf(true)));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
         List<Method> methods = methodsOf(clazz);

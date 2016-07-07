@@ -127,9 +127,6 @@
                     <outputDirectory>${project.build.directory}/generated-test-sources
                     </outputDirectory>
                     <basePackageName>uk.gov.justice.api</basePackageName>
-                    <generatorProperties>
-                        <actionMapping>true</actionMapping>
-                    </generatorProperties>
                 </configuration>
                 <executions>
                     <execution>

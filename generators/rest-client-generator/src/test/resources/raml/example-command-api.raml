@@ -4,6 +4,12 @@ baseUri: http://localhost:8080/rest-client-generator/command/api/rest/example
 
 /users/{userId}:
   post:
+    description: |
+        ...
+        (mapping):
+            requestType: application/vnd.people.update-user+json
+            name: people.update-user
+        ...
     body:
-      application/vnd.people.command.update-user+json:
+      application/vnd.people.update-user+json:
 

@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to 
 [Semantic Versioning](http://semver.org/).
 
+## [0.11.0] - 2016-07-07
+
+### Added
+- Access control violations now return 403 forbidden response
+
+### Fixed
+- Access control provider scanning and bean injection
+
 ## [0.10.1] - 2016-07-05
 
 ### Fixed

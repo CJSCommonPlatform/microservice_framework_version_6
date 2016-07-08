@@ -41,6 +41,11 @@ public class RamlBuilder {
                 .withBaseUri("http://localhost:8080/warname/command/api/rest/service");
     }
 
+    public static RamlBuilder restRamlWithEventApiDefaults() {
+        return restRamlWithTitleVersion()
+                .withBaseUri("http://localhost:8080/warname/event/api/rest/service");
+    }
+
     public static RamlBuilder restRamlWithQueryApiDefaults() {
         return restRamlWithTitleVersion()
                 .withBaseUri("http://localhost:8080/warname/query/api/rest/service");

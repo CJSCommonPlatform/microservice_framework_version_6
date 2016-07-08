@@ -3,13 +3,16 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to 
 [Semantic Versioning](http://semver.org/).
 
-## [0.11.0] - 2016-07-07
+## [0.11.0] - 2016-07-8
 
 ### Added
 - Access control violations now return 403 forbidden response
+- Support for Event API components in RAML
 
 ### Fixed
 - Access control provider scanning and bean injection
+- Event processor and JEE dependencies were incorrect
+- Component module dependencies cleaned up and made consistent
 
 ## [0.10.1] - 2016-07-05
 

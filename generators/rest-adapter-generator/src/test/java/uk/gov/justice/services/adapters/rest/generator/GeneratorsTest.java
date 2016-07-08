@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_API;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithCommandApiDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithQueryApiDefaults;
@@ -37,6 +38,13 @@ public class GeneratorsTest {
         Raml raml = restRamlWithCommandApiDefaults().build();
         Component component = Generators.componentFromBaseUriIn(raml);
         assertThat(component, is(COMMAND_API));
+    }
+
+    @Test
+    public void shouldReturnComponentFromBaseUriForEventApi() throws Exception {
+        Raml raml = RamlBuilder.restRamlWithEventApiDefaults().build();
+        Component component = Generators.componentFromBaseUriIn(raml);
+        assertThat(component, is(EVENT_API));
     }
 
     @Test

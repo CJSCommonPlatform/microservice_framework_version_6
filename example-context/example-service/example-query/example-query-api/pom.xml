@@ -83,6 +83,12 @@
                         <version>${project.version}</version>
                         <classifier>raml</classifier>
                     </dependency>
+                    <dependency>
+                        <groupId>javax</groupId>
+                        <artifactId>javaee-api</artifactId>
+                        <version>7.0</version>
+                        <scope>runtime</scope>
+                    </dependency>
                 </dependencies>
             </plugin>
         </plugins>

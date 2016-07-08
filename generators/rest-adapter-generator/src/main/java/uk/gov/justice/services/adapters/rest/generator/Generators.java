@@ -14,7 +14,7 @@ import org.raml.model.Raml;
 
 final class Generators {
     private static final Pattern PILLAR_AND_TIER_PATTERN = Pattern
-            .compile("(command/api|command/controller|command/handler|query/api|query/controller|query/view)");
+            .compile("(command/api|command/controller|command/handler|query/api|query/controller|query/view|event/api)");
 
     private Generators() {
     }

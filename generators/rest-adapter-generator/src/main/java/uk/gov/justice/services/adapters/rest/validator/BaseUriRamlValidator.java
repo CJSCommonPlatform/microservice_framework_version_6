@@ -13,7 +13,7 @@ import org.raml.model.Raml;
 public class BaseUriRamlValidator implements RamlValidator {
     private static final String ERROR_MSG = "Pillar and tier of service should be specified in the base uri: %s";
     private static final Pattern URI_PATTERN = Pattern
-            .compile("\\S+(command/api|command/controller|command/handler|query/api|query/controller|query/view)\\S+");
+            .compile("\\S+(command/api|command/controller|command/handler|query/api|query/controller|query/view|event/api)\\S+");
 
     @Override
     public void validate(final Raml raml) {

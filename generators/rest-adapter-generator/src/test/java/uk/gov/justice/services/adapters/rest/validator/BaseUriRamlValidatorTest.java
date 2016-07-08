@@ -23,6 +23,12 @@ public class BaseUriRamlValidatorTest {
     }
 
     @Test
+    public void shouldPassIfBaseUriContainsTheEventPillarAndApiTier() throws Exception {
+        validator.validate(restRamlWithTitleVersion()
+                .withBaseUri("http://localhost:8080/warname/event/api/rest/service").build());
+    }
+
+    @Test
     public void shouldPassIfBaseUriContainsTheQueryPillarAndControllerTier() throws Exception {
         validator.validate(restRamlWithTitleVersion()
                 .withBaseUri("http://localhost:8080/warname/query/controller/rest/service").build());

@@ -10,6 +10,7 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLLER;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.annotation.exception.MissingAnnotationException;
@@ -19,7 +20,6 @@ import uk.gov.justice.services.core.handler.exception.MissingHandlerException;
 import uk.gov.justice.services.core.jms.JmsSender;
 import uk.gov.justice.services.core.jms.JmsSenderFactory;
 import uk.gov.justice.services.core.util.TestInjectionPoint;
-import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import org.junit.Before;
@@ -64,7 +64,7 @@ public class SenderProducerTest {
 
         assertThat(returnedSender, notNullValue());
 
-        final JsonEnvelope envelope = DefaultJsonEnvelope.envelopeFrom(null, null);
+        final JsonEnvelope envelope = envelope().build();
 
         returnedSender.send(envelope);
 
@@ -82,7 +82,7 @@ public class SenderProducerTest {
 
         assertThat(returnedSender, notNullValue());
 
-        final JsonEnvelope envelope = DefaultJsonEnvelope.envelopeFrom(null, null);
+        final JsonEnvelope envelope = envelope().build();
 
         returnedSender.send(envelope);
 
@@ -95,7 +95,7 @@ public class SenderProducerTest {
 
         when(dispatcherCache.dispatcherFor(injectionPoint)).thenReturn(dispatcher);
         when(jmsSenderFactory.createJmsSender(COMMAND_CONTROLLER)).thenReturn(legacyJmsSender);
-        final JsonEnvelope envelope = DefaultJsonEnvelope.envelopeFrom(null, null);
+        final JsonEnvelope envelope = envelope().build();
         doThrow(new MissingHandlerException("")).when(dispatcher).asynchronousDispatch(envelope);
 
         final Sender returnedSender = senderProducer.produce(injectionPoint);

@@ -12,16 +12,16 @@ import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.adapter.rest.parameter.ParameterType.BOOLEAN;
 import static uk.gov.justice.services.adapter.rest.parameter.ParameterType.NUMERIC;
 import static uk.gov.justice.services.adapter.rest.parameter.ParameterType.STRING;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
 
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
 import uk.gov.justice.services.adapter.rest.parameter.Parameter;
 import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
-import uk.gov.justice.services.messaging.JsonObjectMetadata;
 import uk.gov.justice.services.messaging.Metadata;
 
 import java.util.Collection;
@@ -69,10 +69,7 @@ public class RestProcessorTest {
     public void setup() {
         restProcessor = new RestProcessor(new RestEnvelopeBuilderFactory(), envelope -> new JsonObjectEnvelopeConverter().fromEnvelope(envelope).toString(), false);
 
-        metadata = JsonObjectMetadata.metadataFrom(Json.createObjectBuilder()
-                .add(ID, UUID.randomUUID().toString())
-                .add(NAME, "eventName")
-                .build());
+
     }
 
     @Test
@@ -112,8 +109,7 @@ public class RestProcessorTest {
 
     @Test
     public void shouldReturn200ResponseOnSyncProcessing() throws Exception {
-        when(function.apply(any(JsonEnvelope.class))).thenReturn(
-                envelopeFrom(metadata, Json.createObjectBuilder().build()));
+        when(function.apply(any(JsonEnvelope.class))).thenReturn(envelope().with(metadataWithDefaults()).build());
         Response response = restProcessor.processSynchronously(function, NOT_USED_ACTION, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
 
         assertThat(response.getStatus(), equalTo(200));
@@ -121,7 +117,7 @@ public class RestProcessorTest {
 
     @Test
     public void shouldReturn404ResponseOnSyncProcessingIfPayloadIsJsonValueNull() throws Exception {
-        when(function.apply(any(JsonEnvelope.class))).thenReturn(envelopeFrom(null, JsonValue.NULL));
+        when(function.apply(any(JsonEnvelope.class))).thenReturn(envelopeFrom(metadataWithDefaults(), JsonValue.NULL));
         Response response = restProcessor.processSynchronously(function, NOT_USED_ACTION, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
 
         assertThat(response.getStatus(), equalTo(404));
@@ -169,7 +165,7 @@ public class RestProcessorTest {
     @Test
     public void shouldReturnPayloadOfEnvelopeReturnedByFunction() {
         when(function.apply(any(JsonEnvelope.class))).thenReturn(
-                envelopeFrom(metadata, Json.createObjectBuilder().add("key11", "value33").add("key22", "value55").build()));
+                envelope().with(metadataWithDefaults()).withPayloadOf("value33", "key11").withPayloadOf("value55", "key22").build());
 
         Response response = restProcessor.processSynchronously(function, NOT_USED_ACTION, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
         String responseEntity = (String) response.getEntity();
@@ -182,14 +178,15 @@ public class RestProcessorTest {
     public void shouldReturnPayloadOnlyAndMetadataIdInHeader() {
         RestProcessor payLoadOnlyProcessor = new RestProcessor(new RestEnvelopeBuilderFactory(), envelope -> envelope.payload().toString(), true);
 
+        final UUID metadataId = UUID.randomUUID();
         when(function.apply(any(JsonEnvelope.class))).thenReturn(
-                envelopeFrom(metadata, Json.createObjectBuilder().add("key11", "value33").add("key22", "value55").build()));
+                envelope().with(metadataOf(metadataId, "name1")).build());
 
         Response response = payLoadOnlyProcessor.processSynchronously(function, NOT_USED_ACTION, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
 
         with((String) response.getEntity())
                 .assertNotDefined(JsonEnvelope.METADATA);
-        assertThat(response.getHeaderString(HeaderConstants.ID), equalTo(metadata.id().toString()));
+        assertThat(response.getHeaderString(HeaderConstants.ID), equalTo(metadataId.toString()));
     }
 
 }

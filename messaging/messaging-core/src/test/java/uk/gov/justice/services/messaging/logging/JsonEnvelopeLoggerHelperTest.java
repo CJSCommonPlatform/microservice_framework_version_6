@@ -1,12 +1,9 @@
 package uk.gov.justice.services.messaging.logging;
 
-import org.hamcrest.collection.IsEmptyCollection;
-import org.hamcrest.core.IsCollectionContaining;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import static com.jayway.jsonassert.JsonAssert.with;
+import static org.hamcrest.collection.IsEmptyCollection.empty;
+import static org.mockito.Mockito.when;
+
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectMetadata;
 import uk.gov.justice.services.messaging.Metadata;
@@ -16,8 +13,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.jayway.jsonassert.JsonAssert.with;
-import static org.mockito.Mockito.when;
+import org.hamcrest.core.IsCollectionContaining;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -32,6 +33,12 @@ public class JsonEnvelopeLoggerHelperTest {
     private static final Optional<String> CLIENT_CORRELTAION_ID_VALUE = Optional.of("e8c16418-fa1f-48f7-95cc-8dad3df04dd3");
     private static final Optional<String> SESSION_ID_VALUE = Optional.of("e938e175-075f-45c0-8ebb-7541c9253615");
     private static final Optional<String> USER_ID_VALUE = Optional.of("e647234c-7dbd-4524-aee6-d729a538926d");
+    private static final String ID = "id";
+    private static final String NAME = "name";
+    private static final String SESSION = "session";
+    private static final String CORRELATION = "correlation";
+    private static final String CAUSATION = "causation";
+    private static final String USER = "user";
 
     @Mock
     private JsonEnvelope envelopeWithCausation;
@@ -90,30 +97,30 @@ public class JsonEnvelopeLoggerHelperTest {
     @Test
     public void shouldPrintAsTraceWithoutCausations() throws Exception {
         with(JsonEnvelopeLoggerHelper.toEnvelopeTraceString(envelopeWithoutCausation))
-                .assertEquals(JsonObjectMetadata.ID, ID_VALUE.toString())
-                .assertEquals(JsonObjectMetadata.NAME, NAME_VALUE)
-                .assertEquals(JsonObjectMetadata.SESSION_ID, SESSION_ID_VALUE.get())
-                .assertEquals(JsonObjectMetadata.CORRELATION, CLIENT_CORRELTAION_ID_VALUE.get())
-                .assertThat(JsonObjectMetadata.CAUSATION, IsEmptyCollection.empty());
+                .assertEquals(ID, ID_VALUE.toString())
+                .assertEquals(NAME, NAME_VALUE)
+                .assertEquals(SESSION, SESSION_ID_VALUE.get())
+                .assertEquals(CORRELATION, CLIENT_CORRELTAION_ID_VALUE.get())
+                .assertThat(CAUSATION, empty());
     }
 
     @Test
     public void shouldPrintAsTrace() throws Exception {
         with(JsonEnvelopeLoggerHelper.toEnvelopeTraceString(envelopeWithCausation))
-                .assertEquals(JsonObjectMetadata.ID, ID_VALUE.toString())
-                .assertEquals(JsonObjectMetadata.NAME, NAME_VALUE)
-                .assertEquals(JsonObjectMetadata.USER_ID, USER_ID_VALUE.get())
-                .assertEquals(JsonObjectMetadata.SESSION_ID, SESSION_ID_VALUE.get())
-                .assertEquals(JsonObjectMetadata.CORRELATION, CLIENT_CORRELTAION_ID_VALUE.get())
+                .assertEquals(ID, ID_VALUE.toString())
+                .assertEquals(NAME, NAME_VALUE)
+                .assertEquals(USER, USER_ID_VALUE.get())
+                .assertEquals(SESSION, SESSION_ID_VALUE.get())
+                .assertEquals(CORRELATION, CLIENT_CORRELTAION_ID_VALUE.get())
                 .assertThat(JsonObjectMetadata.CAUSATION, IsCollectionContaining.hasItems(CAUSE_1_VALUE.toString(), CAUSE_2_VALUE.toString()));
     }
 
     @Test
     public void shouldPrintWithoutMissingOptionals() throws Exception {
         with(JsonEnvelopeLoggerHelper.toEnvelopeTraceString(envelopeWithoutOptionals))
-                .assertEquals(JsonObjectMetadata.ID, ID_VALUE.toString())
-                .assertEquals(JsonObjectMetadata.NAME, NAME_VALUE)
-                .assertNotDefined(JsonObjectMetadata.SESSION_ID, SESSION_ID_VALUE.get())
-                .assertNotDefined(JsonObjectMetadata.CORRELATION, CLIENT_CORRELTAION_ID_VALUE.get());
+                .assertEquals(ID, ID_VALUE.toString())
+                .assertEquals(NAME, NAME_VALUE)
+                .assertNotDefined(SESSION, SESSION_ID_VALUE.get())
+                .assertNotDefined(CORRELATION, CLIENT_CORRELTAION_ID_VALUE.get());
     }
 }

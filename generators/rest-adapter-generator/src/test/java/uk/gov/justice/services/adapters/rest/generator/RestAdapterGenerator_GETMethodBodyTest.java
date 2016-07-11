@@ -28,7 +28,7 @@ import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuil
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.setField;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
 import uk.gov.justice.services.adapter.rest.BasicActionMapper;
 import uk.gov.justice.services.adapter.rest.exception.BadRequestException;
@@ -106,7 +106,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         ArgumentCaptor<Function> consumerCaptor = ArgumentCaptor.forClass(Function.class);
         verify(restProcessor).processSynchronously(consumerCaptor.capture(), anyString(), any(HttpHeaders.class), any(Collection.class));
 
-        JsonEnvelope envelope = envelopeFrom(null, null);
+        JsonEnvelope envelope = envelope().build();
         consumerCaptor.getValue().apply(envelope);
 
         verify(dispatcher).dispatch(envelope);

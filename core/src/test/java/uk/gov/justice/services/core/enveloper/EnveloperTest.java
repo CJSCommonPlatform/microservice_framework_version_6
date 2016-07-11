@@ -7,31 +7,17 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.CAUSATION;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.CLIENT_ID;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.CONTEXT;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.CORRELATION;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.SESSION_ID;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.STREAM;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.STREAM_ID;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.USER_ID;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.core.enveloper.exception.InvalidEventException;
 import uk.gov.justice.services.core.extension.EventFoundEvent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjectMetadata;
-import uk.gov.justice.services.messaging.Metadata;
 
 import java.util.UUID;
 
-import javax.json.Json;
 import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -90,7 +76,10 @@ public class EnveloperTest {
     @Test
     public void shouldEnvelopeEventObject() throws JsonProcessingException {
         enveloper.register(event);
-        when(envelope.metadata()).thenReturn(metadata(true));
+        when(envelope.metadata()).thenReturn(
+                metadataOf(COMMAND_UUID, TEST_EVENT_NAME)
+                        .withCausation(OLD_CAUSATION_ID)
+                        .build());
         when(objectToJsonValueConverter.convert(object)).thenReturn(payload);
 
         JsonEnvelope event = enveloper.withMetadataFrom(envelope).apply(object);
@@ -111,7 +100,10 @@ public class EnveloperTest {
 
     @Test
     public void shouldEnvelopeObjectWithName() throws JsonProcessingException {
-        when(envelope.metadata()).thenReturn(metadata(true));
+        when(envelope.metadata()).thenReturn(
+                metadataOf(COMMAND_UUID, TEST_NAME)
+                        .withCausation(OLD_CAUSATION_ID)
+                        .build());
         when(objectToJsonValueConverter.convert(object)).thenReturn(payload);
 
         JsonEnvelope event = enveloper.withMetadataFrom(envelope, TEST_NAME).apply(object);
@@ -127,7 +119,10 @@ public class EnveloperTest {
 
     @Test
     public void shouldEnvelopeMapNullObjectWithName() throws JsonProcessingException {
-        when(envelope.metadata()).thenReturn(metadata(true));
+        when(envelope.metadata()).thenReturn(
+                metadataOf(COMMAND_UUID, TEST_NAME)
+                        .withCausation(OLD_CAUSATION_ID)
+                        .build());
 
         JsonEnvelope event = enveloper.withMetadataFrom(envelope, TEST_NAME).apply(null);
 
@@ -143,7 +138,9 @@ public class EnveloperTest {
     @Test
     public void shouldEnvelopeObjectWithoutCausation() throws JsonProcessingException {
         enveloper.register(event);
-        when(envelope.metadata()).thenReturn(metadata(false));
+        when(envelope.metadata()).thenReturn(
+                metadataOf(COMMAND_UUID, TEST_EVENT_NAME)
+                        .build());
         when(objectToJsonValueConverter.convert(object)).thenReturn(payload);
 
         JsonEnvelope event = enveloper.withMetadataFrom(envelope).apply(object);
@@ -162,30 +159,6 @@ public class EnveloperTest {
         exception.expectMessage("Failed to map event. No event registered for class java.lang.String");
 
         enveloper.withMetadataFrom(envelope).apply("InvalidEventObject");
-    }
-
-    private Metadata metadata(boolean withCausation) {
-        JsonObjectBuilder builder = Json.createObjectBuilder()
-                .add(ID, COMMAND_UUID.toString())
-                .add(NAME, TEST_COMMAND_NAME)
-                .add(CORRELATION, Json.createObjectBuilder()
-                        .add(CLIENT_ID, CLIENT_ID_VALUE.toString())
-                )
-                .add(CONTEXT, Json.createObjectBuilder()
-                        .add(USER_ID, USER_ID_VALUE.toString())
-                        .add(SESSION_ID, SESSION_ID_VALUE.toString())
-                )
-                .add(STREAM, Json.createObjectBuilder()
-                        .add(STREAM_ID, STREAM_ID_VALUE.toString())
-                        .add(JsonObjectMetadata.VERSION, VERSION)
-                );
-        if (withCausation) {
-            builder.add(CAUSATION, Json.createArrayBuilder()
-                    .add(OLD_CAUSATION_ID.toString())
-            );
-        }
-
-        return metadataFrom(builder.build());
     }
 
     @Event("Test-Event")

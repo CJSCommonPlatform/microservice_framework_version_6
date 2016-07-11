@@ -28,6 +28,10 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
         return new DefaultJsonEnvelope(metadata, payload);
     }
 
+    public static JsonEnvelope envelopeFrom(final JsonObjectMetadata.Builder metadataBuilder, final JsonValue payload) {
+        return envelopeFrom(metadataBuilder.build(), payload);
+    }
+
     @Override
     public Metadata metadata() {
         return metadata;

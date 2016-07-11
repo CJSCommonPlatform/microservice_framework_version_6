@@ -35,7 +35,7 @@ import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuil
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.methodsOf;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.setField;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
 import uk.gov.justice.services.adapter.messaging.JmsProcessor;
 import uk.gov.justice.services.adapter.messaging.JsonSchemaValidationInterceptor;
@@ -613,7 +613,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
         ArgumentCaptor<Consumer> consumerCaptor = ArgumentCaptor.forClass(Consumer.class);
         verify(jmsProcessor).process(consumerCaptor.capture(), eq(message));
 
-        JsonEnvelope envelope = envelopeFrom(null, null);
+        JsonEnvelope envelope = envelope().build();
         consumerCaptor.getValue().accept(envelope);
 
         verify(dispatcher).dispatch(envelope);

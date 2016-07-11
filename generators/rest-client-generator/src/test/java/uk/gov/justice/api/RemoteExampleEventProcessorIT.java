@@ -13,10 +13,8 @@ import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
 import static javax.ws.rs.core.Response.Status.ACCEPTED;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 
 import uk.gov.justice.services.clients.core.RestClientHelper;
 import uk.gov.justice.services.clients.core.RestClientProcessor;
@@ -33,23 +31,12 @@ import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
 import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SynchronousDispatcherProducer;
-import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcherProducer;
-import uk.gov.justice.services.core.dispatcher.DispatcherCache;
-import uk.gov.justice.services.core.dispatcher.RequesterProducer;
-import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
-import uk.gov.justice.services.core.dispatcher.SynchronousDispatcherProducer;
-import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcherProducer;
-import uk.gov.justice.services.core.dispatcher.DispatcherCache;
-import uk.gov.justice.services.core.dispatcher.RequesterProducer;
-import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
-import uk.gov.justice.services.core.dispatcher.SynchronousDispatcherProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.jms.JmsDestinations;
 import uk.gov.justice.services.core.jms.JmsSenderFactory;
 import uk.gov.justice.services.core.sender.ComponentDestination;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.core.sender.SenderProducer;
-import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.DefaultJmsEnvelopeSender;
 import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
@@ -59,7 +46,6 @@ import java.util.Properties;
 import java.util.UUID;
 
 import javax.inject.Inject;
-import javax.json.JsonObject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
@@ -150,27 +136,22 @@ public class RemoteExampleEventProcessorIT {
     public void shouldSendCommandToRemoteService() {
 
         final String name = "people.command.update-user";
-        final JsonObject metadata = createObjectBuilder()
-                .add(NAME, name)
-                .add(ID, QUERY_ID.toString())
-                .build();
-        final JsonObject payload = createObjectBuilder()
-                .add("userId", USER_ID.toString())
-                .add("userName", USER_NAME)
-                .build();
-        final String bodyPayload = createObjectBuilder().add("userName", USER_NAME).build().toString();
 
-        final JsonEnvelope command = envelopeFrom(metadataFrom(metadata), payload);
 
         final String path = format("/users/%s", USER_ID.toString());
         final String mimeType = format("application/vnd.%s+json", name);
+        final String bodyPayload = createObjectBuilder().add("userName", USER_NAME).build().toString();
 
         stubFor(post(urlEqualTo(BASE_PATH + path))
                 .withRequestBody(equalToJson(bodyPayload))
                 .willReturn(aResponse()
                         .withStatus(ACCEPTED.getStatusCode())));
 
-        sender.send(command);
+        sender.send(envelope()
+                .with(metadataOf(QUERY_ID, name))
+                .withPayloadOf(USER_ID.toString(), "userId")
+                .withPayloadOf(USER_NAME, "userName")
+                .build());
 
         verify(postRequestedFor(urlEqualTo(BASE_PATH + path))
                 .withHeader(CONTENT_TYPE, equalTo(mimeType))

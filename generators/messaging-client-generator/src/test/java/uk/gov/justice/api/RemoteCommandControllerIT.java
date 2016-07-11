@@ -1,12 +1,11 @@
 package uk.gov.justice.api;
 
-import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 
 import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
 import uk.gov.justice.services.core.accesscontrol.AccessControlService;
@@ -19,22 +18,11 @@ import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
 import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SynchronousDispatcherProducer;
-import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcherProducer;
-import uk.gov.justice.services.core.dispatcher.DispatcherCache;
-import uk.gov.justice.services.core.dispatcher.RequesterProducer;
-import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
-import uk.gov.justice.services.core.dispatcher.SynchronousDispatcherProducer;
-import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcherProducer;
-import uk.gov.justice.services.core.dispatcher.DispatcherCache;
-import uk.gov.justice.services.core.dispatcher.RequesterProducer;
-import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
-import uk.gov.justice.services.core.dispatcher.SynchronousDispatcherProducer;
 import uk.gov.justice.services.core.jms.JmsDestinations;
 import uk.gov.justice.services.core.jms.JmsSenderFactory;
 import uk.gov.justice.services.core.sender.ComponentDestination;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.core.sender.SenderProducer;
-import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.logging.JsonEnvelopeLoggerHelper;
 import uk.gov.justice.test.util.RecordingJmsEnvelopeSender;
@@ -116,11 +104,7 @@ public class RemoteCommandControllerIT {
     public void shouldPassEnvelopeToEnvelopeSender() throws Exception {
         final String name = "contexta.commanda";
         final UUID id = UUID.randomUUID();
-        sender.send(DefaultJsonEnvelope.envelopeFrom(metadataFrom(
-                createObjectBuilder()
-                        .add(ID, id.toString())
-                        .add("name", name)
-                        .build()), null));
+        sender.send(envelope().with(metadataOf(id, name)).build());
 
         final List<JsonEnvelope> sentEnvelopes = envelopeSender.envelopesSentTo("contexta.controller.command");
         assertThat(sentEnvelopes, hasSize(1));

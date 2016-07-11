@@ -6,14 +6,8 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.CAUSATION;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.CORRELATION;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.SESSION_ID;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.USER_ID;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 import static uk.gov.justice.services.messaging.logging.JmsMessageLoggerHelper.toJmsTraceString;
-import static uk.gov.justice.services.messaging.logging.JsonEnvelopeLoggerHelperTest.makeCausations;
 
 import java.io.StringReader;
 import java.util.List;
@@ -23,7 +17,6 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.TextMessage;
 import javax.json.Json;
-import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
@@ -35,7 +28,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class JmsMessageLoggerHelperTest {
 
-    private static final String A_CORRELATION_ID = UUID.randomUUID().toString();
     private static final String A_NAME = "context.command.do-something";
     private static final String A_MESSAGE_ID = UUID.randomUUID().toString();
     private static final String A_SESSION_ID = UUID.randomUUID().toString();
@@ -54,14 +46,14 @@ public class JmsMessageLoggerHelperTest {
 
     @Test
     public void shouldReturnValidMetadataJson() throws JMSException {
-        when(message.getText()).thenReturn(getMetaData());
+        when(message.getText()).thenReturn(envelopeString());
 
         JsonObject result = toJsonObject(message);
 
-        assertThat(result.getString(ID), is(A_MESSAGE_ID));
-        assertThat(result.getString(NAME), is(A_NAME));
-        assertThat(result.getString(CORRELATION), is(A_CORRELATION_ID));
-        assertThat(result.getString(SESSION_ID), is(A_SESSION_ID));
+        assertThat(result.getString("id"), is(A_MESSAGE_ID));
+        assertThat(result.getString("name"), is(A_NAME));
+        assertThat(result.getJsonObject("context").getString("user"), is(A_USER_ID));
+        assertThat(result.getJsonObject("context").getString("session"), is(A_SESSION_ID));
     }
 
     @Test
@@ -77,26 +69,15 @@ public class JmsMessageLoggerHelperTest {
         return jsonReader.readObject();
     }
 
-    private String getMetaData() {
+    private String envelopeString() {
+
         return createObjectBuilder()
-                .add("_metadata", createObjectBuilder()
-                        .add(ID, A_MESSAGE_ID)
-                        .add(NAME, A_NAME)
-                        .add(CORRELATION, A_CORRELATION_ID)
-                        .add(SESSION_ID, A_SESSION_ID)
-                        .add(USER_ID, A_USER_ID)
-                        .add(CAUSATION, getCausations()))
+                .add("_metadata", metadataOf(UUID.fromString(A_MESSAGE_ID), A_NAME)
+                        .withUserId(A_USER_ID)
+                        .withSessionId(A_SESSION_ID)
+                        .build().asJsonObject())
                 .add("something", "anything really")
                 .build().toString();
     }
 
-    private JsonArrayBuilder getCausations() {
-
-        List<UUID> causations = makeCausations();
-        JsonArrayBuilder builder = Json.createArrayBuilder();
-        for (UUID uuid : causations) {
-            builder.add(uuid.toString());
-        }
-        return builder;
-    }
 }

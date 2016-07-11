@@ -71,9 +71,7 @@
                                 <include>**/*.messaging.raml</include>
                             </includes>
                             <basePackageName>uk.gov.justice.api</basePackageName>
-                            <generatorProperties>
-                                <actionMapping>true</actionMapping>
-                            </generatorProperties>
+
                         </configuration>
                     </execution>
                     <execution>

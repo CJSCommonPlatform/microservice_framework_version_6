@@ -22,7 +22,6 @@ import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.defaultGetAction;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
-import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpActionWithNoMapping;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.mapping;
 import static uk.gov.justice.services.generators.test.utils.builder.QueryParamBuilder.queryParam;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
@@ -125,27 +124,6 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     }
 
     @Test
-    public void shouldGenerateResourceInterfaceForPOSTIfActionMappingFalse() throws Exception {
-        generator.run(
-                restRamlWithDefaults()
-                        .with(resource("/some/path")
-                                .with(httpActionWithNoMapping(POST, "application/vnd.context.command.default+json"))
-                        ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, ACTION_MAPPING_FALSE));
-
-        Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
-
-        List<Method> methods = methodsOf(interfaceClass);
-        assertThat(methods, hasSize(1));
-        Method method = methods.get(0);
-        assertThat(method.getReturnType(), equalTo(Response.class));
-        assertThat(method.getAnnotation(POST.class), not(nullValue()));
-        assertThat(method.getAnnotation(Consumes.class), not(nullValue()));
-        assertThat(method.getAnnotation(Consumes.class).value(),
-                is(new String[]{"application/vnd.context.command.default+json"}));
-    }
-
-    @Test
     public void shouldGenerateResourceInterfaceWithTwoPOSTMethods() throws Exception {
         generator.run(
                 restRamlWithDefaults().with(
@@ -201,27 +179,6 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                 is(new String[]{"application/vnd.ctx.query.query1+json"}));
     }
 
-    @Test
-    public void shouldGenerateResourceInterfaceForGETIfActionMappingFalse() throws Exception {
-        generator.run(
-                restRamlWithDefaults()
-                        .with(resource("/some/path")
-                                .with(httpActionWithNoMapping(GET)
-                                        .withResponseTypes("application/vnd.ctx.query.query1+json"))
-                        ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, ACTION_MAPPING_FALSE));
-
-        Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
-
-        List<Method> methods = methodsOf(interfaceClass);
-        assertThat(methods, hasSize(1));
-        Method method = methods.get(0);
-        assertThat(method.getReturnType(), equalTo(Response.class));
-        assertThat(method.getAnnotation(javax.ws.rs.GET.class), not(nullValue()));
-        assertThat(method.getAnnotation(Produces.class), not(nullValue()));
-        assertThat(method.getAnnotation(Produces.class).value(),
-                is(new String[]{"application/vnd.ctx.query.query1+json"}));
-    }
 
     @Test
     public void shouldGenerateGETMethodWithTwoMediaTypeAnnotations() throws Exception {
@@ -704,7 +661,10 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                 restRamlWithQueryApiDefaults().with(
                         resource("/users").with(httpAction(GET)
                                 .with(queryParam("surname"))
-                                .withResponseTypes("application/vnd.people.query.search-users+json"))
+                                .withResponseTypes("application/vnd.people.query.search-users+json")
+                                .with(mapping()
+                                        .withName("blah")
+                                        .withResponseType("application/vnd.people.query.search-users+json")))
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap())
         );

@@ -40,6 +40,7 @@ import com.squareup.javapoet.TypeSpec;
 import org.raml.model.Action;
 import org.raml.model.ActionType;
 import org.raml.model.MimeType;
+import org.raml.model.Raml;
 import org.raml.model.Resource;
 import org.raml.model.parameter.QueryParameter;
 import org.raml.model.parameter.UriParameter;
@@ -47,9 +48,22 @@ import org.raml.model.parameter.UriParameter;
 /**
  * Internal code generation class for generating the JAX-RS interface.
  */
-class JaxRsInterfaceGenerator extends AbstractInternalGenerator {
+class JaxRsInterfaceGenerator {
 
     private static final String ANNOTATION_FORMAT = "$S";
+
+    /**
+     * Generate Java code for a Raml structure
+     *
+     * @param raml {@link Raml ) structure to generate code from
+     * @return a list of {@link TypeSpec } that represent Java classes
+     */
+    public List<TypeSpec> generateFor(final Raml raml) {
+        final Collection<Resource> resources = raml.getResources().values();
+        return resources.stream()
+                .map(this::generateFor)
+                .collect(toList());
+    }
 
     /**
      * Create an interface for the specified {@link Resource}
@@ -57,7 +71,6 @@ class JaxRsInterfaceGenerator extends AbstractInternalGenerator {
      * @param resource the resource to generate as an implementation class
      * @return a {@link TypeSpec} that represents the implementation class
      */
-    @Override
     TypeSpec generateFor(final Resource resource) {
         final TypeSpec.Builder interfaceSpecBuilder = interfaceSpecFor(resource);
 

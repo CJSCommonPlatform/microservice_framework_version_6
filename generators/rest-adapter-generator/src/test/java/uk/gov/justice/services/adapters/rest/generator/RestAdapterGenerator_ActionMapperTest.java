@@ -14,6 +14,7 @@ import static uk.gov.justice.services.generators.test.utils.builder.MappingBuild
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
+import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.methodOf;
 
 import java.lang.reflect.Method;
@@ -47,7 +48,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
                                 )
 
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, ACTION_MAPPING_TRUE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
         Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultUserResourceActionMapper");
         Object mapperObject = mapperClass.newInstance();
@@ -81,7 +82,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
                                 )
 
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, ACTION_MAPPING_TRUE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
         Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultStatusResourceActionMapper");
         Object mapperObject = mapperClass.newInstance();
@@ -109,7 +110,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
                                 )
 
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, ACTION_MAPPING_TRUE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
         Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCaseResourceActionMapper");
         Object mapperObject = mapperClass.newInstance();
@@ -142,7 +143,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
                                 )
 
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, ACTION_MAPPING_TRUE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
         Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCaseResourceActionMapper");
         Object mapperObject = mapperClass.newInstance();
@@ -178,7 +179,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
                                         .withResponseTypes("application/vnd.mediatype1+json")
                                 )
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, ACTION_MAPPING_TRUE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
         Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCaseResourceActionMapper");
         Object mapperObject = mapperClass.newInstance();
@@ -202,7 +203,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
                                 .with(defaultGetAction())
 
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, ACTION_MAPPING_TRUE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
         Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultStatusResourceActionMapper");
         assertThat(mapperClass.getAnnotation(Named.class), not(nullValue()));

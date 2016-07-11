@@ -10,7 +10,6 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_CONTROLLER;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_VIEW;
-import static uk.gov.justice.services.generators.commons.config.GeneratorProperties.isActionMapping;
 import static uk.gov.justice.services.generators.commons.config.GeneratorProperties.serviceComponentOf;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.emptyPathConfigurationWith;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
@@ -99,30 +98,5 @@ public class GeneratorPropertiesTest {
         exception.expectMessage("serviceComponent generator property not set in the plugin config");
 
         serviceComponentOf(emptyPathConfigurationWith(emptyMap()));
-    }
-
-    @Test
-    public void shouldReturnFalseIfGeneratorPropertiesNullForActionMapping() throws Exception {
-        assertThat(isActionMapping(emptyPathConfigurationWith(null)), is(false));
-    }
-
-    @Test
-    public void shouldReturnFalseIfActionMappingConfigurationIsNotSetToTrue() throws Exception {
-        assertThat(isActionMapping(
-                emptyPathConfigurationWith(
-                        generatorProperties()
-                                .withActionMappingOf(false)
-                                .build())),
-                is(false));
-    }
-
-    @Test
-    public void shouldReturnTrueIfActionMappingConfigurationIsSetToTrue() throws Exception {
-        assertThat(isActionMapping(
-                emptyPathConfigurationWith(
-                        generatorProperties()
-                                .withActionMappingOf(true)
-                                .build())),
-                is(true));
     }
 }

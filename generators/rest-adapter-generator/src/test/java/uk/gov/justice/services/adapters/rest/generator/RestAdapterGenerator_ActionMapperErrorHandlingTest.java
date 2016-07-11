@@ -13,6 +13,7 @@ import static uk.gov.justice.services.generators.test.utils.builder.MappingBuild
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
+import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
 
 import uk.gov.justice.services.generators.commons.validator.RamlValidationException;
 
@@ -38,7 +39,7 @@ public class RestAdapterGenerator_ActionMapperErrorHandlingTest extends BaseRest
                                 )
 
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, ACTION_MAPPING_TRUE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
     }
 
     @Test
@@ -54,7 +55,7 @@ public class RestAdapterGenerator_ActionMapperErrorHandlingTest extends BaseRest
                                 )
 
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, ACTION_MAPPING_TRUE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
     }
 
     @Test
@@ -70,7 +71,7 @@ public class RestAdapterGenerator_ActionMapperErrorHandlingTest extends BaseRest
                                         .withResponseTypes("application/vnd.ctx.query.defquery+json")
                                 )
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, ACTION_MAPPING_TRUE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
     }
 
 
@@ -90,7 +91,7 @@ public class RestAdapterGenerator_ActionMapperErrorHandlingTest extends BaseRest
                                 )
 
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, ACTION_MAPPING_TRUE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
     }
 
     @Test
@@ -109,7 +110,7 @@ public class RestAdapterGenerator_ActionMapperErrorHandlingTest extends BaseRest
                                 )
 
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, ACTION_MAPPING_TRUE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
     }
 
     @Test
@@ -130,7 +131,7 @@ public class RestAdapterGenerator_ActionMapperErrorHandlingTest extends BaseRest
                                 )
 
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, ACTION_MAPPING_TRUE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
     }
 
     @Test
@@ -153,7 +154,7 @@ public class RestAdapterGenerator_ActionMapperErrorHandlingTest extends BaseRest
                                                 "application/vnd.mediatype2+json",
                                                 "application/vnd.mediatype3+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, ACTION_MAPPING_TRUE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
     }
 
 }

@@ -5,6 +5,7 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static org.apache.commons.lang3.StringUtils.capitalize;
 import static org.raml.model.ActionType.GET;
 import static uk.gov.justice.services.generators.commons.helper.Names.nameFrom;
+import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.INVALID_ACTION_MAPPING_ERROR_MSG;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.services.adapter.rest.parameter.ParameterType;
@@ -12,11 +13,10 @@ import uk.gov.justice.services.clients.core.EndpointDefinition;
 import uk.gov.justice.services.clients.core.QueryParam;
 import uk.gov.justice.services.clients.core.RestClientHelper;
 import uk.gov.justice.services.clients.core.RestClientProcessor;
-import uk.gov.justice.services.clients.rest.generator.strategy.ClientGenerationStrategy;
-import uk.gov.justice.services.clients.rest.generator.strategy.ClientGenerationStrategyFactory;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.generators.commons.client.AbstractClientGenerator;
 import uk.gov.justice.services.generators.commons.mapping.ActionMapping;
+import uk.gov.justice.services.generators.commons.validator.RamlValidationException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.HashSet;
@@ -105,10 +105,14 @@ public class RestClientGenerator extends AbstractClientGenerator {
 
     @Override
     protected String handlesAnnotationValueOf(final Action ramlAction, final MimeType mimeType, final GeneratorConfig generatorConfig) {
-        final ClientGenerationStrategy generationStrategy = ClientGenerationStrategyFactory.createFrom(generatorConfig);
-        final List<ActionMapping> actionMappings = generationStrategy.listOfActionMappings(ramlAction.getDescription());
-        final Optional<ActionMapping> mapping = generationStrategy.mappingOf(actionMappings, mimeType, ramlAction.getType());
-        return generationStrategy.handlesValue(mapping, nameFrom(mimeType));
+        return actionMappingOf(ramlAction, mimeType)
+                .orElseThrow(() -> new RamlValidationException(INVALID_ACTION_MAPPING_ERROR_MSG))
+                .getName();
+    }
+
+    private Optional<ActionMapping> actionMappingOf(final Action ramlAction, final MimeType mimeType) {
+        final List<ActionMapping> actionMappings = ActionMapping.listOf(ramlAction.getDescription());
+        return actionMappings.stream().filter(m -> m.mimeTypeFor(ramlAction.getType()).equals(mimeType.getType())).findAny();
     }
 
     private FieldSpec restClientHelperField() {

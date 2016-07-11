@@ -26,6 +26,7 @@ import static uk.gov.justice.services.generators.test.utils.builder.QueryParamBu
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
+import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.setField;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
@@ -158,7 +159,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                                                 "application/vnd.ctx.query.somemediatype2+json",
                                                 "application/vnd.ctx.query.somemediatype3+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, ACTION_MAPPING_TRUE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCakeResource");
         Object resourceObject = instanceOf(resourceClass);
@@ -189,7 +190,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                                                 .withResponseType("application/vnd.ctx.query.mediatype1+json"))
                                         .withResponseTypes("application/vnd.ctx.query.mediatype1+json"))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, ACTION_MAPPING_TRUE));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultRecipeResource");
         Object resourceObject = instanceOf(resourceClass);

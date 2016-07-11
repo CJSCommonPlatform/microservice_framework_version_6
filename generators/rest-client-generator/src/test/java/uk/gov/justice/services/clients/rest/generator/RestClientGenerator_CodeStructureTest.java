@@ -24,9 +24,9 @@ import static uk.gov.justice.services.generators.test.utils.config.GeneratorProp
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.methodsOf;
 
+import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.Remote;
-import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
@@ -35,7 +35,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -73,28 +72,11 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
             .build();
 
     private static final String BASE_PACKAGE = "org.raml.test";
-    private static final Map<String, String> NOT_USED_GENERATOR_PROPERTIES = generatorProperties()
-            .withServiceComponentOf("QUERY_CONTROLLER")
-            .withActionMappingOf(true)
-            .build();
+
 
     private static final String BASE_URI_WITH_LESS_THAN_EIGHT_PARTS = "http://localhost:8080/command/api/rest/service";
     private static final String BASE_URI_WITH_MORE_THAN_EIGHT_PARTS = "http://localhost:8080/warname/command/api/rest/service/extra";
 
-    private static final Map<String, String> GENERATOR_PROPERTIES = generatorProperties()
-            .withServiceComponentOf("QUERY_API")
-            .withActionMappingOf(true)
-            .build();
-
-    private static final Map<String, String> QUERY_CONTROLLER_GENERATOR_PROPERTIES = generatorProperties()
-            .withServiceComponentOf("QUERY_CONTROLLER")
-            .withActionMappingOf(true)
-            .build();
-
-    private static final Map<String, String> NO_MAPPING_GENERATOR_PROPERTIES = generatorProperties()
-            .withServiceComponentOf("QUERY_CONTROLLER")
-            .withActionMappingOf(false)
-            .build();
 
     @Test
     public void shouldGenerateClassWithAnnotations() throws Exception {
@@ -105,15 +87,15 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
                                 .with(httpAction(GET, "application/vnd.cakeshop.query.add-recipe+json")
                                         .with(queryParam("recipename").required(true), queryParam("topingredient").required(false)))
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, GENERATOR_PROPERTIES));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("CUSTOM_COMPONENT")));
 
 
         Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceQueryApi");
 
         assertThat(generatedClass.getCanonicalName(), is("org.raml.test.RemoteServiceQueryApi"));
         assertThat(generatedClass.getAnnotation(Remote.class), not(nullValue()));
-        assertThat(generatedClass.getAnnotation(ServiceComponent.class), not(nullValue()));
-        assertThat(generatedClass.getAnnotation(ServiceComponent.class).value().toString(), is("QUERY_API"));
+        assertThat(generatedClass.getAnnotation(FrameworkComponent.class), not(nullValue()));
+        assertThat(generatedClass.getAnnotation(FrameworkComponent.class).value(), is("CUSTOM_COMPONENT"));
         assertBaseUriField(generatedClass.getDeclaredField("BASE_URI"));
         assertRestClientField(generatedClass.getDeclaredField("restClientProcessor"));
         assertRestClientHelperField(generatedClass.getDeclaredField("restClientHelper"));
@@ -126,10 +108,10 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
                         .withBaseUri("http://localhost:8080/warname/query/api/rest/service")
                         .withDefaultPostResource()
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, QUERY_CONTROLLER_GENERATOR_PROPERTIES));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("QUERY_CONTROLLER")));
 
         Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceQueryApi");
-        assertThat(generatedClass.getAnnotation(ServiceComponent.class).value().toString(), is("QUERY_CONTROLLER"));
+        assertThat(generatedClass.getAnnotation(FrameworkComponent.class).value(), is("QUERY_CONTROLLER"));
     }
 
     @Test
@@ -139,7 +121,7 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
                         .withBaseUri("http://localhost:8080/warname/query/api/rest/service")
                         .withDefaultPostResource()
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, QUERY_CONTROLLER_GENERATOR_PROPERTIES));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
 
         Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceQueryApi");
 
@@ -160,7 +142,7 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
                                         .withResponseTypes("application/vnd.cakeshop.query.recipe+json")
                                         .withDescription(GET_MAPPING_ANNOTATION))
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, NOT_USED_GENERATOR_PROPERTIES));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent().withActionMappingOf(true)));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
         List<Method> methods = methodsOf(clazz);
@@ -181,7 +163,7 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
                                 .with(httpActionWithNoMapping(GET)
                                         .withResponseTypes("application/vnd.cakeshop.query.recipe+json"))
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, NO_MAPPING_GENERATOR_PROPERTIES));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
         List<Method> methods = methodsOf(clazz);
@@ -202,7 +184,7 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
                                 .with(httpAction(POST, "application/vnd.cakeshop.command.update-recipe+json")
                                         .withDescription(POST_MAPPING_ANNOTATION))
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, NOT_USED_GENERATOR_PROPERTIES));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent().withActionMappingOf(true)));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
         List<Method> methods = methodsOf(clazz);
@@ -223,7 +205,7 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
                                 .with(httpAction(POST, "application/vnd.cakeshop.command.update-recipe+json")
                                         .withDescription(POST_MAPPING_ANNOTATION))
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, NOT_USED_GENERATOR_PROPERTIES));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
         Method method = firstMethodOf(clazz);
@@ -237,28 +219,12 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("serviceComponent generator property not set in the plugin config");
 
-        Map<String, String> generatorProperties = emptyMap();
         generator.run(
                 restRamlWithDefaults()
                         .withDefaultPostResource()
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-
-    }
-
-    @Test
-    public void shouldThrowExceptionIfServiceComponentPropertyNotValid() {
-
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage(containsString("serviceComponent generator property invalid. Expected one of: COMMAND_API, COMMAND_CONTROLLER"));
-
-        Map<String, String> generatorProperties = generatorProperties().withServiceComponentOf("UNKNOWN").build();
-        generator.run(
-                restRamlWithDefaults()
-                        .withDefaultPostResource()
-                        .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
     }
 
@@ -270,7 +236,7 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
 
         generator.run(
                 restRamlWithTitleVersion().withBaseUri(BASE_URI_WITH_LESS_THAN_EIGHT_PARTS).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, NOT_USED_GENERATOR_PROPERTIES));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
 
     }
 
@@ -282,7 +248,7 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
 
         generator.run(
                 restRamlWithTitleVersion().withBaseUri(BASE_URI_WITH_MORE_THAN_EIGHT_PARTS).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, NOT_USED_GENERATOR_PROPERTIES));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
 
     }
 

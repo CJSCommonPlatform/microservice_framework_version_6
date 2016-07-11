@@ -2,7 +2,6 @@ package uk.gov.justice.services.core.extension;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
-import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.LOCAL;
 
 import javax.enterprise.inject.spi.Bean;
@@ -26,7 +25,7 @@ public class ServiceComponentFoundEventTest {
 
     @Before
     public void setup() {
-        event = new ServiceComponentFoundEvent(COMMAND_API, bean, LOCAL);
+        event = new ServiceComponentFoundEvent("COMMAND_API", bean, LOCAL);
     }
 
     @Test
@@ -36,7 +35,7 @@ public class ServiceComponentFoundEventTest {
 
     @Test
     public void shouldReturnCommandApiComponent() {
-        assertThat(event.getComponent(), equalTo(COMMAND_API));
+        assertThat(event.getComponentName(), equalTo("COMMAND_API"));
     }
 
     @Test

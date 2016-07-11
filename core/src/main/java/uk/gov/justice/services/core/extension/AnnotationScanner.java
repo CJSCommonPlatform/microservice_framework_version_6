@@ -1,9 +1,10 @@
 package uk.gov.justice.services.core.extension;
 
-import static uk.gov.justice.services.core.annotation.Component.componentFrom;
+import static uk.gov.justice.services.core.annotation.ComponentNameUtil.componentFrom;
 import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.componentLocationFrom;
 
 import uk.gov.justice.domain.annotation.Event;
+import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Provider;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 
@@ -41,7 +42,8 @@ public class AnnotationScanner implements Extension {
     @SuppressWarnings("unused")
     void afterDeploymentValidation(@Observes final AfterDeploymentValidation event, final BeanManager beanManager) {
         beanManager.getBeans(Object.class, annotationLiteral()).stream()
-                .filter(b -> b.getBeanClass().isAnnotationPresent(ServiceComponent.class))
+                .filter(b -> b.getBeanClass().isAnnotationPresent(ServiceComponent.class)
+                        || b.getBeanClass().isAnnotationPresent(FrameworkComponent.class))
                 .forEach(this::processServiceComponentsForEvents);
 
         beanManager.getBeans(Object.class, annotationLiteral()).stream()

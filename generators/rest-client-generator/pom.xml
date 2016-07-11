@@ -113,7 +113,7 @@
                                 <include>**/*query-controller.raml</include>
                             </includes>
                             <generatorProperties>
-                                <serviceComponent>QUERY_API</serviceComponent>
+                                <serviceComponent>COMPONENT_ABC</serviceComponent>
                                 <actionMapping>true</actionMapping>
                             </generatorProperties>
                         </configuration>

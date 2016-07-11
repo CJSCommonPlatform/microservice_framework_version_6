@@ -1,9 +1,8 @@
 package uk.gov.justice.services.core.dispatcher;
 
-import static uk.gov.justice.services.core.annotation.Component.componentFrom;
+import static uk.gov.justice.services.core.annotation.ComponentNameUtil.componentFrom;
 import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.componentLocationFrom;
 
-import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.ServiceComponentLocation;
 import uk.gov.justice.services.core.extension.ServiceComponentFoundEvent;
 
@@ -24,9 +23,9 @@ import org.apache.commons.lang3.tuple.Pair;
 public class DispatcherCache {
 
     @Inject
-    private DispatcherFactory dispatcherFactory;
+    DispatcherFactory dispatcherFactory;
 
-    private final Map<Pair<Component, ServiceComponentLocation>, Dispatcher> dispatcherMap = new ConcurrentHashMap<>();
+    private final Map<Pair<String, ServiceComponentLocation>, Dispatcher> dispatcherMap = new ConcurrentHashMap<>();
 
     /**
      * Return a {@link Dispatcher} for the given {@link InjectionPoint}.
@@ -47,10 +46,10 @@ public class DispatcherCache {
      */
     public Dispatcher dispatcherFor(final ServiceComponentFoundEvent event) {
         return createDispatcherIfAbsent(Pair.of(
-                event.getComponent(), event.getLocation()));
+                event.getComponentName(), event.getLocation()));
     }
 
-    private Dispatcher createDispatcherIfAbsent(final Pair<Component, ServiceComponentLocation> component) {
+    private Dispatcher createDispatcherIfAbsent(final Pair<String, ServiceComponentLocation> component) {
         return dispatcherMap.computeIfAbsent(component, c -> dispatcherFactory.createNew());
     }
 }

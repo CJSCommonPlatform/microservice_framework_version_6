@@ -1,7 +1,7 @@
 package uk.gov.justice.services.adapter.rest.processor;
 
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
-import static uk.gov.justice.services.core.annotation.Component.componentFrom;
+import static uk.gov.justice.services.core.annotation.ComponentNameUtil.componentFrom;
 
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
@@ -44,7 +44,7 @@ public class RestProcessorProducer {
      */
     @Produces
     public RestProcessor produceRestProcessor(final InjectionPoint injectionPoint) {
-        return componentFrom(injectionPoint) == QUERY_API ? payloadOnlyRestProcessor : defaultRestProcessor;
+        return componentFrom(injectionPoint).equals(QUERY_API.name()) ? payloadOnlyRestProcessor : defaultRestProcessor;
     }
 
 }

@@ -13,14 +13,10 @@ import static uk.gov.justice.services.core.annotation.Component.EVENT_API;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
-import static uk.gov.justice.services.core.annotation.Component.componentFrom;
 import static uk.gov.justice.services.core.annotation.Component.contains;
 import static uk.gov.justice.services.core.annotation.Component.names;
 import static uk.gov.justice.services.core.annotation.Component.valueOf;
 
-import uk.gov.justice.services.core.util.TestInjectionPoint;
-
-import javax.inject.Inject;
 import javax.jms.Queue;
 import javax.jms.Topic;
 
@@ -39,7 +35,6 @@ public class ComponentTest {
     private static final String TIER_HANDLER = "handler";
     private static final String TIER_LISTENER = "listener";
     private static final String TIER_PROCESSOR = "processor";
-    private static final String FIELD_NAME = "field";
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
@@ -128,73 +123,5 @@ public class ComponentTest {
     public void shouldReturnStringContainingSeparatedNames() {
         assertThat(names(", "), is("COMMAND_API, COMMAND_CONTROLLER, COMMAND_HANDLER, EVENT_LISTENER, EVENT_PROCESSOR, EVENT_API, QUERY_API, QUERY_CONTROLLER, QUERY_VIEW"));
     }
-
-    @Test
-    public void shouldReturnFieldLevelComponent() throws NoSuchFieldException {
-        assertThat(componentFrom(new TestInjectionPoint(FieldLevelAnnotation.class.getDeclaredField(FIELD_NAME))), equalTo(COMMAND_CONTROLLER));
-    }
-
-    @Test
-    public void shouldReturnClassLevelComponent() throws NoSuchFieldException {
-        assertThat(componentFrom(new TestInjectionPoint(ClassLevelAnnotation.class.getDeclaredField(FIELD_NAME))), equalTo(COMMAND_HANDLER));
-    }
-
-    @Test
-    public void shouldReturnClassLevelAdaptorComponent() throws NoSuchFieldException {
-        assertThat(componentFrom(new TestInjectionPoint(AdapterAnnotation.class.getDeclaredField(FIELD_NAME))), equalTo(EVENT_LISTENER));
-    }
-
-    @Test
-    public void shouldReturnClassLevelComponentForMethodInjectionPoint() throws NoSuchFieldException {
-        assertThat(componentFrom(new TestInjectionPoint(MethodAnnotation.class.getDeclaredMethods()[0])), equalTo(QUERY_API));
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void shouldThrowExceptionOnMissingComponentAnnotation() throws NoSuchFieldException {
-        componentFrom(new TestInjectionPoint(NoAnnotation.class.getDeclaredField(FIELD_NAME)));
-    }
-
-
-    public static class FieldLevelAnnotation {
-
-        @Inject
-        @ServiceComponent(COMMAND_CONTROLLER)
-        Object field;
-
-    }
-
-    @ServiceComponent(COMMAND_HANDLER)
-    public static class ClassLevelAnnotation {
-
-        @Inject
-        Object field;
-
-    }
-
-    @Adapter(EVENT_LISTENER)
-    public static class AdapterAnnotation {
-
-        @Inject
-        Object field;
-
-    }
-
-    public static class NoAnnotation {
-
-        @Inject
-        Object field;
-
-    }
-
-    @ServiceComponent(QUERY_API)
-    public static class MethodAnnotation {
-
-        @Inject
-        public void test(Object field) {
-
-        }
-
-    }
-
 
 }

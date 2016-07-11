@@ -13,6 +13,7 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 
 import uk.gov.justice.domain.annotation.Event;
+import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Provider;
 import uk.gov.justice.services.core.annotation.Remote;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -60,55 +61,45 @@ public class AnnotationScannerTest {
     private ProviderFoundEvent providerFoundEvent;
 
     @Mock
-    private Bean<Object> beanMockCommandApiHandler;
-
-    @Mock
-    private Bean<Object> beanMockCommandController;
-
-    @Mock
-    private Bean<Object> beanMockCommandHandler;
-
-    @Mock
-    private Bean<Object> beanMockRemoteQueryApi;
-
-    @Mock
-    private Bean<Object> beanMockProvider;
-
-    @Mock
-    private Bean<Object> beanMockDummy;
+    private Bean<Object> bean;
 
     private AnnotationScanner annotationScanner;
 
     @Before
     public void setup() {
         annotationScanner = new AnnotationScanner();
-
-        doReturn(TestCommandApiHandler.class).when(beanMockCommandApiHandler).getBeanClass();
-        doReturn(TestCommandController.class).when(beanMockCommandController).getBeanClass();
-        doReturn(TestCommandHandler.class).when(beanMockCommandHandler).getBeanClass();
-        doReturn(TestRemoteQueryApiHandler.class).when(beanMockRemoteQueryApi).getBeanClass();
-        doReturn(TestProvider.class).when(beanMockProvider).getBeanClass();
-        doReturn(Object.class).when(beanMockDummy).getBeanClass();
     }
 
     @Test
     public void shouldFireCommandApiFoundEventWithCommandApi() throws Exception {
-        verifyIfServiceComponentFoundEventFiredWith(beanMockCommandApiHandler);
+        doReturn(TestCommandApiHandler.class).when(bean).getBeanClass();
+        verifyIfServiceComponentFoundEventFiredWith(bean);
     }
 
     @Test
     public void shouldFireCommandControllerFoundEventWithCommandController() throws Exception {
-        verifyIfServiceComponentFoundEventFiredWith(beanMockCommandController);
+        doReturn(TestCommandController.class).when(bean).getBeanClass();
+
+        verifyIfServiceComponentFoundEventFiredWith(bean);
     }
 
     @Test
     public void shouldFireCommandHandlerFoundEventWithCommandHandler() throws Exception {
-        verifyIfServiceComponentFoundEventFiredWith(beanMockCommandHandler);
+        doReturn(TestCommandHandler.class).when(bean).getBeanClass();
+        verifyIfServiceComponentFoundEventFiredWith(bean);
     }
 
     @Test
     public void shouldFireRemoteQueryApiHandlerFoundEventWithRemoteQueryApi() throws Exception {
-        verifyIfRemoteServiceComponentFoundEventFiredWith(beanMockRemoteQueryApi);
+        doReturn(TestRemoteQueryApiHandler.class).when(bean).getBeanClass();
+
+        verifyIfRemoteServiceComponentFoundEventFiredWith(bean);
+    }
+
+    @Test
+    public void shouldFireCommandApiFoundEventWithFramework() throws Exception {
+        doReturn(TestFrameworkComponent.class).when(bean).getBeanClass();
+        verifyIfServiceComponentFoundEventFiredWith(bean);
     }
 
     @Test
@@ -118,19 +109,22 @@ public class AnnotationScannerTest {
 
     @Test
     public void shouldFireProviderFoundEvent() throws Exception {
+        doReturn(TestProvider.class).when(bean).getBeanClass();
         ArgumentCaptor<ProviderFoundEvent> captor = ArgumentCaptor.forClass(ProviderFoundEvent.class);
-        mockBeanManagerGetBeansWith(beanMockProvider);
+        mockBeanManagerGetBeansWith(bean);
 
         annotationScanner.afterDeploymentValidation(afterDeploymentValidation, beanManager);
 
         verify(beanManager).fireEvent(captor.capture());
         assertThat(captor.getValue(), instanceOf(ProviderFoundEvent.class));
-        assertThat(captor.getValue().getBean(), equalTo(beanMockProvider));
+        assertThat(captor.getValue().getBean(), equalTo(bean));
     }
 
     @Test
     public void shouldNotFireAnyEventWithNoHandler() throws Exception {
-        mockBeanManagerGetBeansWith(beanMockDummy);
+        doReturn(Object.class).when(bean).getBeanClass();
+
+        mockBeanManagerGetBeansWith(bean);
 
         annotationScanner.afterDeploymentValidation(afterDeploymentValidation, beanManager);
 
@@ -196,6 +190,10 @@ public class AnnotationScannerTest {
 
     @ServiceComponent(COMMAND_HANDLER)
     public static class TestCommandHandler {
+    }
+
+    @FrameworkComponent("COMPONENT_ABC")
+    public static class TestFrameworkComponent {
     }
 
     @Remote

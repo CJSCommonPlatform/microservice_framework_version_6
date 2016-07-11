@@ -2,7 +2,6 @@ package uk.gov.justice.services.clients.messaging.generator;
 
 
 import static java.util.Collections.emptyMap;
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -20,9 +19,9 @@ import static uk.gov.justice.services.generators.test.utils.config.GeneratorProp
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.methodsOf;
 
+import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.Remote;
-import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
@@ -64,8 +63,8 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
 
         assertThat(generatedClass.getCanonicalName(), is("org.raml.test.RemoteCakeshopCommandController"));
         assertThat(generatedClass.getAnnotation(Remote.class), not(nullValue()));
-        assertThat(generatedClass.getAnnotation(ServiceComponent.class), not(nullValue()));
-        assertThat(generatedClass.getAnnotation(ServiceComponent.class).value().toString(), is("COMMAND_API"));
+        assertThat(generatedClass.getAnnotation(FrameworkComponent.class), not(nullValue()));
+        assertThat(generatedClass.getAnnotation(FrameworkComponent.class).value(), is("COMMAND_API"));
 
     }
 
@@ -81,7 +80,7 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
 
         Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCakeshopCommandHandler");
 
-        assertThat(generatedClass.getAnnotation(ServiceComponent.class).value().toString(), is("COMMAND_CONTROLLER"));
+        assertThat(generatedClass.getAnnotation(FrameworkComponent.class).value(), is("COMMAND_CONTROLLER"));
     }
 
     @Test
@@ -96,7 +95,7 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
 
         Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemotePublicEvent");
 
-        assertThat(generatedClass.getAnnotation(ServiceComponent.class).value().toString(), is("EVENT_PROCESSOR"));
+        assertThat(generatedClass.getAnnotation(FrameworkComponent.class).value(), is("EVENT_PROCESSOR"));
     }
 
     @Test
@@ -214,17 +213,6 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
 
     }
 
-    @Test
-    public void shouldThrowExceptionIfServiceComponentPropertyNotValid() {
-
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage(containsString("serviceComponent generator property invalid. Expected one of: COMMAND_API, COMMAND_CONTROLLER"));
-
-        generator.run(
-                messagingRamlWithDefaults().withDefaultMessagingResource().build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("UNKNOWN")));
-
-    }
 
 
 }

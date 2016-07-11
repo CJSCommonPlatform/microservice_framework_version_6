@@ -6,16 +6,15 @@ import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
+import static uk.gov.justice.services.generators.commons.config.GeneratorProperties.serviceComponentOf;
 import static uk.gov.justice.services.generators.commons.helper.Names.camelCase;
 import static uk.gov.justice.services.generators.commons.helper.Names.nameFrom;
 
 import uk.gov.justice.raml.core.Generator;
 import uk.gov.justice.raml.core.GeneratorConfig;
-import uk.gov.justice.services.core.annotation.Component;
+import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.Remote;
-import uk.gov.justice.services.core.annotation.ServiceComponent;
-import uk.gov.justice.services.generators.commons.config.GeneratorProperties;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.logging.JsonEnvelopeLoggerHelper;
 import uk.gov.justice.services.messaging.logging.LoggerUtils;
@@ -71,9 +70,9 @@ public abstract class AbstractClientGenerator implements Generator {
     }
 
     private MethodSpec methodOf(final Resource resource,
-                                  final Action ramlAction,
-                                  final MimeType mediaType,
-                                  final GeneratorConfig generatorConfig) {
+                                final Action ramlAction,
+                                final MimeType mediaType,
+                                final GeneratorConfig generatorConfig) {
 
         final MethodSpec.Builder method = methodOf(ramlAction, mediaType, handlesAnnotationValueOf(ramlAction, mediaType, generatorConfig));
 
@@ -121,7 +120,6 @@ public abstract class AbstractClientGenerator implements Generator {
     }
 
 
-
     private List<MethodSpec> methodsOf(final Raml raml, final GeneratorConfig generatorConfig) {
         return raml.getResources().values().stream()
                 .flatMap(resource -> methodsOf(resource, generatorConfig))
@@ -133,8 +131,8 @@ public abstract class AbstractClientGenerator implements Generator {
         return TypeSpec.classBuilder(className)
                 .addModifiers(PUBLIC, FINAL)
                 .addAnnotation(Remote.class)
-                .addAnnotation(AnnotationSpec.builder(ServiceComponent.class)
-                        .addMember("value", "$T.$L", Component.class, GeneratorProperties.serviceComponentOf(generatorConfig))
+                .addAnnotation(AnnotationSpec.builder(FrameworkComponent.class)
+                        .addMember("value", "$S", serviceComponentOf(generatorConfig))
                         .build())
                 .addField(loggerConstantField(className));
     }
@@ -163,9 +161,13 @@ public abstract class AbstractClientGenerator implements Generator {
     }
 
     protected abstract String classNameOf(final Raml raml);
+
     protected abstract Iterable<FieldSpec> fieldsOf(final Raml raml);
+
     protected abstract TypeName methodReturnTypeOf(Action ramlAction);
+
     protected abstract CodeBlock methodBodyOf(Resource resource, Action ramlAction, MimeType mimeType);
+
     protected abstract String handlesAnnotationValueOf(Action ramlAction, MimeType mimeType, GeneratorConfig generatorConfig);
 
 }

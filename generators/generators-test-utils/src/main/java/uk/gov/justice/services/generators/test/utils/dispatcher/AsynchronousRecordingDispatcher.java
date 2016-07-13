@@ -22,6 +22,4 @@ public class AsynchronousRecordingDispatcher extends BasicRecordingDispatcher im
     public void dispatch(final JsonEnvelope envelope) {
         record(envelope);
     }
-
-
 }

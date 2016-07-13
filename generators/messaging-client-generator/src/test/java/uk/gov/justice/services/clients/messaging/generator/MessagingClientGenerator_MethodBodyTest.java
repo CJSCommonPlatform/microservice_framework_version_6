@@ -39,7 +39,7 @@ public class MessagingClientGenerator_MethodBodyTest extends BaseGeneratorTest {
                 messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/cakeshop.controller.command")
-                                .withDefaultAction())
+                                .withDefaultPostAction())
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
 

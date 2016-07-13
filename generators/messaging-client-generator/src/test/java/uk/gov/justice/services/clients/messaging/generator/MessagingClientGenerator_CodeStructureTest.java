@@ -55,7 +55,7 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
                 messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/cakeshop.controller.command")
-                                .withDefaultAction())
+                                .withDefaultPostAction())
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_API")));
 
@@ -74,7 +74,7 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
                 messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/cakeshop.handler.command")
-                                .withDefaultAction())
+                                .withDefaultPostAction())
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_CONTROLLER")));
 
@@ -89,7 +89,7 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
                 messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/public.event")
-                                .withDefaultAction())
+                                .withDefaultPostAction())
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("EVENT_PROCESSOR")));
 
@@ -104,7 +104,7 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
                 messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/cakeshop.controller.command")
-                                .withDefaultAction())
+                                .withDefaultPostAction())
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
 
@@ -124,7 +124,7 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
                 messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/cakeshop.controller.command")
-                                .withDefaultAction())
+                                .withDefaultPostAction())
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
 

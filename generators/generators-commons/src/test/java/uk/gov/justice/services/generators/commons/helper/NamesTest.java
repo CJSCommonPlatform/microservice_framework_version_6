@@ -63,7 +63,7 @@ public class NamesTest {
 
     @Test
     public void shouldReturnInterfaceName() throws Exception {
-        Resource resource = resource().withDefaultAction().build();
+        Resource resource = resource().withDefaultPostAction().build();
         String interfaceName = resourceInterfaceNameOf(resource);
         assertThat(interfaceName, is("SomecontextControllerCommandResource"));
     }

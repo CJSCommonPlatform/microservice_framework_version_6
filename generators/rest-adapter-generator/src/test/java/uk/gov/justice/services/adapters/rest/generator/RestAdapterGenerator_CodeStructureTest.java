@@ -336,7 +336,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithDefaults()
                         .withBaseUri("http://localhost:8080/warname/command/api/rest/service")
-                        .with(resource("/some/path").withDefaultAction()
+                        .with(resource("/some/path").withDefaultPostAction()
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -354,7 +354,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                 restRamlWithDefaults()
                         .withBaseUri("http://localhost:8080/warname/query/api/rest/service")
                         .with(resource("/some/path")
-                                .withDefaultAction()
+                                .withDefaultPostAction()
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 

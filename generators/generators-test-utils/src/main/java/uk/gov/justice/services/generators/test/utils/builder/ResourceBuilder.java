@@ -50,7 +50,7 @@ public class ResourceBuilder {
         return this;
     }
 
-    public ResourceBuilder withDefaultAction() {
+    public ResourceBuilder withDefaultPostAction() {
         with(defaultPostAction());
         return this;
     }

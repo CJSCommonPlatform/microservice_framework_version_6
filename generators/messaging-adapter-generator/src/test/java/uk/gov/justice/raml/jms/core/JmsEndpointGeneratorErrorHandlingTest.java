@@ -37,7 +37,7 @@ public class JmsEndpointGeneratorErrorHandlingTest extends BaseGeneratorTest {
                 raml()
                         .with(resource()
                                 .withRelativeUri("/structure.unknowntier.command")
-                                .withDefaultAction())
+                                .withDefaultPostAction())
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
     }
@@ -52,7 +52,7 @@ public class JmsEndpointGeneratorErrorHandlingTest extends BaseGeneratorTest {
                 raml()
                         .with(resource()
                                 .withRelativeUri("/lifecycle.controller.unknown")
-                                .withDefaultAction()
+                                .withDefaultPostAction()
                         )
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
@@ -68,7 +68,7 @@ public class JmsEndpointGeneratorErrorHandlingTest extends BaseGeneratorTest {
                 raml()
                         .with(resource()
                                 .withRelativeUri("/structure.controller")
-                                .withDefaultAction())
+                                .withDefaultPostAction())
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
     }
@@ -173,7 +173,7 @@ public class JmsEndpointGeneratorErrorHandlingTest extends BaseGeneratorTest {
                         .withBaseUri(null)
                         .with(resource()
                                 .withRelativeUri("/structure.event")
-                                .withDefaultAction())
+                                .withDefaultPostAction())
                         .build(),
                 configurationWithBasePackage("uk.somepackage", outputFolder, emptyMap()));
 
@@ -190,7 +190,7 @@ public class JmsEndpointGeneratorErrorHandlingTest extends BaseGeneratorTest {
                         .withBaseUri("message://too/short/uri")
                         .with(resource()
                                 .withRelativeUri("/structure.event")
-                                .withDefaultAction())
+                                .withDefaultPostAction())
                         .build(),
                 configurationWithBasePackage("uk.somepackage", outputFolder, emptyMap()));
 

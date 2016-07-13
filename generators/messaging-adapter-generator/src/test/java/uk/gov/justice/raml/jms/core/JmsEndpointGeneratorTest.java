@@ -98,7 +98,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                 messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/structure.controller.command")
-                                .withDefaultAction())
+                                .withDefaultPostAction())
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -115,10 +115,10 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                 messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/structure.controller.command")
-                                .withDefaultAction())
+                                .withDefaultPostAction())
                         .with(resource()
                                 .withRelativeUri("/people.controller.command")
-                                .withDefaultAction())
+                                .withDefaultPostAction())
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -132,6 +132,45 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
     }
 
     @Test
+    public void shouldIgnoreGETResource() throws Exception {
+        generator.run(
+                messagingRamlWithDefaults()
+                        .with(resource()
+                                .withRelativeUri("/cakeshop.handler.command")
+                                .with(httpAction(GET)
+                                        .withResponseTypes("application/vnd.cakeshop.actionabc+json")))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        File packageDir = new File(outputFolder.getRoot().getAbsolutePath() + BASE_PACKAGE_FOLDER);
+        File[] files = packageDir.listFiles();
+        assertThat(files, nullValue());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void shouldIgnoreGETResourceInMultipleResourceRaml() throws Exception {
+        generator.run(
+                messagingRamlWithDefaults()
+                        .with(resource()
+                                .withRelativeUri("/structure.controller.command")
+                                .withDefaultPostAction())
+                        .with(resource()
+                                .withRelativeUri("/cakeshop.handler.command")
+                                .with(httpAction(GET)
+                                        .withResponseTypes("application/vnd.cakeshop.actionabc+json")))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        File packageDir = new File(outputFolder.getRoot().getAbsolutePath() + BASE_PACKAGE_FOLDER);
+        File[] files = packageDir.listFiles();
+        assertThat(files.length, is(1));
+        assertThat(files[0].getName(), is("StructureCommandControllerJmsListener.java"));
+
+    }
+
+
+    @Test
     public void shouldOverwriteJmsClass() throws Exception {
         String path = outputFolder.getRoot().getAbsolutePath() + BASE_PACKAGE_FOLDER;
         File packageDir = new File(path);
@@ -143,7 +182,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                 messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/structure.controller.command")
-                                .withDefaultAction())
+                                .withDefaultPostAction())
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -157,7 +196,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                 messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/structure.controller.command")
-                                .withDefaultAction())
+                                .withDefaultPostAction())
                         .build(),
                 configurationWithBasePackage("uk.somepackage", outputFolder, emptyMap()));
 
@@ -171,7 +210,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                 messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/structure.controller.command")
-                                .withDefaultAction())
+                                .withDefaultPostAction())
                         .build(),
                 configurationWithBasePackage("uk.somepackage", outputFolder, emptyMap()));
 
@@ -191,7 +230,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                 messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/structure.controller.command")
-                                .withDefaultAction())
+                                .withDefaultPostAction())
                         .build(),
                 configurationWithBasePackage("uk.package2", outputFolder, emptyMap()));
 
@@ -206,7 +245,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                         .withBaseUri("message://event/processor/message/structure")
                         .with(resource()
                                 .withRelativeUri("/structure.event")
-                                .withDefaultAction())
+                                .withDefaultPostAction())
                         .build(),
                 configurationWithBasePackage("uk.somepackage", outputFolder, emptyMap()));
 
@@ -221,7 +260,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                         .withBaseUri("message://event/listener/message/structure")
                         .with(resource()
                                 .withRelativeUri("/structure.event")
-                                .withDefaultAction())
+                                .withDefaultPostAction())
                         .build(),
                 configurationWithBasePackage("uk.somepackage", outputFolder, emptyMap()));
 

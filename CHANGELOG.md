@@ -1,15 +1,21 @@
 # Change Log
-All notable changes to this project will be documented in this file, which follows the guidelines 
-on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to 
+All notable changes to this project will be documented in this file, which follows the guidelines
+on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
-## [UNRELEASED]
+## [Unreleased]
 
-### Added
-
+### Changed
+- Use new parent POM and common POM projects
 
 ### Fixed
+- Prevent access control triggering for remote handlers
+- Ignore GET resources when generating JMS adapters
 - Support for Event API components in RAML
+
+### Removed
+- Action mapper annotation now always required in REST RAML; it is no longer possible to disable the
+action mapper system
 
 ## [0.11.0] - 2016-07-8
 

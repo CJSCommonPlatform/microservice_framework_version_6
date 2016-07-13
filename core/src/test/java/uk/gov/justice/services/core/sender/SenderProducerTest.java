@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLLER;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_API;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
@@ -73,8 +74,25 @@ public class SenderProducerTest {
     }
 
     @Test
-    public void shouldReturnSenderWrapper2() throws Exception {
+    public void shouldReturnSenderWrapperForEventProcessor() throws Exception {
         final TestInjectionPoint injectionPoint = new TestInjectionPoint(TestEventProcessor.class);
+
+        when(dispatcherCache.dispatcherFor(injectionPoint)).thenReturn(dispatcher);
+
+        final Sender returnedSender = senderProducer.produce(injectionPoint);
+
+        assertThat(returnedSender, notNullValue());
+
+        final JsonEnvelope envelope = envelope().build();
+
+        returnedSender.send(envelope);
+
+        verify(dispatcher).asynchronousDispatch(envelope);
+    }
+
+    @Test
+    public void shouldReturnSenderWrapperForEventApi() throws Exception {
+        final TestInjectionPoint injectionPoint = new TestInjectionPoint(TestEventAPI.class);
 
         when(dispatcherCache.dispatcherFor(injectionPoint)).thenReturn(dispatcher);
 
@@ -136,6 +154,13 @@ public class SenderProducerTest {
 
     @ServiceComponent(EVENT_PROCESSOR)
     public static class TestEventProcessor {
+        public void dummyMethod() {
+
+        }
+    }
+
+    @ServiceComponent(EVENT_API)
+    public static class TestEventAPI {
         public void dummyMethod() {
 
         }

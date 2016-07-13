@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to 
 [Semantic Versioning](http://semver.org/).
 
+## [UNRELEASED]
+
+### Added
+
+
+### Fixed
+- Support for Event API components in RAML
+
 ## [0.11.0] - 2016-07-8
 
 ### Added

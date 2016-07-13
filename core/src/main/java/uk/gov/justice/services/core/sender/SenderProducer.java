@@ -1,5 +1,6 @@
 package uk.gov.justice.services.core.sender;
 
+import static uk.gov.justice.services.core.annotation.Component.EVENT_API;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.core.annotation.ComponentNameUtil.componentFrom;
 
@@ -59,7 +60,7 @@ public class SenderProducer {
     private Sender getSender(final String componentName
             , final InjectionPoint injectionPoint) {
         final Sender primarySender = produceSender(injectionPoint);
-        final Sender legacySender = !componentName.equals(EVENT_PROCESSOR.name()) ?
+        final Sender legacySender = !componentName.equals(EVENT_PROCESSOR.name()) && !componentName.equals(EVENT_API.name())?
                 senderMap.computeIfAbsent(componentName, c -> jmsSenderFactory.createJmsSender(componentDestination.getDefault(Component.valueOf(c)))) : null;
         return new JmsSenderWrapper(primarySender, legacySender);
     }

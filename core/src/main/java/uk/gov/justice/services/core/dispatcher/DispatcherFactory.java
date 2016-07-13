@@ -1,8 +1,13 @@
 package uk.gov.justice.services.core.dispatcher;
 
+import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.LOCAL;
+
 import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
 import uk.gov.justice.services.core.accesscontrol.AccessControlService;
+import uk.gov.justice.services.core.annotation.ServiceComponentLocation;
 import uk.gov.justice.services.core.handler.registry.HandlerRegistry;
+
+import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -11,18 +16,22 @@ import javax.inject.Inject;
 public class DispatcherFactory {
 
     @Inject
-    private AccessControlService accessControlService;
+    AccessControlService accessControlService;
 
     @Inject
-    private AccessControlFailureMessageGenerator accessControlFailureMessageGenerator;
+    AccessControlFailureMessageGenerator accessControlFailureMessageGenerator;
 
-     public Dispatcher createNew() {
+    public Dispatcher createNew(final ServiceComponentLocation location) {
         final HandlerRegistry handlerRegistry = new HandlerRegistry();
 
         return new Dispatcher(
                 handlerRegistry,
-                accessControlService,
+                accessControlServiceFor(location),
                 accessControlFailureMessageGenerator
         );
+    }
+
+    private Optional<AccessControlService> accessControlServiceFor(final ServiceComponentLocation location) {
+        return LOCAL.equals(location) ? Optional.of(accessControlService) : Optional.empty();
     }
 }

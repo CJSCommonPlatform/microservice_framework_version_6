@@ -50,6 +50,6 @@ public class DispatcherCache {
     }
 
     private Dispatcher createDispatcherIfAbsent(final Pair<String, ServiceComponentLocation> component) {
-        return dispatcherMap.computeIfAbsent(component, c -> dispatcherFactory.createNew());
+        return dispatcherMap.computeIfAbsent(component, c -> dispatcherFactory.createNew(c.getRight()));
     }
 }

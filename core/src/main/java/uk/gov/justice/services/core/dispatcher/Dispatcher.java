@@ -25,12 +25,12 @@ import java.util.Optional;
 public class Dispatcher {
 
     private final HandlerRegistry handlerRegistry;
-    private final AccessControlService accessControlService;
+    private final Optional<AccessControlService> accessControlService;
     private final AccessControlFailureMessageGenerator accessControlFailureMessageGenerator;
 
 
     public Dispatcher(final HandlerRegistry handlerRegistry,
-                      final AccessControlService accessControlService,
+                      final Optional<AccessControlService> accessControlService,
                       final AccessControlFailureMessageGenerator accessControlFailureMessageGenerator) {
         this.handlerRegistry = handlerRegistry;
         this.accessControlService = accessControlService;
@@ -75,7 +75,9 @@ public class Dispatcher {
     }
 
     private JsonEnvelope doDispatch(final JsonEnvelope envelope, final boolean isSynchronous) {
-        checkAccessControl(envelope);
+        if (accessControlService.isPresent()) {
+            checkAccessControl(envelope);
+        }
         return (JsonEnvelope) getMethod(envelope, isSynchronous).execute(envelope);
     }
 
@@ -93,7 +95,8 @@ public class Dispatcher {
     private void checkAccessControl(final JsonEnvelope jsonEnvelope) {
 
         final Optional<AccessControlViolation> accessControlViolation =
-                accessControlService.checkAccessControl(jsonEnvelope);
+                accessControlService.orElseThrow(() -> new IllegalStateException("Expected access control service, but none set"))
+                        .checkAccessControl(jsonEnvelope);
 
         if (accessControlViolation.isPresent()) {
             final String errorMessage = accessControlFailureMessageGenerator.errorMessageFrom(

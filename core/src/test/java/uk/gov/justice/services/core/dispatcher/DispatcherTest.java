@@ -6,6 +6,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
@@ -20,6 +21,8 @@ import uk.gov.justice.services.core.handler.exception.MissingHandlerException;
 import uk.gov.justice.services.core.handler.registry.HandlerRegistry;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
+
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -49,11 +52,12 @@ public class DispatcherTest {
     @Mock
     private AccessControlFailureMessageGenerator accessControlFailureMessageGenerator;
 
-    @InjectMocks
     private Dispatcher dispatcher;
 
     @Before
     public void setup() {
+        dispatcher = new Dispatcher(handlerRegistry, Optional.of(accessControlService), accessControlFailureMessageGenerator);
+
         when(envelope.metadata()).thenReturn(metadata);
         when(metadata.name()).thenReturn(NAME);
     }
@@ -142,6 +146,20 @@ public class DispatcherTest {
         when(accessControlService.checkAccessControl(envelope)).thenReturn(empty());
 
         dispatcher.synchronousDispatch(envelope);
+    }
+
+    @Test
+    public void shouldSkipAccessControlIfServiceNotProvided() throws Exception {
+
+        dispatcher = new Dispatcher(handlerRegistry, Optional.empty(), accessControlFailureMessageGenerator);
+
+        final SynchronousTestHandler synchronousTestHandler = new SynchronousTestHandler();
+
+        dispatcher.register(synchronousTestHandler);
+        dispatcher.synchronousDispatch(envelope);
+
+        assertThat(synchronousTestHandler.envelope, equalTo(envelope));
+        verifyZeroInteractions(accessControlService);
     }
 
     @ServiceComponent(COMMAND_API)

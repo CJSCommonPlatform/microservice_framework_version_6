@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [0.12.0] - 2016-07-14
 
 ### Changed
 - Use new parent POM and common POM projects
@@ -17,7 +17,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 - Action mapper annotation now always required in REST RAML; it is no longer possible to disable the
 action mapper system
 
-## [0.11.0] - 2016-07-8
+## [0.11.0] - 2016-07-08
 
 ### Added
 - Access control violations now return 403 forbidden response

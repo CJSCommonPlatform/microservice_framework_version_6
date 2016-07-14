@@ -12,7 +12,8 @@ install:
   - $JAVA_HOME/jre/bin/keytool -import -v -noprompt -storepass changeit -storetype jks -trustcacerts -alias IndigoBlueRoot -file target/travis-settings/ROOT-CA.crt -keystore target/travis-settings/cacerts
 script: mvn -Djavax.net.ssl.trustStore=$PWD/target/travis-settings/cacerts -B -V -U --settings target/travis-settings/settings.xml verify coveralls:report
 after_success:
-  - '[[ $TRAVIS_BRANCH == "master" && $TRAVIS_PULL_REQUEST == "false" ]] || [[ $TRAVIS_TAG == release-* ]] && mvn -Djavax.net.ssl.trustStore=$PWD/target/travis-settings/cacerts -DskipTests=true -B -V --errors deploy --settings target/travis-settings/settings.xml'
+  - '[[ $TRAVIS_BRANCH == "master" && $TRAVIS_PULL_REQUEST == "false" && $TRAVIS_TAG != release-*]] && mvn -Djavax.net.ssl.trustStore=$PWD/target/travis-settings/cacerts -DskipTests=true -B -V --errors deploy --settings target/travis-settings/settings.xml'
+  - '[[ $TRAVIS_TAG == release-* ]] && mvn -Prelease -Djavax.net.ssl.trustStore=$PWD/target/travis-settings/cacerts -DskipTests=true -B -V --errors deploy --settings target/travis-settings/settings.xml'
 notifications:
   slack:
     secure: fPlaMvrczZ2riJ4tjMOAqxSGj4JfxGlH/K08knLgG4T/n6EL4LN4+184Npz9XueNbV3m26WUrPkbXEiWXpqkKsbwcZXqqnFxGacGiyxv7LeBeQLYp7NFeARAyB5qDwUpjHlCPAEoAeyeGsZNrpui/wceY4j1tB7ObfdwbxLzAO0tekdbwitSaK1cc7V2sVHkBYr7ChuC+dVO1pshPw0EVTmzPioS8nfFKPaxWoMgyRAuYe7MD0U7DxNQ4Wzsb7tpfd5Oom1wLXyZ7M3wwSMMamIAAxHVG389Az6YvN7hXQggTGDawf/YwVOaoMR2bh7uHBCOiNZO1GbRTOA7IuTPwT7GsK94THRtfvqNm7RFBPkoD4657FATnk2o5c7QNTY3dAlYLsxLnS6mVTL/vAbqC7BbDHo/UGsxmOusQtKt8sRoL8pOCEInHaS3b88Osl7u7oYO/E4YTptdnkEe8tNyWWdx34nEUT0j1Mu/VAN38YcgTMUuiBU6chkMJ5BjIHisJlAAnBJ9VGgF9liqnigNwAGhbrHZPyAlKUX8HLejpD+t4aR0UaEvvauh6aHh4pYm0mZra4zOBC/lBDOXqsu5ajHL8LpHc6j+5FrmNwciiTVoxdud2S4c0U2ymr3L07ivX+UyhoraS9oSH3v7L73Q4NyvuAmD8Zc0xw/cR4Pff9c=

@@ -27,6 +27,7 @@ import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import uk.gov.justice.services.adapter.rest.parameter.ParameterType;
 import uk.gov.justice.services.clients.core.exception.InvalidResponseException;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.core.accesscontrol.AccessControlViolationException;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
@@ -354,7 +355,7 @@ public class RestClientProcessorIT {
     }
 
     @Test(expected = RuntimeException.class)
-    public void shouldThrowExceptionFor500ResponseCode() throws Exception {
+    public void shouldThrowRuntimeExceptionFor500ResponseCode() throws Exception {
 
         final String path = "/my/resource";
         final String mimetype = format("application/vnd.%s+json", QUERY_NAME);
@@ -394,6 +395,26 @@ public class RestClientProcessorIT {
 
         restClientProcessor.post(endpointDefinition, postRequestEnvelope());
     }
+
+    @Test(expected = AccessControlViolationException.class)
+    public void shouldThrowAccessControlExceptionFor403ResponseCode() throws Exception {
+
+        final String path = "/my/resource";
+        final String mimetype = format("application/vnd.%s+json", QUERY_NAME);
+
+        stubFor(get(urlEqualTo(REMOTE_BASE_PATH + path))
+                .withHeader(ACCEPT, WireMock.equalTo(mimetype))
+                .withHeader(CLIENT_CORRELATION_ID, WireMock.equalTo(CLIENT_CORRELATION_ID_VALUE))
+                .withHeader(USER_ID, WireMock.equalTo(USER_ID_VALUE))
+                .withHeader(SESSION_ID, WireMock.equalTo(SESSION_ID_VALUE))
+                .willReturn(aResponse()
+                        .withStatus(403)));
+
+        EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, emptySet(), emptySet(), QUERY_NAME);
+
+        restClientProcessor.get(endpointDefinition, requestEnvelopeParamAParamB());
+    }
+
 
     private void initialiseRestClientProcessor() {
         restClientProcessor = new RestClientProcessor();

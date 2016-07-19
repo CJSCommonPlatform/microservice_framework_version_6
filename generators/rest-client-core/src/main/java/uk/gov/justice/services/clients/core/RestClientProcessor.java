@@ -4,8 +4,7 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.toSet;
 import static javax.ws.rs.client.Entity.entity;
 import static javax.ws.rs.core.Response.Status.ACCEPTED;
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
-import static javax.ws.rs.core.Response.Status.OK;
+import static javax.ws.rs.core.Response.Status.fromStatusCode;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static uk.gov.justice.services.common.http.HeaderConstants.CLIENT_CORRELATION_ID;
 import static uk.gov.justice.services.common.http.HeaderConstants.SESSION_ID;
@@ -20,6 +19,7 @@ import static uk.gov.justice.services.messaging.logging.ResponseLoggerHelper.toR
 
 import uk.gov.justice.services.clients.core.exception.InvalidResponseException;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.core.accesscontrol.AccessControlViolationException;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
@@ -92,18 +92,21 @@ public class RestClientProcessor {
 
         trace(LOGGER, () -> String.format("Sent GET request %s and received: %s", envelope.metadata().id().toString(), toResponseTrace(response)));
 
-        final int status = response.getStatus();
-        if (status == NOT_FOUND.getStatusCode()) {
-            return enveloper.withMetadataFrom(envelope, envelope.metadata().name()).apply(null);
-        } else if (status != OK.getStatusCode()) {
-            throw new RuntimeException(format("GET request %s failed; expected 200 but got %s with reason \"%s\"",
-                    envelope.metadata().id().toString(), status,
-                    response.getStatusInfo().getReasonPhrase()));
+        final Response.Status status = fromStatusCode(response.getStatus());
+        switch (status) {
+            case OK:
+                final JsonObject responseAsJsonObject = stringToJsonObjectConverter.convert(response.readEntity(String.class));
+                return jsonObjectEnvelopeConverter.asEnvelope(addMetadataIfMissing(responseAsJsonObject, envelope.metadata(), response.getHeaderString(CPPID)));
+            case NOT_FOUND:
+                return enveloper.withMetadataFrom(envelope, envelope.metadata().name()).apply(null);
+            case FORBIDDEN:
+                throw new AccessControlViolationException(response.readEntity(String.class));
+            default:
+                throw new RuntimeException(format("GET request %s failed; expected 200 but got %s with reason \"%s\"",
+                        envelope.metadata().id().toString(), response.getStatus(), response.getStatusInfo().getReasonPhrase()));
+
         }
 
-        final JsonObject responseAsJsonObject = stringToJsonObjectConverter.convert(response.readEntity(String.class));
-
-        return jsonObjectEnvelopeConverter.asEnvelope(addMetadataIfMissing(responseAsJsonObject, envelope.metadata(), response.getHeaderString(CPPID)));
     }
 
     /**

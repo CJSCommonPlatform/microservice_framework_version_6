@@ -103,7 +103,7 @@ public class HandlerMethod {
 
                 final Optional<Object> response = Optional.ofNullable(obj);
 
-                if(response.isPresent() && response.get() instanceof JsonEnvelope) {
+                if (response.isPresent() && response.get() instanceof JsonEnvelope) {
                     return format("Response received from handler %s.%s : %s",
                             handlerInstance.getClass().toString(),
                             handlerMethod.getName(),
@@ -118,11 +118,21 @@ public class HandlerMethod {
 
             return obj;
 
-        } catch (IllegalAccessException | InvocationTargetException ex) {
-            throw new HandlerExecutionException(
-                    format("Error while invoking command handler method %s with parameter %s",
-                            handlerMethod, envelope), ex.getCause());
+        } catch (IllegalAccessException ex) {
+            throw handlerExecutionExceptionOf(envelope, ex.getCause());
+        } catch (InvocationTargetException ex) {
+            if (ex.getCause() instanceof RuntimeException) {
+                throw (RuntimeException) ex.getCause();
+            } else {
+                throw handlerExecutionExceptionOf(envelope, ex.getCause());
+            }
         }
+    }
+
+    private HandlerExecutionException handlerExecutionExceptionOf(final JsonEnvelope envelope, final Throwable cause) {
+        return new HandlerExecutionException(
+                format("Error while invoking handler method %s with parameter %s",
+                        handlerMethod, envelope), cause);
     }
 
     /**

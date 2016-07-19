@@ -17,6 +17,7 @@ import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
 import uk.gov.justice.services.core.accesscontrol.AccessControlService;
+import uk.gov.justice.services.core.accesscontrol.AccessControlViolationException;
 import uk.gov.justice.services.core.accesscontrol.AllowAllPolicyEvaluator;
 import uk.gov.justice.services.core.accesscontrol.PolicyEvaluator;
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
@@ -155,5 +156,28 @@ public class RemoteExampleQueryApiIT {
                 Json.createObjectBuilder()
                         .add("result", "SUCCESS")
                         .build()));
+    }
+
+    @Test(expected = AccessControlViolationException.class)
+    public void shouldThrowAccessControlExceptionInCaseOf403Response() {
+        final String name = "people.get-user1";
+        final String responseType = "people.query.user1";
+
+        final JsonEnvelope query = envelope()
+                .with(metadataOf(QUERY_ID, name))
+                .withPayloadOf(USER_ID.toString(), "userId")
+                .build();
+
+
+        final String path = format("/users/%s", USER_ID.toString());
+        final String mimeType = format("application/vnd.%s+json", responseType);
+
+        stubFor(get(urlEqualTo(BASE_PATH + path))
+                .withHeader("Accept", WireMock.equalTo(mimeType))
+                .willReturn(aResponse()
+                        .withStatus(403)));
+
+        requester.request(query);
+
     }
 }

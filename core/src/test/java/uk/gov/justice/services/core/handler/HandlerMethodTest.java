@@ -4,6 +4,7 @@ import static java.lang.String.format;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -23,7 +24,9 @@ import java.nio.charset.Charset;
 
 import com.google.common.io.Resources;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -37,6 +40,11 @@ public class HandlerMethodTest {
     @Mock
     private SynchronousCommandHandler synchronousCommandHandler;
 
+    @Mock
+    private CheckedExceptionThrowingCommandHandler checkedExcCommandHandler;
+
+    @Mock
+    private PrivateMethodCommandHandler privateMethodCommandHandler;
 
     private JsonEnvelope envelope;
 
@@ -59,10 +67,28 @@ public class HandlerMethodTest {
         assertThat(result, sameInstance(envelope));
     }
 
-    @Test(expected = HandlerExecutionException.class)
-    public void shouldThrowHandlerExecutionExceptionIfExceptionThrown() throws Exception {
-        doThrow(new RuntimeException()).when(asynchronousCommandHandler).handles(envelope);
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
+
+    @Test
+    public void shouldRethrowRuntimeException() throws Exception {
+        doThrow(new RuntimeException("messageABC")).when(asynchronousCommandHandler).handles(envelope);
+
+        expectedException.expect(RuntimeException.class);
+        expectedException.expectMessage("messageABC");
+
         asyncHandlerInstance().execute(envelope);
+    }
+
+    @Test
+    public void shouldWrapCheckedException() throws Exception {
+        final Exception thrownException = new Exception("messageABC");
+        doThrow(thrownException).when(checkedExcCommandHandler).handles(envelope);
+
+        expectedException.expect(HandlerExecutionException.class);
+        expectedException.expectCause(is(thrownException));
+
+        new HandlerMethod(checkedExcCommandHandler, method(new CheckedExceptionThrowingCommandHandler(), "handles"), JsonEnvelope.class).execute(envelope);
     }
 
     @Test
@@ -138,4 +164,21 @@ public class HandlerMethodTest {
         public void handlesAsync(final JsonEnvelope envelope) {
         }
     }
+
+    public static class CheckedExceptionThrowingCommandHandler {
+
+        @Handles("test-context.command.create-something")
+        public JsonEnvelope handles(final JsonEnvelope envelope) throws Exception {
+            return envelope;
+        }
+    }
+
+    public static class PrivateMethodCommandHandler {
+
+        @Handles("test-context.command.create-something")
+        private JsonEnvelope handles(final JsonEnvelope envelope) {
+            return envelope;
+        }
+    }
+
 }

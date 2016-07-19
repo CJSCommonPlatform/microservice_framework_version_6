@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
+## [0.12.2] - 2016-07-19
+
+### Fixed
+- 403 response from REST calls caused 500 to be returned
+- Stream order not guaranteed when retrieving events from the event store
+
 ## [0.12.0] - 2016-07-14
 
 ### Changed

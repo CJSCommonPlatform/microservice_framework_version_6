@@ -7,6 +7,7 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
+import java.util.Map;
 import java.util.UUID;
 
 import javax.json.JsonObjectBuilder;
@@ -71,6 +72,12 @@ public class JsonEnvelopeBuilder {
         return this;
     }
 
+    public JsonEnvelopeBuilder withMetadataOf(final Map<String, String> metadata) {
+        for (final String meta : metadata.keySet()) {
+            this.metadataJson.add(meta, metadata.get(meta));
+        }
+        return this;
+    }
 
     public JsonEnvelope build() {
         return envelopeFrom(metadataFrom(metadataJson.build()), payloadJson.build());

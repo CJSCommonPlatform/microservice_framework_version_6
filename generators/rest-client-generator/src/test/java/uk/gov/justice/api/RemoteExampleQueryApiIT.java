@@ -1,12 +1,16 @@
 package uk.gov.justice.api;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.lang.String.format;
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
@@ -43,7 +47,6 @@ import javax.json.JsonObject;
 import javax.json.JsonWriter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.apache.openejb.OpenEjbContainer;
 import org.apache.openejb.jee.Application;
@@ -69,14 +72,15 @@ public class RemoteExampleQueryApiIT {
             .add(METADATA, metadataWithRandomUUID("people.get-user1").build().asJsonObject())
             .add("result", "SUCCESS")
             .build();
-    private static final UUID QUERY_ID = UUID.randomUUID();
-    private static final UUID USER_ID = UUID.randomUUID();
+    private static final UUID USER_ID = randomUUID();
     private static int port = -1;
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(8080);
 
     @Inject
     Requester requester;
+    private static final String PEOPLE_GET_USER1 = "people.get-user1";
+    private static final String PEOPLE_QUERY_USER1 = "people.query.user1";
 
     @BeforeClass
     public static void beforeClass() {
@@ -132,48 +136,70 @@ public class RemoteExampleQueryApiIT {
     @Test
     public void shouldSendQueryRemoteServiceAndReturnResponse() {
 
-        final String name = "people.get-user1";
-        final String responseType = "people.query.user1";
-
         final JsonEnvelope query = envelope()
-                .with(metadataOf(QUERY_ID, name))
-                .withPayloadOf(USER_ID.toString(), "userId")
+                .with(metadataOf(randomUUID(), PEOPLE_GET_USER1))
+                .withPayloadOf(USER_ID, "userId")
                 .build();
 
 
-        final String path = format("/users/%s", USER_ID.toString());
-        final String mimeType = format("application/vnd.%s+json", responseType);
+        final String path = format("/users/%s", USER_ID);
+        final String mimeType = format("application/vnd.%s+json", PEOPLE_QUERY_USER1);
 
         stubFor(get(urlEqualTo(BASE_PATH + path))
-                .withHeader("Accept", WireMock.equalTo(mimeType))
+                .withHeader("Accept", equalTo(mimeType))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", mimeType)
                         .withBody(jsonObjectToString(RESPONSE))));
 
         JsonEnvelope response = requester.request(query);
-        assertThat(response.payloadAsJsonObject(), equalTo(
-                Json.createObjectBuilder()
+        assertThat(response.payloadAsJsonObject(),
+                is(Json.createObjectBuilder()
                         .add("result", "SUCCESS")
                         .build()));
     }
 
+    @Test
+    public void shouldSendQueryWithHttpHeaders() {
+
+        requester.request(envelope()
+                .with(metadataOf(randomUUID(), PEOPLE_GET_USER1)
+                        .withSessionId("sessionId123")
+                        .withUserId("usrId12345")
+                        .withClientCorrelationId("correlationID23456")
+                        .withCausation(
+                                UUID.fromString("391de66a-4e7c-11e6-beb8-9e71128cae77"),
+                                UUID.fromString("391ded4a-4e7c-11e6-beb8-9e71128cae77"))
+
+                )
+                .withPayloadOf(USER_ID, "userId")
+                .build());
+
+        verify(getRequestedFor(urlEqualTo(format("%s/users/%s", BASE_PATH, USER_ID)))
+                .withHeader("CPPSID", equalTo("sessionId123"))
+                .withHeader("CJSCPPUID", equalTo("usrId12345"))
+                .withHeader("CPPCLIENTCORRELATIONID", equalTo("correlationID23456"))
+                .withHeader("CPPCAUSATION", equalTo("391de66a-4e7c-11e6-beb8-9e71128cae77,391ded4a-4e7c-11e6-beb8-9e71128cae77"))
+
+        );
+
+
+    }
+
     @Test(expected = AccessControlViolationException.class)
     public void shouldThrowAccessControlExceptionInCaseOf403Response() {
-        final String name = "people.get-user1";
-        final String responseType = "people.query.user1";
+
 
         final JsonEnvelope query = envelope()
-                .with(metadataOf(QUERY_ID, name))
-                .withPayloadOf(USER_ID.toString(), "userId")
+                .with(metadataOf(randomUUID(), PEOPLE_GET_USER1))
+                .withPayloadOf(USER_ID, "userId")
                 .build();
 
-
-        final String path = format("/users/%s", USER_ID.toString());
-        final String mimeType = format("application/vnd.%s+json", responseType);
+        final String path = format("/users/%s", USER_ID);
+        final String mimeType = format("application/vnd.%s+json", PEOPLE_QUERY_USER1);
 
         stubFor(get(urlEqualTo(BASE_PATH + path))
-                .withHeader("Accept", WireMock.equalTo(mimeType))
+                .withHeader("Accept", equalTo(mimeType))
                 .willReturn(aResponse()
                         .withStatus(403)));
 

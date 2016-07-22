@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import uk.gov.justice.api.PublicEventListenerJmsListener;
 import uk.gov.justice.api.StructureCommandControllerJmsListener;
 import uk.gov.justice.api.StructureCommandHandlerJmsListener;
 import uk.gov.justice.api.StructureEventListenerJmsListener;
@@ -72,6 +73,9 @@ public class JmsEndpointGenerationIT {
     @Resource(name = "structure.event")
     private Topic eventsDestination;
 
+    @Resource(name = "public.event")
+    private Topic publicEventsDestination;
+
     @Resource
     private ConnectionFactory factory;
 
@@ -100,6 +104,7 @@ public class JmsEndpointGenerationIT {
             StructureEventListenerJmsListener.class,
             StructureEventProcessorJmsListener.class,
             StructureCommandHandlerJmsListener.class,
+            PublicEventListenerJmsListener.class,
             ObjectMapperProducer.class,
             EnvelopeConverter.class,
             StringToJsonObjectConverter.class,
@@ -137,7 +142,6 @@ public class JmsEndpointGenerationIT {
         JsonEnvelope receivedEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
         assertThat(receivedEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
         assertThat(receivedEnvelope.metadata().name(), is(commandName));
-
     }
 
     @Test
@@ -151,7 +155,6 @@ public class JmsEndpointGenerationIT {
         JsonEnvelope receivedEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
         assertThat(receivedEnvelope.metadata().name(), is(commandName));
         assertThat(receivedEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
-
     }
 
     @Test
@@ -176,7 +179,6 @@ public class JmsEndpointGenerationIT {
         JsonEnvelope receivedEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
         assertThat(receivedEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
         assertThat(receivedEnvelope.metadata().name(), is(commandName));
-
     }
 
     @Test
@@ -187,7 +189,6 @@ public class JmsEndpointGenerationIT {
 
         sendEnvelope(metadataId, commandName, commandHandlerDestination);
         assertTrue(dispatcher.notFoundEnvelopeWithMetadataOf("id", metadataId));
-
     }
 
     @Test
@@ -210,14 +211,13 @@ public class JmsEndpointGenerationIT {
         //TODO: check OpenEJB code and investigate if we can't fix the issue.
         Thread.sleep(300);
         String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d20";
-        String commandName = "structure.eventaa";
+        String eventName = "structure.eventaa";
 
-        sendEnvelope(metadataId, commandName, eventsDestination);
+        sendEnvelope(metadataId, eventName, eventsDestination);
 
         JsonEnvelope receivedEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
         assertThat(receivedEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
-        assertThat(receivedEnvelope.metadata().name(), is(commandName));
-
+        assertThat(receivedEnvelope.metadata().name(), is(eventName));
     }
 
     @Test
@@ -230,14 +230,13 @@ public class JmsEndpointGenerationIT {
         //TODO: check OpenEJB code and investigate if we can't fix the issue.
         Thread.sleep(300);
         String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d30";
-        String commandName = "structure.eventbb";
+        String eventName = "structure.eventbb";
 
-        sendEnvelope(metadataId, commandName, eventsDestination);
+        sendEnvelope(metadataId, eventName, eventsDestination);
 
         JsonEnvelope receivedEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
         assertThat(receivedEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
-        assertThat(receivedEnvelope.metadata().name(), is(commandName));
-
+        assertThat(receivedEnvelope.metadata().name(), is(eventName));
     }
 
 
@@ -251,6 +250,35 @@ public class JmsEndpointGenerationIT {
         sendEnvelope(metadataId, commandName, eventsDestination);
         assertTrue(dispatcher.notFoundEnvelopeWithMetadataOf("id", metadataId));
 
+    }
+
+    @Test
+    public void allEventsListenerDispatcherShouldReceiveAllEvents() throws InterruptedException, JMSException {
+        Thread.sleep(300);
+
+        String metadataId1 = "861c9430-7bc6-4bf0-b549-6534394b8d31";
+        String eventName1 = "some.eventa";
+        sendEnvelope(metadataId1, eventName1, publicEventsDestination);
+
+        String metadataId2 = "861c9430-7bc6-4bf0-b549-6534394b8d32";
+        String eventName2 = "other.eventb";
+        sendEnvelope(metadataId2, eventName2, publicEventsDestination);
+
+        String metadataId3 = "861c9430-7bc6-4bf0-b549-6534394b8d33";
+        String eventName3 = "another.eventc";
+        sendEnvelope(metadataId3, eventName3, publicEventsDestination);
+
+        JsonEnvelope receivedEnvelope1 = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId1);
+        assertThat(receivedEnvelope1.metadata().id(), is(UUID.fromString(metadataId1)));
+        assertThat(receivedEnvelope1.metadata().name(), is(eventName1));
+
+        JsonEnvelope receivedEnvelope2 = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId2);
+        assertThat(receivedEnvelope2.metadata().id(), is(UUID.fromString(metadataId2)));
+        assertThat(receivedEnvelope2.metadata().name(), is(eventName2));
+
+        JsonEnvelope receivedEnvelope3 = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId3);
+        assertThat(receivedEnvelope3.metadata().id(), is(UUID.fromString(metadataId3)));
+        assertThat(receivedEnvelope3.metadata().name(), is(eventName3));
     }
 
     private void sendEnvelope(String metadataId, String commandName, Destination queue) throws JMSException {

@@ -17,10 +17,12 @@ public abstract class AbstractContentTypeRamlValidator extends AbstractResourceR
     private final ActionType actionType;
     private final String contentTypeDescription;
 
-    public AbstractContentTypeRamlValidator(final ActionType actionType, final String contentTypeDescription) {
+    public AbstractContentTypeRamlValidator(final ActionType actionType,
+                                            final String contentTypeDescription,
+                                            final boolean generalJsonTypeAllowed) {
         this.actionType = actionType;
         this.contentTypeDescription = contentTypeDescription;
-        mediaTypePattern = Pattern.compile("application/vnd\\.\\S+\\+json");
+        mediaTypePattern = Pattern.compile(generalJsonTypeAllowed ? "application/(vnd\\.\\S+\\+)?json" : "application/vnd\\.\\S+\\+json");
     }
 
     @Override

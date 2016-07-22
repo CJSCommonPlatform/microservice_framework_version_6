@@ -18,7 +18,7 @@ public class ResponseContentTypeRamlValidator extends AbstractContentTypeRamlVal
     private static final String CONTENT_TYPE_DESCRIPTION = "response type";
 
     public ResponseContentTypeRamlValidator() {
-        super(ActionType.GET, CONTENT_TYPE_DESCRIPTION);
+        super(ActionType.GET, CONTENT_TYPE_DESCRIPTION, false);
     }
 
     @Override

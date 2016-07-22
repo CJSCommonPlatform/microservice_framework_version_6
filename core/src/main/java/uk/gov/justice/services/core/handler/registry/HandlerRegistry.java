@@ -21,8 +21,10 @@ public class HandlerRegistry {
     private final Map<String, HandlerMethod> handlerMethods = new HashMap<>();
 
     public HandlerMethod get(final String name, final boolean isSynchronous) {
-        if (canHandle(name, isSynchronous)) {
-            return handlerMethods.get(name);
+        final HandlerMethod handlerMethod = handlerMethods.getOrDefault(name, handlerMethods.get("*"));
+
+        if (handlerMethod != null && isSynchronous == handlerMethod.isSynchronous()) {
+            return handlerMethod;
         } else {
             throw new MissingHandlerException(
                     format("No %s handler registered to handle action %s",
@@ -57,9 +59,5 @@ public class HandlerRegistry {
         }
 
         handlerMethods.put(name, handlerMethod);
-    }
-
-    private boolean canHandle(final String name, final boolean isSynchronous) {
-        return handlerMethods.containsKey(name) && isSynchronous == handlerMethods.get(name).isSynchronous();
     }
 }

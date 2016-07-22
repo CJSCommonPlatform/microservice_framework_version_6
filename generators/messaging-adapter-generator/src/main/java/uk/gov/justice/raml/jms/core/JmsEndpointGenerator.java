@@ -29,7 +29,7 @@ public class JmsEndpointGenerator implements Generator {
             new ResourceUriRamlValidator(),
             new ContainsResourcesRamlValidator(),
             new ContainsActionsRamlValidator(),
-            new RequestContentTypeRamlValidator(),
+            new RequestContentTypeRamlValidator(true),
             new BaseUriRamlValidator()
     );
 

@@ -111,7 +111,15 @@
             <artifactId>json-path-assert</artifactId>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.tomee</groupId>
+            <artifactId>openejb-server</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
-
 </project>

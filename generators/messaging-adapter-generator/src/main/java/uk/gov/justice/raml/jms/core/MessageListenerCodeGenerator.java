@@ -7,6 +7,7 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.lang.StringUtils.capitalize;
 
 import uk.gov.justice.raml.jms.uri.BaseUri;
@@ -21,6 +22,7 @@ import uk.gov.justice.services.messaging.logging.JmsMessageLoggerHelper;
 import uk.gov.justice.services.messaging.logging.LoggerUtils;
 
 import java.util.Map;
+import java.util.stream.Stream;
 
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
@@ -39,6 +41,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 import org.raml.model.Action;
 import org.raml.model.ActionType;
+import org.raml.model.MimeType;
 import org.raml.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +70,7 @@ class MessageListenerCodeGenerator {
      * Create an implementation of the {@link MessageListener}.
      *
      * @param resource the resource definition this listener is being generated for
-     * @param baseUri the base URI
+     * @param baseUri  the base URI
      * @return the message listener class specification
      */
     TypeSpec generateFor(final Resource resource, final BaseUri baseUri) {
@@ -78,15 +81,16 @@ class MessageListenerCodeGenerator {
 
     /**
      * Generate the @link MessageListener} class implementation.
+     *
      * @param resource the resource definition this listener is being generated for
-     * @param baseUri the base URI
+     * @param baseUri  the base URI
      * @return the {@link TypeSpec.Builder} that defines the class
      */
     private TypeSpec.Builder classSpecFrom(final Resource resource, final BaseUri baseUri) {
         final MessagingResourceUri resourceUri = new MessagingResourceUri(resource.getUri());
         final Component component = componentOf(resourceUri, baseUri);
 
-        return classBuilder(classNameOf(resourceUri, component))
+        final TypeSpec.Builder clazz = classBuilder(classNameOf(resourceUri, component))
                 .addModifiers(PUBLIC)
                 .addSuperinterface(MessageListener.class)
                 .addField(FieldSpec.builder(ClassName.get(Logger.class), LOGGER_FIELD)
@@ -102,14 +106,19 @@ class MessageListenerCodeGenerator {
                 .addAnnotation(AnnotationSpec.builder(Adapter.class)
                         .addMember(DEFAULT_ANNOTATION_PARAMETER, "$T.$L", Component.class, component)
                         .build())
-                .addAnnotation(AnnotationSpec.builder(Interceptors.class)
-                        .addMember(DEFAULT_ANNOTATION_PARAMETER, "$T.class", JsonSchemaValidationInterceptor.class)
-                        .build())
+
                 .addAnnotation(generateMessageDrivenAnnotation(component, resource.getActions(), resourceUri, baseUri));
+        if (!containsGeneralJsonMimeType(resource.getActions())) {
+            clazz.addAnnotation(AnnotationSpec.builder(Interceptors.class)
+                    .addMember(DEFAULT_ANNOTATION_PARAMETER, "$T.class", JsonSchemaValidationInterceptor.class)
+                    .build());
+        }
+        return clazz;
     }
 
     /**
      * Generate the onMessage method that processes a JMS message.
+     *
      * @return the {@link MethodSpec} that represents the onMessage method
      */
     private MethodSpec generateOnMessageMethod() {
@@ -132,10 +141,11 @@ class MessageListenerCodeGenerator {
 
     /**
      * Generate the @MessageDriven annotation
-     * @param component the service component
-     * @param actions a map of actions for building the message selector
+     *
+     * @param component   the service component
+     * @param actions     a map of actions for building the message selector
      * @param resourceUri the resource URI
-     * @param baseUri the base URI
+     * @param baseUri     the base URI
      * @return the annotation specification
      */
     private AnnotationSpec generateMessageDrivenAnnotation(final Component component,
@@ -144,12 +154,14 @@ class MessageListenerCodeGenerator {
                                                            final BaseUri baseUri) {
 
         AnnotationSpec.Builder builder = AnnotationSpec.builder(MessageDriven.class)
-            .addMember(ACTIVATION_CONFIG_PARAMETER, "$L",
-                    generateActivationConfigPropertyAnnotation(DESTINATION_TYPE, component.inputDestinationType().getName()))
-            .addMember(ACTIVATION_CONFIG_PARAMETER, "$L",
-                    generateActivationConfigPropertyAnnotation(DESTINATION_LOOKUP, resourceUri.destinationName()))
-            .addMember(ACTIVATION_CONFIG_PARAMETER, "$L",
+                .addMember(ACTIVATION_CONFIG_PARAMETER, "$L",
+                        generateActivationConfigPropertyAnnotation(DESTINATION_TYPE, component.inputDestinationType().getName()))
+                .addMember(ACTIVATION_CONFIG_PARAMETER, "$L",
+                        generateActivationConfigPropertyAnnotation(DESTINATION_LOOKUP, resourceUri.destinationName()));
+        if (!containsGeneralJsonMimeType(actions)) {
+            builder.addMember(ACTIVATION_CONFIG_PARAMETER, "$L",
                     generateActivationConfigPropertyAnnotation(MESSAGE_SELECTOR, messageSelectorsFrom(actions)));
+        }
 
         if (Topic.class.equals(component.inputDestinationType())) {
             final String clientId = baseUri.adapterClientId();
@@ -165,9 +177,22 @@ class MessageListenerCodeGenerator {
         return builder.build();
     }
 
+    private boolean containsGeneralJsonMimeType(final Map<ActionType, Action> actions) {
+        return mediaTypesFrom(actions)
+                .filter(mimeType -> mimeType.getType().equals(APPLICATION_JSON))
+                .findAny()
+                .isPresent();
+    }
+
+    private Stream<MimeType> mediaTypesFrom(final Map<ActionType, Action> actions) {
+        return actions.get(ActionType.POST).getBody().values().stream();
+    }
+
     /**
-     * Generate a single @ActivationConfigProperty annotation to add to the @MessageDriven annotation.
-     * @param name the property name
+     * Generate a single @ActivationConfigProperty annotation to add to the @MessageDriven
+     * annotation.
+     *
+     * @param name  the property name
      * @param value the property value
      * @return the annotation specification
      */
@@ -194,6 +219,7 @@ class MessageListenerCodeGenerator {
     /**
      * Convert given URI to a valid component.
      * Takes the last and second to last parts of the URI as the pillar and tier of the component.
+     *
      * @param resourceUri URI of the resource
      * @param baseUri     base uri of the resource
      * @return component the value of the pillar and tier parts of the uri
@@ -207,28 +233,31 @@ class MessageListenerCodeGenerator {
 
     /**
      * Parse and format all the message selectors from the Post Action
+     *
      * @param actions Map of ActionType to Action
      * @return formatted message selector String
      */
     private String messageSelectorsFrom(final Map<ActionType, Action> actions) {
-        return format("CPPNAME in('%s')", parse(actions.get(ActionType.POST)));
+        return format("CPPNAME in('%s')", namesListFrom(mediaTypesFrom(actions)));
     }
 
     /**
-     * Parse an Action into a message selectors String
-     * @param action Action to parse
-     * @return formatted message selectors String
+     * Construct comma separated list of command/event names
+     *
+     * @param mediaTypes mediaTypes to create the list from
+     * @return comma separated list of command/event names
      */
-    private String parse(final Action action) {
-        return action.getBody().values().stream()
+    private String namesListFrom(final Stream<MimeType> mediaTypes) {
+        return mediaTypes
                 .map(Names::nameFrom)
                 .collect(joining("','"));
     }
 
     /**
      * Generate the subscription name for a resource.
+     *
      * @param resourceUri the URI of the resource
-     * @param clientId the previously generated client id
+     * @param clientId    the previously generated client id
      * @return the subscription name
      */
     private String subscriptionNameOf(final MessagingResourceUri resourceUri, final String clientId) {

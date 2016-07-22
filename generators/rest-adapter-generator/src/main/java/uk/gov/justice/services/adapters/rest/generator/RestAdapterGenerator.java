@@ -53,7 +53,7 @@ public class RestAdapterGenerator implements Generator {
     private final RamlValidator validator = new CompositeRamlValidator(
             new ContainsResourcesRamlValidator(),
             new ContainsActionsRamlValidator(),
-            new RequestContentTypeRamlValidator(),
+            new RequestContentTypeRamlValidator(false),
             new ResponseContentTypeRamlValidator(),
             new BaseUriRamlValidator(),
             new ActionMappingRamlValidator());

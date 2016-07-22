@@ -29,6 +29,7 @@ public class DefaultJsonEnvelopeBuilderTest {
         assertThat(envelope.payloadAsJsonObject().getString("name1"), is("value1"));
     }
 
+
     @Test
     public void shouldBuildEnvelopeWithPayloadContainingNestedStringElement() {
         final JsonEnvelope envelope = envelope().withPayloadOf("value1", "nameLevel1", "nameLevel2").build();
@@ -46,6 +47,15 @@ public class DefaultJsonEnvelopeBuilderTest {
         assertThat(envelope.payloadAsJsonObject().getJsonObject("nameLevel1").getString("nameLevel2a"), is("value1"));
         assertThat(envelope.payloadAsJsonObject().getJsonObject("nameLevel1").getString("nameLevel2b"), is("value2"));
     }
+
+    @Test
+    public void shouldBuildEnvelopeWithPayloadContainingUuid() {
+        final UUID id = UUID.randomUUID();
+        final JsonEnvelope envelope = envelope().withPayloadOf(id, "name1").build();
+
+        assertThat(envelope.payloadAsJsonObject().getString("name1"), is(id.toString()));
+    }
+
 
     @Test
     public void shouldBuildEnvelopeWithPayloadContainingNumericElement() {

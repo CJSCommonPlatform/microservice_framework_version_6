@@ -1,11 +1,13 @@
 package uk.gov.justice.services.clients.core;
 
 import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toSet;
 import static javax.ws.rs.client.Entity.entity;
 import static javax.ws.rs.core.Response.Status.ACCEPTED;
 import static javax.ws.rs.core.Response.Status.fromStatusCode;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static uk.gov.justice.services.common.http.HeaderConstants.CAUSATION;
 import static uk.gov.justice.services.common.http.HeaderConstants.CLIENT_CORRELATION_ID;
 import static uk.gov.justice.services.common.http.HeaderConstants.SESSION_ID;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
@@ -25,8 +27,10 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.Metadata;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
@@ -141,6 +145,13 @@ public class RestClientProcessor {
         setHeaderIfPresent(builder, CLIENT_CORRELATION_ID, metadata.clientCorrelationId());
         setHeaderIfPresent(builder, USER_ID, metadata.userId());
         setHeaderIfPresent(builder, SESSION_ID, metadata.sessionId());
+        setHeaderIfPresent(builder, CAUSATION, metadata.causation());
+    }
+
+    private void setHeaderIfPresent(final Builder builder, final String name, final List<UUID> uuids) {
+        if (!uuids.isEmpty()) {
+            builder.header(name, uuids.stream().map(id -> id.toString()).collect(joining(",")));
+        }
     }
 
     private void setHeaderIfPresent(final Builder builder, final String name, final Optional<String> value) {

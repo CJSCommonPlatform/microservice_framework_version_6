@@ -1,6 +1,7 @@
 package uk.gov.justice.services.messaging;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -84,6 +85,11 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
 
         public Builder withPayloadOf(final String value, final String... name) {
             payload.add(value, name);
+            return this;
+        }
+
+        public Builder withPayloadOf(final UUID value, final String... name) {
+            payload.add(value.toString(), name);
             return this;
         }
 

@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
+## [unreleased]
+
+### Fixed
+- Causation HTTP header not sent by the REST client
+
 ## [0.12.3] - 2016-07-19
 
 ### Fixed

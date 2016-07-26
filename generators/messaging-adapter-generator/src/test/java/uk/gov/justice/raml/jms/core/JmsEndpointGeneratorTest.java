@@ -352,6 +352,22 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
     }
 
     @Test
+    public void shouldCreateJmsEndpointWithoutInterceptorsIfMediaTypeIsGeneralJson() throws Exception {
+        generator.run(
+                messagingRamlWithDefaults()
+                        .with(resource()
+                                .withRelativeUri("/people.handler.command")
+                                .with(httpAction(POST, "application/json")))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+        Class<?> clazz = getJmsListenerClass(BASE_PACKAGE, "PeopleCommandHandlerJmsListener");
+        Interceptors interceptorsAnnotation = clazz.getAnnotation(Interceptors.class);
+        assertThat(interceptorsAnnotation, nullValue());
+
+    }
+
+
+    @Test
     public void shouldCreateJmsEndpointImplementingMessageListener() throws Exception {
         generator.run(raml().withDefaultMessagingResource().build(), configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -575,6 +591,24 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("messageSelector")),
                         propertyValue(equalTo("CPPNAME in('structure.events.test-event')")))));
+    }
+
+    @Test
+    public void shouldCreateAnnotatedJmsEndpointWithoutMessageSelectorIfEventNameNotSpecifiedInMediaType() throws Exception {
+        generator.run(
+                messagingRamlWithDefaults()
+                        .with(resource()
+                                .withRelativeUri("/public.event")
+                                .with(httpAction()
+                                        .withHttpActionType(POST)
+                                        .withMediaType("application/json")))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        Class<?> clazz = getJmsListenerClass(BASE_PACKAGE, "PublicEventListenerJmsListener");
+        assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
+        assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
+                not(hasItemInArray(propertyName(equalTo("messageSelector")))));
     }
 
     @Test

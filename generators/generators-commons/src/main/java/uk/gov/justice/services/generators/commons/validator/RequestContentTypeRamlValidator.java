@@ -13,8 +13,8 @@ public class RequestContentTypeRamlValidator extends AbstractContentTypeRamlVali
 
     private static final String CONTENT_TYPE_DESCRIPTION = "request type";
 
-    public RequestContentTypeRamlValidator() {
-        super(ActionType.POST, CONTENT_TYPE_DESCRIPTION);
+    public RequestContentTypeRamlValidator(final boolean generalJsonTypeAllowed) {
+        super(ActionType.POST, CONTENT_TYPE_DESCRIPTION, generalJsonTypeAllowed);
     }
 
     @Override

@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [unreleased]
 
+### Added
+- Service Component pass through test utility; Test Command API, Command Controller, Query API and
+Query Controller as pass through serives
+
 ### Fixed
 - Causation HTTP header not sent by the REST client
 

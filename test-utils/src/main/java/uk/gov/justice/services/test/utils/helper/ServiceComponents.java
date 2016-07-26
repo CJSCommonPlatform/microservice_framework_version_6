@@ -3,9 +3,11 @@ package uk.gov.justice.services.test.utils.helper;
 import static java.lang.String.format;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
+import uk.gov.justice.services.core.dispatcher.Requester;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
@@ -22,8 +24,8 @@ public final class ServiceComponents {
     }
 
     /**
-     * Verify all the pass through handler methods of the specified handler class. This will use
-     * reflection to find all methods that have a Handles annotation and verify each method.
+     * Verify all the pass through handler methods of the specified Command handler class. This will
+     * use reflection to find all methods that have a Handles annotation and verify each method.
      * Verifies there is a ServiceComponent annotation, each method has a @Handles annotation, the
      * Sender field is present, and the sender.send method is called with the original command
      * passed to the handler method.
@@ -38,7 +40,7 @@ public final class ServiceComponents {
     }
 
     /**
-     * Verify a single or multiple named methods of a handler class.  Verifies there is a
+     * Verify a single or multiple named methods of a Command handler class.  Verifies there is a
      * ServiceComponent annotation, each method has a Handles annotation, the Sender field is
      * present, and the sender.send method is called with the original command passed to the
      * handler method.
@@ -57,40 +59,122 @@ public final class ServiceComponents {
     }
 
     /**
-     * Verify a list of method names of a handler.  Verifies there is a ServiceComponent
+     * Verify a list of method names of a Command handler.  Verifies there is a ServiceComponent
      * annotation, each method has a Handles annotation, the Sender field is present, and the
      * sender.send method is called with the original command passed to the handler method.
      *
      * @param handlerClass the handler class to verify
-     * @param methodNames  the method names to verify
+     * @param methods      the method names to verify
      */
-    public static void verifyPassThroughCommandHandlerMethod(final Class<?> handlerClass, final List<Method> methodNames) throws Exception {
+    public static void verifyPassThroughCommandHandlerMethod(final Class<?> handlerClass, final List<Method> methods) throws Exception {
 
-        if (isNotServiceComponent(handlerClass)) {
-            throw new AssertionError(format("No @ServiceComponent annotation present on Class %s", handlerClass.getSimpleName()));
-        }
+        assertIsServiceComponent(handlerClass);
+        assertHandlerHasMethods(handlerClass, methods);
 
-        if (methodNames.isEmpty()) {
-            throw new AssertionError(format("No @Handles annotation present, or no Handler methods for class %s", handlerClass.getSimpleName()));
-        }
+        for (final Method method : methods) {
+            assertMethodHasHandlesAnnotation(method);
 
-        for (final Method method : methodNames) {
             final Sender sender = mock(Sender.class);
             final JsonEnvelope command = mock(JsonEnvelope.class);
-
             final Object handlerInstance = handlerClass.newInstance();
 
-            if (hasNoHandlesAnnotation(method)) {
-                throw new AssertionError(format("No @Handles annotation present on Method %s", method.getName()));
-            }
-
-            final Field senderField = findSenderField(handlerClass);
+            final Field senderField = findField(handlerClass, Sender.class);
             senderField.setAccessible(true);
             senderField.set(handlerInstance, sender);
 
             method.invoke(handlerInstance, command);
 
             verify(sender).send(command);
+        }
+    }
+
+    /**
+     * Verify all the pass through handler methods of the specified Query handler class. This will
+     * use reflection to find all methods that have a Handles annotation and verify each method.
+     * Verifies there is a ServiceComponent annotation, each method has a @Handles annotation, the
+     * Requester field is present, and the requester.request method is called with the original
+     * query passed to the handler method.
+     *
+     * @param handlerClass the handler class to verify
+     */
+    public static void verifyPassThroughQueryHandlerMethod(final Class<?> handlerClass) throws Exception {
+        verifyPassThroughQueryHandlerMethod(handlerClass,
+                Stream.of(handlerClass.getMethods())
+                        .filter(ServiceComponents::hasHandlesAnnotation)
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * Verify a single or multiple named methods of a Query handler class.  Verifies there is a
+     * ServiceComponent annotation, each method has a Handles annotation, the Requester field is
+     * present, and the requester.request method is called with the original command passed to the
+     * handler method.
+     *
+     * @param handlerClass the handler class to verify
+     * @param methodNames  the method names to verify
+     */
+    public static void verifyPassThroughQueryHandlerMethod(final Class<?> handlerClass, final String... methodNames) throws Exception {
+        List<Method> methods = new ArrayList<>();
+
+        for (String methodName : methodNames) {
+            methods.add(handlerClass.getMethod(methodName, JsonEnvelope.class));
+        }
+
+        verifyPassThroughQueryHandlerMethod(handlerClass, methods);
+    }
+
+    /**
+     * Verify a list of method names of a Query handler.  Verifies there is a ServiceComponent
+     * annotation, each method has a Handles annotation, the Requester field is present, and the
+     * requester.request method is called with the original command passed to the handler method.
+     *
+     * @param handlerClass the handler class to verify
+     * @param methods      the method names to verify
+     */
+    public static void verifyPassThroughQueryHandlerMethod(final Class<?> handlerClass, final List<Method> methods) throws Exception {
+
+        assertIsServiceComponent(handlerClass);
+        assertHandlerHasMethods(handlerClass, methods);
+
+        for (final Method method : methods) {
+            assertMethodHasHandlesAnnotation(method);
+
+            final Requester requester = mock(Requester.class);
+            final JsonEnvelope query = mock(JsonEnvelope.class);
+            final JsonEnvelope response = mock(JsonEnvelope.class);
+            final Object handlerInstance = handlerClass.newInstance();
+
+            final Field requesterField = findField(handlerClass, Requester.class);
+            requesterField.setAccessible(true);
+            requesterField.set(handlerInstance, requester);
+
+            when(requester.request(query)).thenReturn(response);
+
+            JsonEnvelope actualResponse = (JsonEnvelope) method.invoke(handlerInstance, query);
+
+            if (!actualResponse.equals(response)) {
+                throw new AssertionError("JsonEnvelope response does not match expected response.");
+            }
+
+            verify(requester).request(query);
+        }
+    }
+
+    private static void assertIsServiceComponent(final Class<?> handlerClass) {
+        if (isNotServiceComponent(handlerClass)) {
+            throw new AssertionError(format("No @ServiceComponent annotation present on Class %s", handlerClass.getSimpleName()));
+        }
+    }
+
+    private static void assertMethodHasHandlesAnnotation(final Method method) {
+        if (hasNoHandlesAnnotation(method)) {
+            throw new AssertionError(format("No @Handles annotation present on Method %s", method.getName()));
+        }
+    }
+
+    private static void assertHandlerHasMethods(final Class<?> handlerClass, final List<Method> methods) {
+        if (methods.isEmpty()) {
+            throw new AssertionError(format("No @Handles annotation present, or no Handler methods for class %s", handlerClass.getSimpleName()));
         }
     }
 
@@ -112,10 +196,10 @@ public final class ServiceComponents {
                 .isPresent();
     }
 
-    private static Field findSenderField(final Class<?> handlerClass) {
+    private static Field findField(final Class<?> handlerClass, final Class<?> fieldClass) {
         return Stream.of(handlerClass.getDeclaredFields())
-                .filter(field -> field.getType().equals(Sender.class))
+                .filter(field -> field.getType().equals(fieldClass))
                 .findFirst()
-                .orElseThrow(() -> new AssertionError("No field of class type Sender found in handler class"));
+                .orElseThrow(() -> new AssertionError(format("No field of class type %s found in handler class", fieldClass.getSimpleName())));
     }
 }

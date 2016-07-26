@@ -25,7 +25,6 @@
         </dependency>
 
         <!-- Test Dependencies -->
-
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -46,6 +45,12 @@
             <artifactId>javax.json</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>test-utils</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 
@@ -64,9 +69,11 @@
                         </goals>
                         <phase>generate-sources</phase>
                         <configuration>
-                            <generatorName>uk.gov.justice.raml.jms.core.JmsEndpointGenerator</generatorName>
+                            <generatorName>uk.gov.justice.raml.jms.core.JmsEndpointGenerator
+                            </generatorName>
                             <sourceDirectory>${basedir}/src/raml</sourceDirectory>
-                            <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
+                            <outputDirectory>${project.build.directory}/generated-sources
+                            </outputDirectory>
                             <includes>
                                 <include>**/*.messaging.raml</include>
                             </includes>
@@ -81,9 +88,13 @@
                         </goals>
                         <phase>generate-sources</phase>
                         <configuration>
-                            <generatorName>uk.gov.justice.services.clients.messaging.generator.MessagingClientGenerator</generatorName>
-                            <sourceDirectory>${basedir}/../example-command-handler/src/raml</sourceDirectory>
-                            <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
+                            <generatorName>
+                                uk.gov.justice.services.clients.messaging.generator.MessagingClientGenerator
+                            </generatorName>
+                            <sourceDirectory>${basedir}/../example-command-handler/src/raml
+                            </sourceDirectory>
+                            <outputDirectory>${project.build.directory}/generated-sources
+                            </outputDirectory>
                             <basePackageName>uk.gov.justice.api.controller</basePackageName>
                             <generatorProperties>
                                 <serviceComponent>COMMAND_CONTROLLER</serviceComponent>

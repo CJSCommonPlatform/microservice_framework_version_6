@@ -4,10 +4,10 @@ import static uk.gov.justice.services.test.utils.helper.ServiceComponents.verify
 
 import org.junit.Test;
 
-public class RecipesQueryApiTest {
+public class CakeOrdersQueryApiTest {
 
     @Test
-    public void shouldHandleRecipesQuery() throws Exception {
-        verifyPassThroughQueryHandlerMethod(RecipesQueryApi.class);
+    public void shouldHandleCakeOrderQuery() throws Exception {
+        verifyPassThroughQueryHandlerMethod(CakeOrdersQueryApi.class);
     }
 }

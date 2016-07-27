@@ -31,7 +31,8 @@
                                 uk.gov.justice.services.adapters.rest.generator.RestAdapterGenerator
                             </generatorName>
                             <sourceDirectory>${basedir}/src/raml</sourceDirectory>
-                            <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
+                            <outputDirectory>${project.build.directory}/generated-sources
+                            </outputDirectory>
                             <basePackageName>uk.gov.justice.api</basePackageName>
                         </configuration>
                     </execution>
@@ -42,9 +43,13 @@
                         </goals>
                         <phase>generate-sources</phase>
                         <configuration>
-                            <generatorName>uk.gov.justice.services.clients.messaging.generator.MessagingClientGenerator</generatorName>
-                            <sourceDirectory>${basedir}/../example-command-controller/src/raml</sourceDirectory>
-                            <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
+                            <generatorName>
+                                uk.gov.justice.services.clients.messaging.generator.MessagingClientGenerator
+                            </generatorName>
+                            <sourceDirectory>${basedir}/../example-command-controller/src/raml
+                            </sourceDirectory>
+                            <outputDirectory>${project.build.directory}/generated-sources
+                            </outputDirectory>
                             <basePackageName>uk.gov.justice.api.controller</basePackageName>
                             <generatorProperties>
                                 <serviceComponent>COMMAND_API</serviceComponent>
@@ -88,7 +93,7 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- JUnit regression testing framework. -->
+        <!-- Test Dependencies -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -97,6 +102,12 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>test-utils</artifactId>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
 

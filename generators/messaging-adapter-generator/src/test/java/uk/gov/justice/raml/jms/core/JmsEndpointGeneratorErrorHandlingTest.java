@@ -27,51 +27,6 @@ public class JmsEndpointGeneratorErrorHandlingTest extends BaseGeneratorTest {
         generator = new JmsEndpointGenerator();
     }
 
-    @Test
-    public void shouldThrowExceptionIfInvalidTierPassedInUri() throws Exception {
-
-        exception.expect(RamlValidationException.class);
-        exception.expectMessage("Invalid uri: /structure.unknowntier.command");
-
-        generator.run(
-                raml()
-                        .with(resource()
-                                .withRelativeUri("/structure.unknowntier.command")
-                                .withDefaultPostAction())
-                        .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-    }
-
-    @Test
-    public void shouldThrowExceptionIfInvalidPillarPassedInUri() throws Exception {
-
-        exception.expect(RamlValidationException.class);
-        exception.expectMessage("Invalid uri: /lifecycle.controller.unknown");
-
-        generator.run(
-                raml()
-                        .with(resource()
-                                .withRelativeUri("/lifecycle.controller.unknown")
-                                .withDefaultPostAction()
-                        )
-                        .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-    }
-
-    @Test
-    public void shouldThrowExceptionIfNoPillarPassedInUri() throws Exception {
-
-        exception.expect(RamlValidationException.class);
-        exception.expectMessage("Invalid uri: /structure.controller");
-
-        generator.run(
-                raml()
-                        .with(resource()
-                                .withRelativeUri("/structure.controller")
-                                .withDefaultPostAction())
-                        .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-    }
 
     @Test
     public void shouldThrowExceptionIfNoResourcesInRaml() throws Exception {
@@ -115,7 +70,7 @@ public class JmsEndpointGeneratorErrorHandlingTest extends BaseGeneratorTest {
     }
 
     @Test
-    public void shouldThrowExceptionIfNotvalidMediaType() throws Exception {
+    public void shouldThrowExceptionIfNotValidMediaType() throws Exception {
 
         exception.expect(RamlValidationException.class);
         exception.expectMessage("Invalid request type: nd.people.unknown.command1+json");

@@ -59,9 +59,9 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_API")));
 
-        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCakeshopCommandController");
+        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCakeshopControllerCommand");
 
-        assertThat(generatedClass.getCanonicalName(), is("org.raml.test.RemoteCakeshopCommandController"));
+        assertThat(generatedClass.getCanonicalName(), is("org.raml.test.RemoteCakeshopControllerCommand"));
         assertThat(generatedClass.getAnnotation(Remote.class), not(nullValue()));
         assertThat(generatedClass.getAnnotation(FrameworkComponent.class), not(nullValue()));
         assertThat(generatedClass.getAnnotation(FrameworkComponent.class).value(), is("COMMAND_API"));
@@ -78,7 +78,7 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_CONTROLLER")));
 
-        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCakeshopCommandHandler");
+        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCakeshopHandlerCommand");
 
         assertThat(generatedClass.getAnnotation(FrameworkComponent.class).value(), is("COMMAND_CONTROLLER"));
     }
@@ -108,7 +108,7 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
 
-        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCakeshopCommandController");
+        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCakeshopControllerCommand");
 
         Field logger = generatedClass.getDeclaredField("LOGGER");
         assertThat(logger, not(nullValue()));
@@ -128,7 +128,7 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
 
-        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCakeshopCommandController");
+        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCakeshopControllerCommand");
 
         Field sender = generatedClass.getDeclaredField("sender");
         assertThat(sender, not(nullValue()));
@@ -148,7 +148,7 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
 
-        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCakeshopCommandController");
+        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCakeshopControllerCommand");
 
         List<Method> methods = methodsOf(generatedClass);
         assertThat(methods, hasSize(1));
@@ -170,7 +170,7 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
 
-        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCakeshopCommandHandler");
+        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCakeshopHandlerCommand");
 
         List<Method> methods = methodsOf(generatedClass);
         assertThat(methods, hasSize(1));
@@ -191,7 +191,7 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCakeshopCommandController");
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCakeshopControllerCommand");
         Method method = firstMethodOf(clazz);
         assertThat(method.getParameterCount(), is(1));
         assertThat(method.getParameters()[0].getType(), equalTo(JsonEnvelope.class));

@@ -6,7 +6,6 @@ import uk.gov.justice.raml.core.Generator;
 import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.raml.jms.uri.BaseUri;
 import uk.gov.justice.raml.jms.validator.BaseUriRamlValidator;
-import uk.gov.justice.raml.jms.validator.ResourceUriRamlValidator;
 import uk.gov.justice.services.generators.commons.validator.CompositeRamlValidator;
 import uk.gov.justice.services.generators.commons.validator.ContainsActionsRamlValidator;
 import uk.gov.justice.services.generators.commons.validator.ContainsResourcesRamlValidator;
@@ -26,7 +25,6 @@ public class JmsEndpointGenerator implements Generator {
     private final MessageListenerCodeGenerator messageListenerCodeGenerator = new MessageListenerCodeGenerator();
 
     private final RamlValidator validator = new CompositeRamlValidator(
-            new ResourceUriRamlValidator(),
             new ContainsResourcesRamlValidator(),
             new ContainsActionsRamlValidator(),
             new RequestContentTypeRamlValidator(true),

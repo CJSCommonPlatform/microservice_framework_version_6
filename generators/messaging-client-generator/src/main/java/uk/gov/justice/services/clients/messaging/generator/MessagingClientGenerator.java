@@ -1,7 +1,6 @@
 package uk.gov.justice.services.clients.messaging.generator;
 
 import static com.squareup.javapoet.TypeName.VOID;
-import static org.apache.commons.lang3.StringUtils.capitalize;
 import static uk.gov.justice.services.generators.commons.helper.Names.nameFrom;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
@@ -27,10 +26,7 @@ public class MessagingClientGenerator extends AbstractClientGenerator {
     @Override
     protected String classNameOf(final Raml raml) {
         MessagingResourceUri uri = new MessagingResourceUri(raml.getResources().values().iterator().next().getUri());
-        return String.format("Remote%s%s%s",
-                capitalize(uri.context()),
-                capitalize(uri.pillar()),
-                capitalize(uri.tier() != null ? uri.tier() : ""));
+        return String.format("Remote%s", uri.toCapitalisedString());
     }
 
     @Override

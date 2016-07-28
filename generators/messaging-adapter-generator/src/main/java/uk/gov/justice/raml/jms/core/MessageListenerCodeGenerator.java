@@ -8,7 +8,6 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.apache.commons.lang.StringUtils.capitalize;
 
 import uk.gov.justice.raml.jms.uri.BaseUri;
 import uk.gov.justice.services.adapter.messaging.JmsProcessor;
@@ -88,14 +87,14 @@ class MessageListenerCodeGenerator {
      */
     private TypeSpec.Builder classSpecFrom(final Resource resource, final BaseUri baseUri) {
         final MessagingResourceUri resourceUri = new MessagingResourceUri(resource.getUri());
-        final Component component = componentOf(resourceUri, baseUri);
+        final Component component = componentOf(baseUri);
 
-        final TypeSpec.Builder clazz = classBuilder(classNameOf(resourceUri, component))
+        final TypeSpec.Builder clazz = classBuilder(classNameOf(resourceUri))
                 .addModifiers(PUBLIC)
                 .addSuperinterface(MessageListener.class)
                 .addField(FieldSpec.builder(ClassName.get(Logger.class), LOGGER_FIELD)
                         .addModifiers(PRIVATE, STATIC, FINAL)
-                        .initializer("$T.getLogger($L.class)", LoggerFactory.class, classNameOf(resourceUri, component))
+                        .initializer("$T.getLogger($L.class)", LoggerFactory.class, classNameOf(resourceUri))
                         .build())
                 .addField(FieldSpec.builder(ClassName.get(AsynchronousDispatcher.class), DISPATCHER_FIELD)
                         .addAnnotation(Inject.class)
@@ -209,26 +208,18 @@ class MessageListenerCodeGenerator {
      * @param resourceUri URI String to convert
      * @return camel case class name
      */
-    private String classNameOf(final MessagingResourceUri resourceUri, final Component component) {
-        return format("%s%s%sJmsListener",
-                capitalize(resourceUri.context()),
-                capitalize(component.pillar()),
-                capitalize(component.tier()));
+    private String classNameOf(final MessagingResourceUri resourceUri) {
+        return format("%sJmsListener", resourceUri.toCapitalisedString());
     }
 
     /**
      * Convert given URI to a valid component.
-     * Takes the last and second to last parts of the URI as the pillar and tier of the component.
      *
-     * @param resourceUri URI of the resource
      * @param baseUri     base uri of the resource
      * @return component the value of the pillar and tier parts of the uri
      */
-    private Component componentOf(final MessagingResourceUri resourceUri, final BaseUri baseUri) {
-
-        final String pillar = resourceUri.pillar();
-        final String tier = resourceUri.tier() != null ? resourceUri.tier() : baseUri.tier();
-        return Component.valueOf(pillar, tier);
+    private Component componentOf(final BaseUri baseUri) {
+        return Component.valueOf(baseUri.pillar(), baseUri.tier());
     }
 
     /**

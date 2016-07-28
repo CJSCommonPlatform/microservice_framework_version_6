@@ -3,14 +3,18 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
-## [unreleased]
+## [Unreleased]
 
 ### Added
-- Service Component pass through test utility; Test Command API, Command Controller, Query API and
-Query Controller as pass through serives
+- Service component passthrough test utility; test Command API, Command Controller, Query API and
+Query Controller as passthrough services
+- Support for listening to all events on a topic or queue
 
 ### Fixed
 - Causation HTTP header not sent by the REST client
+
+### Changed
+- Removed limitation on messaging RAML resources to allow any queue or topic name
 
 ## [0.12.3] - 2016-07-19
 

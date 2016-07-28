@@ -84,7 +84,7 @@ public class RemoteCommandControllerIT {
             JmsSenderFactory.class,
             PolicyEvaluator.class,
             RecordingJmsEnvelopeSender.class,
-            RemoteContextaCommandController.class,
+            RemoteContextaControllerCommand.class,
             RequesterProducer.class,
             SenderProducer.class,
             ServiceComponentObserver.class,

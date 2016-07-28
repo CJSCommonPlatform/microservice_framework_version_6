@@ -5,11 +5,10 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import uk.gov.justice.api.PublicEventListenerJmsListener;
-import uk.gov.justice.api.StructureCommandControllerJmsListener;
-import uk.gov.justice.api.StructureCommandHandlerJmsListener;
-import uk.gov.justice.api.StructureEventListenerJmsListener;
-import uk.gov.justice.api.StructureEventProcessorJmsListener;
+import uk.gov.justice.api.PublicEventJmsListener;
+import uk.gov.justice.api.StructureControllerCommandJmsListener;
+import uk.gov.justice.api.StructureEventJmsListener;
+import uk.gov.justice.api.StructureHandlerCommandJmsListener;
 import uk.gov.justice.services.adapter.messaging.JmsProcessor;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -100,11 +99,10 @@ public class JmsEndpointGenerationIT {
     @Classes(cdi = true, value = {
             JmsProcessor.class,
             AsynchronousRecordingDispatcher.class,
-            StructureCommandControllerJmsListener.class,
-            StructureEventListenerJmsListener.class,
-            StructureEventProcessorJmsListener.class,
-            StructureCommandHandlerJmsListener.class,
-            PublicEventListenerJmsListener.class,
+            StructureControllerCommandJmsListener.class,
+            StructureEventJmsListener.class,
+            StructureHandlerCommandJmsListener.class,
+            PublicEventJmsListener.class,
             ObjectMapperProducer.class,
             EnvelopeConverter.class,
             StringToJsonObjectConverter.class,
@@ -202,26 +200,7 @@ public class JmsEndpointGenerationIT {
     }
 
     @Test
-    public void eventListenerDispatcherShouldReceiveEventA() throws JMSException, InterruptedException {
-
-        //There's an issue in OpenEJB causing tests that involve JMS topics to fail.
-        //On slower machines (e.g. travis) topic consumers tend to be registered after this test starts,
-        //which means the message sent to the topic is lost, which in turn causes this test to fail occasionally.
-        //Delaying test execution (Thread.sleep) mitigates the issue.
-        //TODO: check OpenEJB code and investigate if we can't fix the issue.
-        Thread.sleep(300);
-        String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d20";
-        String eventName = "structure.eventaa";
-
-        sendEnvelope(metadataId, eventName, eventsDestination);
-
-        JsonEnvelope receivedEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
-        assertThat(receivedEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
-        assertThat(receivedEnvelope.metadata().name(), is(eventName));
-    }
-
-    @Test
-    public void eventProcessorDispatcherShouldReceiveEventB() throws JMSException, InterruptedException {
+    public void eventProcessorDispatcherShouldReceiveEvent() throws JMSException, InterruptedException {
 
         //There's an issue in OpenEJB causing tests that involve JMS topics to fail.
         //On slower machines (e.g. travis) topic consumers tend to be registered after this test starts,

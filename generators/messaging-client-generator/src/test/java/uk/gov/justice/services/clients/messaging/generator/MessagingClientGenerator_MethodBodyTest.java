@@ -43,7 +43,7 @@ public class MessagingClientGenerator_MethodBodyTest extends BaseGeneratorTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
 
-        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCakeshopCommandController");
+        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCakeshopControllerCommand");
         final Object instance = instanceOf(generatedClass);
 
         JsonEnvelope envelope = envelope().build();

@@ -37,6 +37,7 @@
         <module>example-context</module>
         <module>test-utils</module>
         <module>framework-bom</module>
+        <module>event-buffer</module>
     </modules>
 
     <properties>

@@ -1,0 +1,1 @@
+java -jar target/event-buffer-liquibase-0.14.0-SNAPSHOT.jar --url=jdbc:postgresql://localhost:5432/stagingviewstore --username=staging --password=staging --logLevel=info update

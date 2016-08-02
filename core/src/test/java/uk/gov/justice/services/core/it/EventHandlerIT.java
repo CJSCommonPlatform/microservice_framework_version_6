@@ -55,7 +55,7 @@ import org.junit.runner.RunWith;
 @RunWith(ApplicationComposer.class)
 @FrameworkComponent("CORE_TEST")
 @Adapter(EVENT_LISTENER)
-public class CoreComponentsIT {
+public class EventHandlerIT {
 
     private static final String EVENT_ABC = "test.event-abc";
 

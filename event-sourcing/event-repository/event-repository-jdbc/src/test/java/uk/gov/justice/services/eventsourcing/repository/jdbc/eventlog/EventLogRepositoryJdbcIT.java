@@ -9,6 +9,7 @@ import static org.junit.Assert.assertThat;
 
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.EventLogRepositoryException;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidSequenceIdException;
+import uk.gov.justice.services.test.utils.reflection.ReflectionUtils;
 
 import java.util.List;
 import java.util.UUID;

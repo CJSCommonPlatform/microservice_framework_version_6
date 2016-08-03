@@ -20,9 +20,9 @@ import org.junit.Test;
  */
 public class EventSwitcherTest {
 
-    public EventSwitcher eventSwitcher;
+    private EventSwitcher eventSwitcher;
 
-    public TestClass event;
+    private TestClass event;
 
     @Before
     public void setup() {
@@ -89,6 +89,28 @@ public class EventSwitcherTest {
         assertThat(result, equalTo(event));
         verify(eventMatcherA, times(0)).apply(any());
         verify(eventMatcherB).apply(event);
+    }
+
+    @Test
+    public void shouldCreateAnOtherwiseDoNothingMatchAllRule() {
+        EventMatcher eventMatcher = EventSwitcher.otherwiseDoNothing();
+
+        assertThat(eventMatcher.matches(event), equalTo(true));
+        assertThat(eventMatcher.matches("test"), equalTo(true));
+    }
+
+    @Test
+    public void shouldCreateAnOtherwiseMatchAllRule() throws Exception {
+        assertThat(EventSwitcher.otherwise().matches("test"), equalTo(true));
+    }
+
+    @Test
+    public void shouldApplyDoNothingConsumer() throws Exception {
+        try {
+            EventSwitcher.doNothing().accept("Test");
+        } catch (Exception ex) {
+            throw new AssertionError("Exception thrown and not expected.", ex);
+        }
     }
 
     private static class TestClass {

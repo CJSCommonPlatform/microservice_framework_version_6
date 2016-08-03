@@ -2,6 +2,8 @@ package uk.gov.justice.domain.aggregate.matcher;
 
 import static java.lang.String.format;
 
+import java.util.function.Consumer;
+
 /**
  * Helper class for building code for applying events in aggregates without if statements and class
  * casts. Using this class allows aggregates to be written like this:
@@ -11,7 +13,8 @@ import static java.lang.String.format;
  *     public Object apply(final Object event) {
  *         return match(event).with(
  *             when(RecipeAdded.class).apply(x -> recipeId = x.getRecipeId()),
- *             when(RecipeNameUpdated.class).apply(x -> name = x.getName()));
+ *             when(RecipeNameUpdated.class).apply(x -> name = x.getName()),
+ *             otherwiseDoNothing());
  *     }
  * }
  * </pre>
@@ -48,6 +51,36 @@ public class EventSwitcher {
      */
     public static <T> ClassRule<T> when(final Class<T> clazz) {
         return new ClassRule<>(clazz);
+    }
+
+    /**
+     * Create a new event matcher that matches any event and does nothing.
+     *
+     * @return the event matcher
+     */
+    public static EventMatcher otherwiseDoNothing() {
+        return otherwise().apply(doNothing());
+    }
+
+    /**
+     * Event matcher rule that matches any object class.
+     *
+     * @return the rule
+     */
+    public static ClassRule<Object> otherwise() {
+        return when(Object.class);
+    }
+
+    /**
+     * A consumer that does nothing.  Can be used in any event matcher.
+     *
+     * e.g. when(SomeObject.class).apply(doNothing())
+     *
+     * @return the do nothing consumer
+     */
+    public static Consumer<Object> doNothing() {
+        return o -> {
+        };
     }
 
     /**

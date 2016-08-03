@@ -3,6 +3,17 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+### Added
+- Add a match all and do nothing EventMatcher to the EventSwitcher. This will ignore all other events.  
+Example:
+```
+match(event).with(
+    when(SomethingAdded.class).apply(x -> id = x.getId()),
+    otherwiseDoNothing());
+```
+
 ## [0.13.0] - 2016-07-28
 
 ### Added

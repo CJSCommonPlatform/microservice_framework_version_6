@@ -52,39 +52,5 @@ public class ResponseContentTypeRamlValidatorTest {
                         resource("/some/path")
                                 .with(httpAction(GET))
                 ).build());
-
     }
-
-    @Test
-    public void shouldThrowExceptionIfdResponseNotVendorSpecific() throws Exception {
-
-        exception.expect(RamlValidationException.class);
-        exception.expectMessage("Invalid response type: application/json");
-
-
-        validator.validate(
-                raml().with(
-                        resource("/some/path")
-                                .with(httpAction(GET).withResponseTypes("application/json"))
-                ).build());
-
-    }
-
-
-    @Test
-    public void shouldThrowExceptionIfdResponseContentTypeDoesNotContainFormat() throws Exception {
-
-        exception.expect(RamlValidationException.class);
-        exception.expectMessage("Invalid response type: application/vnd.blah");
-
-
-        validator.validate(
-                raml().with(
-                        resource("/some/path")
-                                .with(httpAction(GET).withResponseTypes("application/vnd.blah"))
-                ).build());
-
-    }
-
-
 }

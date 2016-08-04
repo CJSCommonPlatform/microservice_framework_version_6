@@ -8,7 +8,6 @@ import static uk.gov.justice.services.generators.test.utils.builder.MappingBuild
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -32,13 +31,11 @@ public class ActionMappingRamlValidatorTest {
                                         .with(mapping()
                                                 .withName("context.someAction")
                                                 .withRequestType("application/vnd.somemediatype1+json"))
-                                        .withMediaType("application/vnd.somemediatype1+json")
-                                        .withMediaType("application/vnd.somemediatype2+json")
+                                        .withMediaType("application/vnd.somemediatype1+json", "json/schema/somemediatype1.json")
+                                        .withMediaType("application/vnd.somemediatype2+json", "json/schema/somemediatype2.json")
                                 )
 
                         ).build());
-
-
     }
 
     @Test

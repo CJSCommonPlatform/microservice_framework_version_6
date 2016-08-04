@@ -157,13 +157,17 @@ class JaxRsInterfaceGenerator {
      */
     private MethodSpec.Builder addToMethodWithMimeType(final MethodSpec.Builder methodBuilder,
                                                        final MimeType bodyMimeType) {
-        return methodBuilder
+        methodBuilder
                 .addAnnotation(AnnotationSpec.builder(Consumes.class)
                         .addMember(DEFAULT_ANNOTATION_PARAMETER, ANNOTATION_FORMAT, bodyMimeType.getType())
-                        .build())
-                .addParameter(ParameterSpec
-                        .builder(JsonObject.class, GENERIC_PAYLOAD_ARGUMENT_NAME)
                         .build());
+
+        if (bodyMimeType.getSchema() != null) {
+            methodBuilder.addParameter(ParameterSpec
+                    .builder(JsonObject.class, GENERIC_PAYLOAD_ARGUMENT_NAME)
+                    .build());
+        }
+        return methodBuilder;
     }
 
     /**

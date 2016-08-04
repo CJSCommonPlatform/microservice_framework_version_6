@@ -17,6 +17,9 @@ protocols: [ HTTP, HTTPS ]
         (mapping):
             requestType: application/vnd.people.modified-user+json
             name: people.update-user
+        (mapping):
+            requestType: application/vnd.people.link-user+json
+            name: people.link-user
         ...
     body:
         application/vnd.people.user+json:
@@ -25,6 +28,7 @@ protocols: [ HTTP, HTTPS ]
         application/vnd.people.modified-user+json:
             schema: !include json/schema/people.modified-user.json
             example: !include json/update-user.json
+        application/vnd.people.link-user+json: !!null
   get:
     description: |
         ...

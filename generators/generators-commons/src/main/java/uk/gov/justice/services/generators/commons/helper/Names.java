@@ -4,15 +4,19 @@ import static java.lang.String.format;
 import static org.apache.commons.lang.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.WordUtils.capitalize;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.listOf;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
+import uk.gov.justice.services.generators.commons.mapping.ActionMapping;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
@@ -81,7 +85,23 @@ public final class Names {
                 .getUri()
                 .replace("{", " By "));
 
-        return action.getType().toString().toLowerCase() + buildMimeTypeInfix(bodyMimeType) + methodBaseName;
+        final String actionType = action.getType().toString().toLowerCase();
+
+        if (bodyMimeType != null) {
+            if (!isEmpty(action.getDescription())) {
+                final Optional<ActionMapping> mapping = listOf(action.getDescription()).stream().filter(actionMapping -> filterActionMapping(actionMapping, bodyMimeType.getType())).findFirst();
+
+                if (mapping.isPresent()) {
+                    return actionType + buildJavaFriendlyName(camelCase(mapping.get().getName())) + methodBaseName;
+                }
+            }
+        }
+
+        return actionType + methodBaseName;
+    }
+
+    private static boolean filterActionMapping(final ActionMapping actionMapping, final String bodyMimeType) {
+        return bodyMimeType.equals(actionMapping.getRequestType()) || bodyMimeType.equals(actionMapping.getResponseType());
     }
 
 

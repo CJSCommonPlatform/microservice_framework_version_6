@@ -34,6 +34,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import javax.json.Json;
@@ -69,7 +70,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
         Object resourceObject = instanceOf(resourceClass);
 
         Response processorResponse = Response.ok().build();
-        when(restProcessor.processAsynchronously(any(Consumer.class), anyString(), any(JsonObject.class), any(HttpHeaders.class),
+        when(restProcessor.processAsynchronously(any(Consumer.class), anyString(), any(Optional.class), any(HttpHeaders.class),
                 any(Collection.class))).thenReturn(processorResponse);
 
         Method method = firstMethodOf(resourceClass);
@@ -98,7 +99,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
         method.invoke(resourceObject, NOT_USED_JSONOBJECT);
 
         ArgumentCaptor<Consumer> consumerCaptor = ArgumentCaptor.forClass(Consumer.class);
-        verify(restProcessor).processAsynchronously(consumerCaptor.capture(), anyString(), any(JsonObject.class), any(HttpHeaders.class),
+        verify(restProcessor).processAsynchronously(consumerCaptor.capture(), anyString(), any(Optional.class), any(HttpHeaders.class),
                 any(Collection.class));
 
         JsonEnvelope envelope = envelope().build();
@@ -121,10 +122,10 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
         Object resourceObject = instanceOf(resourceClass);
 
-        JsonObject jsonObject = Json.createObjectBuilder().add("dummy", "abc").build();
+        Optional<JsonObject> jsonObject = Optional.of(Json.createObjectBuilder().add("dummy", "abc").build());
 
         Method method = firstMethodOf(resourceClass);
-        method.invoke(resourceObject, jsonObject);
+        method.invoke(resourceObject, jsonObject.get());
 
         verify(restProcessor).processAsynchronously(any(Consumer.class), anyString(), eq(jsonObject), any(HttpHeaders.class), any(Collection.class));
     }
@@ -148,7 +149,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
         Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, NOT_USED_JSONOBJECT);
 
-        verify(restProcessor).processAsynchronously(any(Consumer.class), anyString(), any(JsonObject.class), eq(headers), any(Collection.class));
+        verify(restProcessor).processAsynchronously(any(Consumer.class), anyString(), any(Optional.class), eq(headers), any(Collection.class));
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -171,7 +172,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
 
         ArgumentCaptor<Collection> pathParamsCaptor = ArgumentCaptor.forClass(Collection.class);
 
-        verify(restProcessor).processAsynchronously(any(Consumer.class), anyString(), any(JsonObject.class), any(HttpHeaders.class),
+        verify(restProcessor).processAsynchronously(any(Consumer.class), anyString(), any(Optional.class), any(HttpHeaders.class),
                 pathParamsCaptor.capture());
 
         Collection<Parameter> pathParams = pathParamsCaptor.getValue();
@@ -213,7 +214,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
 
         ArgumentCaptor<Collection> pathParamsCaptor = ArgumentCaptor.forClass(Collection.class);
 
-        verify(restProcessor).processAsynchronously(any(Consumer.class), anyString(), any(JsonObject.class), any(HttpHeaders.class),
+        verify(restProcessor).processAsynchronously(any(Consumer.class), anyString(), any(Optional.class), any(HttpHeaders.class),
                 pathParamsCaptor.capture());
 
         Collection<Parameter> pathParams = pathParamsCaptor.getValue();
@@ -221,8 +222,6 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
         final Parameter pathParam = (Parameter) pathParams.iterator().next();
         assertThat(pathParam.getName(), is("p1"));
         assertThat(pathParam.getStringValue(), is("paramValueXYZ"));
-
-
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -244,7 +243,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
 
         ArgumentCaptor<Collection> pathParamsCaptor = ArgumentCaptor.forClass(Collection.class);
 
-        verify(restProcessor).processAsynchronously(any(Consumer.class), anyString(), any(JsonObject.class), any(HttpHeaders.class),
+        verify(restProcessor).processAsynchronously(any(Consumer.class), anyString(), any(Optional.class), any(HttpHeaders.class),
                 pathParamsCaptor.capture());
 
         Collection<Parameter> pathParams = pathParamsCaptor.getValue();
@@ -269,7 +268,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
                                                 .withName("contextA.someAction")
                                                 .withRequestType("application/vnd.somemediatype1+json"))
 
-                                        .withMediaType("application/vnd.somemediatype1+json")
+                                        .withMediaType("application/vnd.somemediatype1+json", "json/schema/somemediatype1.json")
                                 )
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
@@ -285,7 +284,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
         Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, NOT_USED_JSONOBJECT);
 
-        verify(restProcessor).processAsynchronously(any(Consumer.class), eq("contextA.someAction"), any(JsonObject.class), any(HttpHeaders.class), any(Collection.class));
+        verify(restProcessor).processAsynchronously(any(Consumer.class), eq("contextA.someAction"), any(Optional.class), any(HttpHeaders.class), any(Collection.class));
     }
 
 

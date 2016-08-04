@@ -15,10 +15,13 @@ import static uk.gov.justice.services.generators.commons.helper.Names.nameFrom;
 import static uk.gov.justice.services.generators.commons.helper.Names.packageNameOf;
 import static uk.gov.justice.services.generators.commons.helper.Names.resourceInterfaceNameOf;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
+import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.mapping;
+import static uk.gov.justice.services.generators.test.utils.builder.MappingDescriptionBuilder.mappingDescriptionWith;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
+import uk.gov.justice.services.generators.test.utils.builder.MappingBuilder;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -47,7 +50,9 @@ public class NamesTest {
 
     @Test
     public void shouldBuildResourceMethodName() throws Exception {
-        Action action = httpAction().withHttpActionType(POST).build();
+        MappingBuilder mappingBuilder = mapping().withName("command.create-user").withRequestType("application/vnd.command.create-user+json");
+        Action action = httpAction().withHttpActionType(POST).withDescription(mappingDescriptionWith(mappingBuilder).build()).build();
+
         action.setResource(resource().withRelativeUri("test").build());
         String shortMimeType = Names.buildResourceMethodName(action, new MimeType("application/vnd.command.create-user+json"));
         assertThat(shortMimeType, is("postCommandCreateUserTest"));

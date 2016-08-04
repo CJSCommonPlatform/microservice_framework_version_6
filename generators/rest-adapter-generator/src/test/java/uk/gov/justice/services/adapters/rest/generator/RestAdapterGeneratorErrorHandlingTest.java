@@ -64,41 +64,6 @@ public class RestAdapterGeneratorErrorHandlingTest {
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
     }
 
-
-    @Test
-    public void shouldThrowExceptionIfNotvalidRequestType() throws Exception {
-
-        exception.expect(RamlValidationException.class);
-        exception.expectMessage("Invalid request type: nd.people.unknown.command1+json");
-
-        generator.run(
-                raml()
-                        .with(resource()
-                                .with(httpAction(POST, "nd.people.unknown.command1+json")))
-                        .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-
-    }
-
-    @Test
-    public void shouldThrowExceptionIfOneOfRequestTypesNotValid() throws Exception {
-
-        exception.expect(RamlValidationException.class);
-        exception.expectMessage("Invalid request type: application/vnd.somemediatype");
-
-        generator.run(
-                raml()
-                        .with(resource()
-                                .with(httpAction()
-                                        .withHttpActionType(POST)
-                                        .withMediaType("application/vnd.somemediatype")
-                                        .withMediaType("application/vnd.somemediatype+json")
-                                ))
-                        .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-
-    }
-
     @Test
     public void shouldThrowExceptionIfResponseTypeNotSetForGETAction() throws Exception {
 

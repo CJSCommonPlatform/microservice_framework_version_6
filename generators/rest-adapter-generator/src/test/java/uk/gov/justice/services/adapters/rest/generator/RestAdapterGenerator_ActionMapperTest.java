@@ -105,8 +105,8 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
                                         .with(mapping()
                                                 .withName("contextB.someOtherAction")
                                                 .withRequestType("application/vnd.ctx.command.somemediatype2+json"))
-                                        .withMediaType("application/vnd.ctx.command.somemediatype1+json")
-                                        .withMediaType("application/vnd.ctx.command.somemediatype2+json")
+                                        .withMediaType("application/vnd.ctx.command.somemediatype1+json", "json/schema/somemediatype1.json")
+                                        .withMediaType("application/vnd.ctx.command.somemediatype2+json", "json/schema/somemediatype2.json")
                                 )
 
                         ).build(),
@@ -116,11 +116,11 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
         Object mapperObject = mapperClass.newInstance();
         Method actionMethod = methodOf(mapperClass.getSuperclass(), "actionOf");
 
-        Object action = actionMethod.invoke(mapperObject, "postCtxCommandSomemediatype1Case", "POST",
+        Object action = actionMethod.invoke(mapperObject, "postContextBSomeActionCase", "POST",
                 headersWith("Content-Type", "application/vnd.ctx.command.somemediatype1+json"));
         assertThat(action, is("contextB.someAction"));
 
-        action = actionMethod.invoke(mapperObject, "postCtxCommandSomemediatype2Case", "POST",
+        action = actionMethod.invoke(mapperObject, "postContextBSomeOtherActionCase", "POST",
                 headersWith("Content-Type", "application/vnd.ctx.command.somemediatype2+json"));
         assertThat(action, is("contextB.someOtherAction"));
 
@@ -136,10 +136,10 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
                                                 .withName("contextC.someAction")
                                                 .withRequestType("application/vnd.ctx.command.somemediatype1+json"))
                                         .with(mapping()
-                                                .withName("contextC.someAction")
+                                                .withName("contextD.someAction")
                                                 .withRequestType("application/vnd.ctx.command.somemediatype2+json"))
-                                        .withMediaType("application/vnd.ctx.command.somemediatype1+json")
-                                        .withMediaType("application/vnd.ctx.command.somemediatype2+json")
+                                        .withMediaType("application/vnd.ctx.command.somemediatype1+json", "json/schema/somemediatype1.json")
+                                        .withMediaType("application/vnd.ctx.command.somemediatype2+json", "json/schema/somemediatype2.json")
                                 )
 
                         ).build(),
@@ -149,16 +149,15 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
         Object mapperObject = mapperClass.newInstance();
         Method actionMethod = methodOf(mapperClass.getSuperclass(), "actionOf");
 
-        Object action = actionMethod.invoke(mapperObject, "postCtxCommandSomemediatype1Case", "POST",
+        Object action = actionMethod.invoke(mapperObject, "postContextCSomeActionCase", "POST",
                 headersWith("Content-Type", "application/vnd.ctx.command.somemediatype1+json"));
         assertThat(action, is("contextC.someAction"));
 
-        action = actionMethod.invoke(mapperObject, "postCtxCommandSomemediatype2Case", "POST",
+        action = actionMethod.invoke(mapperObject, "postContextDSomeActionCase", "POST",
                 headersWith("Content-Type", "application/vnd.ctx.command.somemediatype2+json"));
-        assertThat(action, is("contextC.someAction"));
+        assertThat(action, is("contextD.someAction"));
 
     }
-
 
     @Test
     public void shouldReturnActionNameForPOSTAndGETResource() throws Exception {
@@ -169,7 +168,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
                                         .with(mapping()
                                                 .withName("contextC.commandAction")
                                                 .withRequestType("application/vnd.somemediatype1+json"))
-                                        .withMediaType("application/vnd.somemediatype1+json")
+                                        .withMediaType("application/vnd.somemediatype1+json", "json/schema/somemediatype1.json")
                                 )
                                 .with(httpAction(GET)
                                         .with(mapping()
@@ -185,7 +184,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
         Object mapperObject = mapperClass.newInstance();
         Method actionMethod = methodOf(mapperClass.getSuperclass(), "actionOf");
 
-        Object action = actionMethod.invoke(mapperObject, "postSomemediatype1Case", "POST",
+        Object action = actionMethod.invoke(mapperObject, "postContextCCommandActionCase", "POST",
                 headersWith("Content-Type", "application/vnd.somemediatype1+json"));
         assertThat(action, is("contextC.commandAction"));
 

@@ -18,6 +18,7 @@ import uk.gov.justice.services.adapter.rest.parameter.Parameter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -66,7 +67,7 @@ public class RestProcessor {
      */
     public Response processAsynchronously(final Consumer<JsonEnvelope> consumer,
                                           final String action,
-                                          final JsonObject initialPayload,
+                                          final Optional<JsonObject> initialPayload,
                                           final HttpHeaders headers,
                                           final Collection<Parameter> params) {
 

@@ -14,6 +14,17 @@ match(event).with(
     otherwiseDoNothing());
 ```
 
+### Changed
+- Removed schema validation for requests without a payload (actions without schema/example specified in raml and denoted with !!null).
+
+Example (Two actions, the second has no payload):
+```
+application/vnd.people.modified-user+json:
+    schema: !include json/schema/people.modified-user.json
+    example: !include json/update-user.json
+application/vnd.people.link-user+json: !!null
+```
+
 ## [0.13.0] - 2016-07-28
 
 ### Added

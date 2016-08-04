@@ -44,8 +44,8 @@ public class RestEnvelopeBuilder {
      * @param initialPayload the payload
      * @return an updated builder
      */
-    public RestEnvelopeBuilder withInitialPayload(final JsonObject initialPayload) {
-        this.initialPayload = Optional.of(initialPayload);
+    public RestEnvelopeBuilder withInitialPayload(final Optional<JsonObject> initialPayload) {
+        this.initialPayload = initialPayload;
         return this;
     }
 

@@ -36,6 +36,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -56,6 +57,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 import org.raml.model.Action;
 import org.raml.model.ActionType;
+import org.raml.model.MimeType;
 import org.raml.model.Raml;
 import org.raml.model.Resource;
 import org.raml.model.parameter.QueryParameter;
@@ -73,7 +75,7 @@ class JaxRsImplementationGenerator {
     private static final String PARAMS_PUT_REQUIRED_STATEMENT_FORMAT = "$L.putRequired($S, $N, $T.$L)";
     private static final String PARAMS_PUT_OPTIONAL_STATEMENT_FORMAT = "$L.putOptional($S, $N, $T.$L)";
     private static final String SYNCHRONOUS_METHOD_STATEMENT = "return restProcessor.processSynchronously(syncDispatcher::dispatch, $L.actionOf($S, \"GET\", headers), headers, $L.parameters())";
-    private static final String ASYNCHRONOUS_METHOD_STATEMENT = "return restProcessor.processAsynchronously(asyncDispatcher::dispatch, $L.actionOf($S, \"POST\", headers), entity, headers, $L.parameters())";
+    private static final String ASYNCHRONOUS_METHOD_STATEMENT = "return restProcessor.processAsynchronously(asyncDispatcher::dispatch, $L.actionOf($S, \"POST\", headers), %s, headers, $L.parameters())";
     private static final String ACTION_MAPPER_VARIABLE = "actionMapper";
 
     private final GeneratorConfig configuration;
@@ -171,7 +173,7 @@ class JaxRsImplementationGenerator {
      */
     private MethodSpec processNoActionBody(final Action action) {
         final String resourceMethodName = buildResourceMethodNameWithNoMimeType(action);
-        return generateResourceMethod(action, resourceMethodName).build();
+        return generateResourceMethod(action, resourceMethodName, false).build();
     }
 
     /**
@@ -183,11 +185,21 @@ class JaxRsImplementationGenerator {
     private List<MethodSpec> processOneOrMoreActionBodies(final Action action) {
         return action.getBody().values().stream()
                 .sorted(byMimeTypeOrder())
-                .map(bodyMimeType -> {
-                    final String resourceMethodName = buildResourceMethodName(action, bodyMimeType);
-                    final MethodSpec.Builder methodBuilder = generateResourceMethod(action, resourceMethodName);
-                    return addToMethodWithMimeType(methodBuilder).build();
-                }).collect(Collectors.toList());
+                .map(bodyMimeType -> buildMethodSpecForMimeType(action, bodyMimeType))
+                .collect(Collectors.toList());
+    }
+
+    private MethodSpec buildMethodSpecForMimeType(final Action action, final MimeType bodyMimeType) {
+        final boolean hasPayload = bodyMimeType.getSchema() != null;
+
+        final String resourceMethodName = buildResourceMethodName(action, bodyMimeType);
+        final MethodSpec.Builder methodBuilder = generateResourceMethod(action, resourceMethodName, hasPayload);
+
+        if (hasPayload) {
+            addToMethodWithMimeType(methodBuilder);
+        }
+
+        return methodBuilder.build();
     }
 
     /**
@@ -275,10 +287,12 @@ class JaxRsImplementationGenerator {
      *
      * @param action             the httpAction to generate as a method
      * @param resourceMethodName the resource method name to generate
+     * @param hasPayload flag indicating whether the method has a payload
      * @return a {@link MethodSpec} that represents the generated method
      */
     private MethodSpec.Builder generateResourceMethod(final Action action,
-                                                      final String resourceMethodName) {
+                                                      final String resourceMethodName,
+                                                      final boolean hasPayload) {
         final ActionType actionType = action.getType();
         final Map<String, QueryParameter> queryParams = action.getQueryParameters();
         final Map<String, UriParameter> pathParams = action.getResource().getUriParameters();
@@ -287,7 +301,7 @@ class JaxRsImplementationGenerator {
         if (actionType == GET) {
             methodBody = methodBody(pathParams, () -> methodBodyForGet(queryParams, resourceMethodName));
         } else if (actionType == POST) {
-            methodBody = methodBody(pathParams, () -> methodBodyForPost(resourceMethodName));
+            methodBody = methodBody(pathParams, () -> methodBodyForPost(resourceMethodName, hasPayload));
         } else {
             throw new IllegalStateException(format("Unsupported httpAction type %s", actionType));
         }
@@ -320,12 +334,13 @@ class JaxRsImplementationGenerator {
      * Produce code specific to the POST httpAction type.
      *
      * @param resourceMethodName name of the resource method
+     * @param hasPayload flag indicating whether the method has a payload
      * @return the {@link CodeBlock} representing the POST specific code
      */
-    private CodeBlock methodBodyForPost(final String resourceMethodName) {
+    private CodeBlock methodBodyForPost(final String resourceMethodName, final boolean hasPayload) {
         return CodeBlock.builder()
-                .addStatement(ASYNCHRONOUS_METHOD_STATEMENT,
-                        ACTION_MAPPER_VARIABLE, resourceMethodName, VARIABLE_PARAMS_COLLECTION_BUILDER)
+                .addStatement(String.format(ASYNCHRONOUS_METHOD_STATEMENT, hasPayload ? "$T.of(entity)" : "$T.empty()"),
+                        ACTION_MAPPER_VARIABLE, resourceMethodName, Optional.class, VARIABLE_PARAMS_COLLECTION_BUILDER)
                 .build();
     }
 

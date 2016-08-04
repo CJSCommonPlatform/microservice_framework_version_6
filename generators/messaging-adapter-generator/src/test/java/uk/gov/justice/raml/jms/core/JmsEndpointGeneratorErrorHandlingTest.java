@@ -37,7 +37,6 @@ public class JmsEndpointGeneratorErrorHandlingTest extends BaseGeneratorTest {
         generator.run(
                 raml().build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-
     }
 
     @Test
@@ -66,41 +65,6 @@ public class JmsEndpointGeneratorErrorHandlingTest extends BaseGeneratorTest {
                                 .with(httpAction().withHttpActionType(POST)))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-
-    }
-
-    @Test
-    public void shouldThrowExceptionIfNotValidMediaType() throws Exception {
-
-        exception.expect(RamlValidationException.class);
-        exception.expectMessage("Invalid request type: nd.people.unknown.command1+json");
-
-        generator.run(
-                raml()
-                        .with(resource()
-                                .with(httpAction(POST, "nd.people.unknown.command1+json")))
-                        .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-
-    }
-
-    @Test
-    public void shouldThrowExceptionIfOneOfMediaTypesNotValid() throws Exception {
-
-        exception.expect(RamlValidationException.class);
-        exception.expectMessage("Invalid request type: application/v.command+json");
-
-        generator.run(
-                raml()
-                        .with(resource()
-                                .with(httpAction()
-                                        .withHttpActionType(POST)
-                                        .withMediaType("application/v.command+json")
-                                        .withMediaType("application/vnd.command1+json")
-                                ))
-                        .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-
     }
 
     @Test
@@ -116,8 +80,6 @@ public class JmsEndpointGeneratorErrorHandlingTest extends BaseGeneratorTest {
                                 .withDefaultPostAction())
                         .build(),
                 configurationWithBasePackage("uk.somepackage", outputFolder, emptyMap()));
-
-
     }
 
     @Test
@@ -133,8 +95,6 @@ public class JmsEndpointGeneratorErrorHandlingTest extends BaseGeneratorTest {
                                 .withDefaultPostAction())
                         .build(),
                 configurationWithBasePackage("uk.somepackage", outputFolder, emptyMap()));
-
-
     }
 
 }

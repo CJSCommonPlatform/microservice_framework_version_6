@@ -25,6 +25,7 @@ import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.Metadata;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -50,7 +51,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class RestProcessorTest {
 
-    private static final JsonObject NOT_USED_PAYLOAD = Json.createObjectBuilder().build();
+    private static final Optional<JsonObject> NOT_USED_PAYLOAD = Optional.of(Json.createObjectBuilder().build());
     private static final Collection<Parameter> NOT_USED_PATH_PARAMS = emptyList();
     private static final HttpHeaders NOT_USED_HEADERS = new ResteasyHttpHeaders(new MultivaluedMapImpl<>());
     private static final String NOT_USED_ACTION = "actionABC";
@@ -81,7 +82,7 @@ public class RestProcessorTest {
 
     @Test
     public void shouldPassEnvelopeWithPayloadToConsumerOnAsyncProcessing() throws Exception {
-        JsonObject payload = Json.createObjectBuilder().add("key123", "value45678").build();
+        Optional<JsonObject> payload = Optional.of(Json.createObjectBuilder().add("key123", "value45678").build());
 
         restProcessor.processAsynchronously(consumer, NOT_USED_ACTION, payload, NOT_USED_HEADERS, asList(Parameter.valueOf("paramABC", "paramValueBCD", STRING)));
 

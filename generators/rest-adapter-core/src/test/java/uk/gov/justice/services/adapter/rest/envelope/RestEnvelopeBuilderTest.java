@@ -14,6 +14,7 @@ import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.json.JsonObject;
@@ -55,13 +56,13 @@ public class RestEnvelopeBuilderTest {
 
     @Test
     public void shouldAddInitialPayload() throws Exception {
-        JsonObject initialPayload = createObjectBuilder()
+        Optional<JsonObject> initialPayload = Optional.of(createObjectBuilder()
                 .add("test", "value")
-                .build();
+                .build());
 
         JsonEnvelope envelope = builderWithDefaultAction().withInitialPayload(initialPayload).build();
 
-        assertThat(envelope.payloadAsJsonObject(), equalTo(initialPayload));
+        assertThat(envelope.payloadAsJsonObject(), equalTo(initialPayload.get()));
     }
 
     @Test
@@ -69,9 +70,9 @@ public class RestEnvelopeBuilderTest {
 
         JsonEnvelope envelope = builderWithDefaultAction()
                 .withInitialPayload(
-                        createObjectBuilder()
+                        Optional.of(createObjectBuilder()
                                 .add("test", "value")
-                                .build())
+                                .build()))
                 .build();
 
         JsonObject expectedPayload = createObjectBuilder()

@@ -149,8 +149,6 @@ class JaxRsImplementationGenerator {
                         .build());
     }
 
-
-
     /**
      * Process the body or bodies for each httpAction.
      *
@@ -173,7 +171,7 @@ class JaxRsImplementationGenerator {
      */
     private MethodSpec processNoActionBody(final Action action) {
         final String resourceMethodName = buildResourceMethodNameWithNoMimeType(action);
-        return generateResourceMethod(action, resourceMethodName, false).build();
+        return generateGetResourceMethod(resourceMethodName, action);
     }
 
     /**
@@ -189,17 +187,26 @@ class JaxRsImplementationGenerator {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Build a method specification for the body mime type of an action
+     *
+     * @param action       - the action
+     * @param bodyMimeType - the mime type to process
+     * @return - a method specification
+     */
     private MethodSpec buildMethodSpecForMimeType(final Action action, final MimeType bodyMimeType) {
-        final boolean hasPayload = bodyMimeType.getSchema() != null;
-
         final String resourceMethodName = buildResourceMethodName(action, bodyMimeType);
-        final MethodSpec.Builder methodBuilder = generateResourceMethod(action, resourceMethodName, hasPayload);
+        final ActionType actionType = action.getType();
 
-        if (hasPayload) {
-            addToMethodWithMimeType(methodBuilder);
+        if (actionType == GET) {
+            return generateGetResourceMethod(resourceMethodName, action);
         }
 
-        return methodBuilder.build();
+        if (actionType == POST) {
+            return generatePostResourceMethod(resourceMethodName, action, bodyMimeType);
+        }
+
+        throw new IllegalStateException(format("Unsupported httpAction type %s", actionType));
     }
 
     /**
@@ -241,11 +248,13 @@ class JaxRsImplementationGenerator {
 
         if (actionType == GET) {
             return synchronousDispatcherField();
-        } else if (actionType == POST) {
-            return asynchronousDispatcherField();
-        } else {
-            throw new IllegalStateException(format("Unsupported httpAction type %s", actionType));
         }
+
+        if (actionType == POST) {
+            return asynchronousDispatcherField();
+        }
+
+        throw new IllegalStateException(format("Unsupported httpAction type %s", actionType));
     }
 
     /**
@@ -271,74 +280,87 @@ class JaxRsImplementationGenerator {
     }
 
     /**
-     * Add MimeType specific parameter to method.
+     * Generate a POST resource method
      *
-     * @param methodBuilder add parameter to this method builder
-     * @return the method builder
+     * @param resourceMethodName - the name of this method
+     * @param action             - the action to retrieve query and path parameters.
+     * @param bodyMimeType       - the mime type to decide if payload parameter is required
+     * @return the method
      */
-    private MethodSpec.Builder addToMethodWithMimeType(final MethodSpec.Builder methodBuilder) {
-        return methodBuilder.addParameter(ParameterSpec
-                .builder(JsonObject.class, GENERIC_PAYLOAD_ARGUMENT_NAME)
-                .build());
+    private MethodSpec generatePostResourceMethod(final String resourceMethodName, final Action action, final MimeType bodyMimeType) {
+        final Map<String, QueryParameter> queryParams = action.getQueryParameters();
+        final Map<String, UriParameter> pathParams = action.getResource().getUriParameters();
+
+        final boolean hasPayload = bodyMimeType.getSchema() != null;
+
+        final MethodSpec.Builder methodBuilder = generateGenericResourceMethod(resourceMethodName, queryParams, pathParams)
+                .addCode(methodBody(pathParams, methodBodyForPost(resourceMethodName, hasPayload)));
+
+        if (hasPayload) {
+            methodBuilder.addParameter(payloadParameter());
+        }
+
+        return methodBuilder.build();
     }
 
     /**
-     * Generate a method for each {@link Action}.
+     * Generate a GET resource method
      *
-     * @param action             the httpAction to generate as a method
-     * @param resourceMethodName the resource method name to generate
-     * @param hasPayload flag indicating whether the method has a payload
-     * @return a {@link MethodSpec} that represents the generated method
+     * @param resourceMethodName - the name of this method
+     * @param action             - the action to retrieve query and path parameters.
+     * @return the method
      */
-    private MethodSpec.Builder generateResourceMethod(final Action action,
-                                                      final String resourceMethodName,
-                                                      final boolean hasPayload) {
-        final ActionType actionType = action.getType();
+    private MethodSpec generateGetResourceMethod(final String resourceMethodName, final Action action) {
         final Map<String, QueryParameter> queryParams = action.getQueryParameters();
         final Map<String, UriParameter> pathParams = action.getResource().getUriParameters();
-        final CodeBlock methodBody;
 
-        if (actionType == GET) {
-            methodBody = methodBody(pathParams, () -> methodBodyForGet(queryParams, resourceMethodName));
-        } else if (actionType == POST) {
-            methodBody = methodBody(pathParams, () -> methodBodyForPost(resourceMethodName, hasPayload));
-        } else {
-            throw new IllegalStateException(format("Unsupported httpAction type %s", actionType));
-        }
+        return generateGenericResourceMethod(resourceMethodName, queryParams, pathParams)
+                .addCode(methodBody(pathParams, methodBodyForGet(queryParams, resourceMethodName)))
+                .build();
+    }
 
+    /**
+     * Generate a generic resource method
+     *
+     * @param resourceMethodName - the name of this method
+     * @param queryParams        - the query params to support
+     * @param pathParams         - the path params to support
+     * @return the method builder
+     */
+    private MethodSpec.Builder generateGenericResourceMethod(final String resourceMethodName, final Map<String, QueryParameter> queryParams, final Map<String, UriParameter> pathParams) {
         return methodBuilder(resourceMethodName)
                 .addModifiers(PUBLIC)
                 .addAnnotation(Override.class)
                 .addParameters(methodPathParams(pathParams))
                 .addParameters(methodQueryParams(queryParams))
-                .addCode(methodBody)
                 .returns(Response.class);
     }
 
     /**
-     * Produce code specific to the GET httpAction type.
+     * Supplier that produces code specific to the GET httpAction type.
      *
      * @param queryParams        the query parameters to add to a map
      * @param resourceMethodName name of the resource method
-     * @return the {@link CodeBlock} representing the GET specific code
+     * @return the supplier that returns the {@link CodeBlock}
      */
-    private CodeBlock methodBodyForGet(final Map<String, QueryParameter> queryParams, final String resourceMethodName) {
-        return CodeBlock.builder()
-                .add(putAllQueryParamsInCollectionBuilder(queryParams))
-                .addStatement(SYNCHRONOUS_METHOD_STATEMENT,
-                        ACTION_MAPPER_VARIABLE, resourceMethodName, VARIABLE_PARAMS_COLLECTION_BUILDER)
-                .build();
+    private Supplier<CodeBlock> methodBodyForGet(final Map<String, QueryParameter> queryParams, final String resourceMethodName) {
+        return () ->
+                CodeBlock.builder()
+                        .add(putAllQueryParamsInCollectionBuilder(queryParams))
+                        .addStatement(SYNCHRONOUS_METHOD_STATEMENT,
+                                ACTION_MAPPER_VARIABLE, resourceMethodName, VARIABLE_PARAMS_COLLECTION_BUILDER)
+                        .build();
     }
 
     /**
-     * Produce code specific to the POST httpAction type.
+     * Supplier that produces code specific to the POST httpAction type.
      *
      * @param resourceMethodName name of the resource method
-     * @param hasPayload flag indicating whether the method has a payload
-     * @return the {@link CodeBlock} representing the POST specific code
+     * @param hasPayload         flag indicating whether the method has a payload
+     * @return the supplier that returns the {@link CodeBlock}
      */
-    private CodeBlock methodBodyForPost(final String resourceMethodName, final boolean hasPayload) {
-        return CodeBlock.builder()
+    private Supplier<CodeBlock> methodBodyForPost(final String resourceMethodName, final boolean hasPayload) {
+        return () -> CodeBlock.builder()
                 .addStatement(String.format(ASYNCHRONOUS_METHOD_STATEMENT, hasPayload ? "$T.of(entity)" : "$T.empty()"),
                         ACTION_MAPPER_VARIABLE, resourceMethodName, Optional.class, VARIABLE_PARAMS_COLLECTION_BUILDER)
                 .build();
@@ -373,7 +395,7 @@ class JaxRsImplementationGenerator {
     private CodeBlock putAllPathParamsInCollectionBuilder(final Set<String> paramNames) {
         final CodeBlock.Builder builder = CodeBlock.builder();
 
-        paramNames.stream().forEach(name ->
+        paramNames.forEach(name ->
                 builder.addStatement(PARAMS_PUT_REQUIRED_STATEMENT_FORMAT, VARIABLE_PARAMS_COLLECTION_BUILDER, name, name, ParameterType.class, "STRING")
         );
 
@@ -389,10 +411,11 @@ class JaxRsImplementationGenerator {
     private CodeBlock putAllQueryParamsInCollectionBuilder(final Map<String, QueryParameter> parameters) {
         final CodeBlock.Builder builder = CodeBlock.builder();
 
-        parameters.entrySet().stream().forEach(paramEntry -> {
-            final String name = paramEntry.getKey();
-            final ParameterType parameterType = ParameterType.valueOf(paramEntry.getValue().getType());
-            if (paramEntry.getValue().isRequired()) {
+        parameters.entrySet().forEach(paramEntry -> {
+                    final String name = paramEntry.getKey();
+                    final ParameterType parameterType = ParameterType.valueOf(paramEntry.getValue().getType());
+
+                    if (paramEntry.getValue().isRequired()) {
                         builder.addStatement(PARAMS_PUT_REQUIRED_STATEMENT_FORMAT, VARIABLE_PARAMS_COLLECTION_BUILDER, name, name, ParameterType.class, parameterType.name());
                     } else {
                         builder.addStatement(PARAMS_PUT_OPTIONAL_STATEMENT_FORMAT, VARIABLE_PARAMS_COLLECTION_BUILDER, name, name, ParameterType.class, parameterType.name());
@@ -401,6 +424,17 @@ class JaxRsImplementationGenerator {
         );
 
         return builder.build();
+    }
+
+    /**
+     * JsonObject payload entity parameter.
+     *
+     * @return the the parameter
+     */
+    private ParameterSpec payloadParameter() {
+        return ParameterSpec
+                .builder(JsonObject.class, GENERIC_PAYLOAD_ARGUMENT_NAME)
+                .build();
     }
 
     /**
@@ -426,7 +460,7 @@ class JaxRsImplementationGenerator {
     private List<ParameterSpec> methodQueryParams(final Map<String, QueryParameter> queryParams) {
         return queryParams.keySet().stream().map(name ->
                 ParameterSpec.builder(String.class, name)
-                        .build()
-        ).collect(Collectors.toList());
+                        .build())
+                .collect(Collectors.toList());
     }
 }

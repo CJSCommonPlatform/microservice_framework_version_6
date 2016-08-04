@@ -74,7 +74,7 @@ public class RestAdapterGenerator implements Generator {
                 implementationGenerator.generateFor(raml), configuration, RESOURCE_PACKAGE_NAME);
 
         writeToBasePackage(applicationGenerator.generateFor(raml, implementationNames), configuration);
-        writeToSubPackage(generateFor(raml), configuration, MAPPER_PACKAGE_NAME);
+        writeToSubPackage(generateActionMappingFor(raml), configuration, MAPPER_PACKAGE_NAME);
     }
 
     private void validate(final GeneratorConfig configuration) {
@@ -87,14 +87,14 @@ public class RestAdapterGenerator implements Generator {
         isTrue(outputDirectory.canWrite(), format("%s can't be written to", outputDirectory));
     }
 
-    private List<TypeSpec> generateFor(final Raml raml) {
+    private List<TypeSpec> generateActionMappingFor(final Raml raml) {
         final Collection<Resource> resources = raml.getResources().values();
         return resources.stream()
-                .map(this::generateFor)
+                .map(this::generateActionMappingFor)
                 .collect(toList());
     }
 
-    private TypeSpec generateFor(final Resource resource) {
+    private TypeSpec generateActionMappingFor(final Resource resource) {
 
         final String className = mapperClassNameOf(resource);
         return classBuilder(className)
@@ -166,20 +166,19 @@ public class RestAdapterGenerator implements Generator {
                                         final String packageName) {
         final List<String> implementationNames = new LinkedList<>();
 
-        typeSpecs.stream()
-                .forEach(typeSpec -> {
-                    try {
-                        if (classDoesNotExist(configuration, typeSpec)) {
-                            JavaFile.builder(packageName, typeSpec)
-                                    .build()
-                                    .writeTo(configuration.getOutputDirectory());
-                        }
+        typeSpecs.forEach(typeSpec -> {
+            try {
+                if (classDoesNotExist(configuration, typeSpec)) {
+                    JavaFile.builder(packageName, typeSpec)
+                            .build()
+                            .writeTo(configuration.getOutputDirectory());
+                }
 
-                        implementationNames.add(typeSpec.name);
-                    } catch (IOException e) {
-                        throw new IllegalStateException(e);
-                    }
-                });
+                implementationNames.add(typeSpec.name);
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
+        });
 
         return implementationNames;
     }

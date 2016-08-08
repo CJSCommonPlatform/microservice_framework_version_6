@@ -13,6 +13,7 @@ match(event).with(
     when(SomethingAdded.class).apply(x -> id = x.getId()),
     otherwiseDoNothing());
 ```
+- Added test utility classes for logger producer, test messaging client and other http utilities.
 
 ### Changed
 - Removed schema validation for requests without a payload (actions without schema/example specified in raml and denoted with !!null).

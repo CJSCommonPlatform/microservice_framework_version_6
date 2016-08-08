@@ -15,7 +15,7 @@ import javax.jms.TextMessage;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.command.ActiveMQTopic;
 
-public class MessageTestClient {
+public class MessageClient {
 
     private static final String EVENT_SELECTOR_TEMPLATE = "CPPNAME IN ('%s')";
     private static final String QUEUE_URI = System.getProperty("queueUri", "tcp://localhost:61616");
@@ -68,7 +68,7 @@ public class MessageTestClient {
         messageConsumer = null;
     }
 
-    private void close(AutoCloseable closeable) {
+    private void close(final AutoCloseable closeable) {
 
         if (closeable == null) {
             return;

@@ -33,10 +33,12 @@ public class SimpleAuditClientTest {
     @Test
     public void shouldPrependTheAppNameToTheEnvelopeJsonAndLog() throws Exception {
 
-        final String envelopeJson = new JSONObject()
-                .put("name", "value")
-                .toString();
         final String appName = "the-app-name";
+        final String propertyValue = "value";
+
+        final String envelopeJson = new JSONObject()
+                .put("propertyName", propertyValue)
+                .toString();
 
         final JsonEnvelope envelope =  mock(JsonEnvelope.class);
 
@@ -49,9 +51,10 @@ public class SimpleAuditClientTest {
 
         verify(logger).info(argumentCaptor.capture());
 
-        final String value = argumentCaptor.getValue();
-        with(value)
+        final String json = argumentCaptor.getValue();
+
+        with(json)
                 .assertEquals("appName", appName)
-                .assertEquals("envelope.name", "value");
+                .assertEquals("envelope.propertyName", propertyValue);
     }
 }

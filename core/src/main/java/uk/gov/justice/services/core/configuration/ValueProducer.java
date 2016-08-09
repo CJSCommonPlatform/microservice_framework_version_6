@@ -7,6 +7,7 @@ import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
+import javax.inject.Inject;
 import javax.naming.InitialContext;
 import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
@@ -14,8 +15,8 @@ import javax.naming.NamingException;
 @ApplicationScoped
 public class ValueProducer {
 
-    @Resource(lookup = "java:app/AppName")
-    String appName;
+    @Inject
+    AppNameProvider appNameProvider;
 
     InitialContext initialContext;
 
@@ -31,7 +32,7 @@ public class ValueProducer {
 
     private String getValue(final Value param) throws NamingException {
         try {
-            return (String) initialContext.lookup(format("java:/app/%s/%s", appName, param.key()));
+            return (String) initialContext.lookup(format("java:/app/%s/%s", appNameProvider.getAppName(), param.key()));
         } catch (NameNotFoundException e) {
             if (isEmpty(param.defaultValue())) {
                 throw new MissingPropertyException(format("Missing property: %s", param.key()));

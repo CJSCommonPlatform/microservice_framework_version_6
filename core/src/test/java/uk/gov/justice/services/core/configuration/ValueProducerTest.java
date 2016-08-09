@@ -26,6 +26,7 @@ public class ValueProducerTest {
     private static final String VALID_KEY = "valid key";
     private static final String DEFAULT_VALUE = "Default Value";
     private static final String EMPTY_VALUE = "";
+
     @InjectMocks
     private ValueProducer valueProducer;
 
@@ -39,11 +40,14 @@ public class ValueProducerTest {
     private Value param;
 
     @Mock
+    private AppNameProvider appNameProvider;
+
+    @Mock
     InitialContext initialContext;
 
     @Before
     public void setup() throws NamingException {
-        valueProducer.appName = APP_NAME;
+        when(appNameProvider.getAppName()).thenReturn(APP_NAME);
         when(propertyInjectionPoint.getAnnotated()).thenReturn(annotated);
         when(annotated.getAnnotation(Value.class)).thenReturn(param);
         when(param.key()).thenReturn(VALID_KEY);

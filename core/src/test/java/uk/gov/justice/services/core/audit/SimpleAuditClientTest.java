@@ -6,7 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import uk.gov.justice.services.core.configuration.AppNameProvider;
+import uk.gov.justice.services.core.configuration.ServiceContextNameProvider;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import org.json.JSONObject;
@@ -25,7 +25,7 @@ public class SimpleAuditClientTest {
     Logger logger;
 
     @Mock
-    AppNameProvider appNameProvider;
+    ServiceContextNameProvider serviceContextNameProvider;
 
     @InjectMocks
     private SimpleAuditClient simpleAuditClient;
@@ -33,7 +33,7 @@ public class SimpleAuditClientTest {
     @Test
     public void shouldPrependTheAppNameToTheEnvelopeJsonAndLog() throws Exception {
 
-        final String appName = "the-app-name";
+        final String serviceContextName = "the-service-context-name";
         final String propertyValue = "value";
 
         final String envelopeJson = new JSONObject()
@@ -43,7 +43,7 @@ public class SimpleAuditClientTest {
         final JsonEnvelope envelope =  mock(JsonEnvelope.class);
 
         when(envelope.toString()).thenReturn(envelopeJson);
-        when(appNameProvider.getAppName()).thenReturn(appName);
+        when(serviceContextNameProvider.getServiceContextName()).thenReturn(serviceContextName);
 
         simpleAuditClient.auditEntry(envelope);
 
@@ -54,7 +54,7 @@ public class SimpleAuditClientTest {
         final String json = argumentCaptor.getValue();
 
         with(json)
-                .assertEquals("appName", appName)
+                .assertEquals("serviceContext", serviceContextName)
                 .assertEquals("envelope.propertyName", propertyValue);
     }
 }

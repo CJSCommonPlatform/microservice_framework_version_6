@@ -1,5 +1,6 @@
 package uk.gov.justice.services.messaging;
 
+import org.json.JSONObject;
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -65,6 +66,15 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
 
     public static Builder envelope() {
         return new Builder();
+    }
+
+    @Override
+    public String toString() {
+
+        return new JSONObject()
+                .put("metadata", new JSONObject(metadata.asJsonObject().toString()))
+                .put("payload", new JSONObject(payload.toString()))
+                .toString(2);
     }
 
     public static class Builder {

@@ -40,14 +40,14 @@ public class ValueProducerTest {
     private Value param;
 
     @Mock
-    private AppNameProvider appNameProvider;
+    private ServiceContextNameProvider serviceContextNameProvider;
 
     @Mock
     InitialContext initialContext;
 
     @Before
     public void setup() throws NamingException {
-        when(appNameProvider.getAppName()).thenReturn(APP_NAME);
+        when(serviceContextNameProvider.getServiceContextName()).thenReturn(APP_NAME);
         when(propertyInjectionPoint.getAnnotated()).thenReturn(annotated);
         when(annotated.getAnnotation(Value.class)).thenReturn(param);
         when(param.key()).thenReturn(VALID_KEY);

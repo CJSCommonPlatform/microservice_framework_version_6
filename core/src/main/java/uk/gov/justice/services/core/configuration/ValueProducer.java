@@ -3,7 +3,6 @@ package uk.gov.justice.services.core.configuration;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
-import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -16,7 +15,7 @@ import javax.naming.NamingException;
 public class ValueProducer {
 
     @Inject
-    AppNameProvider appNameProvider;
+    ServiceContextNameProvider serviceContextNameProvider;
 
     InitialContext initialContext;
 
@@ -32,7 +31,7 @@ public class ValueProducer {
 
     private String getValue(final Value param) throws NamingException {
         try {
-            return (String) initialContext.lookup(format("java:/app/%s/%s", appNameProvider.getAppName(), param.key()));
+            return (String) initialContext.lookup(format("java:/app/%s/%s", serviceContextNameProvider.getServiceContextName(), param.key()));
         } catch (NameNotFoundException e) {
             if (isEmpty(param.defaultValue())) {
                 throw new MissingPropertyException(format("Missing property: %s", param.key()));

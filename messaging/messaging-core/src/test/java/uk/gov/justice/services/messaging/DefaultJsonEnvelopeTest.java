@@ -1,8 +1,13 @@
 package uk.gov.justice.services.messaging;
 
+import static com.jayway.jsonassert.JsonAssert.with;
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
+
+import java.util.UUID;
 
 import javax.json.JsonArray;
 import javax.json.JsonNumber;
@@ -69,4 +74,33 @@ public class DefaultJsonEnvelopeTest {
         assertThat(envelopeFrom(metadata, payloadAsJsonString).payloadAsJsonString(), equalTo(payloadAsJsonString));
     }
 
+    @Test
+    public void shouldPrettyPrintAsJsonWhenCallingToString() throws Exception {
+
+        final String metadataName = "metadata name";
+        final UUID metadataId = randomUUID();
+        final String payloadName = "payloadName";
+        final String payloadValue = "payloadValue";
+
+        final Metadata metadata = metadata(metadataId, metadataName);
+        final JsonObject payload = payload(payloadName, payloadValue);
+        final JsonEnvelope jsonEnvelope = envelopeFrom(metadata, payload);
+
+        final String json = jsonEnvelope.toString();
+        with(json)
+                .assertEquals("metadata.id", metadataId.toString())
+                .assertEquals("metadata.name", metadataName)
+                .assertEquals("payload." + payloadName, payloadValue);
+    }
+
+    private Metadata metadata(final UUID metadataId, final String metadataName) {
+        return metadataOf(metadataId, metadataName).build();
+    }
+
+    private JsonObject payload(final String payloadName, final String payloadValue) {
+        final JsonObjectBuilderWrapper jsonObjectBuilderWrapper = new JsonObjectBuilderWrapper();
+        jsonObjectBuilderWrapper.add(payloadValue, payloadName);
+
+        return jsonObjectBuilderWrapper.build();
+    }
 }

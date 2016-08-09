@@ -15,7 +15,7 @@ import static org.junit.Assert.fail;
 
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLog;
 import uk.gov.justice.services.example.cakeshop.it.util.ApiResponse;
-import uk.gov.justice.services.example.cakeshop.it.util.StandaloneJdbcEventLogRepository;
+import uk.gov.justice.services.example.cakeshop.it.util.StandaloneEventLogJdbcRepository;
 import uk.gov.justice.services.example.cakeshop.it.util.TestProperties;
 
 import java.net.URISyntaxException;
@@ -73,10 +73,11 @@ public class CakeShopIT {
     private static final String QUERY_ORDER_MEDIA_TYPE = "application/vnd.cakeshop.order+json";
 
     public final static String JMS_USERNAME = "jmsuser";
+
     public final static String JMS_PASSWORD = "jms@user123";
     private static final String JMS_BROKER_URL = "tcp://localhost:61616";
 
-    private static StandaloneJdbcEventLogRepository EVENT_LOG_REPOSITORY;
+    private static StandaloneEventLogJdbcRepository EVENT_LOG_REPOSITORY;
     private static ActiveMQConnectionFactory JMS_CONNECTION_FACTORY;
     private static DataSource CAKE_SHOP_DS;
 
@@ -85,11 +86,10 @@ public class CakeShopIT {
     @BeforeClass
     public static void beforeClass() throws Exception {
         DataSource eventStoreDataSource = initEventStoreDb();
-        EVENT_LOG_REPOSITORY = new StandaloneJdbcEventLogRepository(eventStoreDataSource);
+        EVENT_LOG_REPOSITORY = new StandaloneEventLogJdbcRepository(eventStoreDataSource);
         JMS_CONNECTION_FACTORY = new ActiveMQConnectionFactory(JMS_BROKER_URL);
         initCakeShopDb();
     }
-
 
     @Test
     public void shouldReturn202ResponseWhenAddingRecipe() throws Exception {
@@ -408,8 +408,10 @@ public class CakeShopIT {
 
     private static void initCakeShopDb() throws Exception {
         CAKE_SHOP_DS = initDatabase("db.cakeshop.url", "db.cakeshop.userName", "db.cakeshop.password",
-                "liquibase/view-store-db-changelog.xml");
+                "liquibase/view-store-db-changelog.xml", "liquibase/event-buffer-changelog.xml");
     }
+
+
 
     private static DataSource initEventStoreDb() throws Exception {
         return initDatabase("db.eventstore.url", "db.eventstore.userName",
@@ -465,18 +467,24 @@ public class CakeShopIT {
     private static DataSource initDatabase(final String dbUrlPropertyName,
                                            final String dbUserNamePropertyName,
                                            final String dbPasswordPropertyName,
-                                           final String liquibaseEventStoreDbChangelogXml) throws Exception {
-        BasicDataSource dataSource = new BasicDataSource();
+                                           final String... liquibaseChangeLogXmls) throws Exception {
+        final BasicDataSource dataSource = new BasicDataSource();
         dataSource.setDriverClassName(H2_DRIVER);
-        TestProperties properties = TestProperties.getInstance();
+        final TestProperties properties = TestProperties.getInstance();
         dataSource.setUrl(properties.value(dbUrlPropertyName));
         dataSource.setUsername(properties.value(dbUserNamePropertyName));
         dataSource.setPassword(properties.value(dbPasswordPropertyName));
-
-        Liquibase liquibase = new Liquibase(liquibaseEventStoreDbChangelogXml,
-                new ClassLoaderResourceAccessor(), new JdbcConnection(dataSource.getConnection()));
-        liquibase.dropAll();
-        liquibase.update("");
+        boolean dropped = false;
+        final JdbcConnection jdbcConnection = new JdbcConnection(dataSource.getConnection());
+        for (String liquibaseChangeLogXml: liquibaseChangeLogXmls) {
+            Liquibase liquibase = new Liquibase(liquibaseChangeLogXml,
+                    new ClassLoaderResourceAccessor(), jdbcConnection);
+            if (!dropped) {
+                liquibase.dropAll();
+                dropped = true;
+            }
+            liquibase.update("");
+        }
         return dataSource;
     }
 

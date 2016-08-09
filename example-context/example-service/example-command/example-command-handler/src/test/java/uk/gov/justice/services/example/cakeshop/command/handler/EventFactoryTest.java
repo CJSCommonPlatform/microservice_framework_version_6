@@ -2,7 +2,7 @@ package uk.gov.justice.services.example.cakeshop.command.handler;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.justice.services.test.utils.builder.JsonEnvelopeBuilder.envelopeWithDefaultMetadata;
+import static uk.gov.justice.services.test.utils.core.builder.JsonEnvelopeBuilder.envelopeWithDefaultMetadata;
 
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.example.cakeshop.domain.event.CakeOrdered;

@@ -75,3 +75,7 @@ Thumbs.db
 
 *.h2.db
 *.trace.db
+/core/conf/groups.properties
+/core/conf/login.config
+/core/conf/openejb.xml
+/core/conf/users.properties

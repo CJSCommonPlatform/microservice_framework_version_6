@@ -4,7 +4,7 @@ package uk.gov.justice.services.example.cakeshop.event.listener;
 import static javax.json.Json.createObjectBuilder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.test.utils.builder.JsonEnvelopeBuilder.envelopeWithDefaultMetadata;
+import static uk.gov.justice.services.test.utils.core.builder.JsonEnvelopeBuilder.envelopeWithDefaultMetadata;
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.example.cakeshop.persistence.CakeOrderRepository;

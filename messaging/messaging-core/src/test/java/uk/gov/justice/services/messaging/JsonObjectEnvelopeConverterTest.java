@@ -1,9 +1,12 @@
 package uk.gov.justice.services.messaging;
 
+import static co.unruly.matchers.OptionalMatchers.contains;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.hasItems;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -88,6 +91,22 @@ public class JsonObjectEnvelopeConverterTest {
         final JsonEnvelope envelope = envelopeFrom(metadata, payload);
 
         assertEquals(jsonFromFile("envelope"), jsonObjectEnvelopeConverter.asJsonString(envelope), true);
+    }
+
+    @Test
+    public void shouldReturnEnvelopeFromString() throws Exception {
+
+        final JsonEnvelope jsonEnvelope = jsonObjectEnvelopeConverter.asEnvelope(jsonFromFile("envelope"));
+
+        assertThat(jsonEnvelope.metadata().id(), is(UUID.fromString("861c9430-7bc6-4bf0-b549-6534394b8d65")));
+        assertThat(jsonEnvelope.metadata().name(), is("test.command.do-something"));
+        assertThat(jsonEnvelope.metadata().clientCorrelationId(), contains("d51597dc-2526-4c71-bd08-5031c79f11e1"));
+        assertThat(jsonEnvelope.metadata().causation(), hasItems(UUID.fromString("cd68037b-2fcf-4534-b83d-a9f08072f2ca"),
+                UUID.fromString("43464b22-04c1-4d99-8359-82dc1934d763")));
+        assertThat(jsonEnvelope.metadata().sessionId(), contains("45b0c3fe-afe6-4652-882f-7882d79eadd9"));
+        assertThat(jsonEnvelope.metadata().userId(), contains("72251abb-5872-46e3-9045-950ac5bae399"));
+        
+
     }
 
     @Test

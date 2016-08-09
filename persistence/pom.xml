@@ -14,6 +14,7 @@
 
     <modules>
         <module>persistence-deltaspike</module>
+        <module>persistence-jdbc</module>
     </modules>
 
 </project>

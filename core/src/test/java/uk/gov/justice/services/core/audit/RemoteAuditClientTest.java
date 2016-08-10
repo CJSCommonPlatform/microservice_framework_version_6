@@ -10,12 +10,11 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.core.util.EnveloperFactory.createEnveloper;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 
-import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.configuration.ServiceContextNameProvider;
 import uk.gov.justice.services.core.dispatcher.Requester;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -23,7 +22,6 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.UUID;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -127,16 +125,8 @@ public class RemoteAuditClientTest {
         with(json)
                 .assertEquals("metadata.id", id.toString())
                 .assertEquals("metadata.name", metadataName)
-                .assertEquals("payload.timestamp", timestamp.toString())
+                .assertEquals("payload.timestamp", timestamp)
                 .assertEquals("payload.origin", contextName)
                 .assertEquals("payload.message", message);
-    }
-
-    private static Enveloper createEnveloper() {
-
-        final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
-        final ObjectToJsonValueConverter objectToJsonValueConverter = new ObjectToJsonValueConverter(objectMapper);
-
-        return new Enveloper(objectToJsonValueConverter);
     }
 }

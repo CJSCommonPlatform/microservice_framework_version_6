@@ -11,8 +11,7 @@ public class JmsSenderFactoryTest {
 
     @Test
     public void shouldReturnNewJmsSender() throws Exception {
-        JmsSender jmsSender = new JmsSenderFactory().createJmsSender(Component.COMMAND_API);
-        assertThat(jmsSender, notNullValue());
+        assertThat(new JmsSenderFactory().createSender(Component.COMMAND_API), notNullValue());
     }
 
 }

@@ -24,7 +24,7 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.handler.exception.MissingHandlerException;
 import uk.gov.justice.services.core.handler.registry.HandlerRegistry;
-import uk.gov.justice.services.core.util.RecordingTestHandler;
+import uk.gov.justice.services.core.util.TestEnvelopeRecorder;
 import uk.gov.justice.services.event.buffer.api.EventBufferService;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
@@ -213,11 +213,11 @@ public class DispatcherTest {
     }
 
     @ServiceComponent(COMMAND_API)
-    public static class AsynchronousTestHandler extends RecordingTestHandler {
+    public static class AsynchronousTestHandler extends TestEnvelopeRecorder {
 
         @Handles(ACTION_NAME)
         public void handle(JsonEnvelope envelope) {
-            doHandle(envelope);
+            record(envelope);
         }
     }
 

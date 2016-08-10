@@ -29,13 +29,13 @@ import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SynchronousDispatcherProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.extension.AnnotationScanner;
-import uk.gov.justice.services.core.it.repository.StreamBufferOpenEjbAwareJdbcRepository;
-import uk.gov.justice.services.core.it.repository.StreamStatusOpenEjbAwareJdbcRepository;
-import uk.gov.justice.services.core.jms.JmsDestinations;
+import uk.gov.justice.services.core.it.util.repository.StreamBufferOpenEjbAwareJdbcRepository;
+import uk.gov.justice.services.core.it.util.repository.StreamStatusOpenEjbAwareJdbcRepository;
 import uk.gov.justice.services.core.jms.JmsSenderFactory;
+import uk.gov.justice.services.core.jms.JmsDestinations;
 import uk.gov.justice.services.core.sender.ComponentDestination;
 import uk.gov.justice.services.core.sender.SenderProducer;
-import uk.gov.justice.services.core.util.RecordingTestHandler;
+import uk.gov.justice.services.core.util.TestEnvelopeRecorder;
 import uk.gov.justice.services.event.buffer.core.repository.service.ConsecutiveEventBufferService;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
@@ -60,7 +60,7 @@ import org.junit.runner.RunWith;
 @RunWith(ApplicationComposer.class)
 @FrameworkComponent("CORE_TEST")
 @Adapter(EVENT_LISTENER)
-public class EventHandlerIT {
+public class AllEventsHandlerIT {
 
     private static final String EVENT_ABC = "test.event-abc";
 
@@ -124,8 +124,8 @@ public class EventHandlerIT {
                         .withStreamId(randomUUID())
                         .withVersion(1l)).build());
 
-        assertThat(abcEventHandler.recordedEnvelope(), not(nullValue()));
-        assertThat(abcEventHandler.recordedEnvelope().metadata().id(), equalTo(metadataId));
+        assertThat(abcEventHandler.firstRecordedEnvelope(), not(nullValue()));
+        assertThat(abcEventHandler.firstRecordedEnvelope().metadata().id(), equalTo(metadataId));
     }
 
     @Test
@@ -137,28 +137,28 @@ public class EventHandlerIT {
                         .withStreamId(randomUUID())
                         .withVersion(1l)).build());
 
-        assertThat(allEventsHandler.recordedEnvelope(), not(nullValue()));
-        assertThat(allEventsHandler.recordedEnvelope().metadata().id(), equalTo(metadataId));
+        assertThat(allEventsHandler.firstRecordedEnvelope(), not(nullValue()));
+        assertThat(allEventsHandler.firstRecordedEnvelope().metadata().id(), equalTo(metadataId));
     }
 
     @ServiceComponent(EVENT_LISTENER)
     @ApplicationScoped
-    public static class AbcEventHandler extends RecordingTestHandler {
+    public static class AbcEventHandler extends TestEnvelopeRecorder {
 
         @Handles(EVENT_ABC)
         public void handle(JsonEnvelope envelope) {
-            doHandle(envelope);
+            record(envelope);
         }
 
     }
 
     @ServiceComponent(EVENT_LISTENER)
     @ApplicationScoped
-    public static class AllEventsHandler extends RecordingTestHandler {
+    public static class AllEventsHandler extends TestEnvelopeRecorder {
 
         @Handles("*")
         public void handle(JsonEnvelope envelope) {
-            doHandle(envelope);
+            record(envelope);
         }
 
     }

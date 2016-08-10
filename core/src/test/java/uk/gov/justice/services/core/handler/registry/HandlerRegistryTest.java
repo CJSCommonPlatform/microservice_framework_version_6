@@ -16,7 +16,7 @@ import uk.gov.justice.services.core.handler.HandlerMethod;
 import uk.gov.justice.services.core.handler.exception.MissingHandlerException;
 import uk.gov.justice.services.core.handler.registry.exception.DuplicateHandlerException;
 import uk.gov.justice.services.core.handler.registry.exception.InvalidHandlerException;
-import uk.gov.justice.services.core.util.RecordingTestHandler;
+import uk.gov.justice.services.core.util.TestEnvelopeRecorder;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import org.junit.Test;
@@ -77,16 +77,16 @@ public class HandlerRegistryTest {
         final HandlerMethod handlerMethod = registry.get(COMMAND_NAME, ASYNCHRONOUS);
 
         assertHandlerMethodInvokesHandler(handlerMethod, testCommandHandler);
-        assertThat(testAllEventsHandler.recordedEnvelope(), nullValue());
+        assertThat(testAllEventsHandler.firstRecordedEnvelope(), nullValue());
     }
 
-    private void assertHandlerMethodInvokesHandler(final HandlerMethod handlerMethod, final RecordingTestHandler handler) {
+    private void assertHandlerMethodInvokesHandler(final HandlerMethod handlerMethod, final TestEnvelopeRecorder handler) {
         assertThat(handlerMethod, notNullValue());
 
         final JsonEnvelope envelope = envelope().build();
         handlerMethod.execute(envelope);
 
-        assertThat(handler.recordedEnvelope(), sameInstance(envelope));
+        assertThat(handler.firstRecordedEnvelope(), sameInstance(envelope));
     }
 
     @Test(expected = MissingHandlerException.class)
@@ -140,11 +140,11 @@ public class HandlerRegistryTest {
     }
 
     @ServiceComponent(COMMAND_HANDLER)
-    public static class TestCommandHandler extends RecordingTestHandler {
+    public static class TestCommandHandler extends TestEnvelopeRecorder {
 
         @Handles(COMMAND_NAME)
         public void handle(JsonEnvelope envelope) {
-            doHandle(envelope);
+            record(envelope);
         }
 
     }
@@ -178,11 +178,11 @@ public class HandlerRegistryTest {
     }
 
     @ServiceComponent(COMMAND_HANDLER)
-    public static class TestCommandHandlerWithSynchronousHandler extends RecordingTestHandler {
+    public static class TestCommandHandlerWithSynchronousHandler extends TestEnvelopeRecorder {
 
         @Handles(COMMAND_NAME)
         public JsonEnvelope handle1(JsonEnvelope envelope) {
-            doHandle(envelope);
+            record(envelope);
             return envelope;
         }
 
@@ -227,11 +227,11 @@ public class HandlerRegistryTest {
     }
 
     @ServiceComponent(COMMAND_HANDLER)
-    public static class TestAllEventsHandler extends RecordingTestHandler {
+    public static class TestAllEventsHandler extends TestEnvelopeRecorder {
 
         @Handles("*")
         public void handle(JsonEnvelope envelope) {
-            doHandle(envelope);
+            record(envelope);
         }
 
     }

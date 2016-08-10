@@ -8,7 +8,7 @@ import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.annotation.exception.MissingAnnotationException;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
-import uk.gov.justice.services.core.jms.JmsSenderFactory;
+import uk.gov.justice.services.core.jms.SenderFactory;
 import uk.gov.justice.services.core.jms.JmsSenderWrapper;
 
 import java.util.Map;
@@ -26,7 +26,7 @@ import javax.inject.Inject;
 public class SenderProducer {
 
     @Inject
-    JmsSenderFactory jmsSenderFactory;
+    SenderFactory senderFactory;
 
     @Inject
     ComponentDestination componentDestination;
@@ -61,7 +61,7 @@ public class SenderProducer {
             , final InjectionPoint injectionPoint) {
         final Sender primarySender = produceSender(injectionPoint);
         final Sender legacySender = !componentName.equals(EVENT_PROCESSOR.name()) && !componentName.equals(EVENT_API.name())?
-                senderMap.computeIfAbsent(componentName, c -> jmsSenderFactory.createJmsSender(componentDestination.getDefault(Component.valueOf(c)))) : null;
+                senderMap.computeIfAbsent(componentName, c -> senderFactory.createSender(componentDestination.getDefault(Component.valueOf(c)))) : null;
         return new JmsSenderWrapper(primarySender, legacySender);
     }
 

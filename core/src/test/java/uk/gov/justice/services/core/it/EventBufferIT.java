@@ -30,13 +30,13 @@ import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SynchronousDispatcherProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.extension.AnnotationScanner;
-import uk.gov.justice.services.core.it.repository.StreamBufferOpenEjbAwareJdbcRepository;
-import uk.gov.justice.services.core.it.repository.StreamStatusOpenEjbAwareJdbcRepository;
-import uk.gov.justice.services.core.jms.JmsDestinations;
+import uk.gov.justice.services.core.it.util.repository.StreamBufferOpenEjbAwareJdbcRepository;
+import uk.gov.justice.services.core.it.util.repository.StreamStatusOpenEjbAwareJdbcRepository;
 import uk.gov.justice.services.core.jms.JmsSenderFactory;
+import uk.gov.justice.services.core.jms.JmsDestinations;
 import uk.gov.justice.services.core.sender.ComponentDestination;
 import uk.gov.justice.services.core.sender.SenderProducer;
-import uk.gov.justice.services.core.util.RecordingTestHandler;
+import uk.gov.justice.services.core.util.TestEnvelopeRecorder;
 import uk.gov.justice.services.event.buffer.core.repository.service.ConsecutiveEventBufferService;
 import uk.gov.justice.services.event.buffer.core.repository.streambuffer.StreamBufferEvent;
 import uk.gov.justice.services.event.buffer.core.repository.streamstatus.StreamStatus;
@@ -343,11 +343,11 @@ public class EventBufferIT {
 
     @ServiceComponent(EVENT_LISTENER)
     @ApplicationScoped
-    public static class AbcEventHandler extends RecordingTestHandler {
+    public static class AbcEventHandler extends TestEnvelopeRecorder {
 
         @Handles(EVENT_ABC)
         public void handle(JsonEnvelope envelope) {
-            doHandle(envelope);
+            record(envelope);
         }
 
     }

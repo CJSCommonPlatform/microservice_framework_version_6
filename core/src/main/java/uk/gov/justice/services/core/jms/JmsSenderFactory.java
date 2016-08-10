@@ -1,6 +1,7 @@
 package uk.gov.justice.services.core.jms;
 
 import uk.gov.justice.services.core.annotation.Component;
+import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -10,7 +11,7 @@ import javax.inject.Inject;
  * Factory to create {@link JmsSender}.
  */
 @ApplicationScoped
-public class JmsSenderFactory {
+public class JmsSenderFactory implements SenderFactory {
 
     @Inject
     JmsDestinations jmsDestinations;
@@ -24,7 +25,8 @@ public class JmsSenderFactory {
      * @param componentDestination message destination component.
      * @return a new JmsSender instance.
      */
-    public JmsSender createJmsSender(final Component componentDestination) {
+    @Override
+    public Sender createSender(final Component componentDestination) {
         return new JmsSender(componentDestination, jmsDestinations, jmsEnvelopeSender);
     }
 }

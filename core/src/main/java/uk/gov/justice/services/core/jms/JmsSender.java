@@ -11,17 +11,12 @@ import java.util.Objects;
 import javax.enterprise.inject.Alternative;
 import javax.jms.Destination;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 @Alternative
 public class JmsSender implements Sender {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JmsSender.class);
-
     private final JmsDestinations jmsDestinations;
     private final Component destinationComponent;
-    private JmsEnvelopeSender jmsEnvelopeSender;
+    private final JmsEnvelopeSender jmsEnvelopeSender;
 
     public JmsSender(final Component destinationComponent, final JmsDestinations jmsDestinations,
                      JmsEnvelopeSender jmsEnvelopeSender) {

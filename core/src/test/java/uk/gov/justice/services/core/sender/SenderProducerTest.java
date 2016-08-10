@@ -19,7 +19,7 @@ import uk.gov.justice.services.core.dispatcher.Dispatcher;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.handler.exception.MissingHandlerException;
 import uk.gov.justice.services.core.jms.JmsSender;
-import uk.gov.justice.services.core.jms.JmsSenderFactory;
+import uk.gov.justice.services.core.jms.SenderFactory;
 import uk.gov.justice.services.core.util.TestInjectionPoint;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
@@ -33,7 +33,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class SenderProducerTest {
 
     @Mock
-    private JmsSenderFactory jmsSenderFactory;
+    private SenderFactory senderFactory;
 
     @Mock
     private JmsSender legacyJmsSender;
@@ -49,7 +49,7 @@ public class SenderProducerTest {
     @Before
     public void setup() {
         senderProducer = new SenderProducer();
-        senderProducer.jmsSenderFactory = jmsSenderFactory;
+        senderProducer.senderFactory = senderFactory;
         senderProducer.dispatcherCache = dispatcherCache;
         senderProducer.componentDestination = new ComponentDestination();
     }
@@ -59,7 +59,7 @@ public class SenderProducerTest {
         final TestInjectionPoint injectionPoint = new TestInjectionPoint(TestCommandApi.class);
 
         when(dispatcherCache.dispatcherFor(injectionPoint)).thenReturn(dispatcher);
-        when(jmsSenderFactory.createJmsSender(COMMAND_CONTROLLER)).thenReturn(legacyJmsSender);
+        when(senderFactory.createSender(COMMAND_CONTROLLER)).thenReturn(legacyJmsSender);
 
         final Sender returnedSender = senderProducer.produce(injectionPoint);
 
@@ -112,7 +112,7 @@ public class SenderProducerTest {
         final TestInjectionPoint injectionPoint = new TestInjectionPoint(TestCommandApi.class);
 
         when(dispatcherCache.dispatcherFor(injectionPoint)).thenReturn(dispatcher);
-        when(jmsSenderFactory.createJmsSender(COMMAND_CONTROLLER)).thenReturn(legacyJmsSender);
+        when(senderFactory.createSender(COMMAND_CONTROLLER)).thenReturn(legacyJmsSender);
         final JsonEnvelope envelope = envelope().build();
         doThrow(new MissingHandlerException("")).when(dispatcher).asynchronousDispatch(envelope);
 

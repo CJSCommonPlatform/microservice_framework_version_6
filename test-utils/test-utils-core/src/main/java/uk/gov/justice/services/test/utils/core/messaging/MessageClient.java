@@ -1,4 +1,4 @@
-package uk.gov.justice.services.test.utils.messaging;
+package uk.gov.justice.services.test.utils.core.messaging;
 
 import static java.util.Optional.empty;
 import static java.util.Optional.of;

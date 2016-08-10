@@ -1,8 +1,9 @@
 package uk.gov.justice.services.example.cakeshop.query.api;
 
-import static uk.gov.justice.services.test.utils.helper.ServiceComponents.verifyPassThroughQueryHandlerMethod;
 
 import org.junit.Test;
+
+import static uk.gov.justice.services.test.utils.core.helper.ServiceComponents.verifyPassThroughQueryHandlerMethod;
 
 public class CakeOrdersQueryApiTest {
 

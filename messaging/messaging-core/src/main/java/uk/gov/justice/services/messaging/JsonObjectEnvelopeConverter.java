@@ -17,6 +17,9 @@ import javax.json.JsonValue.ValueType;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.IOException;
+import java.io.StringReader;
+
 /**
  * A converter class to convert between {@link JsonEnvelope} and {@link JsonObject}.
  */
@@ -36,6 +39,10 @@ public class JsonObjectEnvelopeConverter {
                 metadataFrom(envelopeJsonObject.getJsonObject(METADATA)),
                 extractPayloadFromEnvelope(envelopeJsonObject));
     }
+    public JsonEnvelope asEnvelope(final String jsonString) {
+        return asEnvelope(Json.createReader(new StringReader(jsonString)).readObject());
+    }
+
 
     /**
      * Converts an {@link JsonEnvelope} into a {@link JsonObject}
@@ -78,6 +85,7 @@ public class JsonObjectEnvelopeConverter {
 
     /**
      * Serialise a JSON envelope into a JSON string.
+     *
      * @param envelope the envelope to serialise
      * @return the JSON
      */
@@ -88,4 +96,5 @@ public class JsonObjectEnvelopeConverter {
             throw new RuntimeException("Could not serialize JSON envelope", e);
         }
     }
+
 }

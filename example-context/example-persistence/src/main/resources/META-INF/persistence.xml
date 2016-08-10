@@ -6,7 +6,7 @@
 
     <persistence-unit name="Cakeshop">
         <provider>org.hibernate.ejb.HibernatePersistence</provider>
-        <jta-data-source>java:/DS.cakeshop</jta-data-source>
+        <jta-data-source>java:/DS.example</jta-data-source>
         <class>uk.gov.justice.services.example.cakeshop.persistence.entity.Recipe</class>
         <class>uk.gov.justice.services.example.cakeshop.persistence.entity.RecipeIngredient</class>
         <class>uk.gov.justice.services.example.cakeshop.persistence.entity.CakeOrder</class>

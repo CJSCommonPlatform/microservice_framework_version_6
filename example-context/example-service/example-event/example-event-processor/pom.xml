@@ -14,7 +14,7 @@
     <dependencies>
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
-            <artifactId>event-listener</artifactId>
+            <artifactId>event-processor</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

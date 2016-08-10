@@ -25,6 +25,7 @@ import uk.gov.justice.services.core.accesscontrol.AccessControlViolationExceptio
 import uk.gov.justice.services.core.accesscontrol.AllowAllPolicyEvaluator;
 import uk.gov.justice.services.core.accesscontrol.PolicyEvaluator;
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
+import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcherProducer;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
@@ -33,6 +34,7 @@ import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SynchronousDispatcherProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.core.eventbuffer.PassThroughEventBufferService;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.logging.JsonEnvelopeLoggerHelper;
@@ -125,7 +127,9 @@ public class RemoteExampleQueryApiIT {
             DispatcherCache.class,
             DispatcherFactory.class,
             JsonEnvelopeLoggerHelper.class,
-            PolicyEvaluator.class
+            PolicyEvaluator.class,
+            PassThroughEventBufferService.class,
+            LoggerProducer.class
     })
     public WebApp war() {
         return new WebApp()

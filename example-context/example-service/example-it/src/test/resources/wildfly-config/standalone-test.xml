@@ -92,7 +92,6 @@
     <profile>
         <subsystem xmlns="urn:jboss:domain:logging:3.0">
             <console-handler name="CONSOLE">
-                <level name="INFO"/>
                 <formatter>
                     <named-formatter name="COLOR-PATTERN"/>
                 </formatter>
@@ -113,6 +112,9 @@
             </logger>
             <logger category="sun.rmi">
                 <level name="WARN"/>
+            </logger>
+            <logger category="uk.gov.justice">
+                <level name="TRACE"/>
             </logger>
             <root-logger>
                 <level name="INFO"/>
@@ -382,7 +384,7 @@
                         <password>${db.eventstore.password}</password>
                     </security>
                 </datasource>
-                <datasource jndi-name="java:/DS.cakeshop" pool-name="DS.cakeshop" enabled="true"
+                <datasource jndi-name="java:/DS.example" pool-name="DS.example" enabled="true"
                             use-java-context="true">
                     <connection-url>${db.cakeshop.url}</connection-url>
                     <driver>h2</driver>

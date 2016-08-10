@@ -6,6 +6,7 @@ import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGen
 import uk.gov.justice.services.core.accesscontrol.AccessControlService;
 import uk.gov.justice.services.core.annotation.ServiceComponentLocation;
 import uk.gov.justice.services.core.handler.registry.HandlerRegistry;
+import uk.gov.justice.services.event.buffer.api.EventBufferService;
 
 import java.util.Optional;
 
@@ -21,12 +22,16 @@ public class DispatcherFactory {
     @Inject
     AccessControlFailureMessageGenerator accessControlFailureMessageGenerator;
 
+    @Inject
+    EventBufferService eventBufferService;
+
     public Dispatcher createNew(final ServiceComponentLocation location) {
         final HandlerRegistry handlerRegistry = new HandlerRegistry();
 
         return new Dispatcher(
                 handlerRegistry,
                 accessControlServiceFor(location),
+                eventBufferService,
                 accessControlFailureMessageGenerator
         );
     }

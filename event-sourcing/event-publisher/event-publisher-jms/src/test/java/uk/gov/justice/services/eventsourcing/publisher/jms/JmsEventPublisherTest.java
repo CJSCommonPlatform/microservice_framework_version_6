@@ -2,7 +2,7 @@ package uk.gov.justice.services.eventsourcing.publisher.jms;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.test.utils.builder.JsonEnvelopeBuilder.envelope;
+import static uk.gov.justice.services.test.utils.core.builder.JsonEnvelopeBuilder.envelope;
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;

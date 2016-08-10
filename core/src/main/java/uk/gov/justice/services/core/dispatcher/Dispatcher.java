@@ -9,6 +9,7 @@ import uk.gov.justice.services.core.accesscontrol.AccessControlViolation;
 import uk.gov.justice.services.core.accesscontrol.AccessControlViolationException;
 import uk.gov.justice.services.core.handler.HandlerMethod;
 import uk.gov.justice.services.core.handler.registry.HandlerRegistry;
+import uk.gov.justice.services.event.buffer.api.EventBufferService;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.Optional;
@@ -26,14 +27,17 @@ public class Dispatcher {
 
     private final HandlerRegistry handlerRegistry;
     private final Optional<AccessControlService> accessControlService;
+    private final EventBufferService eventBufferService;
     private final AccessControlFailureMessageGenerator accessControlFailureMessageGenerator;
 
 
     public Dispatcher(final HandlerRegistry handlerRegistry,
                       final Optional<AccessControlService> accessControlService,
+                      final EventBufferService eventBufferService,
                       final AccessControlFailureMessageGenerator accessControlFailureMessageGenerator) {
         this.handlerRegistry = handlerRegistry;
         this.accessControlService = accessControlService;
+        this.eventBufferService = eventBufferService;
         this.accessControlFailureMessageGenerator = accessControlFailureMessageGenerator;
     }
 
@@ -48,7 +52,8 @@ public class Dispatcher {
      * @param envelope the envelope to dispatch to a handler
      */
     public void asynchronousDispatch(final JsonEnvelope envelope) {
-        doDispatch(envelope, ASYNCHRONOUS);
+        eventBufferService.currentOrderedEventsWith(envelope)
+                .forEach(bufferedEnvelope -> doDispatch(bufferedEnvelope, ASYNCHRONOUS));
     }
 
     /**
@@ -100,8 +105,7 @@ public class Dispatcher {
 
         if (accessControlViolation.isPresent()) {
             final String errorMessage = accessControlFailureMessageGenerator.errorMessageFrom(
-                    jsonEnvelope,
-                    accessControlViolation.get());
+                    jsonEnvelope, accessControlViolation.get());
 
             throw new AccessControlViolationException(errorMessage);
         }

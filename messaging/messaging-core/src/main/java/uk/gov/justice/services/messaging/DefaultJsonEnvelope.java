@@ -79,10 +79,6 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
             return this;
         }
 
-        public JsonEnvelope build() {
-            return envelopeFrom(metadata != null ? metadata.build() : null, payload.build());
-        }
-
         public Builder withPayloadOf(final String value, final String... name) {
             payload.add(value, name);
             return this;
@@ -110,6 +106,14 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
             }
             payload.add(jsonArray, name);
             return this;
+        }
+
+        public JsonEnvelope build() {
+            return envelopeFrom(metadata != null ? metadata.build() : null, payload.build());
+        }
+
+        public String toJsonString() {
+            return new JsonObjectEnvelopeConverter().fromEnvelope(build()).toString();
         }
     }
 

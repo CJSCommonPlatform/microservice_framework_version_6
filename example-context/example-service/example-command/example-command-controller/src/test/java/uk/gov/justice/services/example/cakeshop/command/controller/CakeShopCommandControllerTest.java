@@ -1,8 +1,9 @@
 package uk.gov.justice.services.example.cakeshop.command.controller;
 
-import static uk.gov.justice.services.test.utils.helper.ServiceComponents.verifyPassThroughCommandHandlerMethod;
 
 import org.junit.Test;
+
+import static uk.gov.justice.services.test.utils.core.helper.ServiceComponents.verifyPassThroughCommandHandlerMethod;
 
 public class CakeShopCommandControllerTest {
 

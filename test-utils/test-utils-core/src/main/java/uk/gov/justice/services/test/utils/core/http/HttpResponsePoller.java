@@ -1,10 +1,11 @@
-package uk.gov.justice.services.test.utils.http;
+package uk.gov.justice.services.test.utils.core.http;
+
 
 import static java.lang.Thread.currentThread;
 import static java.lang.Thread.sleep;
 import static javax.ws.rs.core.Response.Status.OK;
 
-import uk.gov.justice.services.test.utils.rest.RestClient;
+import uk.gov.justice.services.test.utils.core.rest.RestClient;
 
 import javax.ws.rs.core.Response;
 

@@ -14,7 +14,6 @@ import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
 import uk.gov.justice.services.core.annotation.ServiceComponent;
-import uk.gov.justice.services.core.annotation.exception.MissingAnnotationException;
 import uk.gov.justice.services.core.dispatcher.Dispatcher;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.handler.exception.MissingHandlerException;
@@ -121,13 +120,6 @@ public class SenderProducerTest {
         returnedSender.send(envelope);
 
         verify(legacyJmsSender).send(envelope);
-    }
-
-    @Test(expected = MissingAnnotationException.class)
-    public void shouldThrowExceptionWithInvalidHandler() throws Exception {
-        final TestInjectionPoint injectionPoint = new TestInjectionPoint(TestInvalidHandler.class);
-        when(dispatcherCache.dispatcherFor(injectionPoint)).thenReturn(dispatcher);
-        senderProducer.produce(injectionPoint);
     }
 
     @Test(expected = IllegalArgumentException.class)

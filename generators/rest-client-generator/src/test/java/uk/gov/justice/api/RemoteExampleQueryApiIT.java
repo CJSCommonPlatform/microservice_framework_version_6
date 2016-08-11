@@ -35,6 +35,7 @@ import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SynchronousDispatcherProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.eventbuffer.PassThroughEventBufferService;
+import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 
@@ -127,7 +128,8 @@ public class RemoteExampleQueryApiIT {
             DispatcherFactory.class,
             PolicyEvaluator.class,
             PassThroughEventBufferService.class,
-            LoggerProducer.class
+            LoggerProducer.class,
+            BeanInstantiater.class
     })
     public WebApp war() {
         return new WebApp()

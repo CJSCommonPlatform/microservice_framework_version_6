@@ -21,4 +21,6 @@ public interface JsonEnvelope extends Envelope<JsonValue> {
 
     JsonString payloadAsJsonString();
 
+    String toDebugStringPrettyPrint();
+
 }

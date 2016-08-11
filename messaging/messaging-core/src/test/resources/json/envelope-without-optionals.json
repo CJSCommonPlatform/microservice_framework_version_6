@@ -1,0 +1,17 @@
+{
+  "_metadata": {
+    "id": "861c9430-7bc6-4bf0-b549-6534394b8d65",
+    "name": "test.command.do-something",
+    "correlation": {
+    },
+    "causation": [
+      "cd68037b-2fcf-4534-b83d-a9f08072f2ca",
+      "43464b22-04c1-4d99-8359-82dc1934d763"
+    ],
+    "context": {
+    }
+  },
+  "payloadId": "c3f7182b-bd20-4678-ba8b-e7e5ea8629c3",
+  "payloadVersion": 0,
+  "payloadName": "Name of the Payload"
+}

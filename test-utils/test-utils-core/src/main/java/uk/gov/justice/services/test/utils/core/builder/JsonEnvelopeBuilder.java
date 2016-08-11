@@ -58,7 +58,7 @@ public class JsonEnvelopeBuilder {
 
 
     public JsonEnvelopeBuilder withMetadataOf(final String key, final String value) {
-        this.payloadJson.add(key, value);
+        this.metadataJson.add(key, value);
         return this;
     }
 

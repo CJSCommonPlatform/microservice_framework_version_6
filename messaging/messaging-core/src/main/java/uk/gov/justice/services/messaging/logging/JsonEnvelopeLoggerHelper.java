@@ -14,7 +14,11 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.USER_ID;
 
 /**
  * Helper class to provide trace string for logging of JsonEnvelopes
+ *
+ * Deprecated: logic had moved to JsonEnvelope.toString(). Please
+ * use that instead.
  */
+@Deprecated
 public class JsonEnvelopeLoggerHelper {
 
     public static String toEnvelopeTraceString(final JsonEnvelope envelope) {
@@ -22,23 +26,6 @@ public class JsonEnvelopeLoggerHelper {
     }
 
     public String toTraceString(final JsonEnvelope envelope) {
-        final JsonObjectBuilder builder = Json.createObjectBuilder();
-
-        builder.add("id", String.valueOf(envelope.metadata().id()))
-                .add("name", envelope.metadata().name());
-
-        envelope.metadata().clientCorrelationId().ifPresent(s -> builder.add(CORRELATION, s));
-        envelope.metadata().sessionId().ifPresent(s -> builder.add(SESSION_ID, s));
-        envelope.metadata().userId().ifPresent(s -> builder.add(USER_ID, s));
-
-        final JsonArrayBuilder causationBuilder = Json.createArrayBuilder();
-
-        final List<UUID> causes = envelope.metadata().causation();
-
-        if(causes != null) {
-            envelope.metadata().causation().stream()
-                    .forEach(uuid -> causationBuilder.add(String.valueOf(uuid)));
-        }
-        return builder.add("causation", causationBuilder).build().toString();
+        return envelope.toString();
     }
 }

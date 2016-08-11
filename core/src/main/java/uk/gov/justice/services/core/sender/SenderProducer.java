@@ -5,11 +5,9 @@ import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.core.annotation.ComponentNameUtil.componentFrom;
 
 import uk.gov.justice.services.core.annotation.Component;
-import uk.gov.justice.services.core.annotation.ServiceComponent;
-import uk.gov.justice.services.core.annotation.exception.MissingAnnotationException;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
-import uk.gov.justice.services.core.jms.SenderFactory;
 import uk.gov.justice.services.core.jms.JmsSenderWrapper;
+import uk.gov.justice.services.core.jms.SenderFactory;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -48,19 +46,13 @@ public class SenderProducer {
      */
     @Produces
     public Sender produce(final InjectionPoint injectionPoint) {
-        final Class<?> targetClass = injectionPoint.getMember().getDeclaringClass();
-
-        if (targetClass.isAnnotationPresent(ServiceComponent.class)) {
-            return getSender(componentFrom(injectionPoint), injectionPoint);
-        } else {
-            throw new MissingAnnotationException("InjectionPoint class must be annotated with " + ServiceComponent.class);
-        }
+        return getSender(componentFrom(injectionPoint), injectionPoint);
     }
 
     private Sender getSender(final String componentName
             , final InjectionPoint injectionPoint) {
         final Sender primarySender = produceSender(injectionPoint);
-        final Sender legacySender = !componentName.equals(EVENT_PROCESSOR.name()) && !componentName.equals(EVENT_API.name())?
+        final Sender legacySender = !componentName.equals(EVENT_PROCESSOR.name()) && !componentName.equals(EVENT_API.name()) ?
                 senderMap.computeIfAbsent(componentName, c -> senderFactory.createSender(componentDestination.getDefault(Component.valueOf(c)))) : null;
         return new JmsSenderWrapper(primarySender, legacySender);
     }

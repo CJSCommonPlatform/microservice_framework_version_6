@@ -48,7 +48,7 @@ public class InterceptorChainProcessorProducerTest {
 
         interceptorChainProcessorProducer.produceProcessor(injectionPoint).process(envelope);
 
-        verify(dispatcher).synchronousDispatch(envelope);
+        verify(dispatcher).dispatch(envelope);
     }
 
     public static class TestInterceptor implements Interceptor {

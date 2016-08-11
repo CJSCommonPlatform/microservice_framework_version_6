@@ -26,16 +26,17 @@ import uk.gov.justice.services.core.accesscontrol.AllowAllPolicyEvaluator;
 import uk.gov.justice.services.core.accesscontrol.PolicyEvaluator;
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
-import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcherProducer;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
 import uk.gov.justice.services.core.dispatcher.Requester;
 import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
-import uk.gov.justice.services.core.dispatcher.SynchronousDispatcherProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.eventbuffer.PassThroughEventBufferService;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
+import uk.gov.justice.services.core.interceptor.InterceptorCache;
+import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
+import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 
@@ -112,8 +113,6 @@ public class RemoteExampleQueryApiIT {
             RestClientProcessor.class,
             RestClientHelper.class,
             DispatcherCache.class,
-            AsynchronousDispatcherProducer.class,
-            SynchronousDispatcherProducer.class,
             RequesterProducer.class,
             ServiceComponentObserver.class,
             StringToJsonObjectConverter.class,
@@ -129,7 +128,10 @@ public class RemoteExampleQueryApiIT {
             PolicyEvaluator.class,
             PassThroughEventBufferService.class,
             LoggerProducer.class,
-            BeanInstantiater.class
+            BeanInstantiater.class,
+            InterceptorChainProcessor.class,
+            InterceptorChainProcessorProducer.class,
+            InterceptorCache.class
     })
     public WebApp war() {
         return new WebApp()

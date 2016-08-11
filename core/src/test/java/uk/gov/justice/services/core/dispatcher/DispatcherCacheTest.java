@@ -4,16 +4,15 @@ import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.LOCAL;
 import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.REMOTE;
 
-import uk.gov.justice.services.core.accesscontrol.AccessControlService;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.extension.ServiceComponentFoundEvent;
+import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.util.TestInjectionPoint;
 
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -29,7 +28,6 @@ public class DispatcherCacheTest {
 
     private InjectionPoint adaptorCommandApiInjectionPointA = new TestInjectionPoint(TestCommandApiAdaptorA.class);
 
-
     private InjectionPoint adaptorCommandApiInjectionPointB = new TestInjectionPoint(TestCommandApiAdaptorB.class);
 
     private InjectionPoint adaptorQueryApiInjectionPoint = new TestInjectionPoint(TestQueryApiAdaptor.class);
@@ -40,7 +38,6 @@ public class DispatcherCacheTest {
     public void setUp() throws Exception {
         dispatcherCache = new DispatcherCache();
         dispatcherCache.dispatcherFactory = new DispatcherFactory();
-        dispatcherCache.dispatcherFactory.accessControlService = mock(AccessControlService.class);
     }
 
     @Test
@@ -96,7 +93,7 @@ public class DispatcherCacheTest {
     @Adapter(COMMAND_API)
     public static class TestCommandApiAdaptorA {
         @Inject
-        AsynchronousDispatcher asyncDispatcher;
+        InterceptorChainProcessor interceptorChainProcessor;
 
         public void dummyMethod() {
 
@@ -106,7 +103,7 @@ public class DispatcherCacheTest {
     @Adapter(COMMAND_API)
     public static class TestCommandApiAdaptorB {
         @Inject
-        AsynchronousDispatcher asyncDispatcher;
+        InterceptorChainProcessor interceptorChainProcessor;
 
         public void dummyMethod() {
 
@@ -116,7 +113,7 @@ public class DispatcherCacheTest {
     @Adapter(QUERY_API)
     public static class TestQueryApiAdaptor {
         @Inject
-        AsynchronousDispatcher asyncDispatcher;
+        InterceptorChainProcessor interceptorChainProcessor;
 
         public void dummyMethod() {
 
@@ -126,7 +123,7 @@ public class DispatcherCacheTest {
     @FrameworkComponent("componentNameABC")
     public static class TestCommandApiFrameworkComponentA {
         @Inject
-        AsynchronousDispatcher asyncDispatcher;
+        InterceptorChainProcessor interceptorChainProcessor;
 
         public void dummyMethod() {
 

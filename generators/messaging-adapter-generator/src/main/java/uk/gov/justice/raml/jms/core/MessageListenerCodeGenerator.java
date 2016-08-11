@@ -14,7 +14,7 @@ import uk.gov.justice.services.adapter.messaging.JmsProcessor;
 import uk.gov.justice.services.adapter.messaging.JsonSchemaValidationInterceptor;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
-import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
+import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.generators.commons.helper.MessagingResourceUri;
 import uk.gov.justice.services.generators.commons.helper.Names;
 import uk.gov.justice.services.messaging.logging.JmsMessageLoggerHelper;
@@ -53,7 +53,7 @@ class MessageListenerCodeGenerator {
 
     private static final String DEFAULT_ANNOTATION_PARAMETER = "value";
     private static final String ACTIVATION_CONFIG_PARAMETER = "activationConfig";
-    private static final String DISPATCHER_FIELD = "dispatcher";
+    private static final String INTERCEPTOR_CHAIN_PROCESS = "interceptorChainProcessor";
     private static final String JMS_PROCESSOR_FIELD = "jmsProcessor";
     private static final String LOGGER_FIELD = "LOGGER";
 
@@ -96,7 +96,7 @@ class MessageListenerCodeGenerator {
                         .addModifiers(PRIVATE, STATIC, FINAL)
                         .initializer("$T.getLogger($L.class)", LoggerFactory.class, classNameOf(resourceUri))
                         .build())
-                .addField(FieldSpec.builder(ClassName.get(AsynchronousDispatcher.class), DISPATCHER_FIELD)
+                .addField(FieldSpec.builder(ClassName.get(InterceptorChainProcessor.class), INTERCEPTOR_CHAIN_PROCESS)
                         .addAnnotation(Inject.class)
                         .build())
                 .addField(FieldSpec.builder(ClassName.get(JmsProcessor.class), JMS_PROCESSOR_FIELD)
@@ -133,7 +133,7 @@ class MessageListenerCodeGenerator {
                 .addCode(CodeBlock.builder()
                         .addStatement("$T.trace(LOGGER, () -> $T.format(\"Received JMS message: %s\", $T.toJmsTraceString($L)))",
                                 LoggerUtils.class, String.class, JmsMessageLoggerHelper.class, messageFieldName)
-                        .addStatement("$L.process($L::dispatch, $L)", JMS_PROCESSOR_FIELD, DISPATCHER_FIELD, messageFieldName)
+                        .addStatement("$L.process($L::process, $L)", JMS_PROCESSOR_FIELD, INTERCEPTOR_CHAIN_PROCESS, messageFieldName)
                         .build())
                 .build();
     }
@@ -215,7 +215,7 @@ class MessageListenerCodeGenerator {
     /**
      * Convert given URI to a valid component.
      *
-     * @param baseUri     base uri of the resource
+     * @param baseUri base uri of the resource
      * @return component the value of the pillar and tier parts of the uri
      */
     private Component componentOf(final BaseUri baseUri) {

@@ -16,7 +16,6 @@ import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.emptyArray;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.POST;
@@ -38,8 +37,7 @@ import uk.gov.justice.services.adapter.rest.BasicActionMapper;
 import uk.gov.justice.services.adapter.rest.processor.RestProcessor;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
-import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
-import uk.gov.justice.services.core.dispatcher.SynchronousDispatcher;
+import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -64,6 +62,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 
 public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGeneratorTest {
+
+    private static final String INTERCEPTOR_CHAIN_PROCESSOR = "interceptorChainProcessor";
 
     @Test
     public void shouldGenerateAnnotatedResourceInterface() throws Exception {
@@ -514,7 +514,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     }
 
     @Test
-    public void shouldAddAsyncDispatcherBeanIfThereIsPOSTResourceInRAML() throws Exception {
+    public void shouldAddInterceptorChainProcessorIfThereIsPOSTResourceInRAML() throws Exception {
         generator.run(
                 restRamlWithDefaults()
                         .with(defaultPostResource()
@@ -523,13 +523,12 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
-        Field dispatcher = resourceClass.getDeclaredField("asyncDispatcher");
-        assertThat(dispatcher, not(nullValue()));
-        assertThat(dispatcher.getType(), equalTo(AsynchronousDispatcher.class));
-        assertThat(dispatcher.getAnnotation(Inject.class), not(nullValue()));
-        assertThat(dispatcher.getModifiers(), is(0));
+        Field chainProcess = resourceClass.getDeclaredField(INTERCEPTOR_CHAIN_PROCESSOR);
+        assertThat(chainProcess, not(nullValue()));
+        assertThat(chainProcess.getType(), equalTo(InterceptorChainProcessor.class));
+        assertThat(chainProcess.getAnnotation(Inject.class), not(nullValue()));
+        assertThat(chainProcess.getModifiers(), is(0));
     }
-
 
     @Test
     public void shouldAddLoggerConstant() throws Exception {
@@ -550,24 +549,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     }
 
     @Test
-    public void shouldNotAddAsyncDispatcherBeanIfThereIsNoPOSTResourceInRAML() throws Exception {
-        generator.run(
-                restRamlWithDefaults()
-                        .with(resource("/some/path")
-                                .with(defaultGetAction()))
-                        .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
-
-        assertFalse(stream(resourceClass.getDeclaredFields())
-                .filter(f -> f.getName().equals("asyncDispatcher"))
-                .findAny()
-                .isPresent());
-    }
-
-
-    @Test
-    public void shouldAddSyncDispatcherBeanIfThereIsGETResourceInRAML() throws Exception {
+    public void shouldAddInterceptorChainProcessorIfThereIsGETResourceInRAML() throws Exception {
         generator.run(
                 restRamlWithDefaults()
                         .with(defaultGetResource()
@@ -576,29 +558,11 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
-        Field dispatcher = resourceClass.getDeclaredField("syncDispatcher");
+        Field dispatcher = resourceClass.getDeclaredField(INTERCEPTOR_CHAIN_PROCESSOR);
         assertThat(dispatcher, not(nullValue()));
-        assertThat(dispatcher.getType(), equalTo(SynchronousDispatcher.class));
+        assertThat(dispatcher.getType(), equalTo(InterceptorChainProcessor.class));
         assertThat(dispatcher.getAnnotation(Inject.class), not(nullValue()));
         assertThat(dispatcher.getModifiers(), is(0));
-    }
-
-    @Test
-    public void shouldNotAddSyncDispatcherBeanIfThereIsNoGETResourceInRAML() throws Exception {
-        generator.run(
-                restRamlWithDefaults()
-                        .with(defaultPostResource()
-                                .withRelativeUri("/some/path")
-                        ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
-
-        assertFalse(stream(resourceClass.getDeclaredFields())
-                .filter(f -> f.getName().equals("syncDispatcher"))
-                .findAny()
-                .isPresent());
-
     }
 
     @Test

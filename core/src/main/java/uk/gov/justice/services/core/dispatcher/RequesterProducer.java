@@ -24,6 +24,6 @@ public class RequesterProducer {
      */
     @Produces
     public Requester produceRequester(final InjectionPoint injectionPoint) {
-        return dispatcherCache.dispatcherFor(injectionPoint)::synchronousDispatch;
+        return dispatcherCache.dispatcherFor(injectionPoint)::dispatch;
     }
 }

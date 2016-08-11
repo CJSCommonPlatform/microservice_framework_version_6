@@ -26,15 +26,16 @@ import uk.gov.justice.services.core.accesscontrol.AllowAllPolicyEvaluator;
 import uk.gov.justice.services.core.accesscontrol.PolicyEvaluator;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
-import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcherProducer;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
 import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
-import uk.gov.justice.services.core.dispatcher.SynchronousDispatcherProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.eventbuffer.PassThroughEventBufferService;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
+import uk.gov.justice.services.core.interceptor.InterceptorCache;
+import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
+import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
 import uk.gov.justice.services.core.jms.JmsDestinations;
 import uk.gov.justice.services.core.jms.JmsSenderFactory;
 import uk.gov.justice.services.core.sender.ComponentDestination;
@@ -101,10 +102,12 @@ public class RemoteExampleEventProcessorIT {
             RestClientProcessor.class,
             RestClientHelper.class,
             DispatcherCache.class,
-            AsynchronousDispatcherProducer.class,
-            SynchronousDispatcherProducer.class,
             RequesterProducer.class,
             ServiceComponentObserver.class,
+
+            InterceptorChainProcessorProducer.class,
+            InterceptorCache.class,
+            InterceptorChainProcessor.class,
 
             // TODO: Remove the next 6 classes when sender is migrated fully to dispatcher system
             SenderProducer.class,
@@ -125,6 +128,7 @@ public class RemoteExampleEventProcessorIT {
             AccessControlService.class,
             DispatcherCache.class,
             DispatcherFactory.class,
+            PolicyEvaluator.class,
             PolicyEvaluator.class,
 
             PassThroughEventBufferService.class,

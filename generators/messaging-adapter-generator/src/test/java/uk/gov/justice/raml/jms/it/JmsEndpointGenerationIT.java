@@ -15,7 +15,7 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
-import uk.gov.justice.services.generators.test.utils.dispatcher.AsynchronousRecordingDispatcher;
+import uk.gov.justice.services.generators.test.utils.interceptor.RecordingInterceptorChainProcessor;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonObjects;
@@ -62,7 +62,7 @@ public class JmsEndpointGenerationIT {
     private static int port = -1;
 
     @Inject
-    AsynchronousRecordingDispatcher dispatcher;
+    RecordingInterceptorChainProcessor interceptorChainProcessor;
 
     @Resource(name = "structure.handler.command")
     private Queue commandHandlerDestination;
@@ -99,7 +99,7 @@ public class JmsEndpointGenerationIT {
     @Module
     @Classes(cdi = true, value = {
             JmsProcessor.class,
-            AsynchronousRecordingDispatcher.class,
+            RecordingInterceptorChainProcessor.class,
             StructureControllerCommandJmsListener.class,
             StructureEventJmsListener.class,
             StructureHandlerCommandJmsListener.class,
@@ -130,7 +130,6 @@ public class JmsEndpointGenerationIT {
         session.close();
     }
 
-
     @Test
     public void commandControllerDispatcherShouldReceiveCommandA() throws JMSException {
 
@@ -139,7 +138,7 @@ public class JmsEndpointGenerationIT {
 
         sendEnvelope(metadataId, commandName, commandControllerDestination);
 
-        JsonEnvelope receivedEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
+        JsonEnvelope receivedEnvelope = interceptorChainProcessor.awaitForEnvelopeWithMetadataOf("id", metadataId);
         assertThat(receivedEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
         assertThat(receivedEnvelope.metadata().name(), is(commandName));
     }
@@ -152,7 +151,7 @@ public class JmsEndpointGenerationIT {
 
         sendEnvelope(metadataId, commandName, commandControllerDestination);
 
-        JsonEnvelope receivedEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
+        JsonEnvelope receivedEnvelope = interceptorChainProcessor.awaitForEnvelopeWithMetadataOf("id", metadataId);
         assertThat(receivedEnvelope.metadata().name(), is(commandName));
         assertThat(receivedEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
     }
@@ -165,7 +164,7 @@ public class JmsEndpointGenerationIT {
         String commandName = "structure.commandc";
 
         sendEnvelope(metadataId, commandName, commandControllerDestination);
-        assertTrue(dispatcher.notFoundEnvelopeWithMetadataOf("id", metadataId));
+        assertTrue(interceptorChainProcessor.notFoundEnvelopeWithMetadataOf("id", metadataId));
     }
 
     @Test
@@ -176,7 +175,7 @@ public class JmsEndpointGenerationIT {
 
         sendEnvelope(metadataId, commandName, commandHandlerDestination);
 
-        JsonEnvelope receivedEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
+        JsonEnvelope receivedEnvelope = interceptorChainProcessor.awaitForEnvelopeWithMetadataOf("id", metadataId);
         assertThat(receivedEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
         assertThat(receivedEnvelope.metadata().name(), is(commandName));
     }
@@ -188,7 +187,7 @@ public class JmsEndpointGenerationIT {
         String commandName = "structure.cmdcc";
 
         sendEnvelope(metadataId, commandName, commandHandlerDestination);
-        assertTrue(dispatcher.notFoundEnvelopeWithMetadataOf("id", metadataId));
+        assertTrue(interceptorChainProcessor.notFoundEnvelopeWithMetadataOf("id", metadataId));
     }
 
     @Test
@@ -198,7 +197,7 @@ public class JmsEndpointGenerationIT {
         String commandName = "people.create-user";
 
         sendEnvelope(metadataId, commandName, commandHandlerDestination, createObjectBuilder().add("non_existent_field", "value").build());
-        assertTrue(dispatcher.notFoundEnvelopeWithMetadataOf("id", metadataId));
+        assertTrue(interceptorChainProcessor.notFoundEnvelopeWithMetadataOf("id", metadataId));
     }
 
     @Test
@@ -215,7 +214,7 @@ public class JmsEndpointGenerationIT {
 
         sendEnvelope(metadataId, eventName, eventsDestination);
 
-        JsonEnvelope receivedEnvelope = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId);
+        JsonEnvelope receivedEnvelope = interceptorChainProcessor.awaitForEnvelopeWithMetadataOf("id", metadataId);
         assertThat(receivedEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
         assertThat(receivedEnvelope.metadata().name(), is(eventName));
     }
@@ -229,7 +228,7 @@ public class JmsEndpointGenerationIT {
         String commandName = "structure.eventcc";
 
         sendEnvelope(metadataId, commandName, eventsDestination);
-        assertTrue(dispatcher.notFoundEnvelopeWithMetadataOf("id", metadataId));
+        assertTrue(interceptorChainProcessor.notFoundEnvelopeWithMetadataOf("id", metadataId));
 
     }
 
@@ -249,15 +248,15 @@ public class JmsEndpointGenerationIT {
         String eventName3 = "another.eventc";
         sendEnvelope(metadataId3, eventName3, publicEventsDestination);
 
-        JsonEnvelope receivedEnvelope1 = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId1);
+        JsonEnvelope receivedEnvelope1 = interceptorChainProcessor.awaitForEnvelopeWithMetadataOf("id", metadataId1);
         assertThat(receivedEnvelope1.metadata().id(), is(UUID.fromString(metadataId1)));
         assertThat(receivedEnvelope1.metadata().name(), is(eventName1));
 
-        JsonEnvelope receivedEnvelope2 = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId2);
+        JsonEnvelope receivedEnvelope2 = interceptorChainProcessor.awaitForEnvelopeWithMetadataOf("id", metadataId2);
         assertThat(receivedEnvelope2.metadata().id(), is(UUID.fromString(metadataId2)));
         assertThat(receivedEnvelope2.metadata().name(), is(eventName2));
 
-        JsonEnvelope receivedEnvelope3 = dispatcher.awaitForEnvelopeWithMetadataOf("id", metadataId3);
+        JsonEnvelope receivedEnvelope3 = interceptorChainProcessor.awaitForEnvelopeWithMetadataOf("id", metadataId3);
         assertThat(receivedEnvelope3.metadata().id(), is(UUID.fromString(metadataId3)));
         assertThat(receivedEnvelope3.metadata().name(), is(eventName3));
     }

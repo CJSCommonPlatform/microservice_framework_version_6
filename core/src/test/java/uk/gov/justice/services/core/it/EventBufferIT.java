@@ -20,16 +20,18 @@ import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
-import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
-import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcherProducer;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
 import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
-import uk.gov.justice.services.core.dispatcher.SynchronousDispatcherProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.core.eventbuffer.EventBufferInterceptor;
 import uk.gov.justice.services.core.extension.AnnotationScanner;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
+import uk.gov.justice.services.core.interceptor.InterceptorCache;
+import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
+import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
+import uk.gov.justice.services.core.interceptor.InterceptorObserver;
 import uk.gov.justice.services.core.it.util.repository.StreamBufferOpenEjbAwareJdbcRepository;
 import uk.gov.justice.services.core.it.util.repository.StreamStatusOpenEjbAwareJdbcRepository;
 import uk.gov.justice.services.core.jms.JmsDestinations;
@@ -80,7 +82,7 @@ public class EventBufferIT {
     private DataSource dataSource;
 
     @Inject
-    private AsynchronousDispatcher asyncDispatcher;
+    private InterceptorChainProcessor interceptorChainProcessor;
 
     @Inject
     private AbcEventHandler abcEventHandler;
@@ -95,10 +97,14 @@ public class EventBufferIT {
     @Classes(cdi = true, value = {
             AbcEventHandler.class,
             AnnotationScanner.class,
-            AsynchronousDispatcherProducer.class,
-            SynchronousDispatcherProducer.class,
             RequesterProducer.class,
             ServiceComponentObserver.class,
+
+            InterceptorChainProcessorProducer.class,
+            InterceptorChainProcessor.class,
+            InterceptorCache.class,
+            InterceptorObserver.class,
+            EventBufferInterceptor.class,
 
             SenderProducer.class,
             JmsSenderFactory.class,
@@ -147,7 +153,7 @@ public class EventBufferIT {
                 .with(metadataOf(metadataId, EVENT_ABC)
                         .withStreamId(streamId).withVersion(2L))
                 .build();
-        asyncDispatcher.dispatch(envelope);
+        interceptorChainProcessor.process(envelope);
 
         List<StreamBufferEvent> streamBufferEvents = jdbcStreamBufferRepository.streamById(streamId).collect(toList());
 
@@ -168,7 +174,7 @@ public class EventBufferIT {
                 .with(metadataOf(metadataId, EVENT_ABC)
                         .withStreamId(streamId).withVersion(1L))
                 .build();
-        asyncDispatcher.dispatch(envelope);
+        interceptorChainProcessor.process(envelope);
 
         List<StreamBufferEvent> streamBufferEvents = jdbcStreamBufferRepository.streamById(streamId).collect(toList());
         Optional<StreamStatus> streamStatus = statusRepository.findByStreamId(streamId);
@@ -181,7 +187,7 @@ public class EventBufferIT {
         assertThat(handledEnvelopes, hasSize(1));
 
         assertThat(handledEnvelopes.get(0).metadata().id(), is(metadataId));
-        assertThat(handledEnvelopes.get(0).metadata().version(), contains(1l));
+        assertThat(handledEnvelopes.get(0).metadata().version(), contains(1L));
     }
 
     @Test
@@ -199,7 +205,7 @@ public class EventBufferIT {
                 .build();
 
 
-        asyncDispatcher.dispatch(envelope);
+        interceptorChainProcessor.process(envelope);
 
         List<StreamBufferEvent> streamBufferEvents = jdbcStreamBufferRepository.streamById(streamId).collect(toList());
         Optional<StreamStatus> streamStatus = statusRepository.findByStreamId(streamId);
@@ -218,7 +224,7 @@ public class EventBufferIT {
 
         statusRepository.insert(new StreamStatus(streamId, 2L));
 
-        asyncDispatcher.dispatch(envelope()
+        interceptorChainProcessor.process(envelope()
                 .with(metadataOf(metadataId, EVENT_ABC)
                         .withStreamId(streamId).withVersion(4L))
                 .build());
@@ -245,16 +251,16 @@ public class EventBufferIT {
                 .build();
 
 
-        statusRepository.insert(new StreamStatus(streamId, 1l));
+        statusRepository.insert(new StreamStatus(streamId, 1L));
 
         UUID metadataId3 = UUID.randomUUID();
         UUID metadataId4 = UUID.randomUUID();
         UUID metadataId5 = UUID.randomUUID();
 
         jdbcStreamBufferRepository.insert(
-                new StreamBufferEvent(streamId, 3l, envelope()
+                new StreamBufferEvent(streamId, 3L, envelope()
                         .with(metadataOf(metadataId3, EVENT_ABC)
-                                .withStreamId(streamId).withVersion(3l)).toJsonString()
+                                .withStreamId(streamId).withVersion(3L)).toJsonString()
                 )
         );
 
@@ -272,7 +278,7 @@ public class EventBufferIT {
                 )
         );
 
-        asyncDispatcher.dispatch(envelope);
+        interceptorChainProcessor.process(envelope);
 
         List<StreamBufferEvent> streamBufferEvents = jdbcStreamBufferRepository.streamById(streamId).collect(toList());
         Optional<StreamStatus> streamStatus = statusRepository.findByStreamId(streamId);
@@ -284,16 +290,16 @@ public class EventBufferIT {
         assertThat(handledEnvelopes, hasSize(4));
 
         assertThat(handledEnvelopes.get(0).metadata().id(), is(metadataId2));
-        assertThat(handledEnvelopes.get(0).metadata().version(), contains(2l));
+        assertThat(handledEnvelopes.get(0).metadata().version(), contains(2L));
 
         assertThat(handledEnvelopes.get(1).metadata().id(), is(metadataId3));
-        assertThat(handledEnvelopes.get(1).metadata().version(), contains(3l));
+        assertThat(handledEnvelopes.get(1).metadata().version(), contains(3L));
 
         assertThat(handledEnvelopes.get(2).metadata().id(), is(metadataId4));
-        assertThat(handledEnvelopes.get(2).metadata().version(), contains(4l));
+        assertThat(handledEnvelopes.get(2).metadata().version(), contains(4L));
 
         assertThat(handledEnvelopes.get(3).metadata().id(), is(metadataId5));
-        assertThat(handledEnvelopes.get(3).metadata().version(), contains(5l));
+        assertThat(handledEnvelopes.get(3).metadata().version(), contains(5L));
 
 
         assertThat(streamBufferEvents, hasSize(0));
@@ -317,7 +323,7 @@ public class EventBufferIT {
         jdbcStreamBufferRepository.insert(streamBufferEvent2);
         jdbcStreamBufferRepository.insert(streamBufferEvent3);
 
-        asyncDispatcher.dispatch(envelope);
+        interceptorChainProcessor.process(envelope);
 
         List<StreamBufferEvent> streamBufferEvents = jdbcStreamBufferRepository.streamById(streamId).collect(toList());
         Optional<StreamStatus> streamStatus = statusRepository.findByStreamId(streamId);

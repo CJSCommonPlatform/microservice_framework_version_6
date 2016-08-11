@@ -58,7 +58,7 @@ public class SenderProducer {
     }
 
     private Sender produceSender(final InjectionPoint injectionPoint) {
-        return dispatcherCache.dispatcherFor(injectionPoint)::asynchronousDispatch;
+        return dispatcherCache.dispatcherFor(injectionPoint)::dispatch;
     }
 
 }

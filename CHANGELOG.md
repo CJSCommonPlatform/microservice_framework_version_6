@@ -3,6 +3,17 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
+## [0.15.0] - 2016-08-11
+
+### Added
+- Add a simple Audit Client
+- Add a toDebugStringPrettyPrinted() method that returns the JsonEnvelope as JSON
+
+### Changed
+- Move the logic of JsonEnvelopeLoggerHelper to the toString() method of JsonEnvelope 
+- Move EnveloperFactory to test utils
+
+
 ## [0.14.0] - 2016-08-08
 
 ### Added

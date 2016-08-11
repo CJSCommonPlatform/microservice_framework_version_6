@@ -12,7 +12,7 @@
 
     <groupId>uk.gov.justice.services</groupId>
     <artifactId>microservice-framework</artifactId>
-    <version>0.15.0-SNAPSHOT</version>
+    <version>0.15.0</version>
     <packaging>pom</packaging>
 
     <name>Microservice Framework</name>

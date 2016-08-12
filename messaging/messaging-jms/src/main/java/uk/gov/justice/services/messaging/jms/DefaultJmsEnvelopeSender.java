@@ -2,7 +2,6 @@ package uk.gov.justice.services.messaging.jms;
 
 import static java.lang.String.format;
 import static javax.jms.Session.AUTO_ACKNOWLEDGE;
-import static uk.gov.justice.services.messaging.logging.JsonEnvelopeLoggerHelper.toEnvelopeTraceString;
 import static uk.gov.justice.services.messaging.logging.LoggerUtils.trace;
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -49,7 +48,7 @@ public class DefaultJmsEnvelopeSender implements JmsEnvelopeSender {
      */
     @Override
     public void send(final JsonEnvelope envelope, final Destination destination) {
-        trace(LOGGER, () -> format("Sending JMS message: %s to %s", toEnvelopeTraceString(envelope),
+        trace(LOGGER, () -> format("Sending JMS message: %s to %s", envelope,
                 destination.toString()));
         try (Connection connection = connectionFactory.createConnection();
              Session session = connection.createSession(false, AUTO_ACKNOWLEDGE);
@@ -60,7 +59,7 @@ public class DefaultJmsEnvelopeSender implements JmsEnvelopeSender {
         } catch (JMSException e) {
             throw new JmsEnvelopeSenderException(format("Exception while sending envelope with name %s", envelope.metadata().name()), e);
         }
-        trace(LOGGER, () -> format("Sent JMS message: %s to %s", toEnvelopeTraceString(envelope),
+        trace(LOGGER, () -> format("Sent JMS message: %s to %s", envelope,
                 destination.toString()));
     }
 

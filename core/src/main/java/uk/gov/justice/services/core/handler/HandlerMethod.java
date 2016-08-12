@@ -1,7 +1,6 @@
 package uk.gov.justice.services.core.handler;
 
 import static java.lang.String.format;
-import static uk.gov.justice.services.messaging.logging.JsonEnvelopeLoggerHelper.toEnvelopeTraceString;
 import static uk.gov.justice.services.messaging.logging.LoggerUtils.trace;
 
 import uk.gov.justice.services.core.handler.exception.HandlerExecutionException;
@@ -96,7 +95,7 @@ public class HandlerMethod {
         trace(LOGGER, () -> format("Dispatching to handler %s.%s : %s",
                 handlerInstance.getClass().toString(),
                 handlerMethod.getName(),
-                toEnvelopeTraceString(envelope)));
+                envelope));
         try {
             final Object obj = handlerMethod.invoke(handlerInstance, envelope);
             trace(LOGGER, () -> {
@@ -107,7 +106,7 @@ public class HandlerMethod {
                     return format("Response received from handler %s.%s : %s",
                             handlerInstance.getClass().toString(),
                             handlerMethod.getName(),
-                            toEnvelopeTraceString((JsonEnvelope) response.get()));
+                            response.get());
                 }
 
                 return format("Response from handler %s.%s with id %s was void",

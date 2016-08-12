@@ -36,14 +36,13 @@ import uk.gov.justice.services.core.jms.JmsSenderFactory;
 import uk.gov.justice.services.core.sender.ComponentDestination;
 import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.core.util.TestEnvelopeRecorder;
-import uk.gov.justice.services.event.buffer.core.service.ConsecutiveEventBufferService;
 import uk.gov.justice.services.event.buffer.core.repository.streambuffer.StreamBufferEvent;
 import uk.gov.justice.services.event.buffer.core.repository.streamstatus.StreamStatus;
+import uk.gov.justice.services.event.buffer.core.service.ConsecutiveEventBufferService;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.DefaultJmsEnvelopeSender;
 import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
-import uk.gov.justice.services.messaging.logging.JsonEnvelopeLoggerHelper;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -118,7 +117,6 @@ public class EventBufferIT {
             AccessControlService.class,
             DispatcherCache.class,
             DispatcherFactory.class,
-            JsonEnvelopeLoggerHelper.class,
             PolicyEvaluator.class,
 
             StreamBufferOpenEjbAwareJdbcRepository.class,

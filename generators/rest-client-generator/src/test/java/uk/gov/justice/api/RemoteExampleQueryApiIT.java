@@ -37,7 +37,6 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.eventbuffer.PassThroughEventBufferService;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
-import uk.gov.justice.services.messaging.logging.JsonEnvelopeLoggerHelper;
 
 import java.io.StringWriter;
 import java.util.Properties;
@@ -126,7 +125,6 @@ public class RemoteExampleQueryApiIT {
             AccessControlService.class,
             DispatcherCache.class,
             DispatcherFactory.class,
-            JsonEnvelopeLoggerHelper.class,
             PolicyEvaluator.class,
             PassThroughEventBufferService.class,
             LoggerProducer.class

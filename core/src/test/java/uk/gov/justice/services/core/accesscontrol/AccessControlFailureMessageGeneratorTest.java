@@ -6,20 +6,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.logging.JsonEnvelopeLoggerHelper;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-
 
 @RunWith(MockitoJUnitRunner.class)
 public class AccessControlFailureMessageGeneratorTest {
-
-    @Mock
-    private JsonEnvelopeLoggerHelper jsonEnvelopeLoggerHelper;
 
     @InjectMocks
     private AccessControlFailureMessageGenerator accessControlFailureMessageGenerator;
@@ -34,7 +28,7 @@ public class AccessControlFailureMessageGeneratorTest {
         final AccessControlViolation accessControlViolation = new AccessControlViolation(reason);
         final JsonEnvelope jsonEnvelope = mock(JsonEnvelope.class);
 
-        when(jsonEnvelopeLoggerHelper.toTraceString(jsonEnvelope)).thenReturn(jsonEnvelopeString);
+        when(jsonEnvelope.toString()).thenReturn(jsonEnvelopeString);
 
         final String errorMessage = accessControlFailureMessageGenerator
                         .errorMessageFrom(jsonEnvelope, accessControlViolation);

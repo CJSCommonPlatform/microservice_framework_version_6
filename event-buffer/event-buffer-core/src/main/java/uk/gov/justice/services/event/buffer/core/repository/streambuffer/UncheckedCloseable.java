@@ -1,12 +1,14 @@
 package uk.gov.justice.services.event.buffer.core.repository.streambuffer;
 
 
+import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
+
 public interface UncheckedCloseable extends Runnable, AutoCloseable {
     default void run() {
         try {
             close();
         } catch (Exception ex) {
-            throw new RuntimeException(ex);
+            throw new JdbcRepositoryException(ex);
         }
     }
 

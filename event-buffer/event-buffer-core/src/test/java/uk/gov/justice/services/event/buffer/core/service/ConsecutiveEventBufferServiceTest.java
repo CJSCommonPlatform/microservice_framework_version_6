@@ -1,12 +1,15 @@
-package uk.gov.justice.services.event.buffer.core.repository.service;
+package uk.gov.justice.services.event.buffer.core.service;
 
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.slf4j.Logger;
+import static co.unruly.matchers.StreamMatchers.contains;
+import static co.unruly.matchers.StreamMatchers.empty;
+import static java.util.UUID.randomUUID;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
 
 import uk.gov.justice.services.event.buffer.core.repository.streambuffer.StreamBufferEvent;
 import uk.gov.justice.services.event.buffer.core.repository.streambuffer.StreamBufferJdbcRepository;
@@ -19,15 +22,12 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static co.unruly.matchers.StreamMatchers.contains;
-import static co.unruly.matchers.StreamMatchers.empty;
-import static java.util.UUID.randomUUID;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.slf4j.Logger;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ConsecutiveEventBufferServiceTest {

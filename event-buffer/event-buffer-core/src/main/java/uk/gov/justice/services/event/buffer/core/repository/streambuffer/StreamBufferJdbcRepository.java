@@ -84,6 +84,7 @@ public class StreamBufferJdbcRepository extends AbstractViewStoreJdbcRepository 
 
             close = close.nest(ps);
             ResultSet resultSet = ps.executeQuery();
+            close = close.nest(resultSet);
 
             return StreamSupport.stream(new Spliterators.AbstractSpliterator<StreamBufferEvent>(
                     Long.MAX_VALUE, Spliterator.ORDERED) {

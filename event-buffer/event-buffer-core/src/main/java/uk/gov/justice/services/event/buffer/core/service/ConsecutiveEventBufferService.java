@@ -29,7 +29,6 @@ import org.slf4j.Logger;
 public class ConsecutiveEventBufferService implements EventBufferService {
 
     private static final long INITIAL_VERSION = 1l;
-
     @Inject
     private Logger logger;
 
@@ -44,15 +43,13 @@ public class ConsecutiveEventBufferService implements EventBufferService {
 
 
     /**
+     * Takes an incoming event and returns a stream of json envelopes. If the event is not
+     * consecutive according to the stream_status repository then an empty stream is returned and
+     * the incomingEvent is added to the event-buffer-repository. If the incomingEvent is
+     * consecutive then it is returned as a stream with any consecutive events from the buffer. If
+     * an event is the first to be processed for that streamId then the version value must be 1 or
+     * the incomingEvent is added to the buffer and an empty stream is returned.
      *
-     * Takes an incoming event and returns a stream of json envelopes. If the event is not consecutive
-     * according to the stream_status repository then an empty stream is returned and the incomingEvent
-     * is added to the event-buffer-repository. If the incomingEvent is consecutive then it is returned
-     * as a stream with any consecutive events from the buffer. If an event is the first to be processed
-     * for that streamId then the version value must be 1 or the incomingEvent is added to the buffer
-     * and an empty stream is returned.
-     *
-     * @param incomingEvent
      * @return stream of consecutive events
      */
     @Override
@@ -63,15 +60,18 @@ public class ConsecutiveEventBufferService implements EventBufferService {
         final UUID streamId = incomingEvent.metadata().streamId().orElseThrow(() -> new IllegalStateException("Event must have a a streamId "));
         final long incomingEventVersion = incomingEvent.metadata().version().orElseThrow(() -> new IllegalStateException("Event must have a version"));
 
-        if(incomingEventVersion == 0L) {
+        if (smallerThanInitial(incomingEventVersion)) {
             throw new IllegalStateException("Version cannot be zero");
         }
+
+        //acquires write lock on stream id to prevent race condition in PostgreSQL
+        streamStatusRepository.tryInsertingInPostgres95(new StreamStatus(streamId, 0l));
 
         final Optional<StreamStatus> currentStatus = streamStatusRepository.findByStreamId(streamId);
         if (currentStatus.isPresent()) {
             final long currentVersion = currentStatus.get().getVersion();
             if (incomingEventObsolete(incomingEventVersion, currentVersion)) {
-                logger.trace("Message : {} is an obsolete version", toEnvelopeTraceString(incomingEvent));
+                logger.warn("Message : {} is an obsolete version", toEnvelopeTraceString(incomingEvent));
                 return Stream.empty();
 
             } else if (incomingEventNotInOrder(incomingEventVersion, currentVersion)) {
@@ -85,9 +85,12 @@ public class ConsecutiveEventBufferService implements EventBufferService {
                 return bufferedEvents(streamId, incomingEvent, incomingEventVersion);
             }
         } else {
-            if(incomingEventVersion == INITIAL_VERSION) {
+            //this is to address race condition in H2
+            //in case of primary key violation the execption gets thrown, event goes back into topic and the transaction gets retried
+            streamStatusRepository.insert(new StreamStatus(streamId, 0l));
+            if (initialVersion(incomingEventVersion)) {
                 logger.trace("Message : {} is a new streamId registering with stream_status repo and sending to dispatcher", toEnvelopeTraceString(incomingEvent));
-                streamStatusRepository.insert(new StreamStatus(streamId, incomingEventVersion));
+                streamStatusRepository.update(new StreamStatus(streamId, incomingEventVersion));
                 return Stream.of(incomingEvent);
             } else {
                 logger.trace("Message : {} is a new streamId but version is not INITIAL_VERSION so adding to buffer", toEnvelopeTraceString(incomingEvent));
@@ -97,6 +100,14 @@ public class ConsecutiveEventBufferService implements EventBufferService {
             }
         }
 
+    }
+
+    private boolean smallerThanInitial(final long incomingEventVersion) {
+        return incomingEventVersion < INITIAL_VERSION;
+    }
+
+    private boolean initialVersion(final long incomingEventVersion) {
+        return incomingEventVersion == INITIAL_VERSION;
     }
 
     private Stream<JsonEnvelope> bufferedEvents(final UUID streamId, final JsonEnvelope incomingEvent, final long incomingEventVersion) {

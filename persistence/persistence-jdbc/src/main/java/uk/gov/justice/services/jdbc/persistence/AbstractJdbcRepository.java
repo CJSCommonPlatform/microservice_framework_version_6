@@ -11,8 +11,8 @@ public abstract class AbstractJdbcRepository {
     @Resource(lookup = "java:app/AppName")
     String warFileName;
 
-    Context initialContext;
-    DataSource datasource;
+    private Context initialContext;
+    private DataSource datasource;
 
     protected Context getInitialContext() throws NamingException {
         if (initialContext == null) {

@@ -150,17 +150,13 @@ public class EventBufferIT {
         asyncDispatcher.dispatch(envelope);
 
         List<StreamBufferEvent> streamBufferEvents = jdbcStreamBufferRepository.streamById(streamId).collect(toList());
-        Optional<StreamStatus> streamStatus = statusRepository.findByStreamId(streamId);
 
         assertThat(streamBufferEvents, hasSize(1));
         assertThat(streamBufferEvents.get(0).getStreamId(), is(streamId));
         assertThat(streamBufferEvents.get(0).getVersion(), is(2L));
 
-        assertThat(streamStatus.isPresent(), is(false));
-
         final List<JsonEnvelope> handledEnvelopes = abcEventHandler.recordedEnvelopes();
         assertThat(handledEnvelopes, empty());
-
     }
 
     @Test

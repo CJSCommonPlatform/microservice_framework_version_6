@@ -1,8 +1,5 @@
 package uk.gov.justice.services.core.dispatcher;
 
-import static uk.gov.justice.services.core.handler.HandlerMethod.ASYNCHRONOUS;
-import static uk.gov.justice.services.core.handler.HandlerMethod.SYNCHRONOUS;
-
 import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
 import uk.gov.justice.services.core.accesscontrol.AccessControlService;
 import uk.gov.justice.services.core.accesscontrol.AccessControlViolation;
@@ -53,7 +50,7 @@ public class Dispatcher {
      */
     public void asynchronousDispatch(final JsonEnvelope envelope) {
         eventBufferService.currentOrderedEventsWith(envelope)
-                .forEach(bufferedEnvelope -> doDispatch(bufferedEnvelope, ASYNCHRONOUS));
+                .forEach(this::doDispatch);
     }
 
     /**
@@ -64,7 +61,7 @@ public class Dispatcher {
      * @return the envelope returned by the handler method
      */
     public JsonEnvelope synchronousDispatch(final JsonEnvelope envelope) {
-        return doDispatch(envelope, SYNCHRONOUS);
+        return doDispatch(envelope);
     }
 
     /**
@@ -79,22 +76,11 @@ public class Dispatcher {
         handlerRegistry.register(handler);
     }
 
-    private JsonEnvelope doDispatch(final JsonEnvelope envelope, final boolean isSynchronous) {
+    private JsonEnvelope doDispatch(final JsonEnvelope envelope) {
         if (accessControlService.isPresent()) {
             checkAccessControl(envelope);
         }
-        return (JsonEnvelope) getMethod(envelope, isSynchronous).execute(envelope);
-    }
-
-    /**
-     * Get the handler method for handling this envelope or throw an exception.
-     *
-     * @param envelope the envelope to be handled
-     * @return the handler method
-     */
-    private HandlerMethod getMethod(final JsonEnvelope envelope, final boolean isSynchronous) {
-        final String name = envelope.metadata().name();
-        return handlerRegistry.get(name, isSynchronous);
+        return (JsonEnvelope) handlerRegistry.get(envelope.metadata().name()).execute(envelope);
     }
 
     private void checkAccessControl(final JsonEnvelope jsonEnvelope) {

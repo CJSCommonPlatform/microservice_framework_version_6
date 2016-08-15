@@ -6,18 +6,19 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ## [0.15.0] - 2016-08-11
 
 ### Added
+- Initial implementation of event ordering buffer for event listeners
 - Add a simple Audit Client
 - Add a toDebugStringPrettyPrinted() method that returns the JsonEnvelope as JSON
 
 ### Changed
-- Move the logic of JsonEnvelopeLoggerHelper to the toString() method of JsonEnvelope 
+- Move the logic of JsonEnvelopeLoggerHelper to the toString() method of JsonEnvelope
 - Move EnveloperFactory to test utils
 
 
 ## [0.14.0] - 2016-08-08
 
 ### Added
-- Add a match all and do nothing EventMatcher to the EventSwitcher. This will ignore all other events.  
+- Add a match all and do nothing EventMatcher to the EventSwitcher. This will ignore all other events.
 Example:
 ```
 match(event).with(

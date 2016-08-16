@@ -16,10 +16,15 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
+import org.slf4j.Logger;
+
 /**
  * JDBC implementation of {@link EventRepository}
  */
 public class JdbcEventRepository implements EventRepository {
+
+    @Inject
+    Logger logger;
 
     @Inject
     EventLogConverter eventLogConverter;
@@ -33,6 +38,7 @@ public class JdbcEventRepository implements EventRepository {
             throw new InvalidStreamIdException("streamId is null.");
         }
 
+        logger.trace("Retrieving event stream for {}", streamId);
         return eventLogJdbcRepository.findByStreamIdOrderBySequenceIdAsc(streamId)
                 .map(eventLogConverter::createEnvelope);
     }
@@ -45,6 +51,7 @@ public class JdbcEventRepository implements EventRepository {
             throw new JdbcRepositoryException("sequenceId is null.");
         }
 
+        logger.trace("Retrieving event stream for {} at sequence {}", streamId, sequenceId);
         return eventLogJdbcRepository.findByStreamIdFromSequenceIdOrderBySequenceIdAsc(streamId, sequenceId)
                 .map(eventLogConverter::createEnvelope);
 
@@ -55,6 +62,7 @@ public class JdbcEventRepository implements EventRepository {
     public void store(final JsonEnvelope envelope, final UUID streamId, final Long version) throws StoreEventRequestFailedException {
         try {
             final EventLog eventLog = eventLogConverter.createEventLog(envelope, streamId, version);
+            logger.trace("Storing event {} into stream {} at version {}", eventLog.getName(), streamId, version);
             eventLogJdbcRepository.insert(eventLog);
         } catch (InvalidSequenceIdException ex) {
             throw new StoreEventRequestFailedException(String.format("Could not store event for version %d of stream %s",

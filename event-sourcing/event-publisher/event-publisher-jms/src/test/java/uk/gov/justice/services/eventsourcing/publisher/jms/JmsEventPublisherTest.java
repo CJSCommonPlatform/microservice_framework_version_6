@@ -11,11 +11,20 @@ import java.util.UUID;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.slf4j.Logger;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JmsEventPublisherTest {
+
+    private static final String DESTINATION_NAME = "destinationName";
+
+    private static final String EVENT_NAME = "test.event.listener";
+
+    @Mock
+    private Logger logger;
 
     @Mock
     private JmsEnvelopeSender jmsEnvelopeSender;
@@ -23,22 +32,19 @@ public class JmsEventPublisherTest {
     @Mock
     private EventDestinationResolver eventDestinationResolver;
 
+    @InjectMocks
+    private JmsEventPublisher jmsEventPublisher;
 
     @Test
     public void shouldPublishEnvelope() {
-        JmsEventPublisher jmsEventPublisher = new JmsEventPublisher();
-        jmsEventPublisher.jmsEnvelopeSender = jmsEnvelopeSender;
-        jmsEventPublisher.eventDestinationResolver = eventDestinationResolver;
+        final JsonEnvelope envelope = envelope().withMetadataOf("id", UUID.randomUUID().toString(), "name", EVENT_NAME).build();
 
-        final String eventName = "test.event.listener";
-
-        final JsonEnvelope envelope = envelope().withMetadataOf("id", UUID.randomUUID().toString(), "name", eventName).build();
-        final String destinationName = "someName";
-        when(eventDestinationResolver.destinationNameOf(eventName)).thenReturn(destinationName);
+        when(eventDestinationResolver.destinationNameOf(EVENT_NAME)).thenReturn(DESTINATION_NAME);
 
         jmsEventPublisher.publish(envelope);
 
-        verify(jmsEnvelopeSender).send(envelope, destinationName);
+        verify(jmsEnvelopeSender).send(envelope, DESTINATION_NAME);
+        verify(logger).trace("Publishing event {} to {}", EVENT_NAME, DESTINATION_NAME);
     }
 
 }

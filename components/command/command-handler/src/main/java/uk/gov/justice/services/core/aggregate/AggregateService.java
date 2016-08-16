@@ -14,11 +14,16 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+
 /**
  * Service for replaying event streams on aggregates.
  */
 @ApplicationScoped
 public class AggregateService {
+
+    @Inject
+    Logger logger;
 
     @Inject
     JsonObjectToObjectConverter jsonObjectToObjectConverter;
@@ -36,6 +41,7 @@ public class AggregateService {
     public <T extends Aggregate> T get(final EventStream stream, final Class<T> clazz) {
 
         try {
+            logger.trace("Recreating aggregate for instance {} of aggregate type {}", stream.getId(), clazz);
             final T aggregate = clazz.newInstance();
             aggregate.apply(stream.read().map(this::convertEnvelopeToEvent));
             return aggregate;
@@ -51,6 +57,7 @@ public class AggregateService {
      * @param event identified by the framework to be registered into the event map
      */
     void register(@Observes final EventFoundEvent event) {
+        logger.info("Registering event {}, {} with AggregateService", event.getEventName() , event.getClazz());
         eventMap.putIfAbsent(event.getEventName(), event.getClazz());
     }
 

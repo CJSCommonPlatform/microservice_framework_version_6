@@ -31,7 +31,6 @@ import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.DefaultJmsEnvelopeSender;
 import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
-import uk.gov.justice.services.messaging.logging.JsonEnvelopeLoggerHelper;
 
 import java.util.UUID;
 
@@ -73,7 +72,6 @@ public class SenderInjectedHandlerIT {
             AccessControlService.class,
             DispatcherCache.class,
             DispatcherFactory.class,
-            JsonEnvelopeLoggerHelper.class,
             PolicyEvaluator.class,
             PassThroughEventBufferService.class,
             LoggerProducer.class,
@@ -101,7 +99,6 @@ public class SenderInjectedHandlerIT {
         assertThat(RecordingSender.instance().recordedEnvelopes().get(0).metadata().name(), equalTo("test.event-1"));
 
     }
-
 
 
 }

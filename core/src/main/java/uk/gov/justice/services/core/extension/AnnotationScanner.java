@@ -1,5 +1,6 @@
 package uk.gov.justice.services.core.extension;
 
+import static org.slf4j.LoggerFactory.getLogger;
 import static uk.gov.justice.services.core.annotation.ComponentNameUtil.componentFrom;
 import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.componentLocationFrom;
 
@@ -8,10 +9,13 @@ import uk.gov.justice.services.core.annotation.AnyLiteral;
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Provider;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
+import uk.gov.justice.services.core.handler.registry.HandlerRegistry;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.AfterDeploymentValidation;
@@ -21,10 +25,14 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 
+import org.slf4j.Logger;
+
 /**
  * Scans all beans and processes framework specific annotations.
  */
 public class AnnotationScanner implements Extension {
+
+    private static final Logger LOGGER = getLogger(HandlerRegistry.class);
 
     private List<Object> events = Collections.synchronizedList(new ArrayList<>());
 
@@ -62,11 +70,14 @@ public class AnnotationScanner implements Extension {
      */
     private void processServiceComponentsForEvents(final Bean<?> bean) {
         final Class<?> clazz = bean.getBeanClass();
+        LOGGER.info("Identified ServiceComponent {}", clazz.getSimpleName());
+
         events.add(new ServiceComponentFoundEvent(componentFrom(clazz), bean, componentLocationFrom(clazz)));
     }
 
     private void processProviderForEvents(final Bean<?> bean) {
         events.add(new ProviderFoundEvent(bean));
+        LOGGER.info("Identified Access Control Provider {}", bean.getBeanClass().getSimpleName());
     }
 
     private void fireAllCollectedEvents(final BeanManager beanManager) {

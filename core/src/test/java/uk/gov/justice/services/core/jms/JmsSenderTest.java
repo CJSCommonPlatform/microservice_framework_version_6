@@ -1,5 +1,6 @@
 package uk.gov.justice.services.core.jms;
 
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
@@ -20,29 +21,37 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.slf4j.Logger;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JmsSenderTest {
 
     private static final String QUEUE_NAME = "test.controller.command";
+
     private static final String NAME = "test.command.do-something";
-    @Mock
-    JmsEnvelopeSender jmsEnvelopeSender;
-    @Mock
-    JmsDestinations jmsDestinations;
-    @Mock
-    Destination destination;
+
     @Mock
     private JsonEnvelope envelope;
+
     @Mock
     private Metadata metadata;
 
+    @Mock
+    JmsEnvelopeSender jmsEnvelopeSender;
+
+    @Mock
+    JmsDestinations jmsDestinations;
+
+    @Mock
+    Destination destination;
+
+    @Mock
+    private Logger logger;
+
     @Before
     public void setup() throws Exception {
-
         when(envelope.metadata()).thenReturn(metadata);
         when(metadata.name()).thenReturn(NAME);
-
     }
 
     @SuppressWarnings({"squid:MethodCyclomaticComplexity", "squid:S1067", "squid:S00122"})
@@ -64,11 +73,15 @@ public class JmsSenderTest {
     public void shouldSendValidEnvelopeToTheQueue() throws Exception {
 
         final JmsSender jmsSender = jmsSenderWithComponent(COMMAND_CONTROLLER);
+        jmsSender.logger = logger;
 
         when(jmsDestinations.getDestination(COMMAND_CONTROLLER, ContextName.fromName(QUEUE_NAME))).thenReturn(destination);
 
         jmsSender.send(envelope);
         verify(jmsEnvelopeSender).send(envelope, destination);
+
+        verify(logger).trace(eq("Sending envelope for action {} to destination: {}"), eq(NAME), eq(destination));
+
 
     }
 

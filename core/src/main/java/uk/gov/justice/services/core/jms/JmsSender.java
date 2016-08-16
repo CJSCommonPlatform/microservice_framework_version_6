@@ -9,7 +9,10 @@ import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
 import java.util.Objects;
 
 import javax.enterprise.inject.Alternative;
+import javax.inject.Inject;
 import javax.jms.Destination;
+
+import org.slf4j.Logger;
 
 @Alternative
 public class JmsSender implements Sender {
@@ -18,8 +21,11 @@ public class JmsSender implements Sender {
     private final Component destinationComponent;
     private final JmsEnvelopeSender jmsEnvelopeSender;
 
+    @Inject
+    Logger logger;
+
     public JmsSender(final Component destinationComponent, final JmsDestinations jmsDestinations,
-                     JmsEnvelopeSender jmsEnvelopeSender) {
+                     final JmsEnvelopeSender jmsEnvelopeSender) {
         this.destinationComponent = destinationComponent;
         this.jmsDestinations = jmsDestinations;
         this.jmsEnvelopeSender = jmsEnvelopeSender;
@@ -29,6 +35,7 @@ public class JmsSender implements Sender {
     public void send(final JsonEnvelope envelope) {
         final String contextName = ContextName.fromName(envelope.metadata().name());
         final Destination destination = jmsDestinations.getDestination(destinationComponent, contextName);
+        logger.trace("Sending envelope for action {} to destination: {}", envelope.metadata().name(), destination);
         jmsEnvelopeSender.send(envelope, destination);
 
     }

@@ -4,6 +4,7 @@ import static uk.gov.justice.services.core.annotation.ComponentNameUtil.componen
 import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.componentLocationFrom;
 
 import uk.gov.justice.domain.annotation.Event;
+import uk.gov.justice.services.core.annotation.AnyLiteral;
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Provider;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -11,17 +12,14 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Stream;
 
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Any;
 import javax.enterprise.inject.spi.AfterDeploymentValidation;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
-import javax.enterprise.util.AnnotationLiteral;
 
 /**
  * Scans all beans and processes framework specific annotations.
@@ -29,7 +27,6 @@ import javax.enterprise.util.AnnotationLiteral;
 public class AnnotationScanner implements Extension {
 
     private List<Object> events = Collections.synchronizedList(new ArrayList<>());
-    private List<Object> providers = Collections.synchronizedList(new ArrayList<>());
 
     @SuppressWarnings("unused")
     <T> void processAnnotatedType(@Observes final ProcessAnnotatedType<T> pat) {
@@ -41,22 +38,21 @@ public class AnnotationScanner implements Extension {
 
     @SuppressWarnings("unused")
     void afterDeploymentValidation(@Observes final AfterDeploymentValidation event, final BeanManager beanManager) {
-        beanManager.getBeans(Object.class, annotationLiteral()).stream()
-                .filter(b -> b.getBeanClass().isAnnotationPresent(ServiceComponent.class)
-                        || b.getBeanClass().isAnnotationPresent(FrameworkComponent.class))
-                .forEach(this::processServiceComponentsForEvents);
-
-        beanManager.getBeans(Object.class, annotationLiteral()).stream()
-                .filter(b -> b.getBeanClass().isAnnotationPresent(Provider.class))
-                .forEach(this::processProviderForEvents);
+        beanManager.getBeans(Object.class, AnyLiteral.create())
+                .forEach(this::processBean);
 
         fireAllCollectedEvents(beanManager);
     }
 
-    private AnnotationLiteral<Any> annotationLiteral() {
-        return new AnnotationLiteral<Any>() {
-            private static final long serialVersionUID = -3118797828842400134L;
-        };
+    private void processBean(final Bean<?> bean) {
+        final Class<?> beanClass = bean.getBeanClass();
+
+        if (beanClass.isAnnotationPresent(ServiceComponent.class)
+                || beanClass.isAnnotationPresent(FrameworkComponent.class)) {
+            processServiceComponentsForEvents(bean);
+        } else if (beanClass.isAnnotationPresent(Provider.class)) {
+            processProviderForEvents(bean);
+        }
     }
 
     /**
@@ -70,10 +66,10 @@ public class AnnotationScanner implements Extension {
     }
 
     private void processProviderForEvents(final Bean<?> bean) {
-        providers.add(new ProviderFoundEvent(bean));
+        events.add(new ProviderFoundEvent(bean));
     }
 
     private void fireAllCollectedEvents(final BeanManager beanManager) {
-        Stream.concat(events.stream(), providers.stream()).forEach(beanManager::fireEvent);
+        events.forEach(beanManager::fireEvent);
     }
 }

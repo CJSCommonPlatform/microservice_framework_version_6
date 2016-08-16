@@ -43,20 +43,23 @@ public class RecipeAddedEventListener {
     public void recipeAdded(final JsonEnvelope event) {
 
         final String recipeId = event.payloadAsJsonObject().getString(FIELD_RECIPE_ID);
-        LOGGER.info("=============> Inside add-recipe Event Listener. RecipeId: " + recipeId);
+        LOGGER.trace("=============> Inside add-recipe Event Listener. RecipeId: " + recipeId);
 
         final RecipeAdded recipeAdded = jsonObjectConverter.convert(event.payloadAsJsonObject(), RecipeAdded.class);
 
         recipeRepository.save(recipeAddedToRecipeConverter.convert(recipeAdded));
 
-        LOGGER.info("=====================================================> Recipe saved, RecipeId: " + recipeId);
+        LOGGER.trace("=====================================================> Recipe saved, RecipeId: " + recipeId);
 
         for (final Ingredient ingredient : recipeAddedToIngredientsConverter.convert(recipeAdded)) {
             if (ingredientRepository.findByNameIgnoreCase(ingredient.getName()).isEmpty()) {
+                LOGGER.trace("=============> Inside add-recipe Event Listener about to save Ingredient Id: " + ingredient.getId());
                 ingredientRepository.save(ingredient);
-                LOGGER.info("=====================================================> Ingredient saved, Ingredient Id: " + ingredient.getId());
+                LOGGER.trace("=====================================================> Ingredient saved, Ingredient Id: " + ingredient.getId());
             }
-            LOGGER.info("=====================================================> Skipped adding ingredient as it already exists, Ingredient Name: " + ingredient.getName());
+            else{
+                LOGGER.trace("=====================================================> Skipped adding ingredient as it already exists, Ingredient Name: " + ingredient.getName());
+            }
         }
     }
 }

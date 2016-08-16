@@ -9,6 +9,7 @@ import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
 
 import uk.gov.justice.services.example.cakeshop.persistence.entity.Ingredient;
+import uk.gov.justice.services.test.utils.persistence.BaseTransactionalTest;
 
 import java.util.List;
 import java.util.UUID;
@@ -16,12 +17,11 @@ import java.util.UUID;
 import javax.inject.Inject;
 
 import org.apache.deltaspike.testcontrol.api.junit.CdiTestRunner;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(CdiTestRunner.class)
-public class IngredientRepositoryTest {
+public class IngredientRepositoryTest extends BaseTransactionalTest {
 
     private static final UUID INGREDIENT = UUID.randomUUID();
     private static final String INGREDIENT_NAME_A = "Flour";
@@ -37,8 +37,8 @@ public class IngredientRepositoryTest {
     private Ingredient ingredientB;
     private Ingredient ingredientC;
 
-    @Before
-    public void setup() {
+    @Override
+    protected void setUpBefore() {
         ingredientA = createIngredient(INGREDIENT, INGREDIENT_NAME_A);
         ingredientRepository.save(ingredientA);
         ingredientB = createIngredient(INGREDIENT_ID_B, INGREDIENT_NAME_B);

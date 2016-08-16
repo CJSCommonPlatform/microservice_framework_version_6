@@ -14,14 +14,14 @@ import org.apache.deltaspike.data.api.Repository;
 import org.apache.deltaspike.data.api.criteria.Criteria;
 import org.apache.deltaspike.data.api.criteria.CriteriaSupport;
 
-@Repository(forEntity = Recipe.class)
+@Repository
 public abstract class RecipeRepository extends AbstractEntityRepository<Recipe, UUID> implements CriteriaSupport<Recipe> {
 
     /**
      * Find all {@link Recipe} using criteria.
      *
-     * @param pageSize max size of returned result
-     * @param name     to retrieve the recipe by.
+     * @param pageSize   max size of returned result
+     * @param name       to retrieve the recipe by.
      * @param glutenFree flag to retrieve gluten free recipes.
      * @return List of matching recipes. Never returns null.
      */

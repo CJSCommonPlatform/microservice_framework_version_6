@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
+## [0.16.0] - Not Released
+
+### Changed
+- Updated to use DeltaSpike container managed persistence and transaction
+
+
 ## [0.15.0] - 2016-08-11
 
 ### Added

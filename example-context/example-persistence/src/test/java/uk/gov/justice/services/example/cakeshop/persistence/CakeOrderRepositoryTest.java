@@ -6,6 +6,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import uk.gov.justice.services.example.cakeshop.persistence.entity.CakeOrder;
+import uk.gov.justice.services.test.utils.persistence.BaseTransactionalTest;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -19,8 +20,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(CdiTestRunner.class)
-public class CakeOrderRepositoryTest {
-
+public class CakeOrderRepositoryTest extends BaseTransactionalTest {
 
     @Inject
     private CakeOrderRepository cakeOrderRepository;
@@ -29,10 +29,9 @@ public class CakeOrderRepositoryTest {
 
     @Test
     public void shouldStoreOrder() {
-
         final UUID orderId = UUID.randomUUID();
         final UUID recipeId = UUID.randomUUID();
-        final ZonedDateTime deliveryDate = ZonedDateTime.of(2014,5,13,4,12,12,0, ZoneId.of("UTC"));
+        final ZonedDateTime deliveryDate = ZonedDateTime.of(2014, 5, 13, 4, 12, 12, 0, ZoneId.of("UTC"));
 
         CakeOrder cakeOrderA = new CakeOrder(orderId, recipeId, deliveryDate);
         cakeOrderRepository.save(cakeOrderA);
@@ -46,10 +45,4 @@ public class CakeOrderRepositoryTest {
         System.out.println(TimeZone.getDefault());
         assertThat(cakeOrder.getDeliveryDate().getZone(), is(ZoneId.of("UTC")));
     }
-
-
-
-
-
-
-    }
+}

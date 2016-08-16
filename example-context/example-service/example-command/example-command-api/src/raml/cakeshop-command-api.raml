@@ -14,13 +14,17 @@ protocols: [ HTTP, HTTPS ]
         (mapping):
             requestType: application/vnd.cakeshop.add-recipe+json
             name: cakeshop.add-recipe
+        (mapping):
+            requestType: application/vnd.cakeshop.remove-recipe+json
+            name: cakeshop.remove-recipe
         ...
+
     body:
         application/vnd.cakeshop.add-recipe+json:
             schema: !include json/schema/cakeshop.add-recipe.json
             example: !include json/add-recipe.json
 
-
+        application/vnd.cakeshop.remove-recipe+json: !!null
 
 /cakes/{cakeId}:
   description: |

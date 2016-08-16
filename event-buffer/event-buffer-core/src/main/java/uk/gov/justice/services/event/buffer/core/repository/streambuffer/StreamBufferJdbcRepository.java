@@ -22,7 +22,7 @@ import javax.sql.DataSource;
 
 public class StreamBufferJdbcRepository extends AbstractViewStoreJdbcRepository {
 
-    private static final String INSERT_INTO_STREAM_STATUS_STREAM_ID_VERSION_VALUES = "INSERT INTO stream_buffer (stream_id, version, event) VALUES(?, ?, ?)";
+    private static final String INSERT = "INSERT INTO stream_buffer (stream_id, version, event) VALUES(?, ?, ?)";
     private static final String SELECT_BY_STREAM_ID = "SELECT * FROM stream_buffer WHERE stream_id=? ORDER BY version";
     private static final String DELETE_BY_STREAM_ID_VERSION = "DELETE FROM stream_buffer WHERE stream_id=? AND version=?";
 
@@ -32,7 +32,7 @@ public class StreamBufferJdbcRepository extends AbstractViewStoreJdbcRepository 
 
     public void insert(final StreamBufferEvent bufferedEvent) {
         try (Connection connection = getDataSource().getConnection();
-             PreparedStatement ps = connection.prepareStatement(INSERT_INTO_STREAM_STATUS_STREAM_ID_VERSION_VALUES)) {
+             PreparedStatement ps = connection.prepareStatement(INSERT)) {
 
             ps.setObject(1, bufferedEvent.getStreamId());
             ps.setLong(2, bufferedEvent.getVersion());
@@ -84,6 +84,7 @@ public class StreamBufferJdbcRepository extends AbstractViewStoreJdbcRepository 
 
             close = close.nest(ps);
             ResultSet resultSet = ps.executeQuery();
+            close = close.nest(resultSet);
 
             return StreamSupport.stream(new Spliterators.AbstractSpliterator<StreamBufferEvent>(
                     Long.MAX_VALUE, Spliterator.ORDERED) {

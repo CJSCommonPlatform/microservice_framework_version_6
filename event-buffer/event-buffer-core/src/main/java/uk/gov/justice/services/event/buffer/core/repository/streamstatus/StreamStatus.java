@@ -12,9 +12,9 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 public class StreamStatus {
 
     private UUID streamId;
-    private Long version;
+    private long version;
 
-    public StreamStatus(final UUID streamId, final Long version) {
+    public StreamStatus(final UUID streamId, final long version) {
         this.streamId = streamId;
         this.version = version;
     }
@@ -23,7 +23,7 @@ public class StreamStatus {
         return streamId;
     }
 
-    public Long getVersion() {
+    public long getVersion() {
         return version;
     }
 

@@ -36,11 +36,7 @@ import uk.gov.justice.services.core.jms.JmsSenderFactory;
 import uk.gov.justice.services.core.sender.ComponentDestination;
 import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.core.util.TestEnvelopeRecorder;
-import uk.gov.justice.services.core.jms.JmsDestinations;
-import uk.gov.justice.services.core.jms.JmsSenderFactory;
-import uk.gov.justice.services.core.sender.ComponentDestination;
-import uk.gov.justice.services.core.sender.SenderProducer;
-import uk.gov.justice.services.event.buffer.core.repository.service.ConsecutiveEventBufferService;
+import uk.gov.justice.services.event.buffer.core.service.ConsecutiveEventBufferService;
 import uk.gov.justice.services.event.buffer.core.repository.streambuffer.StreamBufferEvent;
 import uk.gov.justice.services.event.buffer.core.repository.streamstatus.StreamStatus;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -154,17 +150,13 @@ public class EventBufferIT {
         asyncDispatcher.dispatch(envelope);
 
         List<StreamBufferEvent> streamBufferEvents = jdbcStreamBufferRepository.streamById(streamId).collect(toList());
-        Optional<StreamStatus> streamStatus = statusRepository.findByStreamId(streamId);
 
         assertThat(streamBufferEvents, hasSize(1));
         assertThat(streamBufferEvents.get(0).getStreamId(), is(streamId));
         assertThat(streamBufferEvents.get(0).getVersion(), is(2L));
 
-        assertThat(streamStatus.isPresent(), is(false));
-
         final List<JsonEnvelope> handledEnvelopes = abcEventHandler.recordedEnvelopes();
         assertThat(handledEnvelopes, empty());
-
     }
 
     @Test

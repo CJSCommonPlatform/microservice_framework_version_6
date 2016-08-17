@@ -9,6 +9,7 @@ import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
 
 import uk.gov.justice.services.example.cakeshop.persistence.entity.Recipe;
+import uk.gov.justice.services.test.utils.persistence.BaseTransactionalTest;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,12 +18,12 @@ import java.util.UUID;
 import javax.inject.Inject;
 
 import org.apache.deltaspike.testcontrol.api.junit.CdiTestRunner;
-import org.junit.Before;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(CdiTestRunner.class)
-public class RecipeRepositoryTest {
+public class RecipeRepositoryTest extends BaseTransactionalTest {
 
     private static final UUID RECIPE_ID_A = UUID.randomUUID();
     private static final String RECIPE_NAME_A = "Chocolate Cake";
@@ -39,14 +40,14 @@ public class RecipeRepositoryTest {
     private Recipe recipeB;
     private Recipe recipeC;
 
-    @Before
-    public void setup() {
+    @Override
+    protected void setUpBefore() {
+        recipeC = createRecipe(RECIPE_ID_C, RECIPE_NAME_C, true);
+        recipeRepository.save(recipeC);
         recipeA = createRecipe(RECIPE_ID_A, RECIPE_NAME_A, RECIPE_GLUTEN_FREE_A);
         recipeRepository.save(recipeA);
         recipeB = createRecipe(RECIPE_ID_B, RECIPE_NAME_B, false);
         recipeRepository.save(recipeB);
-        recipeC = createRecipe(RECIPE_ID_C, RECIPE_NAME_C, true);
-        recipeRepository.save(recipeC);
     }
 
     @Test
@@ -83,7 +84,6 @@ public class RecipeRepositoryTest {
 
         assertThat(recipeList, hasSize(2));
         assertThat(recipeList, hasItems(recipeA, recipeB));
-
     }
 
     @Test
@@ -110,6 +110,32 @@ public class RecipeRepositoryTest {
         assertThat(recipeList, hasItems(recipeA));
         assertThat(recipeList, hasItems(recipeB));
         assertThat(recipeList, hasItems(recipeC));
+    }
+
+    @Test
+    public void shouldRemoveARecipeFromARecipes() {
+        List<Recipe> recipeList = recipeRepository.findAll();
+
+        assertThat(recipeList, hasSize(3));
+        assertThat(recipeList, hasItems(recipeA));
+        assertThat(recipeList, hasItems(recipeB));
+        assertThat(recipeList, hasItems(recipeC));
+
+        removeAndAssertRecipe(recipeA.getId());
+        removeAndAssertRecipe(recipeB.getId());
+        removeAndAssertRecipe(recipeC.getId());
+
+        List<Recipe> remainingRecipes = recipeRepository.findAll();
+
+        assertThat(remainingRecipes, hasSize(0));
+    }
+
+    private void removeAndAssertRecipe(UUID recipeId) {
+        Recipe foundRecipe = recipeRepository.findBy(recipeId);
+        recipeRepository.remove(foundRecipe);
+        Recipe recipeFound = recipeRepository.findBy(recipeId);
+
+        Assert.assertNull(recipeFound);
     }
 
     private Recipe createRecipe(final UUID id, final String name, final boolean glutenFree) {

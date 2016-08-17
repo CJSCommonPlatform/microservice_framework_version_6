@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 
 import org.junit.Before;
 import org.junit.Test;
+import uk.gov.justice.services.example.cakeshop.domain.event.RecipeRemoved;
 
 /**
  * Unit test for the {@link Recipe} aggregate class.
@@ -76,4 +77,29 @@ public class RecipeTest {
         }
         recipe.addRecipe(RECIPE_ID, NAME, false, INGREDIENTS);
     }
+
+    @Test
+    public void shouldReturnRecipeRemovedEvent() {
+        Stream<Object> events = recipe.addRecipe(RECIPE_ID, NAME, true, INGREDIENTS);
+
+        List<Object> eventList = events.collect(toList());
+        assertThat(eventList, hasSize(1));
+
+        Object event = eventList.get(0);
+        assertThat(event, instanceOf(RecipeAdded.class));
+
+        RecipeAdded recipeAdded = (RecipeAdded) event;
+        assertThat(recipeAdded.getRecipeId(), equalTo(RECIPE_ID));
+        assertThat(recipeAdded.getName(), equalTo(NAME));
+        assertThat(recipeAdded.getIngredients(), equalTo(INGREDIENTS));
+        assertThat(recipeAdded.isGlutenFree(), is(true));
+
+        Stream<Object> eventRemoveStream = recipe.removeRecipe(RECIPE_ID);
+        List<Object> eventRemovedList = eventRemoveStream.collect(toList());
+        assertThat(eventRemovedList, hasSize(1));
+
+        Object eventRemove = eventRemovedList.get(0);
+        assertThat(eventRemove, instanceOf(RecipeRemoved.class));
+    }
+
 }

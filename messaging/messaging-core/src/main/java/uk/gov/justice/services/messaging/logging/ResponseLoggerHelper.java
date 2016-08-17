@@ -1,12 +1,13 @@
 package uk.gov.justice.services.messaging.logging;
 
+import static uk.gov.justice.services.common.http.HeaderConstants.ID;
+
+import java.util.Optional;
+
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.Optional;
-
-import static uk.gov.justice.services.common.http.HeaderConstants.ID;
 
 public final class ResponseLoggerHelper {
 

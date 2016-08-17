@@ -14,7 +14,6 @@ import uk.gov.justice.services.core.handler.registry.HandlerRegistry;
 
 import java.util.Optional;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;

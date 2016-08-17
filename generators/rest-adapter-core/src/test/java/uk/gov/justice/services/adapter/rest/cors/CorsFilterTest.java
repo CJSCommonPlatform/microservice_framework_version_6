@@ -6,7 +6,6 @@ import static javax.ws.rs.HttpMethod.POST;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.adapter.rest.cors.CorsHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS;

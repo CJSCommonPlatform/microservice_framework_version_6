@@ -4,7 +4,6 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.CORRELATION;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.SESSION_ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.USER_ID;
 
-import org.json.JSONObject;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
@@ -17,6 +16,9 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonString;
 import javax.json.JsonValue;
+
+import org.json.JSONObject;
+import org.json.JSONTokener;
 
 /**
  * Default implementation of an envelope.
@@ -38,6 +40,10 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
 
     public static JsonEnvelope envelopeFrom(final JsonObjectMetadata.Builder metadataBuilder, final JsonValue payload) {
         return envelopeFrom(metadataBuilder.build(), payload);
+    }
+
+    public static Builder envelope() {
+        return new Builder();
     }
 
     @Override
@@ -70,10 +76,6 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
         return (JsonString) payload;
     }
 
-    public static Builder envelope() {
-        return new Builder();
-    }
-
     /**
      * Prints the json for logging purposes. Removes any potentially sensitive
      * data.
@@ -95,7 +97,7 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
 
         final List<UUID> causes = metadata.causation();
 
-        if(causes != null) {
+        if (causes != null) {
             metadata.causation().forEach(uuid -> causationBuilder.add(String.valueOf(uuid)));
         }
         return builder.add("causation", causationBuilder).build().toString();
@@ -112,15 +114,15 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
      */
     @Override
     public String toDebugStringPrettyPrint() {
-        return new JSONObject()
-                .put("metadata", new JSONObject(metadata.asJsonObject().toString()))
-                .put("payload", new JSONObject(payload.toString()))
+
+        return new JSONObject(new JSONTokener(payload.toString()))
+                .put("_metadata", new JSONObject(metadata.asJsonObject().toString()))
                 .toString(2);
     }
 
     public static class Builder {
-        private JsonObjectMetadata.Builder metadata;
         private final JsonObjectBuilderWrapper payload = new JsonObjectBuilderWrapper();
+        private JsonObjectMetadata.Builder metadata;
 
         private Builder() {
         }

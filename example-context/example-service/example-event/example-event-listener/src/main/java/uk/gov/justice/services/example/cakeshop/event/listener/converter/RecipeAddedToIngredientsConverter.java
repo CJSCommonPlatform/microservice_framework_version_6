@@ -3,7 +3,6 @@ package uk.gov.justice.services.example.cakeshop.event.listener.converter;
 import uk.gov.justice.services.common.converter.Converter;
 import uk.gov.justice.services.example.cakeshop.domain.event.RecipeAdded;
 import uk.gov.justice.services.example.cakeshop.persistence.entity.Ingredient;
-import uk.gov.justice.services.example.cakeshop.persistence.entity.Recipe;
 
 import java.util.ArrayList;
 import java.util.List;

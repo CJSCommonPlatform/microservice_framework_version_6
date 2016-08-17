@@ -5,6 +5,11 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [0.16.0] - Not Released
 
+### Added
+- MessageProducerClient in test-utils for easy integration testing of sending messages
+- UuidStringMatcher: A Hamcrest matcher for asserting that a string is a valid UUID
+- EnvelopeFactory: for creating a simple JsonEnvelope for testing
+
 ### Changed
 - Updated to use DeltaSpike container managed persistence and transaction
 

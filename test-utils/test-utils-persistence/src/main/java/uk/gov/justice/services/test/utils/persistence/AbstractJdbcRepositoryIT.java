@@ -1,17 +1,15 @@
 package uk.gov.justice.services.test.utils.persistence;
 
-import org.h2.jdbcx.JdbcDataSource;
+import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
 
 import uk.gov.justice.services.jdbc.persistence.AbstractJdbcRepository;
-import uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils;
 
 import javax.naming.Context;
 
 import liquibase.Liquibase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.resource.ClassLoaderResourceAccessor;
-
-import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.*;
+import org.h2.jdbcx.JdbcDataSource;
 
 
 public class AbstractJdbcRepositoryIT<T extends AbstractJdbcRepository> {

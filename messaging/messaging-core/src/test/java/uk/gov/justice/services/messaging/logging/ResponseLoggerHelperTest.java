@@ -1,19 +1,18 @@
 package uk.gov.justice.services.messaging.logging;
 
+import static net.trajano.commons.testing.UtilityClassTestUtil.assertUtilityClassWellDefined;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.common.http.HeaderConstants.ID;
+import static uk.gov.justice.services.messaging.logging.ResponseLoggerHelper.toResponseTrace;
+
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 import com.jayway.jsonassert.JsonAssert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.justice.services.common.http.HeaderConstants;
-
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import static net.trajano.commons.testing.UtilityClassTestUtil.assertUtilityClassWellDefined;
-import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.common.http.HeaderConstants.ID;
-import static uk.gov.justice.services.messaging.logging.ResponseLoggerHelper.toResponseTrace;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ResponseLoggerHelperTest {

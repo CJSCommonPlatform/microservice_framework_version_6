@@ -7,6 +7,8 @@ import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom
 import static uk.gov.justice.services.messaging.JsonEnvelope.METADATA;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
 
+import java.io.StringReader;
+
 import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -16,9 +18,6 @@ import javax.json.JsonValue.ValueType;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.IOException;
-import java.io.StringReader;
 
 /**
  * A converter class to convert between {@link JsonEnvelope} and {@link JsonObject}.

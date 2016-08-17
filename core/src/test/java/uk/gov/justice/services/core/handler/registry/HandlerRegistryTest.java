@@ -5,6 +5,9 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsNull.nullValue;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 import static uk.gov.justice.services.core.handler.HandlerMethod.ASYNCHRONOUS;
 import static uk.gov.justice.services.core.handler.HandlerMethod.SYNCHRONOUS;
@@ -23,6 +26,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.slf4j.Logger;
 
 /**
  * Unit tests for the HandlerRegistry class.
@@ -31,6 +35,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class HandlerRegistryTest {
 
     private static final String COMMAND_NAME = "test.command.mock-command";
+
+    @Mock
+    private Logger logger;
 
     @Mock
     private TestCommandHandler commandHandler;
@@ -46,6 +53,8 @@ public class HandlerRegistryTest {
         createRegistryWith(testCommandHandler);
         final HandlerMethod handlerMethod = registry.get(COMMAND_NAME, ASYNCHRONOUS);
         assertHandlerMethodInvokesHandler(handlerMethod, testCommandHandler);
+
+        assertLogStatement(COMMAND_NAME);
     }
 
     @Test
@@ -54,8 +63,9 @@ public class HandlerRegistryTest {
         createRegistryWith(testCommandHandlerWithSynchronousHandler);
         final HandlerMethod handlerMethod = registry.get(COMMAND_NAME, SYNCHRONOUS);
         assertHandlerMethodInvokesHandler(handlerMethod, testCommandHandlerWithSynchronousHandler);
-    }
 
+        assertLogStatement(COMMAND_NAME);
+    }
 
 
     @Test
@@ -66,6 +76,7 @@ public class HandlerRegistryTest {
 
         assertHandlerMethodInvokesHandler(handlerMethod, testAllEventsHandler);
 
+        assertLogStatement("*");
     }
 
     @Test
@@ -78,6 +89,8 @@ public class HandlerRegistryTest {
 
         assertHandlerMethodInvokesHandler(handlerMethod, testCommandHandler);
         assertThat(testAllEventsHandler.firstRecordedEnvelope(), nullValue());
+
+        assertLogStatement("*");
     }
 
     private void assertHandlerMethodInvokesHandler(final HandlerMethod handlerMethod, final TestEnvelopeRecorder handler) {
@@ -132,11 +145,16 @@ public class HandlerRegistryTest {
     }
 
     private void createRegistryWith(Object... handlers) {
-        registry = new HandlerRegistry();
+        registry = new HandlerRegistry(logger);
         asList(handlers).stream().forEach(x -> registry.register(x));
     }
 
     public static class MockCommand {
+
+    }
+
+    private void assertLogStatement(final String name) {
+        verify(logger).info(eq("Registering handler {}, {}"), eq(name), anyString());
     }
 
     @ServiceComponent(COMMAND_HANDLER)

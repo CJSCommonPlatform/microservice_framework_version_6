@@ -7,6 +7,8 @@ import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+
 /**
  * A JMS implementation of {@link EventPublisher}
  */
@@ -17,11 +19,18 @@ public class JmsEventPublisher implements EventPublisher {
     JmsEnvelopeSender jmsEnvelopeSender;
 
     @Inject
+    Logger logger;
+
+    @Inject
     EventDestinationResolver eventDestinationResolver;
 
     @Override
     public void publish(final JsonEnvelope envelope) {
-        jmsEnvelopeSender.send(envelope, eventDestinationResolver.destinationNameOf(envelope.metadata().name()));
+        final String name = envelope.metadata().name();
+        final String destination = eventDestinationResolver.destinationNameOf(name);
+        logger.trace("Publishing event {} to {}", name, destination);
+
+        jmsEnvelopeSender.send(envelope, destination);
     }
 
 }

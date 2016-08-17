@@ -12,6 +12,7 @@ import uk.gov.justice.api.StructureHandlerCommandJmsListener;
 import uk.gov.justice.services.adapter.messaging.JmsProcessor;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.generators.test.utils.dispatcher.AsynchronousRecordingDispatcher;
@@ -108,7 +109,8 @@ public class JmsEndpointGenerationIT {
             StringToJsonObjectConverter.class,
             JsonObjectEnvelopeConverter.class,
             JsonSchemaValidator.class,
-            JsonSchemaLoader.class
+            JsonSchemaLoader.class,
+            LoggerProducer.class
     })
     public WebApp war() {
         return new WebApp()

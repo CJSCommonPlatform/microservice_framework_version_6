@@ -38,13 +38,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.slf4j.Logger;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DispatcherTest {
 
     private static final String ACTION_NAME = "test.some-action";
+
+    @Mock
+    private Logger logger;
 
     @Mock
     private JsonEnvelope envelope;
@@ -55,9 +58,6 @@ public class DispatcherTest {
     @Mock
     private EventBufferService eventBufferService;
 
-    @Spy
-    private HandlerRegistry handlerRegistry;
-
     @Mock
     private AccessControlService accessControlService;
 
@@ -66,8 +66,11 @@ public class DispatcherTest {
 
     private Dispatcher dispatcher;
 
+    private HandlerRegistry handlerRegistry;
+
     @Before
     public void setup() {
+        handlerRegistry = new HandlerRegistry(logger);
         dispatcher = new Dispatcher(handlerRegistry, Optional.of(accessControlService), eventBufferService, accessControlFailureMessageGenerator);
 
         when(envelope.metadata()).thenReturn(metadata);

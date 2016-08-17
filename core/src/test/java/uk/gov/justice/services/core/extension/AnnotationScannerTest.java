@@ -73,6 +73,7 @@ public class AnnotationScannerTest {
     @Test
     public void shouldFireCommandApiFoundEventWithCommandApi() throws Exception {
         doReturn(TestCommandApiHandler.class).when(bean).getBeanClass();
+
         verifyIfServiceComponentFoundEventFiredWith(bean);
     }
 
@@ -86,6 +87,7 @@ public class AnnotationScannerTest {
     @Test
     public void shouldFireCommandHandlerFoundEventWithCommandHandler() throws Exception {
         doReturn(TestCommandHandler.class).when(bean).getBeanClass();
+
         verifyIfServiceComponentFoundEventFiredWith(bean);
     }
 
@@ -99,6 +101,7 @@ public class AnnotationScannerTest {
     @Test
     public void shouldFireCommandApiFoundEventWithFramework() throws Exception {
         doReturn(TestFrameworkComponent.class).when(bean).getBeanClass();
+
         verifyIfServiceComponentFoundEventFiredWith(bean);
     }
 

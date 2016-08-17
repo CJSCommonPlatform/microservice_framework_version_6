@@ -9,6 +9,7 @@ import javax.inject.Inject;
 
 import org.everit.json.schema.Schema;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 
 /**
  * Service for validating JSON payloads against a schema.
@@ -16,6 +17,9 @@ import org.json.JSONObject;
 public class JsonSchemaValidator {
 
     private final Map<String, Schema> schemas = new ConcurrentHashMap<>();
+
+    @Inject
+    Logger logger;
 
     @Inject
     JsonSchemaLoader loader;
@@ -27,6 +31,7 @@ public class JsonSchemaValidator {
      * @param name the message type name
      */
     public void validate(final String payload, final String name) {
+        logger.trace("Performing schema validation for: {}", name);
         final JSONObject jsonObject = new JSONObject(payload);
         jsonObject.remove(METADATA);
         createIfAbsent(name).validate(jsonObject);

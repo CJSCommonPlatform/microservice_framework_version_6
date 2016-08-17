@@ -27,10 +27,15 @@ import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import javax.transaction.Transactional;
 
+import org.slf4j.Logger;
+
 /**
  * Manages operations on {@link EventStream}
  */
 public class EventStreamManager {
+
+    @Inject
+    Logger logger;
 
     @Inject
     EventRepository eventRepository;

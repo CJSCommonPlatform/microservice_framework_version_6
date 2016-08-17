@@ -8,10 +8,15 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+
 public class AccessControlService {
 
     static final String ACCESS_CONTROL_DISABLED_PROPERTY =
-                    "uk.gov.justice.services.core.accesscontrol.disabled";
+            "uk.gov.justice.services.core.accesscontrol.disabled";
+
+    @Inject
+    Logger logger;
 
     @Inject
     PolicyEvaluator policyEvaluator;
@@ -19,9 +24,11 @@ public class AccessControlService {
     public Optional<AccessControlViolation> checkAccessControl(final JsonEnvelope jsonEnvelope) {
 
         if (accessControlDisabled()) {
+            logger.trace("Skipping access control due to configuration");
             return empty();
         }
 
+        logger.trace("Performing access control for action: {}", jsonEnvelope.metadata().name());
         return policyEvaluator.checkAccessPolicyFor(jsonEnvelope);
     }
 

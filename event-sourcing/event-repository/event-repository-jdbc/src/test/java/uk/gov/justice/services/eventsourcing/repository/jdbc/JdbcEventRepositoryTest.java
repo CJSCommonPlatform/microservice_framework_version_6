@@ -28,6 +28,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.slf4j.Logger;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JdbcEventRepositoryTest {
@@ -36,7 +37,10 @@ public class JdbcEventRepositoryTest {
     private static final long VERSION_1 = 1L;
 
     @Mock
-    Stream<EventLog> eventLogs;
+    private Logger logger;
+
+    @Mock
+    private Stream<EventLog> eventLogs;
 
     @Mock
     private EventLogJdbcRepository eventLogJdbcRepository;
@@ -65,6 +69,7 @@ public class JdbcEventRepositoryTest {
 
         assertThat(streamOfEnvelopes, not(nullValue()));
         assertThat(streamOfEnvelopes.findFirst().get(), equalTo(envelope));
+        verify(logger).trace("Retrieving event stream for {}", STREAM_ID);
     }
 
     @Test
@@ -76,6 +81,7 @@ public class JdbcEventRepositoryTest {
 
         assertThat(streamOfEnvelopes, not(nullValue()));
         assertThat(streamOfEnvelopes.findFirst().get(), equalTo(envelope));
+        verify(logger).trace("Retrieving event stream for {} at sequence {}", STREAM_ID, VERSION_1);
     }
 
     @Test(expected = InvalidStreamIdException.class)
@@ -100,6 +106,7 @@ public class JdbcEventRepositoryTest {
         jdbcEventRepository.store(envelope, STREAM_ID, VERSION_1);
 
         verify(eventLogJdbcRepository).insert(eventLog);
+        verify(logger).trace("Storing event {} into stream {} at version {}", eventLog.getName(), STREAM_ID, VERSION_1);
     }
 
     @Test(expected = StoreEventRequestFailedException.class)

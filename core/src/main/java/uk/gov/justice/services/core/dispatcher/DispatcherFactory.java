@@ -1,5 +1,6 @@
 package uk.gov.justice.services.core.dispatcher;
 
+import static org.slf4j.LoggerFactory.getLogger;
 import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.LOCAL;
 
 import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
@@ -13,8 +14,12 @@ import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+
 @ApplicationScoped
 public class DispatcherFactory {
+
+    private static final Logger LOGGER = getLogger(HandlerRegistry.class);
 
     @Inject
     AccessControlService accessControlService;
@@ -26,7 +31,7 @@ public class DispatcherFactory {
     EventBufferService eventBufferService;
 
     public Dispatcher createNew(final ServiceComponentLocation location) {
-        final HandlerRegistry handlerRegistry = new HandlerRegistry();
+        final HandlerRegistry handlerRegistry = new HandlerRegistry(LOGGER);
 
         return new Dispatcher(
                 handlerRegistry,

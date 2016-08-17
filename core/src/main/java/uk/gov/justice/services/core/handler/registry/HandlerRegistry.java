@@ -12,13 +12,22 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+
 /**
  * Service for storing a map of which command handlers handle which commands.
  */
 
 public class HandlerRegistry {
 
-    private final Map<String, HandlerMethod> handlerMethods = new HashMap<>();
+    private final Map<String, HandlerMethod> handlerMethods;
+
+    private Logger logger;
+
+    public HandlerRegistry(final Logger logger) {
+        this.logger = logger;
+        handlerMethods = new HashMap<>();
+    }
 
     public HandlerMethod get(final String name, final boolean isSynchronous) {
         final HandlerMethod handlerMethod = handlerMethods.getOrDefault(name, handlerMethods.get("*"));
@@ -58,6 +67,7 @@ public class HandlerRegistry {
                             "already been registered for %s ", handlerMethod, handlerMethods.get(name), name));
         }
 
+        logger.info("Registering handler {}, {}", name, handlerMethod.toString());
         handlerMethods.put(name, handlerMethod);
     }
 }

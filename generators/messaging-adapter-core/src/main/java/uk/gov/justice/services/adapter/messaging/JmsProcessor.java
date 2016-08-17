@@ -1,7 +1,9 @@
 package uk.gov.justice.services.adapter.messaging;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.lang.String.format;
+import static uk.gov.justice.services.messaging.logging.JmsMessageLoggerHelper.toJmsTraceString;
+import static uk.gov.justice.services.messaging.logging.LoggerUtils.trace;
+
 import uk.gov.justice.services.adapter.messaging.exception.InvalildJmsMessageTypeException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
@@ -13,10 +15,8 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.TextMessage;
 
-import static java.lang.String.format;
-import static uk.gov.justice.services.messaging.logging.JmsMessageLoggerHelper.toJmsTraceString;
-import static uk.gov.justice.services.messaging.logging.JsonEnvelopeLoggerHelper.toEnvelopeTraceString;
-import static uk.gov.justice.services.messaging.logging.LoggerUtils.trace;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * In order to minimise the amount of generated code in the JMS Listener implementation classes,
@@ -52,8 +52,8 @@ public class JmsProcessor {
         }
 
         final JsonEnvelope jsonEnvelope = envelopeConverter.fromMessage((TextMessage) message);
-        trace(LOGGER, () -> format("JMS message converted to envelope: %s", toEnvelopeTraceString(jsonEnvelope)));
+        trace(LOGGER, () -> format("JMS message converted to envelope: %s", jsonEnvelope));
         consumer.accept(jsonEnvelope);
-        trace(LOGGER, () -> format("JMS message processed: %s", toEnvelopeTraceString(jsonEnvelope)));
+        trace(LOGGER, () -> format("JMS message processed: %s", jsonEnvelope));
     }
 }

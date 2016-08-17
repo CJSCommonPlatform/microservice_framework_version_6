@@ -26,7 +26,6 @@ import uk.gov.justice.services.core.sender.ComponentDestination;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.logging.JsonEnvelopeLoggerHelper;
 import uk.gov.justice.test.util.RecordingJmsEnvelopeSender;
 
 import java.util.List;
@@ -81,7 +80,6 @@ public class RemoteCommandControllerIT {
             ComponentDestination.class,
             DispatcherCache.class,
             DispatcherFactory.class,
-            JsonEnvelopeLoggerHelper.class,
             JmsDestinations.class,
             JmsSenderFactory.class,
             PolicyEvaluator.class,

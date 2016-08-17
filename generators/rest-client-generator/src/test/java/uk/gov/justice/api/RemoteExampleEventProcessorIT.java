@@ -42,7 +42,6 @@ import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.DefaultJmsEnvelopeSender;
 import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
-import uk.gov.justice.services.messaging.logging.JsonEnvelopeLoggerHelper;
 
 import java.util.Properties;
 import java.util.UUID;
@@ -125,7 +124,6 @@ public class RemoteExampleEventProcessorIT {
             AccessControlService.class,
             DispatcherCache.class,
             DispatcherFactory.class,
-            JsonEnvelopeLoggerHelper.class,
             PolicyEvaluator.class,
 
             PassThroughEventBufferService.class,

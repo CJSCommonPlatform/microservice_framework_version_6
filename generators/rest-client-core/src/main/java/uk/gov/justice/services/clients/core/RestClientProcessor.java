@@ -15,7 +15,6 @@ import static uk.gov.justice.services.messaging.JsonEnvelope.METADATA;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilderWithFilter;
-import static uk.gov.justice.services.messaging.logging.JsonEnvelopeLoggerHelper.toEnvelopeTraceString;
 import static uk.gov.justice.services.messaging.logging.LoggerUtils.trace;
 import static uk.gov.justice.services.messaging.logging.ResponseLoggerHelper.toResponseTrace;
 
@@ -90,7 +89,7 @@ public class RestClientProcessor {
         final Builder builder = target.request(format(MEDIA_TYPE_PATTERN, definition.getResponseMediaType()));
         populateHeadersFromMetadata(builder, envelope.metadata());
 
-        trace(LOGGER, () -> String.format("Sending GET request to %s using message: %s", target.getUri().toString(), toEnvelopeTraceString(envelope)));
+        trace(LOGGER, () -> String.format("Sending GET request to %s using message: %s", target.getUri().toString(), envelope));
 
         final Response response = builder.get();
 
@@ -126,7 +125,7 @@ public class RestClientProcessor {
         final Builder builder = target.request(format(MEDIA_TYPE_PATTERN, definition.getResponseMediaType()));
         populateHeadersFromMetadata(builder, envelope.metadata());
 
-        trace(LOGGER, () -> String.format("Sending POST request to %s using message: %s", target.getUri().toString(), toEnvelopeTraceString(envelope)));
+        trace(LOGGER, () -> String.format("Sending POST request to %s using message: %s", target.getUri().toString(), envelope));
 
         final JsonObject requestBody = stripParamsFromPayload(definition, envelope);
         final Response response = builder.post(entity(requestBody.toString(), format(MEDIA_TYPE_PATTERN, envelope.metadata().name())));

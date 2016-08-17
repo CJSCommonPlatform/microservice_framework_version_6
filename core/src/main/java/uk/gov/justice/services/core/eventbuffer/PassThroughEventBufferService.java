@@ -1,8 +1,5 @@
 package uk.gov.justice.services.core.eventbuffer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import uk.gov.justice.services.event.buffer.api.EventBufferService;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
@@ -13,7 +10,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;
 import javax.inject.Inject;
 
-import static uk.gov.justice.services.messaging.logging.JsonEnvelopeLoggerHelper.toEnvelopeTraceString;
+import org.slf4j.Logger;
 
 /**
  * Basic implementation of the EventBufferService passing the envelope through without any buffering
@@ -28,7 +25,7 @@ public class PassThroughEventBufferService implements EventBufferService {
 
     @Override
     public Stream<JsonEnvelope> currentOrderedEventsWith(final JsonEnvelope jsonEnvelope) {
-        logger.trace("Message: {} passing through to dispatcher", toEnvelopeTraceString(jsonEnvelope));
+        logger.trace("Message: {} passing through to dispatcher", jsonEnvelope);
         return Stream.of(jsonEnvelope);
     }
 }

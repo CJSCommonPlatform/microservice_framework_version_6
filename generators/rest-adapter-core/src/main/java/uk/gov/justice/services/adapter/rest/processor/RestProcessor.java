@@ -10,7 +10,6 @@ import static javax.ws.rs.core.Response.status;
 import static org.slf4j.LoggerFactory.getLogger;
 import static uk.gov.justice.services.common.http.HeaderConstants.ID;
 import static uk.gov.justice.services.messaging.logging.HttpMessageLoggerHelper.toHttpHeaderTrace;
-import static uk.gov.justice.services.messaging.logging.JsonEnvelopeLoggerHelper.toEnvelopeTraceString;
 import static uk.gov.justice.services.messaging.logging.LoggerUtils.trace;
 
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
@@ -80,11 +79,11 @@ public class RestProcessor {
                 .withParams(params)
                 .build();
 
-        trace(LOGGER, () -> format("REST message converted to envelope: %s", toEnvelopeTraceString(envelope)));
+        trace(LOGGER, () -> format("REST message converted to envelope: %s", envelope));
 
         consumer.accept(envelope);
 
-        trace(LOGGER, () -> format("REST message processed: %s", toEnvelopeTraceString(envelope)));
+        trace(LOGGER, () -> format("REST message processed: %s", envelope));
 
         return status(ACCEPTED).build();
     }
@@ -111,12 +110,12 @@ public class RestProcessor {
                 .withAction(action)
                 .build();
 
-        trace(LOGGER, () -> format("REST message converted to envelope: %s", toEnvelopeTraceString(envelope)));
+        trace(LOGGER, () -> format("REST message converted to envelope: %s", envelope));
 
         final JsonEnvelope result = function.apply(envelope);
 
-        trace(LOGGER, () -> format("REST message processed: %s", toEnvelopeTraceString(envelope)));
-        trace(LOGGER, () -> format("Responding to REST message with: %s", toEnvelopeTraceString(result)));
+        trace(LOGGER, () -> format("REST message processed: %s", envelope));
+        trace(LOGGER, () -> format("Responding to REST message with: %s", result));
 
         if (result == null) {
             LOGGER.error(format("Dispatcher returned a null envelope for %s", envelope.metadata().name()));

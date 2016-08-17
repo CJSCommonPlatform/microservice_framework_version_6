@@ -16,7 +16,6 @@ import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.Remote;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.logging.JsonEnvelopeLoggerHelper;
 import uk.gov.justice.services.messaging.logging.LoggerUtils;
 
 import java.io.IOException;
@@ -83,7 +82,6 @@ public abstract class AbstractClientGenerator implements Generator {
 
     private MethodSpec.Builder methodOf(final Action ramlAction, final MimeType mediaType, final String handlerValue) {
         final ClassName classLoggerUtils = ClassName.get(LoggerUtils.class);
-        final ClassName classJsonEnvelopeLoggerHelper = ClassName.get(JsonEnvelopeLoggerHelper.class);
 
 
         return methodBuilder(methodNameOf(ramlAction.getType(), mediaType))
@@ -94,8 +92,8 @@ public abstract class AbstractClientGenerator implements Generator {
                 .addParameter(ParameterSpec.builder(JsonEnvelope.class, ENVELOPE)
                         .addModifiers(FINAL)
                         .build())
-                .addStatement("$T.trace(LOGGER, () -> String.format(\"Handling remote request: %s\", $T.toEnvelopeTraceString(envelope)))",
-                        classLoggerUtils, classJsonEnvelopeLoggerHelper);
+                .addStatement("$T.trace(LOGGER, () -> String.format(\"Handling remote request: %s\", envelope))",
+                        classLoggerUtils);
     }
 
     protected Stream<MimeType> mediaTypesOf(Action ramlAction) {

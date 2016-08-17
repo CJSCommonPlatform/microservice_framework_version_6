@@ -7,16 +7,18 @@ import static java.util.Arrays.asList;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.client.Entity.entity;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsCollectionContaining.hasItem;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.fail;
 
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLog;
 import uk.gov.justice.services.example.cakeshop.it.util.ApiResponse;
 import uk.gov.justice.services.example.cakeshop.it.util.StandaloneEventLogJdbcRepository;
 import uk.gov.justice.services.example.cakeshop.it.util.TestProperties;
+import uk.gov.justice.services.test.utils.core.http.HttpResponsePoller;
 
 import java.net.URISyntaxException;
 import java.sql.Connection;
@@ -90,6 +92,8 @@ public class CakeShopIT {
     private static DataSource CAKE_SHOP_DS;
 
     private Client client;
+
+    private HttpResponsePoller httpResponsePoller;
 
     @BeforeClass
     public static void beforeClass() throws Exception {
@@ -228,8 +232,8 @@ public class CakeShopIT {
 
         await().until(() -> eventsWithPayloadContaining(recipeId).count() == 2);
 
-        response = queryForRecipe(recipeId);
-        assertThat(response.httpCode(), is(NOT_FOUND));
+        final String notFoundResponse = httpResponsePoller.pollUntilNotFound(RECIPES_RESOURCE_QUERY_URI + recipeId, QUERY_RECIPE_MEDIA_TYPE);
+        assertThat(notFoundResponse, notNullValue());
     }
 
     @Test
@@ -275,27 +279,29 @@ public class CakeShopIT {
 
     @Test
     public void shouldFailTransactionOnDBFailureAndRedirectEventToDLQ() throws Exception {
-        Session jmsSession = jmsSession();
-        final MessageConsumer dlqConsumer = queueConsumerOf(jmsSession, "DLQ");
-        clear(dlqConsumer);
+        Session jmsSession = null;
+        try {
+            jmsSession = jmsSession();
+            final MessageConsumer dlqConsumer = queueConsumerOf(jmsSession, "DLQ");
+            clear(dlqConsumer);
 
-        //closing db to cause transaction error
-        closeCakeShopDb();
+            //closing db to cause transaction error
+            closeCakeShopDb();
 
-        String recipeId = "363af847-effb-46a9-96bc-32a0f7526f12";
-        sendTo(RECIPES_RESOURCE_URI + recipeId).request()
-                .post(recipeEntity("Cheesy cheese cake"));
+            String recipeId = "363af847-effb-46a9-96bc-32a0f7526f12";
+            sendTo(RECIPES_RESOURCE_URI + recipeId).request()
+                    .post(recipeEntity("Cheesy cheese cake"));
 
-        final TextMessage messageFromDLQ = (TextMessage) dlqConsumer.receive();
+            final TextMessage messageFromDLQ = (TextMessage) dlqConsumer.receive();
 
-        with(messageFromDLQ.getText())
-                .assertThat("$._metadata.name", equalTo("cakeshop.recipe-added"))
-                .assertThat("$.recipeId", equalTo(recipeId));
+            with(messageFromDLQ.getText())
+                    .assertThat("$._metadata.name", equalTo("cakeshop.recipe-added"))
+                    .assertThat("$.recipeId", equalTo(recipeId));
 
-        initCakeShopDb();
-
-        assertThat(queryForRecipe(recipeId).httpCode(), is(NOT_FOUND));
-        jmsSession.close();
+            initCakeShopDb();
+        } finally {
+            jmsSession.close();
+        }
     }
 
 
@@ -606,6 +612,7 @@ public class CakeShopIT {
         cm.setDefaultMaxPerRoute(20); // Increase default max connection per route to 20
         ApacheHttpClient4Engine engine = new ApacheHttpClient4Engine(httpClient);
         client = new ResteasyClientBuilder().httpEngine(engine).build();
+        httpResponsePoller = new HttpResponsePoller();
     }
 
     @After

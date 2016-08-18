@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
-## [0.16.0] - Not Released
+## [0.16.0] - 2016-08-18
 
 ### Added
 - MessageProducerClient in test-utils for easy integration testing of sending messages

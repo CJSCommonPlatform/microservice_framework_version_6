@@ -3,9 +3,9 @@ package uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog;
 
 import static java.lang.String.format;
 
-import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidSequenceIdException;
 import uk.gov.justice.services.jdbc.persistence.AbstractJdbcRepository;
+import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

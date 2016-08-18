@@ -15,7 +15,7 @@ import javax.jms.TextMessage;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
 import org.apache.activemq.artemis.jms.client.ActiveMQTopic;
 
-public class MessageClient {
+public class MessageConsumerClient implements AutoCloseable {
 
     private static final String EVENT_SELECTOR_TEMPLATE = "CPPNAME IN ('%s')";
     private static final String QUEUE_URI = System.getProperty("queueUri", "tcp://localhost:61616");
@@ -59,6 +59,7 @@ public class MessageClient {
         }
     }
 
+    @Override
     public void close() {
         close(messageConsumer);
         close(session);
@@ -69,14 +70,11 @@ public class MessageClient {
     }
 
     private void close(final AutoCloseable closeable) {
-
-        if (closeable == null) {
-            return;
-        }
-
-        try {
-            closeable.close();
-        } catch (Exception ignored) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (Exception ignored) {
+            }
         }
     }
 }

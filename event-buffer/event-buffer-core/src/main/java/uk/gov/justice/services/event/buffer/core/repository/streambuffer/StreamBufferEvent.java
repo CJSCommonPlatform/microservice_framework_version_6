@@ -1,12 +1,12 @@
 package uk.gov.justice.services.event.buffer.core.repository.streambuffer;
 
+import static java.lang.Math.toIntExact;
+
 import java.util.UUID;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-
-import static java.lang.Math.toIntExact;
 
 
 public class StreamBufferEvent implements Comparable<StreamBufferEvent> {

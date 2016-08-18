@@ -88,9 +88,9 @@ public class DefaultJsonEnvelopeTest {
 
         final String json = jsonEnvelope.toDebugStringPrettyPrint();
         with(json)
-                .assertEquals("metadata.id", metadataId.toString())
-                .assertEquals("metadata.name", metadataName)
-                .assertEquals("payload." + payloadName, payloadValue);
+                .assertEquals("_metadata.id", metadataId.toString())
+                .assertEquals("_metadata.name", metadataName)
+                .assertEquals("$.payloadName", payloadValue);
     }
 
     private Metadata metadata(final UUID metadataId, final String metadataName) {

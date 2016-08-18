@@ -5,12 +5,9 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
-import uk.gov.justice.services.example.cakeshop.domain.Ingredient;
 import uk.gov.justice.services.example.cakeshop.domain.event.CakeOrdered;
-import uk.gov.justice.services.example.cakeshop.domain.event.RecipeAdded;
 
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 

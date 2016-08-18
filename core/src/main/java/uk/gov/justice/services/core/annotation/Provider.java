@@ -1,13 +1,13 @@
 package uk.gov.justice.services.core.annotation;
 
 
-import javax.enterprise.context.ApplicationScoped;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import javax.enterprise.context.ApplicationScoped;
 
 /**
  * Identifies provider classes, which are used by the access-control module to inject information

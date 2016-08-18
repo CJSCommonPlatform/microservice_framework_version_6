@@ -1,8 +1,9 @@
 package uk.gov.justice.services.messaging.logging;
 
+import java.util.function.Supplier;
+
 import org.slf4j.Logger;
 
-import java.util.function.Supplier;
 ;
 
 public final class LoggerUtils {

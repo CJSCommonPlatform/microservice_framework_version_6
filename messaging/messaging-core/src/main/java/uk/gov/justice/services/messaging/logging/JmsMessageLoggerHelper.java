@@ -3,7 +3,6 @@ package uk.gov.justice.services.messaging.logging;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 
-import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.TextMessage;
 

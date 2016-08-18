@@ -10,7 +10,6 @@ import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.LOCAL;
 import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.REMOTE;
 
-import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
 import uk.gov.justice.services.core.accesscontrol.AccessControlService;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
@@ -23,8 +22,6 @@ import javax.inject.Inject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)

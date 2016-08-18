@@ -1,7 +1,6 @@
 package uk.gov.justice.services.core.json;
 
 import static org.mockito.Matchers.argThat;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.skyscreamer.jsonassert.JSONCompare.compareJSON;

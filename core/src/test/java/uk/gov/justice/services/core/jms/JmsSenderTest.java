@@ -59,9 +59,9 @@ public class JmsSenderTest {
     public void shouldTestEqualsAndHashCode() throws NamingException {
         final JmsDestinations jmsDestinations = new JmsDestinations();
 
-        final JmsSender item1 = new JmsSender(COMMAND_API, jmsDestinations, jmsEnvelopeSender);
-        final JmsSender item2 = new JmsSender(COMMAND_API, jmsDestinations, jmsEnvelopeSender);
-        final JmsSender item3 = new JmsSender(COMMAND_CONTROLLER, jmsDestinations, jmsEnvelopeSender);
+        final JmsSender item1 = new JmsSender(COMMAND_API, jmsDestinations, jmsEnvelopeSender, logger);
+        final JmsSender item2 = new JmsSender(COMMAND_API, jmsDestinations, jmsEnvelopeSender, logger);
+        final JmsSender item3 = new JmsSender(COMMAND_CONTROLLER, jmsDestinations, jmsEnvelopeSender, logger);
 
         new EqualsTester()
                 .addEqualityGroup(item1, item2)
@@ -73,7 +73,6 @@ public class JmsSenderTest {
     public void shouldSendValidEnvelopeToTheQueue() throws Exception {
 
         final JmsSender jmsSender = jmsSenderWithComponent(COMMAND_CONTROLLER);
-        jmsSender.logger = logger;
 
         when(jmsDestinations.getDestination(COMMAND_CONTROLLER, ContextName.fromName(QUEUE_NAME))).thenReturn(destination);
 
@@ -81,12 +80,10 @@ public class JmsSenderTest {
         verify(jmsEnvelopeSender).send(envelope, destination);
 
         verify(logger).trace(eq("Sending envelope for action {} to destination: {}"), eq(NAME), eq(destination));
-
-
     }
 
     private JmsSender jmsSenderWithComponent(final Component component) {
-        final JmsSender jmsSender = new JmsSender(component, jmsDestinations, jmsEnvelopeSender);
+        final JmsSender jmsSender = new JmsSender(component, jmsDestinations, jmsEnvelopeSender, logger);
         return jmsSender;
     }
 

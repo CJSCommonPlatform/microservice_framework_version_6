@@ -17,18 +17,20 @@ import org.slf4j.Logger;
 @Alternative
 public class JmsSender implements Sender {
 
-    private final JmsDestinations jmsDestinations;
-    private final Component destinationComponent;
-    private final JmsEnvelopeSender jmsEnvelopeSender;
+    final JmsDestinations jmsDestinations;
+    final Component destinationComponent;
+    final JmsEnvelopeSender jmsEnvelopeSender;
+    final Logger logger;
 
-    @Inject
-    Logger logger;
-
-    public JmsSender(final Component destinationComponent, final JmsDestinations jmsDestinations,
-                     final JmsEnvelopeSender jmsEnvelopeSender) {
+    public JmsSender(
+            final Component destinationComponent,
+            final JmsDestinations jmsDestinations,
+            final JmsEnvelopeSender jmsEnvelopeSender,
+            final Logger logger) {
         this.destinationComponent = destinationComponent;
         this.jmsDestinations = jmsDestinations;
         this.jmsEnvelopeSender = jmsEnvelopeSender;
+        this.logger = logger;
     }
 
     @Override

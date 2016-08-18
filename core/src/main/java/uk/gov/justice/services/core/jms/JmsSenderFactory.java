@@ -7,6 +7,9 @@ import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Factory to create {@link JmsSender}.
  */
@@ -19,6 +22,8 @@ public class JmsSenderFactory implements SenderFactory {
     @Inject
     JmsEnvelopeSender jmsEnvelopeSender;
 
+    private final Logger logger = LoggerFactory.getLogger(JmsSender.class);
+
     /**
      * Creates a {@link JmsSender} based on the componentDestination.
      *
@@ -27,6 +32,6 @@ public class JmsSenderFactory implements SenderFactory {
      */
     @Override
     public Sender createSender(final Component componentDestination) {
-        return new JmsSender(componentDestination, jmsDestinations, jmsEnvelopeSender);
+        return new JmsSender(componentDestination, jmsDestinations, jmsEnvelopeSender, logger);
     }
 }

@@ -224,8 +224,8 @@ public class CakeShopIT {
                 .assertThat("$.ingredients[0].name", equalTo("vanilla"))
                 .assertThat("$.ingredients[0].quantity", equalTo(2));
 
-        ApiResponse response = queryForRecipe(recipeId);
-        assertThat(response.httpCode(), is(OK));
+        final String foundResponse = httpResponsePoller.pollUntilFound(RECIPES_RESOURCE_QUERY_URI + recipeId, QUERY_RECIPE_MEDIA_TYPE);
+        assertThat(foundResponse, notNullValue());
 
         sendTo(RECIPES_RESOURCE_URI + recipeId).request().post(entity(jsonObject()
                 .add("recipeId", recipeId).build().toString(), REMOVE_RECIPE_MEDIA_TYPE));

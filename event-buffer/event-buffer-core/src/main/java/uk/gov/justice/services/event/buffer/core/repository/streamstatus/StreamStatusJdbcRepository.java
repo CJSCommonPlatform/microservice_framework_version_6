@@ -46,7 +46,7 @@ public class StreamStatusJdbcRepository extends AbstractViewStoreJdbcRepository 
     }
 
     /**
-     * Tries to insert if database is PostgresSQL and version>=9.5. Uses PostgreSQl-specific sql
+     * Tries to insert if database is PostgresSQL and version&gt;=9.5. Uses PostgreSQl-specific sql
      * clause. Does not fail if status for the given stream already exists
      *
      * @param streamStatus the status of the stream to insert

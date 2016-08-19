@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 
 /**
  * Identifies handler methods for commands, queries and events. <p> Usage:
- * @Handles("context.command.do-something")
+ * "@Handles("context.command.do-something")"
  */
 
 @Retention(RUNTIME)

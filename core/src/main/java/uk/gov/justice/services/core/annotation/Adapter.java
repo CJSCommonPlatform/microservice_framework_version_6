@@ -11,7 +11,7 @@ import javax.enterprise.context.ApplicationScoped;
 
 /**
  * Identifies adapters that receive messages from other service components. <p> Usage:
- * @Adapter({@link Component#COMMAND_CONTROLLER})
+ * "@Adapter({@link Component#COMMAND_CONTROLLER}")
  */
 
 @Retention(RUNTIME)

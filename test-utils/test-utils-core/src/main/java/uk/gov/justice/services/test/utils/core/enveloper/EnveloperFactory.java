@@ -13,13 +13,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *  <pre>
  *  {@code
  *
- *      @Spy
+ *      "@Spy"
  *      private Enveloper enveloper = EnveloperFactory.createEnveloper()
  *
- *      @Mock
+ *      "@Mock"
  *      private MyDependency dependency;
  *
- *      @InjectMocks
+ *      "@InjectMocks"
  *      private MyClassUnderTest classUnderTest;
  * }
  * </pre>

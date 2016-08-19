@@ -15,6 +15,7 @@ public interface SynchronousDispatcher {
      * Dispatches the {@code envelope} to the correct handler.
      *
      * @param envelope The {@link JsonEnvelope} to be dispatched.
+     * @return response as a JsonEnvelope.
      */
     JsonEnvelope dispatch(final JsonEnvelope envelope);
 }

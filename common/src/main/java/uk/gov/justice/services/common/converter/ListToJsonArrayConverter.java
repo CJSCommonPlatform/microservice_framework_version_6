@@ -15,9 +15,9 @@ import javax.json.JsonArrayBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * Converts a List of Type <T> to JsonArray
+ * Converts a List of Type &lt;T&gt; to JsonArray
  *
- * @param <T> the type of objects in the List
+ * @param T the type of objects in the List
  */
 public class ListToJsonArrayConverter<T> implements Converter<List<T>, JsonArray> {
     @Inject

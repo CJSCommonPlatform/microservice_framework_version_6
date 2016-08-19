@@ -31,6 +31,7 @@ public final class ServiceComponents {
      * passed to the handler method.
      *
      * @param handlerClass the handler class to verify
+     * @throws Exception if non pass through method or an error occurs
      */
     public static void verifyPassThroughCommandHandlerMethod(final Class<?> handlerClass) throws Exception {
         verifyPassThroughCommandHandlerMethod(handlerClass,
@@ -47,6 +48,7 @@ public final class ServiceComponents {
      *
      * @param handlerClass the handler class to verify
      * @param methodNames  the method names to verify
+     * @throws Exception if non pass through method or an error occurs
      */
     public static void verifyPassThroughCommandHandlerMethod(final Class<?> handlerClass, final String... methodNames) throws Exception {
         List<Method> methods = new ArrayList<>();
@@ -65,6 +67,7 @@ public final class ServiceComponents {
      *
      * @param handlerClass the handler class to verify
      * @param methods      the method names to verify
+     * @throws Exception if non pass through method or an error occurs
      */
     public static void verifyPassThroughCommandHandlerMethod(final Class<?> handlerClass, final List<Method> methods) throws Exception {
 
@@ -96,6 +99,7 @@ public final class ServiceComponents {
      * query passed to the handler method.
      *
      * @param handlerClass the handler class to verify
+     * @throws Exception if non pass through method or an error occurs
      */
     public static void verifyPassThroughQueryHandlerMethod(final Class<?> handlerClass) throws Exception {
         verifyPassThroughQueryHandlerMethod(handlerClass,
@@ -112,6 +116,7 @@ public final class ServiceComponents {
      *
      * @param handlerClass the handler class to verify
      * @param methodNames  the method names to verify
+     * @throws Exception if non pass through method or an error occurs
      */
     public static void verifyPassThroughQueryHandlerMethod(final Class<?> handlerClass, final String... methodNames) throws Exception {
         List<Method> methods = new ArrayList<>();
@@ -130,6 +135,7 @@ public final class ServiceComponents {
      *
      * @param handlerClass the handler class to verify
      * @param methods      the method names to verify
+     * @throws Exception if non pass through method or an error occurs
      */
     public static void verifyPassThroughQueryHandlerMethod(final Class<?> handlerClass, final List<Method> methods) throws Exception {
 

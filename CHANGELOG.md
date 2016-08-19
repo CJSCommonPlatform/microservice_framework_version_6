@@ -13,6 +13,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ### Changed
 - Updated to use DeltaSpike container managed persistence and transaction
 
+### Removed
+- Remove asynchronous and synchronous differences from Dispatcher
+
 
 ## [0.15.0] - 2016-08-11
 

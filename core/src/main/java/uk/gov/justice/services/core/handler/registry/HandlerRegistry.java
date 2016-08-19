@@ -29,15 +29,14 @@ public class HandlerRegistry {
         handlerMethods = new HashMap<>();
     }
 
-    public HandlerMethod get(final String name, final boolean isSynchronous) {
+    public HandlerMethod get(final String name) {
         final HandlerMethod handlerMethod = handlerMethods.getOrDefault(name, handlerMethods.get("*"));
 
-        if (handlerMethod != null && isSynchronous == handlerMethod.isSynchronous()) {
+        if (handlerMethod != null) {
             return handlerMethod;
         } else {
             throw new MissingHandlerException(
-                    format("No %s handler registered to handle action %s",
-                            isSynchronous ? "synchronous" : "asynchronous", name));
+                    format("No handler registered to handle action %s", name));
         }
     }
 
@@ -47,8 +46,7 @@ public class HandlerRegistry {
      * @param handlerInstance handler instance to be registered.
      */
     public void register(final Object handlerInstance) {
-        handlerMethodsFrom(handlerInstance).stream()
-                .forEach(method -> register(handlerInstance, method));
+        handlerMethodsFrom(handlerInstance).forEach(method -> register(handlerInstance, method));
     }
 
     /**

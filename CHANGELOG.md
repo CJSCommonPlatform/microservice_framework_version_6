@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
+## [0.17.0] - 2016-08-19
+
+### Fixed
+- Travis build file settings
+- Javadoc build issues
+
+
 ## [0.16.0] - 2016-08-18
 
 ### Added

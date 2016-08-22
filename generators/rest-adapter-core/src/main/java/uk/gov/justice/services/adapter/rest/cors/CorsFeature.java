@@ -1,5 +1,9 @@
 package uk.gov.justice.services.adapter.rest.cors;
 
+import static uk.gov.justice.services.common.http.HeaderConstants.CLIENT_CORRELATION_ID;
+import static uk.gov.justice.services.common.http.HeaderConstants.SESSION_ID;
+import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
+
 import uk.gov.justice.services.core.configuration.Value;
 
 import javax.inject.Inject;
@@ -22,7 +26,7 @@ public class CorsFeature implements Feature {
     String allowedOrigin;
 
     @Inject
-    @Value(key = "corsAllowedHeaders", defaultValue ="Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, CPPUID, CPPSID, CPPCLIENTCORRELATIONID")
+    @Value(key = "corsAllowedHeaders", defaultValue = "Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, " + USER_ID + ", " + SESSION_ID + ", " + CLIENT_CORRELATION_ID)
     String allowedHeaders;
 
     @Override

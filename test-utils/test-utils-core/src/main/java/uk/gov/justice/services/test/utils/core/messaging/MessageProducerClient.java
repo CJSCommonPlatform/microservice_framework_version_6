@@ -21,13 +21,13 @@ public class MessageProducerClient implements AutoCloseable {
 
     private Session session;
     private MessageProducer messageProducer;
+    private Connection connection;
 
     public void startProducer(final String topicName) {
 
         try {
             final ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(QUEUE_URI);
-            final Connection connection = factory.createConnection();
-
+            connection = factory.createConnection();
             connection.start();
 
             session = connection.createSession(false, AUTO_ACKNOWLEDGE);
@@ -35,7 +35,7 @@ public class MessageProducerClient implements AutoCloseable {
             messageProducer = session.createProducer(destination);
         } catch (JMSException e) {
             close();
-            throw new RuntimeException("Failed to create message producer to topic '" + topicName + "'", e);
+            throw new RuntimeException("Failed to create message producer to topic: '" + topicName + "', queue uri: '" + QUEUE_URI + "'", e);
         }
     }
 
@@ -57,6 +57,7 @@ public class MessageProducerClient implements AutoCloseable {
 
             messageProducer.send(message);
         } catch (JMSException e) {
+            close();
             throw new RuntimeException("Failed to send message. commandName: '" + commandName + "', json: " + json, e);
         }
     }
@@ -65,9 +66,11 @@ public class MessageProducerClient implements AutoCloseable {
     public void close() {
         close(messageProducer);
         close(session);
+        close(connection);
 
         session = null;
         messageProducer = null;
+        connection = null;
     }
 
     private void close(final AutoCloseable closeable) {

@@ -3,6 +3,15 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
+## [0.18.0] - 2016-08-22
+
+### Added
+- test-utils-persistence to the framework bom
+
+### Fixed
+- CORS response header mismatch
+- JMS Message Producer test-util connection closing issue
+
 ## [0.17.0] - 2016-08-19
 
 ### Fixed

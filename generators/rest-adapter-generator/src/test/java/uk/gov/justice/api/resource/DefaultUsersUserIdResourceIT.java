@@ -24,8 +24,8 @@ import uk.gov.justice.services.adapter.rest.processor.RestProcessor;
 import uk.gov.justice.services.adapter.rest.processor.RestProcessorProducer;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
+import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
-import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.generators.test.utils.interceptor.RecordingInterceptorChainProcessor;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
@@ -99,7 +99,7 @@ public class DefaultUsersUserIdResourceIT {
             DummyCommonProviders.class,
             BadRequestExceptionMapper.class,
             JsonSchemaValidationInterceptor.class,
-            JsonSchemaValidator.class,
+            DefaultJsonSchemaValidator.class,
             JsonSchemaLoader.class,
             DefaultUsersUserIdResourceActionMapper.class,
             DefaultUsersResourceActionMapper.class,

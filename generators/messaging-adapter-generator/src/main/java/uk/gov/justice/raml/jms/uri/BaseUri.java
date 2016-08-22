@@ -3,6 +3,8 @@ package uk.gov.justice.raml.jms.uri;
 
 import static java.lang.String.format;
 
+import uk.gov.justice.services.core.annotation.Component;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -60,6 +62,11 @@ public class BaseUri {
         return service;
     }
 
+    public Component component() {
+        return Component.valueOf(pillar, tier);
+    }
+
+
     /**
      * Constructs clientId used in durable JMS subscribers
      *
@@ -68,4 +75,5 @@ public class BaseUri {
     public String adapterClientId() {
         return format("%s.%s.%s", service(), pillar(), tier());
     }
+
 }

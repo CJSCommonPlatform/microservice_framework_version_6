@@ -2,12 +2,13 @@ package uk.gov.justice.raml.jms.core;
 
 import static com.squareup.javapoet.TypeSpec.classBuilder;
 import static java.lang.String.format;
-import static java.util.stream.Collectors.joining;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.justice.raml.jms.core.MediaTypesUtil.containsGeneralJsonMimeType;
+import static uk.gov.justice.raml.jms.core.MediaTypesUtil.mediaTypesFrom;
+import static uk.gov.justice.services.generators.commons.helper.Names.namesListStringFrom;
 
 import uk.gov.justice.raml.jms.uri.BaseUri;
 import uk.gov.justice.services.adapter.messaging.JmsProcessor;
@@ -16,12 +17,10 @@ import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.generators.commons.helper.MessagingResourceUri;
-import uk.gov.justice.services.generators.commons.helper.Names;
 import uk.gov.justice.services.messaging.logging.JmsMessageLoggerHelper;
 import uk.gov.justice.services.messaging.logging.LoggerUtils;
 
 import java.util.Map;
-import java.util.stream.Stream;
 
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
@@ -40,7 +39,6 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 import org.raml.model.Action;
 import org.raml.model.ActionType;
-import org.raml.model.MimeType;
 import org.raml.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,10 +68,11 @@ class MessageListenerCodeGenerator {
      *
      * @param resource the resource definition this listener is being generated for
      * @param baseUri  the base URI
+     * @param listenToAllMessages
      * @return the message listener class specification
      */
-    TypeSpec generateFor(final Resource resource, final BaseUri baseUri) {
-        return classSpecFrom(resource, baseUri)
+    TypeSpec generatedCodeFor(final Resource resource, final BaseUri baseUri, final boolean listenToAllMessages) {
+        return classSpecFrom(resource, baseUri, listenToAllMessages)
                 .addMethod(generateOnMessageMethod())
                 .build();
     }
@@ -83,9 +82,10 @@ class MessageListenerCodeGenerator {
      *
      * @param resource the resource definition this listener is being generated for
      * @param baseUri  the base URI
+     * @param listenToAllMessages
      * @return the {@link TypeSpec.Builder} that defines the class
      */
-    private TypeSpec.Builder classSpecFrom(final Resource resource, final BaseUri baseUri) {
+    private TypeSpec.Builder classSpecFrom(final Resource resource, final BaseUri baseUri, final boolean listenToAllMessages) {
         final MessagingResourceUri resourceUri = new MessagingResourceUri(resource.getUri());
         final Component component = componentOf(baseUri);
 
@@ -106,7 +106,7 @@ class MessageListenerCodeGenerator {
                         .addMember(DEFAULT_ANNOTATION_PARAMETER, "$T.$L", Component.class, component)
                         .build())
 
-                .addAnnotation(generateMessageDrivenAnnotation(component, resource.getActions(), resourceUri, baseUri));
+                .addAnnotation(messageDrivenAnnotation(component, resource.getActions(), resourceUri, baseUri, listenToAllMessages));
         if (!containsGeneralJsonMimeType(resource.getActions())) {
             clazz.addAnnotation(AnnotationSpec.builder(Interceptors.class)
                     .addMember(DEFAULT_ANNOTATION_PARAMETER, "$T.class", JsonSchemaValidationInterceptor.class)
@@ -145,19 +145,21 @@ class MessageListenerCodeGenerator {
      * @param actions     a map of actions for building the message selector
      * @param resourceUri the resource URI
      * @param baseUri     the base URI
+     * @param listenToAllMessages
      * @return the annotation specification
      */
-    private AnnotationSpec generateMessageDrivenAnnotation(final Component component,
-                                                           final Map<ActionType, Action> actions,
-                                                           final MessagingResourceUri resourceUri,
-                                                           final BaseUri baseUri) {
+    private AnnotationSpec messageDrivenAnnotation(final Component component,
+                                                   final Map<ActionType, Action> actions,
+                                                   final MessagingResourceUri resourceUri,
+                                                   final BaseUri baseUri, final boolean listenToAllMessages) {
 
         AnnotationSpec.Builder builder = AnnotationSpec.builder(MessageDriven.class)
                 .addMember(ACTIVATION_CONFIG_PARAMETER, "$L",
                         generateActivationConfigPropertyAnnotation(DESTINATION_TYPE, component.inputDestinationType().getName()))
                 .addMember(ACTIVATION_CONFIG_PARAMETER, "$L",
                         generateActivationConfigPropertyAnnotation(DESTINATION_LOOKUP, resourceUri.destinationName()));
-        if (!containsGeneralJsonMimeType(actions)) {
+
+        if (!listenToAllMessages) {
             builder.addMember(ACTIVATION_CONFIG_PARAMETER, "$L",
                     generateActivationConfigPropertyAnnotation(MESSAGE_SELECTOR, messageSelectorsFrom(actions)));
         }
@@ -174,17 +176,6 @@ class MessageListenerCodeGenerator {
         }
 
         return builder.build();
-    }
-
-    private boolean containsGeneralJsonMimeType(final Map<ActionType, Action> actions) {
-        return mediaTypesFrom(actions)
-                .filter(mimeType -> mimeType.getType().equals(APPLICATION_JSON))
-                .findAny()
-                .isPresent();
-    }
-
-    private Stream<MimeType> mediaTypesFrom(final Map<ActionType, Action> actions) {
-        return actions.get(ActionType.POST).getBody().values().stream();
     }
 
     /**
@@ -229,20 +220,9 @@ class MessageListenerCodeGenerator {
      * @return formatted message selector String
      */
     private String messageSelectorsFrom(final Map<ActionType, Action> actions) {
-        return format("CPPNAME in('%s')", namesListFrom(mediaTypesFrom(actions)));
+        return format("CPPNAME in('%s')", namesListStringFrom(mediaTypesFrom(actions), "','"));
     }
 
-    /**
-     * Construct comma separated list of command/event names
-     *
-     * @param mediaTypes mediaTypes to create the list from
-     * @return comma separated list of command/event names
-     */
-    private String namesListFrom(final Stream<MimeType> mediaTypes) {
-        return mediaTypes
-                .map(Names::nameFrom)
-                .collect(joining("','"));
-    }
 
     /**
      * Generate the subscription name for a resource.

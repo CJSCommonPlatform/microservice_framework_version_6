@@ -89,7 +89,7 @@ public class RamlBuilder {
     }
 
     public RamlBuilder withDefaultMessagingBaseUri() {
-        return withBaseUri("message://event/listener/message/context");
+        return withBaseUri("message://event/processor/message/context");
     }
 
     public RamlBuilder withBaseUri(final String baseUri) {

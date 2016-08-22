@@ -78,6 +78,15 @@ public class JsonObjectMetadata implements Metadata {
     }
 
     /**
+     * Create metadata builder
+     *
+     * @return metadata builder
+     */
+    public static Builder metadataOf(final String id, final String name) {
+        return metadataOf(UUID.fromString(id), name);
+    }
+
+    /**
      * Create metadata builder with random id
      *
      * @return metadata builder

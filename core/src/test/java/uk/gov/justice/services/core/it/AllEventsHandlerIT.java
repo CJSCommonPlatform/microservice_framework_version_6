@@ -24,6 +24,7 @@ import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
 import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.core.eventfilter.AllowAllEventFilter;
 import uk.gov.justice.services.core.extension.AnnotationScanner;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.interceptor.InterceptorCache;
@@ -35,12 +36,12 @@ import uk.gov.justice.services.core.jms.JmsDestinations;
 import uk.gov.justice.services.core.jms.JmsSenderFactory;
 import uk.gov.justice.services.core.sender.ComponentDestination;
 import uk.gov.justice.services.core.sender.SenderProducer;
-import uk.gov.justice.services.core.util.TestEnvelopeRecorder;
 import uk.gov.justice.services.event.buffer.core.service.ConsecutiveEventBufferService;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.DefaultJmsEnvelopeSender;
 import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
+import uk.gov.justice.services.test.utils.common.envelope.TestEnvelopeRecorder;
 
 import java.util.UUID;
 
@@ -78,6 +79,7 @@ public class AllEventsHandlerIT {
             AnnotationScanner.class,
             RequesterProducer.class,
             ServiceComponentObserver.class,
+            AllowAllEventFilter.class,
 
             InterceptorChainProcessorProducer.class,
             InterceptorChainProcessor.class,

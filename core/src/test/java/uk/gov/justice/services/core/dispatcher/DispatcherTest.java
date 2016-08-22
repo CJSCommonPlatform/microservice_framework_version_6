@@ -11,9 +11,9 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.handler.exception.MissingHandlerException;
 import uk.gov.justice.services.core.handler.registry.HandlerRegistry;
-import uk.gov.justice.services.core.util.TestEnvelopeRecorder;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
+import uk.gov.justice.services.test.utils.common.envelope.TestEnvelopeRecorder;
 
 import java.util.List;
 

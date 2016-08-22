@@ -2,8 +2,8 @@ package uk.gov.justice.services.core.it.util.sender;
 
 
 import uk.gov.justice.services.core.sender.Sender;
-import uk.gov.justice.services.core.util.TestEnvelopeRecorder;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.test.utils.common.envelope.TestEnvelopeRecorder;
 
 
 public class RecordingSender extends TestEnvelopeRecorder implements Sender {

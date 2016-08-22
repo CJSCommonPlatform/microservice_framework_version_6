@@ -1,4 +1,4 @@
-package uk.gov.justice.services.core.util;
+package uk.gov.justice.services.test.utils.common.envelope;
 
 
 import uk.gov.justice.services.messaging.JsonEnvelope;

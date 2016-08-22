@@ -21,6 +21,7 @@ import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.eventbuffer.PassThroughEventBufferService;
+import uk.gov.justice.services.core.eventfilter.AllowAllEventFilter;
 import uk.gov.justice.services.core.extension.AnnotationScanner;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.it.util.sender.RecordingSender;
@@ -77,7 +78,8 @@ public class SenderInjectedHandlerIT {
             PassThroughEventBufferService.class,
             LoggerProducer.class,
             TestSenderFactory.class,
-            BeanInstantiater.class
+            BeanInstantiater.class,
+            AllowAllEventFilter.class,
     })
     public WebApp war() {
         return new WebApp()

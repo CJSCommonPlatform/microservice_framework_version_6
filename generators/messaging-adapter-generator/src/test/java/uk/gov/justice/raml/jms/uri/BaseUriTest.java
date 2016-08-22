@@ -4,6 +4,8 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 
 import org.junit.Test;
 
@@ -46,5 +48,11 @@ public class BaseUriTest {
         assertFalse(BaseUri.valid("message://command/controller/message"));
     }
 
+
+    @Test
+    public void shouldReturnComponent() {
+        assertThat(new BaseUri("message://event/listener/message/service1").component(), is(EVENT_LISTENER));
+        assertThat(new BaseUri("message://event/processor/message/service2").component(), is(EVENT_PROCESSOR));
+    }
 
 }

@@ -29,6 +29,7 @@ import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SynchronousDispatcherProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.extension.AnnotationScanner;
+import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.it.util.repository.StreamBufferOpenEjbAwareJdbcRepository;
 import uk.gov.justice.services.core.it.util.repository.StreamStatusOpenEjbAwareJdbcRepository;
 import uk.gov.justice.services.core.jms.JmsDestinations;
@@ -122,7 +123,8 @@ public class EventBufferIT {
             StreamBufferOpenEjbAwareJdbcRepository.class,
             StreamStatusOpenEjbAwareJdbcRepository.class,
             ConsecutiveEventBufferService.class,
-            LoggerProducer.class
+            LoggerProducer.class,
+            BeanInstantiater.class
 
     })
     public WebApp war() {

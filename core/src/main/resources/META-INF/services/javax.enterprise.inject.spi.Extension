@@ -1,1 +1,2 @@
 uk.gov.justice.services.core.extension.AnnotationScanner
+uk.gov.justice.services.core.interceptor.InterceptorObserver

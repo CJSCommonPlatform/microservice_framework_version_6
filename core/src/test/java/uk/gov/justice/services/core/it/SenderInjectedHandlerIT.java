@@ -22,6 +22,7 @@ import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.eventbuffer.PassThroughEventBufferService;
 import uk.gov.justice.services.core.extension.AnnotationScanner;
+import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.it.util.sender.RecordingSender;
 import uk.gov.justice.services.core.it.util.sender.TestSenderFactory;
 import uk.gov.justice.services.core.jms.JmsDestinations;
@@ -75,8 +76,8 @@ public class SenderInjectedHandlerIT {
             PolicyEvaluator.class,
             PassThroughEventBufferService.class,
             LoggerProducer.class,
-
-            TestSenderFactory.class
+            TestSenderFactory.class,
+            BeanInstantiater.class
     })
     public WebApp war() {
         return new WebApp()
@@ -99,6 +100,4 @@ public class SenderInjectedHandlerIT {
         assertThat(RecordingSender.instance().recordedEnvelopes().get(0).metadata().name(), equalTo("test.event-1"));
 
     }
-
-
 }

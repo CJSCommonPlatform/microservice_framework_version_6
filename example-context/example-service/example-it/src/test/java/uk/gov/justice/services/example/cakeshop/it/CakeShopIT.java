@@ -9,9 +9,12 @@ import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.client.Entity.entity;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsCollectionContaining.hasItem;
+import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.hamcrest.core.IsNull.notNullValue;
+import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.fail;
 
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLog;
@@ -481,6 +484,22 @@ public class CakeShopIT {
         with(queryResponse.body())
                 .assertThat("$.orderId", equalTo(orderId))
                 .assertThat("$.deliveryDate", equalTo("2016-07-25T18:09:01Z"));
+    }
+
+    @Test
+    public void shouldReturnCORSResponse() {
+        final Response corsResponse =
+                sendTo(ORDERS_RESOURCE_URI + "123")
+                        .request()
+                        .header("Origin", "http://foo.example")
+                        .header("Access-Control-Request-Headers", "CPPCLIENTCORRELATIONID")
+                        .options();
+
+        assertThat(corsResponse.getStatus(), is(OK));
+        final String allowedHeaders = corsResponse.getHeaderString("access-control-allow-headers");
+        assertThat(allowedHeaders, not(nullValue()));
+        assertThat(asList(allowedHeaders.split(", ")), hasItems("CJSCPPUID", "CPPSID", "CPPCLIENTCORRELATIONID"));
+
     }
 
     private static void initCakeShopDb() throws Exception {

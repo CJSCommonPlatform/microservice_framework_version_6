@@ -1,6 +1,6 @@
-package uk.gov.justice.services.generators.test.utils.dispatcher;
+package uk.gov.justice.services.generators.test.utils.interceptor;
 
-import uk.gov.justice.services.core.dispatcher.SynchronousDispatcher;
+import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.LinkedList;
@@ -10,14 +10,14 @@ import java.util.Optional;
 import javax.inject.Singleton;
 
 @Singleton
-public class SynchronousRecordingDispatcher extends BasicRecordingDispatcher implements SynchronousDispatcher {
+public class RecordingInterceptorChainProcessor extends EnvelopeRecorder implements InterceptorChainProcessor {
 
     private List<MockResponse> mockResponses = new LinkedList<>();
 
     @Override
-    public JsonEnvelope dispatch(final JsonEnvelope dispatchedEnvelope) {
-        record(dispatchedEnvelope);
-        return responseTo(dispatchedEnvelope);
+    public JsonEnvelope process(final JsonEnvelope envelope) {
+        record(envelope);
+        return responseTo(envelope);
     }
 
     public void setupResponse(final String payloadElementNameCriteria, final String payloadElementValueCriteria,

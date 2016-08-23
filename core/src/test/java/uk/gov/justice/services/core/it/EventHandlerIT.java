@@ -20,16 +20,20 @@ import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
-import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
-import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcherProducer;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
 import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
-import uk.gov.justice.services.core.dispatcher.SynchronousDispatcherProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.extension.AnnotationScanner;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
+import uk.gov.justice.services.core.interceptor.Interceptor;
+import uk.gov.justice.services.core.interceptor.InterceptorCache;
+import uk.gov.justice.services.core.interceptor.InterceptorChain;
+import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
+import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
+import uk.gov.justice.services.core.interceptor.InterceptorContext;
+import uk.gov.justice.services.core.interceptor.InterceptorObserver;
 import uk.gov.justice.services.core.it.repository.StreamBufferOpenEjbAwareJdbcRepository;
 import uk.gov.justice.services.core.it.repository.StreamStatusOpenEjbAwareJdbcRepository;
 import uk.gov.justice.services.core.jms.JmsDestinations;
@@ -65,7 +69,7 @@ public class EventHandlerIT {
     private static final String EVENT_ABC = "test.event-abc";
 
     @Inject
-    private AsynchronousDispatcher asyncDispatcher;
+    private InterceptorChainProcessor interceptorChainProcessor;
 
     @Inject
     private AbcEventHandler abcEventHandler;
@@ -78,10 +82,14 @@ public class EventHandlerIT {
             AbcEventHandler.class,
             AllEventsHandler.class,
             AnnotationScanner.class,
-            AsynchronousDispatcherProducer.class,
-            SynchronousDispatcherProducer.class,
             RequesterProducer.class,
             ServiceComponentObserver.class,
+
+            InterceptorChainProcessorProducer.class,
+            InterceptorChainProcessor.class,
+            InterceptorCache.class,
+            InterceptorObserver.class,
+            TestInterceptor.class,
 
             SenderProducer.class,
             JmsSenderFactory.class,
@@ -119,10 +127,10 @@ public class EventHandlerIT {
     public void shouldHandleEventByName() {
 
         UUID metadataId = randomUUID();
-        asyncDispatcher.dispatch(envelope()
+        interceptorChainProcessor.process(envelope()
                 .with(metadataOf(metadataId, EVENT_ABC)
                         .withStreamId(randomUUID())
-                        .withVersion(1l)).build());
+                        .withVersion(1L)).build());
 
         assertThat(abcEventHandler.firstRecordedEnvelope(), not(nullValue()));
         assertThat(abcEventHandler.firstRecordedEnvelope().metadata().id(), equalTo(metadataId));
@@ -132,13 +140,25 @@ public class EventHandlerIT {
     public void shouldHandleEventByTheAllEventsHandlerIfNamedHandlerNotFound() {
 
         UUID metadataId = randomUUID();
-        asyncDispatcher.dispatch(envelope()
+        interceptorChainProcessor.process(envelope()
                 .with(metadataOf(metadataId, "some.unregistered.event")
                         .withStreamId(randomUUID())
-                        .withVersion(1l)).build());
+                        .withVersion(1L)).build());
 
         assertThat(allEventsHandler.firstRecordedEnvelope(), not(nullValue()));
         assertThat(allEventsHandler.firstRecordedEnvelope().metadata().id(), equalTo(metadataId));
+    }
+
+    @Test
+    public void shouldCallInterceptor() {
+
+        UUID metadataId = UUID.randomUUID();
+        interceptorChainProcessor.process(envelope()
+                .with(metadataOf(metadataId, EVENT_ABC)
+                        .withStreamId(randomUUID())
+                        .withVersion(1L)).build());
+
+        assertThat(TestInterceptor.id, equalTo(metadataId));
     }
 
     @ServiceComponent(EVENT_LISTENER)
@@ -163,4 +183,21 @@ public class EventHandlerIT {
 
     }
 
+    @ApplicationScoped
+    public static class TestInterceptor implements Interceptor {
+
+        //State is set only for testing purposes.  Interceptor should not hold state in normal operation.
+        private static UUID id;
+
+        @Override
+        public InterceptorContext process(final InterceptorContext interceptorContext, final InterceptorChain interceptorChain) {
+            id = interceptorContext.inputEnvelope().metadata().id();
+            return interceptorChain.processNext(interceptorContext);
+        }
+
+        @Override
+        public int priority() {
+            return 2000;
+        }
+    }
 }

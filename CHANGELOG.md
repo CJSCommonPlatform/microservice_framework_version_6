@@ -3,6 +3,15 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
+## [unreleased]
+
+### Added
+- Dispatcher interceptor integration. Interceptors are chained between the adapter and the dispatcher 
+according to a priority setting.  Interceptors implement the Interceptor interface and are registered 
+at startup.  
+Implemented interceptors: Event Buffer Interceptor, Access Control Interceptor
+
+    
 ## [0.18.0] - 2016-08-22
 
 ### Added
@@ -11,6 +20,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ### Fixed
 - CORS response header mismatch
 - JMS Message Producer test-util connection closing issue
+
 
 ## [0.17.0] - 2016-08-19
 

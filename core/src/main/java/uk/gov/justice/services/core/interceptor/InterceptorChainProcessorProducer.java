@@ -36,8 +36,7 @@ public class InterceptorChainProcessorProducer {
      */
     @Produces
     public InterceptorChainProcessor produceProcessor(final InjectionPoint injectionPoint) {
-        //TODO: As part of integration into the framework the dispatcher needs to be simplified so access is through a single method
-        final Function<JsonEnvelope, JsonEnvelope> synchronousDispatch = dispatcherCache.dispatcherFor(injectionPoint)::synchronousDispatch;
+        final Function<JsonEnvelope, JsonEnvelope> synchronousDispatch = dispatcherCache.dispatcherFor(injectionPoint)::dispatch;
 
         trace(logger, () -> format("Interceptor Chain Processor provided for %s", injectionPoint.getClass().getName()));
 

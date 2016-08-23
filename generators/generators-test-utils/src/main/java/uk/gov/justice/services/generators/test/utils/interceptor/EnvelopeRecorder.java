@@ -1,4 +1,4 @@
-package uk.gov.justice.services.generators.test.utils.dispatcher;
+package uk.gov.justice.services.generators.test.utils.interceptor;
 
 import static com.jayway.awaitility.Awaitility.await;
 
@@ -11,9 +11,10 @@ import java.util.function.Predicate;
 
 
 /**
- * Dispatcher for test purposes that records the envelopes it has been asked to dispatch.
+ * Envelope recorder for test purposes that records the envelopes.
  */
-public class BasicRecordingDispatcher {
+public class EnvelopeRecorder {
+
     private final List<JsonEnvelope> recordedEnvelopes = new CopyOnWriteArrayList<>();
 
     protected void record(final JsonEnvelope envelope) {

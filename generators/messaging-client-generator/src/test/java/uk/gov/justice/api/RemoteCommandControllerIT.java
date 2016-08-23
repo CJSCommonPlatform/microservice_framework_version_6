@@ -13,14 +13,13 @@ import uk.gov.justice.services.core.accesscontrol.AllowAllPolicyEvaluator;
 import uk.gov.justice.services.core.accesscontrol.PolicyEvaluator;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
-import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcherProducer;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
 import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
-import uk.gov.justice.services.core.dispatcher.SynchronousDispatcherProducer;
 import uk.gov.justice.services.core.eventbuffer.PassThroughEventBufferService;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
+import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.jms.JmsDestinations;
 import uk.gov.justice.services.core.jms.JmsSenderFactory;
 import uk.gov.justice.services.core.sender.ComponentDestination;
@@ -51,7 +50,14 @@ import org.junit.runner.RunWith;
 @RunWith(ApplicationComposer.class)
 @ServiceComponent(COMMAND_API)
 public class RemoteCommandControllerIT {
+
     private static int port = -1;
+
+    @Inject
+    Sender sender;
+
+    @Inject
+    RecordingJmsEnvelopeSender envelopeSender;
 
     @BeforeClass
     public static void beforeClass() {
@@ -66,18 +72,12 @@ public class RemoteCommandControllerIT {
                 .build();
     }
 
-    @Inject
-    Sender sender;
-
-    @Inject
-    RecordingJmsEnvelopeSender envelopeSender;
-
     @Module
     @Classes(cdi = true, value = {
             AccessControlFailureMessageGenerator.class,
             AccessControlService.class,
             AllowAllPolicyEvaluator.class,
-            AsynchronousDispatcherProducer.class,
+            InterceptorChainProcessor.class,
             ComponentDestination.class,
             DispatcherCache.class,
             DispatcherFactory.class,
@@ -89,7 +89,6 @@ public class RemoteCommandControllerIT {
             RequesterProducer.class,
             SenderProducer.class,
             ServiceComponentObserver.class,
-            SynchronousDispatcherProducer.class,
             PassThroughEventBufferService.class,
             LoggerProducer.class,
             BeanInstantiater.class

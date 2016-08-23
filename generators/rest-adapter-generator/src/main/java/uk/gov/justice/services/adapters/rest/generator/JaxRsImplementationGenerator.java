@@ -27,8 +27,7 @@ import uk.gov.justice.services.adapter.rest.parameter.ValidParameterCollectionBu
 import uk.gov.justice.services.adapter.rest.processor.RestProcessor;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
-import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
-import uk.gov.justice.services.core.dispatcher.SynchronousDispatcher;
+import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.messaging.logging.HttpMessageLoggerHelper;
 import uk.gov.justice.services.messaging.logging.LoggerUtils;
 
@@ -74,9 +73,12 @@ class JaxRsImplementationGenerator {
     private static final String VARIABLE_PARAMS_COLLECTION_BUILDER = "validParameterCollectionBuilder";
     private static final String PARAMS_PUT_REQUIRED_STATEMENT_FORMAT = "$L.putRequired($S, $N, $T.$L)";
     private static final String PARAMS_PUT_OPTIONAL_STATEMENT_FORMAT = "$L.putOptional($S, $N, $T.$L)";
-    private static final String SYNCHRONOUS_METHOD_STATEMENT = "return restProcessor.processSynchronously(syncDispatcher::dispatch, $L.actionOf($S, \"GET\", headers), headers, $L.parameters())";
-    private static final String ASYNCHRONOUS_METHOD_STATEMENT = "return restProcessor.processAsynchronously(asyncDispatcher::dispatch, $L.actionOf($S, \"POST\", headers), %s, headers, $L.parameters())";
+
+    private static final String INTERCEPTOR_CHAIN_PROCESSOR = "interceptorChainProcessor";
     private static final String ACTION_MAPPER_VARIABLE = "actionMapper";
+
+    private static final String SYNCHRONOUS_METHOD_STATEMENT = "return restProcessor.processSynchronously($L::process, $L.actionOf($S, \"GET\", headers), headers, $L.parameters())";
+    private static final String ASYNCHRONOUS_METHOD_STATEMENT = "return restProcessor.processAsynchronously($L::process, $L.actionOf($S, \"POST\", headers), %s, headers, $L.parameters())";
 
     private final GeneratorConfig configuration;
 
@@ -112,10 +114,7 @@ class JaxRsImplementationGenerator {
     TypeSpec generateFor(final Resource resource, final Component component) {
         final TypeSpec.Builder classSpecBuilder = classSpecFor(resource, component);
 
-        resource.getActions().values().forEach(action -> {
-            classSpecBuilder.addField(dispatcherFieldFor(action));
-            classSpecBuilder.addMethods(forEach(action));
-        });
+        resource.getActions().values().forEach(action -> classSpecBuilder.addMethods(forEach(action)));
 
         return classSpecBuilder.build();
     }
@@ -144,6 +143,9 @@ class JaxRsImplementationGenerator {
                         .addAnnotation(AnnotationSpec.builder(Named.class)
                                 .addMember(DEFAULT_ANNOTATION_PARAMETER, "$S", className + "ActionMapper").build())
                         .build())
+                .addField(FieldSpec.builder(InterceptorChainProcessor.class, INTERCEPTOR_CHAIN_PROCESSOR)
+                        .addAnnotation(Inject.class)
+                        .build())
                 .addField(FieldSpec.builder(HttpHeaders.class, "headers")
                         .addAnnotation(Context.class)
                         .build());
@@ -156,11 +158,17 @@ class JaxRsImplementationGenerator {
      * @return the list of {@link MethodSpec} that represents each method for the httpAction
      */
     private List<MethodSpec> forEach(final Action action) {
-        if (!action.hasBody()) {
-            return Collections.singletonList(processNoActionBody(action));
-        } else {
-            return processOneOrMoreActionBodies(action);
+        final ActionType actionType = action.getType();
+
+        if (ActionType.GET == actionType || ActionType.POST == actionType) {
+            if (!action.hasBody()) {
+                return Collections.singletonList(processNoActionBody(action));
+            } else {
+                return processOneOrMoreActionBodies(action);
+            }
         }
+
+        throw new IllegalStateException(format("Unsupported httpAction type %s", actionType));
     }
 
     /**
@@ -236,50 +244,6 @@ class JaxRsImplementationGenerator {
     }
 
     /**
-     * Uses the type of {@link Action} to provide a {@link SynchronousDispatcher} or an {@link
-     * AsynchronousDispatcher} and provides the correct field definition as a {@link FieldSpec}.
-     *
-     * @param action the httpAction to forEach
-     * @return a {@link FieldSpec} representing the field definition.
-     * @throws IllegalStateException if httpAction type is not GET or POST
-     */
-    private FieldSpec dispatcherFieldFor(final Action action) {
-        final ActionType actionType = action.getType();
-
-        if (actionType == GET) {
-            return synchronousDispatcherField();
-        }
-
-        if (actionType == POST) {
-            return asynchronousDispatcherField();
-        }
-
-        throw new IllegalStateException(format("Unsupported httpAction type %s", actionType));
-    }
-
-    /**
-     * Generate the SynchronousDispatcher injected field.
-     *
-     * @return the {@link FieldSpec} that represents the generated field
-     */
-    private FieldSpec synchronousDispatcherField() {
-        return FieldSpec.builder(SynchronousDispatcher.class, "syncDispatcher")
-                .addAnnotation(Inject.class)
-                .build();
-    }
-
-    /**
-     * Generate the AsynchronousDispatcher injected field.
-     *
-     * @return the {@link FieldSpec} that represents the generated field
-     */
-    private FieldSpec asynchronousDispatcherField() {
-        return FieldSpec.builder(AsynchronousDispatcher.class, "asyncDispatcher")
-                .addAnnotation(Inject.class)
-                .build();
-    }
-
-    /**
      * Generate a POST resource method
      *
      * @param resourceMethodName - the name of this method
@@ -348,7 +312,10 @@ class JaxRsImplementationGenerator {
                 CodeBlock.builder()
                         .add(putAllQueryParamsInCollectionBuilder(queryParams))
                         .addStatement(SYNCHRONOUS_METHOD_STATEMENT,
-                                ACTION_MAPPER_VARIABLE, resourceMethodName, VARIABLE_PARAMS_COLLECTION_BUILDER)
+                                INTERCEPTOR_CHAIN_PROCESSOR,
+                                ACTION_MAPPER_VARIABLE,
+                                resourceMethodName,
+                                VARIABLE_PARAMS_COLLECTION_BUILDER)
                         .build();
     }
 
@@ -362,7 +329,11 @@ class JaxRsImplementationGenerator {
     private Supplier<CodeBlock> methodBodyForPost(final String resourceMethodName, final boolean hasPayload) {
         return () -> CodeBlock.builder()
                 .addStatement(String.format(ASYNCHRONOUS_METHOD_STATEMENT, hasPayload ? "$T.of(entity)" : "$T.empty()"),
-                        ACTION_MAPPER_VARIABLE, resourceMethodName, Optional.class, VARIABLE_PARAMS_COLLECTION_BUILDER)
+                        INTERCEPTOR_CHAIN_PROCESSOR,
+                        ACTION_MAPPER_VARIABLE,
+                        resourceMethodName,
+                        Optional.class,
+                        VARIABLE_PARAMS_COLLECTION_BUILDER)
                 .build();
     }
 

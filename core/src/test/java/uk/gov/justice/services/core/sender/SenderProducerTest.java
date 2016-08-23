@@ -68,7 +68,7 @@ public class SenderProducerTest {
 
         returnedSender.send(envelope);
 
-        verify(dispatcher).asynchronousDispatch(envelope);
+        verify(dispatcher).dispatch(envelope);
         verifyZeroInteractions(legacyJmsSender);
     }
 
@@ -86,7 +86,7 @@ public class SenderProducerTest {
 
         returnedSender.send(envelope);
 
-        verify(dispatcher).asynchronousDispatch(envelope);
+        verify(dispatcher).dispatch(envelope);
     }
 
     @Test
@@ -103,7 +103,7 @@ public class SenderProducerTest {
 
         returnedSender.send(envelope);
 
-        verify(dispatcher).asynchronousDispatch(envelope);
+        verify(dispatcher).dispatch(envelope);
     }
 
     @Test
@@ -113,7 +113,7 @@ public class SenderProducerTest {
         when(dispatcherCache.dispatcherFor(injectionPoint)).thenReturn(dispatcher);
         when(senderFactory.createSender(COMMAND_CONTROLLER)).thenReturn(legacyJmsSender);
         final JsonEnvelope envelope = envelope().build();
-        doThrow(new MissingHandlerException("")).when(dispatcher).asynchronousDispatch(envelope);
+        doThrow(new MissingHandlerException("")).when(dispatcher).dispatch(envelope);
 
         final Sender returnedSender = senderProducer.produce(injectionPoint);
 

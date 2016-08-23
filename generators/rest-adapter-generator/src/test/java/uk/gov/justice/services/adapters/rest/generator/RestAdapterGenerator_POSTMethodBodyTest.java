@@ -28,7 +28,7 @@ import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
 import uk.gov.justice.services.adapter.rest.BasicActionMapper;
 import uk.gov.justice.services.adapter.rest.parameter.Parameter;
-import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
+import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.lang.reflect.Method;
@@ -50,9 +50,13 @@ import org.mockito.Mock;
 public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGeneratorTest {
 
     private static final JsonObject NOT_USED_JSONOBJECT = Json.createObjectBuilder().build();
+    private static final String INTERCEPTOR_CHAIN_PROCESSOR = "interceptorChainProcessor";
+    private static final String REST_PROCESSOR = "restProcessor";
+    private static final String ACTION_MAPPER = "actionMapper";
 
     @Mock
-    private AsynchronousDispatcher dispatcher;
+    private InterceptorChainProcessor interceptorChainProcessor;
+
     @Mock
     private BasicActionMapper actionMapper;
 
@@ -82,7 +86,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
 
     @Test
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public void shouldCallDispatcher() throws Exception {
+    public void shouldCallInterceptorChainProcessor() throws Exception {
 
         generator.run(
                 restRamlWithDefaults().with(
@@ -105,7 +109,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
         JsonEnvelope envelope = envelope().build();
         consumerCaptor.getValue().accept(envelope);
 
-        verify(dispatcher).dispatch(envelope);
+        verify(interceptorChainProcessor).process(envelope);
     }
 
     @SuppressWarnings("unchecked")
@@ -177,7 +181,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
 
         Collection<Parameter> pathParams = pathParamsCaptor.getValue();
         assertThat(pathParams, hasSize(1));
-        final Parameter pathParam = (Parameter) pathParams.iterator().next();
+        final Parameter pathParam = pathParams.iterator().next();
         assertThat(pathParam.getName(), is("paramA"));
         assertThat(pathParam.getStringValue(), is("paramValue1234"));
 
@@ -219,7 +223,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
 
         Collection<Parameter> pathParams = pathParamsCaptor.getValue();
         assertThat(pathParams, hasSize(1));
-        final Parameter pathParam = (Parameter) pathParams.iterator().next();
+        final Parameter pathParam = pathParams.iterator().next();
         assertThat(pathParam.getName(), is("p1"));
         assertThat(pathParam.getStringValue(), is("paramValueXYZ"));
     }
@@ -287,12 +291,11 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
         verify(restProcessor).processAsynchronously(any(Consumer.class), eq("contextA.someAction"), any(Optional.class), any(HttpHeaders.class), any(Collection.class));
     }
 
-
     private Object instanceOf(Class<?> resourceClass) throws InstantiationException, IllegalAccessException {
         Object resourceObject = resourceClass.newInstance();
-        setField(resourceObject, "restProcessor", restProcessor);
-        setField(resourceObject, "asyncDispatcher", dispatcher);
-        setField(resourceObject, "actionMapper", actionMapper);
+        setField(resourceObject, REST_PROCESSOR, restProcessor);
+        setField(resourceObject, INTERCEPTOR_CHAIN_PROCESSOR, interceptorChainProcessor);
+        setField(resourceObject, ACTION_MAPPER, actionMapper);
         return resourceObject;
     }
 

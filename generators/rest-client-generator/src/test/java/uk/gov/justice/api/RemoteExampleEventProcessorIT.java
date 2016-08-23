@@ -129,7 +129,6 @@ public class RemoteExampleEventProcessorIT {
             DispatcherCache.class,
             DispatcherFactory.class,
             PolicyEvaluator.class,
-            PolicyEvaluator.class,
 
             PassThroughEventBufferService.class,
             LoggerProducer.class,

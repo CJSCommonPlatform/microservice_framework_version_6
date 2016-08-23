@@ -1,6 +1,7 @@
 package uk.gov.justice.services.core.interceptor;
 
 import static java.lang.String.format;
+import static uk.gov.justice.services.core.interceptor.InterceptorContext.copyWithOutput;
 import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
 import static uk.gov.justice.services.messaging.logging.LoggerUtils.trace;
 
@@ -36,29 +37,33 @@ public class InterceptorChainProcessorProducer {
      */
     @Produces
     public InterceptorChainProcessor produceProcessor(final InjectionPoint injectionPoint) {
-        final Function<JsonEnvelope, JsonEnvelope> synchronousDispatch = dispatcherCache.dispatcherFor(injectionPoint)::dispatch;
+        final Function<JsonEnvelope, JsonEnvelope> dispatch = dispatcherCache.dispatcherFor(injectionPoint)::dispatch;
 
         trace(logger, () -> format("Interceptor Chain Processor provided for %s", injectionPoint.getClass().getName()));
 
-        return createProcessor(synchronousDispatch, injectionPoint);
+        return createProcessor(dispatch, injectionPoint);
     }
 
     /**
-     * Constructs the {@link InterceptorChainProcessor} for the given dispatcher interceptor target
+     * Constructs the {@link InterceptorChainProcessor} for the given dispatch interceptor target
      * and injection point.
      *
-     * @param dispatcher     the dispatcher target method
+     * @param dispatch       the dispatch target method
      * @param injectionPoint the injection point of the {@link InterceptorChainProcessor}
      * @return the interceptor chain processor function
      */
-    private InterceptorChainProcessor createProcessor(final Function<JsonEnvelope, JsonEnvelope> dispatcher, final InjectionPoint injectionPoint) {
+    private InterceptorChainProcessor createProcessor(final Function<JsonEnvelope, JsonEnvelope> dispatch, final InjectionPoint injectionPoint) {
 
         return jsonEnvelope -> {
-            final InterceptorChain interceptorChain = new InterceptorChain(interceptorCache.getInterceptors(), new DispatcherTarget(dispatcher));
+            final InterceptorChain interceptorChain = new InterceptorChain(interceptorCache.getInterceptors(), targetOf(dispatch));
 
-            return interceptorChain.processNext(interceptorContextWithInput(jsonEnvelope, injectionPoint))
-                    .outputEnvelope()
-                    .orElse(null);
+            return interceptorChain
+                    .processNext(interceptorContextWithInput(jsonEnvelope, injectionPoint))
+                    .outputEnvelope();
         };
+    }
+
+    private Target targetOf(final Function<JsonEnvelope, JsonEnvelope> dispatch) {
+        return interceptorContext -> copyWithOutput(interceptorContext, dispatch.apply(interceptorContext.inputEnvelope()));
     }
 }

@@ -15,9 +15,9 @@ public class RecordingInterceptorChainProcessor extends EnvelopeRecorder impleme
     private List<MockResponse> mockResponses = new LinkedList<>();
 
     @Override
-    public JsonEnvelope process(final JsonEnvelope envelope) {
+    public Optional<JsonEnvelope> process(final JsonEnvelope envelope) {
         record(envelope);
-        return responseTo(envelope);
+        return Optional.ofNullable(responseTo(envelope));
     }
 
     public void setupResponse(final String payloadElementNameCriteria, final String payloadElementValueCriteria,

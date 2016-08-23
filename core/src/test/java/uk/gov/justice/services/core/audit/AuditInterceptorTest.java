@@ -9,8 +9,8 @@ import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 
 import uk.gov.justice.services.core.annotation.Adapter;
-import uk.gov.justice.services.core.dispatcher.AsynchronousDispatcher;
 import uk.gov.justice.services.core.interceptor.InterceptorChain;
+import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
 import uk.gov.justice.services.core.util.TestInjectionPoint;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -20,9 +20,7 @@ import java.util.Optional;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -84,7 +82,7 @@ public class AuditInterceptorTest {
     @Adapter(COMMAND_API)
     public static class TestCommandLocal {
         @Inject
-        AsynchronousDispatcher asyncDispatcher;
+        InterceptorChainProcessor interceptorChainProcessor;
 
         public void dummyMethod() {
 
@@ -93,7 +91,7 @@ public class AuditInterceptorTest {
 
     public static class TestCommandRemote {
         @Inject
-        AsynchronousDispatcher asyncDispatcher;
+        InterceptorChainProcessor interceptorChainProcessor;
 
         public void dummyMethod() {
 

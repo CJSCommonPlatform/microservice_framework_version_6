@@ -1,12 +1,12 @@
 package uk.gov.justice.services.eventsourcing.repository.jdbc;
 
+import uk.gov.justice.services.eventsourcing.common.exception.InvalidSequenceIdException;
+import uk.gov.justice.services.eventsourcing.common.exception.InvalidStreamIdException;
 import uk.gov.justice.services.eventsourcing.repository.core.EventRepository;
 import uk.gov.justice.services.eventsourcing.repository.core.exception.StoreEventRequestFailedException;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLog;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLogConverter;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLogJdbcRepository;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidSequenceIdException;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidStreamIdException;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 

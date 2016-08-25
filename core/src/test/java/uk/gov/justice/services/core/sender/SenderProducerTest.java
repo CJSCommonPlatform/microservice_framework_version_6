@@ -13,6 +13,7 @@ import static uk.gov.justice.services.core.annotation.Component.EVENT_API;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
+import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.dispatcher.Dispatcher;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
@@ -107,6 +108,23 @@ public class SenderProducerTest {
     }
 
     @Test
+    public void shouldReturnSenderWrapperForLibraryComponent() throws Exception {
+        final TestInjectionPoint injectionPoint = new TestInjectionPoint(LibraryComponent.class);
+
+        when(dispatcherCache.dispatcherFor(injectionPoint)).thenReturn(dispatcher);
+
+        final Sender returnedSender = senderProducer.produce(injectionPoint);
+
+        assertThat(returnedSender, notNullValue());
+
+        final JsonEnvelope envelope = envelope().build();
+
+        returnedSender.send(envelope);
+
+        verify(dispatcher).dispatch(envelope);
+    }
+
+    @Test
     public void senderWrapperShouldRedirectToLegacySenderWhenPrimaryThrowsException() throws Exception {
         final TestInjectionPoint injectionPoint = new TestInjectionPoint(TestCommandApi.class);
 
@@ -153,6 +171,13 @@ public class SenderProducerTest {
 
     @ServiceComponent(EVENT_API)
     public static class TestEventAPI {
+        public void dummyMethod() {
+
+        }
+    }
+
+    @FrameworkComponent("NonComponentValue")
+    public static class LibraryComponent {
         public void dummyMethod() {
 
         }

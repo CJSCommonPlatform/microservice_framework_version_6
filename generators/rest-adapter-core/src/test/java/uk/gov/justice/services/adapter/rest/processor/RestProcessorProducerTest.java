@@ -24,6 +24,7 @@ import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 
 import java.lang.reflect.Member;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -60,7 +61,7 @@ public class RestProcessorProducerTest {
     private Member queryControllerMember;
 
     @Mock
-    private Function<JsonEnvelope, JsonEnvelope> function;
+    private Function<JsonEnvelope, Optional<JsonEnvelope>> function;
 
     @Mock
     private HttpHeaders httpHeaders;
@@ -85,7 +86,7 @@ public class RestProcessorProducerTest {
     @Test
     public void shouldReturnPayloadOnlyRestProcessorForJsonObject() {
         when(function.apply(any())).thenReturn(
-                envelope().with(metadataOf(UUID.fromString(ID_VALUE), NAME_VALUE)).withPayloadOf(FIELD_VALUE, FIELD_NAME).build());
+                Optional.of(envelope().with(metadataOf(UUID.fromString(ID_VALUE), NAME_VALUE)).withPayloadOf(FIELD_VALUE, FIELD_NAME).build()));
 
         Response response = restProcessorProducer.produceRestProcessor(queryApiInjectionPoint)
                 .processSynchronously(function, "somecontext.somequery", headersWith("Accept", "application/vnd.somecontext.query.somequery+json"), NOT_USED_PATH_PARAMS);
@@ -100,7 +101,7 @@ public class RestProcessorProducerTest {
     @Test
     public void shouldReturnDefaultRestProcessor() {
         when(function.apply(any())).thenReturn(
-                envelope().with(metadataOf(UUID.fromString(ID_VALUE), NAME_VALUE)).withPayloadOf(FIELD_VALUE, FIELD_NAME).build());
+                Optional.of(envelope().with(metadataOf(UUID.fromString(ID_VALUE), NAME_VALUE)).withPayloadOf(FIELD_VALUE, FIELD_NAME).build()));
 
         Response response = restProcessorProducer.produceRestProcessor(queryControllerInjectionPoint)
                 .processSynchronously(function, "somecontext.somequery", headersWith("Accept", "application/vnd.somecontext.query.somequery+json"), NOT_USED_PATH_PARAMS);

@@ -54,8 +54,8 @@ public class RestProcessor {
     }
 
     /**
-     * Process an incoming REST request asynchronously by combining the payload, headers and path parameters into
-     * an envelope and passing the envelope to the given consumer.
+     * Process an incoming REST request asynchronously by combining the payload, headers and path
+     * parameters into an envelope and passing the envelope to the given consumer.
      *
      * @param consumer       a consumer for the envelope
      * @param action         the action name for this request
@@ -89,15 +89,15 @@ public class RestProcessor {
     }
 
     /**
-     * Process an incoming REST request synchronously by combining the payload, headers and path parameters into
-     * an envelope and passing the envelope to the given consumer.
+     * Process an incoming REST request synchronously by combining the payload, headers and path
+     * parameters into an envelope and passing the envelope to the given consumer.
      *
      * @param action  the action name for this request
      * @param headers the headers from the REST request
      * @param params  the parameters from the REST request
      * @return the HTTP response to return to the client
      */
-    public Response processSynchronously(final Function<JsonEnvelope, JsonEnvelope> function,
+    public Response processSynchronously(final Function<JsonEnvelope, Optional<JsonEnvelope>> function,
                                          final String action,
                                          final HttpHeaders headers,
                                          final Collection<Parameter> params) {
@@ -112,22 +112,28 @@ public class RestProcessor {
 
         trace(LOGGER, () -> format("REST message converted to envelope: %s", envelope));
 
-        final JsonEnvelope result = function.apply(envelope);
+        final Optional<JsonEnvelope> result = function.apply(envelope);
 
         trace(LOGGER, () -> format("REST message processed: %s", envelope));
         trace(LOGGER, () -> format("Responding to REST message with: %s", result));
 
-        if (result == null) {
+        if (result.isPresent()) {
+            final JsonEnvelope outputEnvelope = result.get();
+
+            if (outputEnvelope.payload() == NULL) {
+                return status(NOT_FOUND).build();
+            } else {
+                final Response.ResponseBuilder response = status(OK);
+
+                if (sendMetadataIdInHeader) {
+                    response.header(ID, outputEnvelope.metadata().id());
+                }
+
+                return response.entity(responseBodyGenerator.apply(outputEnvelope)).build();
+            }
+        } else {
             LOGGER.error(format("Dispatcher returned a null envelope for %s", envelope.metadata().name()));
             return status(INTERNAL_SERVER_ERROR).build();
-        } else if (result.payload() == NULL) {
-            return status(NOT_FOUND).build();
-        } else {
-            final Response.ResponseBuilder response = status(OK);
-            if (sendMetadataIdInHeader) {
-                response.header(ID, result.metadata().id());
-            }
-            return response.entity(responseBodyGenerator.apply(result)).build();
         }
     }
 }

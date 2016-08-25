@@ -7,7 +7,7 @@ import uk.gov.justice.services.core.extension.BeanInstantiater;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.TreeSet;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -20,7 +20,7 @@ import javax.inject.Inject;
 @ApplicationScoped
 public class InterceptorCache {
 
-    private final Set<Interceptor> interceptors = new ConcurrentSkipListSet<>(comparing(Interceptor::priority));
+    private final Set<Interceptor> interceptors = new TreeSet<>(comparing(Interceptor::priority));
 
     @Inject
     InterceptorObserver observer;

@@ -14,6 +14,7 @@ import uk.gov.justice.services.clients.core.QueryParam;
 import uk.gov.justice.services.clients.core.RestClientHelper;
 import uk.gov.justice.services.clients.core.RestClientProcessor;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
+import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.generators.commons.client.AbstractClientGenerator;
 import uk.gov.justice.services.generators.commons.mapping.ActionMapping;
 import uk.gov.justice.services.generators.commons.validator.RamlValidationException;
@@ -46,6 +47,9 @@ public class RestClientGenerator extends AbstractClientGenerator {
 
     private static final String REST_CLIENT_HELPER = "restClientHelper";
     private static final String REST_CLIENT_PROCESSOR = "restClientProcessor";
+    private static final String ENVELOPER = "enveloper";
+    private static final String OUTPUT_ENVELOPE = "outputEnvelope";
+
     private static final int NUMBER_OF_PATH_SEGMENTS = 8;
     private static final int SERVICE_PATH_SEGMENT_INDEX = 7;
     private static final int PILLAR_PATH_SEGMENT_INDEX = 4;
@@ -65,11 +69,18 @@ public class RestClientGenerator extends AbstractClientGenerator {
 
     @Override
     protected Iterable<FieldSpec> fieldsOf(final Raml raml) {
-        return ImmutableList.of(restClientFieldProcessor(), restClientHelperField(), baseUriStaticFieldOf(raml));
+        return ImmutableList.of(
+                restClientFieldProcessor(),
+                restClientHelperField(),
+                baseUriStaticFieldOf(raml),
+                enveloperField()
+        );
     }
 
     @Override
     protected CodeBlock methodBodyOf(final Resource resource, final Action ramlAction, final MimeType mimeType) {
+        final String actionName = nameFrom(mimeType);
+
         final CodeBlock.Builder methodBody = CodeBlock.builder()
                 .addStatement("final String path = \"$L\"", resource.getRelativeUri())
                 .addStatement("final $T<$T> pathParams = $L.extractPathParametersFromPath(path)",
@@ -82,19 +93,20 @@ public class RestClientGenerator extends AbstractClientGenerator {
                         name, queryParameter.isRequired(), ParameterType.class, ParameterType.valueOf(queryParameter.getType()).name()));
 
         methodBody.addStatement("final $T def = new $T(BASE_URI, path, pathParams, queryParams, $S)",
-                EndpointDefinition.class, EndpointDefinition.class, nameFrom(mimeType));
-
+                EndpointDefinition.class, EndpointDefinition.class, actionName);
 
         switch (ramlAction.getType()) {
             case GET:
                 methodBody.addStatement("return $L.get(def, envelope)", REST_CLIENT_PROCESSOR);
                 break;
             case POST:
-                methodBody.addStatement("$L.post(def, envelope)", REST_CLIENT_PROCESSOR);
+                methodBody.addStatement("final JsonEnvelope $L = $L.withMetadataFrom(envelope, $S).apply(envelope.payload())", OUTPUT_ENVELOPE, ENVELOPER, actionName);
+                methodBody.addStatement("$L.post(def, $L)", REST_CLIENT_PROCESSOR, OUTPUT_ENVELOPE);
                 break;
             default:
                 throw new IllegalArgumentException(format("Action %s not supported in REST client generator", ramlAction.getType().toString()));
         }
+
         return methodBody.build();
     }
 
@@ -117,6 +129,12 @@ public class RestClientGenerator extends AbstractClientGenerator {
 
     private FieldSpec restClientHelperField() {
         return FieldSpec.builder(RestClientHelper.class, REST_CLIENT_HELPER)
+                .addAnnotation(Inject.class)
+                .build();
+    }
+
+    private FieldSpec enveloperField() {
+        return FieldSpec.builder(Enveloper.class, ENVELOPER)
                 .addAnnotation(Inject.class)
                 .build();
     }

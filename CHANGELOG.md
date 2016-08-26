@@ -11,6 +11,9 @@ according to a priority setting.  Interceptors implement the Interceptor interfa
 at startup.  
 Implemented interceptors: Event Buffer Interceptor, Access Control Interceptor
 
+### Fixed
+- Remote Client unable to POST to REST end point with media type that is different to action name
+
     
 ## [0.18.0] - 2016-08-22
 

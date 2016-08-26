@@ -48,36 +48,28 @@ import org.slf4j.Logger;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
-    @Before
-    public void before() {
-        super.before();
-        generator = new RestClientGenerator();
-    }
-
-    @Rule
-    public ExpectedException exception = ExpectedException.none();
 
     private static final String GET_MAPPING_ANNOTATION = mappingDescriptionWith(
             mapping()
                     .withResponseType("application/vnd.cakeshop.query.recipe+json")
                     .withName("cakeshop.get-recipe"))
             .build();
-
-
     private static final String POST_MAPPING_ANNOTATION = mappingDescriptionWith(
             mapping()
                     .withRequestType("application/vnd.cakeshop.command.update-recipe+json")
                     .withName("cakeshop.update-recipe"))
             .build();
-
     private static final String BASE_PACKAGE = "org.raml.test";
-
-
-
     private static final String BASE_URI_WITH_LESS_THAN_EIGHT_PARTS = "http://localhost:8080/command/api/rest/service";
     private static final String BASE_URI_WITH_MORE_THAN_EIGHT_PARTS = "http://localhost:8080/warname/command/api/rest/service/extra";
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
 
-
+    @Before
+    public void before() {
+        super.before();
+        generator = new RestClientGenerator();
+    }
 
     @Test
     public void shouldGenerateClassWithAnnotations() throws Exception {
@@ -91,7 +83,7 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("CUSTOM_COMPONENT")));
 
 
-        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceQueryApi");
+        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceQueryApi");
 
         assertThat(generatedClass.getCanonicalName(), is("org.raml.test.RemoteServiceQueryApi"));
         assertThat(generatedClass.getAnnotation(Remote.class), not(nullValue()));
@@ -100,6 +92,7 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
         assertBaseUriField(generatedClass.getDeclaredField("BASE_URI"));
         assertRestClientField(generatedClass.getDeclaredField("restClientProcessor"));
         assertRestClientHelperField(generatedClass.getDeclaredField("restClientHelper"));
+        assertEnveloperField(generatedClass.getDeclaredField("enveloper"));
     }
 
     @Test
@@ -111,7 +104,7 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("QUERY_CONTROLLER")));
 
-        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceQueryApi");
+        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceQueryApi");
         assertThat(generatedClass.getAnnotation(FrameworkComponent.class).value(), is("QUERY_CONTROLLER"));
     }
 
@@ -124,9 +117,9 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
 
-        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceQueryApi");
+        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceQueryApi");
 
-        Field logger = generatedClass.getDeclaredField("LOGGER");
+        final Field logger = generatedClass.getDeclaredField("LOGGER");
         assertThat(logger, not(nullValue()));
         assertThat(logger.getType(), equalTo(Logger.class));
         assertThat(Modifier.isPrivate(logger.getModifiers()), Matchers.is(true));
@@ -145,12 +138,12 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
-        List<Method> methods = methodsOf(clazz);
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
+        final List<Method> methods = methodsOf(clazz);
         assertThat(methods, hasSize(1));
 
-        Method method = methods.get(0);
-        Handles handlesAnnotation = method.getAnnotation(Handles.class);
+        final Method method = methods.get(0);
+        final Handles handlesAnnotation = method.getAnnotation(Handles.class);
         assertThat(handlesAnnotation, not(nullValue()));
         assertThat(handlesAnnotation.value(), is("cakeshop.get-recipe"));
 
@@ -166,12 +159,12 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
-        List<Method> methods = methodsOf(clazz);
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
+        final List<Method> methods = methodsOf(clazz);
         assertThat(methods, hasSize(1));
 
-        Method method = methods.get(0);
-        Handles handlesAnnotation = method.getAnnotation(Handles.class);
+        final Method method = methods.get(0);
+        final Handles handlesAnnotation = method.getAnnotation(Handles.class);
         assertThat(handlesAnnotation, not(nullValue()));
         assertThat(handlesAnnotation.value(), is("cakeshop.update-recipe"));
 
@@ -187,8 +180,8 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
-        Method method = firstMethodOf(clazz);
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
+        final Method method = firstMethodOf(clazz);
         assertThat(method.getParameterCount(), is(1));
         assertThat(method.getParameters()[0].getType(), equalTo((JsonEnvelope.class)));
     }
@@ -232,17 +225,21 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
 
     }
 
-    private void assertBaseUriField(Field field) {
+    private void assertBaseUriField(final Field field) {
         assertThat(Modifier.isStatic(field.getModifiers()), is(true));
         assertThat(Modifier.isPrivate(field.getModifiers()), is(true));
         assertThat(Modifier.isFinal(field.getModifiers()), is(true));
     }
 
-    private void assertRestClientField(Field field) {
+    private void assertRestClientField(final Field field) {
         assertThat(field.getAnnotation(Inject.class), not(nullValue()));
     }
 
-    private void assertRestClientHelperField(Field field) {
+    private void assertRestClientHelperField(final Field field) {
+        assertThat(field.getAnnotation(Inject.class), not(nullValue()));
+    }
+
+    private void assertEnveloperField(final Field field) {
         assertThat(field.getAnnotation(Inject.class), not(nullValue()));
     }
 

@@ -2,9 +2,9 @@ package uk.gov.justice.services.core.sender;
 
 import static uk.gov.justice.services.core.annotation.Component.EVENT_API;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
+import static uk.gov.justice.services.core.annotation.Component.valueOf;
 import static uk.gov.justice.services.core.annotation.ComponentNameUtil.componentFrom;
 
-import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.jms.JmsSenderWrapper;
 import uk.gov.justice.services.core.jms.SenderFactory;
@@ -52,9 +52,18 @@ public class SenderProducer {
     private Sender getSender(final String componentName
             , final InjectionPoint injectionPoint) {
         final Sender primarySender = produceSender(injectionPoint);
-        final Sender legacySender = !componentName.equals(EVENT_PROCESSOR.name()) && !componentName.equals(EVENT_API.name()) ?
-                senderMap.computeIfAbsent(componentName, c -> senderFactory.createSender(componentDestination.getDefault(Component.valueOf(c)))) : null;
+        final Sender legacySender = !componentName.equals(EVENT_PROCESSOR.name()) && !componentName.equals(EVENT_API.name()) && isFrameworkComponent(componentName) ?
+                senderMap.computeIfAbsent(componentName, c -> senderFactory.createSender(componentDestination.getDefault(valueOf(c)))) : null;
         return new JmsSenderWrapper(primarySender, legacySender);
+    }
+
+    private boolean isFrameworkComponent(final String componentName) {
+        try {
+            valueOf(componentName);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 
     private Sender produceSender(final InjectionPoint injectionPoint) {

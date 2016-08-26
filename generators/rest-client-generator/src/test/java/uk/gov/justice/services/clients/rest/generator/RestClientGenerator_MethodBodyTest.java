@@ -7,15 +7,20 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.same;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.raml.model.ActionType.GET;
+import static org.raml.model.ActionType.POST;
 import static org.raml.model.ParamType.BOOLEAN;
 import static org.raml.model.ParamType.INTEGER;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.defaultGetAction;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
+import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.mapping;
 import static uk.gov.justice.services.generators.test.utils.builder.QueryParamBuilder.queryParam;
+import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithCommandApiDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithQueryApiDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.defaultGetResource;
@@ -30,12 +35,14 @@ import uk.gov.justice.services.adapter.rest.parameter.ParameterType;
 import uk.gov.justice.services.clients.core.EndpointDefinition;
 import uk.gov.justice.services.clients.core.RestClientHelper;
 import uk.gov.justice.services.clients.core.RestClientProcessor;
+import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.function.Function;
 
 import com.google.common.collect.ImmutableSet;
 import org.junit.Before;
@@ -55,6 +62,8 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
     RestClientProcessor restClientProcessor;
     @Mock
     RestClientHelper restClientHelper;
+    @Mock
+    Enveloper enveloper;
 
     @Before
     public void before() {
@@ -72,10 +81,10 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, NOT_USED_GENERATOR_PROPERTIES));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteService1QueryApi");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteService1QueryApi");
         invokeFirstMethod(clazz);
 
-        assertThat(capturedEndpointDefinition().getBaseUri(), is("http://localhost:8080/contextabc/query/api/rest/service1"));
+        assertThat(capturedGetEndpointDefinition().getBaseUri(), is("http://localhost:8080/contextabc/query/api/rest/service1"));
     }
 
     @Test
@@ -87,9 +96,9 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, NOT_USED_GENERATOR_PROPERTIES));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceQueryApi");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceQueryApi");
         invokeFirstMethod(clazz);
-        assertThat(capturedEndpointDefinition().getPath(), is("/pathabc/{anId}"));
+        assertThat(capturedGetEndpointDefinition().getPath(), is("/pathabc/{anId}"));
     }
 
 
@@ -102,17 +111,18 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, NOT_USED_GENERATOR_PROPERTIES));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceQueryApi");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceQueryApi");
 
-        ImmutableSet<String> paramsSetReturnedByHelper = ImmutableSet.of("aaa");
+        final ImmutableSet<String> paramsSetReturnedByHelper = ImmutableSet.of("aaa");
         when(restClientHelper.extractPathParametersFromPath("/pathabc")).thenReturn(paramsSetReturnedByHelper);
 
         invokeFirstMethod(clazz);
 
-        assertThat(capturedEndpointDefinition().getPathParams(), is(paramsSetReturnedByHelper));
+        assertThat(capturedGetEndpointDefinition().getPathParams(), is(paramsSetReturnedByHelper));
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void shouldCallRestClientWithEndpointDefinitionContainingQueryParams() throws Exception {
         generator.run(
                 restRamlWithQueryApiDefaults()
@@ -127,11 +137,11 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, NOT_USED_GENERATOR_PROPERTIES));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceQueryApi");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceQueryApi");
 
         invokeFirstMethod(clazz);
 
-        EndpointDefinition endpointDefinition = capturedEndpointDefinition();
+        final EndpointDefinition endpointDefinition = capturedGetEndpointDefinition();
 
         assertThat(endpointDefinition.getQueryParams(), hasSize(4));
         assertThat(endpointDefinition.getQueryParams(), hasItems(
@@ -151,53 +161,98 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, NOT_USED_GENERATOR_PROPERTIES));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceQueryApi");
-        Object remoteClient = instanceOf(clazz);
-        Method method = firstMethodOf(clazz);
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceQueryApi");
+        final Object remoteClient = instanceOf(clazz);
+        final Method method = firstMethodOf(clazz);
 
-        JsonEnvelope envelope = envelope().build();
+        final JsonEnvelope envelope = envelope().build();
         method.invoke(remoteClient, envelope);
 
         verify(restClientProcessor).get(any(EndpointDefinition.class), same(envelope));
     }
 
     @Test
-    public void shouldPassPostEnvelopeToRestClient() throws Exception {
+    @SuppressWarnings("unchecked")
+    public void shouldSetNameAndPassEnvelopeToRestClient() throws Exception {
 
-        generator.run(
-                restRamlWithQueryApiDefaults()
-                        .withDefaultPostResource()
-                        .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, NOT_USED_GENERATOR_PROPERTIES));
+        generateRemoteServiceCommandApi();
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceQueryApi");
-        Object remoteClient = instanceOf(clazz);
-        Method method = firstMethodOf(clazz);
+        final JsonEnvelope envelope = mock(JsonEnvelope.class);
+        final JsonEnvelope outputEnvelope = mock(JsonEnvelope.class);
+        final Function function = mock(Function.class);
 
-        JsonEnvelope envelope = envelope().build();
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
+        final Object remoteClient = instanceOf(clazz);
+        final Method method = firstMethodOf(clazz);
+
+        when(enveloper.withMetadataFrom(envelope, "ctx.defcmd")).thenReturn(function);
+        when(function.apply(envelope.payload())).thenReturn(outputEnvelope);
+
         method.invoke(remoteClient, envelope);
 
-        verify(restClientProcessor).post(any(EndpointDefinition.class), same(envelope));
+        verify(restClientProcessor).post(any(EndpointDefinition.class), eq(outputEnvelope));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void shouldCallRestClientWithEndpointDefinitionContainingMediaType() throws Exception {
+
+        generateRemoteServiceCommandApi();
+
+        final JsonEnvelope envelope = mock(JsonEnvelope.class);
+        final JsonEnvelope outputEnvelope = mock(JsonEnvelope.class);
+        final Function function = mock(Function.class);
+
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
+        final Object remoteClient = instanceOf(clazz);
+        final Method method = firstMethodOf(clazz);
+
+        when(enveloper.withMetadataFrom(envelope, "ctx.defcmd")).thenReturn(function);
+        when(function.apply(envelope.payload())).thenReturn(outputEnvelope);
+
+        method.invoke(remoteClient, envelope);
+
+        assertThat(capturedPostEndpointDefinition().getResponseMediaType(), is("ctx.defcmd"));
     }
 
     private void invokeFirstMethod(final Class<?> clazz) throws InstantiationException, IllegalAccessException, InvocationTargetException {
-        Object remoteClient = instanceOf(clazz);
-        Method method = firstMethodOf(clazz);
+        final Object remoteClient = instanceOf(clazz);
+        final Method method = firstMethodOf(clazz);
         method.invoke(remoteClient, NOT_USED_ENVELOPE);
     }
 
-    private EndpointDefinition capturedEndpointDefinition() {
-        ArgumentCaptor<EndpointDefinition> endpointDefCaptor = ArgumentCaptor.forClass(EndpointDefinition.class);
+    private EndpointDefinition capturedGetEndpointDefinition() {
+        final ArgumentCaptor<EndpointDefinition> endpointDefCaptor = ArgumentCaptor.forClass(EndpointDefinition.class);
 
         verify(restClientProcessor).get(endpointDefCaptor.capture(), any(JsonEnvelope.class));
         return endpointDefCaptor.getValue();
     }
 
-    private Object instanceOf(Class<?> resourceClass) throws InstantiationException, IllegalAccessException {
-        Object resourceObject = resourceClass.newInstance();
+    private EndpointDefinition capturedPostEndpointDefinition() {
+        final ArgumentCaptor<EndpointDefinition> endpointDefCaptor = ArgumentCaptor.forClass(EndpointDefinition.class);
+
+        verify(restClientProcessor).post(endpointDefCaptor.capture(), any(JsonEnvelope.class));
+        return endpointDefCaptor.getValue();
+    }
+
+    private Object instanceOf(final Class<?> resourceClass) throws InstantiationException, IllegalAccessException {
+        final Object resourceObject = resourceClass.newInstance();
         setField(resourceObject, "restClientProcessor", restClientProcessor);
         setField(resourceObject, "restClientHelper", restClientHelper);
+        setField(resourceObject, "enveloper", enveloper);
         return resourceObject;
+    }
+
+    private void generateRemoteServiceCommandApi() {
+        generator.run(
+                restRamlWithCommandApiDefaults()
+                        .with(resource("/pathabc/{anId}").with(httpAction().withHttpActionType(POST)
+                                .withMediaType("application/vnd.ctx.defcmd+json", "json/schema/ctx.defcmd.json")
+                                .with(mapping()
+                                        .withName("action1")
+                                        .withRequestType("application/vnd.ctx.defcmd+json"))))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, NOT_USED_GENERATOR_PROPERTIES));
     }
 
 }

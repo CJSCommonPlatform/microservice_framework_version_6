@@ -20,6 +20,7 @@ import uk.gov.justice.services.clients.core.RestClientHelper;
 import uk.gov.justice.services.clients.core.RestClientProcessor;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
 import uk.gov.justice.services.core.accesscontrol.AccessControlService;
 import uk.gov.justice.services.core.accesscontrol.AllowAllPolicyEvaluator;
@@ -50,7 +51,6 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.apache.openejb.OpenEjbContainer;
 import org.apache.openejb.jee.Application;
@@ -120,7 +120,7 @@ public class RemoteExampleEventProcessorIT {
             StringToJsonObjectConverter.class,
             JsonObjectEnvelopeConverter.class,
             ObjectToJsonValueConverter.class,
-            ObjectMapper.class,
+            ObjectMapperProducer.class,
             Enveloper.class,
 
             AccessControlFailureMessageGenerator.class,

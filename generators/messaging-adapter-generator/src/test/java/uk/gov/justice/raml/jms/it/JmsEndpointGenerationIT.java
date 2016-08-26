@@ -13,43 +13,26 @@ import uk.gov.justice.services.adapter.messaging.JmsProcessor;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
+import uk.gov.justice.services.core.eventfilter.AllowAllEventFilter;
+import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
-import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.generators.test.utils.interceptor.RecordingInterceptorChainProcessor;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
-import uk.gov.justice.services.messaging.JsonObjects;
 import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
 
-import java.util.Properties;
 import java.util.UUID;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
 import javax.jms.JMSException;
-import javax.jms.MessageProducer;
 import javax.jms.Queue;
-import javax.jms.Session;
-import javax.jms.TextMessage;
 import javax.jms.Topic;
-import javax.json.JsonObject;
-import javax.naming.NamingException;
 
-import org.apache.cxf.common.i18n.Exception;
-import org.apache.openejb.OpenEjbContainer;
 import org.apache.openejb.jee.WebApp;
 import org.apache.openejb.junit.ApplicationComposer;
 import org.apache.openejb.testing.Classes;
-import org.apache.openejb.testing.Configuration;
 import org.apache.openejb.testing.Module;
-import org.apache.openejb.testng.PropertiesBuilder;
-import org.apache.openejb.util.NetworkUtil;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -57,9 +40,7 @@ import org.junit.runner.RunWith;
  * Integration tests for the generated JAX-RS classes.
  */
 @RunWith(ApplicationComposer.class)
-public class JmsEndpointGenerationIT {
-
-    private static int port = -1;
+public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
 
     @Inject
     RecordingInterceptorChainProcessor interceptorChainProcessor;
@@ -71,30 +52,10 @@ public class JmsEndpointGenerationIT {
     private Queue commandControllerDestination;
 
     @Resource(name = "structure.event")
-    private Topic eventsDestination;
+    private Topic structureEventsDestination;
 
     @Resource(name = "public.event")
     private Topic publicEventsDestination;
-
-    @Resource
-    private ConnectionFactory factory;
-
-    private Connection connection;
-
-    private Session session;
-
-    @BeforeClass
-    public static void beforeClass() {
-        port = NetworkUtil.getNextAvailablePort();
-    }
-
-    @Configuration
-    public Properties properties() {
-        return new PropertiesBuilder()
-                .property("httpejbd.port", Integer.toString(port))
-                .property(OpenEjbContainer.OPENEJB_EMBEDDED_REMOTABLE, "true")
-                .build();
-    }
 
     @Module
     @Classes(cdi = true, value = {
@@ -108,27 +69,17 @@ public class JmsEndpointGenerationIT {
             EnvelopeConverter.class,
             StringToJsonObjectConverter.class,
             JsonObjectEnvelopeConverter.class,
-            JsonSchemaValidator.class,
+            DefaultJsonSchemaValidator.class,
             JsonSchemaLoader.class,
-            LoggerProducer.class
+            LoggerProducer.class,
+            AllowAllEventFilter.class
+
     })
     public WebApp war() {
         return new WebApp()
                 .contextRoot("jms-endpoint-test");
     }
 
-    @Before
-    public void setup() throws Exception, JMSException, NamingException {
-        connection = factory.createConnection();
-        connection.start();
-        session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-    }
-
-    @After
-    public void after() throws JMSException {
-        connection.close();
-        session.close();
-    }
 
     @Test
     public void commandControllerDispatcherShouldReceiveCommandA() throws JMSException {
@@ -212,7 +163,7 @@ public class JmsEndpointGenerationIT {
         String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d30";
         String eventName = "structure.eventbb";
 
-        sendEnvelope(metadataId, eventName, eventsDestination);
+        sendEnvelope(metadataId, eventName, structureEventsDestination);
 
         JsonEnvelope receivedEnvelope = interceptorChainProcessor.awaitForEnvelopeWithMetadataOf("id", metadataId);
         assertThat(receivedEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
@@ -227,13 +178,13 @@ public class JmsEndpointGenerationIT {
         String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d21";
         String commandName = "structure.eventcc";
 
-        sendEnvelope(metadataId, commandName, eventsDestination);
+        sendEnvelope(metadataId, commandName, structureEventsDestination);
         assertTrue(interceptorChainProcessor.notFoundEnvelopeWithMetadataOf("id", metadataId));
 
     }
 
     @Test
-    public void allEventsListenerDispatcherShouldReceiveAllEvents() throws InterruptedException, JMSException {
+    public void allEventsProcessorDispatcherShouldReceiveAllEvents() throws InterruptedException, JMSException {
         Thread.sleep(300);
 
         String metadataId1 = "861c9430-7bc6-4bf0-b549-6534394b8d31";
@@ -261,24 +212,4 @@ public class JmsEndpointGenerationIT {
         assertThat(receivedEnvelope3.metadata().name(), is(eventName3));
     }
 
-    private void sendEnvelope(String metadataId, String commandName, Destination queue) throws JMSException {
-        sendEnvelope(metadataId, commandName, queue, createObjectBuilder().build());
-    }
-
-    private void sendEnvelope(String metadataId, String commandName, Destination queue, JsonObject payload) throws JMSException {
-        TextMessage message = session.createTextMessage();
-        message.setText(envelopeJsonWith(metadataId, commandName, payload));
-        message.setStringProperty("CPPNAME", commandName);
-        try (MessageProducer producer = session.createProducer(queue)) {
-            producer.send(message);
-        }
-    }
-
-    private String envelopeJsonWith(String metadataId, String commandName, JsonObject payload) {
-        return JsonObjects.createObjectBuilder(payload)
-                .add("_metadata", createObjectBuilder()
-                        .add("id", metadataId)
-                        .add("name", commandName))
-                .build().toString();
-    }
 }

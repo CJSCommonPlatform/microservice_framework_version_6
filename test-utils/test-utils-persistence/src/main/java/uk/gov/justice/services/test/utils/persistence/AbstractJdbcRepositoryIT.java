@@ -29,7 +29,7 @@ public class AbstractJdbcRepositoryIT<T extends AbstractJdbcRepository> {
                 "org.apache.naming");
 
         dataSource = new JdbcDataSource();
-        dataSource.setURL("jdbc:h2:./test;MV_STORE=FALSE;MVCC=FALSE");
+        dataSource.setURL("jdbc:h2:mem:test;MV_STORE=FALSE;MVCC=FALSE");
         dataSource.setUser("sa");
         dataSource.setPassword("sa");
 

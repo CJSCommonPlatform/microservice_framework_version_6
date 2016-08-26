@@ -1,8 +1,9 @@
 package uk.gov.justice.services.core.it;
 
+import static co.unruly.matchers.OptionalMatchers.contains;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
@@ -11,12 +12,12 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
 import uk.gov.justice.services.core.accesscontrol.AccessControlService;
 import uk.gov.justice.services.core.accesscontrol.AllowAllPolicyEvaluator;
 import uk.gov.justice.services.core.accesscontrol.PolicyEvaluator;
 import uk.gov.justice.services.core.annotation.Adapter;
-import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
@@ -25,15 +26,15 @@ import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
 import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.core.eventbuffer.EventBufferInterceptor;
+import uk.gov.justice.services.core.eventfilter.AbstractEventFilter;
 import uk.gov.justice.services.core.eventfilter.AllowAllEventFilter;
+import uk.gov.justice.services.core.eventfilter.EventFilterInterceptor;
 import uk.gov.justice.services.core.extension.AnnotationScanner;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
-import uk.gov.justice.services.core.interceptor.Interceptor;
 import uk.gov.justice.services.core.interceptor.InterceptorCache;
-import uk.gov.justice.services.core.interceptor.InterceptorChain;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
-import uk.gov.justice.services.core.interceptor.InterceptorContext;
 import uk.gov.justice.services.core.interceptor.InterceptorObserver;
 import uk.gov.justice.services.core.it.util.repository.StreamBufferOpenEjbAwareJdbcRepository;
 import uk.gov.justice.services.core.it.util.repository.StreamStatusOpenEjbAwareJdbcRepository;
@@ -50,24 +51,36 @@ import uk.gov.justice.services.test.utils.common.envelope.TestEnvelopeRecorder;
 
 import java.util.UUID;
 
+import javax.annotation.Priority;
+import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Alternative;
 import javax.inject.Inject;
+import javax.sql.DataSource;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import liquibase.Liquibase;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.resource.ClassLoaderResourceAccessor;
 import org.apache.openejb.jee.Application;
 import org.apache.openejb.jee.WebApp;
 import org.apache.openejb.junit.ApplicationComposer;
 import org.apache.openejb.testing.Classes;
 import org.apache.openejb.testing.Module;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(ApplicationComposer.class)
-@FrameworkComponent("CORE_TEST")
 @Adapter(EVENT_LISTENER)
-public class EventHandlerIT {
+public class EventBufferAndFilterChainIT {
 
-    private static final String EVENT_ABC = "test.event-abc";
+    private static final String LIQUIBASE_STREAM_STATUS_CHANGELOG_XML = "liquibase/event-buffer-changelog.xml";
+
+    private static final String EVENT_SUPPORTED_ABC = "test.event-abc";
+    private static final String EVENT_UNSUPPORTED_DEF = "test.event-def";
+
+    @Resource(name = "openejb/Resource/viewStore")
+    private DataSource dataSource;
 
     @Inject
     private InterceptorChainProcessor interceptorChainProcessor;
@@ -76,21 +89,16 @@ public class EventHandlerIT {
     private AbcEventHandler abcEventHandler;
 
     @Inject
-    private AllEventsHandler allEventsHandler;
+    private DefEventHandler defEventHandler;
+
 
     @Module
     @Classes(cdi = true, value = {
             AbcEventHandler.class,
-            AllEventsHandler.class,
+            DefEventHandler.class,
             AnnotationScanner.class,
             RequesterProducer.class,
             ServiceComponentObserver.class,
-
-            InterceptorChainProcessorProducer.class,
-            InterceptorChainProcessor.class,
-            InterceptorCache.class,
-            InterceptorObserver.class,
-            TestInterceptor.class,
 
             SenderProducer.class,
             JmsSenderFactory.class,
@@ -102,8 +110,17 @@ public class EventHandlerIT {
             StringToJsonObjectConverter.class,
             JsonObjectEnvelopeConverter.class,
             ObjectToJsonValueConverter.class,
-            ObjectMapper.class,
+            ObjectMapperProducer.class,
             Enveloper.class,
+
+            InterceptorChainProcessorProducer.class,
+            InterceptorChainProcessor.class,
+            InterceptorCache.class,
+            InterceptorObserver.class,
+
+            AllowAllEventFilter.class,
+            SupportedEventAllowingEventFilter.class,
+            EventFilterInterceptor.class,
 
             AccessControlFailureMessageGenerator.class,
             AllowAllPolicyEvaluator.class,
@@ -111,11 +128,11 @@ public class EventHandlerIT {
             DispatcherCache.class,
             DispatcherFactory.class,
             PolicyEvaluator.class,
-            AllowAllEventFilter.class,
 
             StreamBufferOpenEjbAwareJdbcRepository.class,
             StreamStatusOpenEjbAwareJdbcRepository.class,
             ConsecutiveEventBufferService.class,
+            EventBufferInterceptor.class,
             LoggerProducer.class,
             BeanInstantiater.class
     })
@@ -125,49 +142,55 @@ public class EventHandlerIT {
                 .addServlet("TestApp", Application.class.getName());
     }
 
-    @Test
-    public void shouldHandleEventByName() {
-
-        UUID metadataId = randomUUID();
-        interceptorChainProcessor.process(envelope()
-                .with(metadataOf(metadataId, EVENT_ABC)
-                        .withStreamId(randomUUID())
-                        .withVersion(1L)).build());
-
-        assertThat(abcEventHandler.firstRecordedEnvelope(), not(nullValue()));
-        assertThat(abcEventHandler.firstRecordedEnvelope().metadata().id(), equalTo(metadataId));
+    @Before
+    public void init() throws Exception {
+        initDatabase();
     }
 
     @Test
-    public void shouldHandleEventByTheAllEventsHandlerIfNamedHandlerNotFound() {
+    public void shouldAllowUnsupportedEventThroughBufferAndFilterOutAfterwards() {
 
-        UUID metadataId = randomUUID();
-        interceptorChainProcessor.process(envelope()
-                .with(metadataOf(metadataId, "some.unregistered.event")
-                        .withStreamId(randomUUID())
-                        .withVersion(1L)).build());
+        final UUID metadataId1 = randomUUID();
+        final UUID metadataId2 = randomUUID();
+        final UUID metadataId3 = randomUUID();
+        final UUID streamId = randomUUID();
 
-        assertThat(allEventsHandler.firstRecordedEnvelope(), not(nullValue()));
-        assertThat(allEventsHandler.firstRecordedEnvelope().metadata().id(), equalTo(metadataId));
-    }
+        interceptorChainProcessor.process(
+                envelope()
+                        .with(metadataOf(metadataId2, EVENT_UNSUPPORTED_DEF)
+                                .withStreamId(streamId)
+                                .withVersion(2L))
+                        .build());
+        interceptorChainProcessor.process(
+                envelope()
+                        .with(metadataOf(metadataId3, EVENT_SUPPORTED_ABC)
+                                .withStreamId(streamId)
+                                .withVersion(3L))
+                        .build());
 
-    @Test
-    public void shouldCallInterceptor() {
 
-        UUID metadataId = UUID.randomUUID();
-        interceptorChainProcessor.process(envelope()
-                .with(metadataOf(metadataId, EVENT_ABC)
-                        .withStreamId(randomUUID())
-                        .withVersion(1L)).build());
+        interceptorChainProcessor.process(
+                envelope()
+                        .with(metadataOf(metadataId1, EVENT_SUPPORTED_ABC)
+                                .withStreamId(streamId)
+                                .withVersion(1L))
+                        .build());
 
-        assertThat(TestInterceptor.id, equalTo(metadataId));
+        assertThat(abcEventHandler.recordedEnvelopes(), not(empty()));
+        assertThat(abcEventHandler.recordedEnvelopes().get(0).metadata().id(), equalTo(metadataId1));
+        assertThat(abcEventHandler.recordedEnvelopes().get(0).metadata().version(), contains(1L));
+        assertThat(abcEventHandler.recordedEnvelopes().get(1).metadata().id(), equalTo(metadataId3));
+        assertThat(abcEventHandler.recordedEnvelopes().get(1).metadata().version(), contains(3L));
+
+
+        assertThat(defEventHandler.recordedEnvelopes(), empty());
     }
 
     @ServiceComponent(EVENT_LISTENER)
     @ApplicationScoped
     public static class AbcEventHandler extends TestEnvelopeRecorder {
 
-        @Handles(EVENT_ABC)
+        @Handles(EVENT_SUPPORTED_ABC)
         public void handle(JsonEnvelope envelope) {
             record(envelope);
         }
@@ -176,9 +199,9 @@ public class EventHandlerIT {
 
     @ServiceComponent(EVENT_LISTENER)
     @ApplicationScoped
-    public static class AllEventsHandler extends TestEnvelopeRecorder {
+    public static class DefEventHandler extends TestEnvelopeRecorder {
 
-        @Handles("*")
+        @Handles(EVENT_UNSUPPORTED_DEF)
         public void handle(JsonEnvelope envelope) {
             record(envelope);
         }
@@ -186,20 +209,18 @@ public class EventHandlerIT {
     }
 
     @ApplicationScoped
-    public static class TestInterceptor implements Interceptor {
-
-        //State is set only for testing purposes.  Interceptor should not hold state in normal operation.
-        private static UUID id;
-
-        @Override
-        public InterceptorContext process(final InterceptorContext interceptorContext, final InterceptorChain interceptorChain) {
-            id = interceptorContext.inputEnvelope().metadata().id();
-            return interceptorChain.processNext(interceptorContext);
+    @Alternative
+    @Priority(2)
+    public static class SupportedEventAllowingEventFilter extends AbstractEventFilter {
+        public SupportedEventAllowingEventFilter() {
+            super(EVENT_SUPPORTED_ABC);
         }
+    }
 
-        @Override
-        public int priority() {
-            return 2000;
-        }
+    private void initDatabase() throws Exception {
+        Liquibase liquibase = new Liquibase(LIQUIBASE_STREAM_STATUS_CHANGELOG_XML,
+                new ClassLoaderResourceAccessor(), new JdbcConnection(dataSource.getConnection()));
+        liquibase.dropAll();
+        liquibase.update("");
     }
 }

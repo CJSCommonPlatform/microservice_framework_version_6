@@ -20,10 +20,10 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.slf4j.Logger;
 
 /**
- * Unit tests for the {@link JsonSchemaValidator} class.
+ * Unit tests for the {@link DefaultJsonSchemaValidator} class.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class JsonSchemaValidatorTest {
+public class DefaultJsonSchemaValidatorTest {
 
     private static final String TEST_SCHEMA_NAME = "test-schema";
 
@@ -37,10 +37,10 @@ public class JsonSchemaValidatorTest {
     private Schema schema;
 
     @InjectMocks
-    private JsonSchemaValidator validator;
+    private DefaultJsonSchemaValidator validator;
 
     @Before
-    public void setuo() {
+    public void setup() {
         when(loader.loadSchema(TEST_SCHEMA_NAME)).thenReturn(schema);
     }
 

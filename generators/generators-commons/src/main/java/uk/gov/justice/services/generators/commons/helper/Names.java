@@ -1,6 +1,7 @@
 package uk.gov.justice.services.generators.commons.helper;
 
 import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
 import static org.apache.commons.lang.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.WordUtils.capitalize;
@@ -18,6 +19,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang.StringUtils;
 import org.raml.model.Action;
@@ -125,6 +127,20 @@ public final class Names {
         return section.substring(0, section.indexOf('+'));
     }
 
+
+    /**
+     * Construct delimiter separated list of command/event names
+     *
+     * @param mediaTypes mediaTypes to create the list from
+     * @param delimiter the delimiter to separates names with
+     * @return delimiter separated list of command/event names
+     */
+    public static String namesListStringFrom(final Stream<MimeType> mediaTypes, final String delimiter) {
+        return mediaTypes.map(Names::nameFrom)
+                .collect(joining(delimiter));
+    }
+
+
     public static String mapperClassNameOf(final Resource resource) {
         return resourceImplementationNameOf(resource) + ACTION_MAPPER_CLASS_SUFFIX;
     }
@@ -141,9 +157,4 @@ public final class Names {
         final String baseName = source.replaceAll("[\\W_]", " ");
         return capitalize(baseName).replaceAll("[\\W_]", "");
     }
-
-    private static String buildMimeTypeInfix(final MimeType bodyMimeType) {
-        return bodyMimeType != null ? buildJavaFriendlyName(camelCase(nameFrom(bodyMimeType))) : "";
-    }
-
 }

@@ -3,18 +3,21 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
-## [unreleased]
+## [0.19.0] - 2016-08-26
 
 ### Added
 - Dispatcher interceptor integration. Interceptors are chained between the adapter and the dispatcher 
 according to a priority setting.  Interceptors implement the Interceptor interface and are registered 
 at startup.  
 Implemented interceptors: Event Buffer Interceptor, Access Control Interceptor
+- Event Listener Filter
+- Additional features to the HttpResponsePoller utility
 
 ### Fixed
 - Remote Client unable to POST to REST end point with media type that is different to action name
+- SenderProducer support for @FrameworkComponent annotated Senders
 
-    
+
 ## [0.18.0] - 2016-08-22
 
 ### Added

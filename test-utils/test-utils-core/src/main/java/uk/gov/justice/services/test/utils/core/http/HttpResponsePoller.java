@@ -1,15 +1,23 @@
 package uk.gov.justice.services.test.utils.core.http;
 
 
+import static java.lang.String.format;
 import static java.lang.Thread.currentThread;
 import static java.lang.Thread.sleep;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.OK;
 
+import uk.gov.justice.services.messaging.JsonObjects;
 import uk.gov.justice.services.test.utils.core.rest.RestClient;
 
+import java.io.StringReader;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
 import javax.ws.rs.core.Response;
 
 public class HttpResponsePoller {
@@ -35,48 +43,90 @@ public class HttpResponsePoller {
         return pollUntilExpectedResponse(url, mediaType, DEFAULT_DELAY_IN_MILLIS, OK);
     }
 
-    public String pollUntilFoundWithCondition(final String url, final String mediaType, final int delayInMillis, final Predicate<String> condition) {
-        final Predicate<Response> doesResponseValueMeetCondition = response -> {
-            final String value = response.readEntity(String.class);
-            return value != null && condition.test(value);
-        };
+    public String pollUntilJsonObjectFoundWithValues(final String url, final String mediaType, final Map<String, String> values) {
+        return pollUntilFoundWithCondition(url, mediaType, compareJsonObjectWith(values));
+    }
 
-        return pollUntilExpectedResponse(url, mediaType, delayInMillis, doesResponseValueMeetCondition).readEntity(String.class);
+    public String pollUntilFoundWithCondition(final String url, final String mediaType, final Predicate<String> condition) {
+        return pollUntilFoundWithCondition(url, mediaType, condition, DEFAULT_DELAY_IN_MILLIS);
+    }
+
+    public String pollUntilFoundWithCondition(final String url, final String mediaType, final Predicate<String> condition, final int delayInMillis) {
+        return pollUntilExpectedResponse(
+                url,
+                mediaType,
+                delayInMillis,
+                response -> response.getStatus() == OK.getStatusCode(),
+                condition
+        );
     }
 
     public String pollUntilExpectedResponse(final String url, final String mediaType, final int delayInMillis, final Response.Status status) {
-        final Response result = pollUntilExpectedResponse(url, mediaType, delayInMillis, response -> response.getStatus() == status.getStatusCode());
-        return result.readEntity(String.class);
-    }
-
-    private Response pollUntilExpectedResponse(final String url, final String mediaType, final int delayInMillis, final Predicate<Response> condition) {
-        for (int i = 1; i <= RETRY_COUNT; i++) {
-            final Response response = restClient.query(url, mediaType);
-
-            if (condition.test(response)) {
-                return response;
-            }
-
-            if (i == RETRY_COUNT) {
-                throw new AssertionError("Failed to get " + response.getStatus() + " response from '" + url + "' after " + RETRY_COUNT + " attempts. Status code: " + response.getStatus());
-            }
-
-            sleepFor(delayInMillis);
-        }
-
-        throw new IllegalStateException("Should never get here");
+        return pollUntilExpectedResponse(
+                url,
+                mediaType,
+                delayInMillis,
+                response -> response.getStatus() == status.getStatusCode(),
+                value -> true
+        );
     }
 
     public Response get(final String url, final String mediaType) {
         return restClient.query(url, mediaType);
     }
 
-    private void sleepFor(long milliseconds) {
-
+    public void sleepFor(final long milliseconds) {
         try {
             sleep(milliseconds);
         } catch (InterruptedException e) {
             currentThread().interrupt();
         }
+    }
+
+    private Predicate<String> compareJsonObjectWith(final Map<String, String> values) {
+        return entity -> {
+            if (entity != null) {
+                final JsonReader jsonReader = Json.createReader(new StringReader(entity));
+                final JsonObject jsonObject = jsonReader.readObject();
+                jsonReader.close();
+
+                final boolean anyMatchFalse = values.entrySet().stream().map(entry -> {
+                    final Optional<String> value = JsonObjects.getString(jsonObject, entry.getKey());
+                    return value.isPresent() && value.get().equals(entry.getValue());
+                }).anyMatch(e -> !e);
+
+                return !anyMatchFalse;
+            }
+
+            return false;
+        };
+    }
+
+    private String pollUntilExpectedResponse(final String url,
+                                             final String mediaType,
+                                             final int delayInMillis,
+                                             final Predicate<Response> responseCondition,
+                                             final Predicate<String> entityCondition) {
+        for (int i = 1; i <= RETRY_COUNT; i++) {
+            final Response response = get(url, mediaType);
+            final String result = response.readEntity(String.class);
+
+            if (responseCondition.test(response) && entityCondition.test(result)) {
+                return result;
+            }
+
+            if (i == RETRY_COUNT) {
+                if(!responseCondition.test(response)) {
+                    final int status = response.getStatus();
+                    throw new AssertionError(format("Failed to match response conditions from %s, after %d attempts, with status code: %s", url, RETRY_COUNT, status));
+                } else {
+                    throw new AssertionError(format("Failed to match result conditions from %s, after %d attempts, with result: %s", url, RETRY_COUNT, result));
+                }
+            }
+
+            sleepFor(delayInMillis);
+        }
+
+        throw new IllegalStateException("Should never get here");
     }
 }

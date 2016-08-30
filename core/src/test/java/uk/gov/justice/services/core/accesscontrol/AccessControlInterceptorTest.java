@@ -2,24 +2,29 @@ package uk.gov.justice.services.core.accesscontrol;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
+import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
 
 import uk.gov.justice.services.core.annotation.Adapter;
+import uk.gov.justice.services.core.interceptor.Interceptor;
 import uk.gov.justice.services.core.interceptor.InterceptorChain;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
+import uk.gov.justice.services.core.interceptor.Target;
 import uk.gov.justice.services.core.util.TestInjectionPoint;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.Optional;
 
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -37,43 +42,47 @@ public class AccessControlInterceptorTest {
     public ExpectedException exception = ExpectedException.none();
 
     @Mock
-    AccessControlService accessControlService;
+    private JsonEnvelope envelope;
 
     @Mock
-    AccessControlFailureMessageGenerator accessControlFailureMessageGenerator;
+    private AccessControlService accessControlService;
+
+    @Mock
+    private AccessControlFailureMessageGenerator accessControlFailureMessageGenerator;
 
     @InjectMocks
-    AccessControlInterceptor accessControlInterceptor;
+    private AccessControlInterceptor accessControlInterceptor;
 
-    private InjectionPoint adaptorCommandLocal = new TestInjectionPoint(TestCommandLocal.class);
-    private InjectionPoint adaptorCommandRemote = new TestInjectionPoint(TestCommandRemote.class);
+    private InterceptorChain interceptorChain;
+    private InjectionPoint adaptorCommandLocal;
+    private InjectionPoint adaptorCommandRemote;
+
+    @Before
+    public void setup() throws Exception {
+        final Deque<Interceptor> interceptors = new LinkedList<>();
+        interceptors.add(accessControlInterceptor);
+
+        final Target target = context -> context;
+
+        interceptorChain = new InterceptorChain(interceptors, target);
+        adaptorCommandLocal = new TestInjectionPoint(TestCommandLocal.class);
+        adaptorCommandRemote = new TestInjectionPoint(TestCommandRemote.class);
+    }
 
     @Test
     public void shouldApplyAccessControlToInputIfLocalComponent() throws Exception {
+        final InterceptorContext inputContext = interceptorContextWithInput(envelope, adaptorCommandLocal);
+        when(accessControlService.checkAccessControl(envelope)).thenReturn(Optional.empty());
 
-        final InterceptorContext interceptorContext = mock(InterceptorContext.class);
-        final InterceptorChain interceptorChain = mock(InterceptorChain.class);
-        final JsonEnvelope jsonEnvelope = mock(JsonEnvelope.class);
-
-        when(interceptorContext.injectionPoint()).thenReturn(adaptorCommandLocal);
-        when(interceptorContext.inputEnvelope()).thenReturn(jsonEnvelope);
-        when(accessControlService.checkAccessControl(jsonEnvelope)).thenReturn(Optional.empty());
-
-        accessControlInterceptor.process(interceptorContext, interceptorChain);
-
-        verify(accessControlService).checkAccessControl(jsonEnvelope);
+        interceptorChain.processNext(inputContext);
+        verify(accessControlService).checkAccessControl(envelope);
     }
 
     @Test
     public void shouldNotApplyAccessControlToInputIfRemoteComponent() throws Exception {
+        final InterceptorContext inputContext = interceptorContextWithInput(envelope, adaptorCommandRemote);
 
-        final InterceptorContext interceptorContext = mock(InterceptorContext.class);
-        final InterceptorChain interceptorChain = mock(InterceptorChain.class);
-
-        when(interceptorContext.injectionPoint()).thenReturn(adaptorCommandRemote);
-
-        accessControlInterceptor.process(interceptorContext, interceptorChain);
-
+        interceptorChain.processNext(inputContext);
         verifyZeroInteractions(accessControlService);
     }
 
@@ -84,21 +93,16 @@ public class AccessControlInterceptorTest {
 
     @Test
     public void shouldThrowAccessControlViolationExceptionIfAccessControlFailsForInput() throws Exception {
-
-        final InterceptorContext interceptorContext = mock(InterceptorContext.class);
-        final InterceptorChain interceptorChain = mock(InterceptorChain.class);
-        final JsonEnvelope jsonEnvelope = mock(JsonEnvelope.class);
+        final InterceptorContext inputContext = interceptorContextWithInput(envelope, adaptorCommandLocal);
         final AccessControlViolation accessControlViolation = new AccessControlViolation("reason");
 
-        when(interceptorContext.injectionPoint()).thenReturn(adaptorCommandLocal);
-        when(interceptorContext.inputEnvelope()).thenReturn(jsonEnvelope);
-        when(accessControlService.checkAccessControl(jsonEnvelope)).thenReturn(Optional.of(accessControlViolation));
-        when(accessControlFailureMessageGenerator.errorMessageFrom(jsonEnvelope, accessControlViolation)).thenReturn("Error message");
+        when(accessControlService.checkAccessControl(envelope)).thenReturn(Optional.of(accessControlViolation));
+        when(accessControlFailureMessageGenerator.errorMessageFrom(envelope, accessControlViolation)).thenReturn("Error message");
 
         exception.expect(AccessControlViolationException.class);
         exception.expectMessage("Error message");
 
-        accessControlInterceptor.process(interceptorContext, interceptorChain);
+        interceptorChain.processNext(inputContext);
     }
 
     @Adapter(COMMAND_API)

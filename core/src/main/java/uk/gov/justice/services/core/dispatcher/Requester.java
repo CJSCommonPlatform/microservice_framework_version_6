@@ -5,7 +5,6 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 /**
  * Sends an request to the next layer.
  */
-@FunctionalInterface
 public interface Requester {
 
     /**
@@ -16,4 +15,6 @@ public interface Requester {
      * @return an envelope containing the response
      */
     JsonEnvelope request(final JsonEnvelope envelope);
+
+    JsonEnvelope requestAsAdmin(JsonEnvelope envelope);
 }

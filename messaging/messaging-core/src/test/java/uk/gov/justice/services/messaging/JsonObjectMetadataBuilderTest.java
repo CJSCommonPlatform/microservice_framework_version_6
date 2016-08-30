@@ -1,8 +1,10 @@
 package uk.gov.justice.services.messaging;
 
+import static co.unruly.matchers.OptionalMatchers.contains;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 
 import java.util.UUID;
@@ -79,6 +81,18 @@ public class JsonObjectMetadataBuilderTest {
         assertThat(metadata.streamId().get(), is(streamId));
         assertThat(metadata.version().get(), is(version));
 
+    }
+
+    @Test
+    public void shouldBuildFromMetadataAndOverwriteFields() throws Exception {
+        final UUID id = UUID.randomUUID();
+        final String name = "some.name";
+        final Metadata originalMetadata = metadataOf(id, name).withUserId("usrIdAAAA").build();
+
+        final Metadata metadata = metadataFrom(originalMetadata).withUserId("usrIdBBBB").build();
+        assertThat(metadata.id(), is(id));
+        assertThat(metadata.name(), is(name));
+        assertThat(metadata.userId(), contains("usrIdBBBB"));
     }
 
     private JsonObjectMetadata.Builder metadataWithDefaults() {

@@ -31,6 +31,7 @@ import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
 import uk.gov.justice.services.core.dispatcher.Requester;
 import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
+import uk.gov.justice.services.core.dispatcher.SystemUserProvider;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.eventbuffer.PassThroughEventBufferService;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
@@ -41,9 +42,12 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 
 import java.io.StringWriter;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.UUID;
 
+import javax.annotation.Priority;
+import javax.enterprise.inject.Alternative;
 import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -76,6 +80,7 @@ public class RemoteExampleQueryApiIT {
             .add("result", "SUCCESS")
             .build();
     private static final UUID USER_ID = randomUUID();
+    private static final String TEST_SYSTEM_USER_ID = "8d6a96f0-6e8e-11e6-8b77-86f30ca893d3";
     private static int port = -1;
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(8080);
@@ -131,6 +136,7 @@ public class RemoteExampleQueryApiIT {
             BeanInstantiater.class,
             InterceptorChainProcessor.class,
             InterceptorChainProcessorProducer.class,
+            TestSystemUserProvider.class,
             InterceptorCache.class
     })
     public WebApp war() {
@@ -192,6 +198,23 @@ public class RemoteExampleQueryApiIT {
 
     }
 
+    @Test
+    public void shouldSubstituteSystemUserIdWhenSendingAsAdmin() {
+
+        requester.requestAsAdmin(envelope()
+                .with(metadataOf(randomUUID(), PEOPLE_GET_USER1)
+                        .withUserId("usrId12345")
+                )
+                .withPayloadOf(USER_ID, "userId")
+                .build());
+
+        verify(getRequestedFor(urlEqualTo(format("%s/users/%s", BASE_PATH, USER_ID)))
+                .withHeader("CJSCPPUID", equalTo(TEST_SYSTEM_USER_ID))
+        );
+
+
+    }
+
     @Test(expected = AccessControlViolationException.class)
     public void shouldThrowAccessControlExceptionInCaseOf403Response() {
 
@@ -211,5 +234,15 @@ public class RemoteExampleQueryApiIT {
 
         requester.request(query);
 
+    }
+
+    @Alternative
+    @Priority(2)
+    public static class TestSystemUserProvider implements SystemUserProvider {
+
+        @Override
+        public Optional<UUID> getContextSystemUserId() {
+            return Optional.of(UUID.fromString(TEST_SYSTEM_USER_ID));
+        }
     }
 }

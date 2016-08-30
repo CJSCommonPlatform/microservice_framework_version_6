@@ -13,7 +13,17 @@ import javax.json.JsonObjectBuilder;
 
 class JsonObjectBuilderWrapper {
 
+    private JsonObjectBuilder jsonObjectBuilder = createObjectBuilder();
     private final Map<String, Object> entryMap = new HashMap<>();
+
+    public JsonObjectBuilderWrapper(final JsonObject jsonObject) {
+        jsonObjectBuilder = JsonObjects.createObjectBuilder(jsonObject);
+    }
+
+    public JsonObjectBuilderWrapper() {
+        jsonObjectBuilder = createObjectBuilder();
+
+    }
 
     void add(final JsonArrayBuilder value, final String name) {
         entryMap.put(name, value);
@@ -71,27 +81,27 @@ class JsonObjectBuilderWrapper {
     }
 
     JsonObject build() {
-        final JsonObjectBuilder jsonObject = createObjectBuilder();
+
         entryMap.forEach((name, value) -> {
             ValueType type = ValueType.valueOf(value.getClass());
             switch (type) {
                 case JsonObjectBuilder:
-                    jsonObject.add(name, ((JsonObjectBuilder) value).build());
+                    jsonObjectBuilder.add(name, ((JsonObjectBuilder) value).build());
                     break;
                 case JsonArrayBuilder:
-                    jsonObject.add(name, ((JsonArrayBuilder) value).build());
+                    jsonObjectBuilder.add(name, ((JsonArrayBuilder) value).build());
                     break;
                 case BigDecimal:
-                    jsonObject.add(name, (BigDecimal) value);
+                    jsonObjectBuilder.add(name, (BigDecimal) value);
                     break;
                 case Boolean:
-                    jsonObject.add(name, (Boolean) value);
+                    jsonObjectBuilder.add(name, (Boolean) value);
                     break;
                 default:
-                    jsonObject.add(name, String.valueOf(value));
+                    jsonObjectBuilder.add(name, String.valueOf(value));
             }
         });
-        return jsonObject.build();
+        return jsonObjectBuilder.build();
     }
 
 

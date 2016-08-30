@@ -3,6 +3,7 @@ package uk.gov.justice.services.messaging;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 
 import java.math.BigDecimal;
@@ -92,6 +93,46 @@ public class DefaultJsonEnvelopeBuilderTest {
         assertThat(envelope.payloadAsJsonObject().getJsonArray("name1").getString(0), is("arraElem1"));
         assertThat(envelope.payloadAsJsonObject().getJsonArray("name1").getString(1), is("arraElem2"));
         assertThat(envelope.payloadAsJsonObject().getJsonArray("name1").getString(2), is("arraElem3"));
+
+    }
+
+    @Test
+    public void shouldBuildEnvelopeFromAnotherEnvelope() {
+        final UUID metadataId = UUID.randomUUID();
+        final String metadataName = "metadataName123";
+        final JsonEnvelope originalEnvelope = envelope()
+                .with(metadataOf(metadataId, metadataName))
+                .withPayloadOf("value1", "nameLevel1", "nameLevel2a")
+                .withPayloadOf("value2", "nameLevel1", "nameLevel2b")
+                .build();
+
+        final JsonEnvelope childEnvelope = envelopeFrom(originalEnvelope)
+                .withPayloadOf("value3", "nameABC")
+                .build();
+
+        assertThat(childEnvelope.metadata().id(), is(metadataId));
+        assertThat(childEnvelope.metadata().name(), is(metadataName));
+        assertThat(childEnvelope.payloadAsJsonObject().getJsonObject("nameLevel1").getString("nameLevel2a"), is("value1"));
+        assertThat(childEnvelope.payloadAsJsonObject().getJsonObject("nameLevel1").getString("nameLevel2b"), is("value2"));
+        assertThat(childEnvelope.payloadAsJsonObject().getString("nameABC"), is("value3"));
+
+    }
+
+    @Test
+    public void shouldBuildEnvelopeWithPayloadFromAnotherEnvelope() {
+        final JsonEnvelope originalEnvelope = envelope()
+                .withPayloadOf("value1", "nameLevel1", "nameLevel2a")
+                .withPayloadOf("value2", "nameLevel1", "nameLevel2b")
+                .build();
+
+        final JsonEnvelope childEnvelope = envelope()
+                .withPayloadFrom(originalEnvelope)
+                .withPayloadOf("value3", "nameABC")
+                .build();
+
+        assertThat(childEnvelope.payloadAsJsonObject().getJsonObject("nameLevel1").getString("nameLevel2a"), is("value1"));
+        assertThat(childEnvelope.payloadAsJsonObject().getJsonObject("nameLevel1").getString("nameLevel2b"), is("value2"));
+        assertThat(childEnvelope.payloadAsJsonObject().getString("nameABC"), is("value3"));
 
     }
 

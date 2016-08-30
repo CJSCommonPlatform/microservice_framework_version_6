@@ -105,6 +105,11 @@ public class JsonObjectMetadata implements Metadata {
         return metadataOf(randomUUID(), "dummyName");
     }
 
+    public static Builder metadataFrom(final Metadata metadata) {
+        return new Builder(metadata);
+    }
+
+
     @Override
     public UUID id() {
         return getUUID(metadata, ID)
@@ -169,9 +174,14 @@ public class JsonObjectMetadata implements Metadata {
 
     public static class Builder {
 
-        private JsonObjectBuilderWrapper json = new JsonObjectBuilderWrapper();
+        private JsonObjectBuilderWrapper json;
 
         private Builder() {
+            json = new JsonObjectBuilderWrapper();
+        }
+
+        private Builder(final Metadata metadata) {
+            json = new JsonObjectBuilderWrapper(metadata.asJsonObject());
         }
 
         /**

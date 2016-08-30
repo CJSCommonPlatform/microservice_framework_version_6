@@ -24,6 +24,7 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
+import uk.gov.justice.services.core.dispatcher.EmptySystemUserProvider;
 import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -124,6 +125,7 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
             PolicyEvaluator.class,
             LoggerProducer.class,
             AllowAllEventFilter.class,
+            EmptySystemUserProvider.class,
             BeanInstantiater.class
 
 

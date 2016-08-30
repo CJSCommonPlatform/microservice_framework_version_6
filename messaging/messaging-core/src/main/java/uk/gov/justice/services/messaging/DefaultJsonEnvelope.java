@@ -3,6 +3,7 @@ package uk.gov.justice.services.messaging;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.CORRELATION;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.SESSION_ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.USER_ID;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -45,6 +46,11 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
     public static Builder envelope() {
         return new Builder();
     }
+
+    public static Builder envelopeFrom(final JsonEnvelope envelope) {
+        return new Builder(envelope);
+    }
+
 
     @Override
     public Metadata metadata() {
@@ -121,10 +127,16 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
     }
 
     public static class Builder {
-        private final JsonObjectBuilderWrapper payload = new JsonObjectBuilderWrapper();
+        private JsonObjectBuilderWrapper payload;
         private JsonObjectMetadata.Builder metadata;
 
         private Builder() {
+            payload = new JsonObjectBuilderWrapper();
+        }
+
+        public Builder(final JsonEnvelope envelope) {
+            payload = new JsonObjectBuilderWrapper(envelope.payloadAsJsonObject());
+            this.metadata = metadataFrom(envelope.metadata());
         }
 
         public Builder with(final JsonObjectMetadata.Builder metadata) {
@@ -161,6 +173,11 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
             return this;
         }
 
+        public Builder withPayloadFrom(final JsonEnvelope envelope) {
+            payload = new JsonObjectBuilderWrapper(envelope.payloadAsJsonObject());
+            return this;
+        }
+
         public JsonEnvelope build() {
             return envelopeFrom(metadata != null ? metadata.build() : null, payload.build());
         }
@@ -169,6 +186,4 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
             return new JsonObjectEnvelopeConverter().fromEnvelope(build()).toString();
         }
     }
-
-
 }

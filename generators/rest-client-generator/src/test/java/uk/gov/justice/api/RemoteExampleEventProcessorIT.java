@@ -29,6 +29,7 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
+import uk.gov.justice.services.core.dispatcher.EmptySystemUserProvider;
 import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -132,6 +133,7 @@ public class RemoteExampleEventProcessorIT {
 
             PassThroughEventBufferService.class,
             LoggerProducer.class,
+            EmptySystemUserProvider.class,
             BeanInstantiater.class
     })
     public WebApp war() {

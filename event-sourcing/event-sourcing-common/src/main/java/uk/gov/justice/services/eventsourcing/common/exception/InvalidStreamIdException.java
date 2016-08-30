@@ -1,4 +1,4 @@
-package uk.gov.justice.services.eventsourcing.repository.jdbc.exception;
+package uk.gov.justice.services.eventsourcing.common.exception;
 
 /**
  * Exception thrown when a request tries to store an event with invalid streamId.

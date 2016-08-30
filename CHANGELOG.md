@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+### Added
+- Add json object value matching to HttpResponsePoller utility
+
+### Fixed
+- HttpResponsePoller conditional poll fixed
+
 ## [0.19.0] - 2016-08-26
 
 ### Added

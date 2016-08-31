@@ -2,6 +2,7 @@ package uk.gov.justice.services.test.utils.core.messaging;
 
 import static javax.jms.Session.AUTO_ACKNOWLEDGE;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnvelopeFactory.createEnvelope;
+import static uk.gov.justice.services.test.utils.core.messaging.QueueUriProvider.queueUri;
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
@@ -17,7 +18,7 @@ import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
 
 public class MessageProducerClient implements AutoCloseable {
 
-    private static final String QUEUE_URI = System.getProperty("queueUri", "tcp://localhost:61616");
+    private static final String QUEUE_URI = queueUri();
 
     private Session session;
     private MessageProducer messageProducer;

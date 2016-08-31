@@ -12,7 +12,7 @@ public class DataSourceProvider {
     @Inject
     private InitialContextFactory initialContextFactory;
 
-    public DataSource getDataSource(String jndiName) {
+    public DataSource getDataSource(final String jndiName) {
         try {
             return (DataSource) getInitialContext().lookup(jndiName);
         } catch (NamingException e) {

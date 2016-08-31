@@ -3,7 +3,15 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
-## [0.20.0] - 2016-08-30
+## [0.22.0] - 2016-08-31
+
+### Added
+- Add JDBC Connection classes for easy access to event store and view store databases
+
+### Fixed
+- Fixed message producer client to use a system property to override the queue url
+
+## [0.21.0] - 2016-08-30
 
 ### Added
 - Add json object value matching to HttpResponsePoller utility

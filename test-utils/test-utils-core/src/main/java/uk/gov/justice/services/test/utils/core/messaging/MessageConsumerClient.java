@@ -3,6 +3,7 @@ package uk.gov.justice.services.test.utils.core.messaging;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static javax.jms.Session.AUTO_ACKNOWLEDGE;
+import static uk.gov.justice.services.test.utils.core.messaging.QueueUriProvider.queueUri;
 
 import java.util.Optional;
 
@@ -17,8 +18,9 @@ import org.apache.activemq.artemis.jms.client.ActiveMQTopic;
 
 public class MessageConsumerClient implements AutoCloseable {
 
+    private static final String QUEUE_URI = queueUri();
+
     private static final String EVENT_SELECTOR_TEMPLATE = "CPPNAME IN ('%s')";
-    private static final String QUEUE_URI = System.getProperty("queueUri", "tcp://localhost:61616");
     private static final long TIMEOUT_IN_MILLIS = 20_000;
 
     private Session session;

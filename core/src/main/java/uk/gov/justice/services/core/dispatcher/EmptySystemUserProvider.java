@@ -9,6 +9,7 @@ import java.util.UUID;
 import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 
@@ -21,6 +22,7 @@ import org.slf4j.Logger;
 @Priority(1)
 public class EmptySystemUserProvider implements SystemUserProvider {
 
+    @Inject
     private Logger logger;
 
     @Override

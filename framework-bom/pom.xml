@@ -90,6 +90,11 @@
                 <artifactId>persistence-deltaspike</artifactId>
                 <version>${cpp.framework.version}</version>
             </dependency>
+            <dependency>
+                <groupId>uk.gov.justice.services</groupId>
+                <artifactId>persistence-jdbc</artifactId>
+                <version>${cpp.framework.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>uk.gov.justice.services</groupId>

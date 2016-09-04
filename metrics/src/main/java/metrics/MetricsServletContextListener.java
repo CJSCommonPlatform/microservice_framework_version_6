@@ -2,6 +2,7 @@ package metrics;
 
 import static com.codahale.metrics.servlets.MetricsServlet.ContextListener;
 
+import javax.inject.Inject;
 import javax.servlet.annotation.WebListener;
 
 import com.codahale.metrics.MetricRegistry;
@@ -12,11 +13,12 @@ import com.codahale.metrics.MetricRegistry;
 @WebListener
 public class MetricsServletContextListener extends ContextListener {
 
-    public static final MetricRegistry METRIC_REGISTRY = new MetricRegistry();
+    @Inject
+    MetricRegistry metricRegistry;
 
     @Override
     protected MetricRegistry getMetricRegistry() {
-        return METRIC_REGISTRY;
+        return metricRegistry;
     }
 
 }

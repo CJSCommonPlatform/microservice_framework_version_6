@@ -1,33 +1,21 @@
 package metrics;
 
-import static org.hamcrest.core.IsNull.notNullValue;
+
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-import javax.servlet.annotation.WebListener;
-
-import org.junit.Before;
+import com.codahale.metrics.MetricRegistry;
 import org.junit.Test;
 
-/**
- * Unit tests for the{@link MetricsServletContextListener} class.
- */
 public class MetricsServletContextListenerTest {
 
-    private MetricsServletContextListener listener;
-
-    @Before
-    public void setup() {
-        listener = new MetricsServletContextListener();
-    }
-
     @Test
-    public void shouldReturnAMetricRegistry() throws Exception {
-        assertThat(listener.getMetricRegistry(), notNullValue());
-    }
+    public void shouldReturnMetricsRegistry() throws Exception {
 
-    @Test
-    public void shouldBeAWebListener() {
-        WebListener annotation = listener.getClass().getAnnotation(WebListener.class);
-        assertThat(annotation, notNullValue());
+        MetricRegistry registry = new MetricRegistry();
+        MetricsServletContextListener listener = new MetricsServletContextListener();
+        listener.metricRegistry = registry;
+
+        assertThat(listener.getMetricRegistry(), is(registry));
     }
 }

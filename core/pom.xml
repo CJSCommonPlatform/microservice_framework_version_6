@@ -64,6 +64,10 @@
             <artifactId>event-buffer-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-core</artifactId>
+        </dependency>
 
         <!-- Test Dependencies -->
         <dependency>

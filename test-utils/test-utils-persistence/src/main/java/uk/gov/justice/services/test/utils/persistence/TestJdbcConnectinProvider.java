@@ -1,6 +1,7 @@
 package uk.gov.justice.services.test.utils.persistence;
 
 import static java.lang.String.format;
+import static uk.gov.justice.services.test.utils.common.host.TestHostProvider.getHost;
 
 import uk.gov.justice.services.jdbc.persistence.DataAccessException;
 
@@ -12,7 +13,9 @@ public class TestJdbcConnectinProvider {
 
     public Connection getEventStoreConnection(final String contextName) {
 
-        final String url = format("jdbc:postgresql://localhost/%seventstore", contextName);
+        final String host = getHost();
+
+        final String url = format("jdbc:postgresql://%s/%seventstore", host, contextName);
         final String username = contextName;
         final String password = contextName;
 
@@ -31,7 +34,8 @@ public class TestJdbcConnectinProvider {
 
     public Connection getViewStoreConnection(final String contextName) {
 
-        final String url = format("jdbc:postgresql://localhost/%sviewstore", contextName);
+        final String host = getHost();
+        final String url = format("jdbc:postgresql://" + host + "/%sviewstore", contextName);
         final String username = contextName;
         final String password = contextName;
 

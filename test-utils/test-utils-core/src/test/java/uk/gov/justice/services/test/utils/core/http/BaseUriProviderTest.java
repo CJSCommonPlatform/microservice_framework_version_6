@@ -2,7 +2,7 @@ package uk.gov.justice.services.test.utils.core.http;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.INTEGRATION_HOST_KEY;
+import static uk.gov.justice.services.test.utils.common.host.TestHostProvider.INTEGRATION_HOST_KEY;
 
 import org.junit.After;
 import org.junit.Test;

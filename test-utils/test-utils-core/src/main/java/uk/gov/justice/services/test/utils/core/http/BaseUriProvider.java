@@ -1,15 +1,16 @@
 package uk.gov.justice.services.test.utils.core.http;
 
 
+import static uk.gov.justice.services.test.utils.common.host.TestHostProvider.getHost;
+
 public class BaseUriProvider {
-    public static final String INTEGRATION_HOST_KEY = "INTEGRATION_HOST_KEY";
+
 
     private static final String SCHEME = "http";
     private static final String PORT = "8080";
 
     public static String getBaseUri() {
 
-        final String host = System.getProperty(INTEGRATION_HOST_KEY, "localhost");
-        return SCHEME + "://" + host + ":" + PORT;
+        return SCHEME + "://" + getHost() + ":" + PORT;
     }
 }

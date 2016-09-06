@@ -2,7 +2,7 @@ package uk.gov.justice.services.test.utils.core.messaging;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.justice.services.test.utils.core.messaging.QueueUriProvider.INTEGRATION_HOST_KEY;
+import static uk.gov.justice.services.test.utils.common.host.TestHostProvider.INTEGRATION_HOST_KEY;
 import static uk.gov.justice.services.test.utils.core.messaging.QueueUriProvider.queueUri;
 
 import org.junit.After;

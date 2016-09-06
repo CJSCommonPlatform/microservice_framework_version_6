@@ -1,33 +1,27 @@
 package uk.gov.justice.services.test.utils.persistence;
 
-import static com.sun.xml.internal.fastinfoset.alphabet.BuiltInRestrictedAlphabets.table;
 import static java.util.Arrays.asList;
-
-import static java.util.Collections.singletonList;
-import static org.apache.openejb.testing.SingleApplicationComposerRunner.close;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import org.junit.Test;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.*;
 
 import uk.gov.justice.services.jdbc.persistence.DataAccessException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Collections;
+
+import org.junit.Test;
 
 public class DatabaseCleanerTest {
 
     private final TestJdbcConnectinProvider testJdbcConnectinProvider = mock(TestJdbcConnectinProvider.class);
 
-    private DatabaseCleaner databaseCleaner = new DatabaseCleaner(testJdbcConnectinProvider);
+    private final DatabaseCleaner databaseCleaner = new DatabaseCleaner(testJdbcConnectinProvider);
 
     @Test
     public void shouldCleanSomeViewStoreTables() throws Exception {

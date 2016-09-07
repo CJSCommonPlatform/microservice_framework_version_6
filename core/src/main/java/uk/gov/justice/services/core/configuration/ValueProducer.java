@@ -1,7 +1,6 @@
 package uk.gov.justice.services.core.configuration;
 
 import static java.lang.String.format;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
@@ -33,7 +32,7 @@ public class ValueProducer {
         try {
             return (String) initialContext.lookup(format("java:/app/%s/%s", serviceContextNameProvider.getServiceContextName(), param.key()));
         } catch (NameNotFoundException e) {
-            if (isEmpty(param.defaultValue())) {
+            if (Value.NULL_DEFAULT.equals(param.defaultValue())) {
                 throw new MissingPropertyException(format("Missing property: %s", param.key()));
             }
             return param.defaultValue();

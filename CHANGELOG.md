@@ -3,6 +3,15 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
+## [Un-released]
+
+### Added
+- Configurable JNDI Auditing blacklist regex of action names in AuditingService
+- TestJdbcConnectionProvider: for getting hard out of container connections
+to the event and view stores
+- DatabaseCleaner: allows easy clearing of database tables for integration tests
+
+
 ## [0.23.0] - 2016-09-01
 
 ### Added

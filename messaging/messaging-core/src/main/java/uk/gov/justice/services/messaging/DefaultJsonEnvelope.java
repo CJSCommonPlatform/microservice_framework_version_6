@@ -86,7 +86,7 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
      * Prints the json for logging purposes. Removes any potentially sensitive
      * data.
      *
-     * @return a String of the json envelope
+     * @return a json String of the envelope
      */
     @Override
     public String toString() {

@@ -34,6 +34,7 @@ public interface JsonEnvelope extends Envelope<JsonValue> {
      *
      * @return this envelope as it's json string, pretty printed.
      **/
+    @Deprecated
     String toDebugStringPrettyPrint();
 
 

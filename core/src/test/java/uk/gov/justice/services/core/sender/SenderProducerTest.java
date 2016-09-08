@@ -24,7 +24,9 @@ import uk.gov.justice.services.core.util.TestInjectionPoint;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -138,6 +140,27 @@ public class SenderProducerTest {
         returnedSender.send(envelope);
 
         verify(legacyJmsSender).send(envelope);
+    }
+
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
+
+
+    @Test
+    public void shouldRethrowExceptionWhenPrimaryThrowsExceptionInEventProcessor() throws Exception {
+        final TestInjectionPoint injectionPoint = new TestInjectionPoint(TestEventProcessor.class);
+        final JsonEnvelope envelope = envelope().build();
+
+        when(dispatcherCache.dispatcherFor(injectionPoint)).thenReturn(dispatcher);
+
+        doThrow(new MissingHandlerException("uhh can't handle that")).when(dispatcher).dispatch(envelope);
+
+        exception.expect(MissingHandlerException.class);
+        exception.expectMessage("uhh can't handle that");
+
+        final Sender returnedSender = senderProducer.produce(injectionPoint);
+
+        returnedSender.send(envelope);
     }
 
     @Test(expected = IllegalArgumentException.class)

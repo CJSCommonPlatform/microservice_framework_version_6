@@ -11,6 +11,8 @@ import javax.inject.Qualifier;
 @Retention(RUNTIME)
 public @interface Value {
 
+    String NULL_DEFAULT = "_null_default";
+
     /**
      * Bundle key
      *
@@ -23,5 +25,5 @@ public @interface Value {
      *
      * @return default value or ""
      */
-    @Nonbinding String defaultValue() default "";
+    @Nonbinding String defaultValue() default NULL_DEFAULT;
 }

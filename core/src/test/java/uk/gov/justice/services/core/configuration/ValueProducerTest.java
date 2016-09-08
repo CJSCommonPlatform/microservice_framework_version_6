@@ -78,7 +78,7 @@ public class ValueProducerTest {
     @Test(expected = MissingPropertyException.class)
     public void shouldThrowExceptionWhenNotFoundAndNoDefaultValue() throws NamingException {
         when(initialContext.lookup(format("java:/app/%s/%s", APP_NAME, param.key()))).thenThrow(NameNotFoundException.class);
-        when(param.defaultValue()).thenReturn(null);
+        when(param.defaultValue()).thenReturn("_null_default");
 
         valueProducer.produceValue(propertyInjectionPoint);
     }

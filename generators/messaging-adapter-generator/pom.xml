@@ -5,7 +5,7 @@
     <parent>
         <artifactId>generators</artifactId>
         <groupId>uk.gov.justice.services</groupId>
-        <version>0.24.0-SNAPSHOT</version>
+        <version>0.24.0</version>
     </parent>
     <artifactId>messaging-adapter-generator</artifactId>
 

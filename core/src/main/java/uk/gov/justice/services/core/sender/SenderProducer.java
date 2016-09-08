@@ -10,6 +10,7 @@ import uk.gov.justice.services.core.jms.JmsSenderWrapper;
 import uk.gov.justice.services.core.jms.SenderFactory;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -49,11 +50,11 @@ public class SenderProducer {
         return getSender(componentFrom(injectionPoint), injectionPoint);
     }
 
-    private Sender getSender(final String componentName
-            , final InjectionPoint injectionPoint) {
+    private Sender getSender(final String componentName, final InjectionPoint injectionPoint) {
         final Sender primarySender = produceSender(injectionPoint);
-        final Sender legacySender = !componentName.equals(EVENT_PROCESSOR.name()) && !componentName.equals(EVENT_API.name()) && isFrameworkComponent(componentName) ?
-                senderMap.computeIfAbsent(componentName, c -> senderFactory.createSender(componentDestination.getDefault(valueOf(c)))) : null;
+        final Optional<Sender> legacySender = Optional.ofNullable(!componentName.equals(EVENT_PROCESSOR.name()) && !componentName.equals(EVENT_API.name()) && isFrameworkComponent(componentName) ?
+                senderMap.computeIfAbsent(componentName, c -> senderFactory.createSender(componentDestination.getDefault(valueOf(c)))) : null);
+
         return new JmsSenderWrapper(primarySender, legacySender);
     }
 

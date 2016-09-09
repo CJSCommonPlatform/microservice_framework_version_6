@@ -1,8 +1,11 @@
 package uk.gov.justice.services.common.json;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
+import java.io.IOException;
 import java.util.Objects;
 
 import org.junit.Test;
@@ -27,6 +30,29 @@ public class JsonParserTest {
         assertThat(jsonParser.toObject(json, JsonPojo.class), is(jsonPojo));
     }
 
+    @Test
+    public void shouldThrowARuntimeExceptionIfTheObjectCannotBeParsedIntoJson() throws Exception {
+
+        try {
+            final String s = jsonParser.fromObject(new Object());
+            fail();
+        } catch (RuntimeException expected) {
+            assertThat(expected.getCause(), is(instanceOf(IOException.class)));
+            assertThat(expected.getMessage(), is("Failed to convert java.lang.Object to json"));
+        }
+    }
+
+    @Test
+    public void shouldThrowARuntimeExceptionIfTheJsonCannotBeParsedIntoAnObject() throws Exception {
+
+        try {
+            jsonParser.toObject("You shall not parse!!!", JsonPojo.class);
+            fail();
+        } catch (RuntimeException expected) {
+            assertThat(expected.getCause(), is(instanceOf(IOException.class)));
+            assertThat(expected.getMessage(), is("Failed to convert json 'You shall not parse!!!' to uk.gov.justice.services.common.json.JsonParserTest$JsonPojo"));
+        }
+    }
 
     public static class JsonPojo {
         private final String name;

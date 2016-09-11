@@ -5,10 +5,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLLER;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 
 import uk.gov.justice.services.core.annotation.Component;
+import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.justice.services.messaging.context.ContextName;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
 
@@ -30,17 +32,16 @@ public class JmsSenderTest {
 
     private static final String NAME = "test.command.do-something";
 
-    @Mock
     private JsonEnvelope envelope;
-
-    @Mock
-    private Metadata metadata;
 
     @Mock
     JmsEnvelopeSender jmsEnvelopeSender;
 
     @Mock
     JmsDestinations jmsDestinations;
+
+    @Mock
+    SystemUserUtil systemUserUtil;
 
     @Mock
     Destination destination;
@@ -50,18 +51,17 @@ public class JmsSenderTest {
 
     @Before
     public void setup() throws Exception {
-        when(envelope.metadata()).thenReturn(metadata);
-        when(metadata.name()).thenReturn(NAME);
+        envelope = envelope().with(metadataWithRandomUUID(NAME)).build();
     }
 
     @SuppressWarnings({"squid:MethodCyclomaticComplexity", "squid:S1067", "squid:S00122"})
     @Test
     public void shouldTestEqualsAndHashCode() throws NamingException {
-        final JmsDestinations jmsDestinations = new JmsDestinations();
+        final JmsDestinations jmsDestinations = new DefaultJmsDestinations();
 
-        final JmsSender item1 = new JmsSender(COMMAND_API, jmsDestinations, jmsEnvelopeSender, logger);
-        final JmsSender item2 = new JmsSender(COMMAND_API, jmsDestinations, jmsEnvelopeSender, logger);
-        final JmsSender item3 = new JmsSender(COMMAND_CONTROLLER, jmsDestinations, jmsEnvelopeSender, logger);
+        final JmsSender item1 = new JmsSender(COMMAND_API, jmsDestinations, jmsEnvelopeSender, logger, systemUserUtil);
+        final JmsSender item2 = new JmsSender(COMMAND_API, jmsDestinations, jmsEnvelopeSender, logger, systemUserUtil);
+        final JmsSender item3 = new JmsSender(COMMAND_CONTROLLER, jmsDestinations, jmsEnvelopeSender, logger, systemUserUtil);
 
         new EqualsTester()
                 .addEqualityGroup(item1, item2)
@@ -82,9 +82,23 @@ public class JmsSenderTest {
         verify(logger).trace(eq("Sending envelope for action {} to destination: {}"), eq(NAME), eq(destination));
     }
 
+    @Test
+    public void shouldSendAsAdmin() throws Exception {
+
+        final JmsSender jmsSender = jmsSenderWithComponent(COMMAND_CONTROLLER);
+
+        when(jmsDestinations.getDestination(COMMAND_CONTROLLER, ContextName.fromName(QUEUE_NAME))).thenReturn(destination);
+        final JsonEnvelope envelopeWithSysUserId = envelope().with(metadataWithRandomUUID(NAME)).build();
+        when(systemUserUtil.asEnvelopeWithSystemUserId(envelope)).thenReturn(envelopeWithSysUserId);
+
+        jmsSender.sendAsAdmin(envelope);
+        verify(jmsEnvelopeSender).send(envelopeWithSysUserId, destination);
+
+        verify(logger).trace(eq("Sending envelope for action {} to destination: {}"), eq(NAME), eq(destination));
+    }
+
     private JmsSender jmsSenderWithComponent(final Component component) {
-        final JmsSender jmsSender = new JmsSender(component, jmsDestinations, jmsEnvelopeSender, logger);
-        return jmsSender;
+        return new JmsSender(component, jmsDestinations, jmsEnvelopeSender, logger, systemUserUtil);
     }
 
 }

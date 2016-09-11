@@ -5,7 +5,6 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 /**
  * Sends an action to the next layer.
  */
-@FunctionalInterface
 public interface Sender {
 
     /**
@@ -14,4 +13,11 @@ public interface Sender {
      * @param envelope JsonEnvelope that needs to be sent.
      */
     void send(final JsonEnvelope envelope);
+
+    /**
+     * Sends envelope to the next component setting system user id.
+     *
+     * @param envelope JsonEnvelope that needs to be sent.
+     */
+    void sendAsAdmin(final JsonEnvelope envelope);
 }

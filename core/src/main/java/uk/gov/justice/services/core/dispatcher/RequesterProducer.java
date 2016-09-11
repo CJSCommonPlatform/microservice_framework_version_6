@@ -14,7 +14,7 @@ public class RequesterProducer {
     DispatcherCache dispatcherCache;
 
     @Inject
-    SystemUserProvider systemUserProvider;
+    SystemUserUtil systemUserUtil;
 
     /**
      * Produces the correct implementation of a requester depending on the {@link ServiceComponent}
@@ -27,6 +27,6 @@ public class RequesterProducer {
      */
     @Produces
     public Requester produceRequester(final InjectionPoint injectionPoint) {
-        return new DefaultRequester(dispatcherCache.dispatcherFor(injectionPoint), systemUserProvider);
+        return new DispatcherDelegate(dispatcherCache.dispatcherFor(injectionPoint), systemUserUtil);
     }
 }

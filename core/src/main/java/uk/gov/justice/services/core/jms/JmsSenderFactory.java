@@ -1,6 +1,7 @@
 package uk.gov.justice.services.core.jms;
 
 import uk.gov.justice.services.core.annotation.Component;
+import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
 
@@ -22,6 +23,9 @@ public class JmsSenderFactory implements SenderFactory {
     @Inject
     JmsEnvelopeSender jmsEnvelopeSender;
 
+    @Inject
+    SystemUserUtil systemUserUtil;
+
     private final Logger logger = LoggerFactory.getLogger(JmsSender.class);
 
     /**
@@ -32,6 +36,6 @@ public class JmsSenderFactory implements SenderFactory {
      */
     @Override
     public Sender createSender(final Component componentDestination) {
-        return new JmsSender(componentDestination, jmsDestinations, jmsEnvelopeSender, logger);
+        return new JmsSender(componentDestination, jmsDestinations, jmsEnvelopeSender, logger, systemUserUtil);
     }
 }

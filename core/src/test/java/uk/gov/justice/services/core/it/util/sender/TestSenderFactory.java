@@ -8,7 +8,6 @@ import uk.gov.justice.services.core.sender.Sender;
 public class TestSenderFactory implements SenderFactory {
 
 
-
     @Override
     public Sender createSender(final Component componentDestination) {
         return RecordingSender.instance();

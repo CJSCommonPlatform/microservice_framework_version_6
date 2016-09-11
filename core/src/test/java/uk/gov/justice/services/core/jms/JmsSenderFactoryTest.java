@@ -8,6 +8,7 @@ import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 
 import uk.gov.justice.services.core.annotation.Component;
+import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
 
@@ -16,7 +17,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -28,8 +28,12 @@ public class JmsSenderFactoryTest {
     @Mock
     private JmsEnvelopeSender jmsEnvelopeSender;
 
+    @Mock
+    private SystemUserUtil systemUserUtil;
+
     @InjectMocks
     private JmsSenderFactory jmsSenderFactory;
+
 
     @Test
     public void shouldReturnNewJmsSender() throws Exception {
@@ -46,6 +50,7 @@ public class JmsSenderFactoryTest {
         assertThat(jmsSender.jmsDestinations, is(sameInstance(jmsDestinations)));
         assertThat(jmsSender.jmsEnvelopeSender, is(sameInstance(jmsEnvelopeSender)));
         assertThat(jmsSender.destinationComponent, is(componentDestination));
+        assertThat(jmsSender.systemUserUtil, is(systemUserUtil));
 
         assertThat(jmsSender.logger, is(LoggerFactory.getLogger(JmsSender.class)));
     }

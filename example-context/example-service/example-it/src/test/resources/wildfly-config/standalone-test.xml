@@ -372,6 +372,7 @@
                 <remote-acceptor name="activemq-5x-acceptor" socket-binding="activemq-5x"/>
             </server>
         </subsystem>
+
         <subsystem xmlns="urn:jboss:domain:datasources:4.0">
             <datasources>
                 <datasource jndi-name="java:/app/example-command-handler/DS.eventstore"
@@ -404,6 +405,9 @@
             </datasources>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:naming:2.0">
+            <bindings>
+                <simple name="java:/app/example-command-api/audit.blacklist" value="cakeshop.*" type="java.lang.String"/>
+            </bindings>
             <remote-naming/>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:pojo:1.0"/>

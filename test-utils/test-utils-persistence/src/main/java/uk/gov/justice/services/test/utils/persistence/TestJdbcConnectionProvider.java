@@ -9,7 +9,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class TestJdbcConnectinProvider {
+public class TestJdbcConnectionProvider {
 
     public Connection getEventStoreConnection(final String contextName) {
 

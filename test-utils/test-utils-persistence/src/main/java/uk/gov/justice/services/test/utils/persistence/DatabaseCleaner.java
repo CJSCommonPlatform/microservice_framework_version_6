@@ -16,15 +16,15 @@ public class DatabaseCleaner {
 
     private static final String SQL_PATTERN = "DELETE FROM %s";
 
-    private final TestJdbcConnectinProvider testJdbcConnectinProvider;
+    private final TestJdbcConnectionProvider testJdbcConnectionProvider;
 
     public DatabaseCleaner() {
-        this(new TestJdbcConnectinProvider());
+        this(new TestJdbcConnectionProvider());
     }
 
     @VisibleForTesting
-    DatabaseCleaner(final TestJdbcConnectinProvider testJdbcConnectinProvider) {
-        this.testJdbcConnectinProvider = testJdbcConnectinProvider;
+    DatabaseCleaner(final TestJdbcConnectionProvider testJdbcConnectionProvider) {
+        this.testJdbcConnectionProvider = testJdbcConnectionProvider;
     }
 
     public void cleanStreamBufferTable(final String contextName) {
@@ -37,7 +37,7 @@ public class DatabaseCleaner {
 
     public void cleanEventLogTable(final String contextName) {
 
-        try (final Connection connection = testJdbcConnectinProvider.getEventStoreConnection(contextName)) {
+        try (final Connection connection = testJdbcConnectionProvider.getEventStoreConnection(contextName)) {
 
             cleanTable("event_log", connection);
 
@@ -48,7 +48,7 @@ public class DatabaseCleaner {
 
     public void cleanViewStoreTables(final String contextName, final List<String> tableNames) {
 
-        try (final Connection connection = testJdbcConnectinProvider.getViewStoreConnection(contextName)) {
+        try (final Connection connection = testJdbcConnectionProvider.getViewStoreConnection(contextName)) {
             for (String tableName : tableNames) {
                 cleanTable(tableName, connection);
             }

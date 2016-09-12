@@ -28,8 +28,8 @@ public abstract class BaseTransactionalTest {
 
     @After
     public final void tearDown() throws HeuristicRollbackException, RollbackException, HeuristicMixedException, SystemException {
-        userTransaction.commit();
         tearDownAfter();
+        userTransaction.commit();
     }
 
     /**

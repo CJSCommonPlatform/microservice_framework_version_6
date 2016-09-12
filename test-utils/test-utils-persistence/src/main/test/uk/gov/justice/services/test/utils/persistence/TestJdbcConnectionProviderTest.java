@@ -19,15 +19,15 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 
 @RunWith(MockitoJUnitRunner.class)
-public class TestJdbcConnectinProviderTest {
+public class TestJdbcConnectionProviderTest {
 
     @InjectMocks
-    private TestJdbcConnectinProvider testJdbcConnectinProvider;
+    private TestJdbcConnectionProvider testJdbcConnectionProvider;
 
     @Test
     public void shouldGetConnectionToEventStore() throws Exception {
 
-        try(final Connection connection = testJdbcConnectinProvider.getEventStoreConnection("usersgroups")) {
+        try(final Connection connection = testJdbcConnectionProvider.getEventStoreConnection("usersgroups")) {
             assertThat(connection, is(notNullValue()));
         }
     }
@@ -43,7 +43,7 @@ public class TestJdbcConnectinProviderTest {
                         "username 'my-non-existent-context', " +
                         "password 'my-non-existent-context'";
 
-        try(final Connection connection = testJdbcConnectinProvider.getEventStoreConnection("my-non-existent-context")) {
+        try(final Connection connection = testJdbcConnectionProvider.getEventStoreConnection("my-non-existent-context")) {
             assertThat(connection, is(notNullValue()));
             fail();
         } catch(DataAccessException expected) {
@@ -55,7 +55,7 @@ public class TestJdbcConnectinProviderTest {
     @Test
     public void shouldGetConnectionToViewStore() throws Exception {
 
-        try(final Connection connection = testJdbcConnectinProvider.getViewStoreConnection("usersgroups")) {
+        try(final Connection connection = testJdbcConnectionProvider.getViewStoreConnection("usersgroups")) {
             assertThat(connection, is(notNullValue()));
         }
     }
@@ -71,7 +71,7 @@ public class TestJdbcConnectinProviderTest {
                         "username 'my-non-existent-context', " +
                         "password 'my-non-existent-context'";
 
-        try(final Connection connection = testJdbcConnectinProvider.getViewStoreConnection("my-non-existent-context")) {
+        try(final Connection connection = testJdbcConnectionProvider.getViewStoreConnection("my-non-existent-context")) {
             assertThat(connection, is(notNullValue()));
             fail();
         } catch(DataAccessException expected) {

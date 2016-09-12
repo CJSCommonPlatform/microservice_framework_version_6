@@ -19,9 +19,9 @@ import org.junit.Test;
 
 public class DatabaseCleanerTest {
 
-    private final TestJdbcConnectinProvider testJdbcConnectinProvider = mock(TestJdbcConnectinProvider.class);
+    private final TestJdbcConnectionProvider testJdbcConnectionProvider = mock(TestJdbcConnectionProvider.class);
 
-    private final DatabaseCleaner databaseCleaner = new DatabaseCleaner(testJdbcConnectinProvider);
+    private final DatabaseCleaner databaseCleaner = new DatabaseCleaner(testJdbcConnectionProvider);
 
     @Test
     public void shouldCleanSomeViewStoreTables() throws Exception {
@@ -35,7 +35,7 @@ public class DatabaseCleanerTest {
         final PreparedStatement preparedStatement_1 = mock(PreparedStatement.class);
         final PreparedStatement preparedStatement_2 = mock(PreparedStatement.class);
 
-        when(testJdbcConnectinProvider.getViewStoreConnection(contextName)).thenReturn(connection);
+        when(testJdbcConnectionProvider.getViewStoreConnection(contextName)).thenReturn(connection);
         when(connection.prepareStatement("DELETE FROM " + table_1)).thenReturn(preparedStatement_1);
         when(connection.prepareStatement("DELETE FROM " + table_2)).thenReturn(preparedStatement_2);
 
@@ -58,7 +58,7 @@ public class DatabaseCleanerTest {
         final Connection connection = mock(Connection.class);
         final PreparedStatement preparedStatement = mock(PreparedStatement.class);
 
-        when(testJdbcConnectinProvider.getEventStoreConnection(contextName)).thenReturn(connection);
+        when(testJdbcConnectionProvider.getEventStoreConnection(contextName)).thenReturn(connection);
         when(connection.prepareStatement("DELETE FROM " + tableName)).thenReturn(preparedStatement);
 
         databaseCleaner.cleanEventLogTable(contextName);
@@ -77,7 +77,7 @@ public class DatabaseCleanerTest {
         final Connection connection = mock(Connection.class);
         final PreparedStatement preparedStatement = mock(PreparedStatement.class);
 
-        when(testJdbcConnectinProvider.getViewStoreConnection(contextName)).thenReturn(connection);
+        when(testJdbcConnectionProvider.getViewStoreConnection(contextName)).thenReturn(connection);
         when(connection.prepareStatement("DELETE FROM " + tableName)).thenReturn(preparedStatement);
 
         databaseCleaner.cleanStreamBufferTable(contextName);
@@ -96,7 +96,7 @@ public class DatabaseCleanerTest {
         final Connection connection = mock(Connection.class);
         final PreparedStatement preparedStatement = mock(PreparedStatement.class);
 
-        when(testJdbcConnectinProvider.getViewStoreConnection(contextName)).thenReturn(connection);
+        when(testJdbcConnectionProvider.getViewStoreConnection(contextName)).thenReturn(connection);
         when(connection.prepareStatement("DELETE FROM " + tableName)).thenReturn(preparedStatement);
 
         databaseCleaner.cleanStreamStatusTable(contextName);
@@ -116,7 +116,7 @@ public class DatabaseCleanerTest {
 
         final Connection connection = mock(Connection.class);
 
-        when(testJdbcConnectinProvider.getViewStoreConnection(contextName)).thenReturn(connection);
+        when(testJdbcConnectionProvider.getViewStoreConnection(contextName)).thenReturn(connection);
         when(connection.prepareStatement("DELETE FROM " + tableName)).thenThrow(sqlException);
 
         try {
@@ -140,7 +140,7 @@ public class DatabaseCleanerTest {
 
         final Connection connection = mock(Connection.class);
 
-        when(testJdbcConnectinProvider.getEventStoreConnection(contextName)).thenReturn(connection);
+        when(testJdbcConnectionProvider.getEventStoreConnection(contextName)).thenReturn(connection);
         when(connection.prepareStatement("DELETE FROM " + tableName)).thenThrow(sqlException);
 
         try {
@@ -165,7 +165,7 @@ public class DatabaseCleanerTest {
         final Connection connection = mock(Connection.class);
         final PreparedStatement preparedStatement = mock(PreparedStatement.class);
 
-        when(testJdbcConnectinProvider.getViewStoreConnection(contextName)).thenReturn(connection);
+        when(testJdbcConnectionProvider.getViewStoreConnection(contextName)).thenReturn(connection);
         when(connection.prepareStatement("DELETE FROM " + tableName)).thenReturn(preparedStatement);
         doThrow(sqlException).when(preparedStatement).close();
 
@@ -190,7 +190,7 @@ public class DatabaseCleanerTest {
         final Connection connection = mock(Connection.class);
         final PreparedStatement preparedStatement = mock(PreparedStatement.class);
 
-        when(testJdbcConnectinProvider.getEventStoreConnection(contextName)).thenReturn(connection);
+        when(testJdbcConnectionProvider.getEventStoreConnection(contextName)).thenReturn(connection);
         when(connection.prepareStatement("DELETE FROM " + tableName)).thenReturn(preparedStatement);
         doThrow(sqlException).when(preparedStatement).close();
 

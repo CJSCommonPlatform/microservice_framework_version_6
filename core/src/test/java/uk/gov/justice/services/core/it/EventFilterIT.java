@@ -27,6 +27,7 @@ import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
 import uk.gov.justice.services.core.dispatcher.EmptySystemUserProvider;
 import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
+import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.eventfilter.AbstractEventFilter;
 import uk.gov.justice.services.core.eventfilter.AllowAllEventFilter;
@@ -37,7 +38,7 @@ import uk.gov.justice.services.core.interceptor.InterceptorCache;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
 import uk.gov.justice.services.core.interceptor.InterceptorObserver;
-import uk.gov.justice.services.core.jms.JmsDestinations;
+import uk.gov.justice.services.core.jms.DefaultJmsDestinations;
 import uk.gov.justice.services.core.jms.JmsSenderFactory;
 import uk.gov.justice.services.core.sender.ComponentDestination;
 import uk.gov.justice.services.core.sender.SenderProducer;
@@ -94,7 +95,7 @@ public class EventFilterIT {
             JmsSenderFactory.class,
             ComponentDestination.class,
             DefaultJmsEnvelopeSender.class,
-            JmsDestinations.class,
+            DefaultJmsDestinations.class,
             EnvelopeConverter.class,
 
             StringToJsonObjectConverter.class,
@@ -120,6 +121,7 @@ public class EventFilterIT {
 
             LoggerProducer.class,
             EmptySystemUserProvider.class,
+            SystemUserUtil.class,
             BeanInstantiater.class
     })
     public WebApp war() {

@@ -12,8 +12,6 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithD
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
-import java.math.BigDecimal;
-import java.util.Optional;
 import java.util.UUID;
 
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -39,7 +37,7 @@ public class RequesterProducerTest {
     DispatcherCache dispatcherCache;
 
     @Mock
-    SystemUserProvider systemUserProvider;
+    SystemUserUtil systemUserUtil;
 
 
     @InjectMocks
@@ -76,34 +74,14 @@ public class RequesterProducerTest {
     public void requesterShouldDelegateAdminRequestSubstitutingUserId() throws Exception {
 
         final Requester requester = requesterProducer.produceRequester(injectionPoint);
-        final UUID sysUserId = UUID.randomUUID();
 
-        when(systemUserProvider.getContextSystemUserId()).thenReturn(Optional.of(sysUserId));
+        final JsonEnvelope originalEnvelope = envelope().with(metadataWithDefaults()).build();
+        final JsonEnvelope envelopeWithSysUserId = envelope().with(metadataWithDefaults()).build();
+        when(systemUserUtil.asEnvelopeWithSystemUserId(originalEnvelope)).thenReturn(envelopeWithSysUserId);
+        requester.requestAsAdmin(originalEnvelope);
 
-        final UUID id = UUID.randomUUID();
-        final String name = "name456";
-        final String userId = "usr456";
-        final JsonEnvelope envelope = envelope()
-                .with(metadataOf(id, name).withUserId(userId))
-                .withPayloadOf(BigDecimal.valueOf(123), "numName").build();
-        requester.requestAsAdmin(envelope);
+        verify(dispatcher).dispatch(envelopeWithSysUserId);
 
-        ArgumentCaptor<JsonEnvelope> dispatchedEnvelopeCaptor = ArgumentCaptor.forClass(JsonEnvelope.class);
-        verify(dispatcher).dispatch(dispatchedEnvelopeCaptor.capture());
-
-        final JsonEnvelope dispatchedEnvelope = dispatchedEnvelopeCaptor.getValue();
-        assertThat(dispatchedEnvelope.metadata().id(), is(id));
-        assertThat(dispatchedEnvelope.metadata().name(), is(name));
-        assertThat(dispatchedEnvelope.metadata().userId(), contains(sysUserId.toString()));
-        assertThat(dispatchedEnvelope.payloadAsJsonObject().getInt("numName"), is(123));
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void adminRequestShouldThrowExceptionIfSystemUserNotFound() throws Exception {
-        final Requester requester = requesterProducer.produceRequester(injectionPoint);
-
-        when(systemUserProvider.getContextSystemUserId()).thenReturn(Optional.empty());
-
-        requester.requestAsAdmin(envelope().with(metadataWithDefaults()).build());
-    }
 }

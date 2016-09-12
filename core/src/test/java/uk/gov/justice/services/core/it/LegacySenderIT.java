@@ -1,10 +1,11 @@
-package uk.gov.justice.api;
+package uk.gov.justice.services.core.it;
 
 import static java.util.UUID.randomUUID;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
+import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLLER;
+import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 
@@ -12,6 +13,7 @@ import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGen
 import uk.gov.justice.services.core.accesscontrol.AccessControlService;
 import uk.gov.justice.services.core.accesscontrol.AllowAllPolicyEvaluator;
 import uk.gov.justice.services.core.accesscontrol.PolicyEvaluator;
+import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
@@ -23,61 +25,50 @@ import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.eventbuffer.PassThroughEventBufferService;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
-import uk.gov.justice.services.core.jms.DefaultJmsDestinations;
+import uk.gov.justice.services.core.it.util.sender.RecordingSender;
+import uk.gov.justice.services.core.jms.JmsDestinations;
 import uk.gov.justice.services.core.jms.JmsSenderFactory;
 import uk.gov.justice.services.core.sender.ComponentDestination;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.test.util.RecordingJmsEnvelopeSender;
+import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
+import uk.gov.justice.services.test.utils.common.envelope.TestEnvelopeRecorder;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.jms.Destination;
 
-import org.apache.openejb.OpenEjbContainer;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.openejb.jee.WebApp;
 import org.apache.openejb.junit.ApplicationComposer;
 import org.apache.openejb.testing.Classes;
-import org.apache.openejb.testing.Configuration;
 import org.apache.openejb.testing.Module;
-import org.apache.openejb.testng.PropertiesBuilder;
-import org.apache.openejb.util.NetworkUtil;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(ApplicationComposer.class)
-@ServiceComponent(COMMAND_API)
-public class RemoteCommandControllerIT {
+public class LegacySenderIT {
 
     private static final UUID TEST_SYS_USER_ID = randomUUID();
-    private static int port = -1;
+
 
     @Inject
-    Sender sender;
+    @ServiceComponent(COMMAND_CONTROLLER)
+    private Sender sender;
 
     @Inject
-    RecordingJmsEnvelopeSender envelopeSender;
-    private static final String COMMAND_NAME = "contexta.commanda";
+    private RecordingJmsEnvelopeSender jmsEnvelopeSender;
 
-    @BeforeClass
-    public static void beforeClass() {
-        port = NetworkUtil.getNextAvailablePort();
-    }
+    @Inject
+    private RecordedJmsDestinationQueries jmsDestinations;
 
-    @Configuration
-    public Properties properties() {
-        return new PropertiesBuilder()
-                .property("httpejbd.port", Integer.toString(port))
-                .property(OpenEjbContainer.OPENEJB_EMBEDDED_REMOTABLE, "true")
-                .build();
-    }
 
     @Module
     @Classes(cdi = true, value = {
@@ -88,11 +79,10 @@ public class RemoteCommandControllerIT {
             ComponentDestination.class,
             DispatcherCache.class,
             DispatcherFactory.class,
-            DefaultJmsDestinations.class,
+            RecordedJmsDestinationQueries.class,
             JmsSenderFactory.class,
             PolicyEvaluator.class,
             RecordingJmsEnvelopeSender.class,
-            RemoteContextaControllerCommand.class,
             RequesterProducer.class,
             SenderProducer.class,
             ServiceComponentObserver.class,
@@ -102,41 +92,56 @@ public class RemoteCommandControllerIT {
             SystemUserUtil.class,
             BeanInstantiater.class
     })
+
     public WebApp war() {
         return new WebApp()
-                .contextRoot("jms-endpoint-test");
+                .contextRoot("jms-legacy-sender-test");
     }
 
     @Before
-    public void setUp() throws Exception {
-        envelopeSender.init();
+    public void before() throws Exception {
+        RecordingSender.instance().reset();
     }
 
     @Test
-    public void shouldPassEnvelopeToEnvelopeSender() throws Exception {
+    public void shouldSendEnvelopeToAJmsDestination() throws Exception {
         final UUID id = randomUUID();
         final String userId = "userId1234";
-        sender.send(envelope().with(metadataOf(id, COMMAND_NAME).withUserId(userId)).build());
+        final String commandName = "contexta.command.aaa";
 
-        final List<JsonEnvelope> sentEnvelopes = envelopeSender.envelopesSentTo("contexta.controller.command");
+        sender.send(envelope().with(metadataOf(id, commandName).withUserId(userId)).build());
+
+        final List<JsonEnvelope> sentEnvelopes = jmsEnvelopeSender.recordedEnvelopes();
         assertThat(sentEnvelopes, hasSize(1));
-        assertThat(sentEnvelopes.get(0).metadata().name(), is(COMMAND_NAME));
+        assertThat(sentEnvelopes.get(0).metadata().name(), is(commandName));
         assertThat(sentEnvelopes.get(0).metadata().id(), is(id));
         assertThat(sentEnvelopes.get(0).metadata().userId().get(), is(userId));
+
+        final List<Pair<Component, String>> recordedDestinationQueries = jmsDestinations.recordedDestinationQueries();
+        assertThat(recordedDestinationQueries, hasSize(1));
+        final Component requestedComponent = recordedDestinationQueries.get(0).getLeft();
+        final String requestedContextName = recordedDestinationQueries.get(0).getRight();
+        assertThat(requestedComponent, is(COMMAND_HANDLER));
+        assertThat(requestedContextName, is("contexta"));
+
     }
 
     @Test
-    public void shouldPassEnvelopeWithSystemUserIdToEnvelopeSender() throws Exception {
+    public void shouldSendEnvelopeAsAdmin() throws Exception {
         final UUID id = randomUUID();
-        final String userId = "userId1235";
-        sender.sendAsAdmin(envelope().with(metadataOf(id, COMMAND_NAME).withUserId(userId)).build());
+        final String userId = "userId1234";
+        final String commandName = "contexta.some.command";
 
-        final List<JsonEnvelope> sentEnvelopes = envelopeSender.envelopesSentTo("contexta.controller.command");
+        sender.sendAsAdmin(envelope().with(metadataOf(id, commandName).withUserId(userId)).build());
+
+        final List<JsonEnvelope> sentEnvelopes = jmsEnvelopeSender.recordedEnvelopes();
         assertThat(sentEnvelopes, hasSize(1));
-        assertThat(sentEnvelopes.get(0).metadata().name(), is(COMMAND_NAME));
+        assertThat(sentEnvelopes.get(0).metadata().name(), is(commandName));
         assertThat(sentEnvelopes.get(0).metadata().id(), is(id));
         assertThat(sentEnvelopes.get(0).metadata().userId().get(), is(TEST_SYS_USER_ID.toString()));
+
     }
+
 
     @ApplicationScoped
     public static class TestSystemUserProvider implements SystemUserProvider {
@@ -146,4 +151,35 @@ public class RemoteCommandControllerIT {
             return Optional.of(TEST_SYS_USER_ID);
         }
     }
+
+    @ApplicationScoped
+    public static class RecordedJmsDestinationQueries implements JmsDestinations {
+
+        private List<Pair<Component, String>> destinationQueries = new LinkedList<>();
+
+        @Override
+        public Destination getDestination(final Component component, final String contextName) {
+            destinationQueries.add(Pair.of(component, contextName));
+            return null;
+        }
+
+        public List<Pair<Component, String>> recordedDestinationQueries() {
+            return destinationQueries;
+        }
+    }
+
+    @ApplicationScoped
+    public static class RecordingJmsEnvelopeSender extends TestEnvelopeRecorder implements JmsEnvelopeSender {
+
+        @Override
+        public void send(final JsonEnvelope envelope, final Destination destination) {
+            record(envelope);
+        }
+
+        @Override
+        public void send(final JsonEnvelope envelope, final String destinationName) {
+
+        }
+    }
+
 }

@@ -32,6 +32,7 @@ import uk.gov.justice.services.core.dispatcher.Requester;
 import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserProvider;
+import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.eventbuffer.PassThroughEventBufferService;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
@@ -137,6 +138,7 @@ public class RemoteExampleQueryApiIT {
             InterceptorChainProcessor.class,
             InterceptorChainProcessorProducer.class,
             TestSystemUserProvider.class,
+            SystemUserUtil.class,
             InterceptorCache.class
     })
     public WebApp war() {

@@ -26,6 +26,7 @@ import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
 import uk.gov.justice.services.core.dispatcher.EmptySystemUserProvider;
 import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
+import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.eventbuffer.EventBufferInterceptor;
 import uk.gov.justice.services.core.extension.AnnotationScanner;
@@ -36,7 +37,7 @@ import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProduce
 import uk.gov.justice.services.core.interceptor.InterceptorObserver;
 import uk.gov.justice.services.core.it.util.repository.StreamBufferOpenEjbAwareJdbcRepository;
 import uk.gov.justice.services.core.it.util.repository.StreamStatusOpenEjbAwareJdbcRepository;
-import uk.gov.justice.services.core.jms.JmsDestinations;
+import uk.gov.justice.services.core.jms.DefaultJmsDestinations;
 import uk.gov.justice.services.core.jms.JmsSenderFactory;
 import uk.gov.justice.services.core.sender.ComponentDestination;
 import uk.gov.justice.services.core.sender.SenderProducer;
@@ -111,7 +112,7 @@ public class EventBufferIT {
             JmsSenderFactory.class,
             ComponentDestination.class,
             DefaultJmsEnvelopeSender.class,
-            JmsDestinations.class,
+            DefaultJmsDestinations.class,
             EnvelopeConverter.class,
 
             StringToJsonObjectConverter.class,
@@ -132,6 +133,7 @@ public class EventBufferIT {
             ConsecutiveEventBufferService.class,
             LoggerProducer.class,
             EmptySystemUserProvider.class,
+            SystemUserUtil.class,
             BeanInstantiater.class
 
     })

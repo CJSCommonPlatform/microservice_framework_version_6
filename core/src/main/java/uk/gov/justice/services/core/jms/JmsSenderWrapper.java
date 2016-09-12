@@ -31,7 +31,21 @@ public class JmsSenderWrapper implements Sender {
         try {
             primarySender.send(envelope);
         } catch (MissingHandlerException e) {
-            legacySender.orElseThrow(() -> e).send(envelope);
+            legacySender(e).send(envelope);
         }
+    }
+
+    @Override
+    public void sendAsAdmin(final JsonEnvelope envelope) {
+        try {
+            primarySender.sendAsAdmin(envelope);
+        } catch (MissingHandlerException e) {
+            legacySender(e).sendAsAdmin(envelope);
+        }
+
+    }
+
+    private Sender legacySender(final MissingHandlerException e) {
+        return legacySender.orElseThrow(() -> e);
     }
 }

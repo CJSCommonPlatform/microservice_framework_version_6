@@ -17,4 +17,9 @@ public class RecordingSender extends TestEnvelopeRecorder implements Sender {
     public void send(final JsonEnvelope envelope) {
         record(envelope);
     }
+
+    @Override
+    public void sendAsAdmin(final JsonEnvelope envelope) {
+        record(envelope);
+    }
 }

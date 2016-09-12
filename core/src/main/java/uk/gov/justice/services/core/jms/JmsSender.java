@@ -1,6 +1,7 @@
 package uk.gov.justice.services.core.jms;
 
 import uk.gov.justice.services.core.annotation.Component;
+import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.context.ContextName;
@@ -9,7 +10,6 @@ import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
 import java.util.Objects;
 
 import javax.enterprise.inject.Alternative;
-import javax.inject.Inject;
 import javax.jms.Destination;
 
 import org.slf4j.Logger;
@@ -21,16 +21,19 @@ public class JmsSender implements Sender {
     final Component destinationComponent;
     final JmsEnvelopeSender jmsEnvelopeSender;
     final Logger logger;
+    final SystemUserUtil systemUserUtil;
 
     public JmsSender(
             final Component destinationComponent,
             final JmsDestinations jmsDestinations,
             final JmsEnvelopeSender jmsEnvelopeSender,
-            final Logger logger) {
+            final Logger logger,
+            final SystemUserUtil systemUserUtil) {
         this.destinationComponent = destinationComponent;
         this.jmsDestinations = jmsDestinations;
         this.jmsEnvelopeSender = jmsEnvelopeSender;
         this.logger = logger;
+        this.systemUserUtil = systemUserUtil;
     }
 
     @Override
@@ -40,6 +43,11 @@ public class JmsSender implements Sender {
         logger.trace("Sending envelope for action {} to destination: {}", envelope.metadata().name(), destination);
         jmsEnvelopeSender.send(envelope, destination);
 
+    }
+
+    @Override
+    public void sendAsAdmin(final JsonEnvelope envelope) {
+        send(systemUserUtil.asEnvelopeWithSystemUserId(envelope));
     }
 
     @Override

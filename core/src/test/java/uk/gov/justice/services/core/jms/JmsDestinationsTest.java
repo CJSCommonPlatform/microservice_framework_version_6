@@ -37,11 +37,11 @@ public class JmsDestinationsTest {
     @Mock
     Destination destination;
 
-    private JmsDestinations jmsDestinations;
+    private DefaultJmsDestinations jmsDestinations;
 
     @Before
     public void setup() throws NamingException {
-        jmsDestinations = new JmsDestinations();
+        jmsDestinations = new DefaultJmsDestinations();
         jmsDestinations.initialContext = initialContext;
     }
 

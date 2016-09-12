@@ -6,6 +6,8 @@ import static uk.gov.justice.services.core.annotation.Component.valueOf;
 import static uk.gov.justice.services.core.annotation.ComponentNameUtil.componentFrom;
 
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
+import uk.gov.justice.services.core.dispatcher.DispatcherDelegate;
+import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.jms.JmsSenderWrapper;
 import uk.gov.justice.services.core.jms.SenderFactory;
 
@@ -32,6 +34,9 @@ public class SenderProducer {
 
     @Inject
     DispatcherCache dispatcherCache;
+
+    @Inject
+    SystemUserUtil systemUserUtil;
 
     private Map<String, Sender> senderMap;
 
@@ -68,7 +73,7 @@ public class SenderProducer {
     }
 
     private Sender produceSender(final InjectionPoint injectionPoint) {
-        return dispatcherCache.dispatcherFor(injectionPoint)::dispatch;
+        return new DispatcherDelegate(dispatcherCache.dispatcherFor(injectionPoint), systemUserUtil);
     }
 
 }

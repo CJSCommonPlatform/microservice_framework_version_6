@@ -2,6 +2,7 @@ package uk.gov.justice.services.core.sender;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -12,11 +13,13 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_API;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
 
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.dispatcher.Dispatcher;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
+import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.handler.exception.MissingHandlerException;
 import uk.gov.justice.services.core.jms.JmsSender;
 import uk.gov.justice.services.core.jms.SenderFactory;
@@ -41,10 +44,14 @@ public class SenderProducerTest {
     private JmsSender legacyJmsSender;
 
     @Mock
+    private SystemUserUtil systemUserUtil;
+
+    @Mock
     Dispatcher dispatcher;
 
     @Mock
     private DispatcherCache dispatcherCache;
+
 
     private SenderProducer senderProducer;
 
@@ -53,6 +60,7 @@ public class SenderProducerTest {
         senderProducer = new SenderProducer();
         senderProducer.senderFactory = senderFactory;
         senderProducer.dispatcherCache = dispatcherCache;
+        senderProducer.systemUserUtil = systemUserUtil;
         senderProducer.componentDestination = new ComponentDestination();
     }
 
@@ -161,6 +169,41 @@ public class SenderProducerTest {
         final Sender returnedSender = senderProducer.produce(injectionPoint);
 
         returnedSender.send(envelope);
+    }
+    @Test
+    public void senderShouldSubstituteUserIdWhenSendingAsAdmin() throws Exception {
+
+        final TestInjectionPoint injectionPoint = new TestInjectionPoint(TestEventProcessor.class);
+
+        when(dispatcherCache.dispatcherFor(injectionPoint)).thenReturn(dispatcher);
+
+        final JsonEnvelope originalEnvelope = envelope().with(metadataWithDefaults()).build();
+        final JsonEnvelope envelopeWithSysUserId = envelope().with(metadataWithDefaults()).build();
+        when(systemUserUtil.asEnvelopeWithSystemUserId(originalEnvelope)).thenReturn(envelopeWithSysUserId);
+
+        final Sender returnedSender = senderProducer.produce(injectionPoint);
+
+
+        returnedSender.sendAsAdmin(originalEnvelope);
+
+        verify(dispatcher).dispatch(envelopeWithSysUserId);
+
+    }
+
+    @Test
+    public void legacySenderShouldSubstituteUserIdWhenSendingAsAdmin() throws Exception {
+        final TestInjectionPoint injectionPoint = new TestInjectionPoint(TestCommandApi.class);
+
+        when(dispatcherCache.dispatcherFor(injectionPoint)).thenReturn(dispatcher);
+        when(senderFactory.createSender(COMMAND_CONTROLLER)).thenReturn(legacyJmsSender);
+        final JsonEnvelope envelope = envelope().with(metadataWithDefaults()).build();
+        doThrow(new MissingHandlerException("")).when(dispatcher).dispatch(any(JsonEnvelope.class));
+
+        final Sender returnedSender = senderProducer.produce(injectionPoint);
+
+        returnedSender.sendAsAdmin(envelope);
+
+        verify(legacyJmsSender).sendAsAdmin(envelope);
     }
 
     @Test(expected = IllegalArgumentException.class)

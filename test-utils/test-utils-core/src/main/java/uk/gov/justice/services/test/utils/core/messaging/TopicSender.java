@@ -2,7 +2,7 @@ package uk.gov.moj.cpp.notification.integration.util;
 
 import static java.lang.String.format;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 import javax.jms.Connection;
 import javax.jms.DeliveryMode;
@@ -46,9 +46,9 @@ public class TopicSender implements AutoCloseable {
 
 
     public void send(final String msg) throws JMSException {
-        exec((Pair<MessageProducer, Session> pair) -> {
+        exec((producer, session) -> {
             try {
-                pair.getLeft().send(pair.getRight().createTextMessage(msg));
+                producer.send(session.createTextMessage(msg));
             } catch (JMSException e) {
                 throw new RuntimeException(format("Failed to send %s", msg), e);
             }
@@ -62,10 +62,10 @@ public class TopicSender implements AutoCloseable {
      * @throws JMSException
      */
     public void send(List<String> msgs) throws JMSException {
-        exec((Pair<MessageProducer, Session> pair) -> {
+        exec((producer, session) -> {
             msgs.stream().forEach((m) -> {
                 try {
-                    pair.getLeft().send(pair.getRight().createTextMessage(m));
+                    producer.send(session.createTextMessage(m));
                 } catch (JMSException e) {
                     throw new RuntimeException(format("Failed to send %s", m), e);
                 }
@@ -74,10 +74,10 @@ public class TopicSender implements AutoCloseable {
     }
 
     public void parallelSend(List<String> msgs) throws JMSException {
-        exec((Pair<MessageProducer, Session> pair) -> {
+        exec((producer, session) -> {
             msgs.parallelStream().forEach((m) -> {
                 try {
-                    pair.getLeft().send(pair.getRight().createTextMessage(m));
+                    producer.send(session.createTextMessage(m));
                 } catch (JMSException e) {
                     throw new RuntimeException(format("Failed to send %s", m), e);
                 }
@@ -85,14 +85,14 @@ public class TopicSender implements AutoCloseable {
         });
     }
 
-    private void exec(Consumer<Pair<MessageProducer, Session>> op) throws JMSException {
+    private void exec(BiConsumer<MessageProducer, Session> op) throws JMSException {
         ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(uri);
         this.connection = factory.createConnection();
         this.connection.start();
         Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
         MessageProducer producer = session.createProducer(session.createTopic(topic));
         producer.setDeliveryMode(DeliveryMode.PERSISTENT);
-        op.accept(Pair.of(producer, session));
+        op.accept(producer, session);
         session.close();
     }
 
@@ -103,7 +103,7 @@ public class TopicSender implements AutoCloseable {
             try {
                 connection.close();
             } catch (JMSException e) {
-                // ignore this as its out of our control
+                throw new RuntimeException("Exception closing connection", e);
             }
         }
     }

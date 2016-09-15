@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "filter": {
+      "type": "object",
+      "oneOf": [
+        { "$ref": "#/definitions/fieldFilter" }
+      ]
+    }
+  },
+  "required": [
+    "filter"
+  ],
+  "definitions": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    },
+    "fieldFilter": {
+      "properties": {
+        "type": {
+          "enum": [ "FIELD" ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "value": {"$ref": "#/definitions/uuid"},
+        "operation": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "name",
+        "value",
+        "operation"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

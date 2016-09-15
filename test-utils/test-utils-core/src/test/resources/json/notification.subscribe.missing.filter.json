@@ -1,0 +1,8 @@
+{
+  "not-filter": {
+    "type": "FIELD",
+    "name": "sessionId",
+    "value": "d3690064-b74d-41b9-bcd2-1da279752a22",
+    "operation": "EQUAL"
+  }
+}

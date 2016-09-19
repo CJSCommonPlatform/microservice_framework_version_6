@@ -1,4 +1,4 @@
-package uk.gov.justice.services.core.configuration;
+package uk.gov.justice.services.common.configuration;
 
 import static java.lang.String.format;
 import static org.hamcrest.CoreMatchers.equalTo;

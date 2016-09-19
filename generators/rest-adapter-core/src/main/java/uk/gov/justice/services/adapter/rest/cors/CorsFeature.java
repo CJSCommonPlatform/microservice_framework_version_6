@@ -4,7 +4,7 @@ import static uk.gov.justice.services.common.http.HeaderConstants.CLIENT_CORRELA
 import static uk.gov.justice.services.common.http.HeaderConstants.SESSION_ID;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 
-import uk.gov.justice.services.core.configuration.Value;
+import uk.gov.justice.services.common.configuration.Value;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.Feature;

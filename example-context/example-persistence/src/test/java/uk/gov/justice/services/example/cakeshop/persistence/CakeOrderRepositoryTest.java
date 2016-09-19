@@ -10,7 +10,6 @@ import uk.gov.justice.services.test.utils.persistence.BaseTransactionalTest;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.TimeZone;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -42,7 +41,6 @@ public class CakeOrderRepositoryTest extends BaseTransactionalTest {
         assertThat(cakeOrder.getOrderId(), equalTo(orderId));
         assertThat(cakeOrder.getRecipeId(), equalTo(recipeId));
         assertThat(cakeOrder.getDeliveryDate(), is(deliveryDate));
-        System.out.println(TimeZone.getDefault());
         assertThat(cakeOrder.getDeliveryDate().getZone(), is(ZoneId.of("UTC")));
     }
 }

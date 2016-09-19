@@ -1,7 +1,7 @@
 package uk.gov.justice.services.core.audit;
 
 
-import uk.gov.justice.services.core.configuration.ServiceContextNameProvider;
+import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.annotation.Priority;

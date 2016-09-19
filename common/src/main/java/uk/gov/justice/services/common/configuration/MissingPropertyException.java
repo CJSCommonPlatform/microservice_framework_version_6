@@ -1,4 +1,4 @@
-package uk.gov.justice.services.core.configuration;
+package uk.gov.justice.services.common.configuration;
 
 public class MissingPropertyException extends RuntimeException {
 

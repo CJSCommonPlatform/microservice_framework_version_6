@@ -50,6 +50,32 @@ public class DatabaseCleanerTest {
     }
 
     @Test
+    public void shouldCleanSomeViewStoreTablesUsingVarArgMethod() throws Exception {
+
+        final String table_1 = "table_1";
+        final String table_2 = "table_2";
+
+        final String contextName = "my-context";
+
+        final Connection connection = mock(Connection.class);
+        final PreparedStatement preparedStatement_1 = mock(PreparedStatement.class);
+        final PreparedStatement preparedStatement_2 = mock(PreparedStatement.class);
+
+        when(testJdbcConnectionProvider.getViewStoreConnection(contextName)).thenReturn(connection);
+        when(connection.prepareStatement("DELETE FROM " + table_1)).thenReturn(preparedStatement_1);
+        when(connection.prepareStatement("DELETE FROM " + table_2)).thenReturn(preparedStatement_2);
+
+        databaseCleaner.cleanViewStoreTables(contextName, table_1, table_2);
+
+        verify(preparedStatement_1).executeUpdate();
+        verify(preparedStatement_2).executeUpdate();
+
+        verify(connection).close();
+        verify(preparedStatement_1).close();
+        verify(preparedStatement_2).close();
+    }
+
+    @Test
     public void shouldCleanTheEventLogTable() throws Exception {
 
         final String tableName = "event_log";

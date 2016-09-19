@@ -1,5 +1,4 @@
-package uk.gov.justice.services.core.eventfilter;
-
+package uk.gov.justice.services.event.filter;
 
 
 import static org.hamcrest.Matchers.is;
@@ -9,6 +8,7 @@ import static uk.gov.justice.services.core.interceptor.InterceptorContext.interc
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 
+import uk.gov.justice.services.core.eventfilter.EventFilter;
 import uk.gov.justice.services.core.interceptor.InterceptorChain;
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -32,12 +32,10 @@ public class EventFilterInterceptorTest {
     private EventFilterInterceptor eventFilterInterceptor;
 
     @Mock
-    private Function<JsonEnvelope,JsonEnvelope> dispatcher;
-
+    private Function<JsonEnvelope, JsonEnvelope> dispatcher;
 
     @Mock
     private InterceptorChain interceptorChain;
-
 
     @Test
     public void shouldProcessNextInChainIfFilterAcceptsMessage() throws Exception {

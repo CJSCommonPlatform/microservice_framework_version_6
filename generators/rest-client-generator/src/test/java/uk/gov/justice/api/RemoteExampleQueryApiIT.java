@@ -34,7 +34,6 @@ import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserProvider;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.core.eventbuffer.PassThroughEventBufferService;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.interceptor.InterceptorCache;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
@@ -132,7 +131,6 @@ public class RemoteExampleQueryApiIT {
             DispatcherCache.class,
             DispatcherFactory.class,
             PolicyEvaluator.class,
-            PassThroughEventBufferService.class,
             LoggerProducer.class,
             BeanInstantiater.class,
             InterceptorChainProcessor.class,

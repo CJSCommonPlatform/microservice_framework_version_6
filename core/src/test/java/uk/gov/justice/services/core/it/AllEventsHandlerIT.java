@@ -32,13 +32,10 @@ import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.interceptor.InterceptorCache;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
-import uk.gov.justice.services.core.it.util.repository.StreamBufferOpenEjbAwareJdbcRepository;
-import uk.gov.justice.services.core.it.util.repository.StreamStatusOpenEjbAwareJdbcRepository;
 import uk.gov.justice.services.core.jms.DefaultJmsDestinations;
 import uk.gov.justice.services.core.jms.JmsSenderFactory;
 import uk.gov.justice.services.core.sender.ComponentDestination;
 import uk.gov.justice.services.core.sender.SenderProducer;
-import uk.gov.justice.services.event.buffer.core.service.ConsecutiveEventBufferService;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.DefaultJmsEnvelopeSender;
@@ -107,9 +104,6 @@ public class AllEventsHandlerIT {
             DispatcherFactory.class,
             PolicyEvaluator.class,
 
-            StreamBufferOpenEjbAwareJdbcRepository.class,
-            StreamStatusOpenEjbAwareJdbcRepository.class,
-            ConsecutiveEventBufferService.class,
             LoggerProducer.class,
             EmptySystemUserProvider.class,
             SystemUserUtil.class,
@@ -128,7 +122,7 @@ public class AllEventsHandlerIT {
         interceptorChainProcessor.process(envelope()
                 .with(metadataOf(metadataId, EVENT_ABC)
                         .withStreamId(randomUUID())
-                        .withVersion(1l)).build());
+                        .withVersion(1L)).build());
 
         assertThat(abcEventHandler.firstRecordedEnvelope(), not(nullValue()));
         assertThat(abcEventHandler.firstRecordedEnvelope().metadata().id(), equalTo(metadataId));
@@ -141,7 +135,7 @@ public class AllEventsHandlerIT {
         interceptorChainProcessor.process(envelope()
                 .with(metadataOf(metadataId, "some.unregistered.event")
                         .withStreamId(randomUUID())
-                        .withVersion(1l)).build());
+                        .withVersion(1L)).build());
 
         assertThat(allEventsHandler.firstRecordedEnvelope(), not(nullValue()));
         assertThat(allEventsHandler.firstRecordedEnvelope().metadata().id(), equalTo(metadataId));

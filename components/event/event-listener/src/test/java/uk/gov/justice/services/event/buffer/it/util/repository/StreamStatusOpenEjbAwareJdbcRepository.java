@@ -1,5 +1,4 @@
-package uk.gov.justice.services.core.it.util.repository;
-
+package uk.gov.justice.services.event.buffer.it.util.repository;
 
 import uk.gov.justice.services.event.buffer.core.repository.streamstatus.StreamStatusJdbcRepository;
 

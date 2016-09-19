@@ -8,7 +8,7 @@ import org.jboss.resteasy.specimpl.ResteasyHttpHeaders;
 
 public class HeadersBuilder {
     public static HttpHeaders headersWith(final String headerName, final String headerValue) {
-        final MultivaluedMapImpl headersMap = new MultivaluedMapImpl();
+        final MultivaluedMapImpl<String, String> headersMap = new MultivaluedMapImpl<>();
         headersMap.add(headerName, headerValue);
         return new ResteasyHttpHeaders(headersMap);
     }

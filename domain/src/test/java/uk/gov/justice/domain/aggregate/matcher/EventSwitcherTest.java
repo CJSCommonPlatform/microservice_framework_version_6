@@ -93,7 +93,7 @@ public class EventSwitcherTest {
 
     @Test
     public void shouldCreateAnOtherwiseDoNothingMatchAllRule() {
-        EventMatcher eventMatcher = EventSwitcher.otherwiseDoNothing();
+        EventMatcher<?> eventMatcher = EventSwitcher.otherwiseDoNothing();
 
         assertThat(eventMatcher.matches(event), equalTo(true));
         assertThat(eventMatcher.matches("test"), equalTo(true));

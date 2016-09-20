@@ -7,6 +7,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ### Added
 - JsonSchemaValidationMatcher class to validate json content against a schema
 
+### Changed
+- Moved EventBufferInterceptor and EventFilterInterceptor to event-listener component
+
 ## [0.25.0]
 ### Added
 - sender.sendAsAdmin() method

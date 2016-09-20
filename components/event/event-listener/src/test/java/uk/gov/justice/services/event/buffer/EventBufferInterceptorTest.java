@@ -1,4 +1,4 @@
-package uk.gov.justice.services.core.eventbuffer;
+package uk.gov.justice.services.event.buffer;
 
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;

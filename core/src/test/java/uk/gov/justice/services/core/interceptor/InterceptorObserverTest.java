@@ -50,16 +50,4 @@ public class InterceptorObserverTest {
 
         assertThat(interceptorBeans, containsInAnyOrder(bean_1, bean_2));
     }
-
-    private static class ValidInterceptor implements Interceptor {
-        @Override
-        public InterceptorContext process(final InterceptorContext interceptorContext, final InterceptorChain interceptorChain) {
-            return interceptorContext;
-        }
-
-        @Override
-        public int priority() {
-            return 1000;
-        }
-    }
 }

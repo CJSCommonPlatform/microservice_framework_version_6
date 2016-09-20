@@ -25,7 +25,7 @@ public class InterceptorObserver implements Extension {
 
     private final List<Bean<?>> interceptorBeans = new ArrayList<>();
 
-    @SuppressWarnings({"unchecked", "unused"})
+    @SuppressWarnings({"unused"})
     void afterDeploymentValidation(@Observes final AfterDeploymentValidation event, final BeanManager beanManager) {
         beanManager.getBeans(Interceptor.class, AnyLiteral.create()).stream()
                 .peek(this::log)

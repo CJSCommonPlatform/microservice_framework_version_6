@@ -1,4 +1,4 @@
-package uk.gov.justice.services.core.eventbuffer;
+package uk.gov.justice.services.event.buffer;
 
 import static uk.gov.justice.services.core.interceptor.InterceptorContext.copyWithInput;
 
@@ -13,7 +13,8 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 
 /**
- * Interceptor to apply the Event Buffer service and stream returned events to the interceptor chain.
+ * Interceptor to apply the Event Buffer service and stream returned events to the interceptor
+ * chain.
  */
 public class EventBufferInterceptor implements Interceptor {
 

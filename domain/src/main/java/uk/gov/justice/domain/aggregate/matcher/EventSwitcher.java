@@ -58,7 +58,7 @@ public class EventSwitcher {
      *
      * @return the event matcher
      */
-    public static EventMatcher otherwiseDoNothing() {
+    public static EventMatcher<?> otherwiseDoNothing() {
         return otherwise().apply(doNothing());
     }
 
@@ -89,8 +89,8 @@ public class EventSwitcher {
      * @param matchers the matchers to match the event against.
      * @return the original event being matched
      */
-    public Object with(final EventMatcher... matchers) {
-        for (EventMatcher matcher : matchers) {
+    public Object with(final EventMatcher<?>... matchers) {
+        for (EventMatcher<?> matcher : matchers) {
             if (matcher.matches(event)) {
                 return matcher.apply(event);
             }

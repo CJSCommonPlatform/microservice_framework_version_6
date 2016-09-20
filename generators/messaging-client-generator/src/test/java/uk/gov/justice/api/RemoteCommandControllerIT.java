@@ -20,7 +20,6 @@ import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserProvider;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
-import uk.gov.justice.services.core.eventbuffer.PassThroughEventBufferService;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.jms.DefaultJmsDestinations;
@@ -96,7 +95,6 @@ public class RemoteCommandControllerIT {
             RequesterProducer.class,
             SenderProducer.class,
             ServiceComponentObserver.class,
-            PassThroughEventBufferService.class,
             LoggerProducer.class,
             TestSystemUserProvider.class,
             SystemUserUtil.class,

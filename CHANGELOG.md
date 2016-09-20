@@ -6,6 +6,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ## [Un-released]
 ### Added
 - JsonSchemaValidationMatcher class to validate json content against a schema
+- Extend DefaultJsonEnvelope to accept JsonObject as part of the payload
 
 ### Changed
 - Moved EventBufferInterceptor and EventFilterInterceptor to event-listener component

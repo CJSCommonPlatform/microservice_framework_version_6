@@ -164,6 +164,11 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
             return this;
         }
 
+        public Builder withPayloadOf(final JsonObject value, final String... name) {
+            payload.add(value, name);
+            return this;
+        }
+
         public Builder withPayloadOf(final String[] values, final String name) {
             final JsonArrayBuilder jsonArray = Json.createArrayBuilder();
             for (String value : values) {

@@ -65,7 +65,8 @@ public class PollingRequestParamsBuilderTest {
         assertThat(pollingRequestParams.getMediaType(), is(mediaType));
         assertThat(pollingRequestParams.getDelayInMillis(), is(delayInMillis));
         assertThat(pollingRequestParams.getRetryCount(), is(retryCount));
-        assertThat(pollingRequestParams.getHeaders(), is(headers));
+        assertThat(pollingRequestParams.getHeaders().size(), is(1));
+        assertThat(pollingRequestParams.getHeaders().get(0), is(headers.get(0)));
         assertThat(pollingRequestParams.getResultCondition(), is(resultPredicate));
         assertThat(pollingRequestParams.getResponseCondition(), is(responsePredicate));
     }

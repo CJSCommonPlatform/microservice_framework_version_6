@@ -1,6 +1,5 @@
 package uk.gov.justice.services.test.utils.core.http;
 
-import static com.sun.tools.doclint.Entity.Mu;
 import static java.util.Collections.singletonList;
 import static uk.gov.justice.services.test.utils.core.http.PollingRequestParams.DEFAULT_DELAY_MILLIS;
 import static uk.gov.justice.services.test.utils.core.http.PollingRequestParams.DEFAULT_RETRY_COUNT;

@@ -2,23 +2,18 @@ package uk.gov.justice.services.test.utils.core.http;
 
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
-import static org.junit.Assert.*;
 
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
@@ -26,7 +21,6 @@ import static uk.gov.justice.services.test.utils.core.http.PollingRequestParams.
 
 import uk.gov.justice.services.test.utils.core.helper.Sleeper;
 
-import java.util.Optional;
 import java.util.function.Predicate;
 
 import javax.ws.rs.core.Response;
@@ -36,7 +30,7 @@ import javax.ws.rs.core.Response;
 public class PollingRestClientTest {
 
     @Mock
-    private SimpleRestClient simpleRestClient;
+    private ValidatingRestClient validatingRestClient;
 
     @Mock
     private Sleeper sleeper;
@@ -61,7 +55,7 @@ public class PollingRestClientTest {
                 .withResultCondition(alwaysTrueResultCondition)
                 .build();
 
-        when(simpleRestClient.get(pollingRequestParams)).thenReturn(empty(), empty(), of(response));
+        when(validatingRestClient.get(pollingRequestParams)).thenReturn(empty(), empty(), of(response));
         when(response.getStatus()).thenReturn(status);
         when(response.readEntity(String.class)).thenReturn(result);
         when(alwaysTrueResponseCondition.test(response)).thenReturn(true);
@@ -83,7 +77,7 @@ public class PollingRestClientTest {
                 .withRetryCount(retryCount)
                 .build();
 
-        when(simpleRestClient.get(pollingRequestParams)).thenReturn(empty(), empty(), empty(), empty(), empty());
+        when(validatingRestClient.get(pollingRequestParams)).thenReturn(empty(), empty(), empty(), empty(), empty());
 
         try {
             pollingRestClient.pollUntilExpectedResponse(pollingRequestParams);
@@ -111,7 +105,7 @@ public class PollingRestClientTest {
                 .withResultCondition(alwaysTrueResultCondition)
                 .build();
 
-        when(simpleRestClient.get(pollingRequestParams)).thenReturn(empty(), empty(), of(response));
+        when(validatingRestClient.get(pollingRequestParams)).thenReturn(empty(), empty(), of(response));
         when(response.getStatus()).thenReturn(status);
         when(response.readEntity(String.class)).thenReturn(result);
         when(alwaysFalseResponseCondition.test(response)).thenReturn(false);
@@ -144,7 +138,7 @@ public class PollingRestClientTest {
                 .withResultCondition(alwaysFalseResultCondition)
                 .build();
 
-        when(simpleRestClient.get(pollingRequestParams)).thenReturn(empty(), empty(), of(response));
+        when(validatingRestClient.get(pollingRequestParams)).thenReturn(empty(), empty(), of(response));
         when(response.getStatus()).thenReturn(status);
         when(response.readEntity(String.class)).thenReturn(result);
         when(alwaysTrueResponseCondition.test(response)).thenReturn(true);

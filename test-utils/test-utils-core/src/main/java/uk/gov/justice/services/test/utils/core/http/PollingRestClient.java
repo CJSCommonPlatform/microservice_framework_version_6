@@ -12,20 +12,18 @@ import com.google.common.annotations.VisibleForTesting;
 
 public class PollingRestClient {
 
-    private final SimpleRestClient simpleRestClient;
+    private final ValidatingRestClient validatingRestClient;
     private final Sleeper sleeper;
 
     /**
      * Constructs a fully functioning PollingRestClient
      */
     public PollingRestClient() {
-        this(new SimpleRestClient(), new Sleeper());
+        this(new ValidatingRestClient(), new Sleeper());
     }
 
-
-    @VisibleForTesting
-    PollingRestClient(final SimpleRestClient simpleRestClient, Sleeper sleeper) {
-        this.simpleRestClient = simpleRestClient;
+    public PollingRestClient(final ValidatingRestClient validatingRestClient, Sleeper sleeper) {
+        this.validatingRestClient = validatingRestClient;
         this.sleeper = sleeper;
     }
 
@@ -81,7 +79,7 @@ public class PollingRestClient {
      */
     public String pollUntilExpectedResponse(final PollingRequestParams pollingRequestParams) {
         for (int i = 0; i < pollingRequestParams.getRetryCount(); i++) {
-            final Optional<Response> responseOptional = simpleRestClient.get(pollingRequestParams);
+            final Optional<Response> responseOptional = validatingRestClient.get(pollingRequestParams);
 
             if (responseOptional.isPresent()) {
 

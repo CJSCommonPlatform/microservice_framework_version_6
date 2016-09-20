@@ -6,13 +6,16 @@ import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
+import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
 import uk.gov.justice.services.test.utils.core.rest.RestClient;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 import org.junit.Rule;
@@ -225,6 +228,39 @@ public class HttpResponsePollerTest {
         expectedException.expectMessage(EXPECTED_MESSAGE_RESULT);
 
         poller.pollUntilJsonObjectFoundWithValues(URL, MEDIA_TYPE, matchValues);
+    }
+
+    @Test
+    public void shouldPassHeadersToRestClientIfItsProvided() {
+
+        final HttpResponsePoller testObj = new HttpResponsePoller(restClient);
+
+        final String responseText = "Condition Met";
+
+        MultivaluedMap<String, Object> arbitraryHerader = new MultivaluedMapImpl<>();
+        when(restClient.query(URL, MEDIA_TYPE, arbitraryHerader)).thenReturn(response);
+        when(response.getStatus()).thenReturn(OK.getStatusCode());
+        when(response.readEntity(String.class)).thenReturn(responseText);
+
+        final String result = testObj.withHeaders(arbitraryHerader).pollUntilFoundWithCondition(URL, MEDIA_TYPE, responseText::equals);
+
+        assertThat(result, is(responseText));
+    }
+
+    @Test
+    public void shouldIgnoreHeadersIfItsNotProvided() {
+
+        final HttpResponsePoller testObj = new HttpResponsePoller(restClient);
+
+        final String responseText = "Condition Met";
+
+        when(restClient.query(URL, MEDIA_TYPE)).thenReturn(response);
+        when(response.getStatus()).thenReturn(OK.getStatusCode());
+        when(response.readEntity(String.class)).thenReturn(responseText);
+
+        final String result = testObj.withHeaders(null).pollUntilFoundWithCondition(URL, MEDIA_TYPE, responseText::equals);
+
+        assertThat(result, is(responseText));
     }
 
 }

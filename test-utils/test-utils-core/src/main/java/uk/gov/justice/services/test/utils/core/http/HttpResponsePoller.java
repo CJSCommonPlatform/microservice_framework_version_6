@@ -18,6 +18,7 @@ import java.util.function.Predicate;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 public class HttpResponsePoller {
@@ -27,12 +28,19 @@ public class HttpResponsePoller {
 
     private final RestClient restClient;
 
+    private MultivaluedMap<String, Object> headers;
+
     public HttpResponsePoller() {
         this.restClient = new RestClient();
     }
 
     public HttpResponsePoller(final RestClient restClient) {
         this.restClient = restClient;
+    }
+
+    public HttpResponsePoller withHeaders(final MultivaluedMap<String, Object> headers) {
+        this.headers = headers;
+        return this;
     }
 
     public String pollUntilNotFound(final String url, final String mediaType) {
@@ -72,6 +80,9 @@ public class HttpResponsePoller {
     }
 
     public Response get(final String url, final String mediaType) {
+        if (null != headers) {
+            return restClient.query(url, mediaType, headers);
+        }
         return restClient.query(url, mediaType);
     }
 
@@ -116,7 +127,7 @@ public class HttpResponsePoller {
             }
 
             if (i == RETRY_COUNT) {
-                if(!responseCondition.test(response)) {
+                if (!responseCondition.test(response)) {
                     final int status = response.getStatus();
                     throw new AssertionError(format("Failed to match response conditions from %s, after %d attempts, with status code: %s", url, RETRY_COUNT, status));
                 } else {

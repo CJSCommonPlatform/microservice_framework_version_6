@@ -20,6 +20,10 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.ws.rs.core.Response;
 
+/**
+ *
+ */
+@Deprecated
 public class HttpResponsePoller {
 
     private static final int DEFAULT_DELAY_IN_MILLIS = 1000;

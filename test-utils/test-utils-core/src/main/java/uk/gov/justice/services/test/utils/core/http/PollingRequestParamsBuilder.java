@@ -22,6 +22,10 @@ public class PollingRequestParamsBuilder {
     private long delayInMillis = DEFAULT_DELAY_MILLIS;
     private int retryCount = DEFAULT_RETRY_COUNT;
 
+    public static PollingRequestParamsBuilder pollingRequestParams(final String url, final String mediaType) {
+        return new PollingRequestParamsBuilder(url, mediaType);
+    }
+
     public PollingRequestParamsBuilder(final String url, final String mediaType) {
         this.url = url;
         this.mediaType = mediaType;

@@ -4,6 +4,7 @@ import static com.jayway.jsonassert.JsonAssert.with;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 
@@ -91,6 +92,15 @@ public class DefaultJsonEnvelopeTest {
                 .assertEquals("_metadata.id", metadataId.toString())
                 .assertEquals("_metadata.name", metadataName)
                 .assertEquals("$.payloadName", payloadValue);
+    }
+
+    @Test
+    public void shouldSupportAddingJsonObjectToPayload() {
+        final String payloadName = "payloadName";
+
+        final JsonEnvelope jsonEnvelope = envelope().withPayloadOf(payloadAsJsonObject, payloadName).build();
+
+        assertThat(jsonEnvelope.payloadAsJsonObject().getJsonObject(payloadName), equalTo(payloadAsJsonObject));
     }
 
     private Metadata metadata(final UUID metadataId, final String metadataName) {

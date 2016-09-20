@@ -13,10 +13,31 @@ import java.util.function.Predicate;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
+/**
+ * A predicate to test that the exact property name and property values are present in the response json.
+ * The property name and values to check can be supplied to the predicate in a <code>Map</code> via constructor.
+ *
+ * To Use:
+ * <pre><blockquote>
+ *
+ *      final Map<String, String> values = new HashMap<>();
+ *
+ *      values.put("name_1", "value_1");
+ *      values.put("name_2", "value_2");
+ *
+ *      final ExpectedJsonValuesResultCondition expectedJsonValuesResultCondition =
+ *      new ExpectedJsonValuesResultCondition(values);
+ *
+ * </blockquote></pre>
+ */
 public class ExpectedJsonValuesResultCondition implements Predicate<String> {
 
     private final Map<String, String> values;
 
+    /**
+     * Creates a predicate with <code>Map<String, String></code> property names and values to match in the json Response.
+     * @param values <code>Map<String, String></code> the property name and value pairs to match in the json Response.
+     */
     public ExpectedJsonValuesResultCondition(final Map<String, String> values) {
         this.values = values;
     }

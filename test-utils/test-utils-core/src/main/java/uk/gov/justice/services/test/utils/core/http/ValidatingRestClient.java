@@ -9,15 +9,15 @@ import java.util.Optional;
 
 import javax.ws.rs.core.Response;
 
-public class SimpleRestClient {
+public class ValidatingRestClient {
 
     private final RestClient restClient;
 
-    public SimpleRestClient() {
+    public ValidatingRestClient() {
         this(new RestClient());
     }
 
-    public SimpleRestClient(final RestClient restClient) {
+    public ValidatingRestClient(final RestClient restClient) {
         this.restClient = restClient;
     }
 

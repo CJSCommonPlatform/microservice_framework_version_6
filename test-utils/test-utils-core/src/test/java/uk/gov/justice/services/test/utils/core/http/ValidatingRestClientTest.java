@@ -22,13 +22,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 
 @RunWith(MockitoJUnitRunner.class)
-public class SimpleRestClientTest {
+public class ValidatingRestClientTest {
 
     @Mock
     private RestClient restClient;
 
     @InjectMocks
-    private SimpleRestClient simpleRestClient;
+    private ValidatingRestClient validatingRestClient;
 
     @Test
     public void shouldGetTheResponseAndReturnAsAString() throws Exception {
@@ -58,7 +58,7 @@ public class SimpleRestClientTest {
         when(alwaysTrueResponseCondition.test(response)).thenReturn(true);
         when(alwaysTrueResultCondition.test(result)).thenReturn(true);
 
-        final Optional<Response> responseOptional = simpleRestClient.get(pollingRequestParams);
+        final Optional<Response> responseOptional = validatingRestClient.get(pollingRequestParams);
 
         assertThat(responseOptional.isPresent(), is(true));
         assertThat(responseOptional.get(), is(response));
@@ -92,7 +92,7 @@ public class SimpleRestClientTest {
         when(alwaysFalseResponseCondition.test(response)).thenReturn(false);
         when(alwaysTrueResultCondition.test(result)).thenReturn(true);
 
-        assertThat(simpleRestClient.get(pollingRequestParams).isPresent(), is(false));
+        assertThat(validatingRestClient.get(pollingRequestParams).isPresent(), is(false));
     }
 
     @Test  @SuppressWarnings("unchecked")
@@ -123,7 +123,7 @@ public class SimpleRestClientTest {
         when(alwaysTrueResponseCondition.test(response)).thenReturn(true);
         when(alwaysFalseResultCondition.test(result)).thenReturn(false);
 
-        assertThat(simpleRestClient.get(pollingRequestParams).isPresent(), is(false));
+        assertThat(validatingRestClient.get(pollingRequestParams).isPresent(), is(false));
     }
 
     private MultivaluedHashMap<String, Object> someHeaders() {

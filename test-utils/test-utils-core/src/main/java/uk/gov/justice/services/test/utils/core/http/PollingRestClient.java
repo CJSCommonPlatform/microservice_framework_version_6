@@ -10,21 +10,21 @@ import javax.ws.rs.core.Response;
 
 public class PollingRestClient {
 
-    private final SimpleRestClient simpleRestClient;
+    private final ValidatingRestClient validatingRestClient;
     private final Sleeper sleeper;
 
     public PollingRestClient() {
-        this(new SimpleRestClient(), new Sleeper());
+        this(new ValidatingRestClient(), new Sleeper());
     }
 
-    public PollingRestClient(final SimpleRestClient simpleRestClient, Sleeper sleeper) {
-        this.simpleRestClient = simpleRestClient;
+    public PollingRestClient(final ValidatingRestClient validatingRestClient, Sleeper sleeper) {
+        this.validatingRestClient = validatingRestClient;
         this.sleeper = sleeper;
     }
 
     public String pollUntilExpectedResponse(final PollingRequestParams pollingRequestParams) {
         for (int i = 0; i < pollingRequestParams.getRetryCount(); i++) {
-            final Optional<Response> responseOptional = simpleRestClient.get(pollingRequestParams);
+            final Optional<Response> responseOptional = validatingRestClient.get(pollingRequestParams);
 
             if (responseOptional.isPresent()) {
 

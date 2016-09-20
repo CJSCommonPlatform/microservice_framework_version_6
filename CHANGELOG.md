@@ -4,11 +4,24 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Un-released]
+
+## [0.27.0] - 2016-09-20
 ### Added
 - JsonSchemaValidationMatcher class to validate json content against a schema
+- PollingRequestClient class as a new implementation of the HttpResponsePoller
 
 ### Changed
 - Moved EventBufferInterceptor and EventFilterInterceptor to event-listener component
+- Added withHeaders method to HttpResponsePoller
+
+### Fixed
+- BaseTransactionalTest to cleanup with rollback
+
+### Deprecated
+- HttpResponsePoller, replaced with PollingRestClient
+
+## [0.26.0] - 2016-09-20
+- Failed release, please do not use.
 
 ## [0.25.0]
 ### Added

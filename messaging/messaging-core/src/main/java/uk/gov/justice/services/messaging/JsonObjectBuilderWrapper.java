@@ -50,6 +50,13 @@ class JsonObjectBuilderWrapper {
         }
     }
 
+    void add(final JsonObject value, final String... name) {
+        final JsonObjectBuilder jsonObject = addOrReturnNestedJsonObject(value, name);
+        if (jsonObject != null) {
+            jsonObject.add(name[1], value);
+        }
+    }
+
     private JsonObjectBuilder addOrReturnNestedJsonObject(final Object value, final String[] name) {
         JsonObjectBuilder nestedJsonObject = null;
         switch (name.length) {
@@ -69,7 +76,7 @@ class JsonObjectBuilderWrapper {
     private JsonObjectBuilder nestedJsonObjectOf(final String name) {
         final Object object = entryMap.get(name);
 
-        JsonObjectBuilder nestedJsonObject = null;
+        final JsonObjectBuilder nestedJsonObject;
 
         if (object == null) {
             nestedJsonObject = createObjectBuilder();
@@ -97,6 +104,9 @@ class JsonObjectBuilderWrapper {
                 case Boolean:
                     jsonObjectBuilder.add(name, (Boolean) value);
                     break;
+                case JsonObject:
+                    jsonObjectBuilder.add(name, (JsonObject) value);
+                    break;
                 default:
                     jsonObjectBuilder.add(name, String.valueOf(value));
             }
@@ -104,10 +114,8 @@ class JsonObjectBuilderWrapper {
         return jsonObjectBuilder.build();
     }
 
-
-
-    static enum ValueType {
-        String, BigDecimal, Boolean, JsonObjectBuilder, JsonArrayBuilder;
+    enum ValueType {
+        String, BigDecimal, Boolean, JsonObjectBuilder, JsonArrayBuilder, JsonObject;
 
         static ValueType valueOf(Class<?> clazz) {
             final String className = clazz.getSimpleName();

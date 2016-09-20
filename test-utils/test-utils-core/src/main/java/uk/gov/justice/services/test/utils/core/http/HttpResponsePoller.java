@@ -21,7 +21,7 @@ import javax.json.JsonReader;
 import javax.ws.rs.core.Response;
 
 /**
- *
+ * @deprecated Use {@link PollingRestClient} instead.
  */
 @Deprecated
 public class HttpResponsePoller {

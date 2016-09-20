@@ -10,6 +10,12 @@ import javax.ws.rs.core.Response;
 
 import com.google.common.annotations.VisibleForTesting;
 
+/**
+ * Client for polling a rest endpoint a configured number of times with a configured wait time
+ * between each poll.
+ *
+ * Can accept condition Predicates for validating the rest Response
+ */
 public class PollingRestClient {
 
     private final ValidatingRestClient validatingRestClient;
@@ -22,7 +28,8 @@ public class PollingRestClient {
         this(new ValidatingRestClient(), new Sleeper());
     }
 
-    public PollingRestClient(final ValidatingRestClient validatingRestClient, Sleeper sleeper) {
+    @VisibleForTesting
+    PollingRestClient(final ValidatingRestClient validatingRestClient, final Sleeper sleeper) {
         this.validatingRestClient = validatingRestClient;
         this.sleeper = sleeper;
     }
@@ -75,6 +82,8 @@ public class PollingRestClient {
      * @param pollingRequestParams all parameters for polling the end point. Best created using the
      *                             @See PollingRequestParamsBuilder
      * @return the response body as a String
+     * @throws AssertionError if the request validation fails or no response is found after the
+     * specified number of retires
      *
      */
     public String pollUntilExpectedResponse(final PollingRequestParams pollingRequestParams) {

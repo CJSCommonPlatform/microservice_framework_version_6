@@ -233,7 +233,7 @@ public class HttpResponsePollerTest {
     @Test
     public void shouldPassHeadersToRestClientIfItsProvided() {
 
-        HttpResponsePoller testObj = new HttpResponsePoller(restClient);
+        final HttpResponsePoller testObj = new HttpResponsePoller(restClient);
 
         final String responseText = "Condition Met";
 
@@ -250,7 +250,7 @@ public class HttpResponsePollerTest {
     @Test
     public void shouldIgnoreHeadersIfItsNotProvided() {
 
-        HttpResponsePoller testObj = new HttpResponsePoller(restClient);
+        final HttpResponsePoller testObj = new HttpResponsePoller(restClient);
 
         final String responseText = "Condition Met";
 

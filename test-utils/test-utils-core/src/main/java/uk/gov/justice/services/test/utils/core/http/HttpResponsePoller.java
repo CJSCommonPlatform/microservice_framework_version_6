@@ -38,7 +38,7 @@ public class HttpResponsePoller {
         this.restClient = restClient;
     }
 
-    public HttpResponsePoller withHeaders(MultivaluedMap<String, Object> headers) {
+    public HttpResponsePoller withHeaders(final MultivaluedMap<String, Object> headers) {
         this.headers = headers;
         return this;
     }

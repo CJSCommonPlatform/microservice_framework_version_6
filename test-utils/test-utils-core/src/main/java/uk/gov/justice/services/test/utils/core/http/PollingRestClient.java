@@ -22,7 +22,7 @@ public class PollingRestClient {
         this.sleeper = sleeper;
     }
 
-    public String pollUntilExpectedResponse(PollingRequestParams pollingRequestParams) {
+    public String pollUntilExpectedResponse(final PollingRequestParams pollingRequestParams) {
         for (int i = 0; i < pollingRequestParams.getRetryCount(); i++) {
             final Optional<Response> responseOptional = simpleRestClient.get(pollingRequestParams);
 
@@ -30,9 +30,9 @@ public class PollingRestClient {
 
                 final Response response = responseOptional.get();
                 final int status = response.getStatus();
-                final String result = response.readEntity(String.class);
+                final String jsonResult = response.readEntity(String.class);
 
-                if(! pollingRequestParams.getResponseCondition().test(response) )  {
+                if(failsCondition(response, pollingRequestParams))  {
                     throw new AssertionError(format(
                             "Failed to match response conditions from %s, after %d attempts, with status code: %s",
                             pollingRequestParams.getUrl(),
@@ -40,20 +40,28 @@ public class PollingRestClient {
                             status));
                 }
 
-                if(! pollingRequestParams.getResultCondition().test(result)) {
+                if(failsCondition(jsonResult, pollingRequestParams)) {
                     throw new AssertionError(format(
                             "Failed to match result conditions from %s, after %d attempts, with result: %s",
                             pollingRequestParams.getUrl(),
                             pollingRequestParams.getRetryCount(),
-                            result));
+                            jsonResult));
                 }
 
-                return result;
+                return jsonResult;
             }
 
             sleeper.sleepFor(pollingRequestParams.getDelayInMillis());
         }
 
         throw new AssertionError(format("Failed to get any response from '%s' after %d retries", pollingRequestParams.getUrl(), pollingRequestParams.getRetryCount()));
+    }
+
+    private boolean failsCondition(final String result, final PollingRequestParams pollingRequestParams) {
+        return ! pollingRequestParams.getResultCondition().test(result);
+    }
+
+    private boolean failsCondition(final Response response, final PollingRequestParams pollingRequestParams) {
+        return ! pollingRequestParams.getResponseCondition().test(response);
     }
 }

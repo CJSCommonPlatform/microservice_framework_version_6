@@ -21,18 +21,30 @@ public class SimpleRestClient {
         this.restClient = restClient;
     }
 
-    public Optional<Response> get(PollingRequestParams pollingRequestParams) {
+    public Optional<Response> get(final PollingRequestParams pollingRequestParams) {
 
         final Response response = restClient.query(
                 pollingRequestParams.getUrl(),
                 pollingRequestParams.getMediaType(),
                 pollingRequestParams.getHeaders());
-        final String result = response.readEntity(String.class);
+        final String jsonResult = response.readEntity(String.class);
 
-        if (pollingRequestParams.getResponseCondition().test(response) && pollingRequestParams.getResultCondition().test(result)) {
-            return of(response);
+        if (failsValidation(pollingRequestParams, response, jsonResult)) {
+            return empty();
         }
 
-        return empty();
+        return of(response);
+    }
+
+    private boolean failsValidation(final PollingRequestParams pollingRequestParams, final Response response, final String jsonResult) {
+        return responseFailsCondition(response, pollingRequestParams) || jsonFailsCondition(jsonResult, pollingRequestParams);
+    }
+
+    private boolean jsonFailsCondition(final String jsonResult, final PollingRequestParams pollingRequestParams) {
+        return !pollingRequestParams.getResultCondition().test(jsonResult);
+    }
+
+    private boolean responseFailsCondition(final Response response, final PollingRequestParams pollingRequestParams) {
+        return !pollingRequestParams.getResponseCondition().test(response);
     }
 }

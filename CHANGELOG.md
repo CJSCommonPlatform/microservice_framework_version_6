@@ -3,9 +3,12 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
-## [Un-released]
+## [0.26.0]
 ### Added
 - JsonSchemaValidationMatcher class to validate json content against a schema
+- PollingRestClient. A new test client for polling a rest end point until the 
+expected result is returned. Replaces HttpResponsePoller to allow easy
+upgrading with new parameters
 
 ## [0.25.0]
 ### Added

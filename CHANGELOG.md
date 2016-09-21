@@ -5,6 +5,11 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Un-released]
 
+## [0.28.0] - 2016-09-21
+
+### Fixed
+- EventBufferInterceptor container discovery
+
 ## [0.27.0] - 2016-09-20
 ### Added
 - JsonSchemaValidationMatcher class to validate json content against a schema

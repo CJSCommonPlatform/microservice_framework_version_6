@@ -7,6 +7,7 @@ import uk.gov.justice.services.test.utils.core.helper.Sleeper;
 import java.util.Optional;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -14,24 +15,26 @@ import com.google.common.annotations.VisibleForTesting;
  * Client for polling a rest endpoint a configured number of times with a configured wait time
  * between each poll.
  *
- * Can accept condition Predicates for validating the rest Response
+ * Can accept response body Predicate for validating the rest response body and an expected status
  */
 public class PollingRestClient {
 
     private final ValidatingRestClient validatingRestClient;
     private final Sleeper sleeper;
+    private final ResponseValidator responseValidator;
 
     /**
      * Constructs a fully functioning PollingRestClient
      */
     public PollingRestClient() {
-        this(new ValidatingRestClient(), new Sleeper());
+        this(new ValidatingRestClient(), new Sleeper(), new ResponseValidator());
     }
 
     @VisibleForTesting
-    PollingRestClient(final ValidatingRestClient validatingRestClient, final Sleeper sleeper) {
+    PollingRestClient(final ValidatingRestClient validatingRestClient, final Sleeper sleeper, final ResponseValidator responseValidator) {
         this.validatingRestClient = validatingRestClient;
         this.sleeper = sleeper;
+        this.responseValidator = responseValidator;
     }
 
     /**
@@ -60,24 +63,39 @@ public class PollingRestClient {
      * will supply all other required parameters with defaults. Overriding these defaults is done in
      * the usual builder pattern way
      *
-     * Response and Result Conditions:
+     * Response body Condition:
      *
-     * To allow waiting until a particular value is updated, then there are two Predicates that can
-     * be added to the builder. One which validates the Response Object: the Response condition, and
-     * one which validates the response body as a String: the Result condition.
+     * To allow waiting until a particular value is updated, then there is a Predicate that can
+     * be added to the builder which validates the response body as a String: the Result condition.
      *
-     * These are best added using the PollingRequestParamsBuilder:
+     * This is best added using the PollingRequestParamsBuilder:
      *
      * <pre><blockquote>
      *
      *     final PollingRequestParams pollingRequestParams =
      *          new PollingRequestParamsBuilder(url, mediaType)
-     *              .withResultCondition(json -> json.equals("my-json"))
-     *              .withResponseCondition(response -> response.getStatus() == 200)
+     *              .withResponseBodyCondition(json -> json.equals("my-json"))
      *          .build();
      *
      * </blockquote></pre>
      *
+     * Expeced status:
+     *
+     * An optional http status which will be compared against the actual response status
+     *
+     * If this is set then the actual status returned by the call will be matched against the
+     * expected status in the request parameters
+     *
+     * This is best added using the PollingRequestParamsBuilder:
+     *
+     * <pre><blockquote>
+     *
+     *     final PollingRequestParams pollingRequestParams =
+     *          new PollingRequestParamsBuilder(url, mediaType)
+     *              .withExpectedResponseStatus(200)
+     *          .build();
+     *
+     * </blockquote></pre>
      *
      * @param pollingRequestParams all parameters for polling the end point. Best created using the
      *                             @See PollingRequestParamsBuilder
@@ -88,31 +106,32 @@ public class PollingRestClient {
      */
     public String pollUntilExpectedResponse(final PollingRequestParams pollingRequestParams) {
         for (int i = 0; i < pollingRequestParams.getRetryCount(); i++) {
-            final Optional<Response> responseOptional = validatingRestClient.get(pollingRequestParams);
+            final Optional<ResponseDetails> responseOptional = validatingRestClient.get(pollingRequestParams);
 
             if (responseOptional.isPresent()) {
 
-                final Response response = responseOptional.get();
-                final int status = response.getStatus();
-                final String jsonResult = response.readEntity(String.class);
+                final ResponseDetails responseDetails = responseOptional.get();
+                final Status status = responseDetails.getStatus();
+                final String responseBody = responseDetails.getResponseBody();
 
-                if (failsCondition(response, pollingRequestParams)) {
-                    throw new AssertionError(format(
-                            "Failed to match response conditions from %s, after %d attempts, with status code: %s",
-                            pollingRequestParams.getUrl(),
-                            pollingRequestParams.getRetryCount(),
-                            status));
-                }
-
-                if (failsCondition(jsonResult, pollingRequestParams)) {
+                if (!responseValidator.hasValidResponseBody(responseBody, pollingRequestParams)) {
                     throw new AssertionError(format(
                             "Failed to match result conditions from %s, after %d attempts, with result: %s",
                             pollingRequestParams.getUrl(),
                             pollingRequestParams.getRetryCount(),
-                            jsonResult));
+                            responseBody));
                 }
 
-                return jsonResult;
+                if (!responseValidator.hasValidStatus(status, pollingRequestParams)) {
+                    //noinspection OptionalGetWithoutIsPresent
+                    throw new AssertionError(format(
+                            "Incorrect http response status received from %s. Expected %s, received %s",
+                            pollingRequestParams.getUrl(),
+                            pollingRequestParams.getExpectedStatus().get(),
+                            status));
+                }
+
+                return responseBody;
             }
 
             sleeper.sleepFor(pollingRequestParams.getDelayInMillis());
@@ -121,11 +140,5 @@ public class PollingRestClient {
         throw new AssertionError(format("Failed to get any response from '%s' after %d retries", pollingRequestParams.getUrl(), pollingRequestParams.getRetryCount()));
     }
 
-    private boolean failsCondition(final String result, final PollingRequestParams pollingRequestParams) {
-        return !pollingRequestParams.getResultCondition().test(result);
-    }
 
-    private boolean failsCondition(final Response response, final PollingRequestParams pollingRequestParams) {
-        return !pollingRequestParams.getResponseCondition().test(response);
-    }
 }

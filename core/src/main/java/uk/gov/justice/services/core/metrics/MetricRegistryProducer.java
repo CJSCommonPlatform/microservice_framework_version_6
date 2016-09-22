@@ -13,7 +13,7 @@ public class MetricRegistryProducer {
     @Produces
     public MetricRegistry metricRegistry() {
         final MetricRegistry metricRegistry = new MetricRegistry();
-        JmxReporter.forRegistry(metricRegistry).build().start();
+        JmxReporter.forRegistry(metricRegistry).inDomain("uk.gov.justice.metrics").build().start();
         return metricRegistry;
     }
 }

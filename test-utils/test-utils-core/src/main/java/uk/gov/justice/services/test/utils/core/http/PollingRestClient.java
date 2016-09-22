@@ -18,18 +18,20 @@ public class PollingRestClient {
 
     private final ValidatingRestClient validatingRestClient;
     private final Sleeper sleeper;
+    private final ResponseValidator responseValidator;
 
     /**
      * Constructs a fully functioning PollingRestClient
      */
     public PollingRestClient() {
-        this(new ValidatingRestClient(), new Sleeper());
+        this(new ValidatingRestClient(), new Sleeper(), new ResponseValidator());
     }
 
     @VisibleForTesting
-    PollingRestClient(final ValidatingRestClient validatingRestClient, final Sleeper sleeper) {
+    PollingRestClient(final ValidatingRestClient validatingRestClient, final Sleeper sleeper, final ResponseValidator responseValidator) {
         this.validatingRestClient = validatingRestClient;
         this.sleeper = sleeper;
+        this.responseValidator = responseValidator;
     }
 
     /**
@@ -94,7 +96,7 @@ public class PollingRestClient {
                 final int status = responseDetails.getStatus();
                 final String responseBody = responseDetails.getResponseBody();
 
-                if (failsJsonValidation(responseBody, pollingRequestParams)) {
+                if (!responseValidator.hasValidResponseBody(responseBody, pollingRequestParams)) {
                     throw new AssertionError(format(
                             "Failed to match result conditions from %s, after %d attempts, with result: %s",
                             pollingRequestParams.getUrl(),
@@ -102,7 +104,7 @@ public class PollingRestClient {
                             responseBody));
                 }
 
-                if (hasIncorrectStatus(status, pollingRequestParams)) {
+                if (!responseValidator.hasValidStatus(status, pollingRequestParams)) {
                     //noinspection OptionalGetWithoutIsPresent
                     throw new AssertionError(format(
                             "Incorrect http response status received from %s. Expected %d, received %d",
@@ -120,17 +122,5 @@ public class PollingRestClient {
         throw new AssertionError(format("Failed to get any response from '%s' after %d retries", pollingRequestParams.getUrl(), pollingRequestParams.getRetryCount()));
     }
 
-    private boolean failsJsonValidation(final String result, final PollingRequestParams pollingRequestParams) {
-        return !pollingRequestParams.getResposeBodyCondition().test(result);
-    }
 
-    private boolean hasIncorrectStatus(final int status, final PollingRequestParams pollingRequestParams) {
-
-        final Optional<Integer> expectedStatus = pollingRequestParams.getExpectedStatus();
-        if(expectedStatus.isPresent()) {
-            return expectedStatus.get() != status;
-        }
-
-        return false;
-    }
 }

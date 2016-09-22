@@ -16,7 +16,7 @@ import javax.ws.rs.core.Response;
 
 /**
  * Builder for creating PollingRequestParameters. Expects a url and a media type. All other
- * required parameters for polling a request point are given as defaults.
+ * required parameters for polling a request point and validating its response are given as defaults.
  */
 public class PollingRequestParamsBuilder {
 
@@ -30,6 +30,18 @@ public class PollingRequestParamsBuilder {
     private int retryCount = DEFAULT_RETRY_COUNT;
 
     /**
+     * Constructs a PollingRequestParamsBuilder
+     *
+     * @param url the url of the rest endpoint
+     * @param mediaType the media type
+     */
+    public PollingRequestParamsBuilder(final String url, final String mediaType) {
+        this.url = url;
+        this.mediaType = mediaType;
+    }
+
+
+    /**
      * Convenience method for creating a new PollingRequestParamsBuilder
      * @param url the url of the rest endpoint
      * @param mediaType the media type
@@ -39,12 +51,6 @@ public class PollingRequestParamsBuilder {
     public static PollingRequestParamsBuilder pollingRequestParams(final String url, final String mediaType) {
         return new PollingRequestParamsBuilder(url, mediaType);
     }
-
-    public PollingRequestParamsBuilder(final String url, final String mediaType) {
-        this.url = url;
-        this.mediaType = mediaType;
-    }
-
     /**
      * Overrides the delay between polls. If not specified a default of 1 second is used.
      * @param delayInMillis the delay betweeen polls in milliseconds

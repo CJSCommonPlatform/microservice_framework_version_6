@@ -2,6 +2,9 @@ package uk.gov.justice.services.test.utils.core.http;
 
 import java.util.Objects;
 
+/**
+ * The response body and status of an HTTP call
+ */
 public class ResponseDetails {
 
     private final int status;

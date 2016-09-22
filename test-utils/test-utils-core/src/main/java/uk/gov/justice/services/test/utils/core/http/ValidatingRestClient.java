@@ -11,6 +11,9 @@ import javax.ws.rs.core.Response;
 
 import com.google.common.annotations.VisibleForTesting;
 
+/**
+ * Wrapper around a rest call which validates the response
+ */
 public class ValidatingRestClient {
 
     private final RestClient restClient;
@@ -26,6 +29,12 @@ public class ValidatingRestClient {
         this.responseValidator = responseValidator;
     }
 
+    /**
+     * Makes a rest call and validates the response
+     *
+     * @param pollingRequestParams the parameters of the rest call and validation
+     * @return an optional of the response body and status if the call succeeds, and empty if it fails
+     */
     public Optional<ResponseDetails> get(final PollingRequestParams pollingRequestParams) {
 
         final Response response = restClient.query(

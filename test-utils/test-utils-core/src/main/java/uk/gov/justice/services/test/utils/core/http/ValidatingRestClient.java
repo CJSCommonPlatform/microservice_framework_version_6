@@ -21,30 +21,41 @@ public class ValidatingRestClient {
         this.restClient = restClient;
     }
 
-    public Optional<Response> get(final PollingRequestParams pollingRequestParams) {
+    public Optional<ResponseDetails> get(final PollingRequestParams pollingRequestParams) {
 
         final Response response = restClient.query(
                 pollingRequestParams.getUrl(),
                 pollingRequestParams.getMediaType(),
                 pollingRequestParams.getHeaders());
-        final String jsonResult = response.readEntity(String.class);
 
-        if (failsValidation(pollingRequestParams, response, jsonResult)) {
+
+        final int status = response.getStatus();
+        final String responseBody = response.readEntity(String.class);
+
+        if (failsValidation(pollingRequestParams, status, responseBody)) {
             return empty();
         }
 
-        return of(response);
+        return of(new ResponseDetails(status, responseBody));
     }
 
-    private boolean failsValidation(final PollingRequestParams pollingRequestParams, final Response response, final String jsonResult) {
-        return responseFailsCondition(response, pollingRequestParams) || jsonFailsCondition(jsonResult, pollingRequestParams);
+    private boolean failsValidation(final PollingRequestParams pollingRequestParams, final int status, final String jsonResult) {
+        return hasIncorrectStatus(status, pollingRequestParams) || jsonFailsCondition(jsonResult, pollingRequestParams);
+    }
+
+    private boolean hasIncorrectStatus(final int status, final PollingRequestParams pollingRequestParams) {
+
+        final Optional<Integer> expectedStatus = pollingRequestParams.getExpectedStatus();
+        if(expectedStatus.isPresent()) {
+            final boolean b = expectedStatus.get() != status;
+            return b;
+        }
+
+        return false;
     }
 
     private boolean jsonFailsCondition(final String jsonResult, final PollingRequestParams pollingRequestParams) {
-        return !pollingRequestParams.getResultCondition().test(jsonResult);
-    }
-
-    private boolean responseFailsCondition(final Response response, final PollingRequestParams pollingRequestParams) {
-        return !pollingRequestParams.getResponseCondition().test(response);
+        final boolean test = pollingRequestParams.getResultCondition().test(jsonResult);
+        return !test;
     }
 }

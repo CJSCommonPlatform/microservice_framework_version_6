@@ -88,31 +88,32 @@ public class PollingRestClient {
      */
     public String pollUntilExpectedResponse(final PollingRequestParams pollingRequestParams) {
         for (int i = 0; i < pollingRequestParams.getRetryCount(); i++) {
-            final Optional<Response> responseOptional = validatingRestClient.get(pollingRequestParams);
+            final Optional<ResponseDetails> responseOptional = validatingRestClient.get(pollingRequestParams);
 
             if (responseOptional.isPresent()) {
 
-                final Response response = responseOptional.get();
-                final int status = response.getStatus();
-                final String jsonResult = response.readEntity(String.class);
+                final ResponseDetails responseDetails = responseOptional.get();
+                final int status = responseDetails.getStatus();
+                final String responseBody = responseDetails.getResponseBody();
 
-                if (failsCondition(response, pollingRequestParams)) {
-                    throw new AssertionError(format(
-                            "Failed to match response conditions from %s, after %d attempts, with status code: %s",
-                            pollingRequestParams.getUrl(),
-                            pollingRequestParams.getRetryCount(),
-                            status));
-                }
-
-                if (failsCondition(jsonResult, pollingRequestParams)) {
+                if (failsJsonValidation(responseBody, pollingRequestParams)) {
                     throw new AssertionError(format(
                             "Failed to match result conditions from %s, after %d attempts, with result: %s",
                             pollingRequestParams.getUrl(),
                             pollingRequestParams.getRetryCount(),
-                            jsonResult));
+                            responseBody));
                 }
 
-                return jsonResult;
+                if (hasIncorrectStatus(status, pollingRequestParams)) {
+                    //noinspection OptionalGetWithoutIsPresent
+                    throw new AssertionError(format(
+                            "Incorrect http response status received from %s. Expected %d, received %d",
+                            pollingRequestParams.getUrl(),
+                            pollingRequestParams.getExpectedStatus().get(),
+                            status));
+                }
+
+                return responseBody;
             }
 
             sleeper.sleepFor(pollingRequestParams.getDelayInMillis());
@@ -121,11 +122,17 @@ public class PollingRestClient {
         throw new AssertionError(format("Failed to get any response from '%s' after %d retries", pollingRequestParams.getUrl(), pollingRequestParams.getRetryCount()));
     }
 
-    private boolean failsCondition(final String result, final PollingRequestParams pollingRequestParams) {
+    private boolean failsJsonValidation(final String result, final PollingRequestParams pollingRequestParams) {
         return !pollingRequestParams.getResultCondition().test(result);
     }
 
-    private boolean failsCondition(final Response response, final PollingRequestParams pollingRequestParams) {
-        return !pollingRequestParams.getResponseCondition().test(response);
+    private boolean hasIncorrectStatus(final int status, final PollingRequestParams pollingRequestParams) {
+
+        final Optional<Integer> expectedStatus = pollingRequestParams.getExpectedStatus();
+        if(expectedStatus.isPresent()) {
+            return expectedStatus.get() != status;
+        }
+
+        return false;
     }
 }

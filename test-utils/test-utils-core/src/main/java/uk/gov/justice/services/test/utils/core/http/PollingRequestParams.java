@@ -3,6 +3,7 @@ package uk.gov.justice.services.test.utils.core.http;
 import static java.util.Objects.hash;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import javax.ws.rs.core.MultivaluedMap;
@@ -17,26 +18,26 @@ public class PollingRequestParams {
     private final String mediaType;
     private final MultivaluedMap<String, Object> headers;
 
-    private final Predicate<Response> responseCondition;
     private final Predicate<String> resultCondition;
     private final long delayInMillis;
     private final int retryCount;
+    private final Optional<Integer> expectedStatus;
 
     public PollingRequestParams(
             final String url,
             final String mediaType,
             final MultivaluedMap<String, Object> headers,
-            final Predicate<Response> responseCondition,
             final Predicate<String> resultCondition,
             final long delayInMillis,
-            final int retryCount) {
+            final int retryCount,
+            final Optional<Integer> expectedStatus) {
         this.url = url;
         this.mediaType = mediaType;
         this.headers = headers;
-        this.responseCondition = responseCondition;
         this.resultCondition = resultCondition;
         this.delayInMillis = delayInMillis;
         this.retryCount = retryCount;
+        this.expectedStatus = expectedStatus;
     }
 
     public String getUrl() {
@@ -47,12 +48,12 @@ public class PollingRequestParams {
         return mediaType;
     }
 
-    public MultivaluedMap<String, Object> getHeaders() {
-        return headers;
+    public Optional<Integer> getExpectedStatus() {
+        return expectedStatus;
     }
 
-    public Predicate<Response> getResponseCondition() {
-        return responseCondition;
+    public MultivaluedMap<String, Object> getHeaders() {
+        return headers;
     }
 
     public Predicate<String> getResultCondition() {
@@ -71,38 +72,38 @@ public class PollingRequestParams {
     public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        final PollingRequestParams pollingRequestParams = (PollingRequestParams) o;
-        return getDelayInMillis() == pollingRequestParams.getDelayInMillis() &&
-                getRetryCount() == pollingRequestParams.getRetryCount() &&
-                Objects.equals(getUrl(), pollingRequestParams.getUrl()) &&
-                Objects.equals(getMediaType(), pollingRequestParams.getMediaType()) &&
-                Objects.equals(getHeaders(), pollingRequestParams.getHeaders()) &&
-                Objects.equals(getResponseCondition(), pollingRequestParams.getResponseCondition()) &&
-                Objects.equals(getResultCondition(), pollingRequestParams.getResultCondition());
+        final PollingRequestParams that = (PollingRequestParams) o;
+        return getDelayInMillis() == that.getDelayInMillis() &&
+                getRetryCount() == that.getRetryCount() &&
+                Objects.equals(getUrl(), that.getUrl()) &&
+                Objects.equals(getMediaType(), that.getMediaType()) &&
+                Objects.equals(getHeaders(), that.getHeaders()) &&
+                Objects.equals(getResultCondition(), that.getResultCondition()) &&
+                Objects.equals(getExpectedStatus(), that.getExpectedStatus());
     }
 
     @Override
     public int hashCode() {
-        return hash(
+        return Objects.hash(
                 getUrl(),
                 getMediaType(),
                 getHeaders(),
-                getResponseCondition(),
                 getResultCondition(),
                 getDelayInMillis(),
-                getRetryCount());
+                getRetryCount(),
+                getExpectedStatus());
     }
 
     @Override
     public String toString() {
-        return "RestStuff{" +
+        return "PollingRequestParams{" +
                 "url='" + url + '\'' +
                 ", mediaType='" + mediaType + '\'' +
                 ", headers=" + headers +
-                ", responseCondition=" + responseCondition +
                 ", resultCondition=" + resultCondition +
                 ", delayInMillis=" + delayInMillis +
                 ", retryCount=" + retryCount +
+                ", expectedStatus=" + expectedStatus +
                 '}';
     }
 }

@@ -15,10 +15,16 @@ public class ResponseDetails {
         this.responseBody = responseBody;
     }
 
+    /**
+     * @return the HTTP status of the response
+     */
     public int getStatus() {
         return status;
     }
 
+    /**
+     * @return the response body
+     */
     public String getResponseBody() {
         return responseBody;
     }

@@ -6,6 +6,9 @@ import uk.gov.justice.services.test.utils.core.helper.Sleeper;
 
 import java.util.Optional;
 
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
 import com.google.common.annotations.VisibleForTesting;
 
 /**
@@ -108,7 +111,7 @@ public class PollingRestClient {
             if (responseOptional.isPresent()) {
 
                 final ResponseDetails responseDetails = responseOptional.get();
-                final int status = responseDetails.getStatus();
+                final Status status = responseDetails.getStatus();
                 final String responseBody = responseDetails.getResponseBody();
 
                 if (!responseValidator.hasValidResponseBody(responseBody, pollingRequestParams)) {
@@ -122,7 +125,7 @@ public class PollingRestClient {
                 if (!responseValidator.hasValidStatus(status, pollingRequestParams)) {
                     //noinspection OptionalGetWithoutIsPresent
                     throw new AssertionError(format(
-                            "Incorrect http response status received from %s. Expected %d, received %d",
+                            "Incorrect http response status received from %s. Expected %s, received %s",
                             pollingRequestParams.getUrl(),
                             pollingRequestParams.getExpectedStatus().get(),
                             status));

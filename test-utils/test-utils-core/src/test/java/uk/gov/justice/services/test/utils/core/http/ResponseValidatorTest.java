@@ -1,19 +1,19 @@
 package uk.gov.justice.services.test.utils.core.http;
 
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
-
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-
-import org.junit.Test;
-import org.mockito.InjectMocks;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static uk.gov.justice.services.test.utils.core.http.PollingRequestParamsBuilder.*;
+import static uk.gov.justice.services.test.utils.core.http.PollingRequestParamsBuilder.pollingRequestParams;
 
 import java.util.function.Predicate;
+
+import javax.ws.rs.core.Response.Status;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ResponseValidatorTest {
@@ -24,7 +24,7 @@ public class ResponseValidatorTest {
     @Test
     public void shouldReturnTrueIfTheExpectedStatusMatchesAndTheConditionSucceeds() throws Exception {
 
-        final Integer status = 200;
+        final Status status = OK;
         final String responseBody = "some json";
         final Predicate<String> successfulResponseBodyCondition = json -> true;
 
@@ -40,8 +40,8 @@ public class ResponseValidatorTest {
     @Test
     public void shouldReturnFalseIfTheStatusDoesNotMatch() throws Exception {
 
-        final Integer expectedStatus = 200;
-        final Integer actualStatus = 404;
+        final Status expectedStatus = OK;
+        final Status actualStatus = NOT_FOUND;
         final String responseBody = "some json";
         final Predicate<String> successfulResponseBodyCondition = json -> true;
 
@@ -57,7 +57,7 @@ public class ResponseValidatorTest {
     @Test
     public void shouldReturnFalseIfTheResponseBodyConditionFailsButTheStatusMatches() throws Exception {
 
-        final Integer status = 200;
+        final Status status = OK;
         final String responseBody = "some json";
         final Predicate<String> successfulResponseBodyCondition = json -> false;
 
@@ -73,8 +73,8 @@ public class ResponseValidatorTest {
     @Test
     public void shouldReturnFalseIfTheExpectedStatusDoesNotMatchAndTheRespnseBodyConditionFails() throws Exception {
 
-        final Integer expectedStatus = 200;
-        final Integer actualStatus = 404;
+        final Status expectedStatus = OK;
+        final Status actualStatus = NOT_FOUND;
         final String responseBody = "some json";
         final Predicate<String> successfulResponseBodyCondition = json -> false;
 

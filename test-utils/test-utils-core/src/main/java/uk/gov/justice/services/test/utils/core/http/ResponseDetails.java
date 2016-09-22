@@ -2,15 +2,17 @@ package uk.gov.justice.services.test.utils.core.http;
 
 import java.util.Objects;
 
+import javax.ws.rs.core.Response.Status;
+
 /**
  * The response body and status of an HTTP call
  */
 public class ResponseDetails {
 
-    private final int status;
+    private final Status status;
     private final String responseBody;
 
-    public ResponseDetails(final int status, final String responseBody) {
+    public ResponseDetails(final Status status, final String responseBody) {
         this.status = status;
         this.responseBody = responseBody;
     }
@@ -18,7 +20,7 @@ public class ResponseDetails {
     /**
      * @return the HTTP status of the response
      */
-    public int getStatus() {
+    public Status getStatus() {
         return status;
     }
 

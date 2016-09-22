@@ -12,7 +12,7 @@ import java.util.function.Predicate;
 
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 /**
  * Builder for creating PollingRequestParameters. Expects a url and a media type. All other
@@ -25,7 +25,7 @@ public class PollingRequestParamsBuilder {
 
     private MultivaluedMap<String, Object> headers = new MultivaluedHashMap<>();
     private Predicate<String> resultCondition = json -> true;
-    private Optional<Integer> expectedResponseStatus = empty();
+    private Optional<Status> expectedResponseStatus = empty();
     private long delayInMillis = DEFAULT_DELAY_MILLIS;
     private int retryCount = DEFAULT_RETRY_COUNT;
 
@@ -99,7 +99,7 @@ public class PollingRequestParamsBuilder {
      * @param status the expected HTTP status that should be returned from the server
      * @return this
      */
-    public PollingRequestParamsBuilder withExpectedResponseStatus(int status) {
+    public PollingRequestParamsBuilder withExpectedResponseStatus(final Status status) {
         expectedResponseStatus = of(status);
         return this;
     }

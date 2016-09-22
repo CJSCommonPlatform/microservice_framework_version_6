@@ -1,8 +1,7 @@
 package uk.gov.justice.services.test.utils.core.http;
 
 import static java.util.Collections.singletonList;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
+import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -11,10 +10,10 @@ import static org.mockito.Mockito.when;
 import uk.gov.justice.services.test.utils.core.rest.RestClient;
 
 import java.util.Optional;
-import java.util.function.Predicate;
 
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,7 +40,7 @@ public class ValidatingRestClientTest {
 
         final String url = "http://url.com";
         final String mediaType = "application/vnd.media.type+json";
-        final int status = 200;
+        final Status status = OK;
         final MultivaluedHashMap<String, Object> headers = someHeaders();
 
         final PollingRequestParams pollingRequestParams = mock(PollingRequestParams.class);
@@ -58,7 +57,7 @@ public class ValidatingRestClientTest {
                 mediaType,
                 headers)).thenReturn(response);
         when(response.readEntity(String.class)).thenReturn(responseBody);
-        when(response.getStatus()).thenReturn(status);
+        when(response.getStatus()).thenReturn(status.getStatusCode());
 
         final Optional<ResponseDetails> responseOptional = validatingRestClient.get(pollingRequestParams);
 
@@ -73,7 +72,7 @@ public class ValidatingRestClientTest {
 
         final String url = "http://url.com";
         final String mediaType = "application/vnd.media.type+json";
-        final int status = 200;
+        final Status status = OK;
         final MultivaluedHashMap<String, Object> headers = someHeaders();
 
         final PollingRequestParams pollingRequestParams = mock(PollingRequestParams.class);
@@ -90,7 +89,7 @@ public class ValidatingRestClientTest {
                 mediaType,
                 headers)).thenReturn(response);
         when(response.readEntity(String.class)).thenReturn(responseBody);
-        when(response.getStatus()).thenReturn(status);
+        when(response.getStatus()).thenReturn(status.getStatusCode());
 
         final Optional<ResponseDetails> responseOptional = validatingRestClient.get(pollingRequestParams);
 

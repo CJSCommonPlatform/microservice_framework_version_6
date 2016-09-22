@@ -2,6 +2,8 @@ package uk.gov.justice.services.test.utils.core.http;
 
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -15,6 +17,7 @@ import uk.gov.justice.services.test.utils.core.helper.Sleeper;
 import java.util.function.Predicate;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,7 +46,7 @@ public class PollingRestClientTest {
 
         final String url = "http://url.com";
         final String mediaType = "application/vnd.media.type+json";
-        final int status = 200;
+        final Status status = OK;
         final String responseBody = "{\"some\": \"json\"}";
 
         final Response response = mock(Response.class);
@@ -56,7 +59,7 @@ public class PollingRestClientTest {
                 .build();
 
         when(validatingRestClient.get(pollingRequestParams)).thenReturn(empty(), empty(), of(responseDetails));
-        when(response.getStatus()).thenReturn(status);
+        when(response.getStatus()).thenReturn(status.getStatusCode());
         when(response.getEntity()).thenReturn(responseBody);
         when(alwaysTrueResultCondition.test(responseBody)).thenReturn(true);
         when(responseValidator.hasValidResponseBody(responseBody, pollingRequestParams)).thenReturn(true);
@@ -71,7 +74,7 @@ public class PollingRestClientTest {
 
         final String url = "http://url.com";
         final String mediaType = "application/vnd.media.type+json";
-        final int status = 200;
+        final Status status = OK;
         final String responseBody = "{\"some\": \"json\"}";
 
         final Response response = mock(Response.class);
@@ -84,7 +87,7 @@ public class PollingRestClientTest {
                 .build();
 
         when(validatingRestClient.get(pollingRequestParams)).thenReturn(empty(), empty(), of(responseDetails));
-        when(response.getStatus()).thenReturn(status);
+        when(response.getStatus()).thenReturn(status.getStatusCode());
         when(response.getEntity()).thenReturn(responseBody);
         when(alwaysTrueResultCondition.test(responseBody)).thenReturn(true);
         when(responseValidator.hasValidResponseBody(responseBody, pollingRequestParams)).thenReturn(false);
@@ -102,8 +105,8 @@ public class PollingRestClientTest {
 
         final String url = "http://url.com";
         final String mediaType = "application/vnd.media.type+json";
-        final int expectedStatus = 200;
-        final int actualStatus = 404;
+        final Status expectedStatus = OK;
+        final Status actualStatus = NOT_FOUND;
         final String responseBody = "{\"some\": \"json\"}";
 
         final Response response = mock(Response.class);
@@ -116,7 +119,7 @@ public class PollingRestClientTest {
                 .build();
 
         when(validatingRestClient.get(pollingRequestParams)).thenReturn(empty(), empty(), of(responseDetails));
-        when(response.getStatus()).thenReturn(actualStatus);
+        when(response.getStatus()).thenReturn(actualStatus.getStatusCode());
         when(response.getEntity()).thenReturn(responseBody);
         when(alwaysTrueResultCondition.test(responseBody)).thenReturn(true);
         when(responseValidator.hasValidResponseBody(responseBody, pollingRequestParams)).thenReturn(true);
@@ -125,7 +128,7 @@ public class PollingRestClientTest {
         try {
             pollingRestClient.pollUntilExpectedResponse(pollingRequestParams);
         } catch (AssertionError expected) {
-            assertThat(expected.getMessage(), is("Incorrect http response status received from http://url.com. Expected 200, received 404"));
+            assertThat(expected.getMessage(), is("Incorrect http response status received from http://url.com. Expected OK, received Not Found"));
         }
     }
 
@@ -157,7 +160,7 @@ public class PollingRestClientTest {
 
         final String url = "http://url.com";
         final String mediaType = "application/vnd.media.type+json";
-        final int status = 200;
+        final Status status = OK;
         final String responseBody = "{\"some\": \"json\"}";
 
         final Response response = mock(Response.class);
@@ -170,7 +173,7 @@ public class PollingRestClientTest {
         final ResponseDetails responseDetails = new ResponseDetails(status, responseBody);
 
         when(validatingRestClient.get(pollingRequestParams)).thenReturn(empty(), empty(), of(responseDetails));
-        when(response.getStatus()).thenReturn(status);
+        when(response.getStatus()).thenReturn(status.getStatusCode());
         when(response.getEntity()).thenReturn(responseBody);
         when(alwaysTrueResponseCondition.test(response)).thenReturn(true);
         when(alwaysFalseResultCondition.test(responseBody)).thenReturn(false);

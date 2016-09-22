@@ -5,6 +5,8 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 public class PollingRequestParams {
 
@@ -18,7 +20,7 @@ public class PollingRequestParams {
     private final Predicate<String> resposeBodyCondition;
     private final long delayInMillis;
     private final int retryCount;
-    private final Optional<Integer> expectedStatus;
+    private final Optional<Status> expectedStatus;
 
     public PollingRequestParams(
             final String url,
@@ -27,7 +29,7 @@ public class PollingRequestParams {
             final Predicate<String> resposeBodyCondition,
             final long delayInMillis,
             final int retryCount,
-            final Optional<Integer> expectedStatus) {
+            final Optional<Status> expectedStatus) {
         this.url = url;
         this.mediaType = mediaType;
         this.headers = headers;
@@ -54,7 +56,7 @@ public class PollingRequestParams {
     /**
      * @return the expected status of the response
      */
-    public Optional<Integer> getExpectedStatus() {
+    public Optional<Status> getExpectedStatus() {
         return expectedStatus;
     }
 

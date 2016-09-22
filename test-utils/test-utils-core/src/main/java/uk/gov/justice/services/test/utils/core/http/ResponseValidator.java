@@ -2,6 +2,9 @@ package uk.gov.justice.services.test.utils.core.http;
 
 import java.util.Optional;
 
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
 /**
  * Validates a responseBody and status against expected status and a response body condition
  */
@@ -15,7 +18,7 @@ public class ResponseValidator {
      * @param pollingRequestParams contains the expected status and response body condition
      * @return true if the status matches the expected status and the response body condition succeeds
      */
-    public boolean isValid(final String responseBody, final int status, final PollingRequestParams pollingRequestParams) {
+    public boolean isValid(final String responseBody, final Status status, final PollingRequestParams pollingRequestParams) {
         return hasValidStatus(status, pollingRequestParams) && hasValidResponseBody(responseBody, pollingRequestParams);
     }
 
@@ -26,11 +29,11 @@ public class ResponseValidator {
      * @param pollingRequestParams contains the expected HTTP status
      * @return true if the expected status in the request parameters matches the actual status
      */
-    public boolean hasValidStatus(final int status, final PollingRequestParams pollingRequestParams) {
+    public boolean hasValidStatus(final Status status, final PollingRequestParams pollingRequestParams) {
 
-        final Optional<Integer> expectedStatus = pollingRequestParams.getExpectedStatus();
+        final Optional<Status> expectedStatus = pollingRequestParams.getExpectedStatus();
         if(expectedStatus.isPresent()) {
-            return expectedStatus.get() == status;
+            return expectedStatus.get().equals(status);
         }
 
         return true;

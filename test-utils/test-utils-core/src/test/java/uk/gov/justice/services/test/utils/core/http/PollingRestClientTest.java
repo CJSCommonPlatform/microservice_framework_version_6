@@ -32,6 +32,9 @@ public class PollingRestClientTest {
     @Mock
     private Sleeper sleeper;
 
+    @Mock
+    private ResponseValidator responseValidator;
+
     @InjectMocks
     private PollingRestClient pollingRestClient;
 
@@ -45,7 +48,7 @@ public class PollingRestClientTest {
 
         final Response response = mock(Response.class);
         final Predicate<String>  alwaysTrueResultCondition = mock(Predicate.class);
-         final ResponseDetails responseDetails = new ResponseDetails(status, responseBody);
+        final ResponseDetails responseDetails = new ResponseDetails(status, responseBody);
 
         final PollingRequestParams pollingRequestParams = new PollingRequestParamsBuilder(url, mediaType)
                 .withExpectedResponseStatus(status)
@@ -56,10 +59,74 @@ public class PollingRestClientTest {
         when(response.getStatus()).thenReturn(status);
         when(response.getEntity()).thenReturn(responseBody);
         when(alwaysTrueResultCondition.test(responseBody)).thenReturn(true);
-
+        when(responseValidator.hasValidResponseBody(responseBody, pollingRequestParams)).thenReturn(true);
+        when(responseValidator.hasValidStatus(status, pollingRequestParams)).thenReturn(true);
         assertThat(pollingRestClient.pollUntilExpectedResponse(pollingRequestParams), is(responseBody));
 
         verify(sleeper, times(2)).sleepFor(DEFAULT_DELAY_MILLIS);
+    }
+
+    @Test @SuppressWarnings("unchecked")
+    public void shouldThrowAssertionErrorWhenResponseBodyIsNotValid() throws Exception {
+
+        final String url = "http://url.com";
+        final String mediaType = "application/vnd.media.type+json";
+        final int status = 200;
+        final String responseBody = "{\"some\": \"json\"}";
+
+        final Response response = mock(Response.class);
+        final Predicate<String>  alwaysTrueResultCondition = mock(Predicate.class);
+        final ResponseDetails responseDetails = new ResponseDetails(status, responseBody);
+
+        final PollingRequestParams pollingRequestParams = new PollingRequestParamsBuilder(url, mediaType)
+                .withExpectedResponseStatus(status)
+                .withResponseBodyCondition(alwaysTrueResultCondition)
+                .build();
+
+        when(validatingRestClient.get(pollingRequestParams)).thenReturn(empty(), empty(), of(responseDetails));
+        when(response.getStatus()).thenReturn(status);
+        when(response.getEntity()).thenReturn(responseBody);
+        when(alwaysTrueResultCondition.test(responseBody)).thenReturn(true);
+        when(responseValidator.hasValidResponseBody(responseBody, pollingRequestParams)).thenReturn(false);
+        when(responseValidator.hasValidStatus(status, pollingRequestParams)).thenReturn(true);
+
+        try {
+            pollingRestClient.pollUntilExpectedResponse(pollingRequestParams);
+        } catch (AssertionError expected) {
+            assertThat(expected.getMessage(), is("Failed to match result conditions from http://url.com, after 5 attempts, with result: " + responseBody));
+        }
+    }
+
+    @Test @SuppressWarnings("unchecked")
+    public void shouldThrowAssertionErrorWhenResponseStatusIsNotValid() throws Exception {
+
+        final String url = "http://url.com";
+        final String mediaType = "application/vnd.media.type+json";
+        final int expectedStatus = 200;
+        final int actualStatus = 404;
+        final String responseBody = "{\"some\": \"json\"}";
+
+        final Response response = mock(Response.class);
+        final Predicate<String>  alwaysTrueResultCondition = mock(Predicate.class);
+        final ResponseDetails responseDetails = new ResponseDetails(actualStatus, responseBody);
+
+        final PollingRequestParams pollingRequestParams = new PollingRequestParamsBuilder(url, mediaType)
+                .withExpectedResponseStatus(expectedStatus)
+                .withResponseBodyCondition(alwaysTrueResultCondition)
+                .build();
+
+        when(validatingRestClient.get(pollingRequestParams)).thenReturn(empty(), empty(), of(responseDetails));
+        when(response.getStatus()).thenReturn(actualStatus);
+        when(response.getEntity()).thenReturn(responseBody);
+        when(alwaysTrueResultCondition.test(responseBody)).thenReturn(true);
+        when(responseValidator.hasValidResponseBody(responseBody, pollingRequestParams)).thenReturn(true);
+        when(responseValidator.hasValidStatus(actualStatus, pollingRequestParams)).thenReturn(false);
+
+        try {
+            pollingRestClient.pollUntilExpectedResponse(pollingRequestParams);
+        } catch (AssertionError expected) {
+            assertThat(expected.getMessage(), is("Incorrect http response status received from http://url.com. Expected 200, received 404"));
+        }
     }
 
     @Test @SuppressWarnings("unchecked")

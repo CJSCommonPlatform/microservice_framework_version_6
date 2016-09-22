@@ -15,7 +15,7 @@ public class Sleeper {
     public void sleepFor(final long milliseconds) {
         try {
             sleep(milliseconds);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException unused) {
             currentThread().interrupt();
         }
     }

@@ -1,19 +1,22 @@
 package uk.gov.justice.services.test.utils.core.http;
 
 import static java.util.Collections.singletonList;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static uk.gov.justice.services.test.utils.core.http.PollingRequestParams.DEFAULT_DELAY_MILLIS;
 import static uk.gov.justice.services.test.utils.core.http.PollingRequestParams.DEFAULT_RETRY_COUNT;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 /**
  * Builder for creating PollingRequestParameters. Expects a url and a media type. All other
- * required parameters for polling a request point are given as defaults.
+ * required parameters for polling a request point and validating its response are given as defaults.
  */
 public class PollingRequestParamsBuilder {
 
@@ -21,10 +24,22 @@ public class PollingRequestParamsBuilder {
     private final String mediaType;
 
     private MultivaluedMap<String, Object> headers = new MultivaluedHashMap<>();
-    private Predicate<Response> responseCondition = new DefaultCondition<>();
-    private Predicate<String> resultCondition = new DefaultCondition<>();
+    private Predicate<String> resultCondition = json -> true;
+    private Optional<Status> expectedResponseStatus = empty();
     private long delayInMillis = DEFAULT_DELAY_MILLIS;
     private int retryCount = DEFAULT_RETRY_COUNT;
+
+    /**
+     * Constructs a PollingRequestParamsBuilder
+     *
+     * @param url the url of the rest endpoint
+     * @param mediaType the media type
+     */
+    public PollingRequestParamsBuilder(final String url, final String mediaType) {
+        this.url = url;
+        this.mediaType = mediaType;
+    }
+
 
     /**
      * Convenience method for creating a new PollingRequestParamsBuilder
@@ -36,12 +51,6 @@ public class PollingRequestParamsBuilder {
     public static PollingRequestParamsBuilder pollingRequestParams(final String url, final String mediaType) {
         return new PollingRequestParamsBuilder(url, mediaType);
     }
-
-    public PollingRequestParamsBuilder(final String url, final String mediaType) {
-        this.url = url;
-        this.mediaType = mediaType;
-    }
-
     /**
      * Overrides the delay between polls. If not specified a default of 1 second is used.
      * @param delayInMillis the delay betweeen polls in milliseconds
@@ -84,22 +93,14 @@ public class PollingRequestParamsBuilder {
     }
 
     /**
-     * Adds a condition for verifying the Response from the rest endpoint. By default allows all.
+     * Adds an expected HTTP status that should match the status in the response. If not
+     * set then the status will not be checked
      *
-     * To use:
-     *      <pre><blockquote>
-     *
-     *      new PollingRequestParamsBuilder()
-     *          .withResponseCondition(response -> response.getStatus() == 200)
-     *          .build();
-     *
-     *      </blockquote></pre>
-     *
-     * @param responseCondition a Predicate for verifying the rest Response
+     * @param status the expected HTTP status that should be returned from the server
      * @return this
      */
-    public PollingRequestParamsBuilder withResponseCondition(final Predicate<Response> responseCondition) {
-        this.responseCondition = responseCondition;
+    public PollingRequestParamsBuilder withExpectedResponseStatus(final Status status) {
+        expectedResponseStatus = of(status);
         return this;
     }
 
@@ -118,7 +119,7 @@ public class PollingRequestParamsBuilder {
      * @param resultCondition
      * @return
      */
-    public PollingRequestParamsBuilder withResultCondition(final Predicate<String> resultCondition) {
+    public PollingRequestParamsBuilder withResponseBodyCondition(final Predicate<String> resultCondition) {
         this.resultCondition = resultCondition;
         return this;
     }
@@ -146,23 +147,10 @@ public class PollingRequestParamsBuilder {
                 url,
                 mediaType,
                 headers,
-                responseCondition,
                 resultCondition,
                 delayInMillis,
-                retryCount
+                retryCount,
+                expectedResponseStatus
         );
-    }
-
-    /**
-     * Default condition to allow all in verification. Used as a default for the
-     * Response condition and the result condition.
-     * @param <T> either Response or String
-     */
-    private static class DefaultCondition<T> implements Predicate<T> {
-
-        @Override
-        public boolean test(final T response) {
-            return true;
-        }
     }
 }

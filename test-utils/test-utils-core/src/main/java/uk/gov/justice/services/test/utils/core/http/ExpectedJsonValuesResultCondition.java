@@ -13,6 +13,12 @@ import java.util.function.Predicate;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
+/**
+ * Handy Predicate which validates that the response body contains the properties and
+ * values contained in the values Map.
+ *
+ * Will recurse the json dom matching against all name/value properties
+ */
 public class ExpectedJsonValuesResultCondition implements Predicate<String> {
 
     private final Map<String, String> values;
@@ -22,9 +28,9 @@ public class ExpectedJsonValuesResultCondition implements Predicate<String> {
     }
 
     @Override
-    public boolean test(final String entity) {
-        if (entity != null) {
-            final JsonReader jsonReader = createReader(new StringReader(entity));
+    public boolean test(final String responseBody) {
+        if (responseBody != null) {
+            final JsonReader jsonReader = createReader(new StringReader(responseBody));
             final JsonObject jsonObject = jsonReader.readObject();
             jsonReader.close();
 

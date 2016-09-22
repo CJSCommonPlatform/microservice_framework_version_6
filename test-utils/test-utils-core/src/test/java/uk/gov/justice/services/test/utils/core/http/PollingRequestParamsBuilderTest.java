@@ -35,7 +35,7 @@ public class PollingRequestParamsBuilderTest {
         assertThat(pollingRequestParams.getDelayInMillis(), is(DEFAULT_DELAY_MILLIS));
         assertThat(pollingRequestParams.getRetryCount(), is(DEFAULT_RETRY_COUNT));
         assertThat(pollingRequestParams.getHeaders().isEmpty(), is(true));
-        assertThat(pollingRequestParams.getResultCondition().test("don't care"), is(true));
+        assertThat(pollingRequestParams.getResposeBodyCondition().test("don't care"), is(true));
     }
 
     @Test
@@ -55,7 +55,7 @@ public class PollingRequestParamsBuilderTest {
                 .withDelayInMillis(delayInMillis)
                 .withHeaders(headers)
                 .withRetryCount(retryCount)
-                .withResultCondition(resultPredicate);
+                .withResponseBodyCondition(resultPredicate);
 
         final PollingRequestParams pollingRequestParams = pollingRequestParamsBuilder.build();
 
@@ -65,7 +65,7 @@ public class PollingRequestParamsBuilderTest {
         assertThat(pollingRequestParams.getRetryCount(), is(retryCount));
         assertThat(pollingRequestParams.getHeaders().size(), is(1));
         assertThat(pollingRequestParams.getHeaders().get(0), is(headers.get(0)));
-        assertThat(pollingRequestParams.getResultCondition(), is(resultPredicate));
+        assertThat(pollingRequestParams.getResposeBodyCondition(), is(resultPredicate));
     }
 
     @Test
@@ -87,7 +87,7 @@ public class PollingRequestParamsBuilderTest {
 
         assertThat(pollingRequestParams.getUrl(), is(url));
         assertThat(pollingRequestParams.getMediaType(), is(mediaType));
-        assertThat(pollingRequestParams.getResultCondition(), is(expectedJsonValuesResultCondition));
+        assertThat(pollingRequestParams.getResposeBodyCondition(), is(expectedJsonValuesResultCondition));
     }
 
     @Test

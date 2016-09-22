@@ -49,7 +49,7 @@ public class PollingRestClientTest {
 
         final PollingRequestParams pollingRequestParams = new PollingRequestParamsBuilder(url, mediaType)
                 .withExpectedResponseStatus(status)
-                .withResultCondition(alwaysTrueResultCondition)
+                .withResponseBodyCondition(alwaysTrueResultCondition)
                 .build();
 
         when(validatingRestClient.get(pollingRequestParams)).thenReturn(empty(), empty(), of(responseDetails));
@@ -98,7 +98,7 @@ public class PollingRestClientTest {
         final Predicate<String>  alwaysFalseResultCondition = mock(Predicate.class);
 
         final PollingRequestParams pollingRequestParams = new PollingRequestParamsBuilder(url, mediaType)
-                .withResultCondition(alwaysFalseResultCondition)
+                .withResponseBodyCondition(alwaysFalseResultCondition)
                 .build();
         final ResponseDetails responseDetails = new ResponseDetails(status, responseBody);
 

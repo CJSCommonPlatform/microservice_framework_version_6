@@ -86,6 +86,13 @@ public class PollingRequestParamsBuilder {
         return this;
     }
 
+    /**
+     * Adds an expected HTTP status that should match the status in the response. If not
+     * set then the status will not be checked
+     *
+     * @param status the expected HTTP status that should be returned from the server
+     * @return this
+     */
     public PollingRequestParamsBuilder withExpectedResponseStatus(int status) {
         expectedResponseStatus = of(status);
         return this;
@@ -106,7 +113,7 @@ public class PollingRequestParamsBuilder {
      * @param resultCondition
      * @return
      */
-    public PollingRequestParamsBuilder withResultCondition(final Predicate<String> resultCondition) {
+    public PollingRequestParamsBuilder withResponseBodyCondition(final Predicate<String> resultCondition) {
         this.resultCondition = resultCondition;
         return this;
     }

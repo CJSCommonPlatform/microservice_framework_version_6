@@ -9,16 +9,21 @@ import java.util.Optional;
 
 import javax.ws.rs.core.Response;
 
+import com.google.common.annotations.VisibleForTesting;
+
 public class ValidatingRestClient {
 
     private final RestClient restClient;
+    private final ResponseValidator responseValidator;
 
     public ValidatingRestClient() {
-        this(new RestClient());
+        this(new RestClient(), new ResponseValidator());
     }
 
-    public ValidatingRestClient(final RestClient restClient) {
+    @VisibleForTesting
+    public ValidatingRestClient(final RestClient restClient, final ResponseValidator responseValidator) {
         this.restClient = restClient;
+        this.responseValidator = responseValidator;
     }
 
     public Optional<ResponseDetails> get(final PollingRequestParams pollingRequestParams) {
@@ -32,30 +37,10 @@ public class ValidatingRestClient {
         final int status = response.getStatus();
         final String responseBody = response.readEntity(String.class);
 
-        if (failsValidation(pollingRequestParams, status, responseBody)) {
-            return empty();
+        if (responseValidator.isValid(responseBody, status, pollingRequestParams)) {
+            return of(new ResponseDetails(status, responseBody));
         }
 
-        return of(new ResponseDetails(status, responseBody));
-    }
-
-    private boolean failsValidation(final PollingRequestParams pollingRequestParams, final int status, final String jsonResult) {
-        return hasIncorrectStatus(status, pollingRequestParams) || jsonFailsCondition(jsonResult, pollingRequestParams);
-    }
-
-    private boolean hasIncorrectStatus(final int status, final PollingRequestParams pollingRequestParams) {
-
-        final Optional<Integer> expectedStatus = pollingRequestParams.getExpectedStatus();
-        if(expectedStatus.isPresent()) {
-            final boolean b = expectedStatus.get() != status;
-            return b;
-        }
-
-        return false;
-    }
-
-    private boolean jsonFailsCondition(final String jsonResult, final PollingRequestParams pollingRequestParams) {
-        final boolean test = pollingRequestParams.getResultCondition().test(jsonResult);
-        return !test;
+        return empty();
     }
 }

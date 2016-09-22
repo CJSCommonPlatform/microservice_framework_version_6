@@ -1,13 +1,10 @@
 package uk.gov.justice.services.test.utils.core.http;
 
-import static java.util.Objects.hash;
-
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
 
 public class PollingRequestParams {
 
@@ -18,7 +15,7 @@ public class PollingRequestParams {
     private final String mediaType;
     private final MultivaluedMap<String, Object> headers;
 
-    private final Predicate<String> resultCondition;
+    private final Predicate<String> resposeBodyCondition;
     private final long delayInMillis;
     private final int retryCount;
     private final Optional<Integer> expectedStatus;
@@ -27,43 +24,64 @@ public class PollingRequestParams {
             final String url,
             final String mediaType,
             final MultivaluedMap<String, Object> headers,
-            final Predicate<String> resultCondition,
+            final Predicate<String> resposeBodyCondition,
             final long delayInMillis,
             final int retryCount,
             final Optional<Integer> expectedStatus) {
         this.url = url;
         this.mediaType = mediaType;
         this.headers = headers;
-        this.resultCondition = resultCondition;
+        this.resposeBodyCondition = resposeBodyCondition;
         this.delayInMillis = delayInMillis;
         this.retryCount = retryCount;
         this.expectedStatus = expectedStatus;
     }
 
+    /**
+     * @return The url of the rest  end point
+     */
     public String getUrl() {
         return url;
     }
 
+    /**
+     * @return the media/content type of the rest call
+     */
     public String getMediaType() {
         return mediaType;
     }
 
+    /**
+     * @return the expected status of the response
+     */
     public Optional<Integer> getExpectedStatus() {
         return expectedStatus;
     }
 
+    /**
+     * @return a map of header names/values for adding to the request
+     */
     public MultivaluedMap<String, Object> getHeaders() {
         return headers;
     }
 
-    public Predicate<String> getResultCondition() {
-        return resultCondition;
+    /**
+     * @return a predicate that can be used to verify the response body.
+     */
+    public Predicate<String> getResposeBodyCondition() {
+        return resposeBodyCondition;
     }
 
+    /**
+     * @return the delay time in milliseconds between each attempted request
+     */
     public long getDelayInMillis() {
         return delayInMillis;
     }
 
+    /**
+     * @return the number of retries
+     */
     public int getRetryCount() {
         return retryCount;
     }
@@ -78,7 +96,7 @@ public class PollingRequestParams {
                 Objects.equals(getUrl(), that.getUrl()) &&
                 Objects.equals(getMediaType(), that.getMediaType()) &&
                 Objects.equals(getHeaders(), that.getHeaders()) &&
-                Objects.equals(getResultCondition(), that.getResultCondition()) &&
+                Objects.equals(getResposeBodyCondition(), that.getResposeBodyCondition()) &&
                 Objects.equals(getExpectedStatus(), that.getExpectedStatus());
     }
 
@@ -88,7 +106,7 @@ public class PollingRequestParams {
                 getUrl(),
                 getMediaType(),
                 getHeaders(),
-                getResultCondition(),
+                getResposeBodyCondition(),
                 getDelayInMillis(),
                 getRetryCount(),
                 getExpectedStatus());
@@ -100,7 +118,7 @@ public class PollingRequestParams {
                 "url='" + url + '\'' +
                 ", mediaType='" + mediaType + '\'' +
                 ", headers=" + headers +
-                ", resultCondition=" + resultCondition +
+                ", resultCondition=" + resposeBodyCondition +
                 ", delayInMillis=" + delayInMillis +
                 ", retryCount=" + retryCount +
                 ", expectedStatus=" + expectedStatus +

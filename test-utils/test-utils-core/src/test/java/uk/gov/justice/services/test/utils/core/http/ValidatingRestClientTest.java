@@ -29,6 +29,9 @@ public class ValidatingRestClientTest {
     @Mock
     private RestClient restClient;
 
+    @Mock
+    private ResponseValidator responseValidator;
+
     @InjectMocks
     private ValidatingRestClient validatingRestClient;
 
@@ -44,13 +47,11 @@ public class ValidatingRestClientTest {
         final PollingRequestParams pollingRequestParams = mock(PollingRequestParams.class);
         final Response response = mock(Response.class);
         final String responseBody = "{\"some\": \"json\"}";
-        final Predicate<String>  alwaysTrueResultCondition = mock(Predicate.class);
 
         when(pollingRequestParams.getUrl()).thenReturn(url);
         when(pollingRequestParams.getMediaType()).thenReturn(mediaType);
         when(pollingRequestParams.getHeaders()).thenReturn(headers);
-        when(pollingRequestParams.getExpectedStatus()).thenReturn(of(status));
-        when(pollingRequestParams.getResultCondition()).thenReturn(alwaysTrueResultCondition);
+        when(responseValidator.isValid(responseBody, status, pollingRequestParams)).thenReturn(true);
 
         when(restClient.query(
                 url,
@@ -59,10 +60,6 @@ public class ValidatingRestClientTest {
         when(response.readEntity(String.class)).thenReturn(responseBody);
         when(response.getStatus()).thenReturn(status);
 
-        when(alwaysTrueResultCondition.test(responseBody)).thenReturn(true);
-
-        assertThat(alwaysTrueResultCondition.test(responseBody), is(true));
-
         final Optional<ResponseDetails> responseOptional = validatingRestClient.get(pollingRequestParams);
 
         assertThat(responseOptional.isPresent(), is(true));
@@ -70,112 +67,35 @@ public class ValidatingRestClientTest {
         assertThat(responseOptional.get().getResponseBody(), is(responseBody));
     }
 
-    @Test  @SuppressWarnings("unchecked")
-    public void shouldReturnEmptyIfTheResultConditionFails() throws Exception {
-
-        final String url = "http://url.com";
-        final String mediaType = "application/vnd.media.type+json";
-        final MultivaluedHashMap<String, Object> headers = someHeaders();
-
-        final PollingRequestParams pollingRequestParams = mock(PollingRequestParams.class);
-        final Response response = mock(Response.class);
-        final String result = "{\"some\": \"json\"}";
-        final int expectedStatus = 200;
-        final Predicate<String>  alwaysFalseResultCondition = mock(Predicate.class);
-
-        when(pollingRequestParams.getUrl()).thenReturn(url);
-        when(pollingRequestParams.getMediaType()).thenReturn(mediaType);
-        when(pollingRequestParams.getHeaders()).thenReturn(headers);
-        when(pollingRequestParams.getExpectedStatus()).thenReturn(of(expectedStatus));
-        when(pollingRequestParams.getResultCondition()).thenReturn(alwaysFalseResultCondition);
-
-        when(restClient.query(
-                url,
-                mediaType,
-                headers)).thenReturn(response);
-        when(response.readEntity(String.class)).thenReturn(result);
-
-        when(alwaysFalseResultCondition.test(result)).thenReturn(false);
-
-        assertThat(validatingRestClient.get(pollingRequestParams).isPresent(), is(false));
-    }
-
     @SuppressWarnings({"unchecked", "OptionalGetWithoutIsPresent"})
     @Test
-    public void shouldNotCheckTheStatusIfItIsAbsent() throws Exception {
+    public void shouldReturnEmptyIfTheValidationFails() throws Exception {
 
         final String url = "http://url.com";
         final String mediaType = "application/vnd.media.type+json";
-        final int actualStatus = 202;
-        final Optional<Integer> expectedStatus = empty();
+        final int status = 200;
         final MultivaluedHashMap<String, Object> headers = someHeaders();
 
         final PollingRequestParams pollingRequestParams = mock(PollingRequestParams.class);
         final Response response = mock(Response.class);
         final String responseBody = "{\"some\": \"json\"}";
-        final Predicate<String>  alwaysTrueResultCondition = mock(Predicate.class);
 
         when(pollingRequestParams.getUrl()).thenReturn(url);
         when(pollingRequestParams.getMediaType()).thenReturn(mediaType);
         when(pollingRequestParams.getHeaders()).thenReturn(headers);
-        when(pollingRequestParams.getExpectedStatus()).thenReturn(expectedStatus);
-        when(pollingRequestParams.getResultCondition()).thenReturn(alwaysTrueResultCondition);
+        when(responseValidator.isValid(responseBody, status, pollingRequestParams)).thenReturn(false);
 
         when(restClient.query(
                 url,
                 mediaType,
                 headers)).thenReturn(response);
         when(response.readEntity(String.class)).thenReturn(responseBody);
-        when(response.getStatus()).thenReturn(actualStatus);
-
-        when(alwaysTrueResultCondition.test(responseBody)).thenReturn(true);
-
-        assertThat(alwaysTrueResultCondition.test(responseBody), is(true));
-
-        final Optional<ResponseDetails> responseOptional = validatingRestClient.get(pollingRequestParams);
-
-        assertThat(responseOptional.isPresent(), is(true));
-        assertThat(responseOptional.get().getStatus(), is(actualStatus));
-        assertThat(responseOptional.get().getResponseBody(), is(responseBody));
-    }
-
-    @SuppressWarnings({"unchecked", "OptionalGetWithoutIsPresent"})
-    @Test
-    public void shouldReturnEmptyIfTheExpectedStatusDoesNotMatch() throws Exception {
-
-        final String url = "http://url.com";
-        final String mediaType = "application/vnd.media.type+json";
-        final int actualStatus = 404;
-        final Optional<Integer> expectedStatus = of(200);
-        final MultivaluedHashMap<String, Object> headers = someHeaders();
-
-        final PollingRequestParams pollingRequestParams = mock(PollingRequestParams.class);
-        final Response response = mock(Response.class);
-        final String responseBody = "{\"some\": \"json\"}";
-        final Predicate<String>  alwaysTrueResultCondition = mock(Predicate.class);
-
-        when(pollingRequestParams.getUrl()).thenReturn(url);
-        when(pollingRequestParams.getMediaType()).thenReturn(mediaType);
-        when(pollingRequestParams.getHeaders()).thenReturn(headers);
-        when(pollingRequestParams.getExpectedStatus()).thenReturn(expectedStatus);
-        when(pollingRequestParams.getResultCondition()).thenReturn(alwaysTrueResultCondition);
-
-        when(restClient.query(
-                url,
-                mediaType,
-                headers)).thenReturn(response);
-        when(response.readEntity(String.class)).thenReturn(responseBody);
-        when(response.getStatus()).thenReturn(actualStatus);
-
-        when(alwaysTrueResultCondition.test(responseBody)).thenReturn(true);
-
-        assertThat(alwaysTrueResultCondition.test(responseBody), is(true));
+        when(response.getStatus()).thenReturn(status);
 
         final Optional<ResponseDetails> responseOptional = validatingRestClient.get(pollingRequestParams);
 
         assertThat(responseOptional.isPresent(), is(false));
     }
-
 
     private MultivaluedHashMap<String, Object> someHeaders() {
         final MultivaluedHashMap<String, Object> headers = new MultivaluedHashMap<>();

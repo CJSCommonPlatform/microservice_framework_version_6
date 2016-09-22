@@ -6,8 +6,6 @@ import uk.gov.justice.services.test.utils.core.helper.Sleeper;
 
 import java.util.Optional;
 
-import javax.ws.rs.core.Response;
-
 import com.google.common.annotations.VisibleForTesting;
 
 /**
@@ -123,7 +121,7 @@ public class PollingRestClient {
     }
 
     private boolean failsJsonValidation(final String result, final PollingRequestParams pollingRequestParams) {
-        return !pollingRequestParams.getResultCondition().test(result);
+        return !pollingRequestParams.getResposeBodyCondition().test(result);
     }
 
     private boolean hasIncorrectStatus(final int status, final PollingRequestParams pollingRequestParams) {

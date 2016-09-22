@@ -4,7 +4,7 @@ package uk.gov.justice.services.core.audit;
 import static java.lang.String.format;
 import static java.util.regex.Pattern.compile;
 
-import uk.gov.justice.services.core.configuration.Value;
+import uk.gov.justice.services.common.configuration.Value;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.regex.Pattern;

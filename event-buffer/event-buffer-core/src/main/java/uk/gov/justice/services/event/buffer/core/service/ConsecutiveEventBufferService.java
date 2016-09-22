@@ -11,7 +11,6 @@ import uk.gov.justice.services.event.buffer.core.repository.streamstatus.StreamS
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -28,6 +27,7 @@ import org.slf4j.Logger;
 public class ConsecutiveEventBufferService implements EventBufferService {
 
     private static final long INITIAL_VERSION = 1l;
+
     @Inject
     private Logger logger;
 
@@ -39,6 +39,9 @@ public class ConsecutiveEventBufferService implements EventBufferService {
 
     @Inject
     private JsonObjectEnvelopeConverter jsonObjectEnvelopeConverter;
+
+    @Inject
+    private BufferInitialisationStrategy bufferInitialisationStrategy;
 
 
     /**
@@ -57,55 +60,36 @@ public class ConsecutiveEventBufferService implements EventBufferService {
         logger.trace("Message buffering for message: {}", incomingEvent);
 
         final UUID streamId = incomingEvent.metadata().streamId().orElseThrow(() -> new IllegalStateException("Event must have a a streamId "));
-        final long incomingEventVersion = incomingEvent.metadata().version().orElseThrow(() -> new IllegalStateException("Event must have a version"));
+        final long incomingEventVersion = versionOf(incomingEvent);
 
+        final long currentVersion = bufferInitialisationStrategy.initialiseBuffer(streamId);
+
+        if (incomingEventObsolete(incomingEventVersion, currentVersion)) {
+            logger.warn("Message : {} is an obsolete version", incomingEvent);
+            return Stream.empty();
+
+        } else if (incomingEventNotInOrder(incomingEventVersion, currentVersion)) {
+            logger.trace("Message : {} is not consecutive, adding to buffer", incomingEvent);
+            addToBuffer(incomingEvent, streamId, incomingEventVersion);
+            return Stream.empty();
+
+        } else {
+            logger.trace("Message : {} version is valid sending stream to dispatcher", incomingEvent);
+            streamStatusRepository.update(new StreamStatus(streamId, incomingEventVersion));
+            return bufferedEvents(streamId, incomingEvent, incomingEventVersion);
+        }
+    }
+
+    private long versionOf(final JsonEnvelope event) {
+        final long incomingEventVersion = event.metadata().version().orElseThrow(() -> new IllegalStateException("Event must have a version"));
         if (smallerThanInitial(incomingEventVersion)) {
             throw new IllegalStateException("Version cannot be zero");
         }
-
-        //acquires write lock on stream id to prevent race condition in PostgreSQL
-        streamStatusRepository.tryInsertingInPostgres95(new StreamStatus(streamId, 0l));
-
-        final Optional<StreamStatus> currentStatus = streamStatusRepository.findByStreamId(streamId);
-        if (currentStatus.isPresent()) {
-            final long currentVersion = currentStatus.get().getVersion();
-            if (incomingEventObsolete(incomingEventVersion, currentVersion)) {
-                logger.warn("Message : {} is an obsolete version", incomingEvent);
-                return Stream.empty();
-
-            } else if (incomingEventNotInOrder(incomingEventVersion, currentVersion)) {
-                logger.trace("Message : {} is not consecutive, adding to buffer", incomingEvent);
-                addToBuffer(incomingEvent, streamId, incomingEventVersion);
-                return Stream.empty();
-
-            } else {
-                logger.trace("Message : {} version is valid sending stream to dispatcher", incomingEvent);
-                streamStatusRepository.update(new StreamStatus(streamId, incomingEventVersion));
-                return bufferedEvents(streamId, incomingEvent, incomingEventVersion);
-            }
-        } else {
-            //this is to address race condition in H2
-            //in case of primary key violation the execption gets thrown, event goes back into topic and the transaction gets retried
-            streamStatusRepository.insert(new StreamStatus(streamId, 0l));
-            if (initialVersion(incomingEventVersion)) {
-                logger.trace("Message : {} is a new streamId registering with stream_status repo and sending to dispatcher", incomingEvent);
-                streamStatusRepository.update(new StreamStatus(streamId, incomingEventVersion));
-                return Stream.of(incomingEvent);
-            } else {
-                logger.trace("Message : {} is a new streamId but version is not INITIAL_VERSION so adding to buffer", incomingEvent);
-                addToBuffer(incomingEvent, streamId, incomingEventVersion);
-                return Stream.empty();
-
-            }
-        }
+        return incomingEventVersion;
     }
 
     private boolean smallerThanInitial(final long incomingEventVersion) {
         return incomingEventVersion < INITIAL_VERSION;
-    }
-
-    private boolean initialVersion(final long incomingEventVersion) {
-        return incomingEventVersion == INITIAL_VERSION;
     }
 
     private Stream<JsonEnvelope> bufferedEvents(final UUID streamId, final JsonEnvelope incomingEvent, final long incomingEventVersion) {
@@ -134,6 +118,4 @@ public class ConsecutiveEventBufferService implements EventBufferService {
     private boolean incomingEventObsolete(final long incomingEventVersion, final long currentVersion) {
         return incomingEventVersion - currentVersion <= 0;
     }
-
-
 }

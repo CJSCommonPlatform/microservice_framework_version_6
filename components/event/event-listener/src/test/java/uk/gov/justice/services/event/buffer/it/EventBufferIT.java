@@ -42,6 +42,7 @@ import uk.gov.justice.services.event.buffer.EventBufferInterceptor;
 import uk.gov.justice.services.event.buffer.core.repository.streambuffer.StreamBufferEvent;
 import uk.gov.justice.services.event.buffer.core.repository.streamstatus.StreamStatus;
 import uk.gov.justice.services.event.buffer.core.service.ConsecutiveEventBufferService;
+import uk.gov.justice.services.event.buffer.it.util.buffer.AnsiSQLBufferInitialisationStrategyProducer;
 import uk.gov.justice.services.event.buffer.it.util.repository.StreamBufferOpenEjbAwareJdbcRepository;
 import uk.gov.justice.services.event.buffer.it.util.repository.StreamStatusOpenEjbAwareJdbcRepository;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -131,6 +132,7 @@ public class EventBufferIT {
             StreamBufferOpenEjbAwareJdbcRepository.class,
             StreamStatusOpenEjbAwareJdbcRepository.class,
             ConsecutiveEventBufferService.class,
+            AnsiSQLBufferInitialisationStrategyProducer.class,
             LoggerProducer.class,
             EmptySystemUserProvider.class,
             SystemUserUtil.class,

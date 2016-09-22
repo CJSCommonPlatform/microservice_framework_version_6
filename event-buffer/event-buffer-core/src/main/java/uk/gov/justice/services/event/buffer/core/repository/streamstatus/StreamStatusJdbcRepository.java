@@ -6,7 +6,6 @@ import uk.gov.justice.services.jdbc.persistence.AbstractViewStoreJdbcRepository;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -51,11 +50,9 @@ public class StreamStatusJdbcRepository extends AbstractViewStoreJdbcRepository 
      *
      * @param streamStatus the status of the stream to insert
      */
-    public void tryInsertingInPostgres95(final StreamStatus streamStatus) {
+    public void insertOrDoNothing(final StreamStatus streamStatus) {
         try (Connection connection = getDataSource().getConnection()) {
-            if (postgreSQL95(connection)) {
-                executeStatement(INSERT_ON_CONFLICT_DO_NOTHING, streamStatus, connection);
-            }
+            executeStatement(INSERT_ON_CONFLICT_DO_NOTHING, streamStatus, connection);
         } catch (SQLException | NamingException e) {
             throw new JdbcRepositoryException(format("Exception while storing status of the stream in PostgreSQL: %s", streamStatus), e);
         }
@@ -94,16 +91,6 @@ public class StreamStatusJdbcRepository extends AbstractViewStoreJdbcRepository 
             throw new JdbcRepositoryException(format("Exception while looking up status of the stream: %s", streamId), e);
         }
     }
-
-    private boolean postgreSQL95(final Connection connection) throws SQLException {
-        final DatabaseMetaData databaseMetaData = connection.getMetaData();
-        final int databaseMajorVersion = databaseMetaData.getDatabaseMajorVersion();
-        final int databaseMinorVersion = databaseMetaData.getDatabaseMinorVersion();
-        return POSTGRE_SQL.equals(databaseMetaData.getDatabaseProductName())
-                && ((databaseMajorVersion == 9 && databaseMinorVersion >= 5)
-                || databaseMajorVersion > 9);
-    }
-
 
     private void executeStatement(final String sqlStatement, final StreamStatus streamStatus, final Connection connection) throws SQLException {
         try (PreparedStatement ps = connection.prepareStatement(sqlStatement)) {

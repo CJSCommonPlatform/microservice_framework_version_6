@@ -1,4 +1,4 @@
-package uk.gov.justice.services.core.configuration;
+package uk.gov.justice.services.common.configuration;
 
 import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;

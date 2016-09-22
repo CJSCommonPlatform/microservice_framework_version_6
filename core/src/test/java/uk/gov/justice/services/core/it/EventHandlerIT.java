@@ -111,7 +111,6 @@ public class EventHandlerIT {
             DispatcherFactory.class,
             PolicyEvaluator.class,
             AllowAllEventFilter.class,
-
             LoggerProducer.class,
             EmptySystemUserProvider.class,
             SystemUserUtil.class,

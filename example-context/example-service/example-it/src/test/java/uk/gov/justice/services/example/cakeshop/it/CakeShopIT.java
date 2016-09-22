@@ -17,9 +17,11 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.fail;
 
+import uk.gov.justice.services.event.buffer.core.repository.streamstatus.StreamStatus;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLog;
 import uk.gov.justice.services.example.cakeshop.it.util.ApiResponse;
 import uk.gov.justice.services.example.cakeshop.it.util.StandaloneEventLogJdbcRepository;
+import uk.gov.justice.services.example.cakeshop.it.util.StandaloneStreamStatusJdbcRepository;
 import uk.gov.justice.services.example.cakeshop.it.util.TestProperties;
 import uk.gov.justice.services.test.utils.core.http.HttpResponsePoller;
 
@@ -28,6 +30,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -91,6 +94,7 @@ public class CakeShopIT {
     private static final String JMS_BROKER_URL = "tcp://localhost:61616";
 
     private static StandaloneEventLogJdbcRepository EVENT_LOG_REPOSITORY;
+    private static StandaloneStreamStatusJdbcRepository STREAM_STATUS_REPOSITORY;
     private static ActiveMQConnectionFactory JMS_CONNECTION_FACTORY;
     private static DataSource CAKE_SHOP_DS;
 
@@ -103,7 +107,8 @@ public class CakeShopIT {
         DataSource eventStoreDataSource = initEventStoreDb();
         EVENT_LOG_REPOSITORY = new StandaloneEventLogJdbcRepository(eventStoreDataSource);
         JMS_CONNECTION_FACTORY = new ActiveMQConnectionFactory(JMS_BROKER_URL);
-        initCakeShopDb();
+        final DataSource viewStoreDatasource = initViewStoreDb();
+        STREAM_STATUS_REPOSITORY = new StandaloneStreamStatusJdbcRepository(viewStoreDatasource);
     }
 
     @Test
@@ -166,21 +171,6 @@ public class CakeShopIT {
     }
 
     @Test
-    public final void singleAddAndRemoveRecipe() throws InterruptedException {
-        shouldRegisterRecipeRemovedEvent();
-    }
-
-
-    @Test
-    public final void sequentialAddAndRemoveRecipe() throws InterruptedException {
-        shouldRegisterRecipeRemovedEvent();
-        shouldRegisterRecipeRemovedEvent();
-        shouldRegisterRecipeRemovedEvent();
-        shouldRegisterRecipeRemovedEvent();
-        shouldRegisterRecipeRemovedEvent();
-    }
-
-    @Test
     public final void concurrentAddAndRemoveRecipe() throws InterruptedException {
         ExecutorService exec = Executors.newFixedThreadPool(5);
         for (int i = 0; i < 10; i++) {
@@ -196,6 +186,7 @@ public class CakeShopIT {
     }
 
 
+    @Test
     public void shouldRegisterRecipeRemovedEvent() {
         final String recipeId = UUID.randomUUID().toString();
 
@@ -301,7 +292,7 @@ public class CakeShopIT {
                     .assertThat("$._metadata.name", equalTo("cakeshop.recipe-added"))
                     .assertThat("$.recipeId", equalTo(recipeId));
 
-            initCakeShopDb();
+            initViewStoreDb();
         } finally {
             jmsSession.close();
         }
@@ -502,9 +493,24 @@ public class CakeShopIT {
 
     }
 
-    private static void initCakeShopDb() throws Exception {
+    @Test
+    public void shouldUpdateEventBufferStatus() throws Exception {
+        String recipeId = "163af847-effb-46a9-96bc-32a0f7526f89";
+        sendTo(RECIPES_RESOURCE_URI + recipeId).request()
+                .post(entity(addRecipeCommand(), ADD_RECIPE_MEDIA_TYPE));
+
+        await().until(() -> streamStatus(recipeId).isPresent());
+        assertThat(streamStatus(recipeId).get().getVersion(), is(1L));
+    }
+
+    private Optional<StreamStatus> streamStatus(final String recipeId) {
+        return STREAM_STATUS_REPOSITORY.findByStreamId(UUID.fromString(recipeId));
+    }
+
+    private static DataSource initViewStoreDb() throws Exception {
         CAKE_SHOP_DS = initDatabase("db.cakeshop.url", "db.cakeshop.userName", "db.cakeshop.password",
                 "liquibase/view-store-db-changelog.xml", "liquibase/event-buffer-changelog.xml");
+        return CAKE_SHOP_DS;
     }
 
 

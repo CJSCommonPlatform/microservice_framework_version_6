@@ -5,7 +5,8 @@ import static co.unruly.matchers.StreamMatchers.contains;
 import static co.unruly.matchers.StreamMatchers.empty;
 import static java.util.UUID.randomUUID;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.never;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -45,6 +46,9 @@ public class ConsecutiveEventBufferServiceTest {
     @Mock
     private JsonObjectEnvelopeConverter jsonObjectEnvelopeConverter;
 
+    @Mock
+    private BufferInitialisationStrategy bufferInitialisationStrategy;
+
     @InjectMocks
     private ConsecutiveEventBufferService bufferService;
 
@@ -57,7 +61,7 @@ public class ConsecutiveEventBufferServiceTest {
 
     @Test(expected = IllegalStateException.class)
     public void shouldNotAllowZeroVersion() {
-        final Stream<JsonEnvelope> returnedEvents = bufferService.currentOrderedEventsWith(envelope()
+        bufferService.currentOrderedEventsWith(envelope()
                 .with(metadataWithDefaults()
                         .withVersion(0L)
                         .withStreamId(randomUUID()))
@@ -67,85 +71,7 @@ public class ConsecutiveEventBufferServiceTest {
     @Test(expected = IllegalStateException.class)
     public void shouldNotAllowNullVersion() {
 
-        final UUID streamId = randomUUID();
-
-        when(streamStatusRepository.findByStreamId(streamId)).thenReturn(Optional.empty());
-
-        bufferService.currentOrderedEventsWith(envelope().with(metadataWithDefaults().withStreamId(streamId)).build());
-    }
-
-    @Test
-    public void shouldTryInsertingZeroStatusInPostgres() {
-        final UUID streamId = randomUUID();
-
-        when(streamStatusRepository.findByStreamId(streamId)).thenReturn(Optional.of(new StreamStatus(streamId, 1l)));
-        when(streamBufferRepository.streamById(streamId)).thenReturn(Stream.empty());
-
-        bufferService.currentOrderedEventsWith(envelope().with(metadataWithDefaults().withStreamId(streamId).withVersion(2l)).build());
-
-        verify(streamStatusRepository).tryInsertingInPostgres95(new StreamStatus(streamId, 0));
-
-    }
-
-
-
-    @Test
-    public void shouldInsertZeroStatusAndUpdateToOneForInitialEventIfNoneAvailable() throws Exception {
-        final UUID streamId = randomUUID();
-
-        when(streamStatusRepository.findByStreamId(streamId)).thenReturn(Optional.empty());
-
-        final long version = 1l;
-        bufferService.currentOrderedEventsWith(envelope().with(metadataWithDefaults().withStreamId(streamId).withVersion(version)).build());
-
-        verify(streamStatusRepository).insert(new StreamStatus(streamId, 0));
-        verify(streamStatusRepository).update(new StreamStatus(streamId, 1));
-
-    }
-
-    @Test
-    public void shouldNotInsertStatusForNonInitialEvent() throws Exception {
-        final UUID streamId = randomUUID();
-
-        when(streamStatusRepository.findByStreamId(streamId)).thenReturn(Optional.empty());
-
-        final long version = 2l;
-        bufferService.currentOrderedEventsWith(envelope().with(metadataWithDefaults().withStreamId(streamId).withVersion(version)).build());
-
-        verify(streamStatusRepository, never()).insert(new StreamStatus(streamId, version));
-
-    }
-
-
-    @Test
-    public void shouldReturnIncomingEventIfNoStatusAvailanle() throws Exception {
-        final UUID streamId = randomUUID();
-
-        when(streamStatusRepository.findByStreamId(streamId)).thenReturn(Optional.empty());
-
-        final long version = 1l;
-
-        final JsonEnvelope incomingEvent = envelope().with(metadataWithDefaults().withStreamId(streamId).withVersion(version)).build();
-
-        final Stream<JsonEnvelope> returnedEvents = bufferService.currentOrderedEventsWith(incomingEvent);
-        assertThat(returnedEvents, contains(incomingEvent));
-
-
-    }
-
-    @Test
-    public void shouldAddEventToBufferIfVersionNotOneAndStatusEmpty() throws Exception {
-        final UUID streamId = randomUUID();
-
-        when(streamStatusRepository.findByStreamId(streamId)).thenReturn(Optional.empty());
-
-        final long version = 2l;
-
-        final JsonEnvelope incomingEvent = envelope().with(metadataWithDefaults().withStreamId(streamId).withVersion(version)).build();
-
-        final Stream<JsonEnvelope> returnedEvents = bufferService.currentOrderedEventsWith(incomingEvent);
-        assertThat(returnedEvents, empty());
-        verify(streamBufferRepository).insert(new StreamBufferEvent(streamId, 2l, null));
+        bufferService.currentOrderedEventsWith(envelope().with(metadataWithDefaults().withStreamId(randomUUID())).build());
     }
 
     @Test
@@ -153,7 +79,7 @@ public class ConsecutiveEventBufferServiceTest {
 
         final UUID streamId = randomUUID();
 
-        when(streamStatusRepository.findByStreamId(streamId)).thenReturn(Optional.of(new StreamStatus(streamId, 4l)));
+        when(bufferInitialisationStrategy.initialiseBuffer(eq(streamId))).thenReturn(4l);
 
         assertThat(
                 bufferService.currentOrderedEventsWith(
@@ -182,7 +108,9 @@ public class ConsecutiveEventBufferServiceTest {
     public void shouldReturnEventThatIsInCorrectOrder() {
         final UUID streamId = randomUUID();
 
-        when(streamStatusRepository.findByStreamId(streamId)).thenReturn(Optional.of(new StreamStatus(streamId, 4l)));
+        when(bufferInitialisationStrategy.initialiseBuffer(eq(streamId))).thenReturn(4l);
+
+
         when(streamBufferRepository.streamById(streamId)).thenReturn(Stream.empty());
 
         final JsonEnvelope incomingEvent =
@@ -200,9 +128,6 @@ public class ConsecutiveEventBufferServiceTest {
     public void shouldIncrementVersionOnIncomingEventInCorrectOrder() {
         final UUID streamId = randomUUID();
 
-        when(streamStatusRepository.findByStreamId(streamId)).thenReturn(Optional.of(new StreamStatus(streamId, 4l)));
-        when(streamBufferRepository.streamById(streamId)).thenReturn(Stream.empty());
-
         final JsonEnvelope incomingEvent =
                 envelope()
                         .with(metadataWithDefaults()
@@ -210,17 +135,17 @@ public class ConsecutiveEventBufferServiceTest {
                                 .withVersion(5l))
                         .build();
 
+        when(bufferInitialisationStrategy.initialiseBuffer(streamId)).thenReturn(4l);
+        when(streamBufferRepository.streamById(streamId)).thenReturn(Stream.empty());
+
         bufferService.currentOrderedEventsWith(incomingEvent);
         verify(streamStatusRepository).update(new StreamStatus(streamId, 5l));
 
     }
 
-
     @Test
     public void shouldStoreEventIncomingNotInOrderAndReturnEmpty() {
         final UUID streamId = randomUUID();
-
-        when(streamStatusRepository.findByStreamId(streamId)).thenReturn(Optional.of(new StreamStatus(streamId, 4l)));
 
         final JsonEnvelope incomingEvent =
                 envelope()
@@ -228,6 +153,10 @@ public class ConsecutiveEventBufferServiceTest {
                                 .withStreamId(streamId)
                                 .withVersion(6l))
                         .build();
+
+        when(bufferInitialisationStrategy.initialiseBuffer(streamId)).thenReturn(4l);
+        when(streamStatusRepository.findByStreamId(streamId)).thenReturn(Optional.of(new StreamStatus(streamId, 4l)));
+
 
         when(jsonObjectEnvelopeConverter.asJsonString(incomingEvent)).thenReturn("someStringRepresentation");
 
@@ -243,7 +172,7 @@ public class ConsecutiveEventBufferServiceTest {
 
         final UUID streamId = randomUUID();
 
-        when(streamStatusRepository.findByStreamId(streamId)).thenReturn(Optional.of(new StreamStatus(streamId, 2l)));
+        when(bufferInitialisationStrategy.initialiseBuffer(eq(streamId))).thenReturn(2l);
 
         when(streamBufferRepository.streamById(streamId)).thenReturn(
                 Stream.of(new StreamBufferEvent(streamId, 4l, "someEventContent4"),
@@ -280,12 +209,12 @@ public class ConsecutiveEventBufferServiceTest {
     public void shouldRemoveEventsFromBufferOnceStreamed() {
 
         final UUID streamId = randomUUID();
-        when(streamStatusRepository.findByStreamId(streamId)).thenReturn(Optional.of(new StreamStatus(streamId, 2l)));
+        when(bufferInitialisationStrategy.initialiseBuffer(eq(streamId))).thenReturn(2l);
+
 
         final StreamBufferEvent event4 = new StreamBufferEvent(streamId, 4l, "someEventContent4");
         final StreamBufferEvent event5 = new StreamBufferEvent(streamId, 5l, "someEventContent5");
         final StreamBufferEvent event6 = new StreamBufferEvent(streamId, 6l, "someEventContent6");
-
 
         when(streamBufferRepository.streamById(streamId)).thenReturn(
                 Stream.of(event4, event5, event6));
@@ -302,7 +231,7 @@ public class ConsecutiveEventBufferServiceTest {
                 envelope()
                         .with(metadataWithDefaults()
                                 .withStreamId(streamId)
-                                .withVersion(3l))
+                                .withVersion(3L))
                         .build();
 
         final Stream<JsonEnvelope> returnedEvents = bufferService.currentOrderedEventsWith(incomingEvent);

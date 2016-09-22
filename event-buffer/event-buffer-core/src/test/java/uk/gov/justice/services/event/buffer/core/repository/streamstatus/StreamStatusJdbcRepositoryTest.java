@@ -2,7 +2,6 @@ package uk.gov.justice.services.event.buffer.core.repository.streamstatus;
 
 import static java.util.UUID.randomUUID;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.sql.Connection;
@@ -44,85 +43,20 @@ public class StreamStatusJdbcRepositoryTest {
     }
 
     @Test
-    public void shouldSendInsertQueryIfDbIsPostgres9_5() throws Exception {
+    public void shouldAttemptToInsert() throws Exception {
         //this is postgreSQL only, so we can't write repository level integration test,
 
 
-        when(dbMetadata.getDatabaseProductName()).thenReturn("PostgreSQL");
-        when(dbMetadata.getDatabaseMajorVersion()).thenReturn(9);
-        when(dbMetadata.getDatabaseMinorVersion()).thenReturn(5);
-
-
         when(connection.prepareStatement("INSERT INTO stream_status (version, stream_id) VALUES(?, ?) ON CONFLICT DO NOTHING"))
                 .thenReturn(statement);
 
         final UUID streamId = randomUUID();
         final long version = 1l;
-        repository.tryInsertingInPostgres95(new StreamStatus(streamId, version));
+        repository.insertOrDoNothing(new StreamStatus(streamId, version));
 
         verify(statement).setLong(1, version);
         verify(statement).setObject(2, streamId);
         verify(statement).executeUpdate();
     }
-
-    @Test
-    public void shouldSendInsertQueryIfDbIsPostgres10_0() throws Exception {
-
-        when(dbMetadata.getDatabaseProductName()).thenReturn("PostgreSQL");
-        when(dbMetadata.getDatabaseMajorVersion()).thenReturn(10);
-        when(dbMetadata.getDatabaseMinorVersion()).thenReturn(0);
-
-
-        when(connection.prepareStatement("INSERT INTO stream_status (version, stream_id) VALUES(?, ?) ON CONFLICT DO NOTHING"))
-                .thenReturn(statement);
-
-        final UUID streamId = randomUUID();
-        final long version = 1l;
-        repository.tryInsertingInPostgres95(new StreamStatus(streamId, version));
-
-        verify(statement).setLong(1, version);
-        verify(statement).setObject(2, streamId);
-        verify(statement).executeUpdate();
-    }
-
-    @Test
-    public void shouldNotExecuteStatementIfDbIsNotPostgres() throws Exception {
-        when(dbMetadata.getDatabaseProductName()).thenReturn("H2");
-
-        repository.tryInsertingInPostgres95(new StreamStatus(randomUUID(), 1l));
-        verify(connection).getMetaData();
-        verify(connection).close();
-        verifyNoMoreInteractions(connection);
-
-    }
-
-    @Test
-    public void shouldNotExecuteStatementIfVersion9_4() throws Exception {
-        when(dbMetadata.getDatabaseProductName()).thenReturn("PostgreSQL");
-        when(dbMetadata.getDatabaseMajorVersion()).thenReturn(9);
-        when(dbMetadata.getDatabaseMinorVersion()).thenReturn(4);
-
-
-        repository.tryInsertingInPostgres95(new StreamStatus(randomUUID(), 1l));
-        verify(connection).getMetaData();
-        verify(connection).close();
-        verifyNoMoreInteractions(connection);
-
-    }
-
-    @Test
-    public void shouldNotExecuteStatementIfVersion8_5() throws Exception {
-        when(dbMetadata.getDatabaseProductName()).thenReturn("PostgreSQL");
-        when(dbMetadata.getDatabaseMajorVersion()).thenReturn(8);
-        when(dbMetadata.getDatabaseMinorVersion()).thenReturn(5);
-
-
-        repository.tryInsertingInPostgres95(new StreamStatus(randomUUID(), 1l));
-        verify(connection).getMetaData();
-        verify(connection).close();
-        verifyNoMoreInteractions(connection);
-
-    }
-
 
 }

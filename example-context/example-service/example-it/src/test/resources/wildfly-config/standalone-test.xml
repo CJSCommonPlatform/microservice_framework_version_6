@@ -407,6 +407,7 @@
         <subsystem xmlns="urn:jboss:domain:naming:2.0">
             <bindings>
                 <simple name="java:/app/example-command-api/audit.blacklist" value="cakeshop.*" type="java.lang.String"/>
+                <simple name="java:global/event.buffer.init.strategy" value="uk.gov.justice.services.event.buffer.core.service.AnsiSQLBasedBufferInitialisationStrategy" type="java.lang.String"/>
             </bindings>
             <remote-naming/>
         </subsystem>

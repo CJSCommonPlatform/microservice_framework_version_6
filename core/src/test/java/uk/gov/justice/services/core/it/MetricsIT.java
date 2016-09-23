@@ -36,8 +36,9 @@ import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProduce
 import uk.gov.justice.services.core.interceptor.InterceptorObserver;
 import uk.gov.justice.services.core.jms.DefaultJmsDestinations;
 import uk.gov.justice.services.core.jms.JmsSenderFactory;
+import uk.gov.justice.services.core.metrics.TotalActionMetricsInterceptor;
+import uk.gov.justice.services.core.metrics.IndividualActionMetricsInterceptor;
 import uk.gov.justice.services.core.metrics.MetricRegistryProducer;
-import uk.gov.justice.services.core.metrics.MetricsInterceptor;
 import uk.gov.justice.services.core.sender.ComponentDestination;
 import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -67,14 +68,17 @@ import org.junit.runner.RunWith;
 @Adapter(EVENT_LISTENER)
 public class MetricsIT {
 
-    private static final String EVENT_ABC = "test.event-abc";
+    private static final String EVENT_ABC = "event-abc";
+    private static final String EVENT_BCD = "event-bcd";
 
     @Inject
     private InterceptorChainProcessor interceptorChainProcessor;
 
+    private MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+
     @Module
     @Classes(cdi = true, value = {
-            AbcEventHandler.class,
+            EventHandler.class,
             AnnotationScanner.class,
             RequesterProducer.class,
             ServiceComponentObserver.class,
@@ -107,7 +111,8 @@ public class MetricsIT {
             EmptySystemUserProvider.class,
             BeanInstantiater.class,
             MetricRegistryProducer.class,
-            MetricsInterceptor.class,
+            TotalActionMetricsInterceptor.class,
+            IndividualActionMetricsInterceptor.class,
             SystemUserUtil.class,
             TestServiceContextNameProvider.class
     })
@@ -118,15 +123,15 @@ public class MetricsIT {
     }
 
     @Test
-    public void shouldExposeComponentMetrics() throws Exception {
-        interceptorChainProcessor.process(envelope()
-                .with(metadataWithRandomUUID(EVENT_ABC)).build());
+    public void shouldExposeTotalComponentMetrics() throws Exception {
 
         interceptorChainProcessor.process(envelope()
                 .with(metadataWithRandomUUID(EVENT_ABC)).build());
 
-        final MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-        final ObjectName metricsObjectName = new ObjectName("metrics:name=test-component");
+        interceptorChainProcessor.process(envelope()
+                .with(metadataWithRandomUUID(EVENT_ABC)).build());
+
+        final ObjectName metricsObjectName = new ObjectName("uk.gov.justice.metrics:name=test-component.action.total");
 
         final Object count = server.getAttribute(metricsObjectName, "Count");
         final Object mean = server.getAttribute(metricsObjectName, "Mean");
@@ -140,6 +145,27 @@ public class MetricsIT {
 
     }
 
+    @Test
+    public void shouldExposeMetricsPerMessageName() throws Exception {
+        interceptorChainProcessor.process(envelope()
+                .with(metadataWithRandomUUID(EVENT_ABC)).build());
+
+        interceptorChainProcessor.process(envelope()
+                .with(metadataWithRandomUUID(EVENT_BCD)).build());
+
+        interceptorChainProcessor.process(envelope()
+                .with(metadataWithRandomUUID(EVENT_ABC)).build());
+
+        final ObjectName metricsAbcObjectName = new ObjectName("uk.gov.justice.metrics:name=test-component.action.event-abc");
+        final ObjectName metricsBcdObjectName = new ObjectName("uk.gov.justice.metrics:name=test-component.action.event-bcd");
+
+        final Object countAbc = server.getAttribute(metricsAbcObjectName, "Count");
+        final Object countBcd = server.getAttribute(metricsBcdObjectName, "Count");
+
+        assertThat(countAbc, is(2L));
+        assertThat(countBcd, is(1L));
+    }
+
     @ApplicationScoped
     public static class TestServiceContextNameProvider implements ServiceContextNameProvider {
 
@@ -151,11 +177,17 @@ public class MetricsIT {
 
     @ServiceComponent(EVENT_LISTENER)
     @ApplicationScoped
-    public static class AbcEventHandler {
+    public static class EventHandler {
 
         @Handles(EVENT_ABC)
-        public void handle(JsonEnvelope envelope) {
+        public void handleAbc(final JsonEnvelope envelope) {
 
         }
+
+        @Handles(EVENT_BCD)
+        public void handleBcd(final JsonEnvelope envelope) {
+
+        }
+
     }
 }

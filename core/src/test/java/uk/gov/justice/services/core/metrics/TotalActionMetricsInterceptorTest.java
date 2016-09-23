@@ -20,7 +20,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MetricsInterceptorTest {
+public class TotalActionMetricsInterceptorTest {
 
     @Mock
     private MetricRegistry metricsRegistry;
@@ -29,27 +29,27 @@ public class MetricsInterceptorTest {
     private InterceptorChain interceptorChain;
 
     @Mock
-    Timer timer;
+    private Timer timer;
 
     @Mock
-    Timer.Context timerContext;
+    private Timer.Context timerContext;
 
     @Mock
-    ServiceContextNameProvider serviceContextNameProvider;
+    private ServiceContextNameProvider serviceContextNameProvider;
 
     @InjectMocks
-    MetricsInterceptor interceptor;
+    private TotalActionMetricsInterceptor interceptor;
 
     @Test
     public void shouldGetTimerFromRegistryByContextName() {
 
         when(serviceContextNameProvider.getServiceContextName()).thenReturn("someCtxNameABC");
-        when(metricsRegistry.timer("someCtxNameABC")).thenReturn(timer);
+        when(metricsRegistry.timer("someCtxNameABC.action.total")).thenReturn(timer);
         when(timer.time()).thenReturn(timerContext);
 
         interceptor.process(interceptorContextWithInput(null, null), interceptorChain);
 
-        verify(metricsRegistry).timer("someCtxNameABC");
+        verify(metricsRegistry).timer("someCtxNameABC.action.total");
 
     }
 

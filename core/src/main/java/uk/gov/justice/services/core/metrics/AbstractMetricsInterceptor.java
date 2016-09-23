@@ -10,9 +10,7 @@ import javax.inject.Inject;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 
-public class MetricsInterceptor implements Interceptor {
-    private static final int PRIORITY = 1;
-
+public abstract class AbstractMetricsInterceptor implements Interceptor {
     @Inject
     MetricRegistry metricsRegistry;
 
@@ -21,7 +19,7 @@ public class MetricsInterceptor implements Interceptor {
 
     @Override
     public InterceptorContext process(final InterceptorContext interceptorContext, final InterceptorChain interceptorChain) {
-        final Timer.Context time = timer().time();
+        final Timer.Context time = metricsRegistry.timer(timerNameOf(interceptorContext)).time();
         try {
             return interceptorChain.processNext(interceptorContext);
         } finally {
@@ -29,12 +27,8 @@ public class MetricsInterceptor implements Interceptor {
         }
     }
 
-    private Timer timer() {
-        return metricsRegistry.timer(serviceContextNameProvider.getServiceContextName());
+    protected String componentName() {
+        return serviceContextNameProvider.getServiceContextName();
     }
-
-    @Override
-    public int priority() {
-        return PRIORITY;
-    }
+    protected abstract String timerNameOf(final InterceptorContext interceptorContext);
 }

@@ -11,7 +11,8 @@
             <module name="com.fasterxml.jackson.core.jackson-jaxrs-base"/>
             <module name="com.fasterxml.jackson.core.jackson-jaxrs-json-provider"/>
             <module name="com.fasterxml.jackson.core.jackson-module-jaxb-annotations"/>
-            <module name="org.jboss.resteasy.resteasy-jackson-provider" />
-            <module name="org.jboss.resteasy.resteasy-jackson2-provider" />        </exclusions>
+            <module name="org.jboss.resteasy.resteasy-jackson-provider"/>
+            <module name="org.jboss.resteasy.resteasy-jackson2-provider"/>
+        </exclusions>
     </deployment>
 </jboss-deployment-structure>

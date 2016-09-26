@@ -2,7 +2,7 @@ package uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog;
 
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.util.Clock;
-import uk.gov.justice.services.eventsourcing.common.exception.InvalidStreamIdException;
+import uk.gov.justice.services.eventsourcing.repository.core.exception.InvalidStreamIdException;
 import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
@@ -14,6 +14,7 @@ import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.json.JsonObject;
+
 
 /**
  * Converter class to convert between {@link JsonEnvelope} and {@link EventLog}
@@ -83,5 +84,4 @@ public class EventLogConverter {
         return jsonObjectEnvelopeConverter.extractPayloadFromEnvelope(
                 jsonObjectEnvelopeConverter.fromEnvelope(envelope)).toString();
     }
-
 }

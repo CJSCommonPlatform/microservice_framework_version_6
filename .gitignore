@@ -75,7 +75,16 @@ Thumbs.db
 
 *.h2.db
 *.trace.db
+/core/conf/groups.properties
+/core/conf/login.config
+/core/conf/openejb.xml
+/core/conf/users.properties
+
 /components/event/event-listener/conf/groups.properties
 /components/event/event-listener/conf/login.config
 /components/event/event-listener/conf/openejb.xml
 /components/event/event-listener/conf/users.properties
+/components/command/command-handler/conf/groups.properties
+/components/command/command-handler/conf/login.config
+/components/command/command-handler/conf/openejb.xml
+/components/command/command-handler/conf/users.properties

@@ -8,8 +8,8 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import uk.gov.justice.services.eventsourcing.common.exception.InvalidSequenceIdException;
-import uk.gov.justice.services.eventsourcing.common.exception.InvalidStreamIdException;
+import uk.gov.justice.services.eventsourcing.repository.core.exception.InvalidSequenceIdException;
+import uk.gov.justice.services.eventsourcing.repository.core.exception.InvalidStreamIdException;
 import uk.gov.justice.services.eventsourcing.repository.core.exception.StoreEventRequestFailedException;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLog;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLogConverter;

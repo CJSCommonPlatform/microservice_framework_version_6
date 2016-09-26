@@ -1,0 +1,79 @@
+@startuml
+skinparam backgroundColor white
+skinparam defaultFontName Arial
+skinparam defaultFontsize 10
+
+participant "CommandHandler" as CommandHandler
+participant "AggregateService" as AggregateService
+participant "SnapshotService" as SnapshotService
+participant "SnapshotRepository" as SnapshotRepository
+participant "AggregateSnapshot" as AggregateSnapshot
+participant "SnapshotStrategy" as SnapshotStrategy
+
+CommandHandler -> AggregateService: get(EventStream, AggregateClass)
+activate AggregateService
+AggregateService -> SnapshotService: getLatestVersionedAggregate(...)
+activate SnapshotService
+SnapshotService -> SnapshotRepository: getLatestSnapshot(streamId)
+activate SnapshotRepository
+SnapshotService <-  SnapshotRepository: Optional<AggregateSnapshot>
+deactivate SnapshotRepository
+SnapshotService <-  SnapshotService: if no snapshot available
+SnapshotService <-  SnapshotService:  New Versioned Aggregate (VA)
+AggregateService <-  SnapshotService:  New Versioned Aggregate (VA)
+deactivate SnapshotService
+AggregateService <-  AggregateService: Read Stream from initial stream version
+AggregateService <-  AggregateService: applyEvents --> Aggregate
+AggregateService -> SnapshotService: attemptAggregateStore(Aggregate,Version)
+CommandHandler <-  AggregateService: Aggregate
+deactivate AggregateService
+
+CommandHandler -> AggregateService: get(EventStream, AggregateClass)
+activate AggregateService
+AggregateService -> SnapshotService: getLatestVersionedAggregate(...)
+
+activate SnapshotService
+SnapshotService <-  SnapshotService: if snapshot available
+SnapshotService ->  AggregateSnapshot: getAggreagte
+activate AggregateSnapshot
+SnapshotService <-  AggregateSnapshot: Aggregate
+deactivate AggregateSnapshot
+SnapshotService <-  SnapshotService:  New Versioned Aggregate (VA)
+AggregateService <-  SnapshotService: Versioned Aggregate (VA)
+deactivate SnapshotService
+AggregateService <-  AggregateService: Read Stream from stream version from VA version
+AggregateService <-  AggregateService: applyEvents --> Aggregate
+AggregateService -> SnapshotService: attemptAggregateStore(Aggregate,Version)
+CommandHandler <-  AggregateService: Aggregate
+deactivate AggregateService
+
+CommandHandler -> AggregateService: get(EventStream, AggregateClass)
+activate AggregateService
+AggregateService -> SnapshotService: getLatestVersionedAggregate(...)
+activate SnapshotService
+SnapshotService ->  AggregateSnapshot: getAggreagte
+activate AggregateSnapshot
+SnapshotService <-  AggregateSnapshot: throws DeserializationException
+deactivate AggregateSnapshot
+SnapshotService <-  SnapshotService: if (deserialization Exception) -> Throw Exception
+AggregateService <-  SnapshotService: AggregateChangeDetectedException
+AggregateService -> SnapshotService: rebuildSnapshots(StreamId,class)
+SnapshotService -> SnapshotRepository: removeAllSnapshots(StreamId)
+SnapshotService <-  SnapshotService:  New Versioned Aggregate (VA)
+activate SnapshotRepository
+deactivate SnapshotRepository
+
+AggregateService <- SnapshotService: New Versioned Aggregate (VA)
+AggregateService <-  AggregateService: Read from oldest stream version
+AggregateService <-  AggregateService: applyEvents --> Aggregate
+deactivate SnapshotService
+
+AggregateService -> SnapshotService: attemptAggregateStore(Aggregate,Version)
+SnapshotService -> SnapshotStrategy: shouldCreateSnapshot(Oldversion,NewVersion)
+activate SnapshotStrategy
+SnapshotService <- SnapshotStrategy: true/false
+deactivate SnapshotStrategy
+SnapshotService ->  SnapshotRepository: if (true) storeSnapshot (AggregateSnapshot)
+CommandHandler <-  AggregateService: Aggregate
+deactivate AggregateService
+@enduml

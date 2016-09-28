@@ -1,6 +1,8 @@
 package uk.gov.justice.services.common.converter;
 
 import static java.time.ZoneOffset.UTC;
+import static java.time.ZonedDateTime.parse;
+import static java.time.format.DateTimeFormatter.ofPattern;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -27,7 +29,7 @@ public final class ZonedDateTimes {
      * @return the date time converted to UTC
      */
     public static ZonedDateTime fromJsonString(final JsonString source) {
-        return ZonedDateTime.parse(source.getString()).withZoneSameInstant(UTC);
+        return fromString(source.getString());
     }
 
     /**
@@ -37,6 +39,16 @@ public final class ZonedDateTimes {
      * @return the date time as a string
      */
     public static String toString(final ZonedDateTime source) {
-        return source.withZoneSameInstant(UTC).format(DateTimeFormatter.ofPattern(ISO_8601));
+        return source.withZoneSameInstant(UTC).format(ofPattern(ISO_8601));
+    }
+
+    /**
+     * Parse a correctly formatted String to create a {@link ZonedDateTime} converted to UTC.
+     *
+     * @param iso8601DateTimeString the datetime as a correctly formatted string
+     * @return the date time converted to UTC
+     */
+    public static ZonedDateTime fromString(final String iso8601DateTimeString) {
+        return parse(iso8601DateTimeString).withZoneSameInstant(UTC);
     }
 }

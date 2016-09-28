@@ -24,6 +24,12 @@ public class ZonedDateTimesTest {
 
     @Test
     public void shouldConvertStringToUtc() {
+        final ZonedDateTime dateTime = ZonedDateTimes.fromString("2016-01-21T23:42:03.522+07:00");
+        assertThat(dateTime.getZone(), equalTo(ZoneId.of("UTC").normalized()));
+    }
+
+    @Test
+    public void shouldConvertJsonStringToUtc() {
         final ZonedDateTime dateTime = ZonedDateTimes.fromJsonString(createJsonString("2016-01-21T23:42:03.522+07:00"));
         assertThat(dateTime.getZone(), equalTo(ZoneId.of("UTC").normalized()));
     }

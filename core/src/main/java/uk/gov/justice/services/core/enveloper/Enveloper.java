@@ -56,7 +56,7 @@ public class Enveloper {
      *
      * @param event identified by the framework to be registered into the event map.
      */
-    void register(@Observes final EventFoundEvent event) {
+    public void register(@Observes final EventFoundEvent event) {
         eventMap.putIfAbsent(event.getClazz(), event.getEventName());
     }
 

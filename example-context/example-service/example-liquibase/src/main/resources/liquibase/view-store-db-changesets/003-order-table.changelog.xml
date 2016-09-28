@@ -14,7 +14,7 @@
             <column name="recipe_id" type="uuid">
                 <constraints nullable="false"/>
             </column>
-            <column name="delivery_date" type="datetime tz">
+            <column name="delivery_date" type="TIMESTAMP WITH TIME ZONE">
                 <constraints nullable="false"/>
             </column>
         </createTable>

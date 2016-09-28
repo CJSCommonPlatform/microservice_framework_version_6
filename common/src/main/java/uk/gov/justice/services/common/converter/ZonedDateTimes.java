@@ -4,8 +4,8 @@ import static java.time.ZoneOffset.UTC;
 import static java.time.ZonedDateTime.parse;
 import static java.time.format.DateTimeFormatter.ofPattern;
 
+import java.sql.Timestamp;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 
 import javax.json.JsonString;
 
@@ -50,5 +50,27 @@ public final class ZonedDateTimes {
      */
     public static ZonedDateTime fromString(final String iso8601DateTimeString) {
         return parse(iso8601DateTimeString).withZoneSameInstant(UTC);
+    }
+
+    /**
+     * Converts the framework date time standard {@link ZonedDateTime} to the SQL {@link Timestamp}
+     * format.
+     *
+     * @param source the date time
+     * @return the date time as a Timestamp
+     */
+    public static Timestamp toSqlTimestamp(final ZonedDateTime source) {
+        return Timestamp.from(source.toInstant());
+    }
+
+    /**
+     * Converts from an {@link Timestamp} to the framework date-time standard {@link
+     * ZonedDateTime}.
+     *
+     * @param timestamp the date time
+     * @return the date time converted to UTC Zoned Date Time.
+     */
+    public static ZonedDateTime fromSqlTimestamp(final Timestamp timestamp) {
+        return ZonedDateTime.ofInstant(timestamp.toInstant(), UTC);
     }
 }

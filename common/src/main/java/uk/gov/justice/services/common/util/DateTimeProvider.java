@@ -2,11 +2,10 @@ package uk.gov.justice.services.common.util;
 
 import static java.time.ZoneOffset.UTC;
 import static java.time.ZonedDateTime.of;
-import static java.time.format.DateTimeFormatter.ofPattern;
-import static uk.gov.justice.services.common.converter.ZonedDateTimes.ISO_8601;
 
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 
@@ -52,5 +51,25 @@ public class DateTimeProvider {
      */
     public ZonedDateTime fromString(final String iso8601DateTimeString) {
         return ZonedDateTimes.fromString(iso8601DateTimeString);
+    }
+
+    /**
+     * Convert a {@link Timestamp} to a UTC {@link ZonedDateTime}.
+     *
+     * @param timestamp the timestamp to be covereted
+     * @return the date time as a UTC ZoneDateTIme
+     */
+    public ZonedDateTime fromSqlTimestamp(final Timestamp timestamp) {
+        return ZonedDateTimes.fromSqlTimestamp(timestamp);
+    }
+
+    /**
+     * Convert a UTC {@link ZonedDateTime} to a {@link Timestamp}.
+     *
+     * @param dateTime the dateTime to be covereted
+     * @return the date time as a UTC ZoneDateTIme
+     */
+    public Timestamp toSqlTimestamp(final ZonedDateTime dateTime) {
+        return ZonedDateTimes.toSqlTimestamp(dateTime);
     }
 }

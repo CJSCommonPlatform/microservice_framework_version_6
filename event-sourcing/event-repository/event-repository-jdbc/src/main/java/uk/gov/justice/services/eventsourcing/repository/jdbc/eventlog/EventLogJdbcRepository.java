@@ -2,6 +2,8 @@ package uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog;
 
 
 import static java.lang.String.format;
+import static uk.gov.justice.services.common.converter.ZonedDateTimes.fromSqlTimestamp;
+import static uk.gov.justice.services.common.converter.ZonedDateTimes.toSqlTimestamp;
 
 import uk.gov.justice.services.eventsourcing.common.exception.InvalidSequenceIdException;
 import uk.gov.justice.services.jdbc.persistence.AbstractJdbcRepository;
@@ -32,6 +34,7 @@ public class EventLogJdbcRepository extends AbstractJdbcRepository {
     static final String COL_NAME = "name";
     static final String COL_METADATA = "metadata";
     static final String COL_PAYLOAD = "payload";
+    static final String COL_TIMESTAMP = "date_created";
 
     static final long INITIAL_VERSION = 0L;
 
@@ -41,8 +44,8 @@ public class EventLogJdbcRepository extends AbstractJdbcRepository {
     static final String SQL_FIND_BY_STREAM_ID = "SELECT * FROM event_log WHERE stream_id=? ORDER BY sequence_id ASC";
     static final String SQL_FIND_BY_STREAM_ID_AND_SEQUENCE_ID = "SELECT * FROM event_log WHERE stream_id=? AND sequence_id>=? ORDER BY sequence_id ASC";
     static final String SQL_FIND_LATEST_SEQUENCE_ID = "SELECT MAX(sequence_id) FROM event_log WHERE stream_id=?";
-    static final String SQL_INSERT_EVENT_LOG = "INSERT INTO event_log (id, stream_id, sequence_id, name, metadata, payload ) " +
-            "VALUES(?, ?, ?, ?, ?, ?)";
+    static final String SQL_INSERT_EVENT_LOG = "INSERT INTO event_log (id, stream_id, sequence_id, name, metadata, payload, date_created ) " +
+            "VALUES(?, ?, ?, ?, ?, ?, ?)";
 
     private static final String READING_STREAM_EXCEPTION = "Exception while reading stream %s";
     private static final String JNDI_DS_EVENT_STORE_PATTERN = "java:/app/%s/DS.eventstore";
@@ -69,6 +72,7 @@ public class EventLogJdbcRepository extends AbstractJdbcRepository {
             ps.setString(4, eventLog.getName());
             ps.setString(5, eventLog.getMetadata());
             ps.setString(6, eventLog.getPayload());
+            ps.setTimestamp(7, toSqlTimestamp(eventLog.getDateCreated()));
 
             ps.executeUpdate();
         } catch (SQLException | NamingException e) {
@@ -149,7 +153,6 @@ public class EventLogJdbcRepository extends AbstractJdbcRepository {
         return INITIAL_VERSION;
     }
 
-
     protected List<EventLog> extractResults(final PreparedStatement preparedStatement) throws SQLException {
         List<EventLog> events = new ArrayList<>();
 
@@ -167,7 +170,8 @@ public class EventLogJdbcRepository extends AbstractJdbcRepository {
                 resultSet.getLong(COL_SEQUENCE_ID),
                 resultSet.getString(COL_NAME),
                 resultSet.getString(COL_METADATA),
-                resultSet.getString(COL_PAYLOAD));
+                resultSet.getString(COL_PAYLOAD),
+                fromSqlTimestamp(resultSet.getTimestamp(COL_TIMESTAMP)));
     }
 
     @Override

@@ -224,7 +224,7 @@
             <remote connector-ref="http-remoting-connector" thread-pool-name="default"/>
             <thread-pools>
                 <thread-pool name="default">
-                    <max-threads count="10"/>
+                    <max-threads count="20"/>
                     <keepalive-time time="100" unit="milliseconds"/>
                 </thread-pool>
             </thread-pools>

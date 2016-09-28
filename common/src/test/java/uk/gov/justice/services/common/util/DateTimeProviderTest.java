@@ -3,12 +3,12 @@ package uk.gov.justice.services.common.util;
 import static java.time.ZoneOffset.UTC;
 import static java.time.ZonedDateTime.now;
 import static javax.json.Json.createObjectBuilder;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
-import uk.gov.justice.services.common.converter.ZonedDateTimes;
-
+import java.sql.Timestamp;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
@@ -58,6 +58,18 @@ public class DateTimeProviderTest {
     public void shouldConvertNonUtcToUtcString() {
         final String dateTime = dateTimeProvider.toString(ZonedDateTime.parse("2016-01-21T23:42:03.522+07:00"));
         assertThat(dateTime, is("2016-01-21T16:42:03.522Z"));
+    }
+
+    @Test
+    public void shouldConvertTimestampToZoneDateTime() {
+        final Timestamp dateTime = dateTimeProvider.toSqlTimestamp(ZonedDateTime.of(2016, 12, 31, 23, 59, 59, 0, UTC));
+        assertThat(dateTime.toString(), equalTo("2016-12-31 23:59:59.0"));
+    }
+
+    @Test
+    public void shouldConertZoneDateTimeToTimestamp() {
+        final ZonedDateTime dateTime = dateTimeProvider.fromSqlTimestamp(Timestamp.valueOf("2016-12-31 23:59:59.123"));
+        assertThat(dateTime.toString(), equalTo("2016-12-31T23:59:59.123Z"));
     }
 
     private JsonString createJsonString(final String source) {

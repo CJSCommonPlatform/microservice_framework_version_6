@@ -2,7 +2,7 @@ package uk.gov.justice.services.test.utils.core.random;
 
 import static java.lang.String.format;
 
-public class NiNumberGenerator implements Generator<String> {
+public class NiNumberGenerator extends Generator<String> {
     @Override
     public String next() {
         return format("%s%06d%s",

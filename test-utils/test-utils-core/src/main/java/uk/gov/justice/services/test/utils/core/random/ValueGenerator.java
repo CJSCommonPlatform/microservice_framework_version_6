@@ -1,6 +1,6 @@
 package uk.gov.justice.services.test.utils.core.random;
 
-public class ValueGenerator<T> implements Generator<T> {
+public class ValueGenerator<T> extends Generator<T> {
 
     private Iterable<T> values;
 
@@ -8,6 +8,7 @@ public class ValueGenerator<T> implements Generator<T> {
         this.values = values;
     }
 
+    @Override
     public T next() {
         return values.iterator().next();
     }

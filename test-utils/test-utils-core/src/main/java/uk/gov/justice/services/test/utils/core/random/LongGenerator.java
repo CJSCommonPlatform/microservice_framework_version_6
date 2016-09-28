@@ -1,6 +1,6 @@
 package uk.gov.justice.services.test.utils.core.random;
 
-class LongGenerator implements Generator<Long> {
+public class LongGenerator extends Generator<Long> {
 
     @Override
     public Long next() {

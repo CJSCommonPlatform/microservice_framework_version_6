@@ -5,18 +5,19 @@ import java.math.BigDecimal;
 import static java.lang.Math.pow;
 import static java.math.RoundingMode.FLOOR;
 
-public class BigDecimalGenerator implements Generator<BigDecimal> {
+public class BigDecimalGenerator extends Generator<BigDecimal> {
 
     private final Integer max;
     private final Integer decimalPlaces;
 
-    public BigDecimalGenerator(Integer max, Integer decimalPlaces) {
+    public BigDecimalGenerator(final Integer max, final Integer decimalPlaces) {
         this.max = max;
         this.decimalPlaces = decimalPlaces;
     }
 
+    @Override
     public BigDecimal next() {
-        double pow = pow(10, decimalPlaces);
+        final double pow = pow(10, decimalPlaces);
         return new BigDecimal((long) RANDOM.nextInt((int) (max * pow)) / pow).setScale(decimalPlaces, FLOOR);
     }
 }

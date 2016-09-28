@@ -1,10 +1,10 @@
 package uk.gov.justice.services.test.utils.core.random;
 
-class IntegerGenerator implements Generator<Integer> {
+class IntegerGenerator extends Generator<Integer> {
 
-    private Integer max;
+    private final Integer max;
 
-    public IntegerGenerator(Integer max) {
+    public IntegerGenerator(final Integer max) {
         this.max = max;
     }
 

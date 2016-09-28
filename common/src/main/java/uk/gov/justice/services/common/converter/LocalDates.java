@@ -7,14 +7,14 @@ import java.time.format.DateTimeFormatter;
  * Utility functions for converting to and from {@link LocalDate} objects
  * and ISO date format String such as '2011-12-03'
  */
-public final class LocalDateTimes {
+public final class LocalDates {
 
     private static DateTimeFormatter FORMAT = DateTimeFormatter.ISO_DATE;
 
     /**
      * Private constructor to avoid misuse of utility class.
      */
-    private LocalDateTimes() {
+    private LocalDates() {
     }
 
     /**

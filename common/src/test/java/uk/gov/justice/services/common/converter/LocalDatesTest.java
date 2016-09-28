@@ -12,13 +12,13 @@ import static net.trajano.commons.testing.UtilityClassTestUtil.assertUtilityClas
 import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
- * Unit tests for the {@link LocalDateTimes} utility class.
+ * Unit tests for the {@link LocalDates} utility class.
  */
-public class LocalDateTimesTest {
+public class LocalDatesTest {
 
     @Test
     public void shouldBeWellDefinedUtilityClass() {
-        assertUtilityClassWellDefined(LocalDateTimes.class);
+        assertUtilityClassWellDefined(LocalDates.class);
     }
 
     @Test
@@ -33,7 +33,7 @@ public class LocalDateTimesTest {
         String localDateStr = format("%d-%02d-%d", year, month, dayOfMonth);
 
         // when
-        final LocalDate localDate = LocalDateTimes.from(localDateStr);
+        final LocalDate localDate = LocalDates.from(localDateStr);
 
         // then
         assertThat(localDate, has(year, month, dayOfMonth));
@@ -74,7 +74,7 @@ public class LocalDateTimesTest {
         LocalDate localDate = LocalDate.now();
 
         // when
-        String str = LocalDateTimes.to(localDate);
+        String str = LocalDates.to(localDate);
 
         // then
         assertThat(str, isFrom(localDate));

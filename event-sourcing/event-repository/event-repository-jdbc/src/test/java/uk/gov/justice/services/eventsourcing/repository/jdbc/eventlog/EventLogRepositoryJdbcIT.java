@@ -1,5 +1,6 @@
 package uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog;
 
+import static java.time.ZonedDateTime.now;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -7,10 +8,12 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertThat;
 
+import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.eventsourcing.common.exception.InvalidSequenceIdException;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 import uk.gov.justice.services.test.utils.persistence.AbstractJdbcRepositoryIT;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -26,6 +29,8 @@ public class EventLogRepositoryJdbcIT extends AbstractJdbcRepositoryIT<EventLogJ
     private static final String PAYLOAD_JSON = "{\"field\": \"Value\"}";
     private static final String METADATA_JSON = "{\"field\": \"Value\"}";
     private static final String LIQUIBASE_EVENT_STORE_DB_CHANGELOG_XML = "liquibase/event-store-db-changelog.xml";
+    private final static ZonedDateTime TIMESTAMP = now();
+
 
     public EventLogRepositoryJdbcIT() {
         super(LIQUIBASE_EVENT_STORE_DB_CHANGELOG_XML);
@@ -81,8 +86,6 @@ public class EventLogRepositoryJdbcIT extends AbstractJdbcRepositoryIT<EventLogJ
         assertThat(eventLogList, hasSize(2));
         assertThat(eventLogList.get(0).getSequenceId(), is(4l));
         assertThat(eventLogList.get(1).getSequenceId(), is(7l));
-
-
     }
 
     @Test(expected = JdbcRepositoryException.class)
@@ -98,16 +101,16 @@ public class EventLogRepositoryJdbcIT extends AbstractJdbcRepositoryIT<EventLogJ
         jdbcRepository.insert(eventLogOf(SEQUENCE_ID, STREAM_ID));
     }
 
-    private EventLog eventLogOf(UUID id, String name, UUID streamId, long sequenceId, String payloadJSON, String metadataJSON) {
-        return new EventLog(id, streamId, sequenceId, name, metadataJSON, payloadJSON);
+    private EventLog eventLogOf(final UUID id, final String name, final UUID streamId, final long sequenceId, final String payloadJSON, final String metadataJSON, final ZonedDateTime timestamp) {
+        return new EventLog(id, streamId, sequenceId, name, metadataJSON, payloadJSON, timestamp);
     }
 
-    private EventLog eventLogOf(final long sequenceId,final UUID streamId) {
-        return eventLogOf(randomUUID(), NAME, streamId, sequenceId, PAYLOAD_JSON, METADATA_JSON);
+    private EventLog eventLogOf(final long sequenceId, final UUID streamId) {
+        return eventLogOf(randomUUID(), NAME, streamId, sequenceId, PAYLOAD_JSON, METADATA_JSON, TIMESTAMP);
     }
 
     private EventLog eventLogOf(UUID id, long sequenceId) {
-        return eventLogOf(id, NAME, STREAM_ID, sequenceId, PAYLOAD_JSON, METADATA_JSON);
+        return eventLogOf(id, NAME, STREAM_ID, sequenceId, PAYLOAD_JSON, METADATA_JSON, TIMESTAMP);
     }
 
 }

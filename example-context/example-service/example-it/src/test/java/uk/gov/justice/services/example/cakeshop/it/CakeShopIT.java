@@ -3,10 +3,13 @@ package uk.gov.justice.services.example.cakeshop.it;
 import static com.jayway.awaitility.Awaitility.await;
 import static com.jayway.jsonassert.JsonAssert.emptyCollection;
 import static com.jayway.jsonassert.JsonAssert.with;
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Arrays.asList;
+import static java.util.UUID.randomUUID;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.client.Entity.entity;
+import static org.exparity.hamcrest.date.ZonedDateTimeMatchers.within;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
@@ -17,6 +20,7 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.fail;
 
+import uk.gov.justice.services.common.util.DateTimeProvider;
 import uk.gov.justice.services.event.buffer.core.repository.streamstatus.StreamStatus;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLog;
 import uk.gov.justice.services.example.cakeshop.it.util.ApiResponse;
@@ -188,7 +192,7 @@ public class CakeShopIT {
 
     @Test
     public void shouldRegisterRecipeRemovedEvent() {
-        final String recipeId = UUID.randomUUID().toString();
+        final String recipeId = randomUUID().toString();
 
         sendTo(RECIPES_RESOURCE_URI + recipeId).request()
                 .post(entity(
@@ -399,7 +403,7 @@ public class CakeShopIT {
 
     @Test
     public void shouldNotPersistRecipeWhenIngredientPersistenceFailsDueToSharedTransaction() throws InterruptedException {
-        final String recipeId = UUID.randomUUID().toString();
+        final String recipeId = randomUUID().toString();
 
         sendTo(RECIPES_RESOURCE_URI + recipeId).request()
                 .post(entity(
@@ -455,26 +459,50 @@ public class CakeShopIT {
 
     @Test
     public void shouldReturnOrderWithUTCOrderDate() {
-        final String orderId = "263af847-effb-46a9-96bc-32a0f7526e12";
+        final UUID orderId = randomUUID();
 
         final Response commandResponse =
-                sendTo(ORDERS_RESOURCE_URI + orderId).request()
+                sendTo(ORDERS_RESOURCE_URI + orderId.toString()).request()
                         .post(entity(
                                 jsonObject()
-                                        .add("recipeId", "163af847-effb-46a9-96bc-32a0f7526f11")
-                                        .add("deliveryDate", "2016-07-25T23:09:01.0+05:00")
+                                        .add("recipeId", randomUUID().toString())
+                                        .add("deliveryDate", "2016-01-21T23:42:03.522+07:00")
                                         .build().toString(),
                                 ORDER_CAKE_MEDIA_TYPE));
 
         assertThat(commandResponse.getStatus(), is(ACCEPTED));
 
-        await().until(() -> queryForOrder(orderId).httpCode() == OK);
+        await().until(() -> queryForOrder(orderId.toString()).httpCode() == OK);
 
-        final ApiResponse queryResponse = queryForOrder(orderId);
+        final ApiResponse queryResponse = queryForOrder(orderId.toString());
 
         with(queryResponse.body())
-                .assertThat("$.orderId", equalTo(orderId))
-                .assertThat("$.deliveryDate", equalTo("2016-07-25T18:09:01Z"));
+                .assertThat("$.orderId", equalTo(orderId.toString()))
+                .assertThat("$.deliveryDate", equalTo("2016-01-21T16:42:03.522Z"));
+    }
+
+    @Test
+    public void shouldSetDateCreatedTimestampInEventStore() {
+        final UUID orderId = randomUUID();
+
+        final Response commandResponse =
+                sendTo(ORDERS_RESOURCE_URI + orderId.toString()).request()
+                        .post(entity(
+                                jsonObject()
+                                        .add("recipeId", randomUUID().toString())
+                                        .add("deliveryDate", "2016-01-21T23:42:03.522+07:00")
+                                        .build().toString(),
+                                ORDER_CAKE_MEDIA_TYPE));
+
+        assertThat(commandResponse.getStatus(), is(ACCEPTED));
+
+        await().until(() -> queryForOrder(orderId.toString()).httpCode() == OK);
+
+        final Stream<EventLog> events = EVENT_LOG_REPOSITORY.findByStreamIdOrderBySequenceIdAsc(orderId);
+        final EventLog eventLog = events.findFirst().get();
+
+        assertThat(eventLog.getDateCreated(), is(notNullValue()));
+        assertThat(eventLog.getDateCreated(), is(within(10L, SECONDS, new DateTimeProvider().now())));
     }
 
     @Test

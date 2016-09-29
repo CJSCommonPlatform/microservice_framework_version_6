@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Un-released]
 
+### Added
+- Timestamp field to the EventLog (Event Store).
+- ZonedDateTimes method to convert to legacy Date format
+
 ## [0.28.0] - 2016-09-21
 
 ### Fixed

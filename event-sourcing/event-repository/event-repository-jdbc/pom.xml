@@ -70,6 +70,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.exparity</groupId>
+            <artifactId>hamcrest-date</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>uk.gov.justice.services</groupId>
             <artifactId>event-repository-liquibase</artifactId>
             <version>${project.version}</version>

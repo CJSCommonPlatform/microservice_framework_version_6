@@ -1,13 +1,19 @@
 package uk.gov.justice.services.example.cakeshop.command.handler;
 
 import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.IsCollectionContaining.hasItems;
-import static org.mockito.Mockito.verify;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
+import static uk.gov.justice.services.messaging.JsonObjects.getBoolean;
+import static uk.gov.justice.services.messaging.JsonObjects.getJsonArray;
+import static uk.gov.justice.services.messaging.JsonObjects.getString;
+import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
+import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
+import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
 
 import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -16,72 +22,76 @@ import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.example.cakeshop.domain.aggregate.Recipe;
 import uk.gov.justice.services.example.cakeshop.domain.event.RecipeAdded;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.Metadata;
 
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import javax.json.JsonObject;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AddRecipeCommandHandlerTest {
 
+    private static final String COMMAND_NAME = "cakeshop.add-recipe";
     private static final String EVENT_NAME = "cakeshop.recipe-added";
     private static final UUID RECIPE_ID = UUID.randomUUID();
     private static final String RECIPE_NAME = "Test Recipe";
     private static final Boolean GULTEN_FREE = true;
 
     @Mock
-    JsonEnvelope envelope;
-
-    @Mock
-    EventSource eventSource;
-
-    @Mock
     EventStream eventStream;
 
     @Mock
-    AggregateService aggregateService;
+    private EventSource eventSource;
 
     @Mock
-    Enveloper enveloper;
+    private AggregateService aggregateService;
 
     @Mock
-    Recipe recipe;
+    private Recipe recipe;
 
-    @Mock
-    RecipeAdded event;
-
-    @Captor
-    private ArgumentCaptor<Stream<JsonEnvelope>> streamCaptor;
+    @Spy
+    private Enveloper enveloper = createEnveloperWithEvents(RecipeAdded.class);
 
     @InjectMocks
     private AddRecipeCommandHandler addRecipeCommandHandler;
 
     @Test
     public void shouldHandleAddRecipeCommand() throws Exception {
+        final UUID commandId = UUID.randomUUID();
         final JsonEnvelope command = envelope()
-                .with(metadataWithRandomUUID(EVENT_NAME))
+                .with(metadataOf(commandId, COMMAND_NAME))
                 .withPayloadOf(RECIPE_ID.toString(), "recipeId")
                 .withPayloadOf(RECIPE_NAME, "name")
                 .withPayloadOf(GULTEN_FREE, "glutenFree")
                 .withPayloadOf(new String[]{}, "ingredients")
                 .build();
 
+        final RecipeAdded recipeAdded = new RecipeAdded(RECIPE_ID, RECIPE_NAME, GULTEN_FREE, emptyList());
+
         when(eventSource.getStreamById(RECIPE_ID)).thenReturn(eventStream);
         when(aggregateService.get(eventStream, Recipe.class)).thenReturn(recipe);
-        when(recipe.addRecipe(RECIPE_ID, RECIPE_NAME, GULTEN_FREE, emptyList())).thenReturn(Stream.of(event));
-        when(enveloper.withMetadataFrom(command)).thenReturn(x -> x.equals(event) ? envelope : null);
+        when(recipe.addRecipe(RECIPE_ID, RECIPE_NAME, GULTEN_FREE, emptyList())).thenReturn(Stream.of(recipeAdded));
 
         addRecipeCommandHandler.addRecipe(command);
 
-        verify(eventStream).append(streamCaptor.capture());
-        assertThat(streamCaptor.getValue().collect(toList()), hasItems(envelope));
-    }
+        final JsonEnvelope resultEvent = verifyAppendAndGetArgumentFrom(eventStream).findFirst().get();
+        final Metadata resultMetadata = resultEvent.metadata();
+        final JsonObject resultPayload = resultEvent.payloadAsJsonObject();
 
+        assertThat(resultMetadata.causation(), contains(commandId));
+        assertThat(resultMetadata.name(), is(EVENT_NAME));
+
+        assertThat(getUUID(resultPayload, "recipeId").get(), is(RECIPE_ID));
+        assertThat(getString(resultPayload, "name").get(), is(RECIPE_NAME));
+        assertThat(getBoolean(resultPayload, "glutenFree").get(), is(GULTEN_FREE));
+        assertThat(getJsonArray(resultPayload, "ingredients").get(), empty());
+    }
 }

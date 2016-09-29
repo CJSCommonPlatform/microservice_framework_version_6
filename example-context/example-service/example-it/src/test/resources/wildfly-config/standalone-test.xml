@@ -114,7 +114,7 @@
                 <level name="WARN"/>
             </logger>
             <logger category="uk.gov.justice">
-                <level name="TRACE"/>
+                <level name="INFO"/>
             </logger>
             <root-logger>
                 <level name="INFO"/>

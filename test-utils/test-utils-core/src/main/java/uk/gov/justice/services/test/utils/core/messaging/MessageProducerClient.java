@@ -16,6 +16,10 @@ import javax.json.JsonObject;
 
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
 
+/**
+ * Test utility class for sending messages to queues
+ */
+@SuppressWarnings("unused")
 public class MessageProducerClient implements AutoCloseable {
 
     private static final String QUEUE_URI = queueUri();
@@ -24,6 +28,12 @@ public class MessageProducerClient implements AutoCloseable {
     private MessageProducer messageProducer;
     private Connection connection;
 
+    /**
+     * Starts the message producer for a specific topic. Must be called
+     * before any messages can be sent.
+     *
+     * @param topicName the name of the topic to send to
+     */
     public void startProducer(final String topicName) {
 
         try {
@@ -40,14 +50,32 @@ public class MessageProducerClient implements AutoCloseable {
         }
     }
 
+    /**
+     * Sends a message to the topic specified in <code>startProducer(...)</code>
+     *
+     * @param commandName the name of the command
+     * @param payload the payload to be wrapped in a simple JsonEnvelope
+     */
     public void sendMessage(final String commandName, final JsonObject payload) {
 
+        final JsonEnvelope jsonEnvelope = createEnvelope(commandName, payload);
+
+        sendMessage(commandName, jsonEnvelope);
+    }
+
+    /**
+     * Sends a message to the topic specified in <code>startProducer(...)</code>
+     *
+     * @param commandName the name of the command
+     * @param jsonEnvelope the full JsonEnvelope to send as a message
+     */
+    public void sendMessage(final String commandName, final JsonEnvelope jsonEnvelope) {
         if (messageProducer == null) {
             close();
             throw new RuntimeException("Message producer not started. Please call startProducer(...) first.");
         }
 
-        final JsonEnvelope jsonEnvelope = createEnvelope(commandName, payload);
+        @SuppressWarnings("deprecation")
         final String json = jsonEnvelope.toDebugStringPrettyPrint();
 
         try {
@@ -63,6 +91,9 @@ public class MessageProducerClient implements AutoCloseable {
         }
     }
 
+    /**
+     * closes all open resources
+     */
     @Override
     public void close() {
         close(messageProducer);

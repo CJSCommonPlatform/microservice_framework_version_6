@@ -6,8 +6,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ## [Un-released]
 
 ### Added
-- Timestamp field to the EventLog (Event Store).
-- ZonedDateTimes method to convert to legacy Date format
+- ZonedDateTimes methods to convert between ZDT and Sql Timestamps
+
+### Changed
+- Event Log to include a 'date_created' timestamp field (Event Store).
 
 ## [0.28.0] - 2016-09-21
 

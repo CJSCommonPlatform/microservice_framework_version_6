@@ -18,7 +18,7 @@ public class RandomGenerator {
     public static final Generator<Double> DOUBLE = new DoubleGenerator(Integer.MAX_VALUE, 2);
     public static final Generator<String> EMAIL_ADDRESS = new EmailAddressGenerator();
     public static final Generator<Integer> INTEGER = new IntegerGenerator(Integer.MAX_VALUE);
-    public static final Generator<String> STRING = new StringGenerator(10);
+    public static final Generator<String> STRING = new StringGenerator();
     public static final Generator<Long> LONG = new LongGenerator();
     public static final Generator<BigDecimal> PERCENTAGE = new BigDecimalGenerator(100, 2);
     public static final Generator<String> NI_NUMBER = new NiNumberGenerator();
@@ -28,7 +28,7 @@ public class RandomGenerator {
     public static final Generator<LocalDate> FUTURE_LOCAL_DATE = new LocalDateGenerator(Period.ofYears(5), LocalDate.now(), LocalDateGenerator.Direction.FORWARD);
     public static final Generator<LocalDate> PAST_LOCAL_DATE = new LocalDateGenerator(Period.ofYears(5), LocalDate.now(), LocalDateGenerator.Direction.BACKWARD);
 
-    public static Generator<String> string(Integer length) {
+    public static Generator<String> string(int length) {
         return new StringGenerator(length);
     }
 

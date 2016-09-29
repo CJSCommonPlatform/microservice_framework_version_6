@@ -8,7 +8,7 @@
                logicalFilePath="002-timestamp-column.changelog.xml">
         <addColumn tableName="event_log">
             <column name="date_created" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false"/>
+                <constraints nullable="true"/>
             </column>
         </addColumn>
     </changeSet>

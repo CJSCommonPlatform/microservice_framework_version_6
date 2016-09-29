@@ -9,5 +9,5 @@ import java.util.Random;
  */
 public abstract class Generator<T> {
     final Random RANDOM = new java.util.Random();
-    abstract T next();
+    public abstract T next();
 }

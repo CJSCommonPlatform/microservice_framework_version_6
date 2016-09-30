@@ -5,11 +5,15 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Un-released]
 
+### Fixed
+- 'Response is closed' bug in PollingRequestClient
+
 ### Added
 - ZonedDateTimes methods to convert between ZDT and Sql Timestamps
 - EnveloperFactory method to create a Enveloper with a list of Event classes registered
 - EventStreamMockHelper that provides a method to verify and return the Stream argument from a call 
 to the EventStream append method
+- DateProvider to allow easy mocking of date creating for testing
 
 ### Changed
 - Event Log to include a 'date_created' timestamp field (Event Store).

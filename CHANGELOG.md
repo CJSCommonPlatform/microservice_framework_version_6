@@ -3,20 +3,24 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
-## [Un-released]
+## [0.29.0] - 2016-09-30
 
 ### Fixed
 - 'Response is closed' bug in PollingRequestClient
 
 ### Added
-- ZonedDateTimes methods to convert between ZDT and Sql Timestamps
+- ZonedDateTimes methods to convert between ZDT and SQL timestamps
+- LocalDate conversion functions
 - EnveloperFactory method to create a Enveloper with a list of Event classes registered
 - EventStreamMockHelper that provides a method to verify and return the Stream argument from a call 
 to the EventStream append method
 - DateProvider to allow easy mocking of date creating for testing
+- Random generators and TypeCheck class for type-based testing
+- Metrics per action name
 
 ### Changed
-- Event Log to include a 'date_created' timestamp field (Event Store).
+- Event Store to include a 'date_created' timestamp field - added to the DB schema but not yet
+enabled in code
 
 ## [0.28.0] - 2016-09-21
 
@@ -39,9 +43,9 @@ to the EventStream append method
 - HttpResponsePoller, replaced with PollingRestClient
 
 ## [0.26.0] - 2016-09-20
-- Failed release, please do not use.
+- Failed release; do not use
 
-## [0.25.0]
+## [0.25.0] - 2016-09-12
 ### Added
 - sender.sendAsAdmin() method
 

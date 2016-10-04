@@ -5,6 +5,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Added
+- Hamcrest Matchers for asserting JsonEnvelopes contained within either Streams or Lists
+
 ## [0.29.0] - 2016-09-30
 
 ### Fixed

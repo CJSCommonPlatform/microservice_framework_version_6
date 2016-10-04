@@ -1,19 +1,20 @@
 package uk.gov.justice.services.example.cakeshop.command.handler;
 
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.Collections.emptyList;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
-import static uk.gov.justice.services.messaging.JsonObjects.getBoolean;
-import static uk.gov.justice.services.messaging.JsonObjects.getJsonArray;
-import static uk.gov.justice.services.messaging.JsonObjects.getString;
-import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
 import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payLoad;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
 
 import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -22,12 +23,9 @@ import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.example.cakeshop.domain.aggregate.Recipe;
 import uk.gov.justice.services.example.cakeshop.domain.event.RecipeAdded;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.Metadata;
 
 import java.util.UUID;
 import java.util.stream.Stream;
-
-import javax.json.JsonObject;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -66,6 +64,7 @@ public class AddRecipeCommandHandlerTest {
     @Test
     public void shouldHandleAddRecipeCommand() throws Exception {
         final UUID commandId = UUID.randomUUID();
+        final RecipeAdded recipeAdded = new RecipeAdded(RECIPE_ID, RECIPE_NAME, GULTEN_FREE, emptyList());
         final JsonEnvelope command = envelope()
                 .with(metadataOf(commandId, COMMAND_NAME))
                 .withPayloadOf(RECIPE_ID.toString(), "recipeId")
@@ -74,24 +73,23 @@ public class AddRecipeCommandHandlerTest {
                 .withPayloadOf(new String[]{}, "ingredients")
                 .build();
 
-        final RecipeAdded recipeAdded = new RecipeAdded(RECIPE_ID, RECIPE_NAME, GULTEN_FREE, emptyList());
-
         when(eventSource.getStreamById(RECIPE_ID)).thenReturn(eventStream);
         when(aggregateService.get(eventStream, Recipe.class)).thenReturn(recipe);
         when(recipe.addRecipe(RECIPE_ID, RECIPE_NAME, GULTEN_FREE, emptyList())).thenReturn(Stream.of(recipeAdded));
 
         addRecipeCommandHandler.addRecipe(command);
 
-        final JsonEnvelope resultEvent = verifyAppendAndGetArgumentFrom(eventStream).findFirst().get();
-        final Metadata resultMetadata = resultEvent.metadata();
-        final JsonObject resultPayload = resultEvent.payloadAsJsonObject();
-
-        assertThat(resultMetadata.causation(), contains(commandId));
-        assertThat(resultMetadata.name(), is(EVENT_NAME));
-
-        assertThat(getUUID(resultPayload, "recipeId").get(), is(RECIPE_ID));
-        assertThat(getString(resultPayload, "name").get(), is(RECIPE_NAME));
-        assertThat(getBoolean(resultPayload, "glutenFree").get(), is(GULTEN_FREE));
-        assertThat(getJsonArray(resultPayload, "ingredients").get(), empty());
+        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
+                jsonEnvelope(
+                        metadata()
+                                .withCausationIds(commandId)
+                                .withName(EVENT_NAME),
+                        payLoad().isJson(allOf(
+                                withJsonPath("$.recipeId", equalTo(RECIPE_ID.toString())),
+                                withJsonPath("$.name", equalTo(RECIPE_NAME)),
+                                withJsonPath("$.glutenFree", equalTo(GULTEN_FREE)),
+                                withJsonPath("$.ingredients", empty())
+                        ))))
+        );
     }
 }

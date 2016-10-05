@@ -21,7 +21,7 @@ public class MakeCakeCommandHandler {
     @Inject
     EventSource eventSource;
 
-    @Handles("cakeshop.make-cake")
+    @Handles("example.make-cake")
     public void handle(final JsonEnvelope command) throws EventStreamException {
 
         LOGGER.info("=============> Inside make-cake Command Handler");

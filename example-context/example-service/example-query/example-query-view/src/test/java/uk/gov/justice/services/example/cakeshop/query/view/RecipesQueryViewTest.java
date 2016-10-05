@@ -60,7 +60,7 @@ public class RecipesQueryViewTest {
 
         final JsonEnvelope response = queryView.findRecipe(envelopeWithDefaultMetadata().withPayloadOf("recipeId", "123").build());
 
-        assertThat(response.metadata().name(), is("cakeshop.findRecipe-response"));
+        assertThat(response.metadata().name(), is("example.findRecipe-response"));
 
     }
 
@@ -145,7 +145,7 @@ public class RecipesQueryViewTest {
 
         final JsonEnvelope response = queryView.listRecipes(envelopeWithDefaultMetadata().withPayloadOf("pagesize", 1).build());
 
-        assertThat(response.metadata().name(), is("cakeshop.recipes-response"));
+        assertThat(response.metadata().name(), is("example.recipes-response"));
 
     }
 

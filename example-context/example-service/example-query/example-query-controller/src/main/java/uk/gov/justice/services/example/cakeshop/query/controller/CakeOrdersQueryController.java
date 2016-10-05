@@ -16,7 +16,7 @@ public class CakeOrdersQueryController {
     @Inject
     Requester requester;
 
-    @Handles("cakeshop.get-order")
+    @Handles("example.get-order")
     public JsonEnvelope getOrder(final JsonEnvelope query) {
         return requester.request(query);
     }

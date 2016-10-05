@@ -85,13 +85,13 @@ public class CakeShopIT {
     private static final String ORDERS_RESOURCE_URI = "http://localhost:8080/example-command-api/command/api/rest/cakeshop/orders/";
     private static final String RECIPES_RESOURCE_QUERY_URI = "http://localhost:8080/example-query-api/query/api/rest/cakeshop/recipes/";
     private static final String ORDERS_RESOURCE_QUERY_URI = "http://localhost:8080/example-query-api/query/api/rest/cakeshop/orders/";
-    private static final String ADD_RECIPE_MEDIA_TYPE = "application/vnd.cakeshop.add-recipe+json";
-    private static final String REMOVE_RECIPE_MEDIA_TYPE = "application/vnd.cakeshop.remove-recipe+json";
-    private static final String MAKE_CAKE_MEDIA_TYPE = "application/vnd.cakeshop.make-cake+json";
-    private static final String ORDER_CAKE_MEDIA_TYPE = "application/vnd.cakeshop.order-cake+json";
-    private static final String QUERY_RECIPE_MEDIA_TYPE = "application/vnd.cakeshop.recipe+json";
-    private static final String QUERY_RECIPES_MEDIA_TYPE = "application/vnd.cakeshop.recipes+json";
-    private static final String QUERY_ORDER_MEDIA_TYPE = "application/vnd.cakeshop.order+json";
+    private static final String ADD_RECIPE_MEDIA_TYPE = "application/vnd.example.add-recipe+json";
+    private static final String REMOVE_RECIPE_MEDIA_TYPE = "application/vnd.example.remove-recipe+json";
+    private static final String MAKE_CAKE_MEDIA_TYPE = "application/vnd.example.make-cake+json";
+    private static final String ORDER_CAKE_MEDIA_TYPE = "application/vnd.example.order-cake+json";
+    private static final String QUERY_RECIPE_MEDIA_TYPE = "application/vnd.example.recipe+json";
+    private static final String QUERY_RECIPES_MEDIA_TYPE = "application/vnd.example.recipes+json";
+    private static final String QUERY_ORDER_MEDIA_TYPE = "application/vnd.example.order+json";
 
     public final static String JMS_USERNAME = "jmsuser";
 
@@ -162,7 +162,7 @@ public class CakeShopIT {
         await().until(() -> eventsWithPayloadContaining(recipeId).count() == 1);
 
         EventLog event = eventsWithPayloadContaining(recipeId).findFirst().get();
-        assertThat(event.getName(), is("cakeshop.recipe-added"));
+        assertThat(event.getName(), is("example.recipe-added"));
         with(event.getMetadata())
                 .assertEquals("stream.id", recipeId)
                 .assertEquals("stream.version", 1);
@@ -211,7 +211,7 @@ public class CakeShopIT {
         await().until(() -> eventsWithPayloadContaining(recipeId).count() == 1);
 
         EventLog event = eventsWithPayloadContaining(recipeId).findFirst().get();
-        assertThat(event.getName(), is("cakeshop.recipe-added"));
+        assertThat(event.getName(), is("example.recipe-added"));
         with(event.getMetadata())
                 .assertEquals("stream.id", recipeId)
                 .assertEquals("stream.version", 1);
@@ -294,7 +294,7 @@ public class CakeShopIT {
             final TextMessage messageFromDLQ = (TextMessage) dlqConsumer.receive();
 
             with(messageFromDLQ.getText())
-                    .assertThat("$._metadata.name", equalTo("cakeshop.recipe-added"))
+                    .assertThat("$._metadata.name", equalTo("example.recipe-added"))
                     .assertThat("$.recipeId", equalTo(recipeId));
 
             initViewStoreDb();
@@ -434,7 +434,7 @@ public class CakeShopIT {
 
         final TextMessage message = (TextMessage) publicTopicConsumer.receive();
         with(message.getText())
-                .assertThat("$._metadata.name", equalTo("cakeshop.recipe-added"))
+                .assertThat("$._metadata.name", equalTo("example.recipe-added"))
                 .assertThat("$.recipeId", equalTo(recipeId))
                 .assertThat("$.name", equalTo("Apple pie"));
 
@@ -538,7 +538,7 @@ public class CakeShopIT {
     }
 
     private static DataSource initViewStoreDb() throws Exception {
-        CAKE_SHOP_DS = initDatabase("db.cakeshop.url", "db.cakeshop.userName", "db.cakeshop.password",
+        CAKE_SHOP_DS = initDatabase("db.example.url", "db.example.userName", "db.example.password",
                 "liquibase/view-store-db-changelog.xml", "liquibase/event-buffer-changelog.xml");
         return CAKE_SHOP_DS;
     }

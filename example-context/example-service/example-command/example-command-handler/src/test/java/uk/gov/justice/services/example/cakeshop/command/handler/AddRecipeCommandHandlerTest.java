@@ -37,8 +37,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class AddRecipeCommandHandlerTest {
 
-    private static final String COMMAND_NAME = "cakeshop.add-recipe";
-    private static final String EVENT_NAME = "cakeshop.recipe-added";
+    private static final String COMMAND_NAME = "example.add-recipe";
+    private static final String EVENT_NAME = "example.recipe-added";
     private static final UUID RECIPE_ID = UUID.randomUUID();
     private static final String RECIPE_NAME = "Test Recipe";
     private static final Boolean GULTEN_FREE = true;

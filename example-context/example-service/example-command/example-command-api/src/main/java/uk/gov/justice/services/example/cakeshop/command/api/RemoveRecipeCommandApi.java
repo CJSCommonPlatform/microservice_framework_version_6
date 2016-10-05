@@ -16,7 +16,7 @@ public class RemoveRecipeCommandApi {
     @Inject
     Sender sender;
 
-    @Handles("cakeshop.remove-recipe")
+    @Handles("example.remove-recipe")
     public void removeRecipe(final JsonEnvelope command) {
         sender.send(command);
     }

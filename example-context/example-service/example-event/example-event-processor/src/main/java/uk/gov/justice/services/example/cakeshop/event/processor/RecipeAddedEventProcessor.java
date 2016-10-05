@@ -20,7 +20,7 @@ public class RecipeAddedEventProcessor {
     @Inject
     Sender sender;
 
-    @Handles("cakeshop.recipe-added")
+    @Handles("example.recipe-added")
     public void recipeAdded(final JsonEnvelope event) {
         LOGGER.info("=============> Inside recipe-added Event Processor");
         sender.send(event);

@@ -18,7 +18,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class MakeCakeCommandHandlerTest {
 
-    private static final String EVENT_NAME = "cakeshop.event.cake-made";
+    private static final String EVENT_NAME = "example.event.cake-made";
     private static final UUID CAKE_ID = UUID.randomUUID();
 
     @Mock

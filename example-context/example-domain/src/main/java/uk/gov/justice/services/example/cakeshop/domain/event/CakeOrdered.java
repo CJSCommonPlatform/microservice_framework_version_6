@@ -5,7 +5,7 @@ import uk.gov.justice.domain.annotation.Event;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-@Event("cakeshop.cake-ordered")
+@Event("example.cake-ordered")
 public class CakeOrdered {
 
     private final UUID orderId;

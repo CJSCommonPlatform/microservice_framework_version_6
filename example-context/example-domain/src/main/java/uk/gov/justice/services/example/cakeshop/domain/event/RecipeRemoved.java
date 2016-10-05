@@ -6,7 +6,7 @@ import uk.gov.justice.services.example.cakeshop.domain.Ingredient;
 import java.util.List;
 import java.util.UUID;
 
-@Event("cakeshop.recipe-removed")
+@Event("example.recipe-removed")
 public class RecipeRemoved {
 
     private final UUID recipeId;

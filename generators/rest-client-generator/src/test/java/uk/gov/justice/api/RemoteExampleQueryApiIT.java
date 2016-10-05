@@ -81,9 +81,10 @@ public class RemoteExampleQueryApiIT {
             .build();
     private static final UUID USER_ID = randomUUID();
     private static final String TEST_SYSTEM_USER_ID = "8d6a96f0-6e8e-11e6-8b77-86f30ca893d3";
+    private static final String MOCK_SERVER_PORT = "mock.server.port";
     private static int port = -1;
     @Rule
-    public WireMockRule wireMockRule = new WireMockRule(8080);
+    public WireMockRule wireMockRule = new WireMockRule(9090);
 
     @Inject
     Requester requester;
@@ -92,6 +93,7 @@ public class RemoteExampleQueryApiIT {
 
     @BeforeClass
     public static void beforeClass() {
+        System.setProperty(MOCK_SERVER_PORT, "9090");
         port = NetworkUtil.getNextAvailablePort();
     }
 

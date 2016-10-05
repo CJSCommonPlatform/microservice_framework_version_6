@@ -1,5 +1,6 @@
 package uk.gov.justice.services.test.utils.core.matchers;
 
+import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -8,19 +9,25 @@ import java.util.List;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
-import org.hamcrest.TypeSafeMatcher;
+import org.hamcrest.TypeSafeDiagnosingMatcher;
+import org.hamcrest.collection.IsIterableContainingInOrder;
 
-public class JsonEnvelopeListMatcher extends TypeSafeMatcher<List<JsonEnvelope>> {
+/**
+ * Matches a List of JsonEnvelopes.  This is very similar to {@link JsonEnvelopeStreamMatcher} and
+ * is used internally by the JsonEnvelopeStreamMatcher.
+ *
+ * See {@link JsonEnvelopeStreamMatcher} for example usage
+ */
+public class JsonEnvelopeListMatcher extends TypeSafeDiagnosingMatcher<List<JsonEnvelope>> {
 
     private final Matcher[] matchers;
 
-    public static JsonEnvelopeListMatcher listContaining(final Matcher... matchers) {
-        return new JsonEnvelopeListMatcher(matchers);
-    }
-
     public JsonEnvelopeListMatcher(final Matcher... matchers) {
         this.matchers = matchers;
+    }
+
+    public static JsonEnvelopeListMatcher listContaining(final Matcher... matchers) {
+        return new JsonEnvelopeListMatcher(matchers);
     }
 
     @Override
@@ -31,9 +38,14 @@ public class JsonEnvelopeListMatcher extends TypeSafeMatcher<List<JsonEnvelope>>
 
     @Override
     @SuppressWarnings("unchecked")
-    protected boolean matchesSafely(final List<JsonEnvelope> jsonEnvelopes) {
-        final Matcher<Iterable<? extends List<JsonEnvelope>>> iterableMatcher = Matchers.contains(matchers);
+    protected boolean matchesSafely(final List<JsonEnvelope> jsonEnvelopes, final Description description) {
+        final IsIterableContainingInOrder containingInOrder = new IsIterableContainingInOrder(asList(matchers));
 
-        return iterableMatcher.matches(jsonEnvelopes);
+        if (!containingInOrder.matches(jsonEnvelopes)) {
+            containingInOrder.describeMismatch(jsonEnvelopes, description);
+            return false;
+        }
+
+        return true;
     }
 }

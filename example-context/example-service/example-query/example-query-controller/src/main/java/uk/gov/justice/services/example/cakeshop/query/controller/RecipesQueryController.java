@@ -15,12 +15,12 @@ public class RecipesQueryController {
     @Inject
     Requester requester;
 
-    @Handles("cakeshop.search-recipes")
+    @Handles("example.search-recipes")
     public JsonEnvelope listRecipes(final JsonEnvelope query) {
         return requester.request(query);
     }
 
-    @Handles("cakeshop.get-recipe")
+    @Handles("example.get-recipe")
     public JsonEnvelope recipe(final JsonEnvelope query) {
         return requester.request(query);
     }

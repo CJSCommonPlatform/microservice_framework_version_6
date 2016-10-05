@@ -11,7 +11,7 @@ import javax.inject.Inject;
 
 @ServiceComponent(Component.QUERY_VIEW)
 public class CakeOrdersQueryView {
-    private static final String NAME_RESPONSE_ORDER = "cakeshop.findOrder-response";
+    private static final String NAME_RESPONSE_ORDER = "example.findOrder-response";
 
     private static final String FIELD_ORDER_ID = "orderId";
     private final CakeOrderService service;
@@ -23,7 +23,7 @@ public class CakeOrdersQueryView {
         this.enveloper = enveloper;
     }
 
-    @Handles("cakeshop.get-order")
+    @Handles("example.get-order")
     public JsonEnvelope findOrder(final JsonEnvelope query) {
         return enveloper.withMetadataFrom(query, NAME_RESPONSE_ORDER).apply(
                 service.findOrder(query.payloadAsJsonObject().getString(FIELD_ORDER_ID)));

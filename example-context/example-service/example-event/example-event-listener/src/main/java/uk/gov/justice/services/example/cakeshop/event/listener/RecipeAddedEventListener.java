@@ -39,7 +39,7 @@ public class RecipeAddedEventListener {
     @Inject
     IngredientRepository ingredientRepository;
 
-    @Handles("cakeshop.recipe-added")
+    @Handles("example.recipe-added")
     public void recipeAdded(final JsonEnvelope event) {
 
         final String recipeId = event.payloadAsJsonObject().getString(FIELD_RECIPE_ID);

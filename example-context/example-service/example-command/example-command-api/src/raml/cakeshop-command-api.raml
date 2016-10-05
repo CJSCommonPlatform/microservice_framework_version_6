@@ -12,19 +12,19 @@ protocols: [ HTTP, HTTPS ]
     description: |
         ...
         (mapping):
-            requestType: application/vnd.cakeshop.add-recipe+json
-            name: cakeshop.add-recipe
+            requestType: application/vnd.example.add-recipe+json
+            name: example.add-recipe
         (mapping):
-            requestType: application/vnd.cakeshop.remove-recipe+json
-            name: cakeshop.remove-recipe
+            requestType: application/vnd.example.remove-recipe+json
+            name: example.remove-recipe
         ...
 
     body:
-        application/vnd.cakeshop.add-recipe+json:
-            schema: !include json/schema/cakeshop.add-recipe.json
+        application/vnd.example.add-recipe+json:
+            schema: !include json/schema/example.add-recipe.json
             example: !include json/add-recipe.json
 
-        application/vnd.cakeshop.remove-recipe+json: !!null
+        application/vnd.example.remove-recipe+json: !!null
 
 /cakes/{cakeId}:
   description: |
@@ -33,12 +33,12 @@ protocols: [ HTTP, HTTPS ]
     description: |
         ...
         (mapping):
-            requestType: application/vnd.cakeshop.make-cake+json
-            name: cakeshop.make-cake
+            requestType: application/vnd.example.make-cake+json
+            name: example.make-cake
         ...
     body:
-        application/vnd.cakeshop.make-cake+json:
-            schema: !include json/schema/cakeshop.make-cake.json
+        application/vnd.example.make-cake+json:
+            schema: !include json/schema/example.make-cake.json
             example: !include json/make-cake.json
 
 
@@ -50,10 +50,10 @@ protocols: [ HTTP, HTTPS ]
     description: |
         ...
         (mapping):
-            requestType: application/vnd.cakeshop.order-cake+json
-            name: cakeshop.order-cake
+            requestType: application/vnd.example.order-cake+json
+            name: example.order-cake
         ...
     body:
-        application/vnd.cakeshop.order-cake+json:
-            schema: !include json/schema/cakeshop.order-cake.json
+        application/vnd.example.order-cake+json:
+            schema: !include json/schema/example.order-cake.json
             example: !include json/order-cake.json

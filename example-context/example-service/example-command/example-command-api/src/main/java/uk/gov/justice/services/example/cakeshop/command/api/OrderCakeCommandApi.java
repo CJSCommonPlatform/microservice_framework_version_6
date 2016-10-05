@@ -15,7 +15,7 @@ public class OrderCakeCommandApi {
     @Inject
     Sender sender;
 
-    @Handles("cakeshop.order-cake")
+    @Handles("example.order-cake")
     public void orderCake(final JsonEnvelope command) {
         sender.send(command);
     }

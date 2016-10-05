@@ -25,7 +25,7 @@ public class CakeOrderedEventListener {
     @Inject
     JsonObjectToObjectConverter converter;
 
-    @Handles("cakeshop.cake-ordered")
+    @Handles("example.cake-ordered")
     public void handle(final JsonEnvelope envelope) {
         logger.info("=============> Inside cake-ordered Event Listener");
         final CakeOrder cakeOrder = converter.convert(envelope.payloadAsJsonObject(), CakeOrder.class);

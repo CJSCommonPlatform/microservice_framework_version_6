@@ -43,7 +43,7 @@ public class AddRecipeCommandHandler {
     @Inject
     Enveloper enveloper;
 
-    @Handles("cakeshop.add-recipe")
+    @Handles("example.add-recipe")
     public void addRecipe(final JsonEnvelope command) throws EventStreamException {
 
         LOGGER.info("=============> Inside add-recipe Command Handler. RecipeId: " + command.payloadAsJsonObject().getString(FIELD_RECIPE_ID));

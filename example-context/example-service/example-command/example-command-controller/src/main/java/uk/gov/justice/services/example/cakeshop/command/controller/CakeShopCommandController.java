@@ -19,28 +19,28 @@ public class CakeShopCommandController {
     @Inject
     Sender sender;
 
-    @Handles("cakeshop.add-recipe")
+    @Handles("example.add-recipe")
     public void addRecipe(final JsonEnvelope command) {
         LOGGER.trace("=============> Inside add-recipe Command Handler");
 
         sender.send(command);
     }
 
-    @Handles("cakeshop.remove-recipe")
+    @Handles("example.remove-recipe")
     public void removeRecipe(final JsonEnvelope command) {
         LOGGER.trace("=============> Inside remove-recipe Command Handler");
 
         sender.send(command);
     }
 
-    @Handles("cakeshop.make-cake")
+    @Handles("example.make-cake")
     public void makeCake(final JsonEnvelope command) {
         LOGGER.trace("=============> Inside make-cake Command Handler");
 
         sender.send(command);
     }
 
-    @Handles("cakeshop.order-cake")
+    @Handles("example.order-cake")
     public void orderCake(final JsonEnvelope command) {
         LOGGER.trace("=============> Inside order-cake Command Handler");
 

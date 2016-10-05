@@ -18,7 +18,7 @@ public class AddRecipeCommandApi {
     @Inject
     Sender sender;
 
-    @Handles("cakeshop.add-recipe")
+    @Handles("example.add-recipe")
     public void addRecipe(final JsonEnvelope command) {
         sender.send(command);
     }

@@ -2,21 +2,21 @@
 title: API Using media type in the URL
 baseUri: message://command/handler/message/cakeshop
 version: v1
-/cakeshop.handler.command:
+/example.handler.command:
   post:
     body:
-        application/vnd.cakeshop.add-recipe+json:
-            schema: !include json/schema/cakeshop.add-recipe.json
+        application/vnd.example.add-recipe+json:
+            schema: !include json/schema/example.add-recipe.json
             example: !include json/add-recipe.json
 
-        application/vnd.cakeshop.remove-recipe+json:
-            schema: !include json/schema/cakeshop.remove-recipe.json
+        application/vnd.example.remove-recipe+json:
+            schema: !include json/schema/example.remove-recipe.json
             example: !include json/remove-recipe.json
 
-        application/vnd.cakeshop.make-cake+json:
-            schema: !include json/schema/cakeshop.make-cake.json
+        application/vnd.example.make-cake+json:
+            schema: !include json/schema/example.make-cake.json
             example: !include json/make-cake.json
 
-        application/vnd.cakeshop.order-cake+json:
-            schema: !include json/schema/cakeshop.order-cake.json
+        application/vnd.example.order-cake+json:
+            schema: !include json/schema/example.order-cake.json
             example: !include json/order-cake.json

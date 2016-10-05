@@ -11,8 +11,8 @@ protocols: [ HTTP, HTTPS ]
     description: |
         ...
         (mapping):
-            responseType: application/vnd.cakeshop.recipes+json
-            name: cakeshop.search-recipes
+            responseType: application/vnd.example.recipes+json
+            name: example.search-recipes
         ...
     queryParameters:
         pagesize:
@@ -30,8 +30,8 @@ protocols: [ HTTP, HTTPS ]
     responses:
       200:
         body:
-          application/vnd.cakeshop.recipes+json:
-            schema: !include json/schema/cakeshop.search-recipes.json
+          application/vnd.example.recipes+json:
+            schema: !include json/schema/example.search-recipes.json
             example: !include json/recipes.json
 
 /recipes/{recipeId}:
@@ -40,14 +40,14 @@ protocols: [ HTTP, HTTPS ]
     description: |
         ...
         (mapping):
-            responseType: application/vnd.cakeshop.recipe+json
-            name: cakeshop.get-recipe
+            responseType: application/vnd.example.recipe+json
+            name: example.get-recipe
         ...
     responses:
       200:
         body:
-          application/vnd.cakeshop.recipe+json:
-            schema: !include json/schema/cakeshop.get-recipe.json
+          application/vnd.example.recipe+json:
+            schema: !include json/schema/example.get-recipe.json
             example: !include json/recipe.json
 
 /orders/{orderId}:
@@ -56,12 +56,12 @@ protocols: [ HTTP, HTTPS ]
     description: |
         ...
         (mapping):
-            responseType: application/vnd.cakeshop.order+json
-            name: cakeshop.get-order
+            responseType: application/vnd.example.order+json
+            name: example.get-order
         ...
     responses:
       200:
         body:
-          application/vnd.cakeshop.order+json:
-            schema: !include json/schema/cakeshop.get-order.json
+          application/vnd.example.order+json:
+            schema: !include json/schema/example.get-order.json
             example: !include json/order.json

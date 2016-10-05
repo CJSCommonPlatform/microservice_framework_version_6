@@ -2,19 +2,19 @@
 title: API Using media type in the URL
 baseUri: message://event/listener/message/cakeshop
 version: v1
-/cakeshop.event:
+/example.event:
   post:
     body:
-        application/vnd.cakeshop.recipe-added+json:
-            schema: !include json/schema/cakeshop.recipe-added.json
+        application/vnd.example.recipe-added+json:
+            schema: !include json/schema/example.recipe-added.json
             example: !include json/add-recipe.json
 
-        application/vnd.cakeshop.recipe-removed+json:
-            schema: !include json/schema/cakeshop.recipe-removed.json
+        application/vnd.example.recipe-removed+json:
+            schema: !include json/schema/example.recipe-removed.json
             example: !include json/recipe-removed.json
 
-        application/vnd.cakeshop.cake-made+json:
-            schema: !include json/schema/cakeshop.cake-made.json
+        application/vnd.example.cake-made+json:
+            schema: !include json/schema/example.cake-made.json
             example: !include json/make-cake.json
 
-        application/vnd.cakeshop.cake-ordered+json:
+        application/vnd.example.cake-ordered+json:

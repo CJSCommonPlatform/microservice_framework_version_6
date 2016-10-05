@@ -15,7 +15,7 @@ public class MakeCakeCommandApi {
     @Inject
     Sender sender;
 
-    @Handles("cakeshop.make-cake")
+    @Handles("example.make-cake")
     public void handle(final JsonEnvelope envelope) {
         sender.send(envelope);
     }

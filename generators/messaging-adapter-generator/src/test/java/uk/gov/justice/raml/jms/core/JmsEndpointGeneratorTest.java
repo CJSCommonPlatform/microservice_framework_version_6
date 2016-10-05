@@ -724,6 +724,24 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                 propertyName(equalTo("subscriptionName")),
                 propertyName(equalTo("subscriptionDurability"))))));
     }
+    
+    @Test
+    public void shouldCreateAnnotatedEventListenerEndpointWithSharedSubscriptionsPropertySetToTrue() throws Exception {
+           generator.run(
+                   messagingRamlWithDefaults()
+                             .withDefaultMessagingBaseUri()
+                             .with(resource()
+                                     .withRelativeUri("/structure.event")
+                                     .with(httpAction(POST, "application/vnd.structure.abc+json")))
+                             .build(),
+                     configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+     
+             Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "StructureEventJmsListener");
+             assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
+             assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
+                     hasItemInArray(allOf(propertyName(equalTo("shareSubscriptions")),
+                              propertyValue(equalTo("true")))));
+    }
 
 
     private Object instantiate(Class<?> resourceClass) throws InstantiationException, IllegalAccessException {

@@ -62,7 +62,7 @@ class MessageListenerCodeGenerator {
     private static final String DURABLE = "Durable";
     private static final String CLIENT_ID = "clientId";
     private static final String SUBSCRIPTION_NAME = "subscriptionName";
-
+    private static final String SHARE_SUBSCRIPTIONS = "shareSubscriptions";
     /**
      * Create an implementation of the {@link MessageListener}.
      *
@@ -157,7 +157,10 @@ class MessageListenerCodeGenerator {
                 .addMember(ACTIVATION_CONFIG_PARAMETER, "$L",
                         generateActivationConfigPropertyAnnotation(DESTINATION_TYPE, component.inputDestinationType().getName()))
                 .addMember(ACTIVATION_CONFIG_PARAMETER, "$L",
-                        generateActivationConfigPropertyAnnotation(DESTINATION_LOOKUP, resourceUri.destinationName()));
+                        generateActivationConfigPropertyAnnotation(DESTINATION_LOOKUP, resourceUri.destinationName()))
+                .addMember(ACTIVATION_CONFIG_PARAMETER, "$L",
+                                generateActivationConfigPropertyAnnotation(SHARE_SUBSCRIPTIONS, "true"));
+
 
         if (!listenToAllMessages) {
             builder.addMember(ACTIVATION_CONFIG_PARAMETER, "$L",

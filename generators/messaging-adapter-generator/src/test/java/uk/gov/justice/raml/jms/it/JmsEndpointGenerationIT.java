@@ -5,6 +5,21 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import java.util.UUID;
+
+import javax.annotation.Resource;
+import javax.inject.Inject;
+import javax.jms.JMSException;
+import javax.jms.Queue;
+import javax.jms.Topic;
+
+import org.apache.openejb.jee.WebApp;
+import org.apache.openejb.junit.ApplicationComposer;
+import org.apache.openejb.testing.Classes;
+import org.apache.openejb.testing.Module;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import uk.gov.justice.api.PublicEventJmsListener;
 import uk.gov.justice.api.StructureControllerCommandJmsListener;
 import uk.gov.justice.api.StructureEventJmsListener;
@@ -20,21 +35,6 @@ import uk.gov.justice.services.generators.test.utils.interceptor.RecordingInterc
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
-
-import java.util.UUID;
-
-import javax.annotation.Resource;
-import javax.inject.Inject;
-import javax.jms.JMSException;
-import javax.jms.Queue;
-import javax.jms.Topic;
-
-import org.apache.openejb.jee.WebApp;
-import org.apache.openejb.junit.ApplicationComposer;
-import org.apache.openejb.testing.Classes;
-import org.apache.openejb.testing.Module;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /**
  * Integration tests for the generated JAX-RS classes.

@@ -1,41 +1,58 @@
 package uk.gov.justice.raml.jms.it;
 
 import static javax.json.Json.createObjectBuilder;
+import static org.junit.Assert.fail;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 
 import java.util.Properties;
 
-import javax.annotation.Resource;
 import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.json.JsonObject;
-import javax.naming.NamingException;
 
-import org.apache.cxf.common.i18n.Exception;
+import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
 import org.apache.openejb.OpenEjbContainer;
 import org.apache.openejb.testing.Configuration;
 import org.apache.openejb.testng.PropertiesBuilder;
 import org.apache.openejb.util.NetworkUtil;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import uk.gov.justice.artemis.EmbeddedArtemisServer;
 
 public abstract class AbstractJmsAdapterGenerationIT {
     private static int port = -1;
-    @Resource
-    private ConnectionFactory factory;
-    private Connection connection;
-    private Session session;
+
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractJmsAdapterGenerationIT.class);
+
+    private final static ActiveMQConnectionFactory cf = new ActiveMQConnectionFactory(
+                    "tcp://localhost:61616?broker.persistent=false&jms.useAsyncSend=false");
 
     @BeforeClass
     public static void beforeClass() {
         port = NetworkUtil.getNextAvailablePort();
+        try{
+            EmbeddedArtemisServer.startServer();
+        }catch(Throwable e){
+            LOG.error("", e);
+            fail(e.getMessage());
+        }
+    }
+
+    @AfterClass
+    public static void afterClass() {
+        try{
+            EmbeddedArtemisServer.stopServer();
+        }catch(Exception e){
+            LOG.error("", e);
+        }
     }
 
     @Configuration
@@ -46,29 +63,31 @@ public abstract class AbstractJmsAdapterGenerationIT {
                 .build();
     }
 
-    @Before
-    public void setup() throws Exception, JMSException, NamingException {
-        connection = factory.createConnection();
-        connection.start();
-        session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-    }
-
-    @After
-    public void after() throws JMSException {
-        connection.close();
-        session.close();
-    }
-
     protected void sendEnvelope(String metadataId, String commandName, Destination queue) throws JMSException {
         sendEnvelope(metadataId, commandName, queue, createObjectBuilder().build());
     }
 
     protected void sendEnvelope(String metadataId, String commandName, Destination queue, JsonObject payload) throws JMSException {
-        TextMessage message = session.createTextMessage();
-        message.setText(envelope().with(metadataOf(metadataId, commandName)).toJsonString());
-        message.setStringProperty("CPPNAME", commandName);
-        try (MessageProducer producer = session.createProducer(queue)) {
-            producer.send(message);
+        try (final Connection connection = getConnection();
+                        final Session session = connection.createSession()) {
+            final TextMessage message = session.createTextMessage();
+            message.setText(envelope().with(metadataOf(metadataId, commandName)).toJsonString());
+            message.setStringProperty("CPPNAME", commandName);
+            try (final MessageProducer producer = session.createProducer(queue)) {
+                producer.send(message);
+            }
         }
     }
+    
+    private Connection getConnection() throws JMSException {
+        final Connection connection = cf.createConnection();
+        connection.start();
+        try {
+            Thread.sleep(300);
+        } catch (InterruptedException e) {
+            LOG.warn(e.toString());
+        }
+        return connection;
+    }
+
 }

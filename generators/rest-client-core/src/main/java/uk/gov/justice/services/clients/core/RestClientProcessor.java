@@ -193,13 +193,16 @@ public class RestClientProcessor {
     }
 
     private String createBaseUri(final EndpointDefinition definition) {
-        // TODO: Port and same service check and temporary solutions
-        return isEmpty(port) || isSameService(definition) ? definition.getBaseUri() : definition.getBaseUri().replace(":8080", ":" + port);
+        final String defaultPort = System.getProperty("DEFAULT_PORT", "8080");
+        final String portToUse = isEmpty(port) || isSameService(definition) ? defaultPort : port;
+
+        return definition.getBaseUri().replace(":8080", ":" + portToUse);
     }
 
     private boolean isSameService(final EndpointDefinition definition) {
         final String currentServiceName = extractServiceFromContext(appName);
         final String remoteServiceName = extractServiceFromContext(extractContextFromUri(definition.getBaseUri()));
+
         return currentServiceName.equals(remoteServiceName);
     }
 

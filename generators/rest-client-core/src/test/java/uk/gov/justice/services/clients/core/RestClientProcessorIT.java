@@ -10,6 +10,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.lang.String.format;
@@ -42,6 +43,9 @@ import java.nio.charset.Charset;
 import java.util.Set;
 import java.util.UUID;
 
+import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
+import com.github.tomakehurst.wiremock.http.HttpHeaders;
+import com.github.tomakehurst.wiremock.http.ResponseDefinition;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Resources;
@@ -151,6 +155,7 @@ public class RestClientProcessorIT {
     public void shouldDoRemoteGetWithPortFromSystemProperty() throws Exception {
         System.setProperty(MOCK_SERVER_PORT, "8089");
         initialiseRestClientProcessor();
+        initialiseRestClientProcessor();
 
         final String path = "/my/resource";
         final String mimetype = format("application/vnd.%s+json", QUERY_NAME);
@@ -173,7 +178,8 @@ public class RestClientProcessorIT {
     @Test
     public void shouldDoLocalGetIgnoringPortFromSystemProperty() throws Exception {
         System.setProperty(MOCK_SERVER_PORT, "10000");
-        configureFor(8080);
+        System.setProperty("DEFAULT_PORT", "8089");
+        configureFor(8089);
         initialiseRestClientProcessor();
 
         final String path = "/my/resource";
@@ -189,7 +195,12 @@ public class RestClientProcessorIT {
                         .withHeader(CONTENT_TYPE, mimetype)
                         .withBody(responseWithMetadata())));
 
-        EndpointDefinition endpointDefinition = new EndpointDefinition(LOCAL_BASE_URI_WITH_DIFFERENT_PORT, path, emptySet(), emptySet(), QUERY_NAME);
+        final EndpointDefinition endpointDefinition = new EndpointDefinition(
+                LOCAL_BASE_URI_WITH_DIFFERENT_PORT,
+                path,
+                emptySet(),
+                emptySet(),
+                QUERY_NAME);
 
         validateResponse(restClientProcessor.get(endpointDefinition, requestEnvelopeParamAParamB()), envelopeWithMetadataAsJson);
     }

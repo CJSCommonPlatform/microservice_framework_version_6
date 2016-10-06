@@ -75,11 +75,12 @@ public class RemoteExampleEventProcessorIT {
     private static final UUID QUERY_ID = UUID.randomUUID();
     private static final UUID USER_ID = UUID.randomUUID();
     private static final String USER_NAME = "John Smith";
+    private static final String MOCK_SERVER_PORT = "mock.server.port";
 
     private static int port = -1;
 
     @Rule
-    public WireMockRule wireMockRule = new WireMockRule(8080);
+    public WireMockRule wireMockRule = new WireMockRule(9090);
 
     @Inject
     Sender sender;
@@ -87,6 +88,7 @@ public class RemoteExampleEventProcessorIT {
     @BeforeClass
     public static void beforeClass() {
         port = NetworkUtil.getNextAvailablePort();
+        System.setProperty(MOCK_SERVER_PORT, "9090");
     }
 
     @Configuration

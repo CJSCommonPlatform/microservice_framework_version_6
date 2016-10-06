@@ -16,8 +16,14 @@ import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 
+import uk.gov.justice.services.clients.core.webclient.BaseUriFactory;
+import uk.gov.justice.services.clients.core.webclient.ContextMatcher;
+import uk.gov.justice.services.clients.core.DefaultServerPortProvider;
+import uk.gov.justice.services.clients.core.webclient.MockServerPortProvider;
 import uk.gov.justice.services.clients.core.RestClientHelper;
 import uk.gov.justice.services.clients.core.RestClientProcessor;
+import uk.gov.justice.services.clients.core.webclient.WebTargetFactory;
+import uk.gov.justice.services.common.configuration.JndiBasedServiceContextNameProvider;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -101,16 +107,36 @@ public class RemoteExampleEventProcessorIT {
 
     @Module
     @Classes(cdi = true, value = {
-            RemoteExampleCommandApi.class,
-            RestClientProcessor.class,
-            RestClientHelper.class,
+            AccessControlFailureMessageGenerator.class,
+            AccessControlService.class,
+            AllowAllPolicyEvaluator.class,
+            BaseUriFactory.class,
+            BeanInstantiater.class,
+            ContextMatcher.class,
+            DefaultServerPortProvider.class,
             DispatcherCache.class,
-            RequesterProducer.class,
-            ServiceComponentObserver.class,
-
-            InterceptorChainProcessorProducer.class,
+            DispatcherCache.class,
+            DispatcherFactory.class,
+            EmptySystemUserProvider.class,
+            Enveloper.class,
             InterceptorCache.class,
             InterceptorChainProcessor.class,
+            InterceptorChainProcessorProducer.class,
+            JndiBasedServiceContextNameProvider.class,
+            JsonObjectEnvelopeConverter.class,
+            LoggerProducer.class,
+            MockServerPortProvider.class,
+            ObjectMapperProducer.class,
+            ObjectToJsonValueConverter.class,
+            PolicyEvaluator.class,
+            RemoteExampleCommandApi.class,
+            RequesterProducer.class,
+            RestClientHelper.class,
+            RestClientProcessor.class,
+            ServiceComponentObserver.class,
+            StringToJsonObjectConverter.class,
+            SystemUserUtil.class,
+            WebTargetFactory.class,
 
             // TODO: Remove the next 6 classes when sender is migrated fully to dispatcher system
             SenderProducer.class,
@@ -118,25 +144,7 @@ public class RemoteExampleEventProcessorIT {
             ComponentDestination.class,
             DefaultJmsEnvelopeSender.class,
             DefaultJmsDestinations.class,
-            EnvelopeConverter.class,
-
-            StringToJsonObjectConverter.class,
-            JsonObjectEnvelopeConverter.class,
-            ObjectToJsonValueConverter.class,
-            ObjectMapperProducer.class,
-            Enveloper.class,
-
-            AccessControlFailureMessageGenerator.class,
-            AllowAllPolicyEvaluator.class,
-            AccessControlService.class,
-            DispatcherCache.class,
-            DispatcherFactory.class,
-            PolicyEvaluator.class,
-
-            LoggerProducer.class,
-            EmptySystemUserProvider.class,
-            SystemUserUtil.class,
-            BeanInstantiater.class
+            EnvelopeConverter.class
     })
     public WebApp war() {
         return new WebApp()

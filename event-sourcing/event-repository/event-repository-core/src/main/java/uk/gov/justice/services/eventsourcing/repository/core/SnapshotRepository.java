@@ -8,34 +8,44 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Service to store and read snapshots.
+ * The interface Snapshot repository.
  */
 public interface SnapshotRepository {
 
     /**
-     * Stores an aggregate snapshot.
+     * Store snapshot.
      *
-     * @param AggregateSnapshot aggregateSnapshot
+     * @param AggregateSnapshot the aggregate snapshot
      */
     void storeSnapshot(final AggregateSnapshot AggregateSnapshot);
 
     /**
-     * Get an Optional Latest Aggregate Snapshot.
+     * Gets latest snapshot.
      *
      * @param <T>      the type parameter
-     * @param streamId the id of the stream to retrieve
+     * @param streamId the stream id
      * @param clazz    the clazz
-     * @return the Optional<AggregateSnapshot>. Never returns null.
+     * @return the latest snapshot
      */
     <T extends Aggregate> Optional<AggregateSnapshot<T>> getLatestSnapshot(final UUID streamId, final Class<T> clazz);
 
 
     /**
-     * deletes all snapshots.
+     * Remove all snapshots.
      *
      * @param <T>      the type parameter
-     * @param streamId the id of the stream to retrieve
+     * @param streamId the stream id
      * @param clazz    the clazz
      */
     <T extends Aggregate> void removeAllSnapshots(UUID streamId, Class<T> clazz);
+
+    /**
+     * Gets latest snapshot version.
+     *
+     * @param <T>      the type parameter
+     * @param streamId the stream id
+     * @param clazz    the clazz
+     * @return the latest snapshot version
+     */
+    <T extends Aggregate> long getLatestSnapshotVersion(UUID streamId, Class<T> clazz);
 }

@@ -55,7 +55,7 @@ public class EventLogJdbcRepository extends AbstractJdbcRepository {
      * Insert the given event into th event log.
      *
      * @param eventLog the event to insert
-     * @throws InvalidSequenceIdException if the version already exists or is null.
+     * @throws InvalidSequenceIdException  if the version already exists or is null.
      */
     public void insert(final EventLog eventLog) throws InvalidSequenceIdException {
 

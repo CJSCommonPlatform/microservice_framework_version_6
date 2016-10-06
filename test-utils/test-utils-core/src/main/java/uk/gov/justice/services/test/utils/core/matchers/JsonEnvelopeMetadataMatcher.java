@@ -5,13 +5,17 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 
 import uk.gov.justice.services.messaging.Metadata;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.hamcrest.Description;
-import org.hamcrest.TypeSafeMatcher;
+import org.hamcrest.TypeSafeDiagnosingMatcher;
 
-public class JsonEnvelopeMetadataMatcher extends TypeSafeMatcher<Metadata> {
+/**
+ * Matches the Metadata part of a JsonEnvelope. See {@link JsonEnvelopeMatcher} for usage example.
+ */
+public class JsonEnvelopeMetadataMatcher extends TypeSafeDiagnosingMatcher<Metadata> {
 
     private Optional<UUID> id = Optional.empty();
     private Optional<String> name = Optional.empty();
@@ -27,7 +31,14 @@ public class JsonEnvelopeMetadataMatcher extends TypeSafeMatcher<Metadata> {
 
     @Override
     public void describeTo(final Description description) {
-        description.appendText(format("Metadata that has ( name = %s ) ", name));
+        description.appendText("Metadata with ");
+        id.ifPresent(value -> description.appendText(format("id = %s, ", value)));
+        name.ifPresent(value -> description.appendText(format("name = %s, ", value)));
+        description.appendText(format("causationIds = %s, ", Arrays.toString(causationIds)));
+        userId.ifPresent(value -> description.appendText(format("userId = %s, ", value)));
+        sessionId.ifPresent(value -> description.appendText(format("sessionId = %s, ", value)));
+        streamId.ifPresent(value -> description.appendText(format("streamId = %s, ", value)));
+        version.ifPresent(value -> description.appendText(format("version = %s ", value)));
     }
 
     public JsonEnvelopeMetadataMatcher withName(final String name) {
@@ -66,13 +77,70 @@ public class JsonEnvelopeMetadataMatcher extends TypeSafeMatcher<Metadata> {
     }
 
     @Override
-    protected boolean matchesSafely(final Metadata metadata) {
-        return id.map(value -> value.equals(metadata.id())).orElse(true)
-                && name.map(value -> value.equals(metadata.name())).orElse(true)
-                && containsInAnyOrder(causationIds).matches(metadata.causation())
-                && userId.equals(metadata.userId())
-                && sessionId.equals(metadata.sessionId())
-                && streamId.equals(metadata.streamId())
-                && version.equals(metadata.version());
+    protected boolean matchesSafely(final Metadata metadata, final Description description) {
+        if (idIsSetAndDoesNotMatchWith(metadata)) {
+            description.appendText("Metadata with id = " + metadata.id());
+            return false;
+        }
+
+        if (nameIsSetAndDoesNotMatchWith(metadata)) {
+            description.appendText("Metadata with name = " + metadata.name());
+            return false;
+        }
+
+        if (causationIdsDoNotMatchWith(metadata)) {
+            description.appendText("Metadata with causationIds = " + metadata.causation());
+            return false;
+        }
+
+        if (userIdIsSetAndDoesNotMatchWith(metadata)) {
+            description.appendText("Metadata with userId = " + metadata.userId());
+            return false;
+        }
+
+        if (sessionIdIsSetAndDoesNotMatchWith(metadata)) {
+            description.appendText("Metadata with sessionId = " + metadata.sessionId());
+            return false;
+        }
+
+        if (streamIdIsSetAndDoesNotMatchWith(metadata)) {
+            description.appendText("Metadata with streamId = " + metadata.streamId());
+            return false;
+        }
+
+        if (versionIsSetAndDoesNotMatchWith(metadata)) {
+            description.appendText("Metadata with version = " + metadata.version());
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean idIsSetAndDoesNotMatchWith(final Metadata metadata) {
+        return !id.map(value -> value.equals(metadata.id())).orElse(true);
+    }
+
+    private boolean nameIsSetAndDoesNotMatchWith(final Metadata metadata) {
+        return !name.map(value -> value.equals(metadata.name())).orElse(true);
+    }
+
+    private boolean causationIdsDoNotMatchWith(final Metadata metadata) {
+        return !containsInAnyOrder(causationIds).matches(metadata.causation());
+    }
+
+    private boolean userIdIsSetAndDoesNotMatchWith(final Metadata metadata) {
+        return !userId.equals(metadata.userId());
+    }
+
+    private boolean sessionIdIsSetAndDoesNotMatchWith(final Metadata metadata) {
+        return !sessionId.equals(metadata.sessionId());
+    }
+
+    private boolean streamIdIsSetAndDoesNotMatchWith(final Metadata metadata) {
+        return !streamId.equals(metadata.streamId());
+    }
+
+    private boolean versionIsSetAndDoesNotMatchWith(final Metadata metadata) {
+        return !version.equals(metadata.version());
     }
 }

@@ -6,9 +6,13 @@ import com.jayway.jsonpath.ReadContext;
 import com.jayway.jsonpath.matchers.IsJson;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeMatcher;
+import org.hamcrest.TypeSafeDiagnosingMatcher;
 
-public class JsonEnvelopePayloadMatcher extends TypeSafeMatcher<JsonObject> {
+/**
+ * Matches the Json Payload part of a JsonEnvelope. See {@link JsonEnvelopeMatcher} for usage
+ * example.
+ */
+public class JsonEnvelopePayloadMatcher extends TypeSafeDiagnosingMatcher<JsonObject> {
 
     private IsJson<Object> matcher;
 
@@ -19,9 +23,9 @@ public class JsonEnvelopePayloadMatcher extends TypeSafeMatcher<JsonObject> {
     @Override
     public void describeTo(final Description description) {
         description
-                .appendText("Json payload (")
+                .appendText("Payload ")
                 .appendDescriptionOf(matcher)
-                .appendText(") ");
+                .appendText(" ");
     }
 
     public JsonEnvelopePayloadMatcher isJson(Matcher<? super ReadContext> matcher) {
@@ -30,8 +34,15 @@ public class JsonEnvelopePayloadMatcher extends TypeSafeMatcher<JsonObject> {
     }
 
     @Override
-    protected boolean matchesSafely(final JsonObject jsonObject) {
+    protected boolean matchesSafely(final JsonObject jsonObject, final Description description) {
         final String jsonAsString = jsonObject.toString();
-        return matcher.matches(jsonAsString);
+
+        if (!matcher.matches(jsonAsString)) {
+            description.appendText("Payload ");
+            matcher.describeMismatch(jsonAsString, description);
+            return false;
+        }
+
+        return true;
     }
 }

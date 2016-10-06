@@ -23,13 +23,13 @@ public interface EventRepository {
     Stream<JsonEnvelope> getByStreamId(final UUID streamId);
 
     /**
-     * Get a stream of envelopes from a given version, ordered by sequence id.
+     * Get a stream of envelopes after a given version, ordered by sequence id.
      *
      * @param streamId   the id of the stream to retrieve
      * @param sequenceId the sequence id to read the stream from
      * @return the stream of envelopes. Never returns null.
      */
-    Stream<JsonEnvelope> getByStreamIdAndSequenceId(final UUID streamId, final Long sequenceId);
+    Stream<JsonEnvelope> getByStreamIdAfterSequenceId(final UUID streamId, final Long sequenceId);
 
     /**
      * Stores the given envelope into the event stream.

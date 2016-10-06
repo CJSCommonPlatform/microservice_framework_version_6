@@ -5,18 +5,20 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.STREAM;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.STREAM_ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.VERSION;
 
+import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.services.eventsourcing.publisher.core.EventPublisher;
 import uk.gov.justice.services.eventsourcing.repository.core.EventRepository;
 import uk.gov.justice.services.eventsourcing.repository.core.exception.StoreEventRequestFailedException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
-import uk.gov.justice.services.eventsourcing.source.core.exception.InvalidStreamVersionRuntimeException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.VersionMismatchException;
+import uk.gov.justice.services.eventsourcing.source.core.snapshot.SnapshotService;
 import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectMetadata;
 import uk.gov.justice.services.messaging.JsonObjects;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -32,10 +34,13 @@ import org.slf4j.Logger;
 /**
  * Manages operations on {@link EventStream}
  */
-public class EventStreamManager {
+public class SnapshotAwareEventStreamManager {
 
     @Inject
     Logger logger;
+
+    @Inject
+    SnapshotService snapshotService;
 
     @Inject
     EventRepository eventRepository;
@@ -68,8 +73,8 @@ public class EventStreamManager {
      * @throws EventStreamException if an event could not be appended
      */
     @Transactional
-    public void append(final UUID id, final Stream<JsonEnvelope> events) throws EventStreamException {
-        append(id, events, Optional.empty());
+    public <T extends Aggregate> void append(final UUID id, final Stream<JsonEnvelope> events, Map<Class<T>, T> aggregatesMap) throws EventStreamException {
+        append(id, events, Optional.empty(), aggregatesMap);
     }
 
     /**
@@ -80,11 +85,11 @@ public class EventStreamManager {
      * @throws EventStreamException if an event could not be appended
      */
     @Transactional
-    public void appendAfter(final UUID id, final Stream<JsonEnvelope> events, final Long version) throws EventStreamException {
+    public <T extends Aggregate> void appendAfter(final UUID id, final Stream<JsonEnvelope> events, final Long version, Map<Class<T>, T> aggregatesMap) throws EventStreamException {
         if (version == null) {
             throw new EventStreamException(String.format("Failed to append to stream %s. Version must not be null.", id));
         }
-        append(id, events, Optional.of(version));
+        append(id, events, Optional.of(version), aggregatesMap);
     }
 
     /**
@@ -96,7 +101,8 @@ public class EventStreamManager {
         return eventRepository.getCurrentSequenceIdForStream(id);
     }
 
-    private void append(final UUID id, final Stream<JsonEnvelope> events, final Optional<Long> versionFrom) throws EventStreamException {
+    private <T extends Aggregate> void append(final UUID id, final Stream<JsonEnvelope> events, final Optional<Long> versionFrom, Map<Class<T>, T> aggregatesMap)
+            throws EventStreamException {
         final List<JsonEnvelope> envelopeList = events.collect(Collectors.toList());
 
         Long currentVersion = eventRepository.getCurrentSequenceIdForStream(id);
@@ -111,6 +117,9 @@ public class EventStreamManager {
             } catch (StoreEventRequestFailedException e) {
                 throw new EventStreamException(String.format("Failed to append event to Event Store %s", event.metadata().id()), e);
             }
+        }
+        for (final Aggregate aggregate : aggregatesMap.values()) {
+            snapshotService.attemptAggregateStore(id, currentVersion, aggregate, snapshotService.getLatestSnapshotVersion(id, aggregate.getClass()));
         }
     }
 

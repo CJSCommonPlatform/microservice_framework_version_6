@@ -77,7 +77,7 @@ public class JdbcEventRepositoryTest {
         when(eventLogJdbcRepository.findByStreamIdFromSequenceIdOrderBySequenceIdAsc(STREAM_ID, VERSION_1)).thenReturn(Arrays.asList(eventLog).stream());
         when(eventLogConverter.createEnvelope(eventLog)).thenReturn(envelope);
 
-        Stream<JsonEnvelope> streamOfEnvelopes = jdbcEventRepository.getByStreamIdAndSequenceId(STREAM_ID, VERSION_1);
+        Stream<JsonEnvelope> streamOfEnvelopes = jdbcEventRepository.getByStreamIdAfterSequenceId(STREAM_ID, VERSION_1);
 
         assertThat(streamOfEnvelopes, not(nullValue()));
         assertThat(streamOfEnvelopes.findFirst().get(), equalTo(envelope));
@@ -91,12 +91,12 @@ public class JdbcEventRepositoryTest {
 
     @Test(expected = InvalidStreamIdException.class)
     public void shouldThrowExceptionOnNullStreamIdWhenGettingStreamByStreamIdAndSequence() throws Exception {
-        jdbcEventRepository.getByStreamIdAndSequenceId(null, VERSION_1);
+        jdbcEventRepository.getByStreamIdAfterSequenceId(null, VERSION_1);
     }
 
     @Test(expected = JdbcRepositoryException.class)
     public void shouldThrowExceptionOnNullSequenceIdWhenGettingStreamByStreamIdAndSequence() throws Exception {
-        jdbcEventRepository.getByStreamIdAndSequenceId(STREAM_ID, null);
+        jdbcEventRepository.getByStreamIdAfterSequenceId(STREAM_ID, null);
     }
 
     @Test

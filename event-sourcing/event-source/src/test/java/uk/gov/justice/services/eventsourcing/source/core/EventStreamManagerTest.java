@@ -104,7 +104,7 @@ public class EventStreamManagerTest {
     }
 
     @Test
-    public void shouldAppendToStreamFromVersion() throws Exception {
+    public void shouldAppendToStreamAFromVersion() throws Exception {
         when(eventRepository.getCurrentSequenceIdForStream(STREAM_ID)).thenReturn(CURRENT_VERSION);
 
         eventStreamManager.appendAfter(STREAM_ID,
@@ -167,22 +167,15 @@ public class EventStreamManagerTest {
         verify(eventRepository).getByStreamId(STREAM_ID);
     }
 
-    @Test(expected = InvalidStreamVersionRuntimeException.class)
-    public void shouldThrowExceptionWhenReadingFromInvalidVersion() {
-        when(eventRepository.getCurrentSequenceIdForStream(STREAM_ID)).thenReturn(CURRENT_VERSION);
-
-        eventStreamManager.readFrom(STREAM_ID, INVALID_VERSION);
-    }
-
     @Test
-    public void shouldReadStreamFromVersion() {
-        when(eventRepository.getByStreamIdAndSequenceId(STREAM_ID, CURRENT_VERSION)).thenReturn(eventStream);
+    public void shouldReadStreamAfterVersion() {
+        when(eventRepository.getByStreamIdAfterSequenceId(STREAM_ID, CURRENT_VERSION+1)).thenReturn(eventStream);
         when(eventRepository.getCurrentSequenceIdForStream(STREAM_ID)).thenReturn(CURRENT_VERSION);
 
-        Stream<JsonEnvelope> actualEnvelopeEventStream = eventStreamManager.readFrom(STREAM_ID, CURRENT_VERSION);
+        Stream<JsonEnvelope> actualEnvelopeEventStream = eventStreamManager.readFrom(STREAM_ID, CURRENT_VERSION+1);
 
         assertThat(actualEnvelopeEventStream, equalTo(eventStream));
-        verify(eventRepository).getByStreamIdAndSequenceId(STREAM_ID, CURRENT_VERSION);
+        verify(eventRepository).getByStreamIdAfterSequenceId(STREAM_ID, CURRENT_VERSION+1);
     }
 
     @Test

@@ -17,6 +17,7 @@
         <module>event-publisher</module>
         <module>event-repository</module>
         <module>event-stream</module>
+        <module>event-snapshot-service</module>
     </modules>
 
 </project>

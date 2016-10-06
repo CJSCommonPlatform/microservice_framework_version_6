@@ -44,7 +44,7 @@ public class JdbcEventRepository implements EventRepository {
     }
 
     @Override
-    public Stream<JsonEnvelope> getByStreamIdAndSequenceId(final UUID streamId, final Long sequenceId) {
+    public Stream<JsonEnvelope> getByStreamIdAfterSequenceId(final UUID streamId, final Long sequenceId) {
         if (streamId == null) {
             throw new InvalidStreamIdException("streamId is null.");
         } else if (sequenceId == null) {

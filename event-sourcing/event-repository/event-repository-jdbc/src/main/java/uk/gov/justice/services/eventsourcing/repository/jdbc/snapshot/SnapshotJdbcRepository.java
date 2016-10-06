@@ -7,6 +7,7 @@ import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.domain.snapshot.AggregateSnapshot;
 import uk.gov.justice.services.eventsourcing.repository.core.SnapshotRepository;
 import uk.gov.justice.services.jdbc.persistence.AbstractJdbcRepository;
+import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -36,6 +37,8 @@ public class SnapshotJdbcRepository extends AbstractJdbcRepository implements Sn
     private static final String SQL_FIND_LATEST_BY_STREAM_ID = "SELECT * FROM snapshot WHERE stream_id=? ORDER BY version_id DESC";
     private static final String SQL_INSERT_EVENT_LOG = "INSERT INTO snapshot (stream_id, version_id, type, aggregate ) VALUES(?, ?, ?, ?)";
     private static final String DELETE_ALL_SNAPSHOTS_FOR_STREAM_ID_AND_CLASS = "delete from snapshot where stream_id =? and  type=?";
+    private static final String SQL_CURRENT_SNAPSHOT_VERSION_ID = "SELECT version_id FROM snapshot WHERE stream_id=? ORDER BY version_id DESC";
+
 
     protected static final String READING_STREAM_EXCEPTION = "Exception while reading stream %s";
     private static final String JNDI_DS_EVENT_STORE_PATTERN = "java:/app/%s/DS.eventstore";
@@ -80,6 +83,24 @@ public class SnapshotJdbcRepository extends AbstractJdbcRepository implements Sn
             ps.executeUpdate();
         } catch (SQLException | NamingException e) {
             logger.error(format("Exception while removing snapshots %s of stream %s", clazz, streamId), e);
+        }
+    }
+
+    @Override
+    public <T extends Aggregate> long getLatestSnapshotVersion(UUID streamId, Class<T> clazz) {
+
+        try (final Connection connection = getDataSource().getConnection();
+             final PreparedStatement preparedStatement = connection.prepareStatement(SQL_CURRENT_SNAPSHOT_VERSION_ID)) {
+            preparedStatement.setObject(1, streamId);
+
+            try (final ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getLong(1);
+                }
+                return 0;
+            }
+        } catch (SQLException | NamingException e) {
+            throw new JdbcRepositoryException(format(READING_STREAM_EXCEPTION, streamId), e);
         }
     }
 

@@ -5,6 +5,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Fixed
+- Event buffer connection held open after exception in event listener
+
 ### Added
 - Hamcrest Matchers for asserting JsonEnvelopes contained within either Streams or Lists
 

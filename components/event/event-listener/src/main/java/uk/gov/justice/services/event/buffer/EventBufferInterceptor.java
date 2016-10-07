@@ -1,11 +1,13 @@
 package uk.gov.justice.services.event.buffer;
 
+import static java.util.stream.Collectors.toList;
 import static uk.gov.justice.services.core.interceptor.InterceptorContext.copyWithInput;
 
 import uk.gov.justice.services.core.interceptor.Interceptor;
 import uk.gov.justice.services.core.interceptor.InterceptorChain;
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
 import uk.gov.justice.services.event.buffer.api.EventBufferService;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -37,8 +39,10 @@ public class EventBufferInterceptor implements Interceptor {
     }
 
     private Stream<InterceptorContext> streamFromEventBufferFor(final InterceptorContext interceptorContext) {
-        return eventBufferService.currentOrderedEventsWith(interceptorContext.inputEnvelope())
-                .map(jsonEnvelope -> copyWithInput(interceptorContext, jsonEnvelope));
+        try (final Stream<JsonEnvelope> envelopeStream = eventBufferService.currentOrderedEventsWith(interceptorContext.inputEnvelope())) {
+            final List<JsonEnvelope> envelopes = envelopeStream.collect(toList());
+            return envelopes.stream().map(jsonEnvelope -> copyWithInput(interceptorContext, jsonEnvelope));
+        }
     }
 
     @Override

@@ -2,7 +2,7 @@ package uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog;
 
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.util.DateTimeProvider;
-import uk.gov.justice.services.eventsourcing.common.exception.InvalidStreamIdException;
+import uk.gov.justice.services.eventsourcing.repository.core.exception.InvalidStreamIdException;
 import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
@@ -83,5 +83,4 @@ public class EventLogConverter {
         return jsonObjectEnvelopeConverter.extractPayloadFromEnvelope(
                 jsonObjectEnvelopeConverter.fromEnvelope(envelope)).toString();
     }
-
 }

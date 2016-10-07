@@ -8,8 +8,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertThat;
 
-import uk.gov.justice.services.common.converter.ZonedDateTimes;
-import uk.gov.justice.services.eventsourcing.common.exception.InvalidSequenceIdException;
+import uk.gov.justice.services.eventsourcing.repository.core.exception.InvalidSequenceIdException;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 import uk.gov.justice.services.test.utils.persistence.AbstractJdbcRepositoryIT;
 
@@ -112,5 +111,4 @@ public class EventLogRepositoryJdbcIT extends AbstractJdbcRepositoryIT<EventLogJ
     private EventLog eventLogOf(UUID id, long sequenceId) {
         return eventLogOf(id, NAME, STREAM_ID, sequenceId, PAYLOAD_JSON, METADATA_JSON, TIMESTAMP);
     }
-
 }

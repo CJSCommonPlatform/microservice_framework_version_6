@@ -1,33 +1,51 @@
 package uk.gov.justice.services.eventsourcing.repository.core;
 
 
-import uk.gov.justice.services.eventsourcing.common.exception.DuplicateSnapshotException;
-import uk.gov.justice.services.eventsourcing.common.exception.InvalidSequenceIdException;
-import uk.gov.justice.services.eventsourcing.common.snapshot.AggregateSnapshot;
+import uk.gov.justice.domain.aggregate.Aggregate;
+import uk.gov.justice.domain.snapshot.AggregateSnapshot;
 
 import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Service to store and read snapshots.
+ * The interface Snapshot repository.
  */
 public interface SnapshotRepository {
 
     /**
-     * Stores an aggregate snapshot.
+     * Store snapshot.
      *
-     * @param AggregateSnapshot aggregateSnapshot
+     * @param AggregateSnapshot the aggregate snapshot
      */
-    void storeSnapshot(final AggregateSnapshot AggregateSnapshot)
-            throws DuplicateSnapshotException, InvalidSequenceIdException;
+    void storeSnapshot(final AggregateSnapshot AggregateSnapshot);
 
     /**
-     * Get an Optional Aggregate Snapshot.
+     * Gets latest snapshot.
      *
-     * @param streamId the id of the stream to retrieve
-     * @return the Optional<AggregateSnapshot>. Never returns null.
+     * @param <T>      the type parameter
+     * @param streamId the stream id
+     * @param clazz    the clazz
+     * @return the latest snapshot
      */
-    Optional<AggregateSnapshot> getLatestSnapshot(final UUID streamId);
+    <T extends Aggregate> Optional<AggregateSnapshot<T>> getLatestSnapshot(final UUID streamId, final Class<T> clazz);
 
 
+    /**
+     * Remove all snapshots.
+     *
+     * @param <T>      the type parameter
+     * @param streamId the stream id
+     * @param clazz    the clazz
+     */
+    <T extends Aggregate> void removeAllSnapshots(UUID streamId, Class<T> clazz);
+
+    /**
+     * Gets latest snapshot version.
+     *
+     * @param <T>      the type parameter
+     * @param streamId the stream id
+     * @param clazz    the clazz
+     * @return the latest snapshot version
+     */
+    <T extends Aggregate> long getLatestSnapshotVersion(UUID streamId, Class<T> clazz);
 }

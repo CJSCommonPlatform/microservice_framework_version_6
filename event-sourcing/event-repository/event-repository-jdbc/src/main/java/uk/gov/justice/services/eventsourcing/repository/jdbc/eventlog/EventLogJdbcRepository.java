@@ -3,7 +3,7 @@ package uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog;
 
 import static java.lang.String.format;
 
-import uk.gov.justice.services.eventsourcing.common.exception.InvalidSequenceIdException;
+import uk.gov.justice.services.eventsourcing.repository.core.exception.InvalidSequenceIdException;
 import uk.gov.justice.services.jdbc.persistence.AbstractJdbcRepository;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 
@@ -55,7 +55,7 @@ public class EventLogJdbcRepository extends AbstractJdbcRepository {
      * Insert the given event into th event log.
      *
      * @param eventLog the event to insert
-     * @throws InvalidSequenceIdException if the version already exists or is null.
+     * @throws InvalidSequenceIdException  if the version already exists or is null.
      */
     public void insert(final EventLog eventLog) throws InvalidSequenceIdException {
 

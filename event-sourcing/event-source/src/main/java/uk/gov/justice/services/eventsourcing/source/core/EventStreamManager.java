@@ -58,10 +58,7 @@ public class EventStreamManager {
      * @return the stream of events
      */
     public Stream<JsonEnvelope> readFrom(final UUID id, final Long version) {
-        if (version > eventRepository.getCurrentSequenceIdForStream(id)) {
-            throw new InvalidStreamVersionRuntimeException(String.format("Failed to read from stream %s. Version %d does not exist.", id, version));
-        }
-        return eventRepository.getByStreamIdAndSequenceId(id, version);
+        return eventRepository.getByStreamIdAfterSequenceId(id, version);
     }
 
     /**

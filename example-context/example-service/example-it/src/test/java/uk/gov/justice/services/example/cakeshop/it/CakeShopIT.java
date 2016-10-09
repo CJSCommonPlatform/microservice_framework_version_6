@@ -114,6 +114,7 @@ public class CakeShopIT {
         JMS_CONNECTION_FACTORY = new ActiveMQConnectionFactory(JMS_BROKER_URL);
         final DataSource viewStoreDatasource = initViewStoreDb();
         STREAM_STATUS_REPOSITORY = new StandaloneStreamStatusJdbcRepository(viewStoreDatasource);
+        Thread.sleep(300);
     }
 
     @Test
@@ -531,6 +532,30 @@ public class CakeShopIT {
 
         await().until(() -> streamStatus(recipeId).isPresent());
         assertThat(streamStatus(recipeId).get().getVersion(), is(1L));
+    }
+
+    @Test
+    public void shouldRecoverAfterException() throws Exception {
+
+        //The ExceptionThrowingInterceptor, in the event listener component, throws an exception on "Exceptional cake"
+        //This triggers 4 exceptions to exhaust the connection pool if there's a connection leak
+        for (int i = 0; i < 2; i++) {
+            sendTo(RECIPES_RESOURCE_URI + randomUUID()).request()
+                    .post(recipeEntity("Exceptional cake"));
+        }
+        String recipeId = "163af847-effb-46a9-96bc-32a0f7526f78";
+        final String recipeName = "Non exceptional cake";
+        sendTo(RECIPES_RESOURCE_URI + recipeId).request()
+                .post(recipeEntity(recipeName));
+
+        await().until(() -> queryForRecipe(recipeId).httpCode() == OK);
+
+        ApiResponse response = queryForRecipe(recipeId);
+
+        with(response.body())
+                .assertThat("$.id", equalTo(recipeId))
+                .assertThat("$.name", equalTo(recipeName));
+
     }
 
     private Optional<StreamStatus> streamStatus(final String recipeId) {

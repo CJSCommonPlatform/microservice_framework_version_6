@@ -4,6 +4,7 @@ package uk.gov.justice.services.event.buffer.core.service;
 import static co.unruly.matchers.StreamMatchers.contains;
 import static co.unruly.matchers.StreamMatchers.empty;
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -19,6 +20,7 @@ import uk.gov.justice.services.event.buffer.core.repository.streamstatus.StreamS
 import uk.gov.justice.services.event.buffer.core.repository.streamstatus.StreamStatusJdbcRepository;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
+import uk.gov.justice.services.test.utils.common.stream.StreamCloseSpy;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -201,9 +203,42 @@ public class ConsecutiveEventBufferServiceTest {
 
         final Stream<JsonEnvelope> returnedEvents = bufferService.currentOrderedEventsWith(incomingEvent);
         assertThat(returnedEvents, contains(incomingEvent, bufferedEvent4, bufferedEvent5, bufferedEvent6));
+    }
+
+    @Test
+    public void shoulCloseSourceStreamOnConsecutiveStreamClose() {
+
+        final UUID streamId = randomUUID();
+
+        when(bufferInitialisationStrategy.initialiseBuffer(eq(streamId))).thenReturn(2l);
+
+        final StreamCloseSpy sourceStreamSpy = new StreamCloseSpy();
+
+        when(streamBufferRepository.streamById(streamId)).thenReturn(
+                Stream.of(new StreamBufferEvent(streamId, 4l, "someEventContent4"),
+                        new StreamBufferEvent(streamId, 8l, "someEventContent8")).onClose(sourceStreamSpy)
+        );
+
+        final JsonEnvelope bufferedEvent4 = envelope().build();
+
+        when(jsonObjectEnvelopeConverter.asEnvelope("someEventContent4")).thenReturn(bufferedEvent4);
+
+        final JsonEnvelope incomingEvent =
+                envelope()
+                        .with(metadataWithDefaults()
+                                .withStreamId(streamId)
+                                .withVersion(3l))
+                        .build();
+
+
+        final Stream<JsonEnvelope> returnedEvents = bufferService.currentOrderedEventsWith(incomingEvent);
+        returnedEvents.close();
+
+        assertThat(sourceStreamSpy.streamClosed(), is(true));
 
 
     }
+
 
     @Test
     public void shouldRemoveEventsFromBufferOnceStreamed() {

@@ -39,9 +39,10 @@ public class InterceptorChain {
      * @return a list of processed interceptor contexts
      */
     public List<InterceptorContext> processNext(final Stream<InterceptorContext> interceptorContexts) {
-        return interceptorContexts
-                .map(interceptorContext -> copyOfInterceptorChain().processNext(interceptorContext))
-                .collect(toList());
+        try (final Stream<InterceptorContext> interceptorContextStream = interceptorContexts
+                .map(interceptorContext -> copyOfInterceptorChain().processNext(interceptorContext))) {
+            return interceptorContextStream.collect(toList());
+        }
     }
 
     @SuppressWarnings("unchecked")

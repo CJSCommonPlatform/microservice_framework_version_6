@@ -39,10 +39,8 @@ public class EventBufferInterceptor implements Interceptor {
     }
 
     private Stream<InterceptorContext> streamFromEventBufferFor(final InterceptorContext interceptorContext) {
-        try (final Stream<JsonEnvelope> envelopeStream = eventBufferService.currentOrderedEventsWith(interceptorContext.inputEnvelope())) {
-            final List<JsonEnvelope> envelopes = envelopeStream.collect(toList());
-            return envelopes.stream().map(jsonEnvelope -> copyWithInput(interceptorContext, jsonEnvelope));
-        }
+        return eventBufferService.currentOrderedEventsWith(interceptorContext.inputEnvelope())
+                .map(jsonEnvelope -> copyWithInput(interceptorContext, jsonEnvelope));
     }
 
     @Override

@@ -108,7 +108,7 @@ public class ConsecutiveEventBufferService implements EventBufferService {
     }
 
     private Stream<StreamBufferEvent> consecutiveEventStreamFromBuffer(final Stream<StreamBufferEvent> messageBuffer, final long currentVersion) {
-        return stream(new ConsecutiveEventsSpliterator(messageBuffer, currentVersion), false);
+        return stream(new ConsecutiveEventsSpliterator(messageBuffer, currentVersion), false).onClose(() -> messageBuffer.close());
     }
 
     private boolean incomingEventNotInOrder(final long incomingEventVersion, final long currentVersion) {

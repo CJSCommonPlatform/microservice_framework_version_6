@@ -4,6 +4,8 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
 
@@ -13,6 +15,7 @@ import uk.gov.justice.services.core.interceptor.InterceptorContext;
 import uk.gov.justice.services.core.interceptor.Target;
 import uk.gov.justice.services.event.buffer.api.EventBufferService;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.test.utils.common.stream.StreamCloseSpy;
 
 import java.util.ArrayList;
 import java.util.Deque;
@@ -90,6 +93,46 @@ public class EventBufferInterceptorTest {
     public void shouldReturnEventBufferPriority() throws Exception {
         assertThat(eventBufferInterceptor.priority(), is(EVENT_BUFFER_PRIORITY));
     }
+
+    @Test
+    public void ensureStreamCLosedIfExceptionOccurs() throws Exception {
+        final Deque<Interceptor> interceptors = new LinkedList<>();
+        interceptors.add(eventBufferInterceptor);
+        interceptors.add(new ExceptionThrowingInterceptor());
+        target = new TestTarget();
+        interceptorChain = new InterceptorChain(interceptors, target);
+
+        final InterceptorContext inputContext = interceptorContextWithInput(envelope_1, injectionPoint);
+        final StreamCloseSpy streamSpy = new StreamCloseSpy();
+        final Stream<JsonEnvelope> envelopes = Stream.of(this.envelope_1, envelope_2).onClose(streamSpy);
+
+        when(eventBufferService.currentOrderedEventsWith(this.envelope_1)).thenReturn(envelopes);
+
+        try {
+            interceptorChain.processNext(inputContext);
+        } catch (TestException e) {
+            //do nothing
+        }
+        assertThat(streamSpy.streamClosed(), is(true));
+    }
+
+    private static class ExceptionThrowingInterceptor implements Interceptor {
+
+        @Override
+        public InterceptorContext process(final InterceptorContext interceptorContext, final InterceptorChain interceptorChain) {
+            throw new TestException();
+        }
+
+        @Override
+        public int priority() {
+            return 1002;
+        }
+    }
+
+    private static class TestException extends RuntimeException {
+
+    }
+
 
     private static class TestTarget implements Target {
 

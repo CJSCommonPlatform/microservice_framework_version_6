@@ -26,13 +26,11 @@ public class ConsecutiveEventsSpliterator extends AbstractSpliterator<StreamBuff
     @Override
     public boolean tryAdvance(final Consumer<? super StreamBufferEvent> consumer) {
         if (!eventStreamIterator.hasNext()) {
-            eventStream.close();
             return false;
         } else {
             final StreamBufferEvent next = eventStreamIterator.next();
             final long version = next.getVersion();
             if (versionGapFound(version)) {
-                eventStream.close();
                 return false;
             } else {
                 currentVersion = version;

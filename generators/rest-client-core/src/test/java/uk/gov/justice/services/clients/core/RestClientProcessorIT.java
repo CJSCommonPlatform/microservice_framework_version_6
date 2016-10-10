@@ -10,7 +10,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.lang.String.format;
@@ -24,6 +23,7 @@ import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static uk.gov.justice.services.clients.core.RestClientProcessorBuilder.aRestClientProcessorBuilder;
 import static uk.gov.justice.services.common.http.HeaderConstants.CLIENT_CORRELATION_ID;
 import static uk.gov.justice.services.common.http.HeaderConstants.SESSION_ID;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
@@ -32,6 +32,11 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 
 import uk.gov.justice.services.adapter.rest.parameter.ParameterType;
 import uk.gov.justice.services.clients.core.exception.InvalidResponseException;
+import uk.gov.justice.services.clients.core.webclient.BaseUriFactory;
+import uk.gov.justice.services.clients.core.webclient.ContextMatcher;
+import uk.gov.justice.services.clients.core.webclient.MockServerPortProvider;
+import uk.gov.justice.services.clients.core.webclient.WebTargetFactory;
+import uk.gov.justice.services.common.configuration.JndiBasedServiceContextNameProvider;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.core.accesscontrol.AccessControlViolationException;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -43,20 +48,14 @@ import java.nio.charset.Charset;
 import java.util.Set;
 import java.util.UUID;
 
-import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
-import com.github.tomakehurst.wiremock.http.HttpHeaders;
-import com.github.tomakehurst.wiremock.http.ResponseDefinition;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Resources;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.skyscreamer.jsonassert.JSONAssert;
 
-@RunWith(MockitoJUnitRunner.class)
 public class RestClientProcessorIT {
 
     private static final String REQUEST_PARAM_A_PARAM_B_FILE_NAME = "request-envelope-a-b";
@@ -104,7 +103,11 @@ public class RestClientProcessorIT {
     public void setup() throws IOException {
         System.clearProperty(MOCK_SERVER_PORT);
         configureFor(8089);
-        initialiseRestClientProcessor();
+
+        restClientProcessor = aRestClientProcessorBuilder()
+                .withAppName(APP_NAME)
+                .build();
+
         envelopeWithMetadataAsJson = responseWithMetadata();
         envelopeWithoutMetadataAsJson = jsonFromFile(RESPONSE_WITHOUT_METADATA_FILE_NAME);
     }
@@ -154,8 +157,6 @@ public class RestClientProcessorIT {
     @Test
     public void shouldDoRemoteGetWithPortFromSystemProperty() throws Exception {
         System.setProperty(MOCK_SERVER_PORT, "8089");
-        initialiseRestClientProcessor();
-        initialiseRestClientProcessor();
 
         final String path = "/my/resource";
         final String mimetype = format("application/vnd.%s+json", QUERY_NAME);
@@ -180,7 +181,9 @@ public class RestClientProcessorIT {
         System.setProperty(MOCK_SERVER_PORT, "10000");
         System.setProperty("DEFAULT_PORT", "8089");
         configureFor(8089);
-        initialiseRestClientProcessor();
+        restClientProcessor = aRestClientProcessorBuilder()
+                .withAppName(APP_NAME)
+                .build();
 
         final String path = "/my/resource";
         final String mimetype = format("application/vnd.%s+json", QUERY_NAME);
@@ -282,12 +285,12 @@ public class RestClientProcessorIT {
                         .withHeader(METADATA_ID, METADATA_ID_VALUE)
                         .withBody(envelopeWithoutMetadataAsJson)));
 
-        Set<QueryParam> queryParams = ImmutableSet.of(
+        final Set<QueryParam> queryParams = ImmutableSet.of(
                 new QueryParam("paramA", true, ParameterType.STRING),
                 new QueryParam("paramB", false, ParameterType.STRING),
                 new QueryParam("paramC", true, ParameterType.NUMERIC));
 
-        EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, emptySet(), queryParams, QUERY_NAME);
+        final EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, emptySet(), queryParams, QUERY_NAME);
 
         validateResponse(restClientProcessor.get(endpointDefinition, requestEnvelopeParamAParamCParamDParamE()), envelopeWithMetadataAsJson);
     }
@@ -381,9 +384,9 @@ public class RestClientProcessorIT {
                         .withHeader(CONTENT_TYPE, mimetype)
                         .withBody(envelopeWithoutMetadataAsJson)));
 
-        Set<QueryParam> queryParams = ImmutableSet.of(new QueryParam("paramA", true, ParameterType.STRING), new QueryParam("paramB", false, ParameterType.STRING), new QueryParam("paramC", true, ParameterType.NUMERIC));
+        final Set<QueryParam> queryParams = ImmutableSet.of(new QueryParam("paramA", true, ParameterType.STRING), new QueryParam("paramB", false, ParameterType.STRING), new QueryParam("paramC", true, ParameterType.NUMERIC));
 
-        EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, emptySet(), queryParams, QUERY_NAME);
+        final EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, emptySet(), queryParams, QUERY_NAME);
 
         restClientProcessor.get(endpointDefinition, requestEnvelopeParamAParamCParamDParamE());
     }
@@ -473,15 +476,6 @@ public class RestClientProcessorIT {
         EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, emptySet(), emptySet(), QUERY_NAME);
 
         restClientProcessor.get(endpointDefinition, requestEnvelopeParamAParamB());
-    }
-
-
-    private void initialiseRestClientProcessor() {
-        restClientProcessor = new RestClientProcessor();
-        restClientProcessor.stringToJsonObjectConverter = new StringToJsonObjectConverter();
-        restClientProcessor.jsonObjectEnvelopeConverter = new JsonObjectEnvelopeConverter();
-        restClientProcessor.enveloper = new Enveloper(null);
-        restClientProcessor.appName = APP_NAME;
     }
 
     private String jsonFromFile(String jsonFileName) throws IOException {

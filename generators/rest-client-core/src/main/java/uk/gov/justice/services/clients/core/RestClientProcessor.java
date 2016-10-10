@@ -6,7 +6,6 @@ import static java.util.stream.Collectors.toSet;
 import static javax.ws.rs.client.Entity.entity;
 import static javax.ws.rs.core.Response.Status.ACCEPTED;
 import static javax.ws.rs.core.Response.Status.fromStatusCode;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static uk.gov.justice.services.common.http.HeaderConstants.CAUSATION;
 import static uk.gov.justice.services.common.http.HeaderConstants.CLIENT_CORRELATION_ID;
 import static uk.gov.justice.services.common.http.HeaderConstants.SESSION_ID;
@@ -19,6 +18,7 @@ import static uk.gov.justice.services.messaging.logging.LoggerUtils.trace;
 import static uk.gov.justice.services.messaging.logging.ResponseLoggerHelper.toResponseTrace;
 
 import uk.gov.justice.services.clients.core.exception.InvalidResponseException;
+import uk.gov.justice.services.clients.core.webclient.WebTargetFactory;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.core.accesscontrol.AccessControlViolationException;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -31,11 +31,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 import javax.json.JsonObject;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
@@ -52,9 +49,6 @@ public class RestClientProcessor {
 
     private static final String MEDIA_TYPE_PATTERN = "application/vnd.%s+json";
     private static final String CPPID = "CPPID";
-    private static final String MOCK_SERVER_PORT = "mock.server.port";
-    public static final int SERVICE_NAME_POSITION = 0;
-    public static final int WEB_CONTEXT_POSITION = 3;
 
     @Inject
     StringToJsonObjectConverter stringToJsonObjectConverter;
@@ -65,14 +59,8 @@ public class RestClientProcessor {
     @Inject
     Enveloper enveloper;
 
-    //TODO Port and appName to be removed in the near future, when WireMock library is implemented.
-    private final String port;
-    @Resource(lookup = "java:app/AppName")
-    String appName;
-
-    public RestClientProcessor() {
-        port = System.getProperty(MOCK_SERVER_PORT);
-    }
+    @Inject
+    WebTargetFactory webTargetFactory;
 
     /**
      * Make a GET request using the envelope provided to a specified endpoint.
@@ -84,7 +72,7 @@ public class RestClientProcessor {
      */
     public JsonEnvelope get(final EndpointDefinition definition, final JsonEnvelope envelope) {
 
-        final WebTarget target = createWebTarget(definition, envelope);
+        final WebTarget target = webTargetFactory.createWebTarget(definition, envelope);
 
         final Builder builder = target.request(format(MEDIA_TYPE_PATTERN, definition.getResponseMediaType()));
         populateHeadersFromMetadata(builder, envelope.metadata());
@@ -109,7 +97,6 @@ public class RestClientProcessor {
                         envelope.metadata().id().toString(), response.getStatus(), response.getStatusInfo().getReasonPhrase()));
 
         }
-
     }
 
     /**
@@ -120,7 +107,7 @@ public class RestClientProcessor {
      *                   request
      */
     public void post(final EndpointDefinition definition, final JsonEnvelope envelope) {
-        final WebTarget target = createWebTarget(definition, envelope);
+        final WebTarget target = webTargetFactory.createWebTarget(definition, envelope);
 
         final Builder builder = target.request(format(MEDIA_TYPE_PATTERN, definition.getResponseMediaType()));
         populateHeadersFromMetadata(builder, envelope.metadata());
@@ -157,61 +144,6 @@ public class RestClientProcessor {
         if (value.isPresent()) {
             builder.header(name, value.get());
         }
-    }
-
-    private WebTarget createWebTarget(final EndpointDefinition definition, final JsonEnvelope envelope) {
-        final JsonObject payload = envelope.payloadAsJsonObject();
-        final Client client = ClientBuilder.newClient();
-
-        WebTarget target = client
-                .target(createBaseUri(definition))
-                .path(definition.getPath());
-
-        for (String pathParam : definition.getPathParams()) {
-            target = target.resolveTemplate(pathParam, payload.getString(pathParam));
-        }
-
-        for (QueryParam queryParam : definition.getQueryParams()) {
-            final String paramName = queryParam.getName();
-            if (!payload.containsKey(paramName) && queryParam.isRequired()) {
-                throw new IllegalStateException(format("Query parameter %s is required, but not present in envelope", paramName));
-            }
-            if (payload.containsKey(paramName)) {
-                switch (queryParam.getType()) {
-                    case NUMERIC:
-                        target = target.queryParam(paramName, payload.getJsonNumber(paramName));
-                        break;
-                    case BOOLEAN:
-                        target = target.queryParam(paramName, payload.getBoolean(paramName));
-                        break;
-                    default:
-                        target = target.queryParam(paramName, payload.getString(paramName));
-                }
-            }
-        }
-        return target;
-    }
-
-    private String createBaseUri(final EndpointDefinition definition) {
-        final String defaultPort = System.getProperty("DEFAULT_PORT", "8080");
-        final String portToUse = isEmpty(port) || isSameService(definition) ? defaultPort : port;
-
-        return definition.getBaseUri().replace(":8080", ":" + portToUse);
-    }
-
-    private boolean isSameService(final EndpointDefinition definition) {
-        final String currentServiceName = extractServiceFromContext(appName);
-        final String remoteServiceName = extractServiceFromContext(extractContextFromUri(definition.getBaseUri()));
-
-        return currentServiceName.equals(remoteServiceName);
-    }
-
-    private String extractServiceFromContext(final String contextName) {
-        return contextName.split("-")[SERVICE_NAME_POSITION];
-    }
-
-    private String extractContextFromUri(final String baseUri) {
-        return baseUri.split("/")[WEB_CONTEXT_POSITION];
     }
 
     private JsonObject stripParamsFromPayload(final EndpointDefinition definition, final JsonEnvelope envelope) {

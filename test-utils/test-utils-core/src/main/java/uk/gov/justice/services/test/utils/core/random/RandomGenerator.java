@@ -1,12 +1,12 @@
 package uk.gov.justice.services.test.utils.core.random;
 
+import static java.util.Arrays.asList;
+
 import java.math.BigDecimal;
 import java.net.URI;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.UUID;
-
-import static java.util.Arrays.asList;
 
 /**
  * Random generators for common types to support fuzzy testing
@@ -44,7 +44,6 @@ public class RandomGenerator {
         return new IntegerGenerator(max);
     }
 
-
     public static Generator<BigDecimal> bigDecimal(Integer max, Integer decimalPlaces) {
         return new BigDecimalGenerator(max, decimalPlaces);
     }
@@ -55,5 +54,9 @@ public class RandomGenerator {
 
     public static Generator<Double> doubleval(Integer max, Integer decimalPlaces) {
         return new DoubleGenerator(max, decimalPlaces);
+    }
+
+    public static <T extends Enum<?>> Generator<T> randomEnum(Class<T> clazz) {
+        return new EnumPicker<>(clazz);
     }
 }

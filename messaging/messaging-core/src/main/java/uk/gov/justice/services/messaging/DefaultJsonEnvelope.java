@@ -159,6 +159,11 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
             return this;
         }
 
+        public Builder withPayloadOf(final Integer value, final String... name) {
+            payload.add(value, name);
+            return this;
+        }
+
         public Builder withPayloadOf(final Boolean value, final String... name) {
             payload.add(value, name);
             return this;

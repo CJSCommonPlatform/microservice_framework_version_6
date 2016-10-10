@@ -4,7 +4,8 @@ package uk.gov.justice.services.example.cakeshop.query.view;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.test.utils.core.builder.JsonEnvelopeBuilder.envelopeWithDefaultMetadata;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
 
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -45,7 +46,9 @@ public class CakeOrdersQueryViewTest {
 
         when(service.findOrder(orderId.toString())).thenReturn(new CakeOrderView(orderId, recipeId, deliveryDate));
 
-        final JsonEnvelope response = queryView.findOrder(envelopeWithDefaultMetadata().withPayloadOf("orderId", orderId.toString()).build());
+        final JsonEnvelope response = queryView.findOrder(
+                envelope().with(metadataWithDefaults())
+                        .withPayloadOf(orderId.toString(), "orderId").build());
 
         assertThat(response.payloadAsJsonObject().getString("orderId"), equalTo(orderId.toString()));
         assertThat(response.payloadAsJsonObject().getString("recipeId"), equalTo(recipeId.toString()));

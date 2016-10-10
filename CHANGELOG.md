@@ -16,7 +16,8 @@ instances to run. Each message will be consumed only once across a cluster.
 - New Clock interface to replace DateTimeProvider
 
 ### Changed
-- DateTimeProvider is now deprecated
+- DateTimeProvider is now deprecated - use Clock instead
+- JsonEnvelopeBuilder is now deprecated - use DefaultJsonEnvelope.envelope() instead
 
 ### Removed
 - Unused JdbcConnectionProvider utility

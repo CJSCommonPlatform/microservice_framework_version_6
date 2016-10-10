@@ -5,6 +5,7 @@ import static javax.json.Json.createObjectBuilder;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
 
+import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.Map;
@@ -12,6 +13,10 @@ import java.util.UUID;
 
 import javax.json.JsonObjectBuilder;
 
+/**
+ * Use {@link DefaultJsonEnvelope#envelope} instead.
+ */
+@Deprecated
 public class JsonEnvelopeBuilder {
 
     private JsonObjectBuilder metadataJson = createObjectBuilder();

@@ -2,12 +2,12 @@ package uk.gov.justice.services.eventsourcing.publisher.jms;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.test.utils.core.builder.JsonEnvelopeBuilder.envelope;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 
+import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
-
-import java.util.UUID;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,7 +37,7 @@ public class JmsEventPublisherTest {
 
     @Test
     public void shouldPublishEnvelope() {
-        final JsonEnvelope envelope = envelope().withMetadataOf("id", UUID.randomUUID().toString(), "name", EVENT_NAME).build();
+        final JsonEnvelope envelope = envelope().with(metadataWithRandomUUID(EVENT_NAME)).build();
 
         when(eventDestinationResolver.destinationNameOf(EVENT_NAME)).thenReturn(DESTINATION_NAME);
 

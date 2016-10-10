@@ -12,8 +12,11 @@ import java.time.ZonedDateTime;
 import javax.json.JsonString;
 
 /**
- * Utility class for date creation to allow mocking of dates in tests
+ * Utility class for date creation to allow mocking of dates in tests.
+ *
+ * Deprecated - inject the {@link Clock} interface instead.
  */
+@Deprecated
 public class DateTimeProvider {
 
     /**

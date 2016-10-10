@@ -8,7 +8,7 @@ import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
 
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
-import uk.gov.justice.services.common.util.DateTimeProvider;
+import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.eventsourcing.common.exception.InvalidStreamIdException;
 import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -49,7 +49,7 @@ public class EventLogConverterTest {
         eventLogConverter = new EventLogConverter();
         eventLogConverter.stringToJsonObjectConverter = new StringToJsonObjectConverter();
         eventLogConverter.jsonObjectEnvelopeConverter = new JsonObjectEnvelopeConverter();
-        eventLogConverter.dateTimeProvider = new DateTimeProvider();
+        eventLogConverter.clock = new UtcClock();
     }
 
     @Test
@@ -64,7 +64,7 @@ public class EventLogConverterTest {
         assertThat(eventLog.getSequenceId(), equalTo(SEQUENCE_ID));
         JSONAssert.assertEquals(METADATA_JSON, eventLog.getMetadata(), false);
         JSONAssert.assertEquals(expectedPayloadAsJsonString, eventLog.getPayload(), false);
-        assertThat(eventLog.getDateCreated(), is(within(5L, SECONDS, new DateTimeProvider().now())));
+        assertThat(eventLog.getDateCreated(), is(within(5L, SECONDS, new UtcClock().now())));
     }
 
     @Test(expected = InvalidStreamIdException.class)
@@ -83,7 +83,7 @@ public class EventLogConverterTest {
     }
 
     private EventLog createEventLog() {
-        return new EventLog(ID, STREAM_ID, SEQUENCE_ID, NAME, METADATA_JSON, PAYLOAD_JSON, new DateTimeProvider().now());
+        return new EventLog(ID, STREAM_ID, SEQUENCE_ID, NAME, METADATA_JSON, PAYLOAD_JSON, new UtcClock().now());
     }
 
     private JsonEnvelope createTestEnvelope() throws IOException {

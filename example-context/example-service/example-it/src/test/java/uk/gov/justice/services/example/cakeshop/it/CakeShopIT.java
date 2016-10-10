@@ -20,7 +20,7 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.fail;
 
-import uk.gov.justice.services.common.util.DateTimeProvider;
+import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.event.buffer.core.repository.streamstatus.StreamStatus;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLog;
 import uk.gov.justice.services.example.cakeshop.it.util.ApiResponse;
@@ -505,7 +505,7 @@ public class CakeShopIT {
         final EventLog eventLog = events.findFirst().get();
 
         assertThat(eventLog.getDateCreated(), is(notNullValue()));
-        assertThat(eventLog.getDateCreated(), is(within(10L, SECONDS, new DateTimeProvider().now())));
+        assertThat(eventLog.getDateCreated(), is(within(10L, SECONDS, new UtcClock().now())));
     }
 
     @Test

@@ -11,6 +11,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ### Added
 - Hamcrest Matchers for asserting JsonEnvelopes contained within either Streams or Lists
+- New Clock interface to replace DateTimeProvider
+
+### Changed
+- DateTimeProvider is now deprecated
 
 ### Removed
 - Unused JdbcConnectionProvider utility

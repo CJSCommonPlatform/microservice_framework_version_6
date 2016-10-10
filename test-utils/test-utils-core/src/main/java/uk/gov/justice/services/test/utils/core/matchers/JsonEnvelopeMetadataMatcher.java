@@ -3,9 +3,11 @@ package uk.gov.justice.services.test.utils.core.matchers;
 import static java.lang.String.format;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 
+import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -17,9 +19,11 @@ import org.hamcrest.TypeSafeDiagnosingMatcher;
  */
 public class JsonEnvelopeMetadataMatcher extends TypeSafeDiagnosingMatcher<Metadata> {
 
+    private static final String NOT_SET = "-- NOT SET --";
+
     private Optional<UUID> id = Optional.empty();
     private Optional<String> name = Optional.empty();
-    private UUID[] causationIds = new UUID[]{};
+    private Optional<UUID[]> causationIds = Optional.empty();
     private Optional<String> userId = Optional.empty();
     private Optional<String> sessionId = Optional.empty();
     private Optional<UUID> streamId = Optional.empty();
@@ -29,12 +33,16 @@ public class JsonEnvelopeMetadataMatcher extends TypeSafeDiagnosingMatcher<Metad
         return new JsonEnvelopeMetadataMatcher();
     }
 
+    public static JsonEnvelopeMetadataMatcher withMetadataEnvelopedFrom(final JsonEnvelope jsonEnvelope) {
+        return metadata().envelopedWith(jsonEnvelope.metadata());
+    }
+
     @Override
     public void describeTo(final Description description) {
         description.appendText("Metadata with ");
         id.ifPresent(value -> description.appendText(format("id = %s, ", value)));
         name.ifPresent(value -> description.appendText(format("name = %s, ", value)));
-        description.appendText(format("causationIds = %s, ", Arrays.toString(causationIds)));
+        causationIds.ifPresent(value -> format("causationIds = %s", Arrays.toString(value)));
         userId.ifPresent(value -> description.appendText(format("userId = %s, ", value)));
         sessionId.ifPresent(value -> description.appendText(format("sessionId = %s, ", value)));
         streamId.ifPresent(value -> description.appendText(format("streamId = %s, ", value)));
@@ -52,7 +60,7 @@ public class JsonEnvelopeMetadataMatcher extends TypeSafeDiagnosingMatcher<Metad
     }
 
     public JsonEnvelopeMetadataMatcher withCausationIds(final UUID... causationIds) {
-        this.causationIds = causationIds;
+        this.causationIds = Optional.of(causationIds);
         return this;
     }
 
@@ -76,6 +84,36 @@ public class JsonEnvelopeMetadataMatcher extends TypeSafeDiagnosingMatcher<Metad
         return this;
     }
 
+    public JsonEnvelopeMetadataMatcher of(final Metadata metadata) {
+        id = Optional.of(metadata.id());
+        name = Optional.of(metadata.name());
+        userId = metadata.userId();
+        sessionId = metadata.sessionId();
+        streamId = metadata.streamId();
+        version = metadata.version();
+
+        final List<UUID> causation = metadata.causation();
+        causationIds = Optional.of(causation.toArray(new UUID[causation.size()]));
+
+        return this;
+    }
+
+    public JsonEnvelopeMetadataMatcher envelopedWith(final Metadata metadata) {
+        id = Optional.empty();
+        name = Optional.empty();
+        userId = metadata.userId();
+        sessionId = metadata.sessionId();
+        streamId = metadata.streamId();
+        version = metadata.version();
+
+        final List<UUID> causation = metadata.causation();
+        final UUID[] uuids = causation.toArray(new UUID[causation.size() + 1]);
+        uuids[uuids.length - 1] = metadata.id();
+        causationIds = Optional.of(uuids);
+
+        return this;
+    }
+
     @Override
     protected boolean matchesSafely(final Metadata metadata, final Description description) {
         if (idIsSetAndDoesNotMatchWith(metadata)) {
@@ -94,22 +132,22 @@ public class JsonEnvelopeMetadataMatcher extends TypeSafeDiagnosingMatcher<Metad
         }
 
         if (userIdIsSetAndDoesNotMatchWith(metadata)) {
-            description.appendText("Metadata with userId = " + metadata.userId());
+            description.appendText("Metadata with userId = " + metadata.userId().orElse(NOT_SET));
             return false;
         }
 
         if (sessionIdIsSetAndDoesNotMatchWith(metadata)) {
-            description.appendText("Metadata with sessionId = " + metadata.sessionId());
+            description.appendText("Metadata with sessionId = " + metadata.sessionId().orElse(NOT_SET));
             return false;
         }
 
         if (streamIdIsSetAndDoesNotMatchWith(metadata)) {
-            description.appendText("Metadata with streamId = " + metadata.streamId());
+            description.appendText("Metadata with streamId = " + metadata.streamId().map(UUID::toString).orElse(NOT_SET));
             return false;
         }
 
         if (versionIsSetAndDoesNotMatchWith(metadata)) {
-            description.appendText("Metadata with version = " + metadata.version());
+            description.appendText("Metadata with version = " + metadata.version().map(String::valueOf).orElse(NOT_SET));
             return false;
         }
 
@@ -117,30 +155,30 @@ public class JsonEnvelopeMetadataMatcher extends TypeSafeDiagnosingMatcher<Metad
     }
 
     private boolean idIsSetAndDoesNotMatchWith(final Metadata metadata) {
-        return !id.map(value -> value.equals(metadata.id())).orElse(true);
+        return id.isPresent() && !id.get().equals(metadata.id());
     }
 
     private boolean nameIsSetAndDoesNotMatchWith(final Metadata metadata) {
-        return !name.map(value -> value.equals(metadata.name())).orElse(true);
+        return name.isPresent() && !name.get().equals(metadata.name());
     }
 
     private boolean causationIdsDoNotMatchWith(final Metadata metadata) {
-        return !containsInAnyOrder(causationIds).matches(metadata.causation());
+        return causationIds.isPresent() && !containsInAnyOrder(causationIds.get()).matches(metadata.causation());
     }
 
     private boolean userIdIsSetAndDoesNotMatchWith(final Metadata metadata) {
-        return !userId.equals(metadata.userId());
+        return userId.isPresent() && !userId.equals(metadata.userId());
     }
 
     private boolean sessionIdIsSetAndDoesNotMatchWith(final Metadata metadata) {
-        return !sessionId.equals(metadata.sessionId());
+        return sessionId.isPresent() && !sessionId.equals(metadata.sessionId());
     }
 
     private boolean streamIdIsSetAndDoesNotMatchWith(final Metadata metadata) {
-        return !streamId.equals(metadata.streamId());
+        return streamId.isPresent() && !streamId.equals(metadata.streamId());
     }
 
     private boolean versionIsSetAndDoesNotMatchWith(final Metadata metadata) {
-        return !version.equals(metadata.version());
+        return version.isPresent() && !version.equals(metadata.version());
     }
 }

@@ -15,8 +15,14 @@ import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 
+import uk.gov.justice.services.clients.core.webclient.BaseUriFactory;
+import uk.gov.justice.services.clients.core.webclient.ContextMatcher;
+import uk.gov.justice.services.clients.core.DefaultServerPortProvider;
+import uk.gov.justice.services.clients.core.webclient.MockServerPortProvider;
 import uk.gov.justice.services.clients.core.RestClientHelper;
 import uk.gov.justice.services.clients.core.RestClientProcessor;
+import uk.gov.justice.services.clients.core.webclient.WebTargetFactory;
+import uk.gov.justice.services.common.configuration.JndiBasedServiceContextNameProvider;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
@@ -116,30 +122,36 @@ public class RemoteExampleQueryApiIT {
 
     @Module
     @Classes(cdi = true, value = {
-            RemoteExampleQueryController.class,
-            RestClientProcessor.class,
-            RestClientHelper.class,
-            DispatcherCache.class,
-            RequesterProducer.class,
-            ServiceComponentObserver.class,
-            StringToJsonObjectConverter.class,
-            JsonObjectEnvelopeConverter.class,
-            ObjectToJsonValueConverter.class,
-            ObjectMapper.class,
-            Enveloper.class,
             AccessControlFailureMessageGenerator.class,
-            AllowAllPolicyEvaluator.class,
             AccessControlService.class,
+            AllowAllPolicyEvaluator.class,
+            BaseUriFactory.class,
+            BeanInstantiater.class,
+            ContextMatcher.class,
+            DefaultServerPortProvider.class,
+            DispatcherCache.class,
             DispatcherCache.class,
             DispatcherFactory.class,
-            PolicyEvaluator.class,
-            LoggerProducer.class,
-            BeanInstantiater.class,
+            Enveloper.class,
+            InterceptorCache.class,
             InterceptorChainProcessor.class,
             InterceptorChainProcessorProducer.class,
-            TestSystemUserProvider.class,
+            JndiBasedServiceContextNameProvider.class,
+            JsonObjectEnvelopeConverter.class,
+            LoggerProducer.class,
+            MockServerPortProvider.class,
+            ObjectMapper.class,
+            ObjectToJsonValueConverter.class,
+            PolicyEvaluator.class,
+            RequesterProducer.class,
+            RestClientHelper.class,
+            RestClientProcessor.class,
+            ServiceComponentObserver.class,
+            StringToJsonObjectConverter.class,
             SystemUserUtil.class,
-            InterceptorCache.class
+            TestSystemUserProvider.class,
+            RemoteExampleQueryController.class,
+            WebTargetFactory.class
     })
     public WebApp war() {
         return new WebApp()

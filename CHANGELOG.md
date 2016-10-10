@@ -7,6 +7,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ### Fixed
 - Event buffer connection held open after exception in event listener
+- RestClientProcessor tests clashing using common 8080 port
 
 ### Added
 - Hamcrest Matchers for asserting JsonEnvelopes contained within either Streams or Lists

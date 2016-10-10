@@ -380,6 +380,11 @@
                             use-java-context="true">
                     <connection-url>${db.eventstore.url}</connection-url>
                     <driver>h2</driver>
+                    <pool>
+                        <min-pool-size>3</min-pool-size>
+                        <max-pool-size>3</max-pool-size>
+                        <prefill>true</prefill>
+                    </pool>
                     <security>
                         <user-name>${db.eventstore.userName}</user-name>
                         <password>${db.eventstore.password}</password>
@@ -389,6 +394,11 @@
                             use-java-context="true">
                     <connection-url>${db.example.url}</connection-url>
                     <driver>h2</driver>
+                    <pool>
+                        <min-pool-size>3</min-pool-size>
+                        <max-pool-size>3</max-pool-size>
+                        <prefill>true</prefill>
+                    </pool>
                     <security>
                         <user-name>${db.example.userName}</user-name>
                         <password>${db.example.password}</password>

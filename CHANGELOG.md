@@ -14,10 +14,12 @@ instances to run. Each message will be consumed only once across a cluster.
 ### Added
 - Hamcrest Matchers for asserting JsonEnvelopes contained within either Streams or Lists
 - New Clock interface to replace DateTimeProvider
+- EnumPicker in random generators
 
 ### Changed
 - DateTimeProvider is now deprecated - use Clock instead
 - JsonEnvelopeBuilder is now deprecated - use DefaultJsonEnvelope.envelope() instead
+- Extend DefaultJsonEnvelope.Builder to accept JsonObject as part of the payload
 
 ### Removed
 - Unused JdbcConnectionProvider utility

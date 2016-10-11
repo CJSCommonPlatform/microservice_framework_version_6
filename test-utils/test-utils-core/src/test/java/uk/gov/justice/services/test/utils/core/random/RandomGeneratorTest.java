@@ -1,7 +1,10 @@
 package uk.gov.justice.services.test.utils.core.random;
 
-import com.google.common.collect.Lists;
-import org.junit.Test;
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.EnumSet.allOf;
+import static uk.gov.justice.services.test.utils.core.helper.TypeCheck.Times.times;
+import static uk.gov.justice.services.test.utils.core.helper.TypeCheck.typeCheck;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.randomEnum;
 
 import java.math.BigDecimal;
 import java.net.URI;
@@ -9,9 +12,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
-import static uk.gov.justice.services.test.utils.core.helper.TypeCheck.Times.times;
-import static uk.gov.justice.services.test.utils.core.helper.TypeCheck.typeCheck;
+import org.junit.Test;
 
 public class RandomGeneratorTest {
 
@@ -145,7 +148,7 @@ public class RandomGeneratorTest {
     @Test
     public void shouldGenerateValuesFromIterable() {
         // given
-        final List<Integer> integers = Lists.newArrayList(1, 2, 3, 4, 5);
+        final List<Integer> integers = newArrayList(1, 2, 3, 4, 5);
         // and
         final Generator<Integer> valuesGenerator = RandomGenerator.values(integers);
 
@@ -206,4 +209,24 @@ public class RandomGeneratorTest {
                 s -> ((doubleWithMaxAndDecimalGenerator.next().compareTo(Double.parseDouble(max + "." + decimalPlaces)) != 1)))
                 .verify(times(NUMBER_OF_TIMES));
     }
+
+    @Test
+    public void shouldPickAnEnumFromAvailableElements() {
+        // given
+        final Generator<TimeUnit> enumGenerator = randomEnum(TimeUnit.class);
+
+        // then
+        typeCheck(enumGenerator, s -> allOf(TimeUnit.class).contains(enumGenerator.next())).verify(times(NUMBER_OF_TIMES));
+    }
+
+    @Test
+    public void shouldAlwaysPickSameElementFromAnEnumWithSingleElement() {
+        // given
+        final Generator<SingleEnum> enumGenerator = randomEnum(SingleEnum.class);
+
+        // then
+        typeCheck(enumGenerator, s -> enumGenerator.next().compareTo(enumGenerator.next()) == 0).verify(times(NUMBER_OF_TIMES));
+    }
+
+    enum SingleEnum {SINGLE_VALUE}
 }

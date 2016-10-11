@@ -1,5 +1,6 @@
 package uk.gov.justice.services.messaging;
 
+import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
@@ -8,6 +9,8 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 
 import java.math.BigDecimal;
 import java.util.UUID;
+
+import javax.json.JsonObject;
 
 import org.junit.Test;
 
@@ -95,6 +98,16 @@ public class DefaultJsonEnvelopeBuilderTest {
         assertThat(envelope.payloadAsJsonObject().getJsonArray("name1").getString(2), is("arraElem3"));
 
     }
+
+    @Test
+    public void shouldBuildEnvelopeWithPayloadContainingJsonObjectElement() {
+        final JsonObject jsonObject = createObjectBuilder().add("some_key", "some_value").build();
+
+        final JsonEnvelope envelope = envelope().withPayloadOf(jsonObject, "filter").build();
+
+        assertThat(envelope.payloadAsJsonObject().getJsonObject("filter").getString("some_key"), is("some_value"));
+    }
+
 
     @Test
     public void shouldBuildEnvelopeFromAnotherEnvelope() {

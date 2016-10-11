@@ -178,6 +178,11 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
             return this;
         }
 
+        public Builder withPayloadOf(final JsonObject value, final String... name) {
+            payload.add(value, name);
+            return this;
+        }
+
         public Builder withPayloadFrom(final JsonEnvelope envelope) {
             payload = new JsonObjectBuilderWrapper(envelope.payloadAsJsonObject());
             return this;

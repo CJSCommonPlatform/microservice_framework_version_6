@@ -28,6 +28,7 @@ public class JsonEnvelopeMetadataMatcher extends TypeSafeDiagnosingMatcher<Metad
     private Optional<String> sessionId = Optional.empty();
     private Optional<UUID> streamId = Optional.empty();
     private Optional<Long> version = Optional.empty();
+    private Optional<String> clientCorrelationId = Optional.empty();
 
     public static JsonEnvelopeMetadataMatcher metadata() {
         return new JsonEnvelopeMetadataMatcher();
@@ -47,6 +48,7 @@ public class JsonEnvelopeMetadataMatcher extends TypeSafeDiagnosingMatcher<Metad
         sessionId.ifPresent(value -> description.appendText(format("sessionId = %s, ", value)));
         streamId.ifPresent(value -> description.appendText(format("streamId = %s, ", value)));
         version.ifPresent(value -> description.appendText(format("version = %s ", value)));
+        clientCorrelationId.ifPresent(value -> description.appendText(format("clientCorrelationId = %s ", value)));
     }
 
     public JsonEnvelopeMetadataMatcher withName(final String name) {
@@ -81,6 +83,11 @@ public class JsonEnvelopeMetadataMatcher extends TypeSafeDiagnosingMatcher<Metad
 
     public JsonEnvelopeMetadataMatcher withVersion(final Long version) {
         this.version = Optional.of(version);
+        return this;
+    }
+
+    public JsonEnvelopeMetadataMatcher withClientCorrelationId(final String clientCorrelationId) {
+        this.clientCorrelationId = Optional.of(clientCorrelationId);
         return this;
     }
 
@@ -151,6 +158,11 @@ public class JsonEnvelopeMetadataMatcher extends TypeSafeDiagnosingMatcher<Metad
             return false;
         }
 
+        if (clientCorrelationIdIsSetAndDoesNotMatchWith(metadata)) {
+            description.appendText("Metadata with clientCorrelationId = " + metadata.clientCorrelationId().map(String::valueOf).orElse(NOT_SET));
+            return false;
+        }
+
         return true;
     }
 
@@ -180,5 +192,9 @@ public class JsonEnvelopeMetadataMatcher extends TypeSafeDiagnosingMatcher<Metad
 
     private boolean versionIsSetAndDoesNotMatchWith(final Metadata metadata) {
         return version.isPresent() && !version.equals(metadata.version());
+    }
+
+    private boolean clientCorrelationIdIsSetAndDoesNotMatchWith(final Metadata metadata) {
+        return clientCorrelationId.isPresent() && !clientCorrelationId.equals(metadata.clientCorrelationId());
     }
 }

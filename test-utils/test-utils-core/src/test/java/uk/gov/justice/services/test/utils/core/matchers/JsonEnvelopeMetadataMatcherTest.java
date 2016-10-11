@@ -22,47 +22,51 @@ public class JsonEnvelopeMetadataMatcherTest {
     private static final String SESSION_ID = "session id";
     private static final UUID STREAM_ID = randomUUID();
     private static final Long VERSION = 1L;
+    private static final String CLIENT_CORRELATION_ID = "client correlation id";
+    private static final String EVENT_NAME = "event.action";
+    private static final String COMMAND_ACTION = "command.action";
 
     @Test
     public void shouldMatchMetadataAll() throws Exception {
-        final Metadata metadata = defaultMetadataWithName("event.action").build();
+        final Metadata metadata = defaultMetadataWithName(EVENT_NAME).build();
 
         assertThat(metadata, JsonEnvelopeMetadataMatcher.metadata()
                 .withId(ID)
-                .withName("event.action")
+                .withName(EVENT_NAME)
                 .withCausationIds(CAUSATION_ID)
                 .withUserId(USER_ID)
                 .withSessionId(SESSION_ID)
                 .withStreamId(STREAM_ID)
-                .withVersion(VERSION));
+                .withVersion(VERSION)
+                .withClientCorrelationId(CLIENT_CORRELATION_ID));
     }
 
     @Test
     public void shouldMatchAGivenMetadata() throws Exception {
-        final Metadata testMetadata = defaultMetadataWithName("event.action").build();
-        final Metadata expectedMetadata = defaultMetadataWithName("event.action").build();
+        final Metadata testMetadata = defaultMetadataWithName(EVENT_NAME).build();
+        final Metadata expectedMetadata = defaultMetadataWithName(EVENT_NAME).build();
 
         assertThat(testMetadata, JsonEnvelopeMetadataMatcher.metadata().of(expectedMetadata));
     }
 
     @Test
     public void shouldMatchAGivenMetadataWhereIdBecomesCausationAndDoesNotMatchName() throws Exception {
-        final Metadata testMetadata = defaultMetadataRandomIdWithName("event.action")
+        final Metadata testMetadata = defaultMetadataRandomIdWithName(EVENT_NAME)
                 .withCausation(ID, CAUSATION_ID)
                 .build();
-        final Metadata expectedMetadata = defaultMetadataWithName("command.action").build();
+        final Metadata expectedMetadata = defaultMetadataWithName(COMMAND_ACTION).build();
 
         assertThat(testMetadata, JsonEnvelopeMetadataMatcher.metadata().envelopedWith(expectedMetadata));
     }
 
     @Test
     public void shouldMatchAGivenMetadataWhereEnvelopedFromJsonEnvelope() throws Exception {
-        final Metadata testMetadata = defaultMetadataRandomIdWithName("event.action")
+        final Metadata testMetadata = defaultMetadataRandomIdWithName(EVENT_NAME)
                 .withCausation(ID, CAUSATION_ID)
                 .build();
 
         final JsonEnvelope jsonEnvelope = envelope()
-                .with(defaultMetadataWithName("command.action"))
+                .with(defaultMetadataWithName(COMMAND_ACTION))
                 .withPayloadOf("Test", "value")
                 .build();
 
@@ -71,7 +75,7 @@ public class JsonEnvelopeMetadataMatcherTest {
 
     @Test
     public void shouldMatchMetadataById() throws Exception {
-        final Metadata metadata = metadataOf(ID, "event.action").build();
+        final Metadata metadata = metadataOf(ID, EVENT_NAME).build();
 
         assertThat(metadata, JsonEnvelopeMetadataMatcher.metadata()
                 .withId(ID));
@@ -79,15 +83,15 @@ public class JsonEnvelopeMetadataMatcherTest {
 
     @Test
     public void shouldMatchMetadataByName() throws Exception {
-        final Metadata metadata = metadataWithRandomUUID("event.action").build();
+        final Metadata metadata = metadataWithRandomUUID(EVENT_NAME).build();
 
         assertThat(metadata, JsonEnvelopeMetadataMatcher.metadata()
-                .withName("event.action"));
+                .withName(EVENT_NAME));
     }
 
     @Test
     public void shouldMatchMetadataByCausation() throws Exception {
-        final Metadata metadata = metadataWithRandomUUID("event.action")
+        final Metadata metadata = metadataWithRandomUUID(EVENT_NAME)
                 .withCausation(CAUSATION_ID)
                 .build();
 
@@ -97,7 +101,7 @@ public class JsonEnvelopeMetadataMatcherTest {
 
     @Test
     public void shouldMatchMetadataByUserId() throws Exception {
-        final Metadata metadata = metadataWithRandomUUID("event.action")
+        final Metadata metadata = metadataWithRandomUUID(EVENT_NAME)
                 .withUserId(USER_ID)
                 .build();
 
@@ -107,7 +111,7 @@ public class JsonEnvelopeMetadataMatcherTest {
 
     @Test
     public void shouldMatchMetadataBySessionId() throws Exception {
-        final Metadata metadata = metadataWithRandomUUID("event.action")
+        final Metadata metadata = metadataWithRandomUUID(EVENT_NAME)
                 .withSessionId(SESSION_ID)
                 .build();
 
@@ -117,7 +121,7 @@ public class JsonEnvelopeMetadataMatcherTest {
 
     @Test
     public void shouldMatchMetadataByStreamId() throws Exception {
-        final Metadata metadata = metadataWithRandomUUID("event.action")
+        final Metadata metadata = metadataWithRandomUUID(EVENT_NAME)
                 .withStreamId(STREAM_ID)
                 .build();
 
@@ -127,7 +131,7 @@ public class JsonEnvelopeMetadataMatcherTest {
 
     @Test
     public void shouldMatchMetadataByVersion() throws Exception {
-        final Metadata metadata = metadataWithRandomUUID("event.action")
+        final Metadata metadata = metadataWithRandomUUID(EVENT_NAME)
                 .withVersion(VERSION)
                 .build();
 
@@ -136,8 +140,18 @@ public class JsonEnvelopeMetadataMatcherTest {
     }
 
     @Test
+    public void shouldMatchMetadataByClientCorrelationId() throws Exception {
+        final Metadata metadata = metadataWithRandomUUID(EVENT_NAME)
+                .withClientCorrelationId(CLIENT_CORRELATION_ID)
+                .build();
+
+        assertThat(metadata, JsonEnvelopeMetadataMatcher.metadata()
+                .withClientCorrelationId(CLIENT_CORRELATION_ID));
+    }
+
+    @Test
     public void shouldMatchWithNoSettings() throws Exception {
-        final Metadata metadata = metadataWithRandomUUID("event.action")
+        final Metadata metadata = metadataWithRandomUUID(EVENT_NAME)
                 .build();
 
         assertThat(metadata, JsonEnvelopeMetadataMatcher.metadata());
@@ -145,7 +159,7 @@ public class JsonEnvelopeMetadataMatcherTest {
 
     @Test(expected = AssertionError.class)
     public void shouldFailIfIdDoesNotMatch() throws Exception {
-        final Metadata metadata = metadataWithRandomUUID("event.action").build();
+        final Metadata metadata = metadataWithRandomUUID(EVENT_NAME).build();
 
         assertThat(metadata, JsonEnvelopeMetadataMatcher.metadata()
                 .withId(randomUUID()));
@@ -153,7 +167,7 @@ public class JsonEnvelopeMetadataMatcherTest {
 
     @Test(expected = AssertionError.class)
     public void shouldFailIfNameDoesNotMatch() throws Exception {
-        final Metadata metadata = metadataWithRandomUUID("event.action").build();
+        final Metadata metadata = metadataWithRandomUUID(EVENT_NAME).build();
 
         assertThat(metadata, JsonEnvelopeMetadataMatcher.metadata()
                 .withName("event.not.match"));
@@ -161,7 +175,7 @@ public class JsonEnvelopeMetadataMatcherTest {
 
     @Test(expected = AssertionError.class)
     public void shouldFailIfCausationIdDoesNotMatch() throws Exception {
-        final Metadata metadata = metadataWithRandomUUID("event.action")
+        final Metadata metadata = metadataWithRandomUUID(EVENT_NAME)
                 .withCausation(randomUUID())
                 .build();
 
@@ -171,8 +185,8 @@ public class JsonEnvelopeMetadataMatcherTest {
 
     @Test(expected = AssertionError.class)
     public void shouldFailIfUserIdDoesNotMatch() throws Exception {
-        final Metadata metadata = metadataWithRandomUUID("event.action")
-                .withUserId("user id")
+        final Metadata metadata = metadataWithRandomUUID(EVENT_NAME)
+                .withUserId(USER_ID)
                 .build();
 
         assertThat(metadata, JsonEnvelopeMetadataMatcher.metadata()
@@ -181,8 +195,8 @@ public class JsonEnvelopeMetadataMatcherTest {
 
     @Test(expected = AssertionError.class)
     public void shouldFailIfSessionIdDoesNotMatch() throws Exception {
-        final Metadata metadata = metadataWithRandomUUID("event.action")
-                .withSessionId("session id")
+        final Metadata metadata = metadataWithRandomUUID(EVENT_NAME)
+                .withSessionId(SESSION_ID)
                 .build();
 
         assertThat(metadata, JsonEnvelopeMetadataMatcher.metadata()
@@ -191,7 +205,7 @@ public class JsonEnvelopeMetadataMatcherTest {
 
     @Test(expected = AssertionError.class)
     public void shouldFailIfStreamIdDoesNotMatch() throws Exception {
-        final Metadata metadata = metadataWithRandomUUID("event.action")
+        final Metadata metadata = metadataWithRandomUUID(EVENT_NAME)
                 .withStreamId(randomUUID())
                 .build();
 
@@ -201,12 +215,22 @@ public class JsonEnvelopeMetadataMatcherTest {
 
     @Test(expected = AssertionError.class)
     public void shouldFailIfVersionDoesNotMatch() throws Exception {
-        final Metadata metadata = metadataWithRandomUUID("event.action")
+        final Metadata metadata = metadataWithRandomUUID(EVENT_NAME)
                 .withVersion(1L)
                 .build();
 
         assertThat(metadata, JsonEnvelopeMetadataMatcher.metadata()
                 .withVersion(2L));
+    }
+
+    @Test(expected = AssertionError.class)
+    public void shouldFailIfClientCorrelationIdDoesNotMatch() throws Exception {
+        final Metadata metadata = metadataWithRandomUUID(EVENT_NAME)
+                .withClientCorrelationId(CLIENT_CORRELATION_ID)
+                .build();
+
+        assertThat(metadata, JsonEnvelopeMetadataMatcher.metadata()
+                .withClientCorrelationId("does not match"));
     }
 
     private JsonObjectMetadata.Builder defaultMetadataWithName(final String name) {
@@ -223,6 +247,7 @@ public class JsonEnvelopeMetadataMatcherTest {
                 .withUserId(USER_ID)
                 .withSessionId(SESSION_ID)
                 .withStreamId(STREAM_ID)
-                .withVersion(VERSION);
+                .withVersion(VERSION)
+                .withClientCorrelationId(CLIENT_CORRELATION_ID);
     }
 }

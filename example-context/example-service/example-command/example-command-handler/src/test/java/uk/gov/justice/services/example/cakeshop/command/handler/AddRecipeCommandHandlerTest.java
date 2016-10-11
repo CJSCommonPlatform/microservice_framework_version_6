@@ -12,7 +12,7 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
 import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.withMetadataEnvelopedFrom;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payLoad;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
 
@@ -81,8 +81,7 @@ public class AddRecipeCommandHandlerTest {
 
         assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
                 jsonEnvelope(
-                        metadata()
-                                .withCausationIds(commandId)
+                        withMetadataEnvelopedFrom(command)
                                 .withName(EVENT_NAME),
                         payLoad().isJson(allOf(
                                 withJsonPath("$.recipeId", equalTo(RECIPE_ID.toString())),

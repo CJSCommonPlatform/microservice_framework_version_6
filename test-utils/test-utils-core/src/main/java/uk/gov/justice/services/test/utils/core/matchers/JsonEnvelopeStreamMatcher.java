@@ -8,33 +8,12 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import java.util.List;
 import java.util.stream.Stream;
 
-import com.jayway.jsonpath.matchers.IsJson;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 
 /**
- * Matches a Stream of JsonEnvelopes
- *
- * Example usage:
- * <pre>
- *  {@code
- *      assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
- *              jsonEnvelope(
- *                      metadata()
- *                          .withCausationIds(commandId)
- *                          .withName(EVENT_NAME),
- *                      payLoad().isJson(allOf(
- *                          withJsonPath("$.recipeId", equalTo(RECIPE_ID.toString())),
- *                          withJsonPath("$.name", equalTo(RECIPE_NAME)),
- *                          withJsonPath("$.glutenFree", equalTo(GULTEN_FREE)),
- *                          withJsonPath("$.ingredients", empty())
- *                      ))))
- *      );
- * }
- * </pre>
- *
- * This makes use of {@link IsJson} to achieve Json matching in the payload.
+ * Matches a Stream of JsonEnvelopes. See {@link EventStreamMatcher} for example of usage.
  */
 public class JsonEnvelopeStreamMatcher extends TypeSafeDiagnosingMatcher<Stream<JsonEnvelope>> {
 

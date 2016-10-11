@@ -11,7 +11,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.jayway.jsonpath.ReadContext;
+import com.jayway.jsonpath.matchers.IsJson;
 import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 
 /**
@@ -29,11 +32,24 @@ public class JsonEnvelopeMetadataMatcher extends TypeSafeDiagnosingMatcher<Metad
     private Optional<UUID> streamId = Optional.empty();
     private Optional<Long> version = Optional.empty();
     private Optional<String> clientCorrelationId = Optional.empty();
+    private Optional<IsJson<Object>> jsonMatcher = Optional.empty();
 
+    /**
+     * Create a metadata matcher instance.
+     *
+     * @return the matcher instance
+     */
     public static JsonEnvelopeMetadataMatcher metadata() {
         return new JsonEnvelopeMetadataMatcher();
     }
 
+    /**
+     * Creates matcher that uses the metadata from the given JsonEnvelope as though the JsonEnvelope
+     * under test was enveloped.
+     *
+     * @param jsonEnvelope the JsonEnvelope to extract the metadata from
+     * @return the matcher instance
+     */
     public static JsonEnvelopeMetadataMatcher withMetadataEnvelopedFrom(final JsonEnvelope jsonEnvelope) {
         return metadata().envelopedWith(jsonEnvelope.metadata());
     }
@@ -49,6 +65,7 @@ public class JsonEnvelopeMetadataMatcher extends TypeSafeDiagnosingMatcher<Metad
         streamId.ifPresent(value -> description.appendText(format("streamId = %s, ", value)));
         version.ifPresent(value -> description.appendText(format("version = %s ", value)));
         clientCorrelationId.ifPresent(value -> description.appendText(format("clientCorrelationId = %s ", value)));
+        jsonMatcher.ifPresent(description::appendDescriptionOf);
     }
 
     public JsonEnvelopeMetadataMatcher withName(final String name) {
@@ -91,6 +108,17 @@ public class JsonEnvelopeMetadataMatcher extends TypeSafeDiagnosingMatcher<Metad
         return this;
     }
 
+    public JsonEnvelopeMetadataMatcher isJson(final Matcher<? super ReadContext> matcher) {
+        this.jsonMatcher = Optional.of(new IsJson<>(matcher));
+        return this;
+    }
+
+    /**
+     * Directly match a given metadata instance
+     *
+     * @param metadata the metadata to match
+     * @return the matcher instance
+     */
     public JsonEnvelopeMetadataMatcher of(final Metadata metadata) {
         id = Optional.of(metadata.id());
         name = Optional.of(metadata.name());
@@ -105,6 +133,13 @@ public class JsonEnvelopeMetadataMatcher extends TypeSafeDiagnosingMatcher<Metad
         return this;
     }
 
+    /**
+     * Does a match of a given metadata instance as though the JsonEnvelope was enveloped using the
+     * given metadata. The id and name are ignored, and the id is added to the causation id list.
+     *
+     * @param metadata the metadata to match
+     * @return the matcher instance
+     */
     public JsonEnvelopeMetadataMatcher envelopedWith(final Metadata metadata) {
         id = Optional.empty();
         name = Optional.empty();
@@ -163,6 +198,12 @@ public class JsonEnvelopeMetadataMatcher extends TypeSafeDiagnosingMatcher<Metad
             return false;
         }
 
+        if (jsonMatcherIsSetAndDoesNotMatchWith(metadata)) {
+            description.appendText("Metadata ");
+            jsonMatcher.ifPresent(matcher -> matcher.describeMismatch(metadata.asJsonObject().toString(), description));
+            return false;
+        }
+
         return true;
     }
 
@@ -196,5 +237,9 @@ public class JsonEnvelopeMetadataMatcher extends TypeSafeDiagnosingMatcher<Metad
 
     private boolean clientCorrelationIdIsSetAndDoesNotMatchWith(final Metadata metadata) {
         return clientCorrelationId.isPresent() && !clientCorrelationId.equals(metadata.clientCorrelationId());
+    }
+
+    private boolean jsonMatcherIsSetAndDoesNotMatchWith(final Metadata metadata) {
+        return jsonMatcher.isPresent() && !jsonMatcher.get().matches(metadata.asJsonObject().toString());
     }
 }

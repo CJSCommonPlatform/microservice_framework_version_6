@@ -9,7 +9,7 @@ import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payLoad;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
@@ -33,13 +33,13 @@ public class JsonEnvelopeStreamMatcherTest {
         assertThat(Stream.of(event_1, event_2), JsonEnvelopeStreamMatcher.streamContaining(
                 jsonEnvelope(
                         metadata().withName("event.action"),
-                        payLoad().isJson(allOf(
+                        payloadIsJson(allOf(
                                 withJsonPath("$.someId", equalTo(ID_1.toString())),
                                 withJsonPath("$.name", equalTo(NAME_1)))
                         )),
                 jsonEnvelope(
                         metadata().withName("event.action"),
-                        payLoad().isJson(allOf(
+                        payloadIsJson(allOf(
                                 withJsonPath("$.someId", equalTo(ID_2.toString())),
                                 withJsonPath("$.name", equalTo(NAME_2)))
                         ))
@@ -54,7 +54,7 @@ public class JsonEnvelopeStreamMatcherTest {
         assertThat(Stream.of(event_1, event_2), JsonEnvelopeStreamMatcher.streamContaining(
                 jsonEnvelope(
                         metadata().withName("event.action"),
-                        payLoad().isJson(allOf(
+                        payloadIsJson(allOf(
                                 withJsonPath("$.someId", equalTo(ID_1.toString())),
                                 withJsonPath("$.name", equalTo(NAME_1)))
                         ))
@@ -68,13 +68,13 @@ public class JsonEnvelopeStreamMatcherTest {
         assertThat(Stream.of(event_2), JsonEnvelopeStreamMatcher.streamContaining(
                 jsonEnvelope(
                         metadata().withName("event.action"),
-                        payLoad().isJson(allOf(
+                        payloadIsJson(allOf(
                                 withJsonPath("$.someId", equalTo(ID_1.toString())),
                                 withJsonPath("$.name", equalTo(NAME_1)))
                         )),
                 jsonEnvelope(
                         metadata().withName("event.action"),
-                        payLoad().isJson(allOf(
+                        payloadIsJson(allOf(
                                 withJsonPath("$.someId", equalTo(ID_2.toString())),
                                 withJsonPath("$.name", equalTo(NAME_2)))
                         ))

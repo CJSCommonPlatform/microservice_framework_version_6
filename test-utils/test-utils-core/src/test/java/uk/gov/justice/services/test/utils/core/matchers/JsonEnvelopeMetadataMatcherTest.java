@@ -1,6 +1,9 @@
 package uk.gov.justice.services.test.utils.core.matchers;
 
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.allOf;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
@@ -157,6 +160,17 @@ public class JsonEnvelopeMetadataMatcherTest {
         assertThat(metadata, JsonEnvelopeMetadataMatcher.metadata());
     }
 
+    @Test
+    public void shouldMatchAsJson() throws Exception {
+        final Metadata metadata = defaultMetadataWithName(EVENT_NAME).build();
+
+        assertThat(metadata, JsonEnvelopeMetadataMatcher.metadata().isJson(allOf(
+                withJsonPath("$.id", equalTo(ID.toString())),
+                withJsonPath("$.name", equalTo(EVENT_NAME)),
+                withJsonPath("$.context.user", equalTo(USER_ID)))
+        ));
+    }
+
     @Test(expected = AssertionError.class)
     public void shouldFailIfIdDoesNotMatch() throws Exception {
         final Metadata metadata = metadataWithRandomUUID(EVENT_NAME).build();
@@ -231,6 +245,16 @@ public class JsonEnvelopeMetadataMatcherTest {
 
         assertThat(metadata, JsonEnvelopeMetadataMatcher.metadata()
                 .withClientCorrelationId("does not match"));
+    }
+
+    @Test(expected = AssertionError.class)
+    public void shouldNotMatchAsJson() throws Exception {
+        final Metadata metadata = defaultMetadataWithName(EVENT_NAME).build();
+
+        assertThat(metadata, JsonEnvelopeMetadataMatcher.metadata().isJson(allOf(
+                withJsonPath("$.id", equalTo(ID.toString())),
+                withJsonPath("$.name", equalTo("does not match")))
+        ));
     }
 
     private JsonObjectMetadata.Builder defaultMetadataWithName(final String name) {

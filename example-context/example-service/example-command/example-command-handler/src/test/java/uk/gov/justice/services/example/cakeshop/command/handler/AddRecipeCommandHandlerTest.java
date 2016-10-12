@@ -10,10 +10,10 @@ import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
-import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
+import static uk.gov.justice.services.test.utils.core.matchers.EventStreamMatcher.eventStreamAppendedWith;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.withMetadataEnvelopedFrom;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payLoad;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
 
 import uk.gov.justice.services.core.aggregate.AggregateService;
@@ -79,16 +79,17 @@ public class AddRecipeCommandHandlerTest {
 
         addRecipeCommandHandler.addRecipe(command);
 
-        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
-                jsonEnvelope(
-                        withMetadataEnvelopedFrom(command)
-                                .withName(EVENT_NAME),
-                        payLoad().isJson(allOf(
-                                withJsonPath("$.recipeId", equalTo(RECIPE_ID.toString())),
-                                withJsonPath("$.name", equalTo(RECIPE_NAME)),
-                                withJsonPath("$.glutenFree", equalTo(GULTEN_FREE)),
-                                withJsonPath("$.ingredients", empty())
-                        ))))
-        );
+        assertThat(eventStream, eventStreamAppendedWith(
+                streamContaining(
+                        jsonEnvelope(
+                                withMetadataEnvelopedFrom(command)
+                                        .withName(EVENT_NAME),
+                                payloadIsJson(allOf(
+                                        withJsonPath("$.recipeId", equalTo(RECIPE_ID.toString())),
+                                        withJsonPath("$.name", equalTo(RECIPE_NAME)),
+                                        withJsonPath("$.glutenFree", equalTo(GULTEN_FREE)),
+                                        withJsonPath("$.ingredients", empty())
+                                )))
+                )));
     }
 }

@@ -13,12 +13,28 @@ import org.hamcrest.TypeSafeDiagnosingMatcher;
  * Matches a JsonEnvelope Metadata and Payload.  This can be used independently or with {@link
  * JsonEnvelopeStreamMatcher} and {@link JsonEnvelopeListMatcher}.
  *
+ * Where the test should specify the metadata use the 'metadata' method. For example:
  * <pre>
  *  {@code
  *         assertThat(jsonEnvelope(), JsonEnvelopeMatcher.jsonEnvelope(
  *                              metadata()
+ *                                  .withUserId(userId)
  *                                  .withName("event.action"),
- *                              payLoad().isJson(allOf(
+ *                              payloadIsJson(allOf(
+ *                                  withJsonPath("$.someId", equalTo(ID.toString())),
+ *                                  withJsonPath("$.name", equalTo(NAME)))
+ *                              )));
+ * }
+ * </pre>
+ *
+ * Where expected JsonEnvelope is enveloped using the input JsonEnvelope you can use
+ * 'withMetadataEnvelopedFrom' and provide the input JsonEnvelope to match. For example:
+ * <pre>
+ *  {@code
+ *         assertThat(jsonEnvelope(), JsonEnvelopeMatcher.jsonEnvelope(
+ *                              withMetadataEnvelopedFrom(commandJsonEnvelope)
+ *                                  .withName("event.action"),
+ *                              payloadIsJson(allOf(
  *                                  withJsonPath("$.someId", equalTo(ID.toString())),
  *                                  withJsonPath("$.name", equalTo(NAME)))
  *                              )));

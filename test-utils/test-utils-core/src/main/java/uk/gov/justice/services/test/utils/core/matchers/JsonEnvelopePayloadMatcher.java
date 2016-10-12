@@ -20,6 +20,10 @@ public class JsonEnvelopePayloadMatcher extends TypeSafeDiagnosingMatcher<JsonOb
         return new JsonEnvelopePayloadMatcher();
     }
 
+    public static JsonEnvelopePayloadMatcher payloadIsJson(final Matcher<? super ReadContext> matcher) {
+        return new JsonEnvelopePayloadMatcher().isJson(matcher);
+    }
+
     @Override
     public void describeTo(final Description description) {
         description
@@ -28,7 +32,7 @@ public class JsonEnvelopePayloadMatcher extends TypeSafeDiagnosingMatcher<JsonOb
                 .appendText(" ");
     }
 
-    public JsonEnvelopePayloadMatcher isJson(Matcher<? super ReadContext> matcher) {
+    public JsonEnvelopePayloadMatcher isJson(final Matcher<? super ReadContext> matcher) {
         this.matcher = new IsJson<>(matcher);
         return this;
     }

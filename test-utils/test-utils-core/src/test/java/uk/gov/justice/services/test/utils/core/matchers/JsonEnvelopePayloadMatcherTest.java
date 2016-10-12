@@ -20,7 +20,14 @@ public class JsonEnvelopePayloadMatcherTest {
 
     @Test
     public void shouldMatchAJsonEnvelopePayload() throws Exception {
+        assertThat(payload(), JsonEnvelopePayloadMatcher.payloadIsJson(allOf(
+                withJsonPath("$.someId", equalTo(ID.toString())),
+                withJsonPath("$.name", equalTo(NAME))))
+        );
+    }
 
+    @Test
+    public void shouldMatchAJsonEnvelopePayloadWithTwoPartMethodCall() throws Exception {
         assertThat(payload(), JsonEnvelopePayloadMatcher.payLoad().isJson(allOf(
                 withJsonPath("$.someId", equalTo(ID.toString())),
                 withJsonPath("$.name", equalTo(NAME))))
@@ -29,7 +36,7 @@ public class JsonEnvelopePayloadMatcherTest {
 
     @Test(expected = AssertionError.class)
     public void shouldNotMatchAJsonEnvelopePayload() throws Exception {
-        assertThat(payload(), JsonEnvelopePayloadMatcher.payLoad().isJson(allOf(
+        assertThat(payload(), JsonEnvelopePayloadMatcher.payloadIsJson(allOf(
                 withJsonPath("$.someId", equalTo(ID.toString())),
                 withJsonPath("$.name", equalTo("will not match"))))
         );

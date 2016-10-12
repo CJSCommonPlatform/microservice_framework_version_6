@@ -5,6 +5,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Added
+- JsonEnvelope.asJsonObject() for simple conversion of the entire envelope to a JsonObject.
+
 ## [0.30.0] - 2016-10-11
 
 ### Fixed

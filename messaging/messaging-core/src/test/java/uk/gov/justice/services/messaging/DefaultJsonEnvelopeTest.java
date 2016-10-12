@@ -93,6 +93,25 @@ public class DefaultJsonEnvelopeTest {
                 .assertEquals("$.payloadName", payloadValue);
     }
 
+    @Test
+    public void shouldReturnEnvelopeAsJsonObject() {
+        final String metadataName = "metadata name";
+        final UUID metadataId = randomUUID();
+        final String payloadName = "payloadName";
+        final String payloadValue = "payloadValue";
+
+        final Metadata metadata = metadata(metadataId, metadataName);
+        final JsonObject payload = payload(payloadName, payloadValue);
+        final JsonEnvelope jsonEnvelope = envelopeFrom(metadata, payload);
+
+        final JsonObject jsonObject = jsonEnvelope.asJsonObject();
+
+        with(jsonObject.toString())
+                .assertEquals("_metadata.id", metadataId.toString())
+                .assertEquals("_metadata.name", metadataName)
+                .assertEquals("$.payloadName", payloadValue);
+    }
+
     private Metadata metadata(final UUID metadataId, final String metadataName) {
         return metadataOf(metadataId, metadataName).build();
     }

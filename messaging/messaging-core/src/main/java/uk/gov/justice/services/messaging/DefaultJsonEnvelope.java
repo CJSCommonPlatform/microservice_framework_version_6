@@ -4,6 +4,7 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.CORRELATION;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.SESSION_ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.USER_ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -51,7 +52,6 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
         return new Builder(envelope);
     }
 
-
     @Override
     public Metadata metadata() {
         return metadata;
@@ -82,9 +82,14 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
         return (JsonString) payload;
     }
 
+    @Override
+    public JsonObject asJsonObject() {
+        return createObjectBuilder(payloadAsJsonObject())
+                .add(METADATA, metadata().asJsonObject()).build();
+    }
+
     /**
-     * Prints the json for logging purposes. Removes any potentially sensitive
-     * data.
+     * Prints the json for logging purposes. Removes any potentially sensitive data.
      *
      * @return a json String of the envelope
      */
@@ -112,9 +117,8 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
     /**
      * Returns a String of the JsonEnvelope as pretty printed json.
      *
-     * Caution: the json envelope may contain sensitive data and so
-     * this method should not be used for logging. Use toString()
-     * for logging instead.
+     * Caution: the json envelope may contain sensitive data and so this method should not be used
+     * for logging. Use toString() for logging instead.
      *
      * @return the json envelope as pretty printed json
      */

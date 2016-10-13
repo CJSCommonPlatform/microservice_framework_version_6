@@ -22,6 +22,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.annotation.Priority;
 import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
@@ -32,6 +33,7 @@ import org.slf4j.Logger;
 /**
  * Manages operations on {@link EventStream}
  */
+@Priority(1)
 public class EventStreamManager {
 
     @Inject

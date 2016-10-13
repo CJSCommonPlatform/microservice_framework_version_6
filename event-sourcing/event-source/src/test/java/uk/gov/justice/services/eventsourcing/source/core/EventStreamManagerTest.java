@@ -19,7 +19,6 @@ import uk.gov.justice.services.eventsourcing.publisher.core.EventPublisher;
 import uk.gov.justice.services.eventsourcing.repository.core.EventRepository;
 import uk.gov.justice.services.eventsourcing.repository.core.exception.StoreEventRequestFailedException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
-import uk.gov.justice.services.eventsourcing.source.core.exception.InvalidStreamVersionRuntimeException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.VersionMismatchException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 

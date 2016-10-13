@@ -5,6 +5,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.UUID;
 
+import javax.enterprise.inject.Default;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -16,11 +18,12 @@ public class EventSourceTest {
 
     private static final UUID STREAM_ID = UUID.randomUUID();
 
-    @InjectMocks
-    EventSource eventSource;
-
     @Mock
     private EventStreamManager eventStreamManager;
+
+    @InjectMocks
+    DefaultEventSource eventSource;
+
 
     @Test
     public void shouldReturnEventStream() {

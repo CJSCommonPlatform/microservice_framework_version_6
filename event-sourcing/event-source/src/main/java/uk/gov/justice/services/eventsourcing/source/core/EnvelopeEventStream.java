@@ -6,9 +6,13 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import javax.annotation.Priority;
+import javax.enterprise.inject.Default;
+
 /**
  * Implementation of {@link EventStream}
  */
+@Priority(1)
 public class EnvelopeEventStream implements EventStream {
 
     final EventStreamManager eventStreamManager;

@@ -38,7 +38,9 @@
         <module>test-utils</module>
         <module>framework-bom</module>
         <module>event-buffer</module>
-    </modules>
+        <module>aggregate</module>
+        <module>aggregate-snapshot</module>
+        </modules>
 
     <properties>
         <common-bom.version>1.2.0</common-bom.version>

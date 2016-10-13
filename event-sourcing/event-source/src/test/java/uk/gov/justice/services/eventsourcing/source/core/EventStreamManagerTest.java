@@ -13,7 +13,7 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payLoad;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 
 import uk.gov.justice.services.eventsourcing.publisher.core.EventPublisher;
 import uk.gov.justice.services.eventsourcing.repository.core.EventRepository;
@@ -93,7 +93,7 @@ public class EventStreamManagerTest {
                         .withId(ID_VALUE)
                         .withName(NAME_VALUE)
                         .withStreamId(STREAM_ID),
-                payLoad().isJson(
+                payloadIsJson(
                         withJsonPath(format("$.%s", PAYLOAD_FIELD_NAME), equalTo(PAYLOAD_FIELD_VALUE))
                 )));
     }
@@ -132,7 +132,7 @@ public class EventStreamManagerTest {
                         .withId(ID_VALUE)
                         .withName(NAME_VALUE)
                         .withStreamId(STREAM_ID),
-                payLoad().isJson(
+                payloadIsJson(
                         withJsonPath(format("$.%s", PAYLOAD_FIELD_NAME), equalTo(PAYLOAD_FIELD_VALUE))
                 )));
     }

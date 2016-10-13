@@ -5,7 +5,9 @@
     "filter": {
       "type": "object",
       "oneOf": [
-        { "$ref": "#/definitions/fieldFilter" }
+        {
+          "$ref": "#/definitions/fieldFilter"
+        }
       ]
     }
   },
@@ -20,12 +22,16 @@
     "fieldFilter": {
       "properties": {
         "type": {
-          "enum": [ "FIELD" ]
+          "enum": [
+            "FIELD"
+          ]
         },
         "name": {
           "type": "string"
         },
-        "value": {"$ref": "#/definitions/uuid"},
+        "value": {
+          "$ref": "#/definitions/uuid"
+        },
         "operation": {
           "type": "string"
         }

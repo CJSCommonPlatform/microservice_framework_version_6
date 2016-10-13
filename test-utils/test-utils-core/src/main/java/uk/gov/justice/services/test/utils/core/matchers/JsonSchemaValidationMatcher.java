@@ -2,7 +2,10 @@ package uk.gov.justice.services.test.utils.core.matchers;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.collect.Lists.newArrayList;
+import static java.lang.String.format;
 import static org.hamcrest.core.IsNot.not;
+
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +22,7 @@ import org.everit.json.schema.ValidationException;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -27,6 +31,7 @@ import org.json.JSONTokener;
 public class JsonSchemaValidationMatcher {
 
     private static final Random random = new Random();
+    private static final String RAML_JSON_SCHEMA_TEMPLATE = "raml/json/schema/%s.json";
 
     /**
      * Matcher to validate json content against a schema
@@ -63,6 +68,50 @@ public class JsonSchemaValidationMatcher {
             @Override
             protected void describeMismatchSafely(final String pathToJsonFile, final Description mismatchDescription) {
                 mismatchDescription.appendText("validation failed with message ").appendValue(exception.getMessage());
+            }
+        };
+    }
+
+    /**
+     * Validates a JsonEnvelope against the correct schema for the action name provided in the
+     * metadata. Expects to find the schema on the class path in package
+     * 'raml/json/schema/{action.name}.json'.
+     *
+     * @return matcher
+     */
+    public static Matcher<JsonEnvelope> isValidJsonEnvelopeForSchema() {
+
+        return new TypeSafeDiagnosingMatcher<JsonEnvelope>() {
+            private ValidationException validationException = null;
+
+            @Override
+            protected boolean matchesSafely(final JsonEnvelope jsonEnvelope, final Description description) {
+
+                if (null == validationException) {
+
+                    try {
+                        final String pathToJsonSchema = format(RAML_JSON_SCHEMA_TEMPLATE, jsonEnvelope.metadata().name());
+                        getJsonSchemaFor(pathToJsonSchema).validate(new JSONObject(jsonEnvelope.payloadAsJsonObject().toString()));
+                    } catch (final ValidationException e) {
+                        validationException = e;
+                        return false;
+                    } catch (final IOException e) {
+                        throw new IllegalArgumentException(e);
+                    }
+
+                    return true;
+                } else {
+                    description
+                            .appendText("Schema validation failed with message: ")
+                            .appendValue(validationException.getMessage());
+                    return false;
+                }
+
+            }
+
+            @Override
+            public void describeTo(final Description description) {
+                description.appendText("JsonEnvelope validated against schema found on classpath at 'raml/json/schema/' ");
             }
         };
     }

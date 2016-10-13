@@ -1,17 +1,21 @@
 package uk.gov.justice.services.test.utils.core.enveloper;
 
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
 import static java.util.stream.Collectors.toList;
-import static org.hamcrest.core.Is.is;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.allOf;
 import static org.junit.Assert.assertThat;
-import static uk.gov.justice.services.messaging.JsonObjects.getString;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeListMatcher.listContaining;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjects;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -30,37 +34,46 @@ public class EnveloperFactoryTest {
 
         final JsonEnvelope result = EnveloperFactory.createEnveloper().withMetadataFrom(envelope, "expected.name").apply(outputPayload);
 
-        final JsonObject resultJson = result.payloadAsJsonObject();
-        assertThat(result.metadata().name(), is("expected.name"));
-        assertThat(getString(resultJson, "name"), is(Optional.of("output")));
-        assertThat(getString(resultJson, "value"), is(Optional.empty()));
+        assertThat(result, jsonEnvelope(
+                metadata().withName("expected.name"),
+                payloadIsJson(allOf(
+                        withJsonPath("$.name", equalTo("output")),
+                        withoutJsonPath("$.value"))
+                )));
     }
 
     @Test
     public void shouldCreateEnveloperWithRegisteredEventClasses() throws Exception {
-        final JsonObject inputPayload = Json.createObjectBuilder().add("value", "init").build();
+        final UUID id1 = UUID.randomUUID();
+        final String name = "name";
+        final String id2 = "id2";
+        final String value = "value";
+
+        final JsonObject inputPayload = Json.createObjectBuilder().add(value, "init").build();
         final JsonEnvelope envelope = EnvelopeFactory.createEnvelope("init.name", inputPayload);
-        final UUID id_1 = UUID.randomUUID();
-        final EnveloperFactoryTest.TestEvent1 testEvent_1 = new EnveloperFactoryTest.TestEvent1(id_1, "name");
-        final EnveloperFactoryTest.TestEvent2 testEvent_2 = new EnveloperFactoryTest.TestEvent2("id2", "value");
+
+        final EnveloperFactoryTest.TestEvent1 testEvent_1 = new EnveloperFactoryTest.TestEvent1(id1, name);
+        final EnveloperFactoryTest.TestEvent2 testEvent_2 = new EnveloperFactoryTest.TestEvent2(id2, value);
         final Stream<Object> events = Stream.of(testEvent_1, testEvent_2);
 
         final Enveloper enveloper = EnveloperFactory.createEnveloperWithEvents(TestEvent1.class, TestEvent2.class);
+
         final List<JsonEnvelope> resultEvents = events.map(enveloper.withMetadataFrom(envelope)).collect(toList());
 
-        assertThat(resultEvents.size(), is(2));
-
-        final JsonEnvelope result_1 = resultEvents.get(0);
-        final JsonObject resultJson_1 = result_1.payloadAsJsonObject();
-        assertThat(result_1.metadata().name(), is("test.event.1"));
-        assertThat(JsonObjects.getUUID(resultJson_1, "id"), is(Optional.of(id_1)));
-        assertThat(getString(resultJson_1, "name"), is(Optional.of("name")));
-
-        final JsonEnvelope result_2 = resultEvents.get(1);
-        final JsonObject resultJson_2 = result_2.payloadAsJsonObject();
-        assertThat(result_2.metadata().name(), is("test.event.2"));
-        assertThat(getString(resultJson_2, "id"), is(Optional.of("id2")));
-        assertThat(getString(resultJson_2, "value"), is(Optional.of("value")));
+        assertThat(resultEvents, listContaining(
+                jsonEnvelope(
+                        metadata().withName("test.event.1"),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.id", equalTo(id1.toString())),
+                                withJsonPath("$.name", equalTo(name)))
+                        )),
+                jsonEnvelope(
+                        metadata().withName("test.event.2"),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.id", equalTo(id2)),
+                                withJsonPath("$.value", equalTo(value)))
+                        ))
+        ));
     }
 
     @Event("test.event.1")

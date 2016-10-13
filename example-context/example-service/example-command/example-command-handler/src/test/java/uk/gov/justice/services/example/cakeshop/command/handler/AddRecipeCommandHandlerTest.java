@@ -1,13 +1,13 @@
 package uk.gov.justice.services.example.cakeshop.command.handler;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
-import static java.util.Collections.emptyList;
+import static javax.json.Json.createArrayBuilder;
+import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.empty;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
 import static uk.gov.justice.services.test.utils.core.matchers.EventStreamMatcher.eventStreamAppendedWith;
@@ -25,7 +25,6 @@ import uk.gov.justice.services.example.cakeshop.domain.event.RecipeAdded;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.UUID;
-import java.util.stream.Stream;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,9 +51,6 @@ public class AddRecipeCommandHandlerTest {
     @Mock
     private AggregateService aggregateService;
 
-    @Mock
-    private Recipe recipe;
-
     @Spy
     private Enveloper enveloper = createEnveloperWithEvents(RecipeAdded.class);
 
@@ -63,19 +59,23 @@ public class AddRecipeCommandHandlerTest {
 
     @Test
     public void shouldHandleAddRecipeCommand() throws Exception {
+        final Recipe recipe = new Recipe();
         final UUID commandId = UUID.randomUUID();
-        final RecipeAdded recipeAdded = new RecipeAdded(RECIPE_ID, RECIPE_NAME, GULTEN_FREE, emptyList());
-        final JsonEnvelope command = envelope()
-                .with(metadataOf(commandId, COMMAND_NAME))
-                .withPayloadOf(RECIPE_ID.toString(), "recipeId")
-                .withPayloadOf(RECIPE_NAME, "name")
-                .withPayloadOf(GULTEN_FREE, "glutenFree")
-                .withPayloadOf(new String[]{}, "ingredients")
-                .build();
+
+        final JsonEnvelope command = envelopeFrom(
+                metadataOf(commandId, COMMAND_NAME),
+                createObjectBuilder()
+                        .add("recipeId", RECIPE_ID.toString())
+                        .add("name", RECIPE_NAME)
+                        .add("glutenFree", GULTEN_FREE)
+                        .add("ingredients", createArrayBuilder()
+                                .add(createObjectBuilder()
+                                        .add("name", "Flour")
+                                        .add("quantity", 200)))
+                        .build());
 
         when(eventSource.getStreamById(RECIPE_ID)).thenReturn(eventStream);
         when(aggregateService.get(eventStream, Recipe.class)).thenReturn(recipe);
-        when(recipe.addRecipe(RECIPE_ID, RECIPE_NAME, GULTEN_FREE, emptyList())).thenReturn(Stream.of(recipeAdded));
 
         addRecipeCommandHandler.addRecipe(command);
 
@@ -88,8 +88,11 @@ public class AddRecipeCommandHandlerTest {
                                         withJsonPath("$.recipeId", equalTo(RECIPE_ID.toString())),
                                         withJsonPath("$.name", equalTo(RECIPE_NAME)),
                                         withJsonPath("$.glutenFree", equalTo(GULTEN_FREE)),
-                                        withJsonPath("$.ingredients", empty())
+                                        withJsonPath("$.ingredients.length()", equalTo(1)),
+                                        withJsonPath("$.ingredients[0].name", equalTo("Flour")),
+                                        withJsonPath("$.ingredients[0].quantity", equalTo(200))
                                 )))
+                                .thatMatchesSchema()
                 )));
     }
 }

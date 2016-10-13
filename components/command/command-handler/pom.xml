@@ -79,5 +79,10 @@
             <artifactId>javax.json</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>aggregate</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>

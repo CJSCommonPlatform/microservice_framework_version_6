@@ -86,6 +86,13 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>aggregate-snapshot-repository-liquibase</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>uk.gov.justice.services.example</groupId>
             <artifactId>example-liquibase</artifactId>
             <version>${project.version}</version>

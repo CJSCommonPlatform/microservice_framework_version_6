@@ -1,6 +1,7 @@
 package uk.gov.justice.services.test.utils.core.helper;
 
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
+import static uk.gov.justice.services.core.annotation.Component.QUERY_CONTROLLER;
 import static uk.gov.justice.services.test.utils.core.helper.ServiceComponents.verifyPassThroughQueryHandlerMethod;
 
 import uk.gov.justice.services.core.annotation.Handles;
@@ -74,6 +75,14 @@ public class ServiceComponentsQueryHandlerTest {
         verifyPassThroughQueryHandlerMethod(NoRequesterField.class, "testA");
     }
 
+    @Test
+    public void shouldFailWhenRequesterIsNotInvoked() throws Exception {
+        exception.expect(AssertionError.class);
+        exception.expectMessage("JsonEnvelope response does not match expected response in method testA");
+
+        verifyPassThroughQueryHandlerMethod(NoRequesterCall.class);
+    }
+
     @ServiceComponent(QUERY_API)
     public static class ValidQueryApi {
 
@@ -122,6 +131,17 @@ public class ServiceComponentsQueryHandlerTest {
 
     @ServiceComponent(QUERY_API)
     public static class NoRequesterField {
+
+        @Handles("testA")
+        public JsonEnvelope testA(final JsonEnvelope query) {
+            return null;
+        }
+    }
+
+    @ServiceComponent(QUERY_CONTROLLER)
+    public static class NoRequesterCall {
+        @Inject
+        private Requester requester;
 
         @Handles("testA")
         public JsonEnvelope testA(final JsonEnvelope query) {

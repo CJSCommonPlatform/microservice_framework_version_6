@@ -11,6 +11,8 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ### Changed
 - JsonEnvelopeMetadataMatcher to allow matching with Json paths
+- Added `rest-client-core` as a standard dependency for `event-processor`s
+- Added `hamcrest-date` as a standard dependency for `test-utils-core`
 
 ## [0.30.0] - 2016-10-11
 

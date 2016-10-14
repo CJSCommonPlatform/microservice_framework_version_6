@@ -77,7 +77,7 @@ public final class ServiceComponents {
         for (final Method method : methods) {
             assertMethodHasHandlesAnnotation(method);
 
-            final Sender sender = mock(Sender.class);
+            final Sender sender = mock(Sender.class, format("%s.sender.send", method.getName()));
             final JsonEnvelope command = mock(JsonEnvelope.class);
             final Object handlerInstance = handlerClass.newInstance();
 
@@ -145,7 +145,7 @@ public final class ServiceComponents {
         for (final Method method : methods) {
             assertMethodHasHandlesAnnotation(method);
 
-            final Requester requester = mock(Requester.class);
+            final Requester requester = mock(Requester.class, format("%s.requester", method.getName()));
             final JsonEnvelope query = mock(JsonEnvelope.class);
             final JsonEnvelope response = mock(JsonEnvelope.class);
             final Object handlerInstance = handlerClass.newInstance();
@@ -158,8 +158,8 @@ public final class ServiceComponents {
 
             JsonEnvelope actualResponse = (JsonEnvelope) method.invoke(handlerInstance, query);
 
-            if (!actualResponse.equals(response)) {
-                throw new AssertionError("JsonEnvelope response does not match expected response.");
+            if (actualResponse == null || !actualResponse.equals(response)) {
+                throw new AssertionError(format("JsonEnvelope response does not match expected response in method %s.", method.getName()));
             }
 
             verify(requester).request(query);

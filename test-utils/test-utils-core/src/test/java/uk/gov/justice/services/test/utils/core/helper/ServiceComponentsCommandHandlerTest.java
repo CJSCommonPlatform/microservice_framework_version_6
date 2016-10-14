@@ -74,6 +74,14 @@ public class ServiceComponentsCommandHandlerTest {
         verifyPassThroughCommandHandlerMethod(NoSenderField.class, "testA");
     }
 
+    @Test
+    public void shouldFailWhenSenderIsNotInvoked() throws Exception {
+        exception.expect(AssertionError.class);
+        exception.expectMessage("testA.sender.send");
+
+        verifyPassThroughCommandHandlerMethod(NoPassThroughInvocation.class, "testA");
+    }
+
     @ServiceComponent(COMMAND_API)
     public static class ValidCommandApi {
 
@@ -125,6 +133,17 @@ public class ServiceComponentsCommandHandlerTest {
 
         @Handles("testA")
         public void testA(final JsonEnvelope command) {
+        }
+    }
+
+    @ServiceComponent(COMMAND_API)
+    public static class NoPassThroughInvocation {
+        @Inject
+        private Sender sender;
+
+        @Handles("testA")
+        public void testA(final JsonEnvelope command) {
+
         }
     }
 }

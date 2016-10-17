@@ -38,6 +38,8 @@
         <module>test-utils</module>
         <module>framework-bom</module>
         <module>event-buffer</module>
+        <module>aggregate</module>
+        <module>aggregate-snapshot</module>
     </modules>
 
     <properties>

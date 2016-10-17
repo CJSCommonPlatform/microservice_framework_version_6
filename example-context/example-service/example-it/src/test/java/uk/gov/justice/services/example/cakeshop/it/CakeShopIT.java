@@ -570,8 +570,9 @@ public class CakeShopIT {
 
 
     private static DataSource initEventStoreDb() throws Exception {
+
         return initDatabase("db.eventstore.url", "db.eventstore.userName",
-                "db.eventstore.password", "liquibase/event-store-db-changelog.xml");
+                "db.eventstore.password", "liquibase/event-store-db-changelog.xml", "liquibase/snapshot-store-db-changelog.xml");
     }
 
     private void closeCakeShopDb() throws SQLException {
@@ -631,6 +632,7 @@ public class CakeShopIT {
         dataSource.setPassword(properties.value(dbPasswordPropertyName));
         boolean dropped = false;
         final JdbcConnection jdbcConnection = new JdbcConnection(dataSource.getConnection());
+
         for (String liquibaseChangeLogXml : liquibaseChangeLogXmls) {
             Liquibase liquibase = new Liquibase(liquibaseChangeLogXml,
                     new ClassLoaderResourceAccessor(), jdbcConnection);

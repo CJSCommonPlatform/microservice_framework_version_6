@@ -42,6 +42,7 @@ import uk.gov.justice.services.core.accesscontrol.AccessControlViolationExceptio
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
+import uk.gov.justice.services.test.utils.core.helper.PortFinder;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -92,7 +93,7 @@ public class RestClientProcessorIT {
     public WireMockRule wireMock8089 = new WireMockRule(8089);
 
     @Rule
-    public WireMockRule wireMock8080 = new WireMockRule(8080);
+    public WireMockRule wireMock8080 = new WireMockRule(PortFinder.getPortWithRandomPortFallback(8080));
 
     private RestClientProcessor restClientProcessor;
 

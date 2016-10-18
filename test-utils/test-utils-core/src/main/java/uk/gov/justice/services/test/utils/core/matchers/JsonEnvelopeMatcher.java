@@ -1,12 +1,17 @@
 package uk.gov.justice.services.test.utils.core.matchers;
 
+import static uk.gov.justice.services.test.utils.core.matchers.JsonSchemaValidationMatcher.isValidJsonEnvelopeForSchema;
+
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
+
+import java.util.Optional;
 
 import javax.json.JsonObject;
 
 import com.jayway.jsonpath.matchers.IsJson;
 import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 
 /**
@@ -41,29 +46,78 @@ import org.hamcrest.TypeSafeDiagnosingMatcher;
  * }
  * </pre>
  *
+ * Where expected JsonEnvelope has a schema matching the Metadata name field and is on the classpath
+ * at 'raml/json/schema/event.action.json' The JsonEnvelope can be validated as follows:
+ * <pre>
+ *  {@code
+ *         assertThat(jsonEnvelope(), JsonEnvelopeMatcher.jsonEnvelope(
+ *                              withMetadataEnvelopedFrom(commandJsonEnvelope)
+ *                                  .withName("event.action"),
+ *                              payloadIsJson(allOf(
+ *                                  withJsonPath("$.someId", equalTo(ID.toString())),
+ *                                  withJsonPath("$.name", equalTo(NAME)))))
+ *                              .thatMatchesSchema());
+ * }
+ * </pre>
+ *
  * This makes use of {@link IsJson} to achieve Json matching in the payload.
  */
 public class JsonEnvelopeMatcher extends TypeSafeDiagnosingMatcher<JsonEnvelope> {
 
-    private final JsonEnvelopeMetadataMatcher metadataMatcher;
-    private final JsonEnvelopePayloadMatcher payloadMatcher;
+    private Optional<JsonEnvelopeMetadataMatcher> metadataMatcher = Optional.empty();
+    private Optional<JsonEnvelopePayloadMatcher> payloadMatcher = Optional.empty();
+    private Optional<Matcher> schemaMatcher = Optional.empty();
 
-    public JsonEnvelopeMatcher(final JsonEnvelopeMetadataMatcher metadataMatcher, final JsonEnvelopePayloadMatcher payloadMatcher) {
-        this.metadataMatcher = metadataMatcher;
-        this.payloadMatcher = payloadMatcher;
+    public static JsonEnvelopeMatcher jsonEnvelope() {
+        return new JsonEnvelopeMatcher();
     }
 
     public static JsonEnvelopeMatcher jsonEnvelope(final JsonEnvelopeMetadataMatcher metadataMatcher, final JsonEnvelopePayloadMatcher payloadMatcher) {
-        return new JsonEnvelopeMatcher(metadataMatcher, payloadMatcher);
+        return new JsonEnvelopeMatcher()
+                .withMetadataOf(metadataMatcher)
+                .withPayloadOf(payloadMatcher);
+    }
+
+    /**
+     * Validate the JsonEnvelope metadata using {@link JsonEnvelopeMetadataMatcher}
+     *
+     * @param metadataMatcher the JsonEnvelopeMetadataMatcher to use
+     * @return the matcher instance
+     */
+    public JsonEnvelopeMatcher withMetadataOf(final JsonEnvelopeMetadataMatcher metadataMatcher) {
+        this.metadataMatcher = Optional.of(metadataMatcher);
+        return this;
+    }
+
+    /**
+     * Validate the JsonEnvelope payload using {@link JsonEnvelopePayloadMatcher}
+     *
+     * @param payloadMatcher the JsonEnvelopePayloadMatcher to use
+     * @return the matcher instance
+     */
+    public JsonEnvelopeMatcher withPayloadOf(final JsonEnvelopePayloadMatcher payloadMatcher) {
+        this.payloadMatcher = Optional.of(payloadMatcher);
+        return this;
+    }
+
+    /**
+     * Validates a JsonEnvelope against the correct schema for the action name provided in the
+     * metadata. Expects to find the schema on the class path in package
+     * 'raml/json/schema/{action.name}.json'.
+     *
+     * @return the matcher instance
+     */
+    public JsonEnvelopeMatcher thatMatchesSchema() {
+        this.schemaMatcher = Optional.of(isValidJsonEnvelopeForSchema());
+        return this;
     }
 
     @Override
     public void describeTo(final Description description) {
-        description
-                .appendText("JsonEnvelope that contains (")
-                .appendDescriptionOf(metadataMatcher)
-                .appendDescriptionOf(payloadMatcher)
-                .appendText(") ");
+        description.appendText("JsonEnvelope that contains (");
+        metadataMatcher.ifPresent(description::appendDescriptionOf);
+        payloadMatcher.ifPresent(description::appendDescriptionOf);
+        description.appendText(") ");
     }
 
     @Override
@@ -71,13 +125,18 @@ public class JsonEnvelopeMatcher extends TypeSafeDiagnosingMatcher<JsonEnvelope>
         final Metadata metadata = jsonEnvelope.metadata();
         final JsonObject payload = jsonEnvelope.payloadAsJsonObject();
 
-        if (!metadataMatcher.matches(metadata)) {
-            metadataMatcher.describeMismatch(metadata, description);
+        if (metadataMatcher.isPresent() && !metadataMatcher.get().matches(metadata)) {
+            metadataMatcher.get().describeMismatch(metadata, description);
             return false;
         }
 
-        if (!payloadMatcher.matches(payload)) {
-            payloadMatcher.describeMismatch(payload, description);
+        if (payloadMatcher.isPresent() && !payloadMatcher.get().matches(payload)) {
+            payloadMatcher.get().describeMismatch(payload, description);
+            return false;
+        }
+
+        if (schemaMatcher.isPresent() && !schemaMatcher.get().matches(jsonEnvelope)) {
+            schemaMatcher.get().describeMismatch(jsonEnvelope, description);
             return false;
         }
 

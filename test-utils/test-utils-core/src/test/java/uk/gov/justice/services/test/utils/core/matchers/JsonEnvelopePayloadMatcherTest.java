@@ -19,7 +19,7 @@ public class JsonEnvelopePayloadMatcherTest {
     private static final String NAME = "someName";
 
     @Test
-    public void shouldMatchAJsonEnvelopePayload() throws Exception {
+    public void shouldMatchJsonEnvelopePayload() throws Exception {
         assertThat(payload(), JsonEnvelopePayloadMatcher.payloadIsJson(allOf(
                 withJsonPath("$.someId", equalTo(ID.toString())),
                 withJsonPath("$.name", equalTo(NAME))))
@@ -27,8 +27,8 @@ public class JsonEnvelopePayloadMatcherTest {
     }
 
     @Test
-    public void shouldMatchAJsonEnvelopePayloadWithTwoPartMethodCall() throws Exception {
-        assertThat(payload(), JsonEnvelopePayloadMatcher.payLoad().isJson(allOf(
+    public void shouldMatchJsonEnvelopePayloadWithTwoPartMethodCall() throws Exception {
+        assertThat(payload(), JsonEnvelopePayloadMatcher.payload().isJson(allOf(
                 withJsonPath("$.someId", equalTo(ID.toString())),
                 withJsonPath("$.name", equalTo(NAME))))
         );

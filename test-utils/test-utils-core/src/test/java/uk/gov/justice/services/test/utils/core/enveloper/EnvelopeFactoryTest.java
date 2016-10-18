@@ -1,8 +1,11 @@
 package uk.gov.justice.services.test.utils.core.enveloper;
 
-import static com.jayway.jsonassert.JsonAssert.with;
-import static org.hamcrest.CoreMatchers.is;
-import static uk.gov.justice.services.test.utils.core.matchers.UuidStringMatcher.isAUuid;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
@@ -24,15 +27,12 @@ public class EnvelopeFactoryTest {
                 .add("payloadName", "payloadValue")
                 .build();
 
-
         final JsonEnvelope jsonEnvelope = envelopeFactory.create(commandName, payload);
 
-
-        final String json = jsonEnvelope.toDebugStringPrettyPrint();
-
-        with(json)
-                .assertThat("$._metadata.name", is(commandName))
-                .assertThat("$._metadata.id", isAUuid())
-                .assertThat("$.payloadName", is("payloadValue"));
+        assertThat(jsonEnvelope, jsonEnvelope(
+                metadata().withName(commandName),
+                payloadIsJson(
+                        withJsonPath("$.payloadName", equalTo("payloadValue"))
+                )));
     }
 }

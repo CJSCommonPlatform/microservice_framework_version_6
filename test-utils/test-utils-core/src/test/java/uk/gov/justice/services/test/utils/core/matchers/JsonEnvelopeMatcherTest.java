@@ -31,6 +31,21 @@ public class JsonEnvelopeMatcherTest {
                 )));
     }
 
+    @Test
+    public void shouldMatchJsonEnvelopeWithSchema() throws Exception {
+        assertThat(jsonEnvelope(), JsonEnvelopeMatcher.jsonEnvelope().thatMatchesSchema());
+    }
+
+    @Test(expected = AssertionError.class)
+    public void shouldNotMatchJsonEnvelopeWithSchema() throws Exception {
+        final JsonEnvelope invalidJsonEnvelope = envelope()
+                .with(metadataWithRandomUUID("event.action"))
+                .withPayloadOf(ID.toString(), "someId")
+                .build();
+
+        assertThat(invalidJsonEnvelope, JsonEnvelopeMatcher.jsonEnvelope().thatMatchesSchema());
+    }
+
     @Test(expected = AssertionError.class)
     public void shouldFailToMatchDifferentMetadata() throws Exception {
         assertThat(jsonEnvelope(), JsonEnvelopeMatcher.jsonEnvelope(

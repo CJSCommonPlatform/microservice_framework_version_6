@@ -42,7 +42,7 @@ public class PollingRestClientTest {
     private PollingRestClient pollingRestClient;
 
     @Test @SuppressWarnings("unchecked")
-    public void shouldPollUntilASucessfulResponseIsFound() throws Exception {
+    public void shouldPollUntilASuccessfulResponseIsFound() throws Exception {
 
         final String url = "http://url.com";
         final String mediaType = "application/vnd.media.type+json";

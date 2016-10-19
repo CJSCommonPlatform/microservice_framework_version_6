@@ -1,4 +1,4 @@
-package uk.gov.justice.services.test.utils.core.matchers;
+package uk.gov.justice.services.test.utils.core.helper;
 
 import static com.google.common.collect.ImmutableMap.of;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
@@ -24,6 +24,7 @@ import javax.ws.rs.core.Response;
 
 import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -78,6 +79,27 @@ public class PollingRestClientHelperTest {
 
         verify(restClient, times(2)).query(REQUEST_URL, MEDIA_TYPE, new MultivaluedHashMap<>(HEADERS));
         verify(response, times(3)).getStatus();
+    }
+
+    @Test
+    @Ignore
+    public void shouldPollUntilResponseMatchesExpectedPayloadAndStatus() {
+        final String payloadValue = STRING.next();
+        when(response.readEntity(String.class)).thenReturn("{}").thenReturn(createObjectBuilder().add("payloadKey", payloadValue).build().toString());
+        when(response.getStatus()).thenReturn(NOT_FOUND.getStatusCode()).thenReturn(ACCEPTED.getStatusCode());
+
+        new PollingRestClientHelper(restClient, pollingRequestParams(REQUEST_URL, MEDIA_TYPE).withHeaders(HEADERS).build())
+                .withLogging()
+                .until(
+                        payload()
+                                .isJson(allOf(
+                                        withJsonPath("$.payloadKey", equalTo(payloadValue))
+                                        )
+                                )
+                );
+
+        verify(restClient, times(2)).query(REQUEST_URL, MEDIA_TYPE, new MultivaluedHashMap<>(HEADERS));
+        verify(response, times(3)).readEntity(String.class);
     }
 
 

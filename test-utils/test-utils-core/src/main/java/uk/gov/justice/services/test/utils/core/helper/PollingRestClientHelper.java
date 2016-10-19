@@ -1,4 +1,4 @@
-package uk.gov.justice.services.test.utils.core.matchers;
+package uk.gov.justice.services.test.utils.core.helper;
 
 import static com.jayway.awaitility.Awaitility.await;
 import static java.util.Optional.empty;
@@ -7,6 +7,7 @@ import static org.hamcrest.CoreMatchers.both;
 import static org.hamcrest.CoreMatchers.not;
 
 import uk.gov.justice.services.test.utils.core.http.PollingRequestParams;
+import uk.gov.justice.services.test.utils.core.matchers.ResponseMatcher;
 import uk.gov.justice.services.test.utils.core.rest.RestClient;
 
 import java.util.Optional;

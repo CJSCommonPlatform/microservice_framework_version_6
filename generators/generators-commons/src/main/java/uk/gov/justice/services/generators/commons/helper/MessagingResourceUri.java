@@ -21,12 +21,17 @@ public class MessagingResourceUri {
     }
 
     /**
-     * Returns capitalised uri string without delimiters
+     * Returns a camel case class name with all invalid characters removed
      *
-     * @return capitalised uri string without delimiters
+     * @return camel case string with all invalid characters removed.
      */
-    public String toCapitalisedString() {
-        return capitalize(stripStart(uriString, "/"), '.').replace(".", "");
+    public String toClassName() {
+
+        String cleaned = uriString.replaceAll("[^A-Za-z0-9_$]", " ");
+        
+        return capitalize(cleaned, " _$0123456789".toCharArray())
+                .replaceAll(" ", "")
+                .replaceAll("^[0-9]+", "");
     }
 
     @Override

@@ -24,7 +24,6 @@ import javax.ws.rs.core.Response;
 
 import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -43,9 +42,13 @@ public class PollingRestClientHelperTest {
     @Mock
     private Response response;
 
+    private PollingRestClientHelper poll;
+
     @Before
     public void setUp() {
         when(restClient.query(anyString(), anyString(), any())).thenReturn(response);
+
+        poll = new PollingRestClientHelper(restClient, pollingRequestParams(REQUEST_URL, MEDIA_TYPE).withHeaders(HEADERS).build());
     }
 
     @Test
@@ -53,8 +56,7 @@ public class PollingRestClientHelperTest {
         final String payloadValue = STRING.next();
         when(response.readEntity(String.class)).thenReturn("{}").thenReturn(createObjectBuilder().add("payloadKey", payloadValue).build().toString());
 
-        new PollingRestClientHelper(restClient, pollingRequestParams(REQUEST_URL, MEDIA_TYPE).withHeaders(HEADERS).build())
-                .withLogging()
+        poll.withLogging()
                 .until(
                         payload()
                                 .isJson(allOf(
@@ -64,42 +66,41 @@ public class PollingRestClientHelperTest {
                 );
 
         verify(restClient, times(2)).query(REQUEST_URL, MEDIA_TYPE, new MultivaluedHashMap<>(HEADERS));
-        verify(response, times(3)).readEntity(String.class);
+        verify(response, times(2)).readEntity(String.class);
     }
 
     @Test
     public void shouldPollUntilResponseMatchesExpectedStatus() {
         when(response.getStatus()).thenReturn(NOT_FOUND.getStatusCode()).thenReturn(ACCEPTED.getStatusCode());
 
-        new PollingRestClientHelper(restClient, pollingRequestParams(REQUEST_URL, MEDIA_TYPE).withHeaders(HEADERS).build())
-                .withLogging()
+        poll.withLogging()
                 .until(
                         status().is(ACCEPTED)
                 );
 
         verify(restClient, times(2)).query(REQUEST_URL, MEDIA_TYPE, new MultivaluedHashMap<>(HEADERS));
-        verify(response, times(3)).getStatus();
+        verify(response, times(2)).getStatus();
     }
 
     @Test
-    @Ignore
     public void shouldPollUntilResponseMatchesExpectedPayloadAndStatus() {
         final String payloadValue = STRING.next();
         when(response.readEntity(String.class)).thenReturn("{}").thenReturn(createObjectBuilder().add("payloadKey", payloadValue).build().toString());
         when(response.getStatus()).thenReturn(NOT_FOUND.getStatusCode()).thenReturn(ACCEPTED.getStatusCode());
 
-        new PollingRestClientHelper(restClient, pollingRequestParams(REQUEST_URL, MEDIA_TYPE).withHeaders(HEADERS).build())
-                .withLogging()
+        poll.withLogging()
                 .until(
                         payload()
                                 .isJson(allOf(
                                         withJsonPath("$.payloadKey", equalTo(payloadValue))
                                         )
-                                )
+                                ),
+                        status().is(ACCEPTED)
                 );
 
         verify(restClient, times(2)).query(REQUEST_URL, MEDIA_TYPE, new MultivaluedHashMap<>(HEADERS));
-        verify(response, times(3)).readEntity(String.class);
+        verify(response, times(2)).readEntity(String.class);
+        verify(response, times(2)).getStatus();
     }
 
 

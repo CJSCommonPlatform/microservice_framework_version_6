@@ -1,13 +1,13 @@
 package uk.gov.justice.services.test.utils.core.matchers;
 
-import javax.ws.rs.core.Response;
+import uk.gov.justice.services.test.utils.core.http.ResponseData;
 
 import com.jayway.jsonpath.ReadContext;
 import com.jayway.jsonpath.matchers.IsJson;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 
-public class ResponsePayloadMatcher extends ResponseMatcher<Response> {
+public class ResponsePayloadMatcher extends ResponseMatcher<ResponseData> {
 
     private IsJson<String> matcher = null;
 
@@ -21,12 +21,12 @@ public class ResponsePayloadMatcher extends ResponseMatcher<Response> {
     }
 
     @Override
-    protected boolean matchesSafely(final Response response, final Description description) {
-        final String responsePayload = response.readEntity(String.class);
+    protected boolean matchesSafely(final ResponseData responseData, final Description description) {
+        final String actualPayload = responseData.getPayload();
 
-        if (!matcher.matches(responsePayload)) {
+        if (!matcher.matches(actualPayload)) {
             description.appendText("Payload ");
-            matcher.describeMismatch(responsePayload, description);
+            matcher.describeMismatch(actualPayload, description);
             return false;
         }
 

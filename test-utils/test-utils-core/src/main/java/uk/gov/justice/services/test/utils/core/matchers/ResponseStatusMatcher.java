@@ -1,14 +1,12 @@
 package uk.gov.justice.services.test.utils.core.matchers;
 
-import static javax.ws.rs.core.Response.Status.fromStatusCode;
+import uk.gov.justice.services.test.utils.core.http.ResponseData;
 
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import com.jayway.jsonpath.matchers.IsJson;
 import org.hamcrest.Description;
 
-public class ResponseStatusMatcher extends ResponseMatcher<Response> {
+public class ResponseStatusMatcher extends ResponseMatcher<ResponseData> {
 
     private Status expectedStatus = null;
 
@@ -22,8 +20,8 @@ public class ResponseStatusMatcher extends ResponseMatcher<Response> {
     }
 
     @Override
-    protected boolean matchesSafely(final Response response, final Description description) {
-        final Status actualStatus = fromStatusCode(response.getStatus());
+    protected boolean matchesSafely(final ResponseData responseData, final Description description) {
+        final Status actualStatus = responseData.getStatus();
 
         if (actualStatus != expectedStatus) {
             description.appendText("got ").appendValue(actualStatus);

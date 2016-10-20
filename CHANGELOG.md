@@ -7,6 +7,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ### Added
 - Support for RestClient to use proxy details from environment properties
+- Matchers for matching handler and handler class methods, annotations and pass through process type (Sender or Requester)
 
 ## [0.32.0] - 2016-10-24
 

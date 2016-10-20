@@ -203,7 +203,7 @@ class MessageListenerCodeGenerator {
      * @return camel case class name
      */
     private String classNameOf(final MessagingResourceUri resourceUri) {
-        return format("%sJmsListener", resourceUri.toCapitalisedString());
+        return format("%sJmsListener", resourceUri.toClassName());
     }
 
     /**

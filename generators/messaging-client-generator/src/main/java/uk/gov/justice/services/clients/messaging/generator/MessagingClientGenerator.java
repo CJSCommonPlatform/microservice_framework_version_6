@@ -26,7 +26,7 @@ public class MessagingClientGenerator extends AbstractClientGenerator {
     @Override
     protected String classNameOf(final Raml raml) {
         MessagingResourceUri uri = new MessagingResourceUri(raml.getResources().values().iterator().next().getUri());
-        return String.format("Remote%s", uri.toCapitalisedString());
+        return String.format("Remote%s", uri.toClassName());
     }
 
     @Override

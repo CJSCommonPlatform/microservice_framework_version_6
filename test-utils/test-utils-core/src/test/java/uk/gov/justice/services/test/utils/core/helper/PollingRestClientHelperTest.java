@@ -3,6 +3,7 @@ package uk.gov.justice.services.test.utils.core.helper;
 import static com.google.common.collect.ImmutableMap.of;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.core.Response.Status.ACCEPTED;
@@ -14,6 +15,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.lessThan;
+import static org.junit.rules.ExpectedException.none;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.times;
@@ -33,7 +35,9 @@ import javax.ws.rs.core.Response;
 
 import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -51,6 +55,9 @@ public class PollingRestClientHelperTest {
     @Mock
     private Response response;
 
+    @Rule
+    public ExpectedException expectedException = none();
+
     private PollingRestClientHelper poll;
 
     @Before
@@ -59,7 +66,8 @@ public class PollingRestClientHelperTest {
 
         poll = new PollingRestClientHelper(restClient, pollingRequestParams(REQUEST_URL, MEDIA_TYPE).withHeaders(HEADERS).build())
                 .with().logging()
-                .with().pollInterval(100, MILLISECONDS);
+                .with().pollInterval(100, MILLISECONDS)
+                .with().timeout(2, SECONDS);
     }
 
     @Test
@@ -128,7 +136,10 @@ public class PollingRestClientHelperTest {
 
         poll
                 .ignoring(
-                        status().is(NOT_FOUND),
+                        status().is(NOT_FOUND)
+                )
+                .and()
+                .ignoring(
                         status().is(FORBIDDEN)
                 )
                 .until(
@@ -152,7 +163,7 @@ public class PollingRestClientHelperTest {
         when(response.getStatus())
                 .thenReturn(OK.getStatusCode());
         when(response.readEntity(String.class))
-                .thenReturn("{}")
+                .thenReturn(createObjectBuilder().add("events", createArrayBuilder().build()).build().toString())
                 .thenReturn(createObjectBuilder().add("events", eventsWith1Item).build().toString())
                 .thenReturn(createObjectBuilder().add("events", eventsWith2Items).build().toString());
 
@@ -179,5 +190,25 @@ public class PollingRestClientHelperTest {
         verify(response, times(3)).getStatus();
     }
 
+    @Test
+    public void shouldFailFastWhenResponseIsNotPartOfIgnoreOrExpectedData() {
+        expectedException.expect(AssertionError.class);
+
+        when(response.getStatus())
+                .thenReturn(NOT_FOUND.getStatusCode())
+                .thenReturn(FORBIDDEN.getStatusCode())
+                .thenReturn(ACCEPTED.getStatusCode());
+
+        poll
+                .ignoring(
+                        status().is(NOT_FOUND)
+                )
+                .until(
+                        status().is(ACCEPTED)
+                );
+
+        verify(restClient, times(2)).query(REQUEST_URL, MEDIA_TYPE, new MultivaluedHashMap<>(HEADERS));
+        verify(response, times(2)).getStatus();
+    }
 
 }

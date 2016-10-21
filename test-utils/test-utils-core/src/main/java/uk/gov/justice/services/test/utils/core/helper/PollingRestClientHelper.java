@@ -6,8 +6,8 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static javax.ws.rs.core.Response.Status.fromStatusCode;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.anyOf;
-import static org.hamcrest.CoreMatchers.both;
-import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import uk.gov.justice.services.test.utils.core.http.PollingRequestParams;
 import uk.gov.justice.services.test.utils.core.http.ResponseData;
@@ -22,7 +22,9 @@ import javax.ws.rs.core.Response;
 import com.google.common.annotations.VisibleForTesting;
 import com.jayway.awaitility.core.ConditionEvaluationLogger;
 import com.jayway.awaitility.core.ConditionFactory;
+import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeDiagnosingMatcher;
 
 public class PollingRestClientHelper {
 
@@ -46,17 +48,22 @@ public class PollingRestClientHelper {
 
     public PollingRestClientHelper ignoring(final Matcher<ResponseData>... matchers) {
         if (ignoredResponseMatcher.isPresent()) {
-            this.ignoredResponseMatcher = Optional.of(both(ignoredResponseMatcher.get()).and(allOf(matchers)));
+            this.ignoredResponseMatcher = Optional.of(anyOf(ignoredResponseMatcher.get(), allOf(matchers)));
         } else {
             this.ignoredResponseMatcher = Optional.of(allOf(matchers));
         }
         return this;
     }
 
-    public void until(final Matcher<ResponseData>... matchers) {
+
+    public ResponseData until(final Matcher<ResponseData>... matchers) {
         expectedResponseMatcher = allOf(matchers);
 
-        this.await.until(new CallableRestClient(requestParams), combinedMatcher());
+        final ResponseData responseData = this.await.until(new CallableRestClient(requestParams), combinedMatcher());
+
+        assertThat(responseData, is(expectedResponseMatcher));
+
+        return responseData;
     }
 
     /**
@@ -101,7 +108,7 @@ public class PollingRestClientHelper {
 
     private Matcher<ResponseData> combinedMatcher() {
         if (ignoredResponseMatcher.isPresent()) {
-            return both(not(ignoredResponseMatcher.get())).and(expectedResponseMatcher);
+            return new StopPollingMatcher(expectedResponseMatcher, ignoredResponseMatcher.get());
         }
         return expectedResponseMatcher;
     }
@@ -123,5 +130,34 @@ public class PollingRestClientHelper {
             return new ResponseData(fromStatusCode(response.getStatus()), response.readEntity(String.class));
         }
     }
+
+    private class StopPollingMatcher extends TypeSafeDiagnosingMatcher<ResponseData> {
+
+        private final Matcher<ResponseData> expectedResponseDataMatcher;
+        private final Matcher<ResponseData> ignoredResponseDataMatcher;
+
+        StopPollingMatcher(final Matcher<ResponseData> expectedResponseDataMatcher, final Matcher<ResponseData> ignoredResponseDataMatcher) {
+            this.expectedResponseDataMatcher = expectedResponseDataMatcher;
+            this.ignoredResponseDataMatcher = ignoredResponseDataMatcher;
+        }
+
+        @Override
+        protected boolean matchesSafely(final ResponseData responseData, final Description description) {
+            if (expectedResponseDataMatcher.matches(responseData)) {
+                return true;
+            } else if (ignoredResponseDataMatcher.matches(responseData)) {
+                ignoredResponseDataMatcher.describeMismatch(responseData, description);
+                return false;
+            }
+
+            return true;
+        }
+
+        @Override
+        public void describeTo(final Description description) {
+            description.appendDescriptionOf(ignoredResponseDataMatcher);
+        }
+    }
+
 
 }

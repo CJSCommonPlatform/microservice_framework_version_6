@@ -35,7 +35,7 @@ public class ResponsePayloadMatcher extends ResponseMatcher<ResponseData> {
 
     @Override
     public void describeTo(final Description description) {
-        description.appendText("Payload with ")
+        description.appendText("Payload ")
                 .appendDescriptionOf(matcher);
 
     }

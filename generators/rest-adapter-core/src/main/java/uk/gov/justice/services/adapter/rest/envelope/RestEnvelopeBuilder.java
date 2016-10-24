@@ -1,21 +1,25 @@
 package uk.gov.justice.services.adapter.rest.envelope;
 
-import static java.util.Collections.emptyList;
+import static java.lang.String.format;
 import static uk.gov.justice.services.common.http.HeaderConstants.CLIENT_CORRELATION_ID;
 import static uk.gov.justice.services.common.http.HeaderConstants.SESSION_ID;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.METADATA;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilderWithFilter;
+import static uk.gov.justice.services.messaging.JsonObjects.getJsonObject;
 
+import uk.gov.justice.services.adapter.rest.exception.BadRequestException;
 import uk.gov.justice.services.adapter.rest.parameter.Parameter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectMetadata;
-import uk.gov.justice.services.messaging.JsonObjects;
 import uk.gov.justice.services.messaging.Metadata;
 
 import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -27,8 +31,9 @@ import javax.ws.rs.core.HttpHeaders;
  */
 public class RestEnvelopeBuilder {
 
-    private UUID id;
+    private static final String METADATA_AND_HEADER_ARE_SET = "The metadata of payload and the headers both have %s set and the values are not equal: payload = %s, headers = %s";
 
+    private UUID id;
     private Optional<JsonObject> initialPayload = Optional.empty();
     private Optional<HttpHeaders> headers = Optional.empty();
     private Optional<Collection<Parameter>> params = Optional.empty();
@@ -92,45 +97,100 @@ public class RestEnvelopeBuilder {
     }
 
     private JsonObject payload() {
-
-        JsonObjectBuilder payloadBuilder = initialPayload
-                .map(JsonObjects::createObjectBuilder)
+        final JsonObjectBuilder payloadBuilder = initialPayload
+                .map(jsonObject -> createObjectBuilderWithFilter(jsonObject, key -> !key.equals(METADATA)))
                 .orElse(Json.createObjectBuilder());
 
-        for (Parameter param : params.orElse(emptyList())) {
-            switch (param.getType()) {
-                case NUMERIC:
-                    payloadBuilder = payloadBuilder.add(param.getName(), param.getNumericValue());
-                    break;
-                case BOOLEAN:
-                    payloadBuilder = payloadBuilder.add(param.getName(), param.getBooleanValue());
-                    break;
-                default:
-                    payloadBuilder = payloadBuilder.add(param.getName(), param.getStringValue());
-            }
-        }
+        params.ifPresent(parameters ->
+                parameters.forEach(param -> {
+                            switch (param.getType()) {
+                                case NUMERIC:
+                                    payloadBuilder.add(param.getName(), param.getNumericValue());
+                                    break;
+                                case BOOLEAN:
+                                    payloadBuilder.add(param.getName(), param.getBooleanValue());
+                                    break;
+                                default:
+                                    payloadBuilder.add(param.getName(), param.getStringValue());
+                            }
+                        }
+                ));
 
         return payloadBuilder.build();
     }
 
     private Metadata buildMetadata() {
-        JsonObjectMetadata.Builder metadata = metadataOf(id, this.action);
+        final Optional<Metadata> payloadMetadata = metadataFromPayloadIfPresent();
+        final JsonObjectMetadata.Builder metadataBuilder = payloadMetadata
+                .map(JsonObjectMetadata::metadataFrom)
+                .orElse(metadataOf(id, this.action));
 
-        if (headers.isPresent() && headers.get().getRequestHeaders() != null) {
-            final HttpHeaders httpHeaders = this.headers.get();
-
-            if (httpHeaders.getHeaderString(CLIENT_CORRELATION_ID) != null) {
-                metadata = metadata.withClientCorrelationId(httpHeaders.getHeaderString(CLIENT_CORRELATION_ID));
-            }
-
-            if (httpHeaders.getHeaderString(USER_ID) != null) {
-                metadata = metadata.withUserId(httpHeaders.getHeaderString(USER_ID));
-            }
-            if (httpHeaders.getHeaderString(SESSION_ID) != null) {
-                metadata = metadata.withSessionId(httpHeaders.getHeaderString(SESSION_ID));
-            }
-        }
-        return metadata.build();
+        return mergeHeadersIntoMetadata(payloadMetadata, metadataBuilder).build();
     }
 
+    private Optional<Metadata> metadataFromPayloadIfPresent() {
+        return initialPayload
+                .flatMap(jsonObject -> getJsonObject(jsonObject, METADATA))
+                .map(JsonObjectMetadata::metadataFrom);
+    }
+
+    private JsonObjectMetadata.Builder mergeHeadersIntoMetadata(final Optional<Metadata> metadata, final JsonObjectMetadata.Builder metadataBuilder) {
+        final Optional<String> correlationId;
+        final Optional<String> sessionId;
+        final Optional<String> userId;
+
+        if (metadata.isPresent()) {
+            final Metadata metadataValue = metadata.get();
+
+            correlationId = metadataValue.clientCorrelationId();
+            sessionId = metadataValue.sessionId();
+            userId = metadataValue.userId();
+        } else {
+            correlationId = Optional.empty();
+            sessionId = Optional.empty();
+            userId = Optional.empty();
+        }
+
+        final boolean requestHeadersArePresent = headers.isPresent() && headers.get().getRequestHeaders() != null;
+
+        if (requestHeadersArePresent) {
+            final HttpHeaders httpHeaders = this.headers.get();
+
+            setMetaDataIfNotSet(
+                    correlationId,
+                    httpHeaders.getHeaderString(CLIENT_CORRELATION_ID),
+                    metadataBuilder::withClientCorrelationId,
+                    "Client Correlation Id");
+
+            setMetaDataIfNotSet(
+                    userId,
+                    httpHeaders.getHeaderString(USER_ID),
+                    metadataBuilder::withUserId,
+                    "User Id");
+
+            setMetaDataIfNotSet(
+                    sessionId,
+                    httpHeaders.getHeaderString(SESSION_ID),
+                    metadataBuilder::withSessionId,
+                    "Session Id");
+        }
+
+        return metadataBuilder;
+    }
+
+    private void setMetaDataIfNotSet(final Optional<String> metadataValue,
+                                     final String headerValue,
+                                     final Consumer<String> setMetadata,
+                                     final String exceptionInfo) {
+
+        final boolean valueIsPresentAndNotEqualInHeaderAndPayload = metadataValue.isPresent()
+                && headerValue != null
+                && !metadataValue.get().equals(headerValue);
+
+        if (valueIsPresentAndNotEqualInHeaderAndPayload) {
+            throw new BadRequestException(format(METADATA_AND_HEADER_ARE_SET, exceptionInfo, metadataValue.get(), headerValue));
+        } else if (headerValue != null) {
+            setMetadata.accept(headerValue);
+        }
+    }
 }

@@ -8,6 +8,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ### Added
 - JsonEnvelope.asJsonObject() for simple conversion of the entire envelope to a JsonObject.
 - EventStreamMatcher to match stream of JsonEnvelopes appended
+- Polling Rest Client helper utility for integration tests
 
 ### Changed
 - JsonEnvelopeMetadataMatcher to allow matching with Json paths

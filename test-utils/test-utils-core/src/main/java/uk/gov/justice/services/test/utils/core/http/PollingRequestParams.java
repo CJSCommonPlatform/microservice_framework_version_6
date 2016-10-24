@@ -5,7 +5,6 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 public class PollingRequestParams {

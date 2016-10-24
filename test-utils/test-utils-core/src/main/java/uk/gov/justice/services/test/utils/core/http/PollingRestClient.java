@@ -6,7 +6,6 @@ import uk.gov.justice.services.test.utils.core.helper.Sleeper;
 
 import java.util.Optional;
 
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -16,7 +15,10 @@ import com.google.common.annotations.VisibleForTesting;
  * between each poll.
  *
  * Can accept response body Predicate for validating the rest response body and an expected status
+ *
+ * @deprecated Use {@link RestPoller} instead.
  */
+@Deprecated
 public class PollingRestClient {
 
     private final ValidatingRestClient validatingRestClient;

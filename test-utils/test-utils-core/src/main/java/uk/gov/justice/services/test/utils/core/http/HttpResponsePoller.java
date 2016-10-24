@@ -22,7 +22,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 /**
- * @deprecated Use {@link PollingRestClient} instead.
+ * @deprecated Use {@link RestPoller} instead.
  */
 @Deprecated
 public class HttpResponsePoller {

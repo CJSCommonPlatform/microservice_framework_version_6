@@ -1,6 +1,6 @@
 package uk.gov.justice.services.test.utils.core.matchers;
 
-import uk.gov.justice.services.test.utils.core.helper.PollingRestClientHelper;
+import uk.gov.justice.services.test.utils.core.http.RestPoller;
 import uk.gov.justice.services.test.utils.core.http.ResponseData;
 
 import javax.ws.rs.core.Response.Status;
@@ -8,7 +8,7 @@ import javax.ws.rs.core.Response.Status;
 import org.hamcrest.Description;
 
 /**
- * Matches the HTTP status part of a response data. See {@link PollingRestClientHelper} for usage
+ * Matches the HTTP status part of a response data. See {@link RestPoller} for usage
  * example.
  */
 public class ResponseStatusMatcher extends ResponseMatcher<ResponseData> {

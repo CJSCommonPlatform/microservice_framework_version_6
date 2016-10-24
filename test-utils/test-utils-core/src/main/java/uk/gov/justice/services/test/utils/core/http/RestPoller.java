@@ -1,4 +1,4 @@
-package uk.gov.justice.services.test.utils.core.helper;
+package uk.gov.justice.services.test.utils.core.http;
 
 import static com.jayway.awaitility.Awaitility.await;
 import static java.util.Optional.empty;
@@ -9,9 +9,6 @@ import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import uk.gov.justice.services.test.utils.core.http.RequestParams;
-import uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder;
-import uk.gov.justice.services.test.utils.core.http.ResponseData;
 import uk.gov.justice.services.test.utils.core.rest.RestClient;
 
 import java.util.Optional;
@@ -96,7 +93,7 @@ import org.hamcrest.TypeSafeDiagnosingMatcher;
  *
  * </blockquote></pre>
  */
-public class PollingRestClientHelper {
+public class RestPoller {
 
     private final RestClient restClient;
     private final RequestParams requestParams;
@@ -106,7 +103,7 @@ public class PollingRestClientHelper {
     private Optional<Matcher<ResponseData>> ignoredResponseMatcher = empty();
 
     @VisibleForTesting
-    PollingRestClientHelper(final RestClient restClient, final RequestParams requestParams) {
+    RestPoller(final RestClient restClient, final RequestParams requestParams) {
         this.requestParams = requestParams;
         this.restClient = restClient;
         this.await = await().with().pollInterval(1, SECONDS).with().timeout(10, SECONDS);
@@ -118,8 +115,8 @@ public class PollingRestClientHelper {
      * @param requestParams request parameters
      * @return polling rest client helper
      */
-    public static PollingRestClientHelper poll(final RequestParams requestParams) {
-        return new PollingRestClientHelper(new RestClient(), requestParams);
+    public static RestPoller poll(final RequestParams requestParams) {
+        return new RestPoller(new RestClient(), requestParams);
     }
 
     /**
@@ -128,8 +125,8 @@ public class PollingRestClientHelper {
      * @param requestParamsBuilder request parameters builder
      * @return polling rest client helper
      */
-    public static PollingRestClientHelper poll(final RequestParamsBuilder requestParamsBuilder) {
-        return new PollingRestClientHelper(new RestClient(), requestParamsBuilder.build());
+    public static RestPoller poll(final RequestParamsBuilder requestParamsBuilder) {
+        return new RestPoller(new RestClient(), requestParamsBuilder.build());
     }
 
     /**
@@ -138,7 +135,7 @@ public class PollingRestClientHelper {
      * @param matchers response data matchers
      * @return polling rest client helper
      */
-    public PollingRestClientHelper ignoring(final Matcher<ResponseData>... matchers) {
+    public RestPoller ignoring(final Matcher<ResponseData>... matchers) {
         if (ignoredResponseMatcher.isPresent()) {
             this.ignoredResponseMatcher = Optional.of(anyOf(ignoredResponseMatcher.get(), allOf(matchers)));
         } else {
@@ -172,7 +169,7 @@ public class PollingRestClientHelper {
      *
      * @return PollingRestClientHelper
      */
-    public PollingRestClientHelper logging() {
+    public RestPoller logging() {
         this.await = this.await.with().conditionEvaluationListener(new ConditionEvaluationLogger());
         return this;
     }
@@ -184,7 +181,7 @@ public class PollingRestClientHelper {
      * @param unit         the unit
      * @return this
      */
-    public PollingRestClientHelper pollInterval(final long pollInterval, final TimeUnit unit) {
+    public RestPoller pollInterval(final long pollInterval, final TimeUnit unit) {
         this.await = this.await.with().pollInterval(pollInterval, unit);
         return this;
     }
@@ -197,7 +194,7 @@ public class PollingRestClientHelper {
      * @param timeout the timeout
      * @param unit    the unit
      */
-    public PollingRestClientHelper timeout(final long timeout, final TimeUnit unit) {
+    public RestPoller timeout(final long timeout, final TimeUnit unit) {
         this.await = this.await.with().timeout(timeout, unit);
         return this;
     }
@@ -210,7 +207,7 @@ public class PollingRestClientHelper {
      * @param delay the delay
      * @param unit  the unit
      */
-    public PollingRestClientHelper pollDelay(final long delay, final TimeUnit unit) {
+    public RestPoller pollDelay(final long delay, final TimeUnit unit) {
         this.await = this.await.with().pollDelay(delay, unit);
         return this;
     }
@@ -220,7 +217,7 @@ public class PollingRestClientHelper {
      *
      * @return PollingRestClientHelper
      */
-    public PollingRestClientHelper with() {
+    public RestPoller with() {
         return this;
     }
 
@@ -229,7 +226,7 @@ public class PollingRestClientHelper {
      *
      * @return PollingRestClientHelper
      */
-    public PollingRestClientHelper and() {
+    public RestPoller and() {
         return this;
     }
 

@@ -1,4 +1,4 @@
-package uk.gov.justice.services.test.utils.core.helper;
+package uk.gov.justice.services.test.utils.core.http;
 
 import static com.google.common.collect.ImmutableMap.of;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
@@ -27,6 +27,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMat
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.UUID;
 
+import uk.gov.justice.services.test.utils.core.http.RestPoller;
 import uk.gov.justice.services.test.utils.core.rest.RestClient;
 
 import javax.json.JsonArray;
@@ -44,7 +45,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class PollingRestClientHelperTest {
+public class RestPollerTest {
 
     private static final String REQUEST_URL = STRING.next();
     private static final String MEDIA_TYPE = STRING.next();
@@ -59,13 +60,13 @@ public class PollingRestClientHelperTest {
     @Rule
     public ExpectedException expectedException = none();
 
-    private PollingRestClientHelper poll;
+    private RestPoller poll;
 
     @Before
     public void setUp() {
         when(restClient.query(anyString(), anyString(), any())).thenReturn(response);
 
-        poll = new PollingRestClientHelper(restClient, requestParams(REQUEST_URL, MEDIA_TYPE).withHeaders(HEADERS).build())
+        poll = new RestPoller(restClient, requestParams(REQUEST_URL, MEDIA_TYPE).withHeaders(HEADERS).build())
                 .with().logging()
                 .with().pollInterval(100, MILLISECONDS)
                 .with().timeout(2, SECONDS);

@@ -2,7 +2,7 @@ package uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog;
 
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.util.Clock;
-import uk.gov.justice.services.eventsourcing.common.exception.InvalidStreamIdException;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidStreamIdException;
 import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;

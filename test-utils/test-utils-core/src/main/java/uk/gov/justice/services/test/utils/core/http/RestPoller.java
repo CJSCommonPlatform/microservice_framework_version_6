@@ -33,6 +33,9 @@ import org.hamcrest.TypeSafeDiagnosingMatcher;
  * Poll until the response has specified number of events with required data:
  * <pre><blockquote>
  *
+ *      import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
+ *      import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
+ *
  *      final String url = "http://localhost:8080/my-context/my/rest/endpoint";
  *      final String mediaType = "application/vnd.notification.query.events+json";
  *
@@ -63,6 +66,9 @@ import org.hamcrest.TypeSafeDiagnosingMatcher;
  * Poll ignoring certain response status, until the response has specified number of events with
  * required data:
  * <pre><blockquote>
+ *
+ *      import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
+ *      import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
  *
  *      final String url = "http://localhost:8080/my-context/my/rest/endpoint";
  *      final String mediaType = "application/vnd.notification.query.events+json";
@@ -113,7 +119,7 @@ public class RestPoller {
      * Instantiates a new polling rest client helper.
      *
      * @param requestParams request parameters
-     * @return polling rest client helper
+     * @return this
      */
     public static RestPoller poll(final RequestParams requestParams) {
         return new RestPoller(new RestClient(), requestParams);
@@ -123,7 +129,7 @@ public class RestPoller {
      * Instantiates a new polling rest client helper.
      *
      * @param requestParamsBuilder request parameters builder
-     * @return polling rest client helper
+     * @return this
      */
     public static RestPoller poll(final RequestParamsBuilder requestParamsBuilder) {
         return new RestPoller(new RestClient(), requestParamsBuilder.build());
@@ -133,7 +139,7 @@ public class RestPoller {
      * Specify matchers to ignore the intermediate responses received during the poll.
      *
      * @param matchers response data matchers
-     * @return polling rest client helper
+     * @return this
      */
     public RestPoller ignoring(final Matcher<ResponseData>... matchers) {
         if (ignoredResponseMatcher.isPresent()) {
@@ -167,7 +173,7 @@ public class RestPoller {
      * print the matcher evaluation results, on every poll, to the console using System.out.printf.
      * Also print the final value if applicable.
      *
-     * @return PollingRestClientHelper
+     * @return this
      */
     public RestPoller logging() {
         this.await = this.await.with().conditionEvaluationListener(new ConditionEvaluationLogger());
@@ -215,7 +221,7 @@ public class RestPoller {
     /**
      * A method to increase the readability
      *
-     * @return PollingRestClientHelper
+     * @return this
      */
     public RestPoller with() {
         return this;
@@ -224,7 +230,7 @@ public class RestPoller {
     /**
      * A method to increase the readability
      *
-     * @return PollingRestClientHelper
+     * @return this
      */
     public RestPoller and() {
         return this;

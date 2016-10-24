@@ -1,5 +1,6 @@
 package uk.gov.justice.services.test.utils.core.matchers;
 
+import uk.gov.justice.services.test.utils.core.helper.PollingRestClientHelper;
 import uk.gov.justice.services.test.utils.core.http.ResponseData;
 
 import com.jayway.jsonpath.ReadContext;
@@ -7,6 +8,10 @@ import com.jayway.jsonpath.matchers.IsJson;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 
+/**
+ * Matches the Json Payload part of a response data. See {@link PollingRestClientHelper} for usage
+ * example.
+ */
 public class ResponsePayloadMatcher extends ResponseMatcher<ResponseData> {
 
     private IsJson<String> matcher = null;

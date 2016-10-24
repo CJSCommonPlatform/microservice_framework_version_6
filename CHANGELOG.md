@@ -5,17 +5,24 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [0.31.0] - 2016-10-24
+
 ### Added
-- JsonEnvelope.asJsonObject() for simple conversion of the entire envelope to a JsonObject.
+- JsonEnvelope.asJsonObject() for simple conversion of the entire envelope to a JsonObject
 - EventStreamMatcher to match stream of JsonEnvelopes appended
 - RestPoller. A polling REST client utility for integration tests
+- Mechanism for taking snapshots of aggregates, disabled by default. To enable, add a dependency on
+the `aggregate-snapshot-service` module. Requires the `aggregate-snapshot-repository-liquibase`
+schema to be applied to the event store.
+- JSON schema matching support in the JsonEnvelopeMatcher
 
 ### Changed
-- JsonEnvelopeMetadataMatcher to allow matching with Json paths
+- JsonEnvelopeMetadataMatcher to allow matching with JSON paths
 - Deprecated PollingRestClient in favour of the new RestPoller
 
 ### Fixed
-- RestClientProcessor. Fixed to allow metadata from payload to be merged with headers.
+- RestProcessor now allows metadata from payload to be merged with headers instead of being
+overwritten
 
 ## [0.30.0] - 2016-10-11
 

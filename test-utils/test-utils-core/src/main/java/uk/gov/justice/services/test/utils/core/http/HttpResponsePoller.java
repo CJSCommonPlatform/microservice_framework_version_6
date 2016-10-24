@@ -8,6 +8,7 @@ import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.OK;
 
 import uk.gov.justice.services.messaging.JsonObjects;
+import uk.gov.justice.services.test.utils.core.helper.PollingRestClientHelper;
 import uk.gov.justice.services.test.utils.core.rest.RestClient;
 
 import java.io.StringReader;
@@ -22,7 +23,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 /**
- * @deprecated Use {@link PollingRestClient} instead.
+ * @deprecated Use {@link PollingRestClientHelper} instead.
  */
 @Deprecated
 public class HttpResponsePoller {

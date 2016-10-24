@@ -9,7 +9,8 @@ import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import uk.gov.justice.services.test.utils.core.http.PollingRequestParams;
+import uk.gov.justice.services.test.utils.core.http.RequestParams;
+import uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder;
 import uk.gov.justice.services.test.utils.core.http.ResponseData;
 import uk.gov.justice.services.test.utils.core.rest.RestClient;
 
@@ -26,26 +27,38 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 
+/**
+ * Client for polling a rest endpoint and matching the response against the specified Matcher.
+ */
 public class PollingRestClientHelper {
 
     private final RestClient restClient;
-    private final PollingRequestParams requestParams;
+    private final RequestParams requestParams;
 
     private ConditionFactory await;
     private Matcher<ResponseData> expectedResponseMatcher;
     private Optional<Matcher<ResponseData>> ignoredResponseMatcher = empty();
 
     @VisibleForTesting
-    PollingRestClientHelper(final RestClient restClient, final PollingRequestParams requestParams) {
+    PollingRestClientHelper(final RestClient restClient, final RequestParams requestParams) {
         this.requestParams = requestParams;
         this.restClient = restClient;
         this.await = await().with().pollInterval(1, SECONDS).with().timeout(10, SECONDS);
     }
 
-    public static PollingRestClientHelper poll(final PollingRequestParams requestParams) {
+    public static PollingRestClientHelper poll(final RequestParams requestParams) {
         return new PollingRestClientHelper(new RestClient(), requestParams);
     }
 
+    public static PollingRestClientHelper poll(final RequestParamsBuilder requestParamsBuilder) {
+        return new PollingRestClientHelper(new RestClient(), requestParamsBuilder.build());
+    }
+
+    /**
+     *
+     * @param matchers
+     * @return
+     */
     public PollingRestClientHelper ignoring(final Matcher<ResponseData>... matchers) {
         if (ignoredResponseMatcher.isPresent()) {
             this.ignoredResponseMatcher = Optional.of(anyOf(ignoredResponseMatcher.get(), allOf(matchers)));
@@ -55,7 +68,11 @@ public class PollingRestClientHelper {
         return this;
     }
 
-
+    /**
+     *
+     * @param matchers
+     * @return
+     */
     public ResponseData until(final Matcher<ResponseData>... matchers) {
         expectedResponseMatcher = allOf(matchers);
 
@@ -77,13 +94,41 @@ public class PollingRestClientHelper {
         return this;
     }
 
+    /**
+     * Overrides the delay between polls. If not specified a default of 1 second is used.
+     *
+     * @param pollInterval the poll interval
+     * @param unit         the unit
+     * @return this
+     */
     public PollingRestClientHelper pollInterval(final long pollInterval, final TimeUnit unit) {
         this.await = this.await.with().pollInterval(pollInterval, unit);
         return this;
     }
 
-    public PollingRestClientHelper timeout(final long pollInterval, final TimeUnit unit) {
-        this.await = this.await.with().timeout(pollInterval, unit);
+    /**
+     * Poll at most timeout before throwing a timeout exception.
+     *
+     * Overrides the default timeout period. If not specified a default of 10 seconds is used.
+     *
+     * @param timeout the timeout
+     * @param unit    the unit
+     */
+    public PollingRestClientHelper timeout(final long timeout, final TimeUnit unit) {
+        this.await = this.await.with().timeout(timeout, unit);
+        return this;
+    }
+
+    /**
+     * Specify the delay that will be used before PollingRestClientHelper starts polling for the
+     * result the first time. If you don't specify a poll delay explicitly it'll be the same as the
+     * poll interval.
+     *
+     * @param delay the delay
+     * @param unit  the unit
+     */
+    public PollingRestClientHelper pollDelay(final long delay, final TimeUnit unit) {
+        this.await = this.await.with().pollDelay(delay, unit);
         return this;
     }
 
@@ -114,9 +159,9 @@ public class PollingRestClientHelper {
     }
 
     private class CallableRestClient implements Callable<ResponseData> {
-        private final PollingRequestParams requestParams;
+        private final RequestParams requestParams;
 
-        private CallableRestClient(final PollingRequestParams requestParams) {
+        private CallableRestClient(final RequestParams requestParams) {
             this.requestParams = requestParams;
         }
 

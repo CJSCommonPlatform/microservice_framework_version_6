@@ -21,7 +21,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.test.utils.core.http.PollingRequestParamsBuilder.pollingRequestParams;
+import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
@@ -64,7 +64,7 @@ public class PollingRestClientHelperTest {
     public void setUp() {
         when(restClient.query(anyString(), anyString(), any())).thenReturn(response);
 
-        poll = new PollingRestClientHelper(restClient, pollingRequestParams(REQUEST_URL, MEDIA_TYPE).withHeaders(HEADERS).build())
+        poll = new PollingRestClientHelper(restClient, requestParams(REQUEST_URL, MEDIA_TYPE).withHeaders(HEADERS).build())
                 .with().logging()
                 .with().pollInterval(100, MILLISECONDS)
                 .with().timeout(2, SECONDS);

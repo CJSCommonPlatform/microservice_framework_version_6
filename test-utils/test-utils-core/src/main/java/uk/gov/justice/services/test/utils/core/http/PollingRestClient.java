@@ -2,6 +2,7 @@ package uk.gov.justice.services.test.utils.core.http;
 
 import static java.lang.String.format;
 
+import uk.gov.justice.services.test.utils.core.helper.PollingRestClientHelper;
 import uk.gov.justice.services.test.utils.core.helper.Sleeper;
 
 import java.util.Optional;
@@ -16,7 +17,10 @@ import com.google.common.annotations.VisibleForTesting;
  * between each poll.
  *
  * Can accept response body Predicate for validating the rest response body and an expected status
+ *
+ * @deprecated Use {@link PollingRestClientHelper} instead.
  */
+@Deprecated
 public class PollingRestClient {
 
     private final ValidatingRestClient validatingRestClient;

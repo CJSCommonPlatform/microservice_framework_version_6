@@ -5,7 +5,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
-## [0.31.0] - 2016-10-24
+## [0.32.0] - 2016-10-24
 
 ### Added
 - JsonEnvelope.asJsonObject() for simple conversion of the entire envelope to a JsonObject
@@ -23,6 +23,10 @@ schema to be applied to the event store.
 ### Fixed
 - RestProcessor now allows metadata from payload to be merged with headers instead of being
 overwritten
+
+## [0.31.0] - 2016-10-24
+
+- Failed release; do not use
 
 ## [0.30.0] - 2016-10-11
 

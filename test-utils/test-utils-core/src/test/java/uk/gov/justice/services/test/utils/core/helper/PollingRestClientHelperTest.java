@@ -29,6 +29,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.UUI
 
 import uk.gov.justice.services.test.utils.core.rest.RestClient;
 
+import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
@@ -154,6 +155,8 @@ public class PollingRestClientHelperTest {
     public void shouldPollUntilResponsePayloadHasRequiredNumberOfItems() {
         final String userId1 = UUID.next().toString();
         final String userId2 = UUID.next().toString();
+
+        final JsonArray emptyEvents = createArrayBuilder().build();
         final JsonArrayBuilder eventsWith1Item = createArrayBuilder()
                 .add(createObjectBuilder().add("userId", userId1).build());
         final JsonArrayBuilder eventsWith2Items = createArrayBuilder()
@@ -163,7 +166,7 @@ public class PollingRestClientHelperTest {
         when(response.getStatus())
                 .thenReturn(OK.getStatusCode());
         when(response.readEntity(String.class))
-                .thenReturn(createObjectBuilder().add("events", createArrayBuilder().build()).build().toString())
+                .thenReturn(createObjectBuilder().add("events", emptyEvents).build().toString())
                 .thenReturn(createObjectBuilder().add("events", eventsWith1Item).build().toString())
                 .thenReturn(createObjectBuilder().add("events", eventsWith2Items).build().toString());
 

@@ -23,12 +23,78 @@ import javax.ws.rs.core.Response;
 import com.google.common.annotations.VisibleForTesting;
 import com.jayway.awaitility.core.ConditionEvaluationLogger;
 import com.jayway.awaitility.core.ConditionFactory;
+import com.jayway.awaitility.core.ConditionTimeoutException;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 
 /**
  * Client for polling a rest endpoint and matching the response against the specified Matcher.
+ *
+ * To Use:
+ *
+ * Poll until the response has specified number of events with required data:
+ * <pre><blockquote>
+ *
+ *      final String url = "http://localhost:8080/my-context/my/rest/endpoint";
+ *      final String mediaType = "application/vnd.notification.query.events+json";
+ *
+ *      final RequestParams requestParams = requestParams(url, mediaType)
+ *              .withHeader("header-name", "header-value")
+ *              .build();
+ *
+ *      poll(requestParams)
+ *          .until(
+ *              status().is(OK),
+ *              payload()
+ *                  .isJson(allOf(
+ *                      withJsonPath("$.events", hasSize(2)),
+ *                      withJsonPath("$.events[0].userId", is(userId1)),
+ *                      withJsonPath("$.events[1].userId", is(userId2))
+ *                      )
+ *                  )
+ *          )
+ *      ;
+ *
+ * </blockquote></pre>
+ *
+ * The call is configured using <code>RequestParams</code>. This object is most easily created using
+ * a <code>RequestParamsBuilder</code> which takes a url and media type and will supply all other
+ * required parameters with defaults. Overriding these defaults is done in the usual builder pattern
+ * way.
+ *
+ * Poll ignoring certain response status, until the response has specified number of events with
+ * required data:
+ * <pre><blockquote>
+ *
+ *      final String url = "http://localhost:8080/my-context/my/rest/endpoint";
+ *      final String mediaType = "application/vnd.notification.query.events+json";
+ *
+ *      final RequestParams requestParams = requestParams(url, mediaType)
+ *              .withHeader("header-name", "header-value")
+ *              .build();
+ *
+ *      poll(requestParams)
+ *          .ignoring(
+ *              status().is(NOT_FOUND)
+ *          )
+ *          .and()
+ *          .ignoring(
+ *              status().is(FORBIDDEN)
+ *          )
+ *          .until(
+ *              status().is(OK),
+ *              payload()
+ *                  .isJson(allOf(
+ *                      withJsonPath("$.events", hasSize(2)),
+ *                      withJsonPath("$.events[0].userId", is(userId1)),
+ *                      withJsonPath("$.events[1].userId", is(userId2))
+ *                      )
+ *                  )
+ *          )
+ *      ;
+ *
+ * </blockquote></pre>
  */
 public class PollingRestClientHelper {
 
@@ -46,18 +112,31 @@ public class PollingRestClientHelper {
         this.await = await().with().pollInterval(1, SECONDS).with().timeout(10, SECONDS);
     }
 
+    /**
+     * Instantiates a new polling rest client helper.
+     *
+     * @param requestParams request parameters
+     * @return polling rest client helper
+     */
     public static PollingRestClientHelper poll(final RequestParams requestParams) {
         return new PollingRestClientHelper(new RestClient(), requestParams);
     }
 
+    /**
+     * Instantiates a new polling rest client helper.
+     *
+     * @param requestParamsBuilder request parameters builder
+     * @return polling rest client helper
+     */
     public static PollingRestClientHelper poll(final RequestParamsBuilder requestParamsBuilder) {
         return new PollingRestClientHelper(new RestClient(), requestParamsBuilder.build());
     }
 
     /**
+     * Specify matchers to ignore the intermediate responses received during the poll.
      *
-     * @param matchers
-     * @return
+     * @param matchers response data matchers
+     * @return polling rest client helper
      */
     public PollingRestClientHelper ignoring(final Matcher<ResponseData>... matchers) {
         if (ignoredResponseMatcher.isPresent()) {
@@ -69,9 +148,13 @@ public class PollingRestClientHelper {
     }
 
     /**
+     * Poll the rest endpoint <code>until</code> the response matches the specified matchers or
+     * throw a timeout exception.
      *
-     * @param matchers
-     * @return
+     * @param matchers response data matchers
+     * @return final response data
+     * @throws ConditionTimeoutException If condition was not fulfilled within the given time
+     *                                   period.
      */
     public ResponseData until(final Matcher<ResponseData>... matchers) {
         expectedResponseMatcher = allOf(matchers);
@@ -84,8 +167,8 @@ public class PollingRestClientHelper {
     }
 
     /**
-     * prints the matcher evaluation results, on every poll, to the console using System.out.printf.
-     * It also prints the final value if applicable.
+     * print the matcher evaluation results, on every poll, to the console using System.out.printf.
+     * Also print the final value if applicable.
      *
      * @return PollingRestClientHelper
      */
@@ -107,7 +190,7 @@ public class PollingRestClientHelper {
     }
 
     /**
-     * Poll at most timeout before throwing a timeout exception.
+     * Poll at most <code>timeout</code> before throwing a timeout exception.
      *
      * Overrides the default timeout period. If not specified a default of 10 seconds is used.
      *

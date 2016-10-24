@@ -8,10 +8,14 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ### Added
 - JsonEnvelope.asJsonObject() for simple conversion of the entire envelope to a JsonObject.
 - EventStreamMatcher to match stream of JsonEnvelopes appended
-- Polling Rest Client helper utility for integration tests
+- RestPoller. A polling REST client utility for integration tests
 
 ### Changed
 - JsonEnvelopeMetadataMatcher to allow matching with Json paths
+- Deprecated PollingRestClient in favour of the new RestPoller
+
+### Fixed
+- RestClientProcessor. Fixed to allow metadata from payload to be merged with headers.
 
 ## [0.30.0] - 2016-10-11
 

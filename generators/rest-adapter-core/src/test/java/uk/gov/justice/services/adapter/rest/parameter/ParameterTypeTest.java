@@ -8,18 +8,20 @@ import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.raml.model.ParamType;
 
+import uk.gov.justice.services.rest.ParameterType;
+
 public class ParameterTypeTest {
 
     @Test
     public void shouldReturnFrameworkParamTypesMappedToRamlTypes() throws Exception {
-        assertThat(ParameterType.valueOf(ParamType.STRING), is(ParameterType.STRING));
-        assertThat(ParameterType.valueOf(ParamType.NUMBER), is(ParameterType.NUMERIC));
-        assertThat(ParameterType.valueOf(ParamType.INTEGER), is(ParameterType.NUMERIC));
-        assertThat(ParameterType.valueOf(ParamType.BOOLEAN), is(ParameterType.BOOLEAN));
+        assertThat(ParameterType.valueOfQueryType(ParamType.STRING.name()), is(ParameterType.STRING));
+        assertThat(ParameterType.valueOfQueryType(ParamType.NUMBER.name()), is(ParameterType.NUMERIC));
+        assertThat(ParameterType.valueOfQueryType(ParamType.INTEGER.name()), is(ParameterType.NUMERIC));
+        assertThat(ParameterType.valueOfQueryType(ParamType.BOOLEAN.name()), is(ParameterType.BOOLEAN));
     }
 
     @Test
     public void shouldReturnStringIfTypeUnmapped() {
-        assertThat(ParameterType.valueOf(ParamType.DATE), is(ParameterType.STRING));
+        assertThat(ParameterType.valueOfQueryType(ParamType.DATE.name()), is(ParameterType.STRING));
     }
 }

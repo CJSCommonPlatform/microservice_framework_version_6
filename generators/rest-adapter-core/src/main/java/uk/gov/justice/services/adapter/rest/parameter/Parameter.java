@@ -4,6 +4,7 @@ import static org.apache.commons.lang3.BooleanUtils.toBooleanObject;
 
 import java.math.BigDecimal;
 
+import uk.gov.justice.services.rest.ParameterType;
 /**
  * Query or path parameter
  */

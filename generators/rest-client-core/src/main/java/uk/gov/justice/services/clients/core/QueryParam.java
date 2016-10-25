@@ -1,6 +1,6 @@
 package uk.gov.justice.services.clients.core;
 
-import uk.gov.justice.services.adapter.rest.parameter.ParameterType;
+import uk.gov.justice.services.rest.ParameterType;
 
 /**
  * Class representing a query parameter definition for a REST endpoint.

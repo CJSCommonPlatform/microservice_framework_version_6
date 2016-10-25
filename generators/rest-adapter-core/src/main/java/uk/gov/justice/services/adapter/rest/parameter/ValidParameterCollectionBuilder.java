@@ -3,6 +3,7 @@ package uk.gov.justice.services.adapter.rest.parameter;
 import static java.lang.String.format;
 
 import uk.gov.justice.services.adapter.rest.exception.BadRequestException;
+import uk.gov.justice.services.rest.ParameterType;
 
 import java.util.ArrayList;
 import java.util.Collection;

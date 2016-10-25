@@ -30,12 +30,12 @@ import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 
-import uk.gov.justice.services.adapter.rest.parameter.ParameterType;
 import uk.gov.justice.services.clients.core.exception.InvalidResponseException;
 import uk.gov.justice.services.clients.core.webclient.BaseUriFactory;
 import uk.gov.justice.services.clients.core.webclient.ContextMatcher;
 import uk.gov.justice.services.clients.core.webclient.MockServerPortProvider;
 import uk.gov.justice.services.clients.core.webclient.WebTargetFactory;
+import uk.gov.justice.services.rest.ParameterType;
 import uk.gov.justice.services.common.configuration.JndiBasedServiceContextNameProvider;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.core.accesscontrol.AccessControlViolationException;

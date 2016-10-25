@@ -8,6 +8,8 @@ import java.math.BigDecimal;
 
 import org.junit.Test;
 
+import uk.gov.justice.services.rest.ParameterType;
+
 public class ParameterTest {
 
     @Test

@@ -1,7 +1,7 @@
 @startuml
 skinparam backgroundColor white
 skinparam defaultFontName Arial
-skinparam defaultFontsize 10
+skinparam defaultFontsize 18
 
 participant "CommandHandler" as CommandHandler
 participant "SnapshotAggregateService" as SnapshotAggregateService

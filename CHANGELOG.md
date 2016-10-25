@@ -5,6 +5,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Added
+- Support for RestClient to use proxy details from environment properties
+
 ## [0.32.0] - 2016-10-24
 
 ### Added

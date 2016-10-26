@@ -1,5 +1,9 @@
 package uk.gov.justice.services.messaging;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static javax.json.Json.createArrayBuilder;
+import static javax.json.Json.createObjectBuilder;
 import static javax.json.JsonValue.NULL;
 import static net.trajano.commons.testing.UtilityClassTestUtil.assertUtilityClassWellDefined;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -10,13 +14,14 @@ import static org.hamcrest.Matchers.hasSize;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 
-import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonString;
+import javax.json.JsonValue;
 
 import com.google.common.collect.ImmutableList;
 import org.junit.Test;
@@ -36,10 +41,10 @@ public class JsonObjectsTest {
 
     @Test
     public void shouldReturnJsonArray() {
-        JsonArray array = Json.createArrayBuilder()
+        JsonArray array = createArrayBuilder()
                 .addNull()
                 .build();
-        JsonObject object = Json.createObjectBuilder()
+        JsonObject object = createObjectBuilder()
                 .add("name", array)
                 .build();
         Optional<JsonArray> jsonArray = JsonObjects.getJsonArray(object, "name");
@@ -50,10 +55,10 @@ public class JsonObjectsTest {
 
     @Test
     public void shouldReturnJsonObject() {
-        JsonObject subObject = Json.createObjectBuilder()
+        JsonObject subObject = createObjectBuilder()
                 .add("name2", "cheese")
                 .build();
-        JsonObject object = Json.createObjectBuilder()
+        JsonObject object = createObjectBuilder()
                 .add("name", subObject)
                 .build();
         Optional<JsonObject> jsonObject = JsonObjects.getJsonObject(object, "name");
@@ -64,7 +69,7 @@ public class JsonObjectsTest {
 
     @Test
     public void shouldReturnJsonNumber() {
-        JsonObject object = Json.createObjectBuilder()
+        JsonObject object = createObjectBuilder()
                 .add("name", 99L)
                 .build();
         Optional<JsonNumber> jsonNumber = JsonObjects.getJsonNumber(object, "name");
@@ -75,7 +80,7 @@ public class JsonObjectsTest {
 
     @Test
     public void shouldReturnJsonString() {
-        JsonObject object = Json.createObjectBuilder()
+        JsonObject object = createObjectBuilder()
                 .add("name", "test")
                 .build();
         Optional<JsonString> jsonString = JsonObjects.getJsonString(object, "name");
@@ -86,8 +91,8 @@ public class JsonObjectsTest {
 
     @Test
     public void shouldReturnJsonStringForNestedField() {
-        JsonObject object = Json.createObjectBuilder()
-                .add("name", Json.createObjectBuilder()
+        JsonObject object = createObjectBuilder()
+                .add("name", createObjectBuilder()
                         .add("name2", "test")
                         .build())
                 .build();
@@ -99,7 +104,7 @@ public class JsonObjectsTest {
 
     @Test
     public void shouldReturnString() {
-        JsonObject object = Json.createObjectBuilder()
+        JsonObject object = createObjectBuilder()
                 .add("name", "test")
                 .build();
         Optional<String> string = JsonObjects.getString(object, "name");
@@ -110,7 +115,7 @@ public class JsonObjectsTest {
 
     @Test
     public void shouldReturnBoolean() {
-        JsonObject object = Json.createObjectBuilder()
+        JsonObject object = createObjectBuilder()
                 .add("someBoolean", true)
                 .build();
         Optional<Boolean> someBoolean = JsonObjects.getBoolean(object, "someBoolean");
@@ -122,7 +127,7 @@ public class JsonObjectsTest {
 
     @Test
     public void shouldReturnEmptyIfBooleanFieldUnknown() {
-        JsonObject object = Json.createObjectBuilder()
+        JsonObject object = createObjectBuilder()
                 .build();
         Optional<Boolean> someBoolean = JsonObjects.getBoolean(object, "someBoolean");
 
@@ -131,7 +136,7 @@ public class JsonObjectsTest {
 
     @Test(expected = IllegalStateException.class)
     public void shouldThrowExceptionForNonBoolean() {
-        JsonObject object = Json.createObjectBuilder()
+        JsonObject object = createObjectBuilder()
                 .add("someBool", 99L)
                 .build();
         JsonObjects.getBoolean(object, "someBool");
@@ -139,7 +144,7 @@ public class JsonObjectsTest {
 
     @Test(expected = IllegalStateException.class)
     public void shouldThrowExceptionForNonString() {
-        JsonObject object = Json.createObjectBuilder()
+        JsonObject object = createObjectBuilder()
                 .add("name", 99L)
                 .build();
         JsonObjects.getString(object, "name");
@@ -148,7 +153,7 @@ public class JsonObjectsTest {
     @Test
     public void shouldReturnUUID() {
         final String stringValue = "6c84963d-47a1-4d57-a706-09bea3fa84a5";
-        JsonObject object = Json.createObjectBuilder()
+        JsonObject object = createObjectBuilder()
                 .add("name", stringValue)
                 .build();
         Optional<UUID> uuid = JsonObjects.getUUID(object, "name");
@@ -159,7 +164,7 @@ public class JsonObjectsTest {
 
     @Test(expected = IllegalStateException.class)
     public void shouldThrowExceptionForNonUUID() {
-        JsonObject object = Json.createObjectBuilder()
+        JsonObject object = createObjectBuilder()
                 .add("name", "blah")
                 .build();
         JsonObjects.getUUID(object, "name");
@@ -167,7 +172,7 @@ public class JsonObjectsTest {
 
     @Test
     public void shouldReturnLong() {
-        JsonObject object = Json.createObjectBuilder()
+        JsonObject object = createObjectBuilder()
                 .add("name", 99L)
                 .build();
         Optional<Long> string = JsonObjects.getLong(object, "name");
@@ -178,7 +183,7 @@ public class JsonObjectsTest {
 
     @Test(expected = IllegalStateException.class)
     public void shouldThrowExceptionForNonLong() {
-        JsonObject object = Json.createObjectBuilder()
+        JsonObject object = createObjectBuilder()
                 .add("name", "blah")
                 .build();
         JsonObjects.getLong(object, "name");
@@ -186,11 +191,11 @@ public class JsonObjectsTest {
 
     @Test
     public void shouldReturnListOfJsonStrings() {
-        JsonArray array = Json.createArrayBuilder()
+        JsonArray array = createArrayBuilder()
                 .add("test1")
                 .add("test2")
                 .build();
-        JsonObject object = Json.createObjectBuilder()
+        JsonObject object = createObjectBuilder()
                 .add("name", array)
                 .build();
         Optional<List<JsonString>> jsonStrings = JsonObjects.getList(object, JsonString.class, "name");
@@ -203,11 +208,11 @@ public class JsonObjectsTest {
 
     @Test
     public void shouldReturnListOfStrings() {
-        JsonArray array = Json.createArrayBuilder()
+        JsonArray array = createArrayBuilder()
                 .add("test1")
                 .add("test2")
                 .build();
-        JsonObject object = Json.createObjectBuilder()
+        JsonObject object = createObjectBuilder()
                 .add("name", array)
                 .build();
         Optional<List<String>> strings = JsonObjects.getList(object, JsonString.class, JsonString::getString, "name");
@@ -218,11 +223,11 @@ public class JsonObjectsTest {
 
     @Test
     public void shouldReturnListOfUUIDs() {
-        JsonArray array = Json.createArrayBuilder()
+        JsonArray array = createArrayBuilder()
                 .add(UUID_A)
                 .add(UUID_B)
                 .build();
-        JsonObject object = Json.createObjectBuilder()
+        JsonObject object = createObjectBuilder()
                 .add("name", array)
                 .build();
         List<UUID> uuids = JsonObjects.getUUIDs(object, "name");
@@ -237,7 +242,7 @@ public class JsonObjectsTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionForNullFieldName() {
-        JsonObject object = Json.createObjectBuilder()
+        JsonObject object = createObjectBuilder()
                 .add("name", 99L)
                 .build();
         JsonObjects.getString(object, (String) null);
@@ -245,7 +250,7 @@ public class JsonObjectsTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionForEmptyVarArgs() {
-        JsonObject object = Json.createObjectBuilder()
+        JsonObject object = createObjectBuilder()
                 .add("name", 99L)
                 .build();
         JsonObjects.getString(object);
@@ -253,7 +258,7 @@ public class JsonObjectsTest {
 
     @Test
     public void shouldReturnEmptyIfFieldIsUnknown() {
-        JsonObject object = Json.createObjectBuilder()
+        JsonObject object = createObjectBuilder()
                 .add("name", "test")
                 .build();
         Optional<String> string = JsonObjects.getString(object, "name2");
@@ -263,7 +268,7 @@ public class JsonObjectsTest {
 
     @Test
     public void shouldReturnEmptyIfFieldValueIsNull() {
-        JsonObject object = Json.createObjectBuilder()
+        JsonObject object = createObjectBuilder()
                 .add("name", NULL)
                 .build();
         Optional<String> string = JsonObjects.getString(object, "name");
@@ -273,7 +278,7 @@ public class JsonObjectsTest {
 
     @Test
     public void shouldCreateBuilderFromJsonObject() {
-        JsonObject source = Json.createObjectBuilder()
+        JsonObject source = createObjectBuilder()
                 .add("name", "test")
                 .build();
 
@@ -284,7 +289,7 @@ public class JsonObjectsTest {
 
     @Test
     public void shouldCreateBuilderFromJsonObjectWithFilter() {
-        JsonObject source = Json.createObjectBuilder()
+        JsonObject source = createObjectBuilder()
                 .add("id", "test id")
                 .add("ignore1", "ignore this")
                 .add("name", "test")
@@ -297,6 +302,60 @@ public class JsonObjectsTest {
         assertThat(actual.size(), equalTo(2));
         assertThat(actual.getString("id"), equalTo(source.getString("id")));
         assertThat(actual.getString("name"), equalTo(source.getString("name")));
+    }
+
+    @Test
+    public void shouldConvertCollectionOfJsonObjectsToJsonArray() {
+
+        final String oldKey = "oldKey";
+        final String newKey = "newKey";
+
+        final JsonArray input = createArrayBuilder()
+                .add(createObjectBuilder().add(oldKey, "value1"))
+                .add(createObjectBuilder().add(oldKey, "value2"))
+                .add(createObjectBuilder().add(oldKey, "value3"))
+                .build();
+
+        final Function<JsonObject, JsonValue> converter = source -> createObjectBuilder()
+                .add(newKey, source.getString(oldKey))
+                .build();
+
+        final JsonArray actual = JsonObjects.toJsonArray(input.getValuesAs(JsonObject.class), converter);
+
+        final JsonArray expected = createArrayBuilder()
+                .add(createObjectBuilder().add(newKey, "value1"))
+                .add(createObjectBuilder().add(newKey, "value2"))
+                .add(createObjectBuilder().add(newKey, "value3"))
+                .build();
+
+        assertThat(actual, equalTo(expected));
+    }
+
+    @Test
+    public void shouldConvertCollectionOfObjectsToJsonArray() {
+        final String key = "key";
+        final String value = "TEST";
+
+        final Function<String, JsonValue> converter = source -> createObjectBuilder().add(key, source).build();
+
+        final JsonArray result = JsonObjects.toJsonArray(asList(value), converter);
+
+        final JsonArray expected = createArrayBuilder()
+                .add(createObjectBuilder().add(key, value))
+                .build();
+
+        assertThat(result, equalTo(expected));
+
+    }
+
+    @Test
+    public void shouldConvertEmptyCollectionToJsonArray() {
+
+        final JsonArray result = JsonObjects.toJsonArray(emptyList(), source -> createObjectBuilder().build());
+
+        final JsonArray expected = createArrayBuilder().build();
+
+        assertThat(result, equalTo(expected));
     }
 
 }

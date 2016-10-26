@@ -3,6 +3,7 @@ package uk.gov.justice.services.messaging;
 import static javax.json.JsonValue.ValueType;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 
 import javax.json.Json;
 import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -281,5 +283,17 @@ public final class JsonObjects {
         }
     }
 
-
+    /**
+     * Convert a collection of objects into a JsonArray
+     *
+     * @param entries the collection to be converted
+     * @param converter to convert each entry in the collection
+     * @param <T> the type of element in the collection
+     * @return a JsonArray with the converted entries
+     */
+    public static <T> JsonArray toJsonArray(final Collection<T> entries, final Function<T, JsonValue> converter) {
+        final JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+        entries.forEach(entry -> arrayBuilder.add(converter.apply(entry)));
+        return arrayBuilder.build();
+    }
 }

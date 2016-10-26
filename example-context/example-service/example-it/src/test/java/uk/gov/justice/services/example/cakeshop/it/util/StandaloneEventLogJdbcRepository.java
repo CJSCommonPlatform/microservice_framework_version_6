@@ -30,21 +30,4 @@ public class StandaloneEventLogJdbcRepository extends EventLogJdbcRepository {
         return datasource;
     }
 
-    /**
-     * @return all events
-     */
-    public Stream<EventLog> findAll() {
-
-        List<EventLog> events;
-        try (final Connection connection = getDataSource().getConnection();
-             final PreparedStatement ps = connection.prepareStatement(SQL_FIND_ALL)) {
-
-            events = extractResults(ps);
-        } catch (SQLException e) {
-            throw new JdbcRepositoryException("Error fetching event stream", e);
-        }
-
-        return events.stream();
-    }
-
 }

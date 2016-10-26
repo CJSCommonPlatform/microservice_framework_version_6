@@ -26,6 +26,16 @@ public class AggregateTest {
     }
 
     @Test
+    public void shouldApplyEventsInForEachLoop() {
+        Stream<Object> events = Stream.of("eventA", "eventB");
+
+        RecordingAggregate aggregate = new RecordingAggregate();
+        aggregate.applyForEach(events);
+
+        assertThat(aggregate.events, hasItems("eventA", "eventB"));
+    }
+
+    @Test
     public void shouldReturnAllEventsInStream() {
         Stream<Object> events = Stream.of("eventA", "eventB");
 

@@ -60,7 +60,6 @@ public class StreamBufferJdbcRepositoryIT extends AbstractJdbcRepositoryIT<Strea
 
     }
 
-
     @Test
     public void shouldRemoveFromBuffer() {
         final UUID id1 = randomUUID();

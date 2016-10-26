@@ -34,7 +34,7 @@ public class SnapshotOpenEjbAwareJdbcRepository extends SnapshotJdbcRepository {
                 }
                 return 0;
             }
-        } catch (SQLException | NamingException e) {
+        } catch (SQLException e) {
             throw new JdbcRepositoryException(format(READING_STREAM_EXCEPTION, streamId), e);
         }
     }

@@ -15,6 +15,13 @@ import javax.transaction.Transactional;
 public interface EventRepository {
 
     /**
+     * Get a stream of envelopes
+     *
+     * @return the stream of envelopes. Never returns null.
+     */
+    Stream<JsonEnvelope> getAll();
+
+    /**
      * Get a stream of envelopes, ordered by sequence id.
      *
      * @param streamId the id of the stream to retrieve

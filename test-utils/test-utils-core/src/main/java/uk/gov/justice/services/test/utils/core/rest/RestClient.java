@@ -2,8 +2,8 @@ package uk.gov.justice.services.test.utils.core.rest;
 
 import static javax.ws.rs.client.Entity.entity;
 import static javax.ws.rs.core.HttpHeaders.ACCEPT;
+import static uk.gov.justice.services.test.utils.core.rest.ResteasyClientBuilderFactory.clientBuilder;
 
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -25,7 +25,7 @@ public class RestClient {
     public Response postCommand(final String url, final String contentType, final String requestPayload) {
         final Entity<String> entity = entity(requestPayload, MediaType.valueOf(contentType));
 
-        return ClientBuilder.newClient()
+        return clientBuilder().build()
                 .target(url)
                 .request()
                 .post(entity);
@@ -43,7 +43,7 @@ public class RestClient {
     public Response postCommand(final String url, final String contentType, final String requestPayload, final MultivaluedMap<String, Object> headers) {
         final Entity<String> entity = entity(requestPayload, MediaType.valueOf(contentType));
 
-        return ClientBuilder.newClient()
+        return clientBuilder().build()
                 .target(url)
                 .request()
                 .headers(headers)
@@ -58,7 +58,7 @@ public class RestClient {
      * @return the Response from the query being issued.
      */
     public Response query(final String url, final String contentTypes) {
-        return ClientBuilder.newClient()
+        return clientBuilder().build()
                 .target(url)
                 .request(MediaType.valueOf(contentTypes))
                 .get();
@@ -73,7 +73,7 @@ public class RestClient {
      * @return the Response from the query being issued.
      */
     public Response query(final String url, final String contentTypes, final MultivaluedMap<String, Object> headers) {
-        return ClientBuilder.newClient()
+        return clientBuilder().build()
                 .target(url)
                 .request()
                 .headers(headers)

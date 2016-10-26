@@ -116,7 +116,7 @@ public class RestPoller {
     }
 
     /**
-     * Instantiates a new polling rest client helper.
+     * Instantiates a new rest poller
      *
      * @param requestParams request parameters
      * @return this
@@ -126,7 +126,7 @@ public class RestPoller {
     }
 
     /**
-     * Instantiates a new polling rest client helper.
+     * Instantiates a new rest poller
      *
      * @param requestParamsBuilder request parameters builder
      * @return this
@@ -206,7 +206,7 @@ public class RestPoller {
     }
 
     /**
-     * Specify the delay that will be used before PollingRestClientHelper starts polling for the
+     * Specify the delay that will be used before RestPoller starts polling for the
      * result the first time. If you don't specify a poll delay explicitly it'll be the same as the
      * poll interval.
      *

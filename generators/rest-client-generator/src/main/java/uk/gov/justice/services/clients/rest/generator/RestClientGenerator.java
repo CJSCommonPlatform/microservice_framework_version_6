@@ -8,7 +8,7 @@ import static uk.gov.justice.services.generators.commons.helper.Names.nameFrom;
 import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.INVALID_ACTION_MAPPING_ERROR_MSG;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
-import uk.gov.justice.services.adapter.rest.parameter.ParameterType;
+import uk.gov.justice.services.rest.ParameterType;
 import uk.gov.justice.services.clients.core.EndpointDefinition;
 import uk.gov.justice.services.clients.core.QueryParam;
 import uk.gov.justice.services.clients.core.RestClientHelper;
@@ -90,7 +90,7 @@ public class RestClientGenerator extends AbstractClientGenerator {
 
         ramlAction.getQueryParameters().forEach((name, queryParameter) ->
                 methodBody.addStatement("queryParams.add(new QueryParam(\"$L\", $L, $T.$L))",
-                        name, queryParameter.isRequired(), ParameterType.class, ParameterType.valueOf(queryParameter.getType()).name()));
+                        name, queryParameter.isRequired(), ParameterType.class, ParameterType.valueOfQueryType(queryParameter.getType().name()).name()));
 
         methodBody.addStatement("final $T def = new $T(BASE_URI, path, pathParams, queryParams, $S)",
                 EndpointDefinition.class, EndpointDefinition.class, actionName);

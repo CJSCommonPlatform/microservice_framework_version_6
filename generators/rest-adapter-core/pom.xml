@@ -27,10 +27,13 @@
             <artifactId>core</artifactId>
             <version>${project.version}</version>
         </dependency>
+        
         <dependency>
-            <groupId>org.raml</groupId>
-            <artifactId>raml-parser</artifactId>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>rest-core</artifactId>
+            <version>${project.version}</version>
         </dependency>
+        
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>

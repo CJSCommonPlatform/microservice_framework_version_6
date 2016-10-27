@@ -1,5 +1,7 @@
 package uk.gov.justice.services.core.dispatcher;
 
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
@@ -10,6 +12,7 @@ import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.L
 import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.REMOTE;
 
 import uk.gov.justice.services.core.annotation.Adapter;
+import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.extension.ServiceComponentFoundEvent;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
@@ -89,6 +92,14 @@ public class DispatcherCacheTest {
         assertThat(dispatcher1, is(not(sameInstance(dispatcher2))));
     }
 
+    @Test
+    public void shouldFindDispatchersByComponentAndLocation() throws Exception {
+
+        final Dispatcher dispatcher1 = dispatcherCache.dispatcherFor(COMMAND_API, LOCAL);
+        final Dispatcher dispatcher2 = dispatcherCache.dispatcherFor(COMMAND_API, LOCAL);
+        assertThat(dispatcher1, is(notNullValue()));
+        assertThat(dispatcher1, is(sameInstance(dispatcher2)));
+    }
 
     @Adapter(COMMAND_API)
     public static class TestCommandApiAdaptorA {

@@ -5,7 +5,7 @@ import static java.lang.String.format;
 
 import javax.naming.NamingException;
 
-public abstract class AbstractViewStoreJdbcRepository extends AbstractJdbcRepository {
+public abstract class AbstractViewStoreJdbcRepository<T> extends AbstractJdbcRepository<T> {
 
     private static final String VIEW_STORE_JNDI_PATTERN = "java:/DS.%s";
 

@@ -54,8 +54,10 @@ public class DefaultAggregateService implements AggregateService {
 
     public <T extends Aggregate> T applyEvents(final Stream<JsonEnvelope> events, final T aggregate) {
         logger.trace("Apply Events for {}", events);
-        aggregate.apply(events.map(this::convertEnvelopeToEvent));
-        return aggregate;
+        try (final Stream<JsonEnvelope> e1 = events){
+            aggregate.applyForEach(events.map(this::convertEnvelopeToEvent));
+            return aggregate;
+        }
     }
 
 

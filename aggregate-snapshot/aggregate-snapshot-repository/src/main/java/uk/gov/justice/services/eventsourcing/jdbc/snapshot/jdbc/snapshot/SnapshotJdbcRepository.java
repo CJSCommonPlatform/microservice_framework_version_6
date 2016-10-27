@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 /**
  * JDBC based repository for snapshot records.
  */
-public class SnapshotJdbcRepository extends AbstractJdbcRepository implements SnapshotRepository {
+public class SnapshotJdbcRepository extends AbstractJdbcRepository<AggregateSnapshot> implements SnapshotRepository {
 
     protected static final String READING_STREAM_EXCEPTION = "Exception while reading stream %s";
 
@@ -50,7 +50,7 @@ public class SnapshotJdbcRepository extends AbstractJdbcRepository implements Sn
             ps.setString(3, aggregateSnapshot.getType());
             ps.setBytes(4, aggregateSnapshot.getAggregateByteRepresentation());
             ps.executeUpdate();
-        } catch (SQLException | NamingException e) {
+        } catch (SQLException e) {
             logger.error("Error while storing a snapshot for {} at version {}", aggregateSnapshot.getStreamId(), aggregateSnapshot.getVersionId(), e);
         }
     }
@@ -65,7 +65,7 @@ public class SnapshotJdbcRepository extends AbstractJdbcRepository implements Sn
 
             return extractResults(preparedStatement, clazz);
 
-        } catch (SQLException | NamingException e) {
+        } catch (SQLException e) {
             logger.error(format(READING_STREAM_EXCEPTION, streamId), e);
         }
         return Optional.empty();
@@ -78,7 +78,7 @@ public class SnapshotJdbcRepository extends AbstractJdbcRepository implements Sn
             ps.setObject(1, streamId);
             ps.setString(2, clazz.getName());
             ps.executeUpdate();
-        } catch (SQLException | NamingException e) {
+        } catch (SQLException e) {
             logger.error(format("Exception while removing snapshots %s of stream %s", clazz, streamId), e);
         }
     }
@@ -96,7 +96,7 @@ public class SnapshotJdbcRepository extends AbstractJdbcRepository implements Sn
                 }
                 return 0;
             }
-        } catch (SQLException | NamingException e) {
+        } catch (SQLException e) {
             throw new JdbcRepositoryException(format(READING_STREAM_EXCEPTION, streamId), e);
         }
     }
@@ -106,24 +106,24 @@ public class SnapshotJdbcRepository extends AbstractJdbcRepository implements Sn
         return String.format(JNDI_DS_EVENT_STORE_PATTERN, warFileName());
     }
 
+    @Override
+    protected AggregateSnapshot entityFrom(final ResultSet resultSet) throws SQLException {
+        return new AggregateSnapshot(
+                (UUID) resultSet.getObject(COL_STREAM_ID),
+                resultSet.getLong(COL_VERSION_ID),
+                resultSet.getString(COL_TYPE),
+                resultSet.getBytes(COL_AGGREGATE));
+    }
+
     private <T extends Aggregate> Optional<AggregateSnapshot<T>> extractResults(final PreparedStatement preparedStatement, final Class<T> clazz) throws SQLException {
 
         try (final ResultSet resultSet = preparedStatement.executeQuery()) {
             if (resultSet.next()) {
-                return createAggregateSnapshot(resultSet, clazz);
+                return Optional.of(entityFrom(resultSet));
             }
         }
         return Optional.empty();
     }
 
-    @SuppressWarnings({"unchecked", "unused"})
-    private <T extends Aggregate> Optional<AggregateSnapshot<T>> createAggregateSnapshot(final ResultSet resultSet, final Class<T> clazz) throws
-            SQLException {
 
-        return Optional.of(new AggregateSnapshot<T>(
-                (UUID) resultSet.getObject(COL_STREAM_ID),
-                resultSet.getLong(COL_VERSION_ID),
-                resultSet.getString(COL_TYPE),
-                resultSet.getBytes(COL_AGGREGATE)));
-    }
 }

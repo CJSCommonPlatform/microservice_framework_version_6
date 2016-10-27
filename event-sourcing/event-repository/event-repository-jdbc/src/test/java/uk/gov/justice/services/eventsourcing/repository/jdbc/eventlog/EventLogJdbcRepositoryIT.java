@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 import org.junit.Before;
 import org.junit.Test;
 
-public class EventLogRepositoryJdbcIT extends AbstractJdbcRepositoryIT<EventLogJdbcRepository> {
+public class EventLogJdbcRepositoryIT extends AbstractJdbcRepositoryIT<EventLogJdbcRepository> {
 
     private static final UUID STREAM_ID = randomUUID();
     private static final Long SEQUENCE_ID = 5L;
@@ -31,7 +31,7 @@ public class EventLogRepositoryJdbcIT extends AbstractJdbcRepositoryIT<EventLogJ
     private final static ZonedDateTime TIMESTAMP = now();
 
 
-    public EventLogRepositoryJdbcIT() {
+    public EventLogJdbcRepositoryIT() {
         super(LIQUIBASE_EVENT_STORE_DB_CHANGELOG_XML);
     }
 
@@ -85,6 +85,22 @@ public class EventLogRepositoryJdbcIT extends AbstractJdbcRepositoryIT<EventLogJ
         assertThat(eventLogList, hasSize(2));
         assertThat(eventLogList.get(0).getSequenceId(), is(4l));
         assertThat(eventLogList.get(1).getSequenceId(), is(7l));
+    }
+
+    @Test
+    public void shouldReturnAllEventsOrderedBySequenceId() throws InvalidSequenceIdException {
+        jdbcRepository.insert(eventLogOf(1, randomUUID()));
+        jdbcRepository.insert(eventLogOf(4, STREAM_ID));
+        jdbcRepository.insert(eventLogOf(2, STREAM_ID));
+
+        Stream<EventLog> eventLogs = jdbcRepository.findAll();
+
+        final List<EventLog> eventLogList = eventLogs.collect(toList());
+        assertThat(eventLogList, hasSize(3));
+        assertThat(eventLogList.get(0).getSequenceId(), is(1l));
+        assertThat(eventLogList.get(1).getSequenceId(), is(2l));
+        assertThat(eventLogList.get(2).getSequenceId(), is(4l));
+
     }
 
     @Test(expected = JdbcRepositoryException.class)

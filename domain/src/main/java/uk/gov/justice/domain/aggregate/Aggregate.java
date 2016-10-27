@@ -32,4 +32,13 @@ public interface Aggregate extends Serializable {
                 .collect(toList())
                 .stream();
     }
+
+    /**
+     * Apply a stream of events to update the state of this aggregate.
+     *
+     * @param events the events to apply
+     */
+    default void applyForEach(final Stream<Object> events) {
+        events.forEach(this::apply);
+    }
 }

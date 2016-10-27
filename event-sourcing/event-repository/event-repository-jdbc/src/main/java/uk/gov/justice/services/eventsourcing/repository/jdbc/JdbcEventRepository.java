@@ -58,6 +58,13 @@ public class JdbcEventRepository implements EventRepository {
     }
 
     @Override
+    public Stream<JsonEnvelope> getAll() {
+        logger.trace("Retrieving all events");
+        return eventLogJdbcRepository.findAll()
+                .map(eventLogConverter::createEnvelope);
+    }
+
+    @Override
     @Transactional
     public void store(final JsonEnvelope envelope, final UUID streamId, final Long version) throws StoreEventRequestFailedException {
         try {
@@ -74,5 +81,4 @@ public class JdbcEventRepository implements EventRepository {
     public Long getCurrentSequenceIdForStream(final UUID streamId) {
         return eventLogJdbcRepository.getLatestSequenceIdForStream(streamId);
     }
-
 }

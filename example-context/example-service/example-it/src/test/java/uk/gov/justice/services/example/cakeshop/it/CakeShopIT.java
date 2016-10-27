@@ -6,6 +6,7 @@ import static com.jayway.jsonassert.JsonAssert.with;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
+import static java.util.stream.Collectors.toList;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.client.Entity.entity;
@@ -39,6 +40,8 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.jms.JMSException;
@@ -160,9 +163,9 @@ public class CakeShopIT {
                                 ).build().toString(),
                         ADD_RECIPE_MEDIA_TYPE));
 
-        await().until(() -> eventsWithPayloadContaining(recipeId).count() == 1);
+        await().until(() -> eventsWithPayloadContaining(recipeId).size() == 1);
 
-        EventLog event = eventsWithPayloadContaining(recipeId).findFirst().get();
+        EventLog event = eventsWithPayloadContaining(recipeId).get(0);
         assertThat(event.getName(), is("example.recipe-added"));
         with(event.getMetadata())
                 .assertEquals("stream.id", recipeId)
@@ -188,7 +191,7 @@ public class CakeShopIT {
             });
         }
         exec.shutdown();
-        exec.awaitTermination(180, TimeUnit.SECONDS);
+        exec.awaitTermination(30, TimeUnit.SECONDS);
     }
 
 
@@ -209,9 +212,9 @@ public class CakeShopIT {
                                 ).build().toString(),
                         ADD_RECIPE_MEDIA_TYPE));
 
-        await().until(() -> eventsWithPayloadContaining(recipeId).count() == 1);
+        await().until(() -> eventsWithPayloadContaining(recipeId).size() == 1);
 
-        EventLog event = eventsWithPayloadContaining(recipeId).findFirst().get();
+        EventLog event = eventsWithPayloadContaining(recipeId).get(0);
         assertThat(event.getName(), is("example.recipe-added"));
         with(event.getMetadata())
                 .assertEquals("stream.id", recipeId)
@@ -230,7 +233,7 @@ public class CakeShopIT {
         sendTo(RECIPES_RESOURCE_URI + recipeId).request().post(entity(jsonObject()
                 .add("recipeId", recipeId).build().toString(), REMOVE_RECIPE_MEDIA_TYPE));
 
-        await().until(() -> eventsWithPayloadContaining(recipeId).count() == 2);
+        await().until(() -> eventsWithPayloadContaining(recipeId).size() == 2);
 
         final String notFoundResponse = httpResponsePoller.pollUntilNotFound(RECIPES_RESOURCE_QUERY_URI + recipeId, QUERY_RECIPE_MEDIA_TYPE);
         assertThat(notFoundResponse, notNullValue());
@@ -655,8 +658,10 @@ public class CakeShopIT {
         return createObjectBuilder();
     }
 
-    private Stream<EventLog> eventsWithPayloadContaining(final String string) {
-        return EVENT_LOG_REPOSITORY.findAll().filter(e -> e.getPayload().contains(string));
+    private List<EventLog> eventsWithPayloadContaining(final String string) {
+        try (final Stream<EventLog> events = EVENT_LOG_REPOSITORY.findAll().filter(e -> e.getPayload().contains(string))) {
+            return events.collect(toList());
+        }
     }
 
     private WebTarget sendTo(String url) {

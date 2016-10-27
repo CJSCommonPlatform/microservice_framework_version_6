@@ -29,7 +29,7 @@ public class EventLogOpenEjbAwareJdbcRepository extends EventLogJdbcRepository {
                 }
                 return 0;
             }
-        } catch (SQLException | NamingException e) {
+        } catch (SQLException e) {
             throw new JdbcRepositoryException(format("Exception getting count of event log entries for ", streamId), e);
         }
     }

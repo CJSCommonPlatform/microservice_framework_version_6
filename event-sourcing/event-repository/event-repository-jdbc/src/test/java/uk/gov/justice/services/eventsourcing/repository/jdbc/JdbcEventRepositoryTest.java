@@ -18,7 +18,6 @@ import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -62,7 +61,7 @@ public class JdbcEventRepositoryTest {
 
     @Test
     public void shouldGetByStreamId() throws Exception {
-        when(eventLogJdbcRepository.findByStreamIdOrderBySequenceIdAsc(STREAM_ID)).thenReturn(Arrays.asList(eventLog).stream());
+        when(eventLogJdbcRepository.findByStreamIdOrderBySequenceIdAsc(STREAM_ID)).thenReturn(Stream.of(eventLog));
         when(eventLogConverter.createEnvelope(eventLog)).thenReturn(envelope);
 
         Stream<JsonEnvelope> streamOfEnvelopes = jdbcEventRepository.getByStreamId(STREAM_ID);
@@ -74,7 +73,7 @@ public class JdbcEventRepositoryTest {
 
     @Test
     public void shouldGetByStreamIdAndSequenceId() throws Exception {
-        when(eventLogJdbcRepository.findByStreamIdFromSequenceIdOrderBySequenceIdAsc(STREAM_ID, VERSION_1)).thenReturn(Arrays.asList(eventLog).stream());
+        when(eventLogJdbcRepository.findByStreamIdFromSequenceIdOrderBySequenceIdAsc(STREAM_ID, VERSION_1)).thenReturn(Stream.of(eventLog));
         when(eventLogConverter.createEnvelope(eventLog)).thenReturn(envelope);
 
         Stream<JsonEnvelope> streamOfEnvelopes = jdbcEventRepository.getByStreamIdAndSequenceId(STREAM_ID, VERSION_1);
@@ -82,6 +81,18 @@ public class JdbcEventRepositoryTest {
         assertThat(streamOfEnvelopes, not(nullValue()));
         assertThat(streamOfEnvelopes.findFirst().get(), equalTo(envelope));
         verify(logger).trace("Retrieving event stream for {} at sequence {}", STREAM_ID, VERSION_1);
+    }
+
+    @Test
+    public void shouldGetAll() throws Exception {
+        when(eventLogJdbcRepository.findAll()).thenReturn(Stream.of(eventLog));
+        when(eventLogConverter.createEnvelope(eventLog)).thenReturn(envelope);
+
+        Stream<JsonEnvelope> streamOfEnvelopes = jdbcEventRepository.getAll();
+
+        assertThat(streamOfEnvelopes, not(nullValue()));
+        assertThat(streamOfEnvelopes.findFirst().get(), equalTo(envelope));
+        verify(logger).trace("Retrieving all events");
     }
 
     @Test(expected = InvalidStreamIdException.class)

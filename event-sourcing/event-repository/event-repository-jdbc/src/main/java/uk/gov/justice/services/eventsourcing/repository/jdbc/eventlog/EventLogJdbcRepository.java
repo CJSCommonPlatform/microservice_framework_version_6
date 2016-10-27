@@ -70,7 +70,6 @@ public class EventLogJdbcRepository extends AbstractJdbcRepository<EventLog> {
             ps.setString(4, eventLog.getName());
             ps.setString(5, eventLog.getMetadata());
             ps.setString(6, eventLog.getPayload());
-//            ps.setTimestamp(7, toSqlTimestamp(eventLog.getDateCreated()));
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new JdbcRepositoryException(format("Exception while storing sequence %s of stream %s",
@@ -164,7 +163,7 @@ public class EventLogJdbcRepository extends AbstractJdbcRepository<EventLog> {
                 resultSet.getString(COL_NAME),
                 resultSet.getString(COL_METADATA),
                 resultSet.getString(COL_PAYLOAD),
-                 /*fromSqlTimestamp(resultSet.getTimestamp(COL_TIMESTAMP))*/null);
+                null);
     }
 
     @Override

@@ -10,6 +10,8 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.dispatcher.Requester;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.test.utils.core.matchers.HandlerClassMatcher;
+import uk.gov.justice.services.test.utils.core.matchers.HandlerMatcher;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -18,6 +20,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Use new matcher classes for matching Handlers {@link HandlerMatcher} and {@link
+ * HandlerClassMatcher}
+ */
+@Deprecated
 public final class ServiceComponents {
 
     private ServiceComponents() {

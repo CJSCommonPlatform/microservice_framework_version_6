@@ -2,11 +2,15 @@ package uk.gov.justice.services.example.cakeshop.query.view;
 
 
 import static java.util.Arrays.asList;
+import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.core.annotation.Component.QUERY_VIEW;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
+import static uk.gov.justice.services.test.utils.core.matchers.HandlerMatcher.isHandler;
+import static uk.gov.justice.services.test.utils.core.matchers.HandlerMethodMatcher.method;
 
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -40,6 +44,15 @@ public class RecipesQueryViewTest {
     public void setup() {
         final Enveloper enveloper = new Enveloper(new ObjectToJsonValueConverter(new ObjectMapperProducer().objectMapper()));
         queryView = new RecipesQueryView(service, enveloper);
+    }
+
+    @Test
+    public void shouldHaveCorrectHandlerMethod() throws Exception {
+        assertThat(queryView, isHandler(QUERY_VIEW)
+                .with(allOf(
+                        method("findRecipe").thatHandles("example.get-recipe"),
+                        method("listRecipes").thatHandles("example.search-recipes")))
+        );
     }
 
     @Test

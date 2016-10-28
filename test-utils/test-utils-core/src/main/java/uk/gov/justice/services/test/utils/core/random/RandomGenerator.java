@@ -16,7 +16,7 @@ public class RandomGenerator {
     public static final Generator<BigDecimal> BIG_DECIMAL = new BigDecimalGenerator();
     public static final Generator<Boolean> BOOLEAN = new BooleanGenerator();
     public static final Generator<Double> DOUBLE = new DoubleGenerator();
-    public static final Generator<String> EMAIL_ADDRESS = new EmailAddressGenerator();
+    public static final Generator<String> EMAIL_ADDRESS = EmailAddressGenerator.getInstance();
     public static final Generator<Integer> INTEGER = new IntegerGenerator(Integer.MAX_VALUE);
     public static final Generator<String> STRING = new StringGenerator();
     public static final Generator<Long> LONG = new LongGenerator();
@@ -80,11 +80,13 @@ public class RandomGenerator {
         return new DoubleGenerator(0L, new Long(max), decimalPlaces);
     }
 
-    public static Generator<Double> doubleValue(final Double min, final Double max, final Integer scale) {
+    public static Generator<Double> doubleValue(final Double min, final Double max,
+                    final Integer scale) {
         return new DoubleGenerator(min, max, scale);
     }
 
-    public static Generator<Double> doubleValue(final Long min, final Long max, final Integer scale) {
+    public static Generator<Double> doubleValue(final Long min, final Long max,
+                    final Integer scale) {
         return new DoubleGenerator(min, max, scale);
     }
 

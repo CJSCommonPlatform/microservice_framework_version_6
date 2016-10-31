@@ -3,6 +3,7 @@ package uk.gov.justice.services.test.utils.core.matchers;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
+import static uk.gov.justice.services.test.utils.core.matchers.EmptyStreamMatcher.isEmptyStream;
 
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
@@ -85,12 +86,22 @@ import org.mockito.ArgumentCaptor;
  * }
  * </pre>
  *
+ * Match an empty EventStream:
+ *
+ * <pre>
+ *  {@code
+ *      assertThat(eventStream, eventStreamWithEmptyStream());
+ * }
+ * </pre>
+ *
+ *
  * This makes use of {@link IsJson} to achieve Json matching in the payload.
  */
 
 public class EventStreamMatcher extends TypeSafeDiagnosingMatcher<EventStream> {
 
-    private JsonEnvelopeStreamMatcher jsonEnvelopeStreamMatcher;
+    private Optional<JsonEnvelopeStreamMatcher> jsonEnvelopeStreamMatcher = Optional.empty();
+    private Optional<EmptyStreamMatcher> emptyStreamMatcher = Optional.empty();
     private Optional<Long> version = Optional.empty();
 
     public static EventStreamMatcher eventStreamAppendedWith(final JsonEnvelopeStreamMatcher jsonEnvelopeStreamMatcher) {
@@ -101,15 +112,25 @@ public class EventStreamMatcher extends TypeSafeDiagnosingMatcher<EventStream> {
         return new EventStreamMatcher().afterVersion(version);
     }
 
+    public static EventStreamMatcher eventStreamWithEmptyStream() {
+        return new EventStreamMatcher().withEmptyStream();
+    }
+
     public EventStreamMatcher with(final JsonEnvelopeStreamMatcher jsonEnvelopeStreamMatcher) {
-        this.jsonEnvelopeStreamMatcher = jsonEnvelopeStreamMatcher;
+        this.jsonEnvelopeStreamMatcher = Optional.of(jsonEnvelopeStreamMatcher);
+        return this;
+    }
+
+    public EventStreamMatcher withEmptyStream() {
+        this.emptyStreamMatcher = Optional.of(isEmptyStream());
         return this;
     }
 
     @Override
     public void describeTo(final Description description) {
         description.appendText("EventStream appended with (");
-        description.appendDescriptionOf(jsonEnvelopeStreamMatcher);
+        jsonEnvelopeStreamMatcher.ifPresent(description::appendDescriptionOf);
+        emptyStreamMatcher.ifPresent(description::appendDescriptionOf);
         description.appendText(")");
     }
 
@@ -128,9 +149,20 @@ public class EventStreamMatcher extends TypeSafeDiagnosingMatcher<EventStream> {
 
             final Stream<JsonEnvelope> jsonEnvelopeStream = argumentCaptor.getValue();
 
-            if (!jsonEnvelopeStreamMatcher.matchesSafely(jsonEnvelopeStream, description)) {
-                jsonEnvelopeStreamMatcher.describeMismatch(jsonEnvelopeStream, description);
-                return false;
+            if (jsonEnvelopeStreamMatcher.isPresent()) {
+
+                if (!jsonEnvelopeStreamMatcher.get().matches(jsonEnvelopeStream)) {
+                    jsonEnvelopeStreamMatcher.get().describeMismatch(jsonEnvelopeStream, description);
+                    return false;
+                }
+
+            } else {
+
+                if (emptyStreamMatcher.isPresent() && !emptyStreamMatcher.get().matches(jsonEnvelopeStream)) {
+                    emptyStreamMatcher.get().describeMismatch(jsonEnvelopeStream, description);
+                    return false;
+                }
+
             }
 
         } catch (EventStreamException e) {

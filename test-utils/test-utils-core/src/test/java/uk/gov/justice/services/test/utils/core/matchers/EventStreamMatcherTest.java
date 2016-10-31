@@ -145,6 +145,20 @@ public class EventStreamMatcherTest {
                 )));
     }
 
+    @Test
+    public void shouldMatchAnEmptyStream() throws Exception {
+        eventStream.append(Stream.empty());
+        assertThat(eventStream, EventStreamMatcher.eventStreamWithEmptyStream());
+    }
+
+    @Test(expected = AssertionError.class)
+    public void shouldNotMatchANonEmptyStream() throws Exception {
+        final JsonEnvelope event_1 = jsonEnvelopeWith(ID_1, NAME_1);
+        eventStream.append(Stream.of(event_1));
+
+        assertThat(eventStream, EventStreamMatcher.eventStreamWithEmptyStream());
+    }
+
     private JsonEnvelope jsonEnvelopeWith(final UUID id, final String name) {
         return envelope()
                 .with(metadataWithRandomUUID("event.action"))

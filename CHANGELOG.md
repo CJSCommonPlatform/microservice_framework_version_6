@@ -5,10 +5,16 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [0.33.0] - 2016-10-31
+
 ### Added
 - Support for RestClient to use proxy details from environment properties
 - Matchers for matching handler and handler class methods, annotations and pass through process type (Sender or Requester)
 - Empty stream matching to EventStreamMatcher
+- toJsonArray utility function
+
+### Changed
+- Improved event stream processing
 
 ## [0.32.0] - 2016-10-24
 
@@ -33,7 +39,7 @@ schema to be applied to the event store.
 overwritten
 - Removed unwanted dependency on the RAML parser within the REST adapter so that adding the REST client to event processors does not break the application
 
-## [0.31.0] - 2016-10-24
+## 0.31.0 - 2016-10-24
 
 - Failed release; do not use
 
@@ -415,3 +421,42 @@ turned off by default
 ### Added
 
 - Initial release with basic dispatcher, handler and adapter generation
+
+[Unreleased]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.33.0...HEAD
+[0.33.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.32.0...release-0.33.0
+[0.32.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.30.0...release-0.32.0
+[0.30.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.29.0...release-0.30.0
+[0.29.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.28.0...release-0.29.0
+[0.28.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.27.0...release-0.28.0
+[0.27.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.26.0...release-0.27.0
+[0.26.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.25.0...release-0.26.0
+[0.25.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.24.0...release-0.25.0
+[0.24.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.23.0...release-0.24.0
+[0.23.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.22.0...release-0.23.0
+[0.22.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.21.0...release-0.22.0
+[0.21.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.19.0...release-0.21.0
+[0.19.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.18.0...release-0.19.0
+[0.18.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.17.0...release-0.18.0
+[0.17.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.16.0...release-0.17.0
+[0.16.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.15.0...release-0.16.0
+[0.15.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.14.0...release-0.15.0
+[0.14.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.13.0...release-0.14.0
+[0.13.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.12.0...release-0.13.0
+[0.12.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.11.0...release-0.12.0
+[0.11.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.10.1...release-0.11.0
+[0.10.1]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.10.0...release-0.10.1
+[0.10.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.9.0...release-0.10.0
+[0.9.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.8.12...release-0.9.0
+[0.8.12]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.8.11...release-0.8.12
+[0.8.11]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.8.10...release-0.8.11
+[0.8.10]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.8.9...release-0.8.10
+[0.8.9]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.8.8...release-0.8.9
+[0.8.8]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.8.7...release-0.8.8
+[0.8.7]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.8.6...release-0.8.7
+[0.8.6]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.8.5...release-0.8.6
+[0.8.5]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.8.4...release-0.8.5
+[0.8.4]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.8.3...release-0.8.4
+[0.8.3]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.8.2...release-0.8.3
+[0.8.2]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.8.1...release-0.8.2
+[0.8.1]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.8.0...release-0.8.1
+[0.8.0]: https://github.com/CJSCommonPlatform/microservice_framework/commits/release-0.8.0

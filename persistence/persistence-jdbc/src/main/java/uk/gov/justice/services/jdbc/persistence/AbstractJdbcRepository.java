@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -42,30 +43,57 @@ public abstract class AbstractJdbcRepository<T> {
         return datasource;
     }
 
-    protected PreparedStatementWrapper preparedStatementWrapperOf(final String selectByStreamId) throws SQLException {
-        return valueOf(getDataSource().getConnection(), selectByStreamId);
+    protected PreparedStatementWrapper preparedStatementWrapperOf(final String query) throws SQLException {
+        return valueOf(getDataSource().getConnection(), query);
     }
 
     protected Stream<T> streamOf(final PreparedStatementWrapper psWrapper) throws SQLException {
 
         final ResultSet resultSet = psWrapper.executeQuery();
 
-        return StreamSupport.stream(new Spliterators.AbstractSpliterator<T>(
+        return streamOf(psWrapper, resultSet);
+    }
+
+    /**
+     *
+     * @param psWrapper prepared statement wrapper
+     * @param resultSet jdbc resultSet
+     * @param resultSetToEntityMapper - function mapping resultSet to entity of type U
+     * @param <U> - generic type of entity
+     * @return stream of entities
+     */
+    protected <U> Stream<U> streamOf(final PreparedStatementWrapper psWrapper, final ResultSet resultSet, final Function<ResultSet, U> resultSetToEntityMapper) {
+        return StreamSupport.stream(new Spliterators.AbstractSpliterator<U>(
                 Long.MAX_VALUE, Spliterator.ORDERED) {
             @Override
-            public boolean tryAdvance(Consumer<? super T> action) {
+            public boolean tryAdvance(final Consumer<? super U> action) {
                 try {
                     if (!resultSet.next()) {
+                        psWrapper.close();
                         return false;
                     }
-                    action.accept(entityFrom(resultSet));
+                    action.accept(resultSetToEntityMapper.apply(resultSet));
                     return true;
                 } catch (SQLException ex) {
-                    psWrapper.close();
-                    throw new JdbcRepositoryException(ex);
+                    throw handled(ex, psWrapper);
                 }
             }
         }, false).onClose(() -> psWrapper.close());
+    }
+
+    private Stream<T> streamOf(final PreparedStatementWrapper psWrapper, final ResultSet resultSet) {
+        return streamOf(psWrapper, resultSet, e -> {
+            try {
+                return entityFrom(resultSet);
+            } catch (SQLException ex) {
+                throw handled(ex, psWrapper);
+            }
+        });
+    }
+
+    protected JdbcRepositoryException handled(final SQLException ex, final PreparedStatementWrapper psWrapper) {
+        psWrapper.close();
+        return new JdbcRepositoryException(ex);
     }
 
     protected String warFileName() throws NamingException {

@@ -4,6 +4,7 @@ import static java.time.ZonedDateTime.now;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertThat;
@@ -100,6 +101,28 @@ public class EventLogJdbcRepositoryIT extends AbstractJdbcRepositoryIT<EventLogJ
         assertThat(eventLogList.get(0).getSequenceId(), is(1l));
         assertThat(eventLogList.get(1).getSequenceId(), is(2l));
         assertThat(eventLogList.get(2).getSequenceId(), is(4l));
+
+    }
+
+    @Test
+    public void shouldReturnStreamOfStreamIds() throws Exception {
+
+        final UUID streamId1 = randomUUID();
+        final UUID streamId2 = randomUUID();
+        final UUID streamId3 = randomUUID();
+        jdbcRepository.insert(eventLogOf(1, streamId1));
+        jdbcRepository.insert(eventLogOf(1, streamId2));
+        jdbcRepository.insert(eventLogOf(1, streamId3));
+        jdbcRepository.insert(eventLogOf(2, streamId1));
+
+        Stream<UUID> streamIds = jdbcRepository.getStreamIds();
+
+        final List<UUID> streamIdList = streamIds.collect(toList());
+
+        assertThat(streamIdList, hasSize(3));
+        assertThat(streamIdList, hasItem(streamId1));
+        assertThat(streamIdList, hasItem(streamId2));
+        assertThat(streamIdList, hasItem(streamId3));
 
     }
 

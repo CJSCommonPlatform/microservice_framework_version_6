@@ -1,18 +1,21 @@
 package uk.gov.justice.services.test.utils.core.helper;
 
-import uk.gov.justice.services.test.utils.core.random.Generator;
-
-import java.util.function.Function;
-
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
+import uk.gov.justice.services.test.utils.core.random.Generator;
+
+import java.util.function.Function;
+
 /**
- * A Utility class for type-based testing, where a type is a high-level specification of behavior that should hold for a range of data point
+ * A Utility class for type-based testing, where a type is a high-level specification of behavior
+ * that should hold for a range of data point
  *
- * @param <T> Type of the Property and must have {@link  Generator} implementation for type T
- *            Usage: typeCheck(RandomGenerator.STRING, s -> s.length() == s.toCharArray().length).withPreCondition(s -> s.length() < 5).verify(times(5));
+ * @param <T> Type of the Property and must have {@link  Generator} implementation for type T Usage:
+ *            typeCheck(RandomGenerator.STRING, s -> s.length() == s.toCharArray().length).withPreCondition(s
+ *            -> s.length() < 5).verify(times(5));
  */
 public class TypeCheck<T> {
 
@@ -46,7 +49,7 @@ public class TypeCheck<T> {
             if (preCondition != null && !preCondition.apply(next)) {
                 i--;
             } else {
-                assertThat(condition.apply(next), is(true));
+                assertThat(format("failed on attempt %s for value %s", i + 1, next), condition.apply(next), is(true));
             }
         }
     }

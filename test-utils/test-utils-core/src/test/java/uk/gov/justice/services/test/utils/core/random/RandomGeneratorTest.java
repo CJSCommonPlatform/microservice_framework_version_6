@@ -12,6 +12,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.ran
 
 import java.math.BigDecimal;
 import java.net.URI;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
@@ -29,6 +30,7 @@ public class RandomGeneratorTest {
     private static final int NUMBER_OF_TIMES = 100000;
     private static final String BIG_DECIMAL_PATTERN = "(-)?(0|(?!0)\\d{1,10})\\.\\d{2}";
     private static final String PERCENTAGE_PATTERN = "((0|(?!0)\\d{1,2})\\.\\d{2})|100.00";
+    private static final String DOUBLE_WITH_OPTIONAL_FRACTION_PATTERN = "(-)?(0|(?!0)\\d{1,309})(\\.\\d{1,2})?";
 
     @Test
     public void shouldGenerateRandomBigDecimal() {
@@ -46,6 +48,15 @@ public class RandomGeneratorTest {
 
         // when & then
         typeCheck(booleanGenerator, s -> ImmutableList.of(TRUE, FALSE).contains(s)).verify(times(NUMBER_OF_TIMES));
+    }
+
+    @Test
+    public void shouldGenerateRandomDouble() {
+        // given
+        final Generator<Double> doubleGenerator = RandomGenerator.DOUBLE;
+
+        // when & then
+        typeCheck(doubleGenerator, s -> new DecimalFormat("#.###").format(s).matches(DOUBLE_WITH_OPTIONAL_FRACTION_PATTERN)).verify(times(NUMBER_OF_TIMES));
     }
 
     @Test
@@ -219,23 +230,36 @@ public class RandomGeneratorTest {
         final Generator<BigDecimal> bigDecimalGenerator = RandomGenerator.bigDecimal(min, max, 0);
 
         // then
-        typeCheck(bigDecimalGenerator,
-                s -> (s.compareTo(new BigDecimal(min)) != -1 && s.compareTo(new BigDecimal(max)) != 1)).verify(times(NUMBER_OF_TIMES));
+        typeCheck(bigDecimalGenerator, s -> (s.compareTo(new BigDecimal(min)) != -1 && s.compareTo(new BigDecimal(max)) != 1))
+                .verify(times(NUMBER_OF_TIMES));
     }
 
     @Test
-    public void shouldGenerateDoubleBelowMaxAndDecimalPlaces() {
+    public void shouldGenerateDoubleGreaterThanOrEqualToMinAndLessThanOrEqualToMaxForBoundsInLong() {
         // given
-        final Integer max = 100;
-        // and
-        final Integer decimalPlaces = 2;
-        // and
-        final Generator<Double> doubleWithMaxAndDecimalGenerator = RandomGenerator.doubleval(max, decimalPlaces);
+        final Long min = -100L;
+        final Long max = 100L;
+        final Integer scale = 2;
 
         // when
-        typeCheck(doubleWithMaxAndDecimalGenerator,
-                s -> ((doubleWithMaxAndDecimalGenerator.next().compareTo(Double.parseDouble(max + "." + decimalPlaces)) != 1)))
-                .verify(times(NUMBER_OF_TIMES));
+        final Generator<Double> doubleGenerator = RandomGenerator.doubleValue(min, max, scale);
+
+        // when
+        typeCheck(doubleGenerator, s -> s >= min && s <= max).verify(times(NUMBER_OF_TIMES));
+    }
+
+    @Test
+    public void shouldGenerateDoubleGreaterThanOrEqualToMinAndLessThanOrEqualToMaxForBoundsInDouble() {
+        // given
+        final Double min = -100.55;
+        final Double max = 100.55;
+        final Integer scale = 2;
+
+        // when
+        final Generator<Double> doubleGenerator = RandomGenerator.doubleValue(min, max, scale);
+
+        // when
+        typeCheck(doubleGenerator, s -> s >= min && s <= max).verify(times(NUMBER_OF_TIMES));
     }
 
     @Test

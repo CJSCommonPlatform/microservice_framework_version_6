@@ -59,4 +59,9 @@ public interface EventRepository {
      */
     Long getCurrentSequenceIdForStream(final UUID streamId);
 
+    /**
+     * Returns stream of envelope streams. Envelopes in the nested stream are ordered by sequenceId
+     * @return the stream of envelope streams
+     */
+    Stream<Stream<JsonEnvelope>> getStreamOfAllEventStreams();
 }

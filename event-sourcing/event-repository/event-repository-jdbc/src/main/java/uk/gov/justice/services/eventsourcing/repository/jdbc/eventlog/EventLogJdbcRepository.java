@@ -43,6 +43,7 @@ public class EventLogJdbcRepository extends AbstractJdbcRepository<EventLog> {
     static final String SQL_FIND_BY_STREAM_ID = "SELECT * FROM event_log WHERE stream_id=? ORDER BY sequence_id ASC";
     static final String SQL_FIND_BY_STREAM_ID_AND_SEQUENCE_ID = "SELECT * FROM event_log WHERE stream_id=? AND sequence_id>=? ORDER BY sequence_id ASC";
     static final String SQL_FIND_LATEST_SEQUENCE_ID = "SELECT MAX(sequence_id) FROM event_log WHERE stream_id=?";
+    static final String SQL_DISTINCT_STREAM_ID = "SELECT DISTINCT stream_id FROM event_log";
     static final String SQL_INSERT_EVENT_LOG = "INSERT INTO event_log (id, stream_id, sequence_id, name, metadata, payload/*, date_created*/ ) " +
             "VALUES(?, ?, ?, ?, ?, ?/*, ?*/)";
 
@@ -155,6 +156,29 @@ public class EventLogJdbcRepository extends AbstractJdbcRepository<EventLog> {
     }
 
 
+    /**
+     * Returns stream of event stream ids
+     *
+     * @return event stream ids
+     */
+    public Stream<UUID> getStreamIds() {
+        try {
+            final PreparedStatementWrapper psWrapper = preparedStatementWrapperOf(SQL_DISTINCT_STREAM_ID);
+            final ResultSet resultSet = psWrapper.executeQuery();
+
+            return streamOf(psWrapper, resultSet, e -> {
+                try {
+                    return (UUID) resultSet.getObject(COL_STREAM_ID);
+                } catch (SQLException e1) {
+                    throw handled(e1, psWrapper);
+                }
+            });
+        } catch (SQLException e) {
+            throw new JdbcRepositoryException(READING_STREAM_ALL_EXCEPTION, e);
+        }
+
+    }
+
     @Override
     protected EventLog entityFrom(final ResultSet resultSet) throws SQLException {
         return new EventLog((UUID) resultSet.getObject(PRIMARY_KEY_ID),
@@ -166,10 +190,9 @@ public class EventLogJdbcRepository extends AbstractJdbcRepository<EventLog> {
                 null);
     }
 
+
     @Override
     protected String jndiName() throws NamingException {
         return format(JNDI_DS_EVENT_STORE_PATTERN, warFileName());
     }
-
-
 }

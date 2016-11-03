@@ -81,4 +81,17 @@ public class JdbcEventRepository implements EventRepository {
     public Long getCurrentSequenceIdForStream(final UUID streamId) {
         return eventLogJdbcRepository.getLatestSequenceIdForStream(streamId);
     }
+
+    @Override
+    public Stream<Stream<JsonEnvelope>> getStreamOfAllEventStreams() {
+        final Stream<UUID> streamIds = eventLogJdbcRepository.getStreamIds();
+        final Stream<Stream<JsonEnvelope>> streamOfStreams = streamIds
+                .map(id -> {
+                    final Stream<EventLog> eventStream = eventLogJdbcRepository.findByStreamIdOrderBySequenceIdAsc(id);
+                    streamIds.onClose(() -> eventStream.close());
+                    return eventStream.map(eventLogConverter::createEnvelope);
+                });
+        return streamOfStreams;
+
+    }
 }

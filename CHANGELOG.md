@@ -5,6 +5,13 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Changed
+- Improve BigDecimalGenerator to cover both positive and negative range
+- TypeCheck class to provide better feedback on failure
+
+### Fixed
+- Test cases related to random date generation
+
 ## [0.33.0] - 2016-10-31
 
 ### Added

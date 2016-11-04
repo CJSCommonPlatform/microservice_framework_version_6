@@ -7,6 +7,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ### Changed
 - Improve BigDecimalGenerator to cover both positive and negative range
+- Improve DoubleGenerator to cover the bounds of double
 - TypeCheck class to provide better feedback on failure
 
 ### Fixed

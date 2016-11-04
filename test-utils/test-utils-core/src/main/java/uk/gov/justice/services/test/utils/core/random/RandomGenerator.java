@@ -15,7 +15,7 @@ public class RandomGenerator {
 
     public static final Generator<BigDecimal> BIG_DECIMAL = new BigDecimalGenerator();
     public static final Generator<Boolean> BOOLEAN = new BooleanGenerator();
-    public static final Generator<Double> DOUBLE = new DoubleGenerator(Integer.MAX_VALUE, 2);
+    public static final Generator<Double> DOUBLE = new DoubleGenerator();
     public static final Generator<String> EMAIL_ADDRESS = new EmailAddressGenerator();
     public static final Generator<Integer> INTEGER = new IntegerGenerator(Integer.MAX_VALUE);
     public static final Generator<String> STRING = new StringGenerator();
@@ -64,8 +64,20 @@ public class RandomGenerator {
         return new BigDecimalGenerator(0, max, 2);
     }
 
+    /**
+     * @deprecated Use {@link #doubleValue(Long min, Long max, Integer scale)} instead.
+     */
+    @Deprecated
     public static Generator<Double> doubleval(final Integer max, final Integer decimalPlaces) {
-        return new DoubleGenerator(max, decimalPlaces);
+        return new DoubleGenerator(0L, new Long(max), decimalPlaces);
+    }
+
+    public static Generator<Double> doubleValue(final Double min, final Double max, final Integer scale) {
+        return new DoubleGenerator(min, max, scale);
+    }
+
+    public static Generator<Double> doubleValue(final Long min, final Long max, final Integer scale) {
+        return new DoubleGenerator(min, max, scale);
     }
 
     public static <T extends Enum<?>> Generator<T> randomEnum(final Class<T> clazz) {

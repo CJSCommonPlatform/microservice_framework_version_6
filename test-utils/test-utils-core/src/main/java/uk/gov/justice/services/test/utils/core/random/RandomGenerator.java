@@ -1,6 +1,6 @@
 package uk.gov.justice.services.test.utils.core.random;
 
-import static java.util.Arrays.asList;
+import static com.google.common.collect.Lists.newArrayList;
 
 import java.math.BigDecimal;
 import java.net.URI;
@@ -33,11 +33,12 @@ public class RandomGenerator {
     }
 
     public static <T> Generator<T> values(final Iterable<T> values) {
-        return new ValueGenerator<>(values);
+        return new ItemPicker<>(newArrayList(values));
     }
 
+    @SafeVarargs
     public static <T> Generator<T> values(final T... values) {
-        return values(asList(values));
+        return new ItemPicker<>(values);
     }
 
     public static Generator<Integer> integer(final Integer max) {

@@ -22,7 +22,6 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.collect.ImmutableList;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class RandomGeneratorTest {
@@ -31,6 +30,7 @@ public class RandomGeneratorTest {
     private static final String BIG_DECIMAL_PATTERN = "(-)?(0|(?!0)\\d{1,10})\\.\\d{2}";
     private static final String PERCENTAGE_PATTERN = "((0|(?!0)\\d{1,2})\\.\\d{2})|100.00";
     private static final String DOUBLE_WITH_OPTIONAL_FRACTION_PATTERN = "(-)?(0|(?!0)\\d{1,309})(\\.\\d{1,2})?";
+    private static final String NI_NUMBER_PATTERN = "(?!BG)(?!GB)(?!NK)(?!KN)(?!TN)(?!NT)(?!ZZ)(?:[A-CEGHJ-PR-TW-Z][A-CEGHJ-NPR-TW-Z])(?:\\s*\\d\\s*){6}([A-D]|\\s)";
 
     @Test
     public void shouldGenerateRandomBigDecimal() {
@@ -107,13 +107,12 @@ public class RandomGeneratorTest {
     }
 
     @Test
-    @Ignore("Broken test. Need to fix.")
     public void shouldGenerateRandomNiNumber() {
         // given
         final Generator<String> niNumberGenerator = RandomGenerator.NI_NUMBER;
 
         // when
-        typeCheck(niNumberGenerator, s -> !niNumberGenerator.next().equals(niNumberGenerator.next())).verify(times(NUMBER_OF_TIMES));
+        typeCheck(niNumberGenerator, s -> s.matches(NI_NUMBER_PATTERN)).verify(times(NUMBER_OF_TIMES));
     }
 
     @Test

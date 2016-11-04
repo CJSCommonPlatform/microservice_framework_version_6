@@ -12,6 +12,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ### Fixed
 - Test cases related to random date generation
+- ValueGenerator to randomly pick items from a given pool and renamed the class to ItemPicker
 
 ## [0.33.0] - 2016-10-31
 

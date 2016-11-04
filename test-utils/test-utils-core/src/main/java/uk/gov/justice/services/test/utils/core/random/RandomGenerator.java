@@ -25,8 +25,10 @@ public class RandomGenerator {
     public static final Generator<String> POST_CODE = new PostcodeGenerator();
     public static final Generator<URI> URI = new UriGenerator();
     public static final Generator<UUID> UUID = new UUIDGenerator();
-    public static final Generator<LocalDate> FUTURE_LOCAL_DATE = new LocalDateGenerator(Period.ofYears(5), LocalDate.now(), LocalDateGenerator.Direction.FORWARD);
-    public static final Generator<LocalDate> PAST_LOCAL_DATE = new LocalDateGenerator(Period.ofYears(5), LocalDate.now(), LocalDateGenerator.Direction.BACKWARD);
+    public static final Generator<LocalDate> FUTURE_LOCAL_DATE = new LocalDateGenerator(
+                    Period.ofYears(5), LocalDate.now(), LocalDateGenerator.Direction.FORWARD);
+    public static final Generator<LocalDate> PAST_LOCAL_DATE = new LocalDateGenerator(
+                    Period.ofYears(5), LocalDate.now(), LocalDateGenerator.Direction.BACKWARD);
 
     public static Generator<String> string(final int length) {
         return new StringGenerator(length);
@@ -44,7 +46,12 @@ public class RandomGenerator {
         return new IntegerGenerator(max);
     }
 
-    public static Generator<BigDecimal> bigDecimal(final Integer min, final Integer max, final Integer scale) {
+    public static Generator<Integer> integer(final Integer min, final Integer max) {
+        return new IntegerGenerator(min, max);
+    }
+
+    public static Generator<BigDecimal> bigDecimal(final Integer min, final Integer max,
+                    final Integer scale) {
         return new BigDecimalGenerator(min, max, scale);
     }
 

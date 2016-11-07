@@ -56,32 +56,6 @@ public class AbstractJdbcRepositoryTest {
 
     }
 
-    @Test
-    public void shouldCloseStatementIfEndOfResultSetReached() throws Exception {
-        when(ps.executeQuery()).thenReturn(rs);
-        when(rs.next()).thenReturn(true).thenReturn(false);
-
-
-        final Stream<String> stream = repository.streamOf(ps);
-        stream.forEach(s->{});
-
-        verify(ps).close();
-    }
-
-    @Test
-    public void shouldNotCloseStatementIfEndOfResultSetNotReached() throws Exception {
-        when(ps.executeQuery()).thenReturn(rs);
-        when(rs.next()).thenReturn(true).thenReturn(false);
-
-        when(rs.getString(0)).thenReturn("");
-        final Stream<String> stream = repository.streamOf(ps);
-
-
-        stream.findFirst();
-        verify(ps, never()).close();
-
-    }
-
 
     private static class TestJdbcRepository extends AbstractJdbcRepository<String> {
 

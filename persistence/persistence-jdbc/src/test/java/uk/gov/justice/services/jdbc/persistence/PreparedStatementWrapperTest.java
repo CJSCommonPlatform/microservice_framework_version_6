@@ -3,6 +3,7 @@ package uk.gov.justice.services.jdbc.persistence;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -13,7 +14,9 @@ import java.sql.SQLException;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -53,8 +56,9 @@ public class PreparedStatementWrapperTest {
 
         }
 
-        verify(connection).close();
-        verify(preparedStatement).close();
+        final InOrder inOrder = inOrder(preparedStatement, connection);
+        inOrder.verify(preparedStatement).close();
+        inOrder.verify(connection).close();
     }
 
     @Test
@@ -68,9 +72,12 @@ public class PreparedStatementWrapperTest {
         ps.executeQuery();
 
         ps.close();
-        verify(connection).close();
-        verify(preparedStatement).close();
-        verify(resultSet).close();
+
+        final InOrder inOrder = inOrder(resultSet, preparedStatement, connection);
+
+        inOrder.verify(resultSet).close();
+        inOrder.verify(preparedStatement).close();
+        inOrder.verify(connection).close();
     }
 
     @Test
@@ -121,7 +128,7 @@ public class PreparedStatementWrapperTest {
     }
 
     @Test
-    public void shouldCloseStatementOnExceptionOnSetObject() throws SQLException {
+    public void shouldCloseStatementAndConnectionOnExceptionOnSetObject() throws SQLException {
         final String query = "dummy";
         when(connection.prepareStatement(query)).thenReturn(preparedStatement);
         final PreparedStatementWrapper ps = PreparedStatementWrapper.valueOf(connection, query);
@@ -133,8 +140,10 @@ public class PreparedStatementWrapperTest {
         } catch (Exception e) {
 
         }
-        verify(connection).close();
-        verify(preparedStatement).close();
+
+        final InOrder inOrder = inOrder(preparedStatement, connection);
+        inOrder.verify(preparedStatement).close();
+        inOrder.verify(connection).close();
 
 
     }
@@ -152,8 +161,10 @@ public class PreparedStatementWrapperTest {
         } catch (Exception e) {
 
         }
-        verify(connection).close();
-        verify(preparedStatement).close();
+        final InOrder inOrder = inOrder(preparedStatement, connection);
+        inOrder.verify(preparedStatement).close();
+        inOrder.verify(connection).close();
+
 
     }
 
@@ -171,8 +182,10 @@ public class PreparedStatementWrapperTest {
         } catch (Exception e) {
 
         }
-        verify(connection).close();
-        verify(preparedStatement).close();
+        final InOrder inOrder = inOrder(preparedStatement, connection);
+        inOrder.verify(preparedStatement).close();
+        inOrder.verify(connection).close();
+
 
     }
 

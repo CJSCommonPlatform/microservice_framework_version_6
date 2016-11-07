@@ -69,7 +69,6 @@ public abstract class AbstractJdbcRepository<T> {
             public boolean tryAdvance(final Consumer<? super U> action) {
                 try {
                     if (!resultSet.next()) {
-                        psWrapper.close();
                         return false;
                     }
                     action.accept(resultSetToEntityMapper.apply(resultSet));

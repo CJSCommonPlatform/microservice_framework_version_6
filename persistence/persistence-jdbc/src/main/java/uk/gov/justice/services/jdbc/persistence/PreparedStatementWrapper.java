@@ -4,12 +4,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
 public class PreparedStatementWrapper implements AutoCloseable {
     private final PreparedStatement preparedStatement;
-    private final List<AutoCloseable> closeables = new LinkedList<>();
+    private final Deque<AutoCloseable> closeables = new LinkedList<>();
 
 
     public static PreparedStatementWrapper valueOf(final Connection connection, final String queryTemplate) throws SQLException {
@@ -50,7 +51,7 @@ public class PreparedStatementWrapper implements AutoCloseable {
         ResultSet resultSet = null;
         try {
             resultSet = preparedStatement.executeQuery();
-            this.closeables.add(resultSet);
+            this.closeables.addFirst(resultSet);
         } catch (SQLException e) {
             handle(e, this);
         }
@@ -68,8 +69,8 @@ public class PreparedStatementWrapper implements AutoCloseable {
     }
 
     private PreparedStatementWrapper(final Connection connection, final PreparedStatement preparedStatement) {
-        this.closeables.add(connection);
         this.closeables.add(preparedStatement);
+        this.closeables.add(connection);
         this.preparedStatement = preparedStatement;
     }
 

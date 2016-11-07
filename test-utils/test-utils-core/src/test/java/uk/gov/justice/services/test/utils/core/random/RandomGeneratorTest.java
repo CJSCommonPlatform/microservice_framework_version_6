@@ -26,7 +26,7 @@ import org.junit.Test;
 
 public class RandomGeneratorTest {
 
-    private static final int NUMBER_OF_TIMES = 100000;
+    private static final int NUMBER_OF_TIMES = 10000;
     private static final String BIG_DECIMAL_PATTERN = "(-)?(0|(?!0)\\d{1,10})\\.\\d{2}";
     private static final String PERCENTAGE_PATTERN = "((0|(?!0)\\d{1,2})\\.\\d{2})|100.00";
     private static final String DOUBLE_WITH_OPTIONAL_FRACTION_PATTERN = "(-)?(0|(?!0)\\d{1,309})(\\.\\d{1,2})?";

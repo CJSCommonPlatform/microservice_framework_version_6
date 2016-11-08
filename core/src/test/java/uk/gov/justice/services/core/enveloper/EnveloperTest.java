@@ -79,6 +79,8 @@ public class EnveloperTest {
         when(envelope.metadata()).thenReturn(
                 metadataOf(COMMAND_UUID, TEST_EVENT_NAME)
                         .withCausation(OLD_CAUSATION_ID)
+                        .withUserId(USER_ID_VALUE.toString())
+                        .withSessionId(SESSION_ID_VALUE.toString())
                         .build());
         when(objectToJsonValueConverter.convert(object)).thenReturn(payload);
 
@@ -90,6 +92,8 @@ public class EnveloperTest {
         assertThat(event.metadata().causation().size(), equalTo(2));
         assertThat(event.metadata().causation().get(0), equalTo(OLD_CAUSATION_ID));
         assertThat(event.metadata().causation().get(1), equalTo(COMMAND_UUID));
+        assertThat(event.metadata().userId().get(), equalTo(USER_ID_VALUE.toString()));
+        assertThat(event.metadata().sessionId().get(), equalTo(SESSION_ID_VALUE.toString()));
         verify(objectToJsonValueConverter, times(1)).convert(object);
     }
 

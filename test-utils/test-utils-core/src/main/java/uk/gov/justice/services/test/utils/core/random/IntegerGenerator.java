@@ -27,16 +27,6 @@ public class IntegerGenerator extends Generator<Integer> {
     /**
      * Package Access only
      * 
-     * @param max value excluded
-     * @see RandomGenerator
-     */
-    IntegerGenerator(final int max) {
-        this.min = 0;
-        this.max = max;
-    }
-    /**
-     * Package Access only
-     * 
      * @param min value included
      * @param max value excluded
      * @see RandomGenerator

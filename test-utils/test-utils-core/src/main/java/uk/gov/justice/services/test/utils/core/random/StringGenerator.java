@@ -1,21 +1,20 @@
 package uk.gov.justice.services.test.utils.core.random;
 
+import static java.lang.String.format;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 
-/**
- * Maximum length supported is 10
- */
 public class StringGenerator extends Generator<String> {
 
-    private static final int MAX_LENGTH = 10;
-    private int length = MAX_LENGTH;
+    private static final int DEFAULT_MAX = 10;
+    private final int length;
 
     public StringGenerator() {
+        this(DEFAULT_MAX);
     }
 
     public StringGenerator(final int length) {
-        if (length > MAX_LENGTH) {
-            throw new IllegalArgumentException("Max supported length is " + MAX_LENGTH);
+        if (length <= 0) {
+            throw new IllegalArgumentException(format("String length needs to be greater than zero. Got %s", length));
         }
         this.length = length;
     }

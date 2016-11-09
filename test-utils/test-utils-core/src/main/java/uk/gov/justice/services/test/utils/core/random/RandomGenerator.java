@@ -2,6 +2,8 @@ package uk.gov.justice.services.test.utils.core.random;
 
 import static com.google.common.collect.Lists.newArrayList;
 
+import uk.gov.justice.services.test.utils.core.random.LocalDateGenerator.Direction;
+
 import java.math.BigDecimal;
 import java.net.URI;
 import java.time.LocalDate;
@@ -16,8 +18,8 @@ public class RandomGenerator {
     public static final Generator<BigDecimal> BIG_DECIMAL = new BigDecimalGenerator();
     public static final Generator<Boolean> BOOLEAN = new BooleanGenerator();
     public static final Generator<Double> DOUBLE = new DoubleGenerator();
-    public static final Generator<String> EMAIL_ADDRESS = EmailAddressGenerator.getInstance();
-    public static final Generator<Integer> INTEGER = new IntegerGenerator(Integer.MAX_VALUE);
+    public static final Generator<String> EMAIL_ADDRESS = new EmailAddressGenerator();
+    public static final Generator<Integer> INTEGER = new IntegerGenerator(0, Integer.MAX_VALUE);
     public static final Generator<String> STRING = new StringGenerator();
     public static final Generator<Long> LONG = new LongGenerator();
     public static final Generator<BigDecimal> PERCENTAGE = new BigDecimalGenerator(0, 100, 2);
@@ -26,9 +28,9 @@ public class RandomGenerator {
     public static final Generator<URI> URI = new UriGenerator();
     public static final Generator<UUID> UUID = new UUIDGenerator();
     public static final Generator<LocalDate> FUTURE_LOCAL_DATE = new LocalDateGenerator(
-                    Period.ofYears(5), LocalDate.now(), LocalDateGenerator.Direction.FORWARD);
+                    Period.ofYears(5), LocalDate.now(), Direction.FORWARD);
     public static final Generator<LocalDate> PAST_LOCAL_DATE = new LocalDateGenerator(
-                    Period.ofYears(5), LocalDate.now(), LocalDateGenerator.Direction.BACKWARD);
+                    Period.ofYears(5), LocalDate.now(), Direction.BACKWARD);
 
     public static Generator<String> string(final int length) {
         return new StringGenerator(length);
@@ -44,7 +46,7 @@ public class RandomGenerator {
     }
 
     public static Generator<Integer> integer(final Integer max) {
-        return new IntegerGenerator(max);
+        return new IntegerGenerator(0, max);
     }
 
     public static Generator<Integer> integer(final Integer min, final Integer max) {

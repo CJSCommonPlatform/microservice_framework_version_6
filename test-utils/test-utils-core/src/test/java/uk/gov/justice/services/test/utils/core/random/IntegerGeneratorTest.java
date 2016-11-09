@@ -209,7 +209,7 @@ public class IntegerGeneratorTest {
     }
     
     private void shouldTestRangesUsingMaxGenerator(final int max, final int loopCount) {
-        IntegerGenerator ig = new IntegerGenerator(max);
+        IntegerGenerator ig = new IntegerGenerator(0, max);
         for (int i = 0; i < loopCount; i++) {
             int k = ig.next();
             assertTrue(format("Value cannot be greater than Max value %s , got Value: %s", max, k), k < max);

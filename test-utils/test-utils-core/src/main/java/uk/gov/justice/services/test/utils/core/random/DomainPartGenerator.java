@@ -1,13 +1,11 @@
 package uk.gov.justice.services.test.utils.core.random;
 
 import static java.lang.String.join;
-import static uk.gov.justice.services.test.utils.core.random.GeneratorUtil.chooseRandomPosition;
 import static uk.gov.justice.services.test.utils.core.random.GeneratorUtil.generateStringFromCharacters;
-import static uk.gov.justice.services.test.utils.core.random.GeneratorUtil.isRandomlyTrue;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.values;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * The domain name part of an email address has to conform to strict guidelines: <br>
@@ -18,13 +16,12 @@ import java.util.Random;
  * <li>digits 0 to 9, provided that top-level domain names are not all-numeric</li>
  * <li>hyphen -, provided that it is not the first or last character</li>
  * </ol>
- * 
+ *
  * Sources: <br>
  * https://tools.ietf.org/html/rfc3696 <br>
  * https://en.wikipedia.org/wiki/Email_address#domain
- * 
  */
-public class DomainPartGenerator {
+public class DomainPartGenerator extends EmailPartsGenerator {
 
     /**
      * The minimum length of the domain part
@@ -40,83 +37,47 @@ public class DomainPartGenerator {
      * List of valid characters in the domain part of the email <br>
      * LDH rule ( letters digits and the hyphen )
      */
-    private static final char[] DOMAINPART_CHARACTERS =
-                    "-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
+    private static final char[] DOMAIN_PART_CHARACTERS =
+            "-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
 
     /**
      * Version 2016102700, Last Updated Thu Oct 27 07:07:01 2016 UTC <br>
      * http://data.iana.org/TLD/tlds-alpha-by-domain.txt
      */
     private final List<String> topLevelDomains = new ArrayList<>();
-
-    /**
-     * Random used for character generation
-     */
-    private final Random random;
+    private final Validator<String> domainPartValidator;
 
     /**
      * Prevent instantiation outside the package
-     * 
-     * @param Random to use for generation
+     *
+     * @param topLevelDomains     top level domains to use for generation
+     * @param domainPartValidator validator for domain part
      */
-    DomainPartGenerator(final Random random) {
-        this.random = random;
+    DomainPartGenerator(final List<String> topLevelDomains, final Validator<String> domainPartValidator) {
+        this.topLevelDomains.addAll(topLevelDomains);
+        this.domainPartValidator = domainPartValidator;
     }
 
     /**
      * Generate the domain part
-     * 
+     *
      * @return the domain part
      */
     public String next() {
-        return generateDomainPart();
-    }
+        String generated = generateStringFromCharacters(DOMAIN_PART_CHARACTERS, MIN_LENGTH,
+                MAX_LENGTH);
+        if (!domainPartValidator.validate(generated)) {
+            return next();
+        }
+        generated = join(".", generated, values(topLevelDomains).next());
 
-    /**
-     * Generate domain part
-     * 
-     * @return domain part
-     */
-    private String generateDomainPart() {
-        String generated = generateStringFromCharacters(random, DOMAINPART_CHARACTERS, MIN_LENGTH,
-                        MAX_LENGTH);
-        if (!passBasicChecks(generated)) {
-            return generateDomainPart();
-        }
-        // toss 100 sided thing
-        if (isRandomlyTrue(100)) {
-            // toss coin
-            if (isRandomlyTrue(2)) {
-                generated = join("", "(comment)", generated);
-            } else {
-                generated = join("", generated, "(comment)");
-            }
-        }
-        generated = join(".", generated,
-                        topLevelDomains.get(chooseRandomPosition(topLevelDomains.size())));
+        generated = insertOptionalComment(generated);
 
         return generated;
     }
 
     public List<String> getTopLevelDomains() {
         return topLevelDomains;
-    }
-
-    public DomainPartGenerator setTopLevelDomains(final List<String> topLevelDomains) {
-        this.topLevelDomains.addAll(topLevelDomains);
-        return this;
-    }
-
-    /**
-     * Check that a domain part is valid
-     * 
-     * @param textToCheck
-     * @return boolean value denoting a valid or invalid domain part
-     */
-    public static boolean passBasicChecks(final String textToCheck) {
-        return !textToCheck.isEmpty() && !(MAX_LENGTH < textToCheck.length())
-                        && !textToCheck.startsWith("-") && !textToCheck.endsWith("-")
-                        && !textToCheck.matches("[0-9]+");
     }
 
 }

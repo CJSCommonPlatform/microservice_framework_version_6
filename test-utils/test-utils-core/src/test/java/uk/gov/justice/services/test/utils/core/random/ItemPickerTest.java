@@ -15,7 +15,6 @@ import org.junit.Test;
 
 public class ItemPickerTest {
 
-
     private static final int NUMBER_OF_TIMES = 100000;
 
     @Test
@@ -25,6 +24,15 @@ public class ItemPickerTest {
         final ItemPicker<Integer> generator = new ItemPicker<>(items);
 
         typeCheck(generator, items::contains).verify(times(NUMBER_OF_TIMES));
+    }
+
+    @Test
+    public void shouldRandomlyPickFromAvailableItemsInArray() {
+        final Integer[] items = {1, 2, 3, 4, 5};
+
+        final ItemPicker<Integer> generator = new ItemPicker<>(items);
+
+        typeCheck(generator, s -> newArrayList(items).contains(s)).verify(times(NUMBER_OF_TIMES));
     }
 
     @Test

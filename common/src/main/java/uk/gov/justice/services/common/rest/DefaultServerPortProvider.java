@@ -3,7 +3,7 @@ package uk.gov.justice.services.common.rest;
 import javax.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
-public class DefaultServerPortProvider {
+public class DefaultServerPortProvider implements ServerPortProvider {
 
     static final String DEFAULT_PORT = "DEFAULT_PORT";
 

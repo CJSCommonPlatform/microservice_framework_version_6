@@ -11,7 +11,6 @@ import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandler;
 import uk.gov.justice.services.core.envelope.EnvelopeValidator;
 import uk.gov.justice.services.core.jms.JmsSenderWrapper;
-import uk.gov.justice.services.core.jms.SenderFactory;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
 
 import java.util.Map;

@@ -21,7 +21,6 @@ public class DefaultJsonEnvelopeToStringTest {
 
     private static final String NAME_VALUE = "test.command.do-something";
 
-
     private static final UUID CAUSE_1_VALUE = UUID.fromString("cd68037b-2fcf-4534-b83d-a9f08072f2ca");
     private static final UUID CAUSE_2_VALUE = UUID.fromString("43464b22-04c1-4d99-8359-82dc1934d763");
     private static final UUID ID_VALUE = UUID.fromString("861c9430-7bc6-4bf0-b549-6534394b8d65");
@@ -75,7 +74,7 @@ public class DefaultJsonEnvelopeToStringTest {
         final String resourceName = "json/" + fileName;
         try {
             final String jsonString = Resources.toString(getResource(resourceName), defaultCharset());
-            return new JsonObjectEnvelopeConverter().asEnvelope(new StringToJsonObjectConverter().convert(jsonString));
+            return new DefaultJsonObjectEnvelopeConverter().asEnvelope(new StringToJsonObjectConverter().convert(jsonString));
         } catch (IOException e) {
             throw new AssertionError("Failed to read json file '" + resourceName + "' from classpath", e);
         }

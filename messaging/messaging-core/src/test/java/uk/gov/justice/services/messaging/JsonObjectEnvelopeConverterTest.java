@@ -50,11 +50,11 @@ public class JsonObjectEnvelopeConverterTest {
     private static final String FIELD_NUMBER = "number";
     private static final String METADATA = "_metadata";
 
-    private JsonObjectEnvelopeConverter jsonObjectEnvelopeConverter;
+    private DefaultJsonObjectEnvelopeConverter jsonObjectEnvelopeConverter;
 
     @Before
     public void setup() {
-        jsonObjectEnvelopeConverter = new JsonObjectEnvelopeConverter();
+        jsonObjectEnvelopeConverter = new DefaultJsonObjectEnvelopeConverter();
         jsonObjectEnvelopeConverter.objectMapper = new ObjectMapperProducer().objectMapper();
     }
 
@@ -105,7 +105,7 @@ public class JsonObjectEnvelopeConverterTest {
                 UUID.fromString("43464b22-04c1-4d99-8359-82dc1934d763")));
         assertThat(jsonEnvelope.metadata().sessionId(), contains("45b0c3fe-afe6-4652-882f-7882d79eadd9"));
         assertThat(jsonEnvelope.metadata().userId(), contains("72251abb-5872-46e3-9045-950ac5bae399"));
-        
+
 
     }
 

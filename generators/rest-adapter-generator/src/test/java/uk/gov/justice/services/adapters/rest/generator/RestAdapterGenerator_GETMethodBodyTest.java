@@ -21,7 +21,7 @@ import static org.raml.model.ActionType.GET;
 import static org.raml.model.ParamType.BOOLEAN;
 import static org.raml.model.ParamType.INTEGER;
 import static org.raml.model.ParamType.STRING;
-import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
+import static uk.gov.justice.services.core.interceptor.DefaultInterceptorContext.interceptorContextWithInput;
 import static uk.gov.justice.services.generators.test.utils.builder.HeadersBuilder.headersWith;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.mapping;

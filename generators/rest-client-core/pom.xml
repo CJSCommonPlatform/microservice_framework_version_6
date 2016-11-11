@@ -15,7 +15,17 @@
     <dependencies>
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
-            <artifactId>core</artifactId>
+            <artifactId>common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>framework-api-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>messaging-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

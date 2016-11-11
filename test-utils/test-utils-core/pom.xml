@@ -26,7 +26,7 @@
         </dependency>
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
-            <artifactId>messaging-core</artifactId>
+            <artifactId>framework-api-event-stream</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

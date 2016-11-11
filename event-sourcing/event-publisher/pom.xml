@@ -13,7 +13,6 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>event-publisher-core</module>
         <module>event-publisher-jms</module>
     </modules>
 

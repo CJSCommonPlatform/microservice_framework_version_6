@@ -10,8 +10,6 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithD
 import static uk.gov.justice.services.test.utils.core.matchers.HandlerMatcher.isHandler;
 import static uk.gov.justice.services.test.utils.core.matchers.HandlerMethodMatcher.method;
 
-import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.example.cakeshop.query.view.response.CakeOrderView;
 import uk.gov.justice.services.example.cakeshop.query.view.service.CakeOrderService;
@@ -21,25 +19,24 @@ import uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CakeOrdersQueryViewTest {
 
-    private CakeOrdersQueryView queryView;
-
     @Mock
     private CakeOrderService service;
 
-    @Before
-    public void setup() {
-        final Enveloper enveloper = EnveloperFactory.createEnveloper();
-        queryView = new CakeOrdersQueryView(service, enveloper);
-    }
+    @Spy
+    private Enveloper enveloper = new EnveloperFactory().create();
+
+    @InjectMocks
+    private CakeOrdersQueryView queryView;
 
     @Test
     public void shouldHaveCorrectHandlerMethod() throws Exception {
@@ -62,8 +59,5 @@ public class CakeOrdersQueryViewTest {
 
         assertThat(response.payloadAsJsonObject().getString("orderId"), equalTo(orderId.toString()));
         assertThat(response.payloadAsJsonObject().getString("recipeId"), equalTo(recipeId.toString()));
-
-
     }
-
 }

@@ -8,10 +8,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.adapter.rest.mutipart.FileInputDetails.FILE_INPUT_DETAILS_LIST;
-import static uk.gov.justice.services.core.interceptor.InterceptorContext.copyWithOutput;
-import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
+import static uk.gov.justice.services.core.interceptor.DefaultInterceptorContext.interceptorContextWithInput;
 
 import uk.gov.justice.services.adapter.rest.mutipart.FileInputDetails;
+import uk.gov.justice.services.core.interceptor.DefaultInterceptorChain;
 import uk.gov.justice.services.core.interceptor.Interceptor;
 import uk.gov.justice.services.core.interceptor.InterceptorChain;
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
@@ -60,7 +60,7 @@ public class InputStreamFileInterceptorTest {
         final Deque<Interceptor> interceptors = new LinkedList<>();
         interceptors.add(inputStreamFileInterceptor);
 
-        interceptorChain = new InterceptorChain(interceptors, this::processResult);
+        interceptorChain = new DefaultInterceptorChain(interceptors, this::processResult);
     }
 
     @Test
@@ -80,10 +80,10 @@ public class InputStreamFileInterceptorTest {
 
         final Optional<JsonEnvelope> jsonEnvelope = outputInterceptorContext.outputEnvelope();
 
-         assertThat(jsonEnvelope.isPresent(), is(true));
-         assertThat(jsonEnvelope.get(), is(outputEnvelope));
+        assertThat(jsonEnvelope.isPresent(), is(true));
+        assertThat(jsonEnvelope.get(), is(outputEnvelope));
 
-         assertThat(resultJsonEnvelope, is(inputEnvelope));
+        assertThat(resultJsonEnvelope, is(inputEnvelope));
     }
 
     @Test
@@ -104,7 +104,6 @@ public class InputStreamFileInterceptorTest {
     }
 
 
-
     private InterceptorContext createInterceptorContext(final List<FileInputDetails> fileInputDetails) {
         final InterceptorContext inputInterceptorContext = interceptorContextWithInput(inputEnvelope);
         inputInterceptorContext.setInputParameter(FILE_INPUT_DETAILS_LIST, fileInputDetails);
@@ -123,6 +122,6 @@ public class InputStreamFileInterceptorTest {
 
     private InterceptorContext processResult(final InterceptorContext interceptorContext) {
         resultJsonEnvelope = interceptorContext.inputEnvelope();
-        return copyWithOutput(interceptorContext, outputEnvelope);
+        return interceptorContext.copyWithOutput(outputEnvelope);
     }
 }

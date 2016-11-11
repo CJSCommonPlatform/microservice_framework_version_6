@@ -3,7 +3,7 @@ package uk.gov.justice.services.interceptors;
 import static java.lang.Integer.MAX_VALUE;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
-import uk.gov.justice.services.core.interceptor.DefaultInterceptorChainProvider;
+import uk.gov.justice.services.core.interceptor.BaseInterceptorChainProvider;
 import uk.gov.justice.services.core.interceptor.Interceptor;
 
 import java.util.List;
@@ -11,7 +11,7 @@ import java.util.List;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
-public class CommandHandlerInterceptorChainProvider extends DefaultInterceptorChainProvider {
+public class CommandHandlerInterceptorChainProvider extends BaseInterceptorChainProvider {
 
     @Override
     public String component() {

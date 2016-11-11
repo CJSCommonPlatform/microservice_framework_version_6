@@ -10,14 +10,14 @@ import javax.enterprise.inject.spi.Bean;
  */
 public class ProviderFoundEvent {
 
-    public Bean<?> getBean() {
-        return bean;
-    }
-
     private final Bean<?> bean;
 
     public ProviderFoundEvent(final Bean<?> bean) {
         this.bean = bean;
+    }
+
+    public Bean<?> getBean() {
+        return bean;
     }
 
 }

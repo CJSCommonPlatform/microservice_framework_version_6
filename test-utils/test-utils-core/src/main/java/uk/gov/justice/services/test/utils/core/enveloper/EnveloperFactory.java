@@ -6,6 +6,7 @@ import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.util.UtcClock;
+import uk.gov.justice.services.core.enveloper.DefaultEnveloper;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.extension.EventFoundEvent;
 
@@ -42,14 +43,15 @@ public class EnveloperFactory {
         return new EnveloperFactory().createWithEvents(events);
     }
 
-    public Enveloper create() {
+    public DefaultEnveloper create() {
         final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
         final ObjectToJsonValueConverter converter = new ObjectToJsonValueConverter(objectMapper);
-        return new Enveloper(new UtcClock(), converter);
+
+        return new DefaultEnveloper(new UtcClock(), converter);
     }
 
     public Enveloper createWithEvents(final Class<?>... events) {
-        final Enveloper enveloper = create();
+        final DefaultEnveloper enveloper = create();
 
         stream(events).forEach(eventClass -> {
             if (eventClass.isAnnotationPresent(Event.class)) {

@@ -20,6 +20,57 @@
         <dependencies>
             <dependency>
                 <groupId>uk.gov.justice.services</groupId>
+                <artifactId>framework-api-all</artifactId>
+                <version>${cpp.framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>uk.gov.justice.services</groupId>
+                <artifactId>framework-api-aggregate</artifactId>
+                <version>${cpp.framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>uk.gov.justice.services</groupId>
+                <artifactId>framework-api-common</artifactId>
+                <version>${cpp.framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>uk.gov.justice.services</groupId>
+                <artifactId>framework-api-core</artifactId>
+                <version>${cpp.framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>uk.gov.justice.services</groupId>
+                <artifactId>framework-api-domain</artifactId>
+                <version>${cpp.framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>uk.gov.justice.services</groupId>
+                <artifactId>framework-api-event-publisher</artifactId>
+                <version>${cpp.framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>uk.gov.justice.services</groupId>
+                <artifactId>framework-api-event-repository</artifactId>
+                <version>${cpp.framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>uk.gov.justice.services</groupId>
+                <artifactId>framework-api-event-source</artifactId>
+                <version>${cpp.framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>uk.gov.justice.services</groupId>
+                <artifactId>framework-api-event-stream</artifactId>
+                <version>${cpp.framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>uk.gov.justice.services</groupId>
+                <artifactId>framework-api-messaging</artifactId>
+                <version>${cpp.framework.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>uk.gov.justice.services</groupId>
                 <artifactId>common</artifactId>
                 <version>${cpp.framework.version}</version>
             </dependency>

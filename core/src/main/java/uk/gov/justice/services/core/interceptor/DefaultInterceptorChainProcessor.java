@@ -1,7 +1,6 @@
 package uk.gov.justice.services.core.interceptor;
 
-import static uk.gov.justice.services.core.interceptor.InterceptorContext.copyWithOutput;
-import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
+import static uk.gov.justice.services.core.interceptor.DefaultInterceptorContext.interceptorContextWithInput;
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
@@ -22,7 +21,7 @@ public class DefaultInterceptorChainProcessor implements InterceptorChainProcess
 
     @Override
     public Optional<JsonEnvelope> process(final InterceptorContext interceptorContext) {
-        return new InterceptorChain(interceptorCache.getInterceptors(component), targetOf(dispatch))
+        return new DefaultInterceptorChain(interceptorCache.getInterceptors(component), targetOf(dispatch))
                 .processNext(interceptorContext)
                 .outputEnvelope();
     }
@@ -34,6 +33,6 @@ public class DefaultInterceptorChainProcessor implements InterceptorChainProcess
     }
 
     private Target targetOf(final Function<JsonEnvelope, JsonEnvelope> dispatch) {
-        return interceptorContext -> copyWithOutput(interceptorContext, dispatch.apply(interceptorContext.inputEnvelope()));
+        return interceptorContext -> interceptorContext.copyWithOutput(dispatch.apply(interceptorContext.inputEnvelope()));
     }
 }

@@ -189,9 +189,9 @@ public class SnapshotAwareAggregateServiceTest {
         defaultAggregateService.jsonObjectToObjectConverter = jsonObjectToObjectConverter;
 
         final UUID streamId = UUID.randomUUID();
-        final long currentStreamVersion = 5l;
+        final long currentStreamVersion = 5L;
         final TestAggregate aggregate = new TestAggregate();
-        final long snapshotVersion = 2l;
+        final long snapshotVersion = 2L;
 
         final JsonEnvelope jsonEventA = DefaultJsonEnvelope.envelope().with(JsonObjectMetadata.metadataWithRandomUUID("eventA")).withPayloadOf("value1", "name1").build();
         final JsonEnvelope jsonEventB = DefaultJsonEnvelope.envelope().with(JsonObjectMetadata.metadataWithRandomUUID("eventB")).withPayloadOf("value2", "name1").build();
@@ -227,7 +227,7 @@ public class SnapshotAwareAggregateServiceTest {
         defaultAggregateService.jsonObjectToObjectConverter = jsonObjectToObjectConverter;
 
         final UUID streamId = UUID.randomUUID();
-        final long currentStreamVersion = 3l;
+        final long currentStreamVersion = 3L;
 
         final JsonEnvelope jsonEventA = DefaultJsonEnvelope.envelope().with(JsonObjectMetadata.metadataWithRandomUUID("eventA")).withPayloadOf("value1", "name1").build();
         final JsonEnvelope jsonEventB = DefaultJsonEnvelope.envelope().with(JsonObjectMetadata.metadataWithRandomUUID("eventB")).withPayloadOf("value2", "name1").build();

@@ -14,7 +14,6 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.dispatcher.Requester;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjectMetadata;
 import uk.gov.justice.services.test.utils.core.matchers.HandlerClassMatcher;
 import uk.gov.justice.services.test.utils.core.matchers.HandlerMatcher;
 import uk.gov.justice.services.test.utils.core.mock.SkipJsonValidationListener;

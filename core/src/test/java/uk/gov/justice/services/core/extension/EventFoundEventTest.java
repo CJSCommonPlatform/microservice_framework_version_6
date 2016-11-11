@@ -10,7 +10,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.omg.CORBA.Object;
 
 /**
- * Unit tests for the {@link EventFoundEventTest} class.
+ * Unit tests for the {@link EventFoundEvent} class.
  */
 @RunWith(MockitoJUnitRunner.class)
 public class EventFoundEventTest {

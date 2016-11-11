@@ -14,8 +14,9 @@ import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.util.Clock;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidStreamIdException;
+import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
+import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.justice.services.test.utils.core.helper.StoppedClock;
 
@@ -53,7 +54,7 @@ public class EventLogConverterTest {
     public void setup() {
         eventLogConverter = new EventLogConverter();
         eventLogConverter.stringToJsonObjectConverter = new StringToJsonObjectConverter();
-        eventLogConverter.jsonObjectEnvelopeConverter = new JsonObjectEnvelopeConverter();
+        eventLogConverter.jsonObjectEnvelopeConverter = new DefaultJsonObjectEnvelopeConverter();
     }
 
     @Test

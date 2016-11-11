@@ -98,4 +98,21 @@ public class JmsLoggerMetadataInterceptorTest {
 
         assertThat(actualResult, is(expectedResult));
     }
+
+    @Test
+    @SuppressWarnings({"unchecked", "deprecation"})
+    public void shouldReturnMessageInMetadataIfExceptionThrownWhenAccessingTextMessage() throws Exception {
+        final TextMessage textMessage = mock(TextMessage.class);
+
+        when(context.getParameters()).thenReturn(new Object[]{textMessage});
+        when(textMessage.getText()).thenThrow(new RuntimeException());
+        when(context.proceed()).thenAnswer(invocationOnMock -> {
+            assertThat(MDC.get(REQUEST_DATA), isJson(
+                    withJsonPath("$.metadata", equalTo("Could not find: _metadata in message"))
+            ));
+            return null;
+        });
+
+        jmsLoggerMetadataInterceptor.addRequestDataToMappedDiagnosticContext(context);
+    }
 }

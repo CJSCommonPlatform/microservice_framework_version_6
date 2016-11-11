@@ -23,7 +23,7 @@ import uk.gov.justice.domain.event.EventC;
 import uk.gov.justice.domain.snapshot.VersionedAggregate;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.aggregate.exception.AggregateChangeDetectedException;
-import uk.gov.justice.services.core.extension.EventFoundEvent;
+import uk.gov.justice.services.core.extension.DefaultEventFoundEvent;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.snapshot.SnapshotService;
 import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
@@ -73,7 +73,7 @@ public class SnapshotAwareAggregateServiceTest {
     private SnapshotAwareAggregateService aggregateService;
 
     private void registerEvent(Class clazz, String name) {
-        defaultAggregateService.register(new EventFoundEvent(clazz, name));
+        defaultAggregateService.register(new DefaultEventFoundEvent(clazz, name));
     }
 
     @Test
@@ -189,9 +189,9 @@ public class SnapshotAwareAggregateServiceTest {
         defaultAggregateService.jsonObjectToObjectConverter = jsonObjectToObjectConverter;
 
         final UUID streamId = UUID.randomUUID();
-        final long currentStreamVersion = 5l;
+        final long currentStreamVersion = 5L;
         final TestAggregate aggregate = new TestAggregate();
-        final long snapshotVersion = 2l;
+        final long snapshotVersion = 2L;
 
         final JsonEnvelope jsonEventA = DefaultJsonEnvelope.envelope().with(JsonObjectMetadata.metadataWithRandomUUID("eventA")).withPayloadOf("value1", "name1").build();
         final JsonEnvelope jsonEventB = DefaultJsonEnvelope.envelope().with(JsonObjectMetadata.metadataWithRandomUUID("eventB")).withPayloadOf("value2", "name1").build();
@@ -227,7 +227,7 @@ public class SnapshotAwareAggregateServiceTest {
         defaultAggregateService.jsonObjectToObjectConverter = jsonObjectToObjectConverter;
 
         final UUID streamId = UUID.randomUUID();
-        final long currentStreamVersion = 3l;
+        final long currentStreamVersion = 3L;
 
         final JsonEnvelope jsonEventA = DefaultJsonEnvelope.envelope().with(JsonObjectMetadata.metadataWithRandomUUID("eventA")).withPayloadOf("value1", "name1").build();
         final JsonEnvelope jsonEventB = DefaultJsonEnvelope.envelope().with(JsonObjectMetadata.metadataWithRandomUUID("eventB")).withPayloadOf("value2", "name1").build();

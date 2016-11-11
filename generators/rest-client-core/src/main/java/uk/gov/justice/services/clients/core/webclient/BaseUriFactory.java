@@ -1,7 +1,7 @@
 package uk.gov.justice.services.clients.core.webclient;
 
 import uk.gov.justice.services.clients.core.EndpointDefinition;
-import uk.gov.justice.services.common.rest.DefaultServerPortProvider;
+import uk.gov.justice.services.common.rest.ServerPortProvider;
 
 import java.util.Optional;
 
@@ -17,7 +17,7 @@ public class BaseUriFactory {
     MockServerPortProvider mockServerPortProvider;
 
     @Inject
-    DefaultServerPortProvider defaultServerPortProvider;
+    ServerPortProvider serverPortProvider;
 
 
     public String createBaseUri(final EndpointDefinition definition) {
@@ -32,6 +32,6 @@ public class BaseUriFactory {
             return mockServerPort.get();
         }
 
-        return defaultServerPortProvider.getDefaultPort();
+        return serverPortProvider.getDefaultPort();
     }
 }

@@ -14,6 +14,6 @@ public class DispatcherFactory {
     private static final Logger LOGGER = getLogger(HandlerRegistry.class);
 
     public Dispatcher createNew() {
-        return new Dispatcher(new HandlerRegistry(LOGGER));
+        return new DefaultDispatcher(new HandlerRegistry(LOGGER));
     }
 }

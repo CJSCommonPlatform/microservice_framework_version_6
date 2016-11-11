@@ -13,13 +13,13 @@ import static uk.gov.justice.services.common.http.HeaderConstants.SESSION_ID;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.common.log.LoggerConstants.METADATA;
 import static uk.gov.justice.services.common.log.LoggerConstants.REQUEST_DATA;
-import static uk.gov.justice.services.messaging.logging.JmsMessageLoggerHelper.addServiceContextNameIfPresent;
+import static uk.gov.justice.services.common.log.LoggerConstants.SERVICE_CONTEXT;
 import static uk.gov.justice.services.messaging.logging.LoggerUtils.trace;
 
 import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.Metadata;
 
 import java.io.ByteArrayInputStream;
@@ -39,7 +39,6 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.MDC;
 
@@ -67,7 +66,8 @@ public class LoggerRequestDataFilter implements ContainerRequestFilter, Containe
         final JsonObjectBuilder builder = createObjectBuilder();
         final MultivaluedMap<String, String> headers = requestContext.getHeaders();
 
-        addServiceContextNameIfPresent(serviceContextNameProvider, builder);
+        Optional.ofNullable(serviceContextNameProvider.getServiceContextName())
+                .ifPresent(value -> builder.add(SERVICE_CONTEXT, value));
         addContentTypeAndAcceptIfPresent(builder, headers);
         mergeHeadersWithPayloadMetadataIfPresent(requestContext, headers)
                 .ifPresent(metadataBuilder -> builder.add(METADATA, metadataBuilder));
@@ -130,7 +130,7 @@ public class LoggerRequestDataFilter implements ContainerRequestFilter, Containe
             try {
                 if (isNotBlank(payload)) {
                     final JsonObject jsonObjectPayload = stringToJsonObjectConverter.convert(payload);
-                    if (jsonObjectPayload. containsKey(JsonEnvelope.METADATA)) {
+                    if (jsonObjectPayload.containsKey(JsonEnvelope.METADATA)) {
                         return Optional.of(payloadMetadataFrom(jsonObjectPayload));
                     }
                 }
@@ -180,7 +180,7 @@ public class LoggerRequestDataFilter implements ContainerRequestFilter, Containe
     }
 
     private Metadata payloadMetadataFrom(final JsonObject payload) {
-        return new JsonObjectEnvelopeConverter()
+        return new DefaultJsonObjectEnvelopeConverter()
                 .asEnvelope(payload)
                 .metadata();
     }

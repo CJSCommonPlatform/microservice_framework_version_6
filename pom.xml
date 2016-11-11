@@ -42,6 +42,7 @@
         <module>aggregate-snapshot</module>
         <module>file</module>
         <module>raml-lint-check</module>
+        <module>framework-api</module>
     </modules>
 
     <properties>

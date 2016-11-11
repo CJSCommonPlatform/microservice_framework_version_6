@@ -39,7 +39,7 @@ public class AnnotationScanner implements Extension {
     <T> void processAnnotatedType(@Observes final ProcessAnnotatedType<T> pat) {
         final AnnotatedType<T> annotatedType = pat.getAnnotatedType();
         if (annotatedType.isAnnotationPresent(Event.class)) {
-            events.add(new EventFoundEvent(annotatedType.getJavaClass(), annotatedType.getAnnotation(Event.class).value()));
+            events.add(new DefaultEventFoundEvent(annotatedType.getJavaClass(), annotatedType.getAnnotation(Event.class).value()));
         }
     }
 

@@ -18,7 +18,7 @@ import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.aggregate.event.EventA;
 import uk.gov.justice.services.core.aggregate.event.EventB;
 import uk.gov.justice.services.core.aggregate.exception.AggregateChangeDetectedException;
-import uk.gov.justice.services.core.extension.EventFoundEvent;
+import uk.gov.justice.services.core.extension.DefaultEventFoundEvent;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 
 import java.util.UUID;
@@ -54,7 +54,7 @@ public class DefaultAggregateServiceTest {
     private DefaultAggregateService aggregateService;
 
     private void registerEvent(Class clazz, String name) {
-        aggregateService.register(new EventFoundEvent(clazz, name));
+        aggregateService.register(new DefaultEventFoundEvent(clazz, name));
     }
 
     @Test

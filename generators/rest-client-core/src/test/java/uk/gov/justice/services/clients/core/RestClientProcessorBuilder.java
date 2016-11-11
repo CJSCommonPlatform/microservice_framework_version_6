@@ -4,7 +4,7 @@ import static uk.gov.justice.services.clients.core.webclient.WebTargetFactoryBui
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
-import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
+import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 
 public class RestClientProcessorBuilder {
 
@@ -22,7 +22,7 @@ public class RestClientProcessorBuilder {
     public RestClientProcessor build() {
         final RestClientProcessor restClientProcessor = new RestClientProcessor();
         restClientProcessor.stringToJsonObjectConverter = new StringToJsonObjectConverter();
-        restClientProcessor.jsonObjectEnvelopeConverter = new JsonObjectEnvelopeConverter();
+        restClientProcessor.jsonObjectEnvelopeConverter = new DefaultJsonObjectEnvelopeConverter();
         restClientProcessor.enveloper = createEnveloper();
         restClientProcessor.webTargetFactory = aWebTargetFactoryBuilder()
                 .withAppName(appName)

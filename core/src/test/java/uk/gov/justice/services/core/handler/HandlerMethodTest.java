@@ -15,8 +15,8 @@ import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.handler.exception.HandlerExecutionException;
 import uk.gov.justice.services.core.handler.registry.exception.InvalidHandlerException;
+import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -138,7 +138,7 @@ public class HandlerMethodTest {
 
     private JsonEnvelope testEnvelope(String fileName) throws IOException {
         String jsonString = Resources.toString(Resources.getResource("json/" + fileName), Charset.defaultCharset());
-        return new JsonObjectEnvelopeConverter().asEnvelope(new StringToJsonObjectConverter().convert(jsonString));
+        return new DefaultJsonObjectEnvelopeConverter().asEnvelope(new StringToJsonObjectConverter().convert(jsonString));
     }
 
     public static class AsynchronousCommandHandler {

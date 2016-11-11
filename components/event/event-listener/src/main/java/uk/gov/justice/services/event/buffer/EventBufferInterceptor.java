@@ -1,6 +1,5 @@
 package uk.gov.justice.services.event.buffer;
 
-import static uk.gov.justice.services.core.interceptor.InterceptorContext.copyWithInput;
 
 import uk.gov.justice.services.core.interceptor.Interceptor;
 import uk.gov.justice.services.core.interceptor.InterceptorChain;
@@ -37,6 +36,6 @@ public class EventBufferInterceptor implements Interceptor {
 
     private Stream<InterceptorContext> streamFromEventBufferFor(final InterceptorContext interceptorContext) {
         return eventBufferService.currentOrderedEventsWith(interceptorContext.inputEnvelope())
-                .map(jsonEnvelope -> copyWithInput(interceptorContext, jsonEnvelope));
+                .map(interceptorContext::copyWithInput);
     }
 }

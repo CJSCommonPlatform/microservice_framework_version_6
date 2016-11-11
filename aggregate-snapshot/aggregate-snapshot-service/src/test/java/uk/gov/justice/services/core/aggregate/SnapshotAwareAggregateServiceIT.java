@@ -30,7 +30,7 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.util.Clock;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
-import uk.gov.justice.services.core.extension.EventFoundEvent;
+import uk.gov.justice.services.core.extension.DefaultEventFoundEvent;
 import uk.gov.justice.services.eventsource.DefaultEventDestinationResolver;
 import uk.gov.justice.services.eventsourcing.publisher.jms.JmsEventPublisher;
 import uk.gov.justice.services.eventsourcing.repository.core.EventRepository;
@@ -46,8 +46,8 @@ import uk.gov.justice.services.eventsourcing.source.core.SnapshotAwareEventSourc
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.eventsourcing.source.core.snapshot.DefaultSnapshotService;
 import uk.gov.justice.services.eventsourcing.source.core.snapshot.DefaultSnapshotStrategy;
+import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
 
@@ -142,7 +142,7 @@ public class SnapshotAwareAggregateServiceIT {
             EventLogConverter.class,
             EnvelopeConverter.class,
             StringToJsonObjectConverter.class,
-            JsonObjectEnvelopeConverter.class,
+            DefaultJsonObjectEnvelopeConverter.class,
             JsonObjectToObjectConverter.class,
             ObjectMapperProducer.class,
 
@@ -173,7 +173,7 @@ public class SnapshotAwareAggregateServiceIT {
     @Before
     public void init() throws Exception {
         initEventDatabase();
-        defaultAggregateService.register(new EventFoundEvent(EventA.class, "context.eventA"));
+        defaultAggregateService.register(new DefaultEventFoundEvent(EventA.class, "context.eventA"));
     }
 
     @Test

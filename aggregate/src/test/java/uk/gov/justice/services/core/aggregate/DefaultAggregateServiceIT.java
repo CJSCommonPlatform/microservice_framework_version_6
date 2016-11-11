@@ -21,7 +21,7 @@ import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.aggregate.event.EventA;
 import uk.gov.justice.services.core.aggregate.event.EventB;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
-import uk.gov.justice.services.core.extension.EventFoundEvent;
+import uk.gov.justice.services.core.extension.DefaultEventFoundEvent;
 import uk.gov.justice.services.eventsourcing.publisher.core.EventPublisher;
 import uk.gov.justice.services.eventsourcing.repository.core.EventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy;
@@ -36,8 +36,8 @@ import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.EventStreamManager;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.jdbc.persistence.AbstractJdbcRepository;
+import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
 import uk.gov.justice.services.repository.EventLogOpenEjbAwareJdbcRepository;
@@ -100,7 +100,6 @@ public class DefaultAggregateServiceIT {
 
             DefaultAggregateService.class,
 
-            EventSource.class,
             DefaultEventSource.class,
             EnvelopeEventStream.class,
             EventStreamManager.class,
@@ -109,7 +108,7 @@ public class DefaultAggregateServiceIT {
             EnvelopeConverter.class,
             EventLogConverter.class,
             StringToJsonObjectConverter.class,
-            JsonObjectEnvelopeConverter.class,
+            DefaultJsonObjectEnvelopeConverter.class,
             JsonObjectToObjectConverter.class,
             ObjectMapperProducer.class,
 
@@ -146,7 +145,7 @@ public class DefaultAggregateServiceIT {
     public void shouldCreateAggregateFromSingletonStream() throws EventStreamException {
 
         final EventStream eventStream = eventSource.getStreamById(STREAM_ID);
-        aggregateService.register(new EventFoundEvent(EventA.class, "context.eventA"));
+        aggregateService.register(new DefaultEventFoundEvent(EventA.class, "context.eventA"));
 
         aggregateService.get(eventStream, TestAggregate.class);
 
@@ -166,8 +165,8 @@ public class DefaultAggregateServiceIT {
 
         final EventStream eventStream = eventSource.getStreamById(STREAM_ID);
 
-        aggregateService.register(new EventFoundEvent(EventA.class, "context.eventA"));
-        aggregateService.register(new EventFoundEvent(EventB.class, "context.eventB"));
+        aggregateService.register(new DefaultEventFoundEvent(EventA.class, "context.eventA"));
+        aggregateService.register(new DefaultEventFoundEvent(EventB.class, "context.eventB"));
 
         aggregateService.get(eventStream, TestAggregate.class);
 
@@ -198,7 +197,7 @@ public class DefaultAggregateServiceIT {
 
         final EventStream eventStream = eventSource.getStreamById(STREAM_ID);
 
-        aggregateService.register(new EventFoundEvent(EventA.class, "eventA"));
+        aggregateService.register(new DefaultEventFoundEvent(EventA.class, "eventA"));
 
         aggregateService.get(eventStream, PrivateAggregate.class);
     }

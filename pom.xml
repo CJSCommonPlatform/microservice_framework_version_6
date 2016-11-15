@@ -40,6 +40,7 @@
         <module>event-buffer</module>
         <module>aggregate</module>
         <module>aggregate-snapshot</module>
+        <module>file</module>
     </modules>
 
     <properties>

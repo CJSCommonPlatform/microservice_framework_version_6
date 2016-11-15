@@ -5,12 +5,19 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Added
+- Stream of streams event retrieval
+- Proxy support to Rest Client
+- JsonObjects toJsonArray method
+
 ### Changed
 - Improve BigDecimalGenerator to cover both positive and negative range
 - Improve DoubleGenerator to cover the bounds of double
 - TypeCheck class to provide better feedback on failure
+- Parent pom to 1.2.0, common bom to 1.4.0 and raml-plugin to 1.3.0
 
 ### Fixed
+- JDBC Repository resource close ordering
 - Test cases related to random date generation
 - ValueGenerator to randomly pick items from a given pool and renamed the class to ItemPicker
 

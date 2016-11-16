@@ -3,7 +3,6 @@ package uk.gov.justice.services.file.alfresco.rest;
 import static java.lang.String.format;
 
 import uk.gov.justice.services.common.configuration.GlobalValue;
-import uk.gov.justice.services.common.configuration.Value;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -35,7 +34,6 @@ public class AlfrescoRestClient {
     @GlobalValue(key = "alfresco.proxy.port", defaultValue = "0")
     public String proxyPort;
 
-
     /**
      * Sends a message via post.
      *
@@ -51,6 +49,22 @@ public class AlfrescoRestClient {
                 .request(mediaType)
                 .headers(headers)
                 .post(entity);
+    }
+
+    /**
+     * Request a resource via a get.
+     *
+     * @param uri       - the URI to request the resource from.
+     * @param mediaType - the mediaType of the resource.
+     * @param headers   - any Http headers required for the request.
+     * @return the response from the Http request.
+     */
+    public Response get(final String uri, final MediaType mediaType, final MultivaluedHashMap<String, Object> headers) {
+        return getClient()
+                .target(format("%s%s", alfrescoBaseUri, uri))
+                .request(mediaType)
+                .headers(headers)
+                .get();
     }
 
     private Client getClient() {

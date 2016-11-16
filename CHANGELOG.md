@@ -5,6 +5,8 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [0.34.0] - 2016-11-16
+
 ### Added
 - Stream of streams event retrieval
 - Proxy support to Rest Client

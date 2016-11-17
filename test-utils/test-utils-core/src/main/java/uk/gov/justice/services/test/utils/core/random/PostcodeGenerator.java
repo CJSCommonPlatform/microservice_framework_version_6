@@ -118,19 +118,19 @@ import static java.lang.String.format;
 public class PostcodeGenerator extends Generator<String> {
 
 
-    final IncodeGenerator incodeGenerator;
-    final OutcodeGenerator outcodeGenerator;
+    final OutCodeGenerator outCodeGenerator;
+    final InCodeGenerator inCodeGenerator;
 
     /**
      * Package specific to prevent instantiation
      */
     PostcodeGenerator() {
-        this.incodeGenerator = new IncodeGenerator(RANDOM);
-        this.outcodeGenerator = new OutcodeGenerator(RANDOM);
+        this.outCodeGenerator = new OutCodeGenerator();
+        this.inCodeGenerator = new InCodeGenerator();
     }
 
     @Override
     public String next() {
-        return format("%s %s", outcodeGenerator.next(), incodeGenerator.next());
+        return format("%s %s", outCodeGenerator.next(), inCodeGenerator.next());
     }
 }

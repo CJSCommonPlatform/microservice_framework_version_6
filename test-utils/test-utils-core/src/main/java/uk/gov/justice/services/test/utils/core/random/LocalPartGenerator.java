@@ -1,19 +1,17 @@
 package uk.gov.justice.services.test.utils.core.random;
 
+import static java.lang.String.format;
 import static java.lang.String.valueOf;
-import static uk.gov.justice.services.test.utils.core.random.GeneratorUtil.chooseRandomPosition;
+import static org.apache.commons.lang3.ArrayUtils.toObject;
 import static uk.gov.justice.services.test.utils.core.random.GeneratorUtil.generateStringFromCharacters;
-import static uk.gov.justice.services.test.utils.core.random.GeneratorUtil.isRandomlyTrue;
-
-import java.util.Random;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.values;
 
 /**
- * 
  * The local name part of an email address based on the below rfc <br>
  * https://tools.ietf.org/html/rfc3696
- *
  */
-public class LocalPartGenerator {
+public class LocalPartGenerator extends EmailPartsGenerator {
 
     /**
      * The minimum length of the local part
@@ -26,81 +24,65 @@ public class LocalPartGenerator {
     /**
      * List of valid characters in the local part of the email
      */
-    private static final char[] LOCALPART_STANDARD_CHARACTERS =
-                    "0123456789!#$%&'*+-/=?^_'.{|}~abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                                    .toCharArray();
+    private static final char[] LOCAL_PART_STANDARD_CHARACTERS =
+            "0123456789!#$%&'*+-/=?^_`.{|}~abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
     /**
-     * Quote are required for the below characters <br>
-     * at-sign ("@"), backslash, double quote, comma, or square brackets
+     * Quotes are required for the below characters <br> space, at-sign ("@"), backslash, double
+     * quote, comma, colon, semi-colon, square brackets, angular brackets, parenthesis
      */
-    private static final int[] LOCALPART_NONSTANDARD_CHARACTERS = new int[] {64, 92, 34, 44, 91, 93};
+    private static final Character[] LOCAL_PART_NONSTANDARD_CHARACTERS = toObject(" \"(),:;<>@[]\\".toCharArray());
 
     /**
-     * Random used for character generation
+     * List of non standard characters to be preceded by a backslash
      */
-    private final Random random;
+    private static final String NONSTANDARD_CHARACTERS_TO_HAVE_BACKSLASH = "\"\\";
+
+    private final Validator<String> localPartValidator;
 
     /**
      * Prevent instantiation outside the package
+     *
+     * @param localPartValidator validator for local part of the email
      */
-    LocalPartGenerator(final Random random) {
-        this.random = random;
+    LocalPartGenerator(final Validator<String> localPartValidator) {
+        this.localPartValidator = localPartValidator;
     }
 
     /**
      * Generate the local part
-     * 
+     *
      * @return the local part
      */
     public String next() {
-        return generateLocalPart();
+        String generated = generateStringFromCharacters(LOCAL_PART_STANDARD_CHARACTERS,
+                MIN_LENGTH, MAX_LENGTH);
+
+        generated = insertOptionalNonStandardCharacterFrom(LOCAL_PART_NONSTANDARD_CHARACTERS, generated);
+
+        if (!localPartValidator.validate(generated)) {
+            return next();
+        }
+
+        return insertOptionalComment(generated);
     }
 
-    /**
-     * Generate local part
-     * 
-     * @param text input
-     * @return text to generate
-     */
-    private String generateLocalPart() {
-        String generated = generateStringFromCharacters(random, LOCALPART_STANDARD_CHARACTERS,
-                        MIN_LENGTH, MAX_LENGTH);
-        // toss dice
-        if (isRandomlyTrue(6)) {
-            final int positionToInsert = chooseRandomPosition(generated.length());
-            final char nonstandardCharacter =
-                            (char) LOCALPART_NONSTANDARD_CHARACTERS[chooseRandomPosition(
-                                            LOCALPART_NONSTANDARD_CHARACTERS.length)];
-            // flip coin
-            final boolean backSlashQuoteType = isRandomlyTrue(2);
-            if (backSlashQuoteType) {
-                generated = String.join("", generated.substring(0, positionToInsert), "\\",
-                                valueOf(nonstandardCharacter),
-                                generated.substring(positionToInsert, generated.length()));
-            } else {
-                generated = String.join("", "\"", generated.substring(0, positionToInsert),
-                                valueOf(nonstandardCharacter),
-                                generated.substring(positionToInsert, generated.length()), "\"");
+    private String insertOptionalNonStandardCharacterFrom(final Character[] nonStandardChars, final String generated) {
+        String resultString = generated;
+        final boolean includeNonStandardChars = BOOLEAN.next();
+
+        if (includeNonStandardChars) {
+            final int positionToInsert = RANDOM.nextInt(generated.length());
+            String charToInsert = valueOf(values(nonStandardChars).next());
+
+            if (NONSTANDARD_CHARACTERS_TO_HAVE_BACKSLASH.contains(charToInsert)) {
+                charToInsert = format("\\%s", charToInsert);
             }
-        }
-        if (passBasicChecks(generated)) {
-            return generated;
+
+            resultString = format("\"%s%s%s\"", generated.substring(0, positionToInsert),
+                    charToInsert, generated.substring(positionToInsert, generated.length()));
         }
 
-        return generateLocalPart();
-    }
-    
-
-    /**
-     * Check the local part of the email
-     * 
-     * @param textToCheck
-     * @return flag indicating check passed
-     */
-    public static boolean passBasicChecks(final String textToCheck) {
-        return !textToCheck.isEmpty() && !(MAX_LENGTH < textToCheck.length())
-                        && !textToCheck.startsWith(".") && !textToCheck.endsWith(".")
-                        && !textToCheck.matches("[0-9]+");
+        return resultString;
     }
 
 }

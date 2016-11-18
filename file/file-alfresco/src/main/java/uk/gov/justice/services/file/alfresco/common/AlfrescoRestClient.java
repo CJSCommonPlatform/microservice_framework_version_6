@@ -1,5 +1,6 @@
-package uk.gov.justice.services.file.alfresco.rest;
+package uk.gov.justice.services.file.alfresco.common;
 
+import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
 
 import uk.gov.justice.services.common.configuration.GlobalValue;
@@ -9,6 +10,8 @@ import javax.inject.Inject;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
@@ -18,12 +21,14 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 @ApplicationScoped
 public class AlfrescoRestClient {
 
+    private static final String NO_PROXY = "none";
+
     @Inject
     @GlobalValue(key = "alfrescoBaseUri")
     public String alfrescoBaseUri;
 
     @Inject
-    @GlobalValue(key = "alfresco.proxy.type", defaultValue = "none")
+    @GlobalValue(key = "alfresco.proxy.type", defaultValue = NO_PROXY)
     public String proxyType;
 
     @Inject
@@ -44,11 +49,7 @@ public class AlfrescoRestClient {
      * @return the response from the Http request.
      */
     public Response post(final String uri, final MediaType mediaType, final MultivaluedHashMap<String, Object> headers, final Entity entity) {
-        return getClient()
-                .target(format("%s%s", alfrescoBaseUri, uri))
-                .request(mediaType)
-                .headers(headers)
-                .post(entity);
+        return alfrescoRequestWith(uri, mediaType, headers).post(entity);
     }
 
     /**
@@ -60,24 +61,24 @@ public class AlfrescoRestClient {
      * @return the response from the Http request.
      */
     public Response get(final String uri, final MediaType mediaType, final MultivaluedHashMap<String, Object> headers) {
-        return getClient()
-                .target(format("%s%s", alfrescoBaseUri, uri))
-                .request(mediaType)
-                .headers(headers)
-                .get();
+        return alfrescoRequestWith(uri, mediaType, headers).get();
     }
 
-    private Client getClient() {
-        Client client;
+    private Builder alfrescoRequestWith(final String uri, final MediaType mediaType, final MultivaluedHashMap<String, Object> headers) {
+        return client()
+                .target(format("%s%s", alfrescoBaseUri, uri))
+                .request(mediaType)
+                .headers(headers);
+    }
 
-        if ("none".equals(proxyType)) {
-            client = ClientBuilder.newClient();
+    private Client client() {
+        if (NO_PROXY.equals(proxyType)) {
+            return ClientBuilder.newClient();
         } else {
-            client = new ResteasyClientBuilder()
-                    .defaultProxy(proxyHostname, Integer.parseInt(proxyPort), proxyType)
+            return new ResteasyClientBuilder()
+                    .defaultProxy(proxyHostname, parseInt(proxyPort), proxyType)
                     .build();
         }
-        return client;
     }
 
 }

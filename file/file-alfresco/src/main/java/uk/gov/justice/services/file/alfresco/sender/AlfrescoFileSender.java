@@ -1,21 +1,25 @@
 package uk.gov.justice.services.file.alfresco.sender;
 
+import static com.jayway.jsonpath.Configuration.defaultConfiguration;
+import static java.lang.String.format;
 import static javax.ws.rs.client.Entity.entity;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA_TYPE;
-import static uk.gov.justice.services.common.http.HeaderConstants.ID;
+import static javax.ws.rs.core.Response.Status.OK;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static uk.gov.justice.services.file.alfresco.common.Headers.headersWithUserId;
 
 import uk.gov.justice.services.common.configuration.GlobalValue;
-import uk.gov.justice.services.file.alfresco.rest.AlfrescoRestClient;
-import uk.gov.justice.services.file.api.FileData;
+import uk.gov.justice.services.file.alfresco.common.AlfrescoRestClient;
+import uk.gov.justice.services.file.api.FileOperationException;
+import uk.gov.justice.services.file.api.sender.FileData;
 import uk.gov.justice.services.file.api.sender.FileSender;
-
-import java.util.Collections;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.core.Response;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 
 @ApplicationScoped
 public class AlfrescoFileSender implements FileSender {
@@ -29,21 +33,29 @@ public class AlfrescoFileSender implements FileSender {
     String alfrescoUploadUser;
 
     @Inject
-    ObjectMapper objectMapper;
-
-    @Inject
     AlfrescoRestClient restClient;
-
 
     @Override
     public FileData send(final String fileName, final byte[] content) {
-        final MultivaluedHashMap<String, Object> headers = new MultivaluedHashMap<>();
-        headers.put(ID, Collections.singletonList(alfrescoUploadUser));
+        try {
+            final Response response = restClient
+                    .post(alfrescoUploadPath, MULTIPART_FORM_DATA_TYPE, headersWithUserId(alfrescoUploadUser), entity(content, MULTIPART_FORM_DATA_TYPE));
+            final String responseEntity = response.readEntity(String.class);
 
-        restClient.post(alfrescoUploadPath, MULTIPART_FORM_DATA_TYPE, headers, entity(content, MULTIPART_FORM_DATA_TYPE));
+            if (response.getStatusInfo() != OK || isEmpty(responseEntity)) {
+                //Alfresco is *very* accepting - failed exceptions represent service outages/problems only.
+                throw new FileOperationException(format("Error while uploading document. Code:%d, Reason:%s", response.getStatus(), response.getStatusInfo().getReasonPhrase()));
+            }
+            return fileDataFrom(responseEntity);
+        } catch (ProcessingException e) {
+            throw new FileOperationException("Error uploading resource into Alfresco", e);
+        }
+    }
 
-        //TODO: build response
-
-        return null;
+    private FileData fileDataFrom(final String responseEntity) {
+        final Object responseDocument = defaultConfiguration().jsonProvider().parse(responseEntity);
+        final String alfrescoAssetId = JsonPath.read(responseDocument, "$.nodeRef").toString().replace("workspace://SpacesStore/", "");
+        final String mimeType = JsonPath.read(responseDocument, "$.fileMimeType");
+        return new FileData(alfrescoAssetId, mimeType);
     }
 }

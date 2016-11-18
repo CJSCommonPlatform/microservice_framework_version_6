@@ -1,7 +1,5 @@
 package uk.gov.justice.services.file.api.requester;
 
-import uk.gov.justice.services.file.api.FileData;
-
 import java.util.Optional;
 
 /**
@@ -9,6 +7,6 @@ import java.util.Optional;
  */
 public interface FileRequester {
 
-    Optional<byte[]> request(final FileData fileData, final String fileName);
+    Optional<byte[]> request(final String fileId, final String fileMimeType, final String fileName);
 
 }

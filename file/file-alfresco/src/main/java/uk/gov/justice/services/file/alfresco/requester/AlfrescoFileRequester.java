@@ -37,10 +37,10 @@ public class AlfrescoFileRequester implements FileRequester {
     AlfrescoRestClient restClient;
 
     @Override
-    public Optional<byte[]> request(final String fileId, final String fileMimeType, final String fileName) {
+    public Optional<byte[]> request(final String fileId, final String fileMimeType, final String fileName, final boolean stream) {
 
         try {
-            final Response response = restClient.get(alfrescoUriOf(fileId, fileName),
+            final Response response = restClient.get(alfrescoUriOf(fileId, fileName, stream),
                     valueOf(fileMimeType), headersWithUserId(alfrescoReadUser));
             final StatusType responseStatus = response.getStatusInfo();
 
@@ -56,7 +56,7 @@ public class AlfrescoFileRequester implements FileRequester {
         }
     }
 
-    private String alfrescoUriOf(final String fieldId, final String fileName) {
+    private String alfrescoUriOf(final String fieldId, final String fileName, final boolean stream) {
         final StringBuilder requestBuilder = new StringBuilder();
         requestBuilder.append(alfrescoWorkspacePath);
         requestBuilder.append(fieldId);
@@ -64,6 +64,10 @@ public class AlfrescoFileRequester implements FileRequester {
         requestBuilder.append("content");
         requestBuilder.append(URL_SEPARATOR);
         requestBuilder.append(fileName);
+        // a means attach -> a = true means don't stream!
+        if (!stream) {
+            requestBuilder.append("?a=true");
+        }
         return requestBuilder.toString();
     }
 }

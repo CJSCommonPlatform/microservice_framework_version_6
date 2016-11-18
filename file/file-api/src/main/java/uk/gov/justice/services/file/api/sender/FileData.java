@@ -1,4 +1,4 @@
-package uk.gov.justice.services.file.api;
+package uk.gov.justice.services.file.api.sender;
 
 import java.util.Objects;
 
@@ -15,11 +15,11 @@ public class FileData {
         this.fileMimeType = fileMimeType;
     }
 
-    public String getFileId() {
+    public String fileId() {
         return fileId;
     }
 
-    public String getFileMimeType() {
+    public String fileMimeType() {
         return fileMimeType;
     }
 
@@ -28,13 +28,13 @@ public class FileData {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final FileData fileData = (FileData) o;
-        return Objects.equals(getFileId(), fileData.getFileId()) &&
-                Objects.equals(getFileMimeType(), fileData.getFileMimeType());
+        return Objects.equals(fileId(), fileData.fileId()) &&
+                Objects.equals(fileMimeType(), fileData.fileMimeType());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getFileId(), getFileMimeType());
+        return Objects.hash(fileId(), fileMimeType());
     }
 
     @Override

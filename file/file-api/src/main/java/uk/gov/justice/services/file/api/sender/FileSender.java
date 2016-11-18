@@ -1,7 +1,5 @@
 package uk.gov.justice.services.file.api.sender;
 
-import uk.gov.justice.services.file.api.FileData;
-
 /**
  * Interface for uploading file to a file service.
  */

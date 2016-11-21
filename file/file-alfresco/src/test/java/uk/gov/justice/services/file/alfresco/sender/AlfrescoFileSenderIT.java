@@ -1,6 +1,7 @@
 package uk.gov.justice.services.file.alfresco.sender;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
@@ -13,11 +14,13 @@ import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA_TYPE;
 import static org.apache.openejb.util.NetworkUtil.getNextAvailablePort;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
 
 import uk.gov.justice.services.file.alfresco.common.AlfrescoRestClient;
 import uk.gov.justice.services.file.api.FileOperationException;
 import uk.gov.justice.services.file.api.sender.FileData;
 import uk.gov.justice.services.file.api.sender.FileSender;
+import uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.junit.BeforeClass;
@@ -54,10 +57,9 @@ public class AlfrescoFileSenderIT {
         fileSender.send("file.txt", "abcd1243".getBytes());
 
         verify(postRequestedFor(urlEqualTo(WEB_CONTEXT + UPLOAD_PATH))
-                .withHeader(CONTENT_TYPE, equalTo(MULTIPART_FORM_DATA_TYPE.toString()))
+                .withHeader(CONTENT_TYPE, containing("multipart/form-data; boundary="))
                 .withHeader("cppuid", equalTo(USER_ID))
-                .withRequestBody(equalTo("abcd1243")));
-
+                .withRequestBody(containing("Content-Disposition: form-data; name=\"filedata\"; filename=\"file.txt\"\r\nContent-Type: text/plain\r\n\r\nabcd1243\r\n")));
     }
 
     @Test
@@ -110,8 +112,8 @@ public class AlfrescoFileSenderIT {
         fileSender.alfrescoUploadPath = UPLOAD_PATH;
         fileSender.alfrescoUploadUser = USER_ID;
         fileSender.restClient = new AlfrescoRestClient();
-        fileSender.restClient.alfrescoBaseUri = basePath;
-        fileSender.restClient.proxyType = "none";
+        setField(fileSender.restClient, "alfrescoBaseUri", basePath);
+        setField(fileSender.restClient, "proxyType", "none");
         return fileSender;
     }
 

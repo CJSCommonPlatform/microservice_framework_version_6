@@ -4,6 +4,7 @@ import static com.jayway.jsonpath.Configuration.defaultConfiguration;
 import static java.lang.String.format;
 import static javax.ws.rs.client.Entity.entity;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA_TYPE;
+import static javax.ws.rs.core.MediaType.TEXT_PLAIN_TYPE;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static uk.gov.justice.services.file.alfresco.common.Headers.headersWithUserId;
@@ -20,9 +21,12 @@ import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.Response;
 
 import com.jayway.jsonpath.JsonPath;
+import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataOutput;
 
 @ApplicationScoped
 public class AlfrescoFileSender implements FileSender {
+
+    private static final String FORM_FILED_FILEDATA = "filedata";
 
     @Inject
     @GlobalValue(key = "alfrescoUploadPath", defaultValue = "/service/case/upload")
@@ -38,8 +42,12 @@ public class AlfrescoFileSender implements FileSender {
     @Override
     public FileData send(final String fileName, final byte[] content) {
         try {
+
+            final MultipartFormDataOutput multipartFormDataOutput = new MultipartFormDataOutput();
+            multipartFormDataOutput.addFormData(FORM_FILED_FILEDATA, content, TEXT_PLAIN_TYPE, fileName);
+
             final Response response = restClient
-                    .post(alfrescoUploadPath, MULTIPART_FORM_DATA_TYPE, headersWithUserId(alfrescoUploadUser), entity(content, MULTIPART_FORM_DATA_TYPE));
+                    .post(alfrescoUploadPath, MULTIPART_FORM_DATA_TYPE, headersWithUserId(alfrescoUploadUser), entity(multipartFormDataOutput, MULTIPART_FORM_DATA_TYPE));
             final String responseEntity = response.readEntity(String.class);
 
             if (response.getStatusInfo() != OK || isEmpty(responseEntity)) {

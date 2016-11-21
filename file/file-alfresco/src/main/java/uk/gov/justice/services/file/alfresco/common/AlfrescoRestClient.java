@@ -25,19 +25,19 @@ public class AlfrescoRestClient {
 
     @Inject
     @GlobalValue(key = "alfrescoBaseUri")
-    public String alfrescoBaseUri;
+    private String alfrescoBaseUri;
 
     @Inject
     @GlobalValue(key = "alfresco.proxy.type", defaultValue = NO_PROXY)
-    public String proxyType;
+    private String proxyType;
 
     @Inject
     @GlobalValue(key = "alfresco.proxy.hostname", defaultValue = "none")
-    public String proxyHostname;
+    private String proxyHostname;
 
     @Inject
     @GlobalValue(key = "alfresco.proxy.port", defaultValue = "0")
-    public String proxyPort;
+    private String proxyPort;
 
     /**
      * Sends a message via post.

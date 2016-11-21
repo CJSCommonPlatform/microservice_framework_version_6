@@ -12,6 +12,7 @@ import static java.util.UUID.randomUUID;
 import static org.apache.openejb.util.NetworkUtil.getNextAvailablePort;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
+import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
 
 import uk.gov.justice.services.file.alfresco.common.AlfrescoRestClient;
 import uk.gov.justice.services.file.api.FileOperationException;
@@ -95,8 +96,8 @@ public class AlfrescoFileRequesterIT {
         fileRequester.alfrescoWorkspacePath = ALFRESCO_WORKSPACE_PATH;
         fileRequester.alfrescoReadUser = "user1234";
         fileRequester.restClient = new AlfrescoRestClient();
-        fileRequester.restClient.alfrescoBaseUri = basePath;
-        fileRequester.restClient.proxyType = "none";
+        setField(fileRequester.restClient, "alfrescoBaseUri", basePath);
+        setField(fileRequester.restClient, "proxyType", "none");
         return fileRequester;
     }
 

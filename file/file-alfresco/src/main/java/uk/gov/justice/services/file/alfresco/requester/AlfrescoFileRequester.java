@@ -51,7 +51,7 @@ public class AlfrescoFileRequester implements FileRequester {
             } else {
                 throw new FileOperationException(format("Alfresco is unavailable with response status code: %d", responseStatus.getStatusCode()));
             }
-        } catch (ProcessingException processingException) {
+        } catch (final ProcessingException processingException) {
             throw new FileOperationException("Error fetching resource from Alfresco", processingException);
         }
     }

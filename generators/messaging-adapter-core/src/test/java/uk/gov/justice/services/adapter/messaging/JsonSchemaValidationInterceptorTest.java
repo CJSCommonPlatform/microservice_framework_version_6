@@ -2,6 +2,7 @@ package uk.gov.justice.services.adapter.messaging;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsSame.sameInstance;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -14,6 +15,7 @@ import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import javax.interceptor.InvocationContext;
 import javax.jms.TextMessage;
 
+import org.everit.json.schema.ValidationException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -90,7 +92,20 @@ public class JsonSchemaValidationInterceptorTest {
         interceptor.validate(invocationContext);
 
         verifyZeroInteractions(validator);
+    }
 
+    @Test(expected = ValidationException.class)
+    public void shouldThrowExceptionIfValidatorFails() throws Exception {
+        final TextMessage message = mock(TextMessage.class);
+        final String payload = "test payload";
+        final String name = "test-name";
 
+        when(message.getText()).thenReturn(payload);
+        when(message.getStringProperty(JMS_HEADER_CPPNAME)).thenReturn(name);
+        when(eventFilter.accepts(name)).thenReturn(true);
+        when(invocationContext.getParameters()).thenReturn(new Object[]{message});
+        doThrow(mock(ValidationException.class)).when(validator).validate(payload, name);
+
+        interceptor.validate(invocationContext);
     }
 }

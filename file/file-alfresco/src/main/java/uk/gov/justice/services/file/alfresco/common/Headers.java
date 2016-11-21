@@ -5,9 +5,12 @@ import static java.util.Collections.singletonList;
 
 import javax.ws.rs.core.MultivaluedHashMap;
 
-public class Headers {
+public final class Headers {
 
     public static final String ALFRESCO_USER_ID = "cppuid";
+
+    private Headers() {
+    }
 
     public static MultivaluedHashMap<String, Object> headersWithUserId(final String id) {
         final MultivaluedHashMap<String, Object> headers = new MultivaluedHashMap<>();

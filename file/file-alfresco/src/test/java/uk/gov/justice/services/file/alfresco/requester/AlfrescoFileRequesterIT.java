@@ -16,7 +16,6 @@ import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUti
 
 import uk.gov.justice.services.file.alfresco.common.AlfrescoRestClient;
 import uk.gov.justice.services.file.api.FileOperationException;
-import uk.gov.justice.services.file.api.requester.FileRequester;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.junit.BeforeClass;
@@ -30,12 +29,10 @@ public class AlfrescoFileRequesterIT {
     public static final String UNUSED_MIME_TYPE = "text/plain";
     public static final String UNUSED_FILE_NAME = "file.txt";
     public static final String ALFRESCO_WORKSPACE_PATH = "/service/api/node/content/workspace/SpacesStore/";
-    public static final boolean STREAM_MODE = true;
-    public static final boolean FILE_ATTACH_MODE = false;
 
     private static int PORT = getNextAvailablePort();
 
-    private static FileRequester fileRequester;
+    private static AlfrescoFileRequester fileRequester;
 
     @Rule
     public WireMockRule wireMock = new WireMockRule(PORT);
@@ -50,22 +47,11 @@ public class AlfrescoFileRequesterIT {
     public void shouldRequestFileFromAlfrescoInAttachmentMode() throws Exception {
         final String fileId = randomUUID().toString();
         final String fileName = "file.txt";
-        fileRequester.request(fileId, UNUSED_MIME_TYPE, fileName, FILE_ATTACH_MODE);
+        fileRequester.request(fileId, UNUSED_MIME_TYPE, fileName);
 
-        verify(getRequestedFor(urlEqualTo("/alfresco" + ALFRESCO_WORKSPACE_PATH + fileId + "/content/" + fileName + "?a=true"))
+        verify(getRequestedFor(urlEqualTo(format("/alfresco%s%s/content/%s?a=true", ALFRESCO_WORKSPACE_PATH, fileId, fileName)))
                 .withHeader("cppuid", equalTo("user1234")));
     }
-
-    @Test
-    public void shouldRequestFileFromAlfrescoInStreamMode() throws Exception {
-        final String fileId = randomUUID().toString();
-        final String fileName = "file.txt";
-        fileRequester.request(fileId, UNUSED_MIME_TYPE, fileName, STREAM_MODE);
-
-        verify(getRequestedFor(urlEqualTo("/alfresco" + ALFRESCO_WORKSPACE_PATH + fileId + "/content/" + fileName))
-                .withHeader("cppuid", equalTo("user1234")));
-    }
-
 
     @Test
     public void shouldReturnResponseFromAlfresco() {
@@ -73,9 +59,9 @@ public class AlfrescoFileRequesterIT {
         final String mimeType = "text/plain";
         final String fileName = "file123.txt";
         final String fileContent = "abcd";
-        stubFor(get(urlEqualTo("/alfresco" + ALFRESCO_WORKSPACE_PATH + fileId + "/content/" + fileName))
+        stubFor(get(urlEqualTo(format("/alfresco%s%s/content/%s?a=true", ALFRESCO_WORKSPACE_PATH, fileId, fileName)))
                 .withHeader("cppuid", equalTo("user1234")).willReturn(aResponse().withBody(fileContent)));
-        assertArrayEquals(fileRequester.request(fileId, mimeType, fileName, STREAM_MODE).get(), fileContent.getBytes());
+        assertArrayEquals(fileRequester.request(fileId, mimeType, fileName).get(), fileContent.getBytes());
     }
 
     @Test
@@ -83,28 +69,28 @@ public class AlfrescoFileRequesterIT {
         final String fileId = randomUUID().toString();
         final String mimeType = "text/xml";
         final String fileName = "file5.xml";
-        stubFor(get(urlEqualTo("/alfresco" + ALFRESCO_WORKSPACE_PATH + fileId + "/content/" + fileName))
+        stubFor(get(urlEqualTo(format("/alfresco%s%s/content/%s?a=true", ALFRESCO_WORKSPACE_PATH, fileId, fileName)))
                 .withHeader("cppuid", equalTo("user1234")).willReturn(aResponse().withStatus(404)));
-        assertFalse(fileRequester.request(fileId, mimeType, fileName, STREAM_MODE).isPresent());
+        assertFalse(fileRequester.request(fileId, mimeType, fileName).isPresent());
     }
 
     @Test(expected = FileOperationException.class)
     public void shouldThrowAnExceptionIfAlfrescoServiceReturnedError() {
         final String fileId = randomUUID().toString();
         final String fileName = "file.txt";
-        stubFor(get(urlEqualTo("/alfresco" + ALFRESCO_WORKSPACE_PATH + fileId + "/content/" + fileName))
+        stubFor(get(urlEqualTo(format("/alfresco%s%s/content/%s?a=true", ALFRESCO_WORKSPACE_PATH, fileId, fileName)))
                 .withHeader("cppuid", equalTo("user1234")).willReturn(aResponse().withStatus(500)));
-        fileRequester.request(fileId, UNUSED_MIME_TYPE, fileName, STREAM_MODE);
+        fileRequester.request(fileId, UNUSED_MIME_TYPE, fileName);
     }
 
     @Test(expected = FileOperationException.class)
     public void shouldThrowAnExceptionIfAlfrescoServiceIsUnavailable() {
         final String fileId = randomUUID().toString();
         alfrescoFileRequesterWith(basePathWithPort(getNextAvailablePort()))
-                .request(fileId, UNUSED_MIME_TYPE, UNUSED_FILE_NAME, STREAM_MODE);
+                .request(fileId, UNUSED_MIME_TYPE, UNUSED_FILE_NAME);
     }
 
-    private static FileRequester alfrescoFileRequesterWith(final String basePath) {
+    private static AlfrescoFileRequester alfrescoFileRequesterWith(final String basePath) {
         AlfrescoFileRequester fileRequester = new AlfrescoFileRequester();
         fileRequester.alfrescoWorkspacePath = ALFRESCO_WORKSPACE_PATH;
         fileRequester.alfrescoReadUser = "user1234";

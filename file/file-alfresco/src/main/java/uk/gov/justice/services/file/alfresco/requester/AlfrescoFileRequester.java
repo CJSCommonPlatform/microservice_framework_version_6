@@ -11,18 +11,20 @@ import static uk.gov.justice.services.file.alfresco.common.Headers.headersWithUs
 import uk.gov.justice.services.common.configuration.GlobalValue;
 import uk.gov.justice.services.file.alfresco.common.AlfrescoRestClient;
 import uk.gov.justice.services.file.api.FileOperationException;
-import uk.gov.justice.services.file.api.requester.FileRequester;
+import uk.gov.justice.services.file.api.requester.StreamingFileRequester;
 
+import java.io.InputStream;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.StatusType;
 
 @ApplicationScoped
-public class AlfrescoFileRequester implements FileRequester {
+public class AlfrescoFileRequester implements StreamingFileRequester {
     private static final String URL_SEPARATOR = "/";
 
     @Inject
@@ -37,10 +39,9 @@ public class AlfrescoFileRequester implements FileRequester {
     AlfrescoRestClient restClient;
 
     @Override
-    public Optional<byte[]> request(final String fileId, final String fileMimeType, final String fileName, final boolean stream) {
-
+    public Optional<byte[]> request(final String fileId, final String fileMimeType, final String fileName) {
         try {
-            final Response response = restClient.get(alfrescoUriOf(fileId, fileName, stream),
+            final Response response = restClient.get(alfrescoUriOf(fileId, fileName, false),
                     valueOf(fileMimeType), headersWithUserId(alfrescoReadUser));
             final StatusType responseStatus = response.getStatusInfo();
 
@@ -49,10 +50,26 @@ public class AlfrescoFileRequester implements FileRequester {
             } else if (responseStatus == NOT_FOUND) {
                 return empty();
             } else {
-                throw new FileOperationException(format("Alfresco is unavailable with response status code: %d", responseStatus.getStatusCode()));
+                throw new FileOperationException(format("Alfresco is unavailable with response status code: %d",
+                        responseStatus.getStatusCode()));
             }
         } catch (final ProcessingException processingException) {
-            throw new FileOperationException("Error fetching resource from Alfresco", processingException);
+            throw new FileOperationException(format("Error fetching %s from Alfresco with fileId = %s",
+                    fileName, fileId), processingException);
+        }
+    }
+
+    @Override
+    public Optional<InputStream> requestStreamed(String fileId, String fileMimeType, String fileName) {
+        try {
+            final InputStream response = restClient.getAsInputStream(alfrescoUriOf(fileId, fileName, true),
+                    valueOf(fileMimeType), headersWithUserId(alfrescoReadUser));
+            return ofNullable(response);
+        } catch (final NotFoundException nfe) {
+            return empty();
+        } catch (final ProcessingException processingException) {
+            throw new FileOperationException(format("Error fetching %s from Alfresco with fileId = %s",
+                    fileName, fileId), processingException);
         }
     }
 
@@ -70,4 +87,5 @@ public class AlfrescoFileRequester implements FileRequester {
         }
         return requestBuilder.toString();
     }
+
 }

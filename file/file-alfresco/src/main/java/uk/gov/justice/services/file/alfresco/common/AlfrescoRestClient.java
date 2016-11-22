@@ -5,12 +5,13 @@ import static java.lang.String.format;
 
 import uk.gov.justice.services.common.configuration.GlobalValue;
 
+import java.io.InputStream;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
@@ -62,6 +63,18 @@ public class AlfrescoRestClient {
      */
     public Response get(final String uri, final MediaType mediaType, final MultivaluedHashMap<String, Object> headers) {
         return alfrescoRequestWith(uri, mediaType, headers).get();
+    }
+
+    /**
+     * Request a resource as InputStream via a get.
+     *
+     * @param uri       - the URI to request the resource from.
+     * @param mediaType - the mediaType of the resource.
+     * @param headers   - any Http headers required for the request.
+     * @return the response from the Http request.
+     */
+    public InputStream getAsInputStream(final String uri, final MediaType mediaType, final MultivaluedHashMap<String, Object> headers) {
+        return alfrescoRequestWith(uri, mediaType, headers).get(InputStream.class);
     }
 
     private Builder alfrescoRequestWith(final String uri, final MediaType mediaType, final MultivaluedHashMap<String, Object> headers) {

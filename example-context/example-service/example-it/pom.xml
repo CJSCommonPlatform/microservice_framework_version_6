@@ -65,6 +65,12 @@
             <type>war</type>
         </dependency>
         <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>test-utils-alfresco-stub</artifactId>
+            <version>${project.version}</version>
+            <type>war</type>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
@@ -277,7 +283,15 @@
                                     <outputDirectory>${jboss.home}/standalone/deployments
                                     </outputDirectory>
                                 </artifactItem>
-
+                                <artifactItem>
+                                    <groupId>uk.gov.justice.services</groupId>
+                                    <artifactId>test-utils-alfresco-stub</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>war</type>
+                                    <destFileName>alfresco-stub.war</destFileName>
+                                    <outputDirectory>${jboss.home}/standalone/deployments
+                                    </outputDirectory>
+                                </artifactItem>
 
                             </artifactItems>
                         </configuration>

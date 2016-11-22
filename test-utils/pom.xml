@@ -17,6 +17,7 @@
         <module>test-utils-core</module>
         <module>test-utils-persistence</module>
         <module>test-utils-common</module>
+        <module>test-utils-alfresco-stub</module>
     </modules>
     <packaging>pom</packaging>
 

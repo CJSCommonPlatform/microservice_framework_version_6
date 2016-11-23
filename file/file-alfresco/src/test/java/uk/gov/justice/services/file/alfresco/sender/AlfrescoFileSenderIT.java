@@ -11,6 +11,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.lang.String.format;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA_TYPE;
+import static org.apache.commons.io.IOUtils.toInputStream;
 import static org.apache.openejb.util.NetworkUtil.getNextAvailablePort;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -23,6 +24,7 @@ import uk.gov.justice.services.file.api.sender.FileSender;
 import uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import org.apache.commons.io.IOUtils;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -54,7 +56,7 @@ public class AlfrescoFileSenderIT {
                         .withStatus(200)
                         .withBody(alfrescoResponseOf("not_used", "not_used"))));
 
-        fileSender.send("file.txt", "abcd1243".getBytes());
+        fileSender.send("file.txt", toInputStream("abcd1243"));
 
         verify(postRequestedFor(urlEqualTo(WEB_CONTEXT + UPLOAD_PATH))
                 .withHeader(CONTENT_TYPE, containing("multipart/form-data; boundary="))
@@ -72,7 +74,7 @@ public class AlfrescoFileSenderIT {
                         .withStatus(200)
                         .withBody(alfrescoResponseOf(fileId, fileMimeType))));
 
-        final FileData fileData = fileSender.send("abc.txt", "aa".getBytes());
+        final FileData fileData = fileSender.send("abc.txt", toInputStream("aa"));
 
         assertThat(fileData.fileId(), is(fileId));
 
@@ -81,7 +83,7 @@ public class AlfrescoFileSenderIT {
     @Test(expected = FileOperationException.class)
     public void shouldThrowExceptionIfAlfrescoNotAvailable() {
         alfrescoFileSenderWith(basePathWithPort(getNextAvailablePort()))
-                .send("abc.txt", "aa".getBytes());
+                .send("abc.txt", toInputStream("aa"));
 
     }
 
@@ -93,7 +95,7 @@ public class AlfrescoFileSenderIT {
                         .withStatus(500)
                         .withBody(alfrescoResponseOf("file1234", "text/plain"))));
 
-        fileSender.send("abc.txt", "aa".getBytes());
+        fileSender.send("abc.txt", toInputStream("aa"));
 
     }
 
@@ -103,7 +105,7 @@ public class AlfrescoFileSenderIT {
                 .willReturn(aResponse()
                         .withStatus(200)));
 
-        fileSender.send("abc.txt", "aa".getBytes());
+        fileSender.send("abc.txt", toInputStream("aa"));
 
     }
 

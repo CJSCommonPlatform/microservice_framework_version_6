@@ -18,6 +18,7 @@ import uk.gov.justice.services.file.api.sender.FileSender;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.ProcessingException;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 
 import com.jayway.jsonpath.JsonPath;
@@ -43,11 +44,8 @@ public class AlfrescoFileSender implements FileSender {
     public FileData send(final String fileName, final byte[] content) {
         try {
 
-            final MultipartFormDataOutput multipartFormDataOutput = new MultipartFormDataOutput();
-            multipartFormDataOutput.addFormData(FORM_FILED_FILEDATA, content, TEXT_PLAIN_TYPE, fileName);
-
             final Response response = restClient
-                    .post(alfrescoUploadPath, MULTIPART_FORM_DATA_TYPE, headersWithUserId(alfrescoUploadUser), entity(multipartFormDataOutput, MULTIPART_FORM_DATA_TYPE));
+                    .post(alfrescoUploadPath, MULTIPART_FORM_DATA_TYPE, headersWithUserId(alfrescoUploadUser), requestEntityOf(fileName, content));
             final String responseEntity = response.readEntity(String.class);
 
             if (response.getStatusInfo() != OK || isEmpty(responseEntity)) {
@@ -58,6 +56,13 @@ public class AlfrescoFileSender implements FileSender {
         } catch (ProcessingException e) {
             throw new FileOperationException("Error uploading resource into Alfresco", e);
         }
+    }
+
+    private Entity<MultipartFormDataOutput> requestEntityOf(final String fileName, final byte[] content) {
+        final MultipartFormDataOutput multipartFormDataOutput = new MultipartFormDataOutput();
+        multipartFormDataOutput.addFormData(FORM_FILED_FILEDATA, content, TEXT_PLAIN_TYPE, fileName);
+
+        return entity(multipartFormDataOutput, MULTIPART_FORM_DATA_TYPE);
     }
 
     private FileData fileDataFrom(final String responseEntity) {

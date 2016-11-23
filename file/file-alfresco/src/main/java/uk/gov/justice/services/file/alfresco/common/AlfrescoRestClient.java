@@ -84,10 +84,6 @@ public class AlfrescoRestClient {
                 .headers(headers);
     }
 
-    private Builder webRequest(final MediaType mediaType) {
-        return client().target("https://wordpress.org/plugins/about/readme.txt").request(mediaType);
-    }
-
     private Client client() {
         if (NO_PROXY.equals(proxyType)) {
             return ClientBuilder.newClient();

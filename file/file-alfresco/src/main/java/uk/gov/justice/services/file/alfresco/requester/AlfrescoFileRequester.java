@@ -27,7 +27,8 @@ import javax.ws.rs.core.Response.StatusType;
 
 @ApplicationScoped
 public class AlfrescoFileRequester implements StreamingFileRequester, FileRequester {
-    private static final String URL_SEPARATOR = "/";
+
+    private static final String DO_NOT_STREAM = "?a=true";
 
     @Inject
     @GlobalValue(key = "alfrescoWorkspacePath", defaultValue = "/service/api/node/content/workspace/SpacesStore/")
@@ -43,7 +44,7 @@ public class AlfrescoFileRequester implements StreamingFileRequester, FileReques
     @Override
     public Optional<byte[]> request(final String fileId, final String fileMimeType, final String fileName) {
         try {
-            final Response response = restClient.get(alfrescoUriOf(fileId, fileName, false),
+            final Response response = restClient.get(alfrescoUriOf(fileId, fileName),
                     valueOf(fileMimeType), headersWithUserId(alfrescoReadUser));
             final StatusType responseStatus = response.getStatusInfo();
 
@@ -51,10 +52,10 @@ public class AlfrescoFileRequester implements StreamingFileRequester, FileReques
                 return ofNullable(response.readEntity(byte[].class));
             } else if (responseStatus == NOT_FOUND) {
                 return empty();
-            } else {
-                throw new FileOperationException(format("Alfresco is unavailable with response status code: %d",
-                        responseStatus.getStatusCode()));
             }
+            throw new FileOperationException(format("Alfresco is unavailable with response status code: %d",
+                    responseStatus.getStatusCode()));
+
         } catch (final ProcessingException processingException) {
             throw new FileOperationException(format("Error fetching %s from Alfresco with fileId = %s",
                     fileName, fileId), processingException);
@@ -62,11 +63,10 @@ public class AlfrescoFileRequester implements StreamingFileRequester, FileReques
     }
 
     @Override
-    public Optional<InputStream> requestStreamed(String fileId, String fileMimeType, String fileName) {
+    public Optional<InputStream> requestStreamed(final String fileId, final String fileMimeType, final String fileName) {
         try {
-            final InputStream response = restClient.getAsInputStream(alfrescoUriOf(fileId, fileName, true),
-                    valueOf(fileMimeType), headersWithUserId(alfrescoReadUser));
-            return ofNullable(response);
+            return ofNullable(restClient.getAsInputStream(alfrescoStreamUriOf(fileId, fileName),
+                    valueOf(fileMimeType), headersWithUserId(alfrescoReadUser)));
         } catch (final NotFoundException nfe) {
             return empty();
         } catch (final ProcessingException | InternalServerErrorException ex ) {
@@ -75,19 +75,12 @@ public class AlfrescoFileRequester implements StreamingFileRequester, FileReques
         }
     }
 
-    private String alfrescoUriOf(final String fieldId, final String fileName, final boolean stream) {
-        final StringBuilder requestBuilder = new StringBuilder();
-        requestBuilder.append(alfrescoWorkspacePath);
-        requestBuilder.append(fieldId);
-        requestBuilder.append(URL_SEPARATOR);
-        requestBuilder.append("content");
-        requestBuilder.append(URL_SEPARATOR);
-        requestBuilder.append(fileName);
-        // a means attach -> a = true means don't stream!
-        if (!stream) {
-            requestBuilder.append("?a=true");
-        }
-        return requestBuilder.toString();
+    private String alfrescoUriOf(final String fileId, final String fileName) {
+        return format("%s%s", alfrescoStreamUriOf(fileId, fileName), DO_NOT_STREAM);
+    }
+
+    private String alfrescoStreamUriOf(final String fileId, final String fileName) {
+        return format("%s%s/content/%s", alfrescoWorkspacePath, fileId, fileName);
     }
 
 }

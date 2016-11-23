@@ -28,10 +28,7 @@ public class AggregateSnapshot<T extends Aggregate> implements Serializable {
     }
 
     public AggregateSnapshot(final UUID streamId, final Long versionId, final Class<T> type, final byte[] aggregateByteRepresentation) {
-        this.streamId = streamId;
-        this.versionId = versionId;
-        this.type = type.getName();
-        this.aggregateByteRepresentation = aggregateByteRepresentation;
+        this(streamId, versionId, type.getName(), aggregateByteRepresentation);
     }
 
     public AggregateSnapshot(final UUID streamId, final Long versionId, final String type, final byte[] aggregateByteRepresentation) {

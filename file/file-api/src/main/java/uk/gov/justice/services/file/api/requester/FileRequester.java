@@ -1,5 +1,6 @@
 package uk.gov.justice.services.file.api.requester;
 
+import java.io.InputStream;
 import java.util.Optional;
 
 /**
@@ -12,9 +13,9 @@ public interface FileRequester {
      * @param fileId - the unique id of the file.
      * @param fileMimeType - mime-type of the file.
      * @param fileName - name of the file.
-     * @return content of the file in byte[].
+     * @return streamed content of the file.
      */
-    Optional<byte[]> request(final String fileId, final String fileMimeType, final String fileName);
+    Optional<InputStream> request(final String fileId, final String fileMimeType, final String fileName);
 
 }
 

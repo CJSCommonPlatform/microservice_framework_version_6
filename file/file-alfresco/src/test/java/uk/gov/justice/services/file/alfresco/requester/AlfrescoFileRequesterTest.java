@@ -52,89 +52,6 @@ public class AlfrescoFileRequesterTest {
     @InjectMocks
     AlfrescoFileRequester alfrescoFileRequester;
 
-    @Test
-    public void shouldRequestAFileAndReceiveByteArrayWhenFileIsFound() {
-        alfrescoFileRequester.alfrescoWorkspacePath = "/service/api/node/content/workspace/SpacesStore/";
-        alfrescoFileRequester.alfrescoReadUser = randomUUID().toString();
-
-        final String fileId = randomUUID().toString();
-        final String expectedFileOutput = "This is a test file";
-
-        when(alfrescoRestClient.get(format("%s%s/content/%s?a=true",
-                alfrescoFileRequester.alfrescoWorkspacePath, fileId, FILE_NAME),
-                TEXT_PLAIN_TYPE, headersWithUserId(alfrescoFileRequester.alfrescoReadUser)))
-                .thenReturn(response);
-        when(response.readEntity(byte[].class)).thenReturn(expectedFileOutput.getBytes());
-        when(response.getStatusInfo()).thenReturn(OK);
-
-        final Optional<byte[]> actualData =
-                alfrescoFileRequester.request(fileId, FILE_MIME_TYPE, FILE_NAME);
-
-        assertTrue(actualData.isPresent());
-        assertArrayEquals(expectedFileOutput.getBytes(), actualData.get());
-    }
-
-    @Test
-    public void shouldRequestAFileAndReceiveEmptyResponseWhenFileIsNotFound() {
-        alfrescoFileRequester.alfrescoWorkspacePath = "/service/api/node/content/workspace/SpacesStore/";
-        alfrescoFileRequester.alfrescoReadUser = randomUUID().toString();
-        final String fileId = randomUUID().toString();
-
-        when(alfrescoRestClient.get(format("%s%s/content/%s?a=true",
-                alfrescoFileRequester.alfrescoWorkspacePath, fileId, FILE_NAME),
-                TEXT_PLAIN_TYPE, headersWithUserId(alfrescoFileRequester.alfrescoReadUser)))
-                .thenReturn(response);
-        when(response.getStatusInfo()).thenReturn(NOT_FOUND);
-
-        final Optional<byte[]> actualData =
-                alfrescoFileRequester.request(fileId, FILE_MIME_TYPE, FILE_NAME);
-
-        assertFalse(actualData.isPresent());
-    }
-
-    @Test
-    public void shouldThrowFileOperationExceptionIfResponseStatusCodeIsNotOkAndNotFound() {
-        alfrescoFileRequester.alfrescoWorkspacePath = "/service/api/node/content/workspace/SpacesStore/";
-        alfrescoFileRequester.alfrescoReadUser = randomUUID().toString();
-
-        final String fileId = randomUUID().toString();
-
-        when(alfrescoRestClient.get(format("%s%s/content/%s?a=true",
-                alfrescoFileRequester.alfrescoWorkspacePath, fileId, FILE_NAME),
-                TEXT_PLAIN_TYPE, headersWithUserId(alfrescoFileRequester.alfrescoReadUser)))
-                .thenReturn(response);
-        when(response.getStatusInfo()).thenReturn(BAD_REQUEST);
-
-        try {
-            alfrescoFileRequester.request(fileId, FILE_MIME_TYPE, FILE_NAME);
-            fail("Was expecting a FileOperationException to be thrown");
-        } catch (final FileOperationException foe) {
-            assertNull(foe.getCause());
-            assertEquals(format("Alfresco is unavailable with response status code: %d",
-                    BAD_REQUEST.getStatusCode()), foe.getMessage());
-        }
-    }
-
-    @Test
-    public void shouldThrowFileOperationExceptionIfProcessingExceptionOccursWhenConnectingToAlfresco() {
-        alfrescoFileRequester.alfrescoWorkspacePath = "/service/api/node/content/workspace/SpacesStore/";
-        alfrescoFileRequester.alfrescoReadUser = randomUUID().toString();
-        final String fileId = randomUUID().toString();
-        final ProcessingException processingException = new ProcessingException("oops");
-
-        when(alfrescoRestClient.get(format("%s%s/content/%s?a=true",
-                alfrescoFileRequester.alfrescoWorkspacePath, fileId, FILE_NAME),
-                TEXT_PLAIN_TYPE, headersWithUserId(alfrescoFileRequester.alfrescoReadUser)))
-                .thenThrow(processingException);
-
-        try {
-            alfrescoFileRequester.request(fileId, FILE_MIME_TYPE, FILE_NAME);
-            fail("Was expecting a FileOperationException to be thrown");
-        } catch (final FileOperationException foe) {
-            assertEquals(processingException, foe.getCause());
-            assertEquals(format("Error fetching %s from Alfresco with fileId = %s", FILE_NAME, fileId), foe.getMessage());
-        }
-    }
 
     @Test
     public void shouldRequestStreamedFileAndReceiveInputStreamWhenFileIsFound() throws IOException {
@@ -148,7 +65,7 @@ public class AlfrescoFileRequesterTest {
                 .thenReturn(inputStream);
 
         final Optional<InputStream> actualInputStream =
-                alfrescoFileRequester.requestStreamed(fileId, FILE_MIME_TYPE, FILE_NAME);
+                alfrescoFileRequester.request(fileId, FILE_MIME_TYPE, FILE_NAME);
 
         assertTrue(actualInputStream.isPresent());
         assertEquals(inputStream, actualInputStream.get());
@@ -168,7 +85,7 @@ public class AlfrescoFileRequesterTest {
                 .thenThrow(notFoundException);
 
         final Optional<InputStream> actualInputStream =
-            alfrescoFileRequester.requestStreamed(fileId, FILE_MIME_TYPE, FILE_NAME);
+                alfrescoFileRequester.request(fileId, FILE_MIME_TYPE, FILE_NAME);
 
         assertFalse(actualInputStream.isPresent());
     }
@@ -186,7 +103,7 @@ public class AlfrescoFileRequesterTest {
                 .thenThrow(processingException);
 
         try {
-            alfrescoFileRequester.requestStreamed(fileId, FILE_MIME_TYPE, FILE_NAME);
+            alfrescoFileRequester.request(fileId, FILE_MIME_TYPE, FILE_NAME);
             fail("Was expecting a FileOperationException to be thrown");
         } catch (final FileOperationException foe) {
             assertEquals(processingException, foe.getCause());
@@ -208,7 +125,7 @@ public class AlfrescoFileRequesterTest {
                 .thenThrow(internalServerErrorException);
 
         try {
-            alfrescoFileRequester.requestStreamed(fileId, FILE_MIME_TYPE, FILE_NAME);
+            alfrescoFileRequester.request(fileId, FILE_MIME_TYPE, FILE_NAME);
             fail("Was expecting a FileOperationException to be thrown");
         } catch (final FileOperationException foe) {
             assertEquals(internalServerErrorException, foe.getCause());

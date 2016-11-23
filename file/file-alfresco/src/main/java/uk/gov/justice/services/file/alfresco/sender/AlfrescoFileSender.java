@@ -15,6 +15,8 @@ import uk.gov.justice.services.file.api.FileOperationException;
 import uk.gov.justice.services.file.api.sender.FileData;
 import uk.gov.justice.services.file.api.sender.FileSender;
 
+import java.io.InputStream;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.ProcessingException;
@@ -41,7 +43,7 @@ public class AlfrescoFileSender implements FileSender {
     AlfrescoRestClient restClient;
 
     @Override
-    public FileData send(final String fileName, final byte[] content) {
+    public FileData send(final String fileName, final InputStream content) {
         try {
 
             final Response response = restClient
@@ -58,7 +60,7 @@ public class AlfrescoFileSender implements FileSender {
         }
     }
 
-    private Entity<MultipartFormDataOutput> requestEntityOf(final String fileName, final byte[] content) {
+    private Entity<MultipartFormDataOutput> requestEntityOf(final String fileName, final InputStream content) {
         final MultipartFormDataOutput multipartFormDataOutput = new MultipartFormDataOutput();
         multipartFormDataOutput.addFormData(FORM_FILED_FILEDATA, content, TEXT_PLAIN_TYPE, fileName);
 

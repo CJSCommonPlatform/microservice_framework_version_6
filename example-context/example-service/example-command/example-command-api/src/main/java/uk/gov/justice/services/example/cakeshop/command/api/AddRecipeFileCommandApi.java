@@ -1,5 +1,6 @@
 package uk.gov.justice.services.example.cakeshop.command.api;
 
+import static org.apache.commons.io.IOUtils.toInputStream;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 
 import uk.gov.justice.services.core.annotation.Handles;
@@ -11,6 +12,8 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import javax.inject.Inject;
 import javax.json.JsonObject;
 
+import org.apache.commons.io.IOUtils;
+
 @ServiceComponent(COMMAND_API)
 public class AddRecipeFileCommandApi {
 
@@ -20,6 +23,6 @@ public class AddRecipeFileCommandApi {
     @Handles("example.add-recipe-file")
     public void addRecipeFile(final JsonEnvelope command) {
         final JsonObject payload = command.payloadAsJsonObject();
-        fileSender.send(payload.getString("fileName"), payload.getString("fileContent").getBytes());
+        fileSender.send(payload.getString("fileName"), toInputStream(payload.getString("fileContent")));
     }
 }

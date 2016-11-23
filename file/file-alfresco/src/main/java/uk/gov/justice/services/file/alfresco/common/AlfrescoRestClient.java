@@ -54,18 +54,6 @@ public class AlfrescoRestClient {
     }
 
     /**
-     * Request a resource via a get.
-     *
-     * @param uri       - the URI to request the resource from.
-     * @param mediaType - the mediaType of the resource.
-     * @param headers   - any Http headers required for the request.
-     * @return the response from the Http request.
-     */
-    public Response get(final String uri, final MediaType mediaType, final MultivaluedHashMap<String, Object> headers) {
-        return alfrescoRequestWith(uri, mediaType, headers).get();
-    }
-
-    /**
      * Request a resource as InputStream via a get.
      *
      * @param uri       - the URI to request the resource from.

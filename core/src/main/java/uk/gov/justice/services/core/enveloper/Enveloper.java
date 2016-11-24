@@ -3,8 +3,11 @@ package uk.gov.justice.services.core.enveloper;
 import static java.lang.String.format;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.CAUSATION;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.CONTEXT;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.SESSION_ID;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.USER_ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
 
 import uk.gov.justice.domain.annotation.Event;
@@ -104,9 +107,17 @@ public class Enveloper {
                 .add(ID, UUID.randomUUID().toString())
                 .add(NAME, name)
                 .add(CAUSATION, createCausation(metadata))
+                .add(CONTEXT, createContext(metadata))
                 .build();
 
         return metadataFrom(jsonObject);
+    }
+
+    private JsonObject createContext(final Metadata metadata) {
+        JsonObjectBuilder context = Json.createObjectBuilder();
+        metadata.sessionId().ifPresent(s -> context.add(SESSION_ID, s));
+        metadata.userId().ifPresent(s -> context.add(USER_ID, s));
+        return context.build();
     }
 
     private JsonArray createCausation(final Metadata metadata) {

@@ -40,7 +40,6 @@ public class TestAggregate implements Aggregate {
 
     @Override
     public Object apply(Object event) {
-        System.out.print("hell");
         return match(event).with(
                 when(EventA.class).apply(x -> {
                     ++numberOfAppliedEvents;

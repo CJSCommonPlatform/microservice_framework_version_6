@@ -5,6 +5,15 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [0.35.0] - 2016-11-24
+### Added
+ - File, file-api and file-alfresco modules
+ - File service interface
+ - Alfresco file service implementation
+
+### Fixed
+ - Refactor random generators for string, uri and email
+
 ## [0.34.0] - 2016-11-16
 
 ### Added

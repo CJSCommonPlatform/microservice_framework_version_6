@@ -17,6 +17,8 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ### Fixed
 - JsonSchemaValidationMatcher to look for json schema in correct location
+- JSON schema validation of date-time format fixed by using a forked version of the JSON schema
+validator library
 
 ## [0.35.0] - 2016-11-24
 ### Added

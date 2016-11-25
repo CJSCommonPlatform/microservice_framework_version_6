@@ -41,7 +41,7 @@ public class JsonValidationLoggerTest {
     @Test
     public void shouldHaveTopLevelMessage() throws IOException {
         with(result)
-                .assertEquals("$.message", "#: 2 schema violations found")
+                .assertEquals("$.message", "#: 6 schema violations found")
                 .assertEquals("$.violation", "#");
     }
 
@@ -89,7 +89,6 @@ public class JsonValidationLoggerTest {
     @Test
     public void shouldHaveCorrectNumberOfNodesAtTopLevel() {
         assertThat(result, hasJsonPath("$.causingExceptions", hasSize(2)));
-        assertThat(result, hasJsonPath("$.causingExceptions[0].causingExceptions", hasSize(3)));
     }
 
     @Test
@@ -126,7 +125,6 @@ public class JsonValidationLoggerTest {
 
     private JSONObject badObject() throws IOException {
         final InputStream inputStream = this.getClass().getResourceAsStream(format(JSON_LOCATION_PATTERN, "fail"));
-        final JSONObject schemaJsonObject = new JSONObject(IOUtils.toString(inputStream, defaultCharset().name()));
-        return schemaJsonObject;
+        return new JSONObject(IOUtils.toString(inputStream, defaultCharset().name()));
     }
 }

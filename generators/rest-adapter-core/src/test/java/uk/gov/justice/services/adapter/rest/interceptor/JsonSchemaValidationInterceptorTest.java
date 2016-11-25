@@ -3,12 +3,15 @@ package uk.gov.justice.services.adapter.rest.interceptor;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Matchers.argThat;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import uk.gov.justice.services.adapter.rest.exception.BadRequestException;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
+import uk.gov.justice.services.messaging.exception.InvalidMediaTypeException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -16,9 +19,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.ReaderInterceptorContext;
 
 import com.google.common.io.CharStreams;
+import org.everit.json.schema.ValidationException;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
@@ -28,6 +34,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.slf4j.Logger;
 
 /**
  * Unit tests for the {@link JsonSchemaValidationInterceptor} class.
@@ -42,7 +49,10 @@ public class JsonSchemaValidationInterceptorTest {
     private static final String NON_JSON_MEDIA_SUBTYPE = "vnd.test-name+xml";
 
     @Mock
-    private ReaderInterceptorContext context = mock(ReaderInterceptorContext.class);
+    private Logger logger;
+
+    @Mock
+    private ReaderInterceptorContext context;
 
     @Mock
     private Object proceed = mock(Object.class);
@@ -82,6 +92,28 @@ public class JsonSchemaValidationInterceptorTest {
         when(context.getMediaType()).thenReturn(new MediaType(MEDIA_TYPE, NON_JSON_MEDIA_SUBTYPE));
         interceptor.aroundReadFrom(context);
         verify(validator, never()).validate(PAYLOAD, NAME);
+    }
+
+    @Test(expected = BadRequestException.class)
+    @SuppressWarnings("unchecked")
+    public void shouldThrowBadRequestExceptionIfValidatorFailsWithValidationException() throws Exception {
+        final MultivaluedMap<String, String> headers = new MultivaluedHashMap();
+
+        doThrow(new ValidationException("")).when(validator).validate(PAYLOAD, NAME);
+        when(context.getHeaders()).thenReturn(headers);
+
+        interceptor.aroundReadFrom(context);
+    }
+
+    @Test(expected = BadRequestException.class)
+    @SuppressWarnings("unchecked")
+    public void shouldThrowBadRequestExceptionIfValidatorFailsWithInvalidMediaTypeException() throws Exception {
+        final MultivaluedMap<String, String> headers = new MultivaluedHashMap();
+
+        doThrow(new InvalidMediaTypeException("", mock(Exception.class))).when(validator).validate(PAYLOAD, NAME);
+        when(context.getHeaders()).thenReturn(headers);
+
+        interceptor.aroundReadFrom(context);
     }
 
     private InputStream inputStream(final String input) throws IOException {

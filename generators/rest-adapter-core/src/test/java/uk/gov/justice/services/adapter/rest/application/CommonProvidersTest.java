@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 
 import uk.gov.justice.services.adapter.rest.cors.CorsFeature;
+import uk.gov.justice.services.adapter.rest.filter.LoggerRequestDataFilter;
 import uk.gov.justice.services.adapter.rest.interceptor.JsonSchemaValidationInterceptor;
 import uk.gov.justice.services.adapter.rest.mapper.BadRequestExceptionMapper;
 import uk.gov.justice.services.adapter.rest.mapper.ForbiddenRequestExceptionMapper;
@@ -17,6 +18,11 @@ public class CommonProvidersTest {
     @Test
     public void shouldReturnAllCommonProviders() throws Exception {
         Set<Class<?>> providers = new CommonProviders().providers();
-        assertThat(providers, containsInAnyOrder(BadRequestExceptionMapper.class, ForbiddenRequestExceptionMapper.class, JsonSchemaValidationInterceptor.class, CorsFeature.class));
+        assertThat(providers, containsInAnyOrder(
+                BadRequestExceptionMapper.class,
+                ForbiddenRequestExceptionMapper.class,
+                JsonSchemaValidationInterceptor.class,
+                LoggerRequestDataFilter.class,
+                CorsFeature.class));
     }
 }

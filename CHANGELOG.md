@@ -8,6 +8,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ### Added
 - Logging request data is set in the MDC and can be added to the log output by setting %X{requestData} in the logger pattern.
 
+### Changed
+- Improve ResponsePayloadMatcher to support string matchers on response payload
+
 ## [0.35.0] - 2016-11-24
 ### Added
  - File, file-api and file-alfresco modules

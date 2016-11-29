@@ -21,12 +21,19 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.slf4j.Logger;
 
 /**
  * Unit tests for the {@link JsonSchemaValidationInterceptor} class.
  */
 @RunWith(MockitoJUnitRunner.class)
 public class JsonSchemaValidationInterceptorTest {
+
+    @Mock
+    Logger logger;
+
+    @Mock
+    JmsParametersChecker parametersChecker;
 
     @Mock
     private JsonSchemaValidator validator;
@@ -40,22 +47,11 @@ public class JsonSchemaValidationInterceptorTest {
     @InjectMocks
     private JsonSchemaValidationInterceptor interceptor;
 
-    @Test(expected = IllegalArgumentException.class)
-    public void shouldThrowExceptionIfInvokedWithWrongNumberOfParameters() throws Exception {
-        when(invocationContext.getParameters()).thenReturn(new Object[]{});
-        interceptor.validate(invocationContext);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void shouldThrowExceptionIfInvokedWithParameterOtherThanTextMessage() throws Exception {
-        when(invocationContext.getParameters()).thenReturn(new Object[]{new Object()});
-        interceptor.validate(invocationContext);
-    }
-
     @Test
     public void shouldReturnContextProceed() throws Exception {
         final Object proceed = new Object();
         final TextMessage message = mock(TextMessage.class);
+
         when(invocationContext.proceed()).thenReturn(proceed);
         when(invocationContext.getParameters()).thenReturn(new Object[]{message});
 
@@ -67,6 +63,7 @@ public class JsonSchemaValidationInterceptorTest {
         final TextMessage message = mock(TextMessage.class);
         final String payload = "test payload";
         final String name = "test-name";
+
         when(message.getText()).thenReturn(payload);
         when(message.getStringProperty(JMS_HEADER_CPPNAME)).thenReturn(name);
         when(eventFilter.accepts(name)).thenReturn(true);
@@ -82,11 +79,10 @@ public class JsonSchemaValidationInterceptorTest {
         final TextMessage message = mock(TextMessage.class);
         final String payload = "test payload";
         final String name = "test-name-abc";
+
         when(message.getText()).thenReturn(payload);
         when(message.getStringProperty(JMS_HEADER_CPPNAME)).thenReturn(name);
-
         when(eventFilter.accepts(name)).thenReturn(false);
-
         when(invocationContext.getParameters()).thenReturn(new Object[]{message});
 
         interceptor.validate(invocationContext);

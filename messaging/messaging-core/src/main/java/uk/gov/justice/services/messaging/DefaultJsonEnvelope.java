@@ -126,7 +126,7 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
     public String toDebugStringPrettyPrint() {
 
         return new JSONObject(new JSONTokener(payload.toString()))
-                .put("_metadata", new JSONObject(metadata.asJsonObject().toString()))
+                .put(METADATA, new JSONObject(metadata.asJsonObject().toString()))
                 .toString(2);
     }
 

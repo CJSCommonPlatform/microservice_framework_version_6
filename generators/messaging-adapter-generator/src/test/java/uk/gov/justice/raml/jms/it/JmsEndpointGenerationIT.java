@@ -5,9 +5,28 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import uk.gov.justice.api.PublicEventJmsListener;
+import uk.gov.justice.api.StructureControllerCommandJmsListener;
+import uk.gov.justice.api.StructureEventJmsListener;
+import uk.gov.justice.api.StructureHandlerCommandJmsListener;
+import uk.gov.justice.services.adapter.messaging.JmsParametersChecker;
+import uk.gov.justice.services.adapter.messaging.JmsProcessor;
+import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.core.cdi.LoggerProducer;
+import uk.gov.justice.services.core.eventfilter.AllowAllEventFilter;
+import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
+import uk.gov.justice.services.core.json.JsonSchemaLoader;
+import uk.gov.justice.services.generators.test.utils.interceptor.RecordingInterceptorChainProcessor;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
+import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
+
 import java.util.UUID;
 
 import javax.annotation.Resource;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.Queue;
@@ -19,22 +38,6 @@ import org.apache.openejb.testing.Classes;
 import org.apache.openejb.testing.Module;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import uk.gov.justice.api.PublicEventJmsListener;
-import uk.gov.justice.api.StructureControllerCommandJmsListener;
-import uk.gov.justice.api.StructureEventJmsListener;
-import uk.gov.justice.api.StructureHandlerCommandJmsListener;
-import uk.gov.justice.services.adapter.messaging.JmsProcessor;
-import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.justice.services.core.cdi.LoggerProducer;
-import uk.gov.justice.services.core.eventfilter.AllowAllEventFilter;
-import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
-import uk.gov.justice.services.core.json.JsonSchemaLoader;
-import uk.gov.justice.services.generators.test.utils.interceptor.RecordingInterceptorChainProcessor;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
-import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
 
 /**
  * Integration tests for the generated JAX-RS classes.
@@ -72,7 +75,9 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
             DefaultJsonSchemaValidator.class,
             JsonSchemaLoader.class,
             LoggerProducer.class,
-            AllowAllEventFilter.class
+            AllowAllEventFilter.class,
+            JmsParametersChecker.class,
+            TestServiceContextNameProvider.class
 
     })
     public WebApp war() {
@@ -212,4 +217,12 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
         assertThat(receivedEnvelope3.metadata().name(), is(eventName3));
     }
 
+    @ApplicationScoped
+    public static class TestServiceContextNameProvider implements ServiceContextNameProvider {
+
+        @Override
+        public String getServiceContextName() {
+            return "test-component";
+        }
+    }
 }

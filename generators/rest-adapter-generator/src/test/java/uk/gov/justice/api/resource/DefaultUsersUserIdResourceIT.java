@@ -18,10 +18,12 @@ import uk.gov.justice.api.mapper.DefaultUsersResourceActionMapper;
 import uk.gov.justice.api.mapper.DefaultUsersUserIdResourceActionMapper;
 import uk.gov.justice.services.adapter.rest.application.CommonProviders;
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
+import uk.gov.justice.services.adapter.rest.filter.LoggerRequestDataFilter;
 import uk.gov.justice.services.adapter.rest.interceptor.JsonSchemaValidationInterceptor;
 import uk.gov.justice.services.adapter.rest.mapper.BadRequestExceptionMapper;
 import uk.gov.justice.services.adapter.rest.processor.RestProcessor;
 import uk.gov.justice.services.adapter.rest.processor.RestProcessorProducer;
+import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
@@ -33,6 +35,7 @@ import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import java.math.BigDecimal;
 import java.util.Properties;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.json.JsonObject;
 import javax.ws.rs.core.Response;
@@ -99,6 +102,8 @@ public class DefaultUsersUserIdResourceIT {
             DummyCommonProviders.class,
             BadRequestExceptionMapper.class,
             JsonSchemaValidationInterceptor.class,
+            LoggerRequestDataFilter.class,
+            TestServiceContextNameProvider.class,
             DefaultJsonSchemaValidator.class,
             JsonSchemaLoader.class,
             DefaultUsersUserIdResourceActionMapper.class,
@@ -307,5 +312,14 @@ public class DefaultUsersUserIdResourceIT {
     @Test
     public void shouldAllowDependencyInjectionToOverrideCommonProviders() {
         assertThat(commonProviders.getClass() == DummyCommonProviders.class, is(true));
+    }
+
+    @ApplicationScoped
+    public static class TestServiceContextNameProvider implements ServiceContextNameProvider {
+
+        @Override
+        public String getServiceContextName() {
+            return "test-component";
+        }
     }
 }

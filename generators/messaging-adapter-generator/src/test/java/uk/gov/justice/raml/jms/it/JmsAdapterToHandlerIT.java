@@ -10,8 +10,11 @@ import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
 import uk.gov.justice.api.PeopleEventJmsListener;
 import uk.gov.justice.api.Service2EventFilter;
+import uk.gov.justice.services.adapter.messaging.JmsLoggerMetadataInterceptor;
+import uk.gov.justice.services.adapter.messaging.JmsParametersChecker;
 import uk.gov.justice.services.adapter.messaging.JmsProcessor;
 import uk.gov.justice.services.adapter.messaging.JsonSchemaValidationInterceptor;
+import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -112,6 +115,9 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
             DefaultJmsDestinations.class,
             EnvelopeConverter.class,
             JsonSchemaValidationInterceptor.class,
+            JmsLoggerMetadataInterceptor.class,
+            JmsParametersChecker.class,
+            TestServiceContextNameProvider.class,
             JsonSchemaLoader.class,
             StringToJsonObjectConverter.class,
             JsonObjectEnvelopeConverter.class,
@@ -129,8 +135,6 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
             EmptySystemUserProvider.class,
             SystemUserUtil.class,
             BeanInstantiater.class
-
-
     })
     public WebApp war() {
         return new WebApp()
@@ -220,5 +224,14 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
             return validatedEventName;
         }
 
+    }
+
+    @ApplicationScoped
+    public static class TestServiceContextNameProvider implements ServiceContextNameProvider {
+
+        @Override
+        public String getServiceContextName() {
+            return "test-component";
+        }
     }
 }

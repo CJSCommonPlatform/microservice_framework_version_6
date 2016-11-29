@@ -11,13 +11,13 @@ import static uk.gov.justice.raml.jms.core.MediaTypesUtil.mediaTypesFrom;
 import static uk.gov.justice.services.generators.commons.helper.Names.namesListStringFrom;
 
 import uk.gov.justice.raml.jms.uri.BaseUri;
+import uk.gov.justice.services.adapter.messaging.JmsLoggerMetadataInterceptor;
 import uk.gov.justice.services.adapter.messaging.JmsProcessor;
 import uk.gov.justice.services.adapter.messaging.JsonSchemaValidationInterceptor;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.generators.commons.helper.MessagingResourceUri;
-import uk.gov.justice.services.messaging.logging.JmsMessageLoggerHelper;
 import uk.gov.justice.services.messaging.logging.LoggerUtils;
 
 import java.util.Map;
@@ -63,12 +63,12 @@ class MessageListenerCodeGenerator {
     private static final String CLIENT_ID = "clientId";
     private static final String SUBSCRIPTION_NAME = "subscriptionName";
     private static final String SHARE_SUBSCRIPTIONS = "shareSubscriptions";
+
     /**
      * Create an implementation of the {@link MessageListener}.
      *
      * @param resource the resource definition this listener is being generated for
      * @param baseUri  the base URI
-     * @param listenToAllMessages
      * @return the message listener class specification
      */
     TypeSpec generatedCodeFor(final Resource resource, final BaseUri baseUri, final boolean listenToAllMessages) {
@@ -82,7 +82,6 @@ class MessageListenerCodeGenerator {
      *
      * @param resource the resource definition this listener is being generated for
      * @param baseUri  the base URI
-     * @param listenToAllMessages
      * @return the {@link TypeSpec.Builder} that defines the class
      */
     private TypeSpec.Builder classSpecFrom(final Resource resource, final BaseUri baseUri, final boolean listenToAllMessages) {
@@ -109,6 +108,7 @@ class MessageListenerCodeGenerator {
                 .addAnnotation(messageDrivenAnnotation(component, resource.getActions(), resourceUri, baseUri, listenToAllMessages));
         if (!containsGeneralJsonMimeType(resource.getActions())) {
             clazz.addAnnotation(AnnotationSpec.builder(Interceptors.class)
+                    .addMember(DEFAULT_ANNOTATION_PARAMETER, "$T.class", JmsLoggerMetadataInterceptor.class)
                     .addMember(DEFAULT_ANNOTATION_PARAMETER, "$T.class", JsonSchemaValidationInterceptor.class)
                     .build());
         }
@@ -131,8 +131,7 @@ class MessageListenerCodeGenerator {
                         .builder(Message.class, messageFieldName)
                         .build())
                 .addCode(CodeBlock.builder()
-                        .addStatement("$T.trace(LOGGER, () -> $T.format(\"Received JMS message: %s\", $T.toJmsTraceString($L)))",
-                                LoggerUtils.class, String.class, JmsMessageLoggerHelper.class, messageFieldName)
+                        .addStatement("$T.trace(LOGGER, () -> \"Received JMS message\")", LoggerUtils.class)
                         .addStatement("$L.process($L::process, $L)", JMS_PROCESSOR_FIELD, INTERCEPTOR_CHAIN_PROCESS, messageFieldName)
                         .build())
                 .build();
@@ -145,7 +144,6 @@ class MessageListenerCodeGenerator {
      * @param actions     a map of actions for building the message selector
      * @param resourceUri the resource URI
      * @param baseUri     the base URI
-     * @param listenToAllMessages
      * @return the annotation specification
      */
     private AnnotationSpec messageDrivenAnnotation(final Component component,
@@ -159,7 +157,7 @@ class MessageListenerCodeGenerator {
                 .addMember(ACTIVATION_CONFIG_PARAMETER, "$L",
                         generateActivationConfigPropertyAnnotation(DESTINATION_LOOKUP, resourceUri.destinationName()))
                 .addMember(ACTIVATION_CONFIG_PARAMETER, "$L",
-                                generateActivationConfigPropertyAnnotation(SHARE_SUBSCRIPTIONS, "true"));
+                        generateActivationConfigPropertyAnnotation(SHARE_SUBSCRIPTIONS, "true"));
 
 
         if (!listenToAllMessages) {

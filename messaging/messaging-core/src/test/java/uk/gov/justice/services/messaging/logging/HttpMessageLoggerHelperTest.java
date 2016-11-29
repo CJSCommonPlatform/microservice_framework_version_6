@@ -1,17 +1,23 @@
 package uk.gov.justice.services.messaging.logging;
 
-import static com.jayway.jsonassert.JsonAssert.with;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasNoJsonPath;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.UUID.randomUUID;
+import static javax.ws.rs.core.HttpHeaders.ACCEPT;
+import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
 import static net.trajano.commons.testing.UtilityClassTestUtil.assertUtilityClassWellDefined;
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.common.http.HeaderConstants.CLIENT_CORRELATION_ID;
 import static uk.gov.justice.services.common.http.HeaderConstants.ID;
 import static uk.gov.justice.services.common.http.HeaderConstants.NAME;
 import static uk.gov.justice.services.common.http.HeaderConstants.SESSION_ID;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
+import static uk.gov.justice.services.common.log.LoggerConstants.METADATA;
 import static uk.gov.justice.services.messaging.logging.HttpMessageLoggerHelper.toHttpHeaderTrace;
-
-import uk.gov.justice.services.common.http.HeaderConstants;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -32,6 +38,8 @@ public class HttpMessageLoggerHelperTest {
     private static final String NAME_VALUE = randomUUID().toString();
     private static final String USER_ID_VALUE = randomUUID().toString();
     private static final String ID_VALUE = randomUUID().toString();
+    private static final String CONTENT_TYPE_VALUE = "media.type.content";
+    private static final String ACCEPT_VALUE = "media.type.response";
 
     @Mock
     HttpHeaders httpHeaders;
@@ -56,16 +64,21 @@ public class HttpMessageLoggerHelperTest {
         map.add(NAME, NAME_VALUE);
         map.add(USER_ID, USER_ID_VALUE);
         map.add(ID, ID_VALUE);
-        map.add(HttpHeaders.CONTENT_TYPE, "media.type.test");
+        map.add(CONTENT_TYPE, CONTENT_TYPE_VALUE);
+        map.add(ACCEPT, ACCEPT_VALUE);
 
         when(httpHeaders.getRequestHeaders()).thenReturn(map);
 
-        with(toHttpHeaderTrace(httpHeaders))
-                .assertEquals(HeaderConstants.ID, ID_VALUE)
-                .assertEquals(HeaderConstants.CLIENT_CORRELATION_ID, CORRELATION_ID_VALUE)
-                .assertEquals(HeaderConstants.NAME, NAME_VALUE)
-                .assertEquals(HeaderConstants.SESSION_ID, SESSION_ID_VALUE)
-                .assertEquals(HeaderConstants.USER_ID, USER_ID_VALUE);
+        assertThat(toHttpHeaderTrace(httpHeaders), isJson(
+                allOf(
+                        withJsonPath("$." + METADATA + "." + ID, equalTo(ID_VALUE)),
+                        withJsonPath("$." + METADATA + "." + CLIENT_CORRELATION_ID, equalTo(CORRELATION_ID_VALUE)),
+                        withJsonPath("$." + METADATA + "." + SESSION_ID, equalTo(SESSION_ID_VALUE)),
+                        withJsonPath("$." + METADATA + "." + NAME, equalTo(NAME_VALUE)),
+                        withJsonPath("$." + METADATA + "." + USER_ID, equalTo(USER_ID_VALUE)),
+                        withJsonPath("$." + CONTENT_TYPE, equalTo(CONTENT_TYPE_VALUE)),
+                        withJsonPath("$." + ACCEPT, equalTo(ACCEPT_VALUE)))
+        ));
     }
 
     @Test
@@ -78,13 +91,12 @@ public class HttpMessageLoggerHelperTest {
 
         when(httpHeaders.getRequestHeaders()).thenReturn(map);
 
-        with(toHttpHeaderTrace(httpHeaders))
-                .assertEquals(HeaderConstants.ID, ID_VALUE)
-                .assertEquals(HeaderConstants.CLIENT_CORRELATION_ID, CORRELATION_ID_VALUE)
-                .assertEquals(HeaderConstants.NAME, NAME_VALUE)
-                .assertNotDefined(HeaderConstants.SESSION_ID)
-                .assertNotDefined(HeaderConstants.USER_ID);
+        assertThat(toHttpHeaderTrace(httpHeaders), isJson(
+                allOf(
+                        withJsonPath("$." + METADATA + "." + ID, equalTo(ID_VALUE)),
+                        withJsonPath("$." + METADATA + "." + CLIENT_CORRELATION_ID, equalTo(CORRELATION_ID_VALUE)),
+                        withJsonPath("$." + METADATA + "." + NAME, equalTo(NAME_VALUE)),
+                        hasNoJsonPath("$." + METADATA + "." + SESSION_ID),
+                        hasNoJsonPath("$." + METADATA + "." + USER_ID))));
     }
-
-
 }

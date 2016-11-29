@@ -39,6 +39,7 @@ import static uk.gov.justice.services.generators.test.utils.reflection.Reflectio
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.setField;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
+import uk.gov.justice.services.adapter.messaging.JmsLoggerMetadataInterceptor;
 import uk.gov.justice.services.adapter.messaging.JmsProcessor;
 import uk.gov.justice.services.adapter.messaging.JsonSchemaValidationInterceptor;
 import uk.gov.justice.services.core.annotation.Adapter;
@@ -335,6 +336,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
         Interceptors interceptorsAnnotation = clazz.getAnnotation(Interceptors.class);
         assertThat(interceptorsAnnotation, not(nullValue()));
         assertThat(interceptorsAnnotation.value(), hasItemInArray(JsonSchemaValidationInterceptor.class));
+        assertThat(interceptorsAnnotation.value(), hasItemInArray(JmsLoggerMetadataInterceptor.class));
     }
 
     @Test
@@ -724,23 +726,23 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                 propertyName(equalTo("subscriptionName")),
                 propertyName(equalTo("subscriptionDurability"))))));
     }
-    
+
     @Test
     public void shouldCreateAnnotatedEventListenerEndpointWithSharedSubscriptionsPropertySetToTrue() throws Exception {
-           generator.run(
-                   messagingRamlWithDefaults()
-                             .withDefaultMessagingBaseUri()
-                             .with(resource()
-                                     .withRelativeUri("/structure.event")
-                                     .with(httpAction(POST, "application/vnd.structure.abc+json")))
-                             .build(),
-                     configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-     
-             Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "StructureEventJmsListener");
-             assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
-             assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
-                     hasItemInArray(allOf(propertyName(equalTo("shareSubscriptions")),
-                              propertyValue(equalTo("true")))));
+        generator.run(
+                messagingRamlWithDefaults()
+                        .withDefaultMessagingBaseUri()
+                        .with(resource()
+                                .withRelativeUri("/structure.event")
+                                .with(httpAction(POST, "application/vnd.structure.abc+json")))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "StructureEventJmsListener");
+        assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
+        assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
+                hasItemInArray(allOf(propertyName(equalTo("shareSubscriptions")),
+                        propertyValue(equalTo("true")))));
     }
 
 

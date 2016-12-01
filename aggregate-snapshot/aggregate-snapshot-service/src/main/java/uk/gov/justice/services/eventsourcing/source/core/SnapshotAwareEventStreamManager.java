@@ -14,6 +14,7 @@ import uk.gov.justice.services.eventsourcing.repository.core.exception.StoreEven
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.VersionMismatchException;
 import uk.gov.justice.services.eventsourcing.source.core.snapshot.DefaultSnapshotService;
+import uk.gov.justice.services.eventsourcing.repository.core.exception.OptimisticLockingRetryException;
 import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectMetadata;
@@ -72,7 +73,7 @@ public class SnapshotAwareEventStreamManager {
      * @param events the stream of events to store
      * @throws EventStreamException if an event could not be appended
      */
-    @Transactional
+    @Transactional(dontRollbackOn = OptimisticLockingRetryException.class)
     public <T extends Aggregate> void append(final UUID id, final Stream<JsonEnvelope> events, final Map<Class<T>, T> aggregatesMap) throws EventStreamException {
         append(id, events, Optional.empty(), aggregatesMap);
     }
@@ -84,7 +85,7 @@ public class SnapshotAwareEventStreamManager {
      * @param version the version to append from
      * @throws EventStreamException if an event could not be appended
      */
-    @Transactional
+    @Transactional(dontRollbackOn = OptimisticLockingRetryException.class)
     public <T extends Aggregate> void appendAfter(final UUID id, final Stream<JsonEnvelope> events, final Long version, final Map<Class<T>, T> aggregatesMap) throws EventStreamException {
         if (version == null) {
             throw new EventStreamException(String.format("Failed to append to stream %s. Version must not be null.", id));

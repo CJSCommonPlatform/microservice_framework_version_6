@@ -18,6 +18,9 @@ public class CakeShopCommandControllerTest {
                         method("addRecipe")
                                 .thatHandles("example.add-recipe")
                                 .withSenderPassThrough(),
+                        method("renameRecipe")
+                                .thatHandles("example.rename-recipe")
+                                .withSenderPassThrough(),
                         method("removeRecipe")
                                 .thatHandles("example.remove-recipe")
                                 .withSenderPassThrough(),

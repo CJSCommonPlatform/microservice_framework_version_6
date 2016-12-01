@@ -11,6 +11,7 @@ import uk.gov.justice.services.eventsourcing.repository.core.exception.StoreEven
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.InvalidStreamVersionRuntimeException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.VersionMismatchException;
+import uk.gov.justice.services.eventsourcing.repository.core.exception.OptimisticLockingRetryException;
 import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectMetadata;
@@ -70,7 +71,7 @@ public class EventStreamManager {
      * @param events the stream of events to store
      * @throws EventStreamException if an event could not be appended
      */
-    @Transactional
+    @Transactional(dontRollbackOn = OptimisticLockingRetryException.class)
     public void append(final UUID id, final Stream<JsonEnvelope> events) throws EventStreamException {
         append(id, events, Optional.empty());
     }
@@ -82,7 +83,7 @@ public class EventStreamManager {
      * @param version the version to append from
      * @throws EventStreamException if an event could not be appended
      */
-    @Transactional
+    @Transactional(dontRollbackOn = OptimisticLockingRetryException.class)
     public void appendAfter(final UUID id, final Stream<JsonEnvelope> events, final Long version) throws EventStreamException {
         if (version == null) {
             throw new EventStreamException(String.format("Failed to append to stream %s. Version must not be null.", id));

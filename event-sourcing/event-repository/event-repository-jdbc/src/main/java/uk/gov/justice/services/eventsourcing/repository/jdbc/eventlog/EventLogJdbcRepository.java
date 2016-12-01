@@ -4,7 +4,7 @@ package uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog;
 import static java.lang.String.format;
 import static uk.gov.justice.services.common.converter.ZonedDateTimes.fromSqlTimestamp;
 
-import uk.gov.justice.services.common.converter.ZonedDateTimes;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.EventLogInsertionStrategy;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidSequenceIdException;
 import uk.gov.justice.services.jdbc.persistence.AbstractJdbcRepository;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
@@ -15,7 +15,10 @@ import java.sql.SQLException;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import javax.inject.Inject;
 import javax.naming.NamingException;
+
+import org.slf4j.Logger;
 
 /**
  * JDBC based repository for event log records.
@@ -23,6 +26,11 @@ import javax.naming.NamingException;
 public class EventLogJdbcRepository extends AbstractJdbcRepository<EventLog> {
 
     //TODO @mrich 2016-09-29 - Re-enable the date_created field once liquibase scripts are configured
+    @Inject
+    Logger logger;
+
+    @Inject
+    EventLogInsertionStrategy eventLogInsertionStrategy;
 
     /**
      * Column Names
@@ -45,37 +53,22 @@ public class EventLogJdbcRepository extends AbstractJdbcRepository<EventLog> {
     static final String SQL_FIND_BY_STREAM_ID_AND_SEQUENCE_ID = "SELECT * FROM event_log WHERE stream_id=? AND sequence_id>=? ORDER BY sequence_id ASC";
     static final String SQL_FIND_LATEST_SEQUENCE_ID = "SELECT MAX(sequence_id) FROM event_log WHERE stream_id=?";
     static final String SQL_DISTINCT_STREAM_ID = "SELECT DISTINCT stream_id FROM event_log";
-    static final String SQL_INSERT_EVENT_LOG = "INSERT INTO event_log (id, stream_id, sequence_id, name, metadata, payload, date_created) " +
-            "VALUES(?, ?, ?, ?, ?, ?, ?)";
 
     private static final String READING_STREAM_ALL_EXCEPTION = "Exception while reading stream";
     private static final String READING_STREAM_EXCEPTION = "Exception while reading stream %s";
     private static final String JNDI_DS_EVENT_STORE_PATTERN = "java:/app/%s/DS.eventstore";
 
-
     /**
-     * Insert the given event into th event log.
+     * Insert the given event into the event log.
      *
      * @param eventLog the event to insert
      * @throws InvalidSequenceIdException if the version already exists or is null.
      */
     public void insert(final EventLog eventLog) throws InvalidSequenceIdException {
-
-        if (eventLog.getSequenceId() == null) {
-            throw new InvalidSequenceIdException(format("Version is null for stream %s", eventLog.getStreamId()));
-        }
-
-        try (final PreparedStatementWrapper ps = preparedStatementWrapperOf(SQL_INSERT_EVENT_LOG)) {
-            ps.setObject(1, eventLog.getId());
-            ps.setObject(2, eventLog.getStreamId());
-            ps.setLong(3, eventLog.getSequenceId());
-            ps.setString(4, eventLog.getName());
-            ps.setString(5, eventLog.getMetadata());
-            ps.setString(6, eventLog.getPayload());
-            ps.setTimestamp(7, ZonedDateTimes.toSqlTimestamp(eventLog.getCreatedAt()));
-
-            ps.executeUpdate();
+        try (final PreparedStatementWrapper ps = preparedStatementWrapperOf(eventLogInsertionStrategy.insertStatement())) {
+            eventLogInsertionStrategy.insert(ps, eventLog);
         } catch (SQLException e) {
+            logger.error("Error persisting event to the database", e);
             throw new JdbcRepositoryException(format("Exception while storing sequence %s of stream %s",
                     eventLog.getSequenceId(), eventLog.getStreamId()), e);
         }
@@ -94,6 +87,7 @@ public class EventLogJdbcRepository extends AbstractJdbcRepository<EventLog> {
             ps.setObject(1, streamId);
             return streamOf(ps);
         } catch (SQLException e) {
+            logger.warn(format("Failed to read stream %s", streamId), e);
             throw new JdbcRepositoryException(format(READING_STREAM_EXCEPTION, streamId), e);
         }
 
@@ -117,6 +111,7 @@ public class EventLogJdbcRepository extends AbstractJdbcRepository<EventLog> {
 
             return streamOf(ps);
         } catch (SQLException e) {
+            logger.warn(format("Failed to read stream %s", streamId), e);
             throw new JdbcRepositoryException(format(READING_STREAM_EXCEPTION, streamId), e);
         }
     }
@@ -152,6 +147,7 @@ public class EventLogJdbcRepository extends AbstractJdbcRepository<EventLog> {
             }
 
         } catch (SQLException e) {
+            logger.warn(format("Failed to read stream %s", streamId), e);
             throw new JdbcRepositoryException(format(READING_STREAM_EXCEPTION, streamId), e);
         }
 

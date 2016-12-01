@@ -46,4 +46,10 @@ public class CakeShopCommandController {
 
         sender.send(command);
     }
+
+    @Handles("example.rename-recipe")
+    public void renameRecipe(final JsonEnvelope command) {
+        LOGGER.trace("=============> Inside rename-recipe Command Controller Handler");
+        sender.send(command);
+    }
 }

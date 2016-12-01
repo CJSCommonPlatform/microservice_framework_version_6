@@ -20,6 +20,9 @@ protocols: [ HTTP, HTTPS ]
         (mapping):
             requestType: application/vnd.example.add-recipe-file+json
             name: example.add-recipe-file
+        (mapping):
+            requestType: application/vnd.example.rename-recipe+json
+            name: example.rename-recipe
         ...
 
     body:
@@ -32,6 +35,9 @@ protocols: [ HTTP, HTTPS ]
         application/vnd.example.add-recipe-file+json:
             schema: !include json/schema/example.add-recipe-file.json
             example: !include json/add-recipe-file.json
+        application/vnd.example.rename-recipe+json:
+            schema: !include json/schema/example.rename-recipe.json
+            example: !include json/rename-recipe.json
 
 
 /recipes/{recipeId}/cakes/{cakeId}:

@@ -97,6 +97,7 @@ public class CakeShopIT {
     private static final String CAKES_RESOURCE_QUERY_URI = "http://localhost:8080/example-query-api/query/api/rest/cakeshop/cakes/";
     private static final String ALRFRESCO_RECORDED_REQUESTS = "http://localhost:8080/alfresco-stub/recorded-requests";
     private static final String ADD_RECIPE_MEDIA_TYPE = "application/vnd.example.add-recipe+json";
+    private static final String RENAME_RECIPE_MEDIA_TYPE = "application/vnd.example.rename-recipe+json";
     private static final String ADD_RECIPE_FILE_MEDIA_TYPE = "application/vnd.example.add-recipe-file+json";
     private static final String REMOVE_RECIPE_MEDIA_TYPE = "application/vnd.example.remove-recipe+json";
     private static final String MAKE_CAKE_MEDIA_TYPE = "application/vnd.example.make-cake+json";
@@ -111,7 +112,7 @@ public class CakeShopIT {
     private static final String JMS_PASSWORD = "jms@user123";
     private static final String JMS_BROKER_URL = "tcp://localhost:61616";
 
-    private static final TestProperties TEST_PROPERTIES = TestProperties.getInstance();
+    private static final TestProperties TEST_PROPERTIES = new TestProperties("test.properties");
 
     private static StandaloneEventLogJdbcRepository EVENT_LOG_REPOSITORY;
     private static StandaloneStreamStatusJdbcRepository STREAM_STATUS_REPOSITORY;
@@ -125,7 +126,7 @@ public class CakeShopIT {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        DataSource eventStoreDataSource = initEventStoreDb();
+        final DataSource eventStoreDataSource = initEventStoreDb();
         EVENT_LOG_REPOSITORY = new StandaloneEventLogJdbcRepository(eventStoreDataSource);
         JMS_CONNECTION_FACTORY = new ActiveMQConnectionFactory(JMS_BROKER_URL);
         final DataSource viewStoreDatasource = initViewStoreDb();
@@ -134,17 +135,33 @@ public class CakeShopIT {
         Thread.sleep(300);
     }
 
+    @Before
+    public void before() throws Exception {
+        final PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+        final CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(cm).build();
+        cm.setMaxTotal(200); // Increase max total connection to 200
+        cm.setDefaultMaxPerRoute(20); // Increase default max connection per route to 20
+        final ApacheHttpClient4Engine engine = new ApacheHttpClient4Engine(httpClient);
+        client = new ResteasyClientBuilder().httpEngine(engine).build();
+        httpResponsePoller = new HttpResponsePoller();
+    }
+
+    @After
+    public void cleanup() throws Exception {
+        client.close();
+    }
+
     @Test
     public void shouldReturn202ResponseWhenAddingRecipe() throws Exception {
-        String recipeId = "163af847-effb-46a9-96bc-32a0f7526f88";
-        Response response = sendTo(RECIPES_RESOURCE_URI + recipeId).request()
+        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526f88";
+        final Response response = sendTo(RECIPES_RESOURCE_URI + recipeId).request()
                 .post(entity(addRecipeCommand(), ADD_RECIPE_MEDIA_TYPE));
         assertThat(response.getStatus(), is(ACCEPTED));
     }
 
     @Test
     public void shouldReturn202ResponseWhenRemovingRecipe() throws Exception {
-        String recipeId = "163af847-effb-46a9-96bc-32a0f7526f25";
+        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526f25";
         Response response = sendTo(RECIPES_RESOURCE_URI + recipeId).request()
                 .post(entity(addRecipeCommand(), ADD_RECIPE_MEDIA_TYPE));
         assertThat(response.getStatus(), is(ACCEPTED));
@@ -155,15 +172,15 @@ public class CakeShopIT {
 
     @Test
     public void shouldReturn400ResponseWhenJsonNotAdheringToSchemaIsSent() throws Exception {
-        String recipeId = "163af847-effb-46a9-96bc-32a0f7526f25";
-        Response response = sendTo(RECIPES_RESOURCE_URI + recipeId).request()
+        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526f25";
+        final Response response = sendTo(RECIPES_RESOURCE_URI + recipeId).request()
                 .post(entity("{}", ADD_RECIPE_MEDIA_TYPE));
         assertThat(response.getStatus(), is(BAD_REQUEST));
     }
 
     @Test
     public void shouldRegisterRecipeAddedEvent() {
-        String recipeId = "163af847-effb-46a9-96bc-32a0f7526f99";
+        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526f99";
         sendTo(RECIPES_RESOURCE_URI + recipeId).request()
                 .post(entity(
                         jsonObject()
@@ -179,12 +196,12 @@ public class CakeShopIT {
 
         await().until(() -> eventsWithPayloadContaining(recipeId).size() == 1);
 
-        EventLog event = eventsWithPayloadContaining(recipeId).get(0);
+        final EventLog event = eventsWithPayloadContaining(recipeId).get(0);
         assertThat(event.getName(), is("example.recipe-added"));
         with(event.getMetadata())
                 .assertEquals("stream.id", recipeId)
                 .assertEquals("stream.version", 1);
-        String eventPayload = event.getPayload();
+        final String eventPayload = event.getPayload();
         with(eventPayload)
                 .assertThat("$.recipeId", equalTo(recipeId))
                 .assertThat("$.name", equalTo("Vanilla cake"))
@@ -195,7 +212,7 @@ public class CakeShopIT {
 
     @Test
     public final void concurrentAddAndRemoveRecipe() throws InterruptedException {
-        ExecutorService exec = Executors.newFixedThreadPool(5);
+        final ExecutorService exec = Executors.newFixedThreadPool(5);
         for (int i = 0; i < 10; i++) {
             exec.execute(new Runnable() {
                 @Override
@@ -207,7 +224,6 @@ public class CakeShopIT {
         exec.shutdown();
         exec.awaitTermination(30, TimeUnit.SECONDS);
     }
-
 
     @Test
     public void shouldRegisterRecipeRemovedEvent() {
@@ -228,12 +244,12 @@ public class CakeShopIT {
 
         await().until(() -> eventsWithPayloadContaining(recipeId).size() == 1);
 
-        EventLog event = eventsWithPayloadContaining(recipeId).get(0);
+        final EventLog event = eventsWithPayloadContaining(recipeId).get(0);
         assertThat(event.getName(), is("example.recipe-added"));
         with(event.getMetadata())
                 .assertEquals("stream.id", recipeId)
                 .assertEquals("stream.version", 1);
-        String eventPayload = event.getPayload();
+        final String eventPayload = event.getPayload();
         with(eventPayload)
                 .assertThat("$.recipeId", equalTo(recipeId))
                 .assertThat("$.name", equalTo("Vanilla cake"))
@@ -255,38 +271,38 @@ public class CakeShopIT {
 
     @Test
     public void shouldReturn200WhenQueryingForRecipes() throws Exception {
-        Response response = sendTo(RECIPES_RESOURCE_QUERY_URI + "?pagesize=10").request().accept(QUERY_RECIPES_MEDIA_TYPE).get();
+        final Response response = sendTo(RECIPES_RESOURCE_QUERY_URI + "?pagesize=10").request().accept(QUERY_RECIPES_MEDIA_TYPE).get();
         assertThat(response.getStatus(), is(OK));
     }
 
     @Test
     public void shouldReturn400WhenMandatoryQueryParamNotProvided() throws Exception {
-        Response response = sendTo(RECIPES_RESOURCE_QUERY_URI).request().accept(QUERY_RECIPES_MEDIA_TYPE).get();
+        final Response response = sendTo(RECIPES_RESOURCE_QUERY_URI).request().accept(QUERY_RECIPES_MEDIA_TYPE).get();
         assertThat(response.getStatus(), is(BAD_REQUEST));
     }
 
     @Test
     public void shouldReturn400WhenIncorrectMediaTypeInAccept() throws Exception {
-        Response response = sendTo(RECIPES_RESOURCE_QUERY_URI).request().accept("*/*").get();
+        final Response response = sendTo(RECIPES_RESOURCE_QUERY_URI).request().accept("*/*").get();
         assertThat(response.getStatus(), is(BAD_REQUEST));
     }
 
     @Test
     public void shouldReturn404IfRecipeDoesNotExist() {
-        ApiResponse response = queryForRecipe("163af847-effb-46a9-96bc-32a0f7526f00");
+        final ApiResponse response = queryForRecipe("163af847-effb-46a9-96bc-32a0f7526f00");
         assertThat(response.httpCode(), is(NOT_FOUND));
     }
 
     @Test
     public void shouldReturnRecipeOfGivenId() {
-        String recipeId = "163af847-effb-46a9-96bc-32a0f7526f22";
+        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526f22";
         final String recipeName = "Cheesy cheese cake";
         addRecipe(recipeId, recipeName);
 
 
         await().until(() -> queryForRecipe(recipeId).httpCode() == OK);
 
-        ApiResponse response = queryForRecipe(recipeId);
+        final ApiResponse response = queryForRecipe(recipeId);
 
         with(response.body())
                 .assertThat("$.id", equalTo(recipeId))
@@ -295,16 +311,14 @@ public class CakeShopIT {
 
     @Test
     public void shouldFailTransactionOnDBFailureAndRedirectEventToDLQ() throws Exception {
-        Session jmsSession = null;
-        try {
-            jmsSession = jmsSession();
+        try (final Session jmsSession = jmsSession();) {
             final MessageConsumer dlqConsumer = queueConsumerOf(jmsSession, "DLQ");
             clear(dlqConsumer);
 
             //closing db to cause transaction error
             closeCakeShopDb();
 
-            String recipeId = "363af847-effb-46a9-96bc-32a0f7526f12";
+            final String recipeId = "363af847-effb-46a9-96bc-32a0f7526f12";
             addRecipe(recipeId, "Cheesy cheese cake");
 
             final TextMessage messageFromDLQ = (TextMessage) dlqConsumer.receive();
@@ -314,8 +328,6 @@ public class CakeShopIT {
                     .assertThat("$.recipeId", equalTo(recipeId));
 
             initViewStoreDb();
-        } finally {
-            jmsSession.close();
         }
     }
 
@@ -323,19 +335,19 @@ public class CakeShopIT {
     @Test
     public void shouldReturnRecipes() {
         //adding 2 recipes
-        String recipeId = "163af847-effb-46a9-96bc-32a0f7526e14";
+        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526e14";
         addRecipe(recipeId, "Cheesy cheese cake");
 
-        String recipeId2 = "163af847-effb-46a9-96bc-32a0f7526e15";
+        final String recipeId2 = "163af847-effb-46a9-96bc-32a0f7526e15";
         addRecipe(recipeId2, "Chocolate muffin");
 
 
         await().until(() -> {
-            String responseBody = recipesQueryResult(asList(new BasicNameValuePair("pagesize", "30"))).body();
+            final String responseBody = recipesQueryResult(asList(new BasicNameValuePair("pagesize", "30"))).body();
             return responseBody.contains(recipeId) && responseBody.contains(recipeId2);
         });
 
-        ApiResponse response = recipesQueryResult();
+        final ApiResponse response = recipesQueryResult();
         assertThat(response.httpCode(), is(OK));
 
         with(response.body())
@@ -346,15 +358,15 @@ public class CakeShopIT {
     @Test
     public void shouldFilterRecipesUsingPageSize() {
         //adding 2 recipes
-        String recipeId = "263af847-effb-46a9-96bc-32a0f7526e44";
+        final String recipeId = "263af847-effb-46a9-96bc-32a0f7526e44";
         addRecipe(recipeId, "Absolutely cheesy cheese cake");
 
-        String recipeId2 = "263af847-effb-46a9-96bc-32a0f7526e55";
+        final String recipeId2 = "263af847-effb-46a9-96bc-32a0f7526e55";
         addRecipe(recipeId2, "Chocolate muffin");
 
         await().until(() -> recipesQueryResult().body().contains(recipeId));
 
-        ApiResponse response = recipesQueryResult(asList(new BasicNameValuePair("pagesize", "1")));
+        final ApiResponse response = recipesQueryResult(asList(new BasicNameValuePair("pagesize", "1")));
         assertThat(response.httpCode(), is(OK));
 
         with(response.body())
@@ -365,17 +377,17 @@ public class CakeShopIT {
     @Test
     public void shouldFilterGlutenFreeRecipes() {
         //adding 2 recipes
-        String recipeId = "163af847-effb-46a9-96bc-32a0f7526e66";
+        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526e66";
         sendTo(RECIPES_RESOURCE_URI + recipeId).request()
                 .post(recipeEntity("Muffin", false));
 
-        String recipeId2 = "163af847-effb-46a9-96bc-32a0f7526e77";
+        final String recipeId2 = "163af847-effb-46a9-96bc-32a0f7526e77";
         sendTo(RECIPES_RESOURCE_URI + recipeId2).request()
                 .post(recipeEntity("Oat cake", true));
 
         await().until(() -> recipesQueryResult().body().contains(recipeId2));
 
-        ApiResponse response = recipesQueryResult(asList(
+        final ApiResponse response = recipesQueryResult(asList(
                 new BasicNameValuePair("pagesize", "30"),
                 new BasicNameValuePair("glutenFree", "true")));
 
@@ -388,7 +400,7 @@ public class CakeShopIT {
 
     @Test
     public void shouldReturn400WhenInvalidNumericParamPassed() {
-        ApiResponse response = recipesQueryResult(asList(
+        final ApiResponse response = recipesQueryResult(asList(
                 new BasicNameValuePair("pagesize", "invalid")));
 
         assertThat(response.httpCode(), is(BAD_REQUEST));
@@ -397,7 +409,7 @@ public class CakeShopIT {
 
     @Test
     public void shouldReturn400WhenInvalidBooleanParamPassed() {
-        ApiResponse response = recipesQueryResult(asList(
+        final ApiResponse response = recipesQueryResult(asList(
                 new BasicNameValuePair("pagesize", "30"),
                 new BasicNameValuePair("glutenFree", "invalid")));
 
@@ -406,8 +418,8 @@ public class CakeShopIT {
 
     @Test
     public void shouldReturnCakesWithNamesInheritedFromRecipe() throws Exception {
-        String recipeId = "163af847-effb-46a9-96bc-32a0f7526e51";
-        String cakeId = "163af847-effb-46a9-96bc-32a0f7526f01";
+        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526e51";
+        final String cakeId = "163af847-effb-46a9-96bc-32a0f7526f01";
         final String cakeName = "Super cake";
 
         addRecipe(recipeId, cakeName);
@@ -476,20 +488,35 @@ public class CakeShopIT {
 
     @Test
     public void shouldPublishEventToPublicTopic() throws Exception {
-        Session jmsSession = jmsSession();
-        final MessageConsumer publicTopicConsumer = topicConsumerOf(jmsSession, "public.event");
+        try (final Session jmsSession = jmsSession();) {
+            final MessageConsumer publicTopicConsumer = topicConsumerOf(jmsSession, "public.event");
 
-        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526e13";
+            final String recipeId = "163af847-effb-46a9-96bc-32a0f7526e13";
+            sendTo(RECIPES_RESOURCE_URI + recipeId).request()
+                    .post(recipeEntity("Apple pie", false));
+
+            final TextMessage message = (TextMessage) publicTopicConsumer.receive();
+            with(message.getText())
+                    .assertThat("$._metadata.name", equalTo("example.recipe-added"))
+                    .assertThat("$.recipeId", equalTo(recipeId))
+                    .assertThat("$.name", equalTo("Apple pie"));
+        }
+    }
+
+    @Test
+    public void shouldUpdateRecipeWithNewName() throws Exception {
+        final String recipeId = randomUUID().toString();
+        final String recipeName = "Original Cheese Cake";
+
         sendTo(RECIPES_RESOURCE_URI + recipeId).request()
-                .post(recipeEntity("Apple pie", false));
+                .post(recipeEntity(recipeName));
 
-        final TextMessage message = (TextMessage) publicTopicConsumer.receive();
-        with(message.getText())
-                .assertThat("$._metadata.name", equalTo("example.recipe-added"))
-                .assertThat("$.recipeId", equalTo(recipeId))
-                .assertThat("$.name", equalTo("Apple pie"));
+        await().until(() -> queryForRecipe(recipeId).httpCode() == OK);
 
-        jmsSession.close();
+        sendTo(RECIPES_RESOURCE_URI + recipeId).request()
+                .post(renameRecipeEntity("New Name"));
+
+        await().until(() -> queryForRecipe(recipeId).body().contains("New Name"));
     }
 
     @Test
@@ -541,7 +568,6 @@ public class CakeShopIT {
         assertThat(eventLog.getCreatedAt(), is(within(10L, SECONDS, new UtcClock().now())));
     }
 
-
     @Test
     public void shouldReturnCORSResponse() {
         final Response corsResponse =
@@ -560,7 +586,7 @@ public class CakeShopIT {
 
     @Test
     public void shouldUpdateEventBufferStatus() throws Exception {
-        String recipeId = "163af847-effb-46a9-96bc-32a0f7526f89";
+        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526f89";
         sendTo(RECIPES_RESOURCE_URI + recipeId).request()
                 .post(entity(addRecipeCommand(), ADD_RECIPE_MEDIA_TYPE));
 
@@ -577,13 +603,13 @@ public class CakeShopIT {
             sendTo(RECIPES_RESOURCE_URI + randomUUID()).request()
                     .post(recipeEntity("Exceptional cake"));
         }
-        String recipeId = "163af847-effb-46a9-96bc-32a0f7526f78";
+        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526f78";
         final String recipeName = "Non exceptional cake";
         addRecipe(recipeId, recipeName);
 
         await().until(() -> queryForRecipe(recipeId).httpCode() == OK);
 
-        ApiResponse response = queryForRecipe(recipeId);
+        final ApiResponse response = queryForRecipe(recipeId);
 
         with(response.body())
                 .assertThat("$.id", equalTo(recipeId))
@@ -623,7 +649,7 @@ public class CakeShopIT {
 
 
     private void makeCake(final String recipeId, final String cakeId) {
-        Response response = sendTo(format(CAKES_RESOURCE_URI, recipeId, cakeId)).request()
+        final Response response = sendTo(format(CAKES_RESOURCE_URI, recipeId, cakeId)).request()
                 .post(entity("{}", MAKE_CAKE_MEDIA_TYPE));
         assertThat(response.getStatus(), is(ACCEPTED));
     }
@@ -666,16 +692,15 @@ public class CakeShopIT {
 
 
     private static DataSource initEventStoreDb() throws Exception {
-
         return initDatabase("db.eventstore.url", "db.eventstore.userName",
                 "db.eventstore.password", "liquibase/event-store-db-changelog.xml", "liquibase/snapshot-store-db-changelog.xml");
     }
 
     private void closeCakeShopDb() throws SQLException {
-        final Connection connection = CAKE_SHOP_DS.getConnection();
-        final Statement statement = connection.createStatement();
-        statement.execute("SHUTDOWN");
-        connection.close();
+        try (final Connection connection = CAKE_SHOP_DS.getConnection();) {
+            final Statement statement = connection.createStatement();
+            statement.execute("SHUTDOWN");
+        }
     }
 
     private ApiResponse queryForRecipe(final String recipeId) {
@@ -694,9 +719,9 @@ public class CakeShopIT {
 
     private ApiResponse recipesQueryResult(final List<NameValuePair> queryParams) {
         try {
-            URIBuilder uri = new URIBuilder(RECIPES_RESOURCE_QUERY_URI);
+            final URIBuilder uri = new URIBuilder(RECIPES_RESOURCE_QUERY_URI);
             uri.addParameters(queryParams);
-            Response jaxrRsResponse = sendTo(uri.toString()).request().accept(QUERY_RECIPES_MEDIA_TYPE).get();
+            final Response jaxrRsResponse = sendTo(uri.toString()).request().accept(QUERY_RECIPES_MEDIA_TYPE).get();
             return ApiResponse.from(jaxrRsResponse);
         } catch (URISyntaxException e) {
             fail(e.getMessage());
@@ -768,6 +793,14 @@ public class CakeShopIT {
         return client.target(url);
     }
 
+    private Entity<String> renameRecipeEntity(final String recipeName) {
+        return entity(
+                jsonObject()
+                        .add("name", recipeName)
+                        .build().toString(),
+                RENAME_RECIPE_MEDIA_TYPE);
+    }
+
     private Entity<String> recipeEntity(final String recipeName) {
         return recipeEntity(recipeName, false);
     }
@@ -790,22 +823,4 @@ public class CakeShopIT {
         while (msgConsumer.receiveNoWait() != null) {
         }
     }
-
-    @Before
-    public void before() throws Exception {
-        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
-        CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(cm).build();
-        cm.setMaxTotal(200); // Increase max total connection to 200
-        cm.setDefaultMaxPerRoute(20); // Increase default max connection per route to 20
-        ApacheHttpClient4Engine engine = new ApacheHttpClient4Engine(httpClient);
-        client = new ResteasyClientBuilder().httpEngine(engine).build();
-        httpResponsePoller = new HttpResponsePoller();
-    }
-
-    @After
-    public void cleanup() throws Exception {
-        client.close();
-
-    }
-
 }

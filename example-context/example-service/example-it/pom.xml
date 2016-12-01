@@ -10,7 +10,12 @@
     <artifactId>example-it</artifactId>
     <properties>
         <jboss.home>${project.build.directory}/wildfly-10.0.0.Final</jboss.home>
+        <!-- To be used when running CakeShopIT-->
         <server.config>standalone-test.xml</server.config>
+
+        <!-- To be used when running CakeShopPostgresIT-->
+        <!--<server.config>standalone-postgres-test.xml</server.config>-->
+
         <wildfly.keepalive>false</wildfly.keepalive>
     </properties>
 
@@ -187,6 +192,15 @@
             <artifactId>hamcrest-date</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- To be used when running CakeShopPostgresIT-->
+        <!--<dependency>-->
+        <!--<groupId>org.postgresql</groupId>-->
+        <!--<artifactId>postgresql</artifactId>-->
+        <!--<version>9.4-1201-jdbc41</version>-->
+        <!--<scope>test</scope>-->
+        <!--</dependency>-->
+
     </dependencies>
 
     <build>
@@ -335,6 +349,35 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- To be used when running CakeShopPostgresIT-->
+            <!--<plugin>-->
+                <!--<artifactId>maven-resources-plugin</artifactId>-->
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<id>copy-jboss-module</id>-->
+                        <!--<phase>process-test-classes</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>copy-resources</goal>-->
+                        <!--</goals>-->
+                        <!--<configuration>-->
+                            <!--<outputDirectory>${jboss.home}/modules/system/layers/base/org-->
+                            <!--</outputDirectory>-->
+                            <!--<resources>-->
+                                <!--<resource>-->
+                                    <!--<directory>src/test/resources/wildfly-modules</directory>-->
+                                    <!--<filtering>true</filtering>-->
+                                <!--</resource>-->
+                            <!--</resources>-->
+                            <!--<filters>-->
+                                <!--<filter>src/test/resources/test.properties</filter>-->
+                            <!--</filters>-->
+                        <!--</configuration>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+            <!--</plugin>-->
+
+            <!-- To be used when running CakeShopIT-->
             <plugin>
                 <groupId>com.edugility</groupId>
                 <artifactId>h2-maven-plugin</artifactId>
@@ -367,6 +410,7 @@
                     <jbossHome>${jboss.home}</jbossHome>
                     <serverConfig>${server.config}</serverConfig>
                     <keepAlive>${wildfly.keepalive}</keepAlive>
+                    <!--<jvmArgs>-agentlib:jdwp=transport=dt_socket,address=8888,server=y,suspend=y</jvmArgs>-->
                 </configuration>
                 <executions>
                     <execution>

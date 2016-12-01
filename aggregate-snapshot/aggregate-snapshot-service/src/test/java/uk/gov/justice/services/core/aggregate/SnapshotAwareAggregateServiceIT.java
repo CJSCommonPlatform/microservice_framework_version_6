@@ -20,6 +20,7 @@ import uk.gov.justice.domain.snapshot.DefaultObjectInputStreamStrategy;
 import uk.gov.justice.domain.snapshot.ObjectInputStreamStrategy;
 import uk.gov.justice.repository.EventLogOpenEjbAwareJdbcRepository;
 import uk.gov.justice.repository.SnapshotOpenEjbAwareJdbcRepository;
+import uk.gov.justice.services.common.configuration.GlobalValueProducer;
 import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
 import uk.gov.justice.services.common.configuration.ValueProducer;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -32,6 +33,8 @@ import uk.gov.justice.services.core.extension.EventFoundEvent;
 import uk.gov.justice.services.eventsource.DefaultEventDestinationResolver;
 import uk.gov.justice.services.eventsourcing.publisher.jms.JmsEventPublisher;
 import uk.gov.justice.services.eventsourcing.repository.core.EventRepository;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.EventLogInsertionStrategy;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.JdbcEventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLogConverter;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
@@ -53,6 +56,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.jms.Destination;
 import javax.sql.DataSource;
@@ -128,6 +132,7 @@ public class SnapshotAwareAggregateServiceIT {
             EventLogOpenEjbAwareJdbcRepository.class,
             JdbcEventRepository.class,
             EventRepository.class,
+            TestEventLogInsertionStrategyProducer.class,
 
             LoggerProducer.class,
 
@@ -151,7 +156,8 @@ public class SnapshotAwareAggregateServiceIT {
             ValueProducer.class,
             DefaultSnapshotService.class,
             UtcClock.class,
-            TestServiceContextNameProvider.class
+            TestServiceContextNameProvider.class,
+            GlobalValueProducer.class
     })
 
     public WebApp war() {
@@ -164,7 +170,6 @@ public class SnapshotAwareAggregateServiceIT {
     public void init() throws Exception {
         initEventDatabase();
         defaultAggregateService.register(new EventFoundEvent(EventA.class, "context.eventA"));
-
     }
 
     @Test
@@ -461,6 +466,15 @@ public class SnapshotAwareAggregateServiceIT {
         @Override
         public String getServiceContextName() {
             return "test-component";
+        }
+    }
+
+    @ApplicationScoped
+    public static class TestEventLogInsertionStrategyProducer {
+
+        @Produces
+        public EventLogInsertionStrategy eventLogInsertionStrategy() {
+            return new AnsiSQLEventLogInsertionStrategy();
         }
     }
 }

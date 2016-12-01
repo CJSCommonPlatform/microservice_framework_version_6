@@ -1,6 +1,8 @@
 package uk.gov.justice.services.example.cakeshop.command.handler;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static java.util.Collections.emptyList;
+import static java.util.UUID.randomUUID;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -25,6 +27,8 @@ import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.example.cakeshop.domain.aggregate.Recipe;
 import uk.gov.justice.services.example.cakeshop.domain.event.RecipeAdded;
+import uk.gov.justice.services.example.cakeshop.domain.event.RecipeRemoved;
+import uk.gov.justice.services.example.cakeshop.domain.event.RecipeRenamed;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.UUID;
@@ -37,16 +41,20 @@ import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AddRecipeCommandHandlerTest {
+public class RecipeCommandHandlerTest {
 
-    private static final String COMMAND_NAME = "example.add-recipe";
-    private static final String EVENT_NAME = "example.recipe-added";
-    private static final UUID RECIPE_ID = UUID.randomUUID();
+    private static final String ADD_RECIPE_COMMAND_NAME = "example.add-recipe";
+    private static final String ADD_RECIPE_EVENT_NAME = "example.recipe-added";
+    private static final String RENAME_RECIPE_COMMAND_NAME = "example.rename-recipe";
+    private static final String RENAME_RECIPE_EVENT_NAME = "example.recipe-renamed";
+    private static final String REMOVE_RECIPE_COMMAND_NAME = "example.remove-recipe";
+    private static final String REMOVE_RECIPE_EVENT_NAME = "example.recipe-removed";
+    private static final UUID RECIPE_ID = randomUUID();
     private static final String RECIPE_NAME = "Test Recipe";
     private static final Boolean GULTEN_FREE = true;
 
     @Mock
-    EventStream eventStream;
+    private EventStream eventStream;
 
     @Mock
     private EventSource eventSource;
@@ -55,24 +63,24 @@ public class AddRecipeCommandHandlerTest {
     private AggregateService aggregateService;
 
     @Spy
-    private Enveloper enveloper = createEnveloperWithEvents(RecipeAdded.class);
+    private Enveloper enveloper = createEnveloperWithEvents(RecipeAdded.class, RecipeRenamed.class, RecipeRemoved.class);
 
     @InjectMocks
-    private AddRecipeCommandHandler addRecipeCommandHandler;
+    private RecipeCommandHandler recipeCommandHandler;
 
     @Test
     public void shouldHaveCorrectHandlesAnnotation() throws Exception {
-        assertThat(addRecipeCommandHandler, isHandler(COMMAND_HANDLER)
+        assertThat(recipeCommandHandler, isHandler(COMMAND_HANDLER)
                 .with(method("addRecipe").thatHandles("example.add-recipe")));
     }
 
     @Test
     public void shouldHandleAddRecipeCommand() throws Exception {
         final Recipe recipe = new Recipe();
-        final UUID commandId = UUID.randomUUID();
+        final UUID commandId = randomUUID();
 
         final JsonEnvelope command = envelopeFrom(
-                metadataOf(commandId, COMMAND_NAME),
+                metadataOf(commandId, ADD_RECIPE_COMMAND_NAME),
                 createObjectBuilder()
                         .add("recipeId", RECIPE_ID.toString())
                         .add("name", RECIPE_NAME)
@@ -86,13 +94,13 @@ public class AddRecipeCommandHandlerTest {
         when(eventSource.getStreamById(RECIPE_ID)).thenReturn(eventStream);
         when(aggregateService.get(eventStream, Recipe.class)).thenReturn(recipe);
 
-        addRecipeCommandHandler.addRecipe(command);
+        recipeCommandHandler.addRecipe(command);
 
         assertThat(eventStream, eventStreamAppendedWith(
                 streamContaining(
                         jsonEnvelope(
                                 withMetadataEnvelopedFrom(command)
-                                        .withName(EVENT_NAME),
+                                        .withName(ADD_RECIPE_EVENT_NAME),
                                 payloadIsJson(allOf(
                                         withJsonPath("$.recipeId", equalTo(RECIPE_ID.toString())),
                                         withJsonPath("$.name", equalTo(RECIPE_NAME)),
@@ -103,5 +111,68 @@ public class AddRecipeCommandHandlerTest {
                                 )))
                                 .thatMatchesSchema()
                 )));
+    }
+
+    @Test
+    public void shouldHandleRenameRecipeCommand() throws Exception {
+        final UUID commandId = randomUUID();
+
+        final JsonEnvelope command = envelopeFrom(
+                metadataOf(commandId, RENAME_RECIPE_COMMAND_NAME),
+                createObjectBuilder()
+                        .add("recipeId", RECIPE_ID.toString())
+                        .add("name", RECIPE_NAME)
+                        .build());
+
+        when(eventSource.getStreamById(RECIPE_ID)).thenReturn(eventStream);
+        when(aggregateService.get(eventStream, Recipe.class)).thenReturn(existingRecipe());
+
+        recipeCommandHandler.renameRecipe(command);
+
+        assertThat(eventStream, eventStreamAppendedWith(
+                streamContaining(
+                        jsonEnvelope(
+                                withMetadataEnvelopedFrom(command)
+                                        .withName(RENAME_RECIPE_EVENT_NAME),
+                                payloadIsJson(allOf(
+                                        withJsonPath("$.recipeId", equalTo(RECIPE_ID.toString())),
+                                        withJsonPath("$.name", equalTo(RECIPE_NAME))
+                                )))
+                                .thatMatchesSchema()
+                )));
+    }
+
+    @Test
+    public void shouldHandleRemoveRecipeCommand() throws Exception {
+        final UUID commandId = randomUUID();
+
+        final JsonEnvelope command = envelopeFrom(
+                metadataOf(commandId, REMOVE_RECIPE_COMMAND_NAME),
+                createObjectBuilder()
+                        .add("recipeId", RECIPE_ID.toString())
+                        .build());
+
+        when(eventSource.getStreamById(RECIPE_ID)).thenReturn(eventStream);
+        when(aggregateService.get(eventStream, Recipe.class)).thenReturn(existingRecipe());
+
+        recipeCommandHandler.removeRecipe(command);
+
+        assertThat(eventStream, eventStreamAppendedWith(
+                streamContaining(
+                        jsonEnvelope(
+                                withMetadataEnvelopedFrom(command)
+                                        .withName(REMOVE_RECIPE_EVENT_NAME),
+                                payloadIsJson(
+                                        withJsonPath("$.recipeId", equalTo(RECIPE_ID.toString()))
+                                ))
+                                .thatMatchesSchema()
+                )));
+
+    }
+
+    private Recipe existingRecipe() {
+        final Recipe recipe = new Recipe();
+        recipe.apply(new RecipeAdded(RECIPE_ID, RECIPE_NAME, GULTEN_FREE, emptyList()));
+        return recipe;
     }
 }

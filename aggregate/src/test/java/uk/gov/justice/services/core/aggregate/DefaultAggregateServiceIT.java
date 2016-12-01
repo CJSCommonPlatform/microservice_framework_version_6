@@ -12,6 +12,7 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithR
 
 import uk.gov.justice.domain.aggregate.PrivateAggregate;
 import uk.gov.justice.domain.aggregate.TestAggregate;
+import uk.gov.justice.services.common.configuration.GlobalValueProducer;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -23,6 +24,8 @@ import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.extension.EventFoundEvent;
 import uk.gov.justice.services.eventsourcing.publisher.core.EventPublisher;
 import uk.gov.justice.services.eventsourcing.repository.core.EventRepository;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.EventLogInsertionStrategy;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.JdbcEventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLogConverter;
 import uk.gov.justice.services.eventsourcing.source.core.DefaultEventSource;
@@ -45,6 +48,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.jms.Destination;
 import javax.sql.DataSource;
@@ -95,6 +99,7 @@ public class DefaultAggregateServiceIT {
             JdbcEventRepository.class,
             EventRepository.class,
             EventLogOpenEjbAwareJdbcRepository.class,
+            TestEventLogInsertionStrategyProducer.class,
 
             DefaultAggregateService.class,
 
@@ -112,7 +117,9 @@ public class DefaultAggregateServiceIT {
 
             DummyJmsEventPublisher.class,
             DummyJmsEnvelopeSender.class,
-            UtcClock.class
+            UtcClock.class,
+
+            GlobalValueProducer.class,
 
     })
 
@@ -243,4 +250,12 @@ public class DefaultAggregateServiceIT {
         }
     }
 
+    @ApplicationScoped
+    public static class TestEventLogInsertionStrategyProducer {
+
+        @Produces
+        public EventLogInsertionStrategy eventLogInsertionStrategy() {
+            return new AnsiSQLEventLogInsertionStrategy();
+        }
+    }
 }

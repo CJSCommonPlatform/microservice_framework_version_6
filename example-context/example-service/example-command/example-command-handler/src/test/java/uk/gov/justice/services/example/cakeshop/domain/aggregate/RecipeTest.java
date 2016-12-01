@@ -13,6 +13,8 @@ import static org.mockito.Mockito.mock;
 import uk.gov.justice.services.example.cakeshop.domain.Ingredient;
 import uk.gov.justice.services.example.cakeshop.domain.event.CakeMade;
 import uk.gov.justice.services.example.cakeshop.domain.event.RecipeAdded;
+import uk.gov.justice.services.example.cakeshop.domain.event.RecipeRemoved;
+import uk.gov.justice.services.example.cakeshop.domain.event.RecipeRenamed;
 
 import java.util.List;
 import java.util.UUID;
@@ -20,7 +22,6 @@ import java.util.stream.Stream;
 
 import org.junit.Before;
 import org.junit.Test;
-import uk.gov.justice.services.example.cakeshop.domain.event.RecipeRemoved;
 
 /**
  * Unit test for the {@link Recipe} aggregate class.
@@ -53,15 +54,15 @@ public class RecipeTest {
     @Test
     public void shouldReturnRecipeAddedEvent() {
 
-        Stream<Object> events = recipe.addRecipe(RECIPE_ID, NAME, true, INGREDIENTS);
+        final Stream<Object> events = recipe.addRecipe(RECIPE_ID, NAME, true, INGREDIENTS);
 
-        List<Object> eventList = events.collect(toList());
+        final List<Object> eventList = events.collect(toList());
         assertThat(eventList, hasSize(1));
 
-        Object event = eventList.get(0);
+        final Object event = eventList.get(0);
         assertThat(event, instanceOf(RecipeAdded.class));
 
-        RecipeAdded recipeAdded = (RecipeAdded) event;
+        final RecipeAdded recipeAdded = (RecipeAdded) event;
         assertThat(recipeAdded.getRecipeId(), equalTo(RECIPE_ID));
         assertThat(recipeAdded.getName(), equalTo(NAME));
         assertThat(recipeAdded.getIngredients(), equalTo(INGREDIENTS));
@@ -83,11 +84,11 @@ public class RecipeTest {
     public void shouldReturnRecipeRemovedEvent() {
         recipe.addRecipe(RECIPE_ID, NAME, true, INGREDIENTS);
 
-        Stream<Object> eventRemoveStream = recipe.removeRecipe();
-        List<Object> eventRemovedList = eventRemoveStream.collect(toList());
+        final Stream<Object> eventRemoveStream = recipe.removeRecipe();
+        final List<Object> eventRemovedList = eventRemoveStream.collect(toList());
         assertThat(eventRemovedList, hasSize(1));
 
-        Object eventRemove = eventRemovedList.get(0);
+        final Object eventRemove = eventRemovedList.get(0);
         assertThat(eventRemove, instanceOf(RecipeRemoved.class));
     }
 
@@ -108,5 +109,17 @@ public class RecipeTest {
         assertThat(cakeMade.getName(), is(NAME));
 
 
+    }
+
+    @Test
+    public void shouldReturnRecipeRenamedEvent() {
+        recipe.addRecipe(RECIPE_ID, NAME, true, INGREDIENTS);
+
+        final Stream<Object> eventRenamedStream = recipe.renameRecipe("new name");
+        final List<Object> eventRenamedList = eventRenamedStream.collect(toList());
+        assertThat(eventRenamedList, hasSize(1));
+
+        final Object eventRenamed = eventRenamedList.get(0);
+        assertThat(eventRenamed, instanceOf(RecipeRenamed.class));
     }
 }

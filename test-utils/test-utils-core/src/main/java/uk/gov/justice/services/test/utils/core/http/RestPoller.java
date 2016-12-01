@@ -30,7 +30,7 @@ import org.hamcrest.TypeSafeDiagnosingMatcher;
  *
  * To Use:
  *
- * Poll until the response has specified number of events with required data:
+ * Poll until the response has specified number of events with required json payload:
  * <pre><blockquote>
  *
  *      import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
@@ -62,6 +62,31 @@ import org.hamcrest.TypeSafeDiagnosingMatcher;
  * a <code>RequestParamsBuilder</code> which takes a url and media type and will supply all other
  * required parameters with defaults. Overriding these defaults is done in the usual builder pattern
  * way.
+ *
+ * Poll until the response has specified substring in the payload:
+ * <pre><blockquote>
+ *
+ *      import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
+ *      import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
+ *
+ *      final String url = "http://localhost:8080/my-context/my/rest/endpoint";
+ *      final String mediaType = "application/vnd.notification.query.events+json";
+ *
+ *      final RequestParams requestParams = requestParams(url, mediaType)
+ *              .withHeader("header-name", "header-value")
+ *              .build();
+ *
+ *      poll(requestParams)
+ *          .until(
+ *              status().is(OK),
+ *              payload()
+ *                  .that(
+ *                      containsString("notification-event.xlsx")
+ *                  )
+ *          )
+ *      ;
+ *
+ * </blockquote></pre>
  *
  * Poll ignoring certain response status, until the response has specified number of events with
  * required data:

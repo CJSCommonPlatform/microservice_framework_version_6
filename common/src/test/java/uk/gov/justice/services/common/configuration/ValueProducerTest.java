@@ -57,14 +57,21 @@ public class ValueProducerTest {
     public void shouldReturnPropertyValue() throws NamingException {
         when(initialContext.lookup(format("java:/app/%s/%s", APP_NAME, param.key()))).thenReturn(VALID_VALUE);
 
-        assertThat(valueProducer.produceValue(propertyInjectionPoint), equalTo(VALID_VALUE));
+        assertThat(valueProducer.stringValueOf(propertyInjectionPoint), equalTo(VALID_VALUE));
+    }
+
+    @Test
+    public void shouldReturnLongPropertyValue() throws NamingException {
+        when(initialContext.lookup(format("java:/app/%s/%s", APP_NAME, param.key()))).thenReturn("100");
+
+        assertThat(valueProducer.longValueOf(propertyInjectionPoint), equalTo(100L));
     }
 
     @Test
     public void shouldReturnEmptyValue() throws NamingException {
         when(initialContext.lookup(format("java:/app/%s/%s", APP_NAME, param.key()))).thenReturn(EMPTY_VALUE);
 
-        assertThat(valueProducer.produceValue(propertyInjectionPoint), equalTo(EMPTY_VALUE));
+        assertThat(valueProducer.stringValueOf(propertyInjectionPoint), equalTo(EMPTY_VALUE));
     }
 
     @Test
@@ -72,7 +79,7 @@ public class ValueProducerTest {
         when(initialContext.lookup(format("java:/app/%s/%s", APP_NAME, param.key()))).thenThrow(NameNotFoundException.class);
         when(param.defaultValue()).thenReturn(DEFAULT_VALUE);
 
-        assertThat(valueProducer.produceValue(propertyInjectionPoint), equalTo(DEFAULT_VALUE));
+        assertThat(valueProducer.stringValueOf(propertyInjectionPoint), equalTo(DEFAULT_VALUE));
     }
 
     @Test(expected = MissingPropertyException.class)
@@ -80,7 +87,7 @@ public class ValueProducerTest {
         when(initialContext.lookup(format("java:/app/%s/%s", APP_NAME, param.key()))).thenThrow(NameNotFoundException.class);
         when(param.defaultValue()).thenReturn("_null_default");
 
-        valueProducer.produceValue(propertyInjectionPoint);
+        valueProducer.stringValueOf(propertyInjectionPoint);
     }
 
 }

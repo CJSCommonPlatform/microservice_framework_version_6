@@ -6,6 +6,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.setField;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.domain.aggregate.TestAggregate;
@@ -18,6 +21,8 @@ import uk.gov.justice.domain.snapshot.DefaultObjectInputStreamStrategy;
 import uk.gov.justice.domain.snapshot.ObjectInputStreamStrategy;
 import uk.gov.justice.repository.EventLogOpenEjbAwareJdbcRepository;
 import uk.gov.justice.repository.SnapshotOpenEjbAwareJdbcRepository;
+import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
+import uk.gov.justice.services.common.configuration.ValueProducer;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -35,6 +40,7 @@ import uk.gov.justice.services.eventsourcing.source.core.SnapshotAwareEventSourc
 import uk.gov.justice.services.eventsourcing.source.core.SnapshotAwareEventStreamManager;
 import uk.gov.justice.services.eventsourcing.source.core.snapshot.DefaultSnapshotService;
 import uk.gov.justice.services.eventsourcing.source.core.snapshot.DefaultSnapshotStrategy;
+import uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil;
 import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
@@ -88,7 +94,7 @@ public class SnapshotAwareAggregateServiceIT {
 
     private static final String TYPE = TEST_AGGREGATE_PACKAGE + ".TestAggregate";
 
-    private static final int SNAPSHOT_THRESHOLD = 25;
+    private static final long SNAPSHOT_THRESHOLD = 25L;
 
     @Resource(name = "openejb/Resource/eventStore")
     private DataSource dataSource;
@@ -111,6 +117,7 @@ public class SnapshotAwareAggregateServiceIT {
 
     @Inject
     private DefaultSnapshotService snapshotService;
+
 
     @Module
     @org.apache.openejb.testing.Classes(cdi = true, value = {
@@ -141,9 +148,11 @@ public class SnapshotAwareAggregateServiceIT {
             SnapshotAwareEventSource.class,
             SnapshotAwareEnvelopeEventStream.class,
             SnapshotAwareEventStreamManager.class,
-            DefaultSnapshotService.class,
             DefaultSnapshotStrategy.class,
-            UtcClock.class
+            ValueProducer.class,
+            DefaultSnapshotService.class,
+            UtcClock.class,
+            TestServiceContextNameProvider.class
     })
 
     public WebApp war() {
@@ -156,8 +165,8 @@ public class SnapshotAwareAggregateServiceIT {
     public void init() throws Exception {
         initEventDatabase();
         defaultAggregateService.register(new EventFoundEvent(EventA.class, "context.eventA"));
-    }
 
+    }
 
     @Test
     public void shouldStoreABrandNewSnapshotWhenEventCountInTheStreamReachesThreshold() throws Exception {
@@ -391,27 +400,27 @@ public class SnapshotAwareAggregateServiceIT {
         return classLoader;
     }
 
-    private <T extends Aggregate> void rebuildAggregateAndApplyEvents(final EventStream eventStream, int eventCount) throws Exception {
+    private <T extends Aggregate> void rebuildAggregateAndApplyEvents(final EventStream eventStream, long eventCount) throws Exception {
 
         TestAggregate aggregateRebuilt = aggregateService.get(eventStream, TestAggregate.class);
 
         eventStream.append(createEventAndApply(eventCount, "context.eventA", aggregateRebuilt));
     }
 
-    private Stream<JsonEnvelope> createEventAndApply(int count, String eventName, TestAggregate aggregate) {
+    private Stream<JsonEnvelope> createEventAndApply(long count, String eventName, TestAggregate aggregate) {
         List<Object> envelopes = new LinkedList<>();
         for (int i = 1; i <= count; i++) {
-            JsonEnvelope envelope = DefaultJsonEnvelope.envelope().with(JsonObjectMetadata.metadataWithRandomUUID(eventName).withStreamId(STREAM_ID)).withPayloadOf("value", "name").build();
+            JsonEnvelope envelope = envelope().with(metadataWithRandomUUID(eventName).withStreamId(STREAM_ID)).withPayloadOf("value", "name").build();
             aggregate.addEvent(envelope);
             envelopes.add(envelope);
         }
         return envelopes.stream().map(x -> (JsonEnvelope) x);
     }
 
-    private <T extends Aggregate> Stream<JsonEnvelope> createEventStreamAndApply(int count, String eventName, T aggregate) {
+    private <T extends Aggregate> Stream<JsonEnvelope> createEventStreamAndApply(long count, String eventName, T aggregate) {
         List<Object> envelopes = new LinkedList<>();
         for (int i = 1; i <= count; i++) {
-            JsonEnvelope envelope = DefaultJsonEnvelope.envelope().with(JsonObjectMetadata.metadataWithRandomUUID(eventName).withStreamId(STREAM_ID)).withPayloadOf("value", "name").build();
+            JsonEnvelope envelope = envelope().with(metadataWithRandomUUID(eventName).withStreamId(STREAM_ID)).withPayloadOf("value", "name").build();
             aggregate.apply(new EventA(String.valueOf(i)));
             envelopes.add(envelope);
         }
@@ -429,6 +438,15 @@ public class SnapshotAwareAggregateServiceIT {
         @Override
         public void send(JsonEnvelope envelope, String destinationName) {
 
+        }
+    }
+
+    @ApplicationScoped
+    public static class TestServiceContextNameProvider implements ServiceContextNameProvider {
+
+        @Override
+        public String getServiceContextName() {
+            return "test-component";
         }
     }
 }

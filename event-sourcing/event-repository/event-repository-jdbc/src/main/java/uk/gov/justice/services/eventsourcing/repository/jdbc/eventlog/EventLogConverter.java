@@ -1,7 +1,6 @@
 package uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog;
 
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
-import uk.gov.justice.services.common.util.Clock;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidStreamIdException;
 import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -27,8 +26,6 @@ public class EventLogConverter {
     @Inject
     StringToJsonObjectConverter stringToJsonObjectConverter;
 
-    @Inject
-    Clock clock;
 
     /**
      * Creates an {@link EventLog} object from the <code>eventEnvelope</code>.
@@ -52,7 +49,10 @@ public class EventLogConverter {
                 eventMetadata.name(),
                 envelope.metadata().asJsonObject().toString(),
                 extractPayloadAsString(envelope),
-                clock.now());
+                eventMetadata
+                        .createdAt()
+                        .map(createdAt -> createdAt)
+                        .orElseThrow(() -> new IllegalArgumentException("createdAt field missing in envelope")));
     }
 
     /**

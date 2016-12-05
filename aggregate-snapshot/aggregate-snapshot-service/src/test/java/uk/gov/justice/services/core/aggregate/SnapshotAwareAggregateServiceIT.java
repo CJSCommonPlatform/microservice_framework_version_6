@@ -6,7 +6,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.setField;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 
@@ -26,6 +25,7 @@ import uk.gov.justice.services.common.configuration.ValueProducer;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.common.util.Clock;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.extension.EventFoundEvent;
@@ -40,11 +40,8 @@ import uk.gov.justice.services.eventsourcing.source.core.SnapshotAwareEventSourc
 import uk.gov.justice.services.eventsourcing.source.core.SnapshotAwareEventStreamManager;
 import uk.gov.justice.services.eventsourcing.source.core.snapshot.DefaultSnapshotService;
 import uk.gov.justice.services.eventsourcing.source.core.snapshot.DefaultSnapshotStrategy;
-import uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil;
-import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
-import uk.gov.justice.services.messaging.JsonObjectMetadata;
 import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
 
@@ -114,6 +111,8 @@ public class SnapshotAwareAggregateServiceIT {
     @Inject
     private DefaultAggregateService defaultAggregateService;
 
+    @Inject
+    private Clock clock;
 
     @Inject
     private DefaultSnapshotService snapshotService;
@@ -410,7 +409,13 @@ public class SnapshotAwareAggregateServiceIT {
     private Stream<JsonEnvelope> createEventAndApply(long count, String eventName, TestAggregate aggregate) {
         List<Object> envelopes = new LinkedList<>();
         for (int i = 1; i <= count; i++) {
-            JsonEnvelope envelope = envelope().with(metadataWithRandomUUID(eventName).withStreamId(STREAM_ID)).withPayloadOf("value", "name").build();
+            JsonEnvelope envelope =
+                    envelope()
+                    .with(metadataWithRandomUUID(eventName)
+                            .createdAt(clock.now())
+                            .withStreamId(STREAM_ID))
+                    .withPayloadOf("value", "name")
+                    .build();
             aggregate.addEvent(envelope);
             envelopes.add(envelope);
         }
@@ -419,8 +424,17 @@ public class SnapshotAwareAggregateServiceIT {
 
     private <T extends Aggregate> Stream<JsonEnvelope> createEventStreamAndApply(long count, String eventName, T aggregate) {
         List<Object> envelopes = new LinkedList<>();
+
         for (int i = 1; i <= count; i++) {
-            JsonEnvelope envelope = envelope().with(metadataWithRandomUUID(eventName).withStreamId(STREAM_ID)).withPayloadOf("value", "name").build();
+
+            JsonEnvelope envelope =
+                    envelope()
+                    .with(metadataWithRandomUUID(eventName)
+                            .createdAt(clock.now())
+                            .withStreamId(STREAM_ID))
+                    .withPayloadOf("value", "name")
+                    .build();
+
             aggregate.apply(new EventA(String.valueOf(i)));
             envelopes.add(envelope);
         }

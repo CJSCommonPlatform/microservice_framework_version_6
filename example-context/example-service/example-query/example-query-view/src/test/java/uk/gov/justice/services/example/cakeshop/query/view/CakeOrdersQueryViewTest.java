@@ -16,6 +16,7 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.example.cakeshop.query.view.response.CakeOrderView;
 import uk.gov.justice.services.example.cakeshop.query.view.service.CakeOrderService;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -36,7 +37,7 @@ public class CakeOrdersQueryViewTest {
 
     @Before
     public void setup() {
-        final Enveloper enveloper = new Enveloper(new ObjectToJsonValueConverter(new ObjectMapperProducer().objectMapper()));
+        final Enveloper enveloper = EnveloperFactory.createEnveloper();
         queryView = new CakeOrdersQueryView(service, enveloper);
     }
 

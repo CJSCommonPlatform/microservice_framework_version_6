@@ -5,6 +5,7 @@ import static java.util.Arrays.stream;
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.extension.EventFoundEvent;
 
@@ -44,8 +45,7 @@ public class EnveloperFactory {
     public Enveloper create() {
         final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
         final ObjectToJsonValueConverter converter = new ObjectToJsonValueConverter(objectMapper);
-
-        return new Enveloper(converter);
+        return new Enveloper(new UtcClock(), converter);
     }
 
     public Enveloper createWithEvents(final Class<?>... events) {

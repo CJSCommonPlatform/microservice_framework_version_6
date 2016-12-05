@@ -25,6 +25,7 @@ import uk.gov.justice.services.clients.core.webclient.WebTargetFactory;
 import uk.gov.justice.services.common.configuration.JndiBasedServiceContextNameProvider;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
 import uk.gov.justice.services.core.accesscontrol.AccessControlService;
 import uk.gov.justice.services.core.accesscontrol.AccessControlViolationException;
@@ -151,7 +152,8 @@ public class RemoteExampleQueryApiIT {
             SystemUserUtil.class,
             TestSystemUserProvider.class,
             RemoteExampleQueryController.class,
-            WebTargetFactory.class
+            WebTargetFactory.class,
+            UtcClock.class
     })
     public WebApp war() {
         return new WebApp()

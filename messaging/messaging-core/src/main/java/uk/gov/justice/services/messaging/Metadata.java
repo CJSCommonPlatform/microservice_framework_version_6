@@ -1,5 +1,6 @@
 package uk.gov.justice.services.messaging;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -76,4 +77,10 @@ public interface Metadata {
      */
     JsonObject asJsonObject();
 
+    /**
+     * Return the timestamp for when the metadata was created
+     *
+     * @return the timestamp the matadata was created at
+     */
+    Optional<ZonedDateTime> createdAt();
 }

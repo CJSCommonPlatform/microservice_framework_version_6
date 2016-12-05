@@ -2,7 +2,9 @@ package uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog;
 
 
 import static java.lang.String.format;
+import static uk.gov.justice.services.common.converter.ZonedDateTimes.fromSqlTimestamp;
 
+import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidSequenceIdException;
 import uk.gov.justice.services.jdbc.persistence.AbstractJdbcRepository;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
@@ -10,8 +12,6 @@ import uk.gov.justice.services.jdbc.persistence.PreparedStatementWrapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -33,6 +33,7 @@ public class EventLogJdbcRepository extends AbstractJdbcRepository<EventLog> {
     static final String COL_NAME = "name";
     static final String COL_METADATA = "metadata";
     static final String COL_PAYLOAD = "payload";
+    static final String COL_TIMESTAMP = "date_created";
 
     static final long INITIAL_VERSION = 0L;
 
@@ -44,8 +45,8 @@ public class EventLogJdbcRepository extends AbstractJdbcRepository<EventLog> {
     static final String SQL_FIND_BY_STREAM_ID_AND_SEQUENCE_ID = "SELECT * FROM event_log WHERE stream_id=? AND sequence_id>=? ORDER BY sequence_id ASC";
     static final String SQL_FIND_LATEST_SEQUENCE_ID = "SELECT MAX(sequence_id) FROM event_log WHERE stream_id=?";
     static final String SQL_DISTINCT_STREAM_ID = "SELECT DISTINCT stream_id FROM event_log";
-    static final String SQL_INSERT_EVENT_LOG = "INSERT INTO event_log (id, stream_id, sequence_id, name, metadata, payload/*, date_created*/ ) " +
-            "VALUES(?, ?, ?, ?, ?, ?/*, ?*/)";
+    static final String SQL_INSERT_EVENT_LOG = "INSERT INTO event_log (id, stream_id, sequence_id, name, metadata, payload, date_created) " +
+            "VALUES(?, ?, ?, ?, ?, ?, ?)";
 
     private static final String READING_STREAM_ALL_EXCEPTION = "Exception while reading stream";
     private static final String READING_STREAM_EXCEPTION = "Exception while reading stream %s";
@@ -71,6 +72,8 @@ public class EventLogJdbcRepository extends AbstractJdbcRepository<EventLog> {
             ps.setString(4, eventLog.getName());
             ps.setString(5, eventLog.getMetadata());
             ps.setString(6, eventLog.getPayload());
+            ps.setTimestamp(7, ZonedDateTimes.toSqlTimestamp(eventLog.getCreatedAt()));
+
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new JdbcRepositoryException(format("Exception while storing sequence %s of stream %s",
@@ -187,7 +190,7 @@ public class EventLogJdbcRepository extends AbstractJdbcRepository<EventLog> {
                 resultSet.getString(COL_NAME),
                 resultSet.getString(COL_METADATA),
                 resultSet.getString(COL_PAYLOAD),
-                null);
+                fromSqlTimestamp(resultSet.getTimestamp(COL_TIMESTAMP)));
     }
 
 

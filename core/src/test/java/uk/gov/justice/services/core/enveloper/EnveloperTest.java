@@ -11,10 +11,12 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
+import uk.gov.justice.services.common.util.Clock;
 import uk.gov.justice.services.core.enveloper.exception.InvalidEventException;
 import uk.gov.justice.services.core.extension.EventFoundEvent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import javax.json.JsonObject;
@@ -26,6 +28,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -46,6 +49,7 @@ public class EnveloperTest {
     @Rule
     public ExpectedException exception = ExpectedException.none();
 
+    @InjectMocks
     private Enveloper enveloper;
 
     private Object object;
@@ -62,9 +66,12 @@ public class EnveloperTest {
     @Mock
     private JsonObject payload;
 
+    @Mock
+    private Clock clock;
+
     @Before
     public void setup() throws JsonProcessingException {
-        enveloper = new Enveloper(objectToJsonValueConverter);
+
         object = new TestEvent();
 
         doReturn(TestEvent.class).when(event).getClazz();
@@ -81,6 +88,7 @@ public class EnveloperTest {
                         .withCausation(OLD_CAUSATION_ID)
                         .build());
         when(objectToJsonValueConverter.convert(object)).thenReturn(payload);
+        when(clock.now()).thenReturn(ZonedDateTime.now());
 
         JsonEnvelope event = enveloper.withMetadataFrom(envelope).apply(object);
 
@@ -105,6 +113,7 @@ public class EnveloperTest {
                         .withCausation(OLD_CAUSATION_ID)
                         .build());
         when(objectToJsonValueConverter.convert(object)).thenReturn(payload);
+        when(clock.now()).thenReturn(ZonedDateTime.now());
 
         JsonEnvelope event = enveloper.withMetadataFrom(envelope, TEST_NAME).apply(object);
 
@@ -123,6 +132,7 @@ public class EnveloperTest {
                 metadataOf(COMMAND_UUID, TEST_NAME)
                         .withCausation(OLD_CAUSATION_ID)
                         .build());
+        when(clock.now()).thenReturn(ZonedDateTime.now());
 
         JsonEnvelope event = enveloper.withMetadataFrom(envelope, TEST_NAME).apply(null);
 
@@ -142,6 +152,7 @@ public class EnveloperTest {
                 metadataOf(COMMAND_UUID, TEST_EVENT_NAME)
                         .build());
         when(objectToJsonValueConverter.convert(object)).thenReturn(payload);
+        when(clock.now()).thenReturn(ZonedDateTime.now());
 
         JsonEnvelope event = enveloper.withMetadataFrom(envelope).apply(object);
 

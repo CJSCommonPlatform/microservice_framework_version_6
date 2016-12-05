@@ -17,16 +17,16 @@ public class EventLog {
     private final String name;
     private final String payload;
     private final String metadata;
-    private final ZonedDateTime dateCreated;
+    private final ZonedDateTime createdAt;
 
-    public EventLog(final UUID id, final UUID streamId, final Long sequenceId, final String name, final String metadata, final String payload, final ZonedDateTime timestamp) {
+    public EventLog(final UUID id, final UUID streamId, final Long sequenceId, final String name, final String metadata, final String payload, final ZonedDateTime createdAt) {
         this.id = id;
         this.streamId = streamId;
         this.sequenceId = sequenceId;
         this.name = name;
         this.metadata = metadata;
         this.payload = payload;
-        this.dateCreated = timestamp;
+        this.createdAt = createdAt;
     }
 
     public UUID getId() {
@@ -53,8 +53,8 @@ public class EventLog {
         return metadata;
     }
 
-    public ZonedDateTime getDateCreated() {
-        return dateCreated;
+    public ZonedDateTime getCreatedAt() {
+        return createdAt;
     }
 
     @Override
@@ -73,18 +73,18 @@ public class EventLog {
                 Objects.equals(payload, eventLog.payload) &&
                 Objects.equals(metadata, eventLog.metadata) &&
                 Objects.equals(name, eventLog.name) &&
-                Objects.equals(dateCreated, eventLog.dateCreated);
+                Objects.equals(createdAt, eventLog.createdAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, streamId, sequenceId, payload, name, metadata, dateCreated);
+        return Objects.hash(id, streamId, sequenceId, payload, name, metadata, createdAt);
     }
 
     @Override
     public String toString() {
-        return String.format("EventLog [id=%s, streamId=%s, sequenceId=%s, name=%s, payload=%s, metadata=%s, dateCreated=$s]", id,
-                streamId, sequenceId, name, payload, metadata, ZonedDateTimes.toString(dateCreated));
+        return String.format("EventLog [id=%s, streamId=%s, sequenceId=%s, name=%s, payload=%s, metadata=%s, createdAt=$s]", id,
+                streamId, sequenceId, name, payload, metadata, ZonedDateTimes.toString(createdAt));
     }
 
 }

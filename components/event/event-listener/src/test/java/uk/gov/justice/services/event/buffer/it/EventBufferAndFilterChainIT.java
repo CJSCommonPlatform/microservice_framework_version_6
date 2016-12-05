@@ -13,6 +13,7 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
 import uk.gov.justice.services.core.accesscontrol.AccessControlService;
 import uk.gov.justice.services.core.accesscontrol.AllowAllPolicyEvaluator;
@@ -140,7 +141,8 @@ public class EventBufferAndFilterChainIT {
             LoggerProducer.class,
             EmptySystemUserProvider.class,
             SystemUserUtil.class,
-            BeanInstantiater.class
+            BeanInstantiater.class,
+            UtcClock.class
     })
     public WebApp war() {
         return new WebApp()

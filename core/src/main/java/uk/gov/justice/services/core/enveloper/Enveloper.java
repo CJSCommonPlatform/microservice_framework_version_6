@@ -3,12 +3,15 @@ package uk.gov.justice.services.core.enveloper;
 import static java.lang.String.format;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.CAUSATION;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.CREATED_AT;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
 
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
+import uk.gov.justice.services.common.converter.ZonedDateTimes;
+import uk.gov.justice.services.common.util.Clock;
 import uk.gov.justice.services.core.enveloper.exception.InvalidEventException;
 import uk.gov.justice.services.core.extension.EventFoundEvent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -37,15 +40,15 @@ import javax.json.JsonValue;
 @ApplicationScoped
 public class Enveloper {
 
-    private final ObjectToJsonValueConverter objectToJsonValueConverter;
+    Clock clock;
 
-    //for CDI proxying only
-    protected Enveloper() {
-        this.objectToJsonValueConverter = null;
-    }
+    ObjectToJsonValueConverter objectToJsonValueConverter;
+
+    Enveloper() {}
 
     @Inject
-    public Enveloper(final ObjectToJsonValueConverter objectToJsonValueConverter) {
+    public Enveloper(final Clock clock, final ObjectToJsonValueConverter objectToJsonValueConverter) {
+        this.clock = clock;
         this.objectToJsonValueConverter = objectToJsonValueConverter;
     }
 
@@ -104,6 +107,7 @@ public class Enveloper {
                 .add(ID, UUID.randomUUID().toString())
                 .add(NAME, name)
                 .add(CAUSATION, createCausation(metadata))
+                .add(CREATED_AT, ZonedDateTimes.toString(clock.now()))
                 .build();
 
         return metadataFrom(jsonObject);
@@ -118,5 +122,4 @@ public class Enveloper {
 
         return causation.build();
     }
-
 }

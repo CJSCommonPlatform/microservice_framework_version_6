@@ -1,6 +1,8 @@
 package uk.gov.justice.services.eventsourcing.source.core.snapshot;
 
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,32 +21,29 @@ public class DefaultSnapshotStrategyTest {
     private DefaultSnapshotStrategy snapshotStrategy;
 
     @Test
-    public void shouldCreateAggregateSnapshotWhenDifferenceGreaterThanThreshold() {
-        long streamVersionId = 26L;
-        long snapshotVersionId = 0L;
-        boolean canBeCreated = snapshotStrategy.shouldCreateSnapshot(streamVersionId, snapshotVersionId);
+    public void shouldCreateAggregateSnapshotWhenDifferenceGreaterOrEqualThanThreshold() {
+        snapshotStrategy.snapshotThreshold = 25L;
+        assertThat(snapshotStrategy.shouldCreateSnapshot(26L, 0L), is(true));
+        assertThat(snapshotStrategy.shouldCreateSnapshot(25L, 0L), is(true));
 
-        assertEquals(true, canBeCreated);
+
+        snapshotStrategy.snapshotThreshold = 22L;
+        assertThat(snapshotStrategy.shouldCreateSnapshot(23L, 0L), is(true));
+        assertThat(snapshotStrategy.shouldCreateSnapshot(22L, 0L), is(true));
+
     }
 
-    @Test
-    public void shouldNotCreateAggregateSnapshotWhenDifferenceIsEqualToThreshold() {
-
-        long streamVersionId = 25L;
-        long snapshotVersionId = 0L;
-        boolean canBeCreated = snapshotStrategy.shouldCreateSnapshot(streamVersionId, snapshotVersionId);
-
-        assertEquals(true, canBeCreated);
-    }
 
     @Test
     public void shouldNotCreateAggregageSnapshotWhenDifferenceIsLessThanThreshold() {
 
-        long streamVersionId = 24L;
-        long snapshotVersionId = 0L;
-        boolean canBeCreated = snapshotStrategy.shouldCreateSnapshot(streamVersionId, snapshotVersionId);
+        snapshotStrategy.snapshotThreshold = 25L;
+        assertThat(snapshotStrategy.shouldCreateSnapshot(24L, 0L), is(false));
 
-        assertEquals(false, canBeCreated);
+        snapshotStrategy.snapshotThreshold = 22L;
+        assertThat(snapshotStrategy.shouldCreateSnapshot(21L, 0L), is(false));
+
+
     }
 
     @Test
@@ -52,9 +51,9 @@ public class DefaultSnapshotStrategyTest {
 
         long streamVersionId = 51L;
         long snapshotVersionId = 25L;
-        boolean canBeCreated = snapshotStrategy.shouldCreateSnapshot(streamVersionId, snapshotVersionId);
+        snapshotStrategy.snapshotThreshold = 25;
 
-        assertEquals(true, canBeCreated);
+        assertEquals(true, snapshotStrategy.shouldCreateSnapshot(streamVersionId, snapshotVersionId));
     }
 
     @Test
@@ -62,18 +61,20 @@ public class DefaultSnapshotStrategyTest {
 
         long streamVersionId = 50L;
         long snapshotVersionId = 25L;
-        boolean canBeCreated = snapshotStrategy.shouldCreateSnapshot(streamVersionId, snapshotVersionId);
+        snapshotStrategy.snapshotThreshold = 25;
 
-        assertEquals(true, canBeCreated);
+        assertEquals(true, snapshotStrategy.shouldCreateSnapshot(streamVersionId, snapshotVersionId));
     }
 
     @Test
-    public void shouldCreateAggregageSnapshotWhenDifferenceIsLessThanThresholdWhenSnapshotIsAlreadyAvailable() {
+    public void shouldNotCreateAggregateSnapshotWhenDifferenceIsLessOrEqualThanThresholdWhenSnapshotIsAlreadyAvailable() {
+        snapshotStrategy.snapshotThreshold = 25L;
+        assertThat(snapshotStrategy.shouldCreateSnapshot(49L, 25L), is(false));
+        assertThat(snapshotStrategy.shouldCreateSnapshot(74L, 50L), is(false));
 
-        long streamVersionId = 49L;
-        long snapshotVersionId = 25L;
-        boolean canBeCreated = snapshotStrategy.shouldCreateSnapshot(streamVersionId, snapshotVersionId);
+        snapshotStrategy.snapshotThreshold = 20L;
+        assertThat(snapshotStrategy.shouldCreateSnapshot(39L, 20L), is(false));
+        assertThat(snapshotStrategy.shouldCreateSnapshot(79L, 60L), is(false));
 
-        assertEquals(false, canBeCreated);
     }
 }

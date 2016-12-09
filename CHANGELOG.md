@@ -10,9 +10,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ### Changed
 - Improve ResponsePayloadMatcher to support string matchers on response payload
+- Upgraded ObjectMapper to allow single arg constructors in Object serialization
 
 ### Removed
- - DateTimeProvider. Use CLock/UtcClock instead
+ - DateTimeProvider: after 2 months deprecation. Use CLock/UtcClock instead
 
 ## [0.35.0] - 2016-11-24
 ### Added

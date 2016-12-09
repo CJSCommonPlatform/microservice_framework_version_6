@@ -27,37 +27,37 @@ public class JsonSchemaValidationMatcherTest {
 
     @Test
     public void shouldValidateJsonContent() {
-        assertThat("raml/json/schema/notification.subscribe.valid.json", isValidForSchema("raml/json/schema/notification.subscribe.json"));
+        assertThat("json/schema/notification.subscribe.valid.json", isValidForSchema("json/schema/notification.subscribe.json"));
     }
 
     @Test
     public void shouldFailWhenJsonDoesNotFollowSchema() {
-        assertThat("raml/json/schema/notification.subscribe.invalid.value.json", isNotValidForSchema("raml/json/schema/notification.subscribe.json"));
+        assertThat("json/schema/notification.subscribe.invalid.value.json", isNotValidForSchema("json/schema/notification.subscribe.json"));
     }
 
     @Test
     public void shouldValidateFailureMessage() {
-        assertThat("raml/json/schema/notification.subscribe.missing.filter.json",
-                failsValidationWithMessage("raml/json/schema/notification.subscribe.json",
+        assertThat("json/schema/notification.subscribe.missing.filter.json",
+                failsValidationWithMessage("json/schema/notification.subscribe.json",
                         "#: required key [filter] not found"));
     }
 
     @Test
     public void shouldValidateJsonWhichAreNotOnClasspath() throws Exception {
-        assertThat(getTemporaryPathTo("raml/json/schema/notification.subscribe.valid.json"),
-                isValidForSchema("raml/json/schema/notification.subscribe.json"));
+        assertThat(getTemporaryPathTo("json/schema/notification.subscribe.valid.json"),
+                isValidForSchema("json/schema/notification.subscribe.json"));
     }
 
     @Test
     public void shouldFailWhenOneOfTheFieldIsMissingFromJsonRoot() throws Exception {
-        assertThat("raml/json/schema/notification.subscribe.valid.json",
-                failsValidationForAnyMissingField("raml/json/schema/notification.subscribe.json"));
+        assertThat("json/schema/notification.subscribe.valid.json",
+                failsValidationForAnyMissingField("json/schema/notification.subscribe.json"));
     }
 
     @Test
     public void shouldFailWhenOneOfTheFilterFieldIsMissing() throws Exception {
-        assertThat("raml/json/schema/notification.subscribe.valid.json",
-                failsValidationForAnyMissingField("raml/json/schema/notification.subscribe.json", "/filter/"));
+        assertThat("json/schema/notification.subscribe.valid.json",
+                failsValidationForAnyMissingField("json/schema/notification.subscribe.json", "/filter/"));
     }
 
     @Test

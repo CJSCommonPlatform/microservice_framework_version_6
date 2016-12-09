@@ -11,6 +11,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ### Changed
 - Improve ResponsePayloadMatcher to support string matchers on response payload
 
+### Fixed
+- JsonSchemaValidationMatcher to look for json schema in correct location
+
 ## [0.35.0] - 2016-11-24
 ### Added
  - File, file-api and file-alfresco modules

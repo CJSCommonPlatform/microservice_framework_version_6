@@ -76,7 +76,8 @@ public class HandlerMethodMatcher extends TypeSafeDiagnosingMatcher<Class<?>> {
                     .appendText("Class ")
                     .appendValue(handlerClass)
                     .appendText("has no method ")
-                    .appendValue(methodName);
+                    .appendValue(methodName)
+                    .appendText(" with an argument of type JsonEnvelope ");
             return false;
         }
 

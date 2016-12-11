@@ -3,12 +3,5 @@
   "id": "",
   "type": "object",
   "properties": {
-    "recipeId": {
-      "id": "/recipeId",
-      "type": "string"
-    }
-  },
-  "required": [
-    "recipeId"
-  ]
+  }
 }

@@ -10,6 +10,7 @@
         <class>uk.gov.justice.services.example.cakeshop.persistence.entity.Recipe</class>
         <class>uk.gov.justice.services.example.cakeshop.persistence.entity.RecipeIngredient</class>
         <class>uk.gov.justice.services.example.cakeshop.persistence.entity.CakeOrder</class>
+        <class>uk.gov.justice.services.example.cakeshop.persistence.entity.Cake</class>
     </persistence-unit>
 
 </persistence>

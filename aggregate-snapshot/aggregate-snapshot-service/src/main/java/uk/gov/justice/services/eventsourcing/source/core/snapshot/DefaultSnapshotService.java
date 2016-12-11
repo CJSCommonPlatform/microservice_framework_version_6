@@ -40,13 +40,12 @@ public class DefaultSnapshotService implements SnapshotService {
 
     @Override
     public <T extends Aggregate> void attemptAggregateStore(final UUID streamId, final long streamVersionId, final T aggregate, final long currentSnapshotVersion) {
-        logger.trace("Applying snapshot Strategy for {}", streamId, streamVersionId, aggregate.getClass(), aggregate, currentSnapshotVersion);
-
         if (snapshotStrategy.shouldCreateSnapshot(streamVersionId, currentSnapshotVersion)) {
             try {
+                logger.trace("Storing snapshot of aggregate: {}, streamId: {}, version: {}", aggregate.getClass().getSimpleName(), streamId, streamVersionId);
                 snapshotRepository.storeSnapshot(new AggregateSnapshot<>(streamId, streamVersionId, aggregate));
             } catch (SerializationException e) {
-                logger.error("SerializationException while creating snapshot Strategy for {}", streamId, streamVersionId, aggregate.getClass(), aggregate, currentSnapshotVersion);
+                logger.error("Error creating snapshot for {}", streamId, e);
             }
         }
     }
@@ -54,11 +53,9 @@ public class DefaultSnapshotService implements SnapshotService {
     @Override
     public <T extends Aggregate> Optional<VersionedAggregate<T>> getLatestVersionedAggregate(final UUID streamId, final Class<T> clazz)
             throws AggregateChangeDetectedException {
-        logger.trace("Retrieving aggregate container strategy for {}", streamId, clazz);
+        logger.trace("Retrieving snapshot for stream id: {}, aggregate: {}", streamId, clazz.getSimpleName());
 
         final Optional<AggregateSnapshot<T>> aggregateSnapshot = snapshotRepository.getLatestSnapshot(streamId, clazz);
-
-        logger.trace("Retrieving aggregate container for {}", aggregateSnapshot, clazz);
 
         if (aggregateSnapshot.isPresent()) {
             final AggregateSnapshot<T> snapshotValue = aggregateSnapshot.get();
@@ -77,7 +74,7 @@ public class DefaultSnapshotService implements SnapshotService {
 
     @Override
     public <T extends Aggregate> long getLatestSnapshotVersion(final UUID streamId, final Class<T> clazz) {
-        logger.trace("Getting the latest snapshot version  for {}", clazz);
+        logger.trace("Getting the latest snapshot version for {}", clazz.getSimpleName());
         return snapshotRepository.getLatestSnapshotVersion(streamId, clazz);
     }
 }

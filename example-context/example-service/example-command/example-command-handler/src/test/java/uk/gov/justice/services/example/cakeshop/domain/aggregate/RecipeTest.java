@@ -11,6 +11,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 import uk.gov.justice.services.example.cakeshop.domain.Ingredient;
+import uk.gov.justice.services.example.cakeshop.domain.event.CakeMade;
 import uk.gov.justice.services.example.cakeshop.domain.event.RecipeAdded;
 
 import java.util.List;
@@ -80,21 +81,9 @@ public class RecipeTest {
 
     @Test
     public void shouldReturnRecipeRemovedEvent() {
-        Stream<Object> events = recipe.addRecipe(RECIPE_ID, NAME, true, INGREDIENTS);
+        recipe.addRecipe(RECIPE_ID, NAME, true, INGREDIENTS);
 
-        List<Object> eventList = events.collect(toList());
-        assertThat(eventList, hasSize(1));
-
-        Object event = eventList.get(0);
-        assertThat(event, instanceOf(RecipeAdded.class));
-
-        RecipeAdded recipeAdded = (RecipeAdded) event;
-        assertThat(recipeAdded.getRecipeId(), equalTo(RECIPE_ID));
-        assertThat(recipeAdded.getName(), equalTo(NAME));
-        assertThat(recipeAdded.getIngredients(), equalTo(INGREDIENTS));
-        assertThat(recipeAdded.isGlutenFree(), is(true));
-
-        Stream<Object> eventRemoveStream = recipe.removeRecipe(RECIPE_ID);
+        Stream<Object> eventRemoveStream = recipe.removeRecipe();
         List<Object> eventRemovedList = eventRemoveStream.collect(toList());
         assertThat(eventRemovedList, hasSize(1));
 
@@ -102,4 +91,22 @@ public class RecipeTest {
         assertThat(eventRemove, instanceOf(RecipeRemoved.class));
     }
 
+    @Test
+    public void shouldReturnCakeMadeEvent() throws Exception {
+        recipe.addRecipe(RECIPE_ID, NAME, true, INGREDIENTS);
+
+        final UUID cakeId = UUID.randomUUID();
+
+        final Stream<Object> cakeMadeStream = recipe.makeCake(cakeId);
+        final List<Object> cakeMadeList = cakeMadeStream.collect(toList());
+
+        assertThat(cakeMadeList, hasSize(1));
+
+        assertThat(cakeMadeList.get(0), instanceOf(CakeMade.class));
+        final CakeMade cakeMade = (CakeMade)cakeMadeList.get(0);
+        assertThat(cakeMade.getCakeId(), is(cakeId));
+        assertThat(cakeMade.getName(), is(NAME));
+
+
+    }
 }

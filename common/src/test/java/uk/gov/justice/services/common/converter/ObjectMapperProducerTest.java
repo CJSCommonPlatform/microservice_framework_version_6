@@ -4,6 +4,7 @@ import static com.google.common.io.Resources.getResource;
 import static java.lang.String.format;
 import static java.nio.charset.Charset.defaultCharset;
 import static javax.json.Json.createObjectBuilder;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.isA;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
@@ -12,6 +13,7 @@ import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import javax.json.JsonObject;
 import javax.json.JsonValue;
@@ -65,7 +67,43 @@ public class ObjectMapperProducerTest {
         assertEquals(jsonFromFile("test-with-one-field"), json, true);
     }
 
+    @Test
+    public void shouldBeAbleToSerializeSingleArgConstructor() throws Exception {
+
+        final DummyBeanWithSingleArgConstructor bean = new DummyBeanWithSingleArgConstructor("fred");
+
+        final String json = mapper.writeValueAsString(bean);
+
+        assertThat(mapper.readValue(json, DummyBeanWithSingleArgConstructor.class), is(bean));
+
+    }
+
     private String jsonFromFile(final String name) throws IOException {
         return Resources.toString(getResource(format("json/%s.json", name)), defaultCharset());
+    }
+
+    public static class DummyBeanWithSingleArgConstructor {
+        private final String name;
+
+        private DummyBeanWithSingleArgConstructor(final String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public boolean equals(final Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            final DummyBeanWithSingleArgConstructor that = (DummyBeanWithSingleArgConstructor) o;
+            return Objects.equals(getName(), that.getName());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(getName());
+        }
     }
 }

@@ -1,5 +1,6 @@
 package uk.gov.justice.services.common.converter.jackson;
 
+import static com.fasterxml.jackson.annotation.JsonCreator.Mode.PROPERTIES;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_ABSENT;
 import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS;
 import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_WITH_ZONE_ID;
@@ -15,6 +16,7 @@ import java.text.SimpleDateFormat;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -31,7 +33,7 @@ public class ObjectMapperProducer {
         return new ObjectMapper()
                 .registerModule(new Jdk8Module())
                 .registerModule(new JavaTimeModule())
-                .registerModule(new ParameterNamesModule())
+                .registerModule(new ParameterNamesModule(PROPERTIES))
                 .registerModule(new InclusionAwareJSR353Module())
                 .configure(WRITE_DATES_AS_TIMESTAMPS, false)
                 .configure(WRITE_DATES_WITH_ZONE_ID, false)

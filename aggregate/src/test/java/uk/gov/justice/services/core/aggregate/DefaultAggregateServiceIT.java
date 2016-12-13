@@ -15,6 +15,7 @@ import uk.gov.justice.domain.aggregate.TestAggregate;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.common.util.Clock;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.aggregate.event.EventA;
 import uk.gov.justice.services.core.aggregate.event.EventB;
@@ -82,6 +83,9 @@ public class DefaultAggregateServiceIT {
 
     @Inject
     private EventLogOpenEjbAwareJdbcRepository eventLogRepository;
+
+    @Inject
+    private Clock clock;
 
     @Module
     @Classes(cdi = true, value = {
@@ -207,7 +211,11 @@ public class DefaultAggregateServiceIT {
     private Stream<JsonEnvelope> envelopes(final int numberOfEnvelopes, String eventName) {
         List<JsonEnvelope> envelopes = new LinkedList<>();
         for (int i = 1; i <= numberOfEnvelopes; i++) {
-            envelopes.add(envelope().with(metadataWithRandomUUID(eventName).withStreamId(STREAM_ID)).withPayloadOf("value", "name").build());
+            envelopes.add(envelope()
+                    .with(metadataWithRandomUUID(eventName)
+                            .createdAt(clock.now())
+                            .withStreamId(STREAM_ID))
+                    .withPayloadOf("value", "name").build());
         }
         return envelopes.stream();
     }

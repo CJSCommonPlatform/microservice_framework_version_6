@@ -408,8 +408,6 @@ public class RestClientProcessorIT {
                         .withHeader(CONTENT_TYPE, mimetype)
                         .withBody(responseWithMetadata())));
 
-        restClientProcessor.enveloper = new Enveloper(null);
-
         EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, emptySet(), emptySet(), QUERY_NAME);
 
         JsonEnvelope response = restClientProcessor.get(endpointDefinition, requestEnvelopeParamAParamB());

@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_VIEW;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
+import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.*;
 import static uk.gov.justice.services.test.utils.core.matchers.HandlerMatcher.isHandler;
 import static uk.gov.justice.services.test.utils.core.matchers.HandlerMethodMatcher.method;
 
@@ -19,6 +20,7 @@ import uk.gov.justice.services.example.cakeshop.query.view.response.RecipeView;
 import uk.gov.justice.services.example.cakeshop.query.view.response.RecipesView;
 import uk.gov.justice.services.example.cakeshop.query.view.service.RecipeService;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -42,7 +44,7 @@ public class RecipesQueryViewTest {
 
     @Before
     public void setup() {
-        final Enveloper enveloper = new Enveloper(new ObjectToJsonValueConverter(new ObjectMapperProducer().objectMapper()));
+        final Enveloper enveloper = createEnveloper();
         queryView = new RecipesQueryView(service, enveloper);
     }
 

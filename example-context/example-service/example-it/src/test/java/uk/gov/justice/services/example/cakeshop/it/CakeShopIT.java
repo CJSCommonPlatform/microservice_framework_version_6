@@ -509,8 +509,8 @@ public class CakeShopIT {
         final Stream<EventLog> events = EVENT_LOG_REPOSITORY.findByStreamIdOrderBySequenceIdAsc(orderId);
         final EventLog eventLog = events.findFirst().get();
 
-        assertThat(eventLog.getDateCreated(), is(notNullValue()));
-        assertThat(eventLog.getDateCreated(), is(within(10L, SECONDS, new UtcClock().now())));
+        assertThat(eventLog.getCreatedAt(), is(notNullValue()));
+        assertThat(eventLog.getCreatedAt(), is(within(10L, SECONDS, new UtcClock().now())));
     }
 
     @Test

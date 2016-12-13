@@ -12,6 +12,7 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithR
 import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
 import uk.gov.justice.services.core.accesscontrol.AccessControlService;
 import uk.gov.justice.services.core.accesscontrol.AllowAllPolicyEvaluator;
@@ -114,7 +115,8 @@ public class MetricsIT {
             TotalActionMetricsInterceptor.class,
             IndividualActionMetricsInterceptor.class,
             SystemUserUtil.class,
-            TestServiceContextNameProvider.class
+            TestServiceContextNameProvider.class,
+            UtcClock.class
     })
     public WebApp war() {
         return new WebApp()

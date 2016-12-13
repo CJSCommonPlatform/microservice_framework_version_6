@@ -27,6 +27,7 @@ import uk.gov.justice.services.common.configuration.JndiBasedServiceContextNameP
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
 import uk.gov.justice.services.core.accesscontrol.AccessControlService;
 import uk.gov.justice.services.core.accesscontrol.AllowAllPolicyEvaluator;
@@ -137,6 +138,7 @@ public class RemoteExampleEventProcessorIT {
             StringToJsonObjectConverter.class,
             SystemUserUtil.class,
             WebTargetFactory.class,
+            UtcClock.class,
 
             // TODO: Remove the next 6 classes when sender is migrated fully to dispatcher system
             SenderProducer.class,

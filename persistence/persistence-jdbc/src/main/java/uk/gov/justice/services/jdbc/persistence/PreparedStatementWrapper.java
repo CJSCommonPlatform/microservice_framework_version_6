@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
@@ -42,6 +43,14 @@ public class PreparedStatementWrapper implements AutoCloseable {
     public void setLong(final int parameterIndex, final Long lng) throws SQLException {
         try {
             this.preparedStatement.setLong(parameterIndex, lng);
+        } catch (SQLException e) {
+            handle(e, this);
+        }
+    }
+
+    public void setTimestamp(final int parameterIndex, final Timestamp timestamp) throws SQLException {
+        try {
+            this.preparedStatement.setTimestamp(parameterIndex, timestamp);
         } catch (SQLException e) {
             handle(e, this);
         }

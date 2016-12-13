@@ -1,6 +1,5 @@
 package uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog;
 
-import static java.time.ZonedDateTime.now;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -9,6 +8,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertThat;
 
+import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidSequenceIdException;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 import uk.gov.justice.services.test.utils.persistence.AbstractJdbcRepositoryIT;
@@ -29,7 +29,7 @@ public class EventLogJdbcRepositoryIT extends AbstractJdbcRepositoryIT<EventLogJ
     private static final String PAYLOAD_JSON = "{\"field\": \"Value\"}";
     private static final String METADATA_JSON = "{\"field\": \"Value\"}";
     private static final String LIQUIBASE_EVENT_STORE_DB_CHANGELOG_XML = "liquibase/event-store-db-changelog.xml";
-    private final static ZonedDateTime TIMESTAMP = now();
+    private final static ZonedDateTime TIMESTAMP = new UtcClock().now();
 
 
     public EventLogJdbcRepositoryIT() {
@@ -72,6 +72,17 @@ public class EventLogJdbcRepositoryIT extends AbstractJdbcRepositoryIT<EventLogJ
         assertThat(eventLogList.get(1).getSequenceId(), is(4l));
         assertThat(eventLogList.get(2).getSequenceId(), is(7l));
 
+    }
+
+    @Test
+    public void shouldStoreAndReturnDateCreated() throws InvalidSequenceIdException {
+        jdbcRepository.insert(eventLogOf(1, STREAM_ID));
+
+        Stream<EventLog> eventLogs = jdbcRepository.findByStreamIdOrderBySequenceIdAsc(STREAM_ID);
+
+        final List<EventLog> eventLogList = eventLogs.collect(toList());
+        assertThat(eventLogList, hasSize(1));
+        assertThat(eventLogList.get(0).getCreatedAt(), is(TIMESTAMP));
     }
 
     @Test

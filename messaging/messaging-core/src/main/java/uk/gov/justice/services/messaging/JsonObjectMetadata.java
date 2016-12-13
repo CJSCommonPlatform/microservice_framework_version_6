@@ -7,7 +7,10 @@ import static uk.gov.justice.services.messaging.JsonObjects.getString;
 import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 import static uk.gov.justice.services.messaging.JsonObjects.getUUIDs;
 
+import uk.gov.justice.services.common.converter.ZonedDateTimes;
+
 import java.math.BigDecimal;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -25,6 +28,7 @@ public class JsonObjectMetadata implements Metadata {
 
     public static final String ID = "id";
     public static final String NAME = "name";
+    public static final String CREATED_AT = "createdAt";
     public static final String CORRELATION = "correlation";
     public static final String CLIENT_ID = "client";
     public static final String CONTEXT = "context";
@@ -158,6 +162,17 @@ public class JsonObjectMetadata implements Metadata {
     }
 
     @Override
+    public Optional<ZonedDateTime> createdAt() {
+        Optional<String>  zonedDateTime = getString(metadata, CREATED_AT);
+
+        if(zonedDateTime.isPresent()) {
+            return Optional.of(ZonedDateTimes.fromString(zonedDateTime.get()));
+        }
+
+        return Optional.empty();
+    }
+
+    @Override
     @SuppressWarnings({"squid:MethodCyclomaticComplexity", "squid:S1067", "squid:S00122"})
     public boolean equals(final Object o) {
         if (this == o) return true;
@@ -190,6 +205,15 @@ public class JsonObjectMetadata implements Metadata {
          */
         public Builder withId(final UUID id) {
             json.add(id.toString(), ID);
+            return this;
+        }
+
+        /**
+         * @param dateCreated timestamp for when the metadata was created
+         * @return metadata builder
+         */
+        public Builder createdAt(final ZonedDateTime dateCreated) {
+            json.add(ZonedDateTimes.toString(dateCreated), CREATED_AT);
             return this;
         }
 
@@ -264,7 +288,5 @@ public class JsonObjectMetadata implements Metadata {
         public Metadata build() {
             return metadataFrom(json.build());
         }
-
-
     }
 }

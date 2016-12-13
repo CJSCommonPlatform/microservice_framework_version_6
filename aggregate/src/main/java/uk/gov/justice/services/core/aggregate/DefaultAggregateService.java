@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Alternative;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -22,6 +23,7 @@ import org.slf4j.Logger;
  * Service for replaying event streams on aggregates.
  */
 @ApplicationScoped
+@Alternative
 @Priority(1)
 public class DefaultAggregateService implements AggregateService {
 
@@ -53,7 +55,7 @@ public class DefaultAggregateService implements AggregateService {
     }
 
     public <T extends Aggregate> T applyEvents(final Stream<JsonEnvelope> events, final T aggregate) {
-        logger.trace("Apply Events for {}", events);
+        logger.trace("Apply events for aggregate: {}", aggregate.getClass());
         try (final Stream<JsonEnvelope> e1 = events){
             aggregate.applyForEach(events.map(this::convertEnvelopeToEvent));
             return aggregate;

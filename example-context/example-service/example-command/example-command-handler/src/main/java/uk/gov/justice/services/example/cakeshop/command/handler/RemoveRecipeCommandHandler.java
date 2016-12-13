@@ -45,7 +45,7 @@ public class RemoveRecipeCommandHandler {
         final Recipe recipe = aggregateService.get(eventStream, Recipe.class);
 
         eventStream.append(
-                recipe.removeRecipe(recipeId)
+                recipe.removeRecipe()
                         .map(enveloper.withMetadataFrom(command)));
     }
 

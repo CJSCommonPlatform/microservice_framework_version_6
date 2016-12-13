@@ -65,3 +65,18 @@ protocols: [ HTTP, HTTPS ]
           application/vnd.example.order+json:
             schema: !include json/schema/example.get-order.json
             example: !include json/order.json
+/cakes:
+  description: return cakes
+  get:
+    description: |
+        ...
+        (mapping):
+            responseType: application/vnd.example.cakes+json
+            name: example.search-cakes
+        ...
+    responses:
+      200:
+        body:
+          application/vnd.example.cakes+json:
+            schema: !include json/schema/example.search-cakes.json
+            example: !include json/cakes.json

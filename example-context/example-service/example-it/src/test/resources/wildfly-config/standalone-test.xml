@@ -417,6 +417,7 @@
         <subsystem xmlns="urn:jboss:domain:naming:2.0">
             <bindings>
                 <simple name="java:/app/example-command-api/audit.blacklist" value="example.*" type="java.lang.String"/>
+                <simple name="java:/app/example-command-handler/default.strategy.snapshot.threshold" value="3" type="java.lang.String"/>
                 <simple name="java:global/event.buffer.init.strategy" value="uk.gov.justice.services.event.buffer.core.service.AnsiSQLBasedBufferInitialisationStrategy" type="java.lang.String"/>
                 <simple name="java:global/alfrescoUploadUser" value="${alfresco.upload.user}" type="java.lang.String"/>
                 <simple name="java:global/alfrescoReadUser" value="${alfresco.read.user}" type="java.lang.String"/>

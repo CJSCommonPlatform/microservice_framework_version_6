@@ -34,9 +34,6 @@ public class SnapshotAwareAggregateService implements AggregateService {
     @Inject
     DefaultAggregateService defaultAggregateService;
 
-    @Inject
-    JsonObjectToObjectConverter jsonObjectToObjectConverter;
-
     @Override
     @SuppressWarnings("unchecked")
     public <T extends Aggregate> T get(final EventStream stream, final Class<T> clazz) {

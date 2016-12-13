@@ -34,7 +34,7 @@ protocols: [ HTTP, HTTPS ]
             example: !include json/add-recipe-file.json
 
 
-/cakes/{cakeId}:
+/recipes/{recipeId}/cakes/{cakeId}:
   description: |
     Make a cake from id in json
   post:

@@ -3,12 +3,17 @@
   "id": "",
   "type": "object",
   "properties": {
-    "recipeId": {
-      "id": "/recipeId",
+    "cakeId": {
+      "id": "/cakeId",
+      "type": "string"
+    },
+    "name": {
+      "id": "/name",
       "type": "string"
     }
   },
   "required": [
-    "recipeId"
+    "cakeId",
+    "name"
   ]
 }

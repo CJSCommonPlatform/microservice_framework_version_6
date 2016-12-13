@@ -6,9 +6,15 @@
     "recipeId": {
       "id": "/recipeId",
       "type": "string"
+    },
+    "cakeId": {
+      "id": "/cakeId",
+      "type": "string"
     }
+
   },
   "required": [
-    "recipeId"
+    "recipeId",
+    "cakeId"
   ]
 }

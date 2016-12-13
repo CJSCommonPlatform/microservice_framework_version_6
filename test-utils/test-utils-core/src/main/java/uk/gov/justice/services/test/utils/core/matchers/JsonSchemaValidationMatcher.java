@@ -31,7 +31,7 @@ import org.json.JSONTokener;
 public class JsonSchemaValidationMatcher {
 
     private static final Random random = new Random();
-    private static final String JSON_SCHEMA_TEMPLATE = "json/schema/%s.json";
+    private static final String RAML_JSON_SCHEMA_TEMPLATE = "raml/json/schema/%s.json";
 
     /**
      * Matcher to validate json content against a schema
@@ -90,7 +90,7 @@ public class JsonSchemaValidationMatcher {
                 if (null == validationException) {
 
                     try {
-                        final String pathToJsonSchema = format(JSON_SCHEMA_TEMPLATE, jsonEnvelope.metadata().name());
+                        final String pathToJsonSchema = format(RAML_JSON_SCHEMA_TEMPLATE, jsonEnvelope.metadata().name());
                         getJsonSchemaFor(pathToJsonSchema).validate(new JSONObject(jsonEnvelope.payloadAsJsonObject().toString()));
                     } catch (final ValidationException e) {
                         validationException = e;

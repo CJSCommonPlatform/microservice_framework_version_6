@@ -15,9 +15,6 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ### Removed
  - DateTimeProvider: after 2 months deprecation. Use CLock/UtcClock instead
 
-### Fixed
-- JsonSchemaValidationMatcher to look for json schema in correct location
-
 ## [0.35.0] - 2016-11-24
 ### Added
  - File, file-api and file-alfresco modules

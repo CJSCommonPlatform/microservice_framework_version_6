@@ -2,12 +2,14 @@ package uk.gov.justice.services.test.utils.core.random;
 
 import static com.google.common.collect.Lists.newArrayList;
 
-import uk.gov.justice.services.test.utils.core.random.LocalDateGenerator.Direction;
+import uk.gov.justice.services.common.util.UtcClock;
+import uk.gov.justice.services.test.utils.core.random.DateGenerator.Direction;
 
 import java.math.BigDecimal;
 import java.net.URI;
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 /**
@@ -28,9 +30,13 @@ public class RandomGenerator {
     public static final Generator<URI> URI = new UriGenerator();
     public static final Generator<UUID> UUID = new UUIDGenerator();
     public static final Generator<LocalDate> FUTURE_LOCAL_DATE = new LocalDateGenerator(
-                    Period.ofYears(5), LocalDate.now(), Direction.FORWARD);
+            Period.ofYears(5), LocalDate.now(), Direction.FUTURE);
     public static final Generator<LocalDate> PAST_LOCAL_DATE = new LocalDateGenerator(
-                    Period.ofYears(5), LocalDate.now(), Direction.BACKWARD);
+            Period.ofYears(5), LocalDate.now(), Direction.PAST);
+    public static final Generator<ZonedDateTime> FUTURE_ZONED_DATE_TIME = new ZonedDateTimeGenerator(
+            Period.ofYears(5), new UtcClock().now(), Direction.FUTURE);
+    public static final Generator<ZonedDateTime> PAST_ZONED_DATE_TIME = new ZonedDateTimeGenerator(
+            Period.ofYears(5), new UtcClock().now(), Direction.PAST);
 
     public static Generator<String> string(final int length) {
         return new StringGenerator(length);
@@ -54,7 +60,7 @@ public class RandomGenerator {
     }
 
     public static Generator<BigDecimal> bigDecimal(final Integer min, final Integer max,
-                    final Integer scale) {
+                                                   final Integer scale) {
         return new BigDecimalGenerator(min, max, scale);
     }
 
@@ -83,12 +89,12 @@ public class RandomGenerator {
     }
 
     public static Generator<Double> doubleValue(final Double min, final Double max,
-                    final Integer scale) {
+                                                final Integer scale) {
         return new DoubleGenerator(min, max, scale);
     }
 
     public static Generator<Double> doubleValue(final Long min, final Long max,
-                    final Integer scale) {
+                                                final Integer scale) {
         return new DoubleGenerator(min, max, scale);
     }
 

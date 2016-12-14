@@ -8,6 +8,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ### Added
 - Logging request data is set in the MDC and can be added to the log output by setting %X{requestData} in the logger pattern.
 - Support for managing optimistic lock retry for event log, when using the PostgreSQL database
+- ZonedDateTimeGenerator to generate random future or past ZonedDateTimes
 
 ### Changed
 - Improve ResponsePayloadMatcher to support string matchers on response payload

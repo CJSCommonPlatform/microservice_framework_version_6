@@ -1,15 +1,15 @@
 package uk.gov.justice.services.test.utils.core.random;
 
+import static java.time.Instant.ofEpochMilli;
+import static java.time.ZoneOffset.UTC;
+import static uk.gov.justice.services.test.utils.core.random.DateGenerator.Direction.FUTURE;
+
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
-import static java.time.Instant.ofEpochMilli;
-import static java.time.ZoneOffset.UTC;
-import static uk.gov.justice.services.test.utils.core.random.LocalDateGenerator.Direction.FORWARD;
-
-public class LocalDateGenerator extends Generator<LocalDate> {
+public class LocalDateGenerator extends DateGenerator<LocalDate> {
     private final LocalDate start;
     private final LocalDate end;
     private final Direction direction;
@@ -17,7 +17,7 @@ public class LocalDateGenerator extends Generator<LocalDate> {
     public LocalDateGenerator(final Period period, final LocalDate start, final Direction direction) {
         this.start = start;
         this.direction = direction;
-        this.end = direction == FORWARD ? start.plus(period) : start.minus(period);
+        this.end = direction == FUTURE ? start.plus(period) : start.minus(period);
     }
 
     @Override
@@ -29,7 +29,7 @@ public class LocalDateGenerator extends Generator<LocalDate> {
 
         Long randomMillsecs;
 
-        if (direction == FORWARD) {
+        if (direction == FUTURE) {
             randomMillsecs = RANDOM.longs(startMillsecs, endMillisecs).findFirst().getAsLong();
         } else {
             randomMillsecs = RANDOM.longs(endMillisecs, startMillsecs).findFirst().getAsLong();
@@ -38,5 +38,4 @@ public class LocalDateGenerator extends Generator<LocalDate> {
         return ofEpochMilli(randomMillsecs).atZone(ZoneId.systemDefault()).toLocalDate();
     }
 
-    public static enum Direction {FORWARD, BACKWARD}
 }

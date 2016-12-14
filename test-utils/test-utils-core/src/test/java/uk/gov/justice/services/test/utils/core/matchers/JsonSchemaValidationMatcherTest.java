@@ -91,6 +91,16 @@ public class JsonSchemaValidationMatcherTest {
         assertThat(jsonEnvelope, JsonSchemaValidationMatcher.isValidJsonEnvelopeForSchema());
     }
 
+    @Test
+    public void shouldFallbackToRamlPathIfNotFoundInJsonPath() throws Exception {
+        final JsonEnvelope jsonEnvelope = envelope()
+                .with(metadataWithRandomUUID("fallback.action"))
+                .withPayloadOf("id", "fallback")
+                .build();
+
+        assertThat(jsonEnvelope, JsonSchemaValidationMatcher.isValidJsonEnvelopeForSchema());
+    }
+
     private String getTemporaryPathTo(final String pathToJsonContent) throws Exception {
         final File tempFileToJson = tempFolder.newFile();
         final BufferedWriter bw = new BufferedWriter(new FileWriter(tempFileToJson));

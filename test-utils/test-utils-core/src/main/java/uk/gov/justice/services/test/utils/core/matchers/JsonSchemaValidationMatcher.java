@@ -32,6 +32,7 @@ public class JsonSchemaValidationMatcher {
 
     private static final Random random = new Random();
     private static final String JSON_SCHEMA_TEMPLATE = "json/schema/%s.json";
+    private static final String RAML_JSON_SCHEMA_TEMPLATE = "raml/" + JSON_SCHEMA_TEMPLATE;
 
     /**
      * Matcher to validate json content against a schema
@@ -75,7 +76,7 @@ public class JsonSchemaValidationMatcher {
     /**
      * Validates a JsonEnvelope against the correct schema for the action name provided in the
      * metadata. Expects to find the schema on the class path in package
-     * 'raml/json/schema/{action.name}.json'.
+     * 'json/schema/{action.name}.json' or 'raml/json/schema/{action.name}.json'.
      *
      * @return matcher
      */
@@ -92,11 +93,16 @@ public class JsonSchemaValidationMatcher {
                     try {
                         final String pathToJsonSchema = format(JSON_SCHEMA_TEMPLATE, jsonEnvelope.metadata().name());
                         getJsonSchemaFor(pathToJsonSchema).validate(new JSONObject(jsonEnvelope.payloadAsJsonObject().toString()));
+                    } catch (final IllegalArgumentException | IOException e) {
+                        try {
+                            final String pathToJsonSchema = format(RAML_JSON_SCHEMA_TEMPLATE, jsonEnvelope.metadata().name());
+                            getJsonSchemaFor(pathToJsonSchema).validate(new JSONObject(jsonEnvelope.payloadAsJsonObject().toString()));
+                        } catch (final IOException ioe) {
+                            throw new IllegalArgumentException(ioe);
+                        }
                     } catch (final ValidationException e) {
                         validationException = e;
                         return false;
-                    } catch (final IOException e) {
-                        throw new IllegalArgumentException(e);
                     }
 
                     return true;

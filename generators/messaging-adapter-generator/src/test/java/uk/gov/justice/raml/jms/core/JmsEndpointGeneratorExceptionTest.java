@@ -1,6 +1,7 @@
 package uk.gov.justice.raml.jms.core;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
@@ -12,9 +13,10 @@ public class JmsEndpointGeneratorExceptionTest {
 
     @Test
     public void shouldCreateAValidJmsEndpointGeneratorException() throws Exception {
-        JmsEndpointGeneratorException jmsEndpointGeneratorException = new JmsEndpointGeneratorException(MESSAGE, CAUSE);
+        final JmsEndpointGeneratorException jmsEndpointGeneratorException = new JmsEndpointGeneratorException(MESSAGE, CAUSE);
         assertThat(jmsEndpointGeneratorException.getMessage(), equalTo(MESSAGE));
         assertThat(jmsEndpointGeneratorException.getCause(), equalTo(CAUSE));
+        assertThat(jmsEndpointGeneratorException, instanceOf(RuntimeException.class));
     }
 
 }

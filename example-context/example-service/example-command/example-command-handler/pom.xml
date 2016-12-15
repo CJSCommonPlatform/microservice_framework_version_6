@@ -41,13 +41,6 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>uk.gov.justice.services.example</groupId>
-            <artifactId>example-event-listener</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-            <classifier>raml</classifier>
-        </dependency>
 
     </dependencies>
 

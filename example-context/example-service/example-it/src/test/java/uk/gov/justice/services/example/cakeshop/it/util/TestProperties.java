@@ -11,34 +11,21 @@ import java.util.Properties;
  * accessor method
  */
 public class TestProperties {
-    private static final String PROPERTY_FILE_NAME = "test.properties";
     private static TestProperties instance;
     private final Properties properties = new Properties();
 
-    private TestProperties() {
-        InputStream is = getClass().getClassLoader().getResourceAsStream(PROPERTY_FILE_NAME);
+    public TestProperties(final String propertyFileName) {
+        final InputStream is = getClass().getClassLoader().getResourceAsStream(propertyFileName);
 
         if (is != null) {
             try {
                 properties.load(is);
             } catch (IOException e) {
-                fail("error reading " + PROPERTY_FILE_NAME);
+                fail("error reading " + propertyFileName);
             }
         } else {
-            fail(PROPERTY_FILE_NAME + "not found in the classpath");
+            fail(propertyFileName + "not found in the classpath");
         }
-    }
-
-    /**
-     * Singleton method
-     *
-     * @return instance of the class
-     */
-    public static TestProperties getInstance() {
-        if (instance == null) {
-            instance = new TestProperties();
-        }
-        return instance;
     }
 
     /**
@@ -47,7 +34,7 @@ public class TestProperties {
      * @param propertyName - name of the property defined in the properties files
      * @return value of the property
      */
-    public String value(String propertyName) {
+    public String value(final String propertyName) {
         return properties.getProperty(propertyName);
     }
 

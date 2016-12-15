@@ -2,6 +2,8 @@ package uk.gov.justice.services.example.cakeshop.event.listener;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static java.util.UUID.randomUUID;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,6 +18,8 @@ import uk.gov.justice.services.example.cakeshop.persistence.entity.Ingredient;
 import uk.gov.justice.services.example.cakeshop.persistence.entity.Recipe;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
+import java.util.UUID;
+
 import javax.json.JsonObject;
 
 import org.junit.Before;
@@ -26,7 +30,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RecipeAddedEventListenerTest {
+public class RecipeEventListenerTest {
 
     private static final String INGREDIENT_NAME = "Flour";
 
@@ -61,22 +65,22 @@ public class RecipeAddedEventListenerTest {
     private JsonObject payload;
 
     @InjectMocks
-    private RecipeAddedEventListener recipeAddedEventListener;
+    private RecipeEventListener recipeEventListener;
 
     @Before
     public void setup() {
         when(envelope.payloadAsJsonObject()).thenReturn(payload);
-        when(jsonObjectToObjectConverter.convert(payload, RecipeAdded.class)).thenReturn(recipeAdded);
-        when(recipeAddedToRecipeConverter.convert(recipeAdded)).thenReturn(recipe);
-        when(ingredient.getName()).thenReturn(INGREDIENT_NAME);
-        when(recipeAddedToIngredientsConverter.convert(recipeAdded)).thenReturn(singletonList(ingredient));
     }
 
     @Test
     public void shouldHandleRecipeAddedEvent() throws Exception {
+        when(recipeAddedToRecipeConverter.convert(recipeAdded)).thenReturn(recipe);
+        when(ingredient.getName()).thenReturn(INGREDIENT_NAME);
+        when(recipeAddedToIngredientsConverter.convert(recipeAdded)).thenReturn(singletonList(ingredient));
         when(ingredientRepository.findByNameIgnoreCase(INGREDIENT_NAME)).thenReturn(emptyList());
+        when(jsonObjectToObjectConverter.convert(payload, RecipeAdded.class)).thenReturn(recipeAdded);
 
-        recipeAddedEventListener.recipeAdded(envelope);
+        recipeEventListener.recipeAdded(envelope);
 
         verify(recipeRepository).save(recipe);
         verify(ingredientRepository).save(ingredient);
@@ -84,11 +88,42 @@ public class RecipeAddedEventListenerTest {
 
     @Test
     public void shouldHandleRecipeAddedEventWithExistingIngredient() throws Exception {
+        when(recipeAddedToRecipeConverter.convert(recipeAdded)).thenReturn(recipe);
+        when(ingredient.getName()).thenReturn(INGREDIENT_NAME);
+        when(recipeAddedToIngredientsConverter.convert(recipeAdded)).thenReturn(singletonList(ingredient));
         when(ingredientRepository.findByNameIgnoreCase(INGREDIENT_NAME)).thenReturn(singletonList(ingredient));
+        when(jsonObjectToObjectConverter.convert(payload, RecipeAdded.class)).thenReturn(recipeAdded);
 
-        recipeAddedEventListener.recipeAdded(envelope);
+        recipeEventListener.recipeAdded(envelope);
 
         verify(recipeRepository).save(recipe);
         verify(ingredientRepository, never()).save(ingredient);
+    }
+
+    @Test
+    public void shouldHandleRecipeRenamedEvent() throws Exception {
+        final String recipeId = randomUUID().toString();
+        final String name = "recipe name";
+
+        when(envelope.payloadAsJsonObject().getString("recipeId")).thenReturn(recipeId);
+        when(envelope.payloadAsJsonObject().getString("name")).thenReturn(name);
+        when(recipeRepository.findBy(UUID.fromString(recipeId))).thenReturn(recipe);
+
+        recipeEventListener.recipeRenamed(envelope);
+
+        verify(recipe).setName(name);
+        verify(recipeRepository).save(recipe);
+    }
+
+    @Test
+    public void shouldHandleRecipeRemovedEvent() throws Exception {
+        final String recipeId = randomUUID().toString();
+
+        when(envelope.payloadAsJsonObject().getString(anyString())).thenReturn(recipeId);
+        when(recipeRepository.findBy(UUID.fromString(recipeId))).thenReturn(recipe);
+
+        recipeEventListener.recipeRemoved(envelope);
+
+        verify(recipeRepository).remove(recipe);
     }
 }

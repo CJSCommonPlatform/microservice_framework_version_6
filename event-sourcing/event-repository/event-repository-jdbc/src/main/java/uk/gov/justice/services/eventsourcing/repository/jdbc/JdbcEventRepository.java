@@ -1,6 +1,7 @@
 package uk.gov.justice.services.eventsourcing.repository.jdbc;
 
 import uk.gov.justice.services.eventsourcing.repository.core.EventRepository;
+import uk.gov.justice.services.eventsourcing.repository.core.exception.OptimisticLockingRetryException;
 import uk.gov.justice.services.eventsourcing.repository.core.exception.StoreEventRequestFailedException;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLog;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLogConverter;
@@ -65,7 +66,7 @@ public class JdbcEventRepository implements EventRepository {
     }
 
     @Override
-    @Transactional
+    @Transactional(dontRollbackOn = OptimisticLockingRetryException.class)
     public void store(final JsonEnvelope envelope, final UUID streamId, final Long version) throws StoreEventRequestFailedException {
         try {
             final EventLog eventLog = eventLogConverter.createEventLog(envelope, streamId, version);
@@ -85,13 +86,12 @@ public class JdbcEventRepository implements EventRepository {
     @Override
     public Stream<Stream<JsonEnvelope>> getStreamOfAllEventStreams() {
         final Stream<UUID> streamIds = eventLogJdbcRepository.getStreamIds();
-        final Stream<Stream<JsonEnvelope>> streamOfStreams = streamIds
+        return streamIds
                 .map(id -> {
                     final Stream<EventLog> eventStream = eventLogJdbcRepository.findByStreamIdOrderBySequenceIdAsc(id);
-                    streamIds.onClose(() -> eventStream.close());
+                    streamIds.onClose(eventStream::close);
                     return eventStream.map(eventLogConverter::createEnvelope);
                 });
-        return streamOfStreams;
 
     }
 }

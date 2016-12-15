@@ -11,7 +11,10 @@ import uk.gov.justice.services.example.cakeshop.event.listener.converter.RecipeA
 import uk.gov.justice.services.example.cakeshop.persistence.IngredientRepository;
 import uk.gov.justice.services.example.cakeshop.persistence.RecipeRepository;
 import uk.gov.justice.services.example.cakeshop.persistence.entity.Ingredient;
+import uk.gov.justice.services.example.cakeshop.persistence.entity.Recipe;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -19,9 +22,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @ServiceComponent(EVENT_LISTENER)
-public class RecipeAddedEventListener {
+public class RecipeEventListener {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RecipeAddedEventListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RecipeEventListener.class);
     private static final String FIELD_RECIPE_ID = "recipeId";
 
     @Inject
@@ -56,10 +59,30 @@ public class RecipeAddedEventListener {
                 LOGGER.trace("=============> Inside add-recipe Event Listener about to save Ingredient Id: " + ingredient.getId());
                 ingredientRepository.save(ingredient);
                 LOGGER.trace("=====================================================> Ingredient saved, Ingredient Id: " + ingredient.getId());
-            }
-            else{
+            } else {
                 LOGGER.trace("=====================================================> Skipped adding ingredient as it already exists, Ingredient Name: " + ingredient.getName());
             }
         }
+    }
+
+    @Handles("example.recipe-renamed")
+    public void recipeRenamed(final JsonEnvelope event) {
+
+        final String recipeId = event.payloadAsJsonObject().getString(FIELD_RECIPE_ID);
+        final String recipeName = event.payloadAsJsonObject().getString("name");
+        LOGGER.trace("=============> Inside rename-recipe Event Listener. RecipeId: " + recipeId);
+
+        final Recipe recipe = recipeRepository.findBy(UUID.fromString(recipeId));
+        recipe.setName(recipeName);
+        recipeRepository.save(recipe);
+    }
+
+    @Handles("example.recipe-removed")
+    public void recipeRemoved(final JsonEnvelope event) {
+        final String recipeId = event.payloadAsJsonObject().getString(FIELD_RECIPE_ID);
+        LOGGER.trace("=============> Inside remove-recipe Event Listener about to find recipeId: " + recipeId);
+        final Recipe recipeFound = recipeRepository.findBy(UUID.fromString(recipeId));
+        LOGGER.trace("=============> Found remove-recipe Event Listener. RecipeId: " + recipeFound);
+        recipeRepository.remove(recipeFound);
     }
 }

@@ -19,7 +19,7 @@ public class Recipe implements Serializable {
     @Column(name = "name", nullable = false, insertable = true, updatable = true)
     private String name;
 
-    @Column(name = "glutenFree", nullable = false, insertable = true, updatable = true)
+    @Column(name = "gluten_free", nullable = false, insertable = true, updatable = true)
     private boolean glutenFree;
 
     public Recipe(final UUID id, final String name, final boolean glutenFree) {
@@ -57,5 +57,9 @@ public class Recipe implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(getId(), getName(), isGlutenFree());
+    }
+
+    public void setName(final String name) {
+        this.name = name;
     }
 }

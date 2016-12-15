@@ -26,7 +26,6 @@ public class JsonSchemaLoader {
     @Inject
     private Logger logger;
 
-
     /**
      * Locate a JSON schema file on the classpath and load it.
      * @param name the logical name for the JSON type

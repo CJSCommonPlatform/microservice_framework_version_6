@@ -10,7 +10,6 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.json.JSONObject;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -31,7 +30,7 @@ public class DefaultJsonSchemaValidatorTest {
     private Logger logger;
 
     @Mock
-    private JsonSchemaLoader loader;
+    private JsonSchemaLoader loader = new JsonSchemaLoader();
 
     @Mock
     private Schema schema;
@@ -39,14 +38,10 @@ public class DefaultJsonSchemaValidatorTest {
     @InjectMocks
     private DefaultJsonSchemaValidator validator;
 
-    @Before
-    public void setup() {
-        when(loader.loadSchema(TEST_SCHEMA_NAME)).thenReturn(schema);
-    }
-
     @Test
     public void shouldValidateUsingCorrectSchema() {
         final String json = "{\"rhubarb\": \"value\"}";
+        when(loader.loadSchema(TEST_SCHEMA_NAME)).thenReturn(schema);
 
         validator.validate(json, TEST_SCHEMA_NAME);
 
@@ -55,9 +50,20 @@ public class DefaultJsonSchemaValidatorTest {
     }
 
     @Test
+    public void shouldAcceptDateTimeWithSingleDigitInSecondsFraction() {
+        final String json = "{\"testField\": \"value\", \"created\": \"2011-12-03T10:15:30.1Z\"}";
+        when(loader.loadSchema(TEST_SCHEMA_NAME)).thenReturn(schema);
+
+        validator.validate(json, TEST_SCHEMA_NAME);
+
+        assertLogStatement();
+    }
+
+    @Test
     public void shouldRemoveMetadataFieldFromJsonToBeValidated() {
         final String json = "{\"rhubarb\": \"value\"}";
         final String jsonWithMetadata = "{\"_metadata\": {}, \"rhubarb\": \"value\"}";
+        when(loader.loadSchema(TEST_SCHEMA_NAME)).thenReturn(schema);
 
         validator.validate(jsonWithMetadata, TEST_SCHEMA_NAME);
 

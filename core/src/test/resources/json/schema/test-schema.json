@@ -6,9 +6,14 @@
     "testField": {
       "id": "/testField",
       "type": "string"
+    },
+    "created": {
+      "type": "string",
+      "format": "date-time"
     }
   },
   "required": [
-    "testField"
+    "testField",
+    "created"
   ]
 }

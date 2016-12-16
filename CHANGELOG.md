@@ -5,17 +5,26 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [1.0.0] - 2016-12-16
+
 ### Added
-- Logging request data is set in the MDC and can be added to the log output by setting %X{requestData} in the logger pattern.
-- Support for managing optimistic lock retry for event log, when using the PostgreSQL database
+- Logging request data is set in the SLF4J mapped diagnostic context (MDC) and can be added to the
+log output by setting %X{requestData} in the logger pattern
+- Support for managing optimistic lock retry for event log, when using the PostgreSQL database.
+Default is to retry forever.
 - ZonedDateTimeGenerator to generate random future or past ZonedDateTimes
 
 ### Changed
 - Improve ResponsePayloadMatcher to support string matchers on response payload
 - Upgraded ObjectMapper to allow single arg constructors in Object serialization
+- Aggregate snapshot repository enabled by default. This requires the `aggregate-snapshot-repository-liquibase`
+schema to have been applied to the event store database, which makes this release backwards incompatible
+- Event timestamps now added to private events automatically and stored in the event store as part
+of the metadata and in a separate field. This requires the latest `event-repository-liquibase`
+schema to be applied to the event store database, which makes this release backwards incompatible
 
 ### Removed
- - DateTimeProvider: after 2 months deprecation. Use CLock/UtcClock instead
+- DateTimeProvider after two months deprecation. Use Clock/UtcClock instead.
 
 ### Fixed
 - JsonSchemaValidationMatcher to look for json schema in correct location
@@ -467,7 +476,8 @@ turned off by default
 
 - Initial release with basic dispatcher, handler and adapter generation
 
-[Unreleased]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.33.0...HEAD
+[Unreleased]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.0.0...HEAD
+[1.0.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.33.0...release-1.0.0
 [0.33.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.32.0...release-0.33.0
 [0.32.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.30.0...release-0.32.0
 [0.30.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.29.0...release-0.30.0

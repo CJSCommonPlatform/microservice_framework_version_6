@@ -20,12 +20,17 @@ import static uk.gov.justice.services.test.utils.core.helper.TypeCheck.typeCheck
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.randomEnum;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.string;
 
+import uk.gov.justice.services.common.util.Clock;
+import uk.gov.justice.services.common.util.UtcClock;
+import uk.gov.justice.services.test.utils.core.helper.StoppedClock;
+
 import java.math.BigDecimal;
 import java.net.URI;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -41,6 +46,8 @@ public class RandomGeneratorTest {
     private static final String NI_NUMBER_PATTERN = "(?!BG)(?!GB)(?!NK)(?!KN)(?!TN)(?!NT)(?!ZZ)(?:[A-CEGHJ-PR-TW-Z][A-CEGHJ-NPR-TW-Z])(?:\\s*\\d\\s*){6}([A-D]|\\s)";
     private static final String LONG_PATTERN = "(-)?(0|(?!0)\\d{1,19})";
     private static final String URI_PATTERN = "(\\(comment\\))?[-0-9a-zA-Z]{1,63}(\\(comment\\))?\\.[-.0-9a-zA-Z]+";
+
+    private final Clock clock = new StoppedClock(new UtcClock().now());
 
     @Test
     public void shouldGenerateRandomBigDecimal() {
@@ -158,7 +165,7 @@ public class RandomGeneratorTest {
     }
 
     @Test
-    public void shouldGenerateRandomForwardDate() {
+    public void shouldGenerateRandomFutureLocalDate() {
         final LocalDateTime startDate = now().atStartOfDay();
         final LocalDateTime endDate = now().plus(Period.ofYears(5)).atStartOfDay();
         final Generator<LocalDate> futureLocalDateGenerator = RandomGenerator.FUTURE_LOCAL_DATE;
@@ -168,12 +175,32 @@ public class RandomGeneratorTest {
     }
 
     @Test
-    public void shouldGenerateRandomBackwardDate() {
+    public void shouldGenerateRandomPastLocalDate() {
         final LocalDateTime startDate = now().atStartOfDay();
         final LocalDateTime endDate = now().minus(Period.ofYears(5)).atStartOfDay();
         final Generator<LocalDate> pastLocalDateGenerator = RandomGenerator.PAST_LOCAL_DATE;
 
         typeCheck(pastLocalDateGenerator, s -> !(s.isBefore(endDate.toLocalDate()) || s.isAfter(startDate.toLocalDate())))
+                .verify(times(NUMBER_OF_TIMES));
+    }
+
+    @Test
+    public void shouldGenerateRandomFutureZonedDateTime() {
+        final ZonedDateTime startDateTime = clock.now();
+        final ZonedDateTime endDateTime = startDateTime.plus(Period.ofYears(5));
+        final Generator<ZonedDateTime> futureZonedDateTimeGenerator = RandomGenerator.FUTURE_ZONED_DATE_TIME;
+
+        typeCheck(futureZonedDateTimeGenerator, s -> !(s.isBefore(startDateTime) || s.isAfter(endDateTime)))
+                .verify(times(NUMBER_OF_TIMES));
+    }
+
+    @Test
+    public void shouldGenerateRandomPastZonedDateTime() {
+        final ZonedDateTime startDateTime = clock.now();
+        final ZonedDateTime endDateTime = startDateTime.minus(Period.ofYears(5));
+        final Generator<ZonedDateTime> pastZonedDateTimeGenerator = RandomGenerator.PAST_ZONED_DATE_TIME;
+
+        typeCheck(pastZonedDateTimeGenerator, s -> !(s.isBefore(endDateTime) || s.isAfter(startDateTime)))
                 .verify(times(NUMBER_OF_TIMES));
     }
 

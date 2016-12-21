@@ -37,6 +37,7 @@ import javax.ws.rs.core.Response;
 
 import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -152,7 +153,10 @@ public class RestPollerTest {
         verify(response, times(3)).getStatus();
     }
 
+    //TODO: fix the flaky test
+    //https://travis-ci.org/CJSCommonPlatform/microservice_framework/builds/185758661
     @Test
+    @Ignore("flaky test")
     public void shouldPollUntilResponsePayloadHasRequiredNumberOfItems() {
         final String userId1 = UUID.next().toString();
         final String userId2 = UUID.next().toString();

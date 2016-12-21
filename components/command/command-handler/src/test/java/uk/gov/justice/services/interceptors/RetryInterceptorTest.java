@@ -1,6 +1,7 @@
 package uk.gov.justice.services.interceptors;
 
 import static java.lang.Integer.MAX_VALUE;
+import static java.lang.System.currentTimeMillis;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
@@ -11,10 +12,10 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithR
 import uk.gov.justice.services.core.interceptor.InterceptorChain;
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
 import uk.gov.justice.services.eventsourcing.repository.core.exception.OptimisticLockingRetryException;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.UUID;
 
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -51,6 +52,7 @@ public class RetryInterceptorTest {
 
         retryInterceptor.maxRetry = "2";
         retryInterceptor.waitTime = "500";
+        retryInterceptor.immediateRetries = "0";
 
         assertThat(retryInterceptor.process(currentContext, interceptorChain), is(nextInChain));
     }
@@ -58,20 +60,49 @@ public class RetryInterceptorTest {
     @Test
     public void shouldThrowExceptionIfRetryMaxValueIsExceeded() throws Exception {
         final UUID streamId = UUID.randomUUID();
+        final JsonEnvelope envelope = envelope().with(metadataWithRandomUUID("nameABC")
+                .withStreamId(streamId))
+                .build();
         final InterceptorContext currentContext = interceptorContextWithInput(
-                envelope().with(metadataWithRandomUUID("nameABC")
-                        .withStreamId(streamId))
-                        .build(), null);
+                envelope, null);
 
         when(interceptorChain.processNext(currentContext))
                 .thenThrow(new OptimisticLockingRetryException("Locking Error"));
 
         retryInterceptor.maxRetry = "1";
         retryInterceptor.waitTime = "500";
+        retryInterceptor.immediateRetries = "0";
 
-        expectedException.expect(RuntimeException.class);
+        expectedException.expect(OptimisticLockingRetryFailedException.class);
+        expectedException.expectMessage("Retry count of 1 exceeded for command " + envelope.metadata().asJsonObject());
 
         retryInterceptor.process(currentContext, interceptorChain);
+    }
+
+    @Test
+    public void shouldRetryStraightAwayForThreeAttemptsThenWaitBeforeRetry() throws Exception {
+        final InterceptorContext currentContext = interceptorContextWithInput(
+                envelope().with(metadataWithRandomUUID("nameABC")).build(), null);
+        final InterceptorContext nextInChain = interceptorContextWithInput(null, null);
+
+        when(interceptorChain.processNext(currentContext))
+                .thenThrow(new OptimisticLockingRetryException("Locking Error"))
+                .thenThrow(new OptimisticLockingRetryException("Locking Error"))
+                .thenThrow(new OptimisticLockingRetryException("Locking Error"))
+                .thenThrow(new OptimisticLockingRetryException("Locking Error"))
+                .thenReturn(nextInChain);
+
+        retryInterceptor.maxRetry = "5";
+        retryInterceptor.waitTime = "1000";
+        retryInterceptor.immediateRetries = "3";
+
+        final long start = currentTimeMillis();
+        assertThat(retryInterceptor.process(currentContext, interceptorChain), is(nextInChain));
+        final long end = currentTimeMillis();
+
+        final long runTime = end - start;
+        assertThat(runTime > 999, is(true));
+        assertThat(runTime < 1999, is(true));
     }
 
     @Test

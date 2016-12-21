@@ -5,6 +5,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Added
+- Immediate retries to RetryInterceptor, defaults to 3 before applying wait period between retries
+
 ## [1.0.0] - 2016-12-16
 
 ### Added

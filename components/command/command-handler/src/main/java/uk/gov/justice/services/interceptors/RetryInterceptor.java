@@ -39,10 +39,16 @@ public class RetryInterceptor implements Interceptor {
     @Value(key = "handler.retry.wait.millis", defaultValue = "1000")
     String waitTime;
 
+    @Inject
+    @Value(key = "handler.retry.immediate.retries", defaultValue = "3")
+    String immediateRetries;
+
     @Override
     public InterceptorContext process(final InterceptorContext interceptorContext, final InterceptorChain interceptorChain) {
         final int maxRetryCount = parseInt(maxRetry);
         final int retryWaitTime = parseInt(waitTime);
+        final int maxImmediateRetries = parseInt(immediateRetries);
+
         final JsonObject metadata = interceptorContext.inputEnvelope().metadata().asJsonObject();
         int retries = 0;
 
@@ -52,20 +58,27 @@ public class RetryInterceptor implements Interceptor {
             } catch (OptimisticLockingRetryException e) {
                 logger.warn(format("Optimistic locking failed on command %s at retry attempt %d", metadata, retries), e);
                 retries++;
-                try {
-                    sleep(retryWaitTime);
-                } catch (InterruptedException ex) {
-                    currentThread().interrupt();
-                    throw new RuntimeException(ex);
+
+                if (retries > maxImmediateRetries) {
+                    waitFor(retryWaitTime);
                 }
             }
         }
 
-        throw new RuntimeException(format("Retry count of %d exceeded for command %s", maxRetryCount, metadata));
+        throw new OptimisticLockingRetryFailedException(format("Retry count of %d exceeded for command %s", maxRetryCount, metadata));
     }
 
     @Override
     public int priority() {
         return MAX_VALUE;
+    }
+
+    private void waitFor(final int retryWaitTime) {
+        try {
+            sleep(retryWaitTime);
+        } catch (InterruptedException ex) {
+            currentThread().interrupt();
+            throw new RuntimeException(ex);
+        }
     }
 }

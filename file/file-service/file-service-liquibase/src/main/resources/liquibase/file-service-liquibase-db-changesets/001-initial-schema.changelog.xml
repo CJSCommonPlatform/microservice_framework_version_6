@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="notifications-subscriptions-1" author="TechPod"
+               logicalFilePath="liquibase/notification-view-store-db-changelog.xml">
+
+        <!-- create subscription table -->
+        <createTable tableName="subscription">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="filter" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="DATETIME TZ">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!--create event_cache table-->
+        <createTable tableName="event_cache">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="session_id" type="uuid">
+                <constraints nullable="true"/>
+            </column>
+            <column name="correlation_id" type="uuid">
+                <constraints nullable="true"/>
+            </column>
+            <column name="stream_id" type="uuid">
+                <constraints nullable="true"/>
+            </column>
+            <column name="event_json" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ttl" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="DATETIME TZ">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expired" type="BOOLEAN">
+            </column>
+        </createTable>
+
+        <!--create indexes for event_cache-->
+        <createIndex tableName="event_cache" indexName="userid_idx">
+            <column name="user_id"/>
+        </createIndex>
+        <createIndex tableName="event_cache" indexName="sessionid_idx">
+            <column name="session_id"/>
+        </createIndex>
+        <createIndex tableName="event_cache" indexName="correlationid_idx">
+            <column name="correlation_id"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

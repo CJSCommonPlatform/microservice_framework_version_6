@@ -3,6 +3,7 @@ package uk.gov.justice.services.adapter.rest.filter;
 import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.core.HttpHeaders.ACCEPT;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static uk.gov.justice.services.adapter.rest.envelope.MediaTypes.JSON_MEDIA_TYPE_SUFFIX;
 import static uk.gov.justice.services.adapter.rest.envelope.MediaTypes.charsetFrom;
 import static uk.gov.justice.services.common.http.HeaderConstants.CLIENT_CORRELATION_ID;
@@ -38,6 +39,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.MDC;
 
@@ -54,6 +56,9 @@ public class LoggerRequestDataFilter implements ContainerRequestFilter, Containe
 
     @Inject
     ServiceContextNameProvider serviceContextNameProvider;
+
+    @Inject
+    StringToJsonObjectConverter stringToJsonObjectConverter;
 
     @Override
     public void filter(final ContainerRequestContext requestContext) throws IOException {
@@ -123,9 +128,11 @@ public class LoggerRequestDataFilter implements ContainerRequestFilter, Containe
             final String payload = IOUtils.toString(requestContext.getEntityStream(), charset);
 
             try {
-
-                if (payload.contains(JsonEnvelope.METADATA)) {
-                    return Optional.of(payloadMetadataFrom(payload));
+                if (isNotBlank(payload)) {
+                    final JsonObject jsonObjectPayload = stringToJsonObjectConverter.convert(payload);
+                    if (jsonObjectPayload. containsKey(JsonEnvelope.METADATA)) {
+                        return Optional.of(payloadMetadataFrom(jsonObjectPayload));
+                    }
                 }
 
             } finally {
@@ -172,9 +179,9 @@ public class LoggerRequestDataFilter implements ContainerRequestFilter, Containe
                 .orElse(false);
     }
 
-    private Metadata payloadMetadataFrom(final String message) {
+    private Metadata payloadMetadataFrom(final JsonObject payload) {
         return new JsonObjectEnvelopeConverter()
-                .asEnvelope(new StringToJsonObjectConverter().convert(message))
+                .asEnvelope(payload)
                 .metadata();
     }
 }

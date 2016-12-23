@@ -4,6 +4,7 @@ import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasNoJsonPath;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.UUID.randomUUID;
+import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.core.HttpHeaders.ACCEPT;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
 import static org.apache.commons.io.IOUtils.toInputStream;
@@ -24,13 +25,16 @@ import static uk.gov.justice.services.common.log.LoggerConstants.METADATA;
 import static uk.gov.justice.services.common.log.LoggerConstants.REQUEST_DATA;
 import static uk.gov.justice.services.common.log.LoggerConstants.SERVICE_CONTEXT;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 
 import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjectMetadata;
 
 import java.io.ByteArrayInputStream;
 
+import javax.json.JsonObject;
+import javax.json.JsonValue;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.core.MediaType;
@@ -42,6 +46,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.MDC;
@@ -66,6 +71,9 @@ public class LoggerRequestDataFilterTest {
 
     @Mock
     private ServiceContextNameProvider serviceContextNameProvider;
+
+    @Spy
+    private StringToJsonObjectConverter stringToJsonObjectConverter = new StringToJsonObjectConverter();
 
     @InjectMocks
     private LoggerRequestDataFilter loggerRequestDataFilter;
@@ -129,7 +137,7 @@ public class LoggerRequestDataFilterTest {
     @SuppressWarnings({"unchecked", "deprecation"})
     public void shouldGetMetadataFromPayload() throws Exception {
         final JsonEnvelope jsonEnvelope = envelope()
-                .with(JsonObjectMetadata.metadataOf(MESSAGE_ID_VALUE, NAME_VALUE)
+                .with(metadataOf(MESSAGE_ID_VALUE, NAME_VALUE)
                         .withClientCorrelationId(CLIENT_CORRELATION_ID_VALUE)
                         .withSessionId(SESSION_ID_VALUE)
                         .withUserId(USER_ID_VALUE))
@@ -162,7 +170,7 @@ public class LoggerRequestDataFilterTest {
     @SuppressWarnings({"unchecked", "deprecation"})
     public void shouldMergeDataInHeadersWithPayloadMetadata() throws Exception {
         final JsonEnvelope jsonEnvelope = envelope()
-                .with(JsonObjectMetadata.metadataOf(MESSAGE_ID_VALUE, NAME_VALUE)
+                .with(metadataOf(MESSAGE_ID_VALUE, NAME_VALUE)
                         .withClientCorrelationId(CLIENT_CORRELATION_ID_VALUE))
                 .withPayloadOf("data", "someData")
                 .build();
@@ -197,7 +205,7 @@ public class LoggerRequestDataFilterTest {
     @SuppressWarnings({"unchecked", "deprecation"})
     public void shouldMergeDataInHeadersWithPayloadMetadataOnlyIfPresent() throws Exception {
         final JsonEnvelope jsonEnvelope = envelope()
-                .with(JsonObjectMetadata.metadataOf(MESSAGE_ID_VALUE, NAME_VALUE)
+                .with(metadataOf(MESSAGE_ID_VALUE, NAME_VALUE)
                         .withClientCorrelationId(CLIENT_CORRELATION_ID_VALUE))
                 .withPayloadOf("data", "someData")
                 .build();
@@ -238,4 +246,40 @@ public class LoggerRequestDataFilterTest {
 
         assertThat(MDC.get(REQUEST_DATA), is("{}"));
     }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void shouldReturnEmptyJsonIfPayloadIsEmpty() throws Exception {
+        final MultivaluedMap<String, String> headers = mock(MultivaluedMap.class);
+
+        when(context.getHeaders()).thenReturn(headers);
+        when(context.getMediaType()).thenReturn(new MediaType("application/test", "+json", "UTF-8"));
+        when(context.getEntityStream()).thenReturn(toInputStream("", "UTF-8"));
+
+        loggerRequestDataFilter.filter(context);
+
+        assertThat(MDC.get(REQUEST_DATA), is("{}"));
+    }
+
+    @Test
+    @SuppressWarnings({"unchecked", "deprecation"})
+    public void shouldIgnoreSubFieldCalledMetadata() throws Exception {
+        final JsonObject payload = createObjectBuilder()
+                .add("toplevel", createObjectBuilder()
+                        .add("_metadata", JsonValue.NULL)
+                ).build();
+
+        final MultivaluedMap<String, String> headers = new MultivaluedHashMap();
+
+        when(context.getHeaders()).thenReturn(headers);
+        when(context.getMediaType()).thenReturn(new MediaType("application/test", "+json", "UTF-8"));
+        when(context.getEntityStream()).thenReturn(toInputStream(payload.toString(), "UTF-8"));
+
+        loggerRequestDataFilter.filter(context);
+
+        assertThat(MDC.get(REQUEST_DATA), is("{}"));
+
+        verify(context).setEntityStream(Mockito.any(ByteArrayInputStream.class));
+    }
+
 }

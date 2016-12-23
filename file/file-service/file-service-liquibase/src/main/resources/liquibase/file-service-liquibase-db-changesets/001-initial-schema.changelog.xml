@@ -7,42 +7,47 @@
     <changeSet id="file-service-001" author="TechPod"
                logicalFilePath="liquibase/file-service-liquibase-db-changelog.xml">
 
-        <!-- file service to create and populate-->
         <createTable tableName="metadata">
 
-            <!-- create before storing a random UUID -->
-            <column name="file_id" type="UUID">
+            <column name="metadata_id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
 
-            <!-- file service to update this field based on input file name-->
-            <column name="file_name" type="TEXT">
+            <column name="json" type="JSONB">
                 <constraints nullable="false"/>
             </column>
 
-            <!-- file service should inspect request header and populate this information-->
-            <column name="content_type" type="TEXT">
-                <constraints nullable="false"/>
+            <column name="file_id" type="UUID">
+                <constraints foreignKeyName="fk_file_id" nullable="false"/>
             </column>
+
+
         </createTable>
 
-        <!-- file service to create and populate-->
         <createTable tableName="file">
 
-            <!-- create before storing a random UUID -->
             <column name="file_id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
 
-            <!-- file service to update this field based on input file name-->
             <column name="bytes" type="BLOB">
                 <constraints nullable="false"/>
             </column>
 
         </createTable>
         <addUniqueConstraint tableName="metadata"
+                             columnNames="metadata_id"
+                             constraintName="metadata_id_constraint"/>
+        <addUniqueConstraint tableName="file"
                              columnNames="file_id"
-                             constraintName="fiie_id_constraint"/>
+                             constraintName="file_id_constraint"/>
+
+        <addForeignKeyConstraint
+                constraintName="fk_file_id"
+                baseColumnNames="file_id"
+                baseTableName="metadata"
+                referencedColumnNames="file_id"
+                referencedTableName="file"/>
 
     </changeSet>
 

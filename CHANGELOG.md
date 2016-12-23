@@ -5,6 +5,8 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [1.0.1] - 2016-12-23
+
 ### Fixed
 - Logging filter was breaking if a message payload contained the string __metadata_ to avoid having
 to parse the JSON; fixed so that it only looks for top level a top level _metadata field.
@@ -480,7 +482,8 @@ turned off by default
 
 - Initial release with basic dispatcher, handler and adapter generation
 
-[Unreleased]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.0.0...HEAD
+[Unreleased]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.0.1...HEAD
+[1.0.1]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.0.0...release-1.0.1
 [1.0.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.33.0...release-1.0.0
 [0.33.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.32.0...release-0.33.0
 [0.32.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.30.0...release-0.32.0

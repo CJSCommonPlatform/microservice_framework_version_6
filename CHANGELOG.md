@@ -8,6 +8,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ### Added
 - Immediate retries to RetryInterceptor, defaults to 3 before applying wait period between retries
 
+### Fixed
+- Logging filter was breaking if a message payload contained the string __metadata_ to avoid having
+to parse the JSON; fixed so that it only looks for top level a top level _metadata field.
+
 ## [1.0.0] - 2016-12-16
 
 ### Added

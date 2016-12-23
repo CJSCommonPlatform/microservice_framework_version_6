@@ -24,6 +24,7 @@ import uk.gov.justice.services.adapter.rest.mapper.BadRequestExceptionMapper;
 import uk.gov.justice.services.adapter.rest.processor.RestProcessor;
 import uk.gov.justice.services.adapter.rest.processor.RestProcessorProducer;
 import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
@@ -108,7 +109,8 @@ public class DefaultUsersUserIdResourceIT {
             JsonSchemaLoader.class,
             DefaultUsersUserIdResourceActionMapper.class,
             DefaultUsersResourceActionMapper.class,
-            LoggerProducer.class
+            LoggerProducer.class,
+            StringToJsonObjectConverter.class
     })
     public WebApp war() {
         return new WebApp()

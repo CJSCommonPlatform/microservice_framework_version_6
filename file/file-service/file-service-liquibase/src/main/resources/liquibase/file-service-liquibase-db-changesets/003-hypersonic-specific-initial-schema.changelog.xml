@@ -5,16 +5,16 @@
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
 
     <!--
-       Postgres specific changeset for production.
-       Adds a column 'json' of type JsonB to the table 'metadata'
+        Hypersonic specific changeset for testing.
+        Adds a column 'json' of type String to the table 'metadata'
     -->
-
     <changeSet
-            id="002-postgres-specific-initial-schema.changelog"
-            author="TechPod">
+            id="003-hypersonic-specific-initial-schema.changelog"
+            author="TechPod"
+            dbms="H2">
 
         <addColumn tableName="metadata">
-            <column name="json" type="JSONB">
+            <column name="json" type="string">
                 <constraints nullable="false"/>
             </column>
         </addColumn>

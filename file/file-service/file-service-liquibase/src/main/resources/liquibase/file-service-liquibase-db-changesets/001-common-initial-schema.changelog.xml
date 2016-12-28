@@ -18,9 +18,28 @@
             </column>
 
         </createTable>
+        <createTable tableName="metadata">
+            <column name="metadata_id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="file_id" type="UUID">
+                <constraints foreignKeyName="fk_file_id" nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint tableName="metadata"
+                             columnNames="metadata_id"
+                             constraintName="metadata_id_constraint"/>
         <addUniqueConstraint tableName="file"
                              columnNames="file_id"
                              constraintName="file_id_constraint"/>
+        <addForeignKeyConstraint
+                constraintName="fk_file_id"
+                baseColumnNames="file_id"
+                baseTableName="metadata"
+                referencedColumnNames="file_id"
+                referencedTableName="file"/>
+
     </changeSet>
 
 </databaseChangeLog>

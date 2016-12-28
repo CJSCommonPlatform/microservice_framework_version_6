@@ -21,12 +21,10 @@ import javax.sql.DataSource;
 
 import org.postgresql.util.PGobject;
 
-public class MetadataRepository extends AbstractJdbcRepository<Metadata> {
+public class MetadataJdbcRepository {
 
     private static final String INSERT_SQL = "INSERT INTO metadata(metadata_id, json, file_id) values (?, ?, ?)";
     private static final String FIND_BY_FILE_ID_SQL = "SELECT metadata_id, json, file_id FROM metadata WHERE file_id = ?";
-
-    private static final String JNDI_DS_FILE_STORE_PATTERN = "java:/app/file-service-persistence/DS.filestore";
 
     @Inject
     JsonSetter jsonSetter;
@@ -37,7 +35,7 @@ public class MetadataRepository extends AbstractJdbcRepository<Metadata> {
     public Optional<Metadata> findByFileId(final UUID fileId) {
 
         ResultSet resultSet = null;
-        try (final Connection connection = getDataSource().getConnection();
+        try (final Connection connection = dataSourceProvider.getDataSource().getConnection();
              final PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_FILE_ID_SQL)) {
 
             preparedStatement.setObject(1, fileId);
@@ -62,7 +60,7 @@ public class MetadataRepository extends AbstractJdbcRepository<Metadata> {
 
     public void insert(final Metadata metadata) {
 
-        try (final Connection connection = getDataSource().getConnection();
+        try (final Connection connection = dataSourceProvider.getDataSource().getConnection();
              final PreparedStatement preparedStatement = connection.prepareStatement(INSERT_SQL)) {
 
             final JsonObject json = metadata.getJson();
@@ -76,27 +74,6 @@ public class MetadataRepository extends AbstractJdbcRepository<Metadata> {
         } catch (SQLException e) {
             throw new RuntimeException("Failed to insert into metadata table. Sql: " + INSERT_SQL, e);
         }
-    }
-
-
-    @Override
-    protected String jndiName() throws NamingException {
-        return JNDI_DS_FILE_STORE_PATTERN;
-    }
-
-    @Override
-    protected Metadata entityFrom(final ResultSet resultSet) throws SQLException {
-
-        final UUID metadataId = (UUID) resultSet.getObject(1);
-        final String json = resultSet.getString(2);
-        final UUID fileId = (UUID) resultSet.getObject(3);
-
-        return new Metadata(metadataId, toJsonObject(json), fileId);
-    }
-
-    @Override
-    protected DataSource getDataSource() {
-        return dataSourceProvider.getDataSource();
     }
 
     private void close(final ResultSet resultSet) {

@@ -29,7 +29,7 @@ public class FileAndMetadataPersistenceTest {
     private static final String DRIVER_CLASS = org.h2.Driver.class.getName();
 
     private final FileJdbcRepository fileJdbcRepository = new FileJdbcRepository();
-    private final MetadataRepository metadataRepository = new MetadataRepository();
+    private final MetadataJdbcRepository metadataJdbcRepository = new MetadataJdbcRepository();
 
     private static final TestDataSourceProvider DATA_SOURCE_PROVIDER = new TestDataSourceProvider(
             URL,
@@ -41,8 +41,8 @@ public class FileAndMetadataPersistenceTest {
     public void setupDataSource() throws Exception {
 
         fileJdbcRepository.dataSourceProvider = DATA_SOURCE_PROVIDER;
-        metadataRepository.dataSourceProvider = DATA_SOURCE_PROVIDER;
-        metadataRepository.jsonSetter = new HsqlPostgresJsonSetter();
+        metadataJdbcRepository.dataSourceProvider = DATA_SOURCE_PROVIDER;
+        metadataJdbcRepository.jsonSetter = new HsqlPostgresJsonSetter();
 
         final Liquibase liquibase = new Liquibase(
                 LIQUIBASE_FILE_STORE_DB_CHANGELOG_XML,
@@ -79,9 +79,9 @@ public class FileAndMetadataPersistenceTest {
         final Metadata metadata = new Metadata(metadataId, toJsonObject(json), fileId);
 
         fileJdbcRepository.insert(file);
-        metadataRepository.insert(metadata);
+        metadataJdbcRepository.insert(metadata);
 
-        final Optional<Metadata> foundMetadata = metadataRepository.findByFileId(fileId);
+        final Optional<Metadata> foundMetadata = metadataJdbcRepository.findByFileId(fileId);
 
         assertThat(foundMetadata.isPresent(), is(true));
         assertThat(foundMetadata.get(), is(metadata));

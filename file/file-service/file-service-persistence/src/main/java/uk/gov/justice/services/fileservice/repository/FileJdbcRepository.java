@@ -19,7 +19,7 @@ import javax.inject.Inject;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
-public class FileJdbcRepository extends AbstractJdbcRepository<File> {
+public class FileJdbcRepository {
 
     private static final String SQL_FIND_BY_FILE_ID = "SELECT * FROM file WHERE file_id=? ";
     private static final String SQL_INSERT_METADATA = "INSERT INTO file(file_id,content) VALUES(?, ?)";
@@ -28,16 +28,11 @@ public class FileJdbcRepository extends AbstractJdbcRepository<File> {
     @Inject
     DataSourceProvider dataSourceProvider;
 
-    @Override
-    protected DataSource getDataSource() {
-        return dataSourceProvider.getDataSource();
-    }
-
     public void insert(final File file) {
 
         final byte[] content = file.getContent();
 
-        try (final Connection connection = getDataSource().getConnection();
+        try (final Connection connection = dataSourceProvider.getDataSource().getConnection();
              final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(content);
              final PreparedStatement ps = connection.prepareStatement(SQL_INSERT_METADATA)
         ) {
@@ -54,7 +49,7 @@ public class FileJdbcRepository extends AbstractJdbcRepository<File> {
     public Optional<File> findByFileId(final UUID fileId) {
 
         ResultSet resultSet = null;
-        try (final Connection connection = getDataSource().getConnection();
+        try (final Connection connection = dataSourceProvider.getDataSource().getConnection();
              final PreparedStatement ps = connection.prepareStatement(SQL_FIND_BY_FILE_ID)) {
             ps.setObject(1, fileId);
             resultSet = ps.executeQuery();
@@ -82,19 +77,5 @@ public class FileJdbcRepository extends AbstractJdbcRepository<File> {
             resultSet.close();
         } catch (SQLException ignored) {
         }
-    }
-
-    @Override
-    protected String jndiName() throws NamingException {
-        return JNDI_DS_FILE_STORE_PATTERN;
-    }
-
-    @Override
-    protected File entityFrom(final ResultSet resultSet) throws SQLException {
-
-        final UUID id = (UUID) resultSet.getObject(1);
-        final byte[] content = resultSet.getBytes(2);
-
-        return new File(id, content);
     }
 }

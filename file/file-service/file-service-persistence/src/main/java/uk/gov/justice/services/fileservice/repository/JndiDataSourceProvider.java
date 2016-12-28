@@ -19,7 +19,6 @@ public class JndiDataSourceProvider implements DataSourceProvider{
     @Inject
     InitialContextFactory initialContextFactory;
 
-
     @Override
     public DataSource getDataSource() {
 

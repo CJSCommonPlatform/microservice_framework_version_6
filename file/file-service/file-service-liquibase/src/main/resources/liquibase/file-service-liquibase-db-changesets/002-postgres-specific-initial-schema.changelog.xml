@@ -11,7 +11,8 @@
 
     <changeSet
             id="002-postgres-specific-initial-schema.changelog"
-            author="TechPod">
+            author="TechPod"
+            dbms="postgresql">
 
         <addColumn tableName="metadata">
             <column name="json" type="JSONB">

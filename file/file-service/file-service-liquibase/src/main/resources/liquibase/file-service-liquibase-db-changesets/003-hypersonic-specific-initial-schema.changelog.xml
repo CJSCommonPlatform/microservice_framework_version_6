@@ -14,7 +14,7 @@
             dbms="H2">
 
         <addColumn tableName="metadata">
-            <column name="json" type="string">
+            <column name="json" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
         </addColumn>

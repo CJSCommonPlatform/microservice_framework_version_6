@@ -113,14 +113,4 @@ public class MetadataRepository extends AbstractJdbcRepository<Metadata> {
     private JsonObject toJsonObject(final String json) {
         return createReader(new StringReader(json)).readObject();
     }
-
-    public static class Fred {
-        public void setJson(final PreparedStatement preparedStatement, final JsonObject jsonObject) throws SQLException {
-            final PGobject pgObject = new PGobject();
-            pgObject.setType("json");
-            pgObject.setValue(jsonObject.toString());
-
-            preparedStatement.setObject(2, pgObject);
-        }
-    }
 }

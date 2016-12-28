@@ -13,27 +13,43 @@ import java.util.UUID;
 
 import javax.json.JsonObject;
 
+import liquibase.Liquibase;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.resource.ClassLoaderResourceAccessor;
 import org.junit.Before;
 import org.junit.Test;
-import org.postgresql.Driver;
 
-public class FileJdbcRepositoryIT {
+public class FileAndMetadataPersistenceTest {
 
+    private static final String LIQUIBASE_FILE_STORE_DB_CHANGELOG_XML = "liquibase/file-service-liquibase-db-changelog.xml";
 
-    private static final String URL = "jdbc:postgresql://localhost/fileservice";
-    private static final String USERNAME = "fileservice";
-    private static final String PASSWORD = "fileservice";
+    private static final String URL = "jdbc:h2:mem:test;MV_STORE=FALSE;MVCC=FALSE";
+    private static final String USERNAME = "sa";
+    private static final String PASSWORD = "sa";
+    private static final String DRIVER_CLASS = org.h2.Driver.class.getName();
 
     private final FileJdbcRepository fileJdbcRepository = new FileJdbcRepository();
     private final MetadataRepository metadataRepository = new MetadataRepository();
 
-    @Before
-    public void setupDataSource() {
+    private static final TestDataSourceProvider DATA_SOURCE_PROVIDER = new TestDataSourceProvider(
+            URL,
+            USERNAME,
+            PASSWORD,
+            DRIVER_CLASS);
 
-        final TestDataSourceProvider dataSourceProvider = new TestDataSourceProvider(URL, USERNAME, PASSWORD);
-        fileJdbcRepository.dataSourceProvider = dataSourceProvider;
-        metadataRepository.dataSourceProvider = dataSourceProvider;
-        metadataRepository.jsonSetter = new PostgresJsonSetter();
+    @Before
+    public void setupDataSource() throws Exception {
+
+        fileJdbcRepository.dataSourceProvider = DATA_SOURCE_PROVIDER;
+        metadataRepository.dataSourceProvider = DATA_SOURCE_PROVIDER;
+        metadataRepository.jsonSetter = new HsqlPostgresJsonSetter();
+
+        final Liquibase liquibase = new Liquibase(
+                LIQUIBASE_FILE_STORE_DB_CHANGELOG_XML,
+                new ClassLoaderResourceAccessor(),
+                new JdbcConnection(DATA_SOURCE_PROVIDER.getDataSource().getConnection()));
+        liquibase.dropAll();
+        liquibase.update("");
     }
 
     @Test

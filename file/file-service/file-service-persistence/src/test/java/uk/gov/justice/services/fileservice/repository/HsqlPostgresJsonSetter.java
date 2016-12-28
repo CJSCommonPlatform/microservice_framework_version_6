@@ -9,6 +9,7 @@ public class HsqlPostgresJsonSetter implements JsonSetter {
 
     @Override
     public void setJson(final PreparedStatement preparedStatement, final JsonObject jsonObject) throws SQLException {
-        preparedStatement.setString(2, jsonObject.toString());
+        final String json = jsonObject.toString();
+        preparedStatement.setString(2, json);
     }
 }

@@ -1,4 +1,4 @@
-package uk.gov.justice.services.fileservice.repository;
+package uk.gov.justice.services.fileservice.repository.json;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -6,6 +6,8 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import uk.gov.justice.services.fileservice.repository.json.PostgresJsonSetter;
 
 import java.sql.PreparedStatement;
 

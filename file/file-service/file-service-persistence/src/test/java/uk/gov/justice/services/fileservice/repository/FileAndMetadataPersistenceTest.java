@@ -7,6 +7,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import uk.gov.justice.services.fileservice.datasource.TestDataSourceProvider;
+import uk.gov.justice.services.fileservice.repository.json.HsqlPostgresJsonSetter;
 
 import java.io.StringReader;
 import java.util.Optional;

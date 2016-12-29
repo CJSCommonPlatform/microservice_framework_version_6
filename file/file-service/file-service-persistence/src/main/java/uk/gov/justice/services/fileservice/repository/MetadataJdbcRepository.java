@@ -6,6 +6,7 @@ import static java.util.UUID.randomUUID;
 import static javax.json.Json.createReader;
 
 import uk.gov.justice.services.fileservice.datasource.DataSourceProvider;
+import uk.gov.justice.services.fileservice.repository.json.JsonSetter;
 
 import java.io.StringReader;
 import java.sql.Connection;

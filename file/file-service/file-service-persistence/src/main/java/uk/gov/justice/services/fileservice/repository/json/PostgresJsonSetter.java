@@ -1,4 +1,4 @@
-package uk.gov.justice.services.fileservice.repository;
+package uk.gov.justice.services.fileservice.repository.json;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;

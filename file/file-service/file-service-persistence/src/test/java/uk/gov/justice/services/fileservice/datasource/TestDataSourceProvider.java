@@ -11,10 +11,6 @@ public class TestDataSourceProvider implements DataSourceProvider {
     private final String password;
     private final String driverName;
 
-    public TestDataSourceProvider(final String url, final String username, final String password) {
-        this(url, username , password, org.postgresql.Driver.class.getName());
-    }
-
     public TestDataSourceProvider(final String url, final String username, final String password, final String driverName) {
         this.url = url;
         this.username = username;

@@ -1,4 +1,4 @@
-package uk.gov.justice.services.fileservice.repository;
+package uk.gov.justice.services.file.api.domain;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -6,13 +6,13 @@ import java.util.UUID;
 
 import javax.json.JsonObject;
 
-public class FileWithMetadata {
+public class StorableFile {
 
     private final UUID fileId;
     private final byte[] content;
     private final JsonObject metadata;
 
-    public FileWithMetadata(
+    public StorableFile(
             final UUID fileId,
             final JsonObject metadata,
             final byte[] content) {
@@ -37,7 +37,7 @@ public class FileWithMetadata {
     public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        final FileWithMetadata that = (FileWithMetadata) o;
+        final StorableFile that = (StorableFile) o;
         return Objects.equals(getFileId(), that.getFileId()) &&
                 Arrays.equals(getContent(), that.getContent()) &&
                 Objects.equals(getMetadata(), that.getMetadata());

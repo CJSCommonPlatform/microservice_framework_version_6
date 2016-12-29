@@ -4,7 +4,6 @@ package uk.gov.justice.services.fileservice.repository;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createReader;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 import java.io.StringReader;
@@ -56,32 +55,28 @@ public class FileAndMetadataPersistenceTest {
     public void shouldStoreAndRetrieveFileData() {
 
         final UUID fileId = randomUUID();
-        final File file = new File(fileId, "file-name".getBytes());
-        fileJdbcRepository.insert(file);
+        final byte[] content = "file-name".getBytes();
+        fileJdbcRepository.insert(fileId, content);
 
-        final Optional<File> fileFound = fileJdbcRepository.findByFileId(fileId);
+        final Optional<byte[]> fileContents = fileJdbcRepository.findByFileId(fileId);
 
-        assertThat(fileFound.isPresent(), is(true));
-
-        assertThat(fileFound, notNullValue());
-        assertThat(fileFound.get().getFileId(), is(file.getFileId()));
-        assertThat(fileFound.get().getContent(), is(file.getContent()));
+        assertThat(fileContents.isPresent(), is(true));
+        assertThat(fileContents.get(), is(content));
     }
 
     @Test
     public void shouldStoreAndRetrieveMetadata() {
 
         final UUID fileId = randomUUID();
-        final UUID metadataId = randomUUID();
 
         final String json = "{\"some\": \"json\"}";
-        final File file = new File(fileId, "some file or other".getBytes());
-        final Metadata metadata = new Metadata(metadataId, toJsonObject(json), fileId);
+        final byte[] content = "some file or other".getBytes();
+        final JsonObject metadata = toJsonObject(json);
 
-        fileJdbcRepository.insert(file);
-        metadataJdbcRepository.insert(metadata);
+        fileJdbcRepository.insert(fileId, content);
+        metadataJdbcRepository.insert(fileId, metadata);
 
-        final Optional<Metadata> foundMetadata = metadataJdbcRepository.findByFileId(fileId);
+        final Optional<JsonObject> foundMetadata = metadataJdbcRepository.findByFileId(fileId);
 
         assertThat(foundMetadata.isPresent(), is(true));
         assertThat(foundMetadata.get(), is(metadata));

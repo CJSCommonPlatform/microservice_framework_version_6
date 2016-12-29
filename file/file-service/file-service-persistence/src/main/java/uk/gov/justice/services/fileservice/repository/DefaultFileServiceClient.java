@@ -25,13 +25,12 @@ public class DefaultFileServiceClient implements FileServiceClient {
 
         final UUID fileId = storableFile.getFileId();
         final JsonObject metadata = storableFile.getMetadata();
+        final byte[] content = storableFile.getContent();
 
-        final Optional<byte[]> fileContents = fileJdbcRepository.findByFileId(fileId);
-
-        if (fileContents.isPresent()) {
-            update(fileId, fileContents.get(), metadata);
+        if (fileJdbcRepository.findByFileId(fileId).isPresent()) {
+            update(fileId, content, metadata);
         } else {
-            insert(fileId, fileContents.get(), metadata);
+            insert(fileId, content, metadata);
         }
     }
 

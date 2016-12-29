@@ -24,7 +24,7 @@ public class JndiDataSourceProvider implements DataSourceProvider{
 
         try {
             return (DataSource) initialContextFactory.create().lookup(JNDI_DATASOURCE);
-        } catch (NamingException e) {
+        } catch (final NamingException e) {
             throw new DataAccessException(format("Failed to get DataSource from container using JNDI name '%s'", JNDI_DATASOURCE), e);
         }
     }

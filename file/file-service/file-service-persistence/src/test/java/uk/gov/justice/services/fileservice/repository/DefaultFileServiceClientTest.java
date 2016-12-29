@@ -37,19 +37,37 @@ public class DefaultFileServiceClientTest {
     private DefaultFileServiceClient defaultFileServiceClient;
 
     @Test
-    public void shouldStoreAFileInTheFileAndMetadataTables() throws Exception {
+    public void shouldInsertAFileInTheFileAndMetadataTablesIfNoFileExistsInTheDatabase() throws Exception {
 
         final UUID fileId = randomUUID();
         final JsonObject metadataJsonObject = mock(JsonObject.class);
-        final byte[] content = "the file content".getBytes();
+        final byte[] newContent = "new file content".getBytes();
 
-        final StorableFile storableFile = new StorableFile(fileId, metadataJsonObject, content);
+        final StorableFile storableFile = new StorableFile(fileId, metadataJsonObject, newContent);
 
-        when(fileJdbcRepository.findByFileId(fileId)).thenReturn(of(content));
+        when(fileJdbcRepository.findByFileId(fileId)).thenReturn(empty());
 
         defaultFileServiceClient.store(storableFile);
 
-        verify(fileJdbcRepository).update(fileId, content);
+        verify(fileJdbcRepository).insert(fileId, newContent);
+        verify(metadataJdbcRepository).insert(fileId, metadataJsonObject);
+    }
+
+    @Test
+    public void shouldUpdateAFileInTheFileAndMetadataTablesIfTheFileExistsInTheDatabase() throws Exception {
+
+        final UUID fileId = randomUUID();
+        final JsonObject metadataJsonObject = mock(JsonObject.class);
+        final byte[] oldContent = "the old file content".getBytes();
+        final byte[] newContent = "new file content".getBytes();
+
+        final StorableFile storableFile = new StorableFile(fileId, metadataJsonObject, newContent);
+
+        when(fileJdbcRepository.findByFileId(fileId)).thenReturn(of(oldContent));
+
+        defaultFileServiceClient.store(storableFile);
+
+        verify(fileJdbcRepository).update(fileId, newContent);
         verify(metadataJdbcRepository).update(fileId, metadataJsonObject);
     }
 
@@ -59,14 +77,10 @@ public class DefaultFileServiceClientTest {
         final UUID fileId = randomUUID();
         final byte[] content = "the file content".getBytes();
 
-        final File file = mock(File.class);
-        final Metadata metadata = mock(Metadata.class);
         final JsonObject metadataJsonObject = mock(JsonObject.class);
 
         when(fileJdbcRepository.findByFileId(fileId)).thenReturn(of(content));
         when(metadataJdbcRepository.findByFileId(fileId)).thenReturn(of(metadataJsonObject));
-        when(metadata.getJson()).thenReturn(metadataJsonObject);
-        when(file.getContent()).thenReturn(content);
 
         final Optional<StorableFile> storableFile = defaultFileServiceClient.find(fileId);
 

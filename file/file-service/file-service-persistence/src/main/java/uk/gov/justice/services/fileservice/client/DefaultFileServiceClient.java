@@ -1,10 +1,12 @@
-package uk.gov.justice.services.fileservice.repository;
+package uk.gov.justice.services.fileservice.client;
 
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
 import uk.gov.justice.services.file.api.FileServiceClient;
 import uk.gov.justice.services.file.api.domain.StorableFile;
+import uk.gov.justice.services.fileservice.repository.FileJdbcRepository;
+import uk.gov.justice.services.fileservice.repository.MetadataJdbcRepository;
 
 import java.util.Optional;
 import java.util.UUID;

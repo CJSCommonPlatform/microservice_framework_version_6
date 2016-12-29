@@ -1,4 +1,4 @@
-package uk.gov.justice.services.fileservice.repository;
+package uk.gov.justice.services.fileservice.datasource;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;

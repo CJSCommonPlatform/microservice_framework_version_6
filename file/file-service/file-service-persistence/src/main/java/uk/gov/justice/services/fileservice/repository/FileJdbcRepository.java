@@ -3,6 +3,7 @@ package uk.gov.justice.services.fileservice.repository;
 import static java.lang.String.format;
 import static java.util.Optional.empty;
 
+import uk.gov.justice.services.fileservice.datasource.DataSourceProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 
 import java.io.ByteArrayInputStream;

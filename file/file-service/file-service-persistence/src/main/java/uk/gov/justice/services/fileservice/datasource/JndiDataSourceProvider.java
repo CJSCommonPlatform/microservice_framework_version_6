@@ -1,4 +1,4 @@
-package uk.gov.justice.services.fileservice.repository;
+package uk.gov.justice.services.fileservice.datasource;
 
 import static java.lang.String.format;
 
@@ -7,12 +7,11 @@ import uk.gov.justice.services.jdbc.persistence.InitialContextFactory;
 
 import javax.enterprise.inject.Default;
 import javax.inject.Inject;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 @Default
-public class JndiDataSourceProvider implements DataSourceProvider{
+public class JndiDataSourceProvider implements DataSourceProvider {
 
     private static final String JNDI_DATASOURCE = "java:/app/fileservice/DS.fileservice";
 

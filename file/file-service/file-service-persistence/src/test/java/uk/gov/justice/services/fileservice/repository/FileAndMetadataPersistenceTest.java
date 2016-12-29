@@ -6,6 +6,8 @@ import static javax.json.Json.createReader;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
+import uk.gov.justice.services.fileservice.datasource.TestDataSourceProvider;
+
 import java.io.StringReader;
 import java.util.Optional;
 import java.util.UUID;

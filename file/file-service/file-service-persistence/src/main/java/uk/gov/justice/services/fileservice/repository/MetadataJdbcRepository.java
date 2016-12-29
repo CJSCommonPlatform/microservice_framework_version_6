@@ -5,7 +5,7 @@ import static java.util.Optional.of;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createReader;
 
-import uk.gov.justice.services.jdbc.persistence.AbstractJdbcRepository;
+import uk.gov.justice.services.fileservice.datasource.DataSourceProvider;
 
 import java.io.StringReader;
 import java.sql.Connection;
@@ -17,10 +17,6 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.json.JsonObject;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
-
-import org.postgresql.util.PGobject;
 
 public class MetadataJdbcRepository {
 

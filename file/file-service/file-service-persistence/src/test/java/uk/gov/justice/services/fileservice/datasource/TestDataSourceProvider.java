@@ -1,4 +1,4 @@
-package uk.gov.justice.services.fileservice.repository;
+package uk.gov.justice.services.fileservice.datasource;
 
 import javax.sql.DataSource;
 

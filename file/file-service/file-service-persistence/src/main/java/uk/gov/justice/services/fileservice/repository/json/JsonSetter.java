@@ -7,5 +7,5 @@ import javax.json.JsonObject;
 
 public interface JsonSetter {
 
-    void setJson(final PreparedStatement preparedStatement, final JsonObject jsonObject) throws SQLException;
+    void setJson(final int columnIndex, final PreparedStatement preparedStatement, final JsonObject jsonObject) throws SQLException;
 }

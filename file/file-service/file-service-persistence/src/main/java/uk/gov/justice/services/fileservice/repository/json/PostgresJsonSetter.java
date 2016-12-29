@@ -12,11 +12,11 @@ import org.postgresql.util.PGobject;
 public class PostgresJsonSetter implements JsonSetter {
 
     @Override
-    public void setJson(final PreparedStatement preparedStatement, final JsonObject jsonObject) throws SQLException {
+    public void setJson(final int columnIndex, final PreparedStatement preparedStatement, final JsonObject jsonObject) throws SQLException {
         final PGobject pgObject = new PGobject();
         pgObject.setType("json");
         pgObject.setValue(jsonObject.toString());
 
-        preparedStatement.setObject(2, pgObject);
+        preparedStatement.setObject(columnIndex, pgObject);
     }
 }

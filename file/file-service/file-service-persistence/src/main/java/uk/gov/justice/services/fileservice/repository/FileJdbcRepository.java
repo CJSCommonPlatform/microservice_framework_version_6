@@ -2,12 +2,9 @@ package uk.gov.justice.services.fileservice.repository;
 
 import static java.lang.String.format;
 import static java.util.Optional.empty;
-
-import uk.gov.justice.services.fileservice.datasource.DataSourceProvider;
-import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
+import static java.util.Optional.of;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,81 +12,64 @@ import java.sql.SQLException;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.inject.Inject;
-
 public class FileJdbcRepository {
 
-    private static final String SQL_FIND_BY_FILE_ID = "SELECT * FROM file WHERE file_id=? ";
-    private static final String SQL_INSERT_METADATA = "INSERT INTO file(file_id,content) VALUES(?, ?)";
+    private static final String SQL_FIND_BY_FILE_ID = "SELECT content FROM file WHERE file_id=? ";
+    private static final String SQL_INSERT_METADATA = "INSERT INTO file(content, file_id) VALUES(?, ?)";
+    private static final String SQL_UPDATE_METADATA = "UPDATE file set content = ? WHERE file_id = ?";
 
-    @Inject
-    DataSourceProvider dataSourceProvider;
+    private final Closer closer = new Closer();
 
-    public void insert(final UUID fileId, final byte[] content) {
-
-        try (final Connection connection = dataSourceProvider.getDataSource().getConnection()) {
-            final boolean autoCommit = connection.getAutoCommit();
-
-            try (final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(content);
-                 final PreparedStatement ps = connection.prepareStatement(SQL_INSERT_METADATA)
-            ) {
-
-                if (autoCommit) {
-                    connection.setAutoCommit(false);
-                }
-
-                ps.setObject(1, fileId);
-                ps.setBinaryStream(2, byteArrayInputStream, content.length);
-                ps.executeUpdate();
-
-                connection.commit();
-            } catch (final SQLException | IOException e) {
-                connection.rollback();
-                throw new JdbcRepositoryException("Exception while inserting file", e);
-            } finally {
-                connection.setAutoCommit(autoCommit);
-            }
-        } catch (final SQLException e) {
-            throw new JdbcRepositoryException("Exception while inserting file", e);
-        }
+    public void insert(final UUID fileId, final byte[] content, final Connection connection) throws DataUpdateException {
+        insertOrUpdate(fileId, content, connection, SQL_INSERT_METADATA);
     }
 
-    public void update(final UUID fileId, final byte[] content) {
-
+    public void update(final UUID fileId, final byte[] content, final Connection connection) throws DataUpdateException {
+        insertOrUpdate(fileId, content, connection, SQL_UPDATE_METADATA);
     }
 
-    public Optional<byte[]> findByFileId(final UUID fileId) {
+    public Optional<byte[]> findByFileId(final UUID fileId, final Connection connection) throws DataUpdateException {
 
         ResultSet resultSet = null;
-        try (final Connection connection = dataSourceProvider.getDataSource().getConnection();
-             final PreparedStatement ps = connection.prepareStatement(SQL_FIND_BY_FILE_ID)) {
-            ps.setObject(1, fileId);
-            resultSet = ps.executeQuery();
+        PreparedStatement preparedStatement = null;
+
+        try {
+            preparedStatement = connection.prepareStatement(SQL_FIND_BY_FILE_ID);
+            preparedStatement.setObject(1, fileId);
+            resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
-
-                // TODO: change query
-                final UUID id = (UUID) resultSet.getObject(1);
-                final byte[] content = resultSet.getBytes(2);
-                return Optional.of(content);
+                return of(resultSet.getBytes(1));
             }
         } catch (final SQLException e) {
-            throw new JdbcRepositoryException(format("Exception while reading metadata %s", fileId), e);
+            throw new DataUpdateException(format("Exception while reading metadata %s", fileId), e);
         } finally {
-            close(resultSet);
+            closer.close(resultSet, preparedStatement);
         }
 
         return empty();
     }
 
-    private void close(final ResultSet resultSet) {
-        if (resultSet == null) {
-            return;
-        }
+    private void insertOrUpdate(
+            final UUID fileId,
+            final byte[] content,
+            final Connection connection,
+            final String sql) throws DataUpdateException {
 
+        final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(content);
+
+        PreparedStatement preparedStatement = null;
         try {
-            resultSet.close();
-        } catch (final SQLException ignored) {
+            preparedStatement = connection.prepareStatement(sql);
+
+            preparedStatement.setBinaryStream(1, byteArrayInputStream, content.length);
+            preparedStatement.setObject(2, fileId);
+            preparedStatement.executeUpdate();
+
+        } catch (final SQLException e) {
+            throw new DataUpdateException("Exception while inserting file", e);
+        } finally {
+            closer.close(byteArrayInputStream, preparedStatement);
         }
     }
 }

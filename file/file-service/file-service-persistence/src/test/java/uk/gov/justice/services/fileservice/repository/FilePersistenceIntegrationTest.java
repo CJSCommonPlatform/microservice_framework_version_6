@@ -10,6 +10,7 @@ import uk.gov.justice.services.fileservice.datasource.TestDataSourceProvider;
 import uk.gov.justice.services.fileservice.repository.json.HsqlPostgresJsonSetter;
 
 import java.io.StringReader;
+import java.sql.Connection;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -18,10 +19,11 @@ import javax.json.JsonObject;
 import liquibase.Liquibase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.resource.ClassLoaderResourceAccessor;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class FileAndMetadataPersistenceTest {
+public class FilePersistenceIntegrationTest {
 
     private static final String LIQUIBASE_FILE_STORE_DB_CHANGELOG_XML = "liquibase/file-service-liquibase-db-changelog.xml";
 
@@ -39,36 +41,44 @@ public class FileAndMetadataPersistenceTest {
             PASSWORD,
             DRIVER_CLASS);
 
-    @Before
-    public void setupDataSource() throws Exception {
+    private Connection connection;
 
-        fileJdbcRepository.dataSourceProvider = DATA_SOURCE_PROVIDER;
-        metadataJdbcRepository.dataSourceProvider = DATA_SOURCE_PROVIDER;
+
+    @Before
+    public void setupDatabase() throws Exception {
+
+        connection = DATA_SOURCE_PROVIDER.getDataSource().getConnection();
+
         metadataJdbcRepository.jsonSetter = new HsqlPostgresJsonSetter();
 
         final Liquibase liquibase = new Liquibase(
                 LIQUIBASE_FILE_STORE_DB_CHANGELOG_XML,
                 new ClassLoaderResourceAccessor(),
-                new JdbcConnection(DATA_SOURCE_PROVIDER.getDataSource().getConnection()));
+                new JdbcConnection(connection));
         liquibase.dropAll();
         liquibase.update("");
     }
 
+    @After
+    public void closeConnection() {
+        new Closer().close(connection);
+    }
+
     @Test
-    public void shouldStoreAndRetrieveFileData() {
+    public void shouldStoreAndRetrieveFileData() throws Exception {
 
         final UUID fileId = randomUUID();
         final byte[] content = "file-name".getBytes();
-        fileJdbcRepository.insert(fileId, content);
+        fileJdbcRepository.insert(fileId, content, connection);
 
-        final Optional<byte[]> fileContents = fileJdbcRepository.findByFileId(fileId);
+        final Optional<byte[]> fileContents = fileJdbcRepository.findByFileId(fileId, connection);
 
         assertThat(fileContents.isPresent(), is(true));
         assertThat(fileContents.get(), is(content));
     }
 
     @Test
-    public void shouldStoreAndRetrieveMetadata() {
+    public void shouldStoreAndRetrieveMetadata() throws Exception {
 
         final UUID fileId = randomUUID();
 
@@ -76,10 +86,10 @@ public class FileAndMetadataPersistenceTest {
         final byte[] content = "some file or other".getBytes();
         final JsonObject metadata = toJsonObject(json);
 
-        fileJdbcRepository.insert(fileId, content);
-        metadataJdbcRepository.insert(fileId, metadata);
+        fileJdbcRepository.insert(fileId, content, connection);
+        metadataJdbcRepository.insert(fileId, metadata, connection);
 
-        final Optional<JsonObject> foundMetadata = metadataJdbcRepository.findByFileId(fileId);
+        final Optional<JsonObject> foundMetadata = metadataJdbcRepository.findByFileId(fileId, connection);
 
         assertThat(foundMetadata.isPresent(), is(true));
         assertThat(foundMetadata.get(), is(metadata));

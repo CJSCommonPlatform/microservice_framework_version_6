@@ -5,8 +5,8 @@ import static java.util.Optional.of;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createReader;
 
-import uk.gov.justice.services.fileservice.datasource.DataSourceProvider;
 import uk.gov.justice.services.fileservice.repository.json.JsonSetter;
+import uk.gov.justice.services.fileservice.repository.json.PostgresJsonSetter;
 
 import java.io.StringReader;
 import java.sql.Connection;
@@ -16,78 +16,76 @@ import java.sql.SQLException;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.inject.Inject;
 import javax.json.JsonObject;
 
 public class MetadataJdbcRepository {
 
     private static final String INSERT_SQL = "INSERT INTO metadata(metadata_id, json, file_id) values (?, ?, ?)";
-    private static final String FIND_BY_FILE_ID_SQL = "SELECT metadata_id, json, file_id FROM metadata WHERE file_id = ?";
+    private static final String UPDATE_SQL = "UPDATE metadata SET json = ? WHERE file_id = ?";
+    private static final String FIND_BY_FILE_ID_SQL = "SELECT json FROM metadata WHERE file_id = ?";
 
-    @Inject
-    JsonSetter jsonSetter;
+    JsonSetter jsonSetter = new PostgresJsonSetter();
 
-    @Inject
-    DataSourceProvider dataSourceProvider;
+    Closer closer = new Closer();
 
-    public Optional<JsonObject> findByFileId(final UUID fileId) {
+    public Optional<JsonObject> findByFileId(final UUID fileId, final Connection connection) {
 
+        PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
-        try (final Connection connection = dataSourceProvider.getDataSource().getConnection();
-             final PreparedStatement preparedStatement = connection.prepareStatement(FIND_BY_FILE_ID_SQL)) {
+        try {
+            preparedStatement = connection.prepareStatement(FIND_BY_FILE_ID_SQL);
 
             preparedStatement.setObject(1, fileId);
 
             resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
-                // TODO: change query
-                final UUID metadataId = (UUID) resultSet.getObject(1);
-                final String json = resultSet.getString(2);
-
-                return of(toJsonObject(json));
+                return of(toJsonObject(resultSet.getString(1)));
             }
 
             return empty();
 
         } catch (final SQLException e) {
-            throw new RuntimeException("Failed to insert into metadata table. Sql: " + INSERT_SQL, e);
+            throw new RuntimeException("Failed to find metadata. Sql: " + FIND_BY_FILE_ID_SQL, e);
         } finally {
-            close(resultSet);
+            closer.close(resultSet, preparedStatement);
         }
     }
 
-    public void update(final UUID fileId, final JsonObject metadata) {
+    public void update(final UUID fileId, final JsonObject metadata, final Connection connection) {
 
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = connection.prepareStatement(UPDATE_SQL);
 
+            jsonSetter.setJson(1, preparedStatement, metadata);
+            preparedStatement.setObject(2, fileId);
+
+            preparedStatement.executeUpdate();
+        } catch (final SQLException e) {
+            throw new RuntimeException("Failed to update metadata table. Sql: " + UPDATE_SQL, e);
+        } finally {
+            closer.close(preparedStatement);
+        }
     }
 
-    public void insert(final UUID fileId, final JsonObject metadata) {
+    public void insert(final UUID fileId, final JsonObject metadata, final Connection connection) {
 
         final UUID metadataId = randomUUID();
 
-        try (final Connection connection = dataSourceProvider.getDataSource().getConnection();
-             final PreparedStatement preparedStatement = connection.prepareStatement(INSERT_SQL)) {
-
-            jsonSetter.setJson(preparedStatement, metadata);
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = connection.prepareStatement(INSERT_SQL);
 
             preparedStatement.setObject(1, metadataId);
+            jsonSetter.setJson(2, preparedStatement, metadata);
             preparedStatement.setObject(3, fileId);
 
             preparedStatement.executeUpdate();
         } catch (final SQLException e) {
             throw new RuntimeException("Failed to insert into metadata table. Sql: " + INSERT_SQL, e);
-        }
-    }
-
-    private void close(final ResultSet resultSet) {
-        if (resultSet == null) {
-            return;
-        }
-
-        try {
-            resultSet.close();
-        } catch (final SQLException ignored) {
+        } finally {
+             closer.close(preparedStatement);
         }
     }
 

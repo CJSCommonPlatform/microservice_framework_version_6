@@ -7,8 +7,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import uk.gov.justice.services.fileservice.repository.json.PostgresJsonSetter;
-
 import java.sql.PreparedStatement;
 
 import javax.json.JsonObject;
@@ -34,14 +32,15 @@ public class PostgresJsonSetterTest {
     public void shouldSetJsonOnTheCorrectColumnUsingThePostgresSpecificPGObjectClass() throws Exception {
 
         final String json = "{\"some\": \"json\"}";
+        final int columnIndex = 23;
         final PreparedStatement preparedStatement = mock(PreparedStatement.class);
         final JsonObject jsonObject = mock(JsonObject.class);
 
         when(jsonObject.toString()).thenReturn(json);
 
-        postgresJsonSetter.setJson(preparedStatement, jsonObject);
+        postgresJsonSetter.setJson(columnIndex, preparedStatement, jsonObject);
 
-        verify(preparedStatement).setObject(eq(2), pgObjectCaptor.capture());
+        verify(preparedStatement).setObject(eq(columnIndex), pgObjectCaptor.capture());
 
         assertThat(pgObjectCaptor.getValue().getType(), is("json"));
         assertThat(pgObjectCaptor.getValue().getValue(), is(json));

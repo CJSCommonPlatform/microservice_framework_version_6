@@ -12,11 +12,11 @@ import java.sql.SQLException;
 import java.util.Optional;
 import java.util.UUID;
 
-public class FileJdbcRepository {
+public class ContentJdbcRepository {
 
-    private static final String SQL_FIND_BY_FILE_ID = "SELECT content FROM file WHERE file_id=? ";
-    private static final String SQL_INSERT_METADATA = "INSERT INTO file(content, file_id) VALUES(?, ?)";
-    private static final String SQL_UPDATE_METADATA = "UPDATE file set content = ? WHERE file_id = ?";
+    private static final String SQL_FIND_BY_FILE_ID = "SELECT content FROM content WHERE file_id=? ";
+    private static final String SQL_INSERT_METADATA = "INSERT INTO content(content, file_id) VALUES(?, ?)";
+    private static final String SQL_UPDATE_METADATA = "UPDATE content set content = ? WHERE file_id = ?";
 
     private final Closer closer = new Closer();
 

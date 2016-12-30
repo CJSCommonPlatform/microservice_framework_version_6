@@ -18,15 +18,25 @@ import java.util.UUID;
 
 import javax.json.JsonObject;
 
+import com.google.common.annotations.VisibleForTesting;
+
 public class MetadataJdbcRepository {
 
     private static final String INSERT_SQL = "INSERT INTO metadata(metadata_id, json, file_id) values (?, ?, ?)";
     private static final String UPDATE_SQL = "UPDATE metadata SET json = ? WHERE file_id = ?";
     private static final String FIND_BY_FILE_ID_SQL = "SELECT json FROM metadata WHERE file_id = ?";
 
-    JsonSetter jsonSetter = new PostgresJsonSetter();
+    private final JsonSetter jsonSetter;
+    private final  Closer closer = new Closer();
 
-    Closer closer = new Closer();
+    public MetadataJdbcRepository() {
+        this(new PostgresJsonSetter());
+    }
+
+    @VisibleForTesting
+    public MetadataJdbcRepository(final JsonSetter jsonSetter) {
+        this.jsonSetter = jsonSetter;
+    }
 
     public Optional<JsonObject> findByFileId(final UUID fileId, final Connection connection) {
 

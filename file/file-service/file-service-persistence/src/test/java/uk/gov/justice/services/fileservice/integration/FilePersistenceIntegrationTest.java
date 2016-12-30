@@ -1,4 +1,4 @@
-package uk.gov.justice.services.fileservice.repository;
+package uk.gov.justice.services.fileservice.integration;
 
 
 import static java.util.UUID.randomUUID;
@@ -7,7 +7,11 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import uk.gov.justice.services.fileservice.datasource.TestDataSourceProvider;
+import uk.gov.justice.services.fileservice.repository.Closer;
+import uk.gov.justice.services.fileservice.repository.ContentJdbcRepository;
+import uk.gov.justice.services.fileservice.repository.MetadataJdbcRepository;
 import uk.gov.justice.services.fileservice.repository.json.HsqlPostgresJsonSetter;
+import uk.gov.justice.services.fileservice.repository.json.JsonSetter;
 
 import java.io.StringReader;
 import java.sql.Connection;
@@ -32,8 +36,10 @@ public class FilePersistenceIntegrationTest {
     private static final String PASSWORD = "sa";
     private static final String DRIVER_CLASS = org.h2.Driver.class.getName();
 
-    private final FileJdbcRepository fileJdbcRepository = new FileJdbcRepository();
-    private final MetadataJdbcRepository metadataJdbcRepository = new MetadataJdbcRepository();
+    private final JsonSetter jsonSetter = new HsqlPostgresJsonSetter();
+
+    private final MetadataJdbcRepository metadataJdbcRepository = new MetadataJdbcRepository(jsonSetter);
+    private final ContentJdbcRepository contentJdbcRepository = new ContentJdbcRepository();
 
     private static final TestDataSourceProvider DATA_SOURCE_PROVIDER = new TestDataSourceProvider(
             URL,
@@ -48,8 +54,6 @@ public class FilePersistenceIntegrationTest {
     public void setupDatabase() throws Exception {
 
         connection = DATA_SOURCE_PROVIDER.getDataSource().getConnection();
-
-        metadataJdbcRepository.jsonSetter = new HsqlPostgresJsonSetter();
 
         final Liquibase liquibase = new Liquibase(
                 LIQUIBASE_FILE_STORE_DB_CHANGELOG_XML,
@@ -69,9 +73,9 @@ public class FilePersistenceIntegrationTest {
 
         final UUID fileId = randomUUID();
         final byte[] content = "file-name".getBytes();
-        fileJdbcRepository.insert(fileId, content, connection);
+        contentJdbcRepository.insert(fileId, content, connection);
 
-        final Optional<byte[]> fileContents = fileJdbcRepository.findByFileId(fileId, connection);
+        final Optional<byte[]> fileContents = contentJdbcRepository.findByFileId(fileId, connection);
 
         assertThat(fileContents.isPresent(), is(true));
         assertThat(fileContents.get(), is(content));
@@ -86,7 +90,7 @@ public class FilePersistenceIntegrationTest {
         final byte[] content = "some file or other".getBytes();
         final JsonObject metadata = toJsonObject(json);
 
-        fileJdbcRepository.insert(fileId, content, connection);
+        contentJdbcRepository.insert(fileId, content, connection);
         metadataJdbcRepository.insert(fileId, metadata, connection);
 
         final Optional<JsonObject> foundMetadata = metadataJdbcRepository.findByFileId(fileId, connection);

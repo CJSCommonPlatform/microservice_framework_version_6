@@ -201,7 +201,7 @@ public class TransactionalFileStoreTest {
         try {
             transactionalFileStore.find(fileId);
             fail();
-        } catch (JdbcRepositoryException expected) {
+        } catch (final JdbcRepositoryException expected) {
             assertThat(expected.getMessage(), is("Failed to find file with id " + fileId));
             assertThat(expected.getCause(), is(transactionFailedException));
         }

@@ -8,7 +8,7 @@
             id="001-common-initial-schema.changelog"
             author="TechPod">
 
-        <createTable tableName="file">
+        <createTable tableName="content">
             <column name="file_id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -30,7 +30,7 @@
         <addUniqueConstraint tableName="metadata"
                              columnNames="metadata_id"
                              constraintName="metadata_id_constraint"/>
-        <addUniqueConstraint tableName="file"
+        <addUniqueConstraint tableName="content"
                              columnNames="file_id"
                              constraintName="file_id_constraint"/>
         <addForeignKeyConstraint
@@ -38,7 +38,7 @@
                 baseColumnNames="file_id"
                 baseTableName="metadata"
                 referencedColumnNames="file_id"
-                referencedTableName="file"/>
+                referencedTableName="content"/>
 
     </changeSet>
 

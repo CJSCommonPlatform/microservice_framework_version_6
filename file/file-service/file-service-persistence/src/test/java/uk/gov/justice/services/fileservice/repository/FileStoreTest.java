@@ -32,7 +32,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class FileStoreTest {
 
     @Mock
-    private FileJdbcRepository fileJdbcRepository;
+    private ContentJdbcRepository contentJdbcRepository;
 
     @Mock
     private MetadataJdbcRepository metadataJdbcRepository;
@@ -49,19 +49,19 @@ public class FileStoreTest {
 
         final Connection connection = mock(Connection.class);
 
-        when(fileJdbcRepository.findByFileId(fileId, connection)).thenReturn(empty());
+        when(contentJdbcRepository.findByFileId(fileId, connection)).thenReturn(empty());
 
         fileStore.store(fileId, content, metadata, connection);
 
         final InOrder inOrder = inOrder(
-                fileJdbcRepository,
+                contentJdbcRepository,
                 metadataJdbcRepository);
 
-        inOrder.verify(fileJdbcRepository).findByFileId(fileId, connection);
-        inOrder.verify(fileJdbcRepository).insert(fileId, content, connection);
+        inOrder.verify(contentJdbcRepository).findByFileId(fileId, connection);
+        inOrder.verify(contentJdbcRepository).insert(fileId, content, connection);
         inOrder.verify(metadataJdbcRepository).insert(fileId, metadata, connection);
 
-        verify(fileJdbcRepository, never()).update(fileId, content, connection);
+        verify(contentJdbcRepository, never()).update(fileId, content, connection);
         verify(metadataJdbcRepository, never()).update(fileId, metadata, connection);
     }
 
@@ -74,19 +74,19 @@ public class FileStoreTest {
 
         final Connection connection = mock(Connection.class);
 
-        when(fileJdbcRepository.findByFileId(fileId, connection)).thenReturn(of(content));
+        when(contentJdbcRepository.findByFileId(fileId, connection)).thenReturn(of(content));
 
         fileStore.store(fileId, content, metadata, connection);
 
         final InOrder inOrder = inOrder(
-                fileJdbcRepository,
+                contentJdbcRepository,
                 metadataJdbcRepository);
 
-        inOrder.verify(fileJdbcRepository).findByFileId(fileId, connection);
-        inOrder.verify(fileJdbcRepository).update(fileId, content, connection);
+        inOrder.verify(contentJdbcRepository).findByFileId(fileId, connection);
+        inOrder.verify(contentJdbcRepository).update(fileId, content, connection);
         inOrder.verify(metadataJdbcRepository).update(fileId, metadata, connection);
 
-        verify(fileJdbcRepository, never()).insert(fileId, content, connection);
+        verify(contentJdbcRepository, never()).insert(fileId, content, connection);
         verify(metadataJdbcRepository, never()).insert(fileId, metadata, connection);
     }
 
@@ -99,7 +99,7 @@ public class FileStoreTest {
 
         final JsonObject metadata = mock(JsonObject.class);
 
-        when(fileJdbcRepository.findByFileId(fileId, connection)).thenReturn(of(content));
+        when(contentJdbcRepository.findByFileId(fileId, connection)).thenReturn(of(content));
         when(metadataJdbcRepository.findByFileId(fileId, connection)).thenReturn(of(metadata));
 
         final Optional<StorableFile> storableFile = fileStore.find(fileId, connection);
@@ -118,7 +118,7 @@ public class FileStoreTest {
         final Connection connection = mock(Connection.class);
 
         when(metadataJdbcRepository.findByFileId(fileId, connection)).thenReturn(empty());
-        when(fileJdbcRepository.findByFileId(fileId, connection)).thenReturn(empty());
+        when(contentJdbcRepository.findByFileId(fileId, connection)).thenReturn(empty());
 
         final Optional<StorableFile> storableFile = fileStore.find(fileId, connection);
 
@@ -134,7 +134,7 @@ public class FileStoreTest {
         final JsonObject metadata = mock(JsonObject.class);
 
         when(metadataJdbcRepository.findByFileId(fileId, connection)).thenReturn(of(metadata));
-        when(fileJdbcRepository.findByFileId(fileId, connection)).thenReturn(empty());
+        when(contentJdbcRepository.findByFileId(fileId, connection)).thenReturn(empty());
 
         try {
             fileStore.find(fileId, connection);

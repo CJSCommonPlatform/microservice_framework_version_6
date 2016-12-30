@@ -23,7 +23,7 @@ import javax.json.JsonObject;
 public class FileStore {
 
     @Inject
-    FileJdbcRepository fileJdbcRepository;
+    ContentJdbcRepository contentJdbcRepository;
 
     @Inject
     MetadataJdbcRepository metadataJdbcRepository;
@@ -45,11 +45,11 @@ public class FileStore {
             final JsonObject metadata,
             final Connection connection) throws TransactionFailedException {
 
-        if (fileJdbcRepository.findByFileId(fileId, connection).isPresent()) {
-            fileJdbcRepository.update(fileId, content, connection);
+        if (contentJdbcRepository.findByFileId(fileId, connection).isPresent()) {
+            contentJdbcRepository.update(fileId, content, connection);
             metadataJdbcRepository.update(fileId, metadata, connection);
         } else {
-            fileJdbcRepository.insert(fileId, content, connection);
+            contentJdbcRepository.insert(fileId, content, connection);
             metadataJdbcRepository.insert(fileId, metadata, connection);
         }
     }
@@ -71,7 +71,7 @@ public class FileStore {
     public Optional<StorableFile> find(final UUID fileId, final Connection connection) throws TransactionFailedException {
 
         final Optional<JsonObject> metadata = metadataJdbcRepository.findByFileId(fileId, connection);
-        final Optional<byte[]> content = fileJdbcRepository.findByFileId(fileId, connection);
+        final Optional<byte[]> content = contentJdbcRepository.findByFileId(fileId, connection);
 
         if (! metadata.isPresent()) {
             return empty();

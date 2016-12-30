@@ -13,7 +13,7 @@ public class DatabaseConnectionUtils {
         try {
             return dataSource.getConnection();
         } catch (final SQLException e) {
-            throw new JdbcRepositoryException("Failed to get SQL Connection", e);
+            throw new JdbcRepositoryException("Failed to get SQL Connection from datasource", e);
         }
     }
 

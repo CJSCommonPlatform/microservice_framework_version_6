@@ -1,8 +1,5 @@
 package uk.gov.justice.services.fileservice.repository;
 
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
-
 import uk.gov.justice.services.file.api.domain.StorableFile;
 import uk.gov.justice.services.fileservice.datasource.DataSourceProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
@@ -46,7 +43,9 @@ public class TransactionalFileStore {
             throw new JdbcRepositoryException("Failed to store file with id " + fileId, e);
         } finally {
             try {
-                databaseConnectionUtils.setAutoCommit(autoCommit, connection);
+                if(autoCommit) {
+                    databaseConnectionUtils.setAutoCommit(true, connection);
+                }
             } finally {
                 closer.close(connection);
             }
@@ -59,7 +58,6 @@ public class TransactionalFileStore {
 
         try {
             return fileStore.find(fileId, connection);
-
         } catch (final DataUpdateException e) {
             throw new JdbcRepositoryException("Failed to find file with id " + fileId, e);
         } finally {

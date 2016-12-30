@@ -5,6 +5,7 @@ import java.sql.SQLException;
 
 import javax.json.JsonObject;
 
+
 public class HsqlPostgresJsonSetter implements JsonSetter {
 
     @Override

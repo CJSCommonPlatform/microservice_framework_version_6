@@ -6,9 +6,12 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.file.api.domain.StorableFile;
@@ -33,7 +36,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TransactionalFileStoreTest {
-
 
     @Mock
     private FileStore fileStore;
@@ -76,8 +78,9 @@ public class TransactionalFileStoreTest {
 
         inOrder.verify(fileStore).store(fileId, content, metadata, connection);
         inOrder.verify(databaseConnectionUtils).commit(connection);
-        inOrder.verify(databaseConnectionUtils).setAutoCommit(autoCommit, connection);
         inOrder.verify(closer).close(connection);
+
+        verify(connection, never()).setAutoCommit(anyBoolean());
     }
 
     @Test
@@ -150,8 +153,9 @@ public class TransactionalFileStoreTest {
 
         inOrder.verify(fileStore).store(fileId, content, metadata, connection);
         inOrder.verify(databaseConnectionUtils).rollback(connection);
-        inOrder.verify(databaseConnectionUtils).setAutoCommit(autoCommit, connection);
         inOrder.verify(closer).close(connection);
+
+        verify(connection, never()).setAutoCommit(anyBoolean());
     }
 
     @Test

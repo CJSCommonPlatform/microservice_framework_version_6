@@ -139,7 +139,7 @@ public class FileStoreTest {
         try {
             fileStore.find(fileId, connection);
             fail();
-        } catch (final DataUpdateException expected) {
+        } catch (final TransactionFailedException expected) {
             assertThat(expected.getMessage(), is("No file content found for file id " + fileId + " but metadata exists for that id"));
         }
 

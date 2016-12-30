@@ -20,15 +20,15 @@ public class FileJdbcRepository {
 
     private final Closer closer = new Closer();
 
-    public void insert(final UUID fileId, final byte[] content, final Connection connection) throws DataUpdateException {
+    public void insert(final UUID fileId, final byte[] content, final Connection connection) throws TransactionFailedException {
         insertOrUpdate(fileId, content, connection, SQL_INSERT_METADATA);
     }
 
-    public void update(final UUID fileId, final byte[] content, final Connection connection) throws DataUpdateException {
+    public void update(final UUID fileId, final byte[] content, final Connection connection) throws TransactionFailedException {
         insertOrUpdate(fileId, content, connection, SQL_UPDATE_METADATA);
     }
 
-    public Optional<byte[]> findByFileId(final UUID fileId, final Connection connection) throws DataUpdateException {
+    public Optional<byte[]> findByFileId(final UUID fileId, final Connection connection) throws TransactionFailedException {
 
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
@@ -42,7 +42,7 @@ public class FileJdbcRepository {
                 return of(resultSet.getBytes(1));
             }
         } catch (final SQLException e) {
-            throw new DataUpdateException(format("Exception while reading metadata %s", fileId), e);
+            throw new TransactionFailedException(format("Exception while reading metadata %s", fileId), e);
         } finally {
             closer.close(resultSet, preparedStatement);
         }
@@ -54,7 +54,7 @@ public class FileJdbcRepository {
             final UUID fileId,
             final byte[] content,
             final Connection connection,
-            final String sql) throws DataUpdateException {
+            final String sql) throws TransactionFailedException {
 
         final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(content);
 
@@ -67,7 +67,7 @@ public class FileJdbcRepository {
             preparedStatement.executeUpdate();
 
         } catch (final SQLException e) {
-            throw new DataUpdateException("Exception while inserting file", e);
+            throw new TransactionFailedException("Exception while inserting file", e);
         } finally {
             closer.close(byteArrayInputStream, preparedStatement);
         }

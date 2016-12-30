@@ -10,6 +10,10 @@ import javax.inject.Inject;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+/**
+ * {@link DataSourceProvider} for getting a DataSource from the container using JNDI.
+ * This is the default implementation.
+ */
 @Default
 public class JndiDataSourceProvider implements DataSourceProvider {
 
@@ -18,6 +22,11 @@ public class JndiDataSourceProvider implements DataSourceProvider {
     @Inject
     InitialContextFactory initialContextFactory;
 
+    /**
+     * Gets the database data source using JNDI
+     *
+     * @return the database data source
+     */
     @Override
     public DataSource getDataSource() {
 

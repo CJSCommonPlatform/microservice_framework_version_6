@@ -12,6 +12,14 @@ import java.util.UUID;
 import javax.inject.Inject;
 import javax.json.JsonObject;
 
+
+/**
+ * Stores/finds file content and metadata in the database.
+ *
+ * NB. This class does not consider transactions as each method considers itself to already
+ * be running inside a transaction. Therefore, it is the responsibility of the calling class
+ * to manage transactions on its connections.
+ */
 public class FileStore {
 
     @Inject
@@ -20,7 +28,22 @@ public class FileStore {
     @Inject
     MetadataJdbcRepository metadataJdbcRepository;
 
-    public void store(final UUID fileId, final byte[] content, final JsonObject metadata, final Connection connection) throws DataUpdateException {
+    /**
+     * Stores file content and metadata in the database
+     *
+     * @param fileId the file id
+     * @param content the file content in bytes[]
+     * @param metadata the file metadata json
+     * @param connection the database connection. Assumes a transaction has been started on this
+     *                   Connection
+     * @throws TransactionFailedException if any of the database updates failed and the transaction
+     * should be rolled back
+     */
+    public void store(
+            final UUID fileId,
+            final byte[] content,
+            final JsonObject metadata,
+            final Connection connection) throws TransactionFailedException {
 
         if (fileJdbcRepository.findByFileId(fileId, connection).isPresent()) {
             fileJdbcRepository.update(fileId, content, connection);
@@ -31,7 +54,21 @@ public class FileStore {
         }
     }
 
-    public Optional<StorableFile> find(final UUID fileId, final Connection connection) throws DataUpdateException {
+    /**
+     * Finds file content and metadata for a specified file id. If no content/metadata exists
+     * for that id then {@link Optional}.empty() is returned.
+     *
+     * If no metadata is found for that id then {@code empty()} is returned
+     * If metadata is found but no content, then an {@link TransactionFailedException} is thrown
+     *
+     * @param fileId the id of the file
+     * @param connection a database connection
+     * @return if found: the {@link StorableFile} for that id wrapped in an {@link Optional}
+     * @return if not found: {@link Optional}.empty()
+     * @throws TransactionFailedException if any of the database updates failed and the transaction
+     * should be rolled back
+     */
+    public Optional<StorableFile> find(final UUID fileId, final Connection connection) throws TransactionFailedException {
 
         final Optional<JsonObject> metadata = metadataJdbcRepository.findByFileId(fileId, connection);
         final Optional<byte[]> content = fileJdbcRepository.findByFileId(fileId, connection);
@@ -40,7 +77,7 @@ public class FileStore {
             return empty();
         }
         if (! content.isPresent()) {
-            throw new DataUpdateException("No file content found for file id " + fileId + " but metadata exists for that id");
+            throw new TransactionFailedException("No file content found for file id " + fileId + " but metadata exists for that id");
         }
 
         return of(new StorableFile(

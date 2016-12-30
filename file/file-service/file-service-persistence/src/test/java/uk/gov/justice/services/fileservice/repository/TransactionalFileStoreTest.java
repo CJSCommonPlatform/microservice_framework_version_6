@@ -124,7 +124,7 @@ public class TransactionalFileStoreTest {
         final byte[] content = "the file content".getBytes();
         final JsonObject metadata = mock(JsonObject.class);
 
-        final Throwable dataUpdateException = new DataUpdateException("Ooops");
+        final Throwable dataUpdateException = new TransactionFailedException("Ooops");
 
         final boolean autoCommit = false;
 
@@ -186,26 +186,24 @@ public class TransactionalFileStoreTest {
     @Test
     public void shouldAlwaysCloseTheConnectionIfTheFindFails() throws Exception {
 
-        final DataUpdateException dataUpdateException = new DataUpdateException("Ooops");
+        final TransactionFailedException transactionFailedException = new TransactionFailedException("Ooops");
 
         final UUID fileId = UUID.randomUUID();
 
         final DataSource dataSource = mock(DataSource.class);
         final Connection connection = mock(Connection.class);
 
-        final Optional<StorableFile> storableFile = of(mock(StorableFile.class));
-
         when(dataSourceProvider.getDataSource()).thenReturn(dataSource);
         when(databaseConnectionUtils.getConnection(dataSource)).thenReturn(connection);
 
-        when(fileStore.find(fileId, connection)).thenThrow(dataUpdateException);
+        when(fileStore.find(fileId, connection)).thenThrow(transactionFailedException);
 
         try {
             transactionalFileStore.find(fileId);
             fail();
         } catch (JdbcRepositoryException expected) {
             assertThat(expected.getMessage(), is("Failed to find file with id " + fileId));
-            assertThat(expected.getCause(), is(dataUpdateException));
+            assertThat(expected.getCause(), is(transactionFailedException));
         }
 
         final InOrder inOrder = inOrder(

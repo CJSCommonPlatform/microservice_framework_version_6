@@ -8,7 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.file.api.domain.StorableFile;
-import uk.gov.justice.services.fileservice.repository.TransactionalFileRepository;
+import uk.gov.justice.services.fileservice.repository.TransactionalFileStore;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -25,7 +25,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class DefaultFileServiceClientTest {
 
     @Mock
-    private TransactionalFileRepository transactionalFileRepository;
+    private TransactionalFileStore transactionalFileStore;
 
     @InjectMocks
     private DefaultFileServiceClient defaultFileServiceClient;
@@ -44,7 +44,7 @@ public class DefaultFileServiceClientTest {
 
         defaultFileServiceClient.store(storableFile);
 
-        verify(transactionalFileRepository).store(fileId, content, metadata);
+        verify(transactionalFileStore).store(fileId, content, metadata);
     }
 
     @Test
@@ -54,7 +54,7 @@ public class DefaultFileServiceClientTest {
 
         final Optional<StorableFile> storableFile = of(mock(StorableFile.class));
 
-        when(transactionalFileRepository.find(fileId)).thenReturn(storableFile);
+        when(transactionalFileStore.find(fileId)).thenReturn(storableFile);
 
         assertThat(defaultFileServiceClient.find(fileId), is(storableFile));
     }

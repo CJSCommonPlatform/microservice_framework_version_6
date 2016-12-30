@@ -14,13 +14,10 @@ import java.util.UUID;
 import javax.inject.Inject;
 import javax.json.JsonObject;
 
-public class TransactionalFileRepository {
+public class TransactionalFileStore {
 
     @Inject
-    FileJdbcRepository fileJdbcRepository;
-
-    @Inject
-    MetadataJdbcRepository metadataJdbcRepository;
+    FileStore fileStore;
 
     @Inject
     DataSourceProvider dataSourceProvider;
@@ -41,21 +38,18 @@ public class TransactionalFileRepository {
                 databaseConnectionUtils.setAutoCommit(false, connection);
             }
 
-            if (fileJdbcRepository.findByFileId(fileId, connection).isPresent()) {
-                fileJdbcRepository.update(fileId, content, connection);
-                metadataJdbcRepository.update(fileId, metadata, connection);
-            } else {
-                fileJdbcRepository.insert(fileId, content, connection);
-                metadataJdbcRepository.insert(fileId, metadata, connection);
-            }
+            fileStore.store(fileId, content, metadata, connection);
 
             databaseConnectionUtils.commit(connection);
         } catch (final DataUpdateException e) {
             databaseConnectionUtils.rollback(connection);
             throw new JdbcRepositoryException("Failed to store file with id " + fileId, e);
         } finally {
-            databaseConnectionUtils.setAutoCommit(autoCommit, connection);
-            closer.close(connection);
+            try {
+                databaseConnectionUtils.setAutoCommit(autoCommit, connection);
+            } finally {
+                closer.close(connection);
+            }
         }
     }
 
@@ -64,20 +58,7 @@ public class TransactionalFileRepository {
         final Connection connection = databaseConnectionUtils.getConnection(dataSourceProvider.getDataSource());
 
         try {
-            final Optional<byte[]> content = fileJdbcRepository.findByFileId(fileId, connection);
-            final Optional<JsonObject> metadata = metadataJdbcRepository.findByFileId(fileId, connection);
-
-            if (! metadata.isPresent()) {
-                return empty();
-            }
-            if (! content.isPresent()) {
-                throw new JdbcRepositoryException("No file content found for file id " + fileId);
-            }
-
-            return of(new StorableFile(
-                    fileId,
-                    metadata.get(),
-                    content.get()));
+            return fileStore.find(fileId, connection);
 
         } catch (final DataUpdateException e) {
             throw new JdbcRepositoryException("Failed to find file with id " + fileId, e);

@@ -38,7 +38,7 @@ public class PostgresJsonSetterTest {
 
         when(jsonObject.toString()).thenReturn(json);
 
-        postgresJsonSetter.setJson(columnIndex, preparedStatement, jsonObject);
+        postgresJsonSetter.setJson(columnIndex, jsonObject, preparedStatement);
 
         verify(preparedStatement).setObject(eq(columnIndex), pgObjectCaptor.capture());
 

@@ -12,6 +12,13 @@ import java.sql.SQLException;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Class for handling inserts/updates/selects on the 'content' database table. This class is not
+ * transactional. Each method takes a valid database connection and it is assumed that the transaction
+ * would have already been started on that connection. Any failures during insert/update will throw
+ * a {@link TransactionFailedException}. In which case the current transaction should be rolled
+ * back
+ */
 public class ContentJdbcRepository {
 
     private static final String SQL_FIND_BY_FILE_ID = "SELECT content FROM content WHERE file_id=? ";
@@ -20,14 +27,42 @@ public class ContentJdbcRepository {
 
     private final Closer closer = new Closer();
 
+    /**
+     * Inserts the content into the content table as an array of bytes[]
+     *
+     * @param fileId the file id of the content
+     * @param content a byte[] array of the file content
+     * @param connection the database connection. It is assumed that a transaction has previously been
+     *                   started on this connection.
+     * @throws TransactionFailedException if the insert fails and the transaction should be rolled back.
+     */
     public void insert(final UUID fileId, final byte[] content, final Connection connection) throws TransactionFailedException {
         insertOrUpdate(fileId, content, connection, SQL_INSERT_METADATA);
     }
 
+    /**
+     * Updates the content in the content table
+     *
+     * @param fileId the file id of the content
+     * @param content a byte[] array of the file content
+     * @param connection the database connection. It is assumed that a transaction has previously been
+     *                   started on this connection.
+     * @throws TransactionFailedException if the update fails and the transaction should be rolled back.
+     */
     public void update(final UUID fileId, final byte[] content, final Connection connection) throws TransactionFailedException {
         insertOrUpdate(fileId, content, connection, SQL_UPDATE_METADATA);
     }
 
+    /**
+     * Finds the file content for the specified file id, returned as a java {@link Optional}. If no
+     * content found for that id then {@code empty()} is returned instead.
+     *
+     * @param fileId the file id of the content
+     * @param connection a live database connection
+     * @return the file content as an array of bytes wrapped in a java {@link Optional}
+     * @throws TransactionFailedException if the read failed and so the current transaction should
+     * be rollled back.
+     */
     public Optional<byte[]> findByFileId(final UUID fileId, final Connection connection) throws TransactionFailedException {
 
         ResultSet resultSet = null;

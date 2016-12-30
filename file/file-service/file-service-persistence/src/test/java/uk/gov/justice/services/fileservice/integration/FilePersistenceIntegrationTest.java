@@ -7,14 +7,14 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import uk.gov.justice.services.fileservice.datasource.TestDataSourceProvider;
-import uk.gov.justice.services.fileservice.repository.Closer;
 import uk.gov.justice.services.fileservice.repository.ContentJdbcRepository;
 import uk.gov.justice.services.fileservice.repository.MetadataJdbcRepository;
-import uk.gov.justice.services.fileservice.repository.json.HsqlPostgresJsonSetter;
+import uk.gov.justice.services.fileservice.repository.json.StringJsonSetter;
 import uk.gov.justice.services.fileservice.repository.json.JsonSetter;
 
 import java.io.StringReader;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -36,12 +36,12 @@ public class FilePersistenceIntegrationTest {
     private static final String PASSWORD = "sa";
     private static final String DRIVER_CLASS = org.h2.Driver.class.getName();
 
-    private final JsonSetter jsonSetter = new HsqlPostgresJsonSetter();
+    private final JsonSetter jsonSetter = new StringJsonSetter();
 
     private final MetadataJdbcRepository metadataJdbcRepository = new MetadataJdbcRepository(jsonSetter);
     private final ContentJdbcRepository contentJdbcRepository = new ContentJdbcRepository();
 
-    private static final TestDataSourceProvider DATA_SOURCE_PROVIDER = new TestDataSourceProvider(
+    private final TestDataSourceProvider dataSourceProvider = new TestDataSourceProvider(
             URL,
             USERNAME,
             PASSWORD,
@@ -53,7 +53,7 @@ public class FilePersistenceIntegrationTest {
     @Before
     public void setupDatabase() throws Exception {
 
-        connection = DATA_SOURCE_PROVIDER.getDataSource().getConnection();
+        connection = dataSourceProvider.getDataSource().getConnection();
 
         final Liquibase liquibase = new Liquibase(
                 LIQUIBASE_FILE_STORE_DB_CHANGELOG_XML,
@@ -64,8 +64,11 @@ public class FilePersistenceIntegrationTest {
     }
 
     @After
-    public void closeConnection() {
-        new Closer().close(connection);
+    public void closeConnection() throws SQLException {
+
+        if(connection != null) {
+            connection.close();
+        }
     }
 
     @Test

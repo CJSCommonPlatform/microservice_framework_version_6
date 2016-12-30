@@ -16,6 +16,9 @@ import javax.json.JsonObject;
 /**
  * Stores/finds file content and metadata in the database.
  *
+ * The responsibility of this class is to select whether this is an insert or an update
+ * and call the appropriate class to handle it.
+ *
  * NB. This class does not consider transactions as each method considers itself to already
  * be running inside a transaction. Therefore, it is the responsibility of the calling class
  * to manage transactions on its connections.

@@ -2,18 +2,23 @@ package uk.gov.justice.services.example.cakeshop.command.handler;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
 
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.example.cakeshop.domain.event.CakeOrdered;
 
+import java.io.IOError;
+import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 public class EventFactoryTest {
 
@@ -38,5 +43,14 @@ public class EventFactoryTest {
         assertThat(cakeOrdered.getRecipeId(), is(UUID.fromString("163af847-effb-46a9-96bc-32a0f7526f23")));
         assertThat(cakeOrdered.getDeliveryDate(), is(ZonedDateTime.of(2016, 01, 14, 18, 15, 3, 123, ZoneId.of("UTC"))));
 
+    }
+
+    @Test (expected = IllegalStateException.class)
+    public void shouldThrowIllegalStateExceptionOnMapperIOException() throws IOException {
+        final ObjectMapper mockedMapper = Mockito.mock(ObjectMapper.class);
+        when(mockedMapper.readValue(Mockito.anyString(), Mockito.eq(CakeOrdered.class))).thenThrow(new IOException("Error"));
+        eventFactory.objectMapper = mockedMapper;
+
+        eventFactory.cakeOrderedEventFrom(envelope().with(metadataWithDefaults()).build());
     }
 }

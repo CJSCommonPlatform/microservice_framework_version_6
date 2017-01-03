@@ -1,6 +1,5 @@
 package uk.gov.justice.services.fileservice.client;
 
-import uk.gov.justice.services.file.api.FileServiceClient;
 import uk.gov.justice.services.file.api.domain.StorableFile;
 import uk.gov.justice.services.fileservice.repository.TransactionalFileStore;
 

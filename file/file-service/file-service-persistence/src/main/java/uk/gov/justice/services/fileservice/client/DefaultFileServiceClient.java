@@ -15,7 +15,7 @@ import javax.json.JsonObject;
  * the file service.
  *
  * Currently this class is a simple wrapper around {@link TransactionalFileStore}, kept
- * separate simply for isolation of resposibilities
+ * separate simply for isolation of responsibilities
  */
 public class DefaultFileServiceClient implements FileServiceClient {
 

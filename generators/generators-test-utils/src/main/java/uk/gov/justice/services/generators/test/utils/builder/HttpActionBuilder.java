@@ -88,6 +88,15 @@ public class HttpActionBuilder {
                         .withResponseType("application/vnd.ctx.query.defquery+json"));
     }
 
+    public HttpActionBuilder withHttpActionOfDefaultRequestAndResponseType() {
+        return withMediaType("application/vnd.ctx.command.defcmd+json", "json/schema/ctx.command.defcmd.json")
+                .withResponseTypes("application/vnd.ctx.query.defquery+json")
+                .with(mapping()
+                        .withName("action1")
+                        .withRequestType("application/vnd.ctx.command.defcmd+json")
+                        .withResponseType("application/vnd.ctx.query.defquery+json"));
+    }
+
     public HttpActionBuilder withResponseTypes(final String... responseTypes) {
         return withHttpActionResponse(new Response(), responseTypes);
     }
@@ -116,9 +125,7 @@ public class HttpActionBuilder {
     }
 
     public HttpActionBuilder withMediaType(final MimeType mimeType, final Optional<String> schema) {
-        if (schema.isPresent()) {
-            mimeType.setSchema(schema.get());
-        }
+        schema.ifPresent(mimeType::setSchema);
         body.put(mimeType.toString(), mimeType);
         return this;
     }

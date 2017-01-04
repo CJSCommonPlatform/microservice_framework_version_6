@@ -2,29 +2,33 @@ package uk.gov.justice.api;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.lang.String.format;
 import static java.util.UUID.randomUUID;
+import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 
-import uk.gov.justice.services.clients.core.webclient.BaseUriFactory;
-import uk.gov.justice.services.clients.core.webclient.ContextMatcher;
 import uk.gov.justice.services.clients.core.DefaultServerPortProvider;
-import uk.gov.justice.services.clients.core.webclient.MockServerPortProvider;
 import uk.gov.justice.services.clients.core.RestClientHelper;
 import uk.gov.justice.services.clients.core.RestClientProcessor;
+import uk.gov.justice.services.clients.core.webclient.BaseUriFactory;
+import uk.gov.justice.services.clients.core.webclient.ContextMatcher;
+import uk.gov.justice.services.clients.core.webclient.MockServerPortProvider;
 import uk.gov.justice.services.clients.core.webclient.WebTargetFactory;
 import uk.gov.justice.services.common.configuration.JndiBasedServiceContextNameProvider;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
 import uk.gov.justice.services.core.accesscontrol.AccessControlService;
@@ -35,6 +39,7 @@ import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
+import uk.gov.justice.services.core.dispatcher.EmptySystemUserProvider;
 import uk.gov.justice.services.core.dispatcher.Requester;
 import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
@@ -60,7 +65,6 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonWriter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.apache.openejb.OpenEjbContainer;
 import org.apache.openejb.jee.Application;
@@ -90,6 +94,9 @@ public class RemoteExampleQueryApiIT {
     private static final String TEST_SYSTEM_USER_ID = "8d6a96f0-6e8e-11e6-8b77-86f30ca893d3";
     private static final String MOCK_SERVER_PORT = "mock.server.port";
     private static int port = -1;
+
+    private static final String USER_NAME = "John Smith";
+
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(9090);
 
@@ -131,7 +138,6 @@ public class RemoteExampleQueryApiIT {
             ContextMatcher.class,
             DefaultServerPortProvider.class,
             DispatcherCache.class,
-            DispatcherCache.class,
             DispatcherFactory.class,
             Enveloper.class,
             InterceptorCache.class,
@@ -141,7 +147,6 @@ public class RemoteExampleQueryApiIT {
             JsonObjectEnvelopeConverter.class,
             LoggerProducer.class,
             MockServerPortProvider.class,
-            ObjectMapper.class,
             ObjectToJsonValueConverter.class,
             PolicyEvaluator.class,
             RequesterProducer.class,
@@ -153,7 +158,11 @@ public class RemoteExampleQueryApiIT {
             TestSystemUserProvider.class,
             RemoteExampleQueryController.class,
             WebTargetFactory.class,
-            UtcClock.class
+            UtcClock.class,
+
+            EmptySystemUserProvider.class,
+            ObjectMapperProducer.class,
+            RemoteExampleCommandApi.class
     })
     public WebApp war() {
         return new WebApp()
@@ -250,6 +259,39 @@ public class RemoteExampleQueryApiIT {
 
         requester.request(query);
 
+    }
+
+    @Test
+    public void shouldRequestSynchronousPostToRemoteService() {
+
+        final String name = "people.post-search-users";
+
+        final String path = "/users";
+        final String mimeType = format("application/vnd.%s+json", "people.users");
+        final String bodyPayload = createObjectBuilder()
+                .add("userId", USER_ID.toString())
+                .add("userName", USER_NAME)
+                .build().toString();
+
+        stubFor(post(urlEqualTo(BASE_PATH + path))
+                .withRequestBody(equalToJson(bodyPayload))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", mimeType)
+                        .withBody(jsonObjectToString(RESPONSE))));
+
+        final JsonEnvelope query = envelope()
+                .with(metadataOf(randomUUID(), name))
+                .withPayloadOf(USER_ID, "userId")
+                .withPayloadOf(USER_NAME, "userName")
+                .build();
+
+        final JsonEnvelope response = requester.request(query);
+
+        assertThat(response.payloadAsJsonObject(),
+                is(Json.createObjectBuilder()
+                        .add("result", "SUCCESS")
+                        .build()));
     }
 
     @Alternative

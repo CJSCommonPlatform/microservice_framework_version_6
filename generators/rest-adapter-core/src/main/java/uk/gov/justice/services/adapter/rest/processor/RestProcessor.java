@@ -102,9 +102,29 @@ public class RestProcessor {
                                          final HttpHeaders headers,
                                          final Collection<Parameter> params) {
 
+        return processSynchronously(function, action, Optional.empty(), headers, params);
+    }
+
+    /**
+     * Process an incoming REST request synchronously by combining the payload, headers and path
+     * parameters into an envelope and passing the envelope to the given consumer.
+     *
+     * @param action  the action name for this request
+     * @param initialPayload the payload from the REST request
+     * @param headers the headers from the REST request
+     * @param params  the parameters from the REST request
+     * @return the HTTP response to return to the client
+     */
+    public Response processSynchronously(final Function<JsonEnvelope, Optional<JsonEnvelope>> function,
+                                         final String action,
+                                         final Optional<JsonObject> initialPayload,
+                                         final HttpHeaders headers,
+                                         final Collection<Parameter> params) {
+
         trace(LOGGER, () -> format("Processing REST message: %s", toHttpHeaderTrace(headers)));
 
         final JsonEnvelope envelope = envelopeBuilderFactory.builder()
+                .withInitialPayload(initialPayload)
                 .withHeaders(headers)
                 .withParams(params)
                 .withAction(action)

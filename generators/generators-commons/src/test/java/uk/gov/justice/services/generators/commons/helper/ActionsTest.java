@@ -1,4 +1,4 @@
-package uk.gov.justice.services.adapters.rest.generator;
+package uk.gov.justice.services.generators.commons.helper;
 
 import static net.trajano.commons.testing.UtilityClassTestUtil.assertUtilityClassWellDefined;
 

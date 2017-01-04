@@ -3,12 +3,11 @@ package uk.gov.justice.services.clients.rest.generator;
 import static java.lang.String.format;
 import static javax.lang.model.element.Modifier.FINAL;
 import static org.apache.commons.lang3.StringUtils.capitalize;
-import static org.raml.model.ActionType.GET;
+import static uk.gov.justice.services.generators.commons.helper.Actions.hasResponseMimeTypes;
 import static uk.gov.justice.services.generators.commons.helper.Names.nameFrom;
 import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.INVALID_ACTION_MAPPING_ERROR_MSG;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
-import uk.gov.justice.services.rest.ParameterType;
 import uk.gov.justice.services.clients.core.EndpointDefinition;
 import uk.gov.justice.services.clients.core.QueryParam;
 import uk.gov.justice.services.clients.core.RestClientHelper;
@@ -16,9 +15,11 @@ import uk.gov.justice.services.clients.core.RestClientProcessor;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.generators.commons.client.AbstractClientGenerator;
+import uk.gov.justice.services.generators.commons.client.ActionMimeTypes;
 import uk.gov.justice.services.generators.commons.mapping.ActionMapping;
 import uk.gov.justice.services.generators.commons.validator.RamlValidationException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.rest.ParameterType;
 
 import java.util.HashSet;
 import java.util.List;
@@ -78,8 +79,9 @@ public class RestClientGenerator extends AbstractClientGenerator {
     }
 
     @Override
-    protected CodeBlock methodBodyOf(final Resource resource, final Action ramlAction, final MimeType mimeType) {
-        final String actionName = nameFrom(mimeType);
+    protected CodeBlock methodBodyOf(final Resource resource, final Action ramlAction, final ActionMimeTypes mimeTypes) {
+        final String actionName = nameFrom(mimeTypes.getNameType());
+        final String responseName = nameFrom(mimeTypes.getResponseType());
 
         final CodeBlock.Builder methodBody = CodeBlock.builder()
                 .addStatement("final String path = \"$L\"", resource.getRelativeUri())
@@ -93,15 +95,17 @@ public class RestClientGenerator extends AbstractClientGenerator {
                         name, queryParameter.isRequired(), ParameterType.class, ParameterType.valueOfQueryType(queryParameter.getType().name()).name()));
 
         methodBody.addStatement("final $T def = new $T(BASE_URI, path, pathParams, queryParams, $S)",
-                EndpointDefinition.class, EndpointDefinition.class, actionName);
+                EndpointDefinition.class, EndpointDefinition.class, responseName);
 
         switch (ramlAction.getType()) {
             case GET:
                 methodBody.addStatement("return $L.get(def, envelope)", REST_CLIENT_PROCESSOR);
                 break;
             case POST:
+                final String postMethod = hasResponseMimeTypes(ramlAction) ? "return $L.synchronousPost(def, $L)" : "$L.post(def, $L)";
+
                 methodBody.addStatement("final JsonEnvelope $L = $L.withMetadataFrom(envelope, $S).apply(envelope.payload())", OUTPUT_ENVELOPE, ENVELOPER, actionName);
-                methodBody.addStatement("$L.post(def, $L)", REST_CLIENT_PROCESSOR, OUTPUT_ENVELOPE);
+                methodBody.addStatement(postMethod, REST_CLIENT_PROCESSOR, OUTPUT_ENVELOPE);
                 break;
             default:
                 throw new IllegalArgumentException(format("Action %s not supported in REST client generator", ramlAction.getType().toString()));
@@ -112,12 +116,12 @@ public class RestClientGenerator extends AbstractClientGenerator {
 
     @Override
     protected TypeName methodReturnTypeOf(final Action ramlAction) {
-        return ramlAction.getType().equals(GET) ? TypeName.get(JsonEnvelope.class) : TypeName.VOID;
+        return hasResponseMimeTypes(ramlAction) ? TypeName.get(JsonEnvelope.class) : TypeName.VOID;
     }
 
     @Override
-    protected String handlesAnnotationValueOf(final Action ramlAction, final MimeType mimeType, final GeneratorConfig generatorConfig) {
-        return actionMappingOf(ramlAction, mimeType)
+    protected String handlesAnnotationValueOf(final Action ramlAction, final ActionMimeTypes mimeTypes, final GeneratorConfig generatorConfig) {
+        return actionMappingOf(ramlAction, mimeTypes.getNameType())
                 .orElseThrow(() -> new RamlValidationException(INVALID_ACTION_MAPPING_ERROR_MSG))
                 .getName();
     }

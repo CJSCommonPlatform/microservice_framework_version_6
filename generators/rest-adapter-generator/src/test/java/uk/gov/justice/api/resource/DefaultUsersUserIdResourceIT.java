@@ -176,6 +176,22 @@ public class DefaultUsersUserIdResourceIT {
     }
 
     @Test
+    public void shouldReturn200ResponseForSynchronousPOST() {
+        interceptorChainProcessor.setupResponse("userUrn", "test",
+                envelope().with(metadataWithDefaults()).withPayloadOf("user1234", "userName").build());
+
+        Response response = create(BASE_URI)
+                .path("/users")
+                .header("Accept", "application/vnd.people.user+json")
+                .post(entity(JSON, CREATE_USER_MEDIA_TYPE));
+
+        assertThat(response.getStatus(), is(OK.getStatusCode()));
+        String responseBody = response.readEntity(String.class);
+        with(responseBody)
+                .assertThat("userName", equalTo("user1234"));
+    }
+
+    @Test
     public void shouldDispatchUpdateUserCommand() throws Exception {
         create(BASE_URI)
                 .path("/users/4444-9876")

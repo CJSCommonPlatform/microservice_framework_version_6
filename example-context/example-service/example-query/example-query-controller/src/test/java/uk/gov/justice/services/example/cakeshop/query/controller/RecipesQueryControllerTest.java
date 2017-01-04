@@ -20,6 +20,9 @@ public class RecipesQueryControllerTest {
                                 .withRequesterPassThrough(),
                         method("recipe")
                                 .thatHandles("example.get-recipe")
+                                .withRequesterPassThrough(),
+                        method("queryRecipes")
+                                .thatHandles("example.query-recipes")
                                 .withRequesterPassThrough()
                 )));
     }

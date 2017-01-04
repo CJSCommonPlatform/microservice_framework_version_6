@@ -5,6 +5,7 @@ import static uk.gov.justice.services.generators.commons.helper.Names.nameFrom;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.services.generators.commons.client.AbstractClientGenerator;
+import uk.gov.justice.services.generators.commons.client.ActionMimeTypes;
 import uk.gov.justice.services.generators.commons.helper.MessagingResourceUri;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
 
@@ -15,7 +16,6 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.TypeName;
 import org.raml.model.Action;
-import org.raml.model.MimeType;
 import org.raml.model.Raml;
 import org.raml.model.Resource;
 
@@ -42,12 +42,12 @@ public class MessagingClientGenerator extends AbstractClientGenerator {
     }
 
     @Override
-    protected String handlesAnnotationValueOf(final Action ramlAction, final MimeType mediaType, final GeneratorConfig generatorConfig) {
-        return nameFrom(mediaType);
+    protected String handlesAnnotationValueOf(final Action ramlAction, final ActionMimeTypes mediaTypes, final GeneratorConfig generatorConfig) {
+        return nameFrom(mediaTypes.getNameType());
     }
 
     @Override
-    protected CodeBlock methodBodyOf(final Resource resource, final Action ramlAction, final MimeType mediaType) {
+    protected CodeBlock methodBodyOf(final Resource resource, final Action ramlAction, final ActionMimeTypes mediaTypes) {
         final MessagingResourceUri resourceUri = new MessagingResourceUri(resource.getUri());
         return CodeBlock.builder()
                 .addStatement("$L.send($L, $S)", SENDER, ENVELOPE, resourceUri.destinationName())

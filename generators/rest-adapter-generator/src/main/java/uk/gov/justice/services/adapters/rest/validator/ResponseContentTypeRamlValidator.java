@@ -1,6 +1,6 @@
 package uk.gov.justice.services.adapters.rest.validator;
 
-import static uk.gov.justice.services.adapters.rest.generator.Actions.responseMimeTypesOf;
+import static uk.gov.justice.services.generators.commons.helper.Actions.responseMimeTypesOf;
 
 import uk.gov.justice.services.generators.commons.validator.AbstractContentTypeRamlValidator;
 

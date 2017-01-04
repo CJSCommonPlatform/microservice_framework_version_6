@@ -44,7 +44,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.raml.model.Action;
-import org.raml.model.MimeType;
 import org.raml.model.Raml;
 import org.raml.model.Resource;
 import org.slf4j.Logger;
@@ -99,7 +98,6 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
         assertThat(generatedClass.getAnnotation(FrameworkComponent.class).value(), is("COMMAND_CONTROLLER"));
 
     }
-
 
 
     @Test
@@ -222,12 +220,12 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
 
 
         @Override
-        protected CodeBlock methodBodyOf(final Resource resource, final Action ramlAction, final MimeType mimeType) {
+        protected CodeBlock methodBodyOf(final Resource resource, final Action ramlAction, final ActionMimeTypes mimeTypes) {
             return CodeBlock.builder().addStatement("return 12345678").build();
         }
 
         @Override
-        protected String handlesAnnotationValueOf(final Action ramlAction, final MimeType mimeType, final GeneratorConfig generatorConfig) {
+        protected String handlesAnnotationValueOf(final Action ramlAction, final ActionMimeTypes mimeTypes, final GeneratorConfig generatorConfig) {
             return "some.action";
         }
     }

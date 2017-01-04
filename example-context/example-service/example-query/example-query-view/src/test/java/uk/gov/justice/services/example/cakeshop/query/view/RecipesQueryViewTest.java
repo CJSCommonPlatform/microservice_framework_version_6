@@ -2,6 +2,7 @@ package uk.gov.justice.services.example.cakeshop.query.view;
 
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -9,18 +10,15 @@ import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_VIEW;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
-import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.*;
+import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 import static uk.gov.justice.services.test.utils.core.matchers.HandlerMatcher.isHandler;
 import static uk.gov.justice.services.test.utils.core.matchers.HandlerMethodMatcher.method;
 
-import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.example.cakeshop.query.view.response.RecipeView;
 import uk.gov.justice.services.example.cakeshop.query.view.response.RecipesView;
 import uk.gov.justice.services.example.cakeshop.query.view.service.RecipeService;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -99,7 +97,6 @@ public class RecipesQueryViewTest {
         final JsonEnvelope response = queryView.listRecipes(envelope().with(metadataWithDefaults())
                 .withPayloadOf(pageSize, "pagesize").build());
 
-
         final JsonArray recipesArray = response.payloadAsJsonObject().getJsonArray("recipes");
         assertThat(recipesArray.getJsonObject(0).getString("id"), is(recipeId.toString()));
         assertThat(recipesArray.getJsonObject(0).getString("name"), is(recipeName));
@@ -108,7 +105,6 @@ public class RecipesQueryViewTest {
         assertThat(recipesArray.getJsonObject(1).getString("name"), is(recipeName2));
 
     }
-
 
     @Test
     public void shouldQueryForRecipesOfGivenName() throws Exception {
@@ -119,7 +115,8 @@ public class RecipesQueryViewTest {
         final String nameUsedInQuery = "some recipe";
 
         final int pagesize = 5;
-        when(service.getRecipes(pagesize, Optional.of(nameUsedInQuery), Optional.empty())).thenReturn(new RecipesView(asList(new RecipeView(recipeId, recipeName, false))));
+        when(service.getRecipes(pagesize, Optional.of(nameUsedInQuery), Optional.empty()))
+                .thenReturn(new RecipesView(singletonList(new RecipeView(recipeId, recipeName, false))));
 
         final JsonEnvelope response = queryView.listRecipes(
                 envelope().with(metadataWithDefaults())
@@ -127,12 +124,12 @@ public class RecipesQueryViewTest {
                         .withPayloadOf(nameUsedInQuery, "name")
                         .build());
 
-
         final JsonArray recipesArray = response.payloadAsJsonObject().getJsonArray("recipes");
         assertThat(recipesArray.getJsonObject(0).getString("id"), is(recipeId.toString()));
         assertThat(recipesArray.getJsonObject(0).getString("name"), is(recipeName));
 
     }
+
 
     @Test
     public void shouldQueryForGlutenFreeRecipes() throws Exception {
@@ -140,19 +137,17 @@ public class RecipesQueryViewTest {
         final UUID recipeId = UUID.randomUUID();
         final String recipeName = "some recipe name";
 
-
         final int pagesize = 5;
         final boolean glutenFree = true;
 
         when(service.getRecipes(pagesize, Optional.empty(), Optional.of(glutenFree))).thenReturn(
-                new RecipesView(asList(new RecipeView(recipeId, recipeName, glutenFree))));
+                new RecipesView(singletonList(new RecipeView(recipeId, recipeName, glutenFree))));
 
         final JsonEnvelope response = queryView.listRecipes(
                 envelope().with(metadataWithDefaults())
                         .withPayloadOf(pagesize, "pagesize")
                         .withPayloadOf(glutenFree, "glutenFree")
                         .build());
-
 
         final JsonArray recipesArray = response.payloadAsJsonObject().getJsonArray("recipes");
         assertThat(recipesArray.getJsonObject(0).getString("id"), is(recipeId.toString()));
@@ -172,5 +167,28 @@ public class RecipesQueryViewTest {
 
     }
 
+    @Test
+    public void shouldReturnRecipesForQuery() throws Exception {
 
+        final UUID recipeId = UUID.randomUUID();
+        final String recipeName = "some recipe name";
+
+        final int pagesize = 5;
+        final boolean glutenFree = true;
+
+        when(service.getRecipes(pagesize, Optional.empty(), Optional.of(glutenFree))).thenReturn(
+                new RecipesView(singletonList(new RecipeView(recipeId, recipeName, glutenFree))));
+
+        final JsonEnvelope response = queryView.queryRecipes(
+                envelope().with(metadataWithDefaults())
+                        .withPayloadOf(pagesize, "pagesize")
+                        .withPayloadOf(glutenFree, "glutenFree")
+                        .build());
+
+        final JsonArray recipesArray = response.payloadAsJsonObject().getJsonArray("recipes");
+        assertThat(recipesArray.getJsonObject(0).getString("id"), is(recipeId.toString()));
+        assertThat(recipesArray.getJsonObject(0).getString("name"), is(recipeName));
+        assertThat(recipesArray.getJsonObject(0).getBoolean("glutenFree"), is(glutenFree));
+
+    }
 }

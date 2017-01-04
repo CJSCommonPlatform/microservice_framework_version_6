@@ -26,9 +26,7 @@ import static uk.gov.justice.services.generators.test.utils.reflection.Reflectio
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.setField;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
-import uk.gov.justice.services.adapter.rest.BasicActionMapper;
 import uk.gov.justice.services.adapter.rest.parameter.Parameter;
-import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.lang.reflect.Method;
@@ -45,21 +43,11 @@ import javax.ws.rs.core.Response;
 import org.apache.cxf.jaxrs.impl.tl.ThreadLocalHttpHeaders;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
 
 public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGeneratorTest {
 
     private static final JsonObject NOT_USED_JSONOBJECT = Json.createObjectBuilder().build();
-    private static final String INTERCEPTOR_CHAIN_PROCESSOR = "interceptorChainProcessor";
-    private static final String REST_PROCESSOR = "restProcessor";
-    private static final String ACTION_MAPPER = "actionMapper";
-
-    @Mock
-    private InterceptorChainProcessor interceptorChainProcessor;
-
-    @Mock
-    private BasicActionMapper actionMapper;
-
+    
     @SuppressWarnings("unchecked")
     @Test
     public void shouldReturnResponseGeneratedByRestProcessor() throws Exception {
@@ -71,7 +59,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
-        Object resourceObject = instanceOf(resourceClass);
+        Object resourceObject = getInstanceOf(resourceClass);
 
         Response processorResponse = Response.ok().build();
         when(restProcessor.processAsynchronously(any(Consumer.class), anyString(), any(Optional.class), any(HttpHeaders.class),
@@ -96,7 +84,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
-        Object resourceObject = instanceOf(resourceClass);
+        Object resourceObject = getInstanceOf(resourceClass);
 
         Method method = firstMethodOf(resourceClass);
 
@@ -124,7 +112,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
-        Object resourceObject = instanceOf(resourceClass);
+        Object resourceObject = getInstanceOf(resourceClass);
 
         Optional<JsonObject> jsonObject = Optional.of(Json.createObjectBuilder().add("dummy", "abc").build());
 
@@ -145,7 +133,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
-        Object resourceObject = instanceOf(resourceClass);
+        Object resourceObject = getInstanceOf(resourceClass);
 
         HttpHeaders headers = new ThreadLocalHttpHeaders();
         setField(resourceObject, "headers", headers);
@@ -169,7 +157,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamAResource");
 
-        Object resourceObject = instanceOf(resourceClass);
+        Object resourceObject = getInstanceOf(resourceClass);
 
         Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, "paramValue1234", NOT_USED_JSONOBJECT);
@@ -209,7 +197,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathP1Resource");
 
-        Object resourceObject = instanceOf(resourceClass);
+        Object resourceObject = getInstanceOf(resourceClass);
 
         List<Method> methods = methodsOf(resourceClass);
 
@@ -240,7 +228,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParam1Param2Resource");
 
-        Object resourceObject = instanceOf(resourceClass);
+        Object resourceObject = getInstanceOf(resourceClass);
 
         Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, "paramValueABC", "paramValueDEF", NOT_USED_JSONOBJECT);
@@ -278,7 +266,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultUserResource");
-        Object resourceObject = instanceOf(resourceClass);
+        Object resourceObject = getInstanceOf(resourceClass);
 
         Class<?> actionMapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultUserResourceActionMapper");
         Object actionMapperObject = actionMapperClass.newInstance();
@@ -290,14 +278,5 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
 
         verify(restProcessor).processAsynchronously(any(Consumer.class), eq("contextA.someAction"), any(Optional.class), any(HttpHeaders.class), any(Collection.class));
     }
-
-    private Object instanceOf(Class<?> resourceClass) throws InstantiationException, IllegalAccessException {
-        Object resourceObject = resourceClass.newInstance();
-        setField(resourceObject, REST_PROCESSOR, restProcessor);
-        setField(resourceObject, INTERCEPTOR_CHAIN_PROCESSOR, interceptorChainProcessor);
-        setField(resourceObject, ACTION_MAPPER, actionMapper);
-        return resourceObject;
-    }
-
 
 }

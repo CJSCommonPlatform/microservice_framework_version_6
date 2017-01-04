@@ -157,6 +157,35 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     }
 
     @Test
+    public void shouldGenerateResourceInterfaceWithOneSynchronousPOSTMethod() throws Exception {
+        generator.run(
+                restRamlWithDefaults()
+                        .with(resource("/some/path")
+                                .with(httpAction(POST, "application/vnd.default+json")
+                                        .withResponseTypes("application/vnd.ctx.query.query1+json")
+                                        .with(mapping()
+                                                .withName("blah")
+                                                .withRequestType("application/vnd.default+json")
+                                                .withResponseType("application/vnd.ctx.query.query1+json")))
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+
+        final List<Method> methods = methodsOf(interfaceClass);
+        assertThat(methods, hasSize(1));
+        final Method method = methods.get(0);
+        assertThat(method.getReturnType(), equalTo(Response.class));
+        assertThat(method.getAnnotation(POST.class), not(nullValue()));
+        assertThat(method.getAnnotation(Consumes.class), not(nullValue()));
+        assertThat(method.getAnnotation(Consumes.class).value(),
+                is(new String[]{"application/vnd.default+json"}));
+        assertThat(method.getAnnotation(Produces.class), not(nullValue()));
+        assertThat(method.getAnnotation(Produces.class).value(),
+                is(new String[]{"application/vnd.ctx.query.query1+json"}));
+    }
+
+    @Test
     public void shouldGenerateResourceInterfaceWithOneGETMethod() throws Exception {
         generator.run(
                 restRamlWithDefaults()
@@ -214,7 +243,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
 
 
     @Test
-    public void interfaceShouldContainMethodWithBodyParameter() throws Exception {
+    public void shouldGenerateInterfaceThatContainsMethodWithBodyParameter() throws Exception {
 
         generator.run(
                 restRamlWithDefaults()
@@ -233,7 +262,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     }
 
     @Test
-    public void interfaceShouldContainMethodWithPathParamAndBodyParam() throws Exception {
+    public void shouldGenerateInterfaceThatContainsMethodWithPathParamAndBodyParam() throws Exception {
         generator.run(
                 restRamlWithDefaults()
                         .with(defaultPostResource()
@@ -263,7 +292,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     }
 
     @Test
-    public void interfaceShouldContainMethodWithTwoPathParamsAndBodyParam() throws Exception {
+    public void shouldGenerateInterfaceThatContainsMethodWithTwoPathParamsAndBodyParam() throws Exception {
         generator.run(
                 restRamlWithDefaults()
                         .with(defaultPostResource()
@@ -366,7 +395,6 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
 
     }
 
-
     @Test
     public void shouldGenerateResourceClassContainingOneMethod() throws Exception {
         generator.run(
@@ -386,7 +414,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     }
 
     @Test
-    public void shouldGenerateResourceClassContaining4Methods() throws Exception {
+    public void shouldGenerateResourceClassContainingFourMethods() throws Exception {
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/some/path/{p1}", "p1")
@@ -412,7 +440,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     }
 
     @Test
-    public void classShouldContainMethodWithPathParamAndBodyParam() throws Exception {
+    public void shouldGenerateClassContainingMethodWithPathParamAndBodyParam() throws Exception {
         generator.run(
                 restRamlWithDefaults()
                         .with(defaultPostResource()
@@ -439,7 +467,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     }
 
     @Test
-    public void classShouldContainMethodWith3PathParamsAnd1BodyParam() throws Exception {
+    public void shouldGenerateClassContainingMethodWithThreePathParamsAndOneBodyParam() throws Exception {
         generator.run(
                 restRamlWithDefaults()
                         .with(defaultPostResource()
@@ -501,6 +529,29 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                 restRamlWithDefaults()
                         .with(defaultPostResource()
                                 .withRelativeUri("/some/path")
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        List<Method> methods = methodsOf(class1);
+        assertThat(methods, hasSize(1));
+        Method method = methods.get(0);
+        assertThat(method.getReturnType(), equalTo(Response.class));
+        assertThat(method.getParameterCount(), is(1));
+        assertThat(method.getParameters()[0].getType(), equalTo(JsonObject.class));
+    }
+
+    @Test
+    public void shouldGenerateResourceClassWithOneSynchronousPOSTMethod() throws Exception {
+        generator.run(
+                restRamlWithDefaults()
+                        .with(resource("/some/path")
+                                .with(httpAction(POST, "application/vnd.default+json")
+                                        .withResponseTypes("application/vnd.ctx.query.query1+json")
+                                        .with(mapping()
+                                                .withName("blah")
+                                                .withRequestType("application/vnd.default+json")
+                                                .withResponseType("application/vnd.ctx.query.query1+json")))
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -620,7 +671,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     }
 
     @Test
-    public void classShouldContainQueryParam() throws Exception {
+    public void shouldGenerateClassContainingQueryParam() throws Exception {
         generator.run(
                 restRamlWithQueryApiDefaults().with(
                         resource("/users").with(httpAction(GET)
@@ -658,7 +709,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     }
 
     @Test
-    public void classShouldContainThreeQueryParams() throws Exception {
+    public void shouldGenerateClassContainingThreeQueryParams() throws Exception {
         generator.run(
                 restRamlWithQueryApiDefaults().with(
                         resource("/users").with(httpAction(GET)

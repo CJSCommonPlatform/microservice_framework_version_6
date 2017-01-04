@@ -31,10 +31,8 @@ import static uk.gov.justice.services.generators.test.utils.reflection.Reflectio
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.setField;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
-import uk.gov.justice.services.adapter.rest.BasicActionMapper;
 import uk.gov.justice.services.adapter.rest.exception.BadRequestException;
 import uk.gov.justice.services.adapter.rest.parameter.Parameter;
-import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.lang.reflect.InvocationTargetException;
@@ -51,23 +49,13 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
 
 public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGeneratorTest {
 
     private static final String NULL_STRING_VALUE = null;
-    private static final String INTERCEPTOR_CHAIN_PROCESSOR = "interceptorChainProcessor";
-    private static final String REST_PROCESSOR = "restProcessor";
-    private static final String ACTION_MAPPER = "actionMapper";
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
-
-    @Mock
-    private InterceptorChainProcessor interceptorChainProcessor;
-
-    @Mock
-    private BasicActionMapper actionMapper;
 
     @SuppressWarnings("unchecked")
     @Test
@@ -80,7 +68,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
-        Object resourceObject = instanceOf(resourceClass);
+        Object resourceObject = getInstanceOf(resourceClass);
 
         Response processorResponse = Response.ok().build();
         when(restProcessor.processSynchronously(any(Function.class), anyString(), any(HttpHeaders.class), any(Collection.class))).thenReturn(processorResponse);
@@ -104,7 +92,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
-        Object resourceObject = instanceOf(resourceClass);
+        Object resourceObject = getInstanceOf(resourceClass);
 
         Method method = firstMethodOf(resourceClass);
 
@@ -131,7 +119,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
-        Object resourceObject = instanceOf(resourceClass);
+        Object resourceObject = getInstanceOf(resourceClass);
 
         HttpHeaders headers = new ThreadLocalHttpHeaders();
 
@@ -168,7 +156,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCakeResource");
-        Object resourceObject = instanceOf(resourceClass);
+        Object resourceObject = getInstanceOf(resourceClass);
 
         Class<?> actionMapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCakeResourceActionMapper");
         Object actionMapperObject = actionMapperClass.newInstance();
@@ -199,7 +187,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultRecipeResource");
-        Object resourceObject = instanceOf(resourceClass);
+        Object resourceObject = getInstanceOf(resourceClass);
 
 
         Class<?> actionMapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultRecipeResourceActionMapper");
@@ -230,7 +218,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamAResource");
 
-        Object resourceObject = instanceOf(resourceClass);
+        Object resourceObject = getInstanceOf(resourceClass);
 
         Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, "paramValue1234");
@@ -260,7 +248,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParam1Param2Resource");
 
-        Object resourceObject = instanceOf(resourceClass);
+        Object resourceObject = getInstanceOf(resourceClass);
 
         Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, "paramValueABC", "paramValueDEF");
@@ -293,7 +281,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
-        Object resourceObject = instanceOf(resourceClass);
+        Object resourceObject = getInstanceOf(resourceClass);
 
         Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, "paramValue1234");
@@ -330,7 +318,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
-        Object resourceObject = instanceOf(resourceClass);
+        Object resourceObject = getInstanceOf(resourceClass);
 
         Method method = firstMethodOf(resourceClass);
 
@@ -372,7 +360,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
-        Object resourceObject = instanceOf(resourceClass);
+        Object resourceObject = getInstanceOf(resourceClass);
 
         Method method = firstMethodOf(resourceClass);
 
@@ -408,7 +396,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamResource");
 
-        Object resourceObject = instanceOf(resourceClass);
+        Object resourceObject = getInstanceOf(resourceClass);
 
         Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, "paramValueABC", "paramValueDEF");
@@ -443,7 +431,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
-        Object resourceObject = instanceOf(resourceClass);
+        Object resourceObject = getInstanceOf(resourceClass);
 
         Method method = firstMethodOf(resourceClass);
 
@@ -485,20 +473,11 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
-        Object resourceObject = instanceOf(resourceClass);
+        Object resourceObject = getInstanceOf(resourceClass);
 
         Method method = firstMethodOf(resourceClass);
 
         method.invoke(resourceObject, NULL_STRING_VALUE);
     }
-
-    private Object instanceOf(Class<?> resourceClass) throws InstantiationException, IllegalAccessException {
-        Object resourceObject = resourceClass.newInstance();
-        setField(resourceObject, REST_PROCESSOR, restProcessor);
-        setField(resourceObject, INTERCEPTOR_CHAIN_PROCESSOR, interceptorChainProcessor);
-        setField(resourceObject, ACTION_MAPPER, actionMapper);
-        return resourceObject;
-    }
-
 
 }

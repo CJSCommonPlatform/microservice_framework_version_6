@@ -31,13 +31,13 @@ import static uk.gov.justice.services.generators.test.utils.reflection.Reflectio
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.setField;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
-import uk.gov.justice.services.rest.ParameterType;
 import uk.gov.justice.services.clients.core.EndpointDefinition;
 import uk.gov.justice.services.clients.core.RestClientHelper;
 import uk.gov.justice.services.clients.core.RestClientProcessor;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.rest.ParameterType;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -213,6 +213,38 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
         method.invoke(remoteClient, envelope);
 
         assertThat(capturedPostEndpointDefinition().getResponseMediaType(), is("ctx.defcmd"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void shouldSynchronousPostEnvelope() throws Exception {
+
+        generator.run(
+                restRamlWithCommandApiDefaults()
+                        .with(resource("/pathabc/{anId}").with(httpAction().withHttpActionType(POST)
+                                .withMediaType("application/vnd.ctx.defcmd+json", "json/schema/ctx.defcmd.json")
+                                .withResponseTypes("application/vnd.ctx.response+json")
+                                .with(mapping()
+                                        .withName("action1")
+                                        .withRequestType("application/vnd.ctx.defcmd+json")
+                                        .withResponseType("application/vnd.ctx.response+json"))))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, NOT_USED_GENERATOR_PROPERTIES));
+
+        final JsonEnvelope envelope = mock(JsonEnvelope.class);
+        final JsonEnvelope outputEnvelope = mock(JsonEnvelope.class);
+        final Function function = mock(Function.class);
+
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
+        final Object remoteClient = instanceOf(clazz);
+        final Method method = firstMethodOf(clazz);
+
+        when(enveloper.withMetadataFrom(envelope, "ctx.defcmd")).thenReturn(function);
+        when(function.apply(envelope.payload())).thenReturn(outputEnvelope);
+
+        method.invoke(remoteClient, envelope);
+
+        verify(restClientProcessor).synchronousPost(any(EndpointDefinition.class), eq(outputEnvelope));
     }
 
     private void invokeFirstMethod(final Class<?> clazz) throws InstantiationException, IllegalAccessException, InvocationTargetException {

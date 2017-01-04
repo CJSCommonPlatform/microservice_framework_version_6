@@ -1,4 +1,4 @@
-package uk.gov.justice.services.adapters.rest.generator;
+package uk.gov.justice.services.generators.commons.helper;
 
 
 import static java.util.Collections.emptyList;
@@ -20,6 +20,10 @@ public final class Actions {
                 && notEmpty(responses.values().iterator().next().getBody())
                 ? responses.values().iterator().next().getBody().values()
                 : emptyList();
+    }
+
+    public static boolean hasResponseMimeTypes(final Action action) {
+        return notEmpty(action.getResponses());
     }
 
     private static boolean notEmpty(final Map<String, ?> responses) {

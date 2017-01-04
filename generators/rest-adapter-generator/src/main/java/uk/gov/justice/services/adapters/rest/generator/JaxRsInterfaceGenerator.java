@@ -10,8 +10,8 @@ import static org.apache.commons.lang.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang.StringUtils.strip;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.POST;
-import static uk.gov.justice.services.adapters.rest.generator.Actions.responseMimeTypesOf;
 import static uk.gov.justice.services.adapters.rest.generator.Generators.byMimeTypeOrder;
+import static uk.gov.justice.services.generators.commons.helper.Actions.responseMimeTypesOf;
 import static uk.gov.justice.services.generators.commons.helper.Names.DEFAULT_ANNOTATION_PARAMETER;
 import static uk.gov.justice.services.generators.commons.helper.Names.GENERIC_PAYLOAD_ARGUMENT_NAME;
 import static uk.gov.justice.services.generators.commons.helper.Names.buildResourceMethodName;
@@ -253,7 +253,7 @@ class JaxRsInterfaceGenerator {
         if (!responseMimeTypes.isEmpty()) {
             final AnnotationSpec.Builder annotationBuilder = AnnotationSpec.builder(Produces.class);
 
-            responseMimeTypes.stream().forEach(responseMimeType ->
+            responseMimeTypes.forEach(responseMimeType ->
                     annotationBuilder.addMember(DEFAULT_ANNOTATION_PARAMETER, ANNOTATION_FORMAT, responseMimeType.getType()));
 
             specs.add(annotationBuilder.build());

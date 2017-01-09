@@ -10,6 +10,7 @@ import static org.apache.commons.lang.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang.StringUtils.strip;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.POST;
+import static org.raml.model.ActionType.PUT;
 import static uk.gov.justice.services.adapters.rest.generator.Generators.byMimeTypeOrder;
 import static uk.gov.justice.services.generators.commons.helper.Actions.responseMimeTypesOf;
 import static uk.gov.justice.services.generators.commons.helper.Names.DEFAULT_ANNOTATION_PARAMETER;
@@ -191,6 +192,8 @@ class JaxRsInterfaceGenerator {
             actionTypeAnnotation = AnnotationSpec.builder(javax.ws.rs.GET.class).build();
         } else if (actionType == POST) {
             actionTypeAnnotation = AnnotationSpec.builder(javax.ws.rs.POST.class).build();
+        } else if (actionType == PUT) {
+            actionTypeAnnotation = AnnotationSpec.builder(javax.ws.rs.PUT.class).build();
         } else {
             throw new IllegalStateException(String.format("Unsupported httpAction type %s", actionType));
         }

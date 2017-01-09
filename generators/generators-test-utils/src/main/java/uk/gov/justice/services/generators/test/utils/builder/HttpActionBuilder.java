@@ -5,6 +5,7 @@ import static java.util.Arrays.stream;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.POST;
+import static org.raml.model.ActionType.PUT;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.defaultMapping;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.mapping;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingDescriptionBuilder.mappingDescription;
@@ -41,6 +42,12 @@ public class HttpActionBuilder {
     public static HttpActionBuilder defaultPostAction() {
         return httpAction()
                 .withHttpActionType(POST)
+                .withHttpActionOfDefaultRequestType();
+    }
+
+    public static HttpActionBuilder defaultPutAction() {
+        return httpAction()
+                .withHttpActionType(PUT)
                 .withHttpActionOfDefaultRequestType();
     }
 

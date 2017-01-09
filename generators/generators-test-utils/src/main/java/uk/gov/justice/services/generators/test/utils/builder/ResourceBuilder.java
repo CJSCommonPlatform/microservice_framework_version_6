@@ -2,6 +2,7 @@ package uk.gov.justice.services.generators.test.utils.builder;
 
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.defaultGetAction;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.defaultPostAction;
+import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.defaultPutAction;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,6 +37,12 @@ public class ResourceBuilder {
     public static ResourceBuilder defaultPostResource() {
         return resource("/some/path/{recipeId}")
                 .with(defaultPostAction());
+
+    }
+
+    public static ResourceBuilder defaultPutResource() {
+        return resource("/some/path/{recipeId}")
+                .with(defaultPutAction());
 
     }
 

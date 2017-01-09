@@ -63,12 +63,12 @@ public class RestClientProcessor {
     WebTargetFactory webTargetFactory;
 
     /**
-     * Make a GET request using the envelope provided to a specified endpoint.
+     * Make a synchronous GET request using the envelope provided to a specified endpoint.
      *
      * @param definition the endpoint definition
      * @param envelope   the envelope containing the payload and/or parameters to pass in the
      *                   request
-     * @return the response from that the endpoint returned for this request
+     * @return the response that the endpoint returned for this request
      */
     public JsonEnvelope get(final EndpointDefinition definition, final JsonEnvelope envelope) {
 
@@ -87,7 +87,7 @@ public class RestClientProcessor {
     }
 
     /**
-     * Make a POST request using the envelope provided to a specified endpoint.
+     * Make an asynchronous POST request using the envelope provided to a specified endpoint.
      *
      * @param definition the endpoint definition
      * @param envelope   the envelope containing the payload and/or parameters to pass in the
@@ -115,12 +115,12 @@ public class RestClientProcessor {
     }
 
     /**
-     * Make a Sybchronous POST request using the envelope provided to a specified endpoint.
+     * Make a synchronous POST request using the envelope provided to a specified endpoint.
      *
      * @param definition the endpoint definition
      * @param envelope   the envelope containing the payload and/or parameters to pass in the
      *                   request
-     * @return the response from that the endpoint returned for this request
+     * @return the response that the endpoint returned for this request
      */
     public JsonEnvelope synchronousPost(final EndpointDefinition definition, final JsonEnvelope envelope) {
         final WebTarget target = webTargetFactory.createWebTarget(definition, envelope);
@@ -134,6 +134,58 @@ public class RestClientProcessor {
         final Response response = builder.post(entity(requestBody.toString(), format(MEDIA_TYPE_PATTERN, envelope.metadata().name())));
 
         trace(LOGGER, () -> String.format("Sent POST request %s and received: %s", envelope.metadata().id().toString(), toResponseTrace(response)));
+
+        return processedResponse(envelope, response);
+    }
+
+    /**
+     * Make an asynchronous PUT request using the envelope provided to a specified endpoint.
+     *
+     * @param definition the endpoint definition
+     * @param envelope   the envelope containing the payload and/or parameters to pass in the
+     *                   request
+     */
+    public void put(final EndpointDefinition definition, final JsonEnvelope envelope) {
+        final WebTarget target = webTargetFactory.createWebTarget(definition, envelope);
+
+        final Builder builder = target.request(format(MEDIA_TYPE_PATTERN, definition.getResponseMediaType()));
+        populateHeadersFromMetadata(builder, envelope.metadata());
+
+        trace(LOGGER, () -> String.format("Sending PUT request to %s using message: %s", target.getUri().toString(), envelope));
+
+        final JsonObject requestBody = stripParamsFromPayload(definition, envelope);
+        final Response response = builder.put(entity(requestBody.toString(), format(MEDIA_TYPE_PATTERN, envelope.metadata().name())));
+
+        trace(LOGGER, () -> String.format("Sent PUT request %s and received: %s", envelope.metadata().id().toString(), toResponseTrace(response)));
+
+        final int status = response.getStatus();
+        if (status != ACCEPTED.getStatusCode()) {
+            throw new RuntimeException(format("PUT request %s failed; expected 202 response but got %s with reason \"%s\"",
+                    envelope.metadata().id().toString(), status,
+                    response.getStatusInfo().getReasonPhrase()));
+        }
+    }
+
+    /**
+     * Make a synchronous PUT request using the envelope provided to a specified endpoint.
+     *
+     * @param definition the endpoint definition
+     * @param envelope   the envelope containing the payload and/or parameters to pass in the
+     *                   request
+     * @return the response that the endpoint returned for this request
+     */
+    public JsonEnvelope synchronousPut(final EndpointDefinition definition, final JsonEnvelope envelope) {
+        final WebTarget target = webTargetFactory.createWebTarget(definition, envelope);
+
+        final Builder builder = target.request(format(MEDIA_TYPE_PATTERN, definition.getResponseMediaType()));
+        populateHeadersFromMetadata(builder, envelope.metadata());
+
+        trace(LOGGER, () -> String.format("Sending PUT request to %s using message: %s", target.getUri().toString(), envelope));
+
+        final JsonObject requestBody = stripParamsFromPayload(definition, envelope);
+        final Response response = builder.put(entity(requestBody.toString(), format(MEDIA_TYPE_PATTERN, envelope.metadata().name())));
+
+        trace(LOGGER, () -> String.format("Sent PUT request %s and received: %s", envelope.metadata().id().toString(), toResponseTrace(response)));
 
         return processedResponse(envelope, response);
     }

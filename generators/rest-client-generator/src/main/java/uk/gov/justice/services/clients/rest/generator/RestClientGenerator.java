@@ -56,6 +56,14 @@ public class RestClientGenerator extends AbstractClientGenerator {
     private static final int PILLAR_PATH_SEGMENT_INDEX = 4;
     private static final int TIER_PATH_SEGMENT_INDEX = 5;
 
+    private static final String SYNC_GET_RETURN_STATEMENT = "return $L.get(def, envelope)";
+
+    private static final String ASYNC_POST_STATEMENT = "$L.post(def, $L)";
+    private static final String SYNC_POST_RETURN_STATEMENT = "return $L.synchronousPost(def, $L)";
+
+    private static final String ASYNC_PUT_STATEMENT = "$L.put(def, $L)";
+    private static final String SYNC_PUT_RETURN_STATEMENT = "return $L.synchronousPut(def, $L)";
+
     @Override
     protected String classNameOf(final Raml raml) {
         final String[] pathSegments = raml.getBaseUri().split("/");
@@ -99,14 +107,26 @@ public class RestClientGenerator extends AbstractClientGenerator {
 
         switch (ramlAction.getType()) {
             case GET:
-                methodBody.addStatement("return $L.get(def, envelope)", REST_CLIENT_PROCESSOR);
+                methodBody.addStatement(SYNC_GET_RETURN_STATEMENT, REST_CLIENT_PROCESSOR);
                 break;
-            case POST:
-                final String postMethod = hasResponseMimeTypes(ramlAction) ? "return $L.synchronousPost(def, $L)" : "$L.post(def, $L)";
 
-                methodBody.addStatement("final JsonEnvelope $L = $L.withMetadataFrom(envelope, $S).apply(envelope.payload())", OUTPUT_ENVELOPE, ENVELOPER, actionName);
-                methodBody.addStatement(postMethod, REST_CLIENT_PROCESSOR, OUTPUT_ENVELOPE);
+            case POST:
+                methodBody.add(
+                        methodStatementsFrom(
+                                actionName,
+                                hasResponseMimeTypes(ramlAction) ? SYNC_POST_RETURN_STATEMENT : ASYNC_POST_STATEMENT
+                        ));
+
                 break;
+
+            case PUT:
+                methodBody.add(
+                        methodStatementsFrom(
+                                actionName,
+                                hasResponseMimeTypes(ramlAction) ? SYNC_PUT_RETURN_STATEMENT : ASYNC_PUT_STATEMENT
+                        ));
+                break;
+
             default:
                 throw new IllegalArgumentException(format("Action %s not supported in REST client generator", ramlAction.getType().toString()));
         }
@@ -124,6 +144,13 @@ public class RestClientGenerator extends AbstractClientGenerator {
         return actionMappingOf(ramlAction, mimeTypes.getNameType())
                 .orElseThrow(() -> new RamlValidationException(INVALID_ACTION_MAPPING_ERROR_MSG))
                 .getName();
+    }
+
+    private CodeBlock methodStatementsFrom(final String actionName, final String statementTemplate) {
+        return CodeBlock.builder()
+                .addStatement("final JsonEnvelope $L = $L.withMetadataFrom(envelope, $S).apply(envelope.payload())", OUTPUT_ENVELOPE, ENVELOPER, actionName)
+                .addStatement(statementTemplate, REST_CLIENT_PROCESSOR, OUTPUT_ENVELOPE)
+                .build();
     }
 
     private Optional<ActionMapping> actionMappingOf(final Action ramlAction, final MimeType mimeType) {

@@ -524,7 +524,7 @@ public class CakeShopIT {
         await().until(() -> queryForRecipe(recipeId).httpCode() == OK);
 
         sendTo(RECIPES_RESOURCE_URI + recipeId).request()
-                .post(renameRecipeEntity("New Name"));
+                .put(renameRecipeEntity("New Name"));
 
         await().until(() -> queryForRecipe(recipeId).body().contains("New Name"));
     }

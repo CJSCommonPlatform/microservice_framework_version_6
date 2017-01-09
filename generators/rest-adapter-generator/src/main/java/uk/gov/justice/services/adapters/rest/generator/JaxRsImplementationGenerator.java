@@ -9,6 +9,7 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.POST;
+import static org.raml.model.ActionType.PUT;
 import static uk.gov.justice.services.adapters.rest.generator.Generators.byMimeTypeOrder;
 import static uk.gov.justice.services.adapters.rest.generator.Generators.componentFromBaseUriIn;
 import static uk.gov.justice.services.generators.commons.helper.Actions.hasResponseMimeTypes;
@@ -79,8 +80,8 @@ class JaxRsImplementationGenerator {
     private static final String ACTION_MAPPER_VARIABLE = "actionMapper";
 
     private static final String SYNCHRONOUS_METHOD_STATEMENT = "return restProcessor.processSynchronously($L::process, $L.actionOf($S, \"GET\", headers), headers, $L.parameters())";
-    private static final String SYNCHRONOUS_POST_METHOD_STATEMENT = "return restProcessor.processSynchronously($L::process, $L.actionOf($S, \"POST\", headers), %s, headers, $L.parameters())";
-    private static final String ASYNCHRONOUS_METHOD_STATEMENT = "return restProcessor.processAsynchronously($L::process, $L.actionOf($S, \"POST\", headers), %s, headers, $L.parameters())";
+    private static final String SYNCHRONOUS_POST_METHOD_STATEMENT = "return restProcessor.processSynchronously($L::process, $L.actionOf($S, $S, headers), %s, headers, $L.parameters())";
+    private static final String ASYNCHRONOUS_METHOD_STATEMENT = "return restProcessor.processAsynchronously($L::process, $L.actionOf($S, $S, headers), %s, headers, $L.parameters())";
 
     private final GeneratorConfig configuration;
 
@@ -162,7 +163,7 @@ class JaxRsImplementationGenerator {
     private List<MethodSpec> forEach(final Action action) {
         final ActionType actionType = action.getType();
 
-        if (ActionType.GET == actionType || ActionType.POST == actionType) {
+        if (GET == actionType || POST == actionType || PUT == actionType) {
             if (!action.hasBody()) {
                 return Collections.singletonList(processNoActionBody(action));
             } else {
@@ -212,8 +213,8 @@ class JaxRsImplementationGenerator {
             return generateGetResourceMethod(resourceMethodName, action);
         }
 
-        if (actionType == POST) {
-            return generatePostResourceMethod(resourceMethodName, action, bodyMimeType);
+        if (actionType == POST || actionType == PUT) {
+            return generatePostOrPutResourceMethod(resourceMethodName, action, bodyMimeType);
         }
 
         throw new IllegalStateException(format("Unsupported httpAction type %s", actionType));
@@ -246,21 +247,21 @@ class JaxRsImplementationGenerator {
     }
 
     /**
-     * Generate a POST resource method
+     * Generate a POST or PUT resource method
      *
      * @param resourceMethodName - the name of this method
      * @param action             - the action to retrieve query and path parameters.
      * @param bodyMimeType       - the mime type to decide if payload parameter is required
      * @return the method
      */
-    private MethodSpec generatePostResourceMethod(final String resourceMethodName, final Action action, final MimeType bodyMimeType) {
+    private MethodSpec generatePostOrPutResourceMethod(final String resourceMethodName, final Action action, final MimeType bodyMimeType) {
         final Map<String, QueryParameter> queryParams = action.getQueryParameters();
         final Map<String, UriParameter> pathParams = action.getResource().getUriParameters();
 
         final boolean hasPayload = bodyMimeType.getSchema() != null;
 
         final MethodSpec.Builder methodBuilder = generateGenericResourceMethod(resourceMethodName, queryParams, pathParams)
-                .addCode(methodBody(pathParams, methodBodyForPost(resourceMethodName, hasPayload, hasResponseMimeTypes(action))));
+                .addCode(methodBody(pathParams, methodBodyForPostOrPut(resourceMethodName, hasPayload, hasResponseMimeTypes(action), action.getType())));
 
         if (hasPayload) {
             methodBuilder.addParameter(payloadParameter());
@@ -322,13 +323,13 @@ class JaxRsImplementationGenerator {
     }
 
     /**
-     * Supplier that produces code specific to the POST httpAction type.
+     * Supplier that produces code specific to the POST or PUT httpAction type.
      *
      * @param resourceMethodName name of the resource method
      * @param hasPayload         flag indicating whether the method has a payload
      * @return the supplier that returns the {@link CodeBlock}
      */
-    private Supplier<CodeBlock> methodBodyForPost(final String resourceMethodName, final boolean hasPayload, final boolean hasResponses) {
+    private Supplier<CodeBlock> methodBodyForPostOrPut(final String resourceMethodName, final boolean hasPayload, final boolean hasResponses, final ActionType actionType) {
 
         final String methodStatement = hasResponses ? SYNCHRONOUS_POST_METHOD_STATEMENT : ASYNCHRONOUS_METHOD_STATEMENT;
 
@@ -337,6 +338,7 @@ class JaxRsImplementationGenerator {
                         INTERCEPTOR_CHAIN_PROCESSOR,
                         ACTION_MAPPER_VARIABLE,
                         resourceMethodName,
+                        actionType.toString(),
                         Optional.class,
                         VARIABLE_PARAMS_COLLECTION_BUILDER)
                 .build();

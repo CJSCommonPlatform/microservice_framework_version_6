@@ -11,6 +11,7 @@ import static org.apache.commons.lang.Validate.isTrue;
 import static org.apache.commons.lang.Validate.notEmpty;
 import static org.apache.commons.lang.Validate.notNull;
 import static org.raml.model.ActionType.POST;
+import static org.raml.model.ActionType.PUT;
 import static uk.gov.justice.services.generators.commons.helper.Names.JAVA_FILENAME_SUFFIX;
 import static uk.gov.justice.services.generators.commons.helper.Names.MAPPER_PACKAGE_NAME;
 import static uk.gov.justice.services.generators.commons.helper.Names.RESOURCE_PACKAGE_NAME;
@@ -118,7 +119,7 @@ public class RestAdapterGenerator implements Generator {
             actionMappings.forEach(m -> {
                 final String mediaType = m.mimeTypeFor(ramlAction.getType());
                 constructorCode.addStatement("add($S, $S, $S)",
-                        buildResourceMethodName(ramlAction, ramlAction.getType() == POST ? new MimeType(mediaType) : null),
+                        buildResourceMethodName(ramlAction, ramlAction.getType() == POST || ramlAction.getType() == PUT ? new MimeType(mediaType) : null),
                         mediaType,
                         m.getName());
             });

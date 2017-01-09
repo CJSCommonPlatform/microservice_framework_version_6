@@ -6,6 +6,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.put;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
@@ -274,6 +275,39 @@ public class RemoteExampleQueryApiIT {
                 .build().toString();
 
         stubFor(post(urlEqualTo(BASE_PATH + path))
+                .withRequestBody(equalToJson(bodyPayload))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", mimeType)
+                        .withBody(jsonObjectToString(RESPONSE))));
+
+        final JsonEnvelope query = envelope()
+                .with(metadataOf(randomUUID(), name))
+                .withPayloadOf(USER_ID, "userId")
+                .withPayloadOf(USER_NAME, "userName")
+                .build();
+
+        final JsonEnvelope response = requester.request(query);
+
+        assertThat(response.payloadAsJsonObject(),
+                is(Json.createObjectBuilder()
+                        .add("result", "SUCCESS")
+                        .build()));
+    }
+
+    @Test
+    public void shouldRequestSynchronousPutToRemoteService() {
+
+        final String name = "people.put-search-users";
+
+        final String path = "/users";
+        final String mimeType = format("application/vnd.%s+json", "people.users");
+        final String bodyPayload = createObjectBuilder()
+                .add("userId", USER_ID.toString())
+                .add("userName", USER_NAME)
+                .build().toString();
+
+        stubFor(put(urlEqualTo(BASE_PATH + path))
                 .withRequestBody(equalToJson(bodyPayload))
                 .willReturn(aResponse()
                         .withStatus(200)

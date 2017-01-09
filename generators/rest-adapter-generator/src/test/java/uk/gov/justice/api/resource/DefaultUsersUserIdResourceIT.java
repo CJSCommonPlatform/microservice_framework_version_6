@@ -62,7 +62,7 @@ import org.junit.runner.RunWith;
 @RunWith(ApplicationComposer.class)
 public class DefaultUsersUserIdResourceIT {
 
-    private static final String CREATE_USER_MEDIA_TYPE = "application/vnd.people.user+json";
+    private static final String USER_MEDIA_TYPE = "application/vnd.people.user+json";
     private static final String UPDATE_USER_MEDIA_TYPE = "application/vnd.people.modified-user+json";
     private static final String LINK_USER_MEDIA_TYPE = "application/vnd.people.link-user+json";
     private static final String BASE_URI_PATTERN = "http://localhost:%d/rest-adapter-generator/query/api/rest/example";
@@ -121,9 +121,9 @@ public class DefaultUsersUserIdResourceIT {
 
     @Test
     public void shouldReturn202CreatingUser() throws Exception {
-        Response response = create(BASE_URI)
+        final Response response = create(BASE_URI)
                 .path("/users/1234")
-                .post(entity(JSON, CREATE_USER_MEDIA_TYPE));
+                .post(entity(JSON, USER_MEDIA_TYPE));
 
         assertThat(response.getStatus(), is(ACCEPTED.getStatusCode()));
     }
@@ -132,9 +132,9 @@ public class DefaultUsersUserIdResourceIT {
     public void shouldDispatchCreateUserCommand() throws Exception {
         create(BASE_URI)
                 .path("/users/567-8910")
-                .post(entity("{\"userUrn\" : \"1234\"}", CREATE_USER_MEDIA_TYPE));
+                .post(entity("{\"userUrn\" : \"1234\"}", USER_MEDIA_TYPE));
 
-        JsonEnvelope jsonEnvelope = interceptorChainProcessor.awaitForEnvelopeWithPayloadOf("userId", "567-8910");
+        final JsonEnvelope jsonEnvelope = interceptorChainProcessor.awaitForEnvelopeWithPayloadOf("userId", "567-8910");
         assertThat(jsonEnvelope.metadata().name(), is("people.create-user"));
         assertThat(jsonEnvelope.payloadAsJsonObject().getString("userId"), is("567-8910"));
         assertThat(jsonEnvelope.payloadAsJsonObject().getString("userUrn"), is("1234"));
@@ -142,18 +142,27 @@ public class DefaultUsersUserIdResourceIT {
 
     @Test
     public void shouldReturn400ForJsonNotAdheringToSchema() throws Exception {
-        Response response = create(BASE_URI)
+        final Response response = create(BASE_URI)
                 .path("/users/1234")
-                .post(entity("{\"blah\" : \"1234\"}", CREATE_USER_MEDIA_TYPE));
+                .post(entity("{\"blah\" : \"1234\"}", USER_MEDIA_TYPE));
 
         assertThat(response.getStatus(), is(BAD_REQUEST.getStatusCode()));
     }
 
     @Test
-    public void shouldReturn202UpdatingUser() throws Exception {
-        Response response = create(BASE_URI)
+    public void shouldReturn202UpdatingUserWithPost() throws Exception {
+        final Response response = create(BASE_URI)
                 .path("/users/1234")
                 .post(entity(JSON, UPDATE_USER_MEDIA_TYPE));
+
+        assertThat(response.getStatus(), is(ACCEPTED.getStatusCode()));
+    }
+
+    @Test
+    public void shouldReturn202UpdatingUserWithPut() throws Exception {
+        final Response response = create(BASE_URI)
+                .path("/users/1234")
+                .put(entity(JSON, UPDATE_USER_MEDIA_TYPE));
 
         assertThat(response.getStatus(), is(ACCEPTED.getStatusCode()));
     }
@@ -163,14 +172,13 @@ public class DefaultUsersUserIdResourceIT {
         interceptorChainProcessor.setupResponse("userId", "4444-5556",
                 envelope().with(metadataWithDefaults()).withPayloadOf("user1234", "userName").build());
 
-
-        Response response = create(BASE_URI)
+        final Response response = create(BASE_URI)
                 .path("/users/4444-5556")
                 .header("Accept", "application/vnd.people.user+json")
                 .get();
 
         assertThat(response.getStatus(), is(OK.getStatusCode()));
-        String responseBody = response.readEntity(String.class);
+        final String responseBody = response.readEntity(String.class);
         with(responseBody)
                 .assertThat("userName", equalTo("user1234"));
     }
@@ -179,25 +187,51 @@ public class DefaultUsersUserIdResourceIT {
     public void shouldReturn200ResponseForSynchronousPOST() {
         interceptorChainProcessor.setupResponse("userUrn", "test",
                 envelope().with(metadataWithDefaults()).withPayloadOf("user1234", "userName").build());
-
-        Response response = create(BASE_URI)
+        final Response response = create(BASE_URI)
                 .path("/users")
                 .header("Accept", "application/vnd.people.user+json")
-                .post(entity(JSON, CREATE_USER_MEDIA_TYPE));
+                .post(entity(JSON, USER_MEDIA_TYPE));
 
         assertThat(response.getStatus(), is(OK.getStatusCode()));
-        String responseBody = response.readEntity(String.class);
+        final String responseBody = response.readEntity(String.class);
         with(responseBody)
                 .assertThat("userName", equalTo("user1234"));
     }
 
     @Test
-    public void shouldDispatchUpdateUserCommand() throws Exception {
+    public void shouldReturn200ResponseForSynchronousPUT() {
+        interceptorChainProcessor.setupResponse("userUrn", "test",
+                envelope().with(metadataWithDefaults()).withPayloadOf("user1234", "userName").build());
+        final Response response = create(BASE_URI)
+                .path("/users")
+                .header("Accept", "application/vnd.people.user+json")
+                .put(entity(JSON, USER_MEDIA_TYPE));
+
+        assertThat(response.getStatus(), is(OK.getStatusCode()));
+        final String responseBody = response.readEntity(String.class);
+        with(responseBody)
+                .assertThat("userName", equalTo("user1234"));
+    }
+
+    @Test
+    public void shouldDispatchPostUpdateUserCommand() throws Exception {
         create(BASE_URI)
                 .path("/users/4444-9876")
                 .post(entity("{\"userUrn\" : \"5678\"}", UPDATE_USER_MEDIA_TYPE));
 
-        JsonEnvelope envelope = interceptorChainProcessor.awaitForEnvelopeWithPayloadOf("userId", "4444-9876");
+        final JsonEnvelope envelope = interceptorChainProcessor.awaitForEnvelopeWithPayloadOf("userId", "4444-9876");
+        assertThat(envelope.metadata().name(), is("people.update-user"));
+        assertThat(envelope.payloadAsJsonObject().getString("userId"), is("4444-9876"));
+        assertThat(envelope.payloadAsJsonObject().getString("userUrn"), is("5678"));
+    }
+
+    @Test
+    public void shouldDispatchPutUpdateUserCommand() throws Exception {
+        create(BASE_URI)
+                .path("/users/4444-9876")
+                .put(entity("{\"userUrn\" : \"5678\"}", UPDATE_USER_MEDIA_TYPE));
+
+        final JsonEnvelope envelope = interceptorChainProcessor.awaitForEnvelopeWithPayloadOf("userId", "4444-9876");
         assertThat(envelope.metadata().name(), is("people.update-user"));
         assertThat(envelope.payloadAsJsonObject().getString("userId"), is("4444-9876"));
         assertThat(envelope.payloadAsJsonObject().getString("userUrn"), is("5678"));
@@ -209,7 +243,7 @@ public class DefaultUsersUserIdResourceIT {
                 .path("/users/4444-9877")
                 .post(entity("", LINK_USER_MEDIA_TYPE));
 
-        JsonEnvelope envelope = interceptorChainProcessor.awaitForEnvelopeWithPayloadOf("userId", "4444-9877");
+        final JsonEnvelope envelope = interceptorChainProcessor.awaitForEnvelopeWithPayloadOf("userId", "4444-9877");
         assertThat(envelope.metadata().name(), is("people.link-user"));
         assertThat(envelope.payloadAsJsonObject().getString("userId"), is("4444-9877"));
     }
@@ -220,7 +254,7 @@ public class DefaultUsersUserIdResourceIT {
                 .path("/users/4444-5555")
                 .header("Accept", "application/vnd.people.user+json")
                 .get();
-        JsonEnvelope envelope = interceptorChainProcessor.awaitForEnvelopeWithPayloadOf("userId", "4444-5555");
+        final JsonEnvelope envelope = interceptorChainProcessor.awaitForEnvelopeWithPayloadOf("userId", "4444-5555");
         assertThat(envelope.payloadAsJsonObject().getString("userId"), is("4444-5555"));
         assertThat(envelope.metadata().name(), is("people.get-user"));
     }
@@ -229,13 +263,13 @@ public class DefaultUsersUserIdResourceIT {
     public void shouldDispatchGetUserCommandWithOtherMediaType() throws Exception {
         interceptorChainProcessor.setupResponse("userId", "4444-5555", envelope().with(metadataWithDefaults()).build());
 
-        Response response = create(BASE_URI)
+        final Response response = create(BASE_URI)
                 .path("/users/4444-5555")
                 .header("Accept", "application/vnd.people.user-summary+json")
                 .get();
 
         assertThat(response.getStatus(), is(OK.getStatusCode()));
-        JsonEnvelope envelope = interceptorChainProcessor.awaitForEnvelopeWithPayloadOf("userId", "4444-5555");
+        final JsonEnvelope envelope = interceptorChainProcessor.awaitForEnvelopeWithPayloadOf("userId", "4444-5555");
         assertThat(envelope.payloadAsJsonObject().getString("userId"), is("4444-5555"));
         assertThat(envelope.metadata().name(), is("people.get-user-summary"));
     }
@@ -243,7 +277,7 @@ public class DefaultUsersUserIdResourceIT {
     @Test
     public void shouldReturn406ifQueryTypeNotRecognised() throws Exception {
 
-        Response response = create(BASE_URI)
+        final Response response = create(BASE_URI)
                 .path("/users/4444-5555")
                 .header("Accept", "application/vnd.people.query.unknown+json")
                 .get();
@@ -256,7 +290,7 @@ public class DefaultUsersUserIdResourceIT {
     public void shouldReturnResponseWithContentType() {
         interceptorChainProcessor.setupResponse("userId", "4444-5556", envelope().with(metadataWithDefaults()).build());
 
-        Response response = create(BASE_URI)
+        final Response response = create(BASE_URI)
                 .path("/users/4444-5556")
                 .header("Accept", "application/vnd.people.user+json")
                 .get();
@@ -268,7 +302,7 @@ public class DefaultUsersUserIdResourceIT {
     public void shouldReturnResponseWithSecondContentType() {
         interceptorChainProcessor.setupResponse("userId", "4444-5556", envelope().with(metadataWithDefaults()).build());
 
-        Response response = create(BASE_URI)
+        final Response response = create(BASE_URI)
                 .path("/users/4444-5556")
                 .header("Accept", "application/vnd.people.user-summary+json")
                 .get();
@@ -280,7 +314,7 @@ public class DefaultUsersUserIdResourceIT {
     public void shouldDispatchUsersQueryWithQueryParams() throws Exception {
         interceptorChainProcessor.setupResponse("lastname", "Smith", envelope().with(metadataWithDefaults()).build());
 
-        Response response = create(BASE_URI)
+        final Response response = create(BASE_URI)
                 .path("/users")
                 .query("lastname", "Smith")
                 .query("firstname", "John")
@@ -291,7 +325,7 @@ public class DefaultUsersUserIdResourceIT {
                 .get();
 
         assertThat(response.getStatus(), is(OK.getStatusCode()));
-        JsonEnvelope jsonEnvelope = interceptorChainProcessor.awaitForEnvelopeWithPayloadOf("lastname", "Smith");
+        final JsonEnvelope jsonEnvelope = interceptorChainProcessor.awaitForEnvelopeWithPayloadOf("lastname", "Smith");
         assertThat(jsonEnvelope.metadata().name(), is("people.search-users"));
 
         final JsonObject payload = (JsonObject) jsonEnvelope.payload();
@@ -305,7 +339,7 @@ public class DefaultUsersUserIdResourceIT {
     @Test
     public void shouldReturn400IfRequiredQueryParamIsNotProvided() throws Exception {
 
-        Response response = create(BASE_URI)
+        final Response response = create(BASE_URI)
                 .path("/users")
                 .query("firstname", "firstname")
                 .header("Accept", "application/vnd.people.users+json")
@@ -318,7 +352,7 @@ public class DefaultUsersUserIdResourceIT {
     public void shouldReturn200WhenOptionalParameterIsNotProvided() throws Exception {
         interceptorChainProcessor.setupResponse("lastname", "lastname", envelope().with(metadataWithDefaults()).build());
 
-        Response response = create(BASE_URI)
+        final Response response = create(BASE_URI)
                 .path("/users")
                 .query("lastname", "lastname")
                 .header("Accept", "application/vnd.people.users+json")

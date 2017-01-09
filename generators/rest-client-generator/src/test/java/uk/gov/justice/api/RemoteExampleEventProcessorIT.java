@@ -5,6 +5,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.put;
+import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
@@ -16,12 +18,12 @@ import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 
-import uk.gov.justice.services.clients.core.webclient.BaseUriFactory;
-import uk.gov.justice.services.clients.core.webclient.ContextMatcher;
 import uk.gov.justice.services.clients.core.DefaultServerPortProvider;
-import uk.gov.justice.services.clients.core.webclient.MockServerPortProvider;
 import uk.gov.justice.services.clients.core.RestClientHelper;
 import uk.gov.justice.services.clients.core.RestClientProcessor;
+import uk.gov.justice.services.clients.core.webclient.BaseUriFactory;
+import uk.gov.justice.services.clients.core.webclient.ContextMatcher;
+import uk.gov.justice.services.clients.core.webclient.MockServerPortProvider;
 import uk.gov.justice.services.clients.core.webclient.WebTargetFactory;
 import uk.gov.justice.services.common.configuration.JndiBasedServiceContextNameProvider;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
@@ -155,13 +157,9 @@ public class RemoteExampleEventProcessorIT {
     }
 
     @Test
-    public void shouldSendCommandToRemoteService() {
-
-        final String name = "people.update-user";
-
-
+    public void shouldPostCommandToRemoteService() {
         final String path = format("/users/%s", USER_ID.toString());
-        final String mimeType = format("application/vnd.%s+json", name);
+        final String mimeType = "application/vnd.people.update-user+json";
         final String bodyPayload = createObjectBuilder().add("userName", USER_NAME).build().toString();
 
         stubFor(post(urlEqualTo(BASE_PATH + path))
@@ -170,12 +168,35 @@ public class RemoteExampleEventProcessorIT {
                         .withStatus(ACCEPTED.getStatusCode())));
 
         sender.send(envelope()
-                .with(metadataOf(QUERY_ID, name))
+                .with(metadataOf(QUERY_ID, "people.post-update-user"))
                 .withPayloadOf(USER_ID.toString(), "userId")
                 .withPayloadOf(USER_NAME, "userName")
                 .build());
 
         verify(postRequestedFor(urlEqualTo(BASE_PATH + path))
+                .withHeader(CONTENT_TYPE, equalTo(mimeType))
+                .withRequestBody(equalToJson(bodyPayload))
+        );
+    }
+
+    @Test
+    public void shouldPutCommandToRemoteService() {
+        final String path = format("/users/%s", USER_ID.toString());
+        final String mimeType = "application/vnd.people.update-user+json";
+        final String bodyPayload = createObjectBuilder().add("userName", USER_NAME).build().toString();
+
+        stubFor(put(urlEqualTo(BASE_PATH + path))
+                .withRequestBody(equalToJson(bodyPayload))
+                .willReturn(aResponse()
+                        .withStatus(ACCEPTED.getStatusCode())));
+
+        sender.send(envelope()
+                .with(metadataOf(QUERY_ID, "people.put-update-user"))
+                .withPayloadOf(USER_ID.toString(), "userId")
+                .withPayloadOf(USER_NAME, "userName")
+                .build());
+
+        verify(putRequestedFor(urlEqualTo(BASE_PATH + path))
                 .withHeader(CONTENT_TYPE, equalTo(mimeType))
                 .withRequestBody(equalToJson(bodyPayload))
         );

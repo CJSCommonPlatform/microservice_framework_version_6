@@ -19,6 +19,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.POST;
+import static org.raml.model.ActionType.PUT;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.defaultGetAction;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.mapping;
@@ -27,6 +28,7 @@ import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithQueryApiDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.defaultGetResource;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.defaultPostResource;
+import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.defaultPutResource;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
@@ -51,6 +53,7 @@ import javax.inject.Named;
 import javax.json.JsonObject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -157,6 +160,30 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     }
 
     @Test
+    public void shouldGenerateResourceInterfaceWithOnePUTMethod() throws Exception {
+        generator.run(
+                restRamlWithDefaults()
+                        .with(resource("/some/path")
+                                .with(httpAction(PUT, "application/vnd.default+json")
+                                        .with(mapping()
+                                                .withName("blah")
+                                                .withRequestType("application/vnd.default+json")))
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+
+        List<Method> methods = methodsOf(interfaceClass);
+        assertThat(methods, hasSize(1));
+        Method method = methods.get(0);
+        assertThat(method.getReturnType(), equalTo(Response.class));
+        assertThat(method.getAnnotation(PUT.class), not(nullValue()));
+        assertThat(method.getAnnotation(Consumes.class), not(nullValue()));
+        assertThat(method.getAnnotation(Consumes.class).value(),
+                is(new String[]{"application/vnd.default+json"}));
+    }
+
+    @Test
     public void shouldGenerateResourceInterfaceWithOneSynchronousPOSTMethod() throws Exception {
         generator.run(
                 restRamlWithDefaults()
@@ -177,6 +204,35 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
         final Method method = methods.get(0);
         assertThat(method.getReturnType(), equalTo(Response.class));
         assertThat(method.getAnnotation(POST.class), not(nullValue()));
+        assertThat(method.getAnnotation(Consumes.class), not(nullValue()));
+        assertThat(method.getAnnotation(Consumes.class).value(),
+                is(new String[]{"application/vnd.default+json"}));
+        assertThat(method.getAnnotation(Produces.class), not(nullValue()));
+        assertThat(method.getAnnotation(Produces.class).value(),
+                is(new String[]{"application/vnd.ctx.query.query1+json"}));
+    }
+
+    @Test
+    public void shouldGenerateResourceInterfaceWithOneSynchronousPUTMethod() throws Exception {
+        generator.run(
+                restRamlWithDefaults()
+                        .with(resource("/some/path")
+                                .with(httpAction(PUT, "application/vnd.default+json")
+                                        .withResponseTypes("application/vnd.ctx.query.query1+json")
+                                        .with(mapping()
+                                                .withName("blah")
+                                                .withRequestType("application/vnd.default+json")
+                                                .withResponseType("application/vnd.ctx.query.query1+json")))
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+
+        final List<Method> methods = methodsOf(interfaceClass);
+        assertThat(methods, hasSize(1));
+        final Method method = methods.get(0);
+        assertThat(method.getReturnType(), equalTo(Response.class));
+        assertThat(method.getAnnotation(PUT.class), not(nullValue()));
         assertThat(method.getAnnotation(Consumes.class), not(nullValue()));
         assertThat(method.getAnnotation(Consumes.class).value(),
                 is(new String[]{"application/vnd.default+json"}));
@@ -552,6 +608,24 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                                                 .withName("blah")
                                                 .withRequestType("application/vnd.default+json")
                                                 .withResponseType("application/vnd.ctx.query.query1+json")))
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        List<Method> methods = methodsOf(class1);
+        assertThat(methods, hasSize(1));
+        Method method = methods.get(0);
+        assertThat(method.getReturnType(), equalTo(Response.class));
+        assertThat(method.getParameterCount(), is(1));
+        assertThat(method.getParameters()[0].getType(), equalTo(JsonObject.class));
+    }
+
+    @Test
+    public void shouldGenerateResourceClassWithOnePUTMethod() throws Exception {
+        generator.run(
+                restRamlWithDefaults()
+                        .with(defaultPutResource()
+                                .withRelativeUri("/some/path")
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 

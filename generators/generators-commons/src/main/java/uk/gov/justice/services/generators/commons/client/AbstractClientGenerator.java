@@ -113,7 +113,9 @@ public abstract class AbstractClientGenerator implements Generator {
         switch (ramlAction.getType()) {
             case GET:
                 return responseMediaTypesOf(ramlAction).map(ActionMimeTypes::actionWithResponseOf);
+
             case POST:
+            case PUT:
                 return ramlAction.getBody().values().stream()
                         .flatMap(responseType -> {
                             if (hasResponseMimeTypes(ramlAction)) {
@@ -123,6 +125,7 @@ public abstract class AbstractClientGenerator implements Generator {
                                 return Stream.of(actionWithRequestOf(responseType));
                             }
                         });
+
             default:
                 throw new IllegalStateException(format("Unsupported httpAction type %s", ramlAction.getType()));
         }

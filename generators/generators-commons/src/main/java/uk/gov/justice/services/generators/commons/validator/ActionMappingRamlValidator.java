@@ -4,12 +4,14 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.raml.model.ActionType.POST;
+import static org.raml.model.ActionType.PUT;
 import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.listOf;
 
 import java.util.Collection;
 import java.util.Set;
 
 import org.raml.model.Action;
+import org.raml.model.ActionType;
 import org.raml.model.MimeType;
 import org.raml.model.Resource;
 
@@ -41,10 +43,14 @@ public class ActionMappingRamlValidator extends AbstractResourceRamlValidator {
     }
 
     private Collection<MimeType> mimeTypesOf(final Action ramlAction) {
-        return ramlAction.getType() == POST
-                ? ramlAction.getBody().values()
-                : ramlAction.getResponses().values().stream()
-                .flatMap(r -> r.getBody().values().stream())
-                .collect(toList());
+        final ActionType ramlActionType = ramlAction.getType();
+
+        if (ramlActionType == POST || ramlActionType == PUT) {
+            return ramlAction.getBody().values();
+        } else {
+            return ramlAction.getResponses().values().stream()
+                    .flatMap(r -> r.getBody().values().stream())
+                    .collect(toList());
+        }
     }
 }

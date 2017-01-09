@@ -12,6 +12,7 @@ import static org.hamcrest.core.Is.is;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.POST;
 import static org.raml.model.ActionType.PUT;
+import static org.raml.model.ActionType.TRACE;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.messagingRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
@@ -56,9 +57,8 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
         generator = new TestClientGenerator();
     }
 
-
     @Test
-    public void shouldGenerateRemoteController() throws Exception {
+    public void shouldGenerateRemotePostController() throws Exception {
 
         generator.run(
                 messagingRamlWithDefaults()
@@ -68,7 +68,27 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_API")));
 
 
-        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteABCController");
+        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteABCController");
+
+        assertThat(generatedClass.getCanonicalName(), is("org.raml.test.RemoteABCController"));
+        assertThat(generatedClass.getAnnotation(Remote.class), not(nullValue()));
+        assertThat(generatedClass.getAnnotation(FrameworkComponent.class), not(nullValue()));
+        assertThat(generatedClass.getAnnotation(FrameworkComponent.class).value(), is("COMMAND_API"));
+
+    }
+
+    @Test
+    public void shouldGenerateRemotePutController() throws Exception {
+
+        generator.run(
+                messagingRamlWithDefaults()
+                        .with(resource()
+                                .with(httpAction(PUT, "application/vnd.cakeshop.actionabc+json")))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_API")));
+
+
+        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteABCController");
 
         assertThat(generatedClass.getCanonicalName(), is("org.raml.test.RemoteABCController"));
         assertThat(generatedClass.getAnnotation(Remote.class), not(nullValue()));
@@ -90,7 +110,7 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_CONTROLLER")));
 
 
-        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteABCController");
+        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteABCController");
 
         assertThat(generatedClass.getCanonicalName(), is("org.raml.test.RemoteABCController"));
         assertThat(generatedClass.getAnnotation(Remote.class), not(nullValue()));
@@ -99,7 +119,6 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
 
     }
 
-
     @Test
     public void shouldContainLoggerConstant() throws Exception {
         generator.run(
@@ -107,9 +126,9 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder,
                         generatorProperties().withDefaultServiceComponent()));
 
-        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteABCController");
+        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteABCController");
 
-        Field logger = generatedClass.getDeclaredField("LOGGER");
+        final Field logger = generatedClass.getDeclaredField("LOGGER");
         assertThat(logger, not(nullValue()));
         assertThat(logger.getType(), equalTo(Logger.class));
         assertThat(Modifier.isPrivate(logger.getModifiers()), Matchers.is(true));
@@ -124,9 +143,9 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder,
                         generatorProperties().withDefaultServiceComponent()));
 
-        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteABCController");
+        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteABCController");
 
-        Field logger = generatedClass.getDeclaredField("dummyVariable");
+        final Field logger = generatedClass.getDeclaredField("dummyVariable");
         assertThat(logger, not(nullValue()));
         assertThat(logger.getType(), equalTo(Object.class));
         assertThat(Modifier.isStatic(logger.getModifiers()), Matchers.is(false));
@@ -139,13 +158,13 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder,
                         generatorProperties().withDefaultServiceComponent()));
 
-        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteABCController");
+        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteABCController");
 
-        List<Method> methods = methodsOf(generatedClass);
+        final List<Method> methods = methodsOf(generatedClass);
         assertThat(methods, hasSize(1));
 
-        Method method = methods.get(0);
-        Handles handlesAnnotation = method.getAnnotation(Handles.class);
+        final Method method = methods.get(0);
+        final Handles handlesAnnotation = method.getAnnotation(Handles.class);
         assertThat(handlesAnnotation, not(nullValue()));
         assertThat(handlesAnnotation.value(), is("some.action"));
         assertThat(method.getParameterCount(), is(1));
@@ -159,16 +178,15 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder,
                         generatorProperties().withDefaultServiceComponent()));
 
-        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteABCController");
+        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteABCController");
 
-        List<Method> methods = methodsOf(generatedClass);
+        final List<Method> methods = methodsOf(generatedClass);
         assertThat(methods, hasSize(1));
         final Object instance = generatedClass.newInstance();
-        Method method = firstMethodOf(generatedClass);
+        final Method method = firstMethodOf(generatedClass);
         final Object result = method.invoke(instance, envelope().build());
         assertThat(result, is(12345678));
     }
-
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
@@ -179,22 +197,21 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("serviceComponent generator property not set in the plugin config");
 
-        Map<String, String> generatorProperties = emptyMap();
+        final Map<String, String> generatorProperties = emptyMap();
         generator.run(
                 messagingRamlWithDefaults().withDefaultMessagingResource().build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
     }
 
-
     @Test
     public void shouldThrowExceptionIfActionOtherThanPOSTorGET() {
         exception.expect(IllegalStateException.class);
-        exception.expectMessage(containsString("Unsupported httpAction type PUT"));
+        exception.expectMessage(containsString("Unsupported httpAction type TRACE"));
         generator.run(
                 messagingRamlWithDefaults()
                         .with(resource()
-                                .with(httpAction(PUT, "application/vnd.cakeshop.actionabc+json")))
+                                .with(httpAction(TRACE, "application/vnd.cakeshop.actionabc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
 

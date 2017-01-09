@@ -4,7 +4,6 @@ import static org.raml.model.ActionType.DELETE;
 import static org.raml.model.ActionType.HEAD;
 import static org.raml.model.ActionType.OPTIONS;
 import static org.raml.model.ActionType.PATCH;
-import static org.raml.model.ActionType.PUT;
 import static org.raml.model.ActionType.TRACE;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.raml;
@@ -22,11 +21,6 @@ public class JaxRsInterfaceGeneratorTest {
     @Before
     public void setup() {
         jaxRsInterfaceGenerator = new JaxRsInterfaceGenerator();
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void shouldThrowExceptionIfActionTypeIsPUT() throws Exception {
-        jaxRsInterfaceGenerator.generateFor(singleResourceWithActionType(PUT));
     }
 
     @Test(expected = IllegalStateException.class)

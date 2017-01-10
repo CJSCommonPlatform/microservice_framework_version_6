@@ -6,6 +6,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.patch;
+import static com.github.tomakehurst.wiremock.client.WireMock.patchRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.put;
@@ -305,6 +307,58 @@ public class RestClientProcessorIT {
         validateResponse(restClientProcessor.synchronousPut(endpointDefinition, postRequestEnvelope()), envelopeWithMetadataAsJson);
 
         verify(putRequestedFor(urlEqualTo(REMOTE_BASE_PATH + "/my/resource/valueA/valueB"))
+                .withHeader(CONTENT_TYPE, equalTo(mimetype))
+                .withRequestBody(equalToJson(bodyWithoutParams)));
+    }
+
+    @Test
+    public void shouldDoPatchWithPathParameters() throws Exception {
+
+        final String path = "/my/resource/{paramA}/{paramB}";
+        final String mimetype = format("application/vnd.%s+json", COMMAND_NAME);
+        final String bodyWithoutParams = jsonFromFile(POST_REQUEST_BODY_ONLY_FILE_NAME);
+
+        stubFor(patch(urlEqualTo(REMOTE_BASE_PATH + "/my/resource/valueA/valueB"))
+                .withHeader(CONTENT_TYPE, equalTo(mimetype))
+                .withHeader(CLIENT_CORRELATION_ID, equalTo(CLIENT_CORRELATION_ID_VALUE))
+                .withHeader(USER_ID, equalTo(USER_ID_VALUE))
+                .withHeader(SESSION_ID, equalTo(SESSION_ID_VALUE))
+                .withRequestBody(equalToJson(bodyWithoutParams))
+                .willReturn(aResponse()
+                        .withStatus(ACCEPTED.getStatusCode())));
+
+        final EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, ImmutableSet.of("paramA", "paramB"), emptySet(), COMMAND_NAME);
+
+        restClientProcessor.patch(endpointDefinition, postRequestEnvelope());
+
+        verify(patchRequestedFor(urlEqualTo(REMOTE_BASE_PATH + "/my/resource/valueA/valueB"))
+                .withHeader(CONTENT_TYPE, equalTo(mimetype))
+                .withRequestBody(equalToJson(bodyWithoutParams)));
+    }
+
+    @Test
+    public void shouldDoSynchronousPatchWithPathParameters() throws Exception {
+
+        final String path = "/my/resource/{paramA}/{paramB}";
+        final String mimetype = format("application/vnd.%s+json", COMMAND_NAME);
+        final String bodyWithoutParams = jsonFromFile(POST_REQUEST_BODY_ONLY_FILE_NAME);
+
+        stubFor(patch(urlEqualTo(REMOTE_BASE_PATH + "/my/resource/valueA/valueB"))
+                .withHeader(CONTENT_TYPE, equalTo(mimetype))
+                .withHeader(CLIENT_CORRELATION_ID, equalTo(CLIENT_CORRELATION_ID_VALUE))
+                .withHeader(USER_ID, equalTo(USER_ID_VALUE))
+                .withHeader(SESSION_ID, equalTo(SESSION_ID_VALUE))
+                .withRequestBody(equalToJson(bodyWithoutParams))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader(CONTENT_TYPE, mimetype)
+                        .withBody(responseWithMetadata())));
+
+        final EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, ImmutableSet.of("paramA", "paramB"), emptySet(), COMMAND_NAME);
+
+        validateResponse(restClientProcessor.synchronousPatch(endpointDefinition, postRequestEnvelope()), envelopeWithMetadataAsJson);
+
+        verify(patchRequestedFor(urlEqualTo(REMOTE_BASE_PATH + "/my/resource/valueA/valueB"))
                 .withHeader(CONTENT_TYPE, equalTo(mimetype))
                 .withRequestBody(equalToJson(bodyWithoutParams)));
     }

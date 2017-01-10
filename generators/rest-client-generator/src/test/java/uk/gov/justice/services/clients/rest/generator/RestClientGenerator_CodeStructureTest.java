@@ -9,6 +9,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.raml.model.ActionType.GET;
+import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
 import static org.raml.model.ActionType.PUT;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
@@ -58,8 +59,8 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
 
     private static final String POST_MAPPING_ANNOTATION = mappingDescriptionWith(
             mapping()
-                    .withRequestType("application/vnd.cakeshop.command.update-recipe+json")
-                    .withName("cakeshop.update-recipe"))
+                    .withRequestType("application/vnd.cakeshop.command.create-recipe+json")
+                    .withName("cakeshop.create-recipe"))
             .build();
 
     private static final String PUT_MAPPING_ANNOTATION = mappingDescriptionWith(
@@ -68,9 +69,16 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
                     .withName("cakeshop.update-recipe"))
             .build();
 
+    private static final String PATCH_MAPPING_ANNOTATION = mappingDescriptionWith(
+            mapping()
+                    .withRequestType("application/vnd.cakeshop.command.patch-recipe+json")
+                    .withName("cakeshop.patch-recipe"))
+            .build();
+
     private static final String BASE_PACKAGE = "org.raml.test";
     private static final String BASE_URI_WITH_LESS_THAN_EIGHT_PARTS = "http://localhost:8080/command/api/rest/service";
     private static final String BASE_URI_WITH_MORE_THAN_EIGHT_PARTS = "http://localhost:8080/warname/command/api/rest/service/extra";
+
     @Rule
     public ExpectedException exception = ExpectedException.none();
 
@@ -163,7 +171,7 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
         generator.run(
                 restRamlWithDefaults()
                         .with(resource("/some/path/{recipeId}")
-                                .with(httpAction(POST, "application/vnd.cakeshop.command.update-recipe+json")
+                                .with(httpAction(POST, "application/vnd.cakeshop.command.create-recipe+json")
                                         .withDescription(POST_MAPPING_ANNOTATION))
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
@@ -175,7 +183,7 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
         final Method method = methods.get(0);
         final Handles handlesAnnotation = method.getAnnotation(Handles.class);
         assertThat(handlesAnnotation, not(nullValue()));
-        assertThat(handlesAnnotation.value(), is("cakeshop.update-recipe"));
+        assertThat(handlesAnnotation.value(), is("cakeshop.create-recipe"));
 
     }
 
@@ -201,11 +209,32 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
     }
 
     @Test
+    public void shouldGenerateMethodAnnotatedWithHandlesAnnotationForPATCH() throws Exception {
+        generator.run(
+                restRamlWithDefaults()
+                        .with(resource("/some/path/{recipeId}")
+                                .with(httpAction(PATCH, "application/vnd.cakeshop.command.patch-recipe+json")
+                                        .withDescription(PATCH_MAPPING_ANNOTATION))
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
+
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
+        final List<Method> methods = methodsOf(clazz);
+        assertThat(methods, hasSize(1));
+
+        final Method method = methods.get(0);
+        final Handles handlesAnnotation = method.getAnnotation(Handles.class);
+        assertThat(handlesAnnotation, not(nullValue()));
+        assertThat(handlesAnnotation.value(), is("cakeshop.patch-recipe"));
+
+    }
+
+    @Test
     public void shouldGenerateMethodAcceptingEnvelope() throws MalformedURLException {
         generator.run(
                 restRamlWithDefaults()
                         .with(resource("/some/path/{recipeId}")
-                                .with(httpAction(POST, "application/vnd.cakeshop.command.update-recipe+json")
+                                .with(httpAction(POST, "application/vnd.cakeshop.command.create-recipe+json")
                                         .withDescription(POST_MAPPING_ANNOTATION))
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));

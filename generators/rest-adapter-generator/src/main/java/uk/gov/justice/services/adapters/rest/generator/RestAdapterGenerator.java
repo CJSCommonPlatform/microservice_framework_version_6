@@ -10,6 +10,8 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static org.apache.commons.lang.Validate.isTrue;
 import static org.apache.commons.lang.Validate.notEmpty;
 import static org.apache.commons.lang.Validate.notNull;
+import static org.raml.model.ActionType.GET;
+import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
 import static org.raml.model.ActionType.PUT;
 import static uk.gov.justice.services.generators.commons.helper.Names.JAVA_FILENAME_SUFFIX;
@@ -45,6 +47,8 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
+import org.raml.model.Action;
+import org.raml.model.ActionType;
 import org.raml.model.MimeType;
 import org.raml.model.Raml;
 import org.raml.model.Resource;
@@ -116,16 +120,29 @@ public class RestAdapterGenerator implements Generator {
         //NOTE: there's a bit of ambiguity here: ramlActions (http methods) are not framework actions
         resource.getActions().values().forEach(ramlAction -> {
             final List<ActionMapping> actionMappings = ActionMapping.listOf(ramlAction.getDescription());
-            actionMappings.forEach(m -> {
-                final String mediaType = m.mimeTypeFor(ramlAction.getType());
+
+            actionMappings.forEach(actionMapping -> {
+                final String mediaType = actionMapping.mimeTypeFor(ramlAction.getType());
+
                 constructorCode.addStatement("add($S, $S, $S)",
-                        buildResourceMethodName(ramlAction, ramlAction.getType() == POST || ramlAction.getType() == PUT ? new MimeType(mediaType) : null),
+                        buildResourceMethodName(ramlAction, bodyMimeTypeFor(ramlAction, mediaType)),
                         mediaType,
-                        m.getName());
+                        actionMapping.getName());
             });
 
         });
         return constructorCode.build();
+    }
+
+    private MimeType bodyMimeTypeFor(final Action ramlAction, final String mediaType) {
+        final ActionType actionType = ramlAction.getType();
+        if (actionType == POST || actionType == PUT || actionType == PATCH) {
+            return new MimeType(mediaType);
+        } else if (actionType == GET) {
+            return null;
+        }
+
+        throw new IllegalStateException(format("Http Method of type %s is not supported by the Action Mapper", actionType.toString()));
     }
 
     /**

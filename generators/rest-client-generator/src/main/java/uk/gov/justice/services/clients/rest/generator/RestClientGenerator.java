@@ -64,6 +64,9 @@ public class RestClientGenerator extends AbstractClientGenerator {
     private static final String ASYNC_PUT_STATEMENT = "$L.put(def, $L)";
     private static final String SYNC_PUT_RETURN_STATEMENT = "return $L.synchronousPut(def, $L)";
 
+    private static final String ASYNC_PATCH_STATEMENT = "$L.patch(def, $L)";
+    private static final String SYNC_PATCH_RETURN_STATEMENT = "return $L.synchronousPatch(def, $L)";
+
     @Override
     protected String classNameOf(final Raml raml) {
         final String[] pathSegments = raml.getBaseUri().split("/");
@@ -124,6 +127,14 @@ public class RestClientGenerator extends AbstractClientGenerator {
                         methodStatementsFrom(
                                 actionName,
                                 hasResponseMimeTypes(ramlAction) ? SYNC_PUT_RETURN_STATEMENT : ASYNC_PUT_STATEMENT
+                        ));
+                break;
+
+            case PATCH:
+                methodBody.add(
+                        methodStatementsFrom(
+                                actionName,
+                                hasResponseMimeTypes(ramlAction) ? SYNC_PATCH_RETURN_STATEMENT : ASYNC_PATCH_STATEMENT
                         ));
                 break;
 

@@ -9,6 +9,7 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static org.apache.commons.lang.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang.StringUtils.strip;
 import static org.raml.model.ActionType.GET;
+import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
 import static org.raml.model.ActionType.PUT;
 import static uk.gov.justice.services.adapters.rest.generator.Generators.byMimeTypeOrder;
@@ -194,6 +195,8 @@ class JaxRsInterfaceGenerator {
             actionTypeAnnotation = AnnotationSpec.builder(javax.ws.rs.POST.class).build();
         } else if (actionType == PUT) {
             actionTypeAnnotation = AnnotationSpec.builder(javax.ws.rs.PUT.class).build();
+        } else if (actionType == PATCH) {
+            actionTypeAnnotation = AnnotationSpec.builder(uk.gov.justice.services.rest.annotation.PATCH.class).build();
         } else {
             throw new IllegalStateException(String.format("Unsupported httpAction type %s", actionType));
         }

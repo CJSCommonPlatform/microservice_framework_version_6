@@ -3,7 +3,6 @@ package uk.gov.justice.services.adapters.rest.generator;
 import static org.raml.model.ActionType.DELETE;
 import static org.raml.model.ActionType.HEAD;
 import static org.raml.model.ActionType.OPTIONS;
-import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.TRACE;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.raml;
@@ -36,11 +35,6 @@ public class JaxRsInterfaceGeneratorTest {
     @Test(expected = IllegalStateException.class)
     public void shouldThrowExceptionIfActionTypeIsOPTIONS() throws Exception {
         jaxRsInterfaceGenerator.generateFor(singleResourceWithActionType(OPTIONS));
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void shouldThrowExceptionIfActionTypeIsPATCH() throws Exception {
-        jaxRsInterfaceGenerator.generateFor(singleResourceWithActionType(PATCH));
     }
 
     @Test(expected = IllegalStateException.class)

@@ -8,6 +8,7 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static org.raml.model.ActionType.GET;
+import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
 import static org.raml.model.ActionType.PUT;
 import static uk.gov.justice.services.adapters.rest.generator.Generators.byMimeTypeOrder;
@@ -163,7 +164,7 @@ class JaxRsImplementationGenerator {
     private List<MethodSpec> forEach(final Action action) {
         final ActionType actionType = action.getType();
 
-        if (GET == actionType || POST == actionType || PUT == actionType) {
+        if (GET == actionType || POST == actionType || PUT == actionType || PATCH == actionType) {
             if (!action.hasBody()) {
                 return Collections.singletonList(processNoActionBody(action));
             } else {
@@ -213,7 +214,7 @@ class JaxRsImplementationGenerator {
             return generateGetResourceMethod(resourceMethodName, action);
         }
 
-        if (actionType == POST || actionType == PUT) {
+        if (actionType == POST || actionType == PUT || actionType == PATCH) {
             return generatePostOrPutResourceMethod(resourceMethodName, action, bodyMimeType);
         }
 

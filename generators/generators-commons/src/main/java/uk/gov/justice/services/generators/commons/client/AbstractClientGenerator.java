@@ -116,6 +116,7 @@ public abstract class AbstractClientGenerator implements Generator {
 
             case POST:
             case PUT:
+            case PATCH:
                 return ramlAction.getBody().values().stream()
                         .flatMap(responseType -> {
                             if (hasResponseMimeTypes(ramlAction)) {

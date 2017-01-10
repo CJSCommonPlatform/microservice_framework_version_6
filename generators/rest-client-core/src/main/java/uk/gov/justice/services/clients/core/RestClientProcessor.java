@@ -190,6 +190,62 @@ public class RestClientProcessor {
         return processedResponse(envelope, response);
     }
 
+    /**
+     * Make an asynchronous PATCH request using the envelope provided to a specified endpoint.
+     *
+     * @param definition the endpoint definition
+     * @param envelope   the envelope containing the payload and/or parameters to pass in the
+     *                   request
+     */
+    public void patch(final EndpointDefinition definition, final JsonEnvelope envelope) {
+        final WebTarget target = webTargetFactory.createWebTarget(definition, envelope);
+
+        final Builder builder = target.request(format(MEDIA_TYPE_PATTERN, definition.getResponseMediaType()));
+        populateHeadersFromMetadata(builder, envelope.metadata());
+
+        trace(LOGGER, () -> String.format("Sending PATCH request to %s using message: %s", target.getUri().toString(), envelope));
+
+        final JsonObject requestBody = stripParamsFromPayload(definition, envelope);
+        final Response response = builder
+                .build("PATCH", entity(requestBody.toString(), format(MEDIA_TYPE_PATTERN, envelope.metadata().name())))
+                .invoke();
+
+        trace(LOGGER, () -> String.format("Sent PATCH request %s and received: %s", envelope.metadata().id().toString(), toResponseTrace(response)));
+
+        final int status = response.getStatus();
+        if (status != ACCEPTED.getStatusCode()) {
+            throw new RuntimeException(format("PATCH request %s failed; expected 202 response but got %s with reason \"%s\"",
+                    envelope.metadata().id().toString(), status,
+                    response.getStatusInfo().getReasonPhrase()));
+        }
+    }
+
+    /**
+     * Make a synchronous PATCH request using the envelope provided to a specified endpoint.
+     *
+     * @param definition the endpoint definition
+     * @param envelope   the envelope containing the payload and/or parameters to pass in the
+     *                   request
+     * @return the response that the endpoint returned for this request
+     */
+    public JsonEnvelope synchronousPatch(final EndpointDefinition definition, final JsonEnvelope envelope) {
+        final WebTarget target = webTargetFactory.createWebTarget(definition, envelope);
+
+        final Builder builder = target.request(format(MEDIA_TYPE_PATTERN, definition.getResponseMediaType()));
+        populateHeadersFromMetadata(builder, envelope.metadata());
+
+        trace(LOGGER, () -> String.format("Sending PATCH request to %s using message: %s", target.getUri().toString(), envelope));
+
+        final JsonObject requestBody = stripParamsFromPayload(definition, envelope);
+        final Response response = builder
+                .build("PATCH", entity(requestBody.toString(), format(MEDIA_TYPE_PATTERN, envelope.metadata().name())))
+                .invoke();
+
+        trace(LOGGER, () -> String.format("Sent PATCH request %s and received: %s", envelope.metadata().id().toString(), toResponseTrace(response)));
+
+        return processedResponse(envelope, response);
+    }
+
     private JsonEnvelope processedResponse(final JsonEnvelope envelope, final Response response) {
         final Response.Status status = fromStatusCode(response.getStatus());
         switch (status) {

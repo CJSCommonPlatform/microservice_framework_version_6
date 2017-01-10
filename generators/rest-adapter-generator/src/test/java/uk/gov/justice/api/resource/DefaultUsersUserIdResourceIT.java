@@ -1,12 +1,10 @@
 package uk.gov.justice.api.resource;
 
 import static com.jayway.jsonassert.JsonAssert.with;
-import static javax.ws.rs.client.Entity.entity;
 import static javax.ws.rs.core.Response.Status.ACCEPTED;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.NOT_ACCEPTABLE;
 import static javax.ws.rs.core.Response.Status.OK;
-import static org.apache.cxf.jaxrs.client.WebClient.create;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -33,14 +31,24 @@ import uk.gov.justice.services.generators.test.utils.interceptor.RecordingInterc
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.Properties;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.json.JsonObject;
-import javax.ws.rs.core.Response;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPatch;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.apache.openejb.OpenEjbContainer;
 import org.apache.openejb.jee.Application;
 import org.apache.openejb.jee.WebApp;
@@ -51,6 +59,7 @@ import org.apache.openejb.testing.EnableServices;
 import org.apache.openejb.testing.Module;
 import org.apache.openejb.testng.PropertiesBuilder;
 import org.apache.openejb.util.NetworkUtil;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -70,6 +79,8 @@ public class DefaultUsersUserIdResourceIT {
     private static int port = -1;
     private static String BASE_URI;
 
+    private CloseableHttpClient httpClient;
+
     @Inject
     RecordingInterceptorChainProcessor interceptorChainProcessor;
 
@@ -82,6 +93,10 @@ public class DefaultUsersUserIdResourceIT {
         BASE_URI = String.format(BASE_URI_PATTERN, port);
     }
 
+    @Before
+    public void setup() {
+        httpClient = HttpClients.createDefault();
+    }
 
     @Configuration
     public Properties properties() {
@@ -121,18 +136,13 @@ public class DefaultUsersUserIdResourceIT {
 
     @Test
     public void shouldReturn202CreatingUser() throws Exception {
-        final Response response = create(BASE_URI)
-                .path("/users/1234")
-                .post(entity(JSON, USER_MEDIA_TYPE));
-
-        assertThat(response.getStatus(), is(ACCEPTED.getStatusCode()));
+        final HttpResponse response = httpClient.execute(postRequestFor("/users/1234", JSON, USER_MEDIA_TYPE));
+        assertThat(response.getStatusLine().getStatusCode(), is(ACCEPTED.getStatusCode()));
     }
 
     @Test
     public void shouldDispatchCreateUserCommand() throws Exception {
-        create(BASE_URI)
-                .path("/users/567-8910")
-                .post(entity("{\"userUrn\" : \"1234\"}", USER_MEDIA_TYPE));
+        httpClient.execute(postRequestFor("/users/567-8910", "{\"userUrn\" : \"1234\"}", USER_MEDIA_TYPE));
 
         final JsonEnvelope jsonEnvelope = interceptorChainProcessor.awaitForEnvelopeWithPayloadOf("userId", "567-8910");
         assertThat(jsonEnvelope.metadata().name(), is("people.create-user"));
@@ -142,82 +152,83 @@ public class DefaultUsersUserIdResourceIT {
 
     @Test
     public void shouldReturn400ForJsonNotAdheringToSchema() throws Exception {
-        final Response response = create(BASE_URI)
-                .path("/users/1234")
-                .post(entity("{\"blah\" : \"1234\"}", USER_MEDIA_TYPE));
-
-        assertThat(response.getStatus(), is(BAD_REQUEST.getStatusCode()));
+        final HttpResponse response = httpClient.execute(postRequestFor("/users/1234", "{\"blah\" : \"1234\"}", USER_MEDIA_TYPE));
+        assertThat(response.getStatusLine().getStatusCode(), is(BAD_REQUEST.getStatusCode()));
     }
 
     @Test
     public void shouldReturn202UpdatingUserWithPost() throws Exception {
-        final Response response = create(BASE_URI)
-                .path("/users/1234")
-                .post(entity(JSON, UPDATE_USER_MEDIA_TYPE));
-
-        assertThat(response.getStatus(), is(ACCEPTED.getStatusCode()));
+        final HttpResponse response = httpClient.execute(postRequestFor("/users/1234", JSON, UPDATE_USER_MEDIA_TYPE));
+        assertThat(response.getStatusLine().getStatusCode(), is(ACCEPTED.getStatusCode()));
     }
 
     @Test
     public void shouldReturn202UpdatingUserWithPut() throws Exception {
-        final Response response = create(BASE_URI)
-                .path("/users/1234")
-                .put(entity(JSON, UPDATE_USER_MEDIA_TYPE));
-
-        assertThat(response.getStatus(), is(ACCEPTED.getStatusCode()));
+        final HttpResponse response = httpClient.execute(putRequestFor("/users/1234", JSON, UPDATE_USER_MEDIA_TYPE));
+        assertThat(response.getStatusLine().getStatusCode(), is(ACCEPTED.getStatusCode()));
     }
 
     @Test
-    public void shouldReturn200ResponseContainingUserDataReturnedByDispatcher() {
+    public void shouldReturn202UpdatingUserWithPatch() throws Exception {
+        final HttpResponse httpResponse = httpClient.execute(patchRequestFor("/users/1234", JSON, UPDATE_USER_MEDIA_TYPE));
+        assertThat(httpResponse.getStatusLine().getStatusCode(), is(ACCEPTED.getStatusCode()));
+    }
+
+    @Test
+    public void shouldReturn200ResponseContainingUserDataReturnedByDispatcher() throws Exception {
         interceptorChainProcessor.setupResponse("userId", "4444-5556",
                 envelope().with(metadataWithDefaults()).withPayloadOf("user1234", "userName").build());
 
-        final Response response = create(BASE_URI)
-                .path("/users/4444-5556")
-                .header("Accept", "application/vnd.people.user+json")
-                .get();
+        final HttpResponse response = httpClient.execute(getRequestFor("/users/4444-5556", "application/vnd.people.user+json"));
 
-        assertThat(response.getStatus(), is(OK.getStatusCode()));
-        final String responseBody = response.readEntity(String.class);
+        assertThat(response.getStatusLine().getStatusCode(), is(OK.getStatusCode()));
+        final String responseBody = EntityUtils.toString(response.getEntity());
         with(responseBody)
                 .assertThat("userName", equalTo("user1234"));
     }
 
     @Test
-    public void shouldReturn200ResponseForSynchronousPOST() {
+    public void shouldReturn200ResponseForSynchronousPOST() throws Exception {
         interceptorChainProcessor.setupResponse("userUrn", "test",
                 envelope().with(metadataWithDefaults()).withPayloadOf("user1234", "userName").build());
-        final Response response = create(BASE_URI)
-                .path("/users")
-                .header("Accept", "application/vnd.people.user+json")
-                .post(entity(JSON, USER_MEDIA_TYPE));
 
-        assertThat(response.getStatus(), is(OK.getStatusCode()));
-        final String responseBody = response.readEntity(String.class);
+        final HttpResponse response = httpClient.execute(postRequestFor("/users", JSON, USER_MEDIA_TYPE, "application/vnd.people.user+json"));
+
+        assertThat(response.getStatusLine().getStatusCode(), is(OK.getStatusCode()));
+        final String responseBody = EntityUtils.toString(response.getEntity());
         with(responseBody)
                 .assertThat("userName", equalTo("user1234"));
     }
 
     @Test
-    public void shouldReturn200ResponseForSynchronousPUT() {
+    public void shouldReturn200ResponseForSynchronousPUT() throws Exception {
         interceptorChainProcessor.setupResponse("userUrn", "test",
                 envelope().with(metadataWithDefaults()).withPayloadOf("user1234", "userName").build());
-        final Response response = create(BASE_URI)
-                .path("/users")
-                .header("Accept", "application/vnd.people.user+json")
-                .put(entity(JSON, USER_MEDIA_TYPE));
 
-        assertThat(response.getStatus(), is(OK.getStatusCode()));
-        final String responseBody = response.readEntity(String.class);
+        final HttpResponse response = httpClient.execute(putRequestFor("/users", JSON, USER_MEDIA_TYPE, "application/vnd.people.user+json"));
+
+        assertThat(response.getStatusLine().getStatusCode(), is(OK.getStatusCode()));
+        final String responseBody = EntityUtils.toString(response.getEntity());
+        with(responseBody)
+                .assertThat("userName", equalTo("user1234"));
+    }
+
+    @Test
+    public void shouldReturn200ResponseForSynchronousPATCH() throws Exception {
+        interceptorChainProcessor.setupResponse("userUrn", "test",
+                envelope().with(metadataWithDefaults()).withPayloadOf("user1234", "userName").build());
+
+        final HttpResponse response = httpClient.execute(patchRequestFor("/users", JSON, USER_MEDIA_TYPE, "application/vnd.people.user+json"));
+
+        assertThat(response.getStatusLine().getStatusCode(), is(OK.getStatusCode()));
+        final String responseBody = EntityUtils.toString(response.getEntity());
         with(responseBody)
                 .assertThat("userName", equalTo("user1234"));
     }
 
     @Test
     public void shouldDispatchPostUpdateUserCommand() throws Exception {
-        create(BASE_URI)
-                .path("/users/4444-9876")
-                .post(entity("{\"userUrn\" : \"5678\"}", UPDATE_USER_MEDIA_TYPE));
+        httpClient.execute(postRequestFor("/users/4444-9876", "{\"userUrn\" : \"5678\"}", UPDATE_USER_MEDIA_TYPE));
 
         final JsonEnvelope envelope = interceptorChainProcessor.awaitForEnvelopeWithPayloadOf("userId", "4444-9876");
         assertThat(envelope.metadata().name(), is("people.update-user"));
@@ -227,9 +238,17 @@ public class DefaultUsersUserIdResourceIT {
 
     @Test
     public void shouldDispatchPutUpdateUserCommand() throws Exception {
-        create(BASE_URI)
-                .path("/users/4444-9876")
-                .put(entity("{\"userUrn\" : \"5678\"}", UPDATE_USER_MEDIA_TYPE));
+        httpClient.execute(putRequestFor("/users/4444-9876", "{\"userUrn\" : \"5678\"}", UPDATE_USER_MEDIA_TYPE));
+
+        final JsonEnvelope envelope = interceptorChainProcessor.awaitForEnvelopeWithPayloadOf("userId", "4444-9876");
+        assertThat(envelope.metadata().name(), is("people.update-user"));
+        assertThat(envelope.payloadAsJsonObject().getString("userId"), is("4444-9876"));
+        assertThat(envelope.payloadAsJsonObject().getString("userUrn"), is("5678"));
+    }
+
+    @Test
+    public void shouldDispatchPatchUpdateUserCommand() throws Exception {
+        httpClient.execute(patchRequestFor("/users/4444-9876", "{\"userUrn\" : \"5678\"}", UPDATE_USER_MEDIA_TYPE));
 
         final JsonEnvelope envelope = interceptorChainProcessor.awaitForEnvelopeWithPayloadOf("userId", "4444-9876");
         assertThat(envelope.metadata().name(), is("people.update-user"));
@@ -239,9 +258,7 @@ public class DefaultUsersUserIdResourceIT {
 
     @Test
     public void shouldDispatchLinkUserCommandWhichHasNoBody() throws Exception {
-        create(BASE_URI)
-                .path("/users/4444-9877")
-                .post(entity("", LINK_USER_MEDIA_TYPE));
+        httpClient.execute(postRequestFor("/users/4444-9877", "", LINK_USER_MEDIA_TYPE));
 
         final JsonEnvelope envelope = interceptorChainProcessor.awaitForEnvelopeWithPayloadOf("userId", "4444-9877");
         assertThat(envelope.metadata().name(), is("people.link-user"));
@@ -250,10 +267,8 @@ public class DefaultUsersUserIdResourceIT {
 
     @Test
     public void shouldDispatchGetUserCommand() throws Exception {
-        create(BASE_URI)
-                .path("/users/4444-5555")
-                .header("Accept", "application/vnd.people.user+json")
-                .get();
+        httpClient.execute(getRequestFor("/users/4444-5555", "application/vnd.people.user+json"));
+
         final JsonEnvelope envelope = interceptorChainProcessor.awaitForEnvelopeWithPayloadOf("userId", "4444-5555");
         assertThat(envelope.payloadAsJsonObject().getString("userId"), is("4444-5555"));
         assertThat(envelope.metadata().name(), is("people.get-user"));
@@ -263,12 +278,9 @@ public class DefaultUsersUserIdResourceIT {
     public void shouldDispatchGetUserCommandWithOtherMediaType() throws Exception {
         interceptorChainProcessor.setupResponse("userId", "4444-5555", envelope().with(metadataWithDefaults()).build());
 
-        final Response response = create(BASE_URI)
-                .path("/users/4444-5555")
-                .header("Accept", "application/vnd.people.user-summary+json")
-                .get();
+        final HttpResponse response = httpClient.execute(getRequestFor("/users/4444-5555", "application/vnd.people.user-summary+json"));
 
-        assertThat(response.getStatus(), is(OK.getStatusCode()));
+        assertThat(response.getStatusLine().getStatusCode(), is(OK.getStatusCode()));
         final JsonEnvelope envelope = interceptorChainProcessor.awaitForEnvelopeWithPayloadOf("userId", "4444-5555");
         assertThat(envelope.payloadAsJsonObject().getString("userId"), is("4444-5555"));
         assertThat(envelope.metadata().name(), is("people.get-user-summary"));
@@ -276,55 +288,47 @@ public class DefaultUsersUserIdResourceIT {
 
     @Test
     public void shouldReturn406ifQueryTypeNotRecognised() throws Exception {
+        final HttpResponse response = httpClient.execute(getRequestFor("/users/4444-5555", "application/vnd.people.query.unknown+json"));
 
-        final Response response = create(BASE_URI)
-                .path("/users/4444-5555")
-                .header("Accept", "application/vnd.people.query.unknown+json")
-                .get();
-
-        assertThat(response.getStatus(), is(NOT_ACCEPTABLE.getStatusCode()));
-
+        assertThat(response.getStatusLine().getStatusCode(), is(NOT_ACCEPTABLE.getStatusCode()));
     }
 
     @Test
-    public void shouldReturnResponseWithContentType() {
+    public void shouldReturnResponseWithContentType() throws Exception {
         interceptorChainProcessor.setupResponse("userId", "4444-5556", envelope().with(metadataWithDefaults()).build());
 
-        final Response response = create(BASE_URI)
-                .path("/users/4444-5556")
-                .header("Accept", "application/vnd.people.user+json")
-                .get();
-        assertThat(response.getStatus(), is(OK.getStatusCode()));
-        assertThat(response.getMediaType().toString(), is("application/vnd.people.user+json"));
+        final HttpResponse response = httpClient.execute(getRequestFor("/users/4444-5556", "application/vnd.people.user+json"));
+
+        assertThat(response.getStatusLine().getStatusCode(), is(OK.getStatusCode()));
+        assertThat(response.getEntity().getContentType().getValue(), is("application/vnd.people.user+json"));
     }
 
     @Test
-    public void shouldReturnResponseWithSecondContentType() {
+    public void shouldReturnResponseWithSecondContentType() throws Exception {
         interceptorChainProcessor.setupResponse("userId", "4444-5556", envelope().with(metadataWithDefaults()).build());
 
-        final Response response = create(BASE_URI)
-                .path("/users/4444-5556")
-                .header("Accept", "application/vnd.people.user-summary+json")
-                .get();
-        assertThat(response.getStatus(), is(OK.getStatusCode()));
-        assertThat(response.getMediaType().toString(), is("application/vnd.people.user-summary+json"));
+        final HttpResponse response = httpClient.execute(getRequestFor("/users/4444-5556", "application/vnd.people.user-summary+json"));
+
+        assertThat(response.getStatusLine().getStatusCode(), is(OK.getStatusCode()));
+        assertThat(response.getEntity().getContentType().getValue(), is("application/vnd.people.user-summary+json"));
     }
 
     @Test
     public void shouldDispatchUsersQueryWithQueryParams() throws Exception {
         interceptorChainProcessor.setupResponse("lastname", "Smith", envelope().with(metadataWithDefaults()).build());
 
-        final Response response = create(BASE_URI)
-                .path("/users")
-                .query("lastname", "Smith")
-                .query("firstname", "John")
-                .query("height", 175.5)
-                .query("married", true)
-                .query("age", 34)
-                .header("Accept", "application/vnd.people.users+json")
-                .get();
+        final String uri = new URIBuilder()
+                .setPath("/users")
+                .setParameter("lastname", "Smith")
+                .setParameter("firstname", "John")
+                .setParameter("height", "175.5")
+                .setParameter("married", "True")
+                .setParameter("age", "34")
+                .build().toString();
 
-        assertThat(response.getStatus(), is(OK.getStatusCode()));
+        final HttpResponse response = httpClient.execute(getRequestFor(uri, "application/vnd.people.users+json"));
+
+        assertThat(response.getStatusLine().getStatusCode(), is(OK.getStatusCode()));
         final JsonEnvelope jsonEnvelope = interceptorChainProcessor.awaitForEnvelopeWithPayloadOf("lastname", "Smith");
         assertThat(jsonEnvelope.metadata().name(), is("people.search-users"));
 
@@ -338,32 +342,78 @@ public class DefaultUsersUserIdResourceIT {
 
     @Test
     public void shouldReturn400IfRequiredQueryParamIsNotProvided() throws Exception {
+        final String uri = new URIBuilder()
+                .setPath("/users")
+                .setParameter("firstname", "firstname")
+                .build().toString();
 
-        final Response response = create(BASE_URI)
-                .path("/users")
-                .query("firstname", "firstname")
-                .header("Accept", "application/vnd.people.users+json")
-                .get();
+        final HttpResponse response = httpClient.execute(getRequestFor(uri, "application/vnd.people.users+json"));
 
-        assertThat(response.getStatus(), is(BAD_REQUEST.getStatusCode()));
+        assertThat(response.getStatusLine().getStatusCode(), is(BAD_REQUEST.getStatusCode()));
     }
 
     @Test
     public void shouldReturn200WhenOptionalParameterIsNotProvided() throws Exception {
         interceptorChainProcessor.setupResponse("lastname", "lastname", envelope().with(metadataWithDefaults()).build());
 
-        final Response response = create(BASE_URI)
-                .path("/users")
-                .query("lastname", "lastname")
-                .header("Accept", "application/vnd.people.users+json")
-                .get();
+        final String uri = new URIBuilder()
+                .setPath("/users")
+                .setParameter("lastname", "lastname")
+                .build().toString();
 
-        assertThat(response.getStatus(), is(OK.getStatusCode()));
+        final HttpResponse response = httpClient.execute(getRequestFor(uri, "application/vnd.people.users+json"));
+
+        assertThat(response.getStatusLine().getStatusCode(), is(OK.getStatusCode()));
     }
 
     @Test
     public void shouldAllowDependencyInjectionToOverrideCommonProviders() {
         assertThat(commonProviders.getClass() == DummyCommonProviders.class, is(true));
+    }
+
+    private HttpGet getRequestFor(final String uri, final String accept) throws UnsupportedEncodingException {
+        final HttpGet request = new HttpGet(BASE_URI + uri);
+        request.setHeader("Accept", accept);
+        return request;
+    }
+
+    private HttpPost postRequestFor(final String uri, final String json, final String contentType, final String accept) throws UnsupportedEncodingException {
+        final HttpPost request = postRequestFor(uri, json, contentType);
+        request.setHeader("Accept", accept);
+        return request;
+    }
+
+    private HttpPost postRequestFor(final String uri, final String json, final String contentType) throws UnsupportedEncodingException {
+        final HttpPost request = new HttpPost(BASE_URI + uri);
+        request.setEntity(new StringEntity(json));
+        request.setHeader("Content-Type", contentType);
+        return request;
+    }
+
+    private HttpPut putRequestFor(final String uri, final String json, final String contentType, final String accept) throws UnsupportedEncodingException {
+        final HttpPut request = putRequestFor(uri, json, contentType);
+        request.setHeader("Accept", accept);
+        return request;
+    }
+
+    private HttpPut putRequestFor(final String uri, final String json, final String contentType) throws UnsupportedEncodingException {
+        final HttpPut request = new HttpPut(BASE_URI + uri);
+        request.setEntity(new StringEntity(json));
+        request.setHeader("Content-Type", contentType);
+        return request;
+    }
+
+    private HttpPatch patchRequestFor(final String uri, final String json, final String contentType, final String accept) throws UnsupportedEncodingException {
+        final HttpPatch request = patchRequestFor(uri, json, contentType);
+        request.setHeader("Accept", accept);
+        return request;
+    }
+
+    private HttpPatch patchRequestFor(final String uri, final String json, final String contentType) throws UnsupportedEncodingException {
+        final HttpPatch request = new HttpPatch(BASE_URI + uri);
+        request.setEntity(new StringEntity(json));
+        request.setHeader("Content-Type", contentType);
+        return request;
     }
 
     @ApplicationScoped

@@ -55,6 +55,17 @@ protocols: [ HTTP, HTTPS ]
         application/vnd.people.modified-user+json:
             schema: !include json/schema/people.modified-user.json
             example: !include json/update-user.json
+  patch:
+    description: |
+        ...
+        (mapping):
+            requestType: application/vnd.people.modified-user+json
+            name: people.update-user
+        ...
+    body:
+        application/vnd.people.modified-user+json:
+            schema: !include json/schema/people.modified-user.json
+            example: !include json/update-user.json
 
 /users:
   description: |
@@ -111,12 +122,29 @@ protocols: [ HTTP, HTTPS ]
         ...
         (mapping):
             requestType: application/vnd.people.user+json
-            name: people.modify-user
+            name: people.update-user
         ...
     body:
         application/vnd.people.user+json:
             schema: !include json/schema/people.user.json
             example: !include json/update-user.json
+
+    responses:
+        200:
+            body:
+                application/vnd.people.user+json:
+
+  patch:
+    description: |
+        ...
+        (mapping):
+            requestType: application/vnd.people.user+json
+            name: people.modify-user
+        ...
+    body:
+        application/vnd.people.user+json:
+            schema: !include json/schema/people.user.json
+            example: !include json/modify-user.json
 
     responses:
         200:

@@ -1,6 +1,7 @@
 package uk.gov.justice.services.generators.test.utils.builder;
 
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.defaultGetAction;
+import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.defaultPatchAction;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.defaultPostAction;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.defaultPutAction;
 
@@ -43,6 +44,12 @@ public class ResourceBuilder {
     public static ResourceBuilder defaultPutResource() {
         return resource("/some/path/{recipeId}")
                 .with(defaultPutAction());
+
+    }
+
+    public static ResourceBuilder defaultPatchResource() {
+        return resource("/some/path/{recipeId}")
+                .with(defaultPatchAction());
 
     }
 

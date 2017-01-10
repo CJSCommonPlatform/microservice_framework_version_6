@@ -3,6 +3,8 @@ package uk.gov.justice.api;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
+import static com.github.tomakehurst.wiremock.client.WireMock.patch;
+import static com.github.tomakehurst.wiremock.client.WireMock.patchRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.put;
@@ -10,13 +12,21 @@ import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.lang.String.format;
+import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
 import static javax.ws.rs.core.Response.Status.ACCEPTED;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.allOf;
+import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 
 import uk.gov.justice.services.clients.core.DefaultServerPortProvider;
 import uk.gov.justice.services.clients.core.RestClientHelper;
@@ -39,6 +49,7 @@ import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
 import uk.gov.justice.services.core.dispatcher.EmptySystemUserProvider;
+import uk.gov.justice.services.core.dispatcher.Requester;
 import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
@@ -52,7 +63,10 @@ import uk.gov.justice.services.core.jms.JmsSenderFactory;
 import uk.gov.justice.services.core.sender.ComponentDestination;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.core.sender.SenderProducer;
+import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
+import uk.gov.justice.services.messaging.JsonObjectMetadata;
 import uk.gov.justice.services.messaging.jms.DefaultJmsEnvelopeSender;
 import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
 
@@ -80,19 +94,30 @@ import org.junit.runner.RunWith;
 @ServiceComponent(EVENT_PROCESSOR)
 public class RemoteExampleEventProcessorIT {
 
+    private static int port = -1;
     private static final String BASE_PATH = "/rest-client-generator/command/api/rest/example";
-    private static final UUID QUERY_ID = UUID.randomUUID();
-    private static final UUID USER_ID = UUID.randomUUID();
-    private static final String USER_NAME = "John Smith";
     private static final String MOCK_SERVER_PORT = "mock.server.port";
 
-    private static int port = -1;
+    private static final UUID QUERY_ID = UUID.randomUUID();
+    private static final UUID USER_ID = UUID.randomUUID();
+    private static final UUID GROUP_ID = UUID.randomUUID();
+    private static final String USER_NAME = "John Smith";
+    private static final String GROUP_NAME = "admin";
+
+    private static final JsonEnvelope RESPONSE = DefaultJsonEnvelope.envelope()
+            .with(JsonObjectMetadata.metadataWithRandomUUID("people.group"))
+            .withPayloadOf(GROUP_ID, "groupId")
+            .withPayloadOf(GROUP_NAME, "groupName")
+            .build();
 
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(9090);
 
     @Inject
     Sender sender;
+
+    @Inject
+    Requester requester;
 
     @BeforeClass
     public static void beforeClass() {
@@ -159,7 +184,7 @@ public class RemoteExampleEventProcessorIT {
     @Test
     public void shouldPostCommandToRemoteService() {
         final String path = format("/users/%s", USER_ID.toString());
-        final String mimeType = "application/vnd.people.update-user+json";
+        final String mimeType = "application/vnd.people.create-user+json";
         final String bodyPayload = createObjectBuilder().add("userName", USER_NAME).build().toString();
 
         stubFor(post(urlEqualTo(BASE_PATH + path))
@@ -168,7 +193,7 @@ public class RemoteExampleEventProcessorIT {
                         .withStatus(ACCEPTED.getStatusCode())));
 
         sender.send(envelope()
-                .with(metadataOf(QUERY_ID, "people.post-update-user"))
+                .with(metadataOf(QUERY_ID, "people.create-user"))
                 .withPayloadOf(USER_ID.toString(), "userId")
                 .withPayloadOf(USER_NAME, "userName")
                 .build());
@@ -191,7 +216,7 @@ public class RemoteExampleEventProcessorIT {
                         .withStatus(ACCEPTED.getStatusCode())));
 
         sender.send(envelope()
-                .with(metadataOf(QUERY_ID, "people.put-update-user"))
+                .with(metadataOf(QUERY_ID, "people.update-user"))
                 .withPayloadOf(USER_ID.toString(), "userId")
                 .withPayloadOf(USER_NAME, "userName")
                 .build());
@@ -200,5 +225,130 @@ public class RemoteExampleEventProcessorIT {
                 .withHeader(CONTENT_TYPE, equalTo(mimeType))
                 .withRequestBody(equalToJson(bodyPayload))
         );
+    }
+
+    @Test
+    public void shouldPatchCommandToRemoteService() {
+        final String path = format("/users/%s", USER_ID.toString());
+        final String mimeType = "application/vnd.people.modify-user+json";
+        final String bodyPayload = createObjectBuilder().add("userName", USER_NAME).build().toString();
+
+        stubFor(patch(urlEqualTo(BASE_PATH + path))
+                .withRequestBody(equalToJson(bodyPayload))
+                .willReturn(aResponse()
+                        .withStatus(ACCEPTED.getStatusCode())));
+
+        sender.send(envelope()
+                .with(metadataOf(QUERY_ID, "people.modify-user"))
+                .withPayloadOf(USER_ID.toString(), "userId")
+                .withPayloadOf(USER_NAME, "userName")
+                .build());
+
+        verify(patchRequestedFor(urlEqualTo(BASE_PATH + path))
+                .withHeader(CONTENT_TYPE, equalTo(mimeType))
+                .withRequestBody(equalToJson(bodyPayload))
+        );
+    }
+
+    @Test
+    public void shouldRequestSynchronousPostToRemoteService() {
+
+        final String name = "people.create-group";
+
+        final String path = "/groups/" + GROUP_ID.toString();
+        final String mimeType = "application/vnd.people.group+json";
+        final String bodyPayload = createObjectBuilder()
+                .add("groupName", GROUP_NAME)
+                .build().toString();
+
+        stubFor(post(urlEqualTo(BASE_PATH + path))
+                .withRequestBody(equalToJson(bodyPayload))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", mimeType)
+                        .withBody(RESPONSE.toDebugStringPrettyPrint())));
+
+        final JsonEnvelope group = envelope()
+                .with(metadataOf(randomUUID(), name))
+                .withPayloadOf(GROUP_ID.toString(), "groupId")
+                .withPayloadOf(GROUP_NAME, "groupName")
+                .build();
+
+        final JsonEnvelope response = requester.request(group);
+
+        assertThat(response, jsonEnvelope(
+                metadata().withName("people.group"),
+                payloadIsJson(allOf(
+                        withJsonPath("$.groupId", is(GROUP_ID.toString())),
+                        withJsonPath("$.groupName", is(GROUP_NAME)))
+                )));
+    }
+
+    @Test
+    public void shouldRequestSynchronousPutToRemoteService() {
+
+        final String name = "people.update-group";
+
+        final String path = "/groups/" + GROUP_ID.toString();
+        final String mimeType = "application/vnd.people.group+json";
+        final String bodyPayload = createObjectBuilder()
+                .add("groupName", GROUP_NAME)
+                .build().toString();
+
+        stubFor(put(urlEqualTo(BASE_PATH + path))
+                .withRequestBody(equalToJson(bodyPayload))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", mimeType)
+                        .withBody(RESPONSE.toDebugStringPrettyPrint())));
+
+        final JsonEnvelope group = envelope()
+                .with(metadataOf(randomUUID(), name))
+                .withPayloadOf(GROUP_ID.toString(), "groupId")
+                .withPayloadOf(GROUP_NAME, "groupName")
+                .build();
+
+        final JsonEnvelope response = requester.request(group);
+
+        assertThat(response, jsonEnvelope(
+                metadata().withName("people.group"),
+                payloadIsJson(allOf(
+                        withJsonPath("$.groupId", is(GROUP_ID.toString())),
+                        withJsonPath("$.groupName", is(GROUP_NAME)))
+                )));
+    }
+
+    @Test
+    public void shouldRequestSynchronousPatchToRemoteService() {
+
+        final String name = "people.modify-group";
+
+        final String path = "/groups/" + GROUP_ID.toString();
+        final String mimeType = "application/vnd.people.group+json";
+        final String bodyPayload = createObjectBuilder()
+                .add("groupName", GROUP_NAME)
+                .build().toString();
+
+        stubFor(patch(urlEqualTo(BASE_PATH + path))
+                .withRequestBody(equalToJson(bodyPayload))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", mimeType)
+                        .withBody(RESPONSE.toDebugStringPrettyPrint())));
+
+        final JsonEnvelope group = envelope()
+                .with(metadataOf(randomUUID(), name))
+                .withPayloadOf(GROUP_ID.toString(), "groupId")
+                .withPayloadOf(GROUP_NAME, "groupName")
+                .build();
+
+        final JsonEnvelope response = requester.request(group);
+
+        assertThat(response, jsonEnvelope(
+                metadata().withName("people.group"),
+                payloadIsJson(allOf(
+                        withJsonPath("$.groupId", is(GROUP_ID.toString())),
+                        withJsonPath("$.groupName", is(GROUP_NAME)))
+                )));
     }
 }

@@ -13,6 +13,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.raml.model.ActionType.GET;
+import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
 import static org.raml.model.ActionType.PUT;
 import static org.raml.model.ParamType.BOOLEAN;
@@ -60,13 +61,13 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
     private static final Map<String, String> NOT_USED_GENERATOR_PROPERTIES = generatorProperties().withServiceComponentOf("QUERY_CONTROLLER").build();
 
     @Mock
-    RestClientProcessor restClientProcessor;
+    private RestClientProcessor restClientProcessor;
 
     @Mock
-    RestClientHelper restClientHelper;
+    private RestClientHelper restClientHelper;
 
     @Mock
-    Enveloper enveloper;
+    private Enveloper enveloper;
 
     @Before
     public void before() {
@@ -310,6 +311,38 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
         method.invoke(remoteClient, envelope);
 
         verify(restClientProcessor).synchronousPut(any(EndpointDefinition.class), eq(outputEnvelope));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void shouldCallSynchronousPatchRestClientMethodEnvelope() throws Exception {
+
+        generator.run(
+                restRamlWithCommandApiDefaults()
+                        .with(resource("/pathabc/{anId}").with(httpAction().withHttpActionType(PATCH)
+                                .withMediaType("application/vnd.ctx.defcmd+json", "json/schema/ctx.defcmd.json")
+                                .withResponseTypes("application/vnd.ctx.response+json")
+                                .with(mapping()
+                                        .withName("action1")
+                                        .withRequestType("application/vnd.ctx.defcmd+json")
+                                        .withResponseType("application/vnd.ctx.response+json"))))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, NOT_USED_GENERATOR_PROPERTIES));
+
+        final JsonEnvelope envelope = mock(JsonEnvelope.class);
+        final JsonEnvelope outputEnvelope = mock(JsonEnvelope.class);
+        final Function function = mock(Function.class);
+
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
+        final Object remoteClient = instanceOf(clazz);
+        final Method method = firstMethodOf(clazz);
+
+        when(enveloper.withMetadataFrom(envelope, "ctx.defcmd")).thenReturn(function);
+        when(function.apply(envelope.payload())).thenReturn(outputEnvelope);
+
+        method.invoke(remoteClient, envelope);
+
+        verify(restClientProcessor).synchronousPatch(any(EndpointDefinition.class), eq(outputEnvelope));
     }
 
     private void invokeFirstMethod(final Class<?> clazz) throws InstantiationException, IllegalAccessException, InvocationTargetException {

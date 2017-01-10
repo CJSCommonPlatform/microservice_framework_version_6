@@ -8,6 +8,7 @@ import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.trim;
+import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
 import static org.raml.model.ActionType.PUT;
 
@@ -77,7 +78,7 @@ public class ActionMapping {
     }
 
     public String mimeTypeFor(final ActionType httpMethod) {
-        return POST.equals(httpMethod) || PUT.equals(httpMethod) ? getRequestType() : getResponseType();
+        return POST.equals(httpMethod) || PUT.equals(httpMethod) || PATCH.equals(httpMethod) ? getRequestType() : getResponseType();
     }
 
     private static List<ActionMapping> actionMappingsOf(final String mappingString) {

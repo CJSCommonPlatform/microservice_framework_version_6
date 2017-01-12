@@ -12,6 +12,7 @@ import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.raml.model.ActionType.DELETE;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
@@ -221,7 +222,7 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void shouldCallSynchronousPostRestClientMethodEnvelope() throws Exception {
+    public void shouldCallSynchronousPostRestClientMethod() throws Exception {
 
         generator.run(
                 restRamlWithCommandApiDefaults()
@@ -253,7 +254,7 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void shouldCallAsynchronousPutRestClientMethodEnvelope() throws Exception {
+    public void shouldCallAsynchronousPutRestClientMethod() throws Exception {
 
         generator.run(
                 restRamlWithCommandApiDefaults()
@@ -283,7 +284,7 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void shouldCallSynchronousPutRestClientMethodEnvelope() throws Exception {
+    public void shouldCallSynchronousPutRestClientMethod() throws Exception {
 
         generator.run(
                 restRamlWithCommandApiDefaults()
@@ -315,7 +316,37 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void shouldCallSynchronousPatchRestClientMethodEnvelope() throws Exception {
+    public void shouldCallAsynchronousPatchRestClientMethod() throws Exception {
+
+        generator.run(
+                restRamlWithCommandApiDefaults()
+                        .with(resource("/pathabc/{anId}").with(httpAction().withHttpActionType(PATCH)
+                                .withMediaType("application/vnd.ctx.defcmd+json", "json/schema/ctx.defcmd.json")
+                                .with(mapping()
+                                        .withName("action1")
+                                        .withRequestType("application/vnd.ctx.defcmd+json"))))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, NOT_USED_GENERATOR_PROPERTIES));
+
+        final JsonEnvelope envelope = mock(JsonEnvelope.class);
+        final JsonEnvelope outputEnvelope = mock(JsonEnvelope.class);
+        final Function function = mock(Function.class);
+
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
+        final Object remoteClient = instanceOf(clazz);
+        final Method method = firstMethodOf(clazz);
+
+        when(enveloper.withMetadataFrom(envelope, "ctx.defcmd")).thenReturn(function);
+        when(function.apply(envelope.payload())).thenReturn(outputEnvelope);
+
+        method.invoke(remoteClient, envelope);
+
+        verify(restClientProcessor).patch(any(EndpointDefinition.class), eq(outputEnvelope));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void shouldCallSynchronousPatchRestClientMethod() throws Exception {
 
         generator.run(
                 restRamlWithCommandApiDefaults()
@@ -343,6 +374,36 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
         method.invoke(remoteClient, envelope);
 
         verify(restClientProcessor).synchronousPatch(any(EndpointDefinition.class), eq(outputEnvelope));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void shouldCallAsynchronousDELETERestClientMethod() throws Exception {
+
+        generator.run(
+                restRamlWithCommandApiDefaults()
+                        .with(resource("/pathabc/{anId}").with(httpAction().withHttpActionType(DELETE)
+                                .withMediaType("application/vnd.ctx.defcmd+json", "json/schema/ctx.defcmd.json")
+                                .with(mapping()
+                                        .withName("action1")
+                                        .withRequestType("application/vnd.ctx.defcmd+json"))))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, NOT_USED_GENERATOR_PROPERTIES));
+
+        final JsonEnvelope envelope = mock(JsonEnvelope.class);
+        final JsonEnvelope outputEnvelope = mock(JsonEnvelope.class);
+        final Function function = mock(Function.class);
+
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
+        final Object remoteClient = instanceOf(clazz);
+        final Method method = firstMethodOf(clazz);
+
+        when(enveloper.withMetadataFrom(envelope, "ctx.defcmd")).thenReturn(function);
+        when(function.apply(envelope.payload())).thenReturn(outputEnvelope);
+
+        method.invoke(remoteClient, envelope);
+
+        verify(restClientProcessor).delete(any(EndpointDefinition.class), eq(outputEnvelope));
     }
 
     private void invokeFirstMethod(final Class<?> clazz) throws InstantiationException, IllegalAccessException, InvocationTargetException {

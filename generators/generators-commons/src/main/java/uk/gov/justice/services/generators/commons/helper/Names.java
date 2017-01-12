@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang.StringUtils;
@@ -45,6 +46,7 @@ public final class Names {
     private static final String INTERFACE_NAME_SUFFIX = "Resource";
     private static final String APPLICATION_NAME_SUFFIX = "Application";
     private static final String ACTION_MAPPER_CLASS_SUFFIX = "ActionMapper";
+    private static final String BLANK = "";
 
     private Names() {
     }
@@ -79,33 +81,28 @@ public final class Names {
     }
 
     public static String buildResourceMethodNameWithNoMimeType(final Action action) {
-        return buildResourceMethodName(action, null);
+        return buildResourceMethodNameWith(action, () -> BLANK);
     }
 
     public static String buildResourceMethodName(final Action action, final MimeType bodyMimeType) {
-        final String methodBaseName = buildJavaFriendlyName(action.getResource()
-                .getUri()
-                .replace("{", " By "));
-
-        final String actionType = action.getType().toString().toLowerCase();
-
-        if (bodyMimeType != null) {
-            if (!isEmpty(action.getDescription())) {
-                final Optional<ActionMapping> mapping = listOf(action.getDescription()).stream().filter(actionMapping -> filterActionMapping(actionMapping, bodyMimeType.getType())).findFirst();
-
-                if (mapping.isPresent()) {
-                    return actionType + buildJavaFriendlyName(camelCase(mapping.get().getName())) + methodBaseName;
-                }
-            }
+        if (null == bodyMimeType) {
+            return buildResourceMethodNameWithNoMimeType(action);
         }
 
-        return actionType + methodBaseName;
-    }
+        return buildResourceMethodNameWith(action, () -> {
+            if (!isEmpty(action.getDescription())) {
+                final Optional<ActionMapping> mapping = listOf(action.getDescription()).stream()
+                        .filter(actionMapping -> filterActionMapping(actionMapping, bodyMimeType.getType()))
+                        .findFirst();
 
-    private static boolean filterActionMapping(final ActionMapping actionMapping, final String bodyMimeType) {
-        return bodyMimeType.equals(actionMapping.getRequestType()) || bodyMimeType.equals(actionMapping.getResponseType());
-    }
+                if (mapping.isPresent()) {
+                    return buildJavaFriendlyName(camelCase(mapping.get().getName()));
+                }
+            }
 
+            return BLANK;
+        });
+    }
 
     public static String packageNameOf(final GeneratorConfig configuration, final String subPackageName) {
         final StringBuilder packageBuilder = new StringBuilder().append(configuration.getBasePackageName());
@@ -132,14 +129,13 @@ public final class Names {
      * Construct delimiter separated list of command/event names
      *
      * @param mediaTypes mediaTypes to create the list from
-     * @param delimiter the delimiter to separates names with
+     * @param delimiter  the delimiter to separates names with
      * @return delimiter separated list of command/event names
      */
     public static String namesListStringFrom(final Stream<MimeType> mediaTypes, final String delimiter) {
         return mediaTypes.map(Names::nameFrom)
                 .collect(joining(delimiter));
     }
-
 
     public static String mapperClassNameOf(final Resource resource) {
         return resourceImplementationNameOf(resource) + ACTION_MAPPER_CLASS_SUFFIX;
@@ -151,6 +147,17 @@ public final class Names {
             sb.append(sb.length() == 0 ? s : StringUtils.capitalize(s));
         }
         return sb.toString();
+    }
+
+    private static boolean filterActionMapping(final ActionMapping actionMapping, final String bodyMimeType) {
+        return bodyMimeType.equals(actionMapping.getRequestType()) || bodyMimeType.equals(actionMapping.getResponseType());
+    }
+
+    private static String buildResourceMethodNameWith(final Action action, final Supplier<String> rootMethodName) {
+        final String actionType = action.getType().toString().toLowerCase();
+        return actionType
+                + rootMethodName.get()
+                + buildJavaFriendlyName(action.getResource().getUri().replace("{", " By "));
     }
 
     private static String buildJavaFriendlyName(final String source) {

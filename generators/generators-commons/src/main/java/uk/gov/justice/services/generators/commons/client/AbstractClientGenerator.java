@@ -6,10 +6,12 @@ import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
-import static uk.gov.justice.services.generators.commons.client.ActionMimeTypes.actionWithRequestAndResponseOf;
-import static uk.gov.justice.services.generators.commons.client.ActionMimeTypes.actionWithRequestOf;
+import static uk.gov.justice.services.generators.commons.client.ActionMimeTypeDefinition.definitionWithRequest;
+import static uk.gov.justice.services.generators.commons.client.ActionMimeTypeDefinition.definitionWithRequestAndResponse;
 import static uk.gov.justice.services.generators.commons.config.GeneratorProperties.serviceComponentOf;
 import static uk.gov.justice.services.generators.commons.helper.Actions.hasResponseMimeTypes;
+import static uk.gov.justice.services.generators.commons.helper.Actions.isSupportedActionType;
+import static uk.gov.justice.services.generators.commons.helper.Actions.isSupportedActionTypeWithRequestType;
 import static uk.gov.justice.services.generators.commons.helper.Names.camelCase;
 import static uk.gov.justice.services.generators.commons.helper.Names.nameFrom;
 
@@ -64,18 +66,18 @@ public abstract class AbstractClientGenerator implements Generator {
 
     protected abstract TypeName methodReturnTypeOf(Action ramlAction);
 
-    protected abstract CodeBlock methodBodyOf(Resource resource, Action ramlAction, ActionMimeTypes mimeTypes);
+    protected abstract CodeBlock methodBodyOf(Resource resource, Action ramlAction, ActionMimeTypeDefinition definition);
 
-    protected abstract String handlesAnnotationValueOf(Action ramlAction, ActionMimeTypes mimeTypes, GeneratorConfig generatorConfig);
+    protected abstract String handlesAnnotationValueOf(Action ramlAction, ActionMimeTypeDefinition definition, GeneratorConfig generatorConfig);
 
     private Stream<MethodSpec> methodsOf(final Resource resource, final GeneratorConfig generationConfig) {
         return resource.getActions().values().stream()
-                .flatMap(ramlAction -> mediaTypesOf(ramlAction)
-                        .map(actionMimeTypes ->
+                .flatMap(ramlAction -> mimeTypesOf(ramlAction)
+                        .map(definition ->
                                 methodOf(
                                         resource,
                                         ramlAction,
-                                        actionMimeTypes,
+                                        definition,
                                         generationConfig
                                 )
                         ));
@@ -83,21 +85,21 @@ public abstract class AbstractClientGenerator implements Generator {
 
     private MethodSpec methodOf(final Resource resource,
                                 final Action ramlAction,
-                                final ActionMimeTypes mediaTypes,
+                                final ActionMimeTypeDefinition definition,
                                 final GeneratorConfig generatorConfig) {
 
-        final MethodSpec.Builder method = methodOf(ramlAction, mediaTypes, handlesAnnotationValueOf(ramlAction, mediaTypes, generatorConfig));
+        final MethodSpec.Builder method = methodOf(ramlAction, definition, handlesAnnotationValueOf(ramlAction, definition, generatorConfig));
 
-        method.addCode(methodBodyOf(resource, ramlAction, mediaTypes));
+        method.addCode(methodBodyOf(resource, ramlAction, definition));
         method.returns(methodReturnTypeOf(ramlAction));
         return method.build();
     }
 
-    private MethodSpec.Builder methodOf(final Action ramlAction, final ActionMimeTypes mediaTypes, final String handlerValue) {
+    private MethodSpec.Builder methodOf(final Action ramlAction, final ActionMimeTypeDefinition definition, final String handlerValue) {
         final ClassName classLoggerUtils = ClassName.get(LoggerUtils.class);
 
 
-        return methodBuilder(methodNameOf(ramlAction.getType(), mediaTypes))
+        return methodBuilder(methodNameOf(ramlAction.getType(), definition))
                 .addModifiers(PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Handles.class)
                         .addMember("value", "$S", handlerValue)
@@ -109,27 +111,30 @@ public abstract class AbstractClientGenerator implements Generator {
                         classLoggerUtils);
     }
 
-    private Stream<ActionMimeTypes> mediaTypesOf(final Action ramlAction) {
-        switch (ramlAction.getType()) {
-            case GET:
-                return responseMediaTypesOf(ramlAction).map(ActionMimeTypes::actionWithResponseOf);
+    private Stream<ActionMimeTypeDefinition> mimeTypesOf(final Action ramlAction) {
+        final ActionType actionType = ramlAction.getType();
 
-            case POST:
-            case PUT:
-            case PATCH:
-                return ramlAction.getBody().values().stream()
-                        .flatMap(responseType -> {
-                            if (hasResponseMimeTypes(ramlAction)) {
-                                return responseMediaTypesOf(ramlAction)
-                                        .map(requestType -> actionWithRequestAndResponseOf(responseType, requestType));
-                            } else {
-                                return Stream.of(actionWithRequestOf(responseType));
-                            }
-                        });
-
-            default:
-                throw new IllegalStateException(format("Unsupported httpAction type %s", ramlAction.getType()));
+        if (isSupportedActionType(actionType)) {
+            if (isSupportedActionTypeWithRequestType(actionType)) {
+                return actionMimeTypesForRequestAndResponseOf(ramlAction);
+            } else {
+                return responseMediaTypesOf(ramlAction).map(ActionMimeTypeDefinition::definitionWithResponse);
+            }
         }
+
+        throw new IllegalStateException(format("Unsupported httpAction type %s", actionType));
+    }
+
+    private Stream<ActionMimeTypeDefinition> actionMimeTypesForRequestAndResponseOf(final Action ramlAction) {
+        return ramlAction.getBody().values().stream()
+                .flatMap(responseType -> {
+                    if (hasResponseMimeTypes(ramlAction)) {
+                        return responseMediaTypesOf(ramlAction)
+                                .map(requestType -> definitionWithRequestAndResponse(responseType, requestType));
+                    } else {
+                        return Stream.of(definitionWithRequest(responseType));
+                    }
+                });
     }
 
     private Stream<MimeType> responseMediaTypesOf(final Action ramlAction) {
@@ -141,9 +146,9 @@ public abstract class AbstractClientGenerator implements Generator {
         }
     }
 
-    private String methodNameOf(final ActionType actionType, final ActionMimeTypes mimeTypes) {
+    private String methodNameOf(final ActionType actionType, final ActionMimeTypeDefinition definition) {
         final String actionTypeStr = actionType.name().toLowerCase();
-        return camelCase(format("%s.%s", actionTypeStr, nameFrom(mimeTypes.getNameType())));
+        return camelCase(format("%s.%s", actionTypeStr, nameFrom(definition.getNameType())));
     }
 
     private List<MethodSpec> methodsOf(final Raml raml, final GeneratorConfig generatorConfig) {

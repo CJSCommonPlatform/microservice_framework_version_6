@@ -8,6 +8,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
+import static org.raml.model.ActionType.DELETE;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
@@ -73,6 +74,12 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
             mapping()
                     .withRequestType("application/vnd.cakeshop.command.patch-recipe+json")
                     .withName("cakeshop.patch-recipe"))
+            .build();
+
+    private static final String DELETE_MAPPING_ANNOTATION = mappingDescriptionWith(
+            mapping()
+                    .withRequestType("application/vnd.cakeshop.command.delete-recipe+json")
+                    .withName("cakeshop.delete-recipe"))
             .build();
 
     private static final String BASE_PACKAGE = "org.raml.test";
@@ -226,6 +233,27 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
         final Handles handlesAnnotation = method.getAnnotation(Handles.class);
         assertThat(handlesAnnotation, not(nullValue()));
         assertThat(handlesAnnotation.value(), is("cakeshop.patch-recipe"));
+
+    }
+
+    @Test
+    public void shouldGenerateMethodAnnotatedWithHandlesAnnotationForDELETE() throws Exception {
+        generator.run(
+                restRamlWithDefaults()
+                        .with(resource("/some/path/{recipeId}")
+                                .with(httpAction(DELETE, "application/vnd.cakeshop.command.delete-recipe+json")
+                                        .withDescription(DELETE_MAPPING_ANNOTATION))
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
+
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
+        final List<Method> methods = methodsOf(clazz);
+        assertThat(methods, hasSize(1));
+
+        final Method method = methods.get(0);
+        final Handles handlesAnnotation = method.getAnnotation(Handles.class);
+        assertThat(handlesAnnotation, not(nullValue()));
+        assertThat(handlesAnnotation.value(), is("cakeshop.delete-recipe"));
 
     }
 

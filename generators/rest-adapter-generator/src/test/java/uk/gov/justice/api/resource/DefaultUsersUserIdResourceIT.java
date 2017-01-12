@@ -40,6 +40,7 @@ import javax.inject.Inject;
 import javax.json.JsonObject;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
@@ -74,6 +75,7 @@ public class DefaultUsersUserIdResourceIT {
     private static final String USER_MEDIA_TYPE = "application/vnd.people.user+json";
     private static final String UPDATE_USER_MEDIA_TYPE = "application/vnd.people.modified-user+json";
     private static final String LINK_USER_MEDIA_TYPE = "application/vnd.people.link-user+json";
+    private static final String DELETE_USER_MEDIA_TYPE = "application/vnd.people.delete-user+json";
     private static final String BASE_URI_PATTERN = "http://localhost:%d/rest-adapter-generator/query/api/rest/example";
     private static final String JSON = "{\"userUrn\" : \"test\"}";
     private static int port = -1;
@@ -175,6 +177,12 @@ public class DefaultUsersUserIdResourceIT {
     }
 
     @Test
+    public void shouldReturn202UpdatingUserWithDelete() throws Exception {
+        final HttpResponse httpResponse = httpClient.execute(deleteRequestFor("/users/1234", DELETE_USER_MEDIA_TYPE));
+        assertThat(httpResponse.getStatusLine().getStatusCode(), is(ACCEPTED.getStatusCode()));
+    }
+
+    @Test
     public void shouldReturn200ResponseContainingUserDataReturnedByDispatcher() throws Exception {
         interceptorChainProcessor.setupResponse("userId", "4444-5556",
                 envelope().with(metadataWithDefaults()).withPayloadOf("user1234", "userName").build());
@@ -254,6 +262,14 @@ public class DefaultUsersUserIdResourceIT {
         assertThat(envelope.metadata().name(), is("people.update-user"));
         assertThat(envelope.payloadAsJsonObject().getString("userId"), is("4444-9876"));
         assertThat(envelope.payloadAsJsonObject().getString("userUrn"), is("5678"));
+    }
+
+    @Test
+    public void shouldDispatchDeleteUpdateUserCommand() throws Exception {
+        httpClient.execute(deleteRequestFor("/users/4444-9876", DELETE_USER_MEDIA_TYPE));
+
+        final JsonEnvelope envelope = interceptorChainProcessor.awaitForEnvelopeWithPayloadOf("userId", "4444-9876");
+        assertThat(envelope.metadata().name(), is("people.delete-user"));
     }
 
     @Test
@@ -412,6 +428,12 @@ public class DefaultUsersUserIdResourceIT {
     private HttpPatch patchRequestFor(final String uri, final String json, final String contentType) throws UnsupportedEncodingException {
         final HttpPatch request = new HttpPatch(BASE_URI + uri);
         request.setEntity(new StringEntity(json));
+        request.setHeader("Content-Type", contentType);
+        return request;
+    }
+
+    private HttpDelete deleteRequestFor(final String uri, final String contentType) throws UnsupportedEncodingException {
+        final HttpDelete request = new HttpDelete(BASE_URI + uri);
         request.setHeader("Content-Type", contentType);
         return request;
     }

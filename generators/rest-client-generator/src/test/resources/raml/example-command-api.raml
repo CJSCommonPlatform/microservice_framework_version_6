@@ -33,6 +33,16 @@ baseUri: http://localhost:8080/rest-client-generator/command/api/rest/example
     body:
       application/vnd.people.modify-user+json:
 
+  delete:
+    description: |
+        ...
+        (mapping):
+            requestType: application/vnd.people.delete-user+json
+            name: people.delete-user
+        ...
+    body:
+      application/vnd.people.delete-user+json: !!null
+
 /groups/{groupId}:
   post:
     description: |

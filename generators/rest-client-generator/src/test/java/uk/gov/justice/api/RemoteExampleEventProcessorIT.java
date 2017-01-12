@@ -1,6 +1,8 @@
 package uk.gov.justice.api;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.delete;
+import static com.github.tomakehurst.wiremock.client.WireMock.deleteRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.patch;
@@ -182,7 +184,7 @@ public class RemoteExampleEventProcessorIT {
     }
 
     @Test
-    public void shouldPostCommandToRemoteService() {
+    public void shouldSendPostCommandToRemoteService() {
         final String path = format("/users/%s", USER_ID.toString());
         final String mimeType = "application/vnd.people.create-user+json";
         final String bodyPayload = createObjectBuilder().add("userName", USER_NAME).build().toString();
@@ -205,7 +207,7 @@ public class RemoteExampleEventProcessorIT {
     }
 
     @Test
-    public void shouldPutCommandToRemoteService() {
+    public void shouldSendPutCommandToRemoteService() {
         final String path = format("/users/%s", USER_ID.toString());
         final String mimeType = "application/vnd.people.update-user+json";
         final String bodyPayload = createObjectBuilder().add("userName", USER_NAME).build().toString();
@@ -228,7 +230,7 @@ public class RemoteExampleEventProcessorIT {
     }
 
     @Test
-    public void shouldPatchCommandToRemoteService() {
+    public void shouldSendPatchCommandToRemoteService() {
         final String path = format("/users/%s", USER_ID.toString());
         final String mimeType = "application/vnd.people.modify-user+json";
         final String bodyPayload = createObjectBuilder().add("userName", USER_NAME).build().toString();
@@ -247,6 +249,26 @@ public class RemoteExampleEventProcessorIT {
         verify(patchRequestedFor(urlEqualTo(BASE_PATH + path))
                 .withHeader(CONTENT_TYPE, equalTo(mimeType))
                 .withRequestBody(equalToJson(bodyPayload))
+        );
+    }
+
+    @Test
+    public void shouldSendDeleteCommandToRemoteService() {
+        final String path = format("/users/%s", USER_ID.toString());
+        final String mimeType = "application/vnd.people.delete-user+json";
+
+        stubFor(delete(urlEqualTo(BASE_PATH + path))
+                .willReturn(aResponse()
+                        .withStatus(ACCEPTED.getStatusCode())));
+
+        sender.send(envelope()
+                .with(metadataOf(QUERY_ID, "people.delete-user"))
+                .withPayloadOf(USER_ID.toString(), "userId")
+                .withPayloadOf(USER_NAME, "userName")
+                .build());
+
+        verify(deleteRequestedFor(urlEqualTo(BASE_PATH + path))
+                .withHeader(CONTENT_TYPE, equalTo(mimeType))
         );
     }
 

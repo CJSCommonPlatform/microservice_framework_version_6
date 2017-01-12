@@ -3,17 +3,16 @@ package uk.gov.justice.services.adapters.rest.generator;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.TypeSpec.classBuilder;
 import static java.lang.String.format;
+import static java.util.Collections.singletonList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
-import static org.raml.model.ActionType.GET;
-import static org.raml.model.ActionType.PATCH;
-import static org.raml.model.ActionType.POST;
-import static org.raml.model.ActionType.PUT;
 import static uk.gov.justice.services.adapters.rest.generator.Generators.byMimeTypeOrder;
 import static uk.gov.justice.services.adapters.rest.generator.Generators.componentFromBaseUriIn;
 import static uk.gov.justice.services.generators.commons.helper.Actions.hasResponseMimeTypes;
+import static uk.gov.justice.services.generators.commons.helper.Actions.isSupportedActionType;
+import static uk.gov.justice.services.generators.commons.helper.Actions.isSupportedActionTypeWithRequestType;
 import static uk.gov.justice.services.generators.commons.helper.Names.DEFAULT_ANNOTATION_PARAMETER;
 import static uk.gov.justice.services.generators.commons.helper.Names.GENERIC_PAYLOAD_ARGUMENT_NAME;
 import static uk.gov.justice.services.generators.commons.helper.Names.RESOURCE_PACKAGE_NAME;
@@ -35,7 +34,6 @@ import uk.gov.justice.services.messaging.logging.LoggerUtils;
 import uk.gov.justice.services.rest.ParameterType;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -164,9 +162,9 @@ class JaxRsImplementationGenerator {
     private List<MethodSpec> forEach(final Action action) {
         final ActionType actionType = action.getType();
 
-        if (GET == actionType || POST == actionType || PUT == actionType || PATCH == actionType) {
+        if (isSupportedActionType(actionType)) {
             if (!action.hasBody()) {
-                return Collections.singletonList(processNoActionBody(action));
+                return singletonList(processNoActionBody(action));
             } else {
                 return processOneOrMoreActionBodies(action);
             }
@@ -210,12 +208,12 @@ class JaxRsImplementationGenerator {
         final String resourceMethodName = buildResourceMethodName(action, bodyMimeType);
         final ActionType actionType = action.getType();
 
-        if (actionType == GET) {
-            return generateGetResourceMethod(resourceMethodName, action);
-        }
-
-        if (actionType == POST || actionType == PUT || actionType == PATCH) {
-            return generatePostOrPutResourceMethod(resourceMethodName, action, bodyMimeType);
+        if (isSupportedActionType(actionType)) {
+            if (isSupportedActionTypeWithRequestType(actionType)) {
+                return generateResourceMethod(resourceMethodName, action, bodyMimeType);
+            } else {
+                return generateGetResourceMethod(resourceMethodName, action);
+            }
         }
 
         throw new IllegalStateException(format("Unsupported httpAction type %s", actionType));
@@ -255,7 +253,7 @@ class JaxRsImplementationGenerator {
      * @param bodyMimeType       - the mime type to decide if payload parameter is required
      * @return the method
      */
-    private MethodSpec generatePostOrPutResourceMethod(final String resourceMethodName, final Action action, final MimeType bodyMimeType) {
+    private MethodSpec generateResourceMethod(final String resourceMethodName, final Action action, final MimeType bodyMimeType) {
         final Map<String, QueryParameter> queryParams = action.getQueryParameters();
         final Map<String, UriParameter> pathParams = action.getResource().getUriParameters();
 

@@ -8,8 +8,14 @@ import static org.hamcrest.beans.HasPropertyWithValue.hasProperty;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.junit.Assert.assertThat;
+import static org.raml.model.ActionType.DELETE;
 import static org.raml.model.ActionType.GET;
+import static org.raml.model.ActionType.HEAD;
+import static org.raml.model.ActionType.OPTIONS;
+import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
+import static org.raml.model.ActionType.PUT;
+import static org.raml.model.ActionType.TRACE;
 import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.MAPPING_BOUNDARY;
 import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.MAPPING_SEPARATOR;
 import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.NAME_KEY;
@@ -30,14 +36,14 @@ public class ActionMappingTest {
     @Test
     public void shouldCreateSingleMappingWithRequestTypeFromString() throws Exception {
 
-        List<ActionMapping> mappings = listOf(mappingDescriptionWith(
+        final List<ActionMapping> mappings = listOf(mappingDescriptionWith(
                 mapping()
                         .withRequestType("application/vnd.aaaa+json")
                         .withName("actionA"))
                 .build());
 
         assertThat(mappings, hasSize(1));
-        ActionMapping mapping = mappings.get(0);
+        final ActionMapping mapping = mappings.get(0);
         assertThat(mapping.getRequestType(), is("application/vnd.aaaa+json"));
         assertThat(mapping.mimeTypeFor(POST), is("application/vnd.aaaa+json"));
         assertThat(mapping.getName(), is("actionA"));
@@ -46,23 +52,95 @@ public class ActionMappingTest {
     @Test
     public void shouldCreateSingleMappingWithResponseTypeFromString() throws Exception {
 
-        List<ActionMapping> mappings = listOf(mappingDescriptionWith(
+        final List<ActionMapping> mappings = listOf(mappingDescriptionWith(
                 mapping()
                         .withResponseType("application/vnd.bbbb+json")
                         .withName("actionBCD"))
                 .build());
 
         assertThat(mappings, hasSize(1));
-        ActionMapping mapping = mappings.get(0);
+        final ActionMapping mapping = mappings.get(0);
         assertThat(mapping.getResponseType(), is("application/vnd.bbbb+json"));
         assertThat(mapping.mimeTypeFor(GET), is("application/vnd.bbbb+json"));
         assertThat(mapping.getName(), is("actionBCD"));
     }
 
     @Test
+    public void shouldReturnResponseTypeForGetAction() throws Exception {
+
+        final List<ActionMapping> mappings = listOf(mappingDescriptionWith(
+                mapping()
+                        .withResponseType("application/vnd.bbbb+json")
+                        .withName("actionBCD"))
+                .build());
+
+        final ActionMapping mapping = mappings.get(0);
+        assertThat(mapping.mimeTypeFor(GET), is("application/vnd.bbbb+json"));
+    }
+
+    @Test
+    public void shouldReturnRequestTypeForDeletePatchPostAndPutAction() throws Exception {
+
+        final List<ActionMapping> mappings = listOf(mappingDescriptionWith(
+                mapping()
+                        .withRequestType("application/vnd.aaaa+json")
+                        .withName("actionA"))
+                .build());
+
+        final ActionMapping mapping = mappings.get(0);
+        assertThat(mapping.mimeTypeFor(DELETE), is("application/vnd.aaaa+json"));
+        assertThat(mapping.mimeTypeFor(PATCH), is("application/vnd.aaaa+json"));
+        assertThat(mapping.mimeTypeFor(POST), is("application/vnd.aaaa+json"));
+        assertThat(mapping.mimeTypeFor(PUT), is("application/vnd.aaaa+json"));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionForHeadAction() throws Exception {
+
+        final List<ActionMapping> mappings = listOf(mappingDescriptionWith(
+                mapping()
+                        .withResponseType("application/vnd.bbbb+json")
+                        .withRequestType("application/vnd.aaaa+json")
+                        .withName("actionA"))
+                .build());
+
+        final ActionMapping mapping = mappings.get(0);
+        assertThat(mapping.mimeTypeFor(HEAD), is("application/vnd.aaaa+json"));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionForTraceAction() throws Exception {
+
+        final List<ActionMapping> mappings = listOf(mappingDescriptionWith(
+                mapping()
+                        .withResponseType("application/vnd.bbbb+json")
+                        .withRequestType("application/vnd.aaaa+json")
+                        .withName("actionA"))
+                .build());
+
+        final ActionMapping mapping = mappings.get(0);
+        assertThat(mapping.mimeTypeFor(TRACE), is("application/vnd.aaaa+json"));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionForOptionsAction() throws Exception {
+
+        final List<ActionMapping> mappings = listOf(mappingDescriptionWith(
+                mapping()
+                        .withResponseType("application/vnd.bbbb+json")
+                        .withRequestType("application/vnd.aaaa+json")
+                        .withName("actionA"))
+                .build());
+
+        final ActionMapping mapping = mappings.get(0);
+        assertThat(mapping.mimeTypeFor(OPTIONS), is("application/vnd.aaaa+json"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
     public void shouldCreateMappingsCollections() throws Exception {
 
-        List<ActionMapping> mappings = listOf(mappingDescriptionWith(
+        final List<ActionMapping> mappings = listOf(mappingDescriptionWith(
                 mapping()
                         .withRequestType("application/vnd.aaaa+json")
                         .withName("actionA"),
@@ -79,7 +157,7 @@ public class ActionMappingTest {
     @Test
     public void shouldCreateMappingIfPrefixedByOtherText() throws Exception {
 
-        List<ActionMapping> mappings = listOf("Pre description of action" +
+        final List<ActionMapping> mappings = listOf("Pre description of action" +
                 mappingDescriptionWith(
                         mapping()
                                 .withRequestType("application/vnd.aaaa+json")
@@ -87,7 +165,7 @@ public class ActionMappingTest {
                         .build());
 
         assertThat(mappings, hasSize(1));
-        ActionMapping mapping = mappings.get(0);
+        final ActionMapping mapping = mappings.get(0);
         assertThat(mapping.getRequestType(), is("application/vnd.aaaa+json"));
         assertThat(mapping.mimeTypeFor(POST), is("application/vnd.aaaa+json"));
         assertThat(mapping.getName(), is("actionA"));
@@ -96,14 +174,14 @@ public class ActionMappingTest {
     @Test
     public void shouldCreateMappingIfSuffixedByOtherText() throws Exception {
 
-        List<ActionMapping> mappings = listOf(mappingDescriptionWith(
+        final List<ActionMapping> mappings = listOf(mappingDescriptionWith(
                 mapping()
                         .withRequestType("application/vnd.aaaa+json")
                         .withName("actionA"))
                 .build() + "Post description of action");
 
         assertThat(mappings, hasSize(1));
-        ActionMapping mapping = mappings.get(0);
+        final ActionMapping mapping = mappings.get(0);
         assertThat(mapping.getRequestType(), is("application/vnd.aaaa+json"));
         assertThat(mapping.mimeTypeFor(POST), is("application/vnd.aaaa+json"));
         assertThat(mapping.getName(), is("actionA"));

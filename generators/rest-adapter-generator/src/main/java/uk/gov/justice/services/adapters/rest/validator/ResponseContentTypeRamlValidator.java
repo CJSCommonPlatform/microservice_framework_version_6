@@ -1,5 +1,6 @@
 package uk.gov.justice.services.adapters.rest.validator;
 
+import static java.util.Arrays.asList;
 import static uk.gov.justice.services.generators.commons.helper.Actions.responseMimeTypesOf;
 
 import uk.gov.justice.services.generators.commons.validator.AbstractContentTypeRamlValidator;
@@ -17,8 +18,8 @@ public class ResponseContentTypeRamlValidator extends AbstractContentTypeRamlVal
 
     private static final String CONTENT_TYPE_DESCRIPTION = "response type";
 
-    public ResponseContentTypeRamlValidator() {
-        super(ActionType.GET, CONTENT_TYPE_DESCRIPTION);
+    public ResponseContentTypeRamlValidator(final ActionType... actionTypes) {
+        super(asList(actionTypes), CONTENT_TYPE_DESCRIPTION);
     }
 
     @Override

@@ -2,6 +2,8 @@ package uk.gov.justice.services.clients.core;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.delete;
+import static com.github.tomakehurst.wiremock.client.WireMock.deleteRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
@@ -361,6 +363,28 @@ public class RestClientProcessorIT {
         verify(patchRequestedFor(urlEqualTo(REMOTE_BASE_PATH + "/my/resource/valueA/valueB"))
                 .withHeader(CONTENT_TYPE, equalTo(mimetype))
                 .withRequestBody(equalToJson(bodyWithoutParams)));
+    }
+
+    @Test
+    public void shouldDoDeleteWithPathParameters() throws Exception {
+
+        final String path = "/my/resource/{paramA}/{paramB}";
+        final String mimetype = format("application/vnd.%s+json", COMMAND_NAME);
+
+        stubFor(delete(urlEqualTo(REMOTE_BASE_PATH + "/my/resource/valueA/valueB"))
+                .withHeader(CONTENT_TYPE, equalTo(mimetype))
+                .withHeader(CLIENT_CORRELATION_ID, equalTo(CLIENT_CORRELATION_ID_VALUE))
+                .withHeader(USER_ID, equalTo(USER_ID_VALUE))
+                .withHeader(SESSION_ID, equalTo(SESSION_ID_VALUE))
+                .willReturn(aResponse()
+                        .withStatus(ACCEPTED.getStatusCode())));
+
+        final EndpointDefinition endpointDefinition = new EndpointDefinition(BASE_URI, path, ImmutableSet.of("paramA", "paramB"), emptySet(), COMMAND_NAME);
+
+        restClientProcessor.delete(endpointDefinition, postRequestEnvelope());
+
+        verify(deleteRequestedFor(urlEqualTo(REMOTE_BASE_PATH + "/my/resource/valueA/valueB"))
+                .withHeader(CONTENT_TYPE, equalTo(mimetype)));
     }
 
     @Test

@@ -33,7 +33,7 @@ public class JmsEndpointGenerator implements Generator {
     private final RamlValidator validator = new CompositeRamlValidator(
             new ContainsResourcesRamlValidator(),
             new ContainsActionsRamlValidator(),
-            new RequestContentTypeRamlValidator(),
+            new RequestContentTypeRamlValidator(POST),
             new BaseUriRamlValidator()
     );
 

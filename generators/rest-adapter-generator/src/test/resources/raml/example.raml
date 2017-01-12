@@ -66,6 +66,15 @@ protocols: [ HTTP, HTTPS ]
         application/vnd.people.modified-user+json:
             schema: !include json/schema/people.modified-user.json
             example: !include json/update-user.json
+  delete:
+    description: |
+        ...
+        (mapping):
+            requestType: application/vnd.people.delete-user+json
+            name: people.delete-user
+        ...
+    body:
+        application/vnd.people.delete-user+json: !!null
 
 /users:
   description: |

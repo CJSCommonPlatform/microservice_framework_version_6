@@ -3,6 +3,7 @@ package uk.gov.justice.services.generators.test.utils.builder;
 import static java.lang.String.valueOf;
 import static java.util.Arrays.stream;
 import static javax.ws.rs.core.Response.Status.OK;
+import static org.raml.model.ActionType.DELETE;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
@@ -58,6 +59,12 @@ public class HttpActionBuilder {
                 .withHttpActionOfDefaultRequestType();
     }
 
+    public static HttpActionBuilder defaultDeleteAction() {
+        return httpAction()
+                .withHttpActionType(DELETE)
+                .withHttpActionOfDefaultRequestType();
+    }
+
     public static HttpActionBuilder defaultGetAction() {
         return httpAction()
                 .withHttpActionType(GET)
@@ -109,6 +116,24 @@ public class HttpActionBuilder {
                         .withName("action1")
                         .withRequestType("application/vnd.ctx.command.defcmd+json")
                         .withResponseType("application/vnd.ctx.query.defquery+json"));
+    }
+
+    public HttpActionBuilder withNullResponseType() {
+        responses.add(null);
+        return this;
+    }
+
+    public HttpActionBuilder withHttpActionResponseAndNoBody() {
+        responses.add(new Response());
+        return this;
+    }
+
+    public HttpActionBuilder withHttpActionResponseAndEmptyBody() {
+        final Map<String, MimeType> respBody = new HashMap<>();
+        final Response response = new Response();
+        response.setBody(respBody);
+        responses.add(response);
+        return this;
     }
 
     public HttpActionBuilder withResponseTypes(final String... responseTypes) {

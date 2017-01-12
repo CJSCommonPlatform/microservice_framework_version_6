@@ -1,5 +1,7 @@
 package uk.gov.justice.services.generators.commons.validator;
 
+import static java.util.Arrays.asList;
+
 import java.util.Collection;
 
 import org.raml.model.Action;
@@ -13,13 +15,12 @@ public class RequestContentTypeRamlValidator extends AbstractContentTypeRamlVali
 
     private static final String CONTENT_TYPE_DESCRIPTION = "request type";
 
-    public RequestContentTypeRamlValidator() {
-        super(ActionType.POST, CONTENT_TYPE_DESCRIPTION);
+    public RequestContentTypeRamlValidator(final ActionType... actionTypes) {
+        super(asList(actionTypes), CONTENT_TYPE_DESCRIPTION);
     }
 
     @Override
-    protected Collection<MimeType> mediaTypesToValidate(final Action postAction) {
-        return postAction.getBody().values();
+    protected Collection<MimeType> mediaTypesToValidate(final Action action) {
+        return action.getBody().values();
     }
-
 }

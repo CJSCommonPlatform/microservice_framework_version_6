@@ -17,6 +17,7 @@ import static org.hamcrest.Matchers.emptyArray;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.raml.model.ActionType.DELETE;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
@@ -27,6 +28,7 @@ import static uk.gov.justice.services.generators.test.utils.builder.MappingBuild
 import static uk.gov.justice.services.generators.test.utils.builder.QueryParamBuilder.queryParam;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithQueryApiDefaults;
+import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.defaultDeleteResource;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.defaultGetResource;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.defaultPatchResource;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.defaultPostResource;
@@ -55,6 +57,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.json.JsonObject;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -205,6 +208,30 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
         Method method = methods.get(0);
         assertThat(method.getReturnType(), equalTo(Response.class));
         assertThat(method.getAnnotation(PATCH.class), not(nullValue()));
+        assertThat(method.getAnnotation(Consumes.class), not(nullValue()));
+        assertThat(method.getAnnotation(Consumes.class).value(),
+                is(new String[]{"application/vnd.default+json"}));
+    }
+
+    @Test
+    public void shouldGenerateResourceInterfaceWithOneDELETEMethod() throws Exception {
+        generator.run(
+                restRamlWithDefaults()
+                        .with(resource("/some/path")
+                                .with(httpAction(DELETE, "application/vnd.default+json")
+                                        .with(mapping()
+                                                .withName("blah")
+                                                .withRequestType("application/vnd.default+json")))
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+
+        List<Method> methods = methodsOf(interfaceClass);
+        assertThat(methods, hasSize(1));
+        Method method = methods.get(0);
+        assertThat(method.getReturnType(), equalTo(Response.class));
+        assertThat(method.getAnnotation(DELETE.class), not(nullValue()));
         assertThat(method.getAnnotation(Consumes.class), not(nullValue()));
         assertThat(method.getAnnotation(Consumes.class).value(),
                 is(new String[]{"application/vnd.default+json"}));
@@ -746,6 +773,24 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                                                 .withName("blah")
                                                 .withRequestType("application/vnd.default+json")
                                                 .withResponseType("application/vnd.ctx.query.query1+json")))
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        List<Method> methods = methodsOf(class1);
+        assertThat(methods, hasSize(1));
+        Method method = methods.get(0);
+        assertThat(method.getReturnType(), equalTo(Response.class));
+        assertThat(method.getParameterCount(), is(1));
+        assertThat(method.getParameters()[0].getType(), equalTo(JsonObject.class));
+    }
+
+    @Test
+    public void shouldGenerateResourceClassWithOneDELETEMethod() throws Exception {
+        generator.run(
+                restRamlWithDefaults()
+                        .with(defaultDeleteResource()
+                                .withRelativeUri("/some/path")
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 

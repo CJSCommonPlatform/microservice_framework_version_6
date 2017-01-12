@@ -9,7 +9,9 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
+import static org.raml.model.ActionType.DELETE;
 import static org.raml.model.ActionType.GET;
+import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
 import static org.raml.model.ActionType.PUT;
 import static org.raml.model.ActionType.TRACE;
@@ -84,6 +86,46 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
                 messagingRamlWithDefaults()
                         .with(resource()
                                 .with(httpAction(PUT, "application/vnd.cakeshop.actionabc+json")))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_API")));
+
+
+        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteABCController");
+
+        assertThat(generatedClass.getCanonicalName(), is("org.raml.test.RemoteABCController"));
+        assertThat(generatedClass.getAnnotation(Remote.class), not(nullValue()));
+        assertThat(generatedClass.getAnnotation(FrameworkComponent.class), not(nullValue()));
+        assertThat(generatedClass.getAnnotation(FrameworkComponent.class).value(), is("COMMAND_API"));
+
+    }
+
+    @Test
+    public void shouldGenerateRemotePatchController() throws Exception {
+
+        generator.run(
+                messagingRamlWithDefaults()
+                        .with(resource()
+                                .with(httpAction(PATCH, "application/vnd.cakeshop.actionabc+json")))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_API")));
+
+
+        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteABCController");
+
+        assertThat(generatedClass.getCanonicalName(), is("org.raml.test.RemoteABCController"));
+        assertThat(generatedClass.getAnnotation(Remote.class), not(nullValue()));
+        assertThat(generatedClass.getAnnotation(FrameworkComponent.class), not(nullValue()));
+        assertThat(generatedClass.getAnnotation(FrameworkComponent.class).value(), is("COMMAND_API"));
+
+    }
+
+    @Test
+    public void shouldGenerateRemoteDeleteController() throws Exception {
+
+        generator.run(
+                messagingRamlWithDefaults()
+                        .with(resource()
+                                .with(httpAction(DELETE, "application/vnd.cakeshop.actionabc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_API")));
 
@@ -237,12 +279,12 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
 
 
         @Override
-        protected CodeBlock methodBodyOf(final Resource resource, final Action ramlAction, final ActionMimeTypes mimeTypes) {
+        protected CodeBlock methodBodyOf(final Resource resource, final Action ramlAction, final ActionMimeTypeDefinition definition) {
             return CodeBlock.builder().addStatement("return 12345678").build();
         }
 
         @Override
-        protected String handlesAnnotationValueOf(final Action ramlAction, final ActionMimeTypes mimeTypes, final GeneratorConfig generatorConfig) {
+        protected String handlesAnnotationValueOf(final Action ramlAction, final ActionMimeTypeDefinition definition, final GeneratorConfig generatorConfig) {
             return "some.action";
         }
     }

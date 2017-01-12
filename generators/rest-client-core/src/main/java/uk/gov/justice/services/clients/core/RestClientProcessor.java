@@ -3,6 +3,10 @@ package uk.gov.justice.services.clients.core;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toSet;
+import static javax.ws.rs.HttpMethod.DELETE;
+import static javax.ws.rs.HttpMethod.GET;
+import static javax.ws.rs.HttpMethod.POST;
+import static javax.ws.rs.HttpMethod.PUT;
 import static javax.ws.rs.client.Entity.entity;
 import static javax.ws.rs.core.Response.Status.ACCEPTED;
 import static javax.ws.rs.core.Response.Status.fromStatusCode;
@@ -49,6 +53,10 @@ public class RestClientProcessor {
 
     private static final String MEDIA_TYPE_PATTERN = "application/vnd.%s+json";
     private static final String CPPID = "CPPID";
+    private static final String CONTENT_TYPE_HEADER = "Content-type";
+    private static final String PATCH = "PATCH";
+    private static final String SENDING_REQUEST_MESSAGE = "Sending %s request to %s using message: %s";
+    private static final String SENT_REQUEST_MESSAGE = "Sent %s request %s and received: %s";
 
     @Inject
     StringToJsonObjectConverter stringToJsonObjectConverter;
@@ -77,11 +85,11 @@ public class RestClientProcessor {
         final Builder builder = target.request(format(MEDIA_TYPE_PATTERN, definition.getResponseMediaType()));
         populateHeadersFromMetadata(builder, envelope.metadata());
 
-        trace(LOGGER, () -> String.format("Sending GET request to %s using message: %s", target.getUri().toString(), envelope));
+        trace(LOGGER, () -> String.format(SENDING_REQUEST_MESSAGE, GET, target.getUri().toString(), envelope));
 
         final Response response = builder.get();
 
-        trace(LOGGER, () -> String.format("Sent GET request %s and received: %s", envelope.metadata().id().toString(), toResponseTrace(response)));
+        trace(LOGGER, () -> String.format(SENT_REQUEST_MESSAGE, GET, envelope.metadata().id().toString(), toResponseTrace(response)));
 
         return processedResponse(envelope, response);
     }
@@ -99,19 +107,14 @@ public class RestClientProcessor {
         final Builder builder = target.request(format(MEDIA_TYPE_PATTERN, definition.getResponseMediaType()));
         populateHeadersFromMetadata(builder, envelope.metadata());
 
-        trace(LOGGER, () -> String.format("Sending POST request to %s using message: %s", target.getUri().toString(), envelope));
+        trace(LOGGER, () -> String.format(SENDING_REQUEST_MESSAGE, POST, target.getUri().toString(), envelope));
 
         final JsonObject requestBody = stripParamsFromPayload(definition, envelope);
         final Response response = builder.post(entity(requestBody.toString(), format(MEDIA_TYPE_PATTERN, envelope.metadata().name())));
 
-        trace(LOGGER, () -> String.format("Sent POST request %s and received: %s", envelope.metadata().id().toString(), toResponseTrace(response)));
+        trace(LOGGER, () -> String.format(SENT_REQUEST_MESSAGE, POST, envelope.metadata().id().toString(), toResponseTrace(response)));
 
-        final int status = response.getStatus();
-        if (status != ACCEPTED.getStatusCode()) {
-            throw new RuntimeException(format("POST request %s failed; expected 202 response but got %s with reason \"%s\"",
-                    envelope.metadata().id().toString(), status,
-                    response.getStatusInfo().getReasonPhrase()));
-        }
+        checkForAcceptedResponse(response, envelope, POST);
     }
 
     /**
@@ -128,12 +131,12 @@ public class RestClientProcessor {
         final Builder builder = target.request(format(MEDIA_TYPE_PATTERN, definition.getResponseMediaType()));
         populateHeadersFromMetadata(builder, envelope.metadata());
 
-        trace(LOGGER, () -> String.format("Sending POST request to %s using message: %s", target.getUri().toString(), envelope));
+        trace(LOGGER, () -> String.format(SENDING_REQUEST_MESSAGE, POST, target.getUri().toString(), envelope));
 
         final JsonObject requestBody = stripParamsFromPayload(definition, envelope);
         final Response response = builder.post(entity(requestBody.toString(), format(MEDIA_TYPE_PATTERN, envelope.metadata().name())));
 
-        trace(LOGGER, () -> String.format("Sent POST request %s and received: %s", envelope.metadata().id().toString(), toResponseTrace(response)));
+        trace(LOGGER, () -> String.format(SENT_REQUEST_MESSAGE, POST, envelope.metadata().id().toString(), toResponseTrace(response)));
 
         return processedResponse(envelope, response);
     }
@@ -151,19 +154,14 @@ public class RestClientProcessor {
         final Builder builder = target.request(format(MEDIA_TYPE_PATTERN, definition.getResponseMediaType()));
         populateHeadersFromMetadata(builder, envelope.metadata());
 
-        trace(LOGGER, () -> String.format("Sending PUT request to %s using message: %s", target.getUri().toString(), envelope));
+        trace(LOGGER, () -> String.format(SENDING_REQUEST_MESSAGE, PUT, target.getUri().toString(), envelope));
 
         final JsonObject requestBody = stripParamsFromPayload(definition, envelope);
         final Response response = builder.put(entity(requestBody.toString(), format(MEDIA_TYPE_PATTERN, envelope.metadata().name())));
 
-        trace(LOGGER, () -> String.format("Sent PUT request %s and received: %s", envelope.metadata().id().toString(), toResponseTrace(response)));
+        trace(LOGGER, () -> String.format(SENT_REQUEST_MESSAGE, PUT, envelope.metadata().id().toString(), toResponseTrace(response)));
 
-        final int status = response.getStatus();
-        if (status != ACCEPTED.getStatusCode()) {
-            throw new RuntimeException(format("PUT request %s failed; expected 202 response but got %s with reason \"%s\"",
-                    envelope.metadata().id().toString(), status,
-                    response.getStatusInfo().getReasonPhrase()));
-        }
+        checkForAcceptedResponse(response, envelope, PUT);
     }
 
     /**
@@ -180,12 +178,12 @@ public class RestClientProcessor {
         final Builder builder = target.request(format(MEDIA_TYPE_PATTERN, definition.getResponseMediaType()));
         populateHeadersFromMetadata(builder, envelope.metadata());
 
-        trace(LOGGER, () -> String.format("Sending PUT request to %s using message: %s", target.getUri().toString(), envelope));
+        trace(LOGGER, () -> String.format(SENDING_REQUEST_MESSAGE, PUT, target.getUri().toString(), envelope));
 
         final JsonObject requestBody = stripParamsFromPayload(definition, envelope);
         final Response response = builder.put(entity(requestBody.toString(), format(MEDIA_TYPE_PATTERN, envelope.metadata().name())));
 
-        trace(LOGGER, () -> String.format("Sent PUT request %s and received: %s", envelope.metadata().id().toString(), toResponseTrace(response)));
+        trace(LOGGER, () -> String.format(SENT_REQUEST_MESSAGE, PUT, envelope.metadata().id().toString(), toResponseTrace(response)));
 
         return processedResponse(envelope, response);
     }
@@ -203,21 +201,16 @@ public class RestClientProcessor {
         final Builder builder = target.request(format(MEDIA_TYPE_PATTERN, definition.getResponseMediaType()));
         populateHeadersFromMetadata(builder, envelope.metadata());
 
-        trace(LOGGER, () -> String.format("Sending PATCH request to %s using message: %s", target.getUri().toString(), envelope));
+        trace(LOGGER, () -> String.format(SENDING_REQUEST_MESSAGE, PATCH, target.getUri().toString(), envelope));
 
         final JsonObject requestBody = stripParamsFromPayload(definition, envelope);
         final Response response = builder
-                .build("PATCH", entity(requestBody.toString(), format(MEDIA_TYPE_PATTERN, envelope.metadata().name())))
+                .build(PATCH, entity(requestBody.toString(), format(MEDIA_TYPE_PATTERN, envelope.metadata().name())))
                 .invoke();
 
-        trace(LOGGER, () -> String.format("Sent PATCH request %s and received: %s", envelope.metadata().id().toString(), toResponseTrace(response)));
+        trace(LOGGER, () -> format(SENT_REQUEST_MESSAGE, PATCH, envelope.metadata().id().toString(), toResponseTrace(response)));
 
-        final int status = response.getStatus();
-        if (status != ACCEPTED.getStatusCode()) {
-            throw new RuntimeException(format("PATCH request %s failed; expected 202 response but got %s with reason \"%s\"",
-                    envelope.metadata().id().toString(), status,
-                    response.getStatusInfo().getReasonPhrase()));
-        }
+        checkForAcceptedResponse(response, envelope, PATCH);
     }
 
     /**
@@ -234,16 +227,50 @@ public class RestClientProcessor {
         final Builder builder = target.request(format(MEDIA_TYPE_PATTERN, definition.getResponseMediaType()));
         populateHeadersFromMetadata(builder, envelope.metadata());
 
-        trace(LOGGER, () -> String.format("Sending PATCH request to %s using message: %s", target.getUri().toString(), envelope));
+        trace(LOGGER, () -> String.format(SENDING_REQUEST_MESSAGE, PATCH, target.getUri().toString(), envelope));
 
         final JsonObject requestBody = stripParamsFromPayload(definition, envelope);
         final Response response = builder
-                .build("PATCH", entity(requestBody.toString(), format(MEDIA_TYPE_PATTERN, envelope.metadata().name())))
+                .build(PATCH, entity(requestBody.toString(), format(MEDIA_TYPE_PATTERN, envelope.metadata().name())))
                 .invoke();
 
-        trace(LOGGER, () -> String.format("Sent PATCH request %s and received: %s", envelope.metadata().id().toString(), toResponseTrace(response)));
+        trace(LOGGER, () -> String.format(SENT_REQUEST_MESSAGE, PATCH, envelope.metadata().id().toString(), toResponseTrace(response)));
 
         return processedResponse(envelope, response);
+    }
+
+    /**
+     * Make an asynchronous DELETE request using the envelope provided to a specified endpoint.
+     *
+     * @param definition the endpoint definition
+     * @param envelope   the envelope containing the payload and/or parameters to pass in the
+     *                   request
+     */
+    public void delete(final EndpointDefinition definition, final JsonEnvelope envelope) {
+        final WebTarget target = webTargetFactory.createWebTarget(definition, envelope);
+
+        final Builder builder = target.request(format(MEDIA_TYPE_PATTERN, definition.getResponseMediaType()));
+        populateHeadersFromMetadata(builder, envelope.metadata());
+        setHeaderIfPresent(builder, CONTENT_TYPE_HEADER, Optional.of(format(MEDIA_TYPE_PATTERN, envelope.metadata().name())));
+
+        trace(LOGGER, () -> String.format(SENDING_REQUEST_MESSAGE, DELETE, target.getUri().toString(), envelope));
+
+        final Response response = builder.delete();
+
+        trace(LOGGER, () -> String.format(SENT_REQUEST_MESSAGE, DELETE, envelope.metadata().id().toString(), toResponseTrace(response)));
+
+        checkForAcceptedResponse(response, envelope, DELETE);
+    }
+
+    private void checkForAcceptedResponse(final Response response, final JsonEnvelope envelope, final String httpMethod) {
+        final int status = response.getStatus();
+
+        if (status != ACCEPTED.getStatusCode()) {
+            throw new RuntimeException(format("%s request %s failed; expected 202 response but got %s with reason \"%s\"",
+                    httpMethod,
+                    envelope.metadata().id().toString(), status,
+                    response.getStatusInfo().getReasonPhrase()));
+        }
     }
 
     private JsonEnvelope processedResponse(final JsonEnvelope envelope, final Response response) {

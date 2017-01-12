@@ -1,6 +1,5 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
-import static org.raml.model.ActionType.DELETE;
 import static org.raml.model.ActionType.HEAD;
 import static org.raml.model.ActionType.OPTIONS;
 import static org.raml.model.ActionType.TRACE;
@@ -20,11 +19,6 @@ public class JaxRsInterfaceGeneratorTest {
     @Before
     public void setup() {
         jaxRsInterfaceGenerator = new JaxRsInterfaceGenerator();
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void shouldThrowExceptionIfActionTypeIsDELETE() throws Exception {
-        jaxRsInterfaceGenerator.generateFor(singleResourceWithActionType(DELETE));
     }
 
     @Test(expected = IllegalStateException.class)

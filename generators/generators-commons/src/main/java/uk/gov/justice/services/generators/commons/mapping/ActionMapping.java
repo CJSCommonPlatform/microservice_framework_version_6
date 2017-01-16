@@ -1,6 +1,7 @@
 package uk.gov.justice.services.generators.commons.mapping;
 
 import static com.google.common.base.CharMatcher.WHITESPACE;
+import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
@@ -8,7 +9,8 @@ import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.trim;
-import static org.raml.model.ActionType.POST;
+import static uk.gov.justice.services.generators.commons.helper.Actions.isSupportedActionType;
+import static uk.gov.justice.services.generators.commons.helper.Actions.isSupportedActionTypeWithRequestType;
 
 import uk.gov.justice.services.generators.commons.validator.RamlValidationException;
 
@@ -42,17 +44,21 @@ public class ActionMapping {
 
     /**
      * Parses mappings string
+     *
      * @param mappingsString - mapping string from raml file:
+     *
      * <pre>
-     * {@code    ...
-     *  (mapping):
-     *     requestType: application/vnd.people.command.create-user+json
-     *     name: people.create-user
-     *  (mapping):
-     *     requestType: application/vnd.people.command.update-user+json
-     *     name: people.update-user
-     * ...
-     * }
+     *      {@code
+     *          ...
+     *             (mapping):
+     *                  requestType: application/vnd.people.command.create-user+json
+     *                  name: people.create-user
+     *             (mapping):
+     *                  requestType: application/vnd.people.command.update-user+json
+     *                  name: people.update-user
+     *          ...
+     *       }
+     *
      * </pre>
      *
      * @return - collection of {@link ActionMapping} objects
@@ -76,7 +82,15 @@ public class ActionMapping {
     }
 
     public String mimeTypeFor(final ActionType httpMethod) {
-        return POST.equals(httpMethod) ? getRequestType() : getResponseType();
+        if (isSupportedActionType(httpMethod)) {
+            if (isSupportedActionTypeWithRequestType(httpMethod)) {
+                return getRequestType();
+            } else {
+                return getResponseType();
+            }
+        }
+
+        throw new IllegalArgumentException(format("Action %s not supported", httpMethod.toString()));
     }
 
     private static List<ActionMapping> actionMappingsOf(final String mappingString) {
@@ -113,7 +127,7 @@ public class ActionMapping {
                     .trimResults(WHITESPACE)
                     .withKeyValueSeparator(": ").split(mappingString);
             return new ActionMapping(map.get(REQUEST_TYPE_KEY), map.get(RESPONSE_TYPE_KEY), map.get(NAME_KEY));
-        } catch(IllegalArgumentException ex) {
+        } catch (IllegalArgumentException ex) {
             throw new RamlValidationException(INVALID_ACTION_MAPPING_ERROR_MSG, ex);
         }
     }

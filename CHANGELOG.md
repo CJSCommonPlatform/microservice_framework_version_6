@@ -7,6 +7,8 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ### Added
 - Immediate retries to RetryInterceptor, defaults to 3 before applying wait period between retries
+- Support for Http Methods DELETE, PATCH, POST and PUT.  REST Adaptor and REST Client generators now 
+support RAML that contains asynchronous DELETE, PATCH and PUT, and synchronous PATCH, POST and PUT.
 
 ### Changed
 - Optimistic lock log message changed from warn to debug. 

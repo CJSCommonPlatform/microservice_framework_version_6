@@ -1,7 +1,10 @@
 package uk.gov.justice.services.generators.test.utils.builder;
 
+import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.defaultDeleteAction;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.defaultGetAction;
+import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.defaultPatchAction;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.defaultPostAction;
+import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.defaultPutAction;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,7 +39,21 @@ public class ResourceBuilder {
     public static ResourceBuilder defaultPostResource() {
         return resource("/some/path/{recipeId}")
                 .with(defaultPostAction());
+    }
 
+    public static ResourceBuilder defaultPutResource() {
+        return resource("/some/path/{recipeId}")
+                .with(defaultPutAction());
+    }
+
+    public static ResourceBuilder defaultPatchResource() {
+        return resource("/some/path/{recipeId}")
+                .with(defaultPatchAction());
+    }
+
+    public static ResourceBuilder defaultDeleteResource() {
+        return resource("/some/path/{recipeId}")
+                .with(defaultDeleteAction());
     }
 
     public static ResourceBuilder defaultGetResource() {

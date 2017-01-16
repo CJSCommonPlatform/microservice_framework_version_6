@@ -7,24 +7,28 @@ import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.lang.String.format;
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 
-import uk.gov.justice.services.clients.core.webclient.BaseUriFactory;
-import uk.gov.justice.services.clients.core.webclient.ContextMatcher;
 import uk.gov.justice.services.clients.core.DefaultServerPortProvider;
-import uk.gov.justice.services.clients.core.webclient.MockServerPortProvider;
 import uk.gov.justice.services.clients.core.RestClientHelper;
 import uk.gov.justice.services.clients.core.RestClientProcessor;
+import uk.gov.justice.services.clients.core.webclient.BaseUriFactory;
+import uk.gov.justice.services.clients.core.webclient.ContextMatcher;
+import uk.gov.justice.services.clients.core.webclient.MockServerPortProvider;
 import uk.gov.justice.services.clients.core.webclient.WebTargetFactory;
 import uk.gov.justice.services.common.configuration.JndiBasedServiceContextNameProvider;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
 import uk.gov.justice.services.core.accesscontrol.AccessControlService;
@@ -35,6 +39,7 @@ import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
+import uk.gov.justice.services.core.dispatcher.EmptySystemUserProvider;
 import uk.gov.justice.services.core.dispatcher.Requester;
 import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
@@ -45,10 +50,11 @@ import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.interceptor.InterceptorCache;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
+import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
+import uk.gov.justice.services.messaging.JsonObjectMetadata;
 
-import java.io.StringWriter;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.UUID;
@@ -56,11 +62,7 @@ import java.util.UUID;
 import javax.annotation.Priority;
 import javax.enterprise.inject.Alternative;
 import javax.inject.Inject;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonWriter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.apache.openejb.OpenEjbContainer;
 import org.apache.openejb.jee.Application;
@@ -80,37 +82,30 @@ import org.junit.runner.RunWith;
 @FrameworkComponent("COMPONENT_ABC")
 public class RemoteExampleQueryApiIT {
 
+    private static int port = -1;
     private static final String BASE_PATH = "/rest-client-generator/query/controller/rest/example";
-    private static final String METADATA = "_metadata";
-    private static final JsonObject RESPONSE = Json.createObjectBuilder()
-            .add(METADATA, metadataWithRandomUUID("people.get-user1").build().asJsonObject())
-            .add("result", "SUCCESS")
-            .build();
+
     private static final UUID USER_ID = randomUUID();
     private static final String TEST_SYSTEM_USER_ID = "8d6a96f0-6e8e-11e6-8b77-86f30ca893d3";
     private static final String MOCK_SERVER_PORT = "mock.server.port";
-    private static int port = -1;
+    private static final String PEOPLE_GET_USER1 = "people.get-user1";
+    private static final String PEOPLE_QUERY_USER1 = "people.query.user1";
+
+    private static final JsonEnvelope RESPONSE = DefaultJsonEnvelope.envelope()
+            .with(JsonObjectMetadata.metadataWithRandomUUID("people.get-user1"))
+            .withPayloadOf("SUCCESS", "result")
+            .build();
+
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(9090);
 
     @Inject
     Requester requester;
-    private static final String PEOPLE_GET_USER1 = "people.get-user1";
-    private static final String PEOPLE_QUERY_USER1 = "people.query.user1";
 
     @BeforeClass
     public static void beforeClass() {
         System.setProperty(MOCK_SERVER_PORT, "9090");
         port = NetworkUtil.getNextAvailablePort();
-    }
-
-    private static String jsonObjectToString(final JsonObject source) {
-        final StringWriter stringWriter = new StringWriter();
-        try (final JsonWriter writer = Json.createWriter(stringWriter)) {
-            writer.writeObject(source);
-        }
-
-        return stringWriter.getBuffer().toString();
     }
 
     @Configuration
@@ -131,7 +126,6 @@ public class RemoteExampleQueryApiIT {
             ContextMatcher.class,
             DefaultServerPortProvider.class,
             DispatcherCache.class,
-            DispatcherCache.class,
             DispatcherFactory.class,
             Enveloper.class,
             InterceptorCache.class,
@@ -141,7 +135,6 @@ public class RemoteExampleQueryApiIT {
             JsonObjectEnvelopeConverter.class,
             LoggerProducer.class,
             MockServerPortProvider.class,
-            ObjectMapper.class,
             ObjectToJsonValueConverter.class,
             PolicyEvaluator.class,
             RequesterProducer.class,
@@ -153,7 +146,11 @@ public class RemoteExampleQueryApiIT {
             TestSystemUserProvider.class,
             RemoteExampleQueryController.class,
             WebTargetFactory.class,
-            UtcClock.class
+            UtcClock.class,
+
+            EmptySystemUserProvider.class,
+            ObjectMapperProducer.class,
+            RemoteExampleCommandApi.class
     })
     public WebApp war() {
         return new WebApp()
@@ -178,13 +175,12 @@ public class RemoteExampleQueryApiIT {
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", mimeType)
-                        .withBody(jsonObjectToString(RESPONSE))));
+                        .withBody(RESPONSE.toDebugStringPrettyPrint())));
 
-        JsonEnvelope response = requester.request(query);
-        assertThat(response.payloadAsJsonObject(),
-                is(Json.createObjectBuilder()
-                        .add("result", "SUCCESS")
-                        .build()));
+        final JsonEnvelope response = requester.request(query);
+        assertThat(response, jsonEnvelope(
+                metadata().withName("people.get-user1"),
+                payloadIsJson(withJsonPath("$.result", is("SUCCESS")))));
     }
 
     @Test

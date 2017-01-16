@@ -4,6 +4,7 @@ import static java.lang.String.format;
 import static org.apache.commons.lang.StringUtils.capitalize;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.raml.model.Action;
 import org.raml.model.ActionType;
@@ -12,25 +13,28 @@ import org.raml.model.Resource;
 
 public abstract class AbstractContentTypeRamlValidator extends AbstractResourceRamlValidator {
 
-    private final ActionType actionType;
+    private final List<ActionType> actionTypes;
     private final String contentTypeDescription;
 
-    public AbstractContentTypeRamlValidator(final ActionType actionType,
+    public AbstractContentTypeRamlValidator(final List<ActionType> actionTypes,
                                             final String contentTypeDescription) {
-        this.actionType = actionType;
+        this.actionTypes = actionTypes;
         this.contentTypeDescription = contentTypeDescription;
     }
 
     @Override
     protected void validate(final Resource resource) {
-        final Action postAction = resource.getActions().get(actionType);
-        if (postAction != null) {
-            final Collection<MimeType> mediaTypes = mediaTypesToValidate(postAction);
-            checkNonEmpty(mediaTypes);
-        }
+        actionTypes.forEach(actionType -> {
+            final Action action = resource.getActions().get(actionType);
+
+            if (action != null) {
+                final Collection<MimeType> mediaTypes = mediaTypesToValidate(action);
+                checkNonEmpty(mediaTypes);
+            }
+        });
     }
 
-    protected abstract Collection<MimeType> mediaTypesToValidate(final Action postAction);
+    protected abstract Collection<MimeType> mediaTypesToValidate(final Action action);
 
     private void checkNonEmpty(final Collection<MimeType> mediaTypes) {
         if (mediaTypes.isEmpty()) {

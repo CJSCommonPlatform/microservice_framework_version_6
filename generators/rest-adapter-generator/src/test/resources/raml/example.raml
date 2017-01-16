@@ -44,6 +44,37 @@ protocols: [ HTTP, HTTPS ]
             body:
                 application/vnd.people.user+json:
                 application/vnd.people.user-summary+json:
+  put:
+    description: |
+        ...
+        (mapping):
+            requestType: application/vnd.people.modified-user+json
+            name: people.update-user
+        ...
+    body:
+        application/vnd.people.modified-user+json:
+            schema: !include json/schema/people.modified-user.json
+            example: !include json/update-user.json
+  patch:
+    description: |
+        ...
+        (mapping):
+            requestType: application/vnd.people.modified-user+json
+            name: people.update-user
+        ...
+    body:
+        application/vnd.people.modified-user+json:
+            schema: !include json/schema/people.modified-user.json
+            example: !include json/update-user.json
+  delete:
+    description: |
+        ...
+        (mapping):
+            requestType: application/vnd.people.delete-user+json
+            name: people.delete-user
+        ...
+    body:
+        application/vnd.people.delete-user+json: !!null
 
 /users:
   description: |
@@ -77,3 +108,55 @@ protocols: [ HTTP, HTTPS ]
         200:
             body:
                 application/vnd.people.users+json:
+
+  post:
+    description: |
+        ...
+        (mapping):
+            requestType: application/vnd.people.user+json
+            name: people.create-user
+        ...
+    body:
+        application/vnd.people.user+json:
+            schema: !include json/schema/people.user.json
+            example: !include json/create-user.json
+
+    responses:
+        200:
+            body:
+                application/vnd.people.user+json:
+
+  put:
+    description: |
+        ...
+        (mapping):
+            requestType: application/vnd.people.user+json
+            name: people.update-user
+        ...
+    body:
+        application/vnd.people.user+json:
+            schema: !include json/schema/people.user.json
+            example: !include json/update-user.json
+
+    responses:
+        200:
+            body:
+                application/vnd.people.user+json:
+
+  patch:
+    description: |
+        ...
+        (mapping):
+            requestType: application/vnd.people.user+json
+            name: people.modify-user
+        ...
+    body:
+        application/vnd.people.user+json:
+            schema: !include json/schema/people.user.json
+            example: !include json/modify-user.json
+
+    responses:
+        200:
+            body:
+                application/vnd.people.user+json:
+

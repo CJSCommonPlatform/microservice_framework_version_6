@@ -17,16 +17,22 @@ import static org.hamcrest.Matchers.emptyArray;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.raml.model.ActionType.DELETE;
 import static org.raml.model.ActionType.GET;
+import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
+import static org.raml.model.ActionType.PUT;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.defaultGetAction;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.mapping;
 import static uk.gov.justice.services.generators.test.utils.builder.QueryParamBuilder.queryParam;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithQueryApiDefaults;
+import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.defaultDeleteResource;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.defaultGetResource;
+import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.defaultPatchResource;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.defaultPostResource;
+import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.defaultPutResource;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
@@ -38,6 +44,7 @@ import uk.gov.justice.services.adapter.rest.processor.RestProcessor;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
+import uk.gov.justice.services.rest.annotation.PATCH;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -50,7 +57,9 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.json.JsonObject;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -157,6 +166,165 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     }
 
     @Test
+    public void shouldGenerateResourceInterfaceWithOnePUTMethod() throws Exception {
+        generator.run(
+                restRamlWithDefaults()
+                        .with(resource("/some/path")
+                                .with(httpAction(PUT, "application/vnd.default+json")
+                                        .with(mapping()
+                                                .withName("blah")
+                                                .withRequestType("application/vnd.default+json")))
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+
+        List<Method> methods = methodsOf(interfaceClass);
+        assertThat(methods, hasSize(1));
+        Method method = methods.get(0);
+        assertThat(method.getReturnType(), equalTo(Response.class));
+        assertThat(method.getAnnotation(PUT.class), not(nullValue()));
+        assertThat(method.getAnnotation(Consumes.class), not(nullValue()));
+        assertThat(method.getAnnotation(Consumes.class).value(),
+                is(new String[]{"application/vnd.default+json"}));
+    }
+
+    @Test
+    public void shouldGenerateResourceInterfaceWithOnePATCHMethod() throws Exception {
+        generator.run(
+                restRamlWithDefaults()
+                        .with(resource("/some/path")
+                                .with(httpAction(PATCH, "application/vnd.default+json")
+                                        .with(mapping()
+                                                .withName("blah")
+                                                .withRequestType("application/vnd.default+json")))
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+
+        List<Method> methods = methodsOf(interfaceClass);
+        assertThat(methods, hasSize(1));
+        Method method = methods.get(0);
+        assertThat(method.getReturnType(), equalTo(Response.class));
+        assertThat(method.getAnnotation(PATCH.class), not(nullValue()));
+        assertThat(method.getAnnotation(Consumes.class), not(nullValue()));
+        assertThat(method.getAnnotation(Consumes.class).value(),
+                is(new String[]{"application/vnd.default+json"}));
+    }
+
+    @Test
+    public void shouldGenerateResourceInterfaceWithOneDELETEMethod() throws Exception {
+        generator.run(
+                restRamlWithDefaults()
+                        .with(resource("/some/path")
+                                .with(httpAction(DELETE, "application/vnd.default+json")
+                                        .with(mapping()
+                                                .withName("blah")
+                                                .withRequestType("application/vnd.default+json")))
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+
+        List<Method> methods = methodsOf(interfaceClass);
+        assertThat(methods, hasSize(1));
+        Method method = methods.get(0);
+        assertThat(method.getReturnType(), equalTo(Response.class));
+        assertThat(method.getAnnotation(DELETE.class), not(nullValue()));
+        assertThat(method.getAnnotation(Consumes.class), not(nullValue()));
+        assertThat(method.getAnnotation(Consumes.class).value(),
+                is(new String[]{"application/vnd.default+json"}));
+    }
+
+    @Test
+    public void shouldGenerateResourceInterfaceWithOneSynchronousPOSTMethod() throws Exception {
+        generator.run(
+                restRamlWithDefaults()
+                        .with(resource("/some/path")
+                                .with(httpAction(POST, "application/vnd.default+json")
+                                        .withResponseTypes("application/vnd.ctx.query.query1+json")
+                                        .with(mapping()
+                                                .withName("blah")
+                                                .withRequestType("application/vnd.default+json")
+                                                .withResponseType("application/vnd.ctx.query.query1+json")))
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+
+        final List<Method> methods = methodsOf(interfaceClass);
+        assertThat(methods, hasSize(1));
+        final Method method = methods.get(0);
+        assertThat(method.getReturnType(), equalTo(Response.class));
+        assertThat(method.getAnnotation(POST.class), not(nullValue()));
+        assertThat(method.getAnnotation(Consumes.class), not(nullValue()));
+        assertThat(method.getAnnotation(Consumes.class).value(),
+                is(new String[]{"application/vnd.default+json"}));
+        assertThat(method.getAnnotation(Produces.class), not(nullValue()));
+        assertThat(method.getAnnotation(Produces.class).value(),
+                is(new String[]{"application/vnd.ctx.query.query1+json"}));
+    }
+
+    @Test
+    public void shouldGenerateResourceInterfaceWithOneSynchronousPUTMethod() throws Exception {
+        generator.run(
+                restRamlWithDefaults()
+                        .with(resource("/some/path")
+                                .with(httpAction(PUT, "application/vnd.default+json")
+                                        .withResponseTypes("application/vnd.ctx.query.query1+json")
+                                        .with(mapping()
+                                                .withName("blah")
+                                                .withRequestType("application/vnd.default+json")
+                                                .withResponseType("application/vnd.ctx.query.query1+json")))
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+
+        final List<Method> methods = methodsOf(interfaceClass);
+        assertThat(methods, hasSize(1));
+        final Method method = methods.get(0);
+        assertThat(method.getReturnType(), equalTo(Response.class));
+        assertThat(method.getAnnotation(PUT.class), not(nullValue()));
+        assertThat(method.getAnnotation(Consumes.class), not(nullValue()));
+        assertThat(method.getAnnotation(Consumes.class).value(),
+                is(new String[]{"application/vnd.default+json"}));
+        assertThat(method.getAnnotation(Produces.class), not(nullValue()));
+        assertThat(method.getAnnotation(Produces.class).value(),
+                is(new String[]{"application/vnd.ctx.query.query1+json"}));
+    }
+
+    @Test
+    public void shouldGenerateResourceInterfaceWithOneSynchronousPATCHMethod() throws Exception {
+        generator.run(
+                restRamlWithDefaults()
+                        .with(resource("/some/path")
+                                .with(httpAction(PATCH, "application/vnd.default+json")
+                                        .withResponseTypes("application/vnd.ctx.query.query1+json")
+                                        .with(mapping()
+                                                .withName("blah")
+                                                .withRequestType("application/vnd.default+json")
+                                                .withResponseType("application/vnd.ctx.query.query1+json")))
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+
+        final List<Method> methods = methodsOf(interfaceClass);
+        assertThat(methods, hasSize(1));
+        final Method method = methods.get(0);
+        assertThat(method.getReturnType(), equalTo(Response.class));
+        assertThat(method.getAnnotation(PATCH.class), not(nullValue()));
+        assertThat(method.getAnnotation(Consumes.class), not(nullValue()));
+        assertThat(method.getAnnotation(Consumes.class).value(),
+                is(new String[]{"application/vnd.default+json"}));
+        assertThat(method.getAnnotation(Produces.class), not(nullValue()));
+        assertThat(method.getAnnotation(Produces.class).value(),
+                is(new String[]{"application/vnd.ctx.query.query1+json"}));
+    }
+
+    @Test
     public void shouldGenerateResourceInterfaceWithOneGETMethod() throws Exception {
         generator.run(
                 restRamlWithDefaults()
@@ -214,7 +382,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
 
 
     @Test
-    public void interfaceShouldContainMethodWithBodyParameter() throws Exception {
+    public void shouldGenerateInterfaceThatContainsMethodWithBodyParameter() throws Exception {
 
         generator.run(
                 restRamlWithDefaults()
@@ -233,7 +401,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     }
 
     @Test
-    public void interfaceShouldContainMethodWithPathParamAndBodyParam() throws Exception {
+    public void shouldGenerateInterfaceThatContainsMethodWithPathParamAndBodyParam() throws Exception {
         generator.run(
                 restRamlWithDefaults()
                         .with(defaultPostResource()
@@ -263,7 +431,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     }
 
     @Test
-    public void interfaceShouldContainMethodWithTwoPathParamsAndBodyParam() throws Exception {
+    public void shouldGenerateInterfaceThatContainsMethodWithTwoPathParamsAndBodyParam() throws Exception {
         generator.run(
                 restRamlWithDefaults()
                         .with(defaultPostResource()
@@ -366,7 +534,6 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
 
     }
 
-
     @Test
     public void shouldGenerateResourceClassContainingOneMethod() throws Exception {
         generator.run(
@@ -386,7 +553,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     }
 
     @Test
-    public void shouldGenerateResourceClassContaining4Methods() throws Exception {
+    public void shouldGenerateResourceClassContainingFourMethods() throws Exception {
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/some/path/{p1}", "p1")
@@ -412,7 +579,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     }
 
     @Test
-    public void classShouldContainMethodWithPathParamAndBodyParam() throws Exception {
+    public void shouldGenerateClassContainingMethodWithPathParamAndBodyParam() throws Exception {
         generator.run(
                 restRamlWithDefaults()
                         .with(defaultPostResource()
@@ -439,7 +606,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     }
 
     @Test
-    public void classShouldContainMethodWith3PathParamsAnd1BodyParam() throws Exception {
+    public void shouldGenerateClassContainingMethodWithThreePathParamsAndOneBodyParam() throws Exception {
         generator.run(
                 restRamlWithDefaults()
                         .with(defaultPostResource()
@@ -500,6 +667,129 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithDefaults()
                         .with(defaultPostResource()
+                                .withRelativeUri("/some/path")
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        List<Method> methods = methodsOf(class1);
+        assertThat(methods, hasSize(1));
+        Method method = methods.get(0);
+        assertThat(method.getReturnType(), equalTo(Response.class));
+        assertThat(method.getParameterCount(), is(1));
+        assertThat(method.getParameters()[0].getType(), equalTo(JsonObject.class));
+    }
+
+    @Test
+    public void shouldGenerateResourceClassWithOneSynchronousPOSTMethod() throws Exception {
+        generator.run(
+                restRamlWithDefaults()
+                        .with(resource("/some/path")
+                                .with(httpAction(POST, "application/vnd.default+json")
+                                        .withResponseTypes("application/vnd.ctx.query.query1+json")
+                                        .with(mapping()
+                                                .withName("blah")
+                                                .withRequestType("application/vnd.default+json")
+                                                .withResponseType("application/vnd.ctx.query.query1+json")))
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        List<Method> methods = methodsOf(class1);
+        assertThat(methods, hasSize(1));
+        Method method = methods.get(0);
+        assertThat(method.getReturnType(), equalTo(Response.class));
+        assertThat(method.getParameterCount(), is(1));
+        assertThat(method.getParameters()[0].getType(), equalTo(JsonObject.class));
+    }
+
+    @Test
+    public void shouldGenerateResourceClassWithOnePUTMethod() throws Exception {
+        generator.run(
+                restRamlWithDefaults()
+                        .with(defaultPutResource()
+                                .withRelativeUri("/some/path")
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        List<Method> methods = methodsOf(class1);
+        assertThat(methods, hasSize(1));
+        Method method = methods.get(0);
+        assertThat(method.getReturnType(), equalTo(Response.class));
+        assertThat(method.getParameterCount(), is(1));
+        assertThat(method.getParameters()[0].getType(), equalTo(JsonObject.class));
+    }
+
+    @Test
+    public void shouldGenerateResourceClassWithOneSynchronousPUTMethod() throws Exception {
+        generator.run(
+                restRamlWithDefaults()
+                        .with(resource("/some/path")
+                                .with(httpAction(PUT, "application/vnd.default+json")
+                                        .withResponseTypes("application/vnd.ctx.query.query1+json")
+                                        .with(mapping()
+                                                .withName("blah")
+                                                .withRequestType("application/vnd.default+json")
+                                                .withResponseType("application/vnd.ctx.query.query1+json")))
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        List<Method> methods = methodsOf(class1);
+        assertThat(methods, hasSize(1));
+        Method method = methods.get(0);
+        assertThat(method.getReturnType(), equalTo(Response.class));
+        assertThat(method.getParameterCount(), is(1));
+        assertThat(method.getParameters()[0].getType(), equalTo(JsonObject.class));
+    }
+
+    @Test
+    public void shouldGenerateResourceClassWithOnePATCHMethod() throws Exception {
+        generator.run(
+                restRamlWithDefaults()
+                        .with(defaultPatchResource()
+                                .withRelativeUri("/some/path")
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        List<Method> methods = methodsOf(class1);
+        assertThat(methods, hasSize(1));
+        Method method = methods.get(0);
+        assertThat(method.getReturnType(), equalTo(Response.class));
+        assertThat(method.getParameterCount(), is(1));
+        assertThat(method.getParameters()[0].getType(), equalTo(JsonObject.class));
+    }
+
+    @Test
+    public void shouldGenerateResourceClassWithOneSynchronousPATCHMethod() throws Exception {
+        generator.run(
+                restRamlWithDefaults()
+                        .with(resource("/some/path")
+                                .with(httpAction(PATCH, "application/vnd.default+json")
+                                        .withResponseTypes("application/vnd.ctx.query.query1+json")
+                                        .with(mapping()
+                                                .withName("blah")
+                                                .withRequestType("application/vnd.default+json")
+                                                .withResponseType("application/vnd.ctx.query.query1+json")))
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        List<Method> methods = methodsOf(class1);
+        assertThat(methods, hasSize(1));
+        Method method = methods.get(0);
+        assertThat(method.getReturnType(), equalTo(Response.class));
+        assertThat(method.getParameterCount(), is(1));
+        assertThat(method.getParameters()[0].getType(), equalTo(JsonObject.class));
+    }
+
+    @Test
+    public void shouldGenerateResourceClassWithOneDELETEMethod() throws Exception {
+        generator.run(
+                restRamlWithDefaults()
+                        .with(defaultDeleteResource()
                                 .withRelativeUri("/some/path")
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
@@ -620,7 +910,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     }
 
     @Test
-    public void classShouldContainQueryParam() throws Exception {
+    public void shouldGenerateClassContainingQueryParam() throws Exception {
         generator.run(
                 restRamlWithQueryApiDefaults().with(
                         resource("/users").with(httpAction(GET)
@@ -658,7 +948,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     }
 
     @Test
-    public void classShouldContainThreeQueryParams() throws Exception {
+    public void shouldGenerateClassContainingThreeQueryParams() throws Exception {
         generator.run(
                 restRamlWithQueryApiDefaults().with(
                         resource("/users").with(httpAction(GET)

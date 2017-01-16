@@ -111,7 +111,7 @@ class JaxRsApplicationCodeGenerator {
     private CodeBlock statementsToAddClassToSetForEach(final Collection<String> implementationNames) {
         final CodeBlock.Builder codeBlockBuilder = CodeBlock.builder();
 
-        implementationNames.stream().forEach(implementationClassName ->
+        implementationNames.forEach(implementationClassName ->
                 codeBlockBuilder.addStatement("classes.add($T.class)", classNameTypeOf(implementationClassName)));
 
         return codeBlockBuilder.build();

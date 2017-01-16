@@ -21,7 +21,7 @@ public class RequestContentTypeRamlValidatorTest {
     @Test
     public void shouldPassIfMediaTypeContainsAValidCommand() throws Exception {
 
-        new RequestContentTypeRamlValidator().validate(
+        new RequestContentTypeRamlValidator(POST).validate(
                 raml()
                         .with(resource()
                                 .with(httpAction(POST, "application/vnd.command1+json")))
@@ -29,9 +29,20 @@ public class RequestContentTypeRamlValidatorTest {
     }
 
     @Test
+    public void shouldPassIfAllMediaTypesContainAValidCommand() throws Exception {
+
+        new RequestContentTypeRamlValidator(POST, PUT).validate(
+                raml()
+                        .with(resource()
+                                .with(httpAction(POST, "application/vnd.command1+json"))
+                                .with(httpAction(PUT, "application/vnd.command1+json")))
+                        .build());
+    }
+
+    @Test
     public void shouldIgnoreInvalidMediaTypesInNonPOSTActions() throws Exception {
 
-        new RequestContentTypeRamlValidator().validate(
+        new RequestContentTypeRamlValidator(POST).validate(
                 raml()
                         .with(resource()
                                 .with(httpAction(GET, "application/vnd.command1+json"))
@@ -40,6 +51,33 @@ public class RequestContentTypeRamlValidatorTest {
                                 .with(httpAction(PUT, "application/vnd.command4+json"))
                                 .with(httpAction(OPTIONS, "application/vnd.command5+json"))
                         )
+                        .build());
+    }
+
+    @Test
+    public void shouldNotPassIfMediaTypeContainsInvalidCommand() throws Exception {
+
+        exception.expect(RamlValidationException.class);
+        exception.expectMessage("Request type not set");
+
+        new RequestContentTypeRamlValidator(POST).validate(
+                raml()
+                        .with(resource()
+                                .with(httpAction(POST)))
+                        .build());
+    }
+
+    @Test
+    public void shouldNotPassIfAllMediaTypesContainInvalidCommand() throws Exception {
+
+        exception.expect(RamlValidationException.class);
+        exception.expectMessage("Request type not set");
+
+        new RequestContentTypeRamlValidator(POST, PUT).validate(
+                raml()
+                        .with(resource()
+                                .with(httpAction(POST, "application/vnd.command1+json"))
+                                .with(httpAction(PUT)))
                         .build());
     }
 }

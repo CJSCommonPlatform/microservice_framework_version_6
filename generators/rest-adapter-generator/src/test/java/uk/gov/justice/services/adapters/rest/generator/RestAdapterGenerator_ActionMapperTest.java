@@ -5,8 +5,11 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.raml.model.ActionType.DELETE;
 import static org.raml.model.ActionType.GET;
+import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
+import static org.raml.model.ActionType.PUT;
 import static uk.gov.justice.services.generators.test.utils.builder.HeadersBuilder.headersWith;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.defaultGetAction;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
@@ -22,9 +25,14 @@ import java.lang.reflect.Method;
 import javax.inject.Named;
 
 import org.hamcrest.Matchers;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGeneratorTest {
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @SuppressWarnings("unchecked")
     @Test
@@ -127,6 +135,105 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
     }
 
     @Test
+    public void shouldReturnActionNameForPUTResource() throws Exception {
+        generator.run(
+                restRamlWithDefaults()
+                        .with(resource("/case")
+                                .with(httpAction(PUT)
+                                        .with(mapping()
+                                                .withName("contextB.someAction")
+                                                .withRequestType("application/vnd.ctx.command.somemediatype1+json"))
+                                        .with(mapping()
+                                                .withName("contextB.someOtherAction")
+                                                .withRequestType("application/vnd.ctx.command.somemediatype2+json"))
+                                        .withMediaType("application/vnd.ctx.command.somemediatype1+json", "json/schema/somemediatype1.json")
+                                        .withMediaType("application/vnd.ctx.command.somemediatype2+json", "json/schema/somemediatype2.json")
+                                )
+
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
+
+        final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCaseResourceActionMapper");
+        final Object mapperObject = mapperClass.newInstance();
+        final Method actionMethod = methodOf(mapperClass.getSuperclass(), "actionOf");
+
+        final Object firstAction = actionMethod.invoke(mapperObject, "putContextBSomeActionCase", "PUT",
+                headersWith("Content-Type", "application/vnd.ctx.command.somemediatype1+json"));
+        assertThat(firstAction, is("contextB.someAction"));
+
+        final Object secondAction = actionMethod.invoke(mapperObject, "putContextBSomeOtherActionCase", "PUT",
+                headersWith("Content-Type", "application/vnd.ctx.command.somemediatype2+json"));
+        assertThat(secondAction, is("contextB.someOtherAction"));
+
+    }
+
+    @Test
+    public void shouldReturnActionNameForPATCHResource() throws Exception {
+        generator.run(
+                restRamlWithDefaults()
+                        .with(resource("/case")
+                                .with(httpAction(PATCH)
+                                        .with(mapping()
+                                                .withName("contextB.someAction")
+                                                .withRequestType("application/vnd.ctx.command.somemediatype1+json"))
+                                        .with(mapping()
+                                                .withName("contextB.someOtherAction")
+                                                .withRequestType("application/vnd.ctx.command.somemediatype2+json"))
+                                        .withMediaType("application/vnd.ctx.command.somemediatype1+json", "json/schema/somemediatype1.json")
+                                        .withMediaType("application/vnd.ctx.command.somemediatype2+json", "json/schema/somemediatype2.json")
+                                )
+
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
+
+        final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCaseResourceActionMapper");
+        final Object mapperObject = mapperClass.newInstance();
+        final Method actionMethod = methodOf(mapperClass.getSuperclass(), "actionOf");
+
+        final Object firstAction = actionMethod.invoke(mapperObject, "patchContextBSomeActionCase", "PATCH",
+                headersWith("Content-Type", "application/vnd.ctx.command.somemediatype1+json"));
+        assertThat(firstAction, is("contextB.someAction"));
+
+        final Object secondAction = actionMethod.invoke(mapperObject, "patchContextBSomeOtherActionCase", "PATCH",
+                headersWith("Content-Type", "application/vnd.ctx.command.somemediatype2+json"));
+        assertThat(secondAction, is("contextB.someOtherAction"));
+
+    }
+
+    @Test
+    public void shouldReturnActionNameForDELETEResource() throws Exception {
+        generator.run(
+                restRamlWithDefaults()
+                        .with(resource("/case")
+                                .with(httpAction(DELETE)
+                                        .with(mapping()
+                                                .withName("contextB.someAction")
+                                                .withRequestType("application/vnd.ctx.command.somemediatype1+json"))
+                                        .with(mapping()
+                                                .withName("contextB.someOtherAction")
+                                                .withRequestType("application/vnd.ctx.command.somemediatype2+json"))
+                                        .withMediaType("application/vnd.ctx.command.somemediatype1+json", "json/schema/somemediatype1.json")
+                                        .withMediaType("application/vnd.ctx.command.somemediatype2+json", "json/schema/somemediatype2.json")
+                                )
+
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
+
+        final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCaseResourceActionMapper");
+        final Object mapperObject = mapperClass.newInstance();
+        final Method actionMethod = methodOf(mapperClass.getSuperclass(), "actionOf");
+
+        final Object firstAction = actionMethod.invoke(mapperObject, "deleteContextBSomeActionCase", "DELETE",
+                headersWith("Content-Type", "application/vnd.ctx.command.somemediatype1+json"));
+        assertThat(firstAction, is("contextB.someAction"));
+
+        final Object secondAction = actionMethod.invoke(mapperObject, "deleteContextBSomeOtherActionCase", "DELETE",
+                headersWith("Content-Type", "application/vnd.ctx.command.somemediatype2+json"));
+        assertThat(secondAction, is("contextB.someOtherAction"));
+
+    }
+
+    @Test
     public void shouldReturnActionNameForPOSTResourceSameActionMappedToTwoMediaTypes() throws Exception {
         generator.run(
                 restRamlWithDefaults()
@@ -209,5 +316,4 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
         assertThat(mapperClass.getAnnotation(Named.class).value(), Matchers.is("DefaultStatusResourceActionMapper"));
 
     }
-
 }

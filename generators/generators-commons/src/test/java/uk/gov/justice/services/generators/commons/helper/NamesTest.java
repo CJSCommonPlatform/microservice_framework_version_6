@@ -5,6 +5,7 @@ import static net.trajano.commons.testing.UtilityClassTestUtil.assertUtilityClas
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
+import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.services.generators.commons.helper.Names.applicationNameFrom;
 import static uk.gov.justice.services.generators.commons.helper.Names.baseUriPathWithoutContext;
@@ -22,6 +23,8 @@ import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuil
 
 import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.services.generators.test.utils.builder.MappingBuilder;
+
+import java.util.stream.Stream;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -49,71 +52,101 @@ public class NamesTest {
     }
 
     @Test
-    public void shouldBuildResourceMethodName() throws Exception {
-        MappingBuilder mappingBuilder = mapping().withName("command.create-user").withRequestType("application/vnd.command.create-user+json");
-        Action action = httpAction().withHttpActionType(POST).withDescription(mappingDescriptionWith(mappingBuilder).build()).build();
+    public void shouldBuildResourceMethodNameFromActionAndMimeType() throws Exception {
+        final MappingBuilder mappingBuilder = mapping().withName("command.create-user").withRequestType("application/vnd.command.create-user+json");
+        final Action action = httpAction().withHttpActionType(POST).withDescription(mappingDescriptionWith(mappingBuilder).build()).build();
 
         action.setResource(resource().withRelativeUri("test").build());
-        String shortMimeType = Names.buildResourceMethodName(action, new MimeType("application/vnd.command.create-user+json"));
+        final String shortMimeType = Names.buildResourceMethodName(action, new MimeType("application/vnd.command.create-user+json"));
         assertThat(shortMimeType, is("postCommandCreateUserTest"));
     }
 
     @Test
-    public void shouldBuildResourceMethodNameWithNoMimeType() throws Exception {
-        Action action = httpAction().withHttpActionType(POST).build();
+    public void shouldBuildResourceMethodNameFromActionIfNoMapping() throws Exception {
+        final MappingBuilder mappingBuilder = mapping().withName("command.create-user").withRequestType("application/vnd.command.create-user+json");
+        final Action action = httpAction().withHttpActionType(POST).build();
+
         action.setResource(resource().withRelativeUri("test").build());
-        String shortMimeType = buildResourceMethodNameWithNoMimeType(action);
+        final String shortMimeType = Names.buildResourceMethodName(action, new MimeType("application/vnd.command.create-user+json"));
+        assertThat(shortMimeType, is("postTest"));
+    }
+
+    @Test
+    public void shouldBuildResourceMethodNameFromActionAndNullMimeType() throws Exception {
+        final MappingBuilder mappingBuilder = mapping().withName("command.create-user").withRequestType("application/vnd.command.create-user+json");
+        final Action action = httpAction().withHttpActionType(POST).withDescription(mappingDescriptionWith(mappingBuilder).build()).build();
+
+        action.setResource(resource().withRelativeUri("test").build());
+        final String shortMimeType = Names.buildResourceMethodName(action, null);
+        assertThat(shortMimeType, is("postTest"));
+    }
+
+    @Test
+    public void shouldBuildResourceMethodNameFromAction() throws Exception {
+        final MappingBuilder mappingBuilder = mapping().withName("command.create-user").withRequestType("application/vnd.command.create-user+json");
+        final Action action = httpAction().withHttpActionType(GET).withDescription(mappingDescriptionWith(mappingBuilder).build()).build();
+
+        action.setResource(resource().withRelativeUri("test").build());
+        final String shortMimeType = Names.buildResourceMethodNameWithNoMimeType(action);
+        assertThat(shortMimeType, is("getTest"));
+    }
+
+    @Test
+    public void shouldBuildResourceMethodNameWithNoMimeType() throws Exception {
+        final Action action = httpAction().withHttpActionType(POST).build();
+        action.setResource(resource().withRelativeUri("test").build());
+        final String shortMimeType = buildResourceMethodNameWithNoMimeType(action);
         assertThat(shortMimeType, is("postTest"));
     }
 
     @Test
     public void shouldReturnInterfaceName() throws Exception {
-        Resource resource = resource().withDefaultPostAction().build();
-        String interfaceName = resourceInterfaceNameOf(resource);
+        final Resource resource = resource().withDefaultPostAction().build();
+        final String interfaceName = resourceInterfaceNameOf(resource);
         assertThat(interfaceName, is("SomecontextControllerCommandResource"));
     }
 
     @Test
     public void shouldReturnApplicationName() throws Exception {
-        Raml raml = restRamlWithDefaults()
+        final Raml raml = restRamlWithDefaults()
                 .withBaseUri("http://localhost:8080/warname/command/api/rest/service")
                 .build();
-        String applicationName = applicationNameFrom(raml);
+        final String applicationName = applicationNameFrom(raml);
         assertThat(applicationName, is("CommandApiRestServiceApplication"));
     }
 
     @Test(expected = IllegalStateException.class)
     public void shouldThrowExceptionForMalformedUri() throws Exception {
-        Raml raml = restRamlWithDefaults().withBaseUri("blah").build();
+        final Raml raml = restRamlWithDefaults().withBaseUri("blah").build();
         applicationNameFrom(raml);
     }
 
     @Test
     public void shouldReturnPathIfNoContextFound() throws Exception {
-        Raml raml = restRamlWithDefaults().withBaseUri("http://localhost:8080/webcontext").build();
-        String applicationName = applicationNameFrom(raml);
+        final Raml raml = restRamlWithDefaults().withBaseUri("http://localhost:8080/webcontext").build();
+        final String applicationName = applicationNameFrom(raml);
         assertThat(applicationName, is("WebcontextApplication"));
     }
 
     @Test
     public void shouldRemoveContextFromBaseUri() throws Exception {
-        Raml raml = restRamlWithDefaults()
+        final Raml raml = restRamlWithDefaults()
                 .withBaseUri("http://localhost:8080/warname/command/api/rest/service")
                 .build();
-        String applicationName = baseUriPathWithoutContext(raml);
+        final String applicationName = baseUriPathWithoutContext(raml);
         assertThat(applicationName, is("/command/api/rest/service"));
     }
 
     @Test(expected = IllegalStateException.class)
     public void shouldThrowExceptionForMalformedBaseUri() throws Exception {
-        Raml raml = restRamlWithDefaults().withBaseUri("blah").build();
+        final Raml raml = restRamlWithDefaults().withBaseUri("blah").build();
         baseUriPathWithoutContext(raml);
     }
 
     @Test
     public void shouldThrowExceptionForBaseUriThatDoesNotHaveEnoughPathElements() throws Exception {
-        Raml raml = restRamlWithDefaults().withBaseUri("http://localhost:8080/webcontext").build();
-        String applicationName = baseUriPathWithoutContext(raml);
+        final Raml raml = restRamlWithDefaults().withBaseUri("http://localhost:8080/webcontext").build();
+        final String applicationName = baseUriPathWithoutContext(raml);
         assertThat(applicationName, is("/webcontext"));
     }
 
@@ -131,7 +164,7 @@ public class NamesTest {
 
     @Test
     public void shouldReturnTheClassNameForAResource() throws Exception {
-        Resource resource = resource().withRelativeUri("/context.command").build();
+        final Resource resource = resource().withRelativeUri("/context.command").build();
         assertThat(mapperClassNameOf(resource), is("DefaultContextCommandResourceActionMapper"));
     }
 
@@ -152,4 +185,15 @@ public class NamesTest {
         assertThat(camelCase("this.is.a.test"), is("thisIsATest"));
     }
 
+    @Test
+    public void shouldConstructDelimitedStringOfMimeTypes() throws Exception {
+        final String expectedResult = "command.create-user,command.update-user,command.delete-user";
+
+        final Stream<MimeType> mimeTypeStream = Stream.of(
+                new MimeType("application/vnd.command.create-user+json"),
+                new MimeType("application/vnd.command.update-user+json"),
+                new MimeType("application/vnd.command.delete-user+json"));
+
+        assertThat(Names.namesListStringFrom(mimeTypeStream, ","), is(expectedResult));
+    }
 }

@@ -3,6 +3,7 @@ package uk.gov.justice.services.adapters.rest.generator;
 
 import static java.util.Collections.emptyMap;
 import static org.raml.model.ActionType.GET;
+import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.raml;
@@ -78,4 +79,45 @@ public class RestAdapterGeneratorErrorHandlingTest {
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
     }
 
+    @Test
+    public void shouldThrowExceptionIfRequestTypeNotSetForPATCHAction() throws Exception {
+
+        exception.expect(RamlValidationException.class);
+        exception.expectMessage("Request type not set");
+
+        generator.run(
+                restRamlWithDefaults().with(
+                        resource("/path")
+                                .with(httpAction(PATCH))
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+    }
+
+    @Test
+    public void shouldThrowExceptionIfRequestTypeNotSetForPUTAction() throws Exception {
+
+        exception.expect(RamlValidationException.class);
+        exception.expectMessage("Request type not set");
+
+        generator.run(
+                restRamlWithDefaults().with(
+                        resource("/path")
+                                .with(httpAction(PATCH))
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+    }
+
+    @Test
+    public void shouldThrowExceptionIfRequestTypeNotSetForDELETEAction() throws Exception {
+
+        exception.expect(RamlValidationException.class);
+        exception.expectMessage("Request type not set");
+
+        generator.run(
+                restRamlWithDefaults().with(
+                        resource("/path")
+                                .with(httpAction(PATCH))
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+    }
 }

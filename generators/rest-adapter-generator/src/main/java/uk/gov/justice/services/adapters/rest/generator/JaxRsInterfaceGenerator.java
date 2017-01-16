@@ -8,10 +8,8 @@ import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static org.apache.commons.lang.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang.StringUtils.strip;
-import static org.raml.model.ActionType.GET;
-import static org.raml.model.ActionType.POST;
-import static uk.gov.justice.services.adapters.rest.generator.Actions.responseMimeTypesOf;
 import static uk.gov.justice.services.adapters.rest.generator.Generators.byMimeTypeOrder;
+import static uk.gov.justice.services.generators.commons.helper.Actions.responseMimeTypesOf;
 import static uk.gov.justice.services.generators.commons.helper.Names.DEFAULT_ANNOTATION_PARAMETER;
 import static uk.gov.justice.services.generators.commons.helper.Names.GENERIC_PAYLOAD_ARGUMENT_NAME;
 import static uk.gov.justice.services.generators.commons.helper.Names.buildResourceMethodName;
@@ -71,7 +69,7 @@ class JaxRsInterfaceGenerator {
      * @param resource the resource to generate as an implementation class
      * @return a {@link TypeSpec} that represents the implementation class
      */
-    TypeSpec generateFor(final Resource resource) {
+    private TypeSpec generateFor(final Resource resource) {
         final TypeSpec.Builder interfaceSpecBuilder = interfaceSpecFor(resource);
 
         resource.getActions().values().forEach(action ->
@@ -182,26 +180,44 @@ class JaxRsInterfaceGenerator {
                                                       final String resourceMethodName,
                                                       final Collection<MimeType> responseMimeTypes) {
 
-        final ActionType actionType = action.getType();
         final Map<String, QueryParameter> queryParams = action.getQueryParameters();
         final Map<String, UriParameter> pathParams = action.getResource().getUriParameters();
-        final AnnotationSpec actionTypeAnnotation;
-
-        if (actionType == GET) {
-            actionTypeAnnotation = AnnotationSpec.builder(javax.ws.rs.GET.class).build();
-        } else if (actionType == POST) {
-            actionTypeAnnotation = AnnotationSpec.builder(javax.ws.rs.POST.class).build();
-        } else {
-            throw new IllegalStateException(String.format("Unsupported httpAction type %s", actionType));
-        }
 
         return methodBuilder(resourceMethodName)
                 .addModifiers(PUBLIC, ABSTRACT)
-                .addAnnotation(actionTypeAnnotation)
+                .addAnnotation(annotationFor(action.getType()))
                 .addAnnotations(annotationsForProduces(responseMimeTypes))
                 .addParameters(methodPathParams(pathParams.keySet()))
                 .addParameters(methodQueryParams(queryParams.keySet()))
                 .returns(Response.class);
+    }
+
+    /**
+     * Generate HttpMethod annotation for a given {@link ActionType}.
+     *
+     * @param actionType the action type to generate the annoation for
+     * @return the annotaion representing the HttpMethod type
+     */
+    private AnnotationSpec annotationFor(final ActionType actionType) {
+        switch (actionType) {
+            case DELETE:
+                return AnnotationSpec.builder(javax.ws.rs.DELETE.class).build();
+
+            case GET:
+                return AnnotationSpec.builder(javax.ws.rs.GET.class).build();
+
+            case PATCH:
+                return AnnotationSpec.builder(uk.gov.justice.services.rest.annotation.PATCH.class).build();
+
+            case POST:
+                return AnnotationSpec.builder(javax.ws.rs.POST.class).build();
+
+            case PUT:
+                return AnnotationSpec.builder(javax.ws.rs.PUT.class).build();
+
+            default:
+                throw new IllegalStateException(String.format("Unsupported httpAction type %s", actionType));
+        }
     }
 
     /**
@@ -253,7 +269,7 @@ class JaxRsInterfaceGenerator {
         if (!responseMimeTypes.isEmpty()) {
             final AnnotationSpec.Builder annotationBuilder = AnnotationSpec.builder(Produces.class);
 
-            responseMimeTypes.stream().forEach(responseMimeType ->
+            responseMimeTypes.forEach(responseMimeType ->
                     annotationBuilder.addMember(DEFAULT_ANNOTATION_PARAMETER, ANNOTATION_FORMAT, responseMimeType.getType()));
 
             specs.add(annotationBuilder.build());

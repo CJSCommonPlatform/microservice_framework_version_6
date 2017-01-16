@@ -33,6 +33,23 @@ protocols: [ HTTP, HTTPS ]
           application/vnd.example.recipes+json:
             schema: !include json/schema/example.search-recipes.json
             example: !include json/recipes.json
+  post:
+    description: |
+        ...
+        (mapping):
+            requestType: application/vnd.example.query-recipes+json
+            name: example.query-recipes
+        ...
+    body:
+        application/vnd.example.query-recipes+json:
+            schema: !include json/schema/example.query-recipes.json
+            example: !include json/query-recipes.json
+    responses:
+       200:
+         body:
+           application/vnd.example.recipes+json:
+             schema: !include json/schema/example.search-recipes.json
+             example: !include json/recipes.json
 
 /recipes/{recipeId}:
   description: return a recipe

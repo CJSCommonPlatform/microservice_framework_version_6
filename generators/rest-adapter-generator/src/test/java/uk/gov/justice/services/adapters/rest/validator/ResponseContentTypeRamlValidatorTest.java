@@ -17,7 +17,7 @@ public class ResponseContentTypeRamlValidatorTest {
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
-    private RamlValidator validator = new ResponseContentTypeRamlValidator();
+    private RamlValidator validator = new ResponseContentTypeRamlValidator(GET);
 
     @Test
     public void shouldPassIfResponseContentTypeContainsAVendorSpecificJsonMediaType() throws Exception {

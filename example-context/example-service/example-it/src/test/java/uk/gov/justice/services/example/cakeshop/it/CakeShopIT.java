@@ -6,6 +6,7 @@ import static com.jayway.jsonassert.JsonAssert.with;
 import static java.lang.String.format;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static javax.json.Json.createArrayBuilder;
@@ -35,7 +36,6 @@ import uk.gov.justice.services.example.cakeshop.it.util.StandaloneEventLogJdbcRe
 import uk.gov.justice.services.example.cakeshop.it.util.StandaloneSnapshotJdbcRepository;
 import uk.gov.justice.services.example.cakeshop.it.util.StandaloneStreamStatusJdbcRepository;
 import uk.gov.justice.services.example.cakeshop.it.util.TestProperties;
-import uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils;
 import uk.gov.justice.services.test.utils.core.http.HttpResponsePoller;
 
 import java.net.URISyntaxException;
@@ -79,7 +79,6 @@ import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class CakeShopIT {
@@ -214,12 +213,7 @@ public class CakeShopIT {
     public final void concurrentAddAndRemoveRecipe() throws InterruptedException {
         final ExecutorService exec = Executors.newFixedThreadPool(5);
         for (int i = 0; i < 10; i++) {
-            exec.execute(new Runnable() {
-                @Override
-                public void run() {
-                    shouldRegisterRecipeRemovedEvent();
-                }
-            });
+            exec.execute(this::shouldRegisterRecipeRemovedEvent);
         }
         exec.shutdown();
         exec.awaitTermination(30, TimeUnit.SECONDS);
@@ -276,6 +270,22 @@ public class CakeShopIT {
     }
 
     @Test
+    public void shouldReturn200WhenPostingQueryForRecipes() throws Exception {
+        final Response response = sendTo("http://localhost:8080/example-query-api/query/api/rest/cakeshop/recipes")
+                .request()
+                .accept("application/vnd.example.recipes+json")
+                .post(entity(
+                        jsonObject()
+                                .add("pagesize", 10)
+                                .add("name", "Vanilla cake")
+                                .add("glutenFree", false)
+                                .build().toString(),
+                        "application/vnd.example.query-recipes+json"));
+
+        assertThat(response.getStatus(), is(OK));
+    }
+
+    @Test
     public void shouldReturn400WhenMandatoryQueryParamNotProvided() throws Exception {
         final Response response = sendTo(RECIPES_RESOURCE_QUERY_URI).request().accept(QUERY_RECIPES_MEDIA_TYPE).get();
         assertThat(response.getStatus(), is(BAD_REQUEST));
@@ -311,7 +321,7 @@ public class CakeShopIT {
 
     @Test
     public void shouldFailTransactionOnDBFailureAndRedirectEventToDLQ() throws Exception {
-        try (final Session jmsSession = jmsSession();) {
+        try (final Session jmsSession = jmsSession()) {
             final MessageConsumer dlqConsumer = queueConsumerOf(jmsSession, "DLQ");
             clear(dlqConsumer);
 
@@ -343,7 +353,7 @@ public class CakeShopIT {
 
 
         await().until(() -> {
-            final String responseBody = recipesQueryResult(asList(new BasicNameValuePair("pagesize", "30"))).body();
+            final String responseBody = recipesQueryResult(singletonList(new BasicNameValuePair("pagesize", "30"))).body();
             return responseBody.contains(recipeId) && responseBody.contains(recipeId2);
         });
 
@@ -488,7 +498,7 @@ public class CakeShopIT {
 
     @Test
     public void shouldPublishEventToPublicTopic() throws Exception {
-        try (final Session jmsSession = jmsSession();) {
+        try (final Session jmsSession = jmsSession()) {
             final MessageConsumer publicTopicConsumer = topicConsumerOf(jmsSession, "public.event");
 
             final String recipeId = "163af847-effb-46a9-96bc-32a0f7526e13";
@@ -514,7 +524,7 @@ public class CakeShopIT {
         await().until(() -> queryForRecipe(recipeId).httpCode() == OK);
 
         sendTo(RECIPES_RESOURCE_URI + recipeId).request()
-                .post(renameRecipeEntity("New Name"));
+                .put(renameRecipeEntity("New Name"));
 
         await().until(() -> queryForRecipe(recipeId).body().contains("New Name"));
     }
@@ -696,7 +706,7 @@ public class CakeShopIT {
     }
 
     private void closeCakeShopDb() throws SQLException {
-        try (final Connection connection = CAKE_SHOP_DS.getConnection();) {
+        try (final Connection connection = CAKE_SHOP_DS.getConnection()) {
             final Statement statement = connection.createStatement();
             statement.execute("SHUTDOWN");
         }
@@ -713,7 +723,7 @@ public class CakeShopIT {
     }
 
     private ApiResponse recipesQueryResult() {
-        return recipesQueryResult(asList(new BasicNameValuePair("pagesize", "50")));
+        return recipesQueryResult(singletonList(new BasicNameValuePair("pagesize", "50")));
     }
 
     private ApiResponse recipesQueryResult(final List<NameValuePair> queryParams) {

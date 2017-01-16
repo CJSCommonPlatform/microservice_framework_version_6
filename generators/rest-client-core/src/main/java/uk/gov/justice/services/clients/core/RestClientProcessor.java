@@ -3,6 +3,10 @@ package uk.gov.justice.services.clients.core;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toSet;
+import static javax.ws.rs.HttpMethod.DELETE;
+import static javax.ws.rs.HttpMethod.GET;
+import static javax.ws.rs.HttpMethod.POST;
+import static javax.ws.rs.HttpMethod.PUT;
 import static javax.ws.rs.client.Entity.entity;
 import static javax.ws.rs.core.Response.Status.ACCEPTED;
 import static javax.ws.rs.core.Response.Status.fromStatusCode;
@@ -49,6 +53,10 @@ public class RestClientProcessor {
 
     private static final String MEDIA_TYPE_PATTERN = "application/vnd.%s+json";
     private static final String CPPID = "CPPID";
+    private static final String CONTENT_TYPE_HEADER = "Content-type";
+    private static final String PATCH = "PATCH";
+    private static final String SENDING_REQUEST_MESSAGE = "Sending %s request to %s using message: %s";
+    private static final String SENT_REQUEST_MESSAGE = "Sent %s request %s and received: %s";
 
     @Inject
     StringToJsonObjectConverter stringToJsonObjectConverter;
@@ -63,12 +71,12 @@ public class RestClientProcessor {
     WebTargetFactory webTargetFactory;
 
     /**
-     * Make a GET request using the envelope provided to a specified endpoint.
+     * Make a synchronous GET request using the envelope provided to a specified endpoint.
      *
      * @param definition the endpoint definition
      * @param envelope   the envelope containing the payload and/or parameters to pass in the
      *                   request
-     * @return the response from that the endpoint returned for this request
+     * @return the response that the endpoint returned for this request
      */
     public JsonEnvelope get(final EndpointDefinition definition, final JsonEnvelope envelope) {
 
@@ -77,30 +85,17 @@ public class RestClientProcessor {
         final Builder builder = target.request(format(MEDIA_TYPE_PATTERN, definition.getResponseMediaType()));
         populateHeadersFromMetadata(builder, envelope.metadata());
 
-        trace(LOGGER, () -> String.format("Sending GET request to %s using message: %s", target.getUri().toString(), envelope));
+        trace(LOGGER, () -> String.format(SENDING_REQUEST_MESSAGE, GET, target.getUri().toString(), envelope));
 
         final Response response = builder.get();
 
-        trace(LOGGER, () -> String.format("Sent GET request %s and received: %s", envelope.metadata().id().toString(), toResponseTrace(response)));
+        trace(LOGGER, () -> String.format(SENT_REQUEST_MESSAGE, GET, envelope.metadata().id().toString(), toResponseTrace(response)));
 
-        final Response.Status status = fromStatusCode(response.getStatus());
-        switch (status) {
-            case OK:
-                final JsonObject responseAsJsonObject = stringToJsonObjectConverter.convert(response.readEntity(String.class));
-                return jsonObjectEnvelopeConverter.asEnvelope(addMetadataIfMissing(responseAsJsonObject, envelope.metadata(), response.getHeaderString(CPPID)));
-            case NOT_FOUND:
-                return enveloper.withMetadataFrom(envelope, envelope.metadata().name()).apply(null);
-            case FORBIDDEN:
-                throw new AccessControlViolationException(response.readEntity(String.class));
-            default:
-                throw new RuntimeException(format("GET request %s failed; expected 200 but got %s with reason \"%s\"",
-                        envelope.metadata().id().toString(), response.getStatus(), response.getStatusInfo().getReasonPhrase()));
-
-        }
+        return processedResponse(envelope, response);
     }
 
     /**
-     * Make a POST request using the envelope provided to a specified endpoint.
+     * Make an asynchronous POST request using the envelope provided to a specified endpoint.
      *
      * @param definition the endpoint definition
      * @param envelope   the envelope containing the payload and/or parameters to pass in the
@@ -112,18 +107,185 @@ public class RestClientProcessor {
         final Builder builder = target.request(format(MEDIA_TYPE_PATTERN, definition.getResponseMediaType()));
         populateHeadersFromMetadata(builder, envelope.metadata());
 
-        trace(LOGGER, () -> String.format("Sending POST request to %s using message: %s", target.getUri().toString(), envelope));
+        trace(LOGGER, () -> String.format(SENDING_REQUEST_MESSAGE, POST, target.getUri().toString(), envelope));
 
         final JsonObject requestBody = stripParamsFromPayload(definition, envelope);
         final Response response = builder.post(entity(requestBody.toString(), format(MEDIA_TYPE_PATTERN, envelope.metadata().name())));
 
-        trace(LOGGER, () -> String.format("Sent POST request %s and received: %s", envelope.metadata().id().toString(), toResponseTrace(response)));
+        trace(LOGGER, () -> String.format(SENT_REQUEST_MESSAGE, POST, envelope.metadata().id().toString(), toResponseTrace(response)));
 
+        checkForAcceptedResponse(response, envelope, POST);
+    }
+
+    /**
+     * Make a synchronous POST request using the envelope provided to a specified endpoint.
+     *
+     * @param definition the endpoint definition
+     * @param envelope   the envelope containing the payload and/or parameters to pass in the
+     *                   request
+     * @return the response that the endpoint returned for this request
+     */
+    public JsonEnvelope synchronousPost(final EndpointDefinition definition, final JsonEnvelope envelope) {
+        final WebTarget target = webTargetFactory.createWebTarget(definition, envelope);
+
+        final Builder builder = target.request(format(MEDIA_TYPE_PATTERN, definition.getResponseMediaType()));
+        populateHeadersFromMetadata(builder, envelope.metadata());
+
+        trace(LOGGER, () -> String.format(SENDING_REQUEST_MESSAGE, POST, target.getUri().toString(), envelope));
+
+        final JsonObject requestBody = stripParamsFromPayload(definition, envelope);
+        final Response response = builder.post(entity(requestBody.toString(), format(MEDIA_TYPE_PATTERN, envelope.metadata().name())));
+
+        trace(LOGGER, () -> String.format(SENT_REQUEST_MESSAGE, POST, envelope.metadata().id().toString(), toResponseTrace(response)));
+
+        return processedResponse(envelope, response);
+    }
+
+    /**
+     * Make an asynchronous PUT request using the envelope provided to a specified endpoint.
+     *
+     * @param definition the endpoint definition
+     * @param envelope   the envelope containing the payload and/or parameters to pass in the
+     *                   request
+     */
+    public void put(final EndpointDefinition definition, final JsonEnvelope envelope) {
+        final WebTarget target = webTargetFactory.createWebTarget(definition, envelope);
+
+        final Builder builder = target.request(format(MEDIA_TYPE_PATTERN, definition.getResponseMediaType()));
+        populateHeadersFromMetadata(builder, envelope.metadata());
+
+        trace(LOGGER, () -> String.format(SENDING_REQUEST_MESSAGE, PUT, target.getUri().toString(), envelope));
+
+        final JsonObject requestBody = stripParamsFromPayload(definition, envelope);
+        final Response response = builder.put(entity(requestBody.toString(), format(MEDIA_TYPE_PATTERN, envelope.metadata().name())));
+
+        trace(LOGGER, () -> String.format(SENT_REQUEST_MESSAGE, PUT, envelope.metadata().id().toString(), toResponseTrace(response)));
+
+        checkForAcceptedResponse(response, envelope, PUT);
+    }
+
+    /**
+     * Make a synchronous PUT request using the envelope provided to a specified endpoint.
+     *
+     * @param definition the endpoint definition
+     * @param envelope   the envelope containing the payload and/or parameters to pass in the
+     *                   request
+     * @return the response that the endpoint returned for this request
+     */
+    public JsonEnvelope synchronousPut(final EndpointDefinition definition, final JsonEnvelope envelope) {
+        final WebTarget target = webTargetFactory.createWebTarget(definition, envelope);
+
+        final Builder builder = target.request(format(MEDIA_TYPE_PATTERN, definition.getResponseMediaType()));
+        populateHeadersFromMetadata(builder, envelope.metadata());
+
+        trace(LOGGER, () -> String.format(SENDING_REQUEST_MESSAGE, PUT, target.getUri().toString(), envelope));
+
+        final JsonObject requestBody = stripParamsFromPayload(definition, envelope);
+        final Response response = builder.put(entity(requestBody.toString(), format(MEDIA_TYPE_PATTERN, envelope.metadata().name())));
+
+        trace(LOGGER, () -> String.format(SENT_REQUEST_MESSAGE, PUT, envelope.metadata().id().toString(), toResponseTrace(response)));
+
+        return processedResponse(envelope, response);
+    }
+
+    /**
+     * Make an asynchronous PATCH request using the envelope provided to a specified endpoint.
+     *
+     * @param definition the endpoint definition
+     * @param envelope   the envelope containing the payload and/or parameters to pass in the
+     *                   request
+     */
+    public void patch(final EndpointDefinition definition, final JsonEnvelope envelope) {
+        final WebTarget target = webTargetFactory.createWebTarget(definition, envelope);
+
+        final Builder builder = target.request(format(MEDIA_TYPE_PATTERN, definition.getResponseMediaType()));
+        populateHeadersFromMetadata(builder, envelope.metadata());
+
+        trace(LOGGER, () -> String.format(SENDING_REQUEST_MESSAGE, PATCH, target.getUri().toString(), envelope));
+
+        final JsonObject requestBody = stripParamsFromPayload(definition, envelope);
+        final Response response = builder
+                .build(PATCH, entity(requestBody.toString(), format(MEDIA_TYPE_PATTERN, envelope.metadata().name())))
+                .invoke();
+
+        trace(LOGGER, () -> format(SENT_REQUEST_MESSAGE, PATCH, envelope.metadata().id().toString(), toResponseTrace(response)));
+
+        checkForAcceptedResponse(response, envelope, PATCH);
+    }
+
+    /**
+     * Make a synchronous PATCH request using the envelope provided to a specified endpoint.
+     *
+     * @param definition the endpoint definition
+     * @param envelope   the envelope containing the payload and/or parameters to pass in the
+     *                   request
+     * @return the response that the endpoint returned for this request
+     */
+    public JsonEnvelope synchronousPatch(final EndpointDefinition definition, final JsonEnvelope envelope) {
+        final WebTarget target = webTargetFactory.createWebTarget(definition, envelope);
+
+        final Builder builder = target.request(format(MEDIA_TYPE_PATTERN, definition.getResponseMediaType()));
+        populateHeadersFromMetadata(builder, envelope.metadata());
+
+        trace(LOGGER, () -> String.format(SENDING_REQUEST_MESSAGE, PATCH, target.getUri().toString(), envelope));
+
+        final JsonObject requestBody = stripParamsFromPayload(definition, envelope);
+        final Response response = builder
+                .build(PATCH, entity(requestBody.toString(), format(MEDIA_TYPE_PATTERN, envelope.metadata().name())))
+                .invoke();
+
+        trace(LOGGER, () -> String.format(SENT_REQUEST_MESSAGE, PATCH, envelope.metadata().id().toString(), toResponseTrace(response)));
+
+        return processedResponse(envelope, response);
+    }
+
+    /**
+     * Make an asynchronous DELETE request using the envelope provided to a specified endpoint.
+     *
+     * @param definition the endpoint definition
+     * @param envelope   the envelope containing the payload and/or parameters to pass in the
+     *                   request
+     */
+    public void delete(final EndpointDefinition definition, final JsonEnvelope envelope) {
+        final WebTarget target = webTargetFactory.createWebTarget(definition, envelope);
+
+        final Builder builder = target.request(format(MEDIA_TYPE_PATTERN, definition.getResponseMediaType()));
+        populateHeadersFromMetadata(builder, envelope.metadata());
+        setHeaderIfPresent(builder, CONTENT_TYPE_HEADER, Optional.of(format(MEDIA_TYPE_PATTERN, envelope.metadata().name())));
+
+        trace(LOGGER, () -> String.format(SENDING_REQUEST_MESSAGE, DELETE, target.getUri().toString(), envelope));
+
+        final Response response = builder.delete();
+
+        trace(LOGGER, () -> String.format(SENT_REQUEST_MESSAGE, DELETE, envelope.metadata().id().toString(), toResponseTrace(response)));
+
+        checkForAcceptedResponse(response, envelope, DELETE);
+    }
+
+    private void checkForAcceptedResponse(final Response response, final JsonEnvelope envelope, final String httpMethod) {
         final int status = response.getStatus();
+
         if (status != ACCEPTED.getStatusCode()) {
-            throw new RuntimeException(format("POST request %s failed; expected 202 response but got %s with reason \"%s\"",
+            throw new RuntimeException(format("%s request %s failed; expected 202 response but got %s with reason \"%s\"",
+                    httpMethod,
                     envelope.metadata().id().toString(), status,
                     response.getStatusInfo().getReasonPhrase()));
+        }
+    }
+
+    private JsonEnvelope processedResponse(final JsonEnvelope envelope, final Response response) {
+        final Response.Status status = fromStatusCode(response.getStatus());
+        switch (status) {
+            case OK:
+                final JsonObject responseAsJsonObject = stringToJsonObjectConverter.convert(response.readEntity(String.class));
+                return jsonObjectEnvelopeConverter.asEnvelope(addMetadataIfMissing(responseAsJsonObject, envelope.metadata(), response.getHeaderString(CPPID)));
+            case NOT_FOUND:
+                return enveloper.withMetadataFrom(envelope, envelope.metadata().name()).apply(null);
+            case FORBIDDEN:
+                throw new AccessControlViolationException(response.readEntity(String.class));
+            default:
+                throw new RuntimeException(format("Request %s failed; expected 200 but got %s with reason \"%s\"",
+                        envelope.metadata().id().toString(), response.getStatus(), response.getStatusInfo().getReasonPhrase()));
         }
     }
 
@@ -136,14 +298,12 @@ public class RestClientProcessor {
 
     private void setHeaderIfPresent(final Builder builder, final String name, final List<UUID> uuids) {
         if (!uuids.isEmpty()) {
-            builder.header(name, uuids.stream().map(id -> id.toString()).collect(joining(",")));
+            builder.header(name, uuids.stream().map(UUID::toString).collect(joining(",")));
         }
     }
 
     private void setHeaderIfPresent(final Builder builder, final String name, final Optional<String> value) {
-        if (value.isPresent()) {
-            builder.header(name, value.get());
-        }
+        value.ifPresent(s -> builder.header(name, s));
     }
 
     private JsonObject stripParamsFromPayload(final EndpointDefinition definition, final JsonEnvelope envelope) {

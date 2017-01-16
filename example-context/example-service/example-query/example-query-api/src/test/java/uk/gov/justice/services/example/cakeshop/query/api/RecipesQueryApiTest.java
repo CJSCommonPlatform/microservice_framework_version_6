@@ -20,6 +20,9 @@ public class RecipesQueryApiTest {
                                 .withRequesterPassThrough(),
                         method("getRecipe")
                                 .thatHandles("example.get-recipe")
+                                .withRequesterPassThrough(),
+                        method("queryRecipes")
+                                .thatHandles("example.query-recipes")
                                 .withRequesterPassThrough()
                 )));
     }

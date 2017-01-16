@@ -10,13 +10,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.rest.ParameterType.BOOLEAN;
-import static uk.gov.justice.services.rest.ParameterType.NUMERIC;
-import static uk.gov.justice.services.rest.ParameterType.STRING;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
+import static uk.gov.justice.services.rest.ParameterType.BOOLEAN;
+import static uk.gov.justice.services.rest.ParameterType.NUMERIC;
+import static uk.gov.justice.services.rest.ParameterType.STRING;
 
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
 import uk.gov.justice.services.adapter.rest.parameter.Parameter;
@@ -143,7 +143,7 @@ public class RestProcessorTest {
     }
 
     @Test
-    public void shouldPassEnvelopeWithPayloadToFunctionOnSyncProcessing() throws Exception {
+    public void shouldPassEnvelopeWithParametersToFunctionOnSyncProcessing() throws Exception {
         when(function.apply(any(JsonEnvelope.class))).thenReturn(Optional.empty());
 
         restProcessor.processSynchronously(function, NOT_USED_ACTION, NOT_USED_HEADERS,
@@ -187,6 +187,22 @@ public class RestProcessorTest {
         with((String) response.getEntity())
                 .assertNotDefined(JsonEnvelope.METADATA);
         assertThat(response.getHeaderString(HeaderConstants.ID), equalTo(metadataId.toString()));
+    }
+
+    @Test
+    public void shouldPassEnvelopeWithPayloadToFunctionOnSyncProcessing() throws Exception {
+        when(function.apply(any(JsonEnvelope.class))).thenReturn(Optional.empty());
+        final Optional<JsonObject> payload = Optional.of(Json.createObjectBuilder().add("key123", "value45678").build());
+
+        restProcessor.processSynchronously(function, NOT_USED_ACTION, payload, NOT_USED_HEADERS, singletonList(Parameter.valueOf("paramABC", "paramValueBCD", STRING)));
+
+        final ArgumentCaptor<JsonEnvelope> envelopeCaptor = ArgumentCaptor.forClass(JsonEnvelope.class);
+
+        verify(function).apply(envelopeCaptor.capture());
+
+        final JsonEnvelope envelope = envelopeCaptor.getValue();
+        assertThat(envelope.payloadAsJsonObject().getString("key123"), is("value45678"));
+        assertThat(envelope.payloadAsJsonObject().getString("paramABC"), is("paramValueBCD"));
     }
 
 }

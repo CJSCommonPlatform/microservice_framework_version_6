@@ -24,4 +24,9 @@ public class RecipesQueryApi {
     public JsonEnvelope getRecipe(final JsonEnvelope query) {
         return requester.request(query);
     }
+
+    @Handles("example.query-recipes")
+    public JsonEnvelope queryRecipes(final JsonEnvelope query) {
+        return requester.request(query);
+    }
 }

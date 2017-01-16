@@ -3,12 +3,11 @@ package uk.gov.justice.services.clients.rest.generator;
 import static java.lang.String.format;
 import static javax.lang.model.element.Modifier.FINAL;
 import static org.apache.commons.lang3.StringUtils.capitalize;
-import static org.raml.model.ActionType.GET;
+import static uk.gov.justice.services.generators.commons.helper.Actions.hasResponseMimeTypes;
 import static uk.gov.justice.services.generators.commons.helper.Names.nameFrom;
 import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.INVALID_ACTION_MAPPING_ERROR_MSG;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
-import uk.gov.justice.services.rest.ParameterType;
 import uk.gov.justice.services.clients.core.EndpointDefinition;
 import uk.gov.justice.services.clients.core.QueryParam;
 import uk.gov.justice.services.clients.core.RestClientHelper;
@@ -16,9 +15,11 @@ import uk.gov.justice.services.clients.core.RestClientProcessor;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.generators.commons.client.AbstractClientGenerator;
+import uk.gov.justice.services.generators.commons.client.ActionMimeTypeDefinition;
 import uk.gov.justice.services.generators.commons.mapping.ActionMapping;
 import uk.gov.justice.services.generators.commons.validator.RamlValidationException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.rest.ParameterType;
 
 import java.util.HashSet;
 import java.util.List;
@@ -55,6 +56,19 @@ public class RestClientGenerator extends AbstractClientGenerator {
     private static final int PILLAR_PATH_SEGMENT_INDEX = 4;
     private static final int TIER_PATH_SEGMENT_INDEX = 5;
 
+    private static final String SYNC_GET_RETURN_STATEMENT = "return $L.get(def, envelope)";
+
+    private static final String ASYNC_POST_STATEMENT = "$L.post(def, $L)";
+    private static final String SYNC_POST_RETURN_STATEMENT = "return $L.synchronousPost(def, $L)";
+
+    private static final String ASYNC_PUT_STATEMENT = "$L.put(def, $L)";
+    private static final String SYNC_PUT_RETURN_STATEMENT = "return $L.synchronousPut(def, $L)";
+
+    private static final String ASYNC_PATCH_STATEMENT = "$L.patch(def, $L)";
+    private static final String SYNC_PATCH_RETURN_STATEMENT = "return $L.synchronousPatch(def, $L)";
+
+    private static final String ASYNC_DELETE_STATEMENT = "$L.delete(def, $L)";
+
     @Override
     protected String classNameOf(final Raml raml) {
         final String[] pathSegments = raml.getBaseUri().split("/");
@@ -78,8 +92,8 @@ public class RestClientGenerator extends AbstractClientGenerator {
     }
 
     @Override
-    protected CodeBlock methodBodyOf(final Resource resource, final Action ramlAction, final MimeType mimeType) {
-        final String actionName = nameFrom(mimeType);
+    protected CodeBlock methodBodyOf(final Resource resource, final Action ramlAction, final ActionMimeTypeDefinition definition) {
+        final String responseName = nameFrom(definition.getResponseType());
 
         final CodeBlock.Builder methodBody = CodeBlock.builder()
                 .addStatement("final String path = \"$L\"", resource.getRelativeUri())
@@ -92,34 +106,73 @@ public class RestClientGenerator extends AbstractClientGenerator {
                 methodBody.addStatement("queryParams.add(new QueryParam(\"$L\", $L, $T.$L))",
                         name, queryParameter.isRequired(), ParameterType.class, ParameterType.valueOfQueryType(queryParameter.getType().name()).name()));
 
-        methodBody.addStatement("final $T def = new $T(BASE_URI, path, pathParams, queryParams, $S)",
-                EndpointDefinition.class, EndpointDefinition.class, actionName);
+        return methodBody
+                .addStatement("final $T def = new $T(BASE_URI, path, pathParams, queryParams, $S)",
+                        EndpointDefinition.class, EndpointDefinition.class, responseName)
+                .add(statementsForActionType(ramlAction, definition))
+                .build();
+    }
+
+    private CodeBlock statementsForActionType(final Action ramlAction, final ActionMimeTypeDefinition definition) {
+        final String actionName = nameFrom(definition.getNameType());
+        final CodeBlock.Builder statements = CodeBlock.builder();
 
         switch (ramlAction.getType()) {
             case GET:
-                methodBody.addStatement("return $L.get(def, envelope)", REST_CLIENT_PROCESSOR);
-                break;
+                return statements
+                        .addStatement(SYNC_GET_RETURN_STATEMENT, REST_CLIENT_PROCESSOR)
+                        .build();
+
+            case DELETE:
+                return statements
+                        .add(methodStatementsWith(
+                                actionName,
+                                ASYNC_DELETE_STATEMENT))
+                        .build();
+
+            case PATCH:
+                return statements
+                        .add(methodStatementsWith(
+                                actionName,
+                                hasResponseMimeTypes(ramlAction) ? SYNC_PATCH_RETURN_STATEMENT : ASYNC_PATCH_STATEMENT))
+                        .build();
+
             case POST:
-                methodBody.addStatement("final JsonEnvelope $L = $L.withMetadataFrom(envelope, $S).apply(envelope.payload())", OUTPUT_ENVELOPE, ENVELOPER, actionName);
-                methodBody.addStatement("$L.post(def, $L)", REST_CLIENT_PROCESSOR, OUTPUT_ENVELOPE);
-                break;
+                return statements
+                        .add(methodStatementsWith(
+                                actionName,
+                                hasResponseMimeTypes(ramlAction) ? SYNC_POST_RETURN_STATEMENT : ASYNC_POST_STATEMENT))
+                        .build();
+
+            case PUT:
+                return statements
+                        .add(methodStatementsWith(
+                                actionName,
+                                hasResponseMimeTypes(ramlAction) ? SYNC_PUT_RETURN_STATEMENT : ASYNC_PUT_STATEMENT))
+                        .build();
+
             default:
                 throw new IllegalArgumentException(format("Action %s not supported in REST client generator", ramlAction.getType().toString()));
         }
-
-        return methodBody.build();
     }
 
     @Override
     protected TypeName methodReturnTypeOf(final Action ramlAction) {
-        return ramlAction.getType().equals(GET) ? TypeName.get(JsonEnvelope.class) : TypeName.VOID;
+        return hasResponseMimeTypes(ramlAction) ? TypeName.get(JsonEnvelope.class) : TypeName.VOID;
     }
 
     @Override
-    protected String handlesAnnotationValueOf(final Action ramlAction, final MimeType mimeType, final GeneratorConfig generatorConfig) {
-        return actionMappingOf(ramlAction, mimeType)
+    protected String handlesAnnotationValueOf(final Action ramlAction, final ActionMimeTypeDefinition definition, final GeneratorConfig generatorConfig) {
+        return actionMappingOf(ramlAction, definition.getNameType())
                 .orElseThrow(() -> new RamlValidationException(INVALID_ACTION_MAPPING_ERROR_MSG))
                 .getName();
+    }
+
+    private CodeBlock methodStatementsWith(final String actionName, final String processorStatementTemplate) {
+        return CodeBlock.builder()
+                .addStatement("final JsonEnvelope $L = $L.withMetadataFrom(envelope, $S).apply(envelope.payload())", OUTPUT_ENVELOPE, ENVELOPER, actionName)
+                .addStatement(processorStatementTemplate, REST_CLIENT_PROCESSOR, OUTPUT_ENVELOPE)
+                .build();
     }
 
     private Optional<ActionMapping> actionMappingOf(final Action ramlAction, final MimeType mimeType) {

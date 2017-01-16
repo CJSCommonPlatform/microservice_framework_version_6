@@ -52,6 +52,13 @@ public class RecipesQueryView {
         return enveloper.withMetadataFrom(query, NAME_RESPONSE_RECIPE_LIST).apply(fetchRecipes(query));
     }
 
+    @Handles("example.query-recipes")
+    public JsonEnvelope queryRecipes(final JsonEnvelope query) {
+        LOGGER.info("=============> Inside queryRecipes Query View ");
+
+        return enveloper.withMetadataFrom(query, NAME_RESPONSE_RECIPE_LIST).apply(fetchRecipes(query));
+    }
+
     private RecipesView fetchRecipes(final JsonEnvelope query) {
         final JsonObject queryObject = query.payloadAsJsonObject();
         return recipeService.getRecipes(

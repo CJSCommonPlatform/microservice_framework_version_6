@@ -56,7 +56,7 @@ public class RetryInterceptor implements Interceptor {
             try {
                 return interceptorChain.processNext(interceptorContext);
             } catch (OptimisticLockingRetryException e) {
-                logger.warn(format("Optimistic locking failed on command %s at retry attempt %d", metadata, retries), e);
+                logger.debug(format("Optimistic locking failed on command %s at retry attempt %d", metadata, retries));
                 retries++;
 
                 if (retries > maxImmediateRetries) {

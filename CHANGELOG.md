@@ -8,6 +8,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ### Added
 - Immediate retries to RetryInterceptor, defaults to 3 before applying wait period between retries
 
+### Changed
+- Optimistic lock log message changed from warn to debug. 
+
 ## [1.0.1] - 2016-12-23
 
 ### Fixed

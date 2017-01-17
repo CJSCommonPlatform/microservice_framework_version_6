@@ -13,11 +13,12 @@ import javax.ws.rs.core.Response;
 
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.slf4j.Logger;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BadRequestExceptionMapperTest {
@@ -25,13 +26,13 @@ public class BadRequestExceptionMapperTest {
     private static final String TEST_ERROR_MESSAGE = "Test Error Message.";
 
     @Mock
-    private Schema schema;
-    private BadRequestExceptionMapper exceptionMapper;
+    private Logger logger;
 
-    @Before
-    public void setup() {
-        exceptionMapper = new BadRequestExceptionMapper();
-    }
+    @Mock
+    private Schema schema;
+
+    @InjectMocks
+    private BadRequestExceptionMapper exceptionMapper;
 
     @Test
     public void shouldReturn400ResponseForBadRequestException() throws Exception {

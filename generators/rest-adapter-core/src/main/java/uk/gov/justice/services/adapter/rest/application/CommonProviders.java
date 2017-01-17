@@ -4,6 +4,7 @@ import uk.gov.justice.services.adapter.rest.cors.CorsFeature;
 import uk.gov.justice.services.adapter.rest.filter.LoggerRequestDataFilter;
 import uk.gov.justice.services.adapter.rest.interceptor.JsonSchemaValidationInterceptor;
 import uk.gov.justice.services.adapter.rest.mapper.BadRequestExceptionMapper;
+import uk.gov.justice.services.adapter.rest.mapper.ConflictedResourceExceptionMapper;
 import uk.gov.justice.services.adapter.rest.mapper.ForbiddenRequestExceptionMapper;
 
 import java.util.HashSet;
@@ -21,6 +22,7 @@ public class CommonProviders {
     public Set<Class<?>> providers() {
         final HashSet<Class<?>> classes = new HashSet<>();
         classes.add(BadRequestExceptionMapper.class);
+        classes.add(ConflictedResourceExceptionMapper.class);
         classes.add(ForbiddenRequestExceptionMapper.class);
         classes.add(LoggerRequestDataFilter.class);
         classes.add(JsonSchemaValidationInterceptor.class);

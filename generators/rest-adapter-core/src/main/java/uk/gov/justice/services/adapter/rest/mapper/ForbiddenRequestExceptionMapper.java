@@ -3,10 +3,10 @@ package uk.gov.justice.services.adapter.rest.mapper;
 import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.status;
-import static org.slf4j.LoggerFactory.getLogger;
 
 import uk.gov.justice.services.core.accesscontrol.AccessControlViolationException;
 
+import javax.inject.Inject;
 import javax.json.JsonObjectBuilder;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -17,13 +17,12 @@ import org.slf4j.Logger;
 @Provider
 public class ForbiddenRequestExceptionMapper implements ExceptionMapper<AccessControlViolationException> {
 
-    private static final Logger LOGGER = getLogger(ForbiddenRequestExceptionMapper.class);
+    @Inject
+    Logger logger;
 
     @Override
     public Response toResponse(final AccessControlViolationException exception) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Forbidden Request", exception);
-        }
+        logger.debug("Forbidden Request", exception);
 
         final JsonObjectBuilder builder = createObjectBuilder().add("error", exception.getMessage());
 

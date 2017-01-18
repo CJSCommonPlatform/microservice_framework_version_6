@@ -1,4 +1,4 @@
-package uk.gov.justice.services.clients.core;
+package uk.gov.justice.services.common.rest;
 
 import javax.enterprise.context.ApplicationScoped;
 

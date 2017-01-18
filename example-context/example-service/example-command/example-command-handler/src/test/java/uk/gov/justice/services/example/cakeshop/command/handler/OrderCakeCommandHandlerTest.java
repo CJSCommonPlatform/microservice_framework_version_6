@@ -18,8 +18,6 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetad
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
 
-import uk.gov.justice.services.common.converter.ZonedDateTimes;
-import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.extension.EventFoundEvent;
@@ -28,6 +26,7 @@ import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.example.cakeshop.domain.event.CakeOrdered;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import org.junit.Test;
@@ -74,7 +73,7 @@ public class OrderCakeCommandHandlerTest {
         enveloper.register(new EventFoundEvent(CakeOrdered.class, "CakeOrdered"));
         when(eventSource.getStreamById(ORDER_ID)).thenReturn(eventStream);
 
-        final String deliveryDate = ZonedDateTimes.toString(new UtcClock().now());
+        final  String deliveryDate = "2017-01-18T15:30:20.34Z";
 
         final JsonEnvelope command = envelope()
                 .with(metadataWithRandomUUID(COMMAND_NAME))
@@ -83,7 +82,7 @@ public class OrderCakeCommandHandlerTest {
                 .withPayloadOf(deliveryDate, "deliveryDate")
                 .build();
 
-        final CakeOrdered cakeOrdered = new CakeOrdered(ORDER_ID, RECIPE_ID, ZonedDateTimes.fromString(deliveryDate));
+        final CakeOrdered cakeOrdered = new CakeOrdered(ORDER_ID, RECIPE_ID, ZonedDateTime.parse(deliveryDate));
         when(eventFactory.cakeOrderedEventFrom(command)).thenReturn(cakeOrdered);
         orderCakeCommandHandler.handle(command);
 
@@ -99,6 +98,4 @@ public class OrderCakeCommandHandlerTest {
                                         withJsonPath("$.deliveryDate", equalTo(deliveryDate))
                                 ))))));
     }
-
-
 }

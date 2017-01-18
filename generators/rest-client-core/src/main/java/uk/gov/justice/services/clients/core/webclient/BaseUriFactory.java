@@ -1,7 +1,7 @@
 package uk.gov.justice.services.clients.core.webclient;
 
-import uk.gov.justice.services.clients.core.DefaultServerPortProvider;
 import uk.gov.justice.services.clients.core.EndpointDefinition;
+import uk.gov.justice.services.common.rest.DefaultServerPortProvider;
 
 import java.util.Optional;
 

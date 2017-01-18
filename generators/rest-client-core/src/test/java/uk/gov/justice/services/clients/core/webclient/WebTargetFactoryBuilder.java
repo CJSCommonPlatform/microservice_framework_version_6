@@ -1,7 +1,7 @@
 package uk.gov.justice.services.clients.core.webclient;
 
-import uk.gov.justice.services.clients.core.DefaultServerPortProvider;
 import uk.gov.justice.services.common.configuration.JndiBasedServiceContextNameProvider;
+import uk.gov.justice.services.common.rest.DefaultServerPortProvider;
 
 public class WebTargetFactoryBuilder {
 

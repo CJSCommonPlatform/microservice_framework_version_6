@@ -1,9 +1,9 @@
-package uk.gov.justice.services.clients.core;
+package uk.gov.justice.services.common.rest;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
-import static uk.gov.justice.services.clients.core.DefaultServerPortProvider.DEFAULT_PORT;
+import static uk.gov.justice.services.common.rest.DefaultServerPortProvider.DEFAULT_PORT;
 
 import org.junit.After;
 import org.junit.Before;
@@ -15,7 +15,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultServerPortProviderTest {
-
 
     @InjectMocks
     private DefaultServerPortProvider defaultServerPortProvider;

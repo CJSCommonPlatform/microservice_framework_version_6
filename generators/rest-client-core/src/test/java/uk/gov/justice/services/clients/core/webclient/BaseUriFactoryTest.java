@@ -1,8 +1,5 @@
 package uk.gov.justice.services.clients.core.webclient;
 
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
-
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.hamcrest.CoreMatchers.is;
@@ -10,17 +7,16 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-
-import uk.gov.justice.services.clients.core.DefaultServerPortProvider;
 import uk.gov.justice.services.clients.core.EndpointDefinition;
+import uk.gov.justice.services.common.rest.DefaultServerPortProvider;
 
 import java.util.Optional;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -36,7 +32,7 @@ public class BaseUriFactoryTest {
     private BaseUriFactory baseUriFactory;
 
     @Test
-    public void shouldCreateABaseUriWithADefaultPortIfNoMockServerPortIsSet(){
+    public void shouldCreateABaseUriWithADefaultPortIfNoMockServerPortIsSet() {
 
         final String defaultPort = "9090";
         final String baseUri = "http://localhost:8080/anyUrl";
@@ -52,7 +48,7 @@ public class BaseUriFactoryTest {
     }
 
     @Test
-    public void shouldCreateABaseUriWithTheMockServerPortIfSet(){
+    public void shouldCreateABaseUriWithTheMockServerPortIfSet() {
 
         final Optional<String> mockServerPort = of("8989");
         final String baseUri = "http://localhost:8080/anyUrl";

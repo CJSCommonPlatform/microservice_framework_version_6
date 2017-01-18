@@ -3,11 +3,15 @@ package uk.gov.justice.services.test.utils.core.helper;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
+import static uk.gov.justice.services.test.utils.core.helper.TypeCheck.Times.times;
 
 import uk.gov.justice.services.test.utils.core.random.Generator;
 
 import java.util.function.Function;
+
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
 
 /**
  * A Utility class for type-based testing, where a type is a high-level specification of behavior
@@ -20,18 +24,22 @@ import java.util.function.Function;
 public class TypeCheck<T> {
 
     private final Generator<T> generator;
-    private final Function<T, Boolean> condition;
+    private final Matcher<T> matcher;
     private Function<T, Boolean> preCondition = null;
 
-    private TypeCheck(final Generator<T> generator, final Function<T, Boolean> condition) {
+    private TypeCheck(final Generator<T> generator, final Matcher<T> matcher) {
         requireNonNull(generator, "Generator cannot be null");
-        requireNonNull(condition, "Condition cannot be null");
+        requireNonNull(matcher, "Condition cannot be null");
         this.generator = generator;
-        this.condition = condition;
+        this.matcher = matcher;
+    }
+
+    public static <T> TypeCheck<T> typeCheck(final Generator<T> generator, final Matcher<T> matcher) {
+        return new TypeCheck<>(generator, matcher);
     }
 
     public static <T> TypeCheck<T> typeCheck(final Generator<T> generator, final Function<T, Boolean> condition) {
-        return new TypeCheck<T>(generator, condition);
+        return new TypeCheck<>(generator, matcherFor(condition));
     }
 
     public TypeCheck<T> withPreCondition(final Function<T, Boolean> preCondition) {
@@ -40,7 +48,7 @@ public class TypeCheck<T> {
     }
 
     public void verify() {
-        verify(Times.times(1));
+        verify(times(1));
     }
 
     public void verify(Times times) {
@@ -49,7 +57,7 @@ public class TypeCheck<T> {
             if (preCondition != null && !preCondition.apply(next)) {
                 i--;
             } else {
-                assertThat(format("failed on attempt %s for value %s", i + 1, next), condition.apply(next), is(true));
+                assertThat(format("failed on attempt %s for value %s", i + 1, next), next, matcher);
             }
         }
     }
@@ -68,6 +76,21 @@ public class TypeCheck<T> {
         public static Times times(int times) {
             return new Times(times);
         }
+    }
+
+    private static <T> TypeSafeMatcher<T> matcherFor(final Function<T, Boolean> condition) {
+        return new TypeSafeMatcher<T>() {
+
+            @Override
+            protected boolean matchesSafely(T item) {
+                return condition.apply(item);
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("match a condition");
+            }
+        };
     }
 }
 

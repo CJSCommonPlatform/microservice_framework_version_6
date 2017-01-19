@@ -5,7 +5,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
-## [1.0.2] - 2017-01-19
+## [1.1.0] - 2017-01-19
 
 ### Fixed
 - Fix logging filter metadata bug
@@ -20,6 +20,7 @@ support RAML that contains asynchronous DELETE, PATCH and PUT, and synchronous P
 - Optimistic lock log message changed from warn to debug. 
 - Move default port provider to common module
 - Add ConflictedResourceException for 409 responses
+- Common-bom version to 1.6.0
 
 ## [1.0.1] - 2016-12-23
 

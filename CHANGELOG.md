@@ -5,6 +5,13 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Added
+- No wait retrieve method to MessageConsumerClient
+- No close method to MessageConsumerClient
+
+### Fixed
+- wrong version of apache bean utils pulled in by open ejb core
+
 ## [1.1.0] - 2017-01-19
 
 ### Fixed

@@ -5,6 +5,8 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [1.2.0] - 2017-01-19
+
 ### Added
 - No wait retrieve method to MessageConsumerClient
 - No close method to MessageConsumerClient

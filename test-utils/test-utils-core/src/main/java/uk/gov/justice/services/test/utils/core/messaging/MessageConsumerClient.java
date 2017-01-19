@@ -77,7 +77,7 @@ public class MessageConsumerClient implements AutoCloseable {
 
     @SuppressWarnings("StatementWithEmptyBody")
     public void cleanQueue() {
-        while (!retrieveMessageNoWait().isPresent()) {
+        while (retrieveMessageNoWait().isPresent()) {
         }
     }
 

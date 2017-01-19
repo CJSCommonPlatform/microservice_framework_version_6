@@ -1,5 +1,6 @@
 package uk.gov.justice.services.test.utils.core.messaging;
 
+import static java.lang.String.format;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static javax.jms.Session.AUTO_ACKNOWLEDGE;
@@ -9,6 +10,7 @@ import java.util.Optional;
 
 import javax.jms.Connection;
 import javax.jms.JMSException;
+import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
@@ -36,28 +38,46 @@ public class MessageConsumerClient implements AutoCloseable {
 
             session = connection.createSession(false, AUTO_ACKNOWLEDGE);
             topic = new ActiveMQTopic(topicName);
-            messageConsumer = session.createConsumer(topic, String.format(EVENT_SELECTOR_TEMPLATE, eventSelector));
+            messageConsumer = session.createConsumer(topic, format(EVENT_SELECTOR_TEMPLATE, eventSelector));
 
-        } catch (JMSException e) {
+        } catch (final JMSException e) {
             close();
             throw new RuntimeException("Failed to start message consumer for events: '" + eventSelector + "', topic: '" + topicName + ", queue uri: '" + QUEUE_URI + "'", e);
         }
     }
 
+    public Optional<String> retrieveMessageNoWait() {
+        return retrieve(() -> messageConsumer.receiveNoWait());
+    }
+
     public Optional<String> retrieveMessage() {
+        return retrieveMessage(TIMEOUT_IN_MILLIS);
+    }
+
+    public Optional<String> retrieveMessage(final long timeout) {
+        return retrieve(() -> messageConsumer.receive(timeout));
+    }
+
+    private Optional<String> retrieve(final SupplierWithJmsException<Message> messageSupplier) {
 
         if (messageConsumer == null) {
             throw new RuntimeException("Message consumer not started. Please call startConsumer(...) first.");
         }
 
         try {
-            final TextMessage message = (TextMessage) messageConsumer.receive(TIMEOUT_IN_MILLIS);
+            final TextMessage message = (TextMessage) messageSupplier.get();
             if (message == null) {
                 return empty();
             }
             return of(message.getText());
-        } catch (JMSException e) {
+        } catch (final JMSException e) {
             throw new RuntimeException("Failed to retrieve message", e);
+        }
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    public void cleanQueue() {
+        while (!retrieveMessageNoWait().isPresent()) {
         }
     }
 
@@ -75,8 +95,13 @@ public class MessageConsumerClient implements AutoCloseable {
         if (closeable != null) {
             try {
                 closeable.close();
-            } catch (Exception ignored) {
+            } catch (final Exception ignored) {
             }
         }
+    }
+
+    @FunctionalInterface
+    private interface SupplierWithJmsException<T> {
+        T get() throws JMSException;
     }
 }

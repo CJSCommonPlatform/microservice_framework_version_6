@@ -5,6 +5,11 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [1.0.2] - 2017-01-19
+
+### Fixed
+- Fix logging filter metadata bug
+
 ### Added
 - Immediate retries to RetryInterceptor, defaults to 3 before applying wait period between retries
 - Support for Http Methods DELETE, PATCH, POST and PUT.  REST Adaptor and REST Client generators now 
@@ -13,6 +18,8 @@ support RAML that contains asynchronous DELETE, PATCH and PUT, and synchronous P
 
 ### Changed
 - Optimistic lock log message changed from warn to debug. 
+- Move default port provider to common module
+- Add ConflictedResourceException for 409 responses
 
 ## [1.0.1] - 2016-12-23
 

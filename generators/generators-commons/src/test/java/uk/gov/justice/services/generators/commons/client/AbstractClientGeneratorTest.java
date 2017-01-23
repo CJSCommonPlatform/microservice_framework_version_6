@@ -1,12 +1,19 @@
 package uk.gov.justice.services.generators.commons.client;
 
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.reflect.Modifier.isFinal;
+import static java.lang.reflect.Modifier.isPrivate;
+import static java.lang.reflect.Modifier.isStatic;
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
+import static org.apache.log4j.Level.WARN;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.raml.model.ActionType.DELETE;
@@ -29,11 +36,15 @@ import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.Remote;
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
+import uk.gov.justice.services.generators.test.utils.logger.TestAppender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -41,7 +52,9 @@ import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.TypeName;
+import org.apache.log4j.spi.LoggingEvent;
 import org.hamcrest.Matchers;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -52,11 +65,11 @@ import org.raml.model.Resource;
 import org.slf4j.Logger;
 
 public class AbstractClientGeneratorTest extends BaseGeneratorTest {
-
+    private static final String EXISTING_FILE_PATH = "org/raml/test/resource/RemoteBCDController.java";
     @Before
     public void before() {
         super.before();
-        generator = new TestClientGenerator();
+        generator = new ABCClientGenerator();
     }
 
     @Test
@@ -173,9 +186,9 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
         final Field logger = generatedClass.getDeclaredField("LOGGER");
         assertThat(logger, not(nullValue()));
         assertThat(logger.getType(), equalTo(Logger.class));
-        assertThat(Modifier.isPrivate(logger.getModifiers()), Matchers.is(true));
-        assertThat(Modifier.isStatic(logger.getModifiers()), Matchers.is(true));
-        assertThat(Modifier.isFinal(logger.getModifiers()), Matchers.is(true));
+        assertThat(isPrivate(logger.getModifiers()), is(true));
+        assertThat(isStatic(logger.getModifiers()), is(true));
+        assertThat(isFinal(logger.getModifiers()), is(true));
     }
 
     @Test
@@ -190,7 +203,7 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
         final Field logger = generatedClass.getDeclaredField("dummyVariable");
         assertThat(logger, not(nullValue()));
         assertThat(logger.getType(), equalTo(Object.class));
-        assertThat(Modifier.isStatic(logger.getModifiers()), Matchers.is(false));
+        assertThat(isStatic(logger.getModifiers()), is(false));
     }
 
     @Test
@@ -259,7 +272,51 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
 
     }
 
-    static class TestClientGenerator extends AbstractClientGenerator {
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void shouldNotGenerateExistingClasses() throws Exception {
+
+        new BCDClientGenerator().run(
+                messagingRamlWithDefaults()
+                        .with(resource()
+                                .with(httpAction(GET)))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder,
+                        generatorProperties().withServiceComponentOf("COMMAND_CONTROLLER").build(), singletonList(existingFilePath())));
+
+        Path outputPath = Paths.get(outputFolder.newFile().getAbsolutePath(), EXISTING_FILE_PATH);
+
+        assertThat(outputPath.toFile().exists(), equalTo(FALSE));
+    }
+
+    @Test
+    public void shouldLogWarningIfClassExists() throws Exception {
+
+        final TestAppender appender = new TestAppender();
+        final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getRootLogger();
+        logger.addAppender(appender);
+
+        new BCDClientGenerator().run(
+                messagingRamlWithDefaults()
+                        .with(resource()
+                                .with(httpAction(GET)))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder,
+                        generatorProperties().withServiceComponentOf("COMMAND_CONTROLLER").build(), singletonList( existingFilePath())));
+
+        logger.removeAppender(appender);
+        final List<LoggingEvent> logEntries = appender.messages();
+        assertThat(logEntries, not(empty()));
+        final LoggingEvent logEntry = logEntries.get(0);
+        assertThat(logEntry.getLevel(), Matchers.is(WARN));
+        assertThat((String) logEntry.getMessage(), containsString("The class RemoteBCDController already exists, skipping code generation."));
+
+
+    }
+
+
+    static class ABCClientGenerator extends AbstractClientGenerator {
 
         @Override
         protected String classNameOf(final Raml raml) {
@@ -288,5 +345,18 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
             return "some.action";
         }
     }
+    static class BCDClientGenerator extends ABCClientGenerator {
+        @Override
+        protected String classNameOf(final Raml raml) {
+            return "RemoteBCDController";
+        }
+
+    }
+
+    private Path existingFilePath() {
+        URL resource = getClass().getClassLoader().getResource(EXISTING_FILE_PATH);
+        return Paths.get(new File(resource.getPath()).getPath()).getParent().getParent().getParent().getParent().getParent();
+    }
+
 
 }

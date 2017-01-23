@@ -12,6 +12,7 @@ import static uk.gov.justice.services.generators.commons.config.GeneratorPropert
 import static uk.gov.justice.services.generators.commons.helper.Actions.hasResponseMimeTypes;
 import static uk.gov.justice.services.generators.commons.helper.Actions.isSupportedActionType;
 import static uk.gov.justice.services.generators.commons.helper.Actions.isSupportedActionTypeWithRequestType;
+import static uk.gov.justice.services.generators.commons.helper.GeneratedClassWriter.writeClass;
 import static uk.gov.justice.services.generators.commons.helper.Names.camelCase;
 import static uk.gov.justice.services.generators.commons.helper.Names.nameFrom;
 
@@ -46,7 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractClientGenerator implements Generator {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractClientGenerator.class);
     protected static final String ENVELOPE = "envelope";
     private static final String OK = "200";
 
@@ -56,8 +57,7 @@ public abstract class AbstractClientGenerator implements Generator {
         TypeSpec.Builder classSpec = classSpecOf(raml, generatorConfig)
                 .addFields(fieldsOf(raml))
                 .addMethods(methodsOf(raml, generatorConfig));
-
-        writeToJavaFile(classSpec, generatorConfig);
+        writeClass(generatorConfig, generatorConfig.getBasePackageName(), classSpec.build(), LOGGER);
     }
 
     protected abstract String classNameOf(final Raml raml);
@@ -177,16 +177,5 @@ public abstract class AbstractClientGenerator implements Generator {
                                 .add(format("$L.getLogger(%s.class)", className), classLoggerFactory).build()
                 )
                 .build();
-    }
-
-    private void writeToJavaFile(final TypeSpec.Builder classSpec, final GeneratorConfig generatorConfig) {
-        try {
-            JavaFile
-                    .builder(generatorConfig.getBasePackageName(), classSpec.build())
-                    .build()
-                    .writeTo(generatorConfig.getOutputDirectory());
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
     }
 }

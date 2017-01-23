@@ -5,7 +5,7 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
-public class MessagingResourceUriTest {
+public class  MessagingResourceUriTest {
 
     @Test
     public void shouldReturnStringRepresentation() {

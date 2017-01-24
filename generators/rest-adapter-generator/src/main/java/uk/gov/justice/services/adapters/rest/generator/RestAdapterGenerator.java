@@ -10,6 +10,7 @@ import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
 import static org.raml.model.ActionType.PUT;
+import static uk.gov.justice.services.generators.commons.helper.GeneratedClassWriter.writeClass;
 import static uk.gov.justice.services.generators.commons.helper.Names.JAVA_FILENAME_SUFFIX;
 import static uk.gov.justice.services.generators.commons.helper.Names.MAPPER_PACKAGE_NAME;
 import static uk.gov.justice.services.generators.commons.helper.Names.RESOURCE_PACKAGE_NAME;
@@ -19,6 +20,7 @@ import uk.gov.justice.raml.core.Generator;
 import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.services.adapters.rest.validator.BaseUriRamlValidator;
 import uk.gov.justice.services.adapters.rest.validator.ResponseContentTypeRamlValidator;
+import uk.gov.justice.services.generators.commons.helper.GeneratedClassWriter;
 import uk.gov.justice.services.generators.commons.validator.ActionMappingRamlValidator;
 import uk.gov.justice.services.generators.commons.validator.CompositeRamlValidator;
 import uk.gov.justice.services.generators.commons.validator.ContainsActionsRamlValidator;
@@ -35,9 +37,11 @@ import java.util.List;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 import org.raml.model.Raml;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RestAdapterGenerator implements Generator {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(RestAdapterGenerator.class);
     private final RamlValidator validator = new CompositeRamlValidator(
             new ContainsResourcesRamlValidator(),
             new ContainsActionsRamlValidator(),
@@ -115,41 +119,11 @@ public class RestAdapterGenerator implements Generator {
         final List<String> implementationNames = new LinkedList<>();
 
         typeSpecs.forEach(typeSpec -> {
-            try {
-                if (classDoesNotExist(configuration, typeSpec)) {
-                    JavaFile.builder(packageName, typeSpec)
-                            .build()
-                            .writeTo(configuration.getOutputDirectory());
-                }
-
-                implementationNames.add(typeSpec.name);
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
-            }
+            writeClass(configuration, packageName, typeSpec, LOGGER);
+            implementationNames.add(typeSpec.name);
         });
 
         return implementationNames;
-    }
-
-    private boolean classDoesNotExist(final GeneratorConfig configuration, final TypeSpec typeSpec) {
-        for (final Path path : configuration.getSourcePaths()) {
-
-            final String pathname = format("%s/%s/%s", path.toString(),
-                    getBasePackagePath(configuration), getResourcePath(typeSpec));
-
-            if (new File(pathname).exists()) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private String getResourcePath(final TypeSpec typeSpec) {
-        return format("%s/%s%s", RESOURCE_PACKAGE_NAME, typeSpec.name, JAVA_FILENAME_SUFFIX);
-    }
-
-    private String getBasePackagePath(final GeneratorConfig configuration) {
-        return configuration.getBasePackageName().replaceAll("\\.", "/");
     }
 
 }

@@ -2,14 +2,19 @@ package uk.gov.justice.services.adapters.rest.generator;
 
 
 import static com.google.common.collect.Sets.newHashSet;
+import static java.lang.Boolean.FALSE;
 import static java.lang.reflect.Modifier.isAbstract;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
+import static org.apache.log4j.Level.WARN;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.junit.Assert.assertThat;
@@ -24,6 +29,7 @@ import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuil
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 
 import uk.gov.justice.services.adapter.rest.application.CommonProviders;
+import uk.gov.justice.services.generators.test.utils.logger.TestAppender;
 import uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil;
 
 import java.io.File;
@@ -33,17 +39,21 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
 import com.google.common.reflect.TypeToken;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.log4j.spi.LoggingEvent;
 import org.junit.Test;
 
 public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGeneratorTest {
 
-    public static final String EXISTING_FILE_PATH = "org/raml/test/resource/DefaultPathAResource.java";
+    private static final String EXISTING_FILE_PATH = "org/raml/test/resource/DefaultPathAResource.java";
 
     @Test
     public void shouldGenerateApplicationClass() throws Exception {
@@ -179,20 +189,43 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
     @SuppressWarnings("unchecked")
     @Test
     public void shouldNotGenerateExistingClasses() throws Exception {
-        Path sourcePath = getTestSourcePath();
+        Path sourcePath = existingFilePath();
 
         generator.run(
                 restRamlWithDefaults()
                         .with(resource("/pathA").with(httpAction(GET).withDefaultResponseType()))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap(), Collections.singletonList(sourcePath)));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap(), singletonList(sourcePath)));
 
         Path outputPath = Paths.get(outputFolder.newFile().getAbsolutePath(), EXISTING_FILE_PATH);
 
-        assertThat(outputPath.toFile().exists(), equalTo(Boolean.FALSE));
+        assertThat(outputPath.toFile().exists(), equalTo(FALSE));
     }
 
-    private Path getTestSourcePath() {
+    @Test
+    public void shouldLogWarningIfClassExists() throws Exception {
+
+        final TestAppender appender = new TestAppender();
+        final Logger logger = Logger.getLogger(RestAdapterGenerator.class);
+        logger.addAppender(appender);
+
+        generator.run(
+                restRamlWithDefaults()
+                        .with(resource("/pathA").with(httpAction(GET).withDefaultResponseType()))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap(), singletonList(existingFilePath())));
+
+        logger.removeAppender(appender);
+        final List<LoggingEvent> logEntries = appender.messages();
+        assertThat(logEntries, not(empty()));
+        final LoggingEvent logEntry = logEntries.get(0);
+        assertThat(logEntry.getLevel(), is(WARN));
+        assertThat((String) logEntry.getMessage(), containsString("The class PathAResource already exists, skipping code generation."));
+
+
+    }
+
+    private Path existingFilePath() {
         URL resource = getClass().getClassLoader().getResource(EXISTING_FILE_PATH);
         return Paths.get(new File(resource.getPath()).getPath()).getParent().getParent().getParent().getParent().getParent();
     }

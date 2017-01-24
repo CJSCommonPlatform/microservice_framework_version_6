@@ -3,6 +3,7 @@ package uk.gov.justice.raml.jms.core;
 import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.raml.jms.core.MediaTypesUtil.containsGeneralJsonMimeType;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
+import static uk.gov.justice.services.generators.commons.helper.GeneratedClassWriter.writeClass;
 
 import uk.gov.justice.raml.core.Generator;
 import uk.gov.justice.raml.core.GeneratorConfig;
@@ -21,11 +22,14 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 import org.raml.model.Raml;
 import org.raml.model.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Generates JMS endpoint classes out of RAML object
  */
 public class JmsEndpointGenerator implements Generator {
+    private static final Logger LOGGER = LoggerFactory.getLogger(JmsEndpointGenerator.class);
     private final MessageListenerCodeGenerator messageListenerCodeGenerator = new MessageListenerCodeGenerator();
     private final EventFilterCodeGenerator eventFilterCodeGenerator = new EventFilterCodeGenerator();
 
@@ -52,7 +56,7 @@ public class JmsEndpointGenerator implements Generator {
         raml.getResources().values().stream()
                 .filter(resource -> resource.getAction(POST) != null)
                 .flatMap(resource -> generatedClassesFrom(raml, resource))
-                .forEach(generatedClass -> writeToFile(generatedClass, configuration));
+                .forEach(generatedClass -> writeClass(configuration, configuration.getBasePackageName(), generatedClass, LOGGER));
     }
 
 
@@ -85,15 +89,4 @@ public class JmsEndpointGenerator implements Generator {
         return baseUri.component() == EVENT_LISTENER || containsGeneralJsonMimeType(resource.getActions());
     }
 
-
-    private void writeToFile(final TypeSpec generatedClass, final GeneratorConfig configuration) {
-        try {
-            JavaFile.builder(configuration.getBasePackageName(), generatedClass)
-                    .build()
-                    .writeTo(configuration.getOutputDirectory());
-
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-    }
 }

@@ -11,6 +11,7 @@ import static org.raml.model.ActionType.PUT;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.defaultMapping;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.mapping;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingDescriptionBuilder.mappingDescription;
+import static uk.gov.justice.services.generators.test.utils.builder.ResponseBuilder.response;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,10 +33,10 @@ public class HttpActionBuilder {
     private final Map<String, MimeType> body = new HashMap<>();
     private final Map<String, QueryParameter> queryParameters = new HashMap<>();
     private final List<Response> responses = new ArrayList<>();
+    private final Map<String, Response> responseMap = new HashMap<>();
     private ActionType actionType;
     private String description;
     private MappingDescriptionBuilder mappingDescription;
-    private String schema;
 
     public static HttpActionBuilder httpAction() {
         return new HttpActionBuilder();
@@ -137,16 +138,12 @@ public class HttpActionBuilder {
     }
 
     public HttpActionBuilder withResponseTypes(final String... responseTypes) {
-        return withHttpActionResponse(new Response(), responseTypes);
+        responses.add(response().withBodyTypes(responseTypes).build());
+        return this;
     }
 
-    public HttpActionBuilder withHttpActionResponse(final Response response, final String... responseTypes) {
-        final Map<String, MimeType> respBody = new HashMap<>();
-        for (final String responseType : responseTypes) {
-            respBody.put(responseType, new MimeType(responseType));
-        }
-        response.setBody(respBody);
-        responses.add(response);
+    public HttpActionBuilder withResponsesFrom(final Map<String, Response> responses) {
+        this.responseMap.putAll(responses);
         return this;
     }
 
@@ -211,9 +208,14 @@ public class HttpActionBuilder {
 
         action.setBody(body);
 
-        final HashMap<String, Response> responsesMap = new HashMap<>();
-        this.responses.forEach(r -> responsesMap.put(valueOf(OK.getStatusCode()), r));
-        action.setResponses(responsesMap);
+        if (responseMap.isEmpty()) {
+            final HashMap<String, Response> responsesFromList = new HashMap<>();
+            responses.forEach(response -> responsesFromList.put(valueOf(OK.getStatusCode()), response));
+            action.setResponses(responsesFromList);
+        } else {
+            action.setResponses(responseMap);
+        }
+
         action.setQueryParameters(queryParameters);
         return action;
     }

@@ -14,7 +14,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.junit.Assert.assertThat;
@@ -29,8 +28,8 @@ import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuil
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 
 import uk.gov.justice.services.adapter.rest.application.CommonProviders;
-import uk.gov.justice.services.generators.test.utils.logger.TestAppender;
 import uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil;
+import uk.gov.justice.services.test.utils.common.logger.TestLogAppender;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -38,16 +37,12 @@ import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
 import com.google.common.reflect.TypeToken;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
 import org.junit.Test;
 
@@ -205,9 +200,7 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
     @Test
     public void shouldLogWarningIfClassExists() throws Exception {
 
-        final TestAppender appender = new TestAppender();
-        final Logger logger = Logger.getLogger(RestAdapterGenerator.class);
-        logger.addAppender(appender);
+        final TestLogAppender testLogAppender = TestLogAppender.activate();
 
         generator.run(
                 restRamlWithDefaults()
@@ -215,14 +208,10 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap(), singletonList(existingFilePath())));
 
-        logger.removeAppender(appender);
-        final List<LoggingEvent> logEntries = appender.messages();
-        assertThat(logEntries, not(empty()));
-        final LoggingEvent logEntry = logEntries.get(0);
+        testLogAppender.deactivate();
+        final LoggingEvent logEntry = testLogAppender.firstLogEntry();
         assertThat(logEntry.getLevel(), is(WARN));
         assertThat((String) logEntry.getMessage(), containsString("The class PathAResource already exists, skipping code generation."));
-
-
     }
 
     private Path existingFilePath() {

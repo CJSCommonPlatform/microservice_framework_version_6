@@ -30,6 +30,7 @@
             <artifactId>core</artifactId>
             <version>${project.version}</version>
         </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -58,6 +59,12 @@
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
             <artifactId>generators-test-utils</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>test-utils-common</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>

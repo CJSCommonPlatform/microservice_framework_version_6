@@ -14,17 +14,14 @@ import org.everit.json.schema.Schema;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONObject;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Service for loading JSON schemas.
  */
-@ApplicationScoped
 public class JsonSchemaLoader {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(JsonSchemaLoader.class);
     private final static String SCHEMA_LOCATION_PATTERN = "/json/schema/%s.json";
-
-    @Inject
-    private Logger logger;
 
     /**
      * Locate a JSON schema file on the classpath and load it.
@@ -33,7 +30,7 @@ public class JsonSchemaLoader {
      */
     public Schema loadSchema(final String name) {
         final String schemaFile = format(SCHEMA_LOCATION_PATTERN, name);
-        logger.trace("Loading schema {}", schemaFile);
+        LOGGER.trace("Loading schema {}", schemaFile);
         final InputStream inputStream = this.getClass().getResourceAsStream(schemaFile);
 
         if (inputStream == null) {

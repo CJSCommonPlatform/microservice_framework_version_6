@@ -1,6 +1,10 @@
 package uk.gov.justice.services.generators.commons.helper;
 
+import static java.lang.String.valueOf;
 import static java.util.Collections.EMPTY_LIST;
+import static javax.ws.rs.core.Response.Status.ACCEPTED;
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static net.trajano.commons.testing.UtilityClassTestUtil.assertUtilityClassWellDefined;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
@@ -12,15 +16,20 @@ import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
 import static org.raml.model.ActionType.PUT;
 import static org.raml.model.ActionType.TRACE;
-import static uk.gov.justice.services.generators.commons.helper.Actions.hasResponseMimeTypes;
 import static uk.gov.justice.services.generators.commons.helper.Actions.isSupportedActionType;
 import static uk.gov.justice.services.generators.commons.helper.Actions.isSupportedActionTypeWithRequestType;
 import static uk.gov.justice.services.generators.commons.helper.Actions.isSupportedActionTypeWithResponseTypeOnly;
+import static uk.gov.justice.services.generators.commons.helper.Actions.isSynchronousAction;
 import static uk.gov.justice.services.generators.commons.helper.Actions.responseMimeTypesOf;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
+import static uk.gov.justice.services.generators.test.utils.builder.ResponseBuilder.response;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Test;
 import org.raml.model.Action;
+import org.raml.model.Response;
 
 public class ActionsTest {
 
@@ -70,13 +79,26 @@ public class ActionsTest {
         final Action action = httpAction()
                 .withResponseTypes("application/json")
                 .build();
-        assertThat(hasResponseMimeTypes(action), equalTo(true));
+        assertThat(isSynchronousAction(action), equalTo(true));
+    }
+
+    @Test
+    public void shouldReturnFalseIfActionHasResponseTypesWithAcceptedType() throws Exception {
+        final Map<String, Response> responses = new HashMap<>();
+        responses.put(valueOf(INTERNAL_SERVER_ERROR.getStatusCode()), response().build());
+        responses.put(valueOf(BAD_REQUEST.getStatusCode()), response().build());
+        responses.put(valueOf(ACCEPTED.getStatusCode()), response().build());
+
+        final Action action = httpAction()
+                .withResponsesFrom(responses)
+                .build();
+        assertThat(isSynchronousAction(action), equalTo(false));
     }
 
     @Test
     public void shouldReturnFalseIfActionDoesNotHaveResponseTypes() throws Exception {
         final Action action = httpAction().build();
-        assertThat(hasResponseMimeTypes(action), equalTo(false));
+        assertThat(isSynchronousAction(action), equalTo(false));
     }
 
     @Test

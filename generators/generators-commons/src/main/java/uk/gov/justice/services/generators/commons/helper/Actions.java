@@ -1,6 +1,7 @@
 package uk.gov.justice.services.generators.commons.helper;
 
 
+import static java.lang.String.valueOf;
 import static java.util.Collections.emptyList;
 import static org.raml.model.ActionType.DELETE;
 import static org.raml.model.ActionType.GET;
@@ -18,9 +19,18 @@ import org.raml.model.Response;
 
 public final class Actions {
 
+    private static final String ACCEPTED = valueOf(javax.ws.rs.core.Response.Status.ACCEPTED.getStatusCode());
+
     private Actions() {
     }
 
+    /**
+     * Returns a Collection of the Response {@link MimeType} that an {@link Action} supports,
+     * otherwise an empty Collection.
+     *
+     * @param action the {@link Action} to check
+     * @return the @{link Collection} of Response {@link MimeType}
+     */
     public static Collection<MimeType> responseMimeTypesOf(final Action action) {
         final Map<String, Response> responses = action.getResponses();
 
@@ -35,18 +45,44 @@ public final class Actions {
         return emptyList();
     }
 
-    public static boolean hasResponseMimeTypes(final Action action) {
-        return hasResponse(action.getResponses());
+    /**
+     * Synchronous {@link Action} will have {@link Response} types but will not have the
+     * ACCEPTED(202) {@link Response} type.
+     *
+     * @param action the {@link Action} to check
+     * @return true if action has responses but no ACCEPTED(202) type
+     */
+    public static boolean isSynchronousAction(final Action action) {
+        final Map<String, Response> responses = action.getResponses();
+        return hasResponse(responses) && !responses.containsKey(ACCEPTED);
     }
 
+    /**
+     * Returns true if the {@link ActionType} is a supported type.
+     *
+     * @param actionType the {@link ActionType} to check
+     * @return true if supported type
+     */
     public static boolean isSupportedActionType(final ActionType actionType) {
         return isSupportedActionTypeWithRequestType(actionType) || isSupportedActionTypeWithResponseTypeOnly(actionType);
     }
 
+    /**
+     * Returns true if the {@link ActionType} is a supported with Request type
+     *
+     * @param actionType the {@link ActionType} to check
+     * @return true if supported type
+     */
     public static boolean isSupportedActionTypeWithRequestType(final ActionType actionType) {
         return actionType == POST || actionType == PUT || actionType == PATCH || actionType == DELETE;
     }
 
+    /**
+     * Returns true if the {@link ActionType} is a supported Response only type
+     *
+     * @param actionType the {@link ActionType} to check
+     * @return true if supported type
+     */
     public static boolean isSupportedActionTypeWithResponseTypeOnly(final ActionType actionType) {
         return actionType == GET;
     }

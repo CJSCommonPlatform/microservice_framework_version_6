@@ -131,7 +131,6 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         verify(restProcessor).processSynchronously(any(Function.class), anyString(), eq(headers), any(Collection.class));
     }
 
-
     @SuppressWarnings("unchecked")
     @Test
     public void shouldPassActionToRestProcessor() throws Exception {
@@ -203,7 +202,6 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         verify(restProcessor).processSynchronously(any(Function.class), eq("contextB.action1"),
                 any(HttpHeaders.class), any(Collection.class));
     }
-
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test
@@ -297,8 +295,6 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         assertThat(queryParams, hasItems(
                 allOf(hasProperty("name", equalTo("queryParam")), hasProperty("stringValue", equalTo("paramValue1234")))
         ));
-
-
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -380,7 +376,6 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
 
     }
-
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test

@@ -6,6 +6,7 @@ import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.c
 
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.core.annotation.AnyLiteral;
+import uk.gov.justice.services.core.annotation.CustomServiceComponent;
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Provider;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -54,7 +55,8 @@ public class AnnotationScanner implements Extension {
         final Class<?> beanClass = bean.getBeanClass();
 
         if (beanClass.isAnnotationPresent(ServiceComponent.class)
-                || beanClass.isAnnotationPresent(FrameworkComponent.class)) {
+                || beanClass.isAnnotationPresent(FrameworkComponent.class)
+                || beanClass.isAnnotationPresent(CustomServiceComponent.class)) {
             processServiceComponentsForEvents(bean);
         } else if (beanClass.isAnnotationPresent(Provider.class)) {
             processProviderForEvents(bean);

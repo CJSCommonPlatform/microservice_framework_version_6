@@ -8,6 +8,7 @@ import static java.lang.reflect.Modifier.isStatic;
 import static java.nio.file.Paths.get;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -35,6 +36,7 @@ import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuil
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.defaultPutResource;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
+import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.methodsOf;
 
@@ -51,10 +53,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -88,7 +87,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
 
         assertThat(interfaceClass.isInterface(), is(true));
         assertThat(interfaceClass.getAnnotation(Path.class), not(nullValue()));
@@ -97,17 +96,17 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
 
     @Test
     public void shouldGenerateInterfaceInSpecifiedPackage() throws Exception {
-        String basePackageName = "uk.gov.test1";
+        final String basePackageName = "uk.gov.test1";
 
         java.nio.file.Path outputPath = get(outputFolder.getRoot().getAbsolutePath());
-        GeneratorConfig config = new GeneratorConfig(outputPath, outputPath, basePackageName, emptyMap(), Collections.singletonList(outputPath.getParent()));
+        final GeneratorConfig config = new GeneratorConfig(outputPath, outputPath, basePackageName, emptyMap(), singletonList(outputPath.getParent()));
         generator.run(
                 restRamlWithDefaults()
                         .with(defaultPostResource())
                         .build(),
                 config);
 
-        Class<?> interfaceClass = compiler.compiledInterfaceOf(basePackageName);
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(basePackageName);
 
         assertThat(interfaceClass.getPackage().getName(), is(basePackageName + ".resource"));
 
@@ -125,11 +124,11 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
 
-        List<Method> methods = methodsOf(interfaceClass);
+        final List<Method> methods = methodsOf(interfaceClass);
         assertThat(methods, hasSize(1));
-        Method method = methods.get(0);
+        final Method method = methods.get(0);
         assertThat(method.getReturnType(), equalTo(Response.class));
         assertThat(method.getAnnotation(POST.class), not(nullValue()));
         assertThat(method.getAnnotation(Consumes.class), not(nullValue()));
@@ -149,11 +148,11 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
 
-        List<Method> methods = methodsOf(interfaceClass);
+        final List<Method> methods = methodsOf(interfaceClass);
         assertThat(methods, hasSize(2));
-        Method method1 = methodWithConsumesAnnotationOf(methods, "application/vnd.ctx.command.cmd-a+json");
+        final Method method1 = methodWithConsumesAnnotationOf(methods, "application/vnd.ctx.command.cmd-a+json");
 
         assertThat(method1.getReturnType(), equalTo(Response.class));
         assertThat(method1.getAnnotation(POST.class), not(nullValue()));
@@ -161,7 +160,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
         assertThat(method1.getAnnotation(Consumes.class).value(),
                 is(new String[]{"application/vnd.ctx.command.cmd-a+json"}));
 
-        Method method2 = methodWithConsumesAnnotationOf(methods, "application/vnd.ctx.command.cmd-b+json");
+        final Method method2 = methodWithConsumesAnnotationOf(methods, "application/vnd.ctx.command.cmd-b+json");
         assertThat(method2.getReturnType(), equalTo(Response.class));
         assertThat(method2.getAnnotation(POST.class), not(nullValue()));
         assertThat(method2.getAnnotation(Consumes.class), not(nullValue()));
@@ -182,11 +181,11 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
 
-        List<Method> methods = methodsOf(interfaceClass);
+        final List<Method> methods = methodsOf(interfaceClass);
         assertThat(methods, hasSize(1));
-        Method method = methods.get(0);
+        final Method method = methods.get(0);
         assertThat(method.getReturnType(), equalTo(Response.class));
         assertThat(method.getAnnotation(PUT.class), not(nullValue()));
         assertThat(method.getAnnotation(Consumes.class), not(nullValue()));
@@ -206,11 +205,11 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
 
-        List<Method> methods = methodsOf(interfaceClass);
+        final List<Method> methods = methodsOf(interfaceClass);
         assertThat(methods, hasSize(1));
-        Method method = methods.get(0);
+        final Method method = methods.get(0);
         assertThat(method.getReturnType(), equalTo(Response.class));
         assertThat(method.getAnnotation(PATCH.class), not(nullValue()));
         assertThat(method.getAnnotation(Consumes.class), not(nullValue()));
@@ -230,11 +229,11 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
 
-        List<Method> methods = methodsOf(interfaceClass);
+        final List<Method> methods = methodsOf(interfaceClass);
         assertThat(methods, hasSize(1));
-        Method method = methods.get(0);
+        final Method method = methods.get(0);
         assertThat(method.getReturnType(), equalTo(Response.class));
         assertThat(method.getAnnotation(DELETE.class), not(nullValue()));
         assertThat(method.getAnnotation(Consumes.class), not(nullValue()));
@@ -340,11 +339,11 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
 
-        List<Method> methods = methodsOf(interfaceClass);
+        final List<Method> methods = methodsOf(interfaceClass);
         assertThat(methods, hasSize(1));
-        Method method = methods.get(0);
+        final Method method = methods.get(0);
         assertThat(method.getReturnType(), equalTo(Response.class));
         assertThat(method.getAnnotation(javax.ws.rs.GET.class), not(nullValue()));
         assertThat(method.getAnnotation(Produces.class), not(nullValue()));
@@ -372,11 +371,11 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
 
-        List<Method> methods = methodsOf(interfaceClass);
+        final List<Method> methods = methodsOf(interfaceClass);
         assertThat(methods, hasSize(1));
-        Method method = methods.get(0);
+        final Method method = methods.get(0);
         assertThat(method.getReturnType(), equalTo(Response.class));
         assertThat(method.getAnnotation(javax.ws.rs.GET.class), not(nullValue()));
         assertThat(method.getAnnotation(Produces.class), not(nullValue()));
@@ -395,11 +394,11 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
 
-        List<Method> methods = methodsOf(interfaceClass);
+        final List<Method> methods = methodsOf(interfaceClass);
         assertThat(methods, hasSize(1));
-        Method method = methods.get(0);
+        final Method method = methods.get(0);
         assertThat(method.getParameterCount(), is(1));
         assertThat(method.getParameters()[0].getType(), equalTo(JsonObject.class));
 
@@ -415,21 +414,21 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
 
         assertThat(interfaceClass.isInterface(), is(true));
-        List<Method> methods = methodsOf(interfaceClass);
+        final List<Method> methods = methodsOf(interfaceClass);
         assertThat(methods, hasSize(1));
-        Method method = methods.get(0);
+        final Method method = methods.get(0);
         assertThat(method.getParameterCount(), is(2));
 
-        Parameter methodParam1 = method.getParameters()[0];
+        final Parameter methodParam1 = method.getParameters()[0];
         assertThat(methodParam1.getType(), equalTo(String.class));
         assertThat(methodParam1.getAnnotations(), arrayWithSize(1));
         assertThat(methodParam1.getAnnotations()[0].annotationType(), equalTo(PathParam.class));
         assertThat(methodParam1.getAnnotation(PathParam.class).value(), is("param1"));
 
-        Parameter methodParam2 = method.getParameters()[1];
+        final Parameter methodParam2 = method.getParameters()[1];
         assertThat(methodParam2.getType(), equalTo(JsonObject.class));
         assertThat(methodParam2.getAnnotations(), emptyArray());
 
@@ -446,26 +445,26 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
 
-        List<Method> methods = methodsOf(interfaceClass);
+        final List<Method> methods = methodsOf(interfaceClass);
         assertThat(methods, hasSize(1));
-        Method method = methods.get(0);
+        final Method method = methods.get(0);
         assertThat(method.getParameterCount(), is(3));
 
-        Parameter methodParam1 = method.getParameters()[0];
+        final Parameter methodParam1 = method.getParameters()[0];
         assertThat(methodParam1.getType(), equalTo(String.class));
         assertThat(methodParam1.getAnnotations(), arrayWithSize(1));
         assertThat(methodParam1.getAnnotations()[0].annotationType(), equalTo(PathParam.class));
         assertThat(methodParam1.getAnnotation(PathParam.class).value(), is("paramA"));
 
-        Parameter methodParam2 = method.getParameters()[1];
+        final Parameter methodParam2 = method.getParameters()[1];
         assertThat(methodParam2.getType(), equalTo(String.class));
         assertThat(methodParam2.getAnnotations(), arrayWithSize(1));
         assertThat(methodParam2.getAnnotations()[0].annotationType(), equalTo(PathParam.class));
         assertThat(methodParam2.getAnnotation(PathParam.class).value(), is("paramB"));
 
-        Parameter methodParam3 = method.getParameters()[2];
+        final Parameter methodParam3 = method.getParameters()[2];
         assertThat(methodParam3.getType(), equalTo(JsonObject.class));
         assertThat(methodParam3.getAnnotations(), emptyArray());
 
@@ -480,8 +479,8 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> resourceInterface = compiler.compiledInterfaceOf(BASE_PACKAGE);
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceInterface = compiler.compiledInterfaceOf(BASE_PACKAGE);
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
         assertThat(resourceClass.isInterface(), is(false));
         assertThat(resourceClass.getGenericInterfaces(), arrayWithSize(1));
@@ -498,7 +497,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
         assertThat(isFinal(resourceClass.getModifiers()), is(false));
         assertThat(isPublic(resourceClass.getModifiers()), is(true));
@@ -513,7 +512,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
         assertThat(resourceClass.isInterface(), is(false));
         assertThat(resourceClass.getAnnotation(Adapter.class), not(nullValue()));
@@ -531,7 +530,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
         assertThat(resourceClass.isInterface(), is(false));
         assertThat(resourceClass.getAnnotation(Adapter.class), not(nullValue()));
@@ -541,18 +540,15 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
 
     @Test
     public void shouldGenerateResourceClassContainingCustomAdapterAnnotationIfUnknownPillarNameInUriAndServiceComponentSet() throws Exception {
-        final Map<String, String> generatorProperties = new HashMap<>();
-        generatorProperties.put("serviceComponent", "CUSTOM_API");
-
         generator.run(
                 restRamlWithDefaults()
                         .withBaseUri("http://localhost:8080/warname/custom/api/rest/service")
                         .with(resource("/some/path")
                                 .withDefaultPostAction()
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("CUSTOM_API")));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
         assertThat(resourceClass.isInterface(), is(false));
         assertThat(resourceClass.getAnnotation(CustomAdapter.class), not(nullValue()));
@@ -585,12 +581,12 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
         assertThat(clazz.isInterface(), is(false));
-        List<Method> methods = methodsOf(clazz);
+        final List<Method> methods = methodsOf(clazz);
         assertThat(methods, hasSize(1));
-        Method method = methods.get(0);
+        final Method method = methods.get(0);
         assertThat(method.getReturnType(), equalTo(Response.class));
     }
 
@@ -613,10 +609,10 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathP1Resource");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathP1Resource");
 
         assertThat(clazz.isInterface(), is(false));
-        List<Method> methods = methodsOf(clazz);
+        final List<Method> methods = methodsOf(clazz);
         assertThat(methods, hasSize(4));
     }
 
@@ -630,19 +626,19 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamAResource");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamAResource");
 
         assertThat(clazz.isInterface(), is(false));
-        List<Method> methods = methodsOf(clazz);
+        final List<Method> methods = methodsOf(clazz);
         assertThat(methods, hasSize(1));
-        Method method = methods.get(0);
+        final Method method = methods.get(0);
         assertThat(method.getParameterCount(), is(2));
 
-        Parameter methodParam1 = method.getParameters()[0];
+        final Parameter methodParam1 = method.getParameters()[0];
         assertThat(methodParam1.getType(), equalTo(String.class));
         assertThat(methodParam1.getAnnotations(), emptyArray());
 
-        Parameter methodParam2 = method.getParameters()[1];
+        final Parameter methodParam2 = method.getParameters()[1];
         assertThat(methodParam2.getType(), equalTo(JsonObject.class));
 
     }
@@ -662,24 +658,24 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamAParamBParamCResource");
 
         assertThat(clazz.isInterface(), is(false));
-        List<Method> methods = methodsOf(clazz);
+        final List<Method> methods = methodsOf(clazz);
         assertThat(methods, hasSize(1));
-        Method method = methods.get(0);
+        final Method method = methods.get(0);
         assertThat(method.getParameterCount(), is(4));
 
-        Parameter pathParam1 = method.getParameters()[0];
+        final Parameter pathParam1 = method.getParameters()[0];
         assertThat(pathParam1.getType(), equalTo(String.class));
         assertThat(pathParam1.getAnnotations(), emptyArray());
 
-        Parameter pathParam2 = method.getParameters()[1];
+        final Parameter pathParam2 = method.getParameters()[1];
         assertThat(pathParam2.getType(), equalTo(String.class));
         assertThat(pathParam2.getAnnotations(), emptyArray());
 
-        Parameter pathParam3 = method.getParameters()[2];
+        final Parameter pathParam3 = method.getParameters()[2];
         assertThat(pathParam3.getType(), equalTo(String.class));
         assertThat(pathParam3.getAnnotations(), emptyArray());
 
-        Parameter bodyParam = method.getParameters()[3];
+        final Parameter bodyParam = method.getParameters()[3];
         assertThat(bodyParam.getType(), equalTo(JsonObject.class));
         assertThat(bodyParam.getAnnotations(), emptyArray());
 
@@ -687,18 +683,17 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
 
     @Test
     public void shouldGenerateClassInSpecifiedPackage() throws Exception {
-        String basePackageName = "uk.gov.test2";
+        final String basePackageName = "uk.gov.test2";
 
         java.nio.file.Path outputPath = get(outputFolder.getRoot().getAbsolutePath());
-        GeneratorConfig config = new GeneratorConfig(outputPath, outputPath, basePackageName, emptyMap(), Collections.singletonList(outputPath.getParent()));
         generator.run(
                 restRamlWithDefaults()
                         .with(defaultPostResource()
                                 .withRelativeUri("/some/path")
                         ).build(),
-                config);
+                new GeneratorConfig(outputPath, outputPath, basePackageName, emptyMap(), singletonList(outputPath.getParent())));
 
-        Class<?> resourceImplementation = compiler.compiledClassOf(basePackageName, "resource", "DefaultSomePathResource");
+        final Class<?> resourceImplementation = compiler.compiledClassOf(basePackageName, "resource", "DefaultSomePathResource");
 
         assertThat(resourceImplementation.getPackage().getName(), is(basePackageName + ".resource"));
 
@@ -713,10 +708,10 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
-        List<Method> methods = methodsOf(class1);
+        final Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final List<Method> methods = methodsOf(class1);
         assertThat(methods, hasSize(1));
-        Method method = methods.get(0);
+        final Method method = methods.get(0);
         assertThat(method.getReturnType(), equalTo(Response.class));
         assertThat(method.getParameterCount(), is(1));
         assertThat(method.getParameters()[0].getType(), equalTo(JsonObject.class));
@@ -736,10 +731,10 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
-        List<Method> methods = methodsOf(class1);
+        final Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final List<Method> methods = methodsOf(class1);
         assertThat(methods, hasSize(1));
-        Method method = methods.get(0);
+        final Method method = methods.get(0);
         assertThat(method.getReturnType(), equalTo(Response.class));
         assertThat(method.getParameterCount(), is(1));
         assertThat(method.getParameters()[0].getType(), equalTo(JsonObject.class));
@@ -754,10 +749,10 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
-        List<Method> methods = methodsOf(class1);
+        final Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final List<Method> methods = methodsOf(class1);
         assertThat(methods, hasSize(1));
-        Method method = methods.get(0);
+        final Method method = methods.get(0);
         assertThat(method.getReturnType(), equalTo(Response.class));
         assertThat(method.getParameterCount(), is(1));
         assertThat(method.getParameters()[0].getType(), equalTo(JsonObject.class));
@@ -777,10 +772,10 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
-        List<Method> methods = methodsOf(class1);
+        final Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final List<Method> methods = methodsOf(class1);
         assertThat(methods, hasSize(1));
-        Method method = methods.get(0);
+        final Method method = methods.get(0);
         assertThat(method.getReturnType(), equalTo(Response.class));
         assertThat(method.getParameterCount(), is(1));
         assertThat(method.getParameters()[0].getType(), equalTo(JsonObject.class));
@@ -795,10 +790,10 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
-        List<Method> methods = methodsOf(class1);
+        final Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final List<Method> methods = methodsOf(class1);
         assertThat(methods, hasSize(1));
-        Method method = methods.get(0);
+        final Method method = methods.get(0);
         assertThat(method.getReturnType(), equalTo(Response.class));
         assertThat(method.getParameterCount(), is(1));
         assertThat(method.getParameters()[0].getType(), equalTo(JsonObject.class));
@@ -818,10 +813,10 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
-        List<Method> methods = methodsOf(class1);
+        final Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final List<Method> methods = methodsOf(class1);
         assertThat(methods, hasSize(1));
-        Method method = methods.get(0);
+        final Method method = methods.get(0);
         assertThat(method.getReturnType(), equalTo(Response.class));
         assertThat(method.getParameterCount(), is(1));
         assertThat(method.getParameters()[0].getType(), equalTo(JsonObject.class));
@@ -836,10 +831,10 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
-        List<Method> methods = methodsOf(class1);
+        final Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final List<Method> methods = methodsOf(class1);
         assertThat(methods, hasSize(1));
-        Method method = methods.get(0);
+        final Method method = methods.get(0);
         assertThat(method.getReturnType(), equalTo(Response.class));
         assertThat(method.getParameterCount(), is(1));
         assertThat(method.getParameters()[0].getType(), equalTo(JsonObject.class));
@@ -853,9 +848,9 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                                 .withRelativeUri("/some/path")
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
-        Field chainProcess = resourceClass.getDeclaredField(INTERCEPTOR_CHAIN_PROCESSOR);
+        final Field chainProcess = resourceClass.getDeclaredField(INTERCEPTOR_CHAIN_PROCESSOR);
         assertThat(chainProcess, not(nullValue()));
         assertThat(chainProcess.getType(), equalTo(InterceptorChainProcessor.class));
         assertThat(chainProcess.getAnnotation(Inject.class), not(nullValue()));
@@ -870,9 +865,9 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                                 .withRelativeUri("/some/path")
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
-        Field logger = resourceClass.getDeclaredField("LOGGER");
+        final Field logger = resourceClass.getDeclaredField("LOGGER");
         assertThat(logger, not(nullValue()));
         assertThat(logger.getType(), equalTo(Logger.class));
         assertThat(isPrivate(logger.getModifiers()), is(true));
@@ -888,9 +883,9 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                                 .withRelativeUri("/some/path"))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
-        Field dispatcher = resourceClass.getDeclaredField(INTERCEPTOR_CHAIN_PROCESSOR);
+        final Field dispatcher = resourceClass.getDeclaredField(INTERCEPTOR_CHAIN_PROCESSOR);
         assertThat(dispatcher, not(nullValue()));
         assertThat(dispatcher.getType(), equalTo(InterceptorChainProcessor.class));
         assertThat(dispatcher.getAnnotation(Inject.class), not(nullValue()));
@@ -904,9 +899,9 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         .with(resource("/user").with(defaultGetAction())).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultUserResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultUserResource");
 
-        Field mapping = resourceClass.getDeclaredField("actionMapper");
+        final Field mapping = resourceClass.getDeclaredField("actionMapper");
         assertThat(mapping, not(nullValue()));
         assertThat(mapping.getType(), equalTo(BasicActionMapper.class));
         assertThat(mapping.getAnnotation(Inject.class), not(nullValue()));
@@ -924,9 +919,9 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                                 .withRelativeUri("/some/path")
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
-        Field dispatcher = resourceClass.getDeclaredField("headers");
+        final Field dispatcher = resourceClass.getDeclaredField("headers");
         assertThat(dispatcher, not(nullValue()));
         assertThat(dispatcher.getType(), equalTo(HttpHeaders.class));
         assertThat(dispatcher.getAnnotation(javax.ws.rs.core.Context.class), not(nullValue()));
@@ -942,9 +937,9 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
-        Field dispatcher = resourceClass.getDeclaredField("restProcessor");
+        final Field dispatcher = resourceClass.getDeclaredField("restProcessor");
         assertThat(dispatcher, not(nullValue()));
         assertThat(dispatcher.getType(), equalTo(RestProcessor.class));
         assertThat(dispatcher.getAnnotation(Inject.class), not(nullValue()));
@@ -965,26 +960,25 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap())
         );
 
-        Class<?> implementation = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultUsersResource");
+        final Class<?> implementation = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultUsersResource");
 
         assertThat(implementation.isInterface(), is(false));
 
+        final Method method = firstMethodOf(implementation);
 
-        Method method = firstMethodOf(implementation);
-
-        Parameter param = method.getParameters()[0];
+        final Parameter param = method.getParameters()[0];
         assertThat(param.getType(), equalTo(String.class));
         assertThat(param.getAnnotations(), emptyArray());
 
-        Class<?> iface = compiler.compiledInterfaceClassOf(BASE_PACKAGE, "resource", "UsersResource");
+        final Class<?> iface = compiler.compiledInterfaceClassOf(BASE_PACKAGE, "resource", "UsersResource");
 
-        Method interMethod = firstMethodOf(iface);
+        final Method interMethod = firstMethodOf(iface);
 
-        Parameter interParam = interMethod.getParameters()[0];
+        final Parameter interParam = interMethod.getParameters()[0];
         assertThat(interParam.getType(), equalTo(String.class));
         assertThat(interParam.getAnnotations().length, is(1));
 
-        Annotation annotation = interParam.getAnnotations()[0];
+        final Annotation annotation = interParam.getAnnotations()[0];
         assertThat(annotation.annotationType(), equalTo(QueryParam.class));
 
     }
@@ -1004,11 +998,11 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap())
         );
 
-        Class<?> implementation = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultUsersResource");
+        final Class<?> implementation = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultUsersResource");
 
         assertThat(implementation.isInterface(), is(false));
 
-        Method method = firstMethodOf(implementation);
+        final Method method = firstMethodOf(implementation);
         assertThat(method.getParameterCount(), is(3));
 
         stream(method.getParameters()).forEach(parameter -> {
@@ -1016,11 +1010,11 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
             assertThat(parameter.getAnnotations(), emptyArray());
         });
 
-        Class<?> iface = compiler.compiledInterfaceClassOf(BASE_PACKAGE, "resource", "UsersResource");
+        final Class<?> iface = compiler.compiledInterfaceClassOf(BASE_PACKAGE, "resource", "UsersResource");
 
         assertThat(iface.isInterface(), is(true));
 
-        Method interMethod = firstMethodOf(iface);
+        final Method interMethod = firstMethodOf(iface);
         assertThat(interMethod.getParameterCount(), is(3));
 
         stream(interMethod.getParameters()).forEach(parameter -> {
@@ -1032,14 +1026,11 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
         });
     }
 
-
-    private Method methodWithConsumesAnnotationOf(List<Method> methods, String mediaType) {
+    private Method methodWithConsumesAnnotationOf(final List<Method> methods, final String mediaType) {
         return methods.stream().filter(m -> m.getAnnotation(Consumes.class)
                 .value()[0]
                 .equals(mediaType))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException(format("No method consuming %s found", mediaType)));
     }
-
-
 }

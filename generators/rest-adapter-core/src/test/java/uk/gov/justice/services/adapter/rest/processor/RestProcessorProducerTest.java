@@ -20,6 +20,7 @@ import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
 import uk.gov.justice.services.adapter.rest.parameter.Parameter;
 import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.justice.services.core.annotation.Adapter;
+import uk.gov.justice.services.core.annotation.CustomAdapter;
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
@@ -52,6 +53,7 @@ public class RestProcessorProducerTest {
     private InjectionPoint queryControllerInjectionPoint;
     private InjectionPoint queryViewInjectionPoint;
     private InjectionPoint frameworkApiInjectionPoint;
+    private InjectionPoint customApiInjectionPoint;
 
     @Mock
     private Function<JsonEnvelope, Optional<JsonEnvelope>> function;
@@ -65,6 +67,7 @@ public class RestProcessorProducerTest {
         queryControllerInjectionPoint = injectionPointWithMemberAsFirstMethodOf(QueryControllerAdapter.class);
         queryViewInjectionPoint = injectionPointWithMemberAsFirstMethodOf(QueryViewAdapter.class);
         frameworkApiInjectionPoint = injectionPointWithMemberAsFirstMethodOf(FrameworkApiAdapter.class);
+        customApiInjectionPoint = injectionPointWithMemberAsFirstMethodOf(CustomApiAdapter.class);
 
         restProcessorProducer.envelopeBuilderFactory = new RestEnvelopeBuilderFactory();
         restProcessorProducer.jsonObjectEnvelopeConverter = new JsonObjectEnvelopeConverter();
@@ -92,6 +95,21 @@ public class RestProcessorProducerTest {
                 Optional.of(envelope().with(metadataOf(UUID.fromString(ID_VALUE), NAME_VALUE)).withPayloadOf(FIELD_VALUE, FIELD_NAME).build()));
 
         final Response response = restProcessorProducer.produceRestProcessor(frameworkApiInjectionPoint)
+                .processSynchronously(function, "somecontext.somequery", headersWith("Accept", "application/vnd.somecontext.query.somequery+json"), NOT_USED_PATH_PARAMS);
+
+        assertThat(response, notNullValue());
+        assertThat(response.getHeaderString(HeaderConstants.ID), equalTo(ID_VALUE));
+        with(response.getEntity().toString())
+                .assertNotDefined(METADATA)
+                .assertThat("$." + FIELD_NAME, equalTo(FIELD_VALUE));
+    }
+
+    @Test
+    public void shouldReturnPayloadOnlyRestProcessorForCustomApi() {
+        when(function.apply(any())).thenReturn(
+                Optional.of(envelope().with(metadataOf(UUID.fromString(ID_VALUE), NAME_VALUE)).withPayloadOf(FIELD_VALUE, FIELD_NAME).build()));
+
+        final Response response = restProcessorProducer.produceRestProcessor(customApiInjectionPoint)
                 .processSynchronously(function, "somecontext.somequery", headersWith("Accept", "application/vnd.somecontext.query.somequery+json"), NOT_USED_PATH_PARAMS);
 
         assertThat(response, notNullValue());
@@ -154,6 +172,13 @@ public class RestProcessorProducerTest {
 
     @FrameworkComponent("FRAMEWORK_API")
     private class FrameworkApiAdapter {
+
+        public void test() {
+        }
+    }
+
+    @CustomAdapter("CUSTOM_API")
+    private class CustomApiAdapter {
 
         public void test() {
         }

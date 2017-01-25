@@ -1,6 +1,7 @@
 package uk.gov.justice.services.core.annotation;
 
 
+import static net.trajano.commons.testing.UtilityClassTestUtil.assertUtilityClassWellDefined;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLLER;
@@ -17,6 +18,11 @@ import org.junit.Test;
 public class ComponentNameUtilTest {
 
     private static final String FIELD_NAME = "field";
+
+    @Test
+    public void shouldBeWellDefinedUtilityClass() {
+        assertUtilityClassWellDefined(ComponentNameUtil.class);
+    }
 
     @Test
     public void shouldReturnFieldLevelComponent() throws NoSuchFieldException {
@@ -40,7 +46,7 @@ public class ComponentNameUtilTest {
 
     @Test
     public void shouldReturnClassLevelComponentForMethodInjectionPoint() throws NoSuchFieldException {
-        assertThat(componentFrom(injectionPointWith(MethodAnnotation.class.getDeclaredMethods()[0])), equalTo("QUERY_API"));
+        assertThat(componentFrom(injectionPointWith(ServiceComponentClassLevelAnnotationMethod.class.getDeclaredMethods()[0])), equalTo("QUERY_API"));
     }
 
     @Test
@@ -51,6 +57,16 @@ public class ComponentNameUtilTest {
     @Test
     public void shouldReturnFieldLevelFrameworkComponent() throws NoSuchFieldException {
         assertThat(componentFrom(injectionPointWith(FrameworkComponentFieldLevelAnnotation.class.getDeclaredField(FIELD_NAME))), equalTo("CUSTOM_NAME_BCD"));
+    }
+
+    @Test
+    public void shouldReturnClassLevelCustomServiceComponent() throws NoSuchFieldException {
+        assertThat(componentFrom(injectionPointWith(CustomServiceClassLevelAnnotation.class.getDeclaredMethods()[0])), equalTo("CUSTOM_SERVICE_NAME"));
+    }
+
+    @Test
+    public void shouldReturnFieldLevelCustomServiceComponent() throws NoSuchFieldException {
+        assertThat(componentFrom(injectionPointWith(CustomServiceFieldLevelAnnotation.class.getDeclaredField(FIELD_NAME))), equalTo("CUSTOM_SERVICE_NAME"));
     }
 
     @Test(expected = IllegalStateException.class)
@@ -114,6 +130,23 @@ public class ComponentNameUtilTest {
         @FrameworkComponent("CUSTOM_NAME_BCD")
         Object field;
 
+    }
+
+    @CustomServiceComponent("CUSTOM_SERVICE_NAME")
+    public static class CustomServiceClassLevelAnnotation {
+
+        @Inject
+        public void test(Object field) {
+
+        }
+
+    }
+
+    public static class CustomServiceFieldLevelAnnotation {
+
+        @Inject
+        @CustomServiceComponent("CUSTOM_SERVICE_NAME")
+        Object field;
     }
 
     public static class NoAnnotation {

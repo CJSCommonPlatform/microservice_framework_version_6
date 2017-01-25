@@ -12,7 +12,7 @@ import static uk.gov.justice.services.adapters.rest.generator.Generators.byMimeT
 import static uk.gov.justice.services.adapters.rest.generator.Generators.componentFromBaseUriIn;
 import static uk.gov.justice.services.generators.commons.config.GeneratorProperties.serviceComponentOf;
 import static uk.gov.justice.services.generators.commons.helper.Actions.isSupportedActionType;
-import static uk.gov.justice.services.generators.commons.helper.Actions.isSupportedActionTypeWithRequestType;
+import static uk.gov.justice.services.generators.commons.helper.Actions.isSupportedActionTypeWithResponseTypeOnly;
 import static uk.gov.justice.services.generators.commons.helper.Actions.isSynchronousAction;
 import static uk.gov.justice.services.generators.commons.helper.Names.DEFAULT_ANNOTATION_PARAMETER;
 import static uk.gov.justice.services.generators.commons.helper.Names.GENERIC_PAYLOAD_ARGUMENT_NAME;
@@ -181,7 +181,7 @@ class JaxRsImplementationGenerator {
         final ActionType actionType = action.getType();
 
         if (isSupportedActionType(actionType)) {
-            if (!action.hasBody()) {
+            if (isSupportedActionTypeWithResponseTypeOnly(actionType)) {
                 return singletonList(processNoActionBody(action));
             } else {
                 return processOneOrMoreActionBodies(action);
@@ -224,17 +224,7 @@ class JaxRsImplementationGenerator {
      */
     private MethodSpec buildMethodSpecForMimeType(final Action action, final MimeType bodyMimeType) {
         final String resourceMethodName = buildResourceMethodName(action, bodyMimeType);
-        final ActionType actionType = action.getType();
-
-        if (isSupportedActionType(actionType)) {
-            if (isSupportedActionTypeWithRequestType(actionType)) {
-                return generateResourceMethod(resourceMethodName, action, bodyMimeType);
-            } else {
-                return generateGetResourceMethod(resourceMethodName, action);
-            }
-        }
-
-        throw new IllegalStateException(format("Unsupported httpAction type %s", actionType));
+        return generateResourceMethod(resourceMethodName, action, bodyMimeType);
     }
 
     /**

@@ -37,18 +37,6 @@ public class ServiceComponentLocationTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void shouldReturnLocalForFrameworkComponentAnnotatedInjectionPoint() throws Exception {
-        assertThat(componentLocationFrom(injectionPointWith(FrameworkComponentRemote.class.getDeclaredField(FIELD))), equalTo(REMOTE));
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
-    public void shouldReturnLocalForAdapterAnnotatedInjectionPoint() throws Exception {
-        assertThat(componentLocationFrom(injectionPointWith(AdapterComponent.class.getDeclaredField(FIELD))), equalTo(LOCAL));
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
     public void shouldReturnLocalForCustomAdapterAnnotatedInjectionPoint() throws Exception {
         assertThat(componentLocationFrom(injectionPointWith(CustomAdapterComponent.class.getDeclaredField(FIELD))), equalTo(LOCAL));
     }
@@ -66,20 +54,6 @@ public class ServiceComponentLocationTest {
     @Remote
     private static class TestRemoteComponent {
 
-    }
-
-    @Adapter(QUERY_API)
-    private static class AdapterComponent {
-
-        @Inject
-        Object field;
-    }
-
-    @FrameworkComponent("Framework-Component")
-    private static class FrameworkComponentRemote {
-
-        @Inject
-        Object field;
     }
 
     @Adapter(QUERY_API)

@@ -13,6 +13,7 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 
 import uk.gov.justice.domain.annotation.Event;
+import uk.gov.justice.services.core.annotation.CustomServiceComponent;
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Provider;
 import uk.gov.justice.services.core.annotation.Remote;
@@ -50,15 +51,6 @@ public class AnnotationScannerTest {
 
     @Mock
     private BeanManager beanManager;
-
-    @Mock
-    private ServiceComponentFoundEvent serviceComponentFoundEvent;
-
-    @Mock
-    private EventFoundEvent eventFoundEvent;
-
-    @Mock
-    private ProviderFoundEvent providerFoundEvent;
 
     @Mock
     private Bean<Object> bean;
@@ -106,6 +98,13 @@ public class AnnotationScannerTest {
     }
 
     @Test
+    public void shouldFireServiceComponentFoundEventForCustomServiceComponentAnnotation() throws Exception {
+        doReturn(TestCustomServiceComponent.class).when(bean).getBeanClass();
+
+        verifyIfServiceComponentFoundEventFiredWith(bean);
+    }
+
+    @Test
     public void shouldFireEventFoundEventWithTestEvent() throws Exception {
         verifyIfEventFoundEventFiredWith(processAnnotatedType);
     }
@@ -113,7 +112,7 @@ public class AnnotationScannerTest {
     @Test
     public void shouldFireProviderFoundEvent() throws Exception {
         doReturn(TestProvider.class).when(bean).getBeanClass();
-        ArgumentCaptor<ProviderFoundEvent> captor = ArgumentCaptor.forClass(ProviderFoundEvent.class);
+        final ArgumentCaptor<ProviderFoundEvent> captor = ArgumentCaptor.forClass(ProviderFoundEvent.class);
         mockBeanManagerGetBeansWith(bean);
 
         annotationScanner.afterDeploymentValidation(afterDeploymentValidation, beanManager);
@@ -150,8 +149,8 @@ public class AnnotationScannerTest {
         doReturn(TestEvent.class.getAnnotation(Event.class)).when(annotatedType).getAnnotation(Event.class);
     }
 
-    private void verifyIfServiceComponentFoundEventFiredWith(Bean<Object> handler) {
-        ArgumentCaptor<ServiceComponentFoundEvent> captor = ArgumentCaptor.forClass(ServiceComponentFoundEvent.class);
+    private void verifyIfServiceComponentFoundEventFiredWith(final Bean<Object> handler) {
+        final ArgumentCaptor<ServiceComponentFoundEvent> captor = ArgumentCaptor.forClass(ServiceComponentFoundEvent.class);
         mockBeanManagerGetBeansWith(handler);
 
         annotationScanner.afterDeploymentValidation(afterDeploymentValidation, beanManager);
@@ -161,8 +160,8 @@ public class AnnotationScannerTest {
         assertThat(captor.getValue().getLocation(), equalTo(ServiceComponentLocation.LOCAL));
     }
 
-    private void verifyIfRemoteServiceComponentFoundEventFiredWith(Bean<Object> handler) {
-        ArgumentCaptor<ServiceComponentFoundEvent> captor = ArgumentCaptor.forClass(ServiceComponentFoundEvent.class);
+    private void verifyIfRemoteServiceComponentFoundEventFiredWith(final Bean<Object> handler) {
+        final ArgumentCaptor<ServiceComponentFoundEvent> captor = ArgumentCaptor.forClass(ServiceComponentFoundEvent.class);
         mockBeanManagerGetBeansWith(handler);
 
         annotationScanner.afterDeploymentValidation(afterDeploymentValidation, beanManager);
@@ -172,8 +171,9 @@ public class AnnotationScannerTest {
         assertThat(captor.getValue().getLocation(), equalTo(ServiceComponentLocation.REMOTE));
     }
 
-    private void verifyIfEventFoundEventFiredWith(ProcessAnnotatedType processAnnotatedType) {
-        ArgumentCaptor<EventFoundEvent> captor = ArgumentCaptor.forClass(EventFoundEvent.class);
+    @SuppressWarnings("unchecked")
+    private void verifyIfEventFoundEventFiredWith(final ProcessAnnotatedType processAnnotatedType) {
+        final ArgumentCaptor<EventFoundEvent> captor = ArgumentCaptor.forClass(EventFoundEvent.class);
         mockProcessAnnotatedType();
 
         annotationScanner.processAnnotatedType(processAnnotatedType);
@@ -197,6 +197,10 @@ public class AnnotationScannerTest {
 
     @FrameworkComponent("COMPONENT_ABC")
     public static class TestFrameworkComponent {
+    }
+
+    @CustomServiceComponent("COMPONENT_XYZ")
+    public static class TestCustomServiceComponent {
     }
 
     @Remote

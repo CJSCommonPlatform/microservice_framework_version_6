@@ -1,6 +1,7 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
 
+import static java.util.Comparator.comparing;
 import static uk.gov.justice.services.generators.commons.helper.Names.baseUriPathWithoutContext;
 
 import uk.gov.justice.services.core.annotation.Component;
@@ -44,7 +45,7 @@ final class Generators {
      * @return the MimeType Comparator
      */
     static Comparator<MimeType> byMimeTypeOrder() {
-        return Comparator.comparing(MimeType::getType);
+        return comparing(MimeType::getType);
     }
 
 }

@@ -1,9 +1,10 @@
 package uk.gov.justice.services.adapter.rest.processor;
 
-import static com.jayway.jsonassert.JsonAssert.with;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -12,7 +13,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
 import static uk.gov.justice.services.rest.ParameterType.BOOLEAN;
 import static uk.gov.justice.services.rest.ParameterType.NUMERIC;
@@ -20,13 +20,10 @@ import static uk.gov.justice.services.rest.ParameterType.STRING;
 
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
 import uk.gov.justice.services.adapter.rest.parameter.Parameter;
-import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -44,17 +41,21 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.slf4j.Logger;
 
-/**
- * Unit tests for the {@link RestProcessor} class.
- */
 @RunWith(MockitoJUnitRunner.class)
-public class RestProcessorTest {
+public class BaseRestProcessorTest {
 
     private static final Optional<JsonObject> NOT_USED_PAYLOAD = Optional.of(Json.createObjectBuilder().build());
     private static final Collection<Parameter> NOT_USED_PATH_PARAMS = emptyList();
     private static final HttpHeaders NOT_USED_HEADERS = new ResteasyHttpHeaders(new MultivaluedMapImpl<>());
     private static final String NOT_USED_ACTION = "actionABC";
+
+    @Mock
+    private Logger logger;
+
+    @Mock
+    private Response response;
 
     @Mock
     private Consumer<JsonEnvelope> consumer;
@@ -66,14 +67,7 @@ public class RestProcessorTest {
 
     @Before
     public void setup() {
-        restProcessor = new RestProcessor(new RestEnvelopeBuilderFactory(), envelope -> new JsonObjectEnvelopeConverter().fromEnvelope(envelope).toString(), false);
-    }
-
-    @Test
-    public void shouldReturn202ResponseOnAsyncProcessing() throws Exception {
-        final Response response = restProcessor.processAsynchronously(consumer, NOT_USED_ACTION, NOT_USED_PAYLOAD, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
-
-        assertThat(response.getStatus(), equalTo(202));
+        restProcessor = new ImplOfBaseRestProcessor(new RestEnvelopeBuilderFactory(), logger, response);
     }
 
     @Test
@@ -93,7 +87,6 @@ public class RestProcessorTest {
 
     @Test
     public void shouldPassEnvelopeWithMetadataToConsumerOnAsyncProcessing() throws Exception {
-
         restProcessor.processAsynchronously(consumer, "some.action", NOT_USED_PAYLOAD, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
 
         final ArgumentCaptor<JsonEnvelope> envelopeCaptor = ArgumentCaptor.forClass(JsonEnvelope.class);
@@ -105,11 +98,11 @@ public class RestProcessorTest {
     }
 
     @Test
-    public void shouldReturn200ResponseOnSyncProcessing() throws Exception {
+    public void shouldReturnOkResponseOnSyncProcessing() throws Exception {
         when(function.apply(any(JsonEnvelope.class))).thenReturn(Optional.of(envelope().with(metadataWithDefaults()).build()));
         final Response response = restProcessor.processSynchronously(function, NOT_USED_ACTION, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
 
-        assertThat(response.getStatus(), equalTo(200));
+        assertThat(response, equalTo(response));
     }
 
     @Test
@@ -117,7 +110,7 @@ public class RestProcessorTest {
         when(function.apply(any(JsonEnvelope.class))).thenReturn(Optional.of(envelopeFrom(metadataWithDefaults(), JsonValue.NULL)));
         final Response response = restProcessor.processSynchronously(function, NOT_USED_ACTION, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
 
-        assertThat(response.getStatus(), equalTo(404));
+        assertThat(response.getStatus(), equalTo(NOT_FOUND.getStatusCode()));
     }
 
     @Test
@@ -125,7 +118,7 @@ public class RestProcessorTest {
         when(function.apply(any(JsonEnvelope.class))).thenReturn(Optional.empty());
         final Response response = restProcessor.processSynchronously(function, NOT_USED_ACTION, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
 
-        assertThat(response.getStatus(), equalTo(500));
+        assertThat(response.getStatus(), equalTo(INTERNAL_SERVER_ERROR.getStatusCode()));
     }
 
     @Test
@@ -163,33 +156,6 @@ public class RestProcessorTest {
     }
 
     @Test
-    public void shouldReturnPayloadOfEnvelopeReturnedByFunction() {
-        when(function.apply(any(JsonEnvelope.class))).thenReturn(
-                Optional.of(envelope().with(metadataWithDefaults()).withPayloadOf("value33", "key11").withPayloadOf("value55", "key22").build()));
-
-        final Response response = restProcessor.processSynchronously(function, NOT_USED_ACTION, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
-        final String responseEntity = (String) response.getEntity();
-        with(responseEntity)
-                .assertThat("key11", equalTo("value33"))
-                .assertThat("key22", equalTo("value55"));
-    }
-
-    @Test
-    public void shouldReturnPayloadOnlyAndMetadataIdInHeader() {
-        final RestProcessor payLoadOnlyProcessor = new RestProcessor(new RestEnvelopeBuilderFactory(), envelope -> envelope.payload().toString(), true);
-
-        final UUID metadataId = UUID.randomUUID();
-        when(function.apply(any(JsonEnvelope.class))).thenReturn(
-                Optional.of(envelope().with(metadataOf(metadataId, "name1")).build()));
-
-        final Response response = payLoadOnlyProcessor.processSynchronously(function, NOT_USED_ACTION, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
-
-        with((String) response.getEntity())
-                .assertNotDefined(JsonEnvelope.METADATA);
-        assertThat(response.getHeaderString(HeaderConstants.ID), equalTo(metadataId.toString()));
-    }
-
-    @Test
     public void shouldPassEnvelopeWithPayloadToFunctionOnSyncProcessing() throws Exception {
         when(function.apply(any(JsonEnvelope.class))).thenReturn(Optional.empty());
         final Optional<JsonObject> payload = Optional.of(Json.createObjectBuilder().add("key123", "value45678").build());
@@ -205,4 +171,17 @@ public class RestProcessorTest {
         assertThat(envelope.payloadAsJsonObject().getString("paramABC"), is("paramValueBCD"));
     }
 
+    private static class ImplOfBaseRestProcessor extends BaseRestProcessor {
+        private final Response response;
+
+        ImplOfBaseRestProcessor(final RestEnvelopeBuilderFactory envelopeBuilderFactory, final Logger logger, final Response response) {
+            super(envelopeBuilderFactory, logger);
+            this.response = response;
+        }
+
+        @Override
+        protected Response okResponseFrom(final JsonEnvelope envelope) {
+            return response;
+        }
+    }
 }

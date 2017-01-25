@@ -11,14 +11,13 @@ public final class GeneratorProperties {
 
     private static final String SERVICE_COMPONENT_PROPERTY = "serviceComponent";
     private static final String NOT_SET_MESSAGE = "%s generator property not set in the plugin config";
-    private static final String INVALID_MESSAGE = "%s generator property invalid. Expected one of: %s";
 
     private GeneratorProperties() {
     }
 
     public static String serviceComponentOf(final GeneratorConfig generatorConfig) {
         final Map<String, String> generatorProperties = generatorConfig.getGeneratorProperties();
-        if(generatorProperties == null) {
+        if (generatorProperties == null) {
             throw new IllegalArgumentException(format(NOT_SET_MESSAGE, SERVICE_COMPONENT_PROPERTY));
         }
 

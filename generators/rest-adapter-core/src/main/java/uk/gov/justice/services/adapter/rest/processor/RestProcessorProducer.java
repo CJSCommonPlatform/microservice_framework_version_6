@@ -1,6 +1,7 @@
 package uk.gov.justice.services.adapter.rest.processor;
 
-import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
+import static uk.gov.justice.services.core.annotation.Component.QUERY_CONTROLLER;
+import static uk.gov.justice.services.core.annotation.Component.QUERY_VIEW;
 import static uk.gov.justice.services.core.annotation.ComponentNameUtil.componentFrom;
 
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
@@ -24,14 +25,14 @@ public class RestProcessorProducer {
     @Inject
     RestEnvelopeBuilderFactory envelopeBuilderFactory;
 
-    private RestProcessor defaultRestProcessor;
+    private RestProcessor envelopeResponseRestProcessor;
 
-    private RestProcessor payloadOnlyRestProcessor;
+    private RestProcessor payloadResponseRestProcessor;
 
     @PostConstruct
     void initialise() {
-        defaultRestProcessor = new RestProcessor(envelopeBuilderFactory, envelope -> jsonObjectEnvelopeConverter.fromEnvelope(envelope).toString(), false);
-        payloadOnlyRestProcessor = new RestProcessor(envelopeBuilderFactory, envelope -> envelope.payloadAsJsonObject().toString(), true);
+        envelopeResponseRestProcessor = new EnvelopeResponseRestProcessor(envelopeBuilderFactory, jsonObjectEnvelopeConverter);
+        payloadResponseRestProcessor = new PayloadResponseRestProcessor(envelopeBuilderFactory);
     }
 
     /**
@@ -44,7 +45,8 @@ public class RestProcessorProducer {
      */
     @Produces
     public RestProcessor produceRestProcessor(final InjectionPoint injectionPoint) {
-        return componentFrom(injectionPoint).equals(QUERY_API.name()) ? payloadOnlyRestProcessor : defaultRestProcessor;
+        final String componentName = componentFrom(injectionPoint);
+        return componentName.equals(QUERY_CONTROLLER.name()) || componentName.equals(QUERY_VIEW.name()) ? envelopeResponseRestProcessor : payloadResponseRestProcessor;
     }
 
 }

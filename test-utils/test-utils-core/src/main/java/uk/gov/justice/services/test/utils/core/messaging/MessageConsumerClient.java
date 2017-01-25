@@ -3,46 +3,56 @@ package uk.gov.justice.services.test.utils.core.messaging;
 import static java.lang.String.format;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
-import static javax.jms.Session.AUTO_ACKNOWLEDGE;
 import static uk.gov.justice.services.test.utils.core.messaging.QueueUriProvider.queueUri;
 
 import java.util.Optional;
 
-import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
-import javax.jms.Session;
 import javax.jms.TextMessage;
 
-import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
-import org.apache.activemq.artemis.jms.client.ActiveMQTopic;
+import com.google.common.annotations.VisibleForTesting;
 
 public class MessageConsumerClient implements AutoCloseable {
 
-    private static final String QUEUE_URI = queueUri();
+    public static final long TIMEOUT_IN_MILLIS = 20_000;
+    public static final String QUEUE_URI = queueUri();
 
-    private static final String EVENT_SELECTOR_TEMPLATE = "CPPNAME IN ('%s')";
-    private static final long TIMEOUT_IN_MILLIS = 20_000;
+    private static final String MESSAGE_SELECTOR_TEMPLATE = "CPPNAME IN ('%s')";
 
-    private Session session;
-    private ActiveMQTopic topic;
+
+    private final MessageConsumerFactory messageConsumerFactory;
+
     private MessageConsumer messageConsumer;
 
-    public void startConsumer(final String eventSelector, final String topicName) {
+    public MessageConsumerClient() {
+        this(new MessageConsumerFactory());
+    }
+
+    @VisibleForTesting
+    MessageConsumerClient(final MessageConsumerFactory messageConsumerFactory) {
+        this.messageConsumerFactory = messageConsumerFactory;
+    }
+
+    public void startConsumer(final String eventName, final String topicName) {
+
+        final String messageSelector = format(MESSAGE_SELECTOR_TEMPLATE, eventName);
+
         try {
-            final ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(QUEUE_URI);
-            final Connection connection = factory.createConnection();
-
-            connection.start();
-
-            session = connection.createSession(false, AUTO_ACKNOWLEDGE);
-            topic = new ActiveMQTopic(topicName);
-            messageConsumer = session.createConsumer(topic, format(EVENT_SELECTOR_TEMPLATE, eventSelector));
+            messageConsumer = messageConsumerFactory.createAndStart(
+                    messageSelector,
+                    QUEUE_URI,
+                    topicName);
 
         } catch (final JMSException e) {
             close();
-            throw new RuntimeException("Failed to start message consumer for events: '" + eventSelector + "', topic: '" + topicName + ", queue uri: '" + QUEUE_URI + "'", e);
+            final String message = "Failed to start message consumer for " +
+                    "eventName '" + eventName + "':, " +
+                    "topic: '" + topicName + "', " +
+                    "queueUri: '" + QUEUE_URI + "', " +
+                    "messageSelector: '" + messageSelector + "'";
+            throw new MessageConsumerException(message, e);
         }
     }
 
@@ -58,20 +68,20 @@ public class MessageConsumerClient implements AutoCloseable {
         return retrieve(() -> messageConsumer.receive(timeout));
     }
 
-    private Optional<String> retrieve(final SupplierWithJmsException<Message> messageSupplier) {
+    private Optional<String> retrieve(final MessageSupplier messageSupplier) {
 
         if (messageConsumer == null) {
-            throw new RuntimeException("Message consumer not started. Please call startConsumer(...) first.");
+            throw new MessageConsumerException("Message consumer not started. Please call startConsumer(...) first.");
         }
 
         try {
-            final TextMessage message = (TextMessage) messageSupplier.get();
+            final TextMessage message = (TextMessage) messageSupplier.getMessage();
             if (message == null) {
                 return empty();
             }
             return of(message.getText());
         } catch (final JMSException e) {
-            throw new RuntimeException("Failed to retrieve message", e);
+            throw new MessageConsumerException("Failed to retrieve message", e);
         }
     }
 
@@ -83,25 +93,17 @@ public class MessageConsumerClient implements AutoCloseable {
 
     @Override
     public void close() {
-        close(messageConsumer);
-        close(session);
-
-        session = null;
-        topic = null;
-        messageConsumer = null;
+        messageConsumerFactory.close();
     }
 
-    private void close(final AutoCloseable closeable) {
-        if (closeable != null) {
-            try {
-                closeable.close();
-            } catch (final Exception ignored) {
-            }
-        }
+
+    @VisibleForTesting
+    MessageConsumer getMessageConsumer() {
+        return messageConsumer;
     }
 
     @FunctionalInterface
-    private interface SupplierWithJmsException<T> {
-        T get() throws JMSException;
+    private interface MessageSupplier {
+        Message getMessage() throws JMSException;
     }
 }

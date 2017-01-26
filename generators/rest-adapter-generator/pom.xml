@@ -134,10 +134,34 @@
                 </configuration>
                 <executions>
                     <execution>
+                        <id>generate-for-example-api</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <phase>generate-test-sources</phase>
+                        <configuration>
+                            <includes>
+                                <include>**/example.raml</include>
+                            </includes>
+                            <generatorProperties>
+                                <serviceComponent>QUERY_API</serviceComponent>
+                            </generatorProperties>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-for-custom-api</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>generate-test-sources</phase>
+                        <configuration>
+                            <includes>
+                                <include>**/custom-example.raml</include>
+                            </includes>
+                            <generatorProperties>
+                                <serviceComponent>CUSTOM_API</serviceComponent>
+                            </generatorProperties>
+                        </configuration>
                     </execution>
                 </executions>
                 <dependencies>

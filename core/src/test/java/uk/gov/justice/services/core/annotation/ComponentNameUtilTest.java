@@ -20,17 +20,22 @@ public class ComponentNameUtilTest {
 
     @Test
     public void shouldReturnFieldLevelComponent() throws NoSuchFieldException {
-        assertThat(componentFrom(injectionPointWith(FieldLevelAnnotation.class.getDeclaredField(FIELD_NAME))), equalTo("COMMAND_CONTROLLER"));
+        assertThat(componentFrom(injectionPointWith(ServiceComponentFieldLevelAnnotation.class.getDeclaredField(FIELD_NAME))), equalTo("COMMAND_CONTROLLER"));
     }
 
     @Test
     public void shouldReturnClassLevelComponent() throws NoSuchFieldException {
-        assertThat(componentFrom(injectionPointWith(ClassLevelAnnotation.class.getDeclaredField(FIELD_NAME))), equalTo("COMMAND_HANDLER"));
+        assertThat(componentFrom(injectionPointWith(ServiceComponentClassLevelAnnotation.class.getDeclaredField(FIELD_NAME))), equalTo("COMMAND_HANDLER"));
     }
 
     @Test
     public void shouldReturnClassLevelAdaptorComponent() throws NoSuchFieldException {
         assertThat(componentFrom(injectionPointWith(AdapterAnnotation.class.getDeclaredField(FIELD_NAME))), equalTo("EVENT_LISTENER"));
+    }
+
+    @Test
+    public void shouldReturnClassLevelCustomAdaptorComponent() throws NoSuchFieldException {
+        assertThat(componentFrom(injectionPointWith(CustomAdapterAnnotation.class.getDeclaredField(FIELD_NAME))), equalTo("CUSTOM_ADAPTER"));
     }
 
     @Test
@@ -53,7 +58,7 @@ public class ComponentNameUtilTest {
         componentFrom(injectionPointWith(NoAnnotation.class.getDeclaredField(FIELD_NAME)));
     }
 
-    public static class FieldLevelAnnotation {
+    public static class ServiceComponentFieldLevelAnnotation {
 
         @Inject
         @ServiceComponent(COMMAND_CONTROLLER)
@@ -62,15 +67,33 @@ public class ComponentNameUtilTest {
     }
 
     @ServiceComponent(COMMAND_HANDLER)
-    public static class ClassLevelAnnotation {
+    public static class ServiceComponentClassLevelAnnotation {
 
         @Inject
         Object field;
 
     }
 
+    @ServiceComponent(QUERY_API)
+    public static class ServiceComponentClassLevelAnnotationMethod {
+
+        @Inject
+        public void test(Object field) {
+
+        }
+
+    }
+
     @Adapter(EVENT_LISTENER)
     public static class AdapterAnnotation {
+
+        @Inject
+        Object field;
+
+    }
+
+    @CustomAdapter("CUSTOM_ADAPTER")
+    public static class CustomAdapterAnnotation {
 
         @Inject
         Object field;
@@ -97,16 +120,6 @@ public class ComponentNameUtilTest {
 
         @Inject
         Object field;
-
-    }
-
-    @ServiceComponent(QUERY_API)
-    public static class MethodAnnotation {
-
-        @Inject
-        public void test(Object field) {
-
-        }
 
     }
 }

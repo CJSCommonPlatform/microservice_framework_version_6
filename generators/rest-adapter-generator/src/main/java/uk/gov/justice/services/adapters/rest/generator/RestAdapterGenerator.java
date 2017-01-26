@@ -18,7 +18,6 @@ import static uk.gov.justice.services.generators.commons.helper.Names.packageNam
 
 import uk.gov.justice.raml.core.Generator;
 import uk.gov.justice.raml.core.GeneratorConfig;
-import uk.gov.justice.services.adapters.rest.validator.BaseUriRamlValidator;
 import uk.gov.justice.services.adapters.rest.validator.ResponseContentTypeRamlValidator;
 import uk.gov.justice.services.generators.commons.helper.GeneratedClassWriter;
 import uk.gov.justice.services.generators.commons.validator.ActionMappingRamlValidator;
@@ -47,7 +46,6 @@ public class RestAdapterGenerator implements Generator {
             new ContainsActionsRamlValidator(),
             new RequestContentTypeRamlValidator(DELETE, PATCH, POST, PUT),
             new ResponseContentTypeRamlValidator(GET),
-            new BaseUriRamlValidator(),
             new ActionMappingRamlValidator());
 
     @Override

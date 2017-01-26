@@ -99,7 +99,7 @@ public class AnnotationScannerTest {
     }
 
     @Test
-    public void shouldFireCommandApiFoundEventWithFramework() throws Exception {
+    public void shouldFireServiceComponentFoundEventForFrameworkComponentAnnotation() throws Exception {
         doReturn(TestFrameworkComponent.class).when(bean).getBeanClass();
 
         verifyIfServiceComponentFoundEventFiredWith(bean);

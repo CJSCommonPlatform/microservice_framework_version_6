@@ -15,6 +15,7 @@ import uk.gov.justice.services.generators.test.utils.builder.RamlBuilder;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.junit.Rule;
@@ -36,35 +37,33 @@ public class GeneratorsTest {
     @Test
     public void shouldReturnComponentFromBaseUriForCommandApi() throws Exception {
         Raml raml = restRamlWithCommandApiDefaults().build();
-        Component component = Generators.componentFromBaseUriIn(raml);
-        assertThat(component, is(COMMAND_API));
+        Optional<Component> component = Generators.componentFromBaseUriIn(raml);
+        assertThat(component, is(Optional.of(COMMAND_API)));
     }
 
     @Test
     public void shouldReturnComponentFromBaseUriForEventApi() throws Exception {
         Raml raml = RamlBuilder.restRamlWithEventApiDefaults().build();
-        Component component = Generators.componentFromBaseUriIn(raml);
-        assertThat(component, is(EVENT_API));
+        Optional<Component> component = Generators.componentFromBaseUriIn(raml);
+        assertThat(component, is(Optional.of(EVENT_API)));
     }
 
     @Test
     public void shouldReturnComponentFromBaseUriForQueryApi() throws Exception {
         Raml raml = restRamlWithQueryApiDefaults().build();
-        Component component = Generators.componentFromBaseUriIn(raml);
-        assertThat(component, is(QUERY_API));
+        Optional<Component> component = Generators.componentFromBaseUriIn(raml);
+        assertThat(component, is(Optional.of(QUERY_API)));
     }
 
     @Test
-    public void shouldThrowExceptionIfNoValidPillarAndTier() throws Exception {
+    public void shouldReturnOptionalEmptyIfNoValidPillarAndTier() throws Exception {
         Raml raml = new RamlBuilder()
                 .withVersion("#%RAML 0.8")
                 .withTitle("Example Service")
                 .withBaseUri("http://localhost:8080/warname/event/listener/rest/service").build();
 
-        exception.expect(IllegalStateException.class);
-        exception.expectMessage("Base URI must contain valid pillar and tier: http://localhost:8080/warname/event/listener/rest/service");
-
-        Generators.componentFromBaseUriIn(raml);
+        Optional<Component> component = Generators.componentFromBaseUriIn(raml);
+        assertThat(component, is(Optional.empty()));
     }
 
     @Test

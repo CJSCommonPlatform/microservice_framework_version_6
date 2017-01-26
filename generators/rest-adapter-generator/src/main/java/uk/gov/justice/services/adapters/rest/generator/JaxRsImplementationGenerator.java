@@ -10,6 +10,7 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static uk.gov.justice.services.adapters.rest.generator.Generators.byMimeTypeOrder;
 import static uk.gov.justice.services.adapters.rest.generator.Generators.componentFromBaseUriIn;
+import static uk.gov.justice.services.generators.commons.config.GeneratorProperties.serviceComponentOf;
 import static uk.gov.justice.services.generators.commons.helper.Actions.isSupportedActionType;
 import static uk.gov.justice.services.generators.commons.helper.Actions.isSupportedActionTypeWithRequestType;
 import static uk.gov.justice.services.generators.commons.helper.Actions.isSynchronousAction;
@@ -28,6 +29,7 @@ import uk.gov.justice.services.adapter.rest.parameter.ValidParameterCollectionBu
 import uk.gov.justice.services.adapter.rest.processor.RestProcessor;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
+import uk.gov.justice.services.core.annotation.CustomAdapter;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.messaging.logging.HttpMessageLoggerHelper;
 import uk.gov.justice.services.messaging.logging.LoggerUtils;
@@ -100,11 +102,29 @@ class JaxRsImplementationGenerator {
      * @return a list of {@link TypeSpec} that represent the implementation classes
      */
     List<TypeSpec> generateFor(final Raml raml) {
-        final Component component = componentFromBaseUriIn(raml);
         final Collection<Resource> resources = raml.getResources().values();
         return resources.stream()
-                .map(resource -> generateFor(resource, component))
+                .map(resource -> generateFor(resource, componentAnnotationFromBaseUriOrConfiguration(raml)))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Generate an {@link Adapter} annotation from the Raml base URI or a {@link CustomAdapter}
+     * annotation from the service component configuration parameter.
+     *
+     * @param raml the to use for the base URI
+     * @return the AnnotationSpec
+     */
+    private AnnotationSpec componentAnnotationFromBaseUriOrConfiguration(final Raml raml) {
+        return componentFromBaseUriIn(raml)
+                .map(component ->
+                        AnnotationSpec.builder(Adapter.class)
+                                .addMember(DEFAULT_ANNOTATION_PARAMETER, "$T.$L", Component.class, component)
+                                .build())
+                .orElseGet(() ->
+                        AnnotationSpec.builder(CustomAdapter.class)
+                                .addMember(DEFAULT_ANNOTATION_PARAMETER, "$S", serviceComponentOf(configuration))
+                                .build());
     }
 
     /**
@@ -113,8 +133,8 @@ class JaxRsImplementationGenerator {
      * @param resource the resource to generate as an implementation class
      * @return a {@link TypeSpec} that represents the implementation class
      */
-    TypeSpec generateFor(final Resource resource, final Component component) {
-        final TypeSpec.Builder classSpecBuilder = classSpecFor(resource, component);
+    private TypeSpec generateFor(final Resource resource, final AnnotationSpec componentAnnotation) {
+        final TypeSpec.Builder classSpecBuilder = classSpecFor(resource, componentAnnotation);
 
         resource.getActions().values().forEach(action -> classSpecBuilder.addMethods(forEach(action)));
 
@@ -124,18 +144,16 @@ class JaxRsImplementationGenerator {
     /**
      * Creates a {@link TypeSpec.Builder} from an initial template of an implementation class
      *
-     * @param resource  the resource to generate as an implementation class
-     * @param component specifies the type of framework {@link Component} that is being implemented
+     * @param resource            the resource to generate as an implementation class
+     * @param componentAnnotation the component annotation for this class
      * @return a {@link TypeSpec.Builder} that represents the implementation class
      */
-    private TypeSpec.Builder classSpecFor(final Resource resource, final Component component) {
+    private TypeSpec.Builder classSpecFor(final Resource resource, final AnnotationSpec componentAnnotation) {
         final String className = resourceImplementationNameOf(resource);
         return classBuilder(className)
                 .addSuperinterface(interfaceClassNameFor(resource))
                 .addModifiers(PUBLIC)
-                .addAnnotation(AnnotationSpec.builder(Adapter.class)
-                        .addMember(DEFAULT_ANNOTATION_PARAMETER, "$T.$L", Component.class, component)
-                        .build())
+                .addAnnotation(componentAnnotation)
                 .addField(loggerConstantField(className))
                 .addField(FieldSpec.builder(RestProcessor.class, "restProcessor")
                         .addAnnotation(Inject.class)

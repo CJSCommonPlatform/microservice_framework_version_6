@@ -43,6 +43,7 @@ import uk.gov.justice.services.adapter.rest.BasicActionMapper;
 import uk.gov.justice.services.adapter.rest.processor.RestProcessor;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
+import uk.gov.justice.services.core.annotation.CustomAdapter;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.rest.annotation.PATCH;
 
@@ -51,7 +52,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -67,7 +70,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 
 public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGeneratorTest {
@@ -532,6 +537,43 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
         assertThat(resourceClass.getAnnotation(Adapter.class), not(nullValue()));
         assertThat(resourceClass.getAnnotation(Adapter.class).value(), is(Component.QUERY_API));
 
+    }
+
+    @Test
+    public void shouldGenerateResourceClassContainingCustomAdapterAnnotationIfUnknownPillarNameInUriAndServiceComponentSet() throws Exception {
+        final Map<String, String> generatorProperties = new HashMap<>();
+        generatorProperties.put("serviceComponent", "CUSTOM_API");
+
+        generator.run(
+                restRamlWithDefaults()
+                        .withBaseUri("http://localhost:8080/warname/custom/api/rest/service")
+                        .with(resource("/some/path")
+                                .withDefaultPostAction()
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
+
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+
+        assertThat(resourceClass.isInterface(), is(false));
+        assertThat(resourceClass.getAnnotation(CustomAdapter.class), not(nullValue()));
+        assertThat(resourceClass.getAnnotation(CustomAdapter.class).value(), is("CUSTOM_API"));
+    }
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
+
+    @Test
+    public void shouldThrowExceptionIfUnknownPillarNameInUriAndServiceComponentIsNotSet() throws Exception {
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage("serviceComponent generator property not set in the plugin config");
+
+        generator.run(
+                restRamlWithDefaults()
+                        .withBaseUri("http://localhost:8080/warname/custom/api/rest/service")
+                        .with(resource("/some/path")
+                                .withDefaultPostAction()
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
     }
 
     @Test

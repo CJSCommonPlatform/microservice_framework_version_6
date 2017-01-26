@@ -5,6 +5,8 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [1.3.0] - 2017-01-26
+
 ### Fixed
 - Handle ACCEPTED(202) response type set in raml for asynchronous REST endpoints
 - Fix of unclosed connections in MessageConsumerClient

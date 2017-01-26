@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
+import static uk.gov.justice.services.test.utils.common.MemberInjectionPoint.injectionPointWithMemberAsFirstMethodOf;
 
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.interceptor.Interceptor;
@@ -14,7 +15,6 @@ import uk.gov.justice.services.core.interceptor.InterceptorChain;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
 import uk.gov.justice.services.core.interceptor.Target;
-import uk.gov.justice.services.core.util.TestInjectionPoint;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.Deque;
@@ -65,8 +65,8 @@ public class AccessControlInterceptorTest {
         final Target target = context -> context;
 
         interceptorChain = new InterceptorChain(interceptors, target);
-        adaptorCommandLocal = new TestInjectionPoint(TestCommandLocal.class);
-        adaptorCommandRemote = new TestInjectionPoint(TestCommandRemote.class);
+        adaptorCommandLocal = injectionPointWithMemberAsFirstMethodOf(TestCommandLocal.class);
+        adaptorCommandRemote = injectionPointWithMemberAsFirstMethodOf(TestCommandRemote.class);
     }
 
     @Test

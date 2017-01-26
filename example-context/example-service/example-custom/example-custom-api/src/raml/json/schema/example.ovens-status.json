@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "",
+  "object": {
+    "id": "ovens",
+    "type": "array",
+    "items": [
+      {
+        "id": "/",
+        "type": "object",
+        "properties": {
+          "name": {
+            "id": "name",
+            "type": "string"
+          },
+          "id": {
+            "id": "id",
+            "type": "string"
+          },
+          "temperature": {
+            "id": "temperature",
+            "type": "number"
+          },
+          "active": {
+            "id": "active",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "id"
+        ]
+      }
+    ]
+  }
+}

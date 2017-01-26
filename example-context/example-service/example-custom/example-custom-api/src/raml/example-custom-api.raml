@@ -1,0 +1,22 @@
+#%RAML 0.8
+title: Cakeshop Query
+baseUri: http://localhost:8080/example-custom-api/custom/api/rest/cakeshop
+version: v0.1
+mediaType: application/json
+protocols: [ HTTP, HTTPS ]
+
+/ovens:
+  description: curent status of the ovens
+  get:
+    description: |
+        ...
+        (mapping):
+            responseType: application/vnd.example.status+json
+            name: example.ovens-status
+        ...
+    responses:
+      200:
+        body:
+          application/vnd.example.status+json:
+            schema: !include json/schema/example.ovens-status.json
+            example: !include json/ovens-status.json

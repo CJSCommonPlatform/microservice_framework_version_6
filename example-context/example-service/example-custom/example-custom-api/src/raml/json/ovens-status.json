@@ -1,0 +1,16 @@
+{
+  "ovens": [
+    {
+      "name": "Big Oven",
+      "id": "2955756c-c2e3-44c2-a18d-0a69cb4f4619",
+      "temperature": 200,
+      "active": true
+    },
+    {
+      "name": "Small Oven",
+      "id": "2955756c-c2e3-44c2-a18d-0a69cb4f4623",
+      "temperature": 0,
+      "active": false
+    }
+  ]
+}

@@ -70,6 +70,12 @@
             <type>war</type>
         </dependency>
         <dependency>
+            <groupId>uk.gov.justice.services.example</groupId>
+            <artifactId>example-custom-api</artifactId>
+            <version>${project.version}</version>
+            <type>war</type>
+        </dependency>
+        <dependency>
             <groupId>uk.gov.justice.services</groupId>
             <artifactId>test-utils-alfresco-stub</artifactId>
             <version>${project.version}</version>
@@ -305,6 +311,16 @@
                                     <version>${project.version}</version>
                                     <type>war</type>
                                     <destFileName>example-query-view.war</destFileName>
+                                    <outputDirectory>${jboss.home}/standalone/deployments
+                                    </outputDirectory>
+                                </artifactItem>
+
+                                <artifactItem>
+                                    <groupId>uk.gov.justice.services.example</groupId>
+                                    <artifactId>example-custom-api</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>war</type>
+                                    <destFileName>example-custom-api.war</destFileName>
                                     <outputDirectory>${jboss.home}/standalone/deployments
                                     </outputDirectory>
                                 </artifactItem>

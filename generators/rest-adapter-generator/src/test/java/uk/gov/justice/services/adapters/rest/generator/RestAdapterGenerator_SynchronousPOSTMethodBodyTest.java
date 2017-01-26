@@ -39,15 +39,15 @@ public class RestAdapterGenerator_SynchronousPOSTMethodBodyTest extends BaseRest
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
-        Object resourceObject = getInstanceOf(resourceClass);
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
+        final Object resourceObject = getInstanceOf(resourceClass);
 
-        Response processorResponse = Response.ok().build();
+        final Response processorResponse = Response.ok().build();
         when(restProcessor.processSynchronously(any(Function.class), anyString(), any(Optional.class), any(HttpHeaders.class), any(Collection.class))).thenReturn(processorResponse);
 
-        Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass);
 
-        Object result = method.invoke(resourceObject, NOT_USED_JSONOBJECT);
+        final Object result = method.invoke(resourceObject, NOT_USED_JSONOBJECT);
 
         assertThat(result, is(processorResponse));
     }

@@ -1,6 +1,10 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
+import static java.lang.String.valueOf;
 import static java.util.Collections.emptyMap;
+import static javax.ws.rs.core.Response.Status.ACCEPTED;
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasProperty;
@@ -19,6 +23,7 @@ import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBu
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.mapping;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
+import static uk.gov.justice.services.generators.test.utils.builder.ResponseBuilder.response;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
@@ -31,7 +36,9 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -47,7 +54,7 @@ import org.mockito.ArgumentCaptor;
 public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGeneratorTest {
 
     private static final JsonObject NOT_USED_JSONOBJECT = Json.createObjectBuilder().build();
-    
+
     @SuppressWarnings("unchecked")
     @Test
     public void shouldReturnResponseGeneratedByRestProcessor() throws Exception {
@@ -58,16 +65,16 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
-        Object resourceObject = getInstanceOf(resourceClass);
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
+        final Object resourceObject = getInstanceOf(resourceClass);
 
-        Response processorResponse = Response.ok().build();
+        final Response processorResponse = Response.ok().build();
         when(restProcessor.processAsynchronously(any(Consumer.class), anyString(), any(Optional.class), any(HttpHeaders.class),
                 any(Collection.class))).thenReturn(processorResponse);
 
-        Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass);
 
-        Object result = method.invoke(resourceObject, NOT_USED_JSONOBJECT);
+        final Object result = method.invoke(resourceObject, NOT_USED_JSONOBJECT);
 
         assertThat(result, is(processorResponse));
     }
@@ -83,18 +90,53 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
-        Object resourceObject = getInstanceOf(resourceClass);
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
+        final Object resourceObject = getInstanceOf(resourceClass);
 
-        Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass);
 
         method.invoke(resourceObject, NOT_USED_JSONOBJECT);
 
-        ArgumentCaptor<Consumer> consumerCaptor = ArgumentCaptor.forClass(Consumer.class);
+        final ArgumentCaptor<Consumer> consumerCaptor = ArgumentCaptor.forClass(Consumer.class);
         verify(restProcessor).processAsynchronously(consumerCaptor.capture(), anyString(), any(Optional.class), any(HttpHeaders.class),
                 any(Collection.class));
 
-        JsonEnvelope envelope = envelope().build();
+        final JsonEnvelope envelope = envelope().build();
+        consumerCaptor.getValue().accept(envelope);
+
+        verify(interceptorChainProcessor).process(envelope);
+    }
+
+    @Test
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public void shouldProcessAsynchronouslyIfAcceptedResponseTypePresent() throws Exception {
+
+        final Map<String, org.raml.model.Response> responses = new HashMap<>();
+        responses.put(valueOf(INTERNAL_SERVER_ERROR.getStatusCode()), response().build());
+        responses.put(valueOf(BAD_REQUEST.getStatusCode()), response().build());
+        responses.put(valueOf(ACCEPTED.getStatusCode()), response().build());
+
+        generator.run(
+                restRamlWithDefaults().with(
+                        resource("/path")
+                                .with(httpAction(POST)
+                                        .withHttpActionOfDefaultRequestType()
+                                        .withResponsesFrom(responses))
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
+        final Object resourceObject = getInstanceOf(resourceClass);
+
+        final Method method = firstMethodOf(resourceClass);
+
+        method.invoke(resourceObject, NOT_USED_JSONOBJECT);
+
+        final ArgumentCaptor<Consumer> consumerCaptor = ArgumentCaptor.forClass(Consumer.class);
+        verify(restProcessor).processAsynchronously(consumerCaptor.capture(), anyString(), any(Optional.class), any(HttpHeaders.class),
+                any(Collection.class));
+
+        final JsonEnvelope envelope = envelope().build();
         consumerCaptor.getValue().accept(envelope);
 
         verify(interceptorChainProcessor).process(envelope);
@@ -111,12 +153,12 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
-        Object resourceObject = getInstanceOf(resourceClass);
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
+        final Object resourceObject = getInstanceOf(resourceClass);
 
-        Optional<JsonObject> jsonObject = Optional.of(Json.createObjectBuilder().add("dummy", "abc").build());
+        final Optional<JsonObject> jsonObject = Optional.of(Json.createObjectBuilder().add("dummy", "abc").build());
 
-        Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, jsonObject.get());
 
         verify(restProcessor).processAsynchronously(any(Consumer.class), anyString(), eq(jsonObject), any(HttpHeaders.class), any(Collection.class));
@@ -132,13 +174,13 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
-        Object resourceObject = getInstanceOf(resourceClass);
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
+        final Object resourceObject = getInstanceOf(resourceClass);
 
-        HttpHeaders headers = new ThreadLocalHttpHeaders();
+        final HttpHeaders headers = new ThreadLocalHttpHeaders();
         setField(resourceObject, "headers", headers);
 
-        Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, NOT_USED_JSONOBJECT);
 
         verify(restProcessor).processAsynchronously(any(Consumer.class), anyString(), any(Optional.class), eq(headers), any(Collection.class));
@@ -155,19 +197,19 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamAResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamAResource");
 
-        Object resourceObject = getInstanceOf(resourceClass);
+        final Object resourceObject = getInstanceOf(resourceClass);
 
-        Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, "paramValue1234", NOT_USED_JSONOBJECT);
 
-        ArgumentCaptor<Collection> pathParamsCaptor = ArgumentCaptor.forClass(Collection.class);
+        final ArgumentCaptor<Collection> pathParamsCaptor = ArgumentCaptor.forClass(Collection.class);
 
         verify(restProcessor).processAsynchronously(any(Consumer.class), anyString(), any(Optional.class), any(HttpHeaders.class),
                 pathParamsCaptor.capture());
 
-        Collection<Parameter> pathParams = pathParamsCaptor.getValue();
+        final Collection<Parameter> pathParams = pathParamsCaptor.getValue();
         assertThat(pathParams, hasSize(1));
         final Parameter pathParam = pathParams.iterator().next();
         assertThat(pathParam.getName(), is("paramA"));
@@ -195,21 +237,21 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathP1Resource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathP1Resource");
 
-        Object resourceObject = getInstanceOf(resourceClass);
+        final Object resourceObject = getInstanceOf(resourceClass);
 
-        List<Method> methods = methodsOf(resourceClass);
+        final List<Method> methods = methodsOf(resourceClass);
 
-        Method secondMethod = methods.get(1);
+        final Method secondMethod = methods.get(1);
         secondMethod.invoke(resourceObject, "paramValueXYZ", NOT_USED_JSONOBJECT);
 
-        ArgumentCaptor<Collection> pathParamsCaptor = ArgumentCaptor.forClass(Collection.class);
+        final ArgumentCaptor<Collection> pathParamsCaptor = ArgumentCaptor.forClass(Collection.class);
 
         verify(restProcessor).processAsynchronously(any(Consumer.class), anyString(), any(Optional.class), any(HttpHeaders.class),
                 pathParamsCaptor.capture());
 
-        Collection<Parameter> pathParams = pathParamsCaptor.getValue();
+        final Collection<Parameter> pathParams = pathParamsCaptor.getValue();
         assertThat(pathParams, hasSize(1));
         final Parameter pathParam = pathParams.iterator().next();
         assertThat(pathParam.getName(), is("p1"));
@@ -226,19 +268,19 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParam1Param2Resource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParam1Param2Resource");
 
-        Object resourceObject = getInstanceOf(resourceClass);
+        final Object resourceObject = getInstanceOf(resourceClass);
 
-        Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, "paramValueABC", "paramValueDEF", NOT_USED_JSONOBJECT);
 
-        ArgumentCaptor<Collection> pathParamsCaptor = ArgumentCaptor.forClass(Collection.class);
+        final ArgumentCaptor<Collection> pathParamsCaptor = ArgumentCaptor.forClass(Collection.class);
 
         verify(restProcessor).processAsynchronously(any(Consumer.class), anyString(), any(Optional.class), any(HttpHeaders.class),
                 pathParamsCaptor.capture());
 
-        Collection<Parameter> pathParams = pathParamsCaptor.getValue();
+        final Collection<Parameter> pathParams = pathParamsCaptor.getValue();
 
         assertThat(pathParams, hasSize(2));
 
@@ -265,15 +307,15 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultUserResource");
-        Object resourceObject = getInstanceOf(resourceClass);
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultUserResource");
+        final Object resourceObject = getInstanceOf(resourceClass);
 
-        Class<?> actionMapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultUserResourceActionMapper");
-        Object actionMapperObject = actionMapperClass.newInstance();
+        final Class<?> actionMapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultUserResourceActionMapper");
+        final Object actionMapperObject = actionMapperClass.newInstance();
         setField(resourceObject, "actionMapper", actionMapperObject);
 
         setField(resourceObject, "headers", headersWith("Content-Type", "application/vnd.somemediatype1+json"));
-        Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, NOT_USED_JSONOBJECT);
 
         verify(restProcessor).processAsynchronously(any(Consumer.class), eq("contextA.someAction"), any(Optional.class), any(HttpHeaders.class), any(Collection.class));

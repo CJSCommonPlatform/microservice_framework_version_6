@@ -3,7 +3,7 @@ package uk.gov.justice.services.clients.rest.generator;
 import static java.lang.String.format;
 import static javax.lang.model.element.Modifier.FINAL;
 import static org.apache.commons.lang3.StringUtils.capitalize;
-import static uk.gov.justice.services.generators.commons.helper.Actions.hasResponseMimeTypes;
+import static uk.gov.justice.services.generators.commons.helper.Actions.isSynchronousAction;
 import static uk.gov.justice.services.generators.commons.helper.Names.nameFrom;
 import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.INVALID_ACTION_MAPPING_ERROR_MSG;
 
@@ -134,21 +134,21 @@ public class RestClientGenerator extends AbstractClientGenerator {
                 return statements
                         .add(methodStatementsWith(
                                 actionName,
-                                hasResponseMimeTypes(ramlAction) ? SYNC_PATCH_RETURN_STATEMENT : ASYNC_PATCH_STATEMENT))
+                                isSynchronousAction(ramlAction) ? SYNC_PATCH_RETURN_STATEMENT : ASYNC_PATCH_STATEMENT))
                         .build();
 
             case POST:
                 return statements
                         .add(methodStatementsWith(
                                 actionName,
-                                hasResponseMimeTypes(ramlAction) ? SYNC_POST_RETURN_STATEMENT : ASYNC_POST_STATEMENT))
+                                isSynchronousAction(ramlAction) ? SYNC_POST_RETURN_STATEMENT : ASYNC_POST_STATEMENT))
                         .build();
 
             case PUT:
                 return statements
                         .add(methodStatementsWith(
                                 actionName,
-                                hasResponseMimeTypes(ramlAction) ? SYNC_PUT_RETURN_STATEMENT : ASYNC_PUT_STATEMENT))
+                                isSynchronousAction(ramlAction) ? SYNC_PUT_RETURN_STATEMENT : ASYNC_PUT_STATEMENT))
                         .build();
 
             default:
@@ -158,7 +158,7 @@ public class RestClientGenerator extends AbstractClientGenerator {
 
     @Override
     protected TypeName methodReturnTypeOf(final Action ramlAction) {
-        return hasResponseMimeTypes(ramlAction) ? TypeName.get(JsonEnvelope.class) : TypeName.VOID;
+        return isSynchronousAction(ramlAction) ? TypeName.get(JsonEnvelope.class) : TypeName.VOID;
     }
 
     @Override

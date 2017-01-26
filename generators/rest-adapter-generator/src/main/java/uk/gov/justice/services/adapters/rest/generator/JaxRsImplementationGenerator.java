@@ -10,9 +10,9 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static uk.gov.justice.services.adapters.rest.generator.Generators.byMimeTypeOrder;
 import static uk.gov.justice.services.adapters.rest.generator.Generators.componentFromBaseUriIn;
-import static uk.gov.justice.services.generators.commons.helper.Actions.hasResponseMimeTypes;
 import static uk.gov.justice.services.generators.commons.helper.Actions.isSupportedActionType;
 import static uk.gov.justice.services.generators.commons.helper.Actions.isSupportedActionTypeWithRequestType;
+import static uk.gov.justice.services.generators.commons.helper.Actions.isSynchronousAction;
 import static uk.gov.justice.services.generators.commons.helper.Names.DEFAULT_ANNOTATION_PARAMETER;
 import static uk.gov.justice.services.generators.commons.helper.Names.GENERIC_PAYLOAD_ARGUMENT_NAME;
 import static uk.gov.justice.services.generators.commons.helper.Names.RESOURCE_PACKAGE_NAME;
@@ -260,7 +260,7 @@ class JaxRsImplementationGenerator {
         final boolean hasPayload = bodyMimeType.getSchema() != null;
 
         final MethodSpec.Builder methodBuilder = generateGenericResourceMethod(resourceMethodName, queryParams, pathParams)
-                .addCode(methodBody(pathParams, methodBodyForPostOrPut(resourceMethodName, hasPayload, hasResponseMimeTypes(action), action.getType())));
+                .addCode(methodBody(pathParams, methodBodyForPostOrPut(resourceMethodName, hasPayload, isSynchronousAction(action), action.getType())));
 
         if (hasPayload) {
             methodBuilder.addParameter(payloadParameter());

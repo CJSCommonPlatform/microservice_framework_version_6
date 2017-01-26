@@ -9,9 +9,9 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static uk.gov.justice.services.generators.commons.client.ActionMimeTypeDefinition.definitionWithRequest;
 import static uk.gov.justice.services.generators.commons.client.ActionMimeTypeDefinition.definitionWithRequestAndResponse;
 import static uk.gov.justice.services.generators.commons.config.GeneratorProperties.serviceComponentOf;
-import static uk.gov.justice.services.generators.commons.helper.Actions.hasResponseMimeTypes;
 import static uk.gov.justice.services.generators.commons.helper.Actions.isSupportedActionType;
 import static uk.gov.justice.services.generators.commons.helper.Actions.isSupportedActionTypeWithRequestType;
+import static uk.gov.justice.services.generators.commons.helper.Actions.isSynchronousAction;
 import static uk.gov.justice.services.generators.commons.helper.GeneratedClassWriter.writeClass;
 import static uk.gov.justice.services.generators.commons.helper.Names.camelCase;
 import static uk.gov.justice.services.generators.commons.helper.Names.nameFrom;
@@ -24,7 +24,6 @@ import uk.gov.justice.services.core.annotation.Remote;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.logging.LoggerUtils;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -32,7 +31,6 @@ import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
@@ -128,7 +126,7 @@ public abstract class AbstractClientGenerator implements Generator {
     private Stream<ActionMimeTypeDefinition> actionMimeTypesForRequestAndResponseOf(final Action ramlAction) {
         return ramlAction.getBody().values().stream()
                 .flatMap(responseType -> {
-                    if (hasResponseMimeTypes(ramlAction)) {
+                    if (isSynchronousAction(ramlAction)) {
                         return responseMediaTypesOf(ramlAction)
                                 .map(requestType -> definitionWithRequestAndResponse(responseType, requestType));
                     } else {

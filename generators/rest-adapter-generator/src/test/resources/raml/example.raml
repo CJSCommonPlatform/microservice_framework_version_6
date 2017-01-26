@@ -29,6 +29,14 @@ protocols: [ HTTP, HTTPS ]
             schema: !include json/schema/people.modified-user.json
             example: !include json/update-user.json
         application/vnd.people.link-user+json: !!null
+    responses:
+      400:
+        description: Invalid command
+      500:
+        description: Internal Server Error
+      202:
+        description: standard response
+
   get:
     description: |
         ...

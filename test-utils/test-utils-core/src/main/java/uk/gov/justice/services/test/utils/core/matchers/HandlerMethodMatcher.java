@@ -3,10 +3,14 @@ package uk.gov.justice.services.test.utils.core.matchers;
 import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Answers.RETURNS_DEFAULTS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
 import static uk.gov.justice.services.test.utils.core.matchers.HandlerMethodMatcher.PassThroughType.REQUESTER;
 import static uk.gov.justice.services.test.utils.core.matchers.HandlerMethodMatcher.PassThroughType.SENDER;
 import static uk.gov.justice.services.test.utils.core.matchers.MethodHandlesAnnotationMatcher.methodThatHandles;
@@ -14,6 +18,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.MethodHandlesAnno
 import uk.gov.justice.services.core.dispatcher.Requester;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.test.utils.core.mock.SkipJsonValidationListener;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -38,6 +43,7 @@ import org.hamcrest.TypeSafeDiagnosingMatcher;
 public class HandlerMethodMatcher extends TypeSafeDiagnosingMatcher<Class<?>> {
 
     private static final int ONCE = 1;
+    private static final SkipJsonValidationListener SKIP_JSON_VALIDATION_LISTENER = new SkipJsonValidationListener();
     private String methodName;
     private Optional<String> action = Optional.empty();
     private Optional<PassThroughType> passThroughType = Optional.empty();
@@ -90,9 +96,9 @@ public class HandlerMethodMatcher extends TypeSafeDiagnosingMatcher<Class<?>> {
             try {
                 switch (passThroughType.get()) {
                     case SENDER:
-                        return isSenderPassthrough(handlerClass, method);
+                        return isSenderPassThrough(handlerClass, method);
                     case REQUESTER:
-                        return isRequesterPassthrough(handlerClass, method);
+                        return isRequesterPassThrough(handlerClass, method);
                 }
             } catch (final Exception ex) {
                 description.appendText("Method ")
@@ -109,9 +115,13 @@ public class HandlerMethodMatcher extends TypeSafeDiagnosingMatcher<Class<?>> {
         return true;
     }
 
-    private boolean isSenderPassthrough(final Class<?> handlerClass, final Method method) throws Exception {
-        final Sender sender = mock(Sender.class, format("%s.sender.send", method.getName()));
-        final JsonEnvelope command = mock(JsonEnvelope.class);
+    private boolean isSenderPassThrough(final Class<?> handlerClass, final Method method) throws Exception {
+        final Sender sender = mock(Sender.class, withSettings()
+                .name(format("%s.sender.send", method.getName()))
+                .invocationListeners(SKIP_JSON_VALIDATION_LISTENER)
+                .defaultAnswer(RETURNS_DEFAULTS.get()));
+
+        final JsonEnvelope command = envelope().with(metadataWithDefaults()).build();
         final Object handlerInstance = handlerClass.newInstance();
 
         final Field senderField = findField(handlerClass, Sender.class);
@@ -124,10 +134,14 @@ public class HandlerMethodMatcher extends TypeSafeDiagnosingMatcher<Class<?>> {
         return true;
     }
 
-    private boolean isRequesterPassthrough(final Class<?> handlerClass, final Method method) throws Exception {
-        final Requester requester = mock(Requester.class, format("%s.requester.request", method.getName()));
-        final JsonEnvelope query = mock(JsonEnvelope.class);
-        final JsonEnvelope response = mock(JsonEnvelope.class);
+    private boolean isRequesterPassThrough(final Class<?> handlerClass, final Method method) throws Exception {
+        final Requester requester = mock(Requester.class,
+                withSettings()
+                        .name(format("%s.requester.request", method.getName()))
+                        .invocationListeners(SKIP_JSON_VALIDATION_LISTENER)
+                        .defaultAnswer(RETURNS_DEFAULTS.get()));
+        final JsonEnvelope query = envelope().with(metadataWithDefaults()).build();
+        final JsonEnvelope response = envelope().with(metadataWithDefaults()).build();
         final Object handlerInstance = handlerClass.newInstance();
 
         final Field requesterField = findField(handlerClass, Requester.class);

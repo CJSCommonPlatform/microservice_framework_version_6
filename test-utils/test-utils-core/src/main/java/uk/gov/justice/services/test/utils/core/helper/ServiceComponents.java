@@ -1,22 +1,30 @@
 package uk.gov.justice.services.test.utils.core.helper;
 
 import static java.lang.String.format;
+import static org.mockito.Answers.RETURNS_DEFAULTS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
 
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.dispatcher.Requester;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.JsonObjectMetadata;
 import uk.gov.justice.services.test.utils.core.matchers.HandlerClassMatcher;
 import uk.gov.justice.services.test.utils.core.matchers.HandlerMatcher;
+import uk.gov.justice.services.test.utils.core.mock.SkipJsonValidationListener;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -26,6 +34,8 @@ import java.util.stream.Stream;
  */
 @Deprecated
 public final class ServiceComponents {
+
+    private static final SkipJsonValidationListener SKIP_JSON_VALIDATION_LISTENER = new SkipJsonValidationListener();
 
     private ServiceComponents() {
     }
@@ -84,8 +94,12 @@ public final class ServiceComponents {
         for (final Method method : methods) {
             assertMethodHasHandlesAnnotation(method);
 
-            final Sender sender = mock(Sender.class, format("%s.sender.send", method.getName()));
-            final JsonEnvelope command = mock(JsonEnvelope.class);
+            final Sender sender = mock(Sender.class, withSettings()
+                    .name(format("%s.sender.send", method.getName()))
+                    .invocationListeners(SKIP_JSON_VALIDATION_LISTENER)
+                    .defaultAnswer(RETURNS_DEFAULTS.get()));
+
+            final JsonEnvelope command = envelope().with(metadataWithDefaults()).build();
             final Object handlerInstance = handlerClass.newInstance();
 
             final Field senderField = findField(handlerClass, Sender.class);
@@ -152,9 +166,14 @@ public final class ServiceComponents {
         for (final Method method : methods) {
             assertMethodHasHandlesAnnotation(method);
 
-            final Requester requester = mock(Requester.class, format("%s.requester", method.getName()));
-            final JsonEnvelope query = mock(JsonEnvelope.class);
-            final JsonEnvelope response = mock(JsonEnvelope.class);
+
+            final Requester requester = mock(Requester.class,
+                    withSettings()
+                            .name(format("%s.requester", method.getName()))
+                            .invocationListeners(SKIP_JSON_VALIDATION_LISTENER)
+                            .defaultAnswer(RETURNS_DEFAULTS.get()));
+            final JsonEnvelope query = envelope().with(metadataWithDefaults()).build();
+            final JsonEnvelope response = envelope().with(metadataWithDefaults()).build();
             final Object handlerInstance = handlerClass.newInstance();
 
             final Field requesterField = findField(handlerClass, Requester.class);
@@ -203,10 +222,13 @@ public final class ServiceComponents {
     }
 
     private static boolean hasHandlesAnnotation(final Method handlerMethod) {
+        return handlesAnnotationOf(handlerMethod).isPresent();
+    }
+
+    private static Optional<Annotation> handlesAnnotationOf(final Method handlerMethod) {
         return Stream.of(handlerMethod.getDeclaredAnnotations())
                 .filter(annotation -> annotation.annotationType().equals(Handles.class))
-                .findFirst()
-                .isPresent();
+                .findFirst();
     }
 
     private static Field findField(final Class<?> handlerClass, final Class<?> fieldClass) {

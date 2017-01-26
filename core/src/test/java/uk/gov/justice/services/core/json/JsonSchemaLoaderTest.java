@@ -1,15 +1,14 @@
 package uk.gov.justice.services.core.json;
 
 import static org.apache.log4j.Level.TRACE;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
 import uk.gov.justice.services.test.utils.common.logger.TestLogAppender;
 
 import org.apache.log4j.spi.LoggingEvent;
 import org.everit.json.schema.Schema;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -35,8 +34,8 @@ public class JsonSchemaLoaderTest {
         loader.loadSchema("test-schema");
         testLogAppender.deactivate();
         final LoggingEvent logEntry = testLogAppender.firstLogEntry();
-        Assert.assertThat(logEntry.getLevel(), is(TRACE));
-        Assert.assertThat(logEntry.getMessage(), is("Loading schema /json/schema/test-schema.json"));
+        assertThat(logEntry.getLevel(), is(TRACE));
+        assertThat(logEntry.getMessage(), is("Loading schema /json/schema/test-schema.json"));
 
     }
 

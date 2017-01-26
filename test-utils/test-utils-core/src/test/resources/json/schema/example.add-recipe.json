@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "",
+  "type": "object",
+  "properties": {
+    "name": {
+      "id": "/name",
+      "type": "string",
+      "description": "Uniquely identifies the cake to be produced from the recipe",
+      "name": "Name of Cake",
+      "title": "Name of Cake"
+    },
+    "glutenFree": {
+      "id": "/glutenFree",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "name",
+    "glutenFree"
+  ]
+}

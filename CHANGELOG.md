@@ -7,6 +7,8 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ### Fixed
 - Handle ACCEPTED(202) response type set in raml for asynchronous REST endpoints
+- Fix of unclosed connections in MessageConsumerClient
+- Log warning if generated rest adapter already exists
 
 ## [1.2.0] - 2017-01-19
 

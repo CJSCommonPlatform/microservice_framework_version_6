@@ -1,4 +1,4 @@
-package uk.gov.justice.services.core.util;
+package uk.gov.justice.services.test.utils.common;
 
 
 import java.lang.annotation.Annotation;
@@ -10,16 +10,20 @@ import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
 
-public class TestInjectionPoint implements InjectionPoint {
+public class MemberInjectionPoint implements InjectionPoint {
 
     private final Member member;
 
-    public TestInjectionPoint(final Member member) {
+    private MemberInjectionPoint(final Member member) {
         this.member = member;
     }
 
-    public TestInjectionPoint(final Class clazz) {
-        this.member = clazz.getMethods()[0];
+    public static MemberInjectionPoint injectionPointWith(final Member member) {
+        return new MemberInjectionPoint(member);
+    }
+
+    public static MemberInjectionPoint injectionPointWithMemberAsFirstMethodOf(final Class clazz) {
+        return new MemberInjectionPoint(clazz.getMethods()[0]);
     }
 
     @Override

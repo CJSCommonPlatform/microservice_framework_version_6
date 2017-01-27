@@ -1,7 +1,6 @@
 package uk.gov.justice.services.core.dispatcher;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
@@ -10,13 +9,11 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.LOCAL;
 import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.REMOTE;
+import static uk.gov.justice.services.test.utils.common.MemberInjectionPoint.injectionPointWithMemberAsFirstMethodOf;
 
 import uk.gov.justice.services.core.annotation.Adapter;
-import uk.gov.justice.services.core.annotation.Component;
-import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.extension.ServiceComponentFoundEvent;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
-import uk.gov.justice.services.core.util.TestInjectionPoint;
 
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
@@ -29,11 +26,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class DispatcherCacheTest {
 
-    private InjectionPoint adaptorCommandApiInjectionPointA = new TestInjectionPoint(TestCommandApiAdaptorA.class);
+    private InjectionPoint adaptorCommandApiInjectionPointA = injectionPointWithMemberAsFirstMethodOf(TestCommandApiAdaptorA.class);
 
-    private InjectionPoint adaptorCommandApiInjectionPointB = new TestInjectionPoint(TestCommandApiAdaptorB.class);
+    private InjectionPoint adaptorCommandApiInjectionPointB = injectionPointWithMemberAsFirstMethodOf(TestCommandApiAdaptorB.class);
 
-    private InjectionPoint adaptorQueryApiInjectionPoint = new TestInjectionPoint(TestQueryApiAdaptor.class);
+    private InjectionPoint adaptorQueryApiInjectionPoint = injectionPointWithMemberAsFirstMethodOf(TestQueryApiAdaptor.class);
 
     private DispatcherCache dispatcherCache = new DispatcherCache();
 
@@ -123,16 +120,6 @@ public class DispatcherCacheTest {
 
     @Adapter(QUERY_API)
     public static class TestQueryApiAdaptor {
-        @Inject
-        InterceptorChainProcessor interceptorChainProcessor;
-
-        public void dummyMethod() {
-
-        }
-    }
-
-    @FrameworkComponent("componentNameABC")
-    public static class TestCommandApiFrameworkComponentA {
         @Inject
         InterceptorChainProcessor interceptorChainProcessor;
 

@@ -8,8 +8,7 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 import static uk.gov.justice.services.core.annotation.ComponentNameUtil.componentFrom;
-
-import uk.gov.justice.services.core.util.TestInjectionPoint;
+import static uk.gov.justice.services.test.utils.common.MemberInjectionPoint.injectionPointWith;
 
 import javax.inject.Inject;
 
@@ -21,38 +20,37 @@ public class ComponentNameUtilTest {
 
     @Test
     public void shouldReturnFieldLevelComponent() throws NoSuchFieldException {
-        assertThat(componentFrom(new TestInjectionPoint(FieldLevelAnnotation.class.getDeclaredField(FIELD_NAME))), equalTo("COMMAND_CONTROLLER"));
+        assertThat(componentFrom(injectionPointWith(FieldLevelAnnotation.class.getDeclaredField(FIELD_NAME))), equalTo("COMMAND_CONTROLLER"));
     }
 
     @Test
     public void shouldReturnClassLevelComponent() throws NoSuchFieldException {
-        assertThat(componentFrom(new TestInjectionPoint(ClassLevelAnnotation.class.getDeclaredField(FIELD_NAME))), equalTo("COMMAND_HANDLER"));
+        assertThat(componentFrom(injectionPointWith(ClassLevelAnnotation.class.getDeclaredField(FIELD_NAME))), equalTo("COMMAND_HANDLER"));
     }
 
     @Test
     public void shouldReturnClassLevelAdaptorComponent() throws NoSuchFieldException {
-        assertThat(componentFrom(new TestInjectionPoint(AdapterAnnotation.class.getDeclaredField(FIELD_NAME))), equalTo("EVENT_LISTENER"));
+        assertThat(componentFrom(injectionPointWith(AdapterAnnotation.class.getDeclaredField(FIELD_NAME))), equalTo("EVENT_LISTENER"));
     }
 
     @Test
     public void shouldReturnClassLevelComponentForMethodInjectionPoint() throws NoSuchFieldException {
-        assertThat(componentFrom(new TestInjectionPoint(MethodAnnotation.class.getDeclaredMethods()[0])), equalTo("QUERY_API"));
+        assertThat(componentFrom(injectionPointWith(MethodAnnotation.class.getDeclaredMethods()[0])), equalTo("QUERY_API"));
     }
 
     @Test
-    public void shouldReturnClassLevelFrameworkComponentName() throws NoSuchFieldException {
-        assertThat(componentFrom(new TestInjectionPoint(FrameworkComponentClassLevelAnnotation.class.getDeclaredField(FIELD_NAME))), equalTo("CUSTOM_NAME_ABC"));
+    public void shouldReturnClassLevelFrameworkComponent() throws NoSuchFieldException {
+        assertThat(componentFrom(injectionPointWith(FrameworkComponentClassLevelAnnotation.class.getDeclaredField(FIELD_NAME))), equalTo("CUSTOM_NAME_ABC"));
     }
 
-
     @Test
-    public void shouldReturnFieldLevelFrameworkComponentName() throws NoSuchFieldException {
-        assertThat(componentFrom(new TestInjectionPoint(FrameworkComponentFieldLevelAnnotation.class.getDeclaredField(FIELD_NAME))), equalTo("CUSTOM_NAME_BCD"));
+    public void shouldReturnFieldLevelFrameworkComponent() throws NoSuchFieldException {
+        assertThat(componentFrom(injectionPointWith(FrameworkComponentFieldLevelAnnotation.class.getDeclaredField(FIELD_NAME))), equalTo("CUSTOM_NAME_BCD"));
     }
 
     @Test(expected = IllegalStateException.class)
     public void shouldThrowExceptionOnMissingComponentAnnotation() throws NoSuchFieldException {
-        componentFrom(new TestInjectionPoint(NoAnnotation.class.getDeclaredField(FIELD_NAME)));
+        componentFrom(injectionPointWith(NoAnnotation.class.getDeclaredField(FIELD_NAME)));
     }
 
     public static class FieldLevelAnnotation {
@@ -86,8 +84,6 @@ public class ComponentNameUtilTest {
         Object field;
 
     }
-
-
 
     public static class FrameworkComponentFieldLevelAnnotation {
 

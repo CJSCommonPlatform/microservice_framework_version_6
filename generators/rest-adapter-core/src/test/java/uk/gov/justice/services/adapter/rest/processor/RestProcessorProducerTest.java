@@ -6,7 +6,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_CONTROLLER;
@@ -15,6 +14,7 @@ import static uk.gov.justice.services.generators.test.utils.builder.HeadersBuild
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonEnvelope.METADATA;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
+import static uk.gov.justice.services.test.utils.common.MemberInjectionPoint.injectionPointWithMemberAsFirstMethodOf;
 
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
 import uk.gov.justice.services.adapter.rest.parameter.Parameter;
@@ -24,14 +24,12 @@ import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 
-import java.lang.reflect.Member;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
 import javax.enterprise.inject.spi.InjectionPoint;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 import org.junit.Before;
@@ -50,51 +48,23 @@ public class RestProcessorProducerTest {
     private static final String FIELD_NAME = "name";
     private static final String FIELD_VALUE = "TEST NAME";
 
-    @Mock
     private InjectionPoint queryApiInjectionPoint;
-
-    @Mock
     private InjectionPoint queryControllerInjectionPoint;
-
-    @Mock
     private InjectionPoint queryViewInjectionPoint;
-
-    @Mock
     private InjectionPoint frameworkApiInjectionPoint;
 
     @Mock
-    private Member queryApiMember;
-
-    @Mock
-    private Member queryControllerMember;
-
-    @Mock
-    private Member queryViewMember;
-
-    @Mock
-    private Member frameworkApiMemeber;
-
-    @Mock
     private Function<JsonEnvelope, Optional<JsonEnvelope>> function;
-
-    @Mock
-    private HttpHeaders httpHeaders;
 
     @InjectMocks
     private RestProcessorProducer restProcessorProducer;
 
     @Before
     public void setup() {
-
-        when(queryApiInjectionPoint.getMember()).thenReturn(queryApiMember);
-        when(queryControllerInjectionPoint.getMember()).thenReturn(queryControllerMember);
-        when(queryViewInjectionPoint.getMember()).thenReturn(queryViewMember);
-        when(frameworkApiInjectionPoint.getMember()).thenReturn(frameworkApiMemeber);
-
-        doReturn(QueryApiAdapter.class).when(queryApiMember).getDeclaringClass();
-        doReturn(QueryControllerAdapter.class).when(queryControllerMember).getDeclaringClass();
-        doReturn(QueryViewAdapter.class).when(queryViewMember).getDeclaringClass();
-        doReturn(FrameworkApiAdapter.class).when(frameworkApiMemeber).getDeclaringClass();
+        queryApiInjectionPoint = injectionPointWithMemberAsFirstMethodOf(QueryApiAdapter.class);
+        queryControllerInjectionPoint = injectionPointWithMemberAsFirstMethodOf(QueryControllerAdapter.class);
+        queryViewInjectionPoint = injectionPointWithMemberAsFirstMethodOf(QueryViewAdapter.class);
+        frameworkApiInjectionPoint = injectionPointWithMemberAsFirstMethodOf(FrameworkApiAdapter.class);
 
         restProcessorProducer.envelopeBuilderFactory = new RestEnvelopeBuilderFactory();
         restProcessorProducer.jsonObjectEnvelopeConverter = new JsonObjectEnvelopeConverter();
@@ -106,7 +76,7 @@ public class RestProcessorProducerTest {
         when(function.apply(any())).thenReturn(
                 Optional.of(envelope().with(metadataOf(UUID.fromString(ID_VALUE), NAME_VALUE)).withPayloadOf(FIELD_VALUE, FIELD_NAME).build()));
 
-        Response response = restProcessorProducer.produceRestProcessor(queryApiInjectionPoint)
+        final Response response = restProcessorProducer.produceRestProcessor(queryApiInjectionPoint)
                 .processSynchronously(function, "somecontext.somequery", headersWith("Accept", "application/vnd.somecontext.query.somequery+json"), NOT_USED_PATH_PARAMS);
 
         assertThat(response, notNullValue());
@@ -121,7 +91,7 @@ public class RestProcessorProducerTest {
         when(function.apply(any())).thenReturn(
                 Optional.of(envelope().with(metadataOf(UUID.fromString(ID_VALUE), NAME_VALUE)).withPayloadOf(FIELD_VALUE, FIELD_NAME).build()));
 
-        Response response = restProcessorProducer.produceRestProcessor(frameworkApiInjectionPoint)
+        final Response response = restProcessorProducer.produceRestProcessor(frameworkApiInjectionPoint)
                 .processSynchronously(function, "somecontext.somequery", headersWith("Accept", "application/vnd.somecontext.query.somequery+json"), NOT_USED_PATH_PARAMS);
 
         assertThat(response, notNullValue());
@@ -136,7 +106,7 @@ public class RestProcessorProducerTest {
         when(function.apply(any())).thenReturn(
                 Optional.of(envelope().with(metadataOf(UUID.fromString(ID_VALUE), NAME_VALUE)).withPayloadOf(FIELD_VALUE, FIELD_NAME).build()));
 
-        Response response = restProcessorProducer.produceRestProcessor(queryControllerInjectionPoint)
+        final Response response = restProcessorProducer.produceRestProcessor(queryControllerInjectionPoint)
                 .processSynchronously(function, "somecontext.somequery", headersWith("Accept", "application/vnd.somecontext.query.somequery+json"), NOT_USED_PATH_PARAMS);
 
         assertThat(response, notNullValue());
@@ -151,7 +121,7 @@ public class RestProcessorProducerTest {
         when(function.apply(any())).thenReturn(
                 Optional.of(envelope().with(metadataOf(UUID.fromString(ID_VALUE), NAME_VALUE)).withPayloadOf(FIELD_VALUE, FIELD_NAME).build()));
 
-        Response response = restProcessorProducer.produceRestProcessor(queryViewInjectionPoint)
+        final Response response = restProcessorProducer.produceRestProcessor(queryViewInjectionPoint)
                 .processSynchronously(function, "somecontext.somequery", headersWith("Accept", "application/vnd.somecontext.query.somequery+json"), NOT_USED_PATH_PARAMS);
 
         assertThat(response, notNullValue());
@@ -164,20 +134,28 @@ public class RestProcessorProducerTest {
     @Adapter(QUERY_API)
     private class QueryApiAdapter {
 
+        public void test() {
+        }
     }
 
     @Adapter(QUERY_CONTROLLER)
     private class QueryControllerAdapter {
 
+        public void test() {
+        }
     }
 
     @Adapter(QUERY_VIEW)
     private class QueryViewAdapter {
 
+        public void test() {
+        }
     }
 
     @FrameworkComponent("FRAMEWORK_API")
     private class FrameworkApiAdapter {
 
+        public void test() {
+        }
     }
 }

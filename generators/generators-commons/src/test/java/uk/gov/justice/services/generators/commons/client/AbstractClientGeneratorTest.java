@@ -54,7 +54,6 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.TypeName;
 import org.apache.log4j.spi.LoggingEvent;
 import org.hamcrest.Matchers;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -65,7 +64,9 @@ import org.raml.model.Resource;
 import org.slf4j.Logger;
 
 public class AbstractClientGeneratorTest extends BaseGeneratorTest {
+
     private static final String EXISTING_FILE_PATH = "org/raml/test/resource/RemoteBCDController.java";
+
     @Before
     public void before() {
         super.before();
@@ -303,7 +304,7 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
                                 .with(httpAction(GET)))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder,
-                        generatorProperties().withServiceComponentOf("COMMAND_CONTROLLER").build(), singletonList( existingFilePath())));
+                        generatorProperties().withServiceComponentOf("COMMAND_CONTROLLER").build(), singletonList(existingFilePath())));
 
         logger.removeAppender(appender);
         final List<LoggingEvent> logEntries = appender.messages();
@@ -345,6 +346,7 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
             return "some.action";
         }
     }
+
     static class BCDClientGenerator extends ABCClientGenerator {
         @Override
         protected String classNameOf(final Raml raml) {

@@ -15,6 +15,7 @@ import uk.gov.justice.services.generators.test.utils.builder.RamlBuilder;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.junit.Rule;
@@ -35,52 +36,49 @@ public class GeneratorsTest {
 
     @Test
     public void shouldReturnComponentFromBaseUriForCommandApi() throws Exception {
-        Raml raml = restRamlWithCommandApiDefaults().build();
-        Component component = Generators.componentFromBaseUriIn(raml);
-        assertThat(component, is(COMMAND_API));
+        final Raml raml = restRamlWithCommandApiDefaults().build();
+        final Optional<Component> component = Generators.componentFromBaseUriIn(raml);
+        assertThat(component, is(Optional.of(COMMAND_API)));
     }
 
     @Test
     public void shouldReturnComponentFromBaseUriForEventApi() throws Exception {
-        Raml raml = RamlBuilder.restRamlWithEventApiDefaults().build();
-        Component component = Generators.componentFromBaseUriIn(raml);
-        assertThat(component, is(EVENT_API));
+        final Raml raml = RamlBuilder.restRamlWithEventApiDefaults().build();
+        final Optional<Component> component = Generators.componentFromBaseUriIn(raml);
+        assertThat(component, is(Optional.of(EVENT_API)));
     }
 
     @Test
     public void shouldReturnComponentFromBaseUriForQueryApi() throws Exception {
-        Raml raml = restRamlWithQueryApiDefaults().build();
-        Component component = Generators.componentFromBaseUriIn(raml);
-        assertThat(component, is(QUERY_API));
+        final Raml raml = restRamlWithQueryApiDefaults().build();
+        final Optional<Component> component = Generators.componentFromBaseUriIn(raml);
+        assertThat(component, is(Optional.of(QUERY_API)));
     }
 
     @Test
-    public void shouldThrowExceptionIfNoValidPillarAndTier() throws Exception {
-        Raml raml = new RamlBuilder()
+    public void shouldReturnOptionalEmptyIfNoValidPillarAndTier() throws Exception {
+        final Raml raml = new RamlBuilder()
                 .withVersion("#%RAML 0.8")
                 .withTitle("Example Service")
                 .withBaseUri("http://localhost:8080/warname/event/listener/rest/service").build();
 
-        exception.expect(IllegalStateException.class);
-        exception.expectMessage("Base URI must contain valid pillar and tier: http://localhost:8080/warname/event/listener/rest/service");
-
-        Generators.componentFromBaseUriIn(raml);
+        final Optional<Component> component = Generators.componentFromBaseUriIn(raml);
+        assertThat(component, is(Optional.empty()));
     }
 
     @Test
     public void shouldSortMimeTypes() throws Exception {
-        MimeType mimeTypeA = new MimeType("application/vnd.a+json");
-        MimeType mimeTypeB = new MimeType("application/vnd.b+json");
-        MimeType mimeTypeC = new MimeType("application/vnd.c+json");
-        List<MimeType> mimeTypes = Arrays.asList(mimeTypeB, mimeTypeC, mimeTypeA);
+        final MimeType mimeTypeA = new MimeType("application/vnd.a+json");
+        final MimeType mimeTypeB = new MimeType("application/vnd.b+json");
+        final MimeType mimeTypeC = new MimeType("application/vnd.c+json");
+        final List<MimeType> mimeTypes = Arrays.asList(mimeTypeB, mimeTypeC, mimeTypeA);
 
         assertThat(mimeTypes, contains(mimeTypeB, mimeTypeC, mimeTypeA));
 
-        List<MimeType> orderedMimeTypes = mimeTypes.stream()
+        final List<MimeType> orderedMimeTypes = mimeTypes.stream()
                 .sorted(Generators.byMimeTypeOrder())
                 .collect(Collectors.toList());
 
         assertThat(orderedMimeTypes, contains(mimeTypeA, mimeTypeB, mimeTypeC));
     }
-
 }

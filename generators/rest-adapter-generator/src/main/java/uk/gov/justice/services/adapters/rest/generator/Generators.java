@@ -1,11 +1,13 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
 
+import static java.util.Comparator.comparing;
 import static uk.gov.justice.services.generators.commons.helper.Names.baseUriPathWithoutContext;
 
 import uk.gov.justice.services.core.annotation.Component;
 
 import java.util.Comparator;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,15 +27,15 @@ final class Generators {
      * @param raml the RAML that provides the base URI
      * @return the {@link Component} value derived from the base URI
      */
-    static Component componentFromBaseUriIn(final Raml raml) {
+    static Optional<Component> componentFromBaseUriIn(final Raml raml) {
         final Matcher matcher = PILLAR_AND_TIER_PATTERN.matcher(baseUriPathWithoutContext(raml));
 
         if (matcher.find()) {
             final String pillarAndTier = matcher.group(1);
             final String[] sections = pillarAndTier.split("/");
-            return Component.valueOf(sections[0], sections[1]);
+            return Optional.of(Component.valueOf(sections[0], sections[1]));
         } else {
-            throw new IllegalStateException(String.format("Base URI must contain valid pillar and tier: %s", raml.getBaseUri()));
+            return Optional.empty();
         }
     }
 
@@ -43,7 +45,7 @@ final class Generators {
      * @return the MimeType Comparator
      */
     static Comparator<MimeType> byMimeTypeOrder() {
-        return (t1, t2) -> t1.getType().compareTo(t2.getType());
+        return comparing(MimeType::getType);
     }
 
 }

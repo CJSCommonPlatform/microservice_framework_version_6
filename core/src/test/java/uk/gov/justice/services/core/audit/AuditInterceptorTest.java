@@ -4,13 +4,16 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
+import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.core.interceptor.InterceptorContext.copyWithOutput;
 import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
 import static uk.gov.justice.services.test.utils.common.MemberInjectionPoint.injectionPointWithMemberAsFirstMethodOf;
 
 import uk.gov.justice.services.core.accesscontrol.AccessControlInterceptorTest;
+import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.interceptor.Interceptor;
 import uk.gov.justice.services.core.interceptor.InterceptorChain;
+import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
 import uk.gov.justice.services.core.interceptor.Target;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -19,6 +22,7 @@ import java.util.Deque;
 import java.util.LinkedList;
 
 import javax.enterprise.inject.spi.InjectionPoint;
+import javax.inject.Inject;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -56,8 +60,8 @@ public class AuditInterceptorTest {
         final Target target = context -> copyWithOutput(context, outputEnvelope);
 
         interceptorChain = new InterceptorChain(interceptors, target);
-        adaptorCommandLocal = injectionPointWithMemberAsFirstMethodOf(AccessControlInterceptorTest.TestCommandLocal.class);
-        adaptorCommandRemote = injectionPointWithMemberAsFirstMethodOf(AccessControlInterceptorTest.TestCommandRemote.class);
+        adaptorCommandLocal = injectionPointWithMemberAsFirstMethodOf(TestCommandLocal.class);
+        adaptorCommandRemote = injectionPointWithMemberAsFirstMethodOf(TestCommandRemote.class);
     }
 
     @Test
@@ -82,5 +86,24 @@ public class AuditInterceptorTest {
     @Test
     public void shouldReturnAccessControlPriority() throws Exception {
         assertThat(auditInterceptor.priority(), is(AUDIT_PRIORITY));
+    }
+
+    @Adapter(COMMAND_API)
+    public static class TestCommandLocal {
+        @Inject
+        InterceptorChainProcessor interceptorChainProcessor;
+
+        public void dummyMethod() {
+
+        }
+    }
+
+    public static class TestCommandRemote {
+        @Inject
+        InterceptorChainProcessor interceptorChainProcessor;
+
+        public void dummyMethod() {
+
+        }
     }
 }

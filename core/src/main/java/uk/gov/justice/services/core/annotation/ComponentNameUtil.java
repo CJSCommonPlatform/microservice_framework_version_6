@@ -9,8 +9,10 @@ import java.util.Optional;
 
 import javax.enterprise.inject.spi.InjectionPoint;
 
-public class ComponentNameUtil {
-    private ComponentNameUtil() {}
+public final class ComponentNameUtil {
+
+    private ComponentNameUtil() {
+    }
 
     /**
      * Retrieves name of the component of the provided {@link ServiceComponent} or {@link Adapter}.
@@ -25,6 +27,10 @@ public class ComponentNameUtil {
             return clazz.getAnnotation(Adapter.class).value().name();
         } else if (clazz.isAnnotationPresent(FrameworkComponent.class)) {
             return clazz.getAnnotation(FrameworkComponent.class).value();
+        } else if (clazz.isAnnotationPresent(CustomServiceComponent.class)) {
+            return clazz.getAnnotation(CustomServiceComponent.class).value();
+        } else if (clazz.isAnnotationPresent(CustomAdapter.class)) {
+            return clazz.getAnnotation(CustomAdapter.class).value();
         } else {
             throw new IllegalStateException(format("No annotation found to define component for class %s", clazz));
         }
@@ -48,6 +54,8 @@ public class ComponentNameUtil {
                 return Optional.of(field.getAnnotation(ServiceComponent.class).value().name());
             } else if (field.isAnnotationPresent(FrameworkComponent.class)) {
                 return Optional.of(field.getAnnotation(FrameworkComponent.class).value());
+            } else if (field.isAnnotationPresent(CustomServiceComponent.class)) {
+                return Optional.of(field.getAnnotation(CustomServiceComponent.class).value());
             }
         }
 

@@ -1,51 +1,50 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
+import static java.util.Collections.emptyMap;
 import static org.raml.model.ActionType.HEAD;
 import static org.raml.model.ActionType.OPTIONS;
 import static org.raml.model.ActionType.TRACE;
-import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
+import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
+import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 
-import uk.gov.justice.raml.core.GeneratorConfig;
+import uk.gov.justice.services.generators.commons.validator.RamlValidationException;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.raml.model.ActionType;
-import org.raml.model.Resource;
 
-@RunWith(MockitoJUnitRunner.class)
-public class JaxRsImplementationGeneratorTest {
+public class JaxRsImplementationGeneratorTest extends BaseRestAdapterGeneratorTest {
 
-    @Mock
-    GeneratorConfig config;
-
-    private JaxRsImplementationGenerator jaxRsImplementationGenerator;
-
-    @Before
-    public void setup() {
-        jaxRsImplementationGenerator = new JaxRsImplementationGenerator(config);
-    }
-
-    @Test(expected = IllegalStateException.class)
+    @Test(expected = RamlValidationException.class)
     public void shouldThrowExceptionIfActionTypeIsHEAD() throws Exception {
-        jaxRsImplementationGenerator.generateFor(singleResourceWithActionType(HEAD), COMMAND_API);
+        generator.run(
+                restRamlWithDefaults()
+                        .withBaseUri("http://localhost:8080/warname/query/api/rest/service")
+                        .with(resource("/some/path")
+                                .with(httpAction().withHttpActionType(HEAD))
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test(expected = RamlValidationException.class)
     public void shouldThrowExceptionIfActionTypeIsOPTIONS() throws Exception {
-        jaxRsImplementationGenerator.generateFor(singleResourceWithActionType(OPTIONS), COMMAND_API);
+        generator.run(
+                restRamlWithDefaults()
+                        .withBaseUri("http://localhost:8080/warname/query/api/rest/service")
+                        .with(resource("/some/path")
+                                .with(httpAction().withHttpActionType(OPTIONS))
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test(expected = RamlValidationException.class)
     public void shouldThrowExceptionIfActionTypeIsTRACE() throws Exception {
-        jaxRsImplementationGenerator.generateFor(singleResourceWithActionType(TRACE), COMMAND_API);
-    }
-
-    private Resource singleResourceWithActionType(final ActionType actionType) {
-        return resource().with(httpAction(actionType)).build();
+        generator.run(
+                restRamlWithDefaults()
+                        .withBaseUri("http://localhost:8080/warname/query/api/rest/service")
+                        .with(resource("/some/path")
+                                .with(httpAction().withHttpActionType(TRACE))
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
     }
 }

@@ -5,6 +5,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Fixed
+- Metadata causation being ignored in the Rest Adapter 
+
 ## [1.3.0] - 2017-01-26
 
 ### Fixed

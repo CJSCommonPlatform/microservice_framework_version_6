@@ -13,7 +13,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.raml.model.ActionType.DELETE;
@@ -36,8 +35,8 @@ import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.Remote;
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
-import uk.gov.justice.services.generators.test.utils.logger.TestAppender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.test.utils.common.logger.TestLogAppender;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -294,9 +293,7 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
     @Test
     public void shouldLogWarningIfClassExists() throws Exception {
 
-        final TestAppender appender = new TestAppender();
-        final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getRootLogger();
-        logger.addAppender(appender);
+        final TestLogAppender testAppender = TestLogAppender.activate();
 
         new BCDClientGenerator().run(
                 messagingRamlWithDefaults()
@@ -306,13 +303,11 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder,
                         generatorProperties().withServiceComponentOf("COMMAND_CONTROLLER").build(), singletonList(existingFilePath())));
 
-        logger.removeAppender(appender);
-        final List<LoggingEvent> logEntries = appender.messages();
-        assertThat(logEntries, not(empty()));
-        final LoggingEvent logEntry = logEntries.get(0);
-        assertThat(logEntry.getLevel(), Matchers.is(WARN));
-        assertThat((String) logEntry.getMessage(), containsString("The class RemoteBCDController already exists, skipping code generation."));
+        testAppender.deactivate();
 
+        final LoggingEvent logEntry = testAppender.firstLogEntry();
+        assertThat(logEntry.getLevel(), is(WARN));
+        assertThat((String) logEntry.getMessage(), containsString("The class RemoteBCDController already exists, skipping code generation."));
 
     }
 

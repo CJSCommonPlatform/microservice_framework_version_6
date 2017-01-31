@@ -1,15 +1,25 @@
 package uk.gov.justice.services.core.json;
 
+import static org.apache.log4j.Level.TRACE;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.skyscreamer.jsonassert.JSONCompare.compareJSON;
 
+import uk.gov.justice.services.test.utils.common.logger.TestLogAppender;
+
+import org.apache.log4j.spi.LoggingEvent;
 import org.everit.json.schema.Schema;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -26,17 +36,26 @@ public class DefaultJsonSchemaValidatorTest {
 
     private static final String TEST_SCHEMA_NAME = "test-schema";
 
-    @Mock
-    private Logger logger;
+    private TestLogAppender testLogAppender;
 
     @Mock
-    private JsonSchemaLoader loader = new JsonSchemaLoader();
+    private JsonSchemaLoader loader;
 
     @Mock
     private Schema schema;
 
     @InjectMocks
     private DefaultJsonSchemaValidator validator;
+
+    @Before
+    public void setUp() throws Exception {
+        testLogAppender = TestLogAppender.activate();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        testLogAppender.deactivate();
+    }
 
     @Test
     public void shouldValidateUsingCorrectSchema() {
@@ -72,7 +91,10 @@ public class DefaultJsonSchemaValidatorTest {
     }
 
     private void assertLogStatement() {
-        verify(logger).trace("Performing schema validation for: {}", TEST_SCHEMA_NAME);
+        final LoggingEvent logEntry = testLogAppender.firstLogEntry();
+        assertThat(logEntry.getLevel(), is(TRACE));
+        assertThat(logEntry.getMessage(), is("Performing schema validation for: test-schema"));
+
     }
 
     private Matcher<JSONObject> equalToJSONObject(final JSONObject jsonObject) {

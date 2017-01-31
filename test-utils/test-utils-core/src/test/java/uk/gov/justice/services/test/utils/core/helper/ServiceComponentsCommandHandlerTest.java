@@ -88,7 +88,7 @@ public class ServiceComponentsCommandHandlerTest {
         @Inject
         Sender sender;
 
-        @Handles("testA")
+        @Handles("notification.subscribe")
         public void testA(final JsonEnvelope command) {
             sender.send(command);
         }

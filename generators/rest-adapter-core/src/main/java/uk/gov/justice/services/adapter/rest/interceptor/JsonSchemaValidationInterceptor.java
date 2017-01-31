@@ -1,5 +1,6 @@
 package uk.gov.justice.services.adapter.rest.interceptor;
 
+import static java.lang.String.format;
 import static uk.gov.justice.services.adapter.rest.envelope.MediaTypes.JSON_MEDIA_TYPE_SUFFIX;
 import static uk.gov.justice.services.adapter.rest.envelope.MediaTypes.charsetFrom;
 import static uk.gov.justice.services.adapter.rest.envelope.MediaTypes.nameFrom;
@@ -14,6 +15,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.ext.Provider;
@@ -48,14 +50,14 @@ public class JsonSchemaValidationInterceptor implements ReaderInterceptor {
 
             try {
                 validator.validate(payload, nameFrom(mediaType));
-            } catch (ValidationException | InvalidMediaTypeException ex) {
-                if (ex instanceof ValidationException) {
-                    final String message = String.format("JSON schema validation has failed on %s due to %s ",
-                            toHttpHeaderTrace(context.getHeaders()),
-                            toValidationTrace((ValidationException) ex));
-                    logger.debug(message);
-                    throw new BadRequestException(message, ex);
-                }
+            } catch (ValidationException ex) {
+                final String message = format("JSON schema validation has failed on %s due to %s ",
+                        toHttpHeaderTrace(context.getHeaders()),
+                        toValidationTrace(ex));
+                logger.debug(message);
+                throw new BadRequestException(message, ex);
+
+            } catch (InvalidMediaTypeException ex) {
                 throw new BadRequestException(ex.getMessage(), ex);
             }
 

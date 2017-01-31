@@ -33,6 +33,7 @@ import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
 import uk.gov.justice.services.adapter.rest.exception.BadRequestException;
 import uk.gov.justice.services.adapter.rest.parameter.Parameter;
+import uk.gov.justice.services.adapter.rest.processor.ResponseStrategy;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.lang.reflect.InvocationTargetException;
@@ -71,7 +72,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         Object resourceObject = getInstanceOf(resourceClass);
 
         Response processorResponse = Response.ok().build();
-        when(restProcessor.processSynchronously(any(Function.class), anyString(), any(HttpHeaders.class), any(Collection.class))).thenReturn(processorResponse);
+        when(restProcessor.process(any(ResponseStrategy.class), any(Function.class), anyString(), any(HttpHeaders.class), any(Collection.class))).thenReturn(processorResponse);
 
         Method method = firstMethodOf(resourceClass);
 
@@ -99,7 +100,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         method.invoke(resourceObject);
 
         ArgumentCaptor<Function> consumerCaptor = ArgumentCaptor.forClass(Function.class);
-        verify(restProcessor).processSynchronously(consumerCaptor.capture(), anyString(), any(HttpHeaders.class), any(Collection.class));
+        verify(restProcessor).process(any(ResponseStrategy.class), consumerCaptor.capture(), anyString(), any(HttpHeaders.class), any(Collection.class));
 
         JsonEnvelope envelope = envelope().build();
         consumerCaptor.getValue().apply(envelope);
@@ -128,7 +129,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject);
 
-        verify(restProcessor).processSynchronously(any(Function.class), anyString(), eq(headers), any(Collection.class));
+        verify(restProcessor).process(any(ResponseStrategy.class), any(Function.class), anyString(), eq(headers), any(Collection.class));
     }
 
     @SuppressWarnings("unchecked")
@@ -167,7 +168,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         method.invoke(resourceObject);
 
 
-        verify(restProcessor).processSynchronously(any(Function.class), eq("contextA.action1"),
+        verify(restProcessor).process(any(ResponseStrategy.class), any(Function.class), eq("contextA.action1"),
                 any(HttpHeaders.class), any(Collection.class));
     }
 
@@ -199,7 +200,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         method.invoke(resourceObject);
 
 
-        verify(restProcessor).processSynchronously(any(Function.class), eq("contextB.action1"),
+        verify(restProcessor).process(any(ResponseStrategy.class), any(Function.class), eq("contextB.action1"),
                 any(HttpHeaders.class), any(Collection.class));
     }
 
@@ -223,7 +224,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         ArgumentCaptor<Collection> pathParamsCaptor = ArgumentCaptor.forClass(Collection.class);
 
-        verify(restProcessor).processSynchronously(any(Function.class), anyString(), any(HttpHeaders.class),
+        verify(restProcessor).process(any(ResponseStrategy.class), any(Function.class), anyString(), any(HttpHeaders.class),
                 pathParamsCaptor.capture());
 
         Collection<Parameter> pathParams = pathParamsCaptor.getValue();
@@ -253,7 +254,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         ArgumentCaptor<Collection> pathParamsCaptor = ArgumentCaptor.forClass(Collection.class);
 
-        verify(restProcessor).processSynchronously(any(Function.class), anyString(), any(HttpHeaders.class),
+        verify(restProcessor).process(any(ResponseStrategy.class), any(Function.class), anyString(), any(HttpHeaders.class),
                 pathParamsCaptor.capture());
 
         Collection<Parameter> pathParams = pathParamsCaptor.getValue();
@@ -286,7 +287,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         ArgumentCaptor<Collection> queryParamsCaptor = ArgumentCaptor.forClass(Collection.class);
 
-        verify(restProcessor).processSynchronously(any(Function.class), anyString(), any(HttpHeaders.class),
+        verify(restProcessor).process(any(ResponseStrategy.class), any(Function.class), anyString(), any(HttpHeaders.class),
                 queryParamsCaptor.capture());
 
         Collection<Parameter> queryParams = queryParamsCaptor.getValue();
@@ -327,7 +328,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         ArgumentCaptor<Collection> queryParamsCaptor = ArgumentCaptor.forClass(Collection.class);
 
-        verify(restProcessor).processSynchronously(any(Function.class), anyString(), any(HttpHeaders.class),
+        verify(restProcessor).process(any(ResponseStrategy.class), any(Function.class), anyString(), any(HttpHeaders.class),
                 queryParamsCaptor.capture());
 
         Collection<Parameter> queryParams = queryParamsCaptor.getValue();
@@ -364,7 +365,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         ArgumentCaptor<Collection> queryParamsCaptor = ArgumentCaptor.forClass(Collection.class);
 
-        verify(restProcessor).processSynchronously(any(Function.class), anyString(), any(HttpHeaders.class),
+        verify(restProcessor).process(any(ResponseStrategy.class), any(Function.class), anyString(), any(HttpHeaders.class),
                 queryParamsCaptor.capture());
 
         Collection<Parameter> queryParams = queryParamsCaptor.getValue();
@@ -398,7 +399,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         ArgumentCaptor<Collection> paramsCaptor = ArgumentCaptor.forClass(Collection.class);
 
-        verify(restProcessor).processSynchronously(any(Function.class), anyString(), any(HttpHeaders.class),
+        verify(restProcessor).process(any(ResponseStrategy.class), any(Function.class), anyString(), any(HttpHeaders.class),
                 paramsCaptor.capture());
 
         Collection<Parameter> params = paramsCaptor.getValue();
@@ -439,7 +440,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         ArgumentCaptor<Collection> queryParamsCaptor = ArgumentCaptor.forClass(Collection.class);
 
-        verify(restProcessor).processSynchronously(any(Function.class), anyString(), any(HttpHeaders.class),
+        verify(restProcessor).process(any(ResponseStrategy.class), any(Function.class), anyString(), any(HttpHeaders.class),
                 queryParamsCaptor.capture());
 
         Collection<Parameter> queryParams = queryParamsCaptor.getValue();

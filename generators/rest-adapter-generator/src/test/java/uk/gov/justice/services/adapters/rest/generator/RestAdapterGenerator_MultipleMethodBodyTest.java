@@ -15,11 +15,12 @@ import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuil
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.methodsOf;
 
+import uk.gov.justice.services.adapter.rest.processor.ResponseStrategy;
+
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javax.json.Json;
@@ -49,8 +50,8 @@ public class RestAdapterGenerator_MultipleMethodBodyTest extends BaseRestAdapter
         final Object resourceObject = getInstanceOf(resourceClass);
 
         final Response processorResponse = Response.ok().build();
-        when(restProcessor.processSynchronously(any(Function.class), anyString(), any(HttpHeaders.class), any(Collection.class))).thenReturn(processorResponse);
-        when(restProcessor.processAsynchronously(any(Consumer.class), anyString(), any(Optional.class), any(HttpHeaders.class),
+        when(restProcessor.process(any(ResponseStrategy.class), any(Function.class), anyString(), any(HttpHeaders.class), any(Collection.class))).thenReturn(processorResponse);
+        when(restProcessor.process(any(ResponseStrategy.class), any(Function.class), anyString(), any(Optional.class), any(HttpHeaders.class),
                 any(Collection.class))).thenReturn(processorResponse);
 
         final List<Method> methods = methodsOf(resourceClass);

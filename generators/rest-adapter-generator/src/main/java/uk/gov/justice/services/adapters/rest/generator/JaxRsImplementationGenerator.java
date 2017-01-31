@@ -8,8 +8,13 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
+import static uk.gov.justice.services.adapter.rest.processor.ResponseStrategyFactory.ACCEPTED_STATUS_WITH_NO_ENTITY;
+import static uk.gov.justice.services.adapter.rest.processor.ResponseStrategyFactory.OK_STATUS_WITH_ENVELOPE_ENTITY;
+import static uk.gov.justice.services.adapter.rest.processor.ResponseStrategyFactory.OK_STATUS_WITH_ENVELOPE_PAYLOAD_ENTITY;
 import static uk.gov.justice.services.adapters.rest.generator.Generators.byMimeTypeOrder;
 import static uk.gov.justice.services.adapters.rest.generator.Generators.componentFromBaseUriIn;
+import static uk.gov.justice.services.core.annotation.Component.QUERY_CONTROLLER;
+import static uk.gov.justice.services.core.annotation.Component.QUERY_VIEW;
 import static uk.gov.justice.services.generators.commons.config.GeneratorProperties.serviceComponentOf;
 import static uk.gov.justice.services.generators.commons.helper.Actions.isSupportedActionType;
 import static uk.gov.justice.services.generators.commons.helper.Actions.isSupportedActionTypeWithResponseTypeOnly;
@@ -26,8 +31,10 @@ import static uk.gov.justice.services.generators.commons.helper.Names.resourceIn
 import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.services.adapter.rest.BasicActionMapper;
 import uk.gov.justice.services.adapter.rest.parameter.ValidParameterCollectionBuilder;
+import uk.gov.justice.services.adapter.rest.processor.ResponseStrategyFactory;
 import uk.gov.justice.services.adapter.rest.processor.RestProcessor;
 import uk.gov.justice.services.core.annotation.Adapter;
+import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.CustomAdapter;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.messaging.logging.HttpMessageLoggerHelper;
@@ -79,9 +86,10 @@ class JaxRsImplementationGenerator {
     private static final String INTERCEPTOR_CHAIN_PROCESSOR = "interceptorChainProcessor";
     private static final String ACTION_MAPPER_VARIABLE = "actionMapper";
 
-    private static final String SYNCHRONOUS_METHOD_STATEMENT = "return restProcessor.processSynchronously($L::process, $L.actionOf($S, \"GET\", headers), headers, $L.parameters())";
-    private static final String SYNCHRONOUS_POST_METHOD_STATEMENT = "return restProcessor.processSynchronously($L::process, $L.actionOf($S, $S, headers), %s, headers, $L.parameters())";
-    private static final String ASYNCHRONOUS_METHOD_STATEMENT = "return restProcessor.processAsynchronously($L::process, $L.actionOf($S, $S, headers), %s, headers, $L.parameters())";
+    private static final String REST_PROCESSOR_NO_PAYLOAD_METHOD_STATEMENT = "return restProcessor.process(responseStrategyFactory.strategyFor(ResponseStrategyFactory.$L), $L::process, $L.actionOf($S, \"GET\", headers), headers, $L.parameters())";
+    private static final String REST_PROCESSOR_PAYLOAD_METHOD_STATEMENT = "return restProcessor.process(responseStrategyFactory.strategyFor(ResponseStrategyFactory.$L), $L::process, $L.actionOf($S, $S, headers), %s, headers, $L.parameters())";
+
+    private static final String RESPONSE_STRATEGY_FACTORY = "responseStrategyFactory";
 
     private final GeneratorConfig configuration;
 
@@ -103,39 +111,21 @@ class JaxRsImplementationGenerator {
     List<TypeSpec> generateFor(final Raml raml) {
         final Collection<Resource> resources = raml.getResources().values();
         return resources.stream()
-                .map(resource -> generateFor(resource, componentAnnotationFromBaseUriOrConfiguration(raml)))
+                .map(resource -> generateFor(resource, componentFromBaseUriIn(raml)))
                 .collect(Collectors.toList());
-    }
-
-    /**
-     * Generate an {@link Adapter} annotation from the Raml base URI or a {@link CustomAdapter}
-     * annotation from the service component configuration parameter.
-     *
-     * @param raml the to use for the base URI
-     * @return the AnnotationSpec
-     */
-    private AnnotationSpec componentAnnotationFromBaseUriOrConfiguration(final Raml raml) {
-        return componentFromBaseUriIn(raml)
-                .map(component ->
-                        AnnotationSpec.builder(Adapter.class)
-                                .addMember(DEFAULT_ANNOTATION_PARAMETER, "$S", component)
-                                .build())
-                .orElseGet(() ->
-                        AnnotationSpec.builder(CustomAdapter.class)
-                                .addMember(DEFAULT_ANNOTATION_PARAMETER, "$S", serviceComponentOf(configuration))
-                                .build());
     }
 
     /**
      * Create an implementation class for the specified {@link Resource}
      *
-     * @param resource the resource to generate as an implementation class
+     * @param resource  the resource to generate as an implementation class
+     * @param component the optional component for this class
      * @return a {@link TypeSpec} that represents the implementation class
      */
-    private TypeSpec generateFor(final Resource resource, final AnnotationSpec componentAnnotation) {
-        final TypeSpec.Builder classSpecBuilder = classSpecFor(resource, componentAnnotation);
+    private TypeSpec generateFor(final Resource resource, final Optional<String> component) {
+        final TypeSpec.Builder classSpecBuilder = classSpecFor(resource, component);
 
-        resource.getActions().values().forEach(action -> classSpecBuilder.addMethods(forEach(action)));
+        resource.getActions().values().forEach(action -> classSpecBuilder.addMethods(forEach(action, component)));
 
         return classSpecBuilder.build();
     }
@@ -143,18 +133,22 @@ class JaxRsImplementationGenerator {
     /**
      * Creates a {@link TypeSpec.Builder} from an initial template of an implementation class
      *
-     * @param resource            the resource to generate as an implementation class
-     * @param componentAnnotation the component annotation for this class
+     * @param resource  the resource to generate as an implementation class
+     * @param component the optional component for this class
      * @return a {@link TypeSpec.Builder} that represents the implementation class
      */
-    private TypeSpec.Builder classSpecFor(final Resource resource, final AnnotationSpec componentAnnotation) {
+    private TypeSpec.Builder classSpecFor(final Resource resource, final Optional<String> component) {
         final String className = resourceImplementationNameOf(resource);
+
         return classBuilder(className)
                 .addSuperinterface(interfaceClassNameFor(resource))
                 .addModifiers(PUBLIC)
-                .addAnnotation(componentAnnotation)
+                .addAnnotation(componentAnnotationFor(component))
                 .addField(loggerConstantField(className))
                 .addField(FieldSpec.builder(RestProcessor.class, "restProcessor")
+                        .addAnnotation(Inject.class)
+                        .build())
+                .addField(FieldSpec.builder(ResponseStrategyFactory.class, RESPONSE_STRATEGY_FACTORY)
                         .addAnnotation(Inject.class)
                         .build())
                 .addField(FieldSpec.builder(BasicActionMapper.class, ACTION_MAPPER_VARIABLE)
@@ -171,19 +165,39 @@ class JaxRsImplementationGenerator {
     }
 
     /**
+     * Generate an {@link Adapter} annotation from the Component or a {@link CustomAdapter}
+     * annotation from the service component configuration parameter.
+     *
+     * @param component the Optional Component
+     * @return the AnnotationSpec
+     */
+    private AnnotationSpec componentAnnotationFor(final Optional<String> component) {
+        return component
+                .map(value ->
+                        AnnotationSpec.builder(Adapter.class)
+                                .addMember(DEFAULT_ANNOTATION_PARAMETER, "$T.$L", Component.class, value)
+                                .build())
+                .orElseGet(() ->
+                        AnnotationSpec.builder(CustomAdapter.class)
+                                .addMember(DEFAULT_ANNOTATION_PARAMETER, "$S", serviceComponentOf(configuration))
+                                .build());
+    }
+
+    /**
      * Process the body or bodies for each httpAction.
      *
-     * @param action the httpAction to process
+     * @param action    the httpAction to process
+     * @param component the optional component for this class
      * @return the list of {@link MethodSpec} that represents each method for the httpAction
      */
-    private List<MethodSpec> forEach(final Action action) {
+    private List<MethodSpec> forEach(final Action action, final Optional<String> component) {
         final ActionType actionType = action.getType();
 
         if (isSupportedActionType(actionType)) {
             if (isSupportedActionTypeWithResponseTypeOnly(actionType)) {
-                return singletonList(processNoActionBody(action));
+                return singletonList(processNoActionBody(action, component));
             } else {
-                return processOneOrMoreActionBodies(action);
+                return processOneOrMoreActionBodies(action, component);
             }
         }
 
@@ -193,24 +207,26 @@ class JaxRsImplementationGenerator {
     /**
      * Process an httpAction with no body.
      *
-     * @param action the httpAction to process
+     * @param action    the httpAction to process
+     * @param component the optional component for this class
      * @return the {@link MethodSpec} that represents the method for the httpAction
      */
-    private MethodSpec processNoActionBody(final Action action) {
+    private MethodSpec processNoActionBody(final Action action, final Optional<String> component) {
         final String resourceMethodName = buildResourceMethodNameWithNoMimeType(action);
-        return generateGetResourceMethod(resourceMethodName, action);
+        return generateGetResourceMethod(resourceMethodName, action, component);
     }
 
     /**
      * Process an httpAction with one or more bodies.
      *
-     * @param action the httpAction to process
+     * @param action    the httpAction to process
+     * @param component the optional component for this class
      * @return the list of {@link MethodSpec} that represents each method for the httpAction
      */
-    private List<MethodSpec> processOneOrMoreActionBodies(final Action action) {
+    private List<MethodSpec> processOneOrMoreActionBodies(final Action action, final Optional<String> component) {
         return action.getBody().values().stream()
                 .sorted(byMimeTypeOrder())
-                .map(bodyMimeType -> buildMethodSpecForMimeType(action, bodyMimeType))
+                .map(bodyMimeType -> buildMethodSpecForMimeType(action, bodyMimeType, component))
                 .collect(Collectors.toList());
     }
 
@@ -219,11 +235,12 @@ class JaxRsImplementationGenerator {
      *
      * @param action       - the action
      * @param bodyMimeType - the mime type to process
+     * @param component    the optional component for this class
      * @return - a method specification
      */
-    private MethodSpec buildMethodSpecForMimeType(final Action action, final MimeType bodyMimeType) {
+    private MethodSpec buildMethodSpecForMimeType(final Action action, final MimeType bodyMimeType, final Optional<String> component) {
         final String resourceMethodName = buildResourceMethodName(action, bodyMimeType);
-        return generateResourceMethod(resourceMethodName, action, bodyMimeType);
+        return generateResourceMethod(resourceMethodName, action, bodyMimeType, component);
     }
 
     /**
@@ -258,16 +275,22 @@ class JaxRsImplementationGenerator {
      * @param resourceMethodName - the name of this method
      * @param action             - the action to retrieve query and path parameters.
      * @param bodyMimeType       - the mime type to decide if payload parameter is required
+     * @param component          the optional component for this class
      * @return the method
      */
-    private MethodSpec generateResourceMethod(final String resourceMethodName, final Action action, final MimeType bodyMimeType) {
+    private MethodSpec generateResourceMethod(final String resourceMethodName,
+                                              final Action action,
+                                              final MimeType bodyMimeType,
+                                              final Optional<String> component) {
         final Map<String, QueryParameter> queryParams = action.getQueryParameters();
         final Map<String, UriParameter> pathParams = action.getResource().getUriParameters();
 
         final boolean hasPayload = bodyMimeType.getSchema() != null;
+        final String payloadStatementPart = hasPayload ? "$T.of(entity)" : "$T.empty()";
+        final String responseStrategy = isSynchronousAction(action) ? responseStrategyFor(component) : ACCEPTED_STATUS_WITH_NO_ENTITY;
 
         final MethodSpec.Builder methodBuilder = generateGenericResourceMethod(resourceMethodName, queryParams, pathParams)
-                .addCode(methodBody(pathParams, methodBodyForPostOrPut(resourceMethodName, hasPayload, isSynchronousAction(action), action.getType())));
+                .addCode(methodBody(pathParams, methodBodyForPostOrPut(resourceMethodName, payloadStatementPart, action.getType(), responseStrategy)));
 
         if (hasPayload) {
             methodBuilder.addParameter(payloadParameter());
@@ -281,15 +304,25 @@ class JaxRsImplementationGenerator {
      *
      * @param resourceMethodName - the name of this method
      * @param action             - the action to retrieve query and path parameters.
+     * @param component          the optional component for this class
      * @return the method
      */
-    private MethodSpec generateGetResourceMethod(final String resourceMethodName, final Action action) {
+    private MethodSpec generateGetResourceMethod(final String resourceMethodName,
+                                                 final Action action,
+                                                 final Optional<String> component) {
         final Map<String, QueryParameter> queryParams = action.getQueryParameters();
         final Map<String, UriParameter> pathParams = action.getResource().getUriParameters();
 
         return generateGenericResourceMethod(resourceMethodName, queryParams, pathParams)
-                .addCode(methodBody(pathParams, methodBodyForGet(queryParams, resourceMethodName)))
+                .addCode(methodBody(pathParams, methodBodyForGet(queryParams, resourceMethodName, responseStrategyFor(component))))
                 .build();
+    }
+
+    private String responseStrategyFor(final Optional<String> component) {
+        return component
+                .filter(value -> QUERY_CONTROLLER.equals(value) || QUERY_VIEW.equals(value))
+                .map(value -> OK_STATUS_WITH_ENVELOPE_ENTITY)
+                .orElseGet(() -> OK_STATUS_WITH_ENVELOPE_PAYLOAD_ENTITY);
     }
 
     /**
@@ -300,7 +333,9 @@ class JaxRsImplementationGenerator {
      * @param pathParams         - the path params to support
      * @return the method builder
      */
-    private MethodSpec.Builder generateGenericResourceMethod(final String resourceMethodName, final Map<String, QueryParameter> queryParams, final Map<String, UriParameter> pathParams) {
+    private MethodSpec.Builder generateGenericResourceMethod(final String resourceMethodName,
+                                                             final Map<String, QueryParameter> queryParams,
+                                                             final Map<String, UriParameter> pathParams) {
         return methodBuilder(resourceMethodName)
                 .addModifiers(PUBLIC)
                 .addAnnotation(Override.class)
@@ -314,33 +349,39 @@ class JaxRsImplementationGenerator {
      *
      * @param queryParams        the query parameters to add to a map
      * @param resourceMethodName name of the resource method
+     * @param responseStrategy   the response strategy to pass to the ResponseStrategyFactory
      * @return the supplier that returns the {@link CodeBlock}
      */
-    private Supplier<CodeBlock> methodBodyForGet(final Map<String, QueryParameter> queryParams, final String resourceMethodName) {
-        return () ->
-                CodeBlock.builder()
-                        .add(putAllQueryParamsInCollectionBuilder(queryParams))
-                        .addStatement(SYNCHRONOUS_METHOD_STATEMENT,
-                                INTERCEPTOR_CHAIN_PROCESSOR,
-                                ACTION_MAPPER_VARIABLE,
-                                resourceMethodName,
-                                VARIABLE_PARAMS_COLLECTION_BUILDER)
-                        .build();
+    private Supplier<CodeBlock> methodBodyForGet(final Map<String, QueryParameter> queryParams,
+                                                 final String resourceMethodName,
+                                                 final String responseStrategy) {
+        return () -> CodeBlock.builder()
+                .add(putAllQueryParamsInCollectionBuilder(queryParams))
+                .addStatement(REST_PROCESSOR_NO_PAYLOAD_METHOD_STATEMENT,
+                        responseStrategy,
+                        INTERCEPTOR_CHAIN_PROCESSOR,
+                        ACTION_MAPPER_VARIABLE,
+                        resourceMethodName,
+                        VARIABLE_PARAMS_COLLECTION_BUILDER)
+                .build();
     }
 
     /**
      * Supplier that produces code specific to the POST or PUT httpAction type.
      *
-     * @param resourceMethodName name of the resource method
-     * @param hasPayload         flag indicating whether the method has a payload
+     * @param resourceMethodName   name of the resource method
+     * @param payloadStatementPart defines whether the statement has a payload or no payload
+     * @param actionType           the HTTP action type for this method
+     * @param responseStrategy     the response strategy to pass to the ResponseStrategyFactory
      * @return the supplier that returns the {@link CodeBlock}
      */
-    private Supplier<CodeBlock> methodBodyForPostOrPut(final String resourceMethodName, final boolean hasPayload, final boolean hasResponses, final ActionType actionType) {
-
-        final String methodStatement = hasResponses ? SYNCHRONOUS_POST_METHOD_STATEMENT : ASYNCHRONOUS_METHOD_STATEMENT;
-
+    private Supplier<CodeBlock> methodBodyForPostOrPut(final String resourceMethodName,
+                                                       final String payloadStatementPart,
+                                                       final ActionType actionType,
+                                                       final String responseStrategy) {
         return () -> CodeBlock.builder()
-                .addStatement(String.format(methodStatement, hasPayload ? "$T.of(entity)" : "$T.empty()"),
+                .addStatement(format(REST_PROCESSOR_PAYLOAD_METHOD_STATEMENT, payloadStatementPart),
+                        responseStrategy,
                         INTERCEPTOR_CHAIN_PROCESSOR,
                         ACTION_MAPPER_VARIABLE,
                         resourceMethodName,
@@ -359,7 +400,6 @@ class JaxRsImplementationGenerator {
         final ClassName classMapBuilderType = ClassName.get(ValidParameterCollectionBuilder.class);
         final ClassName classLoggerUtils = ClassName.get(LoggerUtils.class);
         final ClassName classHttpMessageLoggerHelper = ClassName.get(HttpMessageLoggerHelper.class);
-
 
         return CodeBlock.builder()
                 .addStatement("$T $L = new $T()", classMapBuilderType, VARIABLE_PARAMS_COLLECTION_BUILDER, classMapBuilderType)

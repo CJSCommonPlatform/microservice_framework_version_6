@@ -13,6 +13,8 @@ import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuil
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
 
+import uk.gov.justice.services.adapter.rest.processor.ResponseStrategy;
+
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Optional;
@@ -43,7 +45,7 @@ public class RestAdapterGenerator_SynchronousPOSTMethodBodyTest extends BaseRest
         final Object resourceObject = getInstanceOf(resourceClass);
 
         final Response processorResponse = Response.ok().build();
-        when(restProcessor.processSynchronously(any(Function.class), anyString(), any(Optional.class), any(HttpHeaders.class), any(Collection.class))).thenReturn(processorResponse);
+        when(restProcessor.process(any(ResponseStrategy.class), any(Function.class), anyString(), any(Optional.class), any(HttpHeaders.class), any(Collection.class))).thenReturn(processorResponse);
 
         final Method method = firstMethodOf(resourceClass);
 

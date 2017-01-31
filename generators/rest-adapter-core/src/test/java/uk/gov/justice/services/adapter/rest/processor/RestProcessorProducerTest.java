@@ -1,9 +1,7 @@
 package uk.gov.justice.services.adapter.rest.processor;
 
-import static com.jayway.jsonassert.JsonAssert.with;
 import static java.util.Collections.emptyList;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
@@ -11,14 +9,10 @@ import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_CONTROLLER;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_VIEW;
 import static uk.gov.justice.services.generators.test.utils.builder.HeadersBuilder.headersWith;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
-import static uk.gov.justice.services.messaging.JsonEnvelope.METADATA;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 import static uk.gov.justice.services.test.utils.common.MemberInjectionPoint.injectionPointWithMemberAsFirstMethodOf;
 
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
 import uk.gov.justice.services.adapter.rest.parameter.Parameter;
-import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.CustomAdapter;
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
@@ -27,7 +21,6 @@ import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Function;
 
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -38,6 +31,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -58,6 +52,24 @@ public class RestProcessorProducerTest {
     @Mock
     private Function<JsonEnvelope, Optional<JsonEnvelope>> function;
 
+    @Mock
+    private JsonEnvelope jsonEnvelope;
+
+    @Mock
+    private Response response;
+
+    @Mock
+    private JsonObjectEnvelopeConverter jsonObjectEnvelopeConverter;
+
+    @Spy
+    private RestEnvelopeBuilderFactory envelopeBuilderFactory;
+
+    @Mock
+    private EnvelopeResponseFactory envelopeResponseFactory;
+
+    @Mock
+    private PayloadResponseFactory payloadResponseFactory;
+
     @InjectMocks
     private RestProcessorProducer restProcessorProducer;
 
@@ -69,84 +81,62 @@ public class RestProcessorProducerTest {
         frameworkApiInjectionPoint = injectionPointWithMemberAsFirstMethodOf(FrameworkApiAdapter.class);
         customApiInjectionPoint = injectionPointWithMemberAsFirstMethodOf(CustomApiAdapter.class);
 
-        restProcessorProducer.envelopeBuilderFactory = new RestEnvelopeBuilderFactory();
-        restProcessorProducer.jsonObjectEnvelopeConverter = new JsonObjectEnvelopeConverter();
         restProcessorProducer.initialise();
     }
 
     @Test
     public void shouldReturnPayloadOnlyRestProcessorForQueryApi() {
-        when(function.apply(any())).thenReturn(
-                Optional.of(envelope().with(metadataOf(UUID.fromString(ID_VALUE), NAME_VALUE)).withPayloadOf(FIELD_VALUE, FIELD_NAME).build()));
+        when(function.apply(any())).thenReturn(Optional.of(jsonEnvelope));
+        when(payloadResponseFactory.responseFor("somecontext.somequery", Optional.of(jsonEnvelope))).thenReturn(response);
 
-        final Response response = restProcessorProducer.produceRestProcessor(queryApiInjectionPoint)
+        final Response result = restProcessorProducer.produceRestProcessor(queryApiInjectionPoint)
                 .processSynchronously(function, "somecontext.somequery", headersWith("Accept", "application/vnd.somecontext.query.somequery+json"), NOT_USED_PATH_PARAMS);
 
-        assertThat(response, notNullValue());
-        assertThat(response.getHeaderString(HeaderConstants.ID), equalTo(ID_VALUE));
-        with(response.getEntity().toString())
-                .assertNotDefined(METADATA)
-                .assertThat("$." + FIELD_NAME, equalTo(FIELD_VALUE));
+        assertThat(result, sameInstance(response));
     }
 
     @Test
     public void shouldReturnPayloadOnlyRestProcessorForFrameworkApi() {
-        when(function.apply(any())).thenReturn(
-                Optional.of(envelope().with(metadataOf(UUID.fromString(ID_VALUE), NAME_VALUE)).withPayloadOf(FIELD_VALUE, FIELD_NAME).build()));
+        when(function.apply(any())).thenReturn(Optional.of(jsonEnvelope));
+        when(payloadResponseFactory.responseFor("somecontext.somequery", Optional.of(jsonEnvelope))).thenReturn(response);
 
-        final Response response = restProcessorProducer.produceRestProcessor(frameworkApiInjectionPoint)
+        final Response result = restProcessorProducer.produceRestProcessor(frameworkApiInjectionPoint)
                 .processSynchronously(function, "somecontext.somequery", headersWith("Accept", "application/vnd.somecontext.query.somequery+json"), NOT_USED_PATH_PARAMS);
 
-        assertThat(response, notNullValue());
-        assertThat(response.getHeaderString(HeaderConstants.ID), equalTo(ID_VALUE));
-        with(response.getEntity().toString())
-                .assertNotDefined(METADATA)
-                .assertThat("$." + FIELD_NAME, equalTo(FIELD_VALUE));
+        assertThat(result, sameInstance(response));
     }
 
     @Test
     public void shouldReturnPayloadOnlyRestProcessorForCustomApi() {
-        when(function.apply(any())).thenReturn(
-                Optional.of(envelope().with(metadataOf(UUID.fromString(ID_VALUE), NAME_VALUE)).withPayloadOf(FIELD_VALUE, FIELD_NAME).build()));
+        when(function.apply(any())).thenReturn(Optional.of(jsonEnvelope));
+        when(payloadResponseFactory.responseFor("somecontext.somequery", Optional.of(jsonEnvelope))).thenReturn(response);
 
-        final Response response = restProcessorProducer.produceRestProcessor(customApiInjectionPoint)
+        final Response result = restProcessorProducer.produceRestProcessor(customApiInjectionPoint)
                 .processSynchronously(function, "somecontext.somequery", headersWith("Accept", "application/vnd.somecontext.query.somequery+json"), NOT_USED_PATH_PARAMS);
 
-        assertThat(response, notNullValue());
-        assertThat(response.getHeaderString(HeaderConstants.ID), equalTo(ID_VALUE));
-        with(response.getEntity().toString())
-                .assertNotDefined(METADATA)
-                .assertThat("$." + FIELD_NAME, equalTo(FIELD_VALUE));
+        assertThat(result, sameInstance(response));
     }
 
     @Test
     public void shouldReturnDefaultRestProcessorForQueryController() {
-        when(function.apply(any())).thenReturn(
-                Optional.of(envelope().with(metadataOf(UUID.fromString(ID_VALUE), NAME_VALUE)).withPayloadOf(FIELD_VALUE, FIELD_NAME).build()));
+        when(function.apply(any())).thenReturn(Optional.of(jsonEnvelope));
+        when(envelopeResponseFactory.responseFor("somecontext.somequery", Optional.of(jsonEnvelope))).thenReturn(response);
 
-        final Response response = restProcessorProducer.produceRestProcessor(queryControllerInjectionPoint)
+        final Response result = restProcessorProducer.produceRestProcessor(queryControllerInjectionPoint)
                 .processSynchronously(function, "somecontext.somequery", headersWith("Accept", "application/vnd.somecontext.query.somequery+json"), NOT_USED_PATH_PARAMS);
 
-        assertThat(response, notNullValue());
-        with(response.getEntity().toString())
-                .assertThat("$." + FIELD_NAME, equalTo(FIELD_VALUE))
-                .assertThat("$._metadata.id", equalTo(ID_VALUE))
-                .assertThat("$._metadata.name", equalTo(NAME_VALUE));
+        assertThat(result, sameInstance(response));
     }
 
     @Test
     public void shouldReturnDefaultRestProcessorForQueryView() {
-        when(function.apply(any())).thenReturn(
-                Optional.of(envelope().with(metadataOf(UUID.fromString(ID_VALUE), NAME_VALUE)).withPayloadOf(FIELD_VALUE, FIELD_NAME).build()));
+        when(function.apply(any())).thenReturn(Optional.of(jsonEnvelope));
+        when(envelopeResponseFactory.responseFor("somecontext.somequery", Optional.of(jsonEnvelope))).thenReturn(response);
 
-        final Response response = restProcessorProducer.produceRestProcessor(queryViewInjectionPoint)
+        final Response result = restProcessorProducer.produceRestProcessor(queryViewInjectionPoint)
                 .processSynchronously(function, "somecontext.somequery", headersWith("Accept", "application/vnd.somecontext.query.somequery+json"), NOT_USED_PATH_PARAMS);
 
-        assertThat(response, notNullValue());
-        with(response.getEntity().toString())
-                .assertThat("$." + FIELD_NAME, equalTo(FIELD_VALUE))
-                .assertThat("$._metadata.id", equalTo(ID_VALUE))
-                .assertThat("$._metadata.name", equalTo(NAME_VALUE));
+        assertThat(result, sameInstance(response));
     }
 
     @Adapter(QUERY_API)

@@ -19,7 +19,9 @@ import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
 import uk.gov.justice.services.adapter.rest.filter.LoggerRequestDataFilter;
 import uk.gov.justice.services.adapter.rest.interceptor.JsonSchemaValidationInterceptor;
 import uk.gov.justice.services.adapter.rest.mapper.BadRequestExceptionMapper;
-import uk.gov.justice.services.adapter.rest.processor.RestProcessor;
+import uk.gov.justice.services.adapter.rest.processor.EnvelopeResponseFactory;
+import uk.gov.justice.services.adapter.rest.processor.PayloadResponseFactory;
+import uk.gov.justice.services.adapter.rest.processor.ResponseFactoryHelper;
 import uk.gov.justice.services.adapter.rest.processor.RestProcessorProducer;
 import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
@@ -110,8 +112,10 @@ public class DefaultUsersUserIdResourceIT {
 
     @Module
     @Classes(cdi = true, value = {
-            RestProcessor.class,
             RestProcessorProducer.class,
+            EnvelopeResponseFactory.class,
+            PayloadResponseFactory.class,
+            ResponseFactoryHelper.class,
             RestEnvelopeBuilderFactory.class,
             RecordingInterceptorChainProcessor.class,
             ObjectMapperProducer.class,

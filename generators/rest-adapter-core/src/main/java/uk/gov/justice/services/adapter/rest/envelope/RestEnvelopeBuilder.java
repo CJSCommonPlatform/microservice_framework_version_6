@@ -1,6 +1,9 @@
 package uk.gov.justice.services.adapter.rest.envelope;
 
 import static java.lang.String.format;
+import static java.util.Arrays.stream;
+import static java.util.Collections.emptyList;
+import static uk.gov.justice.services.common.http.HeaderConstants.CAUSATION;
 import static uk.gov.justice.services.common.http.HeaderConstants.CLIENT_CORRELATION_ID;
 import static uk.gov.justice.services.common.http.HeaderConstants.SESSION_ID;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
@@ -17,9 +20,11 @@ import uk.gov.justice.services.messaging.JsonObjectMetadata;
 import uk.gov.justice.services.messaging.Metadata;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -138,6 +143,7 @@ public class RestEnvelopeBuilder {
         final Optional<String> correlationId;
         final Optional<String> sessionId;
         final Optional<String> userId;
+        final List<UUID> causation;
 
         if (metadata.isPresent()) {
             final Metadata metadataValue = metadata.get();
@@ -145,10 +151,12 @@ public class RestEnvelopeBuilder {
             correlationId = metadataValue.clientCorrelationId();
             sessionId = metadataValue.sessionId();
             userId = metadataValue.userId();
+            causation = metadataValue.causation();
         } else {
             correlationId = Optional.empty();
             sessionId = Optional.empty();
             userId = Optional.empty();
+            causation = emptyList();
         }
 
         final boolean requestHeadersArePresent = headers.isPresent() && headers.get().getRequestHeaders() != null;
@@ -173,6 +181,11 @@ public class RestEnvelopeBuilder {
                     httpHeaders.getHeaderString(SESSION_ID),
                     metadataBuilder::withSessionId,
                     "Session Id");
+
+            setCausationMetaDataIfNotSet(
+                    causation,
+                    httpHeaders.getHeaderString(CAUSATION),
+                    metadataBuilder::withCausation);
         }
 
         return metadataBuilder;
@@ -191,6 +204,26 @@ public class RestEnvelopeBuilder {
             throw new BadRequestException(format(METADATA_AND_HEADER_ARE_SET, exceptionInfo, metadataValue.get(), headerValue));
         } else if (headerValue != null) {
             setMetadata.accept(headerValue);
+        }
+    }
+
+    private void setCausationMetaDataIfNotSet(final List<UUID> metadataValue,
+                                              final String headerValue,
+                                              final Consumer<UUID[]> setMetadata) {
+
+        if (headerValue != null) {
+            final List<UUID> uuids = stream(headerValue.split(","))
+                    .map(UUID::fromString)
+                    .collect(Collectors.toList());
+
+            final boolean valueIsPresentAndNotEqualInHeaderAndPayload = !metadataValue.isEmpty()
+                    && !metadataValue.equals(uuids);
+
+            if (valueIsPresentAndNotEqualInHeaderAndPayload) {
+                throw new BadRequestException(format(METADATA_AND_HEADER_ARE_SET, "Causation", metadataValue, headerValue));
+            } else {
+                setMetadata.accept(uuids.toArray(new UUID[uuids.size()]));
+            }
         }
     }
 }

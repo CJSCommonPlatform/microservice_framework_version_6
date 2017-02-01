@@ -14,6 +14,7 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithR
 
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.dispatcher.Requester;
+import uk.gov.justice.services.core.envelope.EnvelopeValidationException;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
@@ -46,7 +47,7 @@ public class JsonSchemaValidatingMockTest {
     public void shouldThrowExceptionWhenPayloadPassedToSenderDoesNotAdhereToSchema() {
 
         exception.expect(MockitoException.class);
-        exception.expectCause(allOf(instanceOf(IllegalArgumentException.class),
+        exception.expectCause(allOf(instanceOf(EnvelopeValidationException.class),
                 hasProperty("message", equalTo("Json not valid against schema."))));
 
         new SendingHandler(mock(Sender.class)).handle(
@@ -61,7 +62,7 @@ public class JsonSchemaValidatingMockTest {
     public void shouldThrowExceptionIfNoMetadataInEnvelope() {
 
         exception.expect(MockitoException.class);
-        exception.expectCause(allOf(instanceOf(IllegalArgumentException.class),
+        exception.expectCause(allOf(instanceOf(EnvelopeValidationException.class),
                 hasProperty("message", equalTo("Metadata not set in the envelope."))));
 
         new SendingHandler(mock(Sender.class)).handle(
@@ -91,7 +92,7 @@ public class JsonSchemaValidatingMockTest {
     public void shouldThrowExceptionWhenPayloadReturnedByRequesterDoesNotAdhereToSchema() {
 
         exception.expect(MockitoException.class);
-        exception.expectCause(allOf(instanceOf(IllegalArgumentException.class),
+        exception.expectCause(allOf(instanceOf(EnvelopeValidationException.class),
                 hasProperty("message", equalTo("Json not valid against schema."))));
 
         final Requester requester = mock(Requester.class);

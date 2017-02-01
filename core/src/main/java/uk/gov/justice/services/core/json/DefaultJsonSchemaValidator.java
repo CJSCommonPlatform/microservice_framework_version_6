@@ -34,10 +34,10 @@ public class DefaultJsonSchemaValidator implements JsonSchemaValidator {
         LOGGER.trace("Performing schema validation for: {}", name);
         final JSONObject jsonObject = new JSONObject(payload);
         jsonObject.remove(METADATA);
-        createIfAbsent(name).validate(jsonObject);
+        schemaOf(name).validate(jsonObject);
     }
 
-    private Schema createIfAbsent(final String name) {
+    private Schema schemaOf(final String name) {
         return schemas.computeIfAbsent(name, loader::loadSchema);
     }
 }

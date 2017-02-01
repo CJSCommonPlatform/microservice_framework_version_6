@@ -7,6 +7,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ### Added
 - JsonEnveloperBuilder in test-utils-core to replace the deprecated builer in DefaultJsonEnvelope.
+- Generator support for CustomAdapter and CustomServiceComponent annotations
 
 ### Fixed
 - Metadata causation being ignored in the Rest Adapter

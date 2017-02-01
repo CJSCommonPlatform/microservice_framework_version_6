@@ -95,6 +95,8 @@ public class CakeShopIT {
     private static final String ORDERS_RESOURCE_QUERY_URI = "http://localhost:8080/example-query-api/query/api/rest/cakeshop/orders/";
     private static final String CAKES_RESOURCE_QUERY_URI = "http://localhost:8080/example-query-api/query/api/rest/cakeshop/cakes/";
     private static final String ALRFRESCO_RECORDED_REQUESTS = "http://localhost:8080/alfresco-stub/recorded-requests";
+    private static final String OVEN_RESOURCE_CUSTOM_URI = "http://localhost:8080/example-custom-api/custom/api/rest/cakeshop/ovens/";
+
     private static final String ADD_RECIPE_MEDIA_TYPE = "application/vnd.example.add-recipe+json";
     private static final String RENAME_RECIPE_MEDIA_TYPE = "application/vnd.example.rename-recipe+json";
     private static final String ADD_RECIPE_FILE_MEDIA_TYPE = "application/vnd.example.add-recipe-file+json";
@@ -341,7 +343,6 @@ public class CakeShopIT {
         }
     }
 
-
     @Test
     public void shouldReturnRecipes() {
         //adding 2 recipes
@@ -364,6 +365,7 @@ public class CakeShopIT {
                 .assertThat("$.recipes[?(@.id=='" + recipeId + "')].name", hasItem("Cheesy cheese cake"))
                 .assertThat("$.recipes[?(@.id=='" + recipeId2 + "')].name", hasItem("Chocolate muffin"));
     }
+
 
     @Test
     public void shouldFilterRecipesUsingPageSize() {
@@ -416,7 +418,6 @@ public class CakeShopIT {
         assertThat(response.httpCode(), is(BAD_REQUEST));
     }
 
-
     @Test
     public void shouldReturn400WhenInvalidBooleanParamPassed() {
         final ApiResponse response = recipesQueryResult(asList(
@@ -425,6 +426,7 @@ public class CakeShopIT {
 
         assertThat(response.httpCode(), is(BAD_REQUEST));
     }
+
 
     @Test
     public void shouldReturnCakesWithNamesInheritedFromRecipe() throws Exception {
@@ -642,6 +644,18 @@ public class CakeShopIT {
                 .assertThat("$[0].fileContent", is("Take vanilla and make cake"))
                 .assertThat("$[0].userId", is(TEST_PROPERTIES.value("alfresco.upload.user")));
 
+    }
+
+    @Test
+    public void shouldReturnStatusWhenQueryingForOvenStatus() throws Exception {
+        final Response response = sendTo(OVEN_RESOURCE_CUSTOM_URI).request().accept("application/vnd.example.status+json").get();
+        assertThat(response.getStatus(), is(OK));
+
+        final String entity = response.readEntity(String.class);
+
+        with(entity)
+                .assertEquals("$.ovens[0].name", "Big Oven")
+                .assertEquals("$.ovens[1].name", "Large Oven");
     }
 
     private void tweakRecipeSnapshotName(final String recipeId, final String newRecipeName) throws AggregateChangeDetectedException {

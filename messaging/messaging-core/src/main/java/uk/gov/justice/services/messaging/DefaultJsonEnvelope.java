@@ -117,21 +117,25 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
     public String toString() {
         final JsonObjectBuilder builder = Json.createObjectBuilder();
 
-        builder.add("id", String.valueOf(metadata.id()))
-                .add("name", metadata.name());
+        if (metadata != null) {
+            builder.add("id", String.valueOf(metadata.id()))
+                    .add("name", metadata.name());
 
-        metadata.clientCorrelationId().ifPresent(s -> builder.add(CORRELATION, s));
-        metadata.sessionId().ifPresent(s -> builder.add(SESSION_ID, s));
-        metadata.userId().ifPresent(s -> builder.add(USER_ID, s));
 
-        final JsonArrayBuilder causationBuilder = Json.createArrayBuilder();
+            metadata.clientCorrelationId().ifPresent(s -> builder.add(CORRELATION, s));
+            metadata.sessionId().ifPresent(s -> builder.add(SESSION_ID, s));
+            metadata.userId().ifPresent(s -> builder.add(USER_ID, s));
 
-        final List<UUID> causes = metadata.causation();
+            final JsonArrayBuilder causationBuilder = Json.createArrayBuilder();
 
-        if (causes != null) {
-            metadata.causation().forEach(uuid -> causationBuilder.add(String.valueOf(uuid)));
+            final List<UUID> causes = metadata.causation();
+
+            if (causes != null) {
+                metadata.causation().forEach(uuid -> causationBuilder.add(String.valueOf(uuid)));
+            }
+            builder.add("causation", causationBuilder);
         }
-        return builder.add("causation", causationBuilder).build().toString();
+        return builder.build().toString();
     }
 
     /**

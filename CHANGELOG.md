@@ -5,8 +5,14 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Added
+- JsonEnveloperBuilder in test-utils-core to replace the deprecated builer in DefaultJsonEnvelope.
+
 ### Fixed
-- Metadata causation being ignored in the Rest Adapter 
+- Metadata causation being ignored in the Rest Adapter
+
+### Deprecated
+- Deprecated the DefaultJsonEnvelope builder methods in favour of a test utils version.
 
 ## [1.3.0] - 2017-01-26
 

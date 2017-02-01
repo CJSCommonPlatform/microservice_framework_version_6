@@ -31,23 +31,43 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
 
     private JsonValue payload;
 
-    private DefaultJsonEnvelope(final Metadata metadata, final JsonValue payload) {
+    public DefaultJsonEnvelope(final Metadata metadata, final JsonValue payload) {
         this.metadata = metadata;
         this.payload = payload;
     }
 
+    /**
+     * Please use the Enveloper for creating real envelopes in production code or the
+     * JsonEnvelopeBuilder in test-utils for tests.
+     */
+    @Deprecated
     public static JsonEnvelope envelopeFrom(final Metadata metadata, final JsonValue payload) {
         return new DefaultJsonEnvelope(metadata, payload);
     }
 
+    /**
+     * Please use the Enveloper for creating real envelopes in production code or the
+     * JsonEnvelopeBuilder in test-utils for tests.
+     */
+    @Deprecated
     public static JsonEnvelope envelopeFrom(final JsonObjectMetadata.Builder metadataBuilder, final JsonValue payload) {
         return envelopeFrom(metadataBuilder.build(), payload);
     }
 
+    /**
+     * Please use the Enveloper for creating real envelopes in production code or the
+     * JsonEnvelopeBuilder in test-utils for tests.
+     */
+    @Deprecated
     public static Builder envelope() {
         return new Builder();
     }
 
+    /**
+     * Please use the Enveloper for creating real envelopes in production code or the
+     * JsonEnvelopeBuilder in test-utils for tests.
+     */
+    @Deprecated
     public static Builder envelopeFrom(final JsonEnvelope envelope) {
         return new Builder(envelope);
     }
@@ -192,6 +212,11 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
             return this;
         }
 
+        /**
+         * Please use the Enveloper for creating real envelopes in production code or the
+         * JsonEnvelopeBuilder in test-utils for tests.
+         */
+        @Deprecated
         public JsonEnvelope build() {
             return envelopeFrom(metadata != null ? metadata.build() : null, payload.build());
         }

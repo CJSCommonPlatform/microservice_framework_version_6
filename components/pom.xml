@@ -15,6 +15,7 @@
         <module>command</module>
         <module>event</module>
         <module>query</module>
+        <module>custom</module>
     </modules>
 
 

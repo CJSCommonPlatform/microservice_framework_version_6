@@ -64,7 +64,7 @@
     <dependencies>
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
-            <artifactId>query-api</artifactId>
+            <artifactId>custom</artifactId>
             <version>${project.version}</version>
         </dependency>
 

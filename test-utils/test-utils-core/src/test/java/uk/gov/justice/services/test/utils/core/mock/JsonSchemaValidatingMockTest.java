@@ -48,7 +48,7 @@ public class JsonSchemaValidatingMockTest {
 
         exception.expect(MockitoException.class);
         exception.expectCause(allOf(instanceOf(EnvelopeValidationException.class),
-                hasProperty("message", equalTo("Json not valid against schema."))));
+                hasProperty("message", equalTo("Json not valid against schema for message type example.add-recipe."))));
 
         new SendingHandler(mock(Sender.class)).handle(
                 envelope()
@@ -93,7 +93,7 @@ public class JsonSchemaValidatingMockTest {
 
         exception.expect(MockitoException.class);
         exception.expectCause(allOf(instanceOf(EnvelopeValidationException.class),
-                hasProperty("message", equalTo("Json not valid against schema."))));
+                hasProperty("message", equalTo("Json not valid against schema for message type example.get-recipe."))));
 
         final Requester requester = mock(Requester.class);
 

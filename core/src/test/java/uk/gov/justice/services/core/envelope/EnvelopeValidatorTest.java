@@ -11,13 +11,18 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
+import uk.gov.justice.services.core.json.SchemaLoadingException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+
+import javax.json.JsonValue;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -81,11 +86,22 @@ public class EnvelopeValidatorTest {
     public void shouldHandleJsonValidationException() {
         final ValidationException jsonValidationException = new ValidationException(null, Object.class, null);
         doThrow(jsonValidationException).when(jsonSchemaValidator).validate(anyString(), anyString());
-        envelopeValidator.validate(envelope().with(metadataWithDefaults()).build());
+        envelopeValidator.validate(envelope().with(metadataWithRandomUUID("ABC")).build());
 
         final EnvelopeValidationException exception = handledException();
         assertThat(exception.getCause(), is(jsonValidationException));
-        assertThat(exception.getMessage(), is("Json not valid against schema."));
+        assertThat(exception.getMessage(), is("Json not valid against schema for message type ABC."));
+    }
+
+    @Test
+    public void shouldHandleSchemaLoadingException() {
+        final SchemaLoadingException schemaLoadingException = new SchemaLoadingException("Schema does not exists");
+        doThrow(schemaLoadingException).when(jsonSchemaValidator).validate(anyString(), anyString());
+        envelopeValidator.validate(envelope().with(metadataWithRandomUUID("BCD")).build());
+
+        final EnvelopeValidationException exception = handledException();
+        assertThat(exception.getCause(), is(schemaLoadingException));
+        assertThat(exception.getMessage(), is("Could not load json schema that matches message type BCD."));
     }
 
     @Test
@@ -99,6 +115,16 @@ public class EnvelopeValidatorTest {
 
 
     }
+
+    @Test
+    public void shouldSkipValidationIfPayloadNULL() throws Exception {
+
+        envelopeValidator.validate(envelopeFrom(metadataWithRandomUUID("some-name"), JsonValue.NULL));
+
+        verifyZeroInteractions(jsonSchemaValidator);
+
+    }
+
 
     private EnvelopeValidationException handledException() {
         ArgumentCaptor<EnvelopeValidationException> exceptionCaptor = ArgumentCaptor.forClass(EnvelopeValidationException.class);

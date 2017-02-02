@@ -1,9 +1,15 @@
 package uk.gov.justice.services.core.envelope;
 
 
+import static java.lang.String.format;
+import static javax.json.JsonValue.NULL;
+
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
+import uk.gov.justice.services.core.json.SchemaLoadingException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
+
+import javax.json.JsonValue;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,12 +31,17 @@ public class EnvelopeValidator {
 
     public void validate(final JsonEnvelope envelope) {
         try {
-            jsonSchemaValidator.validate(
-                    objectMapper.writeValueAsString(envelope.payload()), metadataOf(envelope).name());
+            final JsonValue payload = envelope.payload();
+            if (!NULL.equals(payload)) {
+                jsonSchemaValidator.validate(
+                        objectMapper.writeValueAsString(payload), metadataOf(envelope).name());
+            }
         } catch (final JsonProcessingException e) {
             handle(e, "Error serialising json.");
+        } catch (SchemaLoadingException e) {
+            handle(e, format("Could not load json schema that matches message type %s.", envelope.metadata().name()));
         } catch (final ValidationException e) {
-            handle(e, "Json not valid against schema.");
+            handle(e, format("Json not valid against schema for message type %s.", envelope.metadata().name()));
         } catch (final EnvelopeValidationException e) {
             envelopeValidationExceptionHandler.handle(e);
         }

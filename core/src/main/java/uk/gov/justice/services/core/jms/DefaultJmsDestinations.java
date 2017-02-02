@@ -1,6 +1,9 @@
 package uk.gov.justice.services.core.jms;
 
-import uk.gov.justice.services.core.annotation.Component;
+import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLLER;
+import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
+
 import uk.gov.justice.services.core.jms.exception.JmsSenderException;
 
 import java.util.Map;
@@ -19,7 +22,7 @@ import javax.naming.NamingException;
 @ApplicationScoped
 public class DefaultJmsDestinations implements JmsDestinations {
 
-    private final Map<Component, String> destinationMap;
+    private final Map<String, String> destinationMap;
 
     Context initialContext;
 
@@ -27,9 +30,9 @@ public class DefaultJmsDestinations implements JmsDestinations {
         initialContext = new InitialContext();
 
         this.destinationMap = new ConcurrentHashMap<>();
-        destinationMap.put(Component.COMMAND_CONTROLLER, "%s.controller.command");
-        destinationMap.put(Component.COMMAND_HANDLER, "%s.handler.command");
-        destinationMap.put(Component.EVENT_LISTENER, "%s.event");
+        destinationMap.put(COMMAND_CONTROLLER, "%s.controller.command");
+        destinationMap.put(COMMAND_HANDLER, "%s.handler.command");
+        destinationMap.put(EVENT_LISTENER, "%s.event");
     }
 
     /**
@@ -41,7 +44,7 @@ public class DefaultJmsDestinations implements JmsDestinations {
      * @return the destination for the associated service component and context.
      */
     @Override
-    public Destination getDestination(final Component component, final String contextName) {
+    public Destination getDestination(final String component, final String contextName) {
 
         String jndiName = null;
 

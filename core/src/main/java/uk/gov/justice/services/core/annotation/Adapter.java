@@ -19,6 +19,6 @@ import javax.enterprise.context.ApplicationScoped;
 @ApplicationScoped
 public @interface Adapter {
 
-    Component value();
+    String value();
 
 }

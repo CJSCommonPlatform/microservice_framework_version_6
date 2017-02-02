@@ -26,6 +26,7 @@ import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
 import javax.inject.Inject;
 import javax.interceptor.Interceptors;
+import javax.jms.Destination;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.Topic;
@@ -64,6 +65,8 @@ class MessageListenerCodeGenerator {
     private static final String SUBSCRIPTION_NAME = "subscriptionName";
     private static final String SHARE_SUBSCRIPTIONS = "shareSubscriptions";
 
+    private final ComponentDestinationType componentDestinationType = new ComponentDestinationType();
+
     /**
      * Create an implementation of the {@link MessageListener}.
      *
@@ -86,33 +89,43 @@ class MessageListenerCodeGenerator {
      */
     private TypeSpec.Builder classSpecFrom(final Resource resource, final BaseUri baseUri, final boolean listenToAllMessages) {
         final MessagingResourceUri resourceUri = new MessagingResourceUri(resource.getUri());
-        final Component component = componentOf(baseUri);
+        final String component = componentOf(baseUri);
 
-        final TypeSpec.Builder clazz = classBuilder(classNameOf(resourceUri))
-                .addModifiers(PUBLIC)
-                .addSuperinterface(MessageListener.class)
-                .addField(FieldSpec.builder(ClassName.get(Logger.class), LOGGER_FIELD)
-                        .addModifiers(PRIVATE, STATIC, FINAL)
-                        .initializer("$T.getLogger($L.class)", LoggerFactory.class, classNameOf(resourceUri))
-                        .build())
-                .addField(FieldSpec.builder(ClassName.get(InterceptorChainProcessor.class), INTERCEPTOR_CHAIN_PROCESS)
-                        .addAnnotation(Inject.class)
-                        .build())
-                .addField(FieldSpec.builder(ClassName.get(JmsProcessor.class), JMS_PROCESSOR_FIELD)
-                        .addAnnotation(Inject.class)
-                        .build())
-                .addAnnotation(AnnotationSpec.builder(Adapter.class)
-                        .addMember(DEFAULT_ANNOTATION_PARAMETER, "$T.$L", Component.class, component)
-                        .build())
+        if (componentDestinationType.isSupported(component)) {
 
-                .addAnnotation(messageDrivenAnnotation(component, resource.getActions(), resourceUri, baseUri, listenToAllMessages));
+            final TypeSpec.Builder typeSpecBuilder = classBuilder(classNameOf(resourceUri))
+                    .addModifiers(PUBLIC)
+                    .addSuperinterface(MessageListener.class)
+                    .addField(FieldSpec.builder(ClassName.get(Logger.class), LOGGER_FIELD)
+                            .addModifiers(PRIVATE, STATIC, FINAL)
+                            .initializer("$T.getLogger($L.class)", LoggerFactory.class, classNameOf(resourceUri))
+                            .build())
+                    .addField(FieldSpec.builder(ClassName.get(InterceptorChainProcessor.class), INTERCEPTOR_CHAIN_PROCESS)
+                            .addAnnotation(Inject.class)
+                            .build())
+                    .addField(FieldSpec.builder(ClassName.get(JmsProcessor.class), JMS_PROCESSOR_FIELD)
+                            .addAnnotation(Inject.class)
+                            .build())
+                    .addAnnotation(AnnotationSpec.builder(Adapter.class)
+                            .addMember(DEFAULT_ANNOTATION_PARAMETER, "$S", component)
+                            .build())
+                    .addAnnotation(messageDrivenAnnotation(component, resource.getActions(), resourceUri, baseUri, listenToAllMessages));
+
+            addLoggerAndSchemaInterceptorsIfNotGeneralJsonMimeType(resource, typeSpecBuilder);
+
+            return typeSpecBuilder;
+        }
+
+        throw new IllegalStateException(format("JMS Endpoint generation is unsupported for framework component type %s", component));
+    }
+
+    private void addLoggerAndSchemaInterceptorsIfNotGeneralJsonMimeType(final Resource resource, final TypeSpec.Builder typeSpecBuilder) {
         if (!containsGeneralJsonMimeType(resource.getActions())) {
-            clazz.addAnnotation(AnnotationSpec.builder(Interceptors.class)
+            typeSpecBuilder.addAnnotation(AnnotationSpec.builder(Interceptors.class)
                     .addMember(DEFAULT_ANNOTATION_PARAMETER, "$T.class", JmsLoggerMetadataInterceptor.class)
                     .addMember(DEFAULT_ANNOTATION_PARAMETER, "$T.class", JsonSchemaValidationInterceptor.class)
                     .build());
         }
-        return clazz;
     }
 
     /**
@@ -146,14 +159,16 @@ class MessageListenerCodeGenerator {
      * @param baseUri     the base URI
      * @return the annotation specification
      */
-    private AnnotationSpec messageDrivenAnnotation(final Component component,
+    private AnnotationSpec messageDrivenAnnotation(final String component,
                                                    final Map<ActionType, Action> actions,
                                                    final MessagingResourceUri resourceUri,
                                                    final BaseUri baseUri, final boolean listenToAllMessages) {
 
+        final Class<? extends Destination> inputType = componentDestinationType.inputTypeFor(component);
+
         AnnotationSpec.Builder builder = AnnotationSpec.builder(MessageDriven.class)
                 .addMember(ACTIVATION_CONFIG_PARAMETER, "$L",
-                        generateActivationConfigPropertyAnnotation(DESTINATION_TYPE, component.inputDestinationType().getName()))
+                        generateActivationConfigPropertyAnnotation(DESTINATION_TYPE, inputType.getName()))
                 .addMember(ACTIVATION_CONFIG_PARAMETER, "$L",
                         generateActivationConfigPropertyAnnotation(DESTINATION_LOOKUP, resourceUri.destinationName()))
                 .addMember(ACTIVATION_CONFIG_PARAMETER, "$L",
@@ -165,7 +180,7 @@ class MessageListenerCodeGenerator {
                     generateActivationConfigPropertyAnnotation(MESSAGE_SELECTOR, messageSelectorsFrom(actions)));
         }
 
-        if (Topic.class.equals(component.inputDestinationType())) {
+        if (Topic.class.equals(inputType)) {
             final String clientId = baseUri.adapterClientId();
             builder = builder
                     .addMember(ACTIVATION_CONFIG_PARAMETER, "$L",
@@ -210,7 +225,7 @@ class MessageListenerCodeGenerator {
      * @param baseUri base uri of the resource
      * @return component the value of the pillar and tier parts of the uri
      */
-    private Component componentOf(final BaseUri baseUri) {
+    private String componentOf(final BaseUri baseUri) {
         return Component.valueOf(baseUri.pillar(), baseUri.tier());
     }
 

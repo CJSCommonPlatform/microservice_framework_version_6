@@ -1,7 +1,7 @@
 package uk.gov.justice.services.core.annotation;
 
 
-import static org.hamcrest.CoreMatchers.equalTo;
+import static net.trajano.commons.testing.UtilityClassTestUtil.assertUtilityClassWellDefined;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
@@ -14,11 +14,7 @@ import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 import static uk.gov.justice.services.core.annotation.Component.contains;
-import static uk.gov.justice.services.core.annotation.Component.names;
 import static uk.gov.justice.services.core.annotation.Component.valueOf;
-
-import javax.jms.Queue;
-import javax.jms.Topic;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -26,48 +22,12 @@ import org.junit.rules.ExpectedException;
 
 public class ComponentTest {
 
-    private static final String PILLAR_COMMAND = "command";
-    private static final String PILLAR_QUERY = "query";
-    private static final String PILLAR_EVENT = "event";
-
-    private static final String TIER_API = "api";
-    private static final String TIER_CONTROLLER = "controller";
-    private static final String TIER_HANDLER = "handler";
-    private static final String TIER_LISTENER = "listener";
-    private static final String TIER_PROCESSOR = "processor";
-
     @Rule
     public ExpectedException exception = ExpectedException.none();
 
     @Test
-    public void shouldReturnPillar() throws Exception {
-        assertThat(COMMAND_API.pillar(), equalTo(PILLAR_COMMAND));
-        assertThat(QUERY_API.pillar(), equalTo(PILLAR_QUERY));
-        assertThat(COMMAND_CONTROLLER.pillar(), equalTo(PILLAR_COMMAND));
-        assertThat(COMMAND_HANDLER.pillar(), equalTo(PILLAR_COMMAND));
-        assertThat(EVENT_LISTENER.pillar(), equalTo(PILLAR_EVENT));
-        assertThat(EVENT_PROCESSOR.pillar(), equalTo(PILLAR_EVENT));
-        assertThat(EVENT_API.pillar(), equalTo(PILLAR_EVENT));
-    }
-
-    @Test
-    public void shouldReturnTier() throws Exception {
-        assertThat(COMMAND_API.tier(), equalTo(TIER_API));
-        assertThat(QUERY_API.tier(), equalTo(TIER_API));
-        assertThat(COMMAND_CONTROLLER.tier(), equalTo(TIER_CONTROLLER));
-        assertThat(COMMAND_HANDLER.tier(), equalTo(TIER_HANDLER));
-        assertThat(EVENT_LISTENER.tier(), equalTo(TIER_LISTENER));
-        assertThat(EVENT_PROCESSOR.tier(), equalTo(TIER_PROCESSOR));
-        assertThat(EVENT_API.tier(), equalTo(TIER_API));
-    }
-
-    @Test
-    public void shouldReturnDestinationType() throws Exception {
-        assertThat(COMMAND_API.inputDestinationType(), equalTo(Queue.class));
-        assertThat(COMMAND_CONTROLLER.inputDestinationType(), equalTo(Queue.class));
-        assertThat(COMMAND_HANDLER.inputDestinationType(), equalTo(Queue.class));
-        assertThat(EVENT_LISTENER.inputDestinationType(), equalTo(Topic.class));
-        assertThat(EVENT_API.inputDestinationType(), equalTo(null));
+    public void shouldBeWellDefinedUtilityClass() {
+        assertUtilityClassWellDefined(Component.class);
     }
 
     @Test
@@ -84,7 +44,7 @@ public class ComponentTest {
     @Test
     public void shouldThrowExceptionIfPillarInvalid() {
         exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("No enum constant for pillar: invalidPillar, tier: api");
+        exception.expectMessage("No component matches pillar: invalidPillar, tier: api");
 
         valueOf("invalidPillar", "api");
 
@@ -93,7 +53,7 @@ public class ComponentTest {
     @Test
     public void shouldThrowExceptionIfTierInvalid() {
         exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("No enum constant for pillar: commands, tier: invalidTier");
+        exception.expectMessage("No component matches pillar: commands, tier: invalidTier");
 
         valueOf("commands", "invalidTier");
 
@@ -118,10 +78,4 @@ public class ComponentTest {
         assertFalse(contains("COMMAND_API_aaa"));
         assertFalse(contains("UNKNOWN"));
     }
-
-    @Test
-    public void shouldReturnStringContainingSeparatedNames() {
-        assertThat(names(", "), is("COMMAND_API, COMMAND_CONTROLLER, COMMAND_HANDLER, EVENT_LISTENER, EVENT_PROCESSOR, EVENT_API, QUERY_API, QUERY_CONTROLLER, QUERY_VIEW"));
-    }
-
 }

@@ -1,6 +1,5 @@
 package uk.gov.justice.services.core.jms;
 
-import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
@@ -35,7 +34,7 @@ public class JmsSenderFactory implements SenderFactory {
      * @return a new JmsSender instance.
      */
     @Override
-    public Sender createSender(final Component componentDestination) {
+    public Sender createSender(final String componentDestination) {
         return new JmsSender(componentDestination, jmsDestinations, jmsEnvelopeSender, logger, systemUserUtil);
     }
 }

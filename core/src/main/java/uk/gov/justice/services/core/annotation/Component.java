@@ -1,83 +1,74 @@
 package uk.gov.justice.services.core.annotation;
 
 import static java.lang.String.format;
-import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.joining;
 
-import java.util.stream.Stream;
-
-import javax.jms.Destination;
-import javax.jms.Queue;
-import javax.jms.Topic;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Enum representing all the service components.
+ * Class representing all the service components.
  */
-public enum Component {
+public final class Component {
 
-    COMMAND_API("command", "api", Queue.class),
-    COMMAND_CONTROLLER("command", "controller", Queue.class),
-    COMMAND_HANDLER("command", "handler", Queue.class),
-    EVENT_LISTENER("event", "listener", Topic.class),
-    EVENT_PROCESSOR("event", "processor", Topic.class),
-    EVENT_API("event", "api", null),
-    QUERY_API("query", "api", null),
-    QUERY_CONTROLLER("query", "controller", null),
-    QUERY_VIEW("query", "view", null);
+    public static final String COMMAND_API = "COMMAND_API";
+    public static final String COMMAND_CONTROLLER = "COMMAND_CONTROLLER";
+    public static final String COMMAND_HANDLER = "COMMAND_HANDLER";
 
-    private final String pillar;
-    private final String tier;
-    private final Class<? extends Destination> inputDestinationType;
+    public static final String EVENT_API = "EVENT_API";
+    public static final String EVENT_PROCESSOR = "EVENT_PROCESSOR";
+    public static final String EVENT_LISTENER = "EVENT_LISTENER";
 
-    Component(final String pillar, final String tier, final Class<? extends Destination> inputDestinationType) {
-        this.pillar = pillar;
-        this.tier = tier;
-        this.inputDestinationType = inputDestinationType;
+    public static final String QUERY_API = "QUERY_API";
+    public static final String QUERY_CONTROLLER = "QUERY_CONTROLLER";
+    public static final String QUERY_VIEW = "QUERY_VIEW";
+
+    private Component() {
     }
 
+    private static final List<String> components = new ArrayList<String>() {
+
+        private static final long serialVersionUID = -7403626856706763685L;
+
+        {
+            add(COMMAND_API);
+            add(COMMAND_CONTROLLER);
+            add(COMMAND_HANDLER);
+
+            add(EVENT_API);
+            add(EVENT_PROCESSOR);
+            add(EVENT_LISTENER);
+
+            add(QUERY_API);
+            add(QUERY_CONTROLLER);
+            add(QUERY_VIEW);
+        }
+    };
+
     /**
-     * Returns component of the provided pillar and tier.
+     * Returns component name of the provided pillar and tier.
      *
      * @param pillar the pillar
      * @param tier   the tier
-     * @return the component for the provided pillar and tier
+     * @return the component name for the provided pillar and tier
      */
-    public static Component valueOf(final String pillar, final String tier) {
-        return valuesStream()
-                .filter(c -> c.pillar.equals(pillar) && c.tier.equals(tier))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(
-                        format("No enum constant for pillar: %s, tier: %s", pillar, tier)));
-    }
+    public static String valueOf(final String pillar, final String tier) {
+        final String pillarAndTier = (pillar + "_" + tier).toUpperCase();
 
+        if (components.contains(pillarAndTier)) {
+            return pillarAndTier;
+        } else {
+            throw new IllegalArgumentException(
+                    format("No component matches pillar: %s, tier: %s", pillar, tier));
+        }
+    }
 
     /**
-     * Checks if enum contains component with given name
+     * Checks if given name is a component
      *
      * @param name - component name
-     * @return true if the enum contains the given name, false otherwise
+     * @return true if the given name is a component, false otherwise
      */
     public static boolean contains(final String name) {
-        return valuesStream().filter(c -> c.name().equals(name)).findAny().isPresent();
-    }
-
-    private static Stream<Component> valuesStream() {
-        return stream(Component.values());
-    }
-
-    public static String names(final String delimiter) {
-        return valuesStream().map(Component::name).collect(joining(delimiter));
-    }
-
-    public String pillar() {
-        return pillar;
-    }
-
-    public String tier() {
-        return tier;
-    }
-
-    public Class<? extends Destination> inputDestinationType() {
-        return inputDestinationType;
+        return components.contains(name);
     }
 }

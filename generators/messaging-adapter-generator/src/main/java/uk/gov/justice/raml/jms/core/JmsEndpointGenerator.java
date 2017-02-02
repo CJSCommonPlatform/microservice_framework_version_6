@@ -15,10 +15,8 @@ import uk.gov.justice.services.generators.commons.validator.ContainsResourcesRam
 import uk.gov.justice.services.generators.commons.validator.RamlValidator;
 import uk.gov.justice.services.generators.commons.validator.RequestContentTypeRamlValidator;
 
-import java.io.IOException;
 import java.util.stream.Stream;
 
-import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 import org.raml.model.Raml;
 import org.raml.model.Resource;
@@ -82,11 +80,11 @@ public class JmsEndpointGenerator implements Generator {
     */
 
     private boolean shouldGenerateEventFilter(final Resource resource, final BaseUri baseUri) {
-        return baseUri.component() == EVENT_LISTENER && !containsGeneralJsonMimeType(resource.getActions());
+        return EVENT_LISTENER.equals(baseUri.component()) && !containsGeneralJsonMimeType(resource.getActions());
     }
 
     private boolean shouldListenToAllMessages(final Resource resource, final BaseUri baseUri) {
-        return baseUri.component() == EVENT_LISTENER || containsGeneralJsonMimeType(resource.getActions());
+        return EVENT_LISTENER.equals(baseUri.component()) || containsGeneralJsonMimeType(resource.getActions());
     }
 
 }

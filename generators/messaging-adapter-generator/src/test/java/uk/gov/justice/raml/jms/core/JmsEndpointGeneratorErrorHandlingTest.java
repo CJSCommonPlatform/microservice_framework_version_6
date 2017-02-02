@@ -97,4 +97,19 @@ public class JmsEndpointGeneratorErrorHandlingTest extends BaseGeneratorTest {
                 configurationWithBasePackage("uk.somepackage", outputFolder, emptyMap()));
     }
 
+    @Test
+    public void shouldThrowExceptionWhenUnsupportedFrameworkComponentSetInBaseUri() throws Exception {
+        exception.expect(IllegalStateException.class);
+        exception.expectMessage("JMS Endpoint generation is unsupported for framework component type QUERY_API");
+
+        generator.run(
+                raml()
+                        .withBaseUri("message://query/api/message/people")
+                        .with(resource()
+                                .withRelativeUri("/structure.event")
+                                .withDefaultPostAction())
+                        .build(),
+                configurationWithBasePackage("uk.somepackage", outputFolder, emptyMap()));
+    }
+
 }

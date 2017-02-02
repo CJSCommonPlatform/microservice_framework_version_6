@@ -10,7 +10,6 @@ import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithCommandApiDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithQueryApiDefaults;
 
-import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.generators.test.utils.builder.RamlBuilder;
 
 import java.util.Arrays;
@@ -37,21 +36,21 @@ public class GeneratorsTest {
     @Test
     public void shouldReturnComponentFromBaseUriForCommandApi() throws Exception {
         final Raml raml = restRamlWithCommandApiDefaults().build();
-        final Optional<Component> component = Generators.componentFromBaseUriIn(raml);
+        final Optional<String> component = Generators.componentFromBaseUriIn(raml);
         assertThat(component, is(Optional.of(COMMAND_API)));
     }
 
     @Test
     public void shouldReturnComponentFromBaseUriForEventApi() throws Exception {
         final Raml raml = RamlBuilder.restRamlWithEventApiDefaults().build();
-        final Optional<Component> component = Generators.componentFromBaseUriIn(raml);
+        final Optional<String> component = Generators.componentFromBaseUriIn(raml);
         assertThat(component, is(Optional.of(EVENT_API)));
     }
 
     @Test
     public void shouldReturnComponentFromBaseUriForQueryApi() throws Exception {
         final Raml raml = restRamlWithQueryApiDefaults().build();
-        final Optional<Component> component = Generators.componentFromBaseUriIn(raml);
+        final Optional<String> component = Generators.componentFromBaseUriIn(raml);
         assertThat(component, is(Optional.of(QUERY_API)));
     }
 
@@ -62,7 +61,7 @@ public class GeneratorsTest {
                 .withTitle("Example Service")
                 .withBaseUri("http://localhost:8080/warname/event/listener/rest/service").build();
 
-        final Optional<Component> component = Generators.componentFromBaseUriIn(raml);
+        final Optional<String> component = Generators.componentFromBaseUriIn(raml);
         assertThat(component, is(Optional.empty()));
     }
 

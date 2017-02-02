@@ -3,7 +3,6 @@ package uk.gov.justice.services.core.dispatcher;
 import static uk.gov.justice.services.core.annotation.ComponentNameUtil.componentFrom;
 import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.componentLocationFrom;
 
-import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.ServiceComponentLocation;
 import uk.gov.justice.services.core.extension.ServiceComponentFoundEvent;
 
@@ -51,14 +50,15 @@ public class DispatcherCache {
     }
 
     /**
-     * Return the {@link Dispatcher} for the given {@link Component} and {@link ServiceComponentLocation}.
+     * Return the {@link Dispatcher} for the given component name and {@link
+     * ServiceComponentLocation}.
      *
-     * @param component the component type for which the dispatcher is for
-     * @param location whether the dispatcher is local or remote
+     * @param component the component name for which the dispatcher is for
+     * @param location  whether the dispatcher is local or remote
      * @return the {@link Dispatcher}
      */
-    public Dispatcher dispatcherFor(final Component component, final ServiceComponentLocation location) {
-       return createDispatcherIfAbsent(Pair.of(component.name(), location));
+    public Dispatcher dispatcherFor(final String component, final ServiceComponentLocation location) {
+        return createDispatcherIfAbsent(Pair.of(component, location));
     }
 
     private Dispatcher createDispatcherIfAbsent(final Pair<String, ServiceComponentLocation> component) {

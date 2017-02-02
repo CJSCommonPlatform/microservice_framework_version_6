@@ -22,9 +22,9 @@ public final class ComponentNameUtil {
      */
     public static String componentFrom(final Class<?> clazz) {
         if (clazz.isAnnotationPresent(ServiceComponent.class)) {
-            return clazz.getAnnotation(ServiceComponent.class).value().name();
+            return clazz.getAnnotation(ServiceComponent.class).value();
         } else if (clazz.isAnnotationPresent(Adapter.class)) {
-            return clazz.getAnnotation(Adapter.class).value().name();
+            return clazz.getAnnotation(Adapter.class).value();
         } else if (clazz.isAnnotationPresent(FrameworkComponent.class)) {
             return clazz.getAnnotation(FrameworkComponent.class).value();
         } else if (clazz.isAnnotationPresent(CustomServiceComponent.class)) {
@@ -51,7 +51,7 @@ public final class ComponentNameUtil {
         if (injectionPoint.getMember() instanceof Field) {
             final Field field = (Field) injectionPoint.getMember();
             if (field.isAnnotationPresent(ServiceComponent.class)) {
-                return Optional.of(field.getAnnotation(ServiceComponent.class).value().name());
+                return Optional.of(field.getAnnotation(ServiceComponent.class).value());
             } else if (field.isAnnotationPresent(FrameworkComponent.class)) {
                 return Optional.of(field.getAnnotation(FrameworkComponent.class).value());
             } else if (field.isAnnotationPresent(CustomServiceComponent.class)) {

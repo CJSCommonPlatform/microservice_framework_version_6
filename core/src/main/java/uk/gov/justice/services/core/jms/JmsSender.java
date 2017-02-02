@@ -1,6 +1,5 @@
 package uk.gov.justice.services.core.jms;
 
-import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -18,13 +17,13 @@ import org.slf4j.Logger;
 public class JmsSender implements Sender {
 
     final JmsDestinations jmsDestinations;
-    final Component destinationComponent;
+    final String destinationComponent;
     final JmsEnvelopeSender jmsEnvelopeSender;
     final Logger logger;
     final SystemUserUtil systemUserUtil;
 
     public JmsSender(
-            final Component destinationComponent,
+            final String destinationComponent,
             final JmsDestinations jmsDestinations,
             final JmsEnvelopeSender jmsEnvelopeSender,
             final Logger logger,
@@ -56,7 +55,7 @@ public class JmsSender implements Sender {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         JmsSender jmsSender = (JmsSender) o;
-        return destinationComponent == jmsSender.destinationComponent;
+        return Objects.equals(destinationComponent, jmsSender.destinationComponent);
     }
 
     @Override

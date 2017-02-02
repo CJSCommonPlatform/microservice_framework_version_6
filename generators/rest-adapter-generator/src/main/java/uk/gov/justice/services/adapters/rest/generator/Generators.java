@@ -22,12 +22,12 @@ final class Generators {
     }
 
     /**
-     * Derive the framework {@link Component} pillar and tier value from the base URI in the RAML.
+     * Derive the framework component name pillar and tier value from the base URI in the RAML.
      *
      * @param raml the RAML that provides the base URI
-     * @return the {@link Component} value derived from the base URI
+     * @return the component name derived from the base URI
      */
-    static Optional<Component> componentFromBaseUriIn(final Raml raml) {
+    static Optional<String> componentFromBaseUriIn(final Raml raml) {
         final Matcher matcher = PILLAR_AND_TIER_PATTERN.matcher(baseUriPathWithoutContext(raml));
 
         if (matcher.find()) {

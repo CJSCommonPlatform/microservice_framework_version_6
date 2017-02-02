@@ -62,7 +62,7 @@ public class BaseUri {
         return service;
     }
 
-    public Component component() {
+    public String component() {
         return Component.valueOf(pillar, tier);
     }
 

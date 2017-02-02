@@ -26,27 +26,27 @@ public class GeneratorPropertiesTest {
     public ExpectedException exception = ExpectedException.none();
 
     private static final Map<String, String> QUERY_API_PROPERTY = generatorProperties()
-            .withServiceComponentOf(QUERY_API.name())
+            .withServiceComponentOf(QUERY_API)
             .build();
 
     private static final Map<String, String> QUERY_CONTROLLER_PROPERTY = generatorProperties()
-            .withServiceComponentOf(QUERY_CONTROLLER.name())
+            .withServiceComponentOf(QUERY_CONTROLLER)
             .build();
 
     private static final Map<String, String> QUERY_VIEW_PROPERTY = generatorProperties()
-            .withServiceComponentOf(QUERY_VIEW.name())
+            .withServiceComponentOf(QUERY_VIEW)
             .build();
 
     private static final Map<String, String> COMMAND_API_PROPERTY = generatorProperties()
-            .withServiceComponentOf(COMMAND_API.name())
+            .withServiceComponentOf(COMMAND_API)
             .build();
 
     private static final Map<String, String> COMMAND_CONTROLLER_PROPERTY = generatorProperties()
-            .withServiceComponentOf(COMMAND_CONTROLLER.name())
+            .withServiceComponentOf(COMMAND_CONTROLLER)
             .build();
 
     private static final Map<String, String> COMMAND_HANDLER_PROPERTY = generatorProperties()
-            .withServiceComponentOf(COMMAND_HANDLER.name())
+            .withServiceComponentOf(COMMAND_HANDLER)
             .build();
 
     @Test
@@ -56,32 +56,32 @@ public class GeneratorPropertiesTest {
 
     @Test
     public void shouldReturnQueryApi() throws Exception {
-        assertThat(serviceComponentOf(emptyPathConfigurationWith(QUERY_API_PROPERTY)), is(QUERY_API.name()));
+        assertThat(serviceComponentOf(emptyPathConfigurationWith(QUERY_API_PROPERTY)), is(QUERY_API));
     }
 
     @Test
     public void shouldReturnQueryController() throws Exception {
-        assertThat(serviceComponentOf(emptyPathConfigurationWith(QUERY_CONTROLLER_PROPERTY)), is(QUERY_CONTROLLER.name()));
+        assertThat(serviceComponentOf(emptyPathConfigurationWith(QUERY_CONTROLLER_PROPERTY)), is(QUERY_CONTROLLER));
     }
 
     @Test
     public void shouldReturnQueryView() throws Exception {
-        assertThat(serviceComponentOf(emptyPathConfigurationWith(QUERY_VIEW_PROPERTY)), is(QUERY_VIEW.name()));
+        assertThat(serviceComponentOf(emptyPathConfigurationWith(QUERY_VIEW_PROPERTY)), is(QUERY_VIEW));
     }
 
     @Test
     public void shouldReturnCommandApi() throws Exception {
-        assertThat(serviceComponentOf(emptyPathConfigurationWith(COMMAND_API_PROPERTY)), is(COMMAND_API.name()));
+        assertThat(serviceComponentOf(emptyPathConfigurationWith(COMMAND_API_PROPERTY)), is(COMMAND_API));
     }
 
     @Test
     public void shouldReturnCommandController() throws Exception {
-        assertThat(serviceComponentOf(emptyPathConfigurationWith(COMMAND_CONTROLLER_PROPERTY)), is(COMMAND_CONTROLLER.name()));
+        assertThat(serviceComponentOf(emptyPathConfigurationWith(COMMAND_CONTROLLER_PROPERTY)), is(COMMAND_CONTROLLER));
     }
 
     @Test
     public void shouldReturnCommandHandler() throws Exception {
-        assertThat(serviceComponentOf(emptyPathConfigurationWith(COMMAND_HANDLER_PROPERTY)), is(COMMAND_HANDLER.name()));
+        assertThat(serviceComponentOf(emptyPathConfigurationWith(COMMAND_HANDLER_PROPERTY)), is(COMMAND_HANDLER));
     }
 
     @Test

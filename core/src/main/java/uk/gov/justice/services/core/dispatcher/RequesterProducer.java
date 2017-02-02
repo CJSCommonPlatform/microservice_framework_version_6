@@ -1,11 +1,16 @@
 package uk.gov.justice.services.core.dispatcher;
 
 import uk.gov.justice.services.core.annotation.ServiceComponent;
+import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandler;
+import uk.gov.justice.services.core.envelope.EnvelopeValidator;
+import uk.gov.justice.services.core.json.JsonSchemaValidator;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ApplicationScoped
 public class RequesterProducer {
@@ -15,6 +20,15 @@ public class RequesterProducer {
 
     @Inject
     SystemUserUtil systemUserUtil;
+
+    @Inject
+    ObjectMapper objectMapper;
+
+    @Inject
+    JsonSchemaValidator jsonSchemaValidator;
+
+    @Inject
+    EnvelopeValidationExceptionHandler envelopeValidationExceptionHandler;
 
     /**
      * Produces the correct implementation of a requester depending on the {@link ServiceComponent}
@@ -27,6 +41,7 @@ public class RequesterProducer {
      */
     @Produces
     public Requester produceRequester(final InjectionPoint injectionPoint) {
-        return new DispatcherDelegate(dispatcherCache.dispatcherFor(injectionPoint), systemUserUtil);
+        return new DispatcherDelegate(dispatcherCache.dispatcherFor(injectionPoint), systemUserUtil,
+                new EnvelopeValidator(jsonSchemaValidator, envelopeValidationExceptionHandler, objectMapper));
     }
 }

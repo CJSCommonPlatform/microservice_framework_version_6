@@ -45,11 +45,14 @@ import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserProvider;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
+import uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.interceptor.InterceptorCache;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
+import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
+import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
@@ -73,6 +76,7 @@ import org.apache.openejb.testing.Configuration;
 import org.apache.openejb.testing.Module;
 import org.apache.openejb.testng.PropertiesBuilder;
 import org.apache.openejb.util.NetworkUtil;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -83,13 +87,14 @@ import org.junit.runner.RunWith;
 public class RemoteExampleQueryApiIT {
 
     private static int port = -1;
+    private static final String PEOPLE_QUERY_USER1 = "people.query.user1";
+    private static final String MIME_TYPE = format("application/vnd.%s+json", PEOPLE_QUERY_USER1);
     private static final String BASE_PATH = "/rest-client-generator/query/controller/rest/example";
-
     private static final UUID USER_ID = randomUUID();
     private static final String TEST_SYSTEM_USER_ID = "8d6a96f0-6e8e-11e6-8b77-86f30ca893d3";
     private static final String MOCK_SERVER_PORT = "mock.server.port";
+
     private static final String PEOPLE_GET_USER1 = "people.get-user1";
-    private static final String PEOPLE_QUERY_USER1 = "people.query.user1";
 
     private static final JsonEnvelope RESPONSE = DefaultJsonEnvelope.envelope()
             .with(JsonObjectMetadata.metadataWithRandomUUID("people.get-user1"))
@@ -98,7 +103,6 @@ public class RemoteExampleQueryApiIT {
 
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(9090);
-
     @Inject
     Requester requester;
 
@@ -150,12 +154,28 @@ public class RemoteExampleQueryApiIT {
 
             EmptySystemUserProvider.class,
             ObjectMapperProducer.class,
-            RemoteExampleCommandApi.class
+            RemoteExampleCommandApi.class,
+
+
+            RethrowingValidationExceptionHandler.class,
+            DefaultJsonSchemaValidator.class,
+            JsonSchemaLoader.class
     })
     public WebApp war() {
         return new WebApp()
                 .contextRoot("rest-client-generator")
                 .addServlet("TestApp", Application.class.getName());
+    }
+
+    @Before
+    public void setUp() throws Exception {
+        stubFor(get(urlEqualTo(BASE_PATH + format("/users/%s", USER_ID)))
+                .withHeader("Accept", equalTo(MIME_TYPE))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", MIME_TYPE)
+                        .withBody(RESPONSE.toDebugStringPrettyPrint())));
+
     }
 
     @Test
@@ -168,14 +188,8 @@ public class RemoteExampleQueryApiIT {
 
 
         final String path = format("/users/%s", USER_ID);
-        final String mimeType = format("application/vnd.%s+json", PEOPLE_QUERY_USER1);
 
-        stubFor(get(urlEqualTo(BASE_PATH + path))
-                .withHeader("Accept", equalTo(mimeType))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", mimeType)
-                        .withBody(RESPONSE.toDebugStringPrettyPrint())));
+
 
         final JsonEnvelope response = requester.request(query);
         assertThat(response, jsonEnvelope(

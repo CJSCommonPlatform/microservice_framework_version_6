@@ -34,14 +34,14 @@ public class JsonSchemaLoader {
         final InputStream inputStream = this.getClass().getResourceAsStream(schemaFile);
 
         if (inputStream == null) {
-            throw new IllegalStateException(format("JSON schema %s not found on classpath", schemaFile));
+            throw new SchemaLoadingException(format("JSON schema %s not found on classpath", schemaFile));
         }
 
         try {
             final JSONObject schemaJsonObject = new JSONObject(IOUtils.toString(inputStream, defaultCharset().name()));
             return SchemaLoader.load(schemaJsonObject);
         } catch (IOException ex) {
-            throw new IllegalStateException("Unable to load JSON schema from classpath", ex);
+            throw new SchemaLoadingException("Unable to load JSON schema from classpath", ex);
         }
     }
 }

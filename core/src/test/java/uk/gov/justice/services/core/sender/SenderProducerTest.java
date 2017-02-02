@@ -14,16 +14,22 @@ import static uk.gov.justice.services.core.annotation.Component.EVENT_API;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.common.MemberInjectionPoint.injectionPointWithMemberAsFirstMethodOf;
 
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.dispatcher.Dispatcher;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
+import uk.gov.justice.services.core.envelope.EnvelopeValidationException;
+import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandler;
+import uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler;
 import uk.gov.justice.services.core.handler.exception.MissingHandlerException;
 import uk.gov.justice.services.core.jms.JmsSender;
 import uk.gov.justice.services.core.jms.SenderFactory;
+import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -33,6 +39,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -54,16 +61,17 @@ public class SenderProducerTest {
     @Mock
     private DispatcherCache dispatcherCache;
 
+    @Mock
+    private EnvelopeValidationExceptionHandler envelopeValidationExceptionHandler;
 
+    @InjectMocks
     private SenderProducer senderProducer;
 
     @Before
     public void setup() {
-        senderProducer = new SenderProducer();
-        senderProducer.senderFactory = senderFactory;
-        senderProducer.dispatcherCache = dispatcherCache;
-        senderProducer.systemUserUtil = systemUserUtil;
         senderProducer.componentDestination = new ComponentDestination();
+        senderProducer.jsonSchemaValidator = new DefaultJsonSchemaValidator();
+        senderProducer.objectMapper = new ObjectMapperProducer().objectMapper();
     }
 
     @Test
@@ -100,6 +108,7 @@ public class SenderProducerTest {
         returnedSender.send(envelope);
 
         verify(dispatcher).dispatch(envelope);
+        verifyZeroInteractions(legacyJmsSender);
     }
 
     @Test
@@ -117,6 +126,7 @@ public class SenderProducerTest {
         returnedSender.send(envelope);
 
         verify(dispatcher).dispatch(envelope);
+        verifyZeroInteractions(legacyJmsSender);
     }
 
     @Test
@@ -134,6 +144,7 @@ public class SenderProducerTest {
         returnedSender.send(envelope);
 
         verify(dispatcher).dispatch(envelope);
+        verifyZeroInteractions(legacyJmsSender);
     }
 
     @Test
@@ -209,6 +220,36 @@ public class SenderProducerTest {
         verify(legacyJmsSender).sendAsAdmin(envelope);
     }
 
+    @Test
+    public void shouldThrowExceptionIfPayloadDoesNotAdhereToSchema() throws Exception {
+        senderProducer.envelopeValidationExceptionHandler = new RethrowingValidationExceptionHandler();
+
+        final InjectionPoint injectionPoint = injectionPointWithMemberAsFirstMethodOf(TestEventProcessor.class);
+        when(dispatcherCache.dispatcherFor(injectionPoint)).thenReturn(dispatcher);
+
+        exception.expect(EnvelopeValidationException.class);
+        exception.expectMessage("Json not valid against schema for message type some-action.");
+
+        senderProducer.produce(injectionPoint).send(envelope()
+                .with(metadataWithRandomUUID("some-action"))
+                .withPayloadOf("value1", "someField1")
+                .build());
+    }
+
+    @Test
+    public void shouldNotThrowExceptionIfPayloadAdheresToSchema() throws Exception {
+        senderProducer.envelopeValidationExceptionHandler = new RethrowingValidationExceptionHandler();
+
+        final InjectionPoint injectionPoint = injectionPointWithMemberAsFirstMethodOf(TestEventProcessor.class);
+        when(dispatcherCache.dispatcherFor(injectionPoint)).thenReturn(dispatcher);
+
+        senderProducer.produce(injectionPoint).send(envelope()
+                .with(metadataWithRandomUUID("some-action"))
+                .withPayloadOf("value1", "someField1")
+                .withPayloadOf("value2", "someField2")
+                .build());
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionWithInvalidComponent() throws Exception {
         final InjectionPoint injectionPoint = injectionPointWithMemberAsFirstMethodOf(TestCommandHandler.class);
@@ -257,5 +298,4 @@ public class SenderProducerTest {
 
         }
     }
-
 }

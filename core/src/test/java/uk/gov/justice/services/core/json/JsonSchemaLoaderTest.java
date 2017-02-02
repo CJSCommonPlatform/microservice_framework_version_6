@@ -39,7 +39,7 @@ public class JsonSchemaLoaderTest {
 
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test(expected = SchemaLoadingException.class)
     public void shouldThrowExceptionIfSchemaCouldNotBeLoaded() {
         loader.loadSchema("non-existent");
     }

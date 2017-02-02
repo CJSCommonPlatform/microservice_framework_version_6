@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "test-schema",
+  "type": "object",
+  "properties": {
+    "groupName": {
+      "id": "/groupName",
+      "type": "string"
+    },
+    "groupId": {
+      "id": "/groupId",
+      "type": "string"
+    }
+  },
+  "required": [
+    "groupName",
+    "groupId"
+  ]
+}

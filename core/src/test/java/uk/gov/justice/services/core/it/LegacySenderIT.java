@@ -8,7 +8,9 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLL
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
 import uk.gov.justice.services.core.accesscontrol.AccessControlService;
 import uk.gov.justice.services.core.accesscontrol.AllowAllPolicyEvaluator;
@@ -22,11 +24,15 @@ import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserProvider;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
+import uk.gov.justice.services.core.envelope.EnvelopeValidationException;
+import uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.it.util.sender.RecordingSender;
 import uk.gov.justice.services.core.jms.JmsDestinations;
 import uk.gov.justice.services.core.jms.JmsSenderFactory;
+import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
+import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.sender.ComponentDestination;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.core.sender.SenderProducer;
@@ -56,7 +62,6 @@ import org.junit.runner.RunWith;
 public class LegacySenderIT {
 
     private static final UUID TEST_SYS_USER_ID = randomUUID();
-
 
     @Inject
     @ServiceComponent(COMMAND_CONTROLLER)
@@ -88,9 +93,13 @@ public class LegacySenderIT {
             LoggerProducer.class,
             TestSystemUserProvider.class,
             SystemUserUtil.class,
-            BeanInstantiater.class
-    })
+            BeanInstantiater.class,
 
+            ObjectMapperProducer.class,
+            RethrowingValidationExceptionHandler.class,
+            DefaultJsonSchemaValidator.class,
+            JsonSchemaLoader.class
+    })
     public WebApp war() {
         return new WebApp()
                 .contextRoot("jms-legacy-sender-test");
@@ -107,7 +116,7 @@ public class LegacySenderIT {
         final String userId = "userId1234";
         final String commandName = "contexta.command.aaa";
 
-        sender.send(envelope().with(metadataOf(id, commandName).withUserId(userId)).build());
+        sender.send(envelope().with(metadataOf(id, commandName).withUserId(userId)).withPayloadOf("a", "someField1").build());
 
         final List<JsonEnvelope> sentEnvelopes = jmsEnvelopeSender.recordedEnvelopes();
         assertThat(sentEnvelopes, hasSize(1));
@@ -128,9 +137,9 @@ public class LegacySenderIT {
     public void shouldSendEnvelopeAsAdmin() throws Exception {
         final UUID id = randomUUID();
         final String userId = "userId1234";
-        final String commandName = "contexta.some.command";
+        final String commandName = "contexta.command.aaa";
 
-        sender.sendAsAdmin(envelope().with(metadataOf(id, commandName).withUserId(userId)).build());
+        sender.sendAsAdmin(envelope().with(metadataOf(id, commandName).withUserId(userId)).withPayloadOf("b", "someField1").build());
 
         final List<JsonEnvelope> sentEnvelopes = jmsEnvelopeSender.recordedEnvelopes();
         assertThat(sentEnvelopes, hasSize(1));
@@ -138,6 +147,11 @@ public class LegacySenderIT {
         assertThat(sentEnvelopes.get(0).metadata().id(), is(id));
         assertThat(sentEnvelopes.get(0).metadata().userId().get(), is(TEST_SYS_USER_ID.toString()));
 
+    }
+
+    @Test(expected = EnvelopeValidationException.class)
+    public void shouldThrowExceptionIfPayloadDoesNotAdhereToSchema() throws Exception {
+        sender.send(envelope().with(metadataWithRandomUUID("contexta.command.aaa")).withPayloadOf("Aaaa", "unknownField").build());
     }
 
 

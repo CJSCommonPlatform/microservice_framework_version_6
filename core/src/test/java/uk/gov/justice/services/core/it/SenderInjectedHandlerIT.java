@@ -7,9 +7,11 @@ import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLLER;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
 import uk.gov.justice.services.core.accesscontrol.AccessControlService;
@@ -22,12 +24,16 @@ import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
 import uk.gov.justice.services.core.dispatcher.EmptySystemUserProvider;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
+import uk.gov.justice.services.core.envelope.EnvelopeValidationException;
+import uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.extension.AnnotationScanner;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.it.util.sender.RecordingSender;
 import uk.gov.justice.services.core.it.util.sender.TestSenderFactory;
 import uk.gov.justice.services.core.jms.DefaultJmsDestinations;
+import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
+import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.sender.ComponentDestination;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.core.sender.SenderProducer;
@@ -39,7 +45,6 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.openejb.jee.Application;
 import org.apache.openejb.jee.WebApp;
 import org.apache.openejb.junit.ApplicationComposer;
@@ -68,7 +73,7 @@ public class SenderInjectedHandlerIT {
             StringToJsonObjectConverter.class,
             JsonObjectEnvelopeConverter.class,
             ObjectToJsonValueConverter.class,
-            ObjectMapper.class,
+            ObjectMapperProducer.class,
             Enveloper.class,
             AccessControlFailureMessageGenerator.class,
             AllowAllPolicyEvaluator.class,
@@ -81,7 +86,11 @@ public class SenderInjectedHandlerIT {
             BeanInstantiater.class,
             SystemUserUtil.class,
             EmptySystemUserProvider.class,
-            UtcClock.class
+            UtcClock.class,
+
+            RethrowingValidationExceptionHandler.class,
+            DefaultJsonSchemaValidator.class,
+            JsonSchemaLoader.class
     })
     public WebApp war() {
         return new WebApp()
@@ -97,11 +106,16 @@ public class SenderInjectedHandlerIT {
     @Test
     public void shouldInjectSenderWithFieldLevelServiceComponentAnnotation() throws Exception {
         UUID metadataId = randomUUID();
-        sender.send(envelope().with(metadataOf(metadataId, "test.event-1")).build());
+        sender.send(envelope().with(metadataOf(metadataId, "contexta.command.aaa")).withPayloadOf("abc", "someField1").build());
 
         assertThat(RecordingSender.instance().recordedEnvelopes(), hasSize(1));
         assertThat(RecordingSender.instance().recordedEnvelopes().get(0).metadata().id(), equalTo(metadataId));
-        assertThat(RecordingSender.instance().recordedEnvelopes().get(0).metadata().name(), equalTo("test.event-1"));
-
+        assertThat(RecordingSender.instance().recordedEnvelopes().get(0).metadata().name(), equalTo("contexta.command.aaa"));
     }
+
+    @Test(expected = EnvelopeValidationException.class)
+    public void shouldThrowExceptionIfPayloadDoesNotAdhereToSchema() throws Exception {
+        sender.send(envelope().with(metadataWithRandomUUID("contexta.command.aaa")).withPayloadOf("Aaaa", "unknownField").build());
+    }
+
 }

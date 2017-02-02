@@ -8,8 +8,11 @@ import static uk.gov.justice.services.core.annotation.ComponentNameUtil.componen
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.dispatcher.DispatcherDelegate;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
+import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandler;
+import uk.gov.justice.services.core.envelope.EnvelopeValidator;
 import uk.gov.justice.services.core.jms.JmsSenderWrapper;
 import uk.gov.justice.services.core.jms.SenderFactory;
+import uk.gov.justice.services.core.json.JsonSchemaValidator;
 
 import java.util.Map;
 import java.util.Optional;
@@ -19,6 +22,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Produces the correct Sender based on the injection point.
@@ -37,6 +42,15 @@ public class SenderProducer {
 
     @Inject
     SystemUserUtil systemUserUtil;
+
+    @Inject
+    ObjectMapper objectMapper;
+
+    @Inject
+    JsonSchemaValidator jsonSchemaValidator;
+
+    @Inject
+    EnvelopeValidationExceptionHandler envelopeValidationExceptionHandler;
 
     private Map<String, Sender> senderMap;
 
@@ -73,7 +87,8 @@ public class SenderProducer {
     }
 
     private Sender produceSender(final InjectionPoint injectionPoint) {
-        return new DispatcherDelegate(dispatcherCache.dispatcherFor(injectionPoint), systemUserUtil);
+        return new DispatcherDelegate(dispatcherCache.dispatcherFor(injectionPoint), systemUserUtil,
+                new EnvelopeValidator(jsonSchemaValidator, envelopeValidationExceptionHandler, objectMapper));
     }
 
 }

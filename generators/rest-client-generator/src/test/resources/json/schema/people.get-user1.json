@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "test-schema",
+  "type": "object",
+  "properties": {
+    "result": {
+      "id": "/result",
+      "type": "string"
+    }
+  },
+  "required": [
+    "result"
+  ]
+}

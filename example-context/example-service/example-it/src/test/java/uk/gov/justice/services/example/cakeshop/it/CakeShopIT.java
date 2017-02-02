@@ -166,6 +166,9 @@ public class CakeShopIT {
         Response response = sendTo(RECIPES_RESOURCE_URI + recipeId).request()
                 .post(entity(addRecipeCommand(), ADD_RECIPE_MEDIA_TYPE));
         assertThat(response.getStatus(), is(ACCEPTED));
+
+        await().until(() -> eventsWithPayloadContaining(recipeId).size() == 1);
+
         response = sendTo(RECIPES_RESOURCE_URI + recipeId).request()
                 .post(entity(addRecipeCommand(), REMOVE_RECIPE_MEDIA_TYPE));
         assertThat(response.getStatus(), is(ACCEPTED));
@@ -435,6 +438,7 @@ public class CakeShopIT {
         final String cakeName = "Super cake";
 
         addRecipe(recipeId, cakeName);
+        addRecipe("163af847-effb-46a9-96bc-32a0f7526f02", "cake");
         await().until(() -> recipesQueryResult().body().contains(recipeId));
 
         makeCake(recipeId, cakeId);

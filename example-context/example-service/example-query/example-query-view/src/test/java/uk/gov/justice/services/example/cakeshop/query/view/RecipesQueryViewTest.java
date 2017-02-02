@@ -78,7 +78,7 @@ public class RecipesQueryViewTest {
                 envelope().with(metadataWithDefaults())
                         .withPayloadOf("123", "recipeId").build());
 
-        assertThat(response.metadata().name(), is("example.findRecipe-response"));
+        assertThat(response.metadata().name(), is("example.get-recipe"));
 
     }
 
@@ -163,7 +163,7 @@ public class RecipesQueryViewTest {
                 envelope().with(metadataWithDefaults())
                         .withPayloadOf(1, "pagesize").build());
 
-        assertThat(response.metadata().name(), is("example.recipes-response"));
+        assertThat(response.metadata().name(), is("example.search-recipes"));
 
     }
 

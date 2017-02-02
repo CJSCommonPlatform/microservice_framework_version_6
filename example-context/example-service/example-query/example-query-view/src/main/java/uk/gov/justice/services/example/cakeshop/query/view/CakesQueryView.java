@@ -26,7 +26,7 @@ public class CakesQueryView {
 
     @Handles("example.search-cakes")
     public JsonEnvelope cakes(final JsonEnvelope query) {
-        return enveloper.withMetadataFrom(query, "example.cakes-response").apply(service.cakes());
+        return enveloper.withMetadataFrom(query, "example.search-cakes").apply(service.cakes());
 
     }
 }

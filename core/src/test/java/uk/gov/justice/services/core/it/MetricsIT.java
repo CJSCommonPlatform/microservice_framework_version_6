@@ -12,6 +12,7 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithR
 import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
 import uk.gov.justice.services.core.accesscontrol.AccessControlService;
@@ -28,6 +29,7 @@ import uk.gov.justice.services.core.dispatcher.EmptySystemUserProvider;
 import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
+import uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.extension.AnnotationScanner;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
@@ -37,6 +39,8 @@ import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProduce
 import uk.gov.justice.services.core.interceptor.InterceptorObserver;
 import uk.gov.justice.services.core.jms.DefaultJmsDestinations;
 import uk.gov.justice.services.core.jms.JmsSenderFactory;
+import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
+import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.metrics.TotalActionMetricsInterceptor;
 import uk.gov.justice.services.core.metrics.IndividualActionMetricsInterceptor;
 import uk.gov.justice.services.core.metrics.MetricRegistryProducer;
@@ -116,7 +120,11 @@ public class MetricsIT {
             IndividualActionMetricsInterceptor.class,
             SystemUserUtil.class,
             TestServiceContextNameProvider.class,
-            UtcClock.class
+            UtcClock.class,
+
+            RethrowingValidationExceptionHandler.class,
+            DefaultJsonSchemaValidator.class,
+            JsonSchemaLoader.class
     })
     public WebApp war() {
         return new WebApp()

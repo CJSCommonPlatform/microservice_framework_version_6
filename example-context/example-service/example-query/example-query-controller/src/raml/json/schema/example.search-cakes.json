@@ -1,26 +1,30 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "",
-  "type": "array",
-  "items": {
-    "id": "/",
-    "type": "object",
-    "properties": {
-      "name": {
-        "id": "name",
-        "type": "string"
-      },
-      "cakeId": {
-        "id": "cakeId",
-        "type": "string"
+  "type": "object",
+  "properties": {
+    "cakes": {
+      "type": "array",
+      "items": {
+        "id": "/",
+        "type": "object",
+        "properties": {
+          "name": {
+            "id": "name",
+            "type": "string"
+          },
+          "id": {
+            "id": "cakeId",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "id"
+        ]
       }
-    },
-    "required": [
-      "name",
-      "cakeId"
-    ]
+    }
   },
   "required": [
-    "0"
+    "cakes"
   ]
 }

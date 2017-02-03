@@ -12,7 +12,7 @@ import javax.inject.Inject;
 @ServiceComponent(Component.QUERY_VIEW)
 public class CakeOrdersQueryView {
 
-    private static final String NAME_RESPONSE_ORDER = "example.findOrder-response";
+    private static final String NAME_RESPONSE_ORDER = "example.get-order";
 
     private static final String FIELD_ORDER_ID = "orderId";
     private final CakeOrderService service;

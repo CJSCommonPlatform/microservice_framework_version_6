@@ -4,20 +4,15 @@ import static java.util.Optional.empty;
 
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.dispatcher.Requester;
+import uk.gov.justice.services.core.envelope.EnvelopeValidator;
+import uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler;
 import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
-import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.Metadata;
 
 import java.util.List;
 import java.util.Optional;
 
-import javax.json.JsonValue;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.everit.json.schema.ValidationException;
 import org.mockito.internal.creation.cglib.CglibMockMaker;
 import org.mockito.invocation.Invocation;
 import org.mockito.invocation.MockHandler;
@@ -33,9 +28,12 @@ import org.mockito.plugins.MockMaker;
 public class JsonSchemaValidatingMockMaker implements MockMaker {
 
     private final MockMaker mockMakerDelegate = new CglibMockMaker();
-    private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
 
-    private final JsonSchemaValidator jsonSchemaValidator = new DefaultJsonSchemaValidator();
+    private final EnvelopeValidator envelopeValidator = new EnvelopeValidator(
+            new DefaultJsonSchemaValidator(),
+            new RethrowingValidationExceptionHandler(),
+            new ObjectMapperProducer().objectMapper());
+
 
     @Override
     public <T> T createMock(final MockCreationSettings<T> settings, final MockHandler handler) {
@@ -62,7 +60,7 @@ public class JsonSchemaValidatingMockMaker implements MockMaker {
     }
 
     private void validateAgainstJsonSchema(final MethodInvocationReport methodInvocationReport) {
-        envelopeToValidateFrom(methodInvocationReport).ifPresent(this::validateAgainstJsonSchema);
+        envelopeToValidateFrom(methodInvocationReport).ifPresent(envelopeValidator::validate);
     }
 
     private Optional<JsonEnvelope> envelopeToValidateFrom(final MethodInvocationReport mockMethodInvocationReport) {
@@ -79,23 +77,6 @@ public class JsonSchemaValidatingMockMaker implements MockMaker {
 
     private Optional<JsonEnvelope> envelopeOf(final Object envelope) {
         return Optional.ofNullable((JsonEnvelope) envelope);
-    }
-
-    private void validateAgainstJsonSchema(final JsonEnvelope envelope) {
-        final Metadata metadata = envelope.metadata();
-        if (metadata == null) {
-            throw new IllegalArgumentException("Metadata not set in the envelope.");
-        }
-        try {
-            final JsonValue payload = envelope.payload();
-            if (payload != null) {
-                jsonSchemaValidator.validate(objectMapper.writeValueAsString(payload), metadata.name());
-            }
-        } catch (ValidationException e) {
-            throw new IllegalArgumentException("Json not valid against schema.", e);
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException(e);
-        }
     }
 
     private boolean mockedClassIs(final Class<?> aClass, final Invocation invocation) {

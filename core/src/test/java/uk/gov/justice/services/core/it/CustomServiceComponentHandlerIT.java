@@ -25,6 +25,7 @@ import uk.gov.justice.services.core.dispatcher.EmptySystemUserProvider;
 import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
+import uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.eventfilter.AllowAllEventFilter;
 import uk.gov.justice.services.core.extension.AnnotationScanner;
@@ -38,6 +39,8 @@ import uk.gov.justice.services.core.interceptor.InterceptorContext;
 import uk.gov.justice.services.core.interceptor.InterceptorObserver;
 import uk.gov.justice.services.core.jms.DefaultJmsDestinations;
 import uk.gov.justice.services.core.jms.JmsSenderFactory;
+import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
+import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.sender.ComponentDestination;
 import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -97,6 +100,10 @@ public class CustomServiceComponentHandlerIT {
             ObjectToJsonValueConverter.class,
             ObjectMapper.class,
             Enveloper.class,
+
+            RethrowingValidationExceptionHandler.class,
+            DefaultJsonSchemaValidator.class,
+            JsonSchemaLoader.class,
 
             AccessControlFailureMessageGenerator.class,
             AllowAllPolicyEvaluator.class,

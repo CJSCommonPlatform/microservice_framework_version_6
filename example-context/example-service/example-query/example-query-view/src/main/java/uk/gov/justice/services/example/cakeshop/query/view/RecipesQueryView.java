@@ -20,8 +20,8 @@ import org.slf4j.Logger;
 @ServiceComponent(Component.QUERY_VIEW)
 public class RecipesQueryView {
 
-    static final String NAME_RESPONSE_RECIPE = "example.findRecipe-response";
-    static final String NAME_RESPONSE_RECIPE_LIST = "example.recipes-response";
+    static final String NAME_RESPONSE_RECIPE = "example.get-recipe";
+    static final String NAME_RESPONSE_RECIPE_LIST = "example.search-recipes";
     private static final Logger LOGGER = getLogger(RecipesQueryView.class);
     private static final String FIELD_RECIPE_ID = "recipeId";
     private static final String FIELD_NAME = "name";

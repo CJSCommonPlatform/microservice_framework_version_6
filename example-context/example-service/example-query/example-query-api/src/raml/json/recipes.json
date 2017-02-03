@@ -1,17 +1,14 @@
-[
-  {
-    "name": "Eton Mess",
-    "recipeId": "2955756c-c2e3-44c2-a18d-0a69cb4f4619",
-    "glutenFree": false
-  },
-  {
-    "name": "Custard on Toast",
-    "recipeId": "2955756c-c2e3-44c2-a18d-0a69cb4f4619",
-    "glutenFree": false
-  },
-  {
-    "name": "Ginger and Cucumber Sponge",
-    "recipeId": "2955756c-c2e3-44c2-a18d-0a69cb4f4619",
-    "glutenFree": true
-  }
-]
+{
+  "recipes": [
+    {
+      "name": "Cheesy cheese cake",
+      "glutenFree": false,
+      "id": "163af847-effb-46a9-96bc-32a0f7526e14"
+    },
+    {
+      "name": "Chocolate muffin",
+      "glutenFree": false,
+      "id": "163af847-effb-46a9-96bc-32a0f7526e15"
+    }
+  ]
+}

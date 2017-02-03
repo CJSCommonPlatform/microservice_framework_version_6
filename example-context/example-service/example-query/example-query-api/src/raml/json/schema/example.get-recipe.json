@@ -10,28 +10,9 @@
     "glutenFree": {
       "id": "/glutenFree",
       "type": "boolean"
-    },
-    "ingredients": {
-      "id": "/ingredients",
-      "type": "array",
-      "items": {
-        "id": "/ingredients/0",
-        "type": "object",
-        "properties": {
-          "name": {
-            "id": "/ingredients/0/name",
-            "type": "string"
-          },
-          "quantity": {
-            "id": "/ingredients/0/quantity",
-            "type": "integer"
-          }
-        }
-      }
     }
   },
   "required": [
-    "name",
-    "ingredients"
+    "name"
   ]
 }

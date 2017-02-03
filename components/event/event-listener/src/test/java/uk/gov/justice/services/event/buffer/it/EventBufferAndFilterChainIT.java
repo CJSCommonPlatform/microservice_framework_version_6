@@ -28,6 +28,7 @@ import uk.gov.justice.services.core.dispatcher.EmptySystemUserProvider;
 import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
+import uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.eventfilter.AbstractEventFilter;
 import uk.gov.justice.services.core.eventfilter.AllowAllEventFilter;
@@ -39,6 +40,8 @@ import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProduce
 import uk.gov.justice.services.core.interceptor.InterceptorObserver;
 import uk.gov.justice.services.core.jms.DefaultJmsDestinations;
 import uk.gov.justice.services.core.jms.JmsSenderFactory;
+import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
+import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.sender.ComponentDestination;
 import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.event.buffer.EventBufferInterceptor;
@@ -142,7 +145,11 @@ public class EventBufferAndFilterChainIT {
             EmptySystemUserProvider.class,
             SystemUserUtil.class,
             BeanInstantiater.class,
-            UtcClock.class
+            UtcClock.class,
+
+            RethrowingValidationExceptionHandler.class,
+            DefaultJsonSchemaValidator.class,
+            JsonSchemaLoader.class
     })
     public WebApp war() {
         return new WebApp()

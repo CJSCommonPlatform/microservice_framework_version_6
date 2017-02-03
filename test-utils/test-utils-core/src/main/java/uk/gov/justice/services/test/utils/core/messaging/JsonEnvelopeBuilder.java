@@ -27,7 +27,7 @@ public class JsonEnvelopeBuilder {
     private JsonObjectMetadata.Builder metadata;
 
     public static JsonEnvelope envelopeFrom(final Metadata metadata, final JsonValue payload) {
-        return new DefaultJsonEnvelope(metadata, payload);
+        return DefaultJsonEnvelope.envelopeFrom(metadata, payload);
     }
 
     public static JsonEnvelope envelopeFrom(final JsonObjectMetadata.Builder metadataBuilder, final JsonValue payload) {
@@ -97,7 +97,7 @@ public class JsonEnvelopeBuilder {
     }
 
     public JsonEnvelope build() {
-        return new DefaultJsonEnvelope(metadata != null ? metadata.build() : null, payload.build());
+        return DefaultJsonEnvelope.envelopeFrom(metadata != null ? metadata.build() : null, payload.build());
     }
 
     public String toJsonString() {

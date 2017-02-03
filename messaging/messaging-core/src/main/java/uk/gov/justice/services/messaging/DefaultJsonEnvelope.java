@@ -31,16 +31,11 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
 
     private JsonValue payload;
 
-    public DefaultJsonEnvelope(final Metadata metadata, final JsonValue payload) {
+    private DefaultJsonEnvelope(final Metadata metadata, final JsonValue payload) {
         this.metadata = metadata;
         this.payload = payload;
     }
 
-    /**
-     * Please use the Enveloper for creating real envelopes in production code or the
-     * JsonEnvelopeBuilder in test-utils for tests.
-     */
-    @Deprecated
     public static JsonEnvelope envelopeFrom(final Metadata metadata, final JsonValue payload) {
         return new DefaultJsonEnvelope(metadata, payload);
     }

@@ -1,31 +1,17 @@
 package uk.gov.justice.services.test.utils.core.matchers;
 
-import static java.lang.String.format;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.Answers.RETURNS_DEFAULTS;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.withSettings;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
-import static uk.gov.justice.services.test.utils.core.matchers.HandlerMethodMatcher.PassThroughType.REQUESTER;
-import static uk.gov.justice.services.test.utils.core.matchers.HandlerMethodMatcher.PassThroughType.SENDER;
-import static uk.gov.justice.services.test.utils.core.matchers.MethodHandlesAnnotationMatcher.methodThatHandles;
+import static uk.gov.justice.services.test.utils.core.matchers.HandlerMethodActionMatcher.hasMethodThatHandlesAction;
+import static uk.gov.justice.services.test.utils.core.matchers.RequesterPassThroughMatcher.hasRequesterPassThroughMethod;
+import static uk.gov.justice.services.test.utils.core.matchers.SenderPassThroughMatcher.hasSenderPassThroughMethod;
 
-import uk.gov.justice.services.core.dispatcher.Requester;
-import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.test.utils.core.mock.SkipJsonValidationListener;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Optional;
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 
 /**
@@ -42,11 +28,9 @@ import org.hamcrest.TypeSafeDiagnosingMatcher;
  */
 public class HandlerMethodMatcher extends TypeSafeDiagnosingMatcher<Class<?>> {
 
-    private static final int ONCE = 1;
-    private static final SkipJsonValidationListener SKIP_JSON_VALIDATION_LISTENER = new SkipJsonValidationListener();
     private String methodName;
-    private Optional<String> action = Optional.empty();
-    private Optional<PassThroughType> passThroughType = Optional.empty();
+
+    private List<Matcher<Class<?>>> matchers = new ArrayList<>();
 
     public HandlerMethodMatcher(final String methodName) {
         this.methodName = methodName;
@@ -57,17 +41,17 @@ public class HandlerMethodMatcher extends TypeSafeDiagnosingMatcher<Class<?>> {
     }
 
     public HandlerMethodMatcher thatHandles(final String action) {
-        this.action = Optional.of(action);
+        matchers.add(hasMethodThatHandlesAction(methodName, action));
         return this;
     }
 
     public HandlerMethodMatcher withSenderPassThrough() {
-        this.passThroughType = Optional.of(SENDER);
+        matchers.add(hasSenderPassThroughMethod(methodName));
         return this;
     }
 
     public HandlerMethodMatcher withRequesterPassThrough() {
-        this.passThroughType = Optional.of(REQUESTER);
+        matchers.add(hasRequesterPassThroughMethod(methodName));
         return this;
     }
 
@@ -87,27 +71,8 @@ public class HandlerMethodMatcher extends TypeSafeDiagnosingMatcher<Class<?>> {
             return false;
         }
 
-        if (action.isPresent() && !methodThatHandles(action.get()).matches(method)) {
-            methodThatHandles(action.get()).describeMismatch(method, description);
-            return false;
-        }
-
-        if (passThroughType.isPresent()) {
-            try {
-                switch (passThroughType.get()) {
-                    case SENDER:
-                        return isSenderPassThrough(handlerClass, method);
-                    case REQUESTER:
-                        return isRequesterPassThrough(handlerClass, method);
-                }
-            } catch (final Exception ex) {
-                description.appendText("Method ")
-                        .appendValue(methodName)
-                        .appendText(" of class ")
-                        .appendValue(handlerClass)
-                        .appendText(" is not a ")
-                        .appendText(passThroughType.get().toString())
-                        .appendText(" pass-through method");
+        for (final Matcher matcher : matchers) {
+            if (!matcher.matches(handlerClass)) {
                 return false;
             }
         }
@@ -115,77 +80,11 @@ public class HandlerMethodMatcher extends TypeSafeDiagnosingMatcher<Class<?>> {
         return true;
     }
 
-    private boolean isSenderPassThrough(final Class<?> handlerClass, final Method method) throws Exception {
-        final Sender sender = mock(Sender.class, withSettings()
-                .name(format("%s.sender.send", method.getName()))
-                .invocationListeners(SKIP_JSON_VALIDATION_LISTENER)
-                .defaultAnswer(RETURNS_DEFAULTS.get()));
-
-        final JsonEnvelope command = envelope().with(metadataWithDefaults()).build();
-        final Object handlerInstance = handlerClass.newInstance();
-
-        final Field senderField = findField(handlerClass, Sender.class);
-        senderField.setAccessible(true);
-        senderField.set(handlerInstance, sender);
-
-        method.invoke(handlerInstance, command);
-        verify(sender, times(ONCE)).send(command);
-
-        return true;
-    }
-
-    private boolean isRequesterPassThrough(final Class<?> handlerClass, final Method method) throws Exception {
-        final Requester requester = mock(Requester.class,
-                withSettings()
-                        .name(format("%s.requester.request", method.getName()))
-                        .invocationListeners(SKIP_JSON_VALIDATION_LISTENER)
-                        .defaultAnswer(RETURNS_DEFAULTS.get()));
-        final JsonEnvelope query = envelope().with(metadataWithDefaults()).build();
-        final JsonEnvelope response = envelope().with(metadataWithDefaults()).build();
-        final Object handlerInstance = handlerClass.newInstance();
-
-        final Field requesterField = findField(handlerClass, Requester.class);
-        requesterField.setAccessible(true);
-        requesterField.set(handlerInstance, requester);
-
-        when(requester.request(query)).thenReturn(response);
-
-        assertThat(method.invoke(handlerInstance, query), is(response));
-        verify(requester, times(ONCE)).request(query);
-
-        return true;
-    }
-
     @Override
     public void describeTo(final Description description) {
-        description.appendText("a command pass through method of ").appendValue(methodName);
-        action.ifPresent(value -> description.appendText(" that handles ").appendValue(value));
-        passThroughType.ifPresent(type ->
-                description.appendText(" that is a ")
-                        .appendText(type.toString())
-                        .appendText(" pass-through method"));
-    }
-
-    private Field findField(final Class<?> handlerClass, final Class<?> fieldClass) {
-        return Stream.of(handlerClass.getDeclaredFields())
-                .filter(field -> field.getType().equals(fieldClass))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError(format("No field of class type %s found in handler class", fieldClass.getSimpleName())));
-    }
-
-    enum PassThroughType {
-
-        SENDER("sender"), REQUESTER("requester");
-
-        private final String description;
-
-        PassThroughType(final String description) {
-            this.description = description;
-        }
-
-        @Override
-        public String toString() {
-            return description;
+        description.appendText("a method of ").appendValue(methodName);
+        for (Matcher matcher : matchers) {
+            matcher.describeTo(description);
         }
     }
 }

@@ -1,0 +1,25 @@
+#%RAML 0.8
+title: Example Service
+baseUri: http://localhost:8080/test-lint-checker/custom/api/rest/example
+version: v0.1
+mediaType: application/json
+protocols: [ HTTP, HTTPS ]
+
+/lint/{lintId}:
+  description: |
+    Test
+  get:
+      description: |
+          ...
+          (mapping):
+              responseType: application/vnd.test.firstcommand+json
+              name: test.firstcommand
+          (mapping):
+              responseType: application/vnd.test.secondcommand+json
+              name: test.secondcommand
+          ...
+      responses:
+          200:
+              body:
+                  application/vnd.test.firstcommand+json:
+                  application/vnd.test.secondcommand+json:

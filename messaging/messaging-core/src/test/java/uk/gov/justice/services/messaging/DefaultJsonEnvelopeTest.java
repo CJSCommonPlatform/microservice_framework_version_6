@@ -3,7 +3,9 @@ package uk.gov.justice.services.messaging;
 import static com.jayway.jsonassert.JsonAssert.with;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.hasItems;
 import static org.junit.Assert.assertThat;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 
@@ -110,6 +112,32 @@ public class DefaultJsonEnvelopeTest {
                 .assertEquals("_metadata.id", metadataId.toString())
                 .assertEquals("_metadata.name", metadataName)
                 .assertEquals("$.payloadName", payloadValue);
+    }
+
+    @Test
+    public void shouldReturnStringRepresentationWithObfuscatedValues() throws Exception {
+        final UUID metadataId = randomUUID();
+        final String metadataName = "nameABC123";
+        final JsonEnvelope envelope = envelope()
+                .with(metadataOf(metadataId, metadataName))
+                .withPayloadOf("valueA", "strProperty")
+                .withPayloadOf("valueB", "nested", "strProperty1")
+                .withPayloadOf(randomUUID(), "nested", "uuidProperty1")
+                .withPayloadOf(34, "nested", "numProperty1")
+                .withPayloadOf(true, "nested", "boolProperty1")
+                .withPayloadOf(new String[]{"value1", "value2", "value3"}, "arrayProperty")
+                .build();
+
+        with(envelope.toObfuscatedDebugString())
+                .assertEquals("_metadata.id", metadataId.toString())
+                .assertEquals("_metadata.name", metadataName)
+                .assertEquals("strProperty", "xxx")
+                .assertEquals("nested.strProperty1", "xxx")
+                .assertEquals("nested.uuidProperty1", "xxx")
+                .assertEquals("nested.numProperty1", 0)
+                .assertEquals("nested.boolProperty1", false)
+                .assertThat("arrayProperty", hasItems("xxx", "xxx", "xxx"));
+        ;
     }
 
     private Metadata metadata(final UUID metadataId, final String metadataName) {

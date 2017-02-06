@@ -228,7 +228,7 @@ public class SenderProducerTest {
         when(dispatcherCache.dispatcherFor(injectionPoint)).thenReturn(dispatcher);
 
         exception.expect(EnvelopeValidationException.class);
-        exception.expectMessage("Json not valid against schema for message type some-action.");
+        exception.expectMessage("Message not valid against schema");
 
         senderProducer.produce(injectionPoint).send(envelope()
                 .with(metadataWithRandomUUID("some-action"))

@@ -47,4 +47,12 @@ public interface JsonEnvelope extends Envelope<JsonValue> {
      * @return a json String of the envelope
      */
     String toString();
+
+    /**
+     * Prints the json for debug purposes. Obfuscates any potentially sensitive
+     * data.
+     *
+     * @return a json String of the envelope with obfuscated payload values
+     */
+    String toObfuscatedDebugString();
 }

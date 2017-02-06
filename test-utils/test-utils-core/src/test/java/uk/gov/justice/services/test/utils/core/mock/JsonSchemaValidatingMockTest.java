@@ -1,5 +1,6 @@
 package uk.gov.justice.services.test.utils.core.mock;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.Matchers.hasProperty;
@@ -48,7 +49,7 @@ public class JsonSchemaValidatingMockTest {
 
         exception.expect(MockitoException.class);
         exception.expectCause(allOf(instanceOf(EnvelopeValidationException.class),
-                hasProperty("message", equalTo("Json not valid against schema for message type example.add-recipe."))));
+                hasProperty("message", containsString("Message not valid against schema"))));
 
         new SendingHandler(mock(Sender.class)).handle(
                 envelope()
@@ -93,7 +94,7 @@ public class JsonSchemaValidatingMockTest {
 
         exception.expect(MockitoException.class);
         exception.expectCause(allOf(instanceOf(EnvelopeValidationException.class),
-                hasProperty("message", equalTo("Json not valid against schema for message type example.get-recipe."))));
+                hasProperty("message", containsString("Message not valid against schema"))));
 
         final Requester requester = mock(Requester.class);
 

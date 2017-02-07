@@ -9,6 +9,7 @@ import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 
+import uk.gov.justice.services.common.configuration.GlobalValueProducer;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -25,10 +26,12 @@ import uk.gov.justice.services.core.dispatcher.EmptySystemUserProvider;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationException;
+import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandlerProducer;
 import uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.extension.AnnotationScanner;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
+import uk.gov.justice.services.core.it.util.producer.TestEnvelopeValidationExceptionHandlerProducer;
 import uk.gov.justice.services.core.it.util.sender.RecordingSender;
 import uk.gov.justice.services.core.it.util.sender.TestSenderFactory;
 import uk.gov.justice.services.core.jms.DefaultJmsDestinations;
@@ -88,9 +91,12 @@ public class SenderInjectedHandlerIT {
             EmptySystemUserProvider.class,
             UtcClock.class,
 
-            RethrowingValidationExceptionHandler.class,
+            TestEnvelopeValidationExceptionHandlerProducer.class,
+            GlobalValueProducer.class,
             DefaultJsonSchemaValidator.class,
             JsonSchemaLoader.class
+
+
     })
     public WebApp war() {
         return new WebApp()

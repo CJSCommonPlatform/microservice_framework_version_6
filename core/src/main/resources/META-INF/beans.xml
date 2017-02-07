@@ -1,15 +1,10 @@
 <!-- Marker file indicating CDI should be enabled -->
 
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:weld="http://jboss.org/schema/weld/beans"
        xmlns="http://xmlns.jcp.org/xml/ns/javaee"
        xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
       http://xmlns.jcp.org/xml/ns/javaee/beans_1_1.xsd"
 
        bean-discovery-mode="all">
-    <weld:scan>
-        <weld:exclude name="uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler"/>
-        <weld:exclude name="uk.gov.justice.services.core.envelope.EmptyValidationExceptionHandler"/>
-        <weld:exclude name="uk.gov.justice.services.core.envelope.LoggingValidationExceptionHandler"/>
-    </weld:scan>
+
 </beans>

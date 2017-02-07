@@ -8,6 +8,7 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 
+import uk.gov.justice.services.common.configuration.GlobalValueProducer;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
 import uk.gov.justice.services.core.accesscontrol.AccessControlService;
@@ -21,7 +22,7 @@ import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserProvider;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
-import uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler;
+import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandlerProducer;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.jms.DefaultJmsDestinations;
@@ -103,8 +104,8 @@ public class RemoteCommandControllerIT {
             TestSystemUserProvider.class,
             SystemUserUtil.class,
             BeanInstantiater.class,
-
-            RethrowingValidationExceptionHandler.class,
+            GlobalValueProducer.class,
+            EnvelopeValidationExceptionHandlerProducer.class,
             DefaultJsonSchemaValidator.class,
             JsonSchemaLoader.class,
             ObjectMapperProducer.class

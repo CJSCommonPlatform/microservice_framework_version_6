@@ -36,6 +36,7 @@ import uk.gov.justice.services.clients.core.webclient.BaseUriFactory;
 import uk.gov.justice.services.clients.core.webclient.ContextMatcher;
 import uk.gov.justice.services.clients.core.webclient.MockServerPortProvider;
 import uk.gov.justice.services.clients.core.webclient.WebTargetFactory;
+import uk.gov.justice.services.common.configuration.GlobalValueProducer;
 import uk.gov.justice.services.common.configuration.JndiBasedServiceContextNameProvider;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
@@ -55,7 +56,7 @@ import uk.gov.justice.services.core.dispatcher.Requester;
 import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
-import uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler;
+import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandlerProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.interceptor.InterceptorCache;
@@ -180,7 +181,8 @@ public class RemoteExampleEventProcessorIT {
             EnvelopeConverter.class,
 
             DefaultJsonSchemaValidator.class,
-            RethrowingValidationExceptionHandler.class
+            GlobalValueProducer.class,
+            EnvelopeValidationExceptionHandlerProducer.class
     })
     public WebApp war() {
         return new WebApp()

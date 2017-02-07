@@ -2,9 +2,6 @@ package uk.gov.justice.services.core.envelope;
 
 import uk.gov.justice.services.common.configuration.GlobalValue;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;

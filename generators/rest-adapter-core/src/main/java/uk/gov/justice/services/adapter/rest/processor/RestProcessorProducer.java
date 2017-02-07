@@ -5,7 +5,6 @@ import static uk.gov.justice.services.core.annotation.Component.QUERY_VIEW;
 import static uk.gov.justice.services.core.annotation.ComponentNameUtil.componentFrom;
 
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
-import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -20,19 +19,21 @@ import javax.inject.Inject;
 public class RestProcessorProducer {
 
     @Inject
-    JsonObjectEnvelopeConverter jsonObjectEnvelopeConverter;
-
-    @Inject
     RestEnvelopeBuilderFactory envelopeBuilderFactory;
 
-    private RestProcessor envelopeResponseRestProcessor;
+    @Inject
+    EnvelopeResponseFactory envelopeResponseFactory;
 
+    @Inject
+    PayloadResponseFactory payloadResponseFactory;
+
+    private RestProcessor envelopeResponseRestProcessor;
     private RestProcessor payloadResponseRestProcessor;
 
     @PostConstruct
     void initialise() {
-        envelopeResponseRestProcessor = new EnvelopeResponseRestProcessor(envelopeBuilderFactory, jsonObjectEnvelopeConverter);
-        payloadResponseRestProcessor = new PayloadResponseRestProcessor(envelopeBuilderFactory);
+        envelopeResponseRestProcessor = new DefaultRestProcessor(envelopeBuilderFactory, envelopeResponseFactory);
+        payloadResponseRestProcessor = new DefaultRestProcessor(envelopeBuilderFactory, payloadResponseFactory);
     }
 
     /**
@@ -48,5 +49,4 @@ public class RestProcessorProducer {
         final String componentName = componentFrom(injectionPoint);
         return componentName.equals(QUERY_CONTROLLER.name()) || componentName.equals(QUERY_VIEW.name()) ? envelopeResponseRestProcessor : payloadResponseRestProcessor;
     }
-
 }

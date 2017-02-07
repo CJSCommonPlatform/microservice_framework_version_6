@@ -19,7 +19,6 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javax.json.Json;
@@ -50,7 +49,7 @@ public class RestAdapterGenerator_MultipleMethodBodyTest extends BaseRestAdapter
 
         final Response processorResponse = Response.ok().build();
         when(restProcessor.processSynchronously(any(Function.class), anyString(), any(HttpHeaders.class), any(Collection.class))).thenReturn(processorResponse);
-        when(restProcessor.processAsynchronously(any(Consumer.class), anyString(), any(Optional.class), any(HttpHeaders.class),
+        when(restProcessor.processAsynchronously(any(Function.class), anyString(), any(Optional.class), any(HttpHeaders.class),
                 any(Collection.class))).thenReturn(processorResponse);
 
         final List<Method> methods = methodsOf(resourceClass);

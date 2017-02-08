@@ -31,6 +31,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -116,7 +117,7 @@ public class RequesterProducerTest {
         requesterProducer.envelopeValidationExceptionHandler = new RethrowingValidationExceptionHandler();
 
         exception.expect(EnvelopeValidationException.class);
-        exception.expectMessage("Json not valid against schema for message type some-action.");
+        exception.expectMessage("Message not valid against schema");
 
         when(dispatcher.dispatch(any(JsonEnvelope.class)))
                 .thenReturn(envelope()

@@ -41,7 +41,7 @@ public class EnvelopeValidator {
         } catch (SchemaLoadingException e) {
             handle(e, format("Could not load json schema that matches message type %s.", envelope.metadata().name()));
         } catch (final ValidationException e) {
-            handle(e, format("Json not valid against schema for message type %s.", envelope.metadata().name()));
+            handle(e, format("Message not valid against schema: \n%s", envelope.toObfuscatedDebugString()));
         } catch (final EnvelopeValidationException e) {
             envelopeValidationExceptionHandler.handle(e);
         }

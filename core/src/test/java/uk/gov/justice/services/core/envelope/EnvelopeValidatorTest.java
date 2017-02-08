@@ -1,9 +1,11 @@
 package uk.gov.justice.services.core.envelope;
 
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.junit.Assert.assertThat;
@@ -86,11 +88,12 @@ public class EnvelopeValidatorTest {
     public void shouldHandleJsonValidationException() {
         final ValidationException jsonValidationException = new ValidationException(null, Object.class, null);
         doThrow(jsonValidationException).when(jsonSchemaValidator).validate(anyString(), anyString());
-        envelopeValidator.validate(envelope().with(metadataWithRandomUUID("ABC")).build());
+        envelopeValidator.validate(envelope().with(metadataWithRandomUUID("msgNameABC")).withPayloadOf("SensitiveData", "property1").build());
 
         final EnvelopeValidationException exception = handledException();
         assertThat(exception.getCause(), is(jsonValidationException));
-        assertThat(exception.getMessage(), is("Json not valid against schema for message type ABC."));
+        assertThat(exception.getMessage(), allOf(containsString("Message not valid against schema"),
+                containsString("msgNameABC"), containsString("property1"), not(containsString("SensitiveData"))));
     }
 
     @Test

@@ -1,5 +1,6 @@
 package uk.gov.justice.services.messaging;
 
+import static uk.gov.justice.services.messaging.JSONObjectValueObfuscator.obfuscated;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.CORRELATION;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.SESSION_ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.USER_ID;
@@ -149,10 +150,19 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
     @Override
     public String toDebugStringPrettyPrint() {
 
-        return new JSONObject(new JSONTokener(payload.toString()))
-                .put(METADATA, new JSONObject(metadata.asJsonObject().toString()))
-                .toString(2);
+        return jSONPayload().put(METADATA, new JSONObject(metadata.asJsonObject().toString())).toString(2);
     }
+
+    @Override
+    public String toObfuscatedDebugString() {
+        return obfuscated(jSONPayload()).put(METADATA, new JSONObject(metadata.asJsonObject().toString())).toString(2);
+    }
+
+
+    private JSONObject jSONPayload() {
+        return new JSONObject(new JSONTokener(payload.toString()));
+    }
+
 
     public static class Builder {
         private JsonObjectBuilderWrapper payload;

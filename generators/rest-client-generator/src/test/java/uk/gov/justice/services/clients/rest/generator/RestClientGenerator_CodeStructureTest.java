@@ -19,6 +19,7 @@ import static uk.gov.justice.services.generators.test.utils.builder.MappingDescr
 import static uk.gov.justice.services.generators.test.utils.builder.QueryParamBuilder.queryParam;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
+import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithQueryApiDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithTitleVersion;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
@@ -309,6 +310,35 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
         generator.run(
                 restRamlWithTitleVersion().withBaseUri(BASE_URI_WITH_MORE_THAN_EIGHT_PARTS).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
+
+    }
+
+    @Test
+    public void shouldIgnoreNonVendorSpecificMediaTypes() throws Exception {
+        generator.run(
+                restRamlWithQueryApiDefaults()
+                        .with(resource("/pathabc/{anId}")
+                                .with(httpAction()
+                                        .withHttpActionType(GET)
+                                        .withResponseTypes("text/csv")
+                                        .with(mapping()
+                                                .withName("action1")
+                                                .withResponseType("text/csv"))
+                                ))
+                        .with(resource("/pathbcd/{anId}")
+                                .with(httpAction()
+                                        .withHttpActionType(GET)
+                                        .withResponseTypes("application/abc+json")
+                                        .with(mapping()
+                                                .withName("action2")
+                                                .withResponseType("application/abc+json"))
+                                ))
+
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
+
+
+        assertThat(methodsOf(compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceQueryApi")), hasSize(0));
 
     }
 

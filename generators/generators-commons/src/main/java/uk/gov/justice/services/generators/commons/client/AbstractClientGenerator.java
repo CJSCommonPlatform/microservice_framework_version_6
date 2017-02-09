@@ -71,11 +71,12 @@ public abstract class AbstractClientGenerator implements Generator {
     private Stream<MethodSpec> methodsOf(final Resource resource, final GeneratorConfig generationConfig) {
         return resource.getActions().values().stream()
                 .flatMap(ramlAction -> mimeTypesOf(ramlAction)
-                        .map(definition ->
+                        .filter(this::supportedMimeType)
+                        .map(mimeType ->
                                 methodOf(
                                         resource,
                                         ramlAction,
-                                        definition,
+                                        mimeType,
                                         generationConfig
                                 )
                         ));
@@ -175,5 +176,10 @@ public abstract class AbstractClientGenerator implements Generator {
                                 .add(format("$L.getLogger(%s.class)", className), classLoggerFactory).build()
                 )
                 .build();
+    }
+
+    private boolean supportedMimeType(final ActionMimeTypeDefinition mimeType) {
+        final String mimeTypeStr = mimeType.getNameType().getType();
+        return mimeTypeStr.startsWith("application/vnd.") && mimeTypeStr.endsWith("+json");
     }
 }

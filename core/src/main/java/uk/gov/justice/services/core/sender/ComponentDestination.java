@@ -17,7 +17,7 @@ import javax.enterprise.context.ApplicationScoped;
 @ApplicationScoped
 public class ComponentDestination {
 
-    private final Map<Component, Component> destinationComponentMap;
+    private final Map<String, String> destinationComponentMap;
 
     public ComponentDestination() {
         destinationComponentMap = new ConcurrentHashMap<>();
@@ -31,7 +31,7 @@ public class ComponentDestination {
      * @param component the component whose destination {@link Component} is required.
      * @return the default destination {@link Component} for <code>component</code>.
      */
-    public Component getDefault(final Component component) {
+    public String getDefault(final String component) {
         if (!destinationComponentMap.containsKey(component)) {
             throw new IllegalArgumentException("No default destination defined for service component of type " + component);
         }

@@ -3,8 +3,6 @@ package uk.gov.justice.services.test.utils.core.matchers;
 import static uk.gov.justice.services.test.utils.core.matchers.HandlerClassMatcher.isCustomHandlerClass;
 import static uk.gov.justice.services.test.utils.core.matchers.HandlerClassMatcher.isHandlerClass;
 
-import uk.gov.justice.services.core.annotation.Component;
-
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
@@ -37,7 +35,7 @@ public class HandlerMatcher extends TypeSafeDiagnosingMatcher<Object> {
 
     private HandlerClassMatcher handlerClassMatcher;
 
-    public static HandlerMatcher isHandler(final Component component) {
+    public static HandlerMatcher isHandler(final String component) {
         final HandlerMatcher handlerMatcher = new HandlerMatcher();
         handlerMatcher.handlerClassMatcher = isHandlerClass(component);
         return handlerMatcher;

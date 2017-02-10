@@ -2,9 +2,9 @@ package uk.gov.justice.services.core.sender;
 
 import static uk.gov.justice.services.core.annotation.Component.EVENT_API;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
-import static uk.gov.justice.services.core.annotation.Component.valueOf;
 import static uk.gov.justice.services.core.annotation.ComponentNameUtil.componentFrom;
 
+import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.dispatcher.DispatcherDelegate;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
@@ -69,26 +69,32 @@ public class SenderProducer {
         return getSender(componentFrom(injectionPoint), injectionPoint);
     }
 
-    private Sender getSender(final String componentName, final InjectionPoint injectionPoint) {
-        final Sender primarySender = produceSender(injectionPoint);
-        final Optional<Sender> legacySender = Optional.ofNullable(!componentName.equals(EVENT_PROCESSOR.name()) && !componentName.equals(EVENT_API.name()) && isFrameworkComponent(componentName) ?
-                senderMap.computeIfAbsent(componentName, c -> senderFactory.createSender(componentDestination.getDefault(valueOf(c)))) : null);
-
-        return new JmsSenderWrapper(primarySender, legacySender);
+    private Sender getSender(final String component, final InjectionPoint injectionPoint) {
+        return new JmsSenderWrapper(primarySenderFor(injectionPoint), legacySenderFor(component));
     }
 
-    private boolean isFrameworkComponent(final String componentName) {
-        try {
-            valueOf(componentName);
-            return true;
-        } catch (IllegalArgumentException e) {
-            return false;
+    private Optional<Sender> legacySenderFor(final String component) {
+        if (isLegacySenderRequiredFor(component)) {
+            return Optional.of(senderMap.computeIfAbsent(component, this::createSender));
         }
+
+        return Optional.empty();
     }
 
-    private Sender produceSender(final InjectionPoint injectionPoint) {
+    private boolean isLegacySenderRequiredFor(final String componentName) {
+        return !componentName.equals(EVENT_PROCESSOR) && !componentName.equals(EVENT_API) && isFrameworkComponent(componentName);
+    }
+
+    private Sender createSender(final String component) {
+        return senderFactory.createSender(componentDestination.getDefault(component));
+    }
+
+    private boolean isFrameworkComponent(final String component) {
+        return Component.contains(component);
+    }
+
+    private Sender primarySenderFor(final InjectionPoint injectionPoint) {
         return new DispatcherDelegate(dispatcherCache.dispatcherFor(injectionPoint), systemUserUtil,
                 new EnvelopeValidator(jsonSchemaValidator, envelopeValidationExceptionHandler, objectMapper));
     }
-
 }

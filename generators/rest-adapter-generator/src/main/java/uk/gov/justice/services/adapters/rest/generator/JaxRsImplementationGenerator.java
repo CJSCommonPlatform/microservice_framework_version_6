@@ -28,7 +28,6 @@ import uk.gov.justice.services.adapter.rest.BasicActionMapper;
 import uk.gov.justice.services.adapter.rest.parameter.ValidParameterCollectionBuilder;
 import uk.gov.justice.services.adapter.rest.processor.RestProcessor;
 import uk.gov.justice.services.core.annotation.Adapter;
-import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.CustomAdapter;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.messaging.logging.HttpMessageLoggerHelper;
@@ -119,7 +118,7 @@ class JaxRsImplementationGenerator {
         return componentFromBaseUriIn(raml)
                 .map(component ->
                         AnnotationSpec.builder(Adapter.class)
-                                .addMember(DEFAULT_ANNOTATION_PARAMETER, "$T.$L", Component.class, component)
+                                .addMember(DEFAULT_ANNOTATION_PARAMETER, "$S", component)
                                 .build())
                 .orElseGet(() ->
                         AnnotationSpec.builder(CustomAdapter.class)

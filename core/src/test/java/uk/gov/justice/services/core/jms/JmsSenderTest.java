@@ -8,7 +8,6 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLL
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 
-import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.context.ContextName;
@@ -97,7 +96,7 @@ public class JmsSenderTest {
         verify(logger).trace(eq("Sending envelope for action {} to destination: {}"), eq(NAME), eq(destination));
     }
 
-    private JmsSender jmsSenderWithComponent(final Component component) {
+    private JmsSender jmsSenderWithComponent(final String component) {
         return new JmsSender(component, jmsDestinations, jmsEnvelopeSender, logger, systemUserUtil);
     }
 

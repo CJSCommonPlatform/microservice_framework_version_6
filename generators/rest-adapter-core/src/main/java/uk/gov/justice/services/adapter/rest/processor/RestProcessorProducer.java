@@ -46,7 +46,7 @@ public class RestProcessorProducer {
     @Produces
     public RestProcessor produceRestProcessor(final InjectionPoint injectionPoint) {
         final String componentName = componentFrom(injectionPoint);
-        return componentName.equals(QUERY_CONTROLLER.name()) || componentName.equals(QUERY_VIEW.name()) ? envelopeResponseRestProcessor : payloadResponseRestProcessor;
+        return QUERY_CONTROLLER.equals(componentName) || QUERY_VIEW.equals(componentName) ? envelopeResponseRestProcessor : payloadResponseRestProcessor;
     }
 
 }

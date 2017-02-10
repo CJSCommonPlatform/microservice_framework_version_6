@@ -16,7 +16,6 @@ import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGen
 import uk.gov.justice.services.core.accesscontrol.AccessControlService;
 import uk.gov.justice.services.core.accesscontrol.AllowAllPolicyEvaluator;
 import uk.gov.justice.services.core.accesscontrol.PolicyEvaluator;
-import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
@@ -128,9 +127,9 @@ public class LegacySenderIT {
         assertThat(sentEnvelopes.get(0).metadata().id(), is(id));
         assertThat(sentEnvelopes.get(0).metadata().userId().get(), is(userId));
 
-        final List<Pair<Component, String>> recordedDestinationQueries = jmsDestinations.recordedDestinationQueries();
+        final List<Pair<String, String>> recordedDestinationQueries = jmsDestinations.recordedDestinationQueries();
         assertThat(recordedDestinationQueries, hasSize(1));
-        final Component requestedComponent = recordedDestinationQueries.get(0).getLeft();
+        final String requestedComponent = recordedDestinationQueries.get(0).getLeft();
         final String requestedContextName = recordedDestinationQueries.get(0).getRight();
         assertThat(requestedComponent, is(COMMAND_HANDLER));
         assertThat(requestedContextName, is("contexta"));
@@ -171,15 +170,15 @@ public class LegacySenderIT {
     @ApplicationScoped
     public static class RecordedJmsDestinationQueries implements JmsDestinations {
 
-        private List<Pair<Component, String>> destinationQueries = new LinkedList<>();
+        private List<Pair<String, String>> destinationQueries = new LinkedList<>();
 
         @Override
-        public Destination getDestination(final Component component, final String contextName) {
+        public Destination getDestination(final String component, final String contextName) {
             destinationQueries.add(Pair.of(component, contextName));
             return null;
         }
 
-        public List<Pair<Component, String>> recordedDestinationQueries() {
+        public List<Pair<String, String>> recordedDestinationQueries() {
             return destinationQueries;
         }
     }

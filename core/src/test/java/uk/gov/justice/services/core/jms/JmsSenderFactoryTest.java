@@ -7,7 +7,6 @@ import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 
-import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
@@ -38,7 +37,7 @@ public class JmsSenderFactoryTest {
     @Test
     public void shouldReturnNewJmsSender() throws Exception {
 
-        final Component componentDestination = COMMAND_API;
+        final String componentDestination = COMMAND_API;
 
         final Sender sender = jmsSenderFactory.createSender(componentDestination);
 

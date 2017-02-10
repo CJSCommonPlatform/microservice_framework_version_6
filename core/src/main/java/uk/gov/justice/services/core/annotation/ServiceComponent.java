@@ -17,5 +17,5 @@ import javax.enterprise.context.ApplicationScoped;
 @ApplicationScoped
 public @interface ServiceComponent {
 
-    Component value();
+    String value();
 }

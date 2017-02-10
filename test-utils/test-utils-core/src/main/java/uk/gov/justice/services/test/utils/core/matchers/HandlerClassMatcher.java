@@ -1,6 +1,5 @@
 package uk.gov.justice.services.test.utils.core.matchers;
 
-import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.CustomServiceComponent;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 
@@ -53,16 +52,16 @@ import org.hamcrest.TypeSafeDiagnosingMatcher;
  */
 public class HandlerClassMatcher extends TypeSafeDiagnosingMatcher<Class<?>> {
 
-    private final Optional<Component> component;
+    private final Optional<String> component;
     private final Optional<String> customComponent;
     private Optional<Matcher<Class<?>>> matcher = Optional.empty();
 
-    private HandlerClassMatcher(final Optional<Component> component, final Optional<String> customComponent) {
+    private HandlerClassMatcher(final Optional<String> component, final Optional<String> customComponent) {
         this.component = component;
         this.customComponent = customComponent;
     }
 
-    public static HandlerClassMatcher isHandlerClass(final Component component) {
+    public static HandlerClassMatcher isHandlerClass(final String component) {
         return new HandlerClassMatcher(Optional.ofNullable(component), Optional.empty());
     }
 
@@ -95,7 +94,7 @@ public class HandlerClassMatcher extends TypeSafeDiagnosingMatcher<Class<?>> {
 
         if (component.isPresent() && isNotServiceComponent(handlerClass)) {
             description.appendValue(handlerClass.getName())
-                    .appendText(" is not annotated as a Service Component " + component.get().name());
+                    .appendText(" is not annotated as a Service Component " + component.get());
             return false;
         }
 

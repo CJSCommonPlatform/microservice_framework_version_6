@@ -1,7 +1,9 @@
 package uk.gov.justice.services.core.it;
 
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLLER;
@@ -26,8 +28,6 @@ import uk.gov.justice.services.core.dispatcher.EmptySystemUserProvider;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationException;
-import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandlerProducer;
-import uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.extension.AnnotationScanner;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
@@ -54,7 +54,9 @@ import org.apache.openejb.junit.ApplicationComposer;
 import org.apache.openejb.testing.Classes;
 import org.apache.openejb.testing.Module;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 
 @RunWith(ApplicationComposer.class)
@@ -119,9 +121,23 @@ public class SenderInjectedHandlerIT {
         assertThat(RecordingSender.instance().recordedEnvelopes().get(0).metadata().name(), equalTo("contexta.command.aaa"));
     }
 
-    @Test(expected = EnvelopeValidationException.class)
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
+
+    @Test
     public void shouldThrowExceptionIfPayloadDoesNotAdhereToSchema() throws Exception {
+        expectedException.expect(EnvelopeValidationException.class);
+        expectedException.expectMessage(containsString("Message not valid against schema"));
+
         sender.send(envelope().with(metadataWithRandomUUID("contexta.command.aaa")).withPayloadOf("Aaaa", "unknownField").build());
+    }
+
+    @Test
+    public void shouldThrowExceptionIfMalformedSchema() throws Exception {
+        expectedException.expect(EnvelopeValidationException.class);
+        expectedException.expectMessage(is("Could not load json schema that matches message type malformed-schema."));
+
+        sender.send(envelope().with(metadataWithRandomUUID("malformed-schema")).withPayloadOf("abc", "someField1").build());
     }
 
 }

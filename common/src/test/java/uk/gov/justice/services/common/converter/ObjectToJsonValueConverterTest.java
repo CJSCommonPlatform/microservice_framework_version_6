@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import uk.gov.justice.services.common.converter.exception.ConverterException;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -36,6 +37,7 @@ public class ObjectToJsonValueConverterTest {
     private static final String ATTRIBUTE_1 = "Attribute 1";
     private static final String ATTRIBUTE_2 = "Attribute 2";
     private static final Boolean BOOL_FLAG = true;
+    private static final String DATE_TIME = "2016-03-18T00:46:54.700Z";
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
@@ -45,51 +47,64 @@ public class ObjectToJsonValueConverterTest {
 
     @Test
     public void shouldConvertPojoToJsonValue() throws Exception {
-        Pojo pojo = new Pojo(ID, NAME, BOOL_FLAG, ATTRIBUTES);
-        ObjectToJsonValueConverter objectToJsonValueConverter =
+        final Pojo pojo = new Pojo(ID, NAME, BOOL_FLAG, ATTRIBUTES);
+        final ObjectToJsonValueConverter objectToJsonValueConverter =
                 new ObjectToJsonValueConverter(new ObjectMapperProducer().objectMapper());
-        JsonValue jsonValue = objectToJsonValueConverter.convert(pojo);
+        final JsonValue jsonValue = objectToJsonValueConverter.convert(pojo);
 
         assertThat(jsonValue, equalTo(expectedJsonValue()));
     }
 
     @Test
     public void shouldConvertPojoToJsonValue2() throws Exception {
-        Pojo pojo = new Pojo(ID, NAME, BOOL_FLAG, ATTRIBUTES);
-        ObjectToJsonValueConverter objectToJsonValueConverter =
+        final Pojo pojo = new Pojo(ID, NAME, BOOL_FLAG, ATTRIBUTES);
+        final ObjectToJsonValueConverter objectToJsonValueConverter =
                 new ObjectToJsonValueConverter(new ObjectMapperProducer().objectMapper());
 
-        JsonValue jsonValue = objectToJsonValueConverter.convert(pojo);
+        final JsonValue jsonValue = objectToJsonValueConverter.convert(pojo);
 
         assertThat(jsonValue, equalTo(expectedJsonValue()));
     }
 
+    @Test
+    public void shouldConvertPojoWithZoneDateTimeToJsonValueWithOutTruncation() throws Exception {
+        final PojoWithZoneDateTime pojo = new PojoWithZoneDateTime(ZonedDateTimes.fromString(DATE_TIME));
+        final ObjectToJsonValueConverter objectToJsonValueConverter =
+                new ObjectToJsonValueConverter(new ObjectMapperProducer().objectMapper());
+
+        final JsonValue jsonValue = objectToJsonValueConverter.convert(pojo);
+
+        assertThat(jsonValue, equalTo(
+                Json.createObjectBuilder()
+                        .add("dateTime", DATE_TIME)
+                        .build()));
+    }
 
     @Test
     public void shouldConvertNullToJsonValueNull() throws Exception {
-        ObjectToJsonValueConverter objectToJsonValueConverter =
+        final ObjectToJsonValueConverter objectToJsonValueConverter =
                 new ObjectToJsonValueConverter(new ObjectMapperProducer().objectMapper());
 
-        JsonValue jsonValue = objectToJsonValueConverter.convert(null);
+        final JsonValue jsonValue = objectToJsonValueConverter.convert(null);
 
         assertThat(jsonValue, equalTo(NULL));
     }
 
     @Test
     public void shouldConvertListToJsonValue() throws Exception {
-        List<String> list = Arrays.asList(ATTRIBUTE_1, ATTRIBUTE_2);
-        ObjectToJsonValueConverter objectToJsonValueConverter =
+        final List<String> list = Arrays.asList(ATTRIBUTE_1, ATTRIBUTE_2);
+        final ObjectToJsonValueConverter objectToJsonValueConverter =
                 new ObjectToJsonValueConverter(new ObjectMapperProducer().objectMapper());
-        JsonValue jsonValue = objectToJsonValueConverter.convert(list);
+        final JsonValue jsonValue = objectToJsonValueConverter.convert(list);
 
         assertThat(jsonValue, equalTo(expectedJsonArray()));
     }
 
     @Test
     public void shouldThrowExceptionOnConversionError() throws JsonProcessingException {
-        ObjectToJsonValueConverter objectToJsonValueConverter = new ObjectToJsonValueConverter(mapper);
+        final ObjectToJsonValueConverter objectToJsonValueConverter = new ObjectToJsonValueConverter(mapper);
 
-        Pojo pojo = new Pojo(ID, NAME, false, ATTRIBUTES);
+        final Pojo pojo = new Pojo(ID, NAME, false, ATTRIBUTES);
         doThrow(JsonProcessingException.class).when(mapper).writeValueAsString(pojo);
 
         exception.expect(IllegalArgumentException.class);
@@ -100,17 +115,16 @@ public class ObjectToJsonValueConverterTest {
 
     @Test(expected = ConverterException.class)
     public void shouldThrowExceptionOnNullResult() throws JsonProcessingException {
-        ObjectToJsonValueConverter objectToJsonValueConverter = new ObjectToJsonValueConverter(mapper);
+        final ObjectToJsonValueConverter objectToJsonValueConverter = new ObjectToJsonValueConverter(mapper);
 
-
-        Pojo pojo = new Pojo(ID, NAME, false, ATTRIBUTES);
+        final Pojo pojo = new Pojo(ID, NAME, false, ATTRIBUTES);
         when(mapper.writeValueAsString(pojo)).thenReturn(null);
 
         objectToJsonValueConverter.convert(pojo);
     }
 
     private JsonValue expectedJsonValue() {
-        JsonArray array = Json.createArrayBuilder()
+        final JsonArray array = Json.createArrayBuilder()
                 .add("Attribute 1")
                 .add("Attribute 2").build();
 
@@ -118,7 +132,8 @@ public class ObjectToJsonValueConverterTest {
                 .add("id", ID.toString())
                 .add("name", NAME)
                 .add("boolFlag", BOOL_FLAG)
-                .add("attributes", array).build();
+                .add("attributes", array)
+                .build();
     }
 
     private JsonValue expectedJsonArray() {
@@ -156,7 +171,19 @@ public class ObjectToJsonValueConverterTest {
         public List<String> getAttributes() {
             return attributes;
         }
+    }
 
+    public static class PojoWithZoneDateTime {
+
+        private final ZonedDateTime dateTime;
+
+        public PojoWithZoneDateTime(final ZonedDateTime dateTime) {
+            this.dateTime = dateTime;
+        }
+
+        public ZonedDateTime getDateTime() {
+            return dateTime;
+        }
     }
 
 }

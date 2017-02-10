@@ -5,6 +5,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Fixed
+- ObjectMapper truncation of converted ZoneDateTimes when milliseconds part ends with zero
+
 ## [1.4.0] - 2017-02-02
 
 ### Added

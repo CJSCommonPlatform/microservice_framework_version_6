@@ -5,8 +5,11 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [1.4.1] - 2017-02-13
+
 ### Fixed
 - ObjectMapper truncation of converted ZoneDateTimes when milliseconds part ends with zero
+- Ignore non vendor-specific media types while generating clients
 
 ## [1.4.0] - 2017-02-02
 
@@ -530,7 +533,12 @@ turned off by default
 
 - Initial release with basic dispatcher, handler and adapter generation
 
-[Unreleased]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.0.1...HEAD
+[Unreleased]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.4.1...HEAD
+[1.4.1]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.4.0...release-1.4.1
+[1.4.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.3.0...release-1.4.0
+[1.3.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.2.0...release-1.3.0
+[1.2.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.1.0...release-1.2.0
+[1.1.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.0.0...release-1.1.0
 [1.0.1]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.0.0...release-1.0.1
 [1.0.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.33.0...release-1.0.0
 [0.33.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.32.0...release-0.33.0

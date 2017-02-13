@@ -5,8 +5,11 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [1.4.1] - 2017-02-13
+
 ### Fixed
 - ObjectMapper truncation of converted ZoneDateTimes when milliseconds part ends with zero
+- Ignore non vendor-specific media types while generating clients
 
 ## [1.4.0] - 2017-02-02
 

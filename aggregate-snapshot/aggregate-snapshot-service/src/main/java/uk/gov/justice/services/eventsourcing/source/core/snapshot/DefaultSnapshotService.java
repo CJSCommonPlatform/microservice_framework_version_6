@@ -39,7 +39,8 @@ public class DefaultSnapshotService implements SnapshotService {
     }
 
     @Override
-    public <T extends Aggregate> void attemptAggregateStore(final UUID streamId, final long streamVersionId, final T aggregate, final long currentSnapshotVersion) {
+    public <T extends Aggregate> void attemptAggregateStore(final UUID streamId, final long streamVersionId, final T aggregate) {
+        final long currentSnapshotVersion = snapshotRepository.getLatestSnapshotVersion(streamId, aggregate.getClass());
         if (snapshotStrategy.shouldCreateSnapshot(streamVersionId, currentSnapshotVersion)) {
             try {
                 logger.trace("Storing snapshot of aggregate: {}, streamId: {}, version: {}", aggregate.getClass().getSimpleName(), streamId, streamVersionId);

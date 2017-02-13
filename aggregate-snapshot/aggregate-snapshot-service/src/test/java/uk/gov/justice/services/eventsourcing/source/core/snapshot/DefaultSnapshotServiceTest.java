@@ -4,9 +4,10 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsNull.notNullValue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.domain.aggregate.NoSerializableTestAggregate;
@@ -71,12 +72,13 @@ public class DefaultSnapshotServiceTest {
     public void shouldCreateSnapshotIfStrategyMandatesCreation() throws AggregateChangeDetectedException {
         final TestAggregate aggregate = new TestAggregate();
         final Optional<AggregateSnapshot<TestAggregate>> aggregateSnapshot = Optional.empty();
-        final Long initialAggregateVersionId = 0l;
+        final Long currentSnapshotVersion = 0l;
         final Long currentAggregateVersionId = 26l;
         when(snapshotRepository.getLatestSnapshot(STREAM_ID, TestAggregate.class)).thenReturn(aggregateSnapshot);
-        when(snapshotStrategy.shouldCreateSnapshot(currentAggregateVersionId, initialAggregateVersionId)).thenReturn(true);
+        when(snapshotRepository.getLatestSnapshotVersion(STREAM_ID, TestAggregate.class)).thenReturn(currentSnapshotVersion);
+        when(snapshotStrategy.shouldCreateSnapshot(currentAggregateVersionId, currentSnapshotVersion)).thenReturn(true);
 
-        snapshotService.attemptAggregateStore(STREAM_ID, currentAggregateVersionId, aggregate, initialAggregateVersionId);
+        snapshotService.attemptAggregateStore(STREAM_ID, currentAggregateVersionId, aggregate);
 
         verify(snapshotRepository, times(1)).storeSnapshot(snapshotArgumentCaptor.capture());
 
@@ -87,28 +89,30 @@ public class DefaultSnapshotServiceTest {
 
     @Test
     public void shouldNotCreateAggregateIfStrategyDoesNotMandatesCreation() throws AggregateChangeDetectedException {
-        final Long initialAggregateVersionId = 0l;
+        final Long currentSnapshotVersion = 0l;
         final Long currentAggregateVersionId = 26l;
         final TestAggregate aggregate = new TestAggregate();
-        when(snapshotStrategy.shouldCreateSnapshot(currentAggregateVersionId, initialAggregateVersionId)).thenReturn(false);
+        when(snapshotRepository.getLatestSnapshotVersion(STREAM_ID, TestAggregate.class)).thenReturn(currentSnapshotVersion);
+        when(snapshotStrategy.shouldCreateSnapshot(currentAggregateVersionId, currentSnapshotVersion)).thenReturn(false);
 
-        snapshotService.attemptAggregateStore(STREAM_ID, currentAggregateVersionId, aggregate, initialAggregateVersionId);
+        snapshotService.attemptAggregateStore(STREAM_ID, currentAggregateVersionId, aggregate);
+        verify(snapshotRepository, never()).storeSnapshot(any(AggregateSnapshot.class));
 
-        verifyZeroInteractions(snapshotRepository);
+
     }
 
 
     @Test
     public void shouldNotCreateSnapshotWhenStrategyMandatesCreationButFailsSerialization() throws AggregateChangeDetectedException {
         final NoSerializableTestAggregate aggregate = new NoSerializableTestAggregate();
-        final Long initialAggregateVersionId = 0l;
-        final Long currentAggregateVersionId = 26l;
+        final Long currentSnapshotVersion = 16l;
+        final Long currentAggregateVersionId = 36l;
+        when(snapshotRepository.getLatestSnapshotVersion(STREAM_ID, NoSerializableTestAggregate.class)).thenReturn(currentSnapshotVersion);
+        when(snapshotStrategy.shouldCreateSnapshot(currentAggregateVersionId, currentSnapshotVersion)).thenReturn(true);
 
-        when(snapshotStrategy.shouldCreateSnapshot(currentAggregateVersionId, initialAggregateVersionId)).thenReturn(true);
+        snapshotService.attemptAggregateStore(STREAM_ID, currentAggregateVersionId, aggregate);
 
-        snapshotService.attemptAggregateStore(STREAM_ID, currentAggregateVersionId, aggregate, initialAggregateVersionId);
-
-        verifyZeroInteractions(snapshotRepository);
+        verify(snapshotRepository, never()).storeSnapshot(any(AggregateSnapshot.class));
     }
 
 }

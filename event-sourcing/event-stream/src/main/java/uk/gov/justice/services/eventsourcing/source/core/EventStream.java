@@ -24,24 +24,26 @@ public interface EventStream {
      *
      * @return the stream of events
      */
-    Stream<JsonEnvelope> readFrom(final Long version);
+    Stream<JsonEnvelope> readFrom(final long version);
 
     /**
      * Store a stream of events.
      *
      * @param events the stream of events to store
+     * @return the current stream version
      * @throws EventStreamException if an event could not be appended
      */
-    void append(final Stream<JsonEnvelope> events) throws EventStreamException;
+    long append(final Stream<JsonEnvelope> events) throws EventStreamException;
 
     /**
      * Store a stream of events after the given version.
      *
      * @param events  the stream of events to store
      * @param version the version to append from
+     * @return the current stream version
      * @throws EventStreamException if an event could not be appended
      */
-    void appendAfter(final Stream<JsonEnvelope> events, final Long version) throws EventStreamException;
+    long appendAfter(final Stream<JsonEnvelope> events, final long version) throws EventStreamException;
 
     /**
      * Get the current (current maximum) sequence id (version number) for a stream

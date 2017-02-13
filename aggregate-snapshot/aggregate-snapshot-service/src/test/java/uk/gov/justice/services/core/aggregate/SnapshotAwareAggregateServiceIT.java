@@ -38,9 +38,9 @@ import uk.gov.justice.services.eventsourcing.repository.jdbc.EventLogInsertionSt
 import uk.gov.justice.services.eventsourcing.repository.jdbc.JdbcEventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLogConverter;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
+import uk.gov.justice.services.eventsourcing.source.core.EventStreamManager;
 import uk.gov.justice.services.eventsourcing.source.core.SnapshotAwareEnvelopeEventStream;
 import uk.gov.justice.services.eventsourcing.source.core.SnapshotAwareEventSource;
-import uk.gov.justice.services.eventsourcing.source.core.SnapshotAwareEventStreamManager;
 import uk.gov.justice.services.eventsourcing.source.core.snapshot.DefaultSnapshotService;
 import uk.gov.justice.services.eventsourcing.source.core.snapshot.DefaultSnapshotStrategy;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -151,7 +151,7 @@ public class SnapshotAwareAggregateServiceIT {
             SnapshotAwareAggregateService.class,
             SnapshotAwareEventSource.class,
             SnapshotAwareEnvelopeEventStream.class,
-            SnapshotAwareEventStreamManager.class,
+            EventStreamManager.class,
             DefaultSnapshotStrategy.class,
             ValueProducer.class,
             DefaultSnapshotService.class,
@@ -175,7 +175,7 @@ public class SnapshotAwareAggregateServiceIT {
     @Test
     public void shouldStoreABrandNewSnapshotWhenEventCountInTheStreamReachesThreshold() throws Exception {
 
-        final SnapshotAwareEnvelopeEventStream stream = eventSource.getStreamById(STREAM_ID);
+        final EventStream stream = eventSource.getStreamById(STREAM_ID);
 
         rebuildAggregateAndApplyEvents(stream, SNAPSHOT_THRESHOLD);
 
@@ -338,7 +338,7 @@ public class SnapshotAwareAggregateServiceIT {
         assertThat(snapshotRepository.snapshotCount(STREAM_ID), is(2L));
         assertThat(eventLogRepository.eventLogCount(STREAM_ID), is(50));
 
-        TestAggregate aggregateFromSnapshot = (TestAggregate) snapshot.get().getAggregate(new DefaultObjectInputStreamStrategy());
+        TestAggregate aggregateFromSnapshot = snapshot.get().getAggregate(new DefaultObjectInputStreamStrategy());
         assertThat(aggregateFromSnapshot.numberOfAppliedEvents(), is(50));
     }
 

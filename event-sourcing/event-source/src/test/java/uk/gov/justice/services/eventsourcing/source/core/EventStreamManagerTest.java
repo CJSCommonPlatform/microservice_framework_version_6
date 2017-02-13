@@ -4,6 +4,7 @@ import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -68,24 +69,17 @@ public class EventStreamManagerTest {
     public void shouldAppendToStream() throws Exception {
         when(eventRepository.getCurrentSequenceIdForStream(STREAM_ID)).thenReturn(INITIAL_VERSION);
 
-        eventStreamManager.append(STREAM_ID,
-                singletonList(
-                        envelope()
-                                .with(metadataOf(ID_VALUE, NAME_VALUE))
-                                .withPayloadOf(PAYLOAD_FIELD_VALUE, PAYLOAD_FIELD_NAME)
-                                .build())
-                        .stream());
+        eventStreamManager.append(STREAM_ID, Stream.of(
+                envelope()
+                        .with(metadataOf(ID_VALUE, NAME_VALUE))
+                        .withPayloadOf(PAYLOAD_FIELD_VALUE, PAYLOAD_FIELD_NAME)
+                        .build()));
 
         long expectedVersion = INITIAL_VERSION + 1;
         ArgumentCaptor<JsonEnvelope> envelopeArgumentCaptor = ArgumentCaptor.forClass(JsonEnvelope.class);
-        ArgumentCaptor<UUID> streamIdCaptor = ArgumentCaptor.forClass(UUID.class);
-        ArgumentCaptor<Long> versionCaptor = ArgumentCaptor.forClass(Long.class);
 
-        verify(eventRepository).store(envelopeArgumentCaptor.capture(), streamIdCaptor.capture(), versionCaptor.capture());
+        verify(eventRepository).store(envelopeArgumentCaptor.capture());
         verify(eventPublisher).publish(envelopeArgumentCaptor.capture());
-
-        assertThat(streamIdCaptor.getValue(), equalTo(STREAM_ID));
-        assertThat(versionCaptor.getValue(), equalTo(expectedVersion));
 
         assertThat(envelopeArgumentCaptor.getValue(), jsonEnvelope(
                 metadata()
@@ -98,14 +92,18 @@ public class EventStreamManagerTest {
                 )));
     }
 
+
+
     @Test(expected = EventStreamException.class)
     public void shouldThrowExceptionWhenEnvelopeContainsVersion() throws Exception {
         eventStreamManager.append(STREAM_ID, singletonList(envelope().with(metadataWithDefaults().withVersion(INITIAL_VERSION + 1)).build()).stream());
     }
 
+
     @Test
     public void shouldAppendToStreamFromVersion() throws Exception {
         when(eventRepository.getCurrentSequenceIdForStream(STREAM_ID)).thenReturn(CURRENT_VERSION);
+        final long expectedVersion = CURRENT_VERSION + 1;
 
         eventStreamManager.appendAfter(STREAM_ID,
                 singletonList(
@@ -115,16 +113,10 @@ public class EventStreamManagerTest {
                                 .build())
                         .stream(), CURRENT_VERSION);
 
-        final long expectedVersion = CURRENT_VERSION + 1;
         final ArgumentCaptor<JsonEnvelope> envelopeArgumentCaptor = ArgumentCaptor.forClass(JsonEnvelope.class);
-        final ArgumentCaptor<UUID> streamIdCaptor = ArgumentCaptor.forClass(UUID.class);
-        final ArgumentCaptor<Long> versionCaptor = ArgumentCaptor.forClass(Long.class);
 
-        verify(eventRepository).store(envelopeArgumentCaptor.capture(), streamIdCaptor.capture(), versionCaptor.capture());
+        verify(eventRepository).store(envelopeArgumentCaptor.capture());
         verify(eventPublisher).publish(envelopeArgumentCaptor.capture());
-
-        assertThat(streamIdCaptor.getValue(), equalTo(STREAM_ID));
-        assertThat(versionCaptor.getValue(), equalTo(expectedVersion));
 
         assertThat(envelopeArgumentCaptor.getValue(), jsonEnvelope(
                 metadata()
@@ -135,6 +127,35 @@ public class EventStreamManagerTest {
                 payloadIsJson(
                         withJsonPath(format("$.%s", PAYLOAD_FIELD_NAME), equalTo(PAYLOAD_FIELD_VALUE))
                 )));
+    }
+
+    @Test
+    public void appendToStreamShouldReturnCurrentVersion() throws Exception {
+
+        when(eventRepository.getCurrentSequenceIdForStream(STREAM_ID)).thenReturn(6L);
+
+        long returnedVersion = eventStreamManager.append(STREAM_ID, Stream.of(
+                envelope()
+                        .with(metadataWithDefaults())
+                        .build()));
+
+        assertThat(returnedVersion, is(7l));
+
+    }
+
+    @Test
+    public void appendAfterShouldReturnCurrentVersion() throws Exception {
+
+        final long currentVersion = 4L;
+        when(eventRepository.getCurrentSequenceIdForStream(STREAM_ID)).thenReturn(currentVersion);
+
+        long returnedVersion = eventStreamManager.appendAfter(STREAM_ID, Stream.of(
+                envelope()
+                        .with(metadataWithDefaults())
+                        .build()), currentVersion);
+
+        assertThat(returnedVersion, is(currentVersion + 1));
+
     }
 
     @Test(expected = EventStreamException.class)
@@ -165,13 +186,6 @@ public class EventStreamManagerTest {
 
         assertThat(actualEnvelopeEventStream, equalTo(eventStream));
         verify(eventRepository).getByStreamId(STREAM_ID);
-    }
-
-    @Test(expected = InvalidStreamVersionRuntimeException.class)
-    public void shouldThrowExceptionWhenReadingFromInvalidVersion() {
-        when(eventRepository.getCurrentSequenceIdForStream(STREAM_ID)).thenReturn(CURRENT_VERSION);
-
-        eventStreamManager.readFrom(STREAM_ID, INVALID_VERSION);
     }
 
     @Test

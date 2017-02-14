@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Added
+- MultipartRestClient in test-utils: client for multipart file uploads
+- LiquibaseDatabaseBootstrapper in test-utils: bootstraps a database using your liquibase scripts 
+
 ## [1.4.1] - 2017-02-13
 
 ### Fixed

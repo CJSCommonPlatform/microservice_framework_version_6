@@ -35,11 +35,9 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
-        <!--TODO move version to the common bom -->
         <dependency>
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-multipart-provider</artifactId>
-            <version>3.0.7.Final</version>
         </dependency>
         <dependency>
             <groupId>com.jayway.jsonpath</groupId>

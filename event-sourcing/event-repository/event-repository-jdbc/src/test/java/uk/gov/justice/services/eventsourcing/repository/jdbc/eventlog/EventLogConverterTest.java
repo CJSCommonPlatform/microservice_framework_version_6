@@ -7,6 +7,7 @@ import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUIDAndName;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
 
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
@@ -77,12 +78,12 @@ public class EventLogConverterTest {
 
     @Test(expected = InvalidStreamIdException.class)
     public void shouldThrowExceptionOnNullStreamId() throws Exception {
-        eventLogConverter.eventLogOf(envelope().with(metadataWithDefaults()).build());
+        eventLogConverter.eventLogOf(envelope().with(metadataWithRandomUUIDAndName()).build());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionOnMissingCreatedAt() throws Exception {
-        eventLogConverter.eventLogOf((envelope().with(metadataWithDefaults().withStreamId(STREAM_ID)).build()));
+        eventLogConverter.eventLogOf((envelope().with(metadataWithRandomUUIDAndName().withStreamId(STREAM_ID)).build()));
     }
 
     @Test

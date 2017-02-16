@@ -2,6 +2,7 @@ package uk.gov.justice.services.messaging;
 
 
 import static javax.json.Json.createObjectBuilder;
+import static javax.json.JsonValue.ValueType.OBJECT;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import java.util.Map;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
 
 class JsonObjectBuilderWrapper {
 
@@ -17,6 +19,11 @@ class JsonObjectBuilderWrapper {
     private final Map<String, Object> entryMap = new HashMap<>();
 
     public JsonObjectBuilderWrapper(final JsonObject jsonObject) {
+        jsonObject.forEach((k, v) -> {
+            if (v.getValueType() == OBJECT) {
+                entryMap.put(k, JsonObjects.createObjectBuilder((JsonObject) v));
+            }
+        });
         jsonObjectBuilder = JsonObjects.createObjectBuilder(jsonObject);
     }
 

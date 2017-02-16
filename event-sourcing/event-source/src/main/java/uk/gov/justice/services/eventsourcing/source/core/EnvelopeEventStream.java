@@ -38,7 +38,7 @@ public class EnvelopeEventStream implements EventStream {
     }
 
     @Override
-    public Long getCurrentVersion() {
+    public long getCurrentVersion() {
         return eventStreamManager.getCurrentVersion(id);
     }
 

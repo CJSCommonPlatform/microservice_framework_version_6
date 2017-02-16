@@ -86,7 +86,7 @@ public class EventStreamManager {
      *
      * @return the latest sequence id for the provided steam. 0 when stream is empty.
      */
-    public Long getCurrentVersion(final UUID id) {
+    public long getCurrentVersion(final UUID id) {
         return eventRepository.getCurrentSequenceIdForStream(id);
     }
 

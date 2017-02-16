@@ -1,6 +1,7 @@
 package uk.gov.justice.services.messaging;
 
 import static co.unruly.matchers.OptionalMatchers.contains;
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -19,7 +20,7 @@ public class JsonObjectMetadataBuilderTest {
 
     @Test
     public void shouldBuildMetadataWithMandatoryElements() {
-        final UUID id = UUID.randomUUID();
+        final UUID id = randomUUID();
         final String name = "some.name";
 
         final Metadata metadata = metadataOf(id, name).build();
@@ -30,8 +31,8 @@ public class JsonObjectMetadataBuilderTest {
 
     @Test
     public void shouldBuildMetadataWithCausation() throws Exception {
-        final UUID id1 = UUID.randomUUID();
-        final UUID id2 = UUID.randomUUID();
+        final UUID id1 = randomUUID();
+        final UUID id2 = randomUUID();
 
         final Metadata metadata = metadataWithDefaults().withCausation(id1, id2).build();
         assertThat(metadata.causation(), hasItems(id1, id2));
@@ -65,7 +66,7 @@ public class JsonObjectMetadataBuilderTest {
 
     @Test
     public void shouldBuildMetadataWithStreamId() {
-        final UUID streamId = UUID.randomUUID();
+        final UUID streamId = randomUUID();
         final Metadata metadata = metadataWithDefaults().withStreamId(streamId).build();
 
         assertThat(metadata.streamId().get(), is(streamId));
@@ -74,7 +75,7 @@ public class JsonObjectMetadataBuilderTest {
 
     @Test
     public void shouldBuildMetadataWithStreamIdAndVersion() {
-        final UUID streamId = UUID.randomUUID();
+        final UUID streamId = randomUUID();
         final Long version = 1234567l;
         final Metadata metadata = metadataWithDefaults().withStreamId(streamId).withVersion(version).build();
 
@@ -85,17 +86,24 @@ public class JsonObjectMetadataBuilderTest {
 
     @Test
     public void shouldBuildFromMetadataAndOverwriteFields() throws Exception {
-        final UUID id = UUID.randomUUID();
+        final UUID id = randomUUID();
+        final UUID streamId = randomUUID();
+        final UUID causationId1 = randomUUID();
+        final UUID causationId2 = randomUUID();
         final String name = "some.name";
-        final Metadata originalMetadata = metadataOf(id, name).withUserId("usrIdAAAA").build();
+        final Metadata originalMetadata = metadataOf(id, name).withUserId("usrIdAAAA").withStreamId(streamId).withCausation(causationId1, causationId2).build();
 
-        final Metadata metadata = metadataFrom(originalMetadata).withUserId("usrIdBBBB").build();
+        final Metadata metadata = metadataFrom(originalMetadata).withUserId("usrIdBBBB").withVersion(4L).build();
+        assertThat(metadata.version(), contains(4L));
+        assertThat(metadata.userId(), contains("usrIdBBBB"));
         assertThat(metadata.id(), is(id));
         assertThat(metadata.name(), is(name));
-        assertThat(metadata.userId(), contains("usrIdBBBB"));
+        assertThat(metadata.streamId(), contains(streamId));
+        assertThat(metadata.causation(), hasItems(causationId1, causationId2));
+
     }
 
     private JsonObjectMetadata.Builder metadataWithDefaults() {
-        return metadataOf(UUID.randomUUID(), "defaultName");
+        return metadataOf(randomUUID(), "defaultName");
     }
 }

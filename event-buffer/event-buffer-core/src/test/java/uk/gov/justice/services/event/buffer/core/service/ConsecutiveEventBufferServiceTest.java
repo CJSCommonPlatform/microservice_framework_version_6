@@ -12,7 +12,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUIDAndName;
 
 import uk.gov.justice.services.event.buffer.core.repository.streambuffer.StreamBufferEvent;
 import uk.gov.justice.services.event.buffer.core.repository.streambuffer.StreamBufferJdbcRepository;
@@ -58,7 +60,7 @@ public class ConsecutiveEventBufferServiceTest {
     @Test(expected = IllegalStateException.class)
     public void shouldThrowExceptionIfNoStreamId() {
 
-        bufferService.currentOrderedEventsWith(envelope().with(metadataWithDefaults().withVersion(1L)).build());
+        bufferService.currentOrderedEventsWith(envelope().with(metadataWithRandomUUIDAndName().withVersion(1L)).build());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -73,7 +75,7 @@ public class ConsecutiveEventBufferServiceTest {
     @Test(expected = IllegalStateException.class)
     public void shouldNotAllowNullVersion() {
 
-        bufferService.currentOrderedEventsWith(envelope().with(metadataWithDefaults().withStreamId(randomUUID())).build());
+        bufferService.currentOrderedEventsWith(envelope().with(metadataWithRandomUUIDAndName().withStreamId(randomUUID())).build());
     }
 
     @Test

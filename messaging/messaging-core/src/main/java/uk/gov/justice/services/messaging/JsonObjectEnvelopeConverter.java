@@ -9,6 +9,7 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
 
 import java.io.StringReader;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -22,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * A converter class to convert between {@link JsonEnvelope} and {@link JsonObject}.
  */
+@ApplicationScoped
 public class JsonObjectEnvelopeConverter {
 
     @Inject

@@ -50,7 +50,7 @@ public interface EventStream {
      *
      * @return the latest sequence id for the provided steam. 0 when stream is empty.
      */
-    Long getCurrentVersion();
+    long getCurrentVersion();
 
     /**
      * Retrieve the id of this stream.

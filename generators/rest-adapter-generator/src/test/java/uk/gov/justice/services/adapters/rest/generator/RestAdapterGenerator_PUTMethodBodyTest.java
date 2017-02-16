@@ -15,12 +15,13 @@ import static uk.gov.justice.services.generators.test.utils.config.GeneratorConf
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
+import uk.gov.justice.services.adapter.rest.processor.ResponseStrategy;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -44,16 +45,16 @@ public class RestAdapterGenerator_PUTMethodBodyTest extends BaseRestAdapterGener
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
-        Object resourceObject = getInstanceOf(resourceClass);
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
+        final Object resourceObject = getInstanceOf(resourceClass);
 
-        Response processorResponse = Response.ok().build();
-        when(restProcessor.processAsynchronously(any(Consumer.class), anyString(), any(Optional.class), any(HttpHeaders.class),
+        final Response processorResponse = Response.ok().build();
+        when(restProcessor.process(any(ResponseStrategy.class), any(Function.class), anyString(), any(Optional.class), any(HttpHeaders.class),
                 any(Collection.class))).thenReturn(processorResponse);
 
-        Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass);
 
-        Object result = method.invoke(resourceObject, NOT_USED_JSONOBJECT);
+        final Object result = method.invoke(resourceObject, NOT_USED_JSONOBJECT);
 
         assertThat(result, is(processorResponse));
     }
@@ -69,19 +70,19 @@ public class RestAdapterGenerator_PUTMethodBodyTest extends BaseRestAdapterGener
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
-        Object resourceObject = getInstanceOf(resourceClass);
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
+        final Object resourceObject = getInstanceOf(resourceClass);
 
-        Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass);
 
         method.invoke(resourceObject, NOT_USED_JSONOBJECT);
 
-        ArgumentCaptor<Consumer> consumerCaptor = ArgumentCaptor.forClass(Consumer.class);
-        verify(restProcessor).processAsynchronously(consumerCaptor.capture(), anyString(), any(Optional.class), any(HttpHeaders.class),
+        final ArgumentCaptor<Function> functionCaptor = ArgumentCaptor.forClass(Function.class);
+        verify(restProcessor).process(any(ResponseStrategy.class), functionCaptor.capture(), anyString(), any(Optional.class), any(HttpHeaders.class),
                 any(Collection.class));
 
-        JsonEnvelope envelope = envelope().build();
-        consumerCaptor.getValue().accept(envelope);
+        final JsonEnvelope envelope = envelope().build();
+        functionCaptor.getValue().apply(envelope);
 
         verify(interceptorChainProcessor).process(envelope);
     }

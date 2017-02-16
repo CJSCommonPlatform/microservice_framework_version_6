@@ -29,6 +29,8 @@ import static uk.gov.justice.services.generators.test.utils.builder.MappingBuild
 import static uk.gov.justice.services.generators.test.utils.builder.QueryParamBuilder.queryParam;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithQueryApiDefaults;
+import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithQueryControllerDefaults;
+import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithQueryViewDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.defaultDeleteResource;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.defaultGetResource;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.defaultPatchResource;
@@ -42,6 +44,7 @@ import static uk.gov.justice.services.generators.test.utils.reflection.Reflectio
 
 import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.services.adapter.rest.BasicActionMapper;
+import uk.gov.justice.services.adapter.rest.processor.ResponseStrategyFactory;
 import uk.gov.justice.services.adapter.rest.processor.RestProcessor;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
@@ -942,6 +945,78 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
         final Field dispatcher = resourceClass.getDeclaredField("restProcessor");
         assertThat(dispatcher, not(nullValue()));
         assertThat(dispatcher.getType(), equalTo(RestProcessor.class));
+        assertThat(dispatcher.getAnnotation(Inject.class), not(nullValue()));
+        assertThat(dispatcher.getModifiers(), is(0));
+    }
+
+    @Test
+    public void shouldAddAnnotatedEnvelopeResponseFactoryPropertyForQueryController() throws Exception {
+        generator.run(
+                restRamlWithQueryControllerDefaults()
+                        .with(defaultPostResource()
+                                .withRelativeUri("/some/path")
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+
+        final Field dispatcher = resourceClass.getDeclaredField("responseStrategyFactory");
+        assertThat(dispatcher, not(nullValue()));
+        assertThat(dispatcher.getType(), equalTo(ResponseStrategyFactory.class));
+        assertThat(dispatcher.getAnnotation(Inject.class), not(nullValue()));
+        assertThat(dispatcher.getModifiers(), is(0));
+    }
+
+    @Test
+    public void shouldAddAnnotatedEnvelopeResponseFactoryPropertyForQueryView() throws Exception {
+        generator.run(
+                restRamlWithQueryViewDefaults()
+                        .with(defaultPostResource()
+                                .withRelativeUri("/some/path")
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+
+        final Field dispatcher = resourceClass.getDeclaredField("responseStrategyFactory");
+        assertThat(dispatcher, not(nullValue()));
+        assertThat(dispatcher.getType(), equalTo(ResponseStrategyFactory.class));
+        assertThat(dispatcher.getAnnotation(Inject.class), not(nullValue()));
+        assertThat(dispatcher.getModifiers(), is(0));
+    }
+
+    @Test
+    public void shouldAddAnnotatedPayloadResponseFactoryProperty() throws Exception {
+        generator.run(
+                restRamlWithDefaults()
+                        .with(defaultPostResource()
+                                .withRelativeUri("/some/path")
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+
+        final Field dispatcher = resourceClass.getDeclaredField("responseStrategyFactory");
+        assertThat(dispatcher, not(nullValue()));
+        assertThat(dispatcher.getType(), equalTo(ResponseStrategyFactory.class));
+        assertThat(dispatcher.getAnnotation(Inject.class), not(nullValue()));
+        assertThat(dispatcher.getModifiers(), is(0));
+    }
+
+    @Test
+    public void shouldAddAnnotatedAcceptedResponseFactoryProperty() throws Exception {
+        generator.run(
+                restRamlWithDefaults()
+                        .with(defaultPostResource()
+                                .withRelativeUri("/some/path")
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+
+        final Field dispatcher = resourceClass.getDeclaredField("responseStrategyFactory");
+        assertThat(dispatcher, not(nullValue()));
+        assertThat(dispatcher.getType(), equalTo(ResponseStrategyFactory.class));
         assertThat(dispatcher.getAnnotation(Inject.class), not(nullValue()));
         assertThat(dispatcher.getModifiers(), is(0));
     }

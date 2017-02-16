@@ -51,6 +51,16 @@ public class RamlBuilder {
                 .withBaseUri("http://localhost:8080/warname/query/api/rest/service");
     }
 
+    public static RamlBuilder restRamlWithQueryControllerDefaults() {
+        return restRamlWithTitleVersion()
+                .withBaseUri("http://localhost:8080/warname/query/controller/rest/service");
+    }
+
+    public static RamlBuilder restRamlWithQueryViewDefaults() {
+        return restRamlWithTitleVersion()
+                .withBaseUri("http://localhost:8080/warname/query/view/rest/service");
+    }
+
     public static RamlBuilder restRamlWithTitleVersion() {
         return new RamlBuilder()
                 .withVersion("#%RAML 0.8")

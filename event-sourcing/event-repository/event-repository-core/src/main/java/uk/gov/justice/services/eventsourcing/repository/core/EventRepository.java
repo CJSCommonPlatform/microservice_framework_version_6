@@ -42,13 +42,11 @@ public interface EventRepository {
      * Stores the given envelope into the event stream.
      *
      * @param envelope the envelope containing the event and the metadata.
-     * @param streamId the stream id the event needs to be stored in.
-     * @param version  the version at which the event is to be stored
      * @throws StoreEventRequestFailedException If there was a failure in storing the events, this
      *                                          will wrap the underlying cause.
      */
     @Transactional
-    void store(final JsonEnvelope envelope, final UUID streamId, final Long version) throws StoreEventRequestFailedException;
+    void store(final JsonEnvelope envelope) throws StoreEventRequestFailedException;
 
     /**
      * Returns the latest sequence Id for the given stream id.
@@ -57,7 +55,7 @@ public interface EventRepository {
      * @return latest sequence id for the stream.  Returns 0 if stream doesn't exist. Never returns
      * null.
      */
-    Long getCurrentSequenceIdForStream(final UUID streamId);
+    long getCurrentSequenceIdForStream(final UUID streamId);
 
     /**
      * Returns stream of envelope streams. Envelopes in the nested stream are ordered by sequenceId

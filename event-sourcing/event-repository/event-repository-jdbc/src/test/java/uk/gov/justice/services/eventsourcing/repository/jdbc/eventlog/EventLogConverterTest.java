@@ -1,19 +1,19 @@
 package uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog;
 
-import static java.time.temporal.ChronoUnit.SECONDS;
-import static org.exparity.hamcrest.date.ZonedDateTimeMatchers.within;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.CREATED_AT;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUIDAndName;
+import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
 
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
-import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.common.util.Clock;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidStreamIdException;
-import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.Metadata;
@@ -58,9 +58,14 @@ public class EventLogConverterTest {
 
     @Test
     public void shouldCreateEventLog() throws Exception {
-        JsonEnvelope expectedEnvelope = createTestEnvelope();
-        String expectedPayloadAsJsonString = expectedEnvelope.payloadAsJsonObject().toString();
-        EventLog eventLog = eventLogConverter.createEventLog(expectedEnvelope, STREAM_ID, SEQUENCE_ID);
+        JsonEnvelope envelope = envelope()
+                .with(metadataOf(ID, NAME)
+                        .withStreamId(STREAM_ID)
+                        .withVersion(SEQUENCE_ID)
+                        .createdAt(clock.now()))
+                .withPayloadOf(PAYLOAD_FIELD_VALUE, PAYLOAD_FIELD_NAME)
+                .build();
+        EventLog eventLog = eventLogConverter.eventLogOf(envelope);
 
         assertThat(eventLog.getId(), equalTo(ID));
         assertThat(eventLog.getName(), equalTo(NAME));
@@ -68,22 +73,22 @@ public class EventLogConverterTest {
         assertThat(eventLog.getSequenceId(), equalTo(SEQUENCE_ID));
         assertThat(eventLog.getCreatedAt(), is(clock.now()));
         JSONAssert.assertEquals(METADATA_JSON, eventLog.getMetadata(), false);
-        JSONAssert.assertEquals(expectedPayloadAsJsonString, eventLog.getPayload(), false);
+        JSONAssert.assertEquals(envelope.payloadAsJsonObject().toString(), eventLog.getPayload(), false);
     }
 
     @Test(expected = InvalidStreamIdException.class)
     public void shouldThrowExceptionOnNullStreamId() throws Exception {
-        eventLogConverter.createEventLog(createTestEnvelope(), null, SEQUENCE_ID);
+        eventLogConverter.eventLogOf(envelope().with(metadataWithRandomUUIDAndName()).build());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionOnMissingCreatedAt() throws Exception {
-        eventLogConverter.createEventLog(createTestEnvelopeWithoutTimestamp(), STREAM_ID, SEQUENCE_ID);
+        eventLogConverter.eventLogOf((envelope().with(metadataWithRandomUUIDAndName().withStreamId(STREAM_ID)).build()));
     }
 
     @Test
     public void shouldCreateEnvelope() throws Exception {
-        JsonEnvelope actualEnvelope = eventLogConverter.createEnvelope(createEventLog());
+        JsonEnvelope actualEnvelope = eventLogConverter.envelopeOf(new EventLog(ID, STREAM_ID, SEQUENCE_ID, NAME, METADATA_JSON, PAYLOAD_JSON, new UtcClock().now()));
 
         assertThat(actualEnvelope.metadata().id(), equalTo(ID));
         assertThat(actualEnvelope.metadata().name(), equalTo(NAME));
@@ -91,31 +96,6 @@ public class EventLogConverterTest {
         JSONAssert.assertEquals(PAYLOAD_JSON, actualPayload, false);
     }
 
-    private EventLog createEventLog() {
-        return new EventLog(ID, STREAM_ID, SEQUENCE_ID, NAME, METADATA_JSON, PAYLOAD_JSON, new UtcClock().now());
-    }
 
-    private JsonEnvelope createTestEnvelopeWithoutTimestamp() {
-        final Metadata metadata = metadataFrom(Json.createObjectBuilder()
-                .add("id", ID.toString())
-                .add("name", NAME)
-                .build());
-
-        final JsonObject payload = Json.createObjectBuilder().add(PAYLOAD_FIELD_NAME, PAYLOAD_FIELD_VALUE).build();
-
-        return DefaultJsonEnvelope.envelopeFrom(metadata, payload);
-    }
-
-    private JsonEnvelope createTestEnvelope() throws IOException {
-        final Metadata metadata = metadataFrom(Json.createObjectBuilder()
-                .add("id", ID.toString())
-                .add("name", NAME)
-                .add(CREATED_AT, ZonedDateTimes.toString(clock.now()))
-                .build());
-
-        final JsonObject payload = Json.createObjectBuilder().add(PAYLOAD_FIELD_NAME, PAYLOAD_FIELD_VALUE).build();
-
-        return DefaultJsonEnvelope.envelopeFrom(metadata, payload);
-    }
 
 }

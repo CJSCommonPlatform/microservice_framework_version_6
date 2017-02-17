@@ -1,14 +1,13 @@
 package uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog;
 
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
+
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidStreamIdException;
-import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
-import uk.gov.justice.services.messaging.JsonObjectMetadata;
 import uk.gov.justice.services.messaging.Metadata;
-
-import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -31,21 +30,15 @@ public class EventLogConverter {
      * Creates an {@link EventLog} object from the <code>eventEnvelope</code>.
      *
      * @param envelope the envelope to convert from
-     * @param streamId the stream id the event belongs to
-     * @param version  the version of the event
      * @return the database entity created from the given envelope
      */
-    public EventLog createEventLog(final JsonEnvelope envelope, final UUID streamId, final Long version) {
-
-        if (streamId == null) {
-            throw new InvalidStreamIdException("StreamId missing in envelope.");
-        }
+    public EventLog eventLogOf(final JsonEnvelope envelope) {
 
         final Metadata eventMetadata = envelope.metadata();
 
         return new EventLog(eventMetadata.id(),
-                streamId,
-                version,
+                eventMetadata.streamId().orElseThrow(() -> new InvalidStreamIdException("StreamId missing in envelope.")),
+                eventMetadata.version().orElse(null),
                 eventMetadata.name(),
                 envelope.metadata().asJsonObject().toString(),
                 extractPayloadAsString(envelope),
@@ -61,8 +54,8 @@ public class EventLogConverter {
      * @param eventLog eventLog to be converted into an envelope.
      * @return an envelope created from eventLog.
      */
-    public JsonEnvelope createEnvelope(final EventLog eventLog) {
-        return DefaultJsonEnvelope.envelopeFrom(getMetaData(eventLog), getPayload(eventLog));
+    public JsonEnvelope envelopeOf(final EventLog eventLog) {
+        return envelopeFrom(metadataOf(eventLog), payloadOf(eventLog));
     }
 
     /**
@@ -71,11 +64,11 @@ public class EventLogConverter {
      * @param eventLog eventLog containing the metadata.
      * @return metadata from the eventLog.
      */
-    public Metadata getMetaData(final EventLog eventLog) {
-        return JsonObjectMetadata.metadataFrom(stringToJsonObjectConverter.convert(eventLog.getMetadata()));
+    public Metadata metadataOf(final EventLog eventLog) {
+        return metadataFrom(stringToJsonObjectConverter.convert(eventLog.getMetadata()));
     }
 
-    private JsonObject getPayload(final EventLog eventLog) {
+    private JsonObject payloadOf(final EventLog eventLog) {
         return stringToJsonObjectConverter.convert(eventLog.getPayload());
     }
 

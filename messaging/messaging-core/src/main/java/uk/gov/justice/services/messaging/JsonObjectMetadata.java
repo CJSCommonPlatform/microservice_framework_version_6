@@ -1,5 +1,6 @@
 package uk.gov.justice.services.messaging;
 
+import static java.time.ZonedDateTime.now;
 import static java.util.UUID.randomUUID;
 import static uk.gov.justice.services.messaging.JsonObjects.getJsonString;
 import static uk.gov.justice.services.messaging.JsonObjects.getLong;
@@ -101,12 +102,21 @@ public class JsonObjectMetadata implements Metadata {
 
     /**
      * Create metadata builder with random id and dummy name
+     *
+     * @return metadata builder
+     */
+    public static Builder metadataWithRandomUUIDAndName() {
+        return metadataWithRandomUUID("dummy");
+    }
+
+    /**
+     * Create metadata builder with random id and dummy name
      * To be used in unit tests
      *
      * @return metadata builder
      */
     public static Builder metadataWithDefaults() {
-        return metadataOf(randomUUID(), "dummyName");
+        return metadataOf(randomUUID(), "dummyName").withStreamId(randomUUID()).createdAt(now());
     }
 
     public static Builder metadataFrom(final Metadata metadata) {
@@ -163,9 +173,9 @@ public class JsonObjectMetadata implements Metadata {
 
     @Override
     public Optional<ZonedDateTime> createdAt() {
-        Optional<String>  zonedDateTime = getString(metadata, CREATED_AT);
+        Optional<String> zonedDateTime = getString(metadata, CREATED_AT);
 
-        if(zonedDateTime.isPresent()) {
+        if (zonedDateTime.isPresent()) {
             return Optional.of(ZonedDateTimes.fromString(zonedDateTime.get()));
         }
 
@@ -228,7 +238,7 @@ public class JsonObjectMetadata implements Metadata {
 
         /**
          * @param uuid ids that indicate the sequence of commands or events that resulting in this
-         * message
+         *             message
          * @return metadata builder
          */
         public Builder withCausation(final UUID... uuid) {
@@ -275,9 +285,10 @@ public class JsonObjectMetadata implements Metadata {
             json.add(streamId.toString(), STREAM_ID_PATH);
             return this;
         }
+
         /**
-         * @param version sequence id (or version) that indicates where in the stream this message is
-         * positioned
+         * @param version sequence id (or version) that indicates where in the stream this message
+         *                is positioned
          * @return metadata builder
          */
         public Builder withVersion(final Long version) {

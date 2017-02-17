@@ -1,6 +1,7 @@
 package uk.gov.justice.services.test.utils.core.random;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.time.ZoneOffset.UTC;
 
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.test.utils.core.random.DateGenerator.Direction;
@@ -9,6 +10,7 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
@@ -37,6 +39,10 @@ public class RandomGenerator {
             Period.ofYears(5), new UtcClock().now(), Direction.FUTURE);
     public static final Generator<ZonedDateTime> PAST_ZONED_DATE_TIME = new ZonedDateTimeGenerator(
             Period.ofYears(5), new UtcClock().now(), Direction.PAST);
+    public static final Generator<ZonedDateTime> FUTURE_UTC_DATE_TIME = new ZonedDateTimeGenerator(
+            Period.ofYears(5), new UtcClock().now(), Direction.FUTURE, UTC);
+    public static final Generator<ZonedDateTime> PAST_UTC_DATE_TIME = new ZonedDateTimeGenerator(
+            Period.ofYears(5), new UtcClock().now(), Direction.PAST, UTC);
 
     public static Generator<String> string(final int length) {
         return new StringGenerator(length);

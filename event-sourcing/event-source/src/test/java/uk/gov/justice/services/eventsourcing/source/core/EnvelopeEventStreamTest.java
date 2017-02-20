@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 
+import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.UUID;
@@ -60,6 +61,21 @@ public class EnvelopeEventStreamTest {
 
         verify(eventStreamManager).appendAfter(STREAM_ID, stream, VERSION);
     }
+
+    @Test
+    public void shouldAppendWithNonConsecutiveTolerance() throws EventStreamException {
+        eventStream.append(stream, Tolerance.NON_CONSECUTIVE);
+
+        verify(eventStreamManager).appendNonConsecutively(STREAM_ID, stream);
+    }
+
+    @Test
+    public void shouldAppendWithConsecutiveTolerance() throws EventStreamException {
+        eventStream.append(stream, Tolerance.CONSECUTIVE);
+
+        verify(eventStreamManager).append(STREAM_ID, stream);
+    }
+
 
     @Test
     public void shouldReturnCurrentVersion() throws Exception {

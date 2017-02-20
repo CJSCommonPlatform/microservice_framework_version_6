@@ -29,7 +29,17 @@ public class EnvelopeEventStream implements EventStream {
 
     @Override
     public long append(final Stream<JsonEnvelope> events) throws EventStreamException {
-       return eventStreamManager.append(id, events);
+        return eventStreamManager.append(id, events);
+    }
+
+    @Override
+    public long append(final Stream<JsonEnvelope> stream, final Tolerance tolerance) throws EventStreamException {
+        switch (tolerance) {
+            case NON_CONSECUTIVE:
+                return eventStreamManager.appendNonConsecutively(id, stream);
+            default:
+                return eventStreamManager.append(id, stream);
+        }
     }
 
     @Override

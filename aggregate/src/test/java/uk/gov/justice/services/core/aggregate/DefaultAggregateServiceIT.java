@@ -30,6 +30,7 @@ import uk.gov.justice.services.eventsourcing.repository.jdbc.JdbcEventRepository
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLogConverter;
 import uk.gov.justice.services.eventsourcing.source.core.DefaultEventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EnvelopeEventStream;
+import uk.gov.justice.services.eventsourcing.source.core.EventAppender;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.EventStreamManager;
@@ -107,6 +108,7 @@ public class DefaultAggregateServiceIT {
             DefaultEventSource.class,
             EnvelopeEventStream.class,
             EventStreamManager.class,
+            EventAppender.class,
 
             EnvelopeConverter.class,
             EventLogConverter.class,

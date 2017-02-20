@@ -116,6 +116,9 @@
             <logger category="uk.gov.justice">
                 <level name="INFO"/>
             </logger>
+            <logger category="uk.gov.justice.services.eventsourcing">
+                <level name="TRACE"/>
+            </logger>
             <logger category="org.jboss">
                 <level name="DEBUG"/>
             </logger>

@@ -36,6 +36,20 @@ public interface EventStream {
     long append(final Stream<JsonEnvelope> events) throws EventStreamException;
 
     /**
+     * Store a stream of events.
+     *
+     * @param stream    the stream of events to store
+     * @param tolerance - tolerance for optimistic lock errors. <ul> <li/>CONSECUTIVE - store the
+     *                  given stream of events with consecutive versions only, fail in case of an
+     *                  optimistic lock. <li/>NON_CONSECUTIVE - allows to store the given stream of
+     *                  events with non consecutive version ids, but reduces the risk of throwing
+     *                  optimistic lock error in case of a version conflict.</ul>
+     * @return the current stream version
+     * @throws EventStreamException if an event could not be appended
+     */
+    long append(final Stream<JsonEnvelope> stream, final Tolerance tolerance) throws EventStreamException;
+
+    /**
      * Store a stream of events after the given version.
      *
      * @param events  the stream of events to store

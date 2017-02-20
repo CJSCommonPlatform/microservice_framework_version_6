@@ -1,5 +1,6 @@
 package uk.gov.justice.services.common.configuration;
 
+import static java.lang.String.format;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
@@ -43,11 +44,18 @@ public class GlobalValueProducerTest {
     }
 
     @Test
-    public void shouldReturnPropertyValue() throws NamingException {
+    public void shouldReturnStringPropertyValue() throws NamingException {
         when(initialContext.lookup("java:global/myProperty")).thenReturn("some value");
         when(annotation.key()).thenReturn("myProperty");
 
-        assertThat(valueProducer.produceValue(propertyInjectionPoint), equalTo("some value"));
+        assertThat(valueProducer.stringValueOf(propertyInjectionPoint), equalTo("some value"));
+    }
+
+    @Test
+    public void shouldReturnLongPropertyValue() throws NamingException {
+        when(initialContext.lookup("java:global/myLongProperty")).thenReturn("100");
+        when(annotation.key()).thenReturn("myLongProperty");
+        assertThat(valueProducer.longValueOf(propertyInjectionPoint), equalTo(100L));
     }
 
     @Test
@@ -56,7 +64,7 @@ public class GlobalValueProducerTest {
         when(annotation.key()).thenReturn("myOtherProperty");
         when(annotation.defaultValue()).thenReturn("some default value");
 
-        assertThat(valueProducer.produceValue(propertyInjectionPoint), equalTo("some default value"));
+        assertThat(valueProducer.stringValueOf(propertyInjectionPoint), equalTo("some default value"));
     }
 
     @Test(expected = MissingPropertyException.class)
@@ -66,7 +74,7 @@ public class GlobalValueProducerTest {
 
         when(annotation.defaultValue()).thenReturn(CommonValueAnnotationDef.NULL_DEFAULT);
 
-        valueProducer.produceValue(propertyInjectionPoint);
+        valueProducer.stringValueOf(propertyInjectionPoint);
     }
 
 

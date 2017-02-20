@@ -23,6 +23,9 @@ import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
 import static org.raml.model.ActionType.PUT;
+import static uk.gov.justice.services.adapter.rest.processor.response.ResponseStrategies.ACCEPTED_STATUS_NO_ENTITY_RESPONSE_STRATEGY;
+import static uk.gov.justice.services.adapter.rest.processor.response.ResponseStrategies.OK_STATUS_ENVELOPE_ENTITY_RESPONSE_STRATEGY;
+import static uk.gov.justice.services.adapter.rest.processor.response.ResponseStrategies.OK_STATUS_ENVELOPE_PAYLOAD_ENTITY_RESPONSE_STRATEGY;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.defaultGetAction;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.mapping;
@@ -44,8 +47,8 @@ import static uk.gov.justice.services.generators.test.utils.reflection.Reflectio
 
 import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.services.adapter.rest.BasicActionMapper;
-import uk.gov.justice.services.adapter.rest.processor.ResponseStrategyFactory;
 import uk.gov.justice.services.adapter.rest.processor.RestProcessor;
+import uk.gov.justice.services.adapter.rest.processor.response.ResponseStrategy;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.CustomAdapter;
@@ -950,7 +953,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     }
 
     @Test
-    public void shouldAddAnnotatedEnvelopeResponseFactoryPropertyForQueryController() throws Exception {
+    public void shouldAddAnnotatedEnvelopeResponseStrategyPropertyForQueryController() throws Exception {
         generator.run(
                 restRamlWithQueryControllerDefaults()
                         .with(defaultPostResource()
@@ -960,15 +963,17 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
 
         final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
-        final Field dispatcher = resourceClass.getDeclaredField("responseStrategyFactory");
+        final Field dispatcher = resourceClass.getDeclaredField("responseStrategy");
         assertThat(dispatcher, not(nullValue()));
-        assertThat(dispatcher.getType(), equalTo(ResponseStrategyFactory.class));
+        assertThat(dispatcher.getType(), equalTo(ResponseStrategy.class));
         assertThat(dispatcher.getAnnotation(Inject.class), not(nullValue()));
         assertThat(dispatcher.getModifiers(), is(0));
+        assertThat(dispatcher.getAnnotation(Named.class), not(nullValue()));
+        assertThat(dispatcher.getAnnotation(Named.class).value(), is(OK_STATUS_ENVELOPE_ENTITY_RESPONSE_STRATEGY));
     }
 
     @Test
-    public void shouldAddAnnotatedEnvelopeResponseFactoryPropertyForQueryView() throws Exception {
+    public void shouldAddAnnotatedEnvelopeResponseStrategyPropertyForQueryView() throws Exception {
         generator.run(
                 restRamlWithQueryViewDefaults()
                         .with(defaultPostResource()
@@ -978,11 +983,13 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
 
         final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
-        final Field dispatcher = resourceClass.getDeclaredField("responseStrategyFactory");
+        final Field dispatcher = resourceClass.getDeclaredField("responseStrategy");
         assertThat(dispatcher, not(nullValue()));
-        assertThat(dispatcher.getType(), equalTo(ResponseStrategyFactory.class));
+        assertThat(dispatcher.getType(), equalTo(ResponseStrategy.class));
         assertThat(dispatcher.getAnnotation(Inject.class), not(nullValue()));
         assertThat(dispatcher.getModifiers(), is(0));
+        assertThat(dispatcher.getAnnotation(Named.class), not(nullValue()));
+        assertThat(dispatcher.getAnnotation(Named.class).value(), is(OK_STATUS_ENVELOPE_ENTITY_RESPONSE_STRATEGY));
     }
 
     @Test
@@ -996,11 +1003,13 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
 
         final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
-        final Field dispatcher = resourceClass.getDeclaredField("responseStrategyFactory");
+        final Field dispatcher = resourceClass.getDeclaredField("responseStrategy");
         assertThat(dispatcher, not(nullValue()));
-        assertThat(dispatcher.getType(), equalTo(ResponseStrategyFactory.class));
+        assertThat(dispatcher.getType(), equalTo(ResponseStrategy.class));
         assertThat(dispatcher.getAnnotation(Inject.class), not(nullValue()));
         assertThat(dispatcher.getModifiers(), is(0));
+        assertThat(dispatcher.getAnnotation(Named.class), not(nullValue()));
+        assertThat(dispatcher.getAnnotation(Named.class).value(), is(OK_STATUS_ENVELOPE_PAYLOAD_ENTITY_RESPONSE_STRATEGY));
     }
 
     @Test
@@ -1014,11 +1023,13 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
 
         final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
-        final Field dispatcher = resourceClass.getDeclaredField("responseStrategyFactory");
+        final Field dispatcher = resourceClass.getDeclaredField("acceptedStatusNoEntityResponseStrategy");
         assertThat(dispatcher, not(nullValue()));
-        assertThat(dispatcher.getType(), equalTo(ResponseStrategyFactory.class));
+        assertThat(dispatcher.getType(), equalTo(ResponseStrategy.class));
         assertThat(dispatcher.getAnnotation(Inject.class), not(nullValue()));
         assertThat(dispatcher.getModifiers(), is(0));
+        assertThat(dispatcher.getAnnotation(Named.class), not(nullValue()));
+        assertThat(dispatcher.getAnnotation(Named.class).value(), is(ACCEPTED_STATUS_NO_ENTITY_RESPONSE_STRATEGY));
     }
 
     @Test

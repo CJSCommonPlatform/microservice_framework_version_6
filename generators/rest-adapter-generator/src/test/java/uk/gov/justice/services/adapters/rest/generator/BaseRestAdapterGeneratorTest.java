@@ -4,8 +4,10 @@ package uk.gov.justice.services.adapters.rest.generator;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.setField;
 
 import uk.gov.justice.services.adapter.rest.BasicActionMapper;
-import uk.gov.justice.services.adapter.rest.processor.ResponseStrategyFactory;
 import uk.gov.justice.services.adapter.rest.processor.RestProcessor;
+import uk.gov.justice.services.adapter.rest.processor.response.AcceptedStatusNoEntityResponseStrategy;
+import uk.gov.justice.services.adapter.rest.processor.response.OkStatusEnvelopeEntityResponseStrategy;
+import uk.gov.justice.services.adapter.rest.processor.response.OkStatusEnvelopePayloadEntityResponseStrategy;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 
@@ -20,7 +22,8 @@ public abstract class BaseRestAdapterGeneratorTest extends BaseGeneratorTest {
     private static final String INTERCEPTOR_CHAIN_PROCESSOR = "interceptorChainProcessor";
     private static final String REST_PROCESSOR = "restProcessor";
     private static final String ACTION_MAPPER = "actionMapper";
-    private static final String RESPONSE_STRATEGY_FACTORY = "responseStrategyFactory";
+    private static final String RESPONSE_STRATEGY_FIELD = "responseStrategy";
+    private static final String ACCEPTED_STATUS_NO_ENTITY_RESPONSE_STRATEGY_FIELD = "acceptedStatusNoEntityResponseStrategy";
 
     @Mock
     protected InterceptorChainProcessor interceptorChainProcessor;
@@ -32,7 +35,13 @@ public abstract class BaseRestAdapterGeneratorTest extends BaseGeneratorTest {
     protected RestProcessor restProcessor;
 
     @Mock
-    protected ResponseStrategyFactory responseStrategyFactory;
+    protected OkStatusEnvelopeEntityResponseStrategy okStatusEnvelopeEntityResponseStrategy;
+
+    @Mock
+    protected OkStatusEnvelopePayloadEntityResponseStrategy okStatusEnvelopePayloadEntityResponseStrategy;
+
+    @Mock
+    protected AcceptedStatusNoEntityResponseStrategy acceptedStatusNoEntityResponseStrategy;
 
     @Before
     public void before() {
@@ -40,12 +49,13 @@ public abstract class BaseRestAdapterGeneratorTest extends BaseGeneratorTest {
         generator = new RestAdapterGenerator();
     }
 
-    protected Object getInstanceOf(Class<?> resourceClass) throws InstantiationException, IllegalAccessException {
-        Object resourceObject = resourceClass.newInstance();
+    protected Object getInstanceOf(final Class<?> resourceClass) throws InstantiationException, IllegalAccessException {
+        final Object resourceObject = resourceClass.newInstance();
         setField(resourceObject, REST_PROCESSOR, restProcessor);
         setField(resourceObject, INTERCEPTOR_CHAIN_PROCESSOR, interceptorChainProcessor);
         setField(resourceObject, ACTION_MAPPER, actionMapper);
-        setField(resourceObject, RESPONSE_STRATEGY_FACTORY, responseStrategyFactory);
+        setField(resourceObject, RESPONSE_STRATEGY_FIELD, okStatusEnvelopeEntityResponseStrategy);
+        setField(resourceObject, ACCEPTED_STATUS_NO_ENTITY_RESPONSE_STRATEGY_FIELD, acceptedStatusNoEntityResponseStrategy);
         return resourceObject;
     }
 }

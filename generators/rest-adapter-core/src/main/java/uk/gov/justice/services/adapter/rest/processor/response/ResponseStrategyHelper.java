@@ -1,4 +1,4 @@
-package uk.gov.justice.services.adapter.rest.processor;
+package uk.gov.justice.services.adapter.rest.processor.response;
 
 import static java.lang.String.format;
 import static javax.json.JsonValue.NULL;
@@ -21,7 +21,7 @@ import org.slf4j.Logger;
  * Create {@link Response} for resulting JsonEnvelope.
  */
 @ApplicationScoped
-public class ResponseFactoryHelper {
+public class ResponseStrategyHelper {
 
     @Inject
     Logger logger;

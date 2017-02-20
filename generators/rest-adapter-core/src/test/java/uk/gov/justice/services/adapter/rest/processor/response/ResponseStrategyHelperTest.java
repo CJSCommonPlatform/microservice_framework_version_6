@@ -1,4 +1,4 @@
-package uk.gov.justice.services.adapter.rest.processor;
+package uk.gov.justice.services.adapter.rest.processor.response;
 
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
@@ -38,13 +38,13 @@ public class ResponseStrategyHelperTest {
     private Logger logger;
 
     @InjectMocks
-    private ResponseFactoryHelper responseFactoryHelper;
+    private ResponseStrategyHelper responseStrategyHelper;
 
     @Test
     public void shouldCallApplyOnFunctionOnOkResponse() throws Exception {
         when(function.apply(jsonEnvelope)).thenReturn(response);
 
-        final Response result = responseFactoryHelper.responseFor("action.name", Optional.of(jsonEnvelope), function);
+        final Response result = responseStrategyHelper.responseFor("action.name", Optional.of(jsonEnvelope), function);
 
         assertThat(result, sameInstance(response));
     }
@@ -53,14 +53,14 @@ public class ResponseStrategyHelperTest {
     public void shouldReturnNotFoundResponse() throws Exception {
         when(jsonEnvelope.payload()).thenReturn(JsonValue.NULL);
 
-        final Response response = responseFactoryHelper.responseFor("action.name", Optional.of(jsonEnvelope), function);
+        final Response response = responseStrategyHelper.responseFor("action.name", Optional.of(jsonEnvelope), function);
 
         assertThat(response.getStatus(), equalTo(NOT_FOUND.getStatusCode()));
     }
 
     @Test
     public void shouldReturnInternalServerErrorResponse() throws Exception {
-        final Response response = responseFactoryHelper.responseFor("action.name", Optional.empty(), function);
+        final Response response = responseStrategyHelper.responseFor("action.name", Optional.empty(), function);
 
         assertThat(response.getStatus(), equalTo(INTERNAL_SERVER_ERROR.getStatusCode()));
     }

@@ -110,7 +110,6 @@ public class EventFilterIT {
             Enveloper.class,
 
             InterceptorChainProcessorProducer.class,
-            InterceptorChainProcessor.class,
             InterceptorCache.class,
             InterceptorObserver.class,
 

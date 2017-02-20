@@ -109,7 +109,6 @@ public class EventBufferIT {
             ServiceComponentObserver.class,
 
             InterceptorChainProcessorProducer.class,
-            InterceptorChainProcessor.class,
             InterceptorCache.class,
             InterceptorObserver.class,
             EventBufferInterceptor.class,

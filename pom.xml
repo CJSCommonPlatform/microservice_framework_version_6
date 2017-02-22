@@ -44,7 +44,7 @@
     </modules>
 
     <properties>
-        <common-bom.version>1.6.0</common-bom.version>
+        <common-bom.version>1.11.0</common-bom.version>
 		<embedded-artemis.version>1.0.0</embedded-artemis.version>
 		<raml-maven-plugin.version>1.3.0</raml-maven-plugin.version>
     </properties>

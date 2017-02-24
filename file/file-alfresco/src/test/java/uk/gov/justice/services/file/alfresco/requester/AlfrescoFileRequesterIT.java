@@ -10,7 +10,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.lang.String.format;
 import static java.util.UUID.randomUUID;
-import static java.util.stream.Collectors.joining;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static org.apache.openejb.util.NetworkUtil.getNextAvailablePort;
 import static org.hamcrest.core.Is.is;
@@ -24,10 +23,8 @@ import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUti
 import uk.gov.justice.services.file.alfresco.common.AlfrescoRestClient;
 import uk.gov.justice.services.file.api.FileOperationException;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Optional;
 
 import javax.ws.rs.ProcessingException;

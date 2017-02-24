@@ -2,15 +2,11 @@ package uk.gov.justice.services.eventsourcing.source.core;
 
 
 import static java.util.stream.Collectors.toList;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
 
-import uk.gov.justice.services.eventsourcing.publisher.core.EventPublisher;
+import uk.gov.justice.services.common.configuration.GlobalValue;
 import uk.gov.justice.services.eventsourcing.repository.core.EventRepository;
 import uk.gov.justice.services.eventsourcing.repository.core.exception.OptimisticLockingRetryException;
-import uk.gov.justice.services.eventsourcing.repository.core.exception.StoreEventRequestFailedException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
-import uk.gov.justice.services.eventsourcing.source.core.exception.InvalidStreamVersionRuntimeException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.VersionMismatchException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
@@ -19,20 +15,31 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+
+import org.slf4j.Logger;
 
 /**
  * Manages operations on {@link EventStream}
  */
+@ApplicationScoped
 public class EventStreamManager {
 
+    @Inject
+    private Logger logger;
 
     @Inject
     EventRepository eventRepository;
 
     @Inject
-    EventPublisher eventPublisher;
+    EventAppender eventAppender;
+
+    @Inject
+    @GlobalValue(key = "internal.max.retry", defaultValue = "20")
+    long maxRetry;
+
 
     /**
      * Get the stream of events.
@@ -56,13 +63,51 @@ public class EventStreamManager {
      * Store a stream of events.
      *
      * @param events the stream of events to store
-     * @throws EventStreamException if an event could not be appended
      * @return the current stream version
+     * @throws EventStreamException if an event could not be appended
      */
     @Transactional(dontRollbackOn = OptimisticLockingRetryException.class)
     public long append(final UUID id, final Stream<JsonEnvelope> events) throws EventStreamException {
         return append(id, events, Optional.empty());
 
+    }
+
+    /**
+     * Store a stream of events without enforcing consecutive version ids. Reduces risk of throwing
+     * optimistic lock error. To be use instead of the append method, when it's acceptable to store
+     * events with non consecutive version ids
+     *
+     * @param streamId - id of the stream to append to
+     * @param events   the stream of events to store
+     * @return the current stream version
+     * @throws EventStreamException if an event could not be appended
+     */
+    @Transactional(dontRollbackOn = OptimisticLockingRetryException.class)
+    public long appendNonConsecutively(final UUID streamId, final Stream<JsonEnvelope> events) throws EventStreamException {
+        final List<JsonEnvelope> envelopeList = events.collect(toList());
+        long currentVersion = eventRepository.getCurrentSequenceIdForStream(streamId);
+
+        validateEvents(streamId, envelopeList);
+
+        for (final JsonEnvelope event : envelopeList) {
+            boolean appendedSuccessfully = false;
+            long retryCount = 0L;
+            while (!appendedSuccessfully) {
+                try {
+                    eventAppender.append(event, streamId, ++currentVersion);
+                    appendedSuccessfully = true;
+                } catch (OptimisticLockingRetryException e) {
+                    retryCount++;
+                    if (retryCount > maxRetry) {
+                        logger.warn("Failed to append to stream {} due to concurrency issues, returning to handler.", streamId);
+                        throw e;
+                    }
+                    currentVersion = eventRepository.getCurrentSequenceIdForStream(streamId);
+                    logger.trace("Retrying appending to stream {}, with version {}", streamId, currentVersion + 1);
+                }
+            }
+        }
+        return currentVersion;
     }
 
     /**
@@ -78,7 +123,6 @@ public class EventStreamManager {
             throw new EventStreamException(String.format("Failed to append to stream %s. Version must not be null.", id));
         }
         return append(id, events, Optional.of(version));
-
     }
 
     /**
@@ -94,34 +138,25 @@ public class EventStreamManager {
         final List<JsonEnvelope> envelopeList = events.collect(toList());
 
         long currentVersion = eventRepository.getCurrentSequenceIdForStream(id);
-
-        validateEvents(id, envelopeList, versionFrom, currentVersion);
+        validateVersion(id, versionFrom, currentVersion);
+        validateEvents(id, envelopeList);
 
         for (final JsonEnvelope event : envelopeList) {
-            try {
-                final JsonEnvelope eventWithVersion = eventFrom(event, id, ++currentVersion);
-                eventRepository.store(eventWithVersion);
-
-                eventPublisher.publish(eventWithVersion);
-            } catch (StoreEventRequestFailedException e) {
-                throw new EventStreamException(String.format("Failed to append event to Event Store %s", event.metadata().id()), e);
-            }
+            eventAppender.append(event, id, ++currentVersion);
         }
         return currentVersion;
     }
 
-    private JsonEnvelope eventFrom(final JsonEnvelope event, final UUID streamId, final Long version) {
-        return envelopeFrom(metadataFrom(event.metadata()).withStreamId(streamId).withVersion(version), event.payloadAsJsonObject());
+    private void validateEvents(final UUID id, final List<JsonEnvelope> envelopeList) throws EventStreamException {
+        if (envelopeList.stream().anyMatch(e -> e.metadata().version().isPresent())) {
+            throw new EventStreamException(String.format("Failed to append to stream %s. Version must be empty.", id));
+        }
     }
 
-    private void validateEvents(final UUID id, final List<JsonEnvelope> envelopeList, final Optional<Long> versionFrom, final Long currentVersion) throws EventStreamException {
+    private void validateVersion(final UUID id, final Optional<Long> versionFrom, final Long currentVersion) throws VersionMismatchException {
         if (versionFrom.isPresent() && !versionFrom.get().equals(currentVersion)) {
             throw new VersionMismatchException(String.format("Failed to append to stream %s. Version mismatch. Expected %d, Found %d",
                     id, versionFrom.get(), currentVersion));
-        }
-
-        if (envelopeList.stream().anyMatch(e -> e.metadata().version().isPresent())) {
-            throw new EventStreamException(String.format("Failed to append to stream %s. Version must be empty.", id));
         }
     }
 }

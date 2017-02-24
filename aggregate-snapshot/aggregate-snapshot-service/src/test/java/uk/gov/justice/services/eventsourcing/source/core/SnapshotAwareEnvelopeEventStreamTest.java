@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
 
@@ -98,6 +99,31 @@ public class SnapshotAwareEnvelopeEventStreamTest {
         when(eventStreamManager.append(STREAM_ID, streamOfEvents)).thenReturn(streamVersionAfterAppending);
 
         eventStream.append(streamOfEvents);
+
+        verify(snapshotService).attemptAggregateStore(STREAM_ID, streamVersionAfterAppending, aggregate);
+
+    }
+
+    @Test
+    public void shouldNotCreateSnapshotWhenAppendingWithNonConsecutiveTolerance() throws Exception {
+        eventStream.registerAggregates(TestAggregate.class, new TestAggregate());
+
+        eventStream.append(Stream.of(envelope().build()), Tolerance.NON_CONSECUTIVE);
+
+        verifyZeroInteractions(snapshotService);
+
+    }
+
+    @Test
+    public void shouldAttemptSnapshotCreationWhenAppendingWithConsecutiveTolerance() throws Exception {
+        final TestAggregate aggregate = new TestAggregate();
+        eventStream.registerAggregates(TestAggregate.class, aggregate);
+
+        final long streamVersionAfterAppending = 16L;
+        final Stream<JsonEnvelope> streamOfEvents = Stream.of(envelope().build());
+        when(eventStreamManager.append(STREAM_ID, streamOfEvents)).thenReturn(streamVersionAfterAppending);
+
+        eventStream.append(streamOfEvents, Tolerance.CONSECUTIVE);
 
         verify(snapshotService).attemptAggregateStore(STREAM_ID, streamVersionAfterAppending, aggregate);
 

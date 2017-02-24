@@ -1,5 +1,7 @@
 package uk.gov.justice.services.eventsourcing.source.core;
 
+import static uk.gov.justice.services.eventsourcing.source.core.Tolerance.CONSECUTIVE;
+
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.eventsourcing.source.core.snapshot.SnapshotService;
@@ -29,6 +31,15 @@ public class SnapshotAwareEnvelopeEventStream<T extends Aggregate> extends Envel
     public long append(final Stream<JsonEnvelope> events) throws EventStreamException {
         final long currentVersion = super.append(events);
         createAggregateSnapshotsFor(currentVersion);
+        return currentVersion;
+    }
+
+    @Override
+    public long append(final Stream<JsonEnvelope> events, final Tolerance tolerance) throws EventStreamException {
+        final long currentVersion = super.append(events, tolerance);
+        if (tolerance == CONSECUTIVE) {
+            createAggregateSnapshotsFor(currentVersion);
+        }
         return currentVersion;
     }
 

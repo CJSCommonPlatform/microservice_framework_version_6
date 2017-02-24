@@ -291,7 +291,7 @@ public class JsonObjectMetadata implements Metadata {
          *                is positioned
          * @return metadata builder
          */
-        public Builder withVersion(final Long version) {
+        public Builder withVersion(final long version) {
             json.add(BigDecimal.valueOf(version), VERSION_PATH);
             return this;
         }

@@ -6,12 +6,14 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
-import static uk.gov.justice.services.test.utils.core.matchers.EventStreamMatcher.eventStreamAppendedWith;
 import static uk.gov.justice.services.test.utils.core.matchers.HandlerMatcher.isHandler;
 import static uk.gov.justice.services.test.utils.core.matchers.HandlerMethodMatcher.method;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
@@ -23,12 +25,12 @@ import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
+import uk.gov.justice.services.eventsourcing.source.core.Tolerance;
 import uk.gov.justice.services.example.cakeshop.domain.aggregate.Recipe;
 import uk.gov.justice.services.example.cakeshop.domain.event.CakeMade;
 import uk.gov.justice.services.example.cakeshop.domain.event.RecipeAdded;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
-import java.util.Collections;
 import java.util.UUID;
 
 import org.junit.Test;
@@ -85,9 +87,8 @@ public class MakeCakeCommandHandlerTest {
                 .build();
         makeCakeCommandHandler.makeCake(command);
 
-
-        assertThat(eventStream, eventStreamAppendedWith(
-                streamContaining(
+        verify(eventStream).append(
+                argThat(streamContaining(
                         jsonEnvelope(
                                 withMetadataEnvelopedFrom(command)
                                         .withName(EVENT_NAME),
@@ -96,7 +97,7 @@ public class MakeCakeCommandHandlerTest {
                                         withJsonPath("$.name", equalTo(cakeName))
                                 )))
                                 .thatMatchesSchema()
-                )));
+                )), eq(Tolerance.CONSECUTIVE));
     }
 
 

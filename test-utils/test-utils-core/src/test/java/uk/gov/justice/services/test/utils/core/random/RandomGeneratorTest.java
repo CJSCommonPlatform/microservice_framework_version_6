@@ -3,6 +3,7 @@ package uk.gov.justice.services.test.utils.core.random;
 import static com.btmatthews.hamcrest.regex.PatternMatcher.matches;
 import static com.google.common.collect.ImmutableList.of;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newHashSet;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
@@ -12,8 +13,10 @@ import static java.util.EnumSet.allOf;
 import static org.apache.commons.lang3.StringUtils.isAlpha;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.Is.is;
 import static uk.gov.justice.services.test.utils.core.helper.TypeCheck.Times.times;
 import static uk.gov.justice.services.test.utils.core.helper.TypeCheck.typeCheck;
@@ -30,8 +33,10 @@ import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -188,20 +193,58 @@ public class RandomGeneratorTest {
     public void shouldGenerateRandomFutureZonedDateTime() {
         final ZonedDateTime startDateTime = clock.now();
         final ZonedDateTime endDateTime = startDateTime.plus(Period.ofYears(5));
+        final Set<ZoneId> randomZones = newHashSet();
         final Generator<ZonedDateTime> futureZonedDateTimeGenerator = RandomGenerator.FUTURE_ZONED_DATE_TIME;
 
-        typeCheck(futureZonedDateTimeGenerator, s -> !(s.isBefore(startDateTime) || s.isAfter(endDateTime)))
-                .verify(times(NUMBER_OF_TIMES));
+        typeCheck(futureZonedDateTimeGenerator, s -> {
+            randomZones.add(s.getZone());
+            return !(s.isBefore(startDateTime) || s.isAfter(endDateTime));
+        }).verify(times(NUMBER_OF_TIMES));
+
+        assertThat(randomZones, hasSize(greaterThan(10)));
     }
 
     @Test
     public void shouldGenerateRandomPastZonedDateTime() {
         final ZonedDateTime startDateTime = clock.now();
         final ZonedDateTime endDateTime = startDateTime.minus(Period.ofYears(5));
+        final Set<ZoneId> randomZones = newHashSet();
         final Generator<ZonedDateTime> pastZonedDateTimeGenerator = RandomGenerator.PAST_ZONED_DATE_TIME;
 
-        typeCheck(pastZonedDateTimeGenerator, s -> !(s.isBefore(endDateTime) || s.isAfter(startDateTime)))
-                .verify(times(NUMBER_OF_TIMES));
+        typeCheck(pastZonedDateTimeGenerator, s -> {
+            randomZones.add(s.getZone());
+            return !(s.isBefore(endDateTime) || s.isAfter(startDateTime));
+        }).verify(times(NUMBER_OF_TIMES));
+
+        assertThat(randomZones, hasSize(greaterThan(10)));
+    }
+
+    @Test
+    public void shouldGenerateRandomFutureDateTimeInUTCZone() {
+        final ZonedDateTime startDateTime = clock.now();
+        final ZonedDateTime endDateTime = startDateTime.plus(Period.ofYears(5));
+        final Generator<ZonedDateTime> futureZonedDateTimeGenerator = RandomGenerator.FUTURE_UTC_DATE_TIME;
+
+        typeCheck(futureZonedDateTimeGenerator, s -> {
+            assertThat(s.getOffset().getId(), is("Z"));
+            assertThat(s.getOffset().getTotalSeconds(), is(0));
+
+            return !(s.isBefore(startDateTime) || s.isAfter(endDateTime));
+        }).verify(times(NUMBER_OF_TIMES));
+    }
+
+    @Test
+    public void shouldGenerateRandomPastDateTimeInUTCZone() {
+        final ZonedDateTime startDateTime = clock.now();
+        final ZonedDateTime endDateTime = startDateTime.minus(Period.ofYears(5));
+        final Generator<ZonedDateTime> pastZonedDateTimeGenerator = RandomGenerator.PAST_UTC_DATE_TIME;
+
+        typeCheck(pastZonedDateTimeGenerator, s -> {
+            assertThat(s.getOffset().getId(), is("Z"));
+            assertThat(s.getOffset().getTotalSeconds(), is(0));
+
+            return !(s.isBefore(endDateTime) || s.isAfter(startDateTime));
+        }).verify(times(NUMBER_OF_TIMES));
     }
 
     @Test
@@ -279,7 +322,8 @@ public class RandomGeneratorTest {
     public void shouldAlwaysPickSameElementFromAnEnumWithSingleElement() {
         final Generator<SingleEnum> enumGenerator = randomEnum(SingleEnum.class);
 
-        typeCheck(enumGenerator, s -> s.compareTo(enumGenerator.next()) == 0).verify(times(NUMBER_OF_TIMES));
+        typeCheck(enumGenerator, s -> s.compareTo(enumGenerator.next()) == 0 && s == SingleEnum.SINGLE_VALUE)
+                .verify(times(NUMBER_OF_TIMES));
     }
 
     enum SingleEnum {SINGLE_VALUE}

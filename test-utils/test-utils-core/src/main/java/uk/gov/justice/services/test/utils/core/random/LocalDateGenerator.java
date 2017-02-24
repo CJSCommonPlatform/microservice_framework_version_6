@@ -1,13 +1,14 @@
 package uk.gov.justice.services.test.utils.core.random;
 
 import static java.time.Instant.ofEpochMilli;
-import static java.time.ZoneOffset.UTC;
+import static java.time.ZoneId.systemDefault;
 import static uk.gov.justice.services.test.utils.core.random.DateGenerator.Direction.FUTURE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
 
 import java.time.LocalDate;
 import java.time.Period;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.stream.LongStream;
 
 public class LocalDateGenerator extends DateGenerator<LocalDate> {
     private final LocalDate start;
@@ -22,20 +23,22 @@ public class LocalDateGenerator extends DateGenerator<LocalDate> {
 
     @Override
     public LocalDate next() {
-        final ZonedDateTime startZDT = start.atStartOfDay(UTC);
-        final ZonedDateTime endZDT = end.atStartOfDay(UTC);
+        final ZonedDateTime startZDT = start.atStartOfDay(systemDefault());
+        final ZonedDateTime endZDT = end.atStartOfDay(systemDefault());
         final long startMillsecs = startZDT.toInstant().toEpochMilli();
         final long endMillisecs = endZDT.toInstant().toEpochMilli();
 
-        Long randomMillsecs;
+        final LongStream longStream;
+        final Long randomMillsecs;
 
         if (direction == FUTURE) {
-            randomMillsecs = RANDOM.longs(startMillsecs, endMillisecs).findFirst().getAsLong();
+            longStream = RANDOM.longs(startMillsecs, endMillisecs);
         } else {
-            randomMillsecs = RANDOM.longs(endMillisecs, startMillsecs).findFirst().getAsLong();
+            longStream = RANDOM.longs(endMillisecs, startMillsecs);
         }
 
-        return ofEpochMilli(randomMillsecs).atZone(ZoneId.systemDefault()).toLocalDate();
+        randomMillsecs = longStream.limit(1).findFirst().orElse(BOOLEAN.next() ? startMillsecs : endMillisecs);
+        return ofEpochMilli(randomMillsecs).atZone(systemDefault()).toLocalDate();
     }
 
 }

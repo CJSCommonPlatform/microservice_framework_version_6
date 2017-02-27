@@ -1,6 +1,7 @@
 package uk.gov.justice.services.adapter.rest.processor;
 
 import uk.gov.justice.services.adapter.rest.parameter.Parameter;
+import uk.gov.justice.services.adapter.rest.processor.response.ResponseStrategy;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.Collection;

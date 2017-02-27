@@ -15,6 +15,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePaylo
 
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
 import uk.gov.justice.services.adapter.rest.parameter.Parameter;
+import uk.gov.justice.services.adapter.rest.processor.response.ResponseStrategy;
 import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.rest.ParameterType;

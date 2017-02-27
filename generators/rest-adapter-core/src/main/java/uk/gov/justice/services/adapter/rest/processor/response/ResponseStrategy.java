@@ -1,4 +1,4 @@
-package uk.gov.justice.services.adapter.rest.processor;
+package uk.gov.justice.services.adapter.rest.processor.response;
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
 

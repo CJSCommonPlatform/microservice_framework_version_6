@@ -8,9 +8,6 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
-import static uk.gov.justice.services.adapter.rest.processor.ResponseStrategyFactory.ACCEPTED_STATUS_WITH_NO_ENTITY;
-import static uk.gov.justice.services.adapter.rest.processor.ResponseStrategyFactory.OK_STATUS_WITH_ENVELOPE_ENTITY;
-import static uk.gov.justice.services.adapter.rest.processor.ResponseStrategyFactory.OK_STATUS_WITH_ENVELOPE_PAYLOAD_ENTITY;
 import static uk.gov.justice.services.adapters.rest.generator.Generators.byMimeTypeOrder;
 import static uk.gov.justice.services.adapters.rest.generator.Generators.componentFromBaseUriIn;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_CONTROLLER;
@@ -31,8 +28,9 @@ import static uk.gov.justice.services.generators.commons.helper.Names.resourceIn
 import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.services.adapter.rest.BasicActionMapper;
 import uk.gov.justice.services.adapter.rest.parameter.ValidParameterCollectionBuilder;
-import uk.gov.justice.services.adapter.rest.processor.ResponseStrategyFactory;
 import uk.gov.justice.services.adapter.rest.processor.RestProcessor;
+import uk.gov.justice.services.adapter.rest.processor.response.ResponseStrategies;
+import uk.gov.justice.services.adapter.rest.processor.response.ResponseStrategy;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.CustomAdapter;
@@ -79,17 +77,22 @@ import org.slf4j.LoggerFactory;
  */
 class JaxRsImplementationGenerator {
 
-    private static final String VARIABLE_PARAMS_COLLECTION_BUILDER = "validParameterCollectionBuilder";
     private static final String PARAMS_PUT_REQUIRED_STATEMENT_FORMAT = "$L.putRequired($S, $N, $T.$L)";
     private static final String PARAMS_PUT_OPTIONAL_STATEMENT_FORMAT = "$L.putOptional($S, $N, $T.$L)";
 
-    private static final String INTERCEPTOR_CHAIN_PROCESSOR = "interceptorChainProcessor";
-    private static final String ACTION_MAPPER_VARIABLE = "actionMapper";
+    private static final String REST_PROCESSOR_NO_PAYLOAD_METHOD_STATEMENT = "return restProcessor.process($L, $L::process, $L.actionOf($S, \"GET\", headers), headers, $L.parameters())";
+    private static final String REST_PROCESSOR_PAYLOAD_METHOD_STATEMENT = "return restProcessor.process($L, $L::process, $L.actionOf($S, $S, headers), %s, headers, $L.parameters())";
 
-    private static final String REST_PROCESSOR_NO_PAYLOAD_METHOD_STATEMENT = "return restProcessor.process(responseStrategyFactory.strategyFor(ResponseStrategyFactory.$L), $L::process, $L.actionOf($S, \"GET\", headers), headers, $L.parameters())";
-    private static final String REST_PROCESSOR_PAYLOAD_METHOD_STATEMENT = "return restProcessor.process(responseStrategyFactory.strategyFor(ResponseStrategyFactory.$L), $L::process, $L.actionOf($S, $S, headers), %s, headers, $L.parameters())";
+    private static final String VALID_PARAMETER_COLLECTION_BUILDER_VARAIBLE = "validParameterCollectionBuilder";
 
-    private static final String RESPONSE_STRATEGY_FACTORY = "responseStrategyFactory";
+    private static final String INTERCEPTOR_CHAIN_PROCESSOR_FIELD = "interceptorChainProcessor";
+    private static final String ACTION_MAPPER_FIELD = "actionMapper";
+    private static final String ACCEPTED_STATUS_NO_ENTITY_RESPONSE_STRATEGY_FIELD = "acceptedStatusNoEntityResponseStrategy";
+    private static final String DEFAULT_RESPONSE_STRATEGY_FIELD = "responseStrategy";
+
+    private static final String ACCEPTED_STATUS_NO_ENTITY_RESPONSE_STRATEGY_LITERAL = "ACCEPTED_STATUS_NO_ENTITY_RESPONSE_STRATEGY";
+    private static final String OK_STATUS_ENVELOPE_ENTITY_RESPONSE_STRATEGY_LITERAL = "OK_STATUS_ENVELOPE_ENTITY_RESPONSE_STRATEGY";
+    private static final String OK_STATUS_ENVELOPE_PAYLOAD_ENTITY_RESPONSE_STRATEGY_LITERAL = "OK_STATUS_ENVELOPE_PAYLOAD_ENTITY_RESPONSE_STRATEGY";
 
     private final GeneratorConfig configuration;
 
@@ -148,20 +151,35 @@ class JaxRsImplementationGenerator {
                 .addField(FieldSpec.builder(RestProcessor.class, "restProcessor")
                         .addAnnotation(Inject.class)
                         .build())
-                .addField(FieldSpec.builder(ResponseStrategyFactory.class, RESPONSE_STRATEGY_FACTORY)
+                .addField(FieldSpec.builder(ResponseStrategy.class, DEFAULT_RESPONSE_STRATEGY_FIELD)
                         .addAnnotation(Inject.class)
+                        .addAnnotation(AnnotationSpec.builder(Named.class)
+                                .addMember(DEFAULT_ANNOTATION_PARAMETER, "$T.$L", ResponseStrategies.class, namedResponseStrategyFor(component)).build())
                         .build())
-                .addField(FieldSpec.builder(BasicActionMapper.class, ACTION_MAPPER_VARIABLE)
+                .addField(FieldSpec.builder(ResponseStrategy.class, ACCEPTED_STATUS_NO_ENTITY_RESPONSE_STRATEGY_FIELD)
+                        .addAnnotation(Inject.class)
+                        .addAnnotation(AnnotationSpec.builder(Named.class)
+                                .addMember(DEFAULT_ANNOTATION_PARAMETER, "$T.$L", ResponseStrategies.class, ACCEPTED_STATUS_NO_ENTITY_RESPONSE_STRATEGY_LITERAL).build())
+                        .build())
+                .addField(FieldSpec.builder(BasicActionMapper.class, ACTION_MAPPER_FIELD)
                         .addAnnotation(Inject.class)
                         .addAnnotation(AnnotationSpec.builder(Named.class)
                                 .addMember(DEFAULT_ANNOTATION_PARAMETER, "$S", className + "ActionMapper").build())
                         .build())
-                .addField(FieldSpec.builder(InterceptorChainProcessor.class, INTERCEPTOR_CHAIN_PROCESSOR)
+                .addField(FieldSpec.builder(InterceptorChainProcessor.class, INTERCEPTOR_CHAIN_PROCESSOR_FIELD)
                         .addAnnotation(Inject.class)
                         .build())
                 .addField(FieldSpec.builder(HttpHeaders.class, "headers")
                         .addAnnotation(Context.class)
                         .build());
+    }
+
+    private String namedResponseStrategyFor(final Optional<String> component) {
+        if (isPresentAndRequiresEnvelopeEntityResponse(component)) {
+            return OK_STATUS_ENVELOPE_ENTITY_RESPONSE_STRATEGY_LITERAL;
+        }
+
+        return OK_STATUS_ENVELOPE_PAYLOAD_ENTITY_RESPONSE_STRATEGY_LITERAL;
     }
 
     /**
@@ -287,7 +305,7 @@ class JaxRsImplementationGenerator {
 
         final boolean hasPayload = bodyMimeType.getSchema() != null;
         final String payloadStatementPart = hasPayload ? "$T.of(entity)" : "$T.empty()";
-        final String responseStrategy = isSynchronousAction(action) ? responseStrategyFor(component) : ACCEPTED_STATUS_WITH_NO_ENTITY;
+        final String responseStrategy = isSynchronousAction(action) ? DEFAULT_RESPONSE_STRATEGY_FIELD : ACCEPTED_STATUS_NO_ENTITY_RESPONSE_STRATEGY_FIELD;
 
         final MethodSpec.Builder methodBuilder = generateGenericResourceMethod(resourceMethodName, queryParams, pathParams)
                 .addCode(methodBody(pathParams, methodBodyForPostOrPut(resourceMethodName, payloadStatementPart, action.getType(), responseStrategy)));
@@ -314,15 +332,12 @@ class JaxRsImplementationGenerator {
         final Map<String, UriParameter> pathParams = action.getResource().getUriParameters();
 
         return generateGenericResourceMethod(resourceMethodName, queryParams, pathParams)
-                .addCode(methodBody(pathParams, methodBodyForGet(queryParams, resourceMethodName, responseStrategyFor(component))))
+                .addCode(methodBody(pathParams, methodBodyForGet(queryParams, resourceMethodName, DEFAULT_RESPONSE_STRATEGY_FIELD)))
                 .build();
     }
 
-    private String responseStrategyFor(final Optional<String> component) {
-        return component
-                .filter(value -> QUERY_CONTROLLER.equals(value) || QUERY_VIEW.equals(value))
-                .map(value -> OK_STATUS_WITH_ENVELOPE_ENTITY)
-                .orElseGet(() -> OK_STATUS_WITH_ENVELOPE_PAYLOAD_ENTITY);
+    private boolean isPresentAndRequiresEnvelopeEntityResponse(final Optional<String> component) {
+        return component.isPresent() && (QUERY_CONTROLLER.equals(component.get()) || QUERY_VIEW.equals(component.get()));
     }
 
     /**
@@ -349,7 +364,7 @@ class JaxRsImplementationGenerator {
      *
      * @param queryParams        the query parameters to add to a map
      * @param resourceMethodName name of the resource method
-     * @param responseStrategy   the response strategy to pass to the ResponseStrategyFactory
+     * @param responseStrategy   the response strategy
      * @return the supplier that returns the {@link CodeBlock}
      */
     private Supplier<CodeBlock> methodBodyForGet(final Map<String, QueryParameter> queryParams,
@@ -359,10 +374,10 @@ class JaxRsImplementationGenerator {
                 .add(putAllQueryParamsInCollectionBuilder(queryParams))
                 .addStatement(REST_PROCESSOR_NO_PAYLOAD_METHOD_STATEMENT,
                         responseStrategy,
-                        INTERCEPTOR_CHAIN_PROCESSOR,
-                        ACTION_MAPPER_VARIABLE,
+                        INTERCEPTOR_CHAIN_PROCESSOR_FIELD,
+                        ACTION_MAPPER_FIELD,
                         resourceMethodName,
-                        VARIABLE_PARAMS_COLLECTION_BUILDER)
+                        VALID_PARAMETER_COLLECTION_BUILDER_VARAIBLE)
                 .build();
     }
 
@@ -382,12 +397,12 @@ class JaxRsImplementationGenerator {
         return () -> CodeBlock.builder()
                 .addStatement(format(REST_PROCESSOR_PAYLOAD_METHOD_STATEMENT, payloadStatementPart),
                         responseStrategy,
-                        INTERCEPTOR_CHAIN_PROCESSOR,
-                        ACTION_MAPPER_VARIABLE,
+                        INTERCEPTOR_CHAIN_PROCESSOR_FIELD,
+                        ACTION_MAPPER_FIELD,
                         resourceMethodName,
                         actionType.toString(),
                         Optional.class,
-                        VARIABLE_PARAMS_COLLECTION_BUILDER)
+                        VALID_PARAMETER_COLLECTION_BUILDER_VARAIBLE)
                 .build();
     }
 
@@ -402,7 +417,7 @@ class JaxRsImplementationGenerator {
         final ClassName classHttpMessageLoggerHelper = ClassName.get(HttpMessageLoggerHelper.class);
 
         return CodeBlock.builder()
-                .addStatement("$T $L = new $T()", classMapBuilderType, VARIABLE_PARAMS_COLLECTION_BUILDER, classMapBuilderType)
+                .addStatement("$T $L = new $T()", classMapBuilderType, VALID_PARAMETER_COLLECTION_BUILDER_VARAIBLE, classMapBuilderType)
                 .addStatement("$T.trace(LOGGER, () -> String.format(\"Received REST request with headers: %s\", $T.toHttpHeaderTrace(headers)))",
                         classLoggerUtils, classHttpMessageLoggerHelper)
                 .add(putAllPathParamsInCollectionBuilder(pathParams.keySet()))
@@ -420,7 +435,7 @@ class JaxRsImplementationGenerator {
         final CodeBlock.Builder builder = CodeBlock.builder();
 
         paramNames.forEach(name ->
-                builder.addStatement(PARAMS_PUT_REQUIRED_STATEMENT_FORMAT, VARIABLE_PARAMS_COLLECTION_BUILDER, name, name, ParameterType.class, "STRING")
+                builder.addStatement(PARAMS_PUT_REQUIRED_STATEMENT_FORMAT, VALID_PARAMETER_COLLECTION_BUILDER_VARAIBLE, name, name, ParameterType.class, "STRING")
         );
 
         return builder.build();
@@ -440,9 +455,9 @@ class JaxRsImplementationGenerator {
                     final ParameterType parameterType = ParameterType.valueOfQueryType(paramEntry.getValue().getType().name());
 
                     if (paramEntry.getValue().isRequired()) {
-                        builder.addStatement(PARAMS_PUT_REQUIRED_STATEMENT_FORMAT, VARIABLE_PARAMS_COLLECTION_BUILDER, name, name, ParameterType.class, parameterType.name());
+                        builder.addStatement(PARAMS_PUT_REQUIRED_STATEMENT_FORMAT, VALID_PARAMETER_COLLECTION_BUILDER_VARAIBLE, name, name, ParameterType.class, parameterType.name());
                     } else {
-                        builder.addStatement(PARAMS_PUT_OPTIONAL_STATEMENT_FORMAT, VARIABLE_PARAMS_COLLECTION_BUILDER, name, name, ParameterType.class, parameterType.name());
+                        builder.addStatement(PARAMS_PUT_OPTIONAL_STATEMENT_FORMAT, VALID_PARAMETER_COLLECTION_BUILDER_VARAIBLE, name, name, ParameterType.class, parameterType.name());
                     }
                 }
         );

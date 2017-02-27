@@ -11,7 +11,6 @@ import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
 import static org.raml.model.ActionType.PUT;
 import static uk.gov.justice.services.generators.commons.helper.GeneratedClassWriter.writeClass;
-import static uk.gov.justice.services.generators.commons.helper.Names.JAVA_FILENAME_SUFFIX;
 import static uk.gov.justice.services.generators.commons.helper.Names.MAPPER_PACKAGE_NAME;
 import static uk.gov.justice.services.generators.commons.helper.Names.RESOURCE_PACKAGE_NAME;
 import static uk.gov.justice.services.generators.commons.helper.Names.packageNameOf;
@@ -19,21 +18,18 @@ import static uk.gov.justice.services.generators.commons.helper.Names.packageNam
 import uk.gov.justice.raml.core.Generator;
 import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.services.adapters.rest.validator.ResponseContentTypeRamlValidator;
-import uk.gov.justice.services.generators.commons.helper.GeneratedClassWriter;
 import uk.gov.justice.services.generators.commons.validator.ActionMappingRamlValidator;
 import uk.gov.justice.services.generators.commons.validator.CompositeRamlValidator;
 import uk.gov.justice.services.generators.commons.validator.ContainsActionsRamlValidator;
 import uk.gov.justice.services.generators.commons.validator.ContainsResourcesRamlValidator;
+import uk.gov.justice.services.generators.commons.validator.MultipartHasFormParameters;
 import uk.gov.justice.services.generators.commons.validator.RamlValidator;
 import uk.gov.justice.services.generators.commons.validator.RequestContentTypeRamlValidator;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 import org.raml.model.Raml;
 import org.slf4j.Logger;
@@ -46,7 +42,9 @@ public class RestAdapterGenerator implements Generator {
             new ContainsActionsRamlValidator(),
             new RequestContentTypeRamlValidator(DELETE, PATCH, POST, PUT),
             new ResponseContentTypeRamlValidator(GET),
-            new ActionMappingRamlValidator());
+            new ActionMappingRamlValidator(),
+            new MultipartHasFormParameters()
+    );
 
     @Override
     public void run(final Raml raml, final GeneratorConfig configuration) {

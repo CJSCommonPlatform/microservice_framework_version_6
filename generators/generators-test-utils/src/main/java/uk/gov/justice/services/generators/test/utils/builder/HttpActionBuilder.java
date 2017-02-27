@@ -170,6 +170,10 @@ public class HttpActionBuilder {
         return withMediaType(mimeType, Optional.empty());
     }
 
+    public HttpActionBuilder withMediaTypeWithoutSchema(final MimeTypeBuilder mimeType) {
+        return withMediaType(mimeType.build(), Optional.empty());
+    }
+
     public HttpActionBuilder withMediaType(final String stringMimeType, final Optional<String> schema) {
         return withMediaType(new MimeType(stringMimeType), schema);
     }

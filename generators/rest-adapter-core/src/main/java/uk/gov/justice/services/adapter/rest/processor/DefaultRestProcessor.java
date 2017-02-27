@@ -7,12 +7,15 @@ import static uk.gov.justice.services.messaging.logging.HttpMessageLoggerHelper.
 import static uk.gov.justice.services.messaging.logging.LoggerUtils.trace;
 
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
+import uk.gov.justice.services.adapter.rest.mutipart.FileBasedInterceptorContextFactory;
+import uk.gov.justice.services.adapter.rest.mutipart.FileInputDetails;
 import uk.gov.justice.services.adapter.rest.parameter.Parameter;
 import uk.gov.justice.services.adapter.rest.processor.response.ResponseStrategy;
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -33,13 +36,16 @@ public class DefaultRestProcessor implements RestProcessor {
     @Inject
     RestEnvelopeBuilderFactory envelopeBuilderFactory;
 
+    @Inject
+    FileBasedInterceptorContextFactory fileBasedInterceptorContextFactory;
+
     @Override
     public Response process(final ResponseStrategy responseStrategy,
                             final Function<InterceptorContext, Optional<JsonEnvelope>> interceptorChain,
                             final String action,
                             final HttpHeaders headers,
                             final Collection<Parameter> params) {
-        return process(responseStrategy, interceptorChain, action, empty(), headers, params);
+        return process(responseStrategy, interceptorChain, action, empty(), headers, params, empty());
     }
 
     @Override
@@ -49,6 +55,28 @@ public class DefaultRestProcessor implements RestProcessor {
                             final Optional<JsonObject> initialPayload,
                             final HttpHeaders headers,
                             final Collection<Parameter> params) {
+
+        return process(responseStrategy, interceptorChain, action, initialPayload, headers, params, empty());
+    }
+
+    @Override
+    public Response process(final ResponseStrategy responseStrategy,
+                            final Function<InterceptorContext, Optional<JsonEnvelope>> interceptorChain,
+                            final String action,
+                            final HttpHeaders headers,
+                            final Collection<Parameter> params,
+                            final List<FileInputDetails> fileInputDetails) {
+
+        return process(responseStrategy, interceptorChain, action, empty(), headers, params, Optional.of(fileInputDetails));
+    }
+
+    private Response process(final ResponseStrategy responseStrategy,
+                             final Function<InterceptorContext, Optional<JsonEnvelope>> interceptorChain,
+                             final String action,
+                             final Optional<JsonObject> initialPayload,
+                             final HttpHeaders headers,
+                             final Collection<Parameter> params,
+                             final Optional<List<FileInputDetails>> fileInputDetails) {
 
         trace(logger, () -> format("Processing REST message: %s", toHttpHeaderTrace(headers)));
 
@@ -61,7 +89,11 @@ public class DefaultRestProcessor implements RestProcessor {
 
         trace(logger, () -> format("REST message converted to envelope: %s", envelope));
 
-        final Optional<JsonEnvelope> result = interceptorChain.apply(interceptorContextWithInput(envelope));
+        final InterceptorContext interceptorContext = fileInputDetails
+                .map(value -> fileBasedInterceptorContextFactory.create(value, envelope))
+                .orElseGet(() -> interceptorContextWithInput(envelope));
+
+        final Optional<JsonEnvelope> result = interceptorChain.apply(interceptorContext);
 
         trace(logger, () -> format("REST message processed: %s", envelope));
 

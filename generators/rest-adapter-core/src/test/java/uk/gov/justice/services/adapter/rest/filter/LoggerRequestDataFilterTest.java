@@ -7,6 +7,7 @@ import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.core.HttpHeaders.ACCEPT;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
+import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED_TYPE;
 import static org.apache.commons.io.IOUtils.toInputStream;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -14,6 +15,7 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.common.http.HeaderConstants.CLIENT_CORRELATION_ID;
@@ -282,4 +284,17 @@ public class LoggerRequestDataFilterTest {
         verify(context).setEntityStream(Mockito.any(ByteArrayInputStream.class));
     }
 
+    @Test
+    public void shouldIgnoreNonFrameworkMediaTypesAndNotUploadStream() throws Exception {
+        final MultivaluedMap<String, String> headers = new MultivaluedHashMap();
+
+        when(context.getHeaders()).thenReturn(headers);
+        when(context.getMediaType()).thenReturn(APPLICATION_FORM_URLENCODED_TYPE);
+
+        loggerRequestDataFilter.filter(context);
+
+        assertThat(MDC.get(REQUEST_DATA), is("{}"));
+
+        verify(context, never()).setEntityStream(Mockito.any(ByteArrayInputStream.class));
+    }
 }

@@ -8,6 +8,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,6 +17,8 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetad
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
+import uk.gov.justice.services.adapter.rest.mutipart.FileBasedInterceptorContextFactory;
+import uk.gov.justice.services.adapter.rest.mutipart.FileInputDetails;
 import uk.gov.justice.services.adapter.rest.parameter.Parameter;
 import uk.gov.justice.services.adapter.rest.processor.response.ResponseStrategy;
 import uk.gov.justice.services.common.http.HeaderConstants;
@@ -61,6 +64,9 @@ public class DefaultRestProcessorTest {
 
     @Mock
     private ResponseStrategy responseStrategy;
+
+    @Mock
+    private FileBasedInterceptorContextFactory fileBasedInterceptorContextFactory;
 
     @Mock
     private Logger logger;
@@ -142,6 +148,37 @@ public class DefaultRestProcessorTest {
         when(responseStrategy.responseFor(ACTION, Optional.of(jsonEnvelope))).thenReturn(response);
 
         final Response result = restProcessor.process(responseStrategy, interceptorChain, ACTION, headers, pathParams);
+
+        verify(responseStrategy).responseFor(ACTION, Optional.of(jsonEnvelope));
+        assertThat(result, equalTo(response));
+    }
+
+    @Test
+    public void shouldCreateTheInterceptorContextUsingTheFileBasedInterceptorContextFactoryIfTheInputPartExists() throws Exception {
+        final List<FileInputDetails> fileInputDetails = mock(List.class);
+        final InterceptorContext interceptorContext = mock(InterceptorContext.class);
+
+        when(fileBasedInterceptorContextFactory.create(eq(fileInputDetails), any(JsonEnvelope.class))).thenReturn(interceptorContext);
+
+        restProcessor.process(responseStrategy, interceptorChain, ACTION, headers, pathParams, fileInputDetails);
+
+        final ArgumentCaptor<InterceptorContext> interceptorContextCaptor = forClass(InterceptorContext.class);
+        verify(interceptorChain).apply(interceptorContextCaptor.capture());
+
+        final InterceptorContext resultInterceptorContext = interceptorContextCaptor.getValue();
+        assertThat(resultInterceptorContext, equalTo(interceptorContext));
+    }
+
+    @Test
+    public void shouldReturnResponseFromResponseStrategyForCallWithInputPart() throws Exception {
+        final List<FileInputDetails> fileInputDetails = mock(List.class);
+        final InterceptorContext interceptorContext = mock(InterceptorContext.class);
+
+        when(fileBasedInterceptorContextFactory.create(eq(fileInputDetails), any(JsonEnvelope.class))).thenReturn(interceptorContext);
+        when(interceptorChain.apply(interceptorContext)).thenReturn(Optional.of(jsonEnvelope));
+        when(responseStrategy.responseFor(ACTION, Optional.of(jsonEnvelope))).thenReturn(response);
+
+        final Response result = restProcessor.process(responseStrategy, interceptorChain, ACTION, headers, pathParams, fileInputDetails);
 
         verify(responseStrategy).responseFor(ACTION, Optional.of(jsonEnvelope));
         assertThat(result, equalTo(response));

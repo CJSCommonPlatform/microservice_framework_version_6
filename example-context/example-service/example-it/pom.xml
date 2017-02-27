@@ -133,6 +133,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>file-service-liquibase</artifactId>
+            <version>1.4.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
             <scope>test</scope>
@@ -196,6 +202,18 @@
         <dependency>
             <groupId>org.exparity</groupId>
             <artifactId>hamcrest-date</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpmime</artifactId>
+            <version>4.5.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>file-service-api</artifactId>
+            <version>1.1.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -368,29 +386,29 @@
 
             <!-- To be used when running CakeShopPostgresIT-->
             <!--<plugin>-->
-                <!--<artifactId>maven-resources-plugin</artifactId>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<id>copy-jboss-module</id>-->
-                        <!--<phase>process-test-classes</phase>-->
-                        <!--<goals>-->
-                            <!--<goal>copy-resources</goal>-->
-                        <!--</goals>-->
-                        <!--<configuration>-->
-                            <!--<outputDirectory>${jboss.home}/modules/system/layers/base/org-->
-                            <!--</outputDirectory>-->
-                            <!--<resources>-->
-                                <!--<resource>-->
-                                    <!--<directory>src/test/resources/wildfly-modules</directory>-->
-                                    <!--<filtering>true</filtering>-->
-                                <!--</resource>-->
-                            <!--</resources>-->
-                            <!--<filters>-->
-                                <!--<filter>src/test/resources/test.properties</filter>-->
-                            <!--</filters>-->
-                        <!--</configuration>-->
-                    <!--</execution>-->
-                <!--</executions>-->
+            <!--<artifactId>maven-resources-plugin</artifactId>-->
+            <!--<executions>-->
+            <!--<execution>-->
+            <!--<id>copy-jboss-module</id>-->
+            <!--<phase>process-test-classes</phase>-->
+            <!--<goals>-->
+            <!--<goal>copy-resources</goal>-->
+            <!--</goals>-->
+            <!--<configuration>-->
+            <!--<outputDirectory>${jboss.home}/modules/system/layers/base/org-->
+            <!--</outputDirectory>-->
+            <!--<resources>-->
+            <!--<resource>-->
+            <!--<directory>src/test/resources/wildfly-modules</directory>-->
+            <!--<filtering>true</filtering>-->
+            <!--</resource>-->
+            <!--</resources>-->
+            <!--<filters>-->
+            <!--<filter>src/test/resources/test.properties</filter>-->
+            <!--</filters>-->
+            <!--</configuration>-->
+            <!--</execution>-->
+            <!--</executions>-->
             <!--</plugin>-->
 
             <!-- To be used when running CakeShopIT-->

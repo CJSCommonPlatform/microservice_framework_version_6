@@ -34,6 +34,7 @@ public class RecipeCommandHandler {
     private static final String FIELD_RECIPE_ID = "recipeId";
     private static final String FIELD_NAME = "name";
     private static final String FIELD_GLUTEN_FREE = "glutenFree";
+    private static final String FIELD_PHOTO_ID = "photoId";
 
     @Inject
     EventSource eventSource;
@@ -90,6 +91,22 @@ public class RecipeCommandHandler {
         eventStream.append(
                 recipe.removeRecipe()
                         .map(enveloper.withMetadataFrom(command)));
+    }
+
+    @Handles("example.upload-photograph")
+    public void uploadPhotograph(final JsonEnvelope command) throws EventStreamException {
+        LOGGER.trace("=============> Inside upload-photograph Command Handler. RecipeId: " + command.payloadAsJsonObject().getString(FIELD_RECIPE_ID));
+
+        final UUID recipeId = getUUID(command.payloadAsJsonObject(), FIELD_RECIPE_ID).get();
+        final UUID photoId = getUUID(command.payloadAsJsonObject(), FIELD_PHOTO_ID).get();
+
+        final EventStream eventStream = eventSource.getStreamById(recipeId);
+        final Recipe recipe = aggregateService.get(eventStream, Recipe.class);
+
+        eventStream.append(
+                recipe.addPhotograph(photoId)
+                        .map(enveloper.withMetadataFrom(command)),
+                Tolerance.NON_CONSECUTIVE);
     }
 
     private List<Ingredient> ingredientsFrom(final JsonObject payload) {

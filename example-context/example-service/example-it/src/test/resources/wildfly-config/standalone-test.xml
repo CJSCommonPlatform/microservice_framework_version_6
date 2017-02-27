@@ -407,6 +407,23 @@
                         <check-valid-connection-sql>select 1</check-valid-connection-sql>
                     </validation>
                 </datasource>
+               <datasource jndi-name="java:/DS.fileservice" pool-name="DS.fileservice" enabled="true"
+                            use-java-context="true">
+                    <connection-url>${db.fileservice.url}</connection-url>
+                    <driver>h2</driver>
+                    <pool>
+                        <min-pool-size>3</min-pool-size>
+                        <max-pool-size>3</max-pool-size>
+                        <prefill>true</prefill>
+                    </pool>
+                    <security>
+                        <user-name>${db.fileservice.userName}</user-name>
+                        <password>${db.fileservice.password}</password>
+                    </security>
+                    <validation>
+                        <check-valid-connection-sql>select 1</check-valid-connection-sql>
+                    </validation>
+                </datasource>
                 <drivers>
                     <driver name="h2" module="com.h2database.h2">
                         <xa-datasource-class>org.h2.jdbcx.JdbcDataSource</xa-datasource-class>

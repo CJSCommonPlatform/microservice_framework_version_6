@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "",
+  "type": "object",
+  "properties": {
+    "recipeId": {
+      "id": "/recipeId",
+      "type": "string",
+      "description": "Uniquely identifies the recipe",
+      "name": "id of recipe",
+      "title": "id of recipe"
+    },
+    "photoId": {
+      "id": "/photoId",
+      "type": "string",
+      "description": "Id of photo",
+      "name": "Id of photo",
+      "title": "Id of photo"
+    }
+  },
+  "required": [
+    "recipeId",
+    "photoId"
+  ]
+}

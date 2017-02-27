@@ -13,6 +13,8 @@ import javax.persistence.Table;
 @Table(name = "recipe")
 public class Recipe implements Serializable {
 
+    private static final long serialVersionUID = -8793074132428777454L;
+
     @Id
     private UUID id;
 
@@ -22,10 +24,14 @@ public class Recipe implements Serializable {
     @Column(name = "gluten_free", nullable = false, insertable = true, updatable = true)
     private boolean glutenFree;
 
-    public Recipe(final UUID id, final String name, final boolean glutenFree) {
+    @Column(name = "photo_id", nullable = true, insertable = true, updatable = true)
+    private UUID photoId;
+
+    public Recipe(final UUID id, final String name, final boolean glutenFree, final UUID photoId) {
         this.id = id;
         this.name = name;
         this.glutenFree = glutenFree;
+        this.photoId = photoId;
     }
 
     public Recipe() {
@@ -42,6 +48,10 @@ public class Recipe implements Serializable {
 
     public boolean isGlutenFree() {
         return glutenFree;
+    }
+
+    public UUID getPhotoId() {
+        return photoId;
     }
 
     @Override
@@ -61,5 +71,9 @@ public class Recipe implements Serializable {
 
     public void setName(final String name) {
         this.name = name;
+    }
+
+    public void setPhotoId(final UUID photoId) {
+        this.photoId = photoId;
     }
 }

@@ -23,7 +23,7 @@ public class ValueProducerTest {
 
     private static final String VALID_VALUE = "Valid value";
     private static final String APP_NAME = "appName";
-    private static final String VALID_KEY = "valid key";
+    private static final String ANNOTATION_KEY = "somekey";
     private static final String DEFAULT_VALUE = "Default Value";
     private static final String EMPTY_VALUE = "";
 
@@ -50,7 +50,7 @@ public class ValueProducerTest {
         when(serviceContextNameProvider.getServiceContextName()).thenReturn(APP_NAME);
         when(propertyInjectionPoint.getAnnotated()).thenReturn(annotated);
         when(annotated.getAnnotation(Value.class)).thenReturn(param);
-        when(param.key()).thenReturn(VALID_KEY);
+        when(param.key()).thenReturn(ANNOTATION_KEY);
     }
 
     @Test
@@ -62,21 +62,32 @@ public class ValueProducerTest {
 
     @Test
     public void shouldReturnLongPropertyValue() throws NamingException {
-        when(initialContext.lookup(format("java:/app/%s/%s", APP_NAME, param.key()))).thenReturn("100");
+        when(initialContext.lookup(format("java:/app/%s/%s", APP_NAME, ANNOTATION_KEY))).thenReturn("100");
 
         assertThat(valueProducer.longValueOf(propertyInjectionPoint), equalTo(100L));
     }
 
     @Test
     public void shouldReturnEmptyValue() throws NamingException {
-        when(initialContext.lookup(format("java:/app/%s/%s", APP_NAME, param.key()))).thenReturn(EMPTY_VALUE);
+        when(initialContext.lookup(format("java:/app/%s/%s", APP_NAME, ANNOTATION_KEY))).thenReturn(EMPTY_VALUE);
 
         assertThat(valueProducer.stringValueOf(propertyInjectionPoint), equalTo(EMPTY_VALUE));
     }
 
     @Test
+    public void shouldFallBackToGlobalValueIfLocalNotFound() throws NamingException {
+        when(initialContext.lookup(format("java:/app/%s/%s", APP_NAME, ANNOTATION_KEY))).thenThrow(NameNotFoundException.class);
+        final String globalValue = "someValueABCD";
+        when(initialContext.lookup("java:global/" + ANNOTATION_KEY)).thenReturn(globalValue);
+
+        assertThat(valueProducer.stringValueOf(propertyInjectionPoint), equalTo(globalValue));
+    }
+
+
+    @Test
     public void shouldReturnDefaultValueWhenNotFound() throws NamingException {
-        when(initialContext.lookup(format("java:/app/%s/%s", APP_NAME, param.key()))).thenThrow(NameNotFoundException.class);
+        when(initialContext.lookup(format("java:/app/%s/%s", APP_NAME, ANNOTATION_KEY))).thenThrow(NameNotFoundException.class);
+        when(initialContext.lookup("java:global/" + ANNOTATION_KEY)).thenThrow(NameNotFoundException.class);
         when(param.defaultValue()).thenReturn(DEFAULT_VALUE);
 
         assertThat(valueProducer.stringValueOf(propertyInjectionPoint), equalTo(DEFAULT_VALUE));
@@ -84,7 +95,8 @@ public class ValueProducerTest {
 
     @Test(expected = MissingPropertyException.class)
     public void shouldThrowExceptionWhenNotFoundAndNoDefaultValue() throws NamingException {
-        when(initialContext.lookup(format("java:/app/%s/%s", APP_NAME, param.key()))).thenThrow(NameNotFoundException.class);
+        when(initialContext.lookup(format("java:/app/%s/%s", APP_NAME, ANNOTATION_KEY))).thenThrow(NameNotFoundException.class);
+        when(initialContext.lookup("java:global/" + ANNOTATION_KEY)).thenThrow(NameNotFoundException.class);
         when(param.defaultValue()).thenReturn("_null_default");
 
         valueProducer.stringValueOf(propertyInjectionPoint);

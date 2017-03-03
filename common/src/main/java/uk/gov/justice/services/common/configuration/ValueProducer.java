@@ -11,10 +11,12 @@ import javax.naming.NamingException;
 
 
 /**
- * Looks up context specific jndi names in order to inject their values into @Value annotated properties.
+ * Looks up context specific jndi names in order to inject their values into @Value annotated
+ * properties.
  */
 @ApplicationScoped
 public class ValueProducer extends AbstractValueProducer {
+    private static final String LOCAL_JNDI_NAME_PATTERN = "java:/app/%s/%s";
 
     @Inject
     ServiceContextNameProvider serviceContextNameProvider;
@@ -36,8 +38,13 @@ public class ValueProducer extends AbstractValueProducer {
     }
 
     @Override
-    protected String jndiNameFrom(final CommonValueAnnotationDef annotation) {
-        return format("java:/app/%s/%s", serviceContextNameProvider.getServiceContextName(), annotation.key());
+    protected String[] jndiNamesFrom(final CommonValueAnnotationDef annotation) {
+        return new String[]{localJNDINameFrom(annotation), globalJNDINameFrom(annotation)};
     }
+
+    private String localJNDINameFrom(final CommonValueAnnotationDef annotation) {
+        return format(LOCAL_JNDI_NAME_PATTERN, serviceContextNameProvider.getServiceContextName(), annotation.key());
+    }
+
 
 }

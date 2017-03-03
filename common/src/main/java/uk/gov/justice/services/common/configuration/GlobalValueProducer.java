@@ -1,6 +1,5 @@
 package uk.gov.justice.services.common.configuration;
 
-import static java.lang.String.format;
 import static uk.gov.justice.services.common.configuration.CommonValueAnnotationDef.globalValueAnnotationOf;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -9,7 +8,8 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.naming.NamingException;
 
 /**
- * Looks up global jndi names in order to inject their values into @GlobalValue annotated properties.
+ * Looks up global jndi names in order to inject their values into @GlobalValue annotated
+ * properties.
  */
 @ApplicationScoped
 public class GlobalValueProducer extends AbstractValueProducer {
@@ -30,7 +30,7 @@ public class GlobalValueProducer extends AbstractValueProducer {
     }
 
     @Override
-    protected String jndiNameFrom(final CommonValueAnnotationDef annotation) {
-        return format("java:global/%s", annotation.key());
+    protected String[] jndiNamesFrom(final CommonValueAnnotationDef annotation) {
+        return new String[]{globalJNDINameFrom(annotation)};
     }
 }

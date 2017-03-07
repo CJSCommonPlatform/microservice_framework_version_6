@@ -45,9 +45,10 @@
     </modules>
 
     <properties>
-        <common-bom.version>1.11.0</common-bom.version>
+        <common-bom.version>1.12.0</common-bom.version>
 		<embedded-artemis.version>1.0.0</embedded-artemis.version>
 		<raml-maven-plugin.version>1.4.0</raml-maven-plugin.version>
+        <cpp.utilities.version>1.1.0</cpp.utilities.version>
     </properties>
 
     <dependencyManagement>
@@ -64,6 +65,11 @@
                 <artifactId>embedded-artemis</artifactId>
                 <version>${embedded-artemis.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>uk.gov.justice.utils</groupId>
+                <artifactId>utilities-core</artifactId>
+                <version>${cpp.utilities.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

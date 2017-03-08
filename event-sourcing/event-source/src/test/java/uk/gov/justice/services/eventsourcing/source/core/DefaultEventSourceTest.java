@@ -27,6 +27,6 @@ public class DefaultEventSourceTest {
         EnvelopeEventStream eventStream = (EnvelopeEventStream) eventSource.getStreamById(STREAM_ID);
 
         assertThat(eventStream.getId(), equalTo(STREAM_ID));
-        assertThat(eventStream.eventStreamManager, equalTo(eventStreamManager));
+
     }
 }

@@ -1,5 +1,7 @@
 package uk.gov.justice.services.eventsourcing.source.core;
 
+import uk.gov.justice.services.eventsourcing.source.core.snapshot.SnapshotService;
+
 import java.util.UUID;
 
 import javax.annotation.Priority;
@@ -16,16 +18,19 @@ import javax.inject.Inject;
 public class SnapshotAwareEventSource implements EventSource {
 
     @Inject
-    SnapshotAwareEventStreamManager eventStreamManager;
+    EventStreamManager eventStreamManager;
+
+    @Inject
+    SnapshotService snapshotService;
 
     /**
      * Get a stream of events by stream id.
      *
      * @param streamId the stream id
-     * @return the {@link SnapshotAwareEventStreamManager}
+     * @return the {@link SnapshotAwareEnvelopeEventStream}
      */
-    public SnapshotAwareEnvelopeEventStream getStreamById(final UUID streamId) {
-        return new SnapshotAwareEnvelopeEventStream(streamId, eventStreamManager);
+    public EventStream getStreamById(final UUID streamId) {
+        return new SnapshotAwareEnvelopeEventStream(streamId, eventStreamManager, snapshotService);
     }
 
 }

@@ -19,8 +19,14 @@ public class GlobalValueProducer extends AbstractValueProducer {
 
     @GlobalValue
     @Produces
-    public String produceValue(final InjectionPoint ip) throws NamingException {
+    public String stringValueOf(final InjectionPoint ip) throws NamingException {
         return jndiValueFor(globalValueAnnotationOf(ip));
+    }
+
+    @GlobalValue
+    @Produces
+    public long longValueOf(final InjectionPoint ip) throws NamingException {
+        return Long.valueOf(stringValueOf(ip));
     }
 
     @Override

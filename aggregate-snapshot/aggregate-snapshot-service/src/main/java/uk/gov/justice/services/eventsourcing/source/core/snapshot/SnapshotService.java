@@ -15,17 +15,14 @@ public interface SnapshotService {
 
     /**
      * Attempt aggregate store.
-     *
-     * @param <T>                    the type parameter
+     *  @param <T>                    the type parameter
      * @param streamId               the stream id
      * @param streamVersionId        the stream version id
      * @param aggregate              the aggregate
-     * @param currentSnapshotVersion the current snapshot version
      */
     public <T extends Aggregate> void attemptAggregateStore(final UUID streamId,
                                                             final long streamVersionId,
-                                                            final T aggregate,
-                                                            final long currentSnapshotVersion);
+                                                            final T aggregate);
 
     /**
      * Gets latest versioned aggregate.

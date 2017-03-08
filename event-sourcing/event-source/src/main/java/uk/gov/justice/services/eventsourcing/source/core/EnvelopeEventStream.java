@@ -6,12 +6,9 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-/**
- * Implementation of {@link EventStream}
- */
 public class EnvelopeEventStream implements EventStream {
 
-    final EventStreamManager eventStreamManager;
+    private final EventStreamManager eventStreamManager;
     private final UUID id;
 
 
@@ -26,22 +23,32 @@ public class EnvelopeEventStream implements EventStream {
     }
 
     @Override
-    public Stream<JsonEnvelope> readFrom(final Long version) {
+    public Stream<JsonEnvelope> readFrom(final long version) {
         return eventStreamManager.readFrom(id, version);
     }
 
     @Override
-    public void append(final Stream<JsonEnvelope> events) throws EventStreamException {
-        eventStreamManager.append(id, events);
+    public long append(final Stream<JsonEnvelope> events) throws EventStreamException {
+        return eventStreamManager.append(id, events);
     }
 
     @Override
-    public void appendAfter(final Stream<JsonEnvelope> events, final Long version) throws EventStreamException {
-        eventStreamManager.appendAfter(id, events, version);
+    public long append(final Stream<JsonEnvelope> stream, final Tolerance tolerance) throws EventStreamException {
+        switch (tolerance) {
+            case NON_CONSECUTIVE:
+                return eventStreamManager.appendNonConsecutively(id, stream);
+            default:
+                return eventStreamManager.append(id, stream);
+        }
     }
 
     @Override
-    public Long getCurrentVersion() {
+    public long appendAfter(final Stream<JsonEnvelope> events, final long version) throws EventStreamException {
+        return eventStreamManager.appendAfter(id, events, version);
+    }
+
+    @Override
+    public long getCurrentVersion() {
         return eventStreamManager.getCurrentVersion(id);
     }
 

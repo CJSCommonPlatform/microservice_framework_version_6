@@ -8,9 +8,11 @@ import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
-import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
 import static uk.gov.justice.services.test.utils.core.matchers.EventStreamMatcher.eventStreamAppendedWith;
@@ -20,11 +22,13 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatch
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.withMetadataEnvelopedFrom;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
+import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
 
 import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
+import uk.gov.justice.services.eventsourcing.source.core.Tolerance;
 import uk.gov.justice.services.example.cakeshop.domain.aggregate.Recipe;
 import uk.gov.justice.services.example.cakeshop.domain.event.RecipeAdded;
 import uk.gov.justice.services.example.cakeshop.domain.event.RecipeRemoved;
@@ -129,17 +133,16 @@ public class RecipeCommandHandlerTest {
 
         recipeCommandHandler.renameRecipe(command);
 
-        assertThat(eventStream, eventStreamAppendedWith(
-                streamContaining(
+        verify(eventStream).append(
+                argThat(streamContaining(
                         jsonEnvelope(
                                 withMetadataEnvelopedFrom(command)
                                         .withName(RENAME_RECIPE_EVENT_NAME),
                                 payloadIsJson(allOf(
                                         withJsonPath("$.recipeId", equalTo(RECIPE_ID.toString())),
                                         withJsonPath("$.name", equalTo(RECIPE_NAME))
-                                )))
-                                .thatMatchesSchema()
-                )));
+                                ))).thatMatchesSchema()
+                )), eq(Tolerance.NON_CONSECUTIVE));
     }
 
     @Test

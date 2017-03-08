@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 
+import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.UUID;
@@ -26,51 +27,66 @@ public class EnvelopeEventStreamTest {
     @Mock
     Stream<JsonEnvelope> stream;
 
-    private EnvelopeEventStream envelopeEventStream;
+    private EventStream eventStream;
 
     @Before
     public void setup() {
-        envelopeEventStream = new EnvelopeEventStream(STREAM_ID, eventStreamManager);
+        eventStream = new EnvelopeEventStream(STREAM_ID, eventStreamManager);
     }
 
     @Test
     public void shouldReturnStreamOfEnvelopes() throws Exception {
-        envelopeEventStream.read();
+        eventStream.read();
 
         verify(eventStreamManager).read(STREAM_ID);
     }
 
     @Test
     public void shouldReturnStreamFromVersion() throws Exception {
-        envelopeEventStream.readFrom(VERSION);
+        eventStream.readFrom(VERSION);
 
         verify(eventStreamManager).readFrom(STREAM_ID, VERSION);
     }
 
     @Test
     public void shouldAppendStream() throws Exception {
-        envelopeEventStream.append(stream);
+        eventStream.append(stream);
 
         verify(eventStreamManager).append(STREAM_ID, stream);
     }
 
     @Test
     public void shouldAppendStreamAfterVersion() throws Exception {
-        envelopeEventStream.appendAfter(stream, VERSION);
+        eventStream.appendAfter(stream, VERSION);
 
         verify(eventStreamManager).appendAfter(STREAM_ID, stream, VERSION);
     }
 
     @Test
+    public void shouldAppendWithNonConsecutiveTolerance() throws EventStreamException {
+        eventStream.append(stream, Tolerance.NON_CONSECUTIVE);
+
+        verify(eventStreamManager).appendNonConsecutively(STREAM_ID, stream);
+    }
+
+    @Test
+    public void shouldAppendWithConsecutiveTolerance() throws EventStreamException {
+        eventStream.append(stream, Tolerance.CONSECUTIVE);
+
+        verify(eventStreamManager).append(STREAM_ID, stream);
+    }
+
+
+    @Test
     public void shouldReturnCurrentVersion() throws Exception {
-        envelopeEventStream.getCurrentVersion();
+        eventStream.getCurrentVersion();
 
         verify(eventStreamManager).getCurrentVersion(STREAM_ID);
     }
 
     @Test
     public void testGetId() throws Exception {
-        final UUID actualId = envelopeEventStream.getId();
+        final UUID actualId = eventStream.getId();
 
         assertThat(actualId, equalTo(STREAM_ID));
     }

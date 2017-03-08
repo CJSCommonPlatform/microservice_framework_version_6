@@ -52,6 +52,7 @@ import org.junit.Test;
  * Requires a running postgres database on port 5432 with exampleeventstore and exampleviewstore
  * databases.
  */
+@Ignore("Requires Postgres database")
 public class CakeShopPostgresIT {
 
     private static final int OK = 200;
@@ -97,7 +98,6 @@ public class CakeShopPostgresIT {
         client.close();
     }
 
-    @Ignore("Requires Postgres database")
     @Test
     public void shouldProcessMultipleUpdatedToSameRecipeId() throws Exception {
         clearDeadLetterQueue();
@@ -115,7 +115,7 @@ public class CakeShopPostgresIT {
         for (int i = 0; i < updateCount; i++) {
             //random generator string
             sendTo(RECIPES_RESOURCE_URI + recipeId).request()
-                    .post(renameRecipeEntity("New Name"));
+                    .put(renameRecipeEntity("New Name"));
         }
 
         Thread.sleep(updateCount * 1 * 50);
@@ -127,7 +127,7 @@ public class CakeShopPostgresIT {
             assertNull("Dead letter queue is not empty, found message: ", message);
 
             sendTo(RECIPES_RESOURCE_URI + recipeId).request()
-                    .post(renameRecipeEntity("Final Name"));
+                    .put(renameRecipeEntity("Final Name"));
 
             await().until(() -> queryForRecipe(recipeId).body().contains("Final Name"));
         }

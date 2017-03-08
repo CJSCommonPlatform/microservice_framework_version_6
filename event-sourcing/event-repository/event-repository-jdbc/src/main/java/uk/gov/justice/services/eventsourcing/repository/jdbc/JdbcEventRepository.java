@@ -41,7 +41,7 @@ public class JdbcEventRepository implements EventRepository {
 
         logger.trace("Retrieving event stream for {}", streamId);
         return eventLogJdbcRepository.findByStreamIdOrderBySequenceIdAsc(streamId)
-                .map(eventLogConverter::createEnvelope);
+                .map(eventLogConverter::envelopeOf);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class JdbcEventRepository implements EventRepository {
 
         logger.trace("Retrieving event stream for {} at sequence {}", streamId, sequenceId);
         return eventLogJdbcRepository.findByStreamIdFromSequenceIdOrderBySequenceIdAsc(streamId, sequenceId)
-                .map(eventLogConverter::createEnvelope);
+                .map(eventLogConverter::envelopeOf);
 
     }
 
@@ -62,15 +62,15 @@ public class JdbcEventRepository implements EventRepository {
     public Stream<JsonEnvelope> getAll() {
         logger.trace("Retrieving all events");
         return eventLogJdbcRepository.findAll()
-                .map(eventLogConverter::createEnvelope);
+                .map(eventLogConverter::envelopeOf);
     }
 
     @Override
     @Transactional(dontRollbackOn = OptimisticLockingRetryException.class)
-    public void store(final JsonEnvelope envelope, final UUID streamId, final Long version) throws StoreEventRequestFailedException {
+    public void store(final JsonEnvelope envelope) throws StoreEventRequestFailedException {
         try {
-            final EventLog eventLog = eventLogConverter.createEventLog(envelope, streamId, version);
-            logger.trace("Storing event {} into stream {} at version {}", eventLog.getName(), streamId, version);
+            final EventLog eventLog = eventLogConverter.eventLogOf(envelope);
+            logger.trace("Storing event {} into stream {} at version {}", eventLog.getName(), eventLog.getStreamId(), eventLog.getSequenceId());
             eventLogJdbcRepository.insert(eventLog);
         } catch (InvalidSequenceIdException ex) {
             throw new StoreEventRequestFailedException(String.format("Could not store event for version %d of stream %s",
@@ -79,7 +79,7 @@ public class JdbcEventRepository implements EventRepository {
     }
 
     @Override
-    public Long getCurrentSequenceIdForStream(final UUID streamId) {
+    public long getCurrentSequenceIdForStream(final UUID streamId) {
         return eventLogJdbcRepository.getLatestSequenceIdForStream(streamId);
     }
 
@@ -90,7 +90,7 @@ public class JdbcEventRepository implements EventRepository {
                 .map(id -> {
                     final Stream<EventLog> eventStream = eventLogJdbcRepository.findByStreamIdOrderBySequenceIdAsc(id);
                     streamIds.onClose(eventStream::close);
-                    return eventStream.map(eventLogConverter::createEnvelope);
+                    return eventStream.map(eventLogConverter::envelopeOf);
                 });
 
     }

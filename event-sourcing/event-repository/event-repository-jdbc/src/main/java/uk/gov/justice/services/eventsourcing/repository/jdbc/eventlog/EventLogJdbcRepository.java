@@ -133,10 +133,9 @@ public class EventLogJdbcRepository extends AbstractJdbcRepository<EventLog> {
      * Returns the latest sequence Id for the given stream streamId.
      *
      * @param streamId streamId of the stream.
-     * @return latest sequence streamId for the stream.  Returns 0 if stream doesn't exist. Never
-     * returns null.
+     * @return latest sequence streamId for the stream.  Returns 0 if stream doesn't exist.
      */
-    public Long getLatestSequenceIdForStream(final UUID streamId) {
+    public long getLatestSequenceIdForStream(final UUID streamId) {
         try (final PreparedStatementWrapper ps = preparedStatementWrapperOf(SQL_FIND_LATEST_SEQUENCE_ID)) {
 
             ps.setObject(1, streamId);

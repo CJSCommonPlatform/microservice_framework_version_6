@@ -72,7 +72,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
         final Object resourceObject = getInstanceOf(resourceClass);
 
         final Response processorResponse = Response.ok().build();
-        when(restProcessor.process(any(ResponseStrategy.class), any(Function.class), anyString(), any(Optional.class), any(HttpHeaders.class),
+        when(restProcessor.process(anyString(), any(Function.class), anyString(), any(Optional.class), any(HttpHeaders.class),
                 any(Collection.class))).thenReturn(processorResponse);
 
         final Method method = firstMethodOf(resourceClass);
@@ -101,7 +101,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
         method.invoke(resourceObject, NOT_USED_JSONOBJECT);
 
         final ArgumentCaptor<Function> functionCaptor = ArgumentCaptor.forClass(Function.class);
-        verify(restProcessor).process(any(ResponseStrategy.class), functionCaptor.capture(), anyString(), any(Optional.class), any(HttpHeaders.class),
+        verify(restProcessor).process(anyString(), functionCaptor.capture(), anyString(), any(Optional.class), any(HttpHeaders.class),
                 any(Collection.class));
 
         final JsonEnvelope envelope = envelope().build();
@@ -137,7 +137,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
         method.invoke(resourceObject, NOT_USED_JSONOBJECT);
 
         final ArgumentCaptor<Function> functionCaptor = ArgumentCaptor.forClass(Function.class);
-        verify(restProcessor).process(any(ResponseStrategy.class), functionCaptor.capture(), anyString(), any(Optional.class), any(HttpHeaders.class),
+        verify(restProcessor).process(anyString(), functionCaptor.capture(), anyString(), any(Optional.class), any(HttpHeaders.class),
                 any(Collection.class));
 
         final JsonEnvelope envelope = envelope().build();
@@ -166,7 +166,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
         final Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, jsonObject.get());
 
-        verify(restProcessor).process(any(ResponseStrategy.class), any(Function.class), anyString(), eq(jsonObject), any(HttpHeaders.class), any(Collection.class));
+        verify(restProcessor).process(anyString(), any(Function.class), anyString(), eq(jsonObject), any(HttpHeaders.class), any(Collection.class));
     }
 
     @SuppressWarnings("unchecked")
@@ -188,7 +188,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
         final Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, NOT_USED_JSONOBJECT);
 
-        verify(restProcessor).process(any(ResponseStrategy.class), any(Function.class), anyString(), any(Optional.class), eq(headers), any(Collection.class));
+        verify(restProcessor).process(anyString(), any(Function.class), anyString(), any(Optional.class), eq(headers), any(Collection.class));
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -211,7 +211,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
 
         final ArgumentCaptor<Collection> pathParamsCaptor = ArgumentCaptor.forClass(Collection.class);
 
-        verify(restProcessor).process(any(ResponseStrategy.class), any(Function.class), anyString(), any(Optional.class), any(HttpHeaders.class),
+        verify(restProcessor).process(anyString(), any(Function.class), anyString(), any(Optional.class), any(HttpHeaders.class),
                 pathParamsCaptor.capture());
 
         final Collection<Parameter> pathParams = pathParamsCaptor.getValue();
@@ -253,7 +253,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
 
         final ArgumentCaptor<Collection> pathParamsCaptor = ArgumentCaptor.forClass(Collection.class);
 
-        verify(restProcessor).process(any(ResponseStrategy.class), any(Function.class), anyString(), any(Optional.class), any(HttpHeaders.class),
+        verify(restProcessor).process(anyString(), any(Function.class), anyString(), any(Optional.class), any(HttpHeaders.class),
                 pathParamsCaptor.capture());
 
         final Collection<Parameter> pathParams = pathParamsCaptor.getValue();
@@ -282,7 +282,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
 
         final ArgumentCaptor<Collection> pathParamsCaptor = ArgumentCaptor.forClass(Collection.class);
 
-        verify(restProcessor).process(any(ResponseStrategy.class), any(Function.class), anyString(), any(Optional.class), any(HttpHeaders.class),
+        verify(restProcessor).process(anyString(), any(Function.class), anyString(), any(Optional.class), any(HttpHeaders.class),
                 pathParamsCaptor.capture());
 
         final Collection<Parameter> pathParams = pathParamsCaptor.getValue();
@@ -308,6 +308,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
                                                 .withRequestType("application/vnd.somemediatype1+json"))
 
                                         .withMediaType("application/vnd.somemediatype1+json", "json/schema/somemediatype1.json")
+                                        .withHttpActionResponseAndNoBody()
                                 )
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
@@ -323,7 +324,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
         final Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, NOT_USED_JSONOBJECT);
 
-        verify(restProcessor).process(any(ResponseStrategy.class), any(Function.class), eq("contextA.someAction"), any(Optional.class), any(HttpHeaders.class), any(Collection.class));
+        verify(restProcessor).process(anyString(), any(Function.class), eq("contextA.someAction"), any(Optional.class), any(HttpHeaders.class), any(Collection.class));
     }
 
 }

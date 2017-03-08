@@ -29,4 +29,9 @@ public class RecipesQueryController {
     public JsonEnvelope queryRecipes(final JsonEnvelope query) {
         return requester.request(query);
     }
+
+    @Handles("example.get-recipe-photograph")
+    public JsonEnvelope getRecipePhotograph(final JsonEnvelope query) {
+        return requester.request(query);
+    }
 }

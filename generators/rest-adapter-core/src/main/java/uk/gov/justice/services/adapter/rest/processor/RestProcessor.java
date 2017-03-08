@@ -21,7 +21,7 @@ public interface RestProcessor {
      * Process an incoming REST request by combining headers and path
      * parameters into an envelope and passing the envelope to the given consumer.
      *
-     * @param responseStrategy the {@link ResponseStrategy} to use to process the response from the
+     * @param responseStrategyName name of a bean implementing {@link ResponseStrategy} to use to process the response from the
      *                         interceptor chain
      * @param interceptorChain process envelope with this interceptor chain
      * @param action           the action name for this request
@@ -29,7 +29,7 @@ public interface RestProcessor {
      * @param params           the parameters from the REST request
      * @return the HTTP response to return to the client
      */
-    Response process(final ResponseStrategy responseStrategy,
+    Response process(final String responseStrategyName,
                      final Function<InterceptorContext, Optional<JsonEnvelope>> interceptorChain,
                      final String action,
                      final HttpHeaders headers,
@@ -39,7 +39,7 @@ public interface RestProcessor {
      * Process an incoming REST request by combining the payload, headers and path
      * parameters into an envelope and passing the envelope to the given consumer.
      *
-     * @param responseStrategy the {@link ResponseStrategy} to use to process the response from the
+     * @param responseStrategyName name of a bean implementing {@link ResponseStrategy} to use to process the response from the
      *                         interceptor chain
      * @param interceptorChain process envelope with this interceptor chain
      * @param action           the action name for this request
@@ -48,7 +48,7 @@ public interface RestProcessor {
      * @param params           the parameters from the REST request
      * @return the HTTP response to return to the client
      */
-    Response process(final ResponseStrategy responseStrategy,
+    Response process(final String responseStrategyName,
                      final Function<InterceptorContext, Optional<JsonEnvelope>> interceptorChain,
                      final String action,
                      final Optional<JsonObject> initialPayload,
@@ -59,7 +59,7 @@ public interface RestProcessor {
      * Process an incoming REST request by combining the multpart file stream, headers and path
      * parameters into an envelope and passing the envelope to the given consumer.
      *
-     * @param responseStrategy the {@link ResponseStrategy} to use to process the response from the
+     * @param responseStrategyName name of a bean implementing {@link ResponseStrategy} to use to process the response from the
      *                         interceptor chain
      * @param interceptorChain process envelope with this interceptor chain
      * @param action           the action name for this request
@@ -68,7 +68,7 @@ public interface RestProcessor {
      * @param fileInputDetails list of file input details from the multipart input
      * @return the HTTP response to return to the client
      */
-    Response process(final ResponseStrategy responseStrategy,
+    Response process(final String responseStrategyName,
                      final Function<InterceptorContext, Optional<JsonEnvelope>> interceptorChain,
                      final String action,
                      final HttpHeaders headers,

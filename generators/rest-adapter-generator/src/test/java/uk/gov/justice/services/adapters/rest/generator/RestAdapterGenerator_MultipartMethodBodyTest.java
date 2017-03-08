@@ -60,7 +60,7 @@ public class RestAdapterGenerator_MultipartMethodBodyTest extends BaseRestAdapte
         final Object resourceObject = getInstanceOf(resourceClass);
 
         final Response processorResponse = Response.ok().build();
-        when(restProcessor.process(any(ResponseStrategy.class), any(Function.class), anyString(), any(HttpHeaders.class),
+        when(restProcessor.process(anyString(), any(Function.class), anyString(), any(HttpHeaders.class),
                 any(Collection.class), any(List.class))).thenReturn(processorResponse);
 
         final Method method = firstMethodOf(resourceClass);

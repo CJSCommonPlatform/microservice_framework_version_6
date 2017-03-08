@@ -45,7 +45,7 @@ public class RestAdapterGenerator_SynchronousPATCHMethodBodyTest extends BaseRes
         Object resourceObject = getInstanceOf(resourceClass);
 
         Response processorResponse = Response.ok().build();
-        when(restProcessor.process(any(ResponseStrategy.class), any(Function.class), anyString(), any(Optional.class), any(HttpHeaders.class), any(Collection.class))).thenReturn(processorResponse);
+        when(restProcessor.process(anyString(), any(Function.class), anyString(), any(Optional.class), any(HttpHeaders.class), any(Collection.class))).thenReturn(processorResponse);
 
         Method method = firstMethodOf(resourceClass);
 

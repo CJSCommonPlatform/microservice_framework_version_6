@@ -51,7 +51,7 @@ public class RestAdapterGenerator_PUTMethodBodyTest extends BaseRestAdapterGener
         final Object resourceObject = getInstanceOf(resourceClass);
 
         final Response processorResponse = Response.ok().build();
-        when(restProcessor.process(any(ResponseStrategy.class), any(Function.class), anyString(), any(Optional.class), any(HttpHeaders.class),
+        when(restProcessor.process(anyString(), any(Function.class), anyString(), any(Optional.class), any(HttpHeaders.class),
                 any(Collection.class))).thenReturn(processorResponse);
 
         final Method method = firstMethodOf(resourceClass);
@@ -80,7 +80,7 @@ public class RestAdapterGenerator_PUTMethodBodyTest extends BaseRestAdapterGener
         method.invoke(resourceObject, NOT_USED_JSONOBJECT);
 
         final ArgumentCaptor<Function> functionCaptor = ArgumentCaptor.forClass(Function.class);
-        verify(restProcessor).process(any(ResponseStrategy.class), functionCaptor.capture(), anyString(), any(Optional.class), any(HttpHeaders.class),
+        verify(restProcessor).process(anyString(), functionCaptor.capture(), anyString(), any(Optional.class), any(HttpHeaders.class),
                 any(Collection.class));
 
         final JsonEnvelope envelope = envelope().build();

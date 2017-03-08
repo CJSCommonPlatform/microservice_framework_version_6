@@ -13,6 +13,8 @@ import static java.util.stream.Collectors.toList;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.client.Entity.entity;
+import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM_TYPE;
+import static org.apache.commons.io.IOUtils.contentEquals;
 import static org.apache.http.entity.ContentType.APPLICATION_JSON;
 import static org.apache.http.entity.ContentType.APPLICATION_OCTET_STREAM;
 import static org.apache.http.entity.mime.HttpMultipartMode.BROWSER_COMPATIBLE;
@@ -43,6 +45,8 @@ import uk.gov.justice.services.example.cakeshop.it.util.TestProperties;
 import uk.gov.justice.services.test.utils.core.http.HttpResponsePoller;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -66,6 +70,7 @@ import javax.json.JsonObjectBuilder;
 import javax.sql.DataSource;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
@@ -710,6 +715,51 @@ public class CakeShopIT {
         with(event.getPayload())
                 .assertThat("$.recipeId", equalTo(recipeId))
                 .assertThat("$.photoId", notNullValue());
+    }
+
+
+    @Test
+    public void shouldRetrieveRecipePhotograph() throws Exception {
+        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526f24";
+        addRecipe(recipeId, "Easy Muffin");
+        await().until(() -> queryForRecipe(recipeId).httpCode() == OK);
+
+        assertThat(photographFor(recipeId).get().getStatus(), is(NOT_FOUND));
+
+        final String filename = "croydon.jpg";
+        appendFileToTheRecipe(recipeId, filename);
+
+        await().until(() -> photographFor(recipeId).get().getStatus() == OK);
+
+        final InputStream returnedStream = photographFor(recipeId).get(InputStream.class);
+
+        assertThat(contentEquals(returnedStream, fileStreamOf(filename)), is(true));
+
+    }
+
+    private InputStream fileStreamOf(final String filename) {
+        return this.getClass().getClassLoader().getResourceAsStream(filename);
+    }
+
+    private Invocation.Builder photographFor(final String recipeId) {
+        return sendTo(format("%s%s/photograph", RECIPES_RESOURCE_QUERY_URI, recipeId))
+                .request()
+                .accept(APPLICATION_OCTET_STREAM_TYPE);
+    }
+
+    private void appendFileToTheRecipe(final String recipeId, final String filename) throws IOException {
+        final File file = new File(getResource(filename).getFile());
+
+
+        final HttpEntity httpEntity = MultipartEntityBuilder.create()
+                .setMode(BROWSER_COMPATIBLE)
+                .addBinaryBody("photoId", file, APPLICATION_OCTET_STREAM, filename)
+                .build();
+
+        final HttpPost request = new HttpPost(RECIPES_RESOURCE_URI + recipeId + "/photograph");
+        request.setEntity(httpEntity);
+
+        HttpClients.createDefault().execute(request);
     }
 
     private void tweakRecipeSnapshotName(final String recipeId, final String newRecipeName) throws AggregateChangeDetectedException {

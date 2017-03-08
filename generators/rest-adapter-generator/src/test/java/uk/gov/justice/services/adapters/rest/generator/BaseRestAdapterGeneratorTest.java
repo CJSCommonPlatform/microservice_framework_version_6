@@ -59,8 +59,6 @@ public abstract class BaseRestAdapterGeneratorTest extends BaseGeneratorTest {
         setField(resourceObject, REST_PROCESSOR, restProcessor);
         setField(resourceObject, INTERCEPTOR_CHAIN_PROCESSOR, interceptorChainProcessor);
         setField(resourceObject, ACTION_MAPPER, actionMapper);
-        setField(resourceObject, RESPONSE_STRATEGY_FIELD, okStatusEnvelopeEntityResponseStrategy);
-        setField(resourceObject, ACCEPTED_STATUS_NO_ENTITY_RESPONSE_STRATEGY_FIELD, acceptedStatusNoEntityResponseStrategy);
         setField(resourceObject, FILE_INPUT_DETAILS_FACTORY, fileInputDetailsFactory);
         return resourceObject;
     }

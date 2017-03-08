@@ -37,40 +37,44 @@ public class DefaultRestProcessor implements RestProcessor {
     RestEnvelopeBuilderFactory envelopeBuilderFactory;
 
     @Inject
+    ResponseStrategyCache responseStrategyCache;
+
+    @Inject
     FileBasedInterceptorContextFactory fileBasedInterceptorContextFactory;
 
+
     @Override
-    public Response process(final ResponseStrategy responseStrategy,
+    public Response process(final String responseStrategyName,
                             final Function<InterceptorContext, Optional<JsonEnvelope>> interceptorChain,
                             final String action,
                             final HttpHeaders headers,
                             final Collection<Parameter> params) {
-        return process(responseStrategy, interceptorChain, action, empty(), headers, params, empty());
+        return process(responseStrategyName, interceptorChain, action, empty(), headers, params, empty());
     }
 
     @Override
-    public Response process(final ResponseStrategy responseStrategy,
+    public Response process(final String responseStrategyName,
                             final Function<InterceptorContext, Optional<JsonEnvelope>> interceptorChain,
                             final String action,
                             final Optional<JsonObject> initialPayload,
                             final HttpHeaders headers,
                             final Collection<Parameter> params) {
 
-        return process(responseStrategy, interceptorChain, action, initialPayload, headers, params, empty());
+        return process(responseStrategyName, interceptorChain, action, initialPayload, headers, params, empty());
     }
 
     @Override
-    public Response process(final ResponseStrategy responseStrategy,
+    public Response process(final String responseStrategyName,
                             final Function<InterceptorContext, Optional<JsonEnvelope>> interceptorChain,
                             final String action,
                             final HttpHeaders headers,
                             final Collection<Parameter> params,
                             final List<FileInputDetails> fileInputDetails) {
 
-        return process(responseStrategy, interceptorChain, action, empty(), headers, params, Optional.of(fileInputDetails));
+        return process(responseStrategyName, interceptorChain, action, empty(), headers, params, Optional.of(fileInputDetails));
     }
 
-    private Response process(final ResponseStrategy responseStrategy,
+    private Response process(final String responseStrategyName,
                              final Function<InterceptorContext, Optional<JsonEnvelope>> interceptorChain,
                              final String action,
                              final Optional<JsonObject> initialPayload,
@@ -97,6 +101,6 @@ public class DefaultRestProcessor implements RestProcessor {
 
         trace(logger, () -> format("REST message processed: %s", envelope));
 
-        return responseStrategy.responseFor(action, result);
+        return responseStrategyCache.responseStrategyOf(responseStrategyName).responseFor(action, result);
     }
 }

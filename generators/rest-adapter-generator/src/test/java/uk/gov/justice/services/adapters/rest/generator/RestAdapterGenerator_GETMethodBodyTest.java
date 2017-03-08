@@ -6,12 +6,14 @@ import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.Is.isA;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -25,6 +27,8 @@ import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBu
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.mapping;
 import static uk.gov.justice.services.generators.test.utils.builder.QueryParamBuilder.queryParam;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
+import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithQueryApiDefaults;
+import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithQueryControllerDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
@@ -34,6 +38,8 @@ import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
 import uk.gov.justice.services.adapter.rest.exception.BadRequestException;
 import uk.gov.justice.services.adapter.rest.parameter.Parameter;
+import uk.gov.justice.services.adapter.rest.processor.response.OkStatusEnvelopeEntityResponseStrategy;
+import uk.gov.justice.services.adapter.rest.processor.response.OkStatusEnvelopePayloadEntityResponseStrategy;
 import uk.gov.justice.services.adapter.rest.processor.response.ResponseStrategy;
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -70,15 +76,15 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
-        Object resourceObject = getInstanceOf(resourceClass);
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
+        final Object resourceObject = getInstanceOf(resourceClass);
 
-        Response processorResponse = Response.ok().build();
-        when(restProcessor.process(any(ResponseStrategy.class), any(Function.class), anyString(), any(HttpHeaders.class), any(Collection.class))).thenReturn(processorResponse);
+        final Response processorResponse = Response.ok().build();
+        when(restProcessor.process(anyString(), any(Function.class), anyString(), any(HttpHeaders.class), any(Collection.class))).thenReturn(processorResponse);
 
-        Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass);
 
-        Object result = method.invoke(resourceObject);
+        final Object result = method.invoke(resourceObject);
 
         assertThat(result, is(processorResponse));
     }
@@ -94,23 +100,84 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
-        Object resourceObject = getInstanceOf(resourceClass);
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
+        final Object resourceObject = getInstanceOf(resourceClass);
 
-        Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass);
 
         method.invoke(resourceObject);
 
         ArgumentCaptor<Function> consumerCaptor = ArgumentCaptor.forClass(Function.class);
-        verify(restProcessor).process(any(ResponseStrategy.class), consumerCaptor.capture(), anyString(), any(HttpHeaders.class), any(Collection.class));
+        verify(restProcessor).process(anyString(), consumerCaptor.capture(), anyString(), any(HttpHeaders.class), any(Collection.class));
 
-        JsonEnvelope envelope = envelope().build();
-        final InterceptorContext interceptorContext = interceptorContextWithInput(envelope);
+        final InterceptorContext interceptorContext = interceptorContextWithInput(envelope().build());
         consumerCaptor.getValue().apply(interceptorContext);
 
         verify(interceptorChainProcessor).process(interceptorContext);
 
     }
+
+    @Test
+    public void shouldPassEntityResponseStrategyToProcessor() throws Exception {
+
+        generator.run(
+                restRamlWithQueryApiDefaults().with(
+                        resource("/path2")
+                                .with(httpAction(GET).withDefaultResponseType())
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPath2Resource");
+
+        firstMethodOf(resourceClass).invoke(getInstanceOf(resourceClass));
+
+        verify(restProcessor).process(eq("OkStatusEnvelopePayloadEntityResponseStrategy"), any(Function.class), anyString(), any(HttpHeaders.class), any(Collection.class));
+
+
+    }
+
+    @Test
+    public void shouldPassEnvelopePayloadEntityResponseStrategyNameToProcessor() throws Exception {
+
+        generator.run(
+                restRamlWithQueryControllerDefaults().with(
+                        resource("/path")
+                                .with(httpAction(GET).withDefaultResponseType())
+                ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
+
+        firstMethodOf(resourceClass).invoke(getInstanceOf(resourceClass));
+
+        verify(restProcessor).process(eq("OkStatusEnvelopeEntityResponseStrategy"), any(Function.class), anyString(), any(HttpHeaders.class), any(Collection.class));
+
+    }
+
+    @Test
+    public void shouldPassFileStreamReturningResponseStrategyNameToProcessor() throws Exception {
+
+        generator.run(
+                restRamlWithQueryApiDefaults()
+                        .with(resource("/some/path")
+                                .with(httpAction()
+                                        .withHttpActionType(GET)
+                                        .withResponseTypes("application/octet-stream")
+                                        .with(mapping()
+                                                .withName("action1")
+                                                .withResponseType("application/octet-stream"))
+                                )
+                        ).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+
+        firstMethodOf(resourceClass).invoke(getInstanceOf(resourceClass));
+
+        verify(restProcessor).process(eq("FileStreamReturningResponseStrategy"), any(Function.class), anyString(), any(HttpHeaders.class), any(Collection.class));
+
+    }
+
 
     @SuppressWarnings("unchecked")
     @Test
@@ -122,17 +189,17 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
-        Object resourceObject = getInstanceOf(resourceClass);
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
+        final Object resourceObject = getInstanceOf(resourceClass);
 
-        HttpHeaders headers = new ThreadLocalHttpHeaders();
+        final HttpHeaders headers = new ThreadLocalHttpHeaders();
 
         setField(resourceObject, "headers", headers);
 
-        Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject);
 
-        verify(restProcessor).process(any(ResponseStrategy.class), any(Function.class), anyString(), eq(headers), any(Collection.class));
+        verify(restProcessor).process(anyString(), any(Function.class), anyString(), eq(headers), any(Collection.class));
     }
 
     @SuppressWarnings("unchecked")
@@ -158,20 +225,20 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCakeResource");
-        Object resourceObject = getInstanceOf(resourceClass);
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCakeResource");
+        final Object resourceObject = getInstanceOf(resourceClass);
 
-        Class<?> actionMapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCakeResourceActionMapper");
-        Object actionMapperObject = actionMapperClass.newInstance();
+        final Class<?> actionMapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCakeResourceActionMapper");
+        final Object actionMapperObject = actionMapperClass.newInstance();
         setField(resourceObject, "actionMapper", actionMapperObject);
 
         setField(resourceObject, "headers", headersWith("Accept", "application/vnd.ctx.query.somemediatype1+json"));
 
-        Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject);
 
 
-        verify(restProcessor).process(any(ResponseStrategy.class), any(Function.class), eq("contextA.action1"),
+        verify(restProcessor).process(anyString(), any(Function.class), eq("contextA.action1"),
                 any(HttpHeaders.class), any(Collection.class));
     }
 
@@ -189,21 +256,21 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultRecipeResource");
-        Object resourceObject = getInstanceOf(resourceClass);
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultRecipeResource");
+        final Object resourceObject = getInstanceOf(resourceClass);
 
 
-        Class<?> actionMapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultRecipeResourceActionMapper");
-        Object actionMapperObject = actionMapperClass.newInstance();
+        final Class<?> actionMapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultRecipeResourceActionMapper");
+        final Object actionMapperObject = actionMapperClass.newInstance();
         setField(resourceObject, "actionMapper", actionMapperObject);
 
         setField(resourceObject, "headers", headersWith("Accept", "application/vnd.ctx.query.mediatype1+json"));
 
-        Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject);
 
 
-        verify(restProcessor).process(any(ResponseStrategy.class), any(Function.class), eq("contextB.action1"),
+        verify(restProcessor).process(anyString(), any(Function.class), eq("contextB.action1"),
                 any(HttpHeaders.class), any(Collection.class));
     }
 
@@ -218,16 +285,16 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamAResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamAResource");
 
-        Object resourceObject = getInstanceOf(resourceClass);
+        final Object resourceObject = getInstanceOf(resourceClass);
 
-        Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, "paramValue1234");
 
-        ArgumentCaptor<Collection> pathParamsCaptor = ArgumentCaptor.forClass(Collection.class);
+        final ArgumentCaptor<Collection> pathParamsCaptor = ArgumentCaptor.forClass(Collection.class);
 
-        verify(restProcessor).process(any(ResponseStrategy.class), any(Function.class), anyString(), any(HttpHeaders.class),
+        verify(restProcessor).process(anyString(), any(Function.class), anyString(), any(HttpHeaders.class),
                 pathParamsCaptor.capture());
 
         Collection<Parameter> pathParams = pathParamsCaptor.getValue();
@@ -248,19 +315,19 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParam1Param2Resource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParam1Param2Resource");
 
-        Object resourceObject = getInstanceOf(resourceClass);
+        final Object resourceObject = getInstanceOf(resourceClass);
 
-        Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, "paramValueABC", "paramValueDEF");
 
-        ArgumentCaptor<Collection> pathParamsCaptor = ArgumentCaptor.forClass(Collection.class);
+        final ArgumentCaptor<Collection> pathParamsCaptor = ArgumentCaptor.forClass(Collection.class);
 
-        verify(restProcessor).process(any(ResponseStrategy.class), any(Function.class), anyString(), any(HttpHeaders.class),
+        verify(restProcessor).process(anyString(), any(Function.class), anyString(), any(HttpHeaders.class),
                 pathParamsCaptor.capture());
 
-        Collection<Parameter> pathParams = pathParamsCaptor.getValue();
+        final Collection<Parameter> pathParams = pathParamsCaptor.getValue();
         assertThat(pathParams, hasSize(2));
 
         assertThat(pathParams, hasItems(
@@ -281,19 +348,19 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
-        Object resourceObject = getInstanceOf(resourceClass);
+        final Object resourceObject = getInstanceOf(resourceClass);
 
-        Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, "paramValue1234");
 
-        ArgumentCaptor<Collection> queryParamsCaptor = ArgumentCaptor.forClass(Collection.class);
+        final ArgumentCaptor<Collection> queryParamsCaptor = ArgumentCaptor.forClass(Collection.class);
 
-        verify(restProcessor).process(any(ResponseStrategy.class), any(Function.class), anyString(), any(HttpHeaders.class),
+        verify(restProcessor).process(anyString(), any(Function.class), anyString(), any(HttpHeaders.class),
                 queryParamsCaptor.capture());
 
-        Collection<Parameter> queryParams = queryParamsCaptor.getValue();
+        final Collection<Parameter> queryParams = queryParamsCaptor.getValue();
 
         assertThat(queryParams, hasSize(1));
         assertThat(queryParams, hasItems(
@@ -316,11 +383,11 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
-        Object resourceObject = getInstanceOf(resourceClass);
+        final Object resourceObject = getInstanceOf(resourceClass);
 
-        Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass);
 
         boolean queryParam1IsFirstMethodParameter = method.getParameters()[0].getName().equals("queryParam1");
         if (queryParam1IsFirstMethodParameter) {
@@ -329,12 +396,12 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
             method.invoke(resourceObject, "2", "paramValueABC");
         }
 
-        ArgumentCaptor<Collection> queryParamsCaptor = ArgumentCaptor.forClass(Collection.class);
+        final ArgumentCaptor<Collection> queryParamsCaptor = ArgumentCaptor.forClass(Collection.class);
 
-        verify(restProcessor).process(any(ResponseStrategy.class), any(Function.class), anyString(), any(HttpHeaders.class),
+        verify(restProcessor).process(anyString(), any(Function.class), anyString(), any(HttpHeaders.class),
                 queryParamsCaptor.capture());
 
-        Collection<Parameter> queryParams = queryParamsCaptor.getValue();
+        final Collection<Parameter> queryParams = queryParamsCaptor.getValue();
 
         assertThat(queryParams, hasSize(2));
         assertThat(queryParams, hasItems(
@@ -358,20 +425,20 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
-        Object resourceObject = getInstanceOf(resourceClass);
+        final Object resourceObject = getInstanceOf(resourceClass);
 
-        Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass);
 
         method.invoke(resourceObject, "false");
 
-        ArgumentCaptor<Collection> queryParamsCaptor = ArgumentCaptor.forClass(Collection.class);
+        final ArgumentCaptor<Collection> queryParamsCaptor = ArgumentCaptor.forClass(Collection.class);
 
-        verify(restProcessor).process(any(ResponseStrategy.class), any(Function.class), anyString(), any(HttpHeaders.class),
+        verify(restProcessor).process(anyString(), any(Function.class), anyString(), any(HttpHeaders.class),
                 queryParamsCaptor.capture());
 
-        Collection<Parameter> queryParams = queryParamsCaptor.getValue();
+        final Collection<Parameter> queryParams = queryParamsCaptor.getValue();
 
         assertThat(queryParams, hasSize(1));
         assertThat(queryParams, hasItems(
@@ -393,19 +460,19 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamResource");
 
-        Object resourceObject = getInstanceOf(resourceClass);
+        final Object resourceObject = getInstanceOf(resourceClass);
 
-        Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass);
         method.invoke(resourceObject, "paramValueABC", "paramValueDEF");
 
-        ArgumentCaptor<Collection> paramsCaptor = ArgumentCaptor.forClass(Collection.class);
+        final ArgumentCaptor<Collection> paramsCaptor = ArgumentCaptor.forClass(Collection.class);
 
-        verify(restProcessor).process(any(ResponseStrategy.class), any(Function.class), anyString(), any(HttpHeaders.class),
+        verify(restProcessor).process(anyString(), any(Function.class), anyString(), any(HttpHeaders.class),
                 paramsCaptor.capture());
 
-        Collection<Parameter> params = paramsCaptor.getValue();
+        final Collection<Parameter> params = paramsCaptor.getValue();
 
         assertThat(params, hasSize(2));
         assertThat(params, hasItems(
@@ -428,11 +495,11 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
-        Object resourceObject = getInstanceOf(resourceClass);
+        final Object resourceObject = getInstanceOf(resourceClass);
 
-        Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass);
 
         boolean queryParam1IsFirstMethodParameter = method.getParameters()[0].getName().equals("queryParam1");
         if (queryParam1IsFirstMethodParameter) {
@@ -441,12 +508,12 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
             method.invoke(resourceObject, NULL_STRING_VALUE, "paramValueABC");
         }
 
-        ArgumentCaptor<Collection> queryParamsCaptor = ArgumentCaptor.forClass(Collection.class);
+        final ArgumentCaptor<Collection> queryParamsCaptor = ArgumentCaptor.forClass(Collection.class);
 
-        verify(restProcessor).process(any(ResponseStrategy.class), any(Function.class), anyString(), any(HttpHeaders.class),
+        verify(restProcessor).process(anyString(), any(Function.class), anyString(), any(HttpHeaders.class),
                 queryParamsCaptor.capture());
 
-        Collection<Parameter> queryParams = queryParamsCaptor.getValue();
+        final Collection<Parameter> queryParams = queryParamsCaptor.getValue();
 
         assertThat(queryParams, hasSize(1));
         assertThat(queryParams, hasItems(
@@ -470,11 +537,11 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
-        Object resourceObject = getInstanceOf(resourceClass);
+        final Object resourceObject = getInstanceOf(resourceClass);
 
-        Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass);
 
         method.invoke(resourceObject, NULL_STRING_VALUE);
     }

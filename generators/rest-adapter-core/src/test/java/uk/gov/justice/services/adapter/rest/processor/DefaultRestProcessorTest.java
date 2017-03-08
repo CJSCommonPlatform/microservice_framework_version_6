@@ -1,6 +1,7 @@
 package uk.gov.justice.services.adapter.rest.processor;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.allOf;
@@ -8,6 +9,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -31,6 +33,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import javax.json.JsonObject;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
@@ -48,10 +51,12 @@ import org.slf4j.Logger;
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultRestProcessorTest {
 
-    private static final String ACTION = "actionABC";
-    private static final String USER_ID = "userId";
-    private static final String PAYLOAD_ID = "payloadIdValue";
-    private static final String PARAM_VALUE = "nameValue";
+    private static final String NOT_USED_ACTION = "actionABC";
+    private static final String NOT_USED_RESPONSE_STRATEGY_NAME = "notUsedName";
+    private static final List<Parameter> NOT_USED_PATH_PARAMS = emptyList();
+
+    private static final Optional<JsonObject> NOT_USED_PAYLOAD = Optional.of(createObjectBuilder().build());
+    private static final ResteasyHttpHeaders NOT_USED_HEADERS = headersWithUserId("123");
 
     @Mock
     private Function<InterceptorContext, Optional<JsonEnvelope>> interceptorChain;
@@ -66,6 +71,9 @@ public class DefaultRestProcessorTest {
     private ResponseStrategy responseStrategy;
 
     @Mock
+    private ResponseStrategyCache responseStrategyCache;
+
+    @Mock
     private FileBasedInterceptorContextFactory fileBasedInterceptorContextFactory;
 
     @Mock
@@ -77,23 +85,20 @@ public class DefaultRestProcessorTest {
     @InjectMocks
     private DefaultRestProcessor restProcessor;
 
-    private ResteasyHttpHeaders headers;
-    private List<Parameter> pathParams;
-
-    @Before
-    public void setup() {
-        final MultivaluedMapImpl<String, String> requestHeaders = new MultivaluedMapImpl<>();
-        requestHeaders.add(HeaderConstants.USER_ID, USER_ID);
-        headers = new ResteasyHttpHeaders(requestHeaders);
-
-        pathParams = singletonList(Parameter.valueOf("name", PARAM_VALUE, ParameterType.STRING));
-    }
 
     @Test
     public void shouldPassEnvelopeWithPayloadToInterceptorChain() throws Exception {
-        final JsonObject payload = createObjectBuilder().add("payloadId", PAYLOAD_ID).build();
 
-        restProcessor.process(responseStrategy, interceptorChain, ACTION, Optional.of(payload), headers, pathParams);
+        final String userId = "userId1234";
+        final String action = "anAction123";
+        final String payloadIdValue = "payloadIdValue1";
+        final List<Parameter> pathParams = singletonList(Parameter.valueOf("paramName", "someParamValue", ParameterType.STRING));
+
+        final JsonObject payload = createObjectBuilder().add("payloadId", payloadIdValue).build();
+
+        when(responseStrategyCache.responseStrategyOf(anyString())).thenReturn(responseStrategy);
+
+        restProcessor.process(NOT_USED_RESPONSE_STRATEGY_NAME, interceptorChain, action, Optional.of(payload), headersWithUserId(userId), pathParams);
 
         final ArgumentCaptor<InterceptorContext> interceptorContextCaptor = forClass(InterceptorContext.class);
         verify(interceptorChain).apply(interceptorContextCaptor.capture());
@@ -102,17 +107,23 @@ public class DefaultRestProcessorTest {
         final JsonEnvelope envelope = interceptorContext.inputEnvelope();
         assertThat(envelope, jsonEnvelope()
                 .withMetadataOf(metadata()
-                        .withName(ACTION)
-                        .withUserId(USER_ID))
+                        .withName(action)
+                        .withUserId(userId))
                 .withPayloadOf(payloadIsJson(allOf(
-                        withJsonPath("$.payloadId", equalTo(PAYLOAD_ID)),
-                        withJsonPath("$.name", equalTo(PARAM_VALUE))
+                        withJsonPath("$.payloadId", equalTo(payloadIdValue)),
+                        withJsonPath("$.paramName", equalTo("someParamValue"))
                 ))));
     }
 
     @Test
     public void shouldPassEnvelopeWithEmptyPayloadToInterceptorChain() throws Exception {
-        restProcessor.process(responseStrategy, interceptorChain, ACTION, headers, pathParams);
+        final String action = "actionABC";
+        final String userId = "usrABC";
+        final List<Parameter> pathParams = singletonList(Parameter.valueOf("name", "value123", ParameterType.STRING));
+
+        when(responseStrategyCache.responseStrategyOf(anyString())).thenReturn(responseStrategy);
+
+        restProcessor.process(NOT_USED_RESPONSE_STRATEGY_NAME, interceptorChain, action, headersWithUserId(userId), pathParams);
 
         final ArgumentCaptor<InterceptorContext> interceptorContextCaptor = forClass(InterceptorContext.class);
         verify(interceptorChain).apply(interceptorContextCaptor.capture());
@@ -122,45 +133,54 @@ public class DefaultRestProcessorTest {
 
         assertThat(envelope, jsonEnvelope()
                 .withMetadataOf(metadata()
-                        .withName(ACTION)
-                        .withUserId(USER_ID))
+                        .withName(action)
+                        .withUserId(userId))
                 .withPayloadOf(payloadIsJson(
-                        withJsonPath("$.name", equalTo(PARAM_VALUE))
+                        withJsonPath("$.name", equalTo("value123"))
                 )));
     }
 
     @Test
     public void shouldReturnResponseFromResponseStrategyForCallWithPayload() throws Exception {
-        final JsonObject payload = mock(JsonObject.class);
 
         when(interceptorChain.apply(any(InterceptorContext.class))).thenReturn(Optional.of(jsonEnvelope));
-        when(responseStrategy.responseFor(ACTION, Optional.of(jsonEnvelope))).thenReturn(response);
+        final String action = "someActionABC";
+        when(responseStrategy.responseFor(action, Optional.of(jsonEnvelope))).thenReturn(response);
 
-        final Response result = restProcessor.process(responseStrategy, interceptorChain, ACTION, Optional.of(payload), headers, pathParams);
+        final String responseStrategyName = "someStrategy";
 
-        verify(responseStrategy).responseFor(ACTION, Optional.of(jsonEnvelope));
+        when(responseStrategyCache.responseStrategyOf(responseStrategyName)).thenReturn(responseStrategy);
+        final Response result = restProcessor.process(responseStrategyName, interceptorChain, action, NOT_USED_PAYLOAD, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
+
+        verify(responseStrategy).responseFor(action, Optional.of(jsonEnvelope));
         assertThat(result, equalTo(response));
     }
 
     @Test
     public void shouldReturnResponseFromResponseStrategyForCallWithoutPayload() throws Exception {
         when(interceptorChain.apply(any(InterceptorContext.class))).thenReturn(Optional.of(jsonEnvelope));
-        when(responseStrategy.responseFor(ACTION, Optional.of(jsonEnvelope))).thenReturn(response);
 
-        final Response result = restProcessor.process(responseStrategy, interceptorChain, ACTION, headers, pathParams);
+        final String action = "someActionBCD";
+        when(responseStrategy.responseFor(action, Optional.of(jsonEnvelope))).thenReturn(response);
 
-        verify(responseStrategy).responseFor(ACTION, Optional.of(jsonEnvelope));
+        final String responseStrategyName = "someOtherStrategy";
+        when(responseStrategyCache.responseStrategyOf(responseStrategyName)).thenReturn(responseStrategy);
+
+        final Response result = restProcessor.process(responseStrategyName, interceptorChain, action, NOT_USED_PAYLOAD, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS);
+
+        verify(responseStrategy).responseFor(action, Optional.of(jsonEnvelope));
         assertThat(result, equalTo(response));
     }
 
     @Test
     public void shouldCreateTheInterceptorContextUsingTheFileBasedInterceptorContextFactoryIfTheInputPartExists() throws Exception {
-        final List<FileInputDetails> fileInputDetails = mock(List.class);
+        final List<FileInputDetails> fileInputDetails = emptyList();
         final InterceptorContext interceptorContext = mock(InterceptorContext.class);
 
         when(fileBasedInterceptorContextFactory.create(eq(fileInputDetails), any(JsonEnvelope.class))).thenReturn(interceptorContext);
+        when(responseStrategyCache.responseStrategyOf(anyString())).thenReturn(responseStrategy);
 
-        restProcessor.process(responseStrategy, interceptorChain, ACTION, headers, pathParams, fileInputDetails);
+        restProcessor.process(NOT_USED_RESPONSE_STRATEGY_NAME, interceptorChain, NOT_USED_ACTION, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS, fileInputDetails);
 
         final ArgumentCaptor<InterceptorContext> interceptorContextCaptor = forClass(InterceptorContext.class);
         verify(interceptorChain).apply(interceptorContextCaptor.capture());
@@ -176,11 +196,23 @@ public class DefaultRestProcessorTest {
 
         when(fileBasedInterceptorContextFactory.create(eq(fileInputDetails), any(JsonEnvelope.class))).thenReturn(interceptorContext);
         when(interceptorChain.apply(interceptorContext)).thenReturn(Optional.of(jsonEnvelope));
-        when(responseStrategy.responseFor(ACTION, Optional.of(jsonEnvelope))).thenReturn(response);
 
-        final Response result = restProcessor.process(responseStrategy, interceptorChain, ACTION, headers, pathParams, fileInputDetails);
+        final String responseStrategyName = "someOtherStrategy123";
+        when(responseStrategyCache.responseStrategyOf(responseStrategyName)).thenReturn(responseStrategy);
 
-        verify(responseStrategy).responseFor(ACTION, Optional.of(jsonEnvelope));
+        when(responseStrategy.responseFor(NOT_USED_ACTION, Optional.of(jsonEnvelope))).thenReturn(response);
+
+        final Response result = restProcessor.process(responseStrategyName, interceptorChain, NOT_USED_ACTION, NOT_USED_HEADERS, NOT_USED_PATH_PARAMS, fileInputDetails);
+
+        verify(responseStrategy).responseFor(NOT_USED_ACTION, Optional.of(jsonEnvelope));
         assertThat(result, equalTo(response));
+    }
+
+    private static ResteasyHttpHeaders headersWithUserId(final String userId) {
+        final ResteasyHttpHeaders headers;
+        final MultivaluedMapImpl<String, String> requestHeaders = new MultivaluedMapImpl<>();
+        requestHeaders.add(HeaderConstants.USER_ID, userId);
+        headers = new ResteasyHttpHeaders(requestHeaders);
+        return headers;
     }
 }

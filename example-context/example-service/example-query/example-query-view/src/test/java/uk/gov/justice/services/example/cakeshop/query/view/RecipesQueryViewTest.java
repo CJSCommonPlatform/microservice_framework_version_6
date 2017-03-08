@@ -15,6 +15,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.HandlerMatcher.is
 import static uk.gov.justice.services.test.utils.core.matchers.HandlerMethodMatcher.method;
 
 import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.example.cakeshop.query.view.response.PhotoView;
 import uk.gov.justice.services.example.cakeshop.query.view.response.RecipeView;
 import uk.gov.justice.services.example.cakeshop.query.view.response.RecipesView;
 import uk.gov.justice.services.example.cakeshop.query.view.service.RecipeService;
@@ -191,4 +192,24 @@ public class RecipesQueryViewTest {
         assertThat(recipesArray.getJsonObject(0).getBoolean("glutenFree"), is(glutenFree));
 
     }
+
+    @Test
+    public void shouldReturnFileId() {
+
+        final UUID recipeId = UUID.randomUUID();
+        final UUID fileId = UUID.randomUUID();
+
+        when(service.findRecipePhoto(recipeId.toString())).thenReturn(new PhotoView(fileId));
+
+        final JsonEnvelope response = queryView.findRecipePhoto(
+                envelope()
+                        .with(metadataWithDefaults())
+                        .withPayloadOf(recipeId.toString(), "recipeId")
+                        .build());
+
+        assertThat(response.metadata().name(), is("example.get-recipe-photograph"));
+        assertThat(response.payloadAsJsonObject().getString("fileId"), is(fileId.toString()));
+
+    }
+
 }

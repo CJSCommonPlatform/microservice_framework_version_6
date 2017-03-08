@@ -10,6 +10,7 @@ import static org.mockito.BDDMockito.given;
 
 import uk.gov.justice.services.example.cakeshop.persistence.RecipeRepository;
 import uk.gov.justice.services.example.cakeshop.persistence.entity.Recipe;
+import uk.gov.justice.services.example.cakeshop.query.view.response.PhotoView;
 import uk.gov.justice.services.example.cakeshop.query.view.response.RecipeView;
 import uk.gov.justice.services.example.cakeshop.query.view.response.RecipesView;
 
@@ -27,7 +28,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class RecipeServiceTest {
 
     private static final String NAME = "name";
-    private static final UUID USER_ID = UUID.randomUUID();
+    private static final UUID RECIPE_ID = UUID.randomUUID();
     private static final UUID NON_EXISTENT_ID = UUID.randomUUID();
     private static final boolean GLUTEN_FREE = true;
     private static final UUID PHOTO_ID = UUID.randomUUID();
@@ -39,14 +40,15 @@ public class RecipeServiceTest {
 
     @Test
     public void shouldReturnRecipeById() {
-        given(recipeRepository.findBy(USER_ID)).willReturn(new Recipe(USER_ID, NAME, GLUTEN_FREE, PHOTO_ID));
+        given(recipeRepository.findBy(RECIPE_ID)).willReturn(new Recipe(RECIPE_ID, NAME, GLUTEN_FREE, PHOTO_ID));
 
-        RecipeView foundPerson = service.findRecipe(USER_ID.toString());
+        RecipeView foundPerson = service.findRecipe(RECIPE_ID.toString());
 
-        assertThat(foundPerson.getId(), equalTo(USER_ID));
+        assertThat(foundPerson.getId(), equalTo(RECIPE_ID));
         assertThat(foundPerson.getName(), equalTo(NAME));
     }
 
+    @Test
     public void shouldReturnNullWhenRecipeNotFound() {
         given(recipeRepository.findBy(NON_EXISTENT_ID)).willReturn(null);
 
@@ -59,12 +61,12 @@ public class RecipeServiceTest {
         Optional<String> nameQueryParam = Optional.of("name123");
         Optional<Boolean> glutenFreeQueryParam = Optional.of(false);
         given(recipeRepository.findBy(pageSize, nameQueryParam, glutenFreeQueryParam))
-                .willReturn(singletonList(new Recipe(USER_ID, NAME, GLUTEN_FREE, PHOTO_ID)));
+                .willReturn(singletonList(new Recipe(RECIPE_ID, NAME, GLUTEN_FREE, PHOTO_ID)));
         RecipesView recipes = service.getRecipes(pageSize, nameQueryParam, glutenFreeQueryParam);
 
         List<RecipeView> firstRecipe = recipes.getRecipes();
         assertThat(firstRecipe, hasSize(1));
-        assertThat(firstRecipe.get(0).getId(), equalTo(USER_ID));
+        assertThat(firstRecipe.get(0).getId(), equalTo(RECIPE_ID));
         assertThat(firstRecipe.get(0).getName(), equalTo(NAME));
         assertThat(firstRecipe.get(0).isGlutenFree(), is(GLUTEN_FREE));
     }
@@ -77,15 +79,38 @@ public class RecipeServiceTest {
         Optional<Boolean> glutenFreeQueryParam = Optional.empty();
 
         given(recipeRepository.findBy(pageSize, nameQueryParam, glutenFreeQueryParam))
-                .willReturn(singletonList(new Recipe(USER_ID, NAME, GLUTEN_FREE, PHOTO_ID)));
+                .willReturn(singletonList(new Recipe(RECIPE_ID, NAME, GLUTEN_FREE, PHOTO_ID)));
 
         RecipesView recipes = service.getRecipes(pageSize, nameQueryParam, glutenFreeQueryParam);
 
         List<RecipeView> firstRecipe = recipes.getRecipes();
         assertThat(firstRecipe, hasSize(1));
-        assertThat(firstRecipe.get(0).getId(), equalTo(USER_ID));
+        assertThat(firstRecipe.get(0).getId(), equalTo(RECIPE_ID));
         assertThat(firstRecipe.get(0).getName(), equalTo(NAME));
         assertThat(firstRecipe.get(0).isGlutenFree(), is(GLUTEN_FREE));
+    }
+
+    @Test
+    public void shouldGetRecipePhoto() throws Exception {
+        given(recipeRepository.findBy(RECIPE_ID)).willReturn(new Recipe(RECIPE_ID, NAME, GLUTEN_FREE, PHOTO_ID));
+
+        final PhotoView recipePhoto = service.findRecipePhoto(RECIPE_ID.toString());
+
+        assertThat(recipePhoto.getFileId(), is(PHOTO_ID));
+    }
+
+    @Test
+    public void shouldReturnNullWhenFetchingPhotoIfRecipeNotFound() {
+        given(recipeRepository.findBy(NON_EXISTENT_ID)).willReturn(null);
+
+        assertNull(service.findRecipePhoto(NON_EXISTENT_ID.toString()));
+    }
+
+    @Test
+    public void shouldReturnNullWhenPhotoIdNull() {
+        given(recipeRepository.findBy(RECIPE_ID)).willReturn(new Recipe(RECIPE_ID, NAME, GLUTEN_FREE, null));
+
+        assertNull(service.findRecipePhoto(RECIPE_ID.toString()));
     }
 
 }

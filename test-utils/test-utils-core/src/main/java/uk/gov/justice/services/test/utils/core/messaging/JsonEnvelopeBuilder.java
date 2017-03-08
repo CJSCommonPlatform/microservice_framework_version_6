@@ -1,5 +1,6 @@
 package uk.gov.justice.services.test.utils.core.messaging;
 
+import static javax.json.JsonValue.NULL;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
 
 import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
@@ -96,8 +97,13 @@ public class JsonEnvelopeBuilder {
         return this;
     }
 
+    public JsonEnvelopeBuilder withNullPayload() {
+        payload = null;
+        return this;
+    }
+
     public JsonEnvelope build() {
-        return new DefaultJsonEnvelope(metadata != null ? metadata.build() : null, payload.build());
+        return new DefaultJsonEnvelope(metadata != null ? metadata.build() : null, payload!=null ? payload.build() : NULL);
     }
 
     public String toJsonString() {

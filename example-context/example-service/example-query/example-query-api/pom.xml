@@ -103,6 +103,12 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>rest-adapter-file-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- Test Dependencies -->
         <dependency>
             <groupId>junit</groupId>

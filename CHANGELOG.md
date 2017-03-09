@@ -7,10 +7,14 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ### Added
 - MultipartRestClient in test-utils: client for multipart file uploads
-- LiquibaseDatabaseBootstrapper in test-utils: bootstraps a database using your liquibase scripts 
+- LiquibaseDatabaseBootstrapper in test-utils: bootstraps a database using your liquibase scripts
+- Dependency on utilities-core
 
 ### Fixed
 - Generate random ZonedDateTime in different time zones and provide option to generate in UTC specific timezone
+
+### Removed
+- Duplicate classes that are in utilities-core from the framework
 
 ## [1.4.1] - 2017-02-13
 

@@ -18,6 +18,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.raml.model.ActionType.POST;
+import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
 import static uk.gov.justice.services.generators.test.utils.builder.HeadersBuilder.headersWith;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.mapping;
@@ -33,6 +34,7 @@ import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
 import uk.gov.justice.services.adapter.rest.parameter.Parameter;
 import uk.gov.justice.services.adapter.rest.processor.response.ResponseStrategy;
+import uk.gov.justice.services.core.interceptor.InterceptorContext;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.lang.reflect.Method;
@@ -103,9 +105,10 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
                 any(Collection.class));
 
         final JsonEnvelope envelope = envelope().build();
-        functionCaptor.getValue().apply(envelope);
+        final InterceptorContext interceptorContext = interceptorContextWithInput(envelope);
+        functionCaptor.getValue().apply(interceptorContext);
 
-        verify(interceptorChainProcessor).process(envelope);
+        verify(interceptorChainProcessor).process(interceptorContext);
     }
 
     @Test
@@ -138,9 +141,10 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
                 any(Collection.class));
 
         final JsonEnvelope envelope = envelope().build();
-        functionCaptor.getValue().apply(envelope);
+        final InterceptorContext interceptorContext = interceptorContextWithInput(envelope);
+        functionCaptor.getValue().apply(interceptorContext);
 
-        verify(interceptorChainProcessor).process(envelope);
+        verify(interceptorChainProcessor).process(interceptorContext);
     }
 
     @SuppressWarnings("unchecked")

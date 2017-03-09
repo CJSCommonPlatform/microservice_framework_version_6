@@ -30,6 +30,7 @@ import static org.raml.model.ActionType.POST;
 import static org.raml.model.ActionType.TRACE;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLLER;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
+import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.messagingRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.raml;
@@ -45,6 +46,7 @@ import uk.gov.justice.services.adapter.messaging.JsonSchemaValidationInterceptor
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
+import uk.gov.justice.services.core.interceptor.InterceptorContext;
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
@@ -678,9 +680,10 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
         verify(jmsProcessor).process(consumerCaptor.capture(), eq(message));
 
         JsonEnvelope envelope = envelope().build();
-        consumerCaptor.getValue().accept(envelope);
+        final InterceptorContext interceptorContext = interceptorContextWithInput(envelope);
+        consumerCaptor.getValue().accept(interceptorContext);
 
-        verify(interceptorChainProcessor).process(envelope);
+        verify(interceptorChainProcessor).process(interceptorContext);
     }
 
     @Test

@@ -48,7 +48,7 @@ public class JmsProcessorTest {
     public void shouldPassValidMessageToConsumerFunction() throws Exception {
         when(envelopeConverter.fromMessage(textMessage)).thenReturn(expectedEnvelope);
 
-        jmsProcessor.process(envelope -> assertThat(envelope, is(expectedEnvelope)), textMessage);
+        jmsProcessor.process(interceptorContext -> assertThat(interceptorContext.inputEnvelope(), is(expectedEnvelope)), textMessage);
     }
 
     @Test(expected = InvalildJmsMessageTypeException.class)

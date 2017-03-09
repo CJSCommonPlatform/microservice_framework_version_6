@@ -7,6 +7,7 @@ import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
+import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
@@ -143,11 +144,14 @@ public class EventFilterIT {
     @Test
     public void shouldAllowEventABC() {
 
-        UUID metadataId = randomUUID();
-        interceptorChainProcessor.process(envelope()
+        final UUID metadataId = randomUUID();
+        final JsonEnvelope jsonEnvelope = envelope()
                 .with(metadataOf(metadataId, EVENT_ABC)
                         .withStreamId(randomUUID())
-                        .withVersion(1L)).build());
+                        .withVersion(1L))
+                .build();
+
+        interceptorChainProcessor.process(interceptorContextWithInput(jsonEnvelope));
 
         assertThat(abcEventHandler.firstRecordedEnvelope(), not(nullValue()));
         assertThat(abcEventHandler.firstRecordedEnvelope().metadata().id(), equalTo(metadataId));
@@ -156,10 +160,13 @@ public class EventFilterIT {
     @Test
     public void shouldFilterOutEventDEF() {
 
-        interceptorChainProcessor.process(envelope()
+        final JsonEnvelope jsonEnvelope = envelope()
                 .with(metadataWithRandomUUID(EVENT_DEF)
                         .withStreamId(randomUUID())
-                        .withVersion(1L)).build());
+                        .withVersion(1L))
+                .build();
+
+        interceptorChainProcessor.process(interceptorContextWithInput(jsonEnvelope));
 
         assertThat(defEventHandler.recordedEnvelopes(), empty());
     }

@@ -4,6 +4,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
 
 import uk.gov.justice.services.core.dispatcher.Dispatcher;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
@@ -14,6 +15,7 @@ import java.util.Optional;
 
 import javax.enterprise.inject.spi.InjectionPoint;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -45,6 +47,13 @@ public class InterceptorChainProcessorProducerTest {
     @Mock
     private InterceptorCache interceptorCache;
 
+    private InterceptorContext interceptorContext;
+
+    @Before
+    public void initInterceptorContext() {
+        interceptorContext = interceptorContextWithInput(inputEnvelope);
+    }
+
     @Test
     public void shouldProduceProcessorThatDispatchesAnEnvelopeAndReturnsOutputEnvelope() throws Exception {
 
@@ -54,7 +63,7 @@ public class InterceptorChainProcessorProducerTest {
         when(interceptorCache.getInterceptors()).thenReturn(interceptors());
         when(dispatcher.dispatch(inputEnvelope)).thenReturn(outputEnvelope);
 
-        final Optional<JsonEnvelope> result = interceptorChainProcessorProducer.produceProcessor(injectionPoint).process(inputEnvelope);
+        final Optional<JsonEnvelope> result = interceptorChainProcessorProducer.produceProcessor(injectionPoint).process(interceptorContext);
 
         assertThat(result.get(), is(outputEnvelope));
     }
@@ -66,7 +75,7 @@ public class InterceptorChainProcessorProducerTest {
         when(interceptorCache.getInterceptors()).thenReturn(interceptors());
         when(dispatcher.dispatch(inputEnvelope)).thenReturn(null);
 
-        final Optional<JsonEnvelope> result = interceptorChainProcessorProducer.produceProcessor(injectionPoint).process(inputEnvelope);
+        final Optional<JsonEnvelope> result = interceptorChainProcessorProducer.produceProcessor(injectionPoint).process(interceptorContext);
 
         assertThat(result, is(Optional.empty()));
     }

@@ -1,6 +1,7 @@
 package uk.gov.justice.services.generators.test.utils.interceptor;
 
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
+import uk.gov.justice.services.core.interceptor.InterceptorContext;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.LinkedList;
@@ -15,7 +16,10 @@ public class RecordingInterceptorChainProcessor extends EnvelopeRecorder impleme
     private List<MockResponse> mockResponses = new LinkedList<>();
 
     @Override
-    public Optional<JsonEnvelope> process(final JsonEnvelope envelope) {
+    public Optional<JsonEnvelope> process(final InterceptorContext interceptorContext) {
+
+        final JsonEnvelope envelope = interceptorContext.inputEnvelope();
+
         record(envelope);
         return Optional.ofNullable(responseTo(envelope));
     }

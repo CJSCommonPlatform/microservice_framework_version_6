@@ -19,6 +19,7 @@ import static org.raml.model.ActionType.GET;
 import static org.raml.model.ParamType.BOOLEAN;
 import static org.raml.model.ParamType.INTEGER;
 import static org.raml.model.ParamType.STRING;
+import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
 import static uk.gov.justice.services.generators.test.utils.builder.HeadersBuilder.headersWith;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.mapping;
@@ -34,6 +35,7 @@ import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import uk.gov.justice.services.adapter.rest.exception.BadRequestException;
 import uk.gov.justice.services.adapter.rest.parameter.Parameter;
 import uk.gov.justice.services.adapter.rest.processor.response.ResponseStrategy;
+import uk.gov.justice.services.core.interceptor.InterceptorContext;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.lang.reflect.InvocationTargetException;
@@ -103,9 +105,10 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         verify(restProcessor).process(any(ResponseStrategy.class), consumerCaptor.capture(), anyString(), any(HttpHeaders.class), any(Collection.class));
 
         JsonEnvelope envelope = envelope().build();
-        consumerCaptor.getValue().apply(envelope);
+        final InterceptorContext interceptorContext = interceptorContextWithInput(envelope);
+        consumerCaptor.getValue().apply(interceptorContext);
 
-        verify(interceptorChainProcessor).process(envelope);
+        verify(interceptorChainProcessor).process(interceptorContext);
 
     }
 

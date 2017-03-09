@@ -2,6 +2,7 @@ package uk.gov.justice.services.adapter.rest.processor;
 
 import uk.gov.justice.services.adapter.rest.parameter.Parameter;
 import uk.gov.justice.services.adapter.rest.processor.response.ResponseStrategy;
+import uk.gov.justice.services.core.interceptor.InterceptorContext;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.Collection;
@@ -27,7 +28,7 @@ public interface RestProcessor {
      * @return the HTTP response to return to the client
      */
     Response process(final ResponseStrategy responseStrategy,
-                     final Function<JsonEnvelope, Optional<JsonEnvelope>> interceptorChain,
+                     final Function<InterceptorContext, Optional<JsonEnvelope>> interceptorChain,
                      final String action,
                      final HttpHeaders headers,
                      final Collection<Parameter> params);
@@ -46,7 +47,7 @@ public interface RestProcessor {
      * @return the HTTP response to return to the client
      */
     Response process(final ResponseStrategy responseStrategy,
-                     final Function<JsonEnvelope, Optional<JsonEnvelope>> interceptorChain,
+                     final Function<InterceptorContext, Optional<JsonEnvelope>> interceptorChain,
                      final String action,
                      final Optional<JsonObject> initialPayload,
                      final HttpHeaders headers,

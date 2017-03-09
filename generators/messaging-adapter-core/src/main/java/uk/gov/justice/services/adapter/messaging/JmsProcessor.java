@@ -1,10 +1,12 @@
 package uk.gov.justice.services.adapter.messaging;
 
 import static java.lang.String.format;
+import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
 import static uk.gov.justice.services.messaging.logging.JmsMessageLoggerHelper.toJmsTraceString;
 import static uk.gov.justice.services.messaging.logging.LoggerUtils.trace;
 
 import uk.gov.justice.services.adapter.messaging.exception.InvalildJmsMessageTypeException;
+import uk.gov.justice.services.core.interceptor.InterceptorContext;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
 
@@ -38,7 +40,7 @@ public class JmsProcessor {
      * @param consumer a consumer for the envelope
      * @param message  a message to be processed
      */
-    public void process(final Consumer<JsonEnvelope> consumer, final Message message) {
+    public void process(final Consumer<InterceptorContext> consumer, final Message message) {
 
         trace(LOGGER, () -> format("Processing JMS message: %s", toJmsTraceString(message)));
 
@@ -53,7 +55,7 @@ public class JmsProcessor {
 
         final JsonEnvelope jsonEnvelope = envelopeConverter.fromMessage((TextMessage) message);
         trace(LOGGER, () -> format("JMS message converted to envelope: %s", jsonEnvelope));
-        consumer.accept(jsonEnvelope);
+        consumer.accept(interceptorContextWithInput(jsonEnvelope));
         trace(LOGGER, () -> format("JMS message processed: %s", jsonEnvelope));
     }
 }

@@ -6,6 +6,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
+import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 
@@ -136,11 +137,14 @@ public class EventHandlerIT {
     @Test
     public void shouldHandleEventByName() {
 
-        UUID metadataId = randomUUID();
-        interceptorChainProcessor.process(envelope()
+        final UUID metadataId = randomUUID();
+        final JsonEnvelope jsonEnvelope = envelope()
                 .with(metadataOf(metadataId, EVENT_ABC)
                         .withStreamId(randomUUID())
-                        .withVersion(1L)).build());
+                        .withVersion(1L))
+                .build();
+
+        interceptorChainProcessor.process(interceptorContextWithInput(jsonEnvelope));
 
         assertThat(abcEventHandler.firstRecordedEnvelope(), not(nullValue()));
         assertThat(abcEventHandler.firstRecordedEnvelope().metadata().id(), equalTo(metadataId));
@@ -149,11 +153,14 @@ public class EventHandlerIT {
     @Test
     public void shouldHandleEventByTheAllEventsHandlerIfNamedHandlerNotFound() {
 
-        UUID metadataId = randomUUID();
-        interceptorChainProcessor.process(envelope()
+        final UUID metadataId = randomUUID();
+        final JsonEnvelope jsonEnvelope = envelope()
                 .with(metadataOf(metadataId, "some.unregistered.event")
                         .withStreamId(randomUUID())
-                        .withVersion(1L)).build());
+                        .withVersion(1L))
+                .build();
+
+        interceptorChainProcessor.process(interceptorContextWithInput(jsonEnvelope));
 
         assertThat(allEventsHandler.firstRecordedEnvelope(), not(nullValue()));
         assertThat(allEventsHandler.firstRecordedEnvelope().metadata().id(), equalTo(metadataId));
@@ -162,11 +169,14 @@ public class EventHandlerIT {
     @Test
     public void shouldCallInterceptor() {
 
-        UUID metadataId = UUID.randomUUID();
-        interceptorChainProcessor.process(envelope()
+        final UUID metadataId = randomUUID();
+        final JsonEnvelope jsonEnvelope = envelope()
                 .with(metadataOf(metadataId, EVENT_ABC)
                         .withStreamId(randomUUID())
-                        .withVersion(1L)).build());
+                        .withVersion(1L))
+                .build();
+
+        interceptorChainProcessor.process(interceptorContextWithInput(jsonEnvelope));
 
         assertThat(TestInterceptor.id, equalTo(metadataId));
     }
@@ -176,7 +186,7 @@ public class EventHandlerIT {
     public static class AbcEventHandler extends TestEnvelopeRecorder {
 
         @Handles(EVENT_ABC)
-        public void handle(JsonEnvelope envelope) {
+        public void handle(final JsonEnvelope envelope) {
             record(envelope);
         }
 
@@ -187,7 +197,7 @@ public class EventHandlerIT {
     public static class AllEventsHandler extends TestEnvelopeRecorder {
 
         @Handles("*")
-        public void handle(JsonEnvelope envelope) {
+        public void handle(final JsonEnvelope envelope) {
             record(envelope);
         }
 

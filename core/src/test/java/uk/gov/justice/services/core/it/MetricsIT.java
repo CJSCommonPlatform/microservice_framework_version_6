@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
+import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 
@@ -13,7 +14,6 @@ import uk.gov.justice.services.common.configuration.GlobalValueProducer;
 import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
 import uk.gov.justice.services.core.accesscontrol.AccessControlService;
@@ -31,7 +31,6 @@ import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandlerProducer;
-import uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.extension.AnnotationScanner;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
@@ -43,9 +42,9 @@ import uk.gov.justice.services.core.jms.DefaultJmsDestinations;
 import uk.gov.justice.services.core.jms.JmsSenderFactory;
 import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
-import uk.gov.justice.services.core.metrics.TotalActionMetricsInterceptor;
 import uk.gov.justice.services.core.metrics.IndividualActionMetricsInterceptor;
 import uk.gov.justice.services.core.metrics.MetricRegistryProducer;
+import uk.gov.justice.services.core.metrics.TotalActionMetricsInterceptor;
 import uk.gov.justice.services.core.sender.ComponentDestination;
 import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -138,11 +137,12 @@ public class MetricsIT {
     @Test
     public void shouldExposeTotalComponentMetrics() throws Exception {
 
-        interceptorChainProcessor.process(envelope()
-                .with(metadataWithRandomUUID(EVENT_ABC)).build());
+        final JsonEnvelope jsonEnvelope = envelope()
+                .with(metadataWithRandomUUID(EVENT_ABC))
+                .build();
 
-        interceptorChainProcessor.process(envelope()
-                .with(metadataWithRandomUUID(EVENT_ABC)).build());
+        interceptorChainProcessor.process(interceptorContextWithInput(jsonEnvelope));
+        interceptorChainProcessor.process(interceptorContextWithInput(jsonEnvelope));
 
         final ObjectName metricsObjectName = new ObjectName("uk.gov.justice.metrics:name=test-component.action.total");
 
@@ -160,14 +160,17 @@ public class MetricsIT {
 
     @Test
     public void shouldExposeMetricsPerMessageName() throws Exception {
-        interceptorChainProcessor.process(envelope()
-                .with(metadataWithRandomUUID(EVENT_ABC)).build());
 
-        interceptorChainProcessor.process(envelope()
-                .with(metadataWithRandomUUID(EVENT_BCD)).build());
+        final JsonEnvelope jsonEnvelope_1 = envelope()
+                .with(metadataWithRandomUUID(EVENT_ABC))
+                .build();
+        final JsonEnvelope jsonEnvelope_2 = envelope()
+                .with(metadataWithRandomUUID(EVENT_BCD))
+                .build();
 
-        interceptorChainProcessor.process(envelope()
-                .with(metadataWithRandomUUID(EVENT_ABC)).build());
+        interceptorChainProcessor.process(interceptorContextWithInput(jsonEnvelope_1));
+        interceptorChainProcessor.process(interceptorContextWithInput(jsonEnvelope_2));
+        interceptorChainProcessor.process(interceptorContextWithInput(jsonEnvelope_1));
 
         final ObjectName metricsAbcObjectName = new ObjectName("uk.gov.justice.metrics:name=test-component.action.event-abc");
         final ObjectName metricsBcdObjectName = new ObjectName("uk.gov.justice.metrics:name=test-component.action.event-bcd");

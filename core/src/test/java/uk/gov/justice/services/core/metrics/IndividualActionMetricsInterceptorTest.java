@@ -52,7 +52,7 @@ public class IndividualActionMetricsInterceptorTest {
         when(timer.time()).thenReturn(timerContext);
 
         interceptor.process(interceptorContextWithInput(
-                envelope().with(metadataWithRandomUUID("actionNameABC")).build(), null), interceptorChain);
+                envelope().with(metadataWithRandomUUID("actionNameABC")).build()), interceptorChain);
 
         verify(metricsRegistry).timer("someCtxName.action.actionNameABC");
     }
@@ -63,7 +63,7 @@ public class IndividualActionMetricsInterceptorTest {
         when(metricsRegistry.timer(anyString())).thenReturn(timer);
         when(timer.time()).thenReturn(timerContext);
 
-        final InterceptorContext currentContext = interceptorContextWithInput(envelope().with(metadataWithDefaults()).build(), null);
+        final InterceptorContext currentContext = interceptorContextWithInput(envelope().with(metadataWithDefaults()).build());
 
         interceptor.process(currentContext, interceptorChain);
 

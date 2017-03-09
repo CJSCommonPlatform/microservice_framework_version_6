@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
+import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 
@@ -169,7 +170,8 @@ public class EventBufferIT {
                 .with(metadataOf(metadataId, EVENT_ABC)
                         .withStreamId(streamId).withVersion(2L))
                 .build();
-        interceptorChainProcessor.process(envelope);
+
+        interceptorChainProcessor.process(interceptorContextWithInput(envelope));
 
         List<StreamBufferEvent> streamBufferEvents = jdbcStreamBufferRepository.streamById(streamId).collect(toList());
 
@@ -186,11 +188,11 @@ public class EventBufferIT {
 
         UUID metadataId = UUID.randomUUID();
         UUID streamId = UUID.randomUUID();
-        final JsonEnvelope envelope = envelope()
+        final JsonEnvelope jsonEnvelope = envelope()
                 .with(metadataOf(metadataId, EVENT_ABC)
                         .withStreamId(streamId).withVersion(1L))
                 .build();
-        interceptorChainProcessor.process(envelope);
+        interceptorChainProcessor.process(interceptorContextWithInput(jsonEnvelope));
 
         List<StreamBufferEvent> streamBufferEvents = jdbcStreamBufferRepository.streamById(streamId).collect(toList());
         Optional<StreamStatus> streamStatus = statusRepository.findByStreamId(streamId);
@@ -221,7 +223,7 @@ public class EventBufferIT {
                 .build();
 
 
-        interceptorChainProcessor.process(envelope);
+        interceptorChainProcessor.process(interceptorContextWithInput(envelope));
 
         List<StreamBufferEvent> streamBufferEvents = jdbcStreamBufferRepository.streamById(streamId).collect(toList());
         Optional<StreamStatus> streamStatus = statusRepository.findByStreamId(streamId);
@@ -240,10 +242,11 @@ public class EventBufferIT {
 
         statusRepository.insert(new StreamStatus(streamId, 2L));
 
-        interceptorChainProcessor.process(envelope()
+        final JsonEnvelope jsonEnvelope = envelope()
                 .with(metadataOf(metadataId, EVENT_ABC)
                         .withStreamId(streamId).withVersion(4L))
-                .build());
+                .build();
+        interceptorChainProcessor.process(interceptorContextWithInput(jsonEnvelope));
 
         List<StreamBufferEvent> streamBufferEvents = jdbcStreamBufferRepository.streamById(streamId).collect(toList());
         Optional<StreamStatus> streamStatus = statusRepository.findByStreamId(streamId);
@@ -261,7 +264,7 @@ public class EventBufferIT {
 
         UUID metadataId2 = UUID.randomUUID();
         UUID streamId = UUID.randomUUID();
-        final JsonEnvelope envelope = envelope()
+        final JsonEnvelope jsonEnvelope = envelope()
                 .with(metadataOf(metadataId2, EVENT_ABC)
                         .withStreamId(streamId).withVersion(2L))
                 .build();
@@ -294,7 +297,7 @@ public class EventBufferIT {
                 )
         );
 
-        interceptorChainProcessor.process(envelope);
+        interceptorChainProcessor.process(interceptorContextWithInput(jsonEnvelope));
 
         List<StreamBufferEvent> streamBufferEvents = jdbcStreamBufferRepository.streamById(streamId).collect(toList());
         Optional<StreamStatus> streamStatus = statusRepository.findByStreamId(streamId);
@@ -326,7 +329,7 @@ public class EventBufferIT {
 
         UUID metadataId = UUID.randomUUID();
         UUID streamId = UUID.randomUUID();
-        final JsonEnvelope envelope = envelope()
+        final JsonEnvelope jsonEnvelope = envelope()
                 .with(metadataOf(metadataId, EVENT_ABC)
                         .withStreamId(streamId).withVersion(1L))
                 .build();
@@ -339,7 +342,7 @@ public class EventBufferIT {
         jdbcStreamBufferRepository.insert(streamBufferEvent2);
         jdbcStreamBufferRepository.insert(streamBufferEvent3);
 
-        interceptorChainProcessor.process(envelope);
+        interceptorChainProcessor.process(interceptorContextWithInput(jsonEnvelope));
 
         List<StreamBufferEvent> streamBufferEvents = jdbcStreamBufferRepository.streamById(streamId).collect(toList());
         Optional<StreamStatus> streamStatus = statusRepository.findByStreamId(streamId);

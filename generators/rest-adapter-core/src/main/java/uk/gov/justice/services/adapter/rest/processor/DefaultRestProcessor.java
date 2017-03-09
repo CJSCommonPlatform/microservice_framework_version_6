@@ -1,12 +1,15 @@
 package uk.gov.justice.services.adapter.rest.processor;
 
 import static java.lang.String.format;
+import static java.util.Optional.empty;
+import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
 import static uk.gov.justice.services.messaging.logging.HttpMessageLoggerHelper.toHttpHeaderTrace;
 import static uk.gov.justice.services.messaging.logging.LoggerUtils.trace;
 
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
 import uk.gov.justice.services.adapter.rest.parameter.Parameter;
 import uk.gov.justice.services.adapter.rest.processor.response.ResponseStrategy;
+import uk.gov.justice.services.core.interceptor.InterceptorContext;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.Collection;
@@ -32,16 +35,16 @@ public class DefaultRestProcessor implements RestProcessor {
 
     @Override
     public Response process(final ResponseStrategy responseStrategy,
-                            final Function<JsonEnvelope, Optional<JsonEnvelope>> interceptorChain,
+                            final Function<InterceptorContext, Optional<JsonEnvelope>> interceptorChain,
                             final String action,
                             final HttpHeaders headers,
                             final Collection<Parameter> params) {
-        return process(responseStrategy, interceptorChain, action, Optional.empty(), headers, params);
+        return process(responseStrategy, interceptorChain, action, empty(), headers, params);
     }
 
     @Override
     public Response process(final ResponseStrategy responseStrategy,
-                            final Function<JsonEnvelope, Optional<JsonEnvelope>> interceptorChain,
+                            final Function<InterceptorContext, Optional<JsonEnvelope>> interceptorChain,
                             final String action,
                             final Optional<JsonObject> initialPayload,
                             final HttpHeaders headers,
@@ -58,7 +61,7 @@ public class DefaultRestProcessor implements RestProcessor {
 
         trace(logger, () -> format("REST message converted to envelope: %s", envelope));
 
-        final Optional<JsonEnvelope> result = interceptorChain.apply(envelope);
+        final Optional<JsonEnvelope> result = interceptorChain.apply(interceptorContextWithInput(envelope));
 
         trace(logger, () -> format("REST message processed: %s", envelope));
 

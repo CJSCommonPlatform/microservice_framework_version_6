@@ -15,7 +15,6 @@ import javax.ws.rs.core.MediaType;
 
 public class BasicActionMapper {
 
-    private static final String MEDIA_TYPE_PREFIX = "application/vnd.";
     private static final String MEDIA_TYPE_SEPARATOR = "/";
 
     private final Map<String, Map<String, String>> methodToMediaTypeAndActionMap = new HashMap<>();
@@ -26,17 +25,20 @@ public class BasicActionMapper {
     }
 
     public String actionOf(final String methodName, final String httpMethod, final HttpHeaders headers) {
-        return methodToMediaTypeAndActionMap.getOrDefault(methodName, emptyMap())
+        final String action = methodToMediaTypeAndActionMap.getOrDefault(methodName, emptyMap())
                 .get(mediaTypeOf(httpMethod, headers));
+        if (action == null) {
+            throw new BadRequestException(format("No matching action for accept media types: %s", headers.getAcceptableMediaTypes()));
+        }
+        return action;
     }
 
     private String mediaTypeOf(final String httpMethod, final HttpHeaders headers) {
         if (GET.equals(httpMethod)) {
             return headers.getAcceptableMediaTypes().stream()
                     .map(this::mediaType)
-                    .filter(mt -> mt.startsWith(MEDIA_TYPE_PREFIX))
                     .findFirst()
-                    .orElseThrow(() -> new BadRequestException(format("No matching action for accept media types: %s", headers.getAcceptableMediaTypes())));
+                    .get();
         } else {
             return mediaType(headers.getMediaType());
         }

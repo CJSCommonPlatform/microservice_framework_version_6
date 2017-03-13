@@ -63,9 +63,10 @@ public class BasicActionMapperTest {
     @Test
     public void shouldThrowExceptionIfGetRequestMediaTypeDoesNotMatch() throws Exception {
         exception.expect(BadRequestException.class);
-        exception.expectMessage("No matching action for accept media types: [*/*]");
+        exception.expectMessage("No matching action for accept media types: [application/vnd.unknown+json]");
 
-        new TestActionMapper().actionOf("methodA", "GET", headersWith("Accept", "*/*"));
+        new TestActionMapper().actionOf("methodA", "GET", headersWith("Accept", "application/vnd.unknown+json"));
+
     }
 
     private static class TestActionMapper extends BasicActionMapper {

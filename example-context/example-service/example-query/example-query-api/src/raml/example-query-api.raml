@@ -97,3 +97,17 @@ protocols: [ HTTP, HTTPS ]
           application/vnd.example.cakes+json:
             schema: !include json/schema/example.search-cakes.json
             example: !include json/cakes.json
+
+/recipes/{recipeId}/photograph:
+  description: return recipe photograph data
+  get:
+    description: |
+        ...
+        (mapping):
+            responseType: application/octet-stream
+            name: example.get-recipe-photograph
+        ...
+    responses:
+      200:
+        body:
+          application/octet-stream:

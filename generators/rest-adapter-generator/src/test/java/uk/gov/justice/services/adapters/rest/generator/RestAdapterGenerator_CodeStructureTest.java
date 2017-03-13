@@ -23,8 +23,7 @@ import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
 import static org.raml.model.ActionType.PUT;
-import static uk.gov.justice.services.adapter.rest.processor.response.ResponseStrategies.ACCEPTED_STATUS_NO_ENTITY_RESPONSE_STRATEGY;
-import static uk.gov.justice.services.adapter.rest.processor.response.ResponseStrategies.OK_STATUS_ENVELOPE_ENTITY_RESPONSE_STRATEGY;
+import static uk.gov.justice.services.adapter.rest.processor.response.ResponseStrategies.FILE_STREAM_RETURNING_RESPONSE_STRATEGY;
 import static uk.gov.justice.services.adapter.rest.processor.response.ResponseStrategies.OK_STATUS_ENVELOPE_PAYLOAD_ENTITY_RESPONSE_STRATEGY;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.defaultGetAction;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
@@ -32,8 +31,6 @@ import static uk.gov.justice.services.generators.test.utils.builder.MappingBuild
 import static uk.gov.justice.services.generators.test.utils.builder.QueryParamBuilder.queryParam;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithQueryApiDefaults;
-import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithQueryControllerDefaults;
-import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithQueryViewDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.defaultDeleteResource;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.defaultGetResource;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.defaultPatchResource;
@@ -952,85 +949,6 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
         assertThat(dispatcher.getModifiers(), is(0));
     }
 
-    @Test
-    public void shouldAddAnnotatedEnvelopeResponseStrategyPropertyForQueryController() throws Exception {
-        generator.run(
-                restRamlWithQueryControllerDefaults()
-                        .with(defaultPostResource()
-                                .withRelativeUri("/some/path")
-                        ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
-
-        final Field dispatcher = resourceClass.getDeclaredField("responseStrategy");
-        assertThat(dispatcher, not(nullValue()));
-        assertThat(dispatcher.getType(), equalTo(ResponseStrategy.class));
-        assertThat(dispatcher.getAnnotation(Inject.class), not(nullValue()));
-        assertThat(dispatcher.getModifiers(), is(0));
-        assertThat(dispatcher.getAnnotation(Named.class), not(nullValue()));
-        assertThat(dispatcher.getAnnotation(Named.class).value(), is(OK_STATUS_ENVELOPE_ENTITY_RESPONSE_STRATEGY));
-    }
-
-    @Test
-    public void shouldAddAnnotatedEnvelopeResponseStrategyPropertyForQueryView() throws Exception {
-        generator.run(
-                restRamlWithQueryViewDefaults()
-                        .with(defaultPostResource()
-                                .withRelativeUri("/some/path")
-                        ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
-
-        final Field dispatcher = resourceClass.getDeclaredField("responseStrategy");
-        assertThat(dispatcher, not(nullValue()));
-        assertThat(dispatcher.getType(), equalTo(ResponseStrategy.class));
-        assertThat(dispatcher.getAnnotation(Inject.class), not(nullValue()));
-        assertThat(dispatcher.getModifiers(), is(0));
-        assertThat(dispatcher.getAnnotation(Named.class), not(nullValue()));
-        assertThat(dispatcher.getAnnotation(Named.class).value(), is(OK_STATUS_ENVELOPE_ENTITY_RESPONSE_STRATEGY));
-    }
-
-    @Test
-    public void shouldAddAnnotatedPayloadResponseFactoryProperty() throws Exception {
-        generator.run(
-                restRamlWithDefaults()
-                        .with(defaultPostResource()
-                                .withRelativeUri("/some/path")
-                        ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
-
-        final Field dispatcher = resourceClass.getDeclaredField("responseStrategy");
-        assertThat(dispatcher, not(nullValue()));
-        assertThat(dispatcher.getType(), equalTo(ResponseStrategy.class));
-        assertThat(dispatcher.getAnnotation(Inject.class), not(nullValue()));
-        assertThat(dispatcher.getModifiers(), is(0));
-        assertThat(dispatcher.getAnnotation(Named.class), not(nullValue()));
-        assertThat(dispatcher.getAnnotation(Named.class).value(), is(OK_STATUS_ENVELOPE_PAYLOAD_ENTITY_RESPONSE_STRATEGY));
-    }
-
-    @Test
-    public void shouldAddAnnotatedAcceptedResponseFactoryProperty() throws Exception {
-        generator.run(
-                restRamlWithDefaults()
-                        .with(defaultPostResource()
-                                .withRelativeUri("/some/path")
-                        ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
-
-        final Field dispatcher = resourceClass.getDeclaredField("acceptedStatusNoEntityResponseStrategy");
-        assertThat(dispatcher, not(nullValue()));
-        assertThat(dispatcher.getType(), equalTo(ResponseStrategy.class));
-        assertThat(dispatcher.getAnnotation(Inject.class), not(nullValue()));
-        assertThat(dispatcher.getModifiers(), is(0));
-        assertThat(dispatcher.getAnnotation(Named.class), not(nullValue()));
-        assertThat(dispatcher.getAnnotation(Named.class).value(), is(ACCEPTED_STATUS_NO_ENTITY_RESPONSE_STRATEGY));
-    }
 
     @Test
     public void shouldGenerateClassContainingQueryParam() throws Exception {

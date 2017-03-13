@@ -67,6 +67,22 @@ protocols: [ HTTP, HTTPS ]
             schema: !include json/schema/example.get-recipe.json
             example: !include json/recipe.json
 
+/recipes/{recipeId}/photograph:
+  description: return recipe photograph data
+  get:
+    description: |
+        ...
+        (mapping):
+            responseType: application/vnd.example.recipe-photograph+json
+            name: example.get-recipe-photograph
+        ...
+    responses:
+      200:
+        body:
+          application/vnd.example.recipe-photograph+json:
+            schema: !include json/schema/example.get-recipe-photograph.json
+            example: !include json/recipe-photograph.json
+
 /orders/{orderId}:
   description: return a recipe
   get:

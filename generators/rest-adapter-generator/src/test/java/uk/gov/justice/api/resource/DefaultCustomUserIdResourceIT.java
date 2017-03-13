@@ -16,6 +16,7 @@ import uk.gov.justice.services.adapter.rest.mutipart.FileBasedInterceptorContext
 import uk.gov.justice.services.adapter.rest.mutipart.FileInputDetailsFactory;
 import uk.gov.justice.services.adapter.rest.mutipart.InputPartFileNameExtractor;
 import uk.gov.justice.services.adapter.rest.processor.DefaultRestProcessor;
+import uk.gov.justice.services.adapter.rest.processor.ResponseStrategyCache;
 import uk.gov.justice.services.adapter.rest.processor.response.AcceptedStatusNoEntityResponseStrategy;
 import uk.gov.justice.services.adapter.rest.processor.response.OkStatusEnvelopeEntityResponseStrategy;
 import uk.gov.justice.services.adapter.rest.processor.response.OkStatusEnvelopePayloadEntityResponseStrategy;
@@ -120,7 +121,8 @@ public class DefaultCustomUserIdResourceIT {
             StringToJsonObjectConverter.class,
             FileBasedInterceptorContextFactory.class,
             InputPartFileNameExtractor.class,
-            FileInputDetailsFactory.class
+            FileInputDetailsFactory.class,
+            ResponseStrategyCache.class
     })
     public WebApp war() {
         return new WebApp()

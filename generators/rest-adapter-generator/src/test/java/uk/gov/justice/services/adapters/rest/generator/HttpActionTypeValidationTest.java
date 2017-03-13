@@ -13,7 +13,7 @@ import uk.gov.justice.services.generators.commons.validator.RamlValidationExcept
 
 import org.junit.Test;
 
-public class JaxRsImplementationGeneratorTest extends BaseRestAdapterGeneratorTest {
+public class HttpActionTypeValidationTest extends BaseRestAdapterGeneratorTest {
 
     @Test(expected = RamlValidationException.class)
     public void shouldThrowExceptionIfActionTypeIsHEAD() throws Exception {

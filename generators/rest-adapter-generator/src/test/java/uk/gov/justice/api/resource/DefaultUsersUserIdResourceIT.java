@@ -23,6 +23,7 @@ import uk.gov.justice.services.adapter.rest.mutipart.FileBasedInterceptorContext
 import uk.gov.justice.services.adapter.rest.mutipart.FileInputDetailsFactory;
 import uk.gov.justice.services.adapter.rest.mutipart.InputPartFileNameExtractor;
 import uk.gov.justice.services.adapter.rest.processor.DefaultRestProcessor;
+import uk.gov.justice.services.adapter.rest.processor.ResponseStrategyCache;
 import uk.gov.justice.services.adapter.rest.processor.response.AcceptedStatusNoEntityResponseStrategy;
 import uk.gov.justice.services.adapter.rest.processor.response.OkStatusEnvelopeEntityResponseStrategy;
 import uk.gov.justice.services.adapter.rest.processor.response.OkStatusEnvelopePayloadEntityResponseStrategy;
@@ -39,6 +40,7 @@ import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.net.ResponseCache;
 import java.util.Properties;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -139,7 +141,8 @@ public class DefaultUsersUserIdResourceIT {
             StringToJsonObjectConverter.class,
             FileBasedInterceptorContextFactory.class,
             InputPartFileNameExtractor.class,
-            FileInputDetailsFactory.class
+            FileInputDetailsFactory.class,
+            ResponseStrategyCache.class
 
     })
     public WebApp war() {

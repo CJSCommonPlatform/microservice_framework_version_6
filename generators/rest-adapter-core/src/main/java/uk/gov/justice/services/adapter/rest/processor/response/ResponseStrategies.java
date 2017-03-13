@@ -24,6 +24,12 @@ final public class ResponseStrategies {
      */
     public static final String OK_STATUS_ENVELOPE_PAYLOAD_ENTITY_RESPONSE_STRATEGY = "OkStatusEnvelopePayloadEntityResponseStrategy";
 
+    /**
+     * Strategy to return a {@link Response} with OK status, with resulting InputStream
+     * payload, containing file content fetched from file service, as the returned entity.
+     */
+    public static final String FILE_STREAM_RETURNING_RESPONSE_STRATEGY = "FileStreamReturningResponseStrategy";
+
     private ResponseStrategies() {
     }
 }

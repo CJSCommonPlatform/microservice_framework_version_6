@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
+import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 
@@ -129,10 +130,13 @@ public class CustomServiceComponentHandlerIT {
     @Test
     public void shouldHandleFrameWorkComponentByName() {
         final UUID metadataId = randomUUID();
-        interceptorChainProcessor.process(envelope()
+        final JsonEnvelope jsonEnvelope = envelope()
                 .with(metadataOf(metadataId, CUSTOM_XYZ)
                         .withStreamId(randomUUID())
-                        .withVersion(1L)).build());
+                        .withVersion(1L))
+                .build();
+
+        interceptorChainProcessor.process(interceptorContextWithInput(jsonEnvelope));
 
         assertThat(customComponentHandler.firstRecordedEnvelope(), not(nullValue()));
         assertThat(customComponentHandler.firstRecordedEnvelope().metadata().id(), equalTo(metadataId));

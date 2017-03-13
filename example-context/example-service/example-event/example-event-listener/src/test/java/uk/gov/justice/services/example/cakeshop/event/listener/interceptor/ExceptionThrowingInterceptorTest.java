@@ -1,10 +1,8 @@
 package uk.gov.justice.services.example.cakeshop.event.listener.interceptor;
 
-import static org.junit.Assert.*;
 import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 
 import uk.gov.justice.services.core.interceptor.InterceptorChain;
 
@@ -26,7 +24,7 @@ public class ExceptionThrowingInterceptorTest {
     public void shouldThrowExceptionWhenNameContainsExceptionalCake() throws Exception {
 
         interceptor.process(interceptorContextWithInput(
-                envelope().with(metadataWithDefaults()).withPayloadOf("Exceptional cake", "name").build(), null), interceptorChain);
+                envelope().with(metadataWithDefaults()).withPayloadOf("Exceptional cake", "name").build()), interceptorChain);
 
     }
 
@@ -34,10 +32,10 @@ public class ExceptionThrowingInterceptorTest {
     public void shouldNotThrowExceptionPayloadDoesNotContainExceptionalCake() {
 
         interceptor.process(interceptorContextWithInput(
-                envelope().with(metadataWithDefaults()).withPayloadOf("Some cake", "name").build(), null), interceptorChain);
+                envelope().with(metadataWithDefaults()).withPayloadOf("Some cake", "name").build()), interceptorChain);
 
         interceptor.process(interceptorContextWithInput(
-                envelope().with(metadataWithDefaults()).build(), null), interceptorChain);
+                envelope().with(metadataWithDefaults()).build()), interceptorChain);
 
     }
 }

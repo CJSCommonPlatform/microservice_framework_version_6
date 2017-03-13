@@ -2,7 +2,6 @@ package uk.gov.justice.services.core.interceptor;
 
 import static java.lang.String.format;
 import static uk.gov.justice.services.core.interceptor.InterceptorContext.copyWithOutput;
-import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
 import static uk.gov.justice.services.messaging.logging.LoggerUtils.trace;
 
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
@@ -41,24 +40,23 @@ public class InterceptorChainProcessorProducer {
 
         trace(logger, () -> format("Interceptor Chain Processor provided for %s", injectionPoint.getClass().getName()));
 
-        return createProcessor(dispatch, injectionPoint);
+        return createProcessor(dispatch);
     }
 
     /**
      * Constructs the {@link InterceptorChainProcessor} for the given dispatch interceptor target
      * and injection point.
      *
-     * @param dispatch       the dispatch target method
-     * @param injectionPoint the injection point of the {@link InterceptorChainProcessor}
+     * @param dispatch the dispatch target method
      * @return the interceptor chain processor function
      */
-    private InterceptorChainProcessor createProcessor(final Function<JsonEnvelope, JsonEnvelope> dispatch, final InjectionPoint injectionPoint) {
+    private InterceptorChainProcessor createProcessor(final Function<JsonEnvelope, JsonEnvelope> dispatch) {
 
-        return jsonEnvelope -> {
+        return interceptorContext -> {
             final InterceptorChain interceptorChain = new InterceptorChain(interceptorCache.getInterceptors(), targetOf(dispatch));
 
             return interceptorChain
-                    .processNext(interceptorContextWithInput(jsonEnvelope, injectionPoint))
+                    .processNext(interceptorContext)
                     .outputEnvelope();
         };
     }

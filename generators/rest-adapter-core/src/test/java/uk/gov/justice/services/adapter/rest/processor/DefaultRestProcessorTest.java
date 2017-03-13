@@ -2,9 +2,11 @@ package uk.gov.justice.services.adapter.rest.processor;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.Collections.singletonList;
+import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -17,6 +19,7 @@ import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
 import uk.gov.justice.services.adapter.rest.parameter.Parameter;
 import uk.gov.justice.services.adapter.rest.processor.response.ResponseStrategy;
 import uk.gov.justice.services.common.http.HeaderConstants;
+import uk.gov.justice.services.core.interceptor.InterceptorContext;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.rest.ParameterType;
 
@@ -24,7 +27,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-import javax.json.Json;
 import javax.json.JsonObject;
 import javax.ws.rs.core.Response;
 
@@ -49,7 +51,7 @@ public class DefaultRestProcessorTest {
     private static final String PARAM_VALUE = "nameValue";
 
     @Mock
-    private Function<JsonEnvelope, Optional<JsonEnvelope>> interceptorChain;
+    private Function<InterceptorContext, Optional<JsonEnvelope>> interceptorChain;
 
     @Mock
     private JsonEnvelope jsonEnvelope;
@@ -83,14 +85,15 @@ public class DefaultRestProcessorTest {
 
     @Test
     public void shouldPassEnvelopeWithPayloadToInterceptorChain() throws Exception {
-        final JsonObject payload = Json.createObjectBuilder().add("payloadId", PAYLOAD_ID).build();
+        final JsonObject payload = createObjectBuilder().add("payloadId", PAYLOAD_ID).build();
 
         restProcessor.process(responseStrategy, interceptorChain, ACTION, Optional.of(payload), headers, pathParams);
 
-        final ArgumentCaptor<JsonEnvelope> envelopeCaptor = ArgumentCaptor.forClass(JsonEnvelope.class);
-        verify(interceptorChain).apply(envelopeCaptor.capture());
+        final ArgumentCaptor<InterceptorContext> interceptorContextCaptor = forClass(InterceptorContext.class);
+        verify(interceptorChain).apply(interceptorContextCaptor.capture());
 
-        final JsonEnvelope envelope = envelopeCaptor.getValue();
+        final InterceptorContext interceptorContext = interceptorContextCaptor.getValue();
+        final JsonEnvelope envelope = interceptorContext.inputEnvelope();
         assertThat(envelope, jsonEnvelope()
                 .withMetadataOf(metadata()
                         .withName(ACTION)
@@ -105,10 +108,11 @@ public class DefaultRestProcessorTest {
     public void shouldPassEnvelopeWithEmptyPayloadToInterceptorChain() throws Exception {
         restProcessor.process(responseStrategy, interceptorChain, ACTION, headers, pathParams);
 
-        final ArgumentCaptor<JsonEnvelope> envelopeCaptor = ArgumentCaptor.forClass(JsonEnvelope.class);
-        verify(interceptorChain).apply(envelopeCaptor.capture());
+        final ArgumentCaptor<InterceptorContext> interceptorContextCaptor = forClass(InterceptorContext.class);
+        verify(interceptorChain).apply(interceptorContextCaptor.capture());
 
-        final JsonEnvelope envelope = envelopeCaptor.getValue();
+        final InterceptorContext interceptorContext = interceptorContextCaptor.getValue();
+        final JsonEnvelope envelope = interceptorContext.inputEnvelope();
 
         assertThat(envelope, jsonEnvelope()
                 .withMetadataOf(metadata()
@@ -123,7 +127,7 @@ public class DefaultRestProcessorTest {
     public void shouldReturnResponseFromResponseStrategyForCallWithPayload() throws Exception {
         final JsonObject payload = mock(JsonObject.class);
 
-        when(interceptorChain.apply(any(JsonEnvelope.class))).thenReturn(Optional.of(jsonEnvelope));
+        when(interceptorChain.apply(any(InterceptorContext.class))).thenReturn(Optional.of(jsonEnvelope));
         when(responseStrategy.responseFor(ACTION, Optional.of(jsonEnvelope))).thenReturn(response);
 
         final Response result = restProcessor.process(responseStrategy, interceptorChain, ACTION, Optional.of(payload), headers, pathParams);
@@ -134,7 +138,7 @@ public class DefaultRestProcessorTest {
 
     @Test
     public void shouldReturnResponseFromResponseStrategyForCallWithoutPayload() throws Exception {
-        when(interceptorChain.apply(any(JsonEnvelope.class))).thenReturn(Optional.of(jsonEnvelope));
+        when(interceptorChain.apply(any(InterceptorContext.class))).thenReturn(Optional.of(jsonEnvelope));
         when(responseStrategy.responseFor(ACTION, Optional.of(jsonEnvelope))).thenReturn(response);
 
         final Response result = restProcessor.process(responseStrategy, interceptorChain, ACTION, headers, pathParams);

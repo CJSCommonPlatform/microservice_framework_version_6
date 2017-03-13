@@ -2,6 +2,7 @@ package uk.gov.justice.services.core.metrics;
 
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
@@ -9,6 +10,7 @@ import static uk.gov.justice.services.core.interceptor.InterceptorContext.interc
 import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
 import uk.gov.justice.services.core.interceptor.InterceptorChain;
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
@@ -47,7 +49,7 @@ public class TotalActionMetricsInterceptorTest {
         when(metricsRegistry.timer("someCtxNameABC.action.total")).thenReturn(timer);
         when(timer.time()).thenReturn(timerContext);
 
-        interceptor.process(interceptorContextWithInput(null, null), interceptorChain);
+        interceptor.process(interceptorContextWithInput(mock(JsonEnvelope.class)), interceptorChain);
 
         verify(metricsRegistry).timer("someCtxNameABC.action.total");
 
@@ -59,7 +61,7 @@ public class TotalActionMetricsInterceptorTest {
         when(metricsRegistry.timer(anyString())).thenReturn(timer);
         when(timer.time()).thenReturn(timerContext);
 
-        final InterceptorContext currentContext = interceptorContextWithInput(null, null);
+        final InterceptorContext currentContext = interceptorContextWithInput(mock(JsonEnvelope.class));
 
         interceptor.process(currentContext, interceptorChain);
 

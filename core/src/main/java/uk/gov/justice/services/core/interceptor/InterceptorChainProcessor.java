@@ -11,5 +11,5 @@ import java.util.Optional;
 @FunctionalInterface
 public interface InterceptorChainProcessor {
 
-    Optional<JsonEnvelope> process(final JsonEnvelope envelope);
+    Optional<JsonEnvelope> process(final InterceptorContext interceptorContext);
 }

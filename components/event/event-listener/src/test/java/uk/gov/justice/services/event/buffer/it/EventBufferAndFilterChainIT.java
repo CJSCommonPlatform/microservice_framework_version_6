@@ -7,6 +7,7 @@ import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
+import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 
@@ -172,33 +173,31 @@ public class EventBufferAndFilterChainIT {
         final UUID metadataId3 = randomUUID();
         final UUID streamId = randomUUID();
 
-        interceptorChainProcessor.process(
-                envelope()
-                        .with(metadataOf(metadataId2, EVENT_UNSUPPORTED_DEF)
-                                .withStreamId(streamId)
-                                .withVersion(2L))
-                        .build());
-        interceptorChainProcessor.process(
-                envelope()
-                        .with(metadataOf(metadataId3, EVENT_SUPPORTED_ABC)
-                                .withStreamId(streamId)
-                                .withVersion(3L))
-                        .build());
+        final JsonEnvelope jsonEnvelope_1 = envelope()
+                .with(metadataOf(metadataId2, EVENT_UNSUPPORTED_DEF)
+                        .withStreamId(streamId)
+                        .withVersion(2L))
+                .build();
+        final JsonEnvelope jsonEnvelope_2 = envelope()
+                .with(metadataOf(metadataId3, EVENT_SUPPORTED_ABC)
+                        .withStreamId(streamId)
+                        .withVersion(3L))
+                .build();
+        final JsonEnvelope jsonEnvelope_3 = envelope()
+                .with(metadataOf(metadataId1, EVENT_SUPPORTED_ABC)
+                        .withStreamId(streamId)
+                        .withVersion(1L))
+                .build();
 
-
-        interceptorChainProcessor.process(
-                envelope()
-                        .with(metadataOf(metadataId1, EVENT_SUPPORTED_ABC)
-                                .withStreamId(streamId)
-                                .withVersion(1L))
-                        .build());
+        interceptorChainProcessor.process(interceptorContextWithInput(jsonEnvelope_1));
+        interceptorChainProcessor.process(interceptorContextWithInput(jsonEnvelope_2));
+        interceptorChainProcessor.process(interceptorContextWithInput(jsonEnvelope_3));
 
         assertThat(abcEventHandler.recordedEnvelopes(), not(empty()));
         assertThat(abcEventHandler.recordedEnvelopes().get(0).metadata().id(), equalTo(metadataId1));
         assertThat(abcEventHandler.recordedEnvelopes().get(0).metadata().version(), contains(1L));
         assertThat(abcEventHandler.recordedEnvelopes().get(1).metadata().id(), equalTo(metadataId3));
         assertThat(abcEventHandler.recordedEnvelopes().get(1).metadata().version(), contains(3L));
-
 
         assertThat(defEventHandler.recordedEnvelopes(), empty());
     }

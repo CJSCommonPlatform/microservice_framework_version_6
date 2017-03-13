@@ -3,13 +3,10 @@ package uk.gov.justice.services.core.audit;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.core.interceptor.InterceptorContext.copyWithOutput;
 import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
-import static uk.gov.justice.services.test.utils.common.MemberInjectionPoint.injectionPointWithMemberAsFirstMethodOf;
 
-import uk.gov.justice.services.core.accesscontrol.AccessControlInterceptorTest;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.interceptor.Interceptor;
 import uk.gov.justice.services.core.interceptor.InterceptorChain;
@@ -21,7 +18,6 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import java.util.Deque;
 import java.util.LinkedList;
 
-import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 
 import org.junit.Before;
@@ -32,7 +28,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AuditInterceptorTest {
+public class LocalAuditInterceptorTest {
 
     private static final int AUDIT_PRIORITY = 2000;
 
@@ -43,30 +39,26 @@ public class AuditInterceptorTest {
     private JsonEnvelope outputEnvelope;
 
     @InjectMocks
-    private AuditInterceptor auditInterceptor;
+    private LocalAuditInterceptor localAuditInterceptor;
 
     @Mock
     private AuditService auditService;
 
     private InterceptorChain interceptorChain;
-    private InjectionPoint adaptorCommandLocal;
-    private InjectionPoint adaptorCommandRemote;
 
     @Before
     public void setup() throws Exception {
         final Deque<Interceptor> interceptors = new LinkedList<>();
-        interceptors.add(auditInterceptor);
+        interceptors.add(localAuditInterceptor);
 
         final Target target = context -> copyWithOutput(context, outputEnvelope);
 
         interceptorChain = new InterceptorChain(interceptors, target);
-        adaptorCommandLocal = injectionPointWithMemberAsFirstMethodOf(TestCommandLocal.class);
-        adaptorCommandRemote = injectionPointWithMemberAsFirstMethodOf(TestCommandRemote.class);
     }
 
     @Test
     public void shouldApplyAccessControlToInputIfLocalComponent() throws Exception {
-        final InterceptorContext inputContext = interceptorContextWithInput(inputEnvelope, adaptorCommandLocal);
+        final InterceptorContext inputContext = interceptorContextWithInput(inputEnvelope);
 
         interceptorChain.processNext(inputContext);
 
@@ -75,17 +67,8 @@ public class AuditInterceptorTest {
     }
 
     @Test
-    public void shouldNotApplyAccessControlToInputIfRemoteComponent() throws Exception {
-        final InterceptorContext inputContext = interceptorContextWithInput(inputEnvelope, adaptorCommandRemote);
-
-        interceptorChain.processNext(inputContext);
-
-        verifyZeroInteractions(auditService);
-    }
-
-    @Test
     public void shouldReturnAccessControlPriority() throws Exception {
-        assertThat(auditInterceptor.priority(), is(AUDIT_PRIORITY));
+        assertThat(localAuditInterceptor.priority(), is(AUDIT_PRIORITY));
     }
 
     @Adapter(COMMAND_API)

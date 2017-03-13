@@ -11,8 +11,6 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.Optional;
 
-import javax.enterprise.inject.spi.InjectionPoint;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -24,16 +22,12 @@ public class InterceptorContextTest {
     @Mock
     private JsonEnvelope input;
 
-    @Mock
-    private InjectionPoint injectionPoint;
-
     @Test
     public void shouldBuildInterceptorContextWithInputAndInjectionPoint() throws Exception {
 
-        final InterceptorContext result = interceptorContextWithInput(input, injectionPoint);
+        final InterceptorContext result = interceptorContextWithInput(input);
 
         assertThat(result.inputEnvelope(), is(input));
-        assertThat(result.injectionPoint(), is(injectionPoint));
         assertThat(result.outputEnvelope(), is(Optional.empty()));
     }
 
@@ -41,12 +35,11 @@ public class InterceptorContextTest {
     public void shouldCopyInterceptorContextWithInput() throws Exception {
 
         final JsonEnvelope expectedInput = mock(JsonEnvelope.class);
-        final InterceptorContext initialInterceptorContext = interceptorContextWithInput(input, injectionPoint);
+        final InterceptorContext initialInterceptorContext = interceptorContextWithInput(input);
 
         final InterceptorContext result = copyWithInput(initialInterceptorContext, expectedInput);
 
         assertThat(result.inputEnvelope(), is(expectedInput));
-        assertThat(result.injectionPoint(), is(injectionPoint));
         assertThat(result.outputEnvelope(), is(Optional.empty()));
     }
 
@@ -54,12 +47,11 @@ public class InterceptorContextTest {
     public void shouldCopyInterceptorContextWithOutput() throws Exception {
 
         final JsonEnvelope output = mock(JsonEnvelope.class);
-        final InterceptorContext initialInterceptorContext = interceptorContextWithInput(input, injectionPoint);
+        final InterceptorContext initialInterceptorContext = interceptorContextWithInput(input);
 
         final InterceptorContext result = copyWithOutput(initialInterceptorContext, output);
 
         assertThat(result.inputEnvelope(), is(input));
-        assertThat(result.injectionPoint(), is(injectionPoint));
         assertThat(result.outputEnvelope(), is(Optional.of(output)));
     }
 
@@ -67,7 +59,7 @@ public class InterceptorContextTest {
     public void shouldSetAndRetrieveInputParameter() throws Exception {
 
         final Object parameter = mock(Object.class);
-        final InterceptorContext interceptorContext = interceptorContextWithInput(input, injectionPoint);
+        final InterceptorContext interceptorContext = interceptorContextWithInput(input);
 
         interceptorContext.setInputParameter("test", parameter);
 
@@ -78,7 +70,7 @@ public class InterceptorContextTest {
     public void shouldSetAndRetrieveOutputParameter() throws Exception {
 
         final Object parameter = mock(Object.class);
-        final InterceptorContext interceptorContext = interceptorContextWithInput(input, injectionPoint);
+        final InterceptorContext interceptorContext = interceptorContextWithInput(input);
 
         interceptorContext.setOutputParameter("test", parameter);
 
@@ -87,6 +79,6 @@ public class InterceptorContextTest {
 
     @Test(expected = IllegalStateException.class)
     public void shouldThrowExceptionIfInputNotSet() throws Exception {
-        interceptorContextWithInput(null, injectionPoint).inputEnvelope();
+        interceptorContextWithInput(null).inputEnvelope();
     }
 }

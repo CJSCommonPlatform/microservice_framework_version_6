@@ -4,6 +4,7 @@ import static java.lang.Integer.MAX_VALUE;
 import static java.lang.System.currentTimeMillis;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
@@ -43,8 +44,8 @@ public class RetryInterceptorTest {
     @Test
     public void shouldRetryIfExceptionThrownByDispatcher() throws Exception {
         final InterceptorContext currentContext = interceptorContextWithInput(
-                envelope().with(metadataWithRandomUUID("nameABC")).build(), null);
-        final InterceptorContext nextInChain = interceptorContextWithInput(null, null);
+                envelope().with(metadataWithRandomUUID("nameABC")).build());
+        final InterceptorContext nextInChain = interceptorContextWithInput(mock(JsonEnvelope.class));
 
         when(interceptorChain.processNext(currentContext))
                 .thenThrow(new OptimisticLockingRetryException("Locking Error"))
@@ -63,8 +64,7 @@ public class RetryInterceptorTest {
         final JsonEnvelope envelope = envelope().with(metadataWithRandomUUID("nameABC")
                 .withStreamId(streamId))
                 .build();
-        final InterceptorContext currentContext = interceptorContextWithInput(
-                envelope, null);
+        final InterceptorContext currentContext = interceptorContextWithInput(envelope);
 
         when(interceptorChain.processNext(currentContext))
                 .thenThrow(new OptimisticLockingRetryException("Locking Error"));
@@ -82,8 +82,8 @@ public class RetryInterceptorTest {
     @Test
     public void shouldRetryStraightAwayForThreeAttemptsThenWaitBeforeRetry() throws Exception {
         final InterceptorContext currentContext = interceptorContextWithInput(
-                envelope().with(metadataWithRandomUUID("nameABC")).build(), null);
-        final InterceptorContext nextInChain = interceptorContextWithInput(null, null);
+                envelope().with(metadataWithRandomUUID("nameABC")).build());
+        final InterceptorContext nextInChain = interceptorContextWithInput(mock(JsonEnvelope.class));
 
         when(interceptorChain.processNext(currentContext))
                 .thenThrow(new OptimisticLockingRetryException("Locking Error"))

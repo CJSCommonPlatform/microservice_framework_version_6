@@ -26,10 +26,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class RecipeServiceTest {
 
-    public static final String NAME = "name";
+    private static final String NAME = "name";
     private static final UUID USER_ID = UUID.randomUUID();
     private static final UUID NON_EXISTENT_ID = UUID.randomUUID();
     private static final boolean GLUTEN_FREE = true;
+    private static final UUID PHOTO_ID = UUID.randomUUID();
     @InjectMocks
     private RecipeService service;
 
@@ -38,7 +39,7 @@ public class RecipeServiceTest {
 
     @Test
     public void shouldReturnRecipeById() {
-        given(recipeRepository.findBy(USER_ID)).willReturn(new Recipe(USER_ID, NAME, GLUTEN_FREE));
+        given(recipeRepository.findBy(USER_ID)).willReturn(new Recipe(USER_ID, NAME, GLUTEN_FREE, PHOTO_ID));
 
         RecipeView foundPerson = service.findRecipe(USER_ID.toString());
 
@@ -58,7 +59,7 @@ public class RecipeServiceTest {
         Optional<String> nameQueryParam = Optional.of("name123");
         Optional<Boolean> glutenFreeQueryParam = Optional.of(false);
         given(recipeRepository.findBy(pageSize, nameQueryParam, glutenFreeQueryParam))
-                .willReturn(singletonList(new Recipe(USER_ID, NAME, GLUTEN_FREE)));
+                .willReturn(singletonList(new Recipe(USER_ID, NAME, GLUTEN_FREE, PHOTO_ID)));
         RecipesView recipes = service.getRecipes(pageSize, nameQueryParam, glutenFreeQueryParam);
 
         List<RecipeView> firstRecipe = recipes.getRecipes();
@@ -76,7 +77,7 @@ public class RecipeServiceTest {
         Optional<Boolean> glutenFreeQueryParam = Optional.empty();
 
         given(recipeRepository.findBy(pageSize, nameQueryParam, glutenFreeQueryParam))
-                .willReturn(singletonList(new Recipe(USER_ID, NAME, GLUTEN_FREE)));
+                .willReturn(singletonList(new Recipe(USER_ID, NAME, GLUTEN_FREE, PHOTO_ID)));
 
         RecipesView recipes = service.getRecipes(pageSize, nameQueryParam, glutenFreeQueryParam);
 

@@ -26,6 +26,7 @@ public class RecipeEventListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipeEventListener.class);
     private static final String FIELD_RECIPE_ID = "recipeId";
+    private static final String FIELD_PHOTO_ID = "photoId";
 
     @Inject
     JsonObjectToObjectConverter jsonObjectConverter;
@@ -85,4 +86,17 @@ public class RecipeEventListener {
         LOGGER.trace("=============> Found remove-recipe Event Listener. RecipeId: " + recipeFound);
         recipeRepository.remove(recipeFound);
     }
+
+    @Handles("example.recipe-photograph-added")
+    public void recipePhotographAdded(final JsonEnvelope event) {
+
+        final String recipeId = event.payloadAsJsonObject().getString(FIELD_RECIPE_ID);
+        final String photoId = event.payloadAsJsonObject().getString(FIELD_PHOTO_ID);
+        LOGGER.trace("=============> Inside recipe-photograph-added Event Listener. RecipeId: " + recipeId);
+
+        final Recipe recipe = recipeRepository.findBy(UUID.fromString(recipeId));
+        recipe.setPhotoId(UUID.fromString(photoId));
+        recipeRepository.save(recipe);
+    }
+
 }

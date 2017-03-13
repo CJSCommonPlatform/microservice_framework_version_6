@@ -29,4 +29,9 @@ public class RecipeCommandApi {
     public void removeRecipe(final JsonEnvelope command) {
         sender.send(command);
     }
+
+    @Handles("example.upload-photograph")
+    public void uploadPhotograph(final JsonEnvelope command) {
+        sender.send(command);
+    }
 }

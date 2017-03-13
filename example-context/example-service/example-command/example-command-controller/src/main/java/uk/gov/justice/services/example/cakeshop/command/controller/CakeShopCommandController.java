@@ -52,4 +52,10 @@ public class CakeShopCommandController {
         LOGGER.trace("=============> Inside rename-recipe Command Controller Handler");
         sender.send(command);
     }
+
+    @Handles("example.upload-photograph")
+    public void uploadPhotograph(final JsonEnvelope command) {
+        LOGGER.trace("=============> Inside upload-photograph Command Controller Handler");
+        sender.send(command);
+    }
 }

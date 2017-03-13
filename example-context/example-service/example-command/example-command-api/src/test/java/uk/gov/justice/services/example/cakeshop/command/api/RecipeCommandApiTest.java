@@ -22,6 +22,9 @@ public class RecipeCommandApiTest {
                 .with(method("removeRecipe")
                         .thatHandles("example.remove-recipe")
                         .withSenderPassThrough())
+                .with(method("uploadPhotograph")
+                        .thatHandles("example.upload-photograph")
+                        .withSenderPassThrough())
         );
     }
 }

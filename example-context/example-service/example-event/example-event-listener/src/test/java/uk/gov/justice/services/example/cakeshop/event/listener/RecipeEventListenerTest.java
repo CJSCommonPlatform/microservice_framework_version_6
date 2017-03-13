@@ -126,4 +126,19 @@ public class RecipeEventListenerTest {
 
         verify(recipeRepository).remove(recipe);
     }
+
+    @Test
+    public void shouldHandlePhotographAddedEvent() throws Exception {
+        final UUID recipeId = randomUUID();
+        final UUID photoId = randomUUID();
+
+        when(envelope.payloadAsJsonObject().getString("recipeId")).thenReturn(recipeId.toString());
+        when(envelope.payloadAsJsonObject().getString("photoId")).thenReturn(photoId.toString());
+        when(recipeRepository.findBy(UUID.fromString(recipeId.toString()))).thenReturn(recipe);
+
+        recipeEventListener.recipePhotographAdded(envelope);
+
+        verify(recipe).setPhotoId(photoId);
+        verify(recipeRepository).save(recipe);
+    }
 }

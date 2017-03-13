@@ -29,6 +29,9 @@ public class CakeShopCommandControllerTest {
                                 .withSenderPassThrough(),
                         method("orderCake")
                                 .thatHandles("example.order-cake")
+                                .withSenderPassThrough(),
+                        method("uploadPhotograph")
+                                .thatHandles("example.upload-photograph")
                                 .withSenderPassThrough()
                 )));
     }

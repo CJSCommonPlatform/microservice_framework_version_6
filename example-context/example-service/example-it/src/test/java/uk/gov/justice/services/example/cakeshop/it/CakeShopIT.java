@@ -1,5 +1,6 @@
 package uk.gov.justice.services.example.cakeshop.it;
 
+import static com.google.common.io.Resources.getResource;
 import static com.jayway.awaitility.Awaitility.await;
 import static com.jayway.jsonassert.JsonAssert.emptyCollection;
 import static com.jayway.jsonassert.JsonAssert.with;
@@ -12,6 +13,9 @@ import static java.util.stream.Collectors.toList;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.client.Entity.entity;
+import static org.apache.http.entity.ContentType.APPLICATION_JSON;
+import static org.apache.http.entity.ContentType.APPLICATION_OCTET_STREAM;
+import static org.apache.http.entity.mime.HttpMultipartMode.BROWSER_COMPATIBLE;
 import static org.exparity.hamcrest.date.ZonedDateTimeMatchers.within;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -38,6 +42,7 @@ import uk.gov.justice.services.example.cakeshop.it.util.StandaloneStreamStatusJd
 import uk.gov.justice.services.example.cakeshop.it.util.TestProperties;
 import uk.gov.justice.services.test.utils.core.http.HttpResponsePoller;
 
+import java.io.File;
 import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -56,6 +61,7 @@ import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
+import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.sql.DataSource;
 import javax.ws.rs.client.Client;
@@ -68,8 +74,12 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -130,9 +140,13 @@ public class CakeShopIT {
         final DataSource eventStoreDataSource = initEventStoreDb();
         EVENT_LOG_REPOSITORY = new StandaloneEventLogJdbcRepository(eventStoreDataSource);
         JMS_CONNECTION_FACTORY = new ActiveMQConnectionFactory(JMS_BROKER_URL);
+
         final DataSource viewStoreDatasource = initViewStoreDb();
         STREAM_STATUS_REPOSITORY = new StandaloneStreamStatusJdbcRepository(viewStoreDatasource);
         SNAPSHOT_REPOSITORY = new StandaloneSnapshotJdbcRepository(eventStoreDataSource);
+
+        initFileServiceDb();
+
         Thread.sleep(300);
     }
 
@@ -662,6 +676,42 @@ public class CakeShopIT {
                 .assertEquals("$.ovens[1].name", "Large Oven");
     }
 
+    @Test
+    public void shouldReturnAcceptedStatusAndCreatEventWhenPostingPhotographToMultipartEndpoint() throws Exception {
+
+        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526f22";
+        final String fieldName = "photoId";
+        final String filename = "croydon.jpg";
+        final File file = new File(getResource(filename).getFile());
+
+        addRecipe(recipeId, "Cheesy cheese cake");
+
+        await().until(() -> queryForRecipe(recipeId).httpCode() == OK);
+
+        final HttpEntity httpEntity = MultipartEntityBuilder.create()
+                .setMode(BROWSER_COMPATIBLE)
+                .addBinaryBody(fieldName, file, APPLICATION_OCTET_STREAM, filename)
+                .build();
+
+        final HttpPost request = new HttpPost(RECIPES_RESOURCE_URI + recipeId + "/photograph");
+        request.setEntity(httpEntity);
+
+        final HttpResponse response = HttpClients.createDefault().execute(request);
+
+        assertThat(response.getStatusLine().getStatusCode(), is(ACCEPTED));
+
+        await().until(() -> eventsWithPayloadContaining(recipeId).size() == 2);
+
+        final EventLog event = eventsWithPayloadContaining(recipeId).get(1);
+        assertThat(event.getName(), is("example.recipe-photograph-added"));
+        with(event.getMetadata())
+                .assertEquals("stream.id", recipeId)
+                .assertEquals("stream.version", 2);
+        with(event.getPayload())
+                .assertThat("$.recipeId", equalTo(recipeId))
+                .assertThat("$.photoId", notNullValue());
+    }
+
     private void tweakRecipeSnapshotName(final String recipeId, final String newRecipeName) throws AggregateChangeDetectedException {
         final AggregateSnapshot<Recipe> recipeAggregateSnapshot = recipeAggregateSnapshotOf(recipeId).get();
         final Recipe recipe = recipeAggregateSnapshot.getAggregate(new DefaultObjectInputStreamStrategy());
@@ -721,6 +771,11 @@ public class CakeShopIT {
     private static DataSource initEventStoreDb() throws Exception {
         return initDatabase("db.eventstore.url", "db.eventstore.userName",
                 "db.eventstore.password", "liquibase/event-store-db-changelog.xml", "liquibase/snapshot-store-db-changelog.xml");
+    }
+
+    private static DataSource initFileServiceDb() throws Exception {
+        return initDatabase("db.fileservice.url", "db.fileservice.userName",
+                "db.fileservice.password", "liquibase/file-service-liquibase-db-changelog.xml");
     }
 
     private void closeCakeShopDb() throws SQLException {
@@ -798,12 +853,6 @@ public class CakeShopIT {
             liquibase.update("");
         }
         return dataSource;
-    }
-
-    private String makeCakeCommand() {
-        return jsonObject()
-                .add("recipeId", "163af847-effb-46a9-96bc-32a0f7526f99")
-                .build().toString();
     }
 
     private JsonObjectBuilder jsonObject() {

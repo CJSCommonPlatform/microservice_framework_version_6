@@ -31,6 +31,7 @@ import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.Tolerance;
 import uk.gov.justice.services.example.cakeshop.domain.aggregate.Recipe;
 import uk.gov.justice.services.example.cakeshop.domain.event.RecipeAdded;
+import uk.gov.justice.services.example.cakeshop.domain.event.RecipePhotographAdded;
 import uk.gov.justice.services.example.cakeshop.domain.event.RecipeRemoved;
 import uk.gov.justice.services.example.cakeshop.domain.event.RecipeRenamed;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -53,7 +54,10 @@ public class RecipeCommandHandlerTest {
     private static final String RENAME_RECIPE_EVENT_NAME = "example.recipe-renamed";
     private static final String REMOVE_RECIPE_COMMAND_NAME = "example.remove-recipe";
     private static final String REMOVE_RECIPE_EVENT_NAME = "example.recipe-removed";
+    private static final String RECIPE_PHOTOGRAPH_ADDED_EVENT_NAME = "example.recipe-photograph-added";
+
     private static final UUID RECIPE_ID = randomUUID();
+    private static final UUID PHOTO_ID = randomUUID();
     private static final String RECIPE_NAME = "Test Recipe";
     private static final Boolean GULTEN_FREE = true;
 
@@ -67,7 +71,7 @@ public class RecipeCommandHandlerTest {
     private AggregateService aggregateService;
 
     @Spy
-    private Enveloper enveloper = createEnveloperWithEvents(RecipeAdded.class, RecipeRenamed.class, RecipeRemoved.class);
+    private Enveloper enveloper = createEnveloperWithEvents(RecipeAdded.class, RecipeRenamed.class, RecipeRemoved.class, RecipePhotographAdded.class);
 
     @InjectMocks
     private RecipeCommandHandler recipeCommandHandler;
@@ -170,6 +174,36 @@ public class RecipeCommandHandlerTest {
                                 ))
                                 .thatMatchesSchema()
                 )));
+
+    }
+
+    @Test
+    public void shouldHandleUploadPhotographCommand() throws Exception {
+        final UUID commandId = randomUUID();
+
+        final JsonEnvelope command = envelopeFrom(
+                metadataOf(commandId, "example.upload-photograph"),
+                createObjectBuilder()
+                        .add("recipeId", RECIPE_ID.toString())
+                        .add("photoId", PHOTO_ID.toString())
+                        .build());
+
+        when(eventSource.getStreamById(RECIPE_ID)).thenReturn(eventStream);
+        when(aggregateService.get(eventStream, Recipe.class)).thenReturn(existingRecipe());
+
+        recipeCommandHandler.uploadPhotograph(command);
+
+        verify(eventStream).append(
+                argThat(streamContaining(
+                        jsonEnvelope(
+                                withMetadataEnvelopedFrom(command)
+                                        .withName(RECIPE_PHOTOGRAPH_ADDED_EVENT_NAME),
+                                payloadIsJson(allOf(
+                                        withJsonPath("$.recipeId", equalTo(RECIPE_ID.toString())),
+                                        withJsonPath("$.photoId", equalTo(PHOTO_ID.toString()))
+                                )))
+                                .thatMatchesSchema()
+                )), eq(Tolerance.NON_CONSECUTIVE));
 
     }
 

@@ -139,6 +139,6 @@ public class RecipeRepositoryTest extends BaseTransactionalTest {
     }
 
     private Recipe createRecipe(final UUID id, final String name, final boolean glutenFree) {
-        return new Recipe(id, name, glutenFree);
+        return new Recipe(id, name, glutenFree, null);
     }
 }

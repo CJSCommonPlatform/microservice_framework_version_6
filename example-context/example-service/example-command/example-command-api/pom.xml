@@ -101,6 +101,11 @@
             <artifactId>javaee-api</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.utils</groupId>
+            <artifactId>utilities-file</artifactId>
+            <version>${file.service.version}</version>
+        </dependency>
 
         <!-- Test Dependencies -->
         <dependency>

@@ -29,7 +29,8 @@
         </dependency>
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
-            <artifactId>file-service-persistence</artifactId>
+            <artifactId>file-service-persistence-core</artifactId>
+            <version>${file.service.version}</version>
         </dependency>
 
         <!--Test dependencies-->

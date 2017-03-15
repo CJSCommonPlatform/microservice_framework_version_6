@@ -6,6 +6,8 @@ import java.util.Map;
 public class GeneratorPropertiesBuilder {
 
     private static final String SERVICE_COMPONENT_KEY = "serviceComponent";
+    private static final String CUSTOM_MDB_POOL = "customMDBPool";
+
     private final Map<String, String> properties = new HashMap<>();
 
     public static GeneratorPropertiesBuilder generatorProperties() {
@@ -22,6 +24,12 @@ public class GeneratorPropertiesBuilder {
         properties.put(SERVICE_COMPONENT_KEY, "COMMAND_API");
         return this;
     }
+
+    public GeneratorPropertiesBuilder withCustomMDBPool() {
+        properties.put(CUSTOM_MDB_POOL, "TRUE");
+        return this;
+    }
+
 
     public Map<String, String> build() {
         return properties;

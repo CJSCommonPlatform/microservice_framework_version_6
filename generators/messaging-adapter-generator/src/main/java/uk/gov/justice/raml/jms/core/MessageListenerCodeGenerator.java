@@ -10,6 +10,7 @@ import static uk.gov.justice.raml.jms.core.MediaTypesUtil.containsGeneralJsonMim
 import static uk.gov.justice.raml.jms.core.MediaTypesUtil.mediaTypesFrom;
 import static uk.gov.justice.services.generators.commons.helper.Names.namesListStringFrom;
 
+import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.raml.jms.uri.BaseUri;
 import uk.gov.justice.services.adapter.messaging.JmsLoggerMetadataInterceptor;
 import uk.gov.justice.services.adapter.messaging.JmsProcessor;
@@ -38,6 +39,7 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
+import org.jboss.ejb3.annotation.Pool;
 import org.raml.model.Action;
 import org.raml.model.ActionType;
 import org.raml.model.Resource;
@@ -64,6 +66,8 @@ class MessageListenerCodeGenerator {
     private static final String CLIENT_ID = "clientId";
     private static final String SUBSCRIPTION_NAME = "subscriptionName";
     private static final String SHARE_SUBSCRIPTIONS = "shareSubscriptions";
+    private static final String CUSTOM_MDB_POOL_CONFIG_PROPERTY = "customMDBPool";
+    private static final String TRUE = "TRUE";
 
     private final ComponentDestinationType componentDestinationType = new ComponentDestinationType();
 
@@ -74,8 +78,8 @@ class MessageListenerCodeGenerator {
      * @param baseUri  the base URI
      * @return the message listener class specification
      */
-    TypeSpec generatedCodeFor(final Resource resource, final BaseUri baseUri, final boolean listenToAllMessages) {
-        return classSpecFrom(resource, baseUri, listenToAllMessages)
+    TypeSpec generatedCodeFor(final Resource resource, final BaseUri baseUri, final boolean listenToAllMessages, final GeneratorConfig configuration) {
+        return classSpecFrom(resource, baseUri, listenToAllMessages, configuration)
                 .addMethod(generateOnMessageMethod())
                 .build();
     }
@@ -83,11 +87,15 @@ class MessageListenerCodeGenerator {
     /**
      * Generate the @link MessageListener} class implementation.
      *
-     * @param resource the resource definition this listener is being generated for
-     * @param baseUri  the base URI
+     * @param resource               the resource definition this listener is being generated for
+     * @param baseUri                the base URI
+     * @param generatorConfiguration generator generatorConfiguration
      * @return the {@link TypeSpec.Builder} that defines the class
      */
-    private TypeSpec.Builder classSpecFrom(final Resource resource, final BaseUri baseUri, final boolean listenToAllMessages) {
+    private TypeSpec.Builder classSpecFrom(final Resource resource,
+                                           final BaseUri baseUri,
+                                           final boolean listenToAllMessages,
+                                           final GeneratorConfig generatorConfiguration) {
         final MessagingResourceUri resourceUri = new MessagingResourceUri(resource.getUri());
         final String component = componentOf(baseUri);
 
@@ -111,7 +119,18 @@ class MessageListenerCodeGenerator {
                             .build())
                     .addAnnotation(messageDrivenAnnotation(component, resource.getActions(), resourceUri, baseUri, listenToAllMessages));
 
-            addLoggerAndSchemaInterceptorsIfNotGeneralJsonMimeType(resource, typeSpecBuilder);
+            if (!containsGeneralJsonMimeType(resource.getActions())) {
+                typeSpecBuilder.addAnnotation(AnnotationSpec.builder(Interceptors.class)
+                        .addMember(DEFAULT_ANNOTATION_PARAMETER, "$T.class", JmsLoggerMetadataInterceptor.class)
+                        .addMember(DEFAULT_ANNOTATION_PARAMETER, "$T.class", JsonSchemaValidationInterceptor.class)
+                        .build());
+            }
+
+            if (shouldAddCustomPoolConfiguration(generatorConfiguration)) {
+                typeSpecBuilder.addAnnotation(AnnotationSpec.builder(Pool.class)
+                        .addMember(DEFAULT_ANNOTATION_PARAMETER, "$S", poolNameFrom(resourceUri, component))
+                        .build());
+            }
 
             return typeSpecBuilder;
         }
@@ -119,13 +138,12 @@ class MessageListenerCodeGenerator {
         throw new IllegalStateException(format("JMS Endpoint generation is unsupported for framework component type %s", component));
     }
 
-    private void addLoggerAndSchemaInterceptorsIfNotGeneralJsonMimeType(final Resource resource, final TypeSpec.Builder typeSpecBuilder) {
-        if (!containsGeneralJsonMimeType(resource.getActions())) {
-            typeSpecBuilder.addAnnotation(AnnotationSpec.builder(Interceptors.class)
-                    .addMember(DEFAULT_ANNOTATION_PARAMETER, "$T.class", JmsLoggerMetadataInterceptor.class)
-                    .addMember(DEFAULT_ANNOTATION_PARAMETER, "$T.class", JsonSchemaValidationInterceptor.class)
-                    .build());
-        }
+    private String poolNameFrom(final MessagingResourceUri resourceUri, final String component) {
+        return format("%s-%s-pool", resourceUri.hyphenated(), component.toLowerCase().replace("_", "-"));
+    }
+
+    private boolean shouldAddCustomPoolConfiguration(final GeneratorConfig configuration) {
+        return TRUE.equalsIgnoreCase(configuration.getGeneratorProperties().get(CUSTOM_MDB_POOL_CONFIG_PROPERTY));
     }
 
     /**

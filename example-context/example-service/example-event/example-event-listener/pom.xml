@@ -23,7 +23,11 @@
             <artifactId>javaee-api</artifactId>
             <scope>provided</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.jboss.ejb3</groupId>
+            <artifactId>jboss-ejb3-ext-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>uk.gov.justice.services.example</groupId>
             <artifactId>example-persistence</artifactId>
@@ -56,8 +60,8 @@
 
     <build>
         <finalName>${project.artifactId}</finalName>
-
         <plugins>
+
             <plugin>
                 <groupId>uk.gov.justice.maven</groupId>
                 <artifactId>raml-maven-plugin</artifactId>
@@ -70,6 +74,9 @@
                     <includes>
                         <include>**/*.messaging.raml</include>
                     </includes>
+                    <generatorProperties>
+                        <customMDBPool>TRUE</customMDBPool>
+                    </generatorProperties>
                 </configuration>
                 <executions>
                     <execution>
@@ -93,6 +100,7 @@
                     </dependency>
                 </dependencies>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>

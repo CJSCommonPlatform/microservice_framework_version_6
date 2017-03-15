@@ -25,5 +25,15 @@ public class  MessagingResourceUriTest {
         assertThat(new MessagingResourceUri("_system$scheduling.handler_.command").toClassName(), is("_System$SchedulingHandler_Command"));
     }
 
+    @Test
+    public void shouldReturnHyphenatedStringRepresentation() {
+        assertThat(new MessagingResourceUri("/people.handler.command").hyphenated(), is("people-handler-command"));
+        assertThat(new MessagingResourceUri("/public.event").hyphenated(), is("public-event"));
+        assertThat(new MessagingResourceUri("/system-scheduling.handler.command").hyphenated(), is("system-scheduling-handler-command"));
+        assertThat(new MessagingResourceUri(" /9system-scheduling2.handler.command").hyphenated(), is("9system-scheduling2-handler-command"));
+        assertThat(new MessagingResourceUri("/systemScheduling.handler.command").hyphenated(), is("systemScheduling-handler-command"));
+
+    }
+
 
 }

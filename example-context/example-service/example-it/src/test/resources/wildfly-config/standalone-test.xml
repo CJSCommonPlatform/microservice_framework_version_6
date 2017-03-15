@@ -204,6 +204,9 @@
                     <strict-max-pool name="mdb-strict-max-pool" derive-size="from-cpu-count"
                                      instance-acquisition-timeout="5"
                                      instance-acquisition-timeout-unit="MINUTES"/>
+                    <strict-max-pool name="example-event-event-listener-pool" max-pool-size="1"
+                                     instance-acquisition-timeout="5"
+                                     instance-acquisition-timeout-unit="MINUTES"/>
                 </bean-instance-pools>
             </pools>
             <caches>

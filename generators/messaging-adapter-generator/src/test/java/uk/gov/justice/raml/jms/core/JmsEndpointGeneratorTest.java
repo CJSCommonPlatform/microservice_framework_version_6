@@ -36,6 +36,7 @@ import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
+import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.methodsOf;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.setField;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
@@ -48,6 +49,7 @@ import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
+import uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.io.File;
@@ -71,6 +73,7 @@ import org.hamcrest.CoreMatchers;
 import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
+import org.jboss.ejb3.annotation.Pool;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -748,6 +751,36 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                         propertyValue(equalTo("true")))));
     }
 
+
+    @Test
+    public void shouldCreateJmsEndpointAnnotatedWithPoolConfiguration() throws Exception {
+        generator.run(raml()
+                        .withBaseUri("message://event/listener/message/people")
+                        .with(resource()
+                                .withRelativeUri("/people.person-added")
+                                .with(httpAction(POST, "application/vnd.people.abc+json")))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withCustomMDBPool()));
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeoplePersonAddedJmsListener");
+        Pool poolAnnotation = clazz.getAnnotation(Pool.class);
+        assertThat(poolAnnotation, not(nullValue()));
+        assertThat(poolAnnotation .value(), is("people-person-added-event-listener-pool"));
+    }
+
+    @Test
+    public void shouldCreateJmsEndpointAnnotatedWithoutPoolConfiguration() throws Exception {
+        generator.run(raml()
+                        .withBaseUri("message://event/listener/message/people")
+                        .with(resource()
+                                .withRelativeUri("/people.person-added")
+                                .with(httpAction(POST, "application/vnd.people.abc+json")))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeoplePersonAddedJmsListener");
+        Pool poolAnnotation = clazz.getAnnotation(Pool.class);
+        assertThat(poolAnnotation, nullValue());
+
+    }
 
     private Object instantiate(Class<?> resourceClass) throws InstantiationException, IllegalAccessException {
         Object resourceObject = resourceClass.newInstance();

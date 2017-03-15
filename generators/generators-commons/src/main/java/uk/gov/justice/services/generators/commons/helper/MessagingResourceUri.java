@@ -17,7 +17,7 @@ public class MessagingResourceUri {
      * @return messaging destination name
      */
     public String destinationName() {
-        return stripStart(uriString, "/");
+        return stripStart(uriString.trim(), "/");
     }
 
     /**
@@ -32,6 +32,10 @@ public class MessagingResourceUri {
         return capitalize(cleaned, " _$0123456789".toCharArray())
                 .replaceAll(" ", "")
                 .replaceAll("^[0-9]+", "");
+    }
+
+    public String hyphenated() {
+        return destinationName().replaceAll("\\.", "-");
     }
 
     @Override

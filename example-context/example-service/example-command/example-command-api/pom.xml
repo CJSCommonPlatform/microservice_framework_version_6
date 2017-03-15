@@ -104,17 +104,11 @@
         <dependency>
             <groupId>uk.gov.justice.utils</groupId>
             <artifactId>utilities-file</artifactId>
-            <version>${cpp.utilities.version}</version>
+            <version>${utilities.version}</version>
         </dependency>
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
-            <artifactId>file-service-persistence-core</artifactId>
-            <version>${file.service.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>uk.gov.justice.services</groupId>
-            <artifactId>file-service-persistence-ansi</artifactId>
-            <version>${file.service.version}</version>
+            <artifactId>file-service-persistence</artifactId>
         </dependency>
 
         <!-- Test Dependencies -->

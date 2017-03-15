@@ -438,6 +438,7 @@
                 <simple name="java:global/event.buffer.init.strategy" value="uk.gov.justice.services.event.buffer.core.service.AnsiSQLBasedBufferInitialisationStrategy" type="java.lang.String"/>
                 <simple name="java:global/eventlog.insertion.strategy" value="uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy" type="java.lang.String"/>
                 <simple name="java:global/envelope.validation.exception.handler" value="uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler" type="java.lang.String"/>
+                <simple name="java:global/fileservice.metadata.sql.provider.strategy" value="uk.gov.justice.services.fileservice.repository.AnsiMetadataSqlProvider" type="java.lang.String"/>
                 <simple name="java:global/alfrescoUploadUser" value="${alfresco.upload.user}" type="java.lang.String"/>
                 <simple name="java:global/alfrescoReadUser" value="${alfresco.read.user}" type="java.lang.String"/>
                 <simple name="java:global/alfrescoBaseUri" value="http://localhost:8080/alfresco-stub" type="java.lang.String"/>

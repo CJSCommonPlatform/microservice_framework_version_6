@@ -17,6 +17,11 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ### Removed
 - Duplicate classes that are in utilities-core from the framework
+- Configuration classes that are now in utilities-core
+
+### Updated
+- Use File Service version 1.8.0
+- Use Utilities version 1.6.0
 
 ## [1.4.1] - 2017-02-13
 

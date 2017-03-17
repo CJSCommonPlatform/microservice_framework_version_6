@@ -8,11 +8,16 @@ import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonValueNullMatcher.isJsonValueNull;
 
+import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.UUID;
+
+import javax.json.JsonValue;
 
 import org.junit.Test;
 
@@ -34,6 +39,24 @@ public class JsonEnvelopeMatcherTest {
     @Test
     public void shouldMatchJsonEnvelopeWithSchema() throws Exception {
         assertThat(jsonEnvelope(), JsonEnvelopeMatcher.jsonEnvelope().thatMatchesSchema());
+    }
+
+    @Test
+    public void shouldMatchMetadataIfPayloadIsJsonValueNull() throws Exception {
+        assertThat(jsonEnvelopeWithJsonValueNullPayload(), JsonEnvelopeMatcher.jsonEnvelope()
+                .withMetadataOf(metadata().withName("event.action")));
+    }
+
+    @Test
+    public void shouldMatchPayloadIfPayloadIsJsonValueNull() throws Exception {
+        assertThat(jsonEnvelopeWithJsonValueNullPayload(), JsonEnvelopeMatcher.jsonEnvelope()
+                .withPayloadOf(payload(isJsonValueNull())));
+    }
+
+    @Test(expected = AssertionError.class)
+    public void shouldNotMatchJsonEnvelopeWithJsonObject() throws Exception {
+        assertThat(jsonEnvelope(), JsonEnvelopeMatcher.jsonEnvelope()
+                .withPayloadOf(payload(isJsonValueNull())));
     }
 
     @Test(expected = AssertionError.class)
@@ -72,5 +95,9 @@ public class JsonEnvelopeMatcherTest {
                 .withPayloadOf(ID.toString(), "someId")
                 .withPayloadOf(NAME, "name")
                 .build();
+    }
+
+    private JsonEnvelope jsonEnvelopeWithJsonValueNullPayload() {
+        return new DefaultJsonEnvelope(metadataWithRandomUUID("event.action").build(), JsonValue.NULL);
     }
 }

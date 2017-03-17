@@ -7,7 +7,7 @@ import uk.gov.justice.services.messaging.Metadata;
 
 import java.util.Optional;
 
-import javax.json.JsonObject;
+import javax.json.JsonValue;
 
 import com.jayway.jsonpath.matchers.IsJson;
 import org.hamcrest.Description;
@@ -57,6 +57,16 @@ import org.hamcrest.TypeSafeDiagnosingMatcher;
  *                                  withJsonPath("$.someId", equalTo(ID.toString())),
  *                                  withJsonPath("$.name", equalTo(NAME)))))
  *                              .thatMatchesSchema());
+ * }
+ * </pre>
+ *
+ * Where expected envelope payload is a JsonValue.NULL:
+ * <pre>
+ *  {@code
+ *         assertThat(jsonEnvelope(), JsonEnvelopeMatcher.jsonEnvelope(
+ *                              withMetadataEnvelopedFrom(commandJsonEnvelope)
+ *                                  .withName("event.action"),
+ *                              .withPayloadOf(payloadIsJsonValueNull()));
  * }
  * </pre>
  *
@@ -123,16 +133,19 @@ public class JsonEnvelopeMatcher extends TypeSafeDiagnosingMatcher<JsonEnvelope>
     @Override
     protected boolean matchesSafely(final JsonEnvelope jsonEnvelope, final Description description) {
         final Metadata metadata = jsonEnvelope.metadata();
-        final JsonObject payload = jsonEnvelope.payloadAsJsonObject();
 
         if (metadataMatcher.isPresent() && !metadataMatcher.get().matches(metadata)) {
             metadataMatcher.get().describeMismatch(metadata, description);
             return false;
         }
 
-        if (payloadMatcher.isPresent() && !payloadMatcher.get().matches(payload)) {
-            payloadMatcher.get().describeMismatch(payload, description);
-            return false;
+        if (payloadMatcher.isPresent()) {
+            final JsonValue payload = jsonEnvelope.payload();
+
+            if (!payloadMatcher.get().matches(payload)) {
+                payloadMatcher.get().describeMismatch(payload, description);
+                return false;
+            }
         }
 
         if (schemaMatcher.isPresent() && !schemaMatcher.get().matches(jsonEnvelope)) {

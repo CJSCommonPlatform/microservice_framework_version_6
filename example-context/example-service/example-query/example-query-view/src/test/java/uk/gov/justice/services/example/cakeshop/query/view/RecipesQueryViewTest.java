@@ -1,10 +1,11 @@
 package uk.gov.justice.services.example.cakeshop.query.view;
 
 
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_VIEW;
@@ -13,6 +14,11 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithD
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 import static uk.gov.justice.services.test.utils.core.matchers.HandlerMatcher.isHandler;
 import static uk.gov.justice.services.test.utils.core.matchers.HandlerMethodMatcher.method;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payload;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonValueNullMatcher.isJsonValueNull;
 
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.example.cakeshop.query.view.response.PhotoView;
@@ -23,8 +29,6 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.Optional;
 import java.util.UUID;
-
-import javax.json.JsonArray;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -67,9 +71,12 @@ public class RecipesQueryViewTest {
                 envelope().with(metadataWithDefaults())
                         .withPayloadOf(recipeId.toString(), "recipeId").build());
 
-        assertThat(response.payloadAsJsonObject().getString("id"), is(recipeId.toString()));
-        assertThat(response.payloadAsJsonObject().getString("name"), is(recipeName));
-
+        assertThat(response, jsonEnvelope(
+                metadata(),
+                payloadIsJson(allOf(
+                        withJsonPath("$.id", equalTo(recipeId.toString())),
+                        withJsonPath("$.name", equalTo(recipeName))
+                ))));
     }
 
     @Test
@@ -79,8 +86,8 @@ public class RecipesQueryViewTest {
                 envelope().with(metadataWithDefaults())
                         .withPayloadOf("123", "recipeId").build());
 
-        assertThat(response.metadata().name(), is("example.get-recipe"));
-
+        assertThat(response, jsonEnvelope()
+                .withMetadataOf(metadata().withName("example.get-recipe")));
     }
 
     @Test
@@ -98,13 +105,14 @@ public class RecipesQueryViewTest {
         final JsonEnvelope response = queryView.listRecipes(envelope().with(metadataWithDefaults())
                 .withPayloadOf(pageSize, "pagesize").build());
 
-        final JsonArray recipesArray = response.payloadAsJsonObject().getJsonArray("recipes");
-        assertThat(recipesArray.getJsonObject(0).getString("id"), is(recipeId.toString()));
-        assertThat(recipesArray.getJsonObject(0).getString("name"), is(recipeName));
-
-        assertThat(recipesArray.getJsonObject(1).getString("id"), is(recipeId2.toString()));
-        assertThat(recipesArray.getJsonObject(1).getString("name"), is(recipeName2));
-
+        assertThat(response, jsonEnvelope(
+                metadata(),
+                payloadIsJson(allOf(
+                        withJsonPath("$.recipes[0].id", equalTo(recipeId.toString())),
+                        withJsonPath("$.recipes[0].name", equalTo(recipeName)),
+                        withJsonPath("$.recipes[1].id", equalTo(recipeId2.toString())),
+                        withJsonPath("$.recipes[1].name", equalTo(recipeName2))
+                ))));
     }
 
     @Test
@@ -125,10 +133,12 @@ public class RecipesQueryViewTest {
                         .withPayloadOf(nameUsedInQuery, "name")
                         .build());
 
-        final JsonArray recipesArray = response.payloadAsJsonObject().getJsonArray("recipes");
-        assertThat(recipesArray.getJsonObject(0).getString("id"), is(recipeId.toString()));
-        assertThat(recipesArray.getJsonObject(0).getString("name"), is(recipeName));
-
+        assertThat(response, jsonEnvelope(
+                metadata(),
+                payloadIsJson(allOf(
+                        withJsonPath("$.recipes[0].id", equalTo(recipeId.toString())),
+                        withJsonPath("$.recipes[0].name", equalTo(recipeName))
+                ))));
     }
 
 
@@ -150,11 +160,13 @@ public class RecipesQueryViewTest {
                         .withPayloadOf(glutenFree, "glutenFree")
                         .build());
 
-        final JsonArray recipesArray = response.payloadAsJsonObject().getJsonArray("recipes");
-        assertThat(recipesArray.getJsonObject(0).getString("id"), is(recipeId.toString()));
-        assertThat(recipesArray.getJsonObject(0).getString("name"), is(recipeName));
-        assertThat(recipesArray.getJsonObject(0).getBoolean("glutenFree"), is(glutenFree));
-
+        assertThat(response, jsonEnvelope(
+                metadata(),
+                payloadIsJson(allOf(
+                        withJsonPath("$.recipes[0].id", equalTo(recipeId.toString())),
+                        withJsonPath("$.recipes[0].name", equalTo(recipeName)),
+                        withJsonPath("$.recipes[0].glutenFree", equalTo(glutenFree))
+                ))));
     }
 
     @Test
@@ -164,8 +176,8 @@ public class RecipesQueryViewTest {
                 envelope().with(metadataWithDefaults())
                         .withPayloadOf(1, "pagesize").build());
 
-        assertThat(response.metadata().name(), is("example.search-recipes"));
-
+        assertThat(response, jsonEnvelope()
+                .withMetadataOf(metadata().withName("example.search-recipes")));
     }
 
     @Test
@@ -186,11 +198,13 @@ public class RecipesQueryViewTest {
                         .withPayloadOf(glutenFree, "glutenFree")
                         .build());
 
-        final JsonArray recipesArray = response.payloadAsJsonObject().getJsonArray("recipes");
-        assertThat(recipesArray.getJsonObject(0).getString("id"), is(recipeId.toString()));
-        assertThat(recipesArray.getJsonObject(0).getString("name"), is(recipeName));
-        assertThat(recipesArray.getJsonObject(0).getBoolean("glutenFree"), is(glutenFree));
-
+        assertThat(response, jsonEnvelope(
+                metadata(),
+                payloadIsJson(allOf(
+                        withJsonPath("$.recipes[0].id", equalTo(recipeId.toString())),
+                        withJsonPath("$.recipes[0].name", equalTo(recipeName)),
+                        withJsonPath("$.recipes[0].glutenFree", equalTo(glutenFree))
+                ))));
     }
 
     @Test
@@ -207,9 +221,28 @@ public class RecipesQueryViewTest {
                         .withPayloadOf(recipeId.toString(), "recipeId")
                         .build());
 
-        assertThat(response.metadata().name(), is("example.get-recipe-photograph"));
-        assertThat(response.payloadAsJsonObject().getString("fileId"), is(fileId.toString()));
+        assertThat(response, jsonEnvelope(
+                metadata().withName("example.get-recipe-photograph"),
+                payloadIsJson(withJsonPath("$.fileId", equalTo(fileId.toString())))
+        ));
+    }
 
+    @Test
+    public void shouldReturnJsonValueNullIfNullPhotoId() {
+
+        final UUID recipeId = UUID.randomUUID();
+
+        when(service.findRecipePhoto(recipeId.toString())).thenReturn(null);
+
+        final JsonEnvelope response = queryView.findRecipePhoto(
+                envelope()
+                        .with(metadataWithDefaults())
+                        .withPayloadOf(recipeId.toString(), "recipeId")
+                        .build());
+
+        assertThat(response, jsonEnvelope(
+                metadata().withName("example.get-recipe-photograph"),
+                payload(isJsonValueNull())));
     }
 
 }

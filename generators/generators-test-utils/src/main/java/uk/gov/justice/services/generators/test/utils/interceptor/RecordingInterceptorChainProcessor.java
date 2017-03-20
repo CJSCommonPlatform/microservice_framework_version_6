@@ -10,6 +10,8 @@ import java.util.Optional;
 
 import javax.inject.Singleton;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 @Singleton
 public class RecordingInterceptorChainProcessor extends EnvelopeRecorder implements InterceptorChainProcessor {
 
@@ -22,6 +24,11 @@ public class RecordingInterceptorChainProcessor extends EnvelopeRecorder impleme
 
         record(envelope);
         return Optional.ofNullable(responseTo(envelope));
+    }
+
+    @Override
+    public Optional<JsonEnvelope> process(final JsonEnvelope jsonEnvelope) {
+        throw new NotImplementedException();
     }
 
     public void setupResponse(final String payloadElementNameCriteria, final String payloadElementValueCriteria,

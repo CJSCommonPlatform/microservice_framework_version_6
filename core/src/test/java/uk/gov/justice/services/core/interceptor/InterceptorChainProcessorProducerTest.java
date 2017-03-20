@@ -1,21 +1,14 @@
 package uk.gov.justice.services.core.interceptor;
 
-import static org.hamcrest.core.Is.is;
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
 
 import uk.gov.justice.services.core.dispatcher.Dispatcher;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-
-import java.util.LinkedList;
-import java.util.Optional;
 
 import javax.enterprise.inject.spi.InjectionPoint;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -25,12 +18,6 @@ import org.slf4j.Logger;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InterceptorChainProcessorProducerTest {
-
-    @InjectMocks
-    InterceptorChainProcessorProducer interceptorChainProcessorProducer;
-
-    @Mock
-    private JsonEnvelope inputEnvelope;
 
     @Mock
     private Dispatcher dispatcher;
@@ -47,55 +34,15 @@ public class InterceptorChainProcessorProducerTest {
     @Mock
     private InterceptorCache interceptorCache;
 
-    private InterceptorContext interceptorContext;
-
-    @Before
-    public void initInterceptorContext() {
-        interceptorContext = interceptorContextWithInput(inputEnvelope);
-    }
+    @InjectMocks
+    private InterceptorChainProcessorProducer interceptorChainProcessorProducer;
 
     @Test
     public void shouldProduceProcessorThatDispatchesAnEnvelopeAndReturnsOutputEnvelope() throws Exception {
-
-        final JsonEnvelope outputEnvelope = mock(JsonEnvelope.class);
-
         when(dispatcherCache.dispatcherFor(injectionPoint)).thenReturn(dispatcher);
-        when(interceptorCache.getInterceptors()).thenReturn(interceptors());
-        when(dispatcher.dispatch(inputEnvelope)).thenReturn(outputEnvelope);
 
-        final Optional<JsonEnvelope> result = interceptorChainProcessorProducer.produceProcessor(injectionPoint).process(interceptorContext);
+        final InterceptorChainProcessor result = interceptorChainProcessorProducer.produceProcessor(injectionPoint);
 
-        assertThat(result.get(), is(outputEnvelope));
-    }
-
-    @Test
-    public void shouldProduceProcessorThatProcessesAJsonEnvelopeAndReturnsNull() throws Exception {
-
-        when(dispatcherCache.dispatcherFor(injectionPoint)).thenReturn(dispatcher);
-        when(interceptorCache.getInterceptors()).thenReturn(interceptors());
-        when(dispatcher.dispatch(inputEnvelope)).thenReturn(null);
-
-        final Optional<JsonEnvelope> result = interceptorChainProcessorProducer.produceProcessor(injectionPoint).process(interceptorContext);
-
-        assertThat(result, is(Optional.empty()));
-    }
-
-    private LinkedList<Interceptor> interceptors() {
-        final LinkedList<Interceptor> interceptors = new LinkedList<>();
-        interceptors.add(new TestInterceptor());
-        return interceptors;
-    }
-
-    public static class TestInterceptor implements Interceptor {
-
-        @Override
-        public InterceptorContext process(final InterceptorContext interceptorContext, final InterceptorChain interceptorChain) {
-            return interceptorChain.processNext(interceptorContext);
-        }
-
-        @Override
-        public int priority() {
-            return 1000;
-        }
+        assertThat(result, instanceOf(DefaultInterceptorChainProcessor.class));
     }
 }

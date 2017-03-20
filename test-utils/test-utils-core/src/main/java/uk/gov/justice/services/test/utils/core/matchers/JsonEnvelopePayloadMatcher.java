@@ -1,9 +1,8 @@
 package uk.gov.justice.services.test.utils.core.matchers;
 
-import javax.json.JsonObject;
+import javax.json.JsonValue;
 
 import com.jayway.jsonpath.ReadContext;
-import com.jayway.jsonpath.matchers.IsJson;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
@@ -12,9 +11,9 @@ import org.hamcrest.TypeSafeDiagnosingMatcher;
  * Matches the Json Payload part of a JsonEnvelope. See {@link JsonEnvelopeMatcher} for usage
  * example.
  */
-public class JsonEnvelopePayloadMatcher extends TypeSafeDiagnosingMatcher<JsonObject> {
+public class JsonEnvelopePayloadMatcher extends TypeSafeDiagnosingMatcher<JsonValue> {
 
-    private IsJson<Object> matcher;
+    private TypeSafeDiagnosingMatcher<JsonValue> jsonValueMatcher;
 
     /**
      * Use {@link JsonEnvelopePayloadMatcher#payload} or {@link JsonEnvelopePayloadMatcher#payloadIsJson}
@@ -29,32 +28,39 @@ public class JsonEnvelopePayloadMatcher extends TypeSafeDiagnosingMatcher<JsonOb
     }
 
     public static JsonEnvelopePayloadMatcher payloadIsJson(final Matcher<? super ReadContext> matcher) {
-        return new JsonEnvelopePayloadMatcher().isJson(matcher);
+        return new JsonEnvelopePayloadMatcher().isJsonValue(JsonValueIsJsonMatcher.isJson(matcher));
+    }
+
+    public static JsonEnvelopePayloadMatcher payload(final TypeSafeDiagnosingMatcher<JsonValue> jsonValueMatcher) {
+        return new JsonEnvelopePayloadMatcher().isJsonValue(jsonValueMatcher);
     }
 
     @Override
     public void describeTo(final Description description) {
         description
                 .appendText("Payload ")
-                .appendDescriptionOf(matcher)
+                .appendDescriptionOf(jsonValueMatcher)
                 .appendText(" ");
     }
 
-    public JsonEnvelopePayloadMatcher isJson(final Matcher<? super ReadContext> matcher) {
-        this.matcher = new IsJson<>(matcher);
-        return this;
-    }
-
     @Override
-    protected boolean matchesSafely(final JsonObject jsonObject, final Description description) {
-        final String jsonAsString = jsonObject.toString();
-
-        if (!matcher.matches(jsonAsString)) {
+    protected boolean matchesSafely(final JsonValue jsonValue, final Description description) {
+        if (!jsonValueMatcher.matches(jsonValue)) {
             description.appendText("Payload ");
-            matcher.describeMismatch(jsonAsString, description);
+            jsonValueMatcher.describeMismatch(jsonValue, description);
             return false;
         }
 
         return true;
+    }
+
+    public JsonEnvelopePayloadMatcher isJsonValue(final TypeSafeDiagnosingMatcher<JsonValue> jsonValueMatcher) {
+        this.jsonValueMatcher = jsonValueMatcher;
+        return this;
+    }
+
+    public JsonEnvelopePayloadMatcher isJson(final Matcher<? super ReadContext> matcher) {
+        this.isJsonValue(JsonValueIsJsonMatcher.isJson(matcher));
+        return this;
     }
 }

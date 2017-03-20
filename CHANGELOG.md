@@ -22,6 +22,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ### Updated
 - Use File Service version 1.8.0
 - Use Utilities version 1.6.0
+- JsonEnvelopePayloadMatcher to support matching of JsonValue NULL payloads 
 
 ## [1.4.1] - 2017-02-13
 

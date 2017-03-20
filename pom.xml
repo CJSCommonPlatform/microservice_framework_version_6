@@ -50,6 +50,7 @@
 		<raml-maven-plugin.version>1.4.0</raml-maven-plugin.version>
         <file.service.version>1.8.0</file.service.version>
         <utilities.version>1.6.0</utilities.version>
+        <jboss-ejb3-ext-api.version>2.2.0.Final</jboss-ejb3-ext-api.version>
     </properties>
 
     <dependencyManagement>
@@ -76,6 +77,11 @@
                 <groupId>uk.gov.justice.utils</groupId>
                 <artifactId>utilities-core</artifactId>
                 <version>${utilities.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.ejb3</groupId>
+                <artifactId>jboss-ejb3-ext-api</artifactId>
+                <version>${jboss-ejb3-ext-api.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

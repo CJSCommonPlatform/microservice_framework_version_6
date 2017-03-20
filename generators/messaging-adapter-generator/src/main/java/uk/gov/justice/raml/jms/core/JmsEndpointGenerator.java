@@ -53,16 +53,16 @@ public class JmsEndpointGenerator implements Generator {
 
         raml.getResources().values().stream()
                 .filter(resource -> resource.getAction(POST) != null)
-                .flatMap(resource -> generatedClassesFrom(raml, resource))
+                .flatMap(resource -> generatedClassesFrom(raml, resource, configuration))
                 .forEach(generatedClass -> writeClass(configuration, configuration.getBasePackageName(), generatedClass, LOGGER));
     }
 
 
-    private Stream<? extends TypeSpec> generatedClassesFrom(final Raml raml, final Resource resource) {
+    private Stream<? extends TypeSpec> generatedClassesFrom(final Raml raml, final Resource resource, final GeneratorConfig configuration) {
         final BaseUri baseUri = new BaseUri(raml.getBaseUri());
         final boolean listenToAllMessages = shouldListenToAllMessages(resource, baseUri);
 
-        final TypeSpec messageListenerCode = messageListenerCodeGenerator.generatedCodeFor(resource, baseUri, listenToAllMessages);
+        final TypeSpec messageListenerCode = messageListenerCodeGenerator.generatedCodeFor(resource, baseUri, listenToAllMessages, configuration);
 
         return shouldGenerateEventFilter(resource, baseUri)
                 ? Stream.of(messageListenerCode, eventFilterCodeGenerator.generatedCodeFor(resource, baseUri))

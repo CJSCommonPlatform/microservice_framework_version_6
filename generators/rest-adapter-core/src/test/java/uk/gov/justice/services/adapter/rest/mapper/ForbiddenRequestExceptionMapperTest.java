@@ -7,6 +7,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
+import uk.gov.justice.services.common.exception.ForbiddenRequestException;
 import uk.gov.justice.services.core.accesscontrol.AccessControlViolationException;
 
 import javax.ws.rs.core.Response;
@@ -36,7 +37,7 @@ public class ForbiddenRequestExceptionMapperTest {
     @Test
     public void shouldReturn403ResponseForForbiddenRequestException() throws Exception {
 
-        final Response response = exceptionMapper.toResponse(new AccessControlViolationException(TEST_ERROR_MESSAGE));
+        final Response response = exceptionMapper.toResponse(new ForbiddenRequestException(TEST_ERROR_MESSAGE));
 
         assertThat(response.getStatus(), is(FORBIDDEN.getStatusCode()));
         assertThat(response.getEntity(), notNullValue());

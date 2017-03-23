@@ -4,6 +4,7 @@ import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.status;
 
+import uk.gov.justice.services.common.exception.ForbiddenRequestException;
 import uk.gov.justice.services.core.accesscontrol.AccessControlViolationException;
 
 import javax.inject.Inject;
@@ -15,13 +16,13 @@ import javax.ws.rs.ext.Provider;
 import org.slf4j.Logger;
 
 @Provider
-public class ForbiddenRequestExceptionMapper implements ExceptionMapper<AccessControlViolationException> {
+public class ForbiddenRequestExceptionMapper implements ExceptionMapper<ForbiddenRequestException> {
 
     @Inject
     Logger logger;
 
     @Override
-    public Response toResponse(final AccessControlViolationException exception) {
+    public Response toResponse(final ForbiddenRequestException exception) {
         logger.debug("Forbidden Request", exception);
 
         final JsonObjectBuilder builder = createObjectBuilder().add("error", exception.getMessage());

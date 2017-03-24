@@ -168,6 +168,7 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
         assertThat(methods, hasSize(1));
 
         final Method method = methods.get(0);
+        assertThat(method.getName(), equalTo("getSomePathRecipeIdCakeshopQueryRecipe"));
         final Handles handlesAnnotation = method.getAnnotation(Handles.class);
         assertThat(handlesAnnotation, not(nullValue()));
         assertThat(handlesAnnotation.value(), is("cakeshop.get-recipe"));
@@ -190,6 +191,7 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
 
         final Method method = methods.get(0);
         final Handles handlesAnnotation = method.getAnnotation(Handles.class);
+        assertThat(method.getName(), equalTo("postSomePathRecipeIdCakeshopCommandCreateRecipe"));
         assertThat(handlesAnnotation, not(nullValue()));
         assertThat(handlesAnnotation.value(), is("cakeshop.create-recipe"));
 
@@ -210,6 +212,7 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
         assertThat(methods, hasSize(1));
 
         final Method method = methods.get(0);
+        assertThat(method.getName(), equalTo("putSomePathRecipeIdCakeshopCommandUpdateRecipe"));
         final Handles handlesAnnotation = method.getAnnotation(Handles.class);
         assertThat(handlesAnnotation, not(nullValue()));
         assertThat(handlesAnnotation.value(), is("cakeshop.update-recipe"));
@@ -231,6 +234,7 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
         assertThat(methods, hasSize(1));
 
         final Method method = methods.get(0);
+        assertThat(method.getName(), equalTo("patchSomePathRecipeIdCakeshopCommandPatchRecipe"));
         final Handles handlesAnnotation = method.getAnnotation(Handles.class);
         assertThat(handlesAnnotation, not(nullValue()));
         assertThat(handlesAnnotation.value(), is("cakeshop.patch-recipe"));
@@ -252,6 +256,7 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
         assertThat(methods, hasSize(1));
 
         final Method method = methods.get(0);
+        assertThat(method.getName(), equalTo("deleteSomePathRecipeIdCakeshopCommandDeleteRecipe"));
         final Handles handlesAnnotation = method.getAnnotation(Handles.class);
         assertThat(handlesAnnotation, not(nullValue()));
         assertThat(handlesAnnotation.value(), is("cakeshop.delete-recipe"));
@@ -270,6 +275,7 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
 
         final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
         final Method method = firstMethodOf(clazz);
+        assertThat(method.getName(), equalTo("postSomePathRecipeIdCakeshopCommandCreateRecipe"));
         assertThat(method.getParameterCount(), is(1));
         assertThat(method.getParameters()[0].getType(), equalTo((JsonEnvelope.class)));
     }
@@ -285,8 +291,6 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
                         .withDefaultPostResource()
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-
-
     }
 
     @Test

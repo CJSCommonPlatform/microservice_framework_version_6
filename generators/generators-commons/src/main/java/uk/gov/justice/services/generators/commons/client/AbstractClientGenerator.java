@@ -13,6 +13,7 @@ import static uk.gov.justice.services.generators.commons.helper.Actions.isSuppor
 import static uk.gov.justice.services.generators.commons.helper.Actions.isSupportedActionTypeWithRequestType;
 import static uk.gov.justice.services.generators.commons.helper.Actions.isSynchronousAction;
 import static uk.gov.justice.services.generators.commons.helper.GeneratedClassWriter.writeClass;
+import static uk.gov.justice.services.generators.commons.helper.Names.buildResourceMethodNameFromVerbUriAndMimeType;
 import static uk.gov.justice.services.generators.commons.helper.Names.camelCase;
 import static uk.gov.justice.services.generators.commons.helper.Names.nameFrom;
 
@@ -97,8 +98,8 @@ public abstract class AbstractClientGenerator implements Generator {
     private MethodSpec.Builder methodOf(final Action ramlAction, final ActionMimeTypeDefinition definition, final String handlerValue) {
         final ClassName classLoggerUtils = ClassName.get(LoggerUtils.class);
 
-
-        return methodBuilder(methodNameOf(ramlAction.getType(), definition))
+        final String methodName = buildResourceMethodNameFromVerbUriAndMimeType(ramlAction, definition);
+        return methodBuilder(methodName)
                 .addModifiers(PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Handles.class)
                         .addMember("value", "$S", handlerValue)

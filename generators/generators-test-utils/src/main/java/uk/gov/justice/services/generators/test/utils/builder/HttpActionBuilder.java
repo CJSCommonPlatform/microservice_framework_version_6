@@ -11,6 +11,7 @@ import static org.raml.model.ActionType.PUT;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.defaultMapping;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.mapping;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingDescriptionBuilder.mappingDescription;
+import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.builder.ResponseBuilder.response;
 
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ import java.util.Optional;
 import org.raml.model.Action;
 import org.raml.model.ActionType;
 import org.raml.model.MimeType;
+import org.raml.model.Resource;
 import org.raml.model.Response;
 import org.raml.model.parameter.QueryParameter;
 
@@ -37,6 +39,7 @@ public class HttpActionBuilder {
     private ActionType actionType;
     private String description;
     private MappingDescriptionBuilder mappingDescription;
+    private Resource resource;
 
     public static HttpActionBuilder httpAction() {
         return new HttpActionBuilder();
@@ -196,6 +199,11 @@ public class HttpActionBuilder {
         return this;
     }
 
+    public HttpActionBuilder withResourceUri(final String uri) {
+        resource = resource().withRelativeUri(uri).build();
+        return this;
+    }
+
     public Action build() {
         final Action action = new Action();
         action.setType(actionType);
@@ -214,6 +222,10 @@ public class HttpActionBuilder {
             action.setResponses(responsesFromList);
         } else {
             action.setResponses(responseMap);
+        }
+
+        if (resource != null) {
+            action.setResource(resource);
         }
 
         action.setQueryParameters(queryParameters);

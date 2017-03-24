@@ -2,6 +2,7 @@ package uk.gov.justice.services.generators.commons.helper;
 
 
 import static net.trajano.commons.testing.UtilityClassTestUtil.assertUtilityClassWellDefined;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
@@ -22,6 +23,8 @@ import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
+import uk.gov.justice.services.generators.commons.client.ActionMimeTypeDefinition;
+import uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder;
 import uk.gov.justice.services.generators.test.utils.builder.MappingBuilder;
 
 import java.util.stream.Stream;
@@ -196,4 +199,21 @@ public class NamesTest {
 
         assertThat(Names.namesListStringFrom(mimeTypeStream, ","), is(expectedResult));
     }
+
+    @Test
+    public void shouldGenerateCorrectResourceNameForPostWithRequestMimeType() {
+        final Action action = HttpActionBuilder.defaultPostAction().withResourceUri("/some/path/{recipeId}/").build();
+        final ActionMimeTypeDefinition actionMimeTypeDefinition = ActionMimeTypeDefinition.definitionWithRequest(new MimeType("application/vnd.command.create-user+json"));
+
+        assertThat(Names.buildResourceMethodNameFromVerbUriAndMimeType(action, actionMimeTypeDefinition), equalTo("postSomePathRecipeIdCommandCreateUser"));
+    }
+
+    @Test
+    public void shouldGenerateCorrectResourceNameForGetWithResponseMimeType() {
+        final Action action = HttpActionBuilder.defaultGetAction().withResourceUri("/some/path/{recipeId}/").build();
+        final ActionMimeTypeDefinition actionMimeTypeDefinition = ActionMimeTypeDefinition.definitionWithResponse(new MimeType("application/vnd.command.create-user+json"));
+
+        assertThat(Names.buildResourceMethodNameFromVerbUriAndMimeType(action, actionMimeTypeDefinition), equalTo("getSomePathRecipeIdCommandCreateUser"));
+    }
 }
+

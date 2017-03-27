@@ -1,20 +1,28 @@
 package uk.gov.justice.services.eventsourcing.source.core;
 
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
 
 import uk.gov.justice.domain.aggregate.TestAggregate;
 import uk.gov.justice.services.eventsourcing.source.core.snapshot.SnapshotService;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.Metadata;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.hamcrest.Matchers;
+import org.hibernate.metamodel.MetadataBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,19 +50,30 @@ public class SnapshotAwareEnvelopeEventStreamTest {
 
     @Test
     public void shouldReturnStreamOfEnvelopes() throws Exception {
-        final Stream<JsonEnvelope> stream = Stream.of(envelope().build());
-        when(eventStreamManager.read(STREAM_ID)).thenReturn(stream);
+        final JsonEnvelope event = envelope().with(metadataWithDefaults().withVersion(1L)).build();
 
-        assertThat(eventStream.read(), is(stream));
+        when(eventStreamManager.read(STREAM_ID)).thenReturn(Stream.of(event));
+
+        Stream<JsonEnvelope> stream = eventStream.read();
+
+        List<JsonEnvelope> events = stream.collect(toList());
+        assertThat(events, hasSize(1));
+        assertThat(events.get(0), is(event));
     }
 
     @Test
     public void shouldReturnStreamFromVersion() throws Exception {
-        final Stream<JsonEnvelope> stream = Stream.of(envelope().build());
-        final long version = 10L;
-        when(eventStreamManager.readFrom(STREAM_ID, version)).thenReturn(stream);
 
-        assertThat(eventStream.readFrom(version), is(stream));
+        final long version = 10L;
+        final JsonEnvelope event = envelope().with(metadataWithDefaults().withVersion(1L)).build();
+
+        when(eventStreamManager.readFrom(STREAM_ID, version)).thenReturn(Stream.of(event));
+
+        Stream<JsonEnvelope> stream = eventStream.readFrom(version);
+
+        List<JsonEnvelope> events = stream.collect(toList());
+        assertThat(events, hasSize(1));
+        assertThat(events.get(0), is(event));
     }
 
     @Test

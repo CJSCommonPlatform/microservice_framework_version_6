@@ -5,9 +5,10 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
+import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.domain.aggregate.TestAggregate;
@@ -42,6 +43,7 @@ import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.EventStreamManager;
 import uk.gov.justice.services.eventsourcing.source.core.SnapshotAwareEnvelopeEventStream;
 import uk.gov.justice.services.eventsourcing.source.core.SnapshotAwareEventSource;
+import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.eventsourcing.source.core.snapshot.DefaultSnapshotService;
 import uk.gov.justice.services.eventsourcing.source.core.snapshot.DefaultSnapshotStrategy;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -179,7 +181,7 @@ public class SnapshotAwareAggregateServiceIT {
 
         final EventStream stream = eventSource.getStreamById(STREAM_ID);
 
-        rebuildAggregateAndApplyEvents(stream, SNAPSHOT_THRESHOLD);
+        appendEventsViaAggregate(SNAPSHOT_THRESHOLD);
 
         final Optional<AggregateSnapshot<TestAggregate>> snapshot = snapshotRepository.getLatestSnapshot(STREAM_ID, TestAggregate.class);
 
@@ -202,7 +204,7 @@ public class SnapshotAwareAggregateServiceIT {
 
         final EventStream stream = eventSource.getStreamById(STREAM_ID);
 
-        rebuildAggregateAndApplyEvents(stream, SNAPSHOT_THRESHOLD - 2);
+        appendEventsViaAggregate(SNAPSHOT_THRESHOLD - 2);
 
         final Optional<AggregateSnapshot<TestAggregate>> snapshot = snapshotRepository.getLatestSnapshot(STREAM_ID, TestAggregate.class);
 
@@ -218,7 +220,7 @@ public class SnapshotAwareAggregateServiceIT {
         final EventStream stream = eventSource.getStreamById(STREAM_ID);
         final Class aggregateClass = TestAggregate.class;
 
-        rebuildAggregateAndApplyEvents(stream, SNAPSHOT_THRESHOLD);
+        appendEventsViaAggregate(SNAPSHOT_THRESHOLD);
 
         final Optional<AggregateSnapshot> snapshot = snapshotRepository.getLatestSnapshot(STREAM_ID, aggregateClass);
 
@@ -226,7 +228,8 @@ public class SnapshotAwareAggregateServiceIT {
         assertThat(snapshot.isPresent(), equalTo(true));
         assertThat(snapshotRepository.snapshotCount(STREAM_ID), is(1L));
 
-        rebuildAggregateAndApplyEvents(stream, SNAPSHOT_THRESHOLD - 2);
+        final EventStream updatedStream = eventSource.getStreamById(STREAM_ID);
+        appendEventsViaAggregate(SNAPSHOT_THRESHOLD - 2);
 
         final Optional<AggregateSnapshot<TestAggregate>> snapshotChanged = snapshotRepository.getLatestSnapshot(STREAM_ID, aggregateClass);
         assertThat(snapshotChanged, IsNot.not(nullValue()));
@@ -250,7 +253,7 @@ public class SnapshotAwareAggregateServiceIT {
 
         final long initialNumberOfSnapshots = 4;
         for (int i = 0; i < initialNumberOfSnapshots; i++) {
-            rebuildAggregateAndApplyEvents(stream, SNAPSHOT_THRESHOLD);
+            appendEventsViaAggregate(SNAPSHOT_THRESHOLD);
         }
 
         final Optional<AggregateSnapshot> snapshot = snapshotRepository.getLatestSnapshot(STREAM_ID, aggregateClass);
@@ -260,7 +263,7 @@ public class SnapshotAwareAggregateServiceIT {
 
         assertThat(snapshotRepository.snapshotCount(STREAM_ID), is(initialNumberOfSnapshots));
 
-        rebuildAggregateAndApplyEvents(stream, SNAPSHOT_THRESHOLD - 2);
+        appendEventsViaAggregate(SNAPSHOT_THRESHOLD - 2);
 
 
         final Optional<AggregateSnapshot> newSnapshot = snapshotRepository.getLatestSnapshot(STREAM_ID, aggregateClass);
@@ -283,7 +286,7 @@ public class SnapshotAwareAggregateServiceIT {
         final EventStream stream = eventSource.getStreamById(STREAM_ID);
 
         TestAggregate aggregate = aggregateService.get(stream, TestAggregate.class);
-        stream.append(createEventAndApply(24, "context.eventA", aggregate));
+        stream.append(createEventAndApply(24, aggregate));
 
 
         final Optional<AggregateSnapshot<TestAggregate>> snapshot = snapshotRepository.getLatestSnapshot(STREAM_ID, TestAggregate.class);
@@ -298,16 +301,16 @@ public class SnapshotAwareAggregateServiceIT {
     public void shouldNotStoreANewSnapshotOnTopOfExistingSnapshotsWhenThresholdNotMet() throws Exception {
         assertThat(snapshotRepository.snapshotCount(STREAM_ID), is(0L));
 
+        appendEventsViaAggregate(SNAPSHOT_THRESHOLD);
+
+        assertThat(snapshotRepository.snapshotCount(STREAM_ID), is(1L));
+
         final EventStream stream = eventSource.getStreamById(STREAM_ID);
-
-        rebuildAggregateAndApplyEvents(stream, SNAPSHOT_THRESHOLD);
-
         TestAggregate aggregate = aggregateService.get(stream, TestAggregate.class);
-
-        stream.append(createEventAndApply(SNAPSHOT_THRESHOLD - 2, "context.eventA", aggregate));
+        stream.append(createEventAndApply(SNAPSHOT_THRESHOLD - 2, aggregate));
 
         final Optional<AggregateSnapshot<TestAggregate>> snapshot = snapshotRepository.getLatestSnapshot(STREAM_ID, TestAggregate.class);
-        assertThat(snapshot, IsNot.not(Matchers.nullValue()));
+        assertThat(snapshot, notNullValue());
         assertThat(snapshot.isPresent(), equalTo(true));
         assertThat(snapshot.get().getType(), equalTo(TYPE));
         assertThat(snapshot.get().getStreamId(), equalTo(STREAM_ID));
@@ -327,9 +330,9 @@ public class SnapshotAwareAggregateServiceIT {
 
         final EventStream eventStream = eventSource.getStreamById(STREAM_ID);
 
-        rebuildAggregateAndApplyEvents(eventStream, SNAPSHOT_THRESHOLD);
+        appendEventsViaAggregate(SNAPSHOT_THRESHOLD);
 
-        rebuildAggregateAndApplyEvents(eventStream, SNAPSHOT_THRESHOLD);
+        appendEventsViaAggregate(SNAPSHOT_THRESHOLD);
 
         final Optional<AggregateSnapshot<TestAggregate>> snapshot = snapshotRepository.getLatestSnapshot(STREAM_ID, TestAggregate.class);
         assertThat(snapshot, IsNot.not(Matchers.nullValue()));
@@ -347,8 +350,6 @@ public class SnapshotAwareAggregateServiceIT {
     @Test
     public void shouldRebuildSnapshotOnAggregateModelChange() throws Exception {
 
-        final EventStream eventStream = eventSource.getStreamById(STREAM_ID);
-
         DynamicAggregateTestClassGenerator classGenerator = new DynamicAggregateTestClassGenerator();
 
         final Class oldAggregateClass = classGenerator.generatedTestAggregateClassOf(1L, TEST_AGGREGATE_PACKAGE, TEST_AGGREGATE_CLASS_NAME);
@@ -356,9 +357,8 @@ public class SnapshotAwareAggregateServiceIT {
         final long initialNumberOfSnapshots = 4;
 
         for (int i = 1; i <= initialNumberOfSnapshots; i++) {
-            eventStream.append(createEventStreamAndApply(SNAPSHOT_THRESHOLD, "context.eventA", aggregateService.get(eventStream, oldAggregateClass)));
+            createEventStreamAndApply(SNAPSHOT_THRESHOLD, "context.eventA", oldAggregateClass);
         }
-
 
         final Optional<AggregateSnapshot> snapshot = snapshotRepository.getLatestSnapshot(STREAM_ID, oldAggregateClass);
 
@@ -373,7 +373,7 @@ public class SnapshotAwareAggregateServiceIT {
         snapshotService.setStreamStrategy(
                 new CustomClassLoaderObjectInputStreamStrategy(classLoaderWithGeneratedAggregateLoaded()));
 
-        eventStream.append(createEventStreamAndApply(SNAPSHOT_THRESHOLD - 2, "context.eventA", aggregateService.get(eventStream, newAggregateClass)));
+        createEventStreamAndApply(SNAPSHOT_THRESHOLD - 2, "context.eventA", newAggregateClass);
 
         final Optional<AggregateSnapshot> newSnapshot = snapshotRepository.getLatestSnapshot(STREAM_ID, newAggregateClass);
         assertThat(newSnapshot, IsNot.not(Matchers.nullValue()));
@@ -406,19 +406,18 @@ public class SnapshotAwareAggregateServiceIT {
         return classLoader;
     }
 
-    private <T extends Aggregate> void rebuildAggregateAndApplyEvents(final EventStream eventStream, long eventCount) throws Exception {
+    private void appendEventsViaAggregate(final long eventCount) throws Exception {
 
+        final EventStream eventStream = eventSource.getStreamById(STREAM_ID);
         TestAggregate aggregateRebuilt = aggregateService.get(eventStream, TestAggregate.class);
-
-        eventStream.append(createEventAndApply(eventCount, "context.eventA", aggregateRebuilt));
+        eventStream.append(createEventAndApply(eventCount, aggregateRebuilt));
     }
 
-    private Stream<JsonEnvelope> createEventAndApply(long count, String eventName, TestAggregate aggregate) {
-        List<Object> envelopes = new LinkedList<>();
+    private Stream<JsonEnvelope> createEventAndApply(long count, final TestAggregate aggregate) {
+        List<JsonEnvelope> envelopes = new LinkedList<>();
         for (int i = 1; i <= count; i++) {
-            JsonEnvelope envelope =
-                    envelope()
-                    .with(metadataWithRandomUUID(eventName)
+            JsonEnvelope envelope = envelope()
+                    .with(metadataWithRandomUUID("context.eventA")
                             .createdAt(clock.now())
                             .withStreamId(STREAM_ID))
                     .withPayloadOf("value", "name")
@@ -426,16 +425,19 @@ public class SnapshotAwareAggregateServiceIT {
             aggregate.addEvent(envelope);
             envelopes.add(envelope);
         }
-        return envelopes.stream().map(x -> (JsonEnvelope) x);
+        return envelopes.stream();
     }
 
-    private <T extends Aggregate> Stream<JsonEnvelope> createEventStreamAndApply(long count, String eventName, T aggregate) {
-        List<Object> envelopes = new LinkedList<>();
+    private <T extends Aggregate> void createEventStreamAndApply(long count, String eventName, Class<T> aggregateClass) throws EventStreamException {
+
+        final EventStream eventStream = eventSource.getStreamById(STREAM_ID);
+        final T aggregate = aggregateService.get(eventStream, aggregateClass);
+
+        List<JsonEnvelope> envelopes = new LinkedList<>();
 
         for (int i = 1; i <= count; i++) {
 
-            JsonEnvelope envelope =
-                    envelope()
+            JsonEnvelope envelope = envelope()
                     .with(metadataWithRandomUUID(eventName)
                             .createdAt(clock.now())
                             .withStreamId(STREAM_ID))
@@ -445,7 +447,7 @@ public class SnapshotAwareAggregateServiceIT {
             aggregate.apply(new EventA(String.valueOf(i)));
             envelopes.add(envelope);
         }
-        return envelopes.stream().map(x -> (JsonEnvelope) x);
+        eventStream.append( envelopes.stream());
     }
 
     @ApplicationScoped

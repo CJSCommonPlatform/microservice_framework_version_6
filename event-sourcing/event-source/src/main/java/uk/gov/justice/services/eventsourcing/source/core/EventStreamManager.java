@@ -1,6 +1,7 @@
 package uk.gov.justice.services.eventsourcing.source.core;
 
 
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
 import uk.gov.justice.services.common.configuration.GlobalValue;
@@ -138,7 +139,9 @@ public class EventStreamManager {
         final List<JsonEnvelope> envelopeList = events.collect(toList());
 
         long currentVersion = eventRepository.getCurrentSequenceIdForStream(id);
-        validateVersion(id, versionFrom, currentVersion);
+        if (versionFrom.isPresent()) {
+            validateVersion(id, versionFrom.get(), currentVersion);
+        }
         validateEvents(id, envelopeList);
 
         for (final JsonEnvelope event : envelopeList) {
@@ -153,10 +156,13 @@ public class EventStreamManager {
         }
     }
 
-    private void validateVersion(final UUID id, final Optional<Long> versionFrom, final Long currentVersion) throws VersionMismatchException {
-        if (versionFrom.isPresent() && !versionFrom.get().equals(currentVersion)) {
-            throw new VersionMismatchException(String.format("Failed to append to stream %s. Version mismatch. Expected %d, Found %d",
-                    id, versionFrom.get(), currentVersion));
+    private void validateVersion(final UUID id, final Long versionFrom, final Long currentVersion) throws VersionMismatchException {
+        if (versionFrom > currentVersion) {
+            throw new VersionMismatchException(String.format("Failed to append to stream %s due to a version mismatch; expected %d, found %d",
+                    id, versionFrom, currentVersion));
+        } else if (versionFrom < currentVersion) {
+            throw new OptimisticLockingRetryException(format("Optimistic locking failure while storing version %s of stream %s which is already at %s",
+                    versionFrom + 1, id, currentVersion));
         }
     }
 }

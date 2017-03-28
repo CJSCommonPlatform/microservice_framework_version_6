@@ -10,6 +10,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.listOf;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
+import uk.gov.justice.services.generators.commons.client.ActionMimeTypeDefinition;
 import uk.gov.justice.services.generators.commons.mapping.ActionMapping;
 
 import java.net.MalformedURLException;
@@ -82,6 +83,14 @@ public final class Names {
 
     public static String buildResourceMethodNameWithNoMimeType(final Action action) {
         return buildResourceMethodNameWith(action, () -> BLANK);
+    }
+
+    public static String buildResourceMethodNameFromVerbUriAndMimeType(final Action action, final ActionMimeTypeDefinition actionMimeTypeDefinition) {
+        final String type = action.getType().toString().toLowerCase();
+        final String uri = action.getResource().getUri();
+        final String mediaType = nameFrom(new MimeType(actionMimeTypeDefinition.getNameType().getType()));
+
+        return type + buildJavaFriendlyName(uri + mediaType);
     }
 
     public static String buildResourceMethodName(final Action action, final MimeType bodyMimeType) {

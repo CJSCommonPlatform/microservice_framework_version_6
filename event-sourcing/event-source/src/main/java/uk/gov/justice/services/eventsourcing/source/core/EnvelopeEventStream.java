@@ -5,6 +5,7 @@ import static uk.gov.justice.services.eventsourcing.source.core.Tolerance.CONSEC
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -12,8 +13,7 @@ public class EnvelopeEventStream implements EventStream {
 
     private final EventStreamManager eventStreamManager;
     private final UUID id;
-    private Long currentVersion;
-    private boolean isRead = false;
+    private volatile Optional<Long> lastReadVersion = Optional.empty();
 
     EnvelopeEventStream(final UUID id, final EventStreamManager eventStreamManager) {
         this.id = id;
@@ -43,7 +43,8 @@ public class EnvelopeEventStream implements EventStream {
             case NON_CONSECUTIVE:
                 return eventStreamManager.appendNonConsecutively(id, events);
             default:
-                return isRead ? eventStreamManager.appendAfter(id, events, currentVersion) : eventStreamManager.append(id, events);
+                final Optional<Long> lastReadVersion = this.lastReadVersion;
+                return lastReadVersion.isPresent() ? eventStreamManager.appendAfter(id, events, lastReadVersion.get()) : eventStreamManager.append(id, events);
         }
     }
 
@@ -54,7 +55,8 @@ public class EnvelopeEventStream implements EventStream {
 
     @Override
     public long getCurrentVersion() {
-        return isRead ? currentVersion : eventStreamManager.getCurrentVersion(id);
+        final Optional<Long> lastReadVersion = this.lastReadVersion;
+        return lastReadVersion.isPresent() ? lastReadVersion.get() : eventStreamManager.getCurrentVersion(id);
     }
 
     @Override
@@ -63,15 +65,16 @@ public class EnvelopeEventStream implements EventStream {
     }
 
     private JsonEnvelope recordCurrentVersion(final JsonEnvelope event) {
-        currentVersion = event.metadata().version().orElseThrow(() -> new IllegalStateException("Missing version in event from event store"));
+        lastReadVersion = Optional.of(
+                event.metadata().version()
+                        .orElseThrow(() -> new IllegalStateException("Missing version in event from event store")));
         return event;
     }
 
     private synchronized void markAsReadFrom(final long version) {
-        if (isRead) {
+        if (lastReadVersion.isPresent()) {
             throw new IllegalStateException("Event stream has already been read");
         }
-        isRead = true;
-        currentVersion = version;
+        lastReadVersion = Optional.of(version);
     }
 }

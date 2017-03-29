@@ -14,8 +14,6 @@ import javax.inject.Inject;
  */
 public class LocalAuditInterceptor implements Interceptor {
 
-    private static final int AUDIT_PRIORITY = 2000;
-
     @Inject
     AuditService auditService;
 
@@ -28,11 +26,6 @@ public class LocalAuditInterceptor implements Interceptor {
 
         jsonEnvelope.ifPresent(this::recordAudit);
         return outputContext;
-    }
-
-    @Override
-    public int priority() {
-        return AUDIT_PRIORITY;
     }
 
     private void recordAudit(final JsonEnvelope jsonEnvelope) {

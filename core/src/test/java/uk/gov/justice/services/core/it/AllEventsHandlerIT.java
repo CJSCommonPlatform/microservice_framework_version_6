@@ -1,5 +1,6 @@
 package uk.gov.justice.services.core.it;
 
+import static java.util.Collections.emptyList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -33,9 +34,11 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.eventfilter.AllowAllEventFilter;
 import uk.gov.justice.services.core.extension.AnnotationScanner;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
+import uk.gov.justice.services.core.interceptor.Interceptor;
 import uk.gov.justice.services.core.interceptor.InterceptorCache;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
+import uk.gov.justice.services.core.interceptor.InterceptorChainProvider;
 import uk.gov.justice.services.core.jms.DefaultJmsDestinations;
 import uk.gov.justice.services.core.jms.JmsSenderFactory;
 import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
@@ -48,12 +51,14 @@ import uk.gov.justice.services.messaging.jms.DefaultJmsEnvelopeSender;
 import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
 import uk.gov.justice.services.test.utils.common.envelope.TestEnvelopeRecorder;
 
+import java.util.List;
 import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.openejb.jee.Application;
 import org.apache.openejb.jee.WebApp;
 import org.apache.openejb.junit.ApplicationComposer;
@@ -89,6 +94,7 @@ public class AllEventsHandlerIT {
             InterceptorChainProcessorProducer.class,
             InterceptorChainProcessor.class,
             InterceptorCache.class,
+            EventListenerInterceptorChainProvider.class,
 
             SenderProducer.class,
             JmsSenderFactory.class,
@@ -181,4 +187,16 @@ public class AllEventsHandlerIT {
 
     }
 
+    public static class EventListenerInterceptorChainProvider implements InterceptorChainProvider {
+
+        @Override
+        public String component() {
+            return EVENT_LISTENER;
+        }
+
+        @Override
+        public List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes() {
+            return emptyList();
+        }
+    }
 }

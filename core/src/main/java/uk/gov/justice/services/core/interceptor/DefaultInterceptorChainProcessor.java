@@ -12,15 +12,17 @@ public class DefaultInterceptorChainProcessor implements InterceptorChainProcess
 
     private final InterceptorCache interceptorCache;
     private final Function<JsonEnvelope, JsonEnvelope> dispatch;
+    private final String component;
 
-    DefaultInterceptorChainProcessor(final InterceptorCache interceptorCache, final Function<JsonEnvelope, JsonEnvelope> dispatch) {
+    DefaultInterceptorChainProcessor(final InterceptorCache interceptorCache, final Function<JsonEnvelope, JsonEnvelope> dispatch, final String component) {
         this.interceptorCache = interceptorCache;
         this.dispatch = dispatch;
+        this.component = component;
     }
 
     @Override
     public Optional<JsonEnvelope> process(final InterceptorContext interceptorContext) {
-        return new InterceptorChain(interceptorCache.getInterceptors(), targetOf(dispatch))
+        return new InterceptorChain(interceptorCache.getInterceptors(component), targetOf(dispatch))
                 .processNext(interceptorContext)
                 .outputEnvelope();
     }

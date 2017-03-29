@@ -19,9 +19,4 @@ public class EventFilterInterceptor implements Interceptor {
                 ? interceptorChain.processNext(interceptorContext)
                 : interceptorContext;
     }
-
-    @Override
-    public int priority() {
-        return 1001;
-    }
 }

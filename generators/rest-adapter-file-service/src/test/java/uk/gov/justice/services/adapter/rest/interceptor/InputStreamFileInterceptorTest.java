@@ -80,10 +80,10 @@ public class InputStreamFileInterceptorTest {
 
         final Optional<JsonEnvelope> jsonEnvelope = outputInterceptorContext.outputEnvelope();
 
-         assertThat(jsonEnvelope.isPresent(), is(true));
-         assertThat(jsonEnvelope.get(), is(outputEnvelope));
+        assertThat(jsonEnvelope.isPresent(), is(true));
+        assertThat(jsonEnvelope.get(), is(outputEnvelope));
 
-         assertThat(resultJsonEnvelope, is(inputEnvelope));
+        assertThat(resultJsonEnvelope, is(inputEnvelope));
     }
 
     @Test
@@ -104,7 +104,6 @@ public class InputStreamFileInterceptorTest {
     }
 
 
-
     private InterceptorContext createInterceptorContext(final List<FileInputDetails> fileInputDetails) {
         final InterceptorContext inputInterceptorContext = interceptorContextWithInput(inputEnvelope);
         inputInterceptorContext.setInputParameter(FILE_INPUT_DETAILS_LIST, fileInputDetails);
@@ -113,12 +112,6 @@ public class InputStreamFileInterceptorTest {
 
     private InterceptorContext createEmptyInterceptorContext() {
         return interceptorContextWithInput(inputEnvelope);
-    }
-
-    @Test
-    public void shouldHaveTheCorrectPriority() throws Exception {
-
-        assertThat(inputStreamFileInterceptor.priority(), is(7000));
     }
 
     private InterceptorContext processResult(final InterceptorContext interceptorContext) {

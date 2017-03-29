@@ -1,6 +1,5 @@
 package uk.gov.justice.services.interceptors;
 
-import static java.lang.Integer.MAX_VALUE;
 import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
 import static java.lang.Thread.currentThread;
@@ -66,11 +65,6 @@ public class RetryInterceptor implements Interceptor {
         }
 
         throw new OptimisticLockingRetryFailedException(format("Retry count of %d exceeded for command %s", maxRetryCount, metadata));
-    }
-
-    @Override
-    public int priority() {
-        return MAX_VALUE;
     }
 
     private void waitFor(final int retryWaitTime) {

@@ -14,8 +14,6 @@ import javax.inject.Inject;
  */
 public class LocalAccessControlInterceptor implements Interceptor {
 
-    private static final int ACCESS_CONTROL_PRIORITY = 6000;
-
     @Inject
     AccessControlService accessControlService;
 
@@ -28,11 +26,6 @@ public class LocalAccessControlInterceptor implements Interceptor {
         checkAccessControl(interceptorContext.inputEnvelope());
 
         return interceptorChain.processNext(interceptorContext);
-    }
-
-    @Override
-    public int priority() {
-        return ACCESS_CONTROL_PRIORITY;
     }
 
     private void checkAccessControl(final JsonEnvelope jsonEnvelope) {

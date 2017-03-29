@@ -1,7 +1,5 @@
 package uk.gov.justice.services.core.accesscontrol;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
@@ -69,11 +67,6 @@ public class LocalAccessControlInterceptorTest {
 
         interceptorChain.processNext(inputContext);
         verify(accessControlService).checkAccessControl(envelope);
-    }
-
-    @Test
-    public void shouldReturnAccessControlPriority() throws Exception {
-        assertThat(localAccessControlInterceptor.priority(), is(ACCESS_CONTROL_PRIORITY));
     }
 
     @Test

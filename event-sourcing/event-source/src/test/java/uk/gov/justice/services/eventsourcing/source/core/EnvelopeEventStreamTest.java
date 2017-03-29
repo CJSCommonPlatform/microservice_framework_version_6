@@ -6,6 +6,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
@@ -45,6 +46,9 @@ public class EnvelopeEventStreamTest {
 
     @Captor
     ArgumentCaptor<Stream<JsonEnvelope>> streamCaptor;
+
+    @Captor
+    ArgumentCaptor<Long> versionCaptor;
 
     private EventStream eventStream;
 
@@ -150,5 +154,29 @@ public class EnvelopeEventStreamTest {
         final List<JsonEnvelope> appendedEvents = streamCaptor.getValue().collect(toList());
         assertThat(appendedEvents, hasSize(1));
         assertThat(appendedEvents.get(0), is(event));
+    }
+
+    @Test
+    public void shouldAllowTwoAppendsAfterRead() throws Exception {
+        final JsonEnvelope event5 = envelope().with(metadataWithDefaults()).build();
+        final JsonEnvelope event6 = envelope().with(metadataWithDefaults()).build();
+
+        eventStream.read().forEach(e -> {});
+
+        eventStream.append(Stream.of(event5));
+
+        verify(eventStreamManager).appendAfter(eq(STREAM_ID), streamCaptor.capture(), versionCaptor.capture());
+        final List<JsonEnvelope> appendedEvents1 = streamCaptor.getValue().collect(toList());
+        assertThat(appendedEvents1, hasSize(1));
+        assertThat(appendedEvents1.get(0), is(event5));
+        assertThat(versionCaptor.getValue(), equalTo(MAX_VERSION));
+
+        eventStream.append(Stream.of(event6));
+
+        verify(eventStreamManager, times(2)).appendAfter(eq(STREAM_ID), streamCaptor.capture(), versionCaptor.capture());
+        final List<JsonEnvelope> appendedEvents2 = streamCaptor.getValue().collect(toList());
+        assertThat(appendedEvents2, hasSize(1));
+        assertThat(appendedEvents2.get(0), is(event6));
+        assertThat(versionCaptor.getValue(), equalTo(MAX_VERSION + 1));
     }
 }

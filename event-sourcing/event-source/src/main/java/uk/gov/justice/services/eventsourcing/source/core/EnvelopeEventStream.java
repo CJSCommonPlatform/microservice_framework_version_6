@@ -44,7 +44,9 @@ public class EnvelopeEventStream implements EventStream {
                 return eventStreamManager.appendNonConsecutively(id, events);
             default:
                 final Optional<Long> lastReadVersion = this.lastReadVersion;
-                return lastReadVersion.isPresent() ? eventStreamManager.appendAfter(id, events, lastReadVersion.get()) : eventStreamManager.append(id, events);
+                return lastReadVersion.isPresent()
+                        ? eventStreamManager.appendAfter(id, events.map(this::incrementLastReadVersion), lastReadVersion.get())
+                        : eventStreamManager.append(id, events);
         }
     }
 
@@ -68,6 +70,11 @@ public class EnvelopeEventStream implements EventStream {
         lastReadVersion = Optional.of(
                 event.metadata().version()
                         .orElseThrow(() -> new IllegalStateException("Missing version in event from event store")));
+        return event;
+    }
+
+    private synchronized JsonEnvelope incrementLastReadVersion(final JsonEnvelope event) {
+        lastReadVersion = lastReadVersion.map(version -> version + 1);
         return event;
     }
 

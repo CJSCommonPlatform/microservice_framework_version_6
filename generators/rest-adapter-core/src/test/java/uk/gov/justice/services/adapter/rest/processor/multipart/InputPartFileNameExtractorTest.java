@@ -7,7 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.adapter.rest.exception.BadRequestException;
-import uk.gov.justice.services.adapter.rest.mutipart.InputPartFileNameExtractor;
+import uk.gov.justice.services.adapter.rest.multipart.InputPartFileNameExtractor;
 
 import java.util.Map;
 

@@ -49,8 +49,9 @@ import uk.gov.justice.services.core.sender.ComponentDestination;
 import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.DefaultJmsEnvelopeSender;
-import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
+import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
 import uk.gov.justice.services.test.utils.common.envelope.TestEnvelopeRecorder;
 
 import java.util.UUID;
@@ -102,7 +103,7 @@ public class EventHandlerIT {
             ComponentDestination.class,
             DefaultJmsEnvelopeSender.class,
             DefaultJmsDestinations.class,
-            EnvelopeConverter.class,
+            DefaultEnvelopeConverter.class,
 
             StringToJsonObjectConverter.class,
             DefaultJsonObjectEnvelopeConverter.class,
@@ -126,7 +127,8 @@ public class EventHandlerIT {
             EmptySystemUserProvider.class,
             SystemUserUtil.class,
             BeanInstantiater.class,
-            UtcClock.class
+            UtcClock.class,
+            DefaultTraceLogger.class
     })
     public WebApp war() {
         return new WebApp()

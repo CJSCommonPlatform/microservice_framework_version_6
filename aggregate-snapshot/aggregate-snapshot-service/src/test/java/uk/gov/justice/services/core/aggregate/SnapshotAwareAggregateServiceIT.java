@@ -46,7 +46,7 @@ import uk.gov.justice.services.eventsourcing.source.core.snapshot.DefaultSnapsho
 import uk.gov.justice.services.eventsourcing.source.core.snapshot.DefaultSnapshotStrategy;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
+import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
 
 import java.util.LinkedList;
@@ -138,7 +138,7 @@ public class SnapshotAwareAggregateServiceIT {
             LoggerProducer.class,
 
             EventLogConverter.class,
-            EnvelopeConverter.class,
+            DefaultEnvelopeConverter.class,
             StringToJsonObjectConverter.class,
             DefaultJsonObjectEnvelopeConverter.class,
             JsonObjectToObjectConverter.class,

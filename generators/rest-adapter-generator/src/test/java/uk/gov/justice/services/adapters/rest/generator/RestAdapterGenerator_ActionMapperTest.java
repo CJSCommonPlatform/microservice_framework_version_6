@@ -20,6 +20,9 @@ import static uk.gov.justice.services.generators.test.utils.config.GeneratorConf
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.methodOf;
 
+import uk.gov.justice.services.adapter.rest.mapping.ActionMapperHelper;
+import uk.gov.justice.services.adapter.rest.mapping.BasicActionMapperHelper;
+
 import java.lang.reflect.Method;
 
 import javax.inject.Named;
@@ -58,9 +61,9 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
-        Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultUserResourceActionMapper");
-        Object mapperObject = mapperClass.newInstance();
-        Method actionMethod = methodOf(mapperClass.getSuperclass(), "actionOf");
+        final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultUserResourceActionMapper");
+        final Object mapperObject = mapperClass.getConstructor(ActionMapperHelper.class).newInstance(new BasicActionMapperHelper());
+        final Method actionMethod = methodOf(mapperClass, "actionOf");
 
         Object action = actionMethod.invoke(mapperObject, "getUser", "GET",
                 headersWith("Accept", "application/vnd.ctx.query.somemediatype1+json"));
@@ -92,11 +95,11 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
-        Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultStatusResourceActionMapper");
-        Object mapperObject = mapperClass.newInstance();
-        Method actionMethod = methodOf(mapperClass.getSuperclass(), "actionOf");
+        final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultStatusResourceActionMapper");
+        final Object mapperObject = mapperClass.getConstructor(ActionMapperHelper.class).newInstance(new BasicActionMapperHelper());
+        final Method actionMethod = methodOf(mapperClass, "actionOf");
 
-        Object action = actionMethod.invoke(mapperObject, "getStatus", "GET",
+        final Object action = actionMethod.invoke(mapperObject, "getStatus", "GET",
                 headersWith("Accept", "application/vnd.ctx.query.mediatype1+json"));
         assertThat(action, is("ctxA.actionA"));
     }
@@ -120,9 +123,9 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
-        Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCaseResourceActionMapper");
-        Object mapperObject = mapperClass.newInstance();
-        Method actionMethod = methodOf(mapperClass.getSuperclass(), "actionOf");
+        final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCaseResourceActionMapper");
+        final Object mapperObject = mapperClass.getConstructor(ActionMapperHelper.class).newInstance(new BasicActionMapperHelper());
+        final Method actionMethod = methodOf(mapperClass, "actionOf");
 
         Object action = actionMethod.invoke(mapperObject, "postContextBSomeActionCase", "POST",
                 headersWith("Content-Type", "application/vnd.ctx.command.somemediatype1+json"));
@@ -154,8 +157,8 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
         final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCaseResourceActionMapper");
-        final Object mapperObject = mapperClass.newInstance();
-        final Method actionMethod = methodOf(mapperClass.getSuperclass(), "actionOf");
+        final Object mapperObject = mapperClass.getConstructor(ActionMapperHelper.class).newInstance(new BasicActionMapperHelper());
+        final Method actionMethod = methodOf(mapperClass, "actionOf");
 
         final Object firstAction = actionMethod.invoke(mapperObject, "putContextBSomeActionCase", "PUT",
                 headersWith("Content-Type", "application/vnd.ctx.command.somemediatype1+json"));
@@ -187,8 +190,8 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
         final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCaseResourceActionMapper");
-        final Object mapperObject = mapperClass.newInstance();
-        final Method actionMethod = methodOf(mapperClass.getSuperclass(), "actionOf");
+        final Object mapperObject = mapperClass.getConstructor(ActionMapperHelper.class).newInstance(new BasicActionMapperHelper());
+        final Method actionMethod = methodOf(mapperClass, "actionOf");
 
         final Object firstAction = actionMethod.invoke(mapperObject, "patchContextBSomeActionCase", "PATCH",
                 headersWith("Content-Type", "application/vnd.ctx.command.somemediatype1+json"));
@@ -220,8 +223,8 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
         final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCaseResourceActionMapper");
-        final Object mapperObject = mapperClass.newInstance();
-        final Method actionMethod = methodOf(mapperClass.getSuperclass(), "actionOf");
+        final Object mapperObject = mapperClass.getConstructor(ActionMapperHelper.class).newInstance(new BasicActionMapperHelper());
+        final Method actionMethod = methodOf(mapperClass, "actionOf");
 
         final Object firstAction = actionMethod.invoke(mapperObject, "deleteContextBSomeActionCase", "DELETE",
                 headersWith("Content-Type", "application/vnd.ctx.command.somemediatype1+json"));
@@ -252,9 +255,9 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
-        Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCaseResourceActionMapper");
-        Object mapperObject = mapperClass.newInstance();
-        Method actionMethod = methodOf(mapperClass.getSuperclass(), "actionOf");
+        final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCaseResourceActionMapper");
+        final Object mapperObject = mapperClass.getConstructor(ActionMapperHelper.class).newInstance(new BasicActionMapperHelper());
+        final Method actionMethod = methodOf(mapperClass, "actionOf");
 
         Object action = actionMethod.invoke(mapperObject, "postContextCSomeActionCase", "POST",
                 headersWith("Content-Type", "application/vnd.ctx.command.somemediatype1+json"));
@@ -287,9 +290,9 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
-        Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCaseResourceActionMapper");
-        Object mapperObject = mapperClass.newInstance();
-        Method actionMethod = methodOf(mapperClass.getSuperclass(), "actionOf");
+        final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCaseResourceActionMapper");
+        final Object mapperObject = mapperClass.getConstructor(ActionMapperHelper.class).newInstance(new BasicActionMapperHelper());
+        final Method actionMethod = methodOf(mapperClass, "actionOf");
 
         Object action = actionMethod.invoke(mapperObject, "postContextCCommandActionCase", "POST",
                 headersWith("Content-Type", "application/vnd.somemediatype1+json"));
@@ -311,7 +314,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
-        Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultStatusResourceActionMapper");
+        final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultStatusResourceActionMapper");
         assertThat(mapperClass.getAnnotation(Named.class), not(nullValue()));
         assertThat(mapperClass.getAnnotation(Named.class).value(), Matchers.is("DefaultStatusResourceActionMapper"));
 

@@ -18,7 +18,7 @@ import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuil
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.methodsOf;
 
-import uk.gov.justice.services.adapter.rest.mutipart.FileInputDetailsFactory;
+import uk.gov.justice.services.adapter.rest.multipart.FileInputDetailsFactory;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -37,6 +37,8 @@ import org.junit.Test;
 
 public class RestAdapterGenerator_MultipartCodeStructureTest extends BaseRestAdapterGeneratorTest {
 
+    private static final String RESOURCE_PACKAGE = BASE_PACKAGE + ".resource";
+
     @Test
     public void shouldGenerateResourceInterfaceWithOnePOSTMethod() throws Exception {
         generator.run(
@@ -51,7 +53,7 @@ public class RestAdapterGenerator_MultipartCodeStructureTest extends BaseRestAda
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
         final List<Method> methods = methodsOf(interfaceClass);
         assertThat(methods, hasSize(1));
@@ -78,7 +80,7 @@ public class RestAdapterGenerator_MultipartCodeStructureTest extends BaseRestAda
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
         final List<Method> methods = methodsOf(interfaceClass);
         assertThat(methods, hasSize(1));
@@ -106,7 +108,7 @@ public class RestAdapterGenerator_MultipartCodeStructureTest extends BaseRestAda
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
         final List<Method> methods = methodsOf(interfaceClass);
         assertThat(methods, hasSize(1));
@@ -144,7 +146,7 @@ public class RestAdapterGenerator_MultipartCodeStructureTest extends BaseRestAda
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> resourceInterface = compiler.compiledInterfaceOf(BASE_PACKAGE);
+        final Class<?> resourceInterface = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
         final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
         assertThat(resourceClass.isInterface(), is(false));

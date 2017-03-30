@@ -23,8 +23,6 @@ import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
 import static org.raml.model.ActionType.PUT;
-import static uk.gov.justice.services.adapter.rest.processor.response.ResponseStrategies.FILE_STREAM_RETURNING_RESPONSE_STRATEGY;
-import static uk.gov.justice.services.adapter.rest.processor.response.ResponseStrategies.OK_STATUS_ENVELOPE_PAYLOAD_ENTITY_RESPONSE_STRATEGY;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.defaultGetAction;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.mapping;
@@ -43,14 +41,13 @@ import static uk.gov.justice.services.generators.test.utils.reflection.Reflectio
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.methodsOf;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
-import uk.gov.justice.services.adapter.rest.BasicActionMapper;
+import uk.gov.justice.services.adapter.rest.mapping.ActionMapper;
 import uk.gov.justice.services.adapter.rest.processor.RestProcessor;
-import uk.gov.justice.services.adapter.rest.processor.response.ResponseStrategy;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.CustomAdapter;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
-import uk.gov.justice.services.rest.annotation.PATCH;
+import uk.gov.justice.services.adapter.rest.annotation.PATCH;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -80,6 +77,7 @@ import org.slf4j.Logger;
 public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGeneratorTest {
 
     private static final String INTERCEPTOR_CHAIN_PROCESSOR = "interceptorChainProcessor";
+    private static final String RESOURCE_PACKAGE = BASE_PACKAGE + ".resource";
 
     @Test
     public void shouldGenerateAnnotatedResourceInterface() throws Exception {
@@ -90,7 +88,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
         assertThat(interfaceClass.isInterface(), is(true));
         assertThat(interfaceClass.getAnnotation(Path.class), not(nullValue()));
@@ -109,7 +107,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         .build(),
                 config);
 
-        final Class<?> interfaceClass = compiler.compiledInterfaceOf(basePackageName);
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(basePackageName + ".resource");
 
         assertThat(interfaceClass.getPackage().getName(), is(basePackageName + ".resource"));
 
@@ -127,7 +125,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
         final List<Method> methods = methodsOf(interfaceClass);
         assertThat(methods, hasSize(1));
@@ -151,7 +149,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
         final List<Method> methods = methodsOf(interfaceClass);
         assertThat(methods, hasSize(2));
@@ -184,7 +182,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
         final List<Method> methods = methodsOf(interfaceClass);
         assertThat(methods, hasSize(1));
@@ -208,7 +206,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
         final List<Method> methods = methodsOf(interfaceClass);
         assertThat(methods, hasSize(1));
@@ -232,7 +230,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
         final List<Method> methods = methodsOf(interfaceClass);
         assertThat(methods, hasSize(1));
@@ -258,7 +256,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
         final List<Method> methods = methodsOf(interfaceClass);
         assertThat(methods, hasSize(1));
@@ -287,7 +285,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
         final List<Method> methods = methodsOf(interfaceClass);
         assertThat(methods, hasSize(1));
@@ -316,7 +314,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
         final List<Method> methods = methodsOf(interfaceClass);
         assertThat(methods, hasSize(1));
@@ -342,7 +340,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
         final List<Method> methods = methodsOf(interfaceClass);
         assertThat(methods, hasSize(1));
@@ -374,7 +372,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
         final List<Method> methods = methodsOf(interfaceClass);
         assertThat(methods, hasSize(1));
@@ -397,7 +395,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
         final List<Method> methods = methodsOf(interfaceClass);
         assertThat(methods, hasSize(1));
@@ -417,7 +415,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
         assertThat(interfaceClass.isInterface(), is(true));
         final List<Method> methods = methodsOf(interfaceClass);
@@ -448,7 +446,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> interfaceClass = compiler.compiledInterfaceOf(BASE_PACKAGE);
+        final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
         final List<Method> methods = methodsOf(interfaceClass);
         assertThat(methods, hasSize(1));
@@ -482,7 +480,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> resourceInterface = compiler.compiledInterfaceOf(BASE_PACKAGE);
+        final Class<?> resourceInterface = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
         final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
 
         assertThat(resourceClass.isInterface(), is(false));
@@ -658,7 +656,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamAParamBParamCResource");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamAParamBParamCResource");
 
         assertThat(clazz.isInterface(), is(false));
         final List<Method> methods = methodsOf(clazz);
@@ -906,7 +904,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
 
         final Field mapping = resourceClass.getDeclaredField("actionMapper");
         assertThat(mapping, not(nullValue()));
-        assertThat(mapping.getType(), equalTo(BasicActionMapper.class));
+        assertThat(mapping.getType(), equalTo(ActionMapper.class));
         assertThat(mapping.getAnnotation(Inject.class), not(nullValue()));
         assertThat(mapping.getAnnotation(Named.class), not(nullValue()));
         assertThat(mapping.getAnnotation(Named.class).value(), is("DefaultUserResourceActionMapper"));

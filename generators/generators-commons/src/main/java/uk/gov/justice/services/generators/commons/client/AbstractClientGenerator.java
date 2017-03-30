@@ -23,10 +23,12 @@ import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.Remote;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.logging.LoggerUtils;
+import uk.gov.justice.services.messaging.logging.TraceLogger;
 
 import java.util.List;
 import java.util.stream.Stream;
+
+import javax.inject.Inject;
 
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
@@ -49,12 +51,16 @@ public abstract class AbstractClientGenerator implements Generator {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractClientGenerator.class);
     protected static final String ENVELOPE = "envelope";
     private static final String OK = "200";
+    private static final String TRACE_LOGGER_FIELD = "traceLogger";
 
     @Override
     public void run(final Raml raml, final GeneratorConfig generatorConfig) {
 
-        TypeSpec.Builder classSpec = classSpecOf(raml, generatorConfig)
+        final TypeSpec.Builder classSpec = classSpecOf(raml, generatorConfig)
                 .addFields(fieldsOf(raml))
+                .addField(FieldSpec.builder(TraceLogger.class, TRACE_LOGGER_FIELD)
+                        .addAnnotation(Inject.class)
+                        .build())
                 .addMethods(methodsOf(raml, generatorConfig));
         writeClass(generatorConfig, generatorConfig.getBasePackageName(), classSpec.build(), LOGGER);
     }
@@ -96,8 +102,6 @@ public abstract class AbstractClientGenerator implements Generator {
     }
 
     private MethodSpec.Builder methodOf(final Action ramlAction, final ActionMimeTypeDefinition definition, final String handlerValue) {
-        final ClassName classLoggerUtils = ClassName.get(LoggerUtils.class);
-
         final String methodName = buildResourceMethodNameFromVerbUriAndMimeType(ramlAction, definition);
         return methodBuilder(methodName)
                 .addModifiers(PUBLIC)
@@ -107,8 +111,8 @@ public abstract class AbstractClientGenerator implements Generator {
                 .addParameter(ParameterSpec.builder(JsonEnvelope.class, ENVELOPE)
                         .addModifiers(FINAL)
                         .build())
-                .addStatement("$T.trace(LOGGER, () -> String.format(\"Handling remote request: %s\", envelope))",
-                        classLoggerUtils);
+                .addStatement("$L.trace(LOGGER, () -> String.format(\"Handling remote request: %s\", envelope))",
+                        TRACE_LOGGER_FIELD);
     }
 
     private Stream<ActionMimeTypeDefinition> mimeTypesOf(final Action ramlAction) {

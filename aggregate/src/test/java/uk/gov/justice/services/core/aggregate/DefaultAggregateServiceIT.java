@@ -42,8 +42,6 @@ import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
 import uk.gov.justice.services.repository.EventLogOpenEjbAwareJdbcRepository;
 
-import java.util.LinkedList;
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -74,8 +72,6 @@ public class DefaultAggregateServiceIT {
     private static final String LIQUIBASE_EVENT_STORE_CHANGELOG_XML = "liquibase/event-store-db-changelog.xml";
 
     private static final String TEST_AGGREGATE_PACKAGE = "uk.gov.justice.services.core.aggregate";
-
-    private static final String TYPE = TEST_AGGREGATE_PACKAGE + ".DefaultAggregateServiceIT$TestAggregate";
 
     @Resource(name = "openejb/Resource/eventStore")
     private DataSource dataSource;
@@ -154,9 +150,9 @@ public class DefaultAggregateServiceIT {
 
         aggregateService.get(eventStream, TestAggregate.class);
 
-        eventStream.append(envelopes(1, "context.eventA"));
+        eventStream.append(Stream.of(envelopeFrom("context.eventA")));
 
-        final TestAggregate aggregate = aggregateService.get(eventStream, TestAggregate.class);
+        final TestAggregate aggregate = aggregateService.get(eventSource.getStreamById(STREAM_ID), TestAggregate.class);
 
         assertThat(aggregate, notNullValue());
         assertThat(aggregate.recordedEvents(), hasSize(1));
@@ -175,10 +171,9 @@ public class DefaultAggregateServiceIT {
 
         aggregateService.get(eventStream, TestAggregate.class);
 
-        eventStream.append(envelopes(1, "context.eventA"));
-        eventStream.append(envelopes(1, "context.eventB"));
+        eventStream.append(Stream.of(envelopeFrom("context.eventA"), envelopeFrom("context.eventB")));
 
-        final TestAggregate aggregate = aggregateService.get(eventStream, TestAggregate.class);
+        final TestAggregate aggregate = aggregateService.get(eventSource.getStreamById(STREAM_ID), TestAggregate.class);
 
         assertThat(aggregate, notNullValue());
         assertThat(aggregate.recordedEvents(), hasSize(2));
@@ -192,7 +187,7 @@ public class DefaultAggregateServiceIT {
 
         final EventStream eventStream = eventSource.getStreamById(STREAM_ID);
 
-        eventStream.append(envelopes(1, "context.eventA"));
+        eventStream.append(Stream.of(envelopeFrom("context.eventA")));
 
         aggregateService.get(eventStream, TestAggregate.class);
 
@@ -217,16 +212,13 @@ public class DefaultAggregateServiceIT {
 
     }
 
-    private Stream<JsonEnvelope> envelopes(final int numberOfEnvelopes, String eventName) {
-        List<JsonEnvelope> envelopes = new LinkedList<>();
-        for (int i = 1; i <= numberOfEnvelopes; i++) {
-            envelopes.add(envelope()
-                    .with(metadataWithRandomUUID(eventName)
-                            .createdAt(clock.now())
-                            .withStreamId(STREAM_ID))
-                    .withPayloadOf("value", "name").build());
-        }
-        return envelopes.stream();
+    private JsonEnvelope envelopeFrom(final String eventName) {
+        return envelope()
+                .with(metadataWithRandomUUID(eventName)
+                        .createdAt(clock.now())
+                        .withStreamId(STREAM_ID))
+                .withPayloadOf("value", "name")
+                .build();
     }
 
     public static class DummyJmsEventPublisher implements EventPublisher {

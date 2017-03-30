@@ -28,13 +28,6 @@ public class SnapshotAwareEnvelopeEventStream<T extends Aggregate> extends Envel
     }
 
     @Override
-    public long append(final Stream<JsonEnvelope> events) throws EventStreamException {
-        final long currentVersion = super.append(events);
-        createAggregateSnapshotsFor(currentVersion);
-        return currentVersion;
-    }
-
-    @Override
     public long append(final Stream<JsonEnvelope> events, final Tolerance tolerance) throws EventStreamException {
         final long currentVersion = super.append(events, tolerance);
         if (tolerance == CONSECUTIVE) {

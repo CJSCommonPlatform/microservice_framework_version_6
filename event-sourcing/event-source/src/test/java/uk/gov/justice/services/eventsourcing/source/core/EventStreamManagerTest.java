@@ -115,10 +115,17 @@ public class EventStreamManagerTest {
     }
 
     @Test(expected = VersionMismatchException.class)
-    public void shouldThrowExceptionWhenFromVersionNotCorrect() throws Exception {
+    public void shouldThrowExceptionWhenEventsAreMissing() throws Exception {
         when(eventRepository.getCurrentSequenceIdForStream(STREAM_ID)).thenReturn(CURRENT_VERSION);
 
         eventStreamManager.appendAfter(STREAM_ID, Stream.of(envelope().with(metadataWithDefaults()).build()), INVALID_VERSION);
+    }
+
+    @Test(expected = OptimisticLockingRetryException.class)
+    public void shouldThrowExceptionWhenVersionAlreadyExists() throws Exception {
+        when(eventRepository.getCurrentSequenceIdForStream(STREAM_ID)).thenReturn(CURRENT_VERSION + 1);
+
+        eventStreamManager.appendAfter(STREAM_ID, Stream.of(envelope().with(metadataWithDefaults()).build()), CURRENT_VERSION);
     }
 
     @Test

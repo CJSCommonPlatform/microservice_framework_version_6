@@ -5,6 +5,8 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [1.5.0] - 2017-03-30
+
 ### Added
 - MultipartRestClient in test-utils: client for multipart file uploads
 - LiquibaseDatabaseBootstrapper in test-utils: bootstraps a database using your liquibase scripts
@@ -23,6 +25,19 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 - Use File Service version 1.8.0
 - Use Utilities version 1.6.0
 - JsonEnvelopePayloadMatcher to support matching of JsonValue NULL payloads 
+
+## [1.4.3] - 2017-03-30
+
+### Fixed
+- Duplicate method names in REST client generator, fixed by making method name generation use more things
+- Concurrently issue in event stream appends; optimistic locking did not kick in when it should
+
+## [1.4.2] - 2017-03-08
+
+### Fixed
+- Uplift Resteasy dependency versions and changed to provided scope
+- Allow JNDI values to fall back to globals
+- Performance fix to internal optimistic locking failure retries
 
 ## [1.4.1] - 2017-02-13
 
@@ -552,7 +567,15 @@ turned off by default
 
 - Initial release with basic dispatcher, handler and adapter generation
 
-[Unreleased]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.0.1...HEAD
+[Unreleased]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.5.0...HEAD
+[1.5.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.4.0...release-1.5.0
+[1.4.3]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.4.2...release-1.4.3
+[1.4.2]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.4.1...release-1.4.2
+[1.4.1]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.4.0...release-1.4.1
+[1.4.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.3.0...release-1.4.0
+[1.3.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.2.0...release-1.3.0
+[1.2.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.1.0...release-1.2.0
+[1.1.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.0.1...release-1.1.0
 [1.0.1]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.0.0...release-1.0.1
 [1.0.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.33.0...release-1.0.0
 [0.33.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-0.32.0...release-0.33.0

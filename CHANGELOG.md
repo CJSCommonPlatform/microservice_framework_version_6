@@ -5,6 +5,19 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [1.4.3] - 2017-03-30
+
+### Fixed
+- Duplicate method names in REST client generator, fixed by making method name generation use more things
+- Concurrently issue in event stream appends; optimistic locking did not kick in when it should
+
+## [1.4.2] - 2017-03-08
+
+### Fixed
+- Uplift Resteasy dependency versions and changed to provided scope
+- Allow JNDI values to fall back to globals
+- Performance fix to internal optimistic locking failure retries
+
 ## [1.4.1] - 2017-02-13
 
 ### Fixed

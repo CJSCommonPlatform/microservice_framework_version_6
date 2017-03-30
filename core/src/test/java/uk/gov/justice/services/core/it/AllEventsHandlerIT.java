@@ -6,7 +6,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
-import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
+import static uk.gov.justice.services.core.interceptor.DefaultInterceptorContext.interceptorContextWithInput;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 
@@ -15,14 +15,14 @@ import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
-import uk.gov.justice.services.core.accesscontrol.AccessControlService;
 import uk.gov.justice.services.core.accesscontrol.AllowAllPolicyEvaluator;
+import uk.gov.justice.services.core.accesscontrol.DefaultAccessControlService;
 import uk.gov.justice.services.core.accesscontrol.PolicyEvaluator;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
-import uk.gov.justice.services.core.dispatcher.DispatcherCache;
+import uk.gov.justice.services.core.dispatcher.DefaultDispatcherCache;
 import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
 import uk.gov.justice.services.core.dispatcher.EmptySystemUserProvider;
 import uk.gov.justice.services.core.dispatcher.RequesterProducer;
@@ -42,10 +42,11 @@ import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.sender.ComponentDestination;
 import uk.gov.justice.services.core.sender.SenderProducer;
+import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
+import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.DefaultJmsEnvelopeSender;
-import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
+import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
 import uk.gov.justice.services.test.utils.common.envelope.TestEnvelopeRecorder;
 
 import java.util.UUID;
@@ -95,18 +96,18 @@ public class AllEventsHandlerIT {
             ComponentDestination.class,
             DefaultJmsEnvelopeSender.class,
             DefaultJmsDestinations.class,
-            EnvelopeConverter.class,
+            DefaultEnvelopeConverter.class,
 
             StringToJsonObjectConverter.class,
-            JsonObjectEnvelopeConverter.class,
+            DefaultJsonObjectEnvelopeConverter.class,
             ObjectToJsonValueConverter.class,
             ObjectMapper.class,
             Enveloper.class,
 
             AccessControlFailureMessageGenerator.class,
             AllowAllPolicyEvaluator.class,
-            AccessControlService.class,
-            DispatcherCache.class,
+            DefaultAccessControlService.class,
+            DefaultDispatcherCache.class,
             DispatcherFactory.class,
             PolicyEvaluator.class,
 
@@ -119,7 +120,8 @@ public class AllEventsHandlerIT {
             EmptySystemUserProvider.class,
             SystemUserUtil.class,
             BeanInstantiater.class,
-            UtcClock.class
+            UtcClock.class,
+            DefaultTraceLogger.class
     })
     public WebApp war() {
         return new WebApp()

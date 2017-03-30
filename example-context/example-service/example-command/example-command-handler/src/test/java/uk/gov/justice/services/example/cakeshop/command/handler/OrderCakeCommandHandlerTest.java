@@ -20,7 +20,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStrea
 
 import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.core.extension.EventFoundEvent;
+import uk.gov.justice.services.core.extension.DefaultEventFoundEvent;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.example.cakeshop.domain.event.CakeOrdered;
@@ -70,7 +70,7 @@ public class OrderCakeCommandHandlerTest {
 
     @Test
     public void shouldHandleOrderCakeCommand() throws Exception {
-        enveloper.register(new EventFoundEvent(CakeOrdered.class, "CakeOrdered"));
+        enveloper.register(new DefaultEventFoundEvent(CakeOrdered.class, "CakeOrdered"));
         when(eventSource.getStreamById(ORDER_ID)).thenReturn(eventStream);
 
         final String deliveryDate = "2017-01-18T15:30:20.340Z";

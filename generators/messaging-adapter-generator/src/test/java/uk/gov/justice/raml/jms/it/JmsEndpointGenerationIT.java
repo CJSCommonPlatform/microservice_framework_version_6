@@ -9,19 +9,22 @@ import uk.gov.justice.api.PublicEventJmsListener;
 import uk.gov.justice.api.StructureControllerCommandJmsListener;
 import uk.gov.justice.api.StructureEventJmsListener;
 import uk.gov.justice.api.StructureHandlerCommandJmsListener;
-import uk.gov.justice.services.adapter.messaging.JmsParametersChecker;
-import uk.gov.justice.services.adapter.messaging.JmsProcessor;
+import uk.gov.justice.services.adapter.messaging.DefaultJmsParameterChecker;
+import uk.gov.justice.services.adapter.messaging.DefaultJmsProcessor;
 import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.eventfilter.AllowAllEventFilter;
 import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
+import uk.gov.justice.services.core.json.DefaultJsonValidationLoggerHelper;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.generators.test.utils.interceptor.RecordingInterceptorChainProcessor;
+import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
-import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
+import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
+import uk.gov.justice.services.messaging.logging.DefaultJmsMessageLoggerHelper;
+import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
 
 import java.util.UUID;
 
@@ -62,22 +65,25 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
 
     @Module
     @Classes(cdi = true, value = {
-            JmsProcessor.class,
+            DefaultJmsProcessor.class,
             RecordingInterceptorChainProcessor.class,
             StructureControllerCommandJmsListener.class,
             StructureEventJmsListener.class,
             StructureHandlerCommandJmsListener.class,
             PublicEventJmsListener.class,
             ObjectMapperProducer.class,
-            EnvelopeConverter.class,
+            DefaultEnvelopeConverter.class,
             StringToJsonObjectConverter.class,
-            JsonObjectEnvelopeConverter.class,
+            DefaultJsonObjectEnvelopeConverter.class,
             DefaultJsonSchemaValidator.class,
             JsonSchemaLoader.class,
             LoggerProducer.class,
             AllowAllEventFilter.class,
-            JmsParametersChecker.class,
-            TestServiceContextNameProvider.class
+            DefaultJmsParameterChecker.class,
+            TestServiceContextNameProvider.class,
+            DefaultJmsMessageLoggerHelper.class,
+            DefaultTraceLogger.class,
+            DefaultJsonValidationLoggerHelper.class
 
     })
     public WebApp war() {

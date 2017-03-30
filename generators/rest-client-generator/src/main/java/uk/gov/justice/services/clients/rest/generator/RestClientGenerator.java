@@ -8,6 +8,7 @@ import static uk.gov.justice.services.generators.commons.helper.Names.nameFrom;
 import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.INVALID_ACTION_MAPPING_ERROR_MSG;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
+import uk.gov.justice.services.adapter.rest.parameter.ParameterType;
 import uk.gov.justice.services.clients.core.EndpointDefinition;
 import uk.gov.justice.services.clients.core.QueryParam;
 import uk.gov.justice.services.clients.core.RestClientHelper;
@@ -19,7 +20,6 @@ import uk.gov.justice.services.generators.commons.client.ActionMimeTypeDefinitio
 import uk.gov.justice.services.generators.commons.mapping.ActionMapping;
 import uk.gov.justice.services.generators.commons.validator.RamlValidationException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.rest.ParameterType;
 
 import java.util.HashSet;
 import java.util.List;

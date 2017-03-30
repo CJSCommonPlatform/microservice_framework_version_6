@@ -2,7 +2,6 @@ package uk.gov.justice.services.example.cakeshop.command.handler;
 
 import static org.slf4j.LoggerFactory.getLogger;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
-import static uk.gov.justice.services.messaging.JsonObjects.getString;
 import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 
 import uk.gov.justice.services.core.aggregate.AggregateService;

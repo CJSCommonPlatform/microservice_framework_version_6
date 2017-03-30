@@ -32,17 +32,18 @@ import static uk.gov.justice.services.generators.commons.helper.Names.resourceIm
 import static uk.gov.justice.services.generators.commons.helper.Names.resourceInterfaceNameOf;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
-import uk.gov.justice.services.adapter.rest.BasicActionMapper;
-import uk.gov.justice.services.adapter.rest.mutipart.FileInputDetailsFactory;
-import uk.gov.justice.services.adapter.rest.parameter.ValidParameterCollectionBuilder;
+import uk.gov.justice.services.adapter.rest.mapping.ActionMapper;
+import uk.gov.justice.services.adapter.rest.multipart.FileInputDetailsFactory;
+import uk.gov.justice.services.adapter.rest.parameter.ParameterCollectionBuilder;
+import uk.gov.justice.services.adapter.rest.parameter.ParameterCollectionBuilderFactory;
+import uk.gov.justice.services.adapter.rest.parameter.ParameterType;
 import uk.gov.justice.services.adapter.rest.processor.RestProcessor;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.CustomAdapter;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
-import uk.gov.justice.services.messaging.logging.HttpMessageLoggerHelper;
-import uk.gov.justice.services.messaging.logging.LoggerUtils;
-import uk.gov.justice.services.rest.ParameterType;
+import uk.gov.justice.services.messaging.logging.HttpTraceLoggerHelper;
+import uk.gov.justice.services.messaging.logging.TraceLogger;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -101,8 +102,10 @@ class JaxRsImplementationGenerator {
 
     private static final String INTERCEPTOR_CHAIN_PROCESSOR_FIELD = "interceptorChainProcessor";
     private static final String ACTION_MAPPER_FIELD = "actionMapper";
-
     private static final String FILE_INPUT_DETAILS_FACTORY_FIELD = "fileInputDetailsFactory";
+    private static final String VALID_PARAMETER_COLLECTION_BUILDER_FACTORY_FIELD = "validParameterCollectionBuilderFactory";
+    private static final String TRACE_LOGGER_FIELD = "traceLogger";
+    private static final String HTTP_TRACE_LOGGER_HELPER_FIELD = "httpTraceLoggerHelper";
 
     private final GeneratorConfig configuration;
 
@@ -161,7 +164,7 @@ class JaxRsImplementationGenerator {
                 .addField(FieldSpec.builder(RestProcessor.class, "restProcessor")
                         .addAnnotation(Inject.class)
                         .build())
-                .addField(FieldSpec.builder(BasicActionMapper.class, ACTION_MAPPER_FIELD)
+                .addField(FieldSpec.builder(ActionMapper.class, ACTION_MAPPER_FIELD)
                         .addAnnotation(Inject.class)
                         .addAnnotation(AnnotationSpec.builder(Named.class)
                                 .addMember(DEFAULT_ANNOTATION_PARAMETER, "$S", className + "ActionMapper").build())
@@ -173,6 +176,15 @@ class JaxRsImplementationGenerator {
                         .addAnnotation(Context.class)
                         .build())
                 .addField(FieldSpec.builder(FileInputDetailsFactory.class, FILE_INPUT_DETAILS_FACTORY_FIELD)
+                        .addAnnotation(Inject.class)
+                        .build())
+                .addField(FieldSpec.builder(ParameterCollectionBuilderFactory.class, VALID_PARAMETER_COLLECTION_BUILDER_FACTORY_FIELD)
+                        .addAnnotation(Inject.class)
+                        .build())
+                .addField(FieldSpec.builder(TraceLogger.class, TRACE_LOGGER_FIELD)
+                        .addAnnotation(Inject.class)
+                        .build())
+                .addField(FieldSpec.builder(HttpTraceLoggerHelper.class, HTTP_TRACE_LOGGER_HELPER_FIELD)
                         .addAnnotation(Inject.class)
                         .build());
     }
@@ -518,14 +530,12 @@ class JaxRsImplementationGenerator {
      * @return the {@link CodeBlock} representing the general code
      */
     private CodeBlock methodBody(final Map<String, UriParameter> pathParams, final Supplier<CodeBlock> supplier) {
-        final ClassName classMapBuilderType = ClassName.get(ValidParameterCollectionBuilder.class);
-        final ClassName classLoggerUtils = ClassName.get(LoggerUtils.class);
-        final ClassName classHttpMessageLoggerHelper = ClassName.get(HttpMessageLoggerHelper.class);
+        final ClassName classMapBuilderType = ClassName.get(ParameterCollectionBuilder.class);
 
         return CodeBlock.builder()
-                .addStatement("final $T $L = new $T()", classMapBuilderType, VALID_PARAMETER_COLLECTION_BUILDER_VARIABLE, classMapBuilderType)
-                .addStatement("$T.trace(LOGGER, () -> String.format(\"Received REST request with headers: %s\", $T.toHttpHeaderTrace(headers)))",
-                        classLoggerUtils, classHttpMessageLoggerHelper)
+                .addStatement("final $T $L = $L.create()", classMapBuilderType, VALID_PARAMETER_COLLECTION_BUILDER_VARIABLE, VALID_PARAMETER_COLLECTION_BUILDER_FACTORY_FIELD)
+                .addStatement("$L.trace(LOGGER, () -> String.format(\"Received REST request with headers: %s\", $L.toHttpHeaderTrace(headers)))",
+                        TRACE_LOGGER_FIELD, HTTP_TRACE_LOGGER_HELPER_FIELD)
                 .add(putAllPathParamsInCollectionBuilder(pathParams.keySet()))
                 .add(supplier.get())
                 .build();

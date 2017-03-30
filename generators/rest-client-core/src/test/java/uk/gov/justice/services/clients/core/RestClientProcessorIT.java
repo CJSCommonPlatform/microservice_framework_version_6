@@ -36,12 +36,12 @@ import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 
+import uk.gov.justice.services.adapter.rest.parameter.ParameterType;
 import uk.gov.justice.services.clients.core.exception.InvalidResponseException;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.core.accesscontrol.AccessControlViolationException;
+import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
-import uk.gov.justice.services.rest.ParameterType;
 import uk.gov.justice.services.test.utils.core.helper.PortFinder;
 
 import java.io.IOException;
@@ -635,11 +635,11 @@ public class RestClientProcessorIT {
     }
 
     private JsonEnvelope requestEnvelopeParamAParamB() throws IOException {
-        return new JsonObjectEnvelopeConverter().asEnvelope(new StringToJsonObjectConverter().convert(jsonFromFile(REQUEST_PARAM_A_PARAM_B_FILE_NAME)));
+        return new DefaultJsonObjectEnvelopeConverter().asEnvelope(new StringToJsonObjectConverter().convert(jsonFromFile(REQUEST_PARAM_A_PARAM_B_FILE_NAME)));
     }
 
     private JsonEnvelope requestEnvelopeParamAParamCParamDParamE() throws IOException {
-        return new JsonObjectEnvelopeConverter().asEnvelope(new StringToJsonObjectConverter().convert(jsonFromFile(REQUEST_PARAM_A_PARAM_C_PARAM_D_PARAM_E_FILE_NAME)));
+        return new DefaultJsonObjectEnvelopeConverter().asEnvelope(new StringToJsonObjectConverter().convert(jsonFromFile(REQUEST_PARAM_A_PARAM_C_PARAM_D_PARAM_E_FILE_NAME)));
     }
 
     private String responseWithMetadata() throws IOException {
@@ -647,7 +647,7 @@ public class RestClientProcessorIT {
     }
 
     private JsonEnvelope postRequestEnvelope() throws IOException {
-        return new JsonObjectEnvelopeConverter().asEnvelope(new StringToJsonObjectConverter().convert(jsonFromFile(POST_REQUEST_WITH_METADATA_FILE_NAME)));
+        return new DefaultJsonObjectEnvelopeConverter().asEnvelope(new StringToJsonObjectConverter().convert(jsonFromFile(POST_REQUEST_WITH_METADATA_FILE_NAME)));
     }
 
     private void validateResponse(JsonEnvelope response, String expectedResponseJson) {
@@ -655,7 +655,7 @@ public class RestClientProcessorIT {
         assertThat(response.metadata().id().toString(), is(METADATA_ID_VALUE));
         assertThat(response.metadata().name(), is(QUERY_ACTION));
 
-        JSONAssert.assertEquals(expectedResponseJson, new JsonObjectEnvelopeConverter().fromEnvelope(response).toString(), false);
+        JSONAssert.assertEquals(expectedResponseJson, new DefaultJsonObjectEnvelopeConverter().fromEnvelope(response).toString(), false);
 
         assertThat(response.payloadAsJsonObject().getString(PAYLOAD_ID_NAME), is(PAYLOAD_ID_VALUE));
         assertThat(response.payloadAsJsonObject().getInt(PAYLOAD_VERSION_NAME), is(PAYLOAD_VERSION_VALUE));

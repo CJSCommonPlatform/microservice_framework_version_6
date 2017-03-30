@@ -30,8 +30,8 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatch
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 
-import uk.gov.justice.services.clients.core.RestClientHelper;
-import uk.gov.justice.services.clients.core.RestClientProcessor;
+import uk.gov.justice.services.clients.core.DefaultRestClientHelper;
+import uk.gov.justice.services.clients.core.DefaultRestClientProcessor;
 import uk.gov.justice.services.clients.core.webclient.BaseUriFactory;
 import uk.gov.justice.services.clients.core.webclient.ContextMatcher;
 import uk.gov.justice.services.clients.core.webclient.MockServerPortProvider;
@@ -44,12 +44,12 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.rest.DefaultServerPortProvider;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
-import uk.gov.justice.services.core.accesscontrol.AccessControlService;
 import uk.gov.justice.services.core.accesscontrol.AllowAllPolicyEvaluator;
+import uk.gov.justice.services.core.accesscontrol.DefaultAccessControlService;
 import uk.gov.justice.services.core.accesscontrol.PolicyEvaluator;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
-import uk.gov.justice.services.core.dispatcher.DispatcherCache;
+import uk.gov.justice.services.core.dispatcher.DefaultDispatcherCache;
 import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
 import uk.gov.justice.services.core.dispatcher.EmptySystemUserProvider;
 import uk.gov.justice.services.core.dispatcher.Requester;
@@ -57,7 +57,7 @@ import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandlerProducer;
-import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.core.enveloper.DefaultEnveloper;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.interceptor.InterceptorCache;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
@@ -69,11 +69,12 @@ import uk.gov.justice.services.core.sender.ComponentDestination;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
+import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonObjectMetadata;
+import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.DefaultJmsEnvelopeSender;
-import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
+import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
 
 import java.util.Properties;
 import java.util.UUID;
@@ -141,22 +142,21 @@ public class RemoteExampleEventProcessorIT {
     @Module
     @Classes(cdi = true, value = {
             AccessControlFailureMessageGenerator.class,
-            AccessControlService.class,
+            DefaultAccessControlService.class,
             AllowAllPolicyEvaluator.class,
             BaseUriFactory.class,
             BeanInstantiater.class,
             ContextMatcher.class,
             DefaultServerPortProvider.class,
-            DispatcherCache.class,
-            DispatcherCache.class,
+            DefaultDispatcherCache.class,
             DispatcherFactory.class,
             EmptySystemUserProvider.class,
-            Enveloper.class,
+            DefaultEnveloper.class,
             InterceptorCache.class,
             InterceptorChainProcessor.class,
             InterceptorChainProcessorProducer.class,
             JndiBasedServiceContextNameProvider.class,
-            JsonObjectEnvelopeConverter.class,
+            DefaultJsonObjectEnvelopeConverter.class,
             LoggerProducer.class,
             MockServerPortProvider.class,
             ObjectMapperProducer.class,
@@ -164,8 +164,8 @@ public class RemoteExampleEventProcessorIT {
             PolicyEvaluator.class,
             RemoteExampleCommandApi.class,
             RequesterProducer.class,
-            RestClientHelper.class,
-            RestClientProcessor.class,
+            DefaultRestClientHelper.class,
+            DefaultRestClientProcessor.class,
             ServiceComponentObserver.class,
             StringToJsonObjectConverter.class,
             SystemUserUtil.class,
@@ -178,11 +178,12 @@ public class RemoteExampleEventProcessorIT {
             ComponentDestination.class,
             DefaultJmsEnvelopeSender.class,
             DefaultJmsDestinations.class,
-            EnvelopeConverter.class,
+            DefaultEnvelopeConverter.class,
 
             DefaultJsonSchemaValidator.class,
             GlobalValueProducer.class,
-            EnvelopeValidationExceptionHandlerProducer.class
+            EnvelopeValidationExceptionHandlerProducer.class,
+            DefaultTraceLogger.class,
     })
     public WebApp war() {
         return new WebApp()

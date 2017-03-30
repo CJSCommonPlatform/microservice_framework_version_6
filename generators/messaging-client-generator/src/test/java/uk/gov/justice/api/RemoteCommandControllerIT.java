@@ -11,12 +11,12 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 import uk.gov.justice.services.common.configuration.GlobalValueProducer;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
-import uk.gov.justice.services.core.accesscontrol.AccessControlService;
 import uk.gov.justice.services.core.accesscontrol.AllowAllPolicyEvaluator;
+import uk.gov.justice.services.core.accesscontrol.DefaultAccessControlService;
 import uk.gov.justice.services.core.accesscontrol.PolicyEvaluator;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
-import uk.gov.justice.services.core.dispatcher.DispatcherCache;
+import uk.gov.justice.services.core.dispatcher.DefaultDispatcherCache;
 import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
 import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
@@ -33,6 +33,7 @@ import uk.gov.justice.services.core.sender.ComponentDestination;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
 import uk.gov.justice.test.util.RecordingJmsEnvelopeSender;
 
 import java.util.List;
@@ -86,11 +87,11 @@ public class RemoteCommandControllerIT {
     @Module
     @Classes(cdi = true, value = {
             AccessControlFailureMessageGenerator.class,
-            AccessControlService.class,
+            DefaultAccessControlService.class,
             AllowAllPolicyEvaluator.class,
             InterceptorChainProcessor.class,
             ComponentDestination.class,
-            DispatcherCache.class,
+            DefaultDispatcherCache.class,
             DispatcherFactory.class,
             DefaultJmsDestinations.class,
             JmsSenderFactory.class,
@@ -108,7 +109,8 @@ public class RemoteCommandControllerIT {
             EnvelopeValidationExceptionHandlerProducer.class,
             DefaultJsonSchemaValidator.class,
             JsonSchemaLoader.class,
-            ObjectMapperProducer.class
+            ObjectMapperProducer.class,
+            DefaultTraceLogger.class
     })
     public WebApp war() {
         return new WebApp()

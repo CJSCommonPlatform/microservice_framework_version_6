@@ -28,6 +28,7 @@ import static uk.gov.justice.services.generators.test.utils.config.GeneratorConf
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.methodsOf;
+import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.setField;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
@@ -36,6 +37,7 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.Remote;
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
 import uk.gov.justice.services.test.utils.common.logger.TestLogAppender;
 
 import java.io.File;
@@ -52,7 +54,6 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.TypeName;
 import org.apache.log4j.spi.LoggingEvent;
-import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -237,7 +238,10 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
 
         final List<Method> methods = methodsOf(generatedClass);
         assertThat(methods, hasSize(1));
+
         final Object instance = generatedClass.newInstance();
+        setField(instance, "traceLogger", new DefaultTraceLogger());
+
         final Method method = firstMethodOf(generatedClass);
         final Object result = method.invoke(instance, envelope().build());
         assertThat(result, is(12345678));

@@ -10,6 +10,9 @@ import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static uk.gov.justice.services.adapter.rest.parameter.ParameterType.BOOLEAN;
+import static uk.gov.justice.services.adapter.rest.parameter.ParameterType.NUMERIC;
+import static uk.gov.justice.services.adapter.rest.parameter.ParameterType.STRING;
 import static uk.gov.justice.services.common.http.HeaderConstants.CLIENT_CORRELATION_ID;
 import static uk.gov.justice.services.messaging.JsonEnvelope.METADATA;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.CAUSATION;
@@ -25,12 +28,9 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.USER_ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.VERSION;
 import static uk.gov.justice.services.messaging.JsonObjects.getJsonObject;
 import static uk.gov.justice.services.messaging.JsonObjects.getString;
-import static uk.gov.justice.services.rest.ParameterType.BOOLEAN;
-import static uk.gov.justice.services.rest.ParameterType.NUMERIC;
-import static uk.gov.justice.services.rest.ParameterType.STRING;
 
 import uk.gov.justice.services.adapter.rest.exception.BadRequestException;
-import uk.gov.justice.services.adapter.rest.parameter.Parameter;
+import uk.gov.justice.services.adapter.rest.parameter.DefaultParameter;
 import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
@@ -121,7 +121,7 @@ public class RestEnvelopeBuilderTest {
     @Test
     public void shouldAddStringParam() {
 
-        final RestEnvelopeBuilder builder = builderWithDefaultAction().withParams(ImmutableList.of(Parameter.valueOf("test2", "value2", STRING)));
+        final RestEnvelopeBuilder builder = builderWithDefaultAction().withParams(ImmutableList.of(DefaultParameter.valueOf("test2", "value2", STRING)));
         final JsonEnvelope envelope = builder.build();
         assertThat(envelope.payloadAsJsonObject().getString("test2"), is("value2"));
     }
@@ -129,7 +129,7 @@ public class RestEnvelopeBuilderTest {
     @Test
     public void shouldAddNumericParams() {
 
-        final RestEnvelopeBuilder builder = builderWithDefaultAction().withParams(ImmutableList.of(Parameter.valueOf("param1", "3", NUMERIC)));
+        final RestEnvelopeBuilder builder = builderWithDefaultAction().withParams(ImmutableList.of(DefaultParameter.valueOf("param1", "3", NUMERIC)));
         final JsonEnvelope envelope = builder.build();
         assertThat(envelope.payloadAsJsonObject().getInt("param1"), is(3));
     }
@@ -137,7 +137,7 @@ public class RestEnvelopeBuilderTest {
     @Test
     public void shouldAddBooleanParams() {
 
-        final RestEnvelopeBuilder builder = builderWithDefaultAction().withParams(ImmutableList.of(Parameter.valueOf("param1", "true", BOOLEAN)));
+        final RestEnvelopeBuilder builder = builderWithDefaultAction().withParams(ImmutableList.of(DefaultParameter.valueOf("param1", "true", BOOLEAN)));
         final JsonEnvelope envelope = builder.build();
         assertThat(envelope.payloadAsJsonObject().getBoolean("param1"), is(true));
     }

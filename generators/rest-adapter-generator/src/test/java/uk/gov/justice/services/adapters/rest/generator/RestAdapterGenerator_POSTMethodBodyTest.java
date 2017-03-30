@@ -18,7 +18,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.raml.model.ActionType.POST;
-import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
+import static uk.gov.justice.services.core.interceptor.DefaultInterceptorContext.interceptorContextWithInput;
 import static uk.gov.justice.services.generators.test.utils.builder.HeadersBuilder.headersWith;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.mapping;
@@ -32,8 +32,9 @@ import static uk.gov.justice.services.generators.test.utils.reflection.Reflectio
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.setField;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
+import uk.gov.justice.services.adapter.rest.mapping.ActionMapperHelper;
+import uk.gov.justice.services.adapter.rest.mapping.BasicActionMapperHelper;
 import uk.gov.justice.services.adapter.rest.parameter.Parameter;
-import uk.gov.justice.services.adapter.rest.processor.response.ResponseStrategy;
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
@@ -317,7 +318,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
         final Object resourceObject = getInstanceOf(resourceClass);
 
         final Class<?> actionMapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultUserResourceActionMapper");
-        final Object actionMapperObject = actionMapperClass.newInstance();
+        final Object actionMapperObject = actionMapperClass.getConstructor(ActionMapperHelper.class).newInstance(new BasicActionMapperHelper());
         setField(resourceObject, "actionMapper", actionMapperObject);
 
         setField(resourceObject, "headers", headersWith("Content-Type", "application/vnd.somemediatype1+json"));

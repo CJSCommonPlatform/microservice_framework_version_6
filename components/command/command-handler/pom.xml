@@ -20,6 +20,11 @@
 
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
+            <artifactId>common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
             <artifactId>core</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -40,17 +45,7 @@
         </dependency>
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
-            <artifactId>event-publisher-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>uk.gov.justice.services</groupId>
             <artifactId>event-publisher-jms</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>uk.gov.justice.services</groupId>
-            <artifactId>event-repository-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

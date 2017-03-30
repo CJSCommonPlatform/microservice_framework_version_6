@@ -8,13 +8,16 @@ import static org.junit.Assert.assertThat;
 import uk.gov.justice.api.CustomApiRestExampleApplication;
 import uk.gov.justice.api.mapper.DefaultCustomUserIdResourceActionMapper;
 import uk.gov.justice.services.adapter.rest.application.CommonProviders;
+import uk.gov.justice.services.adapter.rest.application.DefaultCommonProviders;
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
 import uk.gov.justice.services.adapter.rest.filter.LoggerRequestDataFilter;
 import uk.gov.justice.services.adapter.rest.interceptor.JsonSchemaValidationInterceptor;
 import uk.gov.justice.services.adapter.rest.mapper.BadRequestExceptionMapper;
-import uk.gov.justice.services.adapter.rest.mutipart.FileBasedInterceptorContextFactory;
-import uk.gov.justice.services.adapter.rest.mutipart.FileInputDetailsFactory;
-import uk.gov.justice.services.adapter.rest.mutipart.InputPartFileNameExtractor;
+import uk.gov.justice.services.adapter.rest.mapping.BasicActionMapperHelper;
+import uk.gov.justice.services.adapter.rest.multipart.DefaultFileInputDetailsFactory;
+import uk.gov.justice.services.adapter.rest.multipart.FileBasedInterceptorContextFactory;
+import uk.gov.justice.services.adapter.rest.multipart.InputPartFileNameExtractor;
+import uk.gov.justice.services.adapter.rest.parameter.ValidParameterCollectionBuilderFactory;
 import uk.gov.justice.services.adapter.rest.processor.DefaultRestProcessor;
 import uk.gov.justice.services.adapter.rest.processor.ResponseStrategyCache;
 import uk.gov.justice.services.adapter.rest.processor.response.AcceptedStatusNoEntityResponseStrategy;
@@ -28,8 +31,10 @@ import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.generators.test.utils.interceptor.RecordingInterceptorChainProcessor;
+import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
+import uk.gov.justice.services.messaging.logging.DefaultHttpTraceLoggerHelper;
+import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Properties;
@@ -107,8 +112,8 @@ public class DefaultCustomUserIdResourceIT {
             RestEnvelopeBuilderFactory.class,
             RecordingInterceptorChainProcessor.class,
             ObjectMapperProducer.class,
-            JsonObjectEnvelopeConverter.class,
-            CommonProviders.class,
+            DefaultJsonObjectEnvelopeConverter.class,
+            DefaultCommonProviders.class,
             DummyCommonProviders.class,
             BadRequestExceptionMapper.class,
             JsonSchemaValidationInterceptor.class,
@@ -117,12 +122,16 @@ public class DefaultCustomUserIdResourceIT {
             DefaultJsonSchemaValidator.class,
             JsonSchemaLoader.class,
             DefaultCustomUserIdResourceActionMapper.class,
+            BasicActionMapperHelper.class,
             LoggerProducer.class,
             StringToJsonObjectConverter.class,
             FileBasedInterceptorContextFactory.class,
             InputPartFileNameExtractor.class,
-            FileInputDetailsFactory.class,
-            ResponseStrategyCache.class
+            DefaultFileInputDetailsFactory.class,
+            ResponseStrategyCache.class,
+            ValidParameterCollectionBuilderFactory.class,
+            DefaultTraceLogger.class,
+            DefaultHttpTraceLoggerHelper.class
     })
     public WebApp war() {
         return new WebApp()

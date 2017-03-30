@@ -29,7 +29,7 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.util.Clock;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
-import uk.gov.justice.services.core.extension.EventFoundEvent;
+import uk.gov.justice.services.core.extension.DefaultEventFoundEvent;
 import uk.gov.justice.services.eventsource.DefaultEventDestinationResolver;
 import uk.gov.justice.services.eventsourcing.publisher.jms.JmsEventPublisher;
 import uk.gov.justice.services.eventsourcing.repository.core.EventRepository;
@@ -44,9 +44,9 @@ import uk.gov.justice.services.eventsourcing.source.core.SnapshotAwareEnvelopeEv
 import uk.gov.justice.services.eventsourcing.source.core.SnapshotAwareEventSource;
 import uk.gov.justice.services.eventsourcing.source.core.snapshot.DefaultSnapshotService;
 import uk.gov.justice.services.eventsourcing.source.core.snapshot.DefaultSnapshotStrategy;
+import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
-import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
+import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
 
 import java.util.LinkedList;
@@ -138,9 +138,9 @@ public class SnapshotAwareAggregateServiceIT {
             LoggerProducer.class,
 
             EventLogConverter.class,
-            EnvelopeConverter.class,
+            DefaultEnvelopeConverter.class,
             StringToJsonObjectConverter.class,
-            JsonObjectEnvelopeConverter.class,
+            DefaultJsonObjectEnvelopeConverter.class,
             JsonObjectToObjectConverter.class,
             ObjectMapperProducer.class,
 
@@ -171,7 +171,7 @@ public class SnapshotAwareAggregateServiceIT {
     @Before
     public void init() throws Exception {
         initEventDatabase();
-        defaultAggregateService.register(new EventFoundEvent(EventA.class, "context.eventA"));
+        defaultAggregateService.register(new DefaultEventFoundEvent(EventA.class, "context.eventA"));
     }
 
     @Test
@@ -406,41 +406,41 @@ public class SnapshotAwareAggregateServiceIT {
         return classLoader;
     }
 
-    private <T extends Aggregate> void rebuildAggregateAndApplyEvents(final EventStream eventStream, long eventCount) throws Exception {
+    private <T extends Aggregate> void rebuildAggregateAndApplyEvents(final EventStream eventStream, final long eventCount) throws Exception {
 
         TestAggregate aggregateRebuilt = aggregateService.get(eventStream, TestAggregate.class);
 
         eventStream.append(createEventAndApply(eventCount, "context.eventA", aggregateRebuilt));
     }
 
-    private Stream<JsonEnvelope> createEventAndApply(long count, String eventName, TestAggregate aggregate) {
+    private Stream<JsonEnvelope> createEventAndApply(final long count, final String eventName, TestAggregate aggregate) {
         List<Object> envelopes = new LinkedList<>();
         for (int i = 1; i <= count; i++) {
             JsonEnvelope envelope =
                     envelope()
-                    .with(metadataWithRandomUUID(eventName)
-                            .createdAt(clock.now())
-                            .withStreamId(STREAM_ID))
-                    .withPayloadOf("value", "name")
-                    .build();
+                            .with(metadataWithRandomUUID(eventName)
+                                    .createdAt(clock.now())
+                                    .withStreamId(STREAM_ID))
+                            .withPayloadOf("value", "name")
+                            .build();
             aggregate.addEvent(envelope);
             envelopes.add(envelope);
         }
         return envelopes.stream().map(x -> (JsonEnvelope) x);
     }
 
-    private <T extends Aggregate> Stream<JsonEnvelope> createEventStreamAndApply(long count, String eventName, T aggregate) {
+    private <T extends Aggregate> Stream<JsonEnvelope> createEventStreamAndApply(final long count, String eventName, final T aggregate) {
         List<Object> envelopes = new LinkedList<>();
 
         for (int i = 1; i <= count; i++) {
 
             JsonEnvelope envelope =
                     envelope()
-                    .with(metadataWithRandomUUID(eventName)
-                            .createdAt(clock.now())
-                            .withStreamId(STREAM_ID))
-                    .withPayloadOf("value", "name")
-                    .build();
+                            .with(metadataWithRandomUUID(eventName)
+                                    .createdAt(clock.now())
+                                    .withStreamId(STREAM_ID))
+                            .withPayloadOf("value", "name")
+                            .build();
 
             aggregate.apply(new EventA(String.valueOf(i)));
             envelopes.add(envelope);

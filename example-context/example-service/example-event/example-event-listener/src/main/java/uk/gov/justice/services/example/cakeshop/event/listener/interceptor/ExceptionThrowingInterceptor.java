@@ -4,7 +4,6 @@ import uk.gov.justice.services.core.interceptor.Interceptor;
 import uk.gov.justice.services.core.interceptor.InterceptorChain;
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.json.JsonObject;
 
 /**

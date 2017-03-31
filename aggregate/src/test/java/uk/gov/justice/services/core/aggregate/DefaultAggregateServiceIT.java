@@ -38,7 +38,7 @@ import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamEx
 import uk.gov.justice.services.jdbc.persistence.AbstractJdbcRepository;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
+import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
 import uk.gov.justice.services.repository.EventLogOpenEjbAwareJdbcRepository;
 
@@ -105,7 +105,7 @@ public class DefaultAggregateServiceIT {
             EventStreamManager.class,
             EventAppender.class,
 
-            EnvelopeConverter.class,
+            DefaultEnvelopeConverter.class,
             EventLogConverter.class,
             StringToJsonObjectConverter.class,
             DefaultJsonObjectEnvelopeConverter.class,

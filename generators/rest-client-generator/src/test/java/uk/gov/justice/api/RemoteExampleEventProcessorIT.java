@@ -30,8 +30,8 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatch
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 
-import uk.gov.justice.services.clients.core.RestClientHelper;
-import uk.gov.justice.services.clients.core.RestClientProcessor;
+import uk.gov.justice.services.clients.core.DefaultRestClientHelper;
+import uk.gov.justice.services.clients.core.DefaultRestClientProcessor;
 import uk.gov.justice.services.clients.core.webclient.BaseUriFactory;
 import uk.gov.justice.services.clients.core.webclient.ContextMatcher;
 import uk.gov.justice.services.clients.core.webclient.MockServerPortProvider;
@@ -72,8 +72,9 @@ import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectMetadata;
+import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.DefaultJmsEnvelopeSender;
-import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
+import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
 
 import java.util.Properties;
 import java.util.UUID;
@@ -163,8 +164,8 @@ public class RemoteExampleEventProcessorIT {
             PolicyEvaluator.class,
             RemoteExampleCommandApi.class,
             RequesterProducer.class,
-            RestClientHelper.class,
-            RestClientProcessor.class,
+            DefaultRestClientHelper.class,
+            DefaultRestClientProcessor.class,
             ServiceComponentObserver.class,
             StringToJsonObjectConverter.class,
             SystemUserUtil.class,
@@ -177,11 +178,12 @@ public class RemoteExampleEventProcessorIT {
             ComponentDestination.class,
             DefaultJmsEnvelopeSender.class,
             DefaultJmsDestinations.class,
-            EnvelopeConverter.class,
+            DefaultEnvelopeConverter.class,
 
             DefaultJsonSchemaValidator.class,
             GlobalValueProducer.class,
-            EnvelopeValidationExceptionHandlerProducer.class
+            EnvelopeValidationExceptionHandlerProducer.class,
+            DefaultTraceLogger.class,
     })
     public WebApp war() {
         return new WebApp()

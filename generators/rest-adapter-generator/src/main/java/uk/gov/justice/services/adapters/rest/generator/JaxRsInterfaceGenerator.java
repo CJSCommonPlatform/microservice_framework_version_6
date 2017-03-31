@@ -17,6 +17,8 @@ import static uk.gov.justice.services.generators.commons.helper.Names.buildResou
 import static uk.gov.justice.services.generators.commons.helper.Names.buildResourceMethodNameWithNoMimeType;
 import static uk.gov.justice.services.generators.commons.helper.Names.resourceInterfaceNameOf;
 
+import uk.gov.justice.services.adapter.rest.annotation.PATCH;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -217,7 +219,7 @@ class JaxRsInterfaceGenerator {
                 return AnnotationSpec.builder(javax.ws.rs.GET.class).build();
 
             case PATCH:
-                return AnnotationSpec.builder(uk.gov.justice.services.rest.annotation.PATCH.class).build();
+                return AnnotationSpec.builder(PATCH.class).build();
 
             case POST:
                 return AnnotationSpec.builder(javax.ws.rs.POST.class).build();

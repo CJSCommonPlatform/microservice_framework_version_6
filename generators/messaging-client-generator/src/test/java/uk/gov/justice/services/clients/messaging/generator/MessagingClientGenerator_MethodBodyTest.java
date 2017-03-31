@@ -1,5 +1,6 @@
 package uk.gov.justice.services.clients.messaging.generator;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.messagingRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
@@ -12,6 +13,8 @@ import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
+import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
+import uk.gov.justice.services.messaging.logging.TraceLogger;
 
 import java.lang.reflect.Method;
 
@@ -23,10 +26,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MessagingClientGenerator_MethodBodyTest extends BaseGeneratorTest {
-    
+
     @Mock
     private JmsEnvelopeSender sender;
-    
+
     @Before
     public void before() {
         super.before();
@@ -43,8 +46,9 @@ public class MessagingClientGenerator_MethodBodyTest extends BaseGeneratorTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
 
-        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCakeshopControllerCommand");
+        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCakeshopControllerCommand");
         final Object instance = instanceOf(generatedClass);
+        setField(instance, "traceLogger", mock(TraceLogger.class));
 
         JsonEnvelope envelope = envelope().build();
         Method method = firstMethodOf(generatedClass);

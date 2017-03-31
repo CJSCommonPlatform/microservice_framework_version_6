@@ -2,10 +2,10 @@ package uk.gov.justice.services.messaging.jms;
 
 import static java.lang.String.format;
 import static javax.jms.Session.AUTO_ACKNOWLEDGE;
-import static uk.gov.justice.services.messaging.logging.LoggerUtils.trace;
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.exception.JmsEnvelopeSenderException;
+import uk.gov.justice.services.messaging.logging.TraceLogger;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
@@ -35,6 +35,9 @@ public class DefaultJmsEnvelopeSender implements JmsEnvelopeSender {
     @Inject
     EnvelopeConverter envelopeConverter;
 
+    @Inject
+    TraceLogger traceLogger;
+
     Context namingContext = new InitialContext();
 
     public DefaultJmsEnvelopeSender() throws NamingException {
@@ -48,7 +51,7 @@ public class DefaultJmsEnvelopeSender implements JmsEnvelopeSender {
      */
     @Override
     public void send(final JsonEnvelope envelope, final Destination destination) {
-        trace(LOGGER, () -> format("Sending JMS message: %s to %s", envelope,
+        traceLogger.trace(LOGGER, () -> format("Sending JMS message: %s to %s", envelope,
                 destination.toString()));
         try (Connection connection = connectionFactory.createConnection();
              Session session = connection.createSession(false, AUTO_ACKNOWLEDGE);
@@ -59,14 +62,14 @@ public class DefaultJmsEnvelopeSender implements JmsEnvelopeSender {
         } catch (JMSException e) {
             throw new JmsEnvelopeSenderException(format("Exception while sending envelope with name %s", envelope.metadata().name()), e);
         }
-        trace(LOGGER, () -> format("Sent JMS message: %s to %s", envelope,
+        traceLogger.trace(LOGGER, () -> format("Sent JMS message: %s to %s", envelope,
                 destination.toString()));
     }
 
     /**
      * Sends envelope to the destination via JMS.
      *
-     * @param envelope    envelope to be sent.
+     * @param envelope        envelope to be sent.
      * @param destinationName JNDI name of the JMS destination.
      */
     @Override

@@ -2,14 +2,13 @@ package uk.gov.justice.services.adapter.rest.interceptor;
 
 import static javax.json.Json.createObjectBuilder;
 
-import uk.gov.justice.services.adapter.rest.mutipart.FileInputDetails;
+import uk.gov.justice.services.adapter.rest.multipart.FileInputDetails;
 
 import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.json.JsonObject;
-import javax.ws.rs.core.MediaType;
 
 @ApplicationScoped
 public class FileInputDetailsHandler {

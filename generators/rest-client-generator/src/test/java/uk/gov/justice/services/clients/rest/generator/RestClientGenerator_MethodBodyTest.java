@@ -34,13 +34,14 @@ import static uk.gov.justice.services.generators.test.utils.reflection.Reflectio
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.setField;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
+import uk.gov.justice.services.adapter.rest.parameter.ParameterType;
 import uk.gov.justice.services.clients.core.EndpointDefinition;
 import uk.gov.justice.services.clients.core.RestClientHelper;
 import uk.gov.justice.services.clients.core.RestClientProcessor;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.rest.ParameterType;
+import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -167,7 +168,7 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, NOT_USED_GENERATOR_PROPERTIES));
 
         final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceQueryApi");
-        final Object remoteClient = instanceOf(clazz);
+        final Object remoteClient = instanceOfRemoteClient(clazz);
         final Method method = firstMethodOf(clazz);
 
         final JsonEnvelope envelope = envelope().build();
@@ -187,7 +188,7 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
         final Function function = mock(Function.class);
 
         final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
-        final Object remoteClient = instanceOf(clazz);
+        final Object remoteClient = instanceOfRemoteClient(clazz);
         final Method method = firstMethodOf(clazz);
 
         when(enveloper.withMetadataFrom(envelope, "ctx.defcmd")).thenReturn(function);
@@ -209,7 +210,7 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
         final Function function = mock(Function.class);
 
         final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
-        final Object remoteClient = instanceOf(clazz);
+        final Object remoteClient = instanceOfRemoteClient(clazz);
         final Method method = firstMethodOf(clazz);
 
         when(enveloper.withMetadataFrom(envelope, "ctx.defcmd")).thenReturn(function);
@@ -241,7 +242,7 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
         final Function function = mock(Function.class);
 
         final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
-        final Object remoteClient = instanceOf(clazz);
+        final Object remoteClient = instanceOfRemoteClient(clazz);
         final Method method = firstMethodOf(clazz);
 
         when(enveloper.withMetadataFrom(envelope, "ctx.defcmd")).thenReturn(function);
@@ -271,7 +272,7 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
         final Function function = mock(Function.class);
 
         final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
-        final Object remoteClient = instanceOf(clazz);
+        final Object remoteClient = instanceOfRemoteClient(clazz);
         final Method method = firstMethodOf(clazz);
 
         when(enveloper.withMetadataFrom(envelope, "ctx.defcmd")).thenReturn(function);
@@ -303,7 +304,7 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
         final Function function = mock(Function.class);
 
         final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
-        final Object remoteClient = instanceOf(clazz);
+        final Object remoteClient = instanceOfRemoteClient(clazz);
         final Method method = firstMethodOf(clazz);
 
         when(enveloper.withMetadataFrom(envelope, "ctx.defcmd")).thenReturn(function);
@@ -333,7 +334,7 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
         final Function function = mock(Function.class);
 
         final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
-        final Object remoteClient = instanceOf(clazz);
+        final Object remoteClient = instanceOfRemoteClient(clazz);
         final Method method = firstMethodOf(clazz);
 
         when(enveloper.withMetadataFrom(envelope, "ctx.defcmd")).thenReturn(function);
@@ -365,7 +366,8 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
         final Function function = mock(Function.class);
 
         final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
-        final Object remoteClient = instanceOf(clazz);
+        final Object remoteClient = instanceOfRemoteClient(clazz);
+
         final Method method = firstMethodOf(clazz);
 
         when(enveloper.withMetadataFrom(envelope, "ctx.defcmd")).thenReturn(function);
@@ -395,7 +397,7 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
         final Function function = mock(Function.class);
 
         final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
-        final Object remoteClient = instanceOf(clazz);
+        final Object remoteClient = instanceOfRemoteClient(clazz);
         final Method method = firstMethodOf(clazz);
 
         when(enveloper.withMetadataFrom(envelope, "ctx.defcmd")).thenReturn(function);
@@ -406,8 +408,14 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
         verify(restClientProcessor).delete(any(EndpointDefinition.class), eq(outputEnvelope));
     }
 
-    private void invokeFirstMethod(final Class<?> clazz) throws InstantiationException, IllegalAccessException, InvocationTargetException {
+    private Object instanceOfRemoteClient(final Class<?> clazz) throws InstantiationException, IllegalAccessException {
         final Object remoteClient = instanceOf(clazz);
+        setField(remoteClient, "traceLogger", new DefaultTraceLogger());
+        return remoteClient;
+    }
+
+    private void invokeFirstMethod(final Class<?> clazz) throws InstantiationException, IllegalAccessException, InvocationTargetException {
+        final Object remoteClient = instanceOfRemoteClient(clazz);
         final Method method = firstMethodOf(clazz);
         method.invoke(remoteClient, NOT_USED_ENVELOPE);
     }

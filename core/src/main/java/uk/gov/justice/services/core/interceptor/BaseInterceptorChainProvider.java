@@ -12,7 +12,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
 
-public abstract class DefaultInterceptorChainProvider implements InterceptorChainProvider {
+public abstract class BaseInterceptorChainProvider implements InterceptorChainProvider {
 
     @Override
     public List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes() {

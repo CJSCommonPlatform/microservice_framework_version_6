@@ -3,16 +3,15 @@ package uk.gov.justice.services.adapter.rest.processor;
 import static java.lang.String.format;
 import static java.util.Optional.empty;
 import static uk.gov.justice.services.core.interceptor.DefaultInterceptorContext.interceptorContextWithInput;
-import static uk.gov.justice.services.messaging.logging.HttpMessageLoggerHelper.toHttpHeaderTrace;
-import static uk.gov.justice.services.messaging.logging.LoggerUtils.trace;
 
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
-import uk.gov.justice.services.adapter.rest.mutipart.FileBasedInterceptorContextFactory;
-import uk.gov.justice.services.adapter.rest.mutipart.FileInputDetails;
+import uk.gov.justice.services.adapter.rest.multipart.FileBasedInterceptorContextFactory;
+import uk.gov.justice.services.adapter.rest.multipart.FileInputDetails;
 import uk.gov.justice.services.adapter.rest.parameter.Parameter;
-import uk.gov.justice.services.adapter.rest.processor.response.ResponseStrategy;
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.logging.HttpTraceLoggerHelper;
+import uk.gov.justice.services.messaging.logging.TraceLogger;
 
 import java.util.Collection;
 import java.util.List;
@@ -42,6 +41,11 @@ public class DefaultRestProcessor implements RestProcessor {
     @Inject
     FileBasedInterceptorContextFactory fileBasedInterceptorContextFactory;
 
+    @Inject
+    TraceLogger traceLogger;
+
+    @Inject
+    HttpTraceLoggerHelper httpTraceLoggerHelper;
 
     @Override
     public Response process(final String responseStrategyName,
@@ -82,7 +86,7 @@ public class DefaultRestProcessor implements RestProcessor {
                              final Collection<Parameter> params,
                              final Optional<List<FileInputDetails>> fileInputDetails) {
 
-        trace(logger, () -> format("Processing REST message: %s", toHttpHeaderTrace(headers)));
+        traceLogger.trace(logger, () -> format("Processing REST message: %s", httpTraceLoggerHelper.toHttpHeaderTrace(headers)));
 
         final JsonEnvelope envelope = envelopeBuilderFactory.builder()
                 .withInitialPayload(initialPayload)
@@ -91,7 +95,7 @@ public class DefaultRestProcessor implements RestProcessor {
                 .withParams(params)
                 .build();
 
-        trace(logger, () -> format("REST message converted to envelope: %s", envelope));
+        traceLogger.trace(logger, () -> format("REST message converted to envelope: %s", envelope));
 
         final InterceptorContext interceptorContext = fileInputDetails
                 .map(value -> fileBasedInterceptorContextFactory.create(value, envelope))
@@ -99,7 +103,7 @@ public class DefaultRestProcessor implements RestProcessor {
 
         final Optional<JsonEnvelope> result = interceptorChain.apply(interceptorContext);
 
-        trace(logger, () -> format("REST message processed: %s", envelope));
+        traceLogger.trace(logger, () -> format("REST message processed: %s", envelope));
 
         return responseStrategyCache.responseStrategyOf(responseStrategyName).responseFor(action, result);
     }

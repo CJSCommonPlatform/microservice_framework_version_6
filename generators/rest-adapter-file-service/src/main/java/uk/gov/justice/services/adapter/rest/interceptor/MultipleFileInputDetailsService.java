@@ -1,6 +1,6 @@
 package uk.gov.justice.services.adapter.rest.interceptor;
 
-import uk.gov.justice.services.adapter.rest.mutipart.FileInputDetails;
+import uk.gov.justice.services.adapter.rest.multipart.FileInputDetails;
 
 import java.util.HashMap;
 import java.util.List;

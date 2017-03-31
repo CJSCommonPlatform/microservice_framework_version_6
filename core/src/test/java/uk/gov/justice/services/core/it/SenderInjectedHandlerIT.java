@@ -41,8 +41,9 @@ import uk.gov.justice.services.core.sender.ComponentDestination;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
+import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.DefaultJmsEnvelopeSender;
-import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
+import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
 
 import java.util.UUID;
 
@@ -74,7 +75,7 @@ public class SenderInjectedHandlerIT {
             ComponentDestination.class,
             DefaultJmsEnvelopeSender.class,
             DefaultJmsDestinations.class,
-            EnvelopeConverter.class,
+            DefaultEnvelopeConverter.class,
             StringToJsonObjectConverter.class,
             DefaultJsonObjectEnvelopeConverter.class,
             ObjectToJsonValueConverter.class,
@@ -96,9 +97,8 @@ public class SenderInjectedHandlerIT {
             TestEnvelopeValidationExceptionHandlerProducer.class,
             GlobalValueProducer.class,
             DefaultJsonSchemaValidator.class,
-            JsonSchemaLoader.class
-
-
+            JsonSchemaLoader.class,
+            DefaultTraceLogger.class
     })
     public WebApp war() {
         return new WebApp()

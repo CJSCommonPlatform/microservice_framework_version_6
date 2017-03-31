@@ -18,8 +18,8 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatch
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 
-import uk.gov.justice.services.clients.core.RestClientHelper;
-import uk.gov.justice.services.clients.core.RestClientProcessor;
+import uk.gov.justice.services.clients.core.DefaultRestClientHelper;
+import uk.gov.justice.services.clients.core.DefaultRestClientProcessor;
 import uk.gov.justice.services.clients.core.webclient.BaseUriFactory;
 import uk.gov.justice.services.clients.core.webclient.ContextMatcher;
 import uk.gov.justice.services.clients.core.webclient.MockServerPortProvider;
@@ -58,6 +58,7 @@ import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectMetadata;
+import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
 
 import java.util.Optional;
 import java.util.Properties;
@@ -143,8 +144,8 @@ public class RemoteExampleQueryApiIT {
             ObjectToJsonValueConverter.class,
             PolicyEvaluator.class,
             RequesterProducer.class,
-            RestClientHelper.class,
-            RestClientProcessor.class,
+            DefaultRestClientHelper.class,
+            DefaultRestClientProcessor.class,
             ServiceComponentObserver.class,
             StringToJsonObjectConverter.class,
             SystemUserUtil.class,
@@ -160,7 +161,8 @@ public class RemoteExampleQueryApiIT {
             GlobalValueProducer.class,
             EnvelopeValidationExceptionHandlerProducer.class,
             DefaultJsonSchemaValidator.class,
-            JsonSchemaLoader.class
+            JsonSchemaLoader.class,
+            DefaultTraceLogger.class
     })
     public WebApp war() {
         return new WebApp()
@@ -170,13 +172,13 @@ public class RemoteExampleQueryApiIT {
 
     @Before
     public void setUp() throws Exception {
+
         stubFor(get(urlEqualTo(BASE_PATH + format("/users/%s", USER_ID)))
                 .withHeader("Accept", equalTo(MIME_TYPE))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", MIME_TYPE)
                         .withBody(RESPONSE.toDebugStringPrettyPrint())));
-
     }
 
     @Test
@@ -186,10 +188,6 @@ public class RemoteExampleQueryApiIT {
                 .with(metadataOf(randomUUID(), PEOPLE_GET_USER1))
                 .withPayloadOf(USER_ID, "userId")
                 .build();
-
-
-        final String path = format("/users/%s", USER_ID);
-
 
         final JsonEnvelope response = requester.request(query);
         assertThat(response, jsonEnvelope(
@@ -220,8 +218,6 @@ public class RemoteExampleQueryApiIT {
                 .withHeader("CPPCAUSATION", equalTo("391de66a-4e7c-11e6-beb8-9e71128cae77,391ded4a-4e7c-11e6-beb8-9e71128cae77"))
 
         );
-
-
     }
 
     @Test
@@ -237,13 +233,10 @@ public class RemoteExampleQueryApiIT {
         verify(getRequestedFor(urlEqualTo(format("%s/users/%s", BASE_PATH, USER_ID)))
                 .withHeader("CJSCPPUID", equalTo(TEST_SYSTEM_USER_ID))
         );
-
-
     }
 
     @Test(expected = AccessControlViolationException.class)
     public void shouldThrowAccessControlExceptionInCaseOf403Response() {
-
 
         final JsonEnvelope query = envelope()
                 .with(metadataOf(randomUUID(), PEOPLE_GET_USER1))
@@ -259,7 +252,6 @@ public class RemoteExampleQueryApiIT {
                         .withStatus(403)));
 
         requester.request(query);
-
     }
 
     @Alternative

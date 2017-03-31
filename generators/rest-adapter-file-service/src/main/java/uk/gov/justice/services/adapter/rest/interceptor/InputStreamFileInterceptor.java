@@ -1,8 +1,8 @@
 package uk.gov.justice.services.adapter.rest.interceptor;
 
-import static uk.gov.justice.services.adapter.rest.mutipart.FileInputDetails.FILE_INPUT_DETAILS_LIST;
+import static uk.gov.justice.services.adapter.rest.multipart.FileInputDetails.FILE_INPUT_DETAILS_LIST;
 
-import uk.gov.justice.services.adapter.rest.mutipart.FileInputDetails;
+import uk.gov.justice.services.adapter.rest.multipart.FileInputDetails;
 import uk.gov.justice.services.core.interceptor.Interceptor;
 import uk.gov.justice.services.core.interceptor.InterceptorChain;
 import uk.gov.justice.services.core.interceptor.InterceptorContext;

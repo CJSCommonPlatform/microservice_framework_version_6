@@ -19,7 +19,6 @@
         <module>rest-adapter-generator</module>
         <module>rest-client-core</module>
         <module>rest-client-generator</module>
-        <module>rest-core</module>
         <module>rest-adapter-file-service</module>
 
     </modules>

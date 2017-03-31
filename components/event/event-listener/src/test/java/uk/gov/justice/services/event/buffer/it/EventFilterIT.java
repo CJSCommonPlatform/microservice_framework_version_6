@@ -52,8 +52,9 @@ import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.event.filter.EventFilterInterceptor;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.DefaultJmsEnvelopeSender;
-import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
+import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
 import uk.gov.justice.services.test.utils.common.envelope.TestEnvelopeRecorder;
 
 import java.util.ArrayList;
@@ -108,7 +109,7 @@ public class EventFilterIT {
             ComponentDestination.class,
             DefaultJmsEnvelopeSender.class,
             DefaultJmsDestinations.class,
-            EnvelopeConverter.class,
+            DefaultEnvelopeConverter.class,
 
             StringToJsonObjectConverter.class,
             DefaultJsonObjectEnvelopeConverter.class,
@@ -140,7 +141,8 @@ public class EventFilterIT {
             GlobalValueProducer.class,
             EnvelopeValidationExceptionHandlerProducer.class,
             DefaultJsonSchemaValidator.class,
-            JsonSchemaLoader.class
+            JsonSchemaLoader.class,
+            DefaultTraceLogger.class
     })
     public WebApp war() {
         return new WebApp()

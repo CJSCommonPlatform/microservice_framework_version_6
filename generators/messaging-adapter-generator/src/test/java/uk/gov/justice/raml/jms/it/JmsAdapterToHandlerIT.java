@@ -10,9 +10,9 @@ import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
 import uk.gov.justice.api.PeopleEventJmsListener;
 import uk.gov.justice.api.Service2EventFilter;
+import uk.gov.justice.services.adapter.messaging.DefaultJmsParameterChecker;
+import uk.gov.justice.services.adapter.messaging.DefaultJmsProcessor;
 import uk.gov.justice.services.adapter.messaging.JmsLoggerMetadataInterceptor;
-import uk.gov.justice.services.adapter.messaging.JmsParametersChecker;
-import uk.gov.justice.services.adapter.messaging.JmsProcessor;
 import uk.gov.justice.services.adapter.messaging.JsonSchemaValidationInterceptor;
 import uk.gov.justice.services.common.configuration.GlobalValueProducer;
 import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
@@ -46,6 +46,7 @@ import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProduce
 import uk.gov.justice.services.core.interceptor.InterceptorChainProvider;
 import uk.gov.justice.services.core.jms.DefaultJmsDestinations;
 import uk.gov.justice.services.core.jms.JmsSenderFactory;
+import uk.gov.justice.services.core.json.DefaultJsonValidationLoggerHelper;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.core.sender.ComponentDestination;
@@ -55,8 +56,10 @@ import uk.gov.justice.services.event.buffer.api.EventBufferService;
 import uk.gov.justice.services.event.filter.EventFilterInterceptor;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.DefaultJmsEnvelopeSender;
-import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
+import uk.gov.justice.services.messaging.logging.DefaultJmsMessageLoggerHelper;
+import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
 import uk.gov.justice.services.test.utils.common.envelope.TestEnvelopeRecorder;
 
 import java.util.ArrayList;
@@ -117,16 +120,16 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
             AnnotationScanner.class,
             RequesterProducer.class,
             ServiceComponentObserver.class,
-            JmsProcessor.class,
+            DefaultJmsProcessor.class,
             SenderProducer.class,
             JmsSenderFactory.class,
             ComponentDestination.class,
             DefaultJmsEnvelopeSender.class,
             DefaultJmsDestinations.class,
-            EnvelopeConverter.class,
+            DefaultEnvelopeConverter.class,
             JsonSchemaValidationInterceptor.class,
             JmsLoggerMetadataInterceptor.class,
-            JmsParametersChecker.class,
+            DefaultJmsParameterChecker.class,
             TestServiceContextNameProvider.class,
             JsonSchemaLoader.class,
             StringToJsonObjectConverter.class,
@@ -147,7 +150,10 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
             BeanInstantiater.class,
             UtcClock.class,
             GlobalValueProducer.class,
-            EnvelopeValidationExceptionHandlerProducer.class
+            EnvelopeValidationExceptionHandlerProducer.class,
+            DefaultJmsMessageLoggerHelper.class,
+            DefaultTraceLogger.class,
+            DefaultJsonValidationLoggerHelper.class
     })
     public WebApp war() {
         return new WebApp()

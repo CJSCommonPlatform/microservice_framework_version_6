@@ -14,7 +14,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 
-public class DefaultInterceptorChainProviderTest {
+public class BaseInterceptorChainProviderTest {
 
     @Test
     @SuppressWarnings("unchecked")
@@ -28,7 +28,7 @@ public class DefaultInterceptorChainProviderTest {
                 new ImmutablePair<>(4000, LocalAccessControlInterceptor.class)));
     }
 
-    public static class TestInterceptorChainProvider extends DefaultInterceptorChainProvider {
+    public static class TestInterceptorChainProvider extends BaseInterceptorChainProvider {
 
         @Override
         public String component() {

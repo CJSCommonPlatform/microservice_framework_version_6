@@ -83,11 +83,6 @@ public class EventBufferInterceptorTest {
     }
 
     @Test
-    public void shouldReturnEventBufferPriority() throws Exception {
-        assertThat(eventBufferInterceptor.priority(), is(EVENT_BUFFER_PRIORITY));
-    }
-
-    @Test
     public void ensureStreamCLosedIfExceptionOccurs() throws Exception {
         final Deque<Interceptor> interceptors = new LinkedList<>();
         interceptors.add(eventBufferInterceptor);
@@ -114,11 +109,6 @@ public class EventBufferInterceptorTest {
         @Override
         public InterceptorContext process(final InterceptorContext interceptorContext, final InterceptorChain interceptorChain) {
             throw new TestException();
-        }
-
-        @Override
-        public int priority() {
-            return 1002;
         }
     }
 

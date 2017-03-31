@@ -3,11 +3,15 @@ package uk.gov.justice.services.core.interceptor;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
+import static uk.gov.justice.services.test.utils.common.MemberInjectionPoint.injectionPointWith;
 
+import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.dispatcher.Dispatcher;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
+import uk.gov.justice.services.test.utils.common.MemberInjectionPoint;
 
-import javax.enterprise.inject.spi.InjectionPoint;
+import javax.inject.Inject;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,9 +27,6 @@ public class InterceptorChainProcessorProducerTest {
     private Dispatcher dispatcher;
 
     @Mock
-    private InjectionPoint injectionPoint;
-
-    @Mock
     private Logger logger;
 
     @Mock
@@ -39,10 +40,20 @@ public class InterceptorChainProcessorProducerTest {
 
     @Test
     public void shouldProduceProcessorThatDispatchesAnEnvelopeAndReturnsOutputEnvelope() throws Exception {
+        final MemberInjectionPoint injectionPoint = injectionPointWith(AdapterAnnotation.class.getDeclaredField("processor"));
+
         when(dispatcherCache.dispatcherFor(injectionPoint)).thenReturn(dispatcher);
 
         final InterceptorChainProcessor result = interceptorChainProcessorProducer.produceProcessor(injectionPoint);
 
         assertThat(result, instanceOf(DefaultInterceptorChainProcessor.class));
+    }
+
+    @Adapter(EVENT_LISTENER)
+    public static class AdapterAnnotation {
+
+        @Inject
+        InterceptorChainProcessor processor;
+
     }
 }

@@ -18,9 +18,6 @@ import javax.inject.Inject;
 
 public class InputStreamFileInterceptor implements Interceptor {
 
-
-    private static final int INPUT_STREAM_FILE_PRIORITY = 7000;
-
     @Inject
     MultipleFileInputDetailsService multipleFileInputDetailsService;
 
@@ -46,11 +43,4 @@ public class InputStreamFileInterceptor implements Interceptor {
 
         return interceptorChain.processNext(interceptorContext);
     }
-
-    @Override
-    public int priority() {
-        return INPUT_STREAM_FILE_PRIORITY;
-    }
-
-
 }

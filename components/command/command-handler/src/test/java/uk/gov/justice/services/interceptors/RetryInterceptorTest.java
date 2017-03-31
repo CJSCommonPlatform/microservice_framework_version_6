@@ -1,6 +1,5 @@
 package uk.gov.justice.services.interceptors;
 
-import static java.lang.Integer.MAX_VALUE;
 import static java.lang.System.currentTimeMillis;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -103,10 +102,5 @@ public class RetryInterceptorTest {
         final long runTime = end - start;
         assertThat(runTime > 999, is(true));
         assertThat(runTime < 1999, is(true));
-    }
-
-    @Test
-    public void shouldHaveMinPriortity() throws Exception {
-        assertThat(retryInterceptor.priority(), is(MAX_VALUE));
     }
 }

@@ -37,10 +37,12 @@ import uk.gov.justice.services.core.eventfilter.AbstractEventFilter;
 import uk.gov.justice.services.core.eventfilter.AllowAllEventFilter;
 import uk.gov.justice.services.core.extension.AnnotationScanner;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
+import uk.gov.justice.services.core.interceptor.Interceptor;
 import uk.gov.justice.services.core.interceptor.InterceptorCache;
+import uk.gov.justice.services.core.interceptor.InterceptorChainObserver;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
-import uk.gov.justice.services.core.interceptor.InterceptorObserver;
+import uk.gov.justice.services.core.interceptor.InterceptorChainProvider;
 import uk.gov.justice.services.core.jms.DefaultJmsDestinations;
 import uk.gov.justice.services.core.jms.JmsSenderFactory;
 import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
@@ -54,6 +56,8 @@ import uk.gov.justice.services.messaging.jms.DefaultJmsEnvelopeSender;
 import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
 import uk.gov.justice.services.test.utils.common.envelope.TestEnvelopeRecorder;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import javax.annotation.Priority;
@@ -62,6 +66,8 @@ import javax.enterprise.inject.Alternative;
 import javax.inject.Inject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.openejb.jee.Application;
 import org.apache.openejb.jee.WebApp;
 import org.apache.openejb.junit.ApplicationComposer;
@@ -112,7 +118,8 @@ public class EventFilterIT {
 
             InterceptorChainProcessorProducer.class,
             InterceptorCache.class,
-            InterceptorObserver.class,
+            InterceptorChainObserver.class,
+            EventListenerInterceptorChainProvider.class,
 
             AccessControlFailureMessageGenerator.class,
             AllowAllPolicyEvaluator.class,
@@ -200,6 +207,21 @@ public class EventFilterIT {
     public static class AbcAllowingEventFilter extends AbstractEventFilter {
         public AbcAllowingEventFilter() {
             super(EVENT_ABC);
+        }
+    }
+
+    public static class EventListenerInterceptorChainProvider implements InterceptorChainProvider {
+
+        @Override
+        public String component() {
+            return EVENT_LISTENER;
+        }
+
+        @Override
+        public List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes() {
+            final List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes = new ArrayList<>();
+            interceptorChainTypes.add(new ImmutablePair<>(1, EventFilterInterceptor.class));
+            return interceptorChainTypes;
         }
     }
 }

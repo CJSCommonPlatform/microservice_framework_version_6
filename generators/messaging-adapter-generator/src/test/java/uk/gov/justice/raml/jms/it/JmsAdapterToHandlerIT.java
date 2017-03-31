@@ -38,10 +38,12 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.eventfilter.AllowAllEventFilter;
 import uk.gov.justice.services.core.extension.AnnotationScanner;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
+import uk.gov.justice.services.core.interceptor.Interceptor;
 import uk.gov.justice.services.core.interceptor.InterceptorCache;
+import uk.gov.justice.services.core.interceptor.InterceptorChainObserver;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
-import uk.gov.justice.services.core.interceptor.InterceptorObserver;
+import uk.gov.justice.services.core.interceptor.InterceptorChainProvider;
 import uk.gov.justice.services.core.jms.DefaultJmsDestinations;
 import uk.gov.justice.services.core.jms.JmsSenderFactory;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
@@ -57,6 +59,8 @@ import uk.gov.justice.services.messaging.jms.DefaultJmsEnvelopeSender;
 import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
 import uk.gov.justice.services.test.utils.common.envelope.TestEnvelopeRecorder;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
 import javax.annotation.Resource;
@@ -64,6 +68,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.jms.Topic;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.openejb.jee.WebApp;
 import org.apache.openejb.junit.ApplicationComposer;
 import org.apache.openejb.testing.Classes;
@@ -103,9 +109,10 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
             InterceptorChainProcessorProducer.class,
             InterceptorChainProcessor.class,
             InterceptorCache.class,
-            InterceptorObserver.class,
+            InterceptorChainObserver.class,
             EventFilterInterceptor.class,
             EventBufferInterceptor.class,
+            EventListenerInterceptorChainProvider.class,
 
             AnnotationScanner.class,
             RequesterProducer.class,
@@ -238,6 +245,22 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
         @Override
         public String getServiceContextName() {
             return "test-component";
+        }
+    }
+
+    public static class EventListenerInterceptorChainProvider implements InterceptorChainProvider {
+
+        @Override
+        public String component() {
+            return EVENT_LISTENER;
+        }
+
+        @Override
+        public List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes() {
+            final List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes = new ArrayList<>();
+            interceptorChainTypes.add(new ImmutablePair<>(1, EventBufferInterceptor.class));
+            interceptorChainTypes.add(new ImmutablePair<>(2, EventFilterInterceptor.class));
+            return interceptorChainTypes;
         }
     }
 }

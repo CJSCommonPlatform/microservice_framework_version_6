@@ -15,12 +15,4 @@ public interface Interceptor {
      * @return an interceptor context
      */
     InterceptorContext process(final InterceptorContext interceptorContext, final InterceptorChain interceptorChain);
-
-    /**
-     * Provides the priority level of an interceptor, lower is higher priority.  This is used to
-     * set the calling sequence the chain of interceptors.
-     *
-     * @return the priority level of the interceptor
-     */
-    int priority();
 }

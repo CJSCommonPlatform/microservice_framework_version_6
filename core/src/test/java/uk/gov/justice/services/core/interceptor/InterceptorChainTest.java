@@ -88,11 +88,6 @@ public class InterceptorChainTest {
         public InterceptorContext process(final InterceptorContext interceptorContext, final InterceptorChain interceptorChain) {
             return interceptorChain.processNext(interceptorContext);
         }
-
-        @Override
-        public int priority() {
-            return 1000;
-        }
     }
 
     private static class ExceptionThrowingInterceptor implements Interceptor {
@@ -100,11 +95,6 @@ public class InterceptorChainTest {
         @Override
         public InterceptorContext process(final InterceptorContext interceptorContext, final InterceptorChain interceptorChain) {
             throw new TestException();
-        }
-
-        @Override
-        public int priority() {
-            return 1001;
         }
     }
 

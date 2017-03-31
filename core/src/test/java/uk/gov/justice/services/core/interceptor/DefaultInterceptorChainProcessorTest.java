@@ -31,11 +31,12 @@ public class DefaultInterceptorChainProcessorTest {
         final JsonEnvelope inputEnvelope = mock(JsonEnvelope.class);
         final JsonEnvelope outputEnvelope = mock(JsonEnvelope.class);
         final InterceptorContext interceptorContext = interceptorContextWithInput(inputEnvelope);
+        final String component = "component";
 
-        when(interceptorCache.getInterceptors()).thenReturn(interceptors());
+        when(interceptorCache.getInterceptors(component)).thenReturn(interceptors());
         when(dispatch.apply(inputEnvelope)).thenReturn(outputEnvelope);
 
-        final DefaultInterceptorChainProcessor interceptorChainProcessor = new DefaultInterceptorChainProcessor(interceptorCache, dispatch);
+        final DefaultInterceptorChainProcessor interceptorChainProcessor = new DefaultInterceptorChainProcessor(interceptorCache, dispatch, component);
 
         final Optional<JsonEnvelope> result = interceptorChainProcessor.process(interceptorContext);
 
@@ -47,11 +48,12 @@ public class DefaultInterceptorChainProcessorTest {
     public void shouldProcessJsonEnvelope() throws Exception {
         final JsonEnvelope inputEnvelope = mock(JsonEnvelope.class);
         final JsonEnvelope outputEnvelope = mock(JsonEnvelope.class);
+        final String component = "component";
 
-        when(interceptorCache.getInterceptors()).thenReturn(interceptors());
+        when(interceptorCache.getInterceptors(component)).thenReturn(interceptors());
         when(dispatch.apply(inputEnvelope)).thenReturn(outputEnvelope);
 
-        final DefaultInterceptorChainProcessor interceptorChainProcessor = new DefaultInterceptorChainProcessor(interceptorCache, dispatch);
+        final DefaultInterceptorChainProcessor interceptorChainProcessor = new DefaultInterceptorChainProcessor(interceptorCache, dispatch, component);
 
         final Optional<JsonEnvelope> result = interceptorChainProcessor.process(inputEnvelope);
 
@@ -62,12 +64,12 @@ public class DefaultInterceptorChainProcessorTest {
     @Test
     public void shouldProcessesDispatcherThatReturnsNull() throws Exception {
         final JsonEnvelope inputEnvelope = mock(JsonEnvelope.class);
-        final InterceptorContext interceptorContext = interceptorContextWithInput(inputEnvelope);
+        final String component = "component";
 
-        when(interceptorCache.getInterceptors()).thenReturn(interceptors());
+        when(interceptorCache.getInterceptors(component)).thenReturn(interceptors());
         when(dispatch.apply(inputEnvelope)).thenReturn(null);
 
-        final DefaultInterceptorChainProcessor interceptorChainProcessor = new DefaultInterceptorChainProcessor(interceptorCache, dispatch);
+        final DefaultInterceptorChainProcessor interceptorChainProcessor = new DefaultInterceptorChainProcessor(interceptorCache, dispatch, component);
         final Optional<JsonEnvelope> result = interceptorChainProcessor.process(inputEnvelope);
 
         assertThat(result, is(Optional.empty()));
@@ -84,11 +86,6 @@ public class DefaultInterceptorChainProcessorTest {
         @Override
         public InterceptorContext process(final InterceptorContext interceptorContext, final InterceptorChain interceptorChain) {
             return interceptorChain.processNext(interceptorContext);
-        }
-
-        @Override
-        public int priority() {
-            return 1000;
         }
     }
 }

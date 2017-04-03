@@ -33,6 +33,7 @@ import uk.gov.justice.services.core.sender.ComponentDestination;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
 import uk.gov.justice.test.util.RecordingJmsEnvelopeSender;
 
 import java.util.List;
@@ -108,7 +109,8 @@ public class RemoteCommandControllerIT {
             EnvelopeValidationExceptionHandlerProducer.class,
             DefaultJsonSchemaValidator.class,
             JsonSchemaLoader.class,
-            ObjectMapperProducer.class
+            ObjectMapperProducer.class,
+            DefaultTraceLogger.class
     })
     public WebApp war() {
         return new WebApp()

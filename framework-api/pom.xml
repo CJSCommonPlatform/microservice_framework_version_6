@@ -23,6 +23,11 @@
         <module>framework-api-event-repository</module>
         <module>framework-api-aggregate</module>
         <module>framework-api-all</module>
+        <module>framework-api-rest-adapter</module>
+        <module>framework-api-messaging-adapter</module>
+        <module>framework-api-rest-client</module>
+        <module>framework-api-rest-core</module>
+        <module>framework-api-messaging-jms</module>
     </modules>
 
 </project>

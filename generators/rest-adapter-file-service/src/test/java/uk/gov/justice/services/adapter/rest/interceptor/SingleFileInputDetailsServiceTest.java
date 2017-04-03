@@ -9,7 +9,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import uk.gov.justice.services.adapter.rest.mutipart.FileInputDetails;
+import uk.gov.justice.services.adapter.rest.multipart.FileInputDetails;
 import uk.gov.justice.services.fileservice.api.FileServiceException;
 import uk.gov.justice.services.fileservice.api.FileStorer;
 
@@ -35,7 +35,7 @@ public class SingleFileInputDetailsServiceTest {
 
     @Mock
     private Logger logger;
-    
+
     @InjectMocks
     private SingleFileInputDetailsService singleFileInputDetailsService;
 

@@ -70,7 +70,6 @@ public class OrderCakeCommandHandlerTest {
 
     @Test
     public void shouldHandleOrderCakeCommand() throws Exception {
-        enveloper.register(new EventFoundEvent(CakeOrdered.class, "CakeOrdered"));
         when(eventSource.getStreamById(ORDER_ID)).thenReturn(eventStream);
 
         final String deliveryDate = "2017-01-18T15:30:20.340Z";

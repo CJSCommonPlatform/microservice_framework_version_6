@@ -12,7 +12,6 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>event-repository-core</module>
         <module>event-repository-liquibase</module>
         <module>event-repository-jdbc</module>
     </modules>

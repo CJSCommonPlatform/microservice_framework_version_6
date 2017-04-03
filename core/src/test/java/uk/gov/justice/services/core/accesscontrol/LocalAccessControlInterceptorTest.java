@@ -3,9 +3,10 @@ package uk.gov.justice.services.core.accesscontrol;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
-import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
+import static uk.gov.justice.services.core.interceptor.DefaultInterceptorContext.interceptorContextWithInput;
 
 import uk.gov.justice.services.core.annotation.Adapter;
+import uk.gov.justice.services.core.interceptor.DefaultInterceptorChain;
 import uk.gov.justice.services.core.interceptor.Interceptor;
 import uk.gov.justice.services.core.interceptor.InterceptorChain;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
@@ -57,7 +58,7 @@ public class LocalAccessControlInterceptorTest {
 
         final Target target = context -> context;
 
-        interceptorChain = new InterceptorChain(interceptors, target);
+        interceptorChain = new DefaultInterceptorChain(interceptors, target);
     }
 
     @Test

@@ -236,7 +236,7 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
         }
 
         public String toJsonString() {
-            return new JsonObjectEnvelopeConverter().fromEnvelope(build()).toString();
+            return new DefaultJsonObjectEnvelopeConverter().fromEnvelope(build()).toString();
         }
     }
 }

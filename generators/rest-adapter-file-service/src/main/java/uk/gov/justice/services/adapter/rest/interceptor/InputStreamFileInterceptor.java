@@ -1,7 +1,6 @@
 package uk.gov.justice.services.adapter.rest.interceptor;
 
 import static uk.gov.justice.services.adapter.rest.mutipart.FileInputDetails.FILE_INPUT_DETAILS_LIST;
-import static uk.gov.justice.services.core.interceptor.InterceptorContext.copyWithInput;
 
 import uk.gov.justice.services.adapter.rest.mutipart.FileInputDetails;
 import uk.gov.justice.services.core.interceptor.Interceptor;
@@ -38,7 +37,7 @@ public class InputStreamFileInterceptor implements Interceptor {
             final Map<String, UUID> results = multipleFileInputDetailsService.storeFileDetails(fileInputDetails);
             final JsonEnvelope inputEnvelope = resultsHandler.addResultsTo(interceptorContext.inputEnvelope(), results);
 
-            return interceptorChain.processNext(copyWithInput(interceptorContext, inputEnvelope));
+            return interceptorChain.processNext(interceptorContext.copyWithInput(inputEnvelope));
         }
 
         return interceptorChain.processNext(interceptorContext);

@@ -31,12 +31,12 @@ public class Dispatcher {
     /**
      * Registers the handler instance.
      *
-     * This is only called by the {@link ServiceComponentObserver} to populate the handler
+     * Called by an Observer to populate the handler
      * registry.
      *
      * @param handler handler instance to be registered.
      */
-    void register(final Object handler) {
+    public void register(final Object handler) {
         handlerRegistry.register(handler);
     }
 }

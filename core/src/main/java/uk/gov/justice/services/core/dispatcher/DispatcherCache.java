@@ -3,6 +3,7 @@ package uk.gov.justice.services.core.dispatcher;
 import static uk.gov.justice.services.core.annotation.ComponentNameUtil.componentFrom;
 import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.componentLocationFrom;
 
+import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.ServiceComponentLocation;
 import uk.gov.justice.services.core.extension.ServiceComponentFoundEvent;
 
@@ -22,10 +23,10 @@ import org.apache.commons.lang3.tuple.Pair;
 @ApplicationScoped
 public class DispatcherCache {
 
+    private final Map<Pair<String, ServiceComponentLocation>, Dispatcher> dispatcherMap = new ConcurrentHashMap<>();
+
     @Inject
     DispatcherFactory dispatcherFactory;
-
-    private final Map<Pair<String, ServiceComponentLocation>, Dispatcher> dispatcherMap = new ConcurrentHashMap<>();
 
     /**
      * Return a {@link Dispatcher} for the given {@link InjectionPoint}.
@@ -50,10 +51,10 @@ public class DispatcherCache {
     }
 
     /**
-     * Return the {@link Dispatcher} for the given component name and {@link
+     * Return the {@link Dispatcher} for the given {@link Component} and {@link
      * ServiceComponentLocation}.
      *
-     * @param component the component name for which the dispatcher is for
+     * @param component the component type for which the dispatcher is for
      * @param location  whether the dispatcher is local or remote
      * @return the {@link Dispatcher}
      */

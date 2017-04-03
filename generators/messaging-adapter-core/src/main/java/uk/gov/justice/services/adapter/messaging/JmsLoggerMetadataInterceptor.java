@@ -1,12 +1,15 @@
 package uk.gov.justice.services.adapter.messaging;
 
 import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.common.log.LoggerConstants.METADATA;
 import static uk.gov.justice.services.common.log.LoggerConstants.REQUEST_DATA;
-import static uk.gov.justice.services.messaging.logging.JmsMessageLoggerHelper.addMetadataToJsonBuilder;
-import static uk.gov.justice.services.messaging.logging.JmsMessageLoggerHelper.addServiceContextNameIfPresent;
+import static uk.gov.justice.services.common.log.LoggerConstants.SERVICE_CONTEXT;
+import static uk.gov.justice.services.messaging.logging.JmsMessageLoggerHelper.metadataAsJsonObject;
 import static uk.gov.justice.services.messaging.logging.LoggerUtils.trace;
 
 import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
+
+import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
@@ -43,8 +46,9 @@ public class JmsLoggerMetadataInterceptor {
 
         final JsonObjectBuilder builder = createObjectBuilder();
 
-        addServiceContextNameIfPresent(serviceContextNameProvider, builder);
-        addMetadataToJsonBuilder(message, builder);
+        addServiceContextNameIfPresent(builder);
+
+        addMetaDataToBuilder(message, builder);
 
         MDC.put(REQUEST_DATA, builder.build().toString());
 
@@ -57,5 +61,18 @@ public class JmsLoggerMetadataInterceptor {
         MDC.clear();
 
         return result;
+    }
+
+    private void addServiceContextNameIfPresent(final JsonObjectBuilder builder) {
+        Optional.ofNullable(serviceContextNameProvider.getServiceContextName())
+                .ifPresent(value -> builder.add(SERVICE_CONTEXT, value));
+    }
+
+    private void addMetaDataToBuilder(final TextMessage message, final JsonObjectBuilder builder) {
+        try {
+            builder.add(METADATA, metadataAsJsonObject(message));
+        } catch (Exception e) {
+            builder.add(METADATA, "Could not find: _metadata in message");
+        }
     }
 }

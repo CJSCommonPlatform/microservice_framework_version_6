@@ -1,4 +1,4 @@
-package uk.gov.justice.services.core.dispatcher;
+package uk.gov.justice.services.core.requester;
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
 

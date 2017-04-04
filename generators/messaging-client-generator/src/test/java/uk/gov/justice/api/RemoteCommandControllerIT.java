@@ -18,18 +18,15 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
-import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserProvider;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandlerProducer;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
-import uk.gov.justice.services.core.jms.DefaultJmsDestinations;
-import uk.gov.justice.services.core.jms.JmsSenderFactory;
 import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
-import uk.gov.justice.services.core.sender.ComponentDestination;
+import uk.gov.justice.services.core.requester.RequesterProducer;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -90,11 +87,8 @@ public class RemoteCommandControllerIT {
             DefaultAccessControlService.class,
             AllowAllPolicyEvaluator.class,
             InterceptorChainProcessor.class,
-            ComponentDestination.class,
             DispatcherCache.class,
             DispatcherFactory.class,
-            DefaultJmsDestinations.class,
-            JmsSenderFactory.class,
             PolicyEvaluator.class,
             RecordingJmsEnvelopeSender.class,
             RemoteContextaControllerCommand.class,

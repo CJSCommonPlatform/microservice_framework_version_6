@@ -52,8 +52,6 @@ import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
 import uk.gov.justice.services.core.dispatcher.EmptySystemUserProvider;
-import uk.gov.justice.services.core.dispatcher.Requester;
-import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandlerProducer;
@@ -62,18 +60,15 @@ import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.interceptor.InterceptorCache;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
-import uk.gov.justice.services.core.jms.DefaultJmsDestinations;
-import uk.gov.justice.services.core.jms.JmsSenderFactory;
 import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
-import uk.gov.justice.services.core.sender.ComponentDestination;
+import uk.gov.justice.services.core.requester.Requester;
+import uk.gov.justice.services.core.requester.RequesterProducer;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectMetadata;
-import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
-import uk.gov.justice.services.messaging.jms.DefaultJmsEnvelopeSender;
 import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
 
 import java.util.Properties;
@@ -171,15 +166,7 @@ public class RemoteExampleEventProcessorIT {
             SystemUserUtil.class,
             WebTargetFactory.class,
             UtcClock.class,
-
-            // TODO: Remove the next 6 classes when sender is migrated fully to dispatcher system
             SenderProducer.class,
-            JmsSenderFactory.class,
-            ComponentDestination.class,
-            DefaultJmsEnvelopeSender.class,
-            DefaultJmsDestinations.class,
-            DefaultEnvelopeConverter.class,
-
             DefaultJsonSchemaValidator.class,
             GlobalValueProducer.class,
             EnvelopeValidationExceptionHandlerProducer.class,

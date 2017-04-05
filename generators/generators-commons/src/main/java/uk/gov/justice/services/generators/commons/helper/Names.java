@@ -169,7 +169,7 @@ public final class Names {
                 + buildJavaFriendlyName(action.getResource().getUri().replace("{", " By "));
     }
 
-    private static String buildJavaFriendlyName(final String source) {
+    public static String buildJavaFriendlyName(final String source) {
         final String baseName = source.replaceAll("[\\W_]", " ");
         return capitalize(baseName).replaceAll("[\\W_]", "");
     }

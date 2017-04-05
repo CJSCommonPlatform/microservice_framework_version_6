@@ -14,7 +14,7 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithD
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 
 import uk.gov.justice.services.core.annotation.Handles;
-import uk.gov.justice.services.core.dispatcher.Requester;
+import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationException;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;

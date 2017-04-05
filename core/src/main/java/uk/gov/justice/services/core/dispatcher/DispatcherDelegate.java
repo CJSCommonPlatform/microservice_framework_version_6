@@ -2,6 +2,7 @@ package uk.gov.justice.services.core.dispatcher;
 
 
 import uk.gov.justice.services.core.envelope.EnvelopeValidator;
+import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 

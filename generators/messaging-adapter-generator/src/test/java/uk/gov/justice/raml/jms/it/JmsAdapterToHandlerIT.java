@@ -30,7 +30,6 @@ import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
 import uk.gov.justice.services.core.dispatcher.EmptySystemUserProvider;
-import uk.gov.justice.services.core.dispatcher.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandlerProducer;
@@ -44,12 +43,10 @@ import uk.gov.justice.services.core.interceptor.InterceptorChainObserver;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProvider;
-import uk.gov.justice.services.core.jms.DefaultJmsDestinations;
-import uk.gov.justice.services.core.jms.JmsSenderFactory;
 import uk.gov.justice.services.core.json.DefaultJsonValidationLoggerHelper;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
-import uk.gov.justice.services.core.sender.ComponentDestination;
+import uk.gov.justice.services.core.requester.RequesterProducer;
 import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.event.buffer.EventBufferInterceptor;
 import uk.gov.justice.services.event.buffer.api.EventBufferService;
@@ -122,10 +119,7 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
             ServiceComponentObserver.class,
             DefaultJmsProcessor.class,
             SenderProducer.class,
-            JmsSenderFactory.class,
-            ComponentDestination.class,
             DefaultJmsEnvelopeSender.class,
-            DefaultJmsDestinations.class,
             DefaultEnvelopeConverter.class,
             JsonSchemaValidationInterceptor.class,
             JmsLoggerMetadataInterceptor.class,

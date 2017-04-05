@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Removed
+- Support for default sender destinations removed; senders now always require messaging clients to
+be provided, typically by generating one from the destination RAML.
+
 ## [1.5.0] - 2017-03-30
 
 ### Added

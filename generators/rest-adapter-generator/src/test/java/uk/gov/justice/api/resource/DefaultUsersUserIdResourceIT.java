@@ -12,8 +12,8 @@ import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
 
 import uk.gov.justice.api.QueryApiRestExampleApplication;
-import uk.gov.justice.api.mapper.DefaultUsersResourceActionMapper;
-import uk.gov.justice.api.mapper.DefaultUsersUserIdResourceActionMapper;
+import uk.gov.justice.api.mapper.DefaultQueryApiUsersResourceActionMapper;
+import uk.gov.justice.api.mapper.DefaultQueryApiUsersUserIdResourceActionMapper;
 import uk.gov.justice.services.adapter.rest.application.CommonProviders;
 import uk.gov.justice.services.adapter.rest.application.DefaultCommonProviders;
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
@@ -139,8 +139,8 @@ public class DefaultUsersUserIdResourceIT {
             TestServiceContextNameProvider.class,
             DefaultJsonSchemaValidator.class,
             JsonSchemaLoader.class,
-            DefaultUsersUserIdResourceActionMapper.class,
-            DefaultUsersResourceActionMapper.class,
+            DefaultQueryApiUsersUserIdResourceActionMapper.class,
+            DefaultQueryApiUsersResourceActionMapper.class,
             BasicActionMapperHelper.class,
             LoggerProducer.class,
             StringToJsonObjectConverter.class,

@@ -2,7 +2,10 @@ package uk.gov.justice.services.adapters.rest.generator;
 
 
 import static org.raml.model.ActionType.GET;
+import static org.raml.model.ActionType.HEAD;
+import static org.raml.model.ActionType.OPTIONS;
 import static org.raml.model.ActionType.POST;
+import static org.raml.model.ActionType.TRACE;
 import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.MAPPING_BOUNDARY;
 import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.MAPPING_SEPARATOR;
 import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.NAME_KEY;
@@ -20,6 +23,7 @@ import uk.gov.justice.services.generators.commons.validator.RamlValidationExcept
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.raml.model.Raml;
 
 public class RestAdapterGenerator_ActionMapperErrorHandlingTest extends BaseRestAdapterGeneratorTest {
 
@@ -155,6 +159,45 @@ public class RestAdapterGenerator_ActionMapperErrorHandlingTest extends BaseRest
                                                 "application/vnd.mediatype3+json"))
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
+    }
+
+    @Test
+    public void shouldThrowExceptionIfActionTypeIsHEAD() throws Exception {
+        exception.expect(IllegalStateException.class);
+        exception.expectMessage("Http Method of type HEAD is not supported by the Action Mapper");
+
+        final Raml raml = restRamlWithDefaults()
+                .with(resource("/some/path")
+                        .with(httpAction(HEAD, "application/vnd.default+json"))
+                ).build();
+
+        new ActionMappingGenerator().generateFor(raml);
+    }
+
+    @Test
+    public void shouldThrowExceptionIfActionTypeIsOPTIONS() throws Exception {
+        exception.expect(IllegalStateException.class);
+        exception.expectMessage("Http Method of type OPTIONS is not supported by the Action Mapper");
+
+        final Raml raml = restRamlWithDefaults()
+                .with(resource("/some/path")
+                        .with(httpAction(OPTIONS, "application/vnd.default+json"))
+                ).build();
+
+        new ActionMappingGenerator().generateFor(raml);
+    }
+
+    @Test
+    public void shouldThrowExceptionIfActionTypeIsTRACE() throws Exception {
+        exception.expect(IllegalStateException.class);
+        exception.expectMessage("Http Method of type TRACE is not supported by the Action Mapper");
+
+        final Raml raml = restRamlWithDefaults()
+                .with(resource("/some/path")
+                        .with(httpAction(TRACE, "application/vnd.default+json"))
+                ).build();
+
+        new ActionMappingGenerator().generateFor(raml);
     }
 
 }

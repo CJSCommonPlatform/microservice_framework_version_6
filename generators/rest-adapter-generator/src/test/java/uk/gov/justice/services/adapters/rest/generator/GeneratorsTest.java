@@ -4,24 +4,21 @@ import static net.trajano.commons.testing.UtilityClassTestUtil.assertUtilityClas
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
-import static uk.gov.justice.services.core.annotation.Component.EVENT_API;
-import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
-import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithCommandApiDefaults;
-import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithQueryApiDefaults;
+import static uk.gov.justice.services.adapters.rest.generator.Generators.resourceInterfaceNameOf;
+import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 
-import uk.gov.justice.services.generators.test.utils.builder.RamlBuilder;
+import uk.gov.justice.services.adapters.rest.uri.BaseUri;
+import uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.raml.model.MimeType;
-import org.raml.model.Raml;
+import org.raml.model.Resource;
 
 public class GeneratorsTest {
 
@@ -31,38 +28,6 @@ public class GeneratorsTest {
     @Test
     public void shouldBeWellDefinedUtilityClass() {
         assertUtilityClassWellDefined(Generators.class);
-    }
-
-    @Test
-    public void shouldReturnComponentFromBaseUriForCommandApi() throws Exception {
-        final Raml raml = restRamlWithCommandApiDefaults().build();
-        final Optional<String> component = Generators.componentFromBaseUriIn(raml);
-        assertThat(component, is(Optional.of(COMMAND_API)));
-    }
-
-    @Test
-    public void shouldReturnComponentFromBaseUriForEventApi() throws Exception {
-        final Raml raml = RamlBuilder.restRamlWithEventApiDefaults().build();
-        final Optional<String> component = Generators.componentFromBaseUriIn(raml);
-        assertThat(component, is(Optional.of(EVENT_API)));
-    }
-
-    @Test
-    public void shouldReturnComponentFromBaseUriForQueryApi() throws Exception {
-        final Raml raml = restRamlWithQueryApiDefaults().build();
-        final Optional<String> component = Generators.componentFromBaseUriIn(raml);
-        assertThat(component, is(Optional.of(QUERY_API)));
-    }
-
-    @Test
-    public void shouldReturnOptionalEmptyIfNoValidPillarAndTier() throws Exception {
-        final Raml raml = new RamlBuilder()
-                .withVersion("#%RAML 0.8")
-                .withTitle("Example Service")
-                .withBaseUri("http://localhost:8080/warname/event/listener/rest/service").build();
-
-        final Optional<String> component = Generators.componentFromBaseUriIn(raml);
-        assertThat(component, is(Optional.empty()));
     }
 
     @Test
@@ -79,5 +44,19 @@ public class GeneratorsTest {
                 .collect(Collectors.toList());
 
         assertThat(orderedMimeTypes, contains(mimeTypeA, mimeTypeB, mimeTypeC));
+    }
+
+    @Test
+    public void shouldReturnInterfaceNamePrefixedWithComponentName() throws Exception {
+        final Resource resource = resource("/abc").withDefaultPostAction().build();
+        final String interfaceName = resourceInterfaceNameOf(resource, new BaseUri("http://localhost:8080/warname/command/api/rest/service"));
+        assertThat(interfaceName, is("CommandApiAbcResource"));
+    }
+
+    @Test
+    public void shouldReturnInterfaceNamePrefixedWithBaseUriPath() throws Exception {
+        final Resource resource = resource("/bcd").withDefaultPostAction().build();
+        final String interfaceName = resourceInterfaceNameOf(resource, new BaseUri("http://localhost:8080/warname/base/path"));
+        assertThat(interfaceName, is("BasePathBcdResource"));
     }
 }

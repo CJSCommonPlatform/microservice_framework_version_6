@@ -13,6 +13,7 @@ import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.mapping;
 import static uk.gov.justice.services.generators.test.utils.builder.MimeTypeBuilder.multipartWithFileFormParameter;
+import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithCommandApiDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
@@ -135,7 +136,7 @@ public class RestAdapterGenerator_MultipartCodeStructureTest extends BaseRestAda
     @Test
     public void shouldGenerateResourceClassImplementingMultipartInterface() throws Exception {
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithCommandApiDefaults()
                         .with(resource("/some/path")
                                 .with(httpAction()
                                         .withHttpActionType(POST)
@@ -147,7 +148,7 @@ public class RestAdapterGenerator_MultipartCodeStructureTest extends BaseRestAda
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         final Class<?> resourceInterface = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
 
         assertThat(resourceClass.isInterface(), is(false));
         assertThat(resourceClass.getGenericInterfaces(), arrayWithSize(1));
@@ -157,7 +158,7 @@ public class RestAdapterGenerator_MultipartCodeStructureTest extends BaseRestAda
     @Test
     public void shouldGenerateResourceClassWithInjectedFileInputDetailsFactory() throws Exception {
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithCommandApiDefaults()
                         .with(resource("/some/path")
                                 .with(httpAction()
                                         .withHttpActionType(POST)
@@ -168,7 +169,7 @@ public class RestAdapterGenerator_MultipartCodeStructureTest extends BaseRestAda
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
 
         final Field chainProcess = resourceClass.getDeclaredField("fileInputDetailsFactory");
         assertThat(chainProcess, not(nullValue()));

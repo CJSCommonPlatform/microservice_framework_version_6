@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import static org.raml.model.ActionType.DELETE;
 import static uk.gov.justice.services.core.interceptor.DefaultInterceptorContext.interceptorContextWithInput;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
+import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithCommandApiDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
@@ -40,13 +41,13 @@ public class RestAdapterGenerator_DELETEMethodBodyTest extends BaseRestAdapterGe
     @Test
     public void shouldReturnResponseGeneratedByRestProcessor() throws Exception {
         generator.run(
-                restRamlWithDefaults().with(
+                restRamlWithCommandApiDefaults().with(
                         resource("/path")
                                 .with(httpAction(DELETE).withHttpActionOfDefaultRequestType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiPathResource");
         final Object resourceObject = getInstanceOf(resourceClass);
 
         final Response processorResponse = Response.ok().build();
@@ -65,13 +66,14 @@ public class RestAdapterGenerator_DELETEMethodBodyTest extends BaseRestAdapterGe
     public void shouldCallInterceptorChainProcessor() throws Exception {
 
         generator.run(
-                restRamlWithDefaults().with(
-                        resource("/path")
-                                .with(httpAction(DELETE).withHttpActionOfDefaultRequestType())
-                ).build(),
+                restRamlWithCommandApiDefaults()
+                        .with(
+                                resource("/path")
+                                        .with(httpAction(DELETE).withHttpActionOfDefaultRequestType())
+                        ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiPathResource");
         final Object resourceObject = getInstanceOf(resourceClass);
 
         final Method method = firstMethodOf(resourceClass);

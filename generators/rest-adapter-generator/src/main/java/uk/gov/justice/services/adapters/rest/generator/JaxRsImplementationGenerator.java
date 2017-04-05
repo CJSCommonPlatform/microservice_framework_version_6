@@ -14,7 +14,8 @@ import static uk.gov.justice.services.adapter.rest.processor.response.ResponseSt
 import static uk.gov.justice.services.adapter.rest.processor.response.ResponseStrategies.OK_STATUS_ENVELOPE_ENTITY_RESPONSE_STRATEGY;
 import static uk.gov.justice.services.adapter.rest.processor.response.ResponseStrategies.OK_STATUS_ENVELOPE_PAYLOAD_ENTITY_RESPONSE_STRATEGY;
 import static uk.gov.justice.services.adapters.rest.generator.Generators.byMimeTypeOrder;
-import static uk.gov.justice.services.adapters.rest.generator.Generators.componentFromBaseUriIn;
+import static uk.gov.justice.services.adapters.rest.generator.Generators.resourceImplementationNameOf;
+import static uk.gov.justice.services.adapters.rest.generator.Generators.resourceInterfaceNameOf;
 import static uk.gov.justice.services.adapters.rest.helper.Multiparts.isMultipartResource;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_CONTROLLER;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_VIEW;
@@ -28,8 +29,6 @@ import static uk.gov.justice.services.generators.commons.helper.Names.RESOURCE_P
 import static uk.gov.justice.services.generators.commons.helper.Names.buildResourceMethodName;
 import static uk.gov.justice.services.generators.commons.helper.Names.buildResourceMethodNameWithNoMimeType;
 import static uk.gov.justice.services.generators.commons.helper.Names.packageNameOf;
-import static uk.gov.justice.services.generators.commons.helper.Names.resourceImplementationNameOf;
-import static uk.gov.justice.services.generators.commons.helper.Names.resourceInterfaceNameOf;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.services.adapter.rest.mapping.ActionMapper;
@@ -38,6 +37,7 @@ import uk.gov.justice.services.adapter.rest.parameter.ParameterCollectionBuilder
 import uk.gov.justice.services.adapter.rest.parameter.ParameterCollectionBuilderFactory;
 import uk.gov.justice.services.adapter.rest.parameter.ParameterType;
 import uk.gov.justice.services.adapter.rest.processor.RestProcessor;
+import uk.gov.justice.services.adapters.rest.uri.BaseUri;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.CustomAdapter;
@@ -127,7 +127,7 @@ class JaxRsImplementationGenerator {
     List<TypeSpec> generateFor(final Raml raml) {
         final Collection<Resource> resources = raml.getResources().values();
         return resources.stream()
-                .map(resource -> generateFor(resource, componentFromBaseUriIn(raml)))
+                .map(resource -> generateFor(resource, new BaseUri(raml.getBaseUri())))
                 .collect(Collectors.toList());
     }
 
@@ -135,13 +135,16 @@ class JaxRsImplementationGenerator {
      * Create an implementation class for the specified {@link Resource}
      *
      * @param resource  the resource to generate as an implementation class
-     * @param component the optional component for this class
+     * @param baseUri base uri of the raml
      * @return a {@link TypeSpec} that represents the implementation class
      */
-    private TypeSpec generateFor(final Resource resource, final Optional<String> component) {
-        final TypeSpec.Builder classSpecBuilder = classSpecFor(resource, component);
+    private TypeSpec generateFor(final Resource resource, final BaseUri baseUri) {
+        final TypeSpec.Builder classSpecBuilder = classSpecFor(resource, baseUri);
 
-        resource.getActions().values().forEach(action -> classSpecBuilder.addMethods(methodsFor(action, component)));
+        resource.getActions().values().forEach(action -> {
+            final Optional<String> component = baseUri.component();
+            classSpecBuilder.addMethods(methodsFor(action, component));
+        });
 
         return classSpecBuilder.build();
     }
@@ -150,14 +153,15 @@ class JaxRsImplementationGenerator {
      * Creates a {@link TypeSpec.Builder} from an initial template of an implementation class
      *
      * @param resource  the resource to generate as an implementation class
-     * @param component the optional component for this class
+     * @param baseUri the optional component for this class
      * @return a {@link TypeSpec.Builder} that represents the implementation class
      */
-    private TypeSpec.Builder classSpecFor(final Resource resource, final Optional<String> component) {
-        final String className = resourceImplementationNameOf(resource);
+    private TypeSpec.Builder classSpecFor(final Resource resource, final BaseUri baseUri) {
+        final String className = resourceImplementationNameOf(resource, baseUri);
 
+        final Optional<String> component = baseUri.component();
         return classBuilder(className)
-                .addSuperinterface(interfaceClassNameFor(resource))
+                .addSuperinterface(interfaceClassNameFor(resource, baseUri))
                 .addModifiers(PUBLIC)
                 .addAnnotation(componentAnnotationFor(component))
                 .addField(loggerConstantField(className))
@@ -241,6 +245,7 @@ class JaxRsImplementationGenerator {
      * Process the body or bodies for each httpAction.
      *
      * @param action the httpAction to process
+     * @param component
      * @return the list of {@link MethodSpec} that represents each method for the httpAction
      */
     private List<MethodSpec> methodsFor(final Action action, final Optional<String> component) {
@@ -297,10 +302,11 @@ class JaxRsImplementationGenerator {
      * Generate the interface class name for implementation class
      *
      * @param resource generate for resource
+     * @param baseUri
      * @return the {@link ClassName} of the interface
      */
-    private ClassName interfaceClassNameFor(final Resource resource) {
-        return ClassName.get(packageNameOf(configuration, RESOURCE_PACKAGE_NAME), resourceInterfaceNameOf(resource));
+    private ClassName interfaceClassNameFor(final Resource resource, final BaseUri baseUri) {
+        return ClassName.get(packageNameOf(configuration, RESOURCE_PACKAGE_NAME), resourceInterfaceNameOf(resource, baseUri));
     }
 
     /**
@@ -618,4 +624,6 @@ class JaxRsImplementationGenerator {
                         .build())
                 .collect(Collectors.toList());
     }
+
+
 }

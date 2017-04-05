@@ -22,7 +22,7 @@ import static uk.gov.justice.services.core.interceptor.DefaultInterceptorContext
 import static uk.gov.justice.services.generators.test.utils.builder.HeadersBuilder.headersWith;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.mapping;
-import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
+import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithCommandApiDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.builder.ResponseBuilder.response;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
@@ -63,13 +63,14 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
     @Test
     public void shouldReturnResponseGeneratedByRestProcessor() throws Exception {
         generator.run(
-                restRamlWithDefaults().with(
-                        resource("/path")
-                                .with(httpAction(POST).withHttpActionOfDefaultRequestType())
-                ).build(),
+                restRamlWithCommandApiDefaults()
+                        .with(
+                                resource("/path")
+                                        .with(httpAction(POST).withHttpActionOfDefaultRequestType())
+                        ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiPathResource");
         final Object resourceObject = getInstanceOf(resourceClass);
 
         final Response processorResponse = Response.ok().build();
@@ -88,13 +89,14 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
     public void shouldCallInterceptorChainProcessor() throws Exception {
 
         generator.run(
-                restRamlWithDefaults().with(
-                        resource("/path")
-                                .with(httpAction(POST).withHttpActionOfDefaultRequestType())
-                ).build(),
+                restRamlWithCommandApiDefaults()
+                        .with(
+                                resource("/path")
+                                        .with(httpAction(POST).withHttpActionOfDefaultRequestType())
+                        ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiPathResource");
         final Object resourceObject = getInstanceOf(resourceClass);
 
         final Method method = firstMethodOf(resourceClass);
@@ -122,15 +124,15 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
         responses.put(valueOf(ACCEPTED.getStatusCode()), response().build());
 
         generator.run(
-                restRamlWithDefaults().with(
-                        resource("/path")
+                restRamlWithCommandApiDefaults()
+                        .with(resource("/path")
                                 .with(httpAction(POST)
                                         .withHttpActionOfDefaultRequestType()
                                         .withResponsesFrom(responses))
-                ).build(),
+                        ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiPathResource");
         final Object resourceObject = getInstanceOf(resourceClass);
 
         final Method method = firstMethodOf(resourceClass);
@@ -153,13 +155,13 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
     public void shouldPassJsonObjectToRestProcessor() throws Exception {
 
         generator.run(
-                restRamlWithDefaults().with(
-                        resource("/path")
+                restRamlWithCommandApiDefaults()
+                        .with(resource("/path")
                                 .with(httpAction(POST).withHttpActionOfDefaultRequestType())
-                ).build(),
+                        ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiPathResource");
         final Object resourceObject = getInstanceOf(resourceClass);
 
         final Optional<JsonObject> jsonObject = Optional.of(Json.createObjectBuilder().add("dummy", "abc").build());
@@ -174,13 +176,13 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
     @Test
     public void shouldPassHttpHeadersToRestProcessor() throws Exception {
         generator.run(
-                restRamlWithDefaults().with(
-                        resource("/path")
+                restRamlWithCommandApiDefaults()
+                        .with(resource("/path")
                                 .with(httpAction(POST).withHttpActionOfDefaultRequestType())
-                ).build(),
+                        ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiPathResource");
         final Object resourceObject = getInstanceOf(resourceClass);
 
         final HttpHeaders headers = new ThreadLocalHttpHeaders();
@@ -197,13 +199,13 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
     public void shouldPassMapWithOnePathParamToRestProcessor() throws Exception {
 
         generator.run(
-                restRamlWithDefaults().with(
-                        resource("/some/path/{paramA}", "paramA")
+                restRamlWithCommandApiDefaults()
+                        .with(resource("/some/path/{paramA}", "paramA")
                                 .with(httpAction(POST).withHttpActionOfDefaultRequestType())
-                ).build(),
+                        ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamAResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathParamAResource");
 
         final Object resourceObject = getInstanceOf(resourceClass);
 
@@ -228,8 +230,8 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
     public void shouldInvoke2ndMethodAndPassMapWithOnePathParamToRestProcessor() throws Exception {
 
         generator.run(
-                restRamlWithDefaults().with(
-                        resource("/some/path/{p1}", "p1")
+                restRamlWithCommandApiDefaults()
+                        .with(resource("/some/path/{p1}", "p1")
                                 .with(httpAction(POST,
                                         "application/vnd.type-aa+json",
                                         "application/vnd.type-bb+json")
@@ -240,10 +242,10 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
                                                 .withName("cmd-bb")
                                                 .withRequestType("application/vnd.type-bb+json"))
                                 )
-                ).build(),
+                        ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathP1Resource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathP1Resource");
 
         final Object resourceObject = getInstanceOf(resourceClass);
 
@@ -268,13 +270,13 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
     @Test
     public void shouldPassMapWithTwoPathParamsToRestProcessor() throws Exception {
         generator.run(
-                restRamlWithDefaults().with(
-                        resource("/some/path/{param1}/{param2}", "param1", "param2")
+                restRamlWithCommandApiDefaults()
+                        .with(resource("/some/path/{param1}/{param2}", "param1", "param2")
                                 .with(httpAction(POST).withHttpActionOfDefaultRequestType())
-                ).build(),
+                        ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParam1Param2Resource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathParam1Param2Resource");
 
         final Object resourceObject = getInstanceOf(resourceClass);
 
@@ -301,7 +303,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
     @Test
     public void shouldPassActionToRestProcessor() throws Exception {
         generator.run(
-                restRamlWithDefaults().with(
+                restRamlWithCommandApiDefaults().with(
                         resource("/user")
                                 .with(httpAction(POST)
                                         .with(mapping()
@@ -314,10 +316,10 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultUserResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiUserResource");
         final Object resourceObject = getInstanceOf(resourceClass);
 
-        final Class<?> actionMapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultUserResourceActionMapper");
+        final Class<?> actionMapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCommandApiUserResourceActionMapper");
         final Object actionMapperObject = actionMapperClass.getConstructor(ActionMapperHelper.class).newInstance(new BasicActionMapperHelper());
         setField(resourceObject, "actionMapper", actionMapperObject);
 

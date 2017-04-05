@@ -23,6 +23,7 @@ import static org.raml.model.ActionType.GET;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
+import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithQueryApiDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.defaultPostResource;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
@@ -48,7 +49,7 @@ import org.junit.Test;
 
 public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGeneratorTest {
 
-    private static final String EXISTING_FILE_PATH = "org/raml/test/resource/DefaultPathAResource.java";
+    private static final String EXISTING_FILE_PATH = "org/raml/test/resource/DefaultQueryApiPathAResource.java";
 
     @Test
     public void shouldGenerateApplicationClass() throws Exception {
@@ -151,8 +152,8 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
         assertThat(result, is(instanceOf(Set.class)));
         Set<Class<?>> classes = (Set<Class<?>>) result;
         assertThat(classes, hasItems(
-                compiler.classOf(compiledClasses, BASE_PACKAGE, "resource", "DefaultPathAResource"),
-                compiler.classOf(compiledClasses, BASE_PACKAGE, "resource", "DefaultPathBResource")));
+                compiler.classOf(compiledClasses, BASE_PACKAGE, "resource", "DefaultCommandApiPathAResource"),
+                compiler.classOf(compiledClasses, BASE_PACKAGE, "resource", "DefaultCommandApiPathBResource")));
     }
 
     @SuppressWarnings("unchecked")
@@ -187,7 +188,7 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
         Path sourcePath = existingFilePath();
 
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithQueryApiDefaults()
                         .with(resource("/pathA").with(httpAction(GET).withDefaultResponseType()))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap(), singletonList(sourcePath)));
@@ -203,7 +204,7 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
         final TestLogAppender testLogAppender = TestLogAppender.activate();
 
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithQueryApiDefaults()
                         .with(resource("/pathA").with(httpAction(GET).withDefaultResponseType()))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap(), singletonList(existingFilePath())));
@@ -211,7 +212,7 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
         testLogAppender.deactivate();
         final LoggingEvent logEntry = testLogAppender.firstLogEntry();
         assertThat(logEntry.getLevel(), is(WARN));
-        assertThat((String) logEntry.getMessage(), containsString("The class PathAResource already exists, skipping code generation."));
+        assertThat((String) logEntry.getMessage(), containsString("The class QueryApiPathAResource already exists, skipping code generation."));
     }
 
     private Path existingFilePath() {

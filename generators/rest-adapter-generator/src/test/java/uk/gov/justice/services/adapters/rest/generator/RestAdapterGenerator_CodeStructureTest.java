@@ -27,6 +27,7 @@ import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBu
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.mapping;
 import static uk.gov.justice.services.generators.test.utils.builder.QueryParamBuilder.queryParam;
+import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithCommandApiDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithQueryApiDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.defaultDeleteResource;
@@ -474,14 +475,14 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     @Test
     public void shouldGenerateResourceClassImplementingInterface() throws Exception {
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithCommandApiDefaults()
                         .with(defaultPostResource()
                                 .withRelativeUri("/some/path")
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
         final Class<?> resourceInterface = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
 
         assertThat(resourceClass.isInterface(), is(false));
         assertThat(resourceClass.getGenericInterfaces(), arrayWithSize(1));
@@ -492,13 +493,13 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     @Test
     public void shouldGenerateANonFinalPublicResourceClass() throws Exception {
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithCommandApiDefaults()
                         .with(defaultPostResource()
                                 .withRelativeUri("/some/path")
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
 
         assertThat(isFinal(resourceClass.getModifiers()), is(false));
         assertThat(isPublic(resourceClass.getModifiers()), is(true));
@@ -507,13 +508,13 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     @Test
     public void shouldGenerateResourceClassContainingCommandAdapterAnnotation() throws Exception {
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithCommandApiDefaults()
                         .withBaseUri("http://localhost:8080/warname/command/api/rest/service")
                         .with(resource("/some/path").withDefaultPostAction()
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
 
         assertThat(resourceClass.isInterface(), is(false));
         assertThat(resourceClass.getAnnotation(Adapter.class), not(nullValue()));
@@ -524,14 +525,13 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     @Test
     public void shouldGenerateResourceClassContainingQueryAdapterAnnotation() throws Exception {
         generator.run(
-                restRamlWithDefaults()
-                        .withBaseUri("http://localhost:8080/warname/query/api/rest/service")
+                restRamlWithQueryApiDefaults()
                         .with(resource("/some/path")
                                 .withDefaultPostAction()
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultQueryApiSomePathResource");
 
         assertThat(resourceClass.isInterface(), is(false));
         assertThat(resourceClass.getAnnotation(Adapter.class), not(nullValue()));
@@ -549,7 +549,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("CUSTOM_API")));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCustomApiRestServiceSomePathResource");
 
         assertThat(resourceClass.isInterface(), is(false));
         assertThat(resourceClass.getAnnotation(CustomAdapter.class), not(nullValue()));
@@ -576,13 +576,13 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     @Test
     public void shouldGenerateResourceClassContainingOneMethod() throws Exception {
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithCommandApiDefaults()
                         .with(defaultPostResource()
                                 .withRelativeUri("/some/path")
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
 
         assertThat(clazz.isInterface(), is(false));
         final List<Method> methods = methodsOf(clazz);
@@ -594,7 +594,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     @Test
     public void shouldGenerateResourceClassContainingFourMethods() throws Exception {
         generator.run(
-                restRamlWithDefaults().with(
+                restRamlWithCommandApiDefaults().with(
                         resource("/some/path/{p1}", "p1")
                                 .with(httpAction(POST,
                                         "application/vnd.ctx.command.command-a+json",
@@ -610,7 +610,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathP1Resource");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathP1Resource");
 
         assertThat(clazz.isInterface(), is(false));
         final List<Method> methods = methodsOf(clazz);
@@ -620,14 +620,14 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     @Test
     public void shouldGenerateClassContainingMethodWithPathParamAndBodyParam() throws Exception {
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithCommandApiDefaults()
                         .with(defaultPostResource()
                                 .withRelativeUri("/some/path/{paramA}")
                                 .withPathParam("paramA")
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamAResource");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathParamAResource");
 
         assertThat(clazz.isInterface(), is(false));
         final List<Method> methods = methodsOf(clazz);
@@ -647,7 +647,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     @Test
     public void shouldGenerateClassContainingMethodWithThreePathParamsAndOneBodyParam() throws Exception {
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithCommandApiDefaults()
                         .with(defaultPostResource()
                                 .withRelativeUri("/some/path/{paramA}/{paramB}/{paramC}")
                                 .withPathParam("paramA")
@@ -656,7 +656,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamAParamBParamCResource");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathParamAParamBParamCResource");
 
         assertThat(clazz.isInterface(), is(false));
         final List<Method> methods = methodsOf(clazz);
@@ -688,13 +688,13 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
 
         java.nio.file.Path outputPath = get(outputFolder.getRoot().getAbsolutePath());
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithCommandApiDefaults()
                         .with(defaultPostResource()
                                 .withRelativeUri("/some/path")
                         ).build(),
                 new GeneratorConfig(outputPath, outputPath, basePackageName, emptyMap(), singletonList(outputPath.getParent())));
 
-        final Class<?> resourceImplementation = compiler.compiledClassOf(basePackageName, "resource", "DefaultSomePathResource");
+        final Class<?> resourceImplementation = compiler.compiledClassOf(basePackageName, "resource", "DefaultCommandApiSomePathResource");
 
         assertThat(resourceImplementation.getPackage().getName(), is(basePackageName + ".resource"));
 
@@ -703,13 +703,13 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     @Test
     public void shouldGenerateResourceClassWithOnePOSTMethod() throws Exception {
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithCommandApiDefaults()
                         .with(defaultPostResource()
                                 .withRelativeUri("/some/path")
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
         final List<Method> methods = methodsOf(class1);
         assertThat(methods, hasSize(1));
         final Method method = methods.get(0);
@@ -721,7 +721,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     @Test
     public void shouldGenerateResourceClassWithOneSynchronousPOSTMethod() throws Exception {
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithCommandApiDefaults()
                         .with(resource("/some/path")
                                 .with(httpAction(POST, "application/vnd.default+json")
                                         .withResponseTypes("application/vnd.ctx.query.query1+json")
@@ -732,7 +732,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
         final List<Method> methods = methodsOf(class1);
         assertThat(methods, hasSize(1));
         final Method method = methods.get(0);
@@ -744,13 +744,13 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     @Test
     public void shouldGenerateResourceClassWithOnePUTMethod() throws Exception {
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithCommandApiDefaults()
                         .with(defaultPutResource()
                                 .withRelativeUri("/some/path")
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
         final List<Method> methods = methodsOf(class1);
         assertThat(methods, hasSize(1));
         final Method method = methods.get(0);
@@ -762,7 +762,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     @Test
     public void shouldGenerateResourceClassWithOneSynchronousPUTMethod() throws Exception {
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithCommandApiDefaults()
                         .with(resource("/some/path")
                                 .with(httpAction(PUT, "application/vnd.default+json")
                                         .withResponseTypes("application/vnd.ctx.query.query1+json")
@@ -773,7 +773,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
         final List<Method> methods = methodsOf(class1);
         assertThat(methods, hasSize(1));
         final Method method = methods.get(0);
@@ -785,13 +785,13 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     @Test
     public void shouldGenerateResourceClassWithOnePATCHMethod() throws Exception {
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithCommandApiDefaults()
                         .with(defaultPatchResource()
                                 .withRelativeUri("/some/path")
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
         final List<Method> methods = methodsOf(class1);
         assertThat(methods, hasSize(1));
         final Method method = methods.get(0);
@@ -803,7 +803,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     @Test
     public void shouldGenerateResourceClassWithOneSynchronousPATCHMethod() throws Exception {
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithCommandApiDefaults()
                         .with(resource("/some/path")
                                 .with(httpAction(PATCH, "application/vnd.default+json")
                                         .withResponseTypes("application/vnd.ctx.query.query1+json")
@@ -814,7 +814,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
         final List<Method> methods = methodsOf(class1);
         assertThat(methods, hasSize(1));
         final Method method = methods.get(0);
@@ -826,13 +826,13 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     @Test
     public void shouldGenerateResourceClassWithOneDELETEMethod() throws Exception {
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithCommandApiDefaults()
                         .with(defaultDeleteResource()
                                 .withRelativeUri("/some/path")
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
         final List<Method> methods = methodsOf(class1);
         assertThat(methods, hasSize(1));
         final Method method = methods.get(0);
@@ -844,12 +844,12 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     @Test
     public void shouldAddInterceptorChainProcessorIfThereIsPOSTResourceInRAML() throws Exception {
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithCommandApiDefaults()
                         .with(defaultPostResource()
                                 .withRelativeUri("/some/path")
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
 
         final Field chainProcess = resourceClass.getDeclaredField(INTERCEPTOR_CHAIN_PROCESSOR);
         assertThat(chainProcess, not(nullValue()));
@@ -861,12 +861,12 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     @Test
     public void shouldAddLoggerConstant() throws Exception {
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithCommandApiDefaults()
                         .with(defaultPostResource()
                                 .withRelativeUri("/some/path")
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
 
         final Field logger = resourceClass.getDeclaredField("LOGGER");
         assertThat(logger, not(nullValue()));
@@ -879,12 +879,12 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     @Test
     public void shouldAddInterceptorChainProcessorIfThereIsGETResourceInRAML() throws Exception {
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithCommandApiDefaults()
                         .with(defaultGetResource()
                                 .withRelativeUri("/some/path"))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
 
         final Field dispatcher = resourceClass.getDeclaredField(INTERCEPTOR_CHAIN_PROCESSOR);
         assertThat(dispatcher, not(nullValue()));
@@ -896,31 +896,30 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     @Test
     public void shouldAddActionMapperBean() throws Exception {
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithCommandApiDefaults()
                         .with(resource("/user").with(defaultGetAction())).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultUserResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiUserResource");
 
         final Field mapping = resourceClass.getDeclaredField("actionMapper");
         assertThat(mapping, not(nullValue()));
         assertThat(mapping.getType(), equalTo(ActionMapper.class));
         assertThat(mapping.getAnnotation(Inject.class), not(nullValue()));
         assertThat(mapping.getAnnotation(Named.class), not(nullValue()));
-        assertThat(mapping.getAnnotation(Named.class).value(), is("DefaultUserResourceActionMapper"));
+        assertThat(mapping.getAnnotation(Named.class).value(), is("DefaultCommandApiUserResourceActionMapper"));
         assertThat(mapping.getModifiers(), is(0));
     }
-
 
     @Test
     public void shouldAddHeadersContext() throws Exception {
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithCommandApiDefaults()
                         .with(defaultPostResource()
                                 .withRelativeUri("/some/path")
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
 
         final Field dispatcher = resourceClass.getDeclaredField("headers");
         assertThat(dispatcher, not(nullValue()));
@@ -932,13 +931,13 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     @Test
     public void shouldAddAnnotatedRestProcessorProperty() throws Exception {
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithCommandApiDefaults()
                         .with(defaultPostResource()
                                 .withRelativeUri("/some/path")
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
 
         final Field dispatcher = resourceClass.getDeclaredField("restProcessor");
         assertThat(dispatcher, not(nullValue()));
@@ -962,7 +961,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap())
         );
 
-        final Class<?> implementation = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultUsersResource");
+        final Class<?> implementation = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultQueryApiUsersResource");
 
         assertThat(implementation.isInterface(), is(false));
 
@@ -972,7 +971,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
         assertThat(param.getType(), equalTo(String.class));
         assertThat(param.getAnnotations(), emptyArray());
 
-        final Class<?> iface = compiler.compiledInterfaceClassOf(BASE_PACKAGE, "resource", "UsersResource");
+        final Class<?> iface = compiler.compiledInterfaceClassOf(BASE_PACKAGE, "resource", "QueryApiUsersResource");
 
         final Method interMethod = firstMethodOf(iface);
 
@@ -1000,7 +999,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap())
         );
 
-        final Class<?> implementation = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultUsersResource");
+        final Class<?> implementation = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultQueryApiUsersResource");
 
         assertThat(implementation.isInterface(), is(false));
 
@@ -1012,7 +1011,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
             assertThat(parameter.getAnnotations(), emptyArray());
         });
 
-        final Class<?> iface = compiler.compiledInterfaceClassOf(BASE_PACKAGE, "resource", "UsersResource");
+        final Class<?> iface = compiler.compiledInterfaceClassOf(BASE_PACKAGE, "resource", "QueryApiUsersResource");
 
         assertThat(iface.isInterface(), is(true));
 

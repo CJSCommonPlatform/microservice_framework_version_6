@@ -66,13 +66,14 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
     @Test
     public void shouldReturnResponseGeneratedByRestProcessor() throws Exception {
         generator.run(
-                restRamlWithDefaults().with(
-                        resource("/path")
-                                .with(httpAction(GET).withDefaultResponseType())
-                ).build(),
+                restRamlWithQueryApiDefaults()
+                        .with(
+                                resource("/path")
+                                        .with(httpAction(GET).withDefaultResponseType())
+                        ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultQueryApiPathResource");
         final Object resourceObject = getInstanceOf(resourceClass);
 
         final Response processorResponse = Response.ok().build();
@@ -90,13 +91,13 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
     public void shouldCallInterceptorChainProcessor() throws Exception {
 
         generator.run(
-                restRamlWithDefaults().with(
+                restRamlWithQueryApiDefaults().with(
                         resource("/path")
                                 .with(httpAction(GET).withDefaultResponseType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultQueryApiPathResource");
         final Object resourceObject = getInstanceOf(resourceClass);
 
         final Method method = firstMethodOf(resourceClass);
@@ -117,13 +118,14 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
     public void shouldPassEntityResponseStrategyToProcessor() throws Exception {
 
         generator.run(
-                restRamlWithQueryApiDefaults().with(
-                        resource("/path2")
-                                .with(httpAction(GET).withDefaultResponseType())
-                ).build(),
+                restRamlWithQueryApiDefaults()
+                        .with(
+                                resource("/path2")
+                                        .with(httpAction(GET).withDefaultResponseType())
+                        ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPath2Resource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultQueryApiPath2Resource");
 
         firstMethodOf(resourceClass).invoke(getInstanceOf(resourceClass));
 
@@ -142,7 +144,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultQueryControllerPathResource");
 
         firstMethodOf(resourceClass).invoke(getInstanceOf(resourceClass));
 
@@ -166,7 +168,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultQueryApiSomePathResource");
 
         firstMethodOf(resourceClass).invoke(getInstanceOf(resourceClass));
 
@@ -179,13 +181,13 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
     @Test
     public void shouldPassHttpHeadersToRestProcessor() throws Exception {
         generator.run(
-                restRamlWithDefaults().with(
+                restRamlWithQueryApiDefaults().with(
                         resource("/path")
                                 .with(httpAction(GET).withDefaultResponseType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultQueryApiPathResource");
         final Object resourceObject = getInstanceOf(resourceClass);
 
         final HttpHeaders headers = new ThreadLocalHttpHeaders();
@@ -202,7 +204,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
     @Test
     public void shouldPassActionToRestProcessor() throws Exception {
         generator.run(
-                restRamlWithDefaults().with(
+                restRamlWithQueryApiDefaults().with(
                         resource("/cake")
                                 .with(httpAction(GET)
                                         .with(mapping()
@@ -221,10 +223,10 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCakeResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultQueryApiCakeResource");
         final Object resourceObject = getInstanceOf(resourceClass);
 
-        final Class<?> actionMapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCakeResourceActionMapper");
+        final Class<?> actionMapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultQueryApiCakeResourceActionMapper");
         final Object actionMapperObject = actionMapperClass.getConstructor(ActionMapperHelper.class).newInstance(new BasicActionMapperHelper());
         setField(resourceObject, "actionMapper", actionMapperObject);
 
@@ -242,7 +244,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
     @Test
     public void shouldPassActionToRestProcessor2() throws Exception {
         generator.run(
-                restRamlWithDefaults().with(
+                restRamlWithQueryApiDefaults().with(
                         resource("/recipe")
                                 .with(httpAction(GET)
                                         .with(mapping()
@@ -252,11 +254,11 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultRecipeResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultQueryApiRecipeResource");
         final Object resourceObject = getInstanceOf(resourceClass);
 
 
-        final Class<?> actionMapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultRecipeResourceActionMapper");
+        final Class<?> actionMapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultQueryApiRecipeResourceActionMapper");
         final Object actionMapperObject = actionMapperClass.getConstructor(ActionMapperHelper.class).newInstance(new BasicActionMapperHelper());
         setField(resourceObject, "actionMapper", actionMapperObject);
 
@@ -275,13 +277,13 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
     public void shouldPassOnePathParamToRestProcessor() throws Exception {
 
         generator.run(
-                restRamlWithDefaults().with(
+                restRamlWithQueryApiDefaults().with(
                         resource("/some/path/{paramA}", "paramA")
                                 .with(httpAction(GET).withDefaultResponseType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamAResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultQueryApiSomePathParamAResource");
 
         final Object resourceObject = getInstanceOf(resourceClass);
 
@@ -305,13 +307,13 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
     @Test
     public void shouldPassTwoPathParamsToRestProcessor() throws Exception {
         generator.run(
-                restRamlWithDefaults().with(
+                restRamlWithQueryApiDefaults().with(
                         resource("/some/path/{param1}/{param2}", "param1", "param2")
                                 .with(httpAction(GET).withDefaultResponseType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParam1Param2Resource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultQueryApiSomePathParam1Param2Resource");
 
         final Object resourceObject = getInstanceOf(resourceClass);
 
@@ -336,7 +338,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
     @Test
     public void shouldPassOneQueryParamToRestProcessor() throws Exception {
         generator.run(
-                restRamlWithDefaults().with(
+                restRamlWithQueryApiDefaults().with(
                         resource("/some/path")
                                 .with(httpAction(GET)
                                         .with(queryParam("queryParam"))
@@ -344,7 +346,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultQueryApiSomePathResource");
 
         final Object resourceObject = getInstanceOf(resourceClass);
 
@@ -368,7 +370,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
     @Test
     public void shouldPassStringAndNumericParamsToRestProcessor() throws Exception {
         generator.run(
-                restRamlWithDefaults().with(
+                restRamlWithQueryApiDefaults().with(
                         resource("/some/path")
                                 .with(httpAction(GET)
                                         .with(
@@ -379,7 +381,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultQueryApiSomePathResource");
 
         final Object resourceObject = getInstanceOf(resourceClass);
 
@@ -411,7 +413,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
     @Test
     public void shouldPassBooleanParamToRestProcessor() throws Exception {
         generator.run(
-                restRamlWithDefaults().with(
+                restRamlWithQueryApiDefaults().with(
                         resource("/some/path")
                                 .with(httpAction(GET)
                                         .with(
@@ -421,7 +423,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultQueryApiSomePathResource");
 
         final Object resourceObject = getInstanceOf(resourceClass);
 
@@ -448,7 +450,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
     @Test
     public void shouldPassOnePathParamAndOneQueryParamToRestProcessor() throws Exception {
         generator.run(
-                restRamlWithDefaults().with(
+                restRamlWithQueryApiDefaults().with(
                         resource("/some/path/{param}", "param")
                                 .with(httpAction(GET)
                                         .with(queryParam("queryParam"))
@@ -456,7 +458,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathParamResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultQueryApiSomePathParamResource");
 
         final Object resourceObject = getInstanceOf(resourceClass);
 
@@ -483,7 +485,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
     @Test
     public void shouldRemoveOptionalQueryParamIfSetToNull() throws Exception {
         generator.run(
-                restRamlWithDefaults().with(
+                restRamlWithQueryApiDefaults().with(
                         resource("/some/path")
                                 .with(httpAction(GET)
                                         .with(queryParam("queryParam1").required(true), queryParam("queryParam2").required(false))
@@ -491,7 +493,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultQueryApiSomePathResource");
 
         final Object resourceObject = getInstanceOf(resourceClass);
 
@@ -525,7 +527,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         exception.expectCause(isA(BadRequestException.class));
 
         generator.run(
-                restRamlWithDefaults().with(
+                restRamlWithQueryApiDefaults().with(
                         resource("/some/path")
                                 .with(httpAction(GET)
                                         .with(queryParam("queryParam1").required(true))
@@ -533,7 +535,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultQueryApiSomePathResource");
 
         final Object resourceObject = getInstanceOf(resourceClass);
 

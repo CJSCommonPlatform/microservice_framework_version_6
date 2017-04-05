@@ -31,12 +31,12 @@ import org.junit.Test;
 import org.mockito.Mock;
 
 public class JmsEndpointGenerator_EventFilterTest extends BaseGeneratorTest {
+
     private static final String BASE_PACKAGE = "uk.test";
     private static final String BASE_PACKAGE_FOLDER = "/uk/test";
 
     @Mock
-    JmsProcessor jmsProcessor;
-
+    private JmsProcessor jmsProcessor;
 
     @Before
     public void setup() throws Exception {
@@ -64,7 +64,6 @@ public class JmsEndpointGenerator_EventFilterTest extends BaseGeneratorTest {
         assertThat(eventFilter.accepts("structure.eventA"), is(true));
         assertThat(eventFilter.accepts("structure.eventB"), is(true));
         assertThat(eventFilter.accepts("structure.eventC"), is(false));
-
     }
 
     @Test
@@ -82,7 +81,6 @@ public class JmsEndpointGenerator_EventFilterTest extends BaseGeneratorTest {
 
         final File packageDir = new File(outputFolder.getRoot().getAbsolutePath() + BASE_PACKAGE_FOLDER);
         assertThat(asList(packageDir.listFiles()), not(hasItem(hasProperty("name", containsString("EventFilter")))));
-
     }
 
     @Test
@@ -117,6 +115,24 @@ public class JmsEndpointGenerator_EventFilterTest extends BaseGeneratorTest {
         final Priority priorityAnnotation = clazz.getAnnotation(Priority.class);
         assertThat(priorityAnnotation, is(not(nullValue())));
         assertThat(priorityAnnotation.value(), is(2));
+    }
 
+    @Test
+    public void shouldGenerateEventFilterIfBaseUriContainsSpecialCharacters() throws Exception {
+        generator.run(
+                raml()
+                        .withBaseUri("message://event/listener/message/my-hyphenated-service")
+                        .with(resource()
+                                .with(httpAction()
+                                        .withHttpActionType(POST)
+                                        .withMediaTypeWithoutSchema("application/vnd.structure.eventA+json")))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "MyHyphenatedServiceEventFilter");
+
+        final AbstractEventFilter eventFilter = (AbstractEventFilter) clazz.newInstance();
+
+        assertThat(eventFilter.accepts("structure.eventA"), is(true));
     }
 }

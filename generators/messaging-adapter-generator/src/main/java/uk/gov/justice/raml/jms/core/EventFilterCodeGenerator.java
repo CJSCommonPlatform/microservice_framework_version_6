@@ -9,10 +9,12 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static org.apache.commons.lang3.StringUtils.capitalize;
 import static uk.gov.justice.raml.jms.core.MediaTypesUtil.mediaTypesFrom;
 import static uk.gov.justice.services.generators.commons.helper.Names.DEFAULT_ANNOTATION_PARAMETER;
+import static uk.gov.justice.services.generators.commons.helper.Names.buildJavaFriendlyName;
 import static uk.gov.justice.services.generators.commons.helper.Names.namesListStringFrom;
 
 import uk.gov.justice.raml.jms.uri.BaseUri;
 import uk.gov.justice.services.core.eventfilter.AbstractEventFilter;
+import uk.gov.justice.services.generators.commons.helper.Names;
 
 import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
@@ -43,7 +45,7 @@ class EventFilterCodeGenerator {
      * @return camel case class name
      */
     private String classNameOf(final BaseUri baseUri) {
-        return format("%sEventFilter", capitalize(baseUri.service()));
+        return format("%sEventFilter", buildJavaFriendlyName(baseUri.service()));
     }
 
 

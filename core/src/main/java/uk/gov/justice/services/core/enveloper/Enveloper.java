@@ -6,6 +6,7 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.CAUSATION;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.CREATED_AT;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.STREAM;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
 
 import uk.gov.justice.domain.annotation.Event;
@@ -101,7 +102,7 @@ public class Enveloper {
     private Metadata buildMetaData(final Metadata metadata, final String name) {
 
         JsonObjectBuilder metadataBuilder = JsonObjects.createObjectBuilderWithFilter(metadata.asJsonObject(),
-                x -> !Arrays.asList(ID, NAME, CAUSATION).contains(x));
+                x -> !Arrays.asList(ID, NAME, CAUSATION, STREAM).contains(x));
 
         final JsonObject jsonObject = metadataBuilder
                 .add(ID, UUID.randomUUID().toString())

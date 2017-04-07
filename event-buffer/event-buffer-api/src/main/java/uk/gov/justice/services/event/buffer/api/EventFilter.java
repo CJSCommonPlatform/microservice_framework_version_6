@@ -1,4 +1,4 @@
-package uk.gov.justice.services.core.eventfilter;
+package uk.gov.justice.services.event.buffer.api;
 
 public interface EventFilter {
     boolean accepts(final String eventName);

@@ -1,8 +1,11 @@
-package uk.gov.justice.services.core.eventfilter;
+package uk.gov.justice.services.event.buffer.api;
 
 
 
 import static org.junit.Assert.assertTrue;
+
+import uk.gov.justice.services.event.buffer.api.AllowAllEventFilter;
+import uk.gov.justice.services.event.buffer.api.EventFilter;
 
 import org.junit.Test;
 

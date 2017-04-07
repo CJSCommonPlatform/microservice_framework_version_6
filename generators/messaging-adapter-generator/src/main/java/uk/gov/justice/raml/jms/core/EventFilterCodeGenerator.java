@@ -6,15 +6,13 @@ import static com.squareup.javapoet.MethodSpec.constructorBuilder;
 import static com.squareup.javapoet.TypeSpec.classBuilder;
 import static java.lang.String.format;
 import static javax.lang.model.element.Modifier.PUBLIC;
-import static org.apache.commons.lang3.StringUtils.capitalize;
 import static uk.gov.justice.raml.jms.core.MediaTypesUtil.mediaTypesFrom;
 import static uk.gov.justice.services.generators.commons.helper.Names.DEFAULT_ANNOTATION_PARAMETER;
 import static uk.gov.justice.services.generators.commons.helper.Names.buildJavaFriendlyName;
 import static uk.gov.justice.services.generators.commons.helper.Names.namesListStringFrom;
 
 import uk.gov.justice.raml.jms.uri.BaseUri;
-import uk.gov.justice.services.core.eventfilter.AbstractEventFilter;
-import uk.gov.justice.services.generators.commons.helper.Names;
+import uk.gov.justice.services.event.buffer.api.AbstractEventFilter;
 
 import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;

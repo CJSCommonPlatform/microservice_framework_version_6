@@ -3,9 +3,9 @@ package uk.gov.justice.services.adapter.messaging;
 import static java.lang.String.format;
 import static uk.gov.justice.services.messaging.jms.HeaderConstants.JMS_HEADER_CPPNAME;
 
-import uk.gov.justice.services.core.eventfilter.EventFilter;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonValidationLoggerHelper;
+import uk.gov.justice.services.event.buffer.api.EventFilter;
 import uk.gov.justice.services.messaging.logging.JmsMessageLoggerHelper;
 
 import javax.inject.Inject;
@@ -13,6 +13,7 @@ import javax.interceptor.AroundInvoke;
 import javax.interceptor.InvocationContext;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
+
 
 import org.everit.json.schema.ValidationException;
 import org.slf4j.Logger;

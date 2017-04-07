@@ -5,6 +5,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+###
+- Service names with hyphens were also breaking other adapters and clients
+
 ## [1.5.1] 2017-04-05
 
 ### Fixed

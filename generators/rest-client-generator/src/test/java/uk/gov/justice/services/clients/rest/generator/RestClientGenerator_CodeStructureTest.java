@@ -86,6 +86,7 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
     private static final String BASE_PACKAGE = "org.raml.test";
     private static final String BASE_URI_WITH_LESS_THAN_EIGHT_PARTS = "http://localhost:8080/command/api/rest/service";
     private static final String BASE_URI_WITH_MORE_THAN_EIGHT_PARTS = "http://localhost:8080/warname/command/api/rest/service/extra";
+    private static final String BASE_URI_WITH_HYPHENATED_SERVICE_NAME = "http://localhost:8080/warname/command/api/rest/service-with-hyphens";
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
@@ -315,6 +316,18 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
                 restRamlWithTitleVersion().withBaseUri(BASE_URI_WITH_MORE_THAN_EIGHT_PARTS).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
 
+    }
+
+    @Test
+    public void shouldGenerateClassIfBaseUriContainsHyphens() throws Exception {
+        generator.run(
+                raml()
+                        .withBaseUri(BASE_URI_WITH_HYPHENATED_SERVICE_NAME)
+                        .withDefaultPostResource()
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_API")));
+
+        compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceWithHyphensCommandApi");
     }
 
     @Test

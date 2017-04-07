@@ -64,6 +64,19 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
     }
 
     @Test
+    public void shouldGenerateApplicationClassIfServiceContainsHyphens() throws Exception {
+        generator.run(
+                raml()
+                        .withBaseUri("http://localhost:8080/warname/command/api/rest/service-with-hyphens")
+                        .with(defaultPostResource()).build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceWithHyphensApplication");
+
+        assertThat(applicationClass.isInterface(), is(false));
+    }
+
+    @Test
     public void shouldGenerateNonFinalPublicApplicationClass() throws Exception {
         generator.run(
                 raml()

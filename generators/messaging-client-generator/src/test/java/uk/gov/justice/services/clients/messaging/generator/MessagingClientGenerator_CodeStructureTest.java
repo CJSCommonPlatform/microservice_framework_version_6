@@ -197,6 +197,20 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
         assertThat(method.getParameters()[0].getType(), equalTo(JsonEnvelope.class));
     }
 
+    @Test
+    public void shouldGenerateClassIfServiceNameContainsHyphens() throws MalformedURLException {
+        generator.run(
+                restRamlWithDefaults()
+                        .withBaseUri("message://event/processor/message/context-with-hyphens")
+                        .with(resource()
+                                .withRelativeUri("/cakeshop.controller.command")
+                                .with(httpAction(POST, "application/vnd.cakeshop.actionabc+json")))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
+
+        compiler.compiledClassOf(BASE_PACKAGE, "RemoteCakeshopControllerCommand");
+    }
+
     @Rule
     public ExpectedException exception = ExpectedException.none();
 

@@ -4,6 +4,7 @@ import static java.lang.String.format;
 import static javax.lang.model.element.Modifier.FINAL;
 import static org.apache.commons.lang3.StringUtils.capitalize;
 import static uk.gov.justice.services.generators.commons.helper.Actions.isSynchronousAction;
+import static uk.gov.justice.services.generators.commons.helper.Names.buildJavaFriendlyName;
 import static uk.gov.justice.services.generators.commons.helper.Names.nameFrom;
 import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.INVALID_ACTION_MAPPING_ERROR_MSG;
 
@@ -17,6 +18,7 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.generators.commons.client.AbstractClientGenerator;
 import uk.gov.justice.services.generators.commons.client.ActionMimeTypeDefinition;
+import uk.gov.justice.services.generators.commons.helper.Names;
 import uk.gov.justice.services.generators.commons.mapping.ActionMapping;
 import uk.gov.justice.services.generators.commons.validator.RamlValidationException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -76,9 +78,9 @@ public class RestClientGenerator extends AbstractClientGenerator {
             throw new IllegalArgumentException("baseUri must have 8 parts");
         }
         return format("Remote%s%s%s",
-                capitalize(pathSegments[SERVICE_PATH_SEGMENT_INDEX]),
-                capitalize(pathSegments[PILLAR_PATH_SEGMENT_INDEX]),
-                capitalize(pathSegments[TIER_PATH_SEGMENT_INDEX]));
+                buildJavaFriendlyName(pathSegments[SERVICE_PATH_SEGMENT_INDEX]),
+                buildJavaFriendlyName(pathSegments[PILLAR_PATH_SEGMENT_INDEX]),
+                buildJavaFriendlyName(pathSegments[TIER_PATH_SEGMENT_INDEX]));
     }
 
     @Override

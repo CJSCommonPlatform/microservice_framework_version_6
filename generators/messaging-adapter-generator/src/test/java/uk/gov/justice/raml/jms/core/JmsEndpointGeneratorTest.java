@@ -115,6 +115,21 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                 hasItem(hasProperty("name", equalTo("StructureControllerCommandJmsListener.java"))));
     }
 
+    @Test
+    public void shouldCreateClassIfBaseUriContainsHyphens() throws Exception {
+        generator.run(
+                messagingRamlWithDefaults()
+                        .withBaseUri("message://event/processor/message/context-with-hyphens")
+                        .with(resource()
+                                .withRelativeUri("/structure.event")
+                                .withDefaultPostAction())
+                        .build(),
+                configurationWithBasePackage("uk.somepackage", outputFolder, emptyMap()));
+
+        Class<?> compiledClass = compiler.compiledClassOf("uk.somepackage", "StructureEventJmsListener");
+        assertThat(compiledClass.getName(), is("uk.somepackage.StructureEventJmsListener"));
+    }
+
     @SuppressWarnings("unchecked")
     @Test
     public void shouldCreateMultipleJmsClasses() throws Exception {
@@ -256,7 +271,6 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
         Class<?> compiledClass = compiler.compiledClassOf("uk.somepackage", "StructureEventJmsListener");
         assertThat(compiledClass.getName(), is("uk.somepackage.StructureEventJmsListener"));
     }
-
 
     @Test
     public void shouldCreateJmsEndpointAnnotatedWithCommandHandlerAdapter() throws Exception {

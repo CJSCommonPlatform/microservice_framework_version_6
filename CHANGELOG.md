@@ -9,6 +9,16 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 - Support for default sender destinations removed; senders now always require messaging clients to
 be provided, typically by generating one from the destination RAML.
 
+## [1.5.2] 2017-04-07
+
+###
+- Service names with hyphens were also breaking other adapters and clients
+
+## [1.5.1] 2017-04-05
+
+### Fixed
+- Event listeners for services with a hyphen in the name generated invalid class names
+
 ## [1.5.0] - 2017-03-30
 
 ### Added

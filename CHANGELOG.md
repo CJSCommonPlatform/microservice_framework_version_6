@@ -5,8 +5,11 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
-###
+### [1.5.2] 2017-04-07
+
+### Fixed
 - Service names with hyphens were also breaking other adapters and clients
+- Enveloper was keeping stream metadata from events when enveloping commands
 
 ## [1.5.1] 2017-04-05
 
@@ -575,7 +578,8 @@ turned off by default
 
 - Initial release with basic dispatcher, handler and adapter generation
 
-[Unreleased]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.5.1...HEAD
+[Unreleased]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.5.2...HEAD
+[1.5.2]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.5.1...release-1.5.2
 [1.5.1]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.5.0...release-1.5.1
 [1.5.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.4.0...release-1.5.0
 [1.4.3]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.4.2...release-1.4.3

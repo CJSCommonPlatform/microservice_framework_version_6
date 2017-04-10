@@ -86,13 +86,20 @@ public class InterceptorCache {
         final Set<Pair<Integer, Interceptor>> interceptors = newOrCachedInterceptorChain(interceptorChainProvider, orderedComponentInterceptors);
 
         interceptorChainProvider.interceptorChainTypes().forEach(interceptorChainType -> {
-            final Interceptor interceptorInstance = interceptorInstancesByType.get(interceptorChainType.getRight());
-            final Integer priority = interceptorChainType.getLeft();
 
-            interceptors.add(new ImmutablePair<>(priority, interceptorInstance));
+            final Integer priority = interceptorChainType.getLeft();
+            interceptors.add(new ImmutablePair<>(priority, interceptorInstanceFrom(interceptorInstancesByType, interceptorChainType)));
         });
 
         orderedComponentInterceptors.put(interceptorChainProvider.component(), interceptors);
+    }
+
+    private Interceptor interceptorInstanceFrom(final Map<Class<?>, Interceptor> interceptorInstancesByType, final Pair<Integer, Class<? extends Interceptor>> interceptorChainType) {
+        final Interceptor interceptorInstance = interceptorInstancesByType.get(interceptorChainType.getRight());
+        if (interceptorInstance == null) {
+            throw new InterceptorCacheException(format("Could not instantiate interceptor bean of type: %s", interceptorChainType.getRight().getName()));
+        }
+        return interceptorInstance;
     }
 
     private void createComponentInterceptorsFrom(final HashMap<String, Set<Pair<Integer, Interceptor>>> orderedComponentInterceptors) {

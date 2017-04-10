@@ -49,7 +49,7 @@ public class InterceptorCacheTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void shouldReturnEmptyDequeIfEmptyIntercpetorChainProvided() throws Exception {
+    public void shouldReturnEmptyDequeIfEmptyInterceptorChainProvided() throws Exception {
         givenThreeInterceptorBeans();
 
         final InterceptorChainProvider interceptorChainProvider = new EmptyInterceptorChainProvider();
@@ -137,6 +137,41 @@ public class InterceptorCacheTest {
         expectedException.expectMessage("Component [Unknown Component] does not have any cached Interceptors, check there is an InterceptorChainProvider for this component.");
 
         interceptorCache.getInterceptors("Unknown Component");
+    }
+
+    @Test
+    public void shouldThrowExceptionIfInterceptorBeanNotInstantiated() throws Exception {
+        expectedException.expect(InterceptorCacheException.class);
+        expectedException.expectMessage("Could not instantiate interceptor bean of type: uk.gov.justice.services.core.interceptor.InterceptorCacheTest$InterceptorOne");
+
+        final Class interceptorClass_1 = InterceptorOne.class;
+
+
+        final Bean<Interceptor> interceptorBean_1 = mock(Bean.class);
+        when(observer.getInterceptorBeans()).thenReturn(asList(interceptorBean_1));
+
+        when(interceptorBean_1.getBeanClass()).thenReturn(interceptorClass_1);
+        when(beanInstantiater.instantiate(interceptorBean_1)).thenReturn(null);
+        final Bean<InterceptorChainProvider> interceptorChainProviderBean = mock(Bean.class);
+        when(observer.getInterceptorChainProviderBeans()).thenReturn(singletonList(interceptorChainProviderBean));
+
+        when(beanInstantiater.instantiate(interceptorChainProviderBean)).thenReturn(new InterceptorChainProvider() {
+            @Override
+            public String component() {
+                return "some component";
+            }
+
+            @Override
+            public List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes() {
+                final List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes = new ArrayList<>();
+                interceptorChainTypes.add(new ImmutablePair<>(1, interceptorClass_1));
+                return interceptorChainTypes;
+            }
+        });
+
+        interceptorCache.initialise();
+
+
     }
 
     @SuppressWarnings("unchecked")

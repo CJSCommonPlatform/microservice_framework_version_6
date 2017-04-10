@@ -33,7 +33,7 @@ import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.extension.EventFoundEvent;
 import uk.gov.justice.services.eventsource.DefaultEventDestinationResolver;
 import uk.gov.justice.services.eventsourcing.publisher.jms.JmsEventPublisher;
-import uk.gov.justice.services.eventsourcing.repository.core.EventRepository;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventLogInsertionStrategy;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.JdbcEventRepository;

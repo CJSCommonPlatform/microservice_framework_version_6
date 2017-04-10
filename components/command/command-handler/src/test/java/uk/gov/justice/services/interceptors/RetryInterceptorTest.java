@@ -11,7 +11,7 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithR
 
 import uk.gov.justice.services.core.interceptor.InterceptorChain;
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
-import uk.gov.justice.services.eventsourcing.repository.core.exception.OptimisticLockingRetryException;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.OptimisticLockingRetryException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.UUID;

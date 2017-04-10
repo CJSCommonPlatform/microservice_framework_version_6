@@ -22,8 +22,8 @@ import uk.gov.justice.services.core.aggregate.event.EventA;
 import uk.gov.justice.services.core.aggregate.event.EventB;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.extension.EventFoundEvent;
-import uk.gov.justice.services.eventsourcing.publisher.core.EventPublisher;
-import uk.gov.justice.services.eventsourcing.repository.core.EventRepository;
+import uk.gov.justice.services.eventsourcing.publisher.jms.EventPublisher;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventLogInsertionStrategy;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.JdbcEventRepository;
@@ -70,8 +70,6 @@ public class DefaultAggregateServiceIT {
     private static final UUID STREAM_ID = randomUUID();
 
     private static final String LIQUIBASE_EVENT_STORE_CHANGELOG_XML = "liquibase/event-store-db-changelog.xml";
-
-    private static final String TEST_AGGREGATE_PACKAGE = "uk.gov.justice.services.core.aggregate";
 
     @Resource(name = "openejb/Resource/eventStore")
     private DataSource dataSource;

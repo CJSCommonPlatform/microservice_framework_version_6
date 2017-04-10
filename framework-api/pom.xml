@@ -19,8 +19,6 @@
         <module>framework-api-common</module>
         <module>framework-api-event-source</module>
         <module>framework-api-event-stream</module>
-        <module>framework-api-event-publisher</module>
-        <module>framework-api-event-repository</module>
         <module>framework-api-aggregate</module>
         <module>framework-api-all</module>
         <module>framework-api-rest-adapter</module>

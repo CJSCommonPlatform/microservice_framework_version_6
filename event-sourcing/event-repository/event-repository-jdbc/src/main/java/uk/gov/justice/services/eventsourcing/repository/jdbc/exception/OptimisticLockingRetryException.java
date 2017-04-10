@@ -1,4 +1,4 @@
-package uk.gov.justice.services.eventsourcing.repository.core.exception;
+package uk.gov.justice.services.eventsourcing.repository.jdbc.exception;
 
 /**
  * Exception thrown when the event log repository insertion fails due to a unique constraint

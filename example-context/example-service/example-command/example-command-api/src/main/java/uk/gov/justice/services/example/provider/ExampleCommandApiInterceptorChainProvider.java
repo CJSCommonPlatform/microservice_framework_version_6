@@ -1,8 +1,8 @@
 package uk.gov.justice.services.example.provider;
 
 import uk.gov.justice.services.adapter.rest.interceptor.InputStreamFileInterceptor;
+import uk.gov.justice.services.components.command.api.interceptors.CommandApiInterceptorChainProvider;
 import uk.gov.justice.services.core.interceptor.Interceptor;
-import uk.gov.justice.services.interceptors.CommandApiInterceptorChainProvider;
 
 import java.util.List;
 

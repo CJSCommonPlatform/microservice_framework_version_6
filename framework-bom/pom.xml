@@ -200,7 +200,7 @@
             </dependency>
             <dependency>
                 <groupId>uk.gov.justice.services</groupId>
-                <artifactId>metrics</artifactId>
+                <artifactId>metrics-servlet</artifactId>
                 <version>${cpp.framework.version}</version>
             </dependency>
 

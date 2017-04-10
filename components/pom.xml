@@ -16,6 +16,7 @@
         <module>event</module>
         <module>query</module>
         <module>custom</module>
+        <module>components-common</module>
     </modules>
 
 

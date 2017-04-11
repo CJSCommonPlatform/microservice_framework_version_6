@@ -5,8 +5,8 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
 import uk.gov.justice.services.common.configuration.GlobalValue;
-import uk.gov.justice.services.eventsourcing.repository.core.EventRepository;
-import uk.gov.justice.services.eventsourcing.repository.core.exception.OptimisticLockingRetryException;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepository;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.OptimisticLockingRetryException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.VersionMismatchException;
 import uk.gov.justice.services.messaging.JsonEnvelope;

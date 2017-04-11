@@ -9,7 +9,7 @@ import uk.gov.justice.services.common.configuration.Value;
 import uk.gov.justice.services.core.interceptor.Interceptor;
 import uk.gov.justice.services.core.interceptor.InterceptorChain;
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
-import uk.gov.justice.services.eventsourcing.repository.core.exception.OptimisticLockingRetryException;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.OptimisticLockingRetryException;
 
 import javax.inject.Inject;
 import javax.json.JsonObject;

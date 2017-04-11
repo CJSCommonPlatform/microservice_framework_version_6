@@ -8,8 +8,8 @@ import static uk.gov.justice.services.common.converter.ZonedDateTimes.toSqlTimes
 import static uk.gov.justice.services.eventsourcing.repository.jdbc.BaseEventLogInsertStrategy.SQL_INSERT_EVENT_LOG;
 
 import uk.gov.justice.services.common.util.UtcClock;
-import uk.gov.justice.services.eventsourcing.repository.core.exception.OptimisticLockingRetryException;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLog;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.OptimisticLockingRetryException;
 import uk.gov.justice.services.jdbc.persistence.PreparedStatementWrapper;
 
 import java.time.ZonedDateTime;

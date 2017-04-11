@@ -1,4 +1,4 @@
-package uk.gov.justice.services.eventsourcing.publisher.core;
+package uk.gov.justice.services.eventsourcing.publisher.jms;
 
 
 import uk.gov.justice.services.messaging.JsonEnvelope;

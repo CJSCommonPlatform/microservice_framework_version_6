@@ -1,4 +1,4 @@
-package uk.gov.justice.services.eventsourcing.repository.core.exception;
+package uk.gov.justice.services.eventsourcing.repository.jdbc.exception;
 
 public class StoreEventRequestFailedException extends Exception {
 

@@ -1,7 +1,7 @@
-package uk.gov.justice.services.eventsourcing.repository.core;
+package uk.gov.justice.services.eventsourcing.repository.jdbc;
 
 
-import uk.gov.justice.services.eventsourcing.repository.core.exception.StoreEventRequestFailedException;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.StoreEventRequestFailedException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.UUID;

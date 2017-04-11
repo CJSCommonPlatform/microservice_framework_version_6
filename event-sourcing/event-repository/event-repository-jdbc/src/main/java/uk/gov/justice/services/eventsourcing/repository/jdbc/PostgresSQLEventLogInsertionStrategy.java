@@ -2,9 +2,9 @@ package uk.gov.justice.services.eventsourcing.repository.jdbc;
 
 import static java.lang.String.format;
 
-import uk.gov.justice.services.eventsourcing.repository.core.exception.OptimisticLockingRetryException;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLog;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidSequenceIdException;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.OptimisticLockingRetryException;
 import uk.gov.justice.services.jdbc.persistence.PreparedStatementWrapper;
 
 import java.sql.SQLException;

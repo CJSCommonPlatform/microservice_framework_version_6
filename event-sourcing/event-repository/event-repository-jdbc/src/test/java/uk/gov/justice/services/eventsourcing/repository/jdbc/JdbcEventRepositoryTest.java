@@ -13,18 +13,17 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
-import uk.gov.justice.services.eventsourcing.repository.core.exception.StoreEventRequestFailedException;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLog;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLogConverter;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLogJdbcRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidSequenceIdException;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidStreamIdException;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.StoreEventRequestFailedException;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.justice.services.test.utils.common.stream.StreamCloseSpy;
 
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

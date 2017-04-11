@@ -10,8 +10,8 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithD
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUIDAndName;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
 
-import uk.gov.justice.services.eventsourcing.repository.core.EventRepository;
-import uk.gov.justice.services.eventsourcing.repository.core.exception.OptimisticLockingRetryException;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepository;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.OptimisticLockingRetryException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.VersionMismatchException;
 import uk.gov.justice.services.messaging.JsonEnvelope;

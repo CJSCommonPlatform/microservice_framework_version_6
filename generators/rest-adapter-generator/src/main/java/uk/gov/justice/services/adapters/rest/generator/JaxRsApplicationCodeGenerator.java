@@ -4,12 +4,12 @@ import static com.squareup.javapoet.TypeSpec.classBuilder;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static org.apache.commons.lang.StringUtils.defaultIfBlank;
 import static uk.gov.justice.services.generators.commons.helper.Names.RESOURCE_PACKAGE_NAME;
-import static uk.gov.justice.services.generators.commons.helper.Names.applicationNameFrom;
-import static uk.gov.justice.services.generators.commons.helper.Names.baseUriPathWithoutContext;
+import static uk.gov.justice.services.generators.commons.helper.Names.buildJavaFriendlyName;
 import static uk.gov.justice.services.generators.commons.helper.Names.packageNameOf;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.services.adapter.rest.application.CommonProviders;
+import uk.gov.justice.services.adapters.rest.uri.BaseUri;
 
 import java.util.Collection;
 import java.util.Set;
@@ -36,6 +36,7 @@ class JaxRsApplicationCodeGenerator {
 
     private static final String DEFAULT_ANNOTATION_PARAMETER = "value";
     private static final String COMMON_PROVIDERS_FIELD = "commonProviders";
+    private static final String APPLICATION_NAME_SUFFIX = "Application";
 
     private final GeneratorConfig config;
 
@@ -69,14 +70,15 @@ class JaxRsApplicationCodeGenerator {
      * @return the {@link TypeSpec.Builder} that defines the class
      */
     private TypeSpec.Builder classSpecFrom(final Raml raml) {
-        return classBuilder(applicationNameFrom(raml))
+        final BaseUri baseUri = new BaseUri(raml.getBaseUri());
+        return classBuilder(applicationNameFrom(baseUri))
                 .addModifiers(PUBLIC)
                 .superclass(Application.class)
                 .addField(FieldSpec.builder(ClassName.get(CommonProviders.class), COMMON_PROVIDERS_FIELD)
                         .addAnnotation(Inject.class)
                         .build())
                 .addAnnotation(AnnotationSpec.builder(ApplicationPath.class)
-                        .addMember(DEFAULT_ANNOTATION_PARAMETER, "$S", defaultIfBlank(baseUriPathWithoutContext(raml), "/"))
+                        .addMember(DEFAULT_ANNOTATION_PARAMETER, "$S", defaultIfBlank(baseUri.pathWithoutWebContext(), "/"))
                         .build());
     }
 
@@ -115,6 +117,11 @@ class JaxRsApplicationCodeGenerator {
                 codeBlockBuilder.addStatement("classes.add($T.class)", classNameTypeOf(implementationClassName)));
 
         return codeBlockBuilder.build();
+    }
+
+    private static String applicationNameFrom(final BaseUri baseUri) {
+        return buildJavaFriendlyName(baseUri.pathWithoutWebContext())
+                .concat(APPLICATION_NAME_SUFFIX);
     }
 
     /**

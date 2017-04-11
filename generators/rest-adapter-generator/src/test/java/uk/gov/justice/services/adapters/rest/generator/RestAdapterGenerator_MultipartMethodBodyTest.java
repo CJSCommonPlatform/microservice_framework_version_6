@@ -12,6 +12,7 @@ import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.mapping;
 import static uk.gov.justice.services.generators.test.utils.builder.MimeTypeBuilder.multipartWithFileFormParameter;
+import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithCommandApiDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
@@ -44,7 +45,7 @@ public class RestAdapterGenerator_MultipartMethodBodyTest extends BaseRestAdapte
     @Test
     public void shouldReturnResponseGeneratedByRestProcessor() throws Exception {
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithCommandApiDefaults()
                         .with(resource("/some/path")
                                 .with(httpAction()
                                         .withHttpActionType(POST)
@@ -55,7 +56,7 @@ public class RestAdapterGenerator_MultipartMethodBodyTest extends BaseRestAdapte
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultSomePathResource");
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
         final Object resourceObject = getInstanceOf(resourceClass);
 
         final Response processorResponse = Response.ok().build();

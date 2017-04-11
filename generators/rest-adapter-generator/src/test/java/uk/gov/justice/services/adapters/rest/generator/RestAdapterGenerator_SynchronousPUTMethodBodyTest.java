@@ -8,12 +8,10 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.raml.model.ActionType.PUT;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
-import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
+import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithCommandApiDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
-
-import uk.gov.justice.services.adapter.rest.processor.response.ResponseStrategy;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -35,13 +33,13 @@ public class RestAdapterGenerator_SynchronousPUTMethodBodyTest extends BaseRestA
     @Test
     public void shouldReturnResponseGeneratedByRestProcessor() throws Exception {
         generator.run(
-                restRamlWithDefaults().with(
-                        resource("/path")
+                restRamlWithCommandApiDefaults()
+                        .with(resource("/path")
                                 .with(httpAction(PUT).withHttpActionOfDefaultRequestAndResponseType())
-                ).build(),
+                        ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultPathResource");
+        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiPathResource");
         Object resourceObject = getInstanceOf(resourceClass);
 
         Response processorResponse = Response.ok().build();

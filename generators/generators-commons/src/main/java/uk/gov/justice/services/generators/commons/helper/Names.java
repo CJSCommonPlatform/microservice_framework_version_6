@@ -13,8 +13,6 @@ import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.services.generators.commons.client.ActionMimeTypeDefinition;
 import uk.gov.justice.services.generators.commons.mapping.ActionMapping;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -26,7 +24,6 @@ import java.util.stream.Stream;
 import org.apache.commons.lang.StringUtils;
 import org.raml.model.Action;
 import org.raml.model.MimeType;
-import org.raml.model.Raml;
 import org.raml.model.Resource;
 
 public final class Names {
@@ -44,41 +41,11 @@ public final class Names {
                     "interface", "long", "native", "new", "null", "package", "private", "protected", "public",
                     "return", "short", "static", "strictfp", "super", "switch", "synchronized", "this", "throw",
                     "throws", "transient", "true", "try", "void", "volatile", "while")));
-    private static final String INTERFACE_NAME_SUFFIX = "Resource";
-    private static final String APPLICATION_NAME_SUFFIX = "Application";
-    private static final String ACTION_MAPPER_CLASS_SUFFIX = "ActionMapper";
+
+
     private static final String BLANK = "";
 
     private Names() {
-    }
-
-    public static String applicationNameFrom(final Raml raml) {
-        return buildJavaFriendlyName(baseUriPathWithoutContext(raml))
-                .concat(APPLICATION_NAME_SUFFIX);
-    }
-
-    public static String baseUriPathWithoutContext(final Raml raml) {
-        try {
-            final URL url = new URL(raml.getBaseUri());
-            final String path = url.getPath();
-            if (path.indexOf('/', 1) == -1) {
-                return path;
-            }
-            return path.substring(path.indexOf('/', 1));
-        } catch (MalformedURLException ex) {
-            throw new IllegalStateException("Base URI must be a valid URL", ex);
-        }
-    }
-
-    public static String resourceInterfaceNameOf(final Resource resource) {
-        final String resourceInterfaceName = buildJavaFriendlyName(defaultIfBlank(resource.getDisplayName(),
-                resource.getRelativeUri()));
-
-        return isBlank(resourceInterfaceName) ? "Root" : resourceInterfaceName.concat(INTERFACE_NAME_SUFFIX);
-    }
-
-    public static String resourceImplementationNameOf(final Resource resource) {
-        return format("Default%s", resourceInterfaceNameOf(resource));
     }
 
     public static String buildResourceMethodNameWithNoMimeType(final Action action) {
@@ -144,10 +111,6 @@ public final class Names {
     public static String namesListStringFrom(final Stream<MimeType> mediaTypes, final String delimiter) {
         return mediaTypes.map(Names::nameFrom)
                 .collect(joining(delimiter));
-    }
-
-    public static String mapperClassNameOf(final Resource resource) {
-        return resourceImplementationNameOf(resource) + ACTION_MAPPER_CLASS_SUFFIX;
     }
 
     public static String camelCase(final String subType) {

@@ -9,15 +9,16 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static org.apache.commons.lang.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang.StringUtils.strip;
 import static uk.gov.justice.services.adapters.rest.generator.Generators.byMimeTypeOrder;
+import static uk.gov.justice.services.adapters.rest.generator.Generators.resourceInterfaceNameOf;
 import static uk.gov.justice.services.adapters.rest.helper.Multiparts.isMultipartResource;
 import static uk.gov.justice.services.generators.commons.helper.Actions.responseMimeTypesOf;
 import static uk.gov.justice.services.generators.commons.helper.Names.DEFAULT_ANNOTATION_PARAMETER;
 import static uk.gov.justice.services.generators.commons.helper.Names.GENERIC_PAYLOAD_ARGUMENT_NAME;
 import static uk.gov.justice.services.generators.commons.helper.Names.buildResourceMethodName;
 import static uk.gov.justice.services.generators.commons.helper.Names.buildResourceMethodNameWithNoMimeType;
-import static uk.gov.justice.services.generators.commons.helper.Names.resourceInterfaceNameOf;
 
 import uk.gov.justice.services.adapter.rest.annotation.PATCH;
+import uk.gov.justice.services.adapters.rest.uri.BaseUri;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -65,7 +66,7 @@ class JaxRsInterfaceGenerator {
     public List<TypeSpec> generateFor(final Raml raml) {
         final Collection<Resource> resources = raml.getResources().values();
         return resources.stream()
-                .map(this::generateFor)
+                .map((resource) -> generateFor(resource, new BaseUri(raml.getBaseUri())))
                 .collect(toList());
     }
 
@@ -73,10 +74,11 @@ class JaxRsInterfaceGenerator {
      * Create an interface for the specified {@link Resource}
      *
      * @param resource the resource to generate as an implementation class
+     * @param baseUri
      * @return a {@link TypeSpec} that represents the implementation class
      */
-    private TypeSpec generateFor(final Resource resource) {
-        final TypeSpec.Builder interfaceSpecBuilder = interfaceSpecFor(resource);
+    private TypeSpec generateFor(final Resource resource, final BaseUri baseUri) {
+        final TypeSpec.Builder interfaceSpecBuilder = interfaceSpecFor(resource, baseUri);
 
         resource.getActions().values().forEach(action ->
                 interfaceSpecBuilder.addMethods(methodsOf(action)));
@@ -133,10 +135,11 @@ class JaxRsInterfaceGenerator {
      * Creates a {@link TypeSpec.Builder} from an initial template of an interface
      *
      * @param resource the resource to generate as an interface
+     * @param baseUri
      * @return a {@link TypeSpec.Builder} that represents the interface
      */
-    private TypeSpec.Builder interfaceSpecFor(final Resource resource) {
-        return interfaceBuilder(resourceInterfaceNameOf(resource))
+    private TypeSpec.Builder interfaceSpecFor(final Resource resource, final BaseUri baseUri) {
+        return interfaceBuilder(resourceInterfaceNameOf(resource, baseUri))
                 .addModifiers(PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Path.class)
                         .addMember(DEFAULT_ANNOTATION_PARAMETER, ANNOTATION_FORMAT, pathAnnotationFor(resource))

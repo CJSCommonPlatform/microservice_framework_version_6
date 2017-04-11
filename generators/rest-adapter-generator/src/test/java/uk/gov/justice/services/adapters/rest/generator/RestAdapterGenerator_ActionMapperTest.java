@@ -14,7 +14,9 @@ import static uk.gov.justice.services.generators.test.utils.builder.HeadersBuild
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.defaultGetAction;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.mapping;
+import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithCommandApiDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
+import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithQueryApiDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
@@ -41,7 +43,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
     @Test
     public void shouldReturnActionNameForGETResource() throws Exception {
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithQueryApiDefaults()
                         .with(resource("/user")
                                 .with(httpAction(GET)
                                         .with(mapping()
@@ -61,7 +63,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
-        final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultUserResourceActionMapper");
+        final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultQueryApiUserResourceActionMapper");
         final Object mapperObject = mapperClass.getConstructor(ActionMapperHelper.class).newInstance(new BasicActionMapperHelper());
         final Method actionMethod = methodOf(mapperClass, "actionOf");
 
@@ -82,7 +84,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
     @Test
     public void shouldReturnActionNameForGETResource2() throws Exception {
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithQueryApiDefaults()
                         .with(resource("/status")
                                 .with(httpAction(GET)
                                         .with(mapping()
@@ -95,7 +97,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
-        final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultStatusResourceActionMapper");
+        final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultQueryApiStatusResourceActionMapper");
         final Object mapperObject = mapperClass.getConstructor(ActionMapperHelper.class).newInstance(new BasicActionMapperHelper());
         final Method actionMethod = methodOf(mapperClass, "actionOf");
 
@@ -107,7 +109,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
     @Test
     public void shouldReturnActionNameForPOSTResource() throws Exception {
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithCommandApiDefaults()
                         .with(resource("/case")
                                 .with(httpAction(POST)
                                         .with(mapping()
@@ -123,7 +125,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
-        final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCaseResourceActionMapper");
+        final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCommandApiCaseResourceActionMapper");
         final Object mapperObject = mapperClass.getConstructor(ActionMapperHelper.class).newInstance(new BasicActionMapperHelper());
         final Method actionMethod = methodOf(mapperClass, "actionOf");
 
@@ -140,7 +142,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
     @Test
     public void shouldReturnActionNameForPUTResource() throws Exception {
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithCommandApiDefaults()
                         .with(resource("/case")
                                 .with(httpAction(PUT)
                                         .with(mapping()
@@ -156,7 +158,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
-        final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCaseResourceActionMapper");
+        final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCommandApiCaseResourceActionMapper");
         final Object mapperObject = mapperClass.getConstructor(ActionMapperHelper.class).newInstance(new BasicActionMapperHelper());
         final Method actionMethod = methodOf(mapperClass, "actionOf");
 
@@ -173,7 +175,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
     @Test
     public void shouldReturnActionNameForPATCHResource() throws Exception {
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithCommandApiDefaults()
                         .with(resource("/case")
                                 .with(httpAction(PATCH)
                                         .with(mapping()
@@ -189,7 +191,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
-        final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCaseResourceActionMapper");
+        final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCommandApiCaseResourceActionMapper");
         final Object mapperObject = mapperClass.getConstructor(ActionMapperHelper.class).newInstance(new BasicActionMapperHelper());
         final Method actionMethod = methodOf(mapperClass, "actionOf");
 
@@ -206,7 +208,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
     @Test
     public void shouldReturnActionNameForDELETEResource() throws Exception {
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithCommandApiDefaults()
                         .with(resource("/case")
                                 .with(httpAction(DELETE)
                                         .with(mapping()
@@ -222,7 +224,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
-        final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCaseResourceActionMapper");
+        final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCommandApiCaseResourceActionMapper");
         final Object mapperObject = mapperClass.getConstructor(ActionMapperHelper.class).newInstance(new BasicActionMapperHelper());
         final Method actionMethod = methodOf(mapperClass, "actionOf");
 
@@ -239,7 +241,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
     @Test
     public void shouldReturnActionNameForPOSTResourceSameActionMappedToTwoMediaTypes() throws Exception {
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithCommandApiDefaults()
                         .with(resource("/case")
                                 .with(httpAction(POST)
                                         .with(mapping()
@@ -255,7 +257,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
-        final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCaseResourceActionMapper");
+        final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCommandApiCaseResourceActionMapper");
         final Object mapperObject = mapperClass.getConstructor(ActionMapperHelper.class).newInstance(new BasicActionMapperHelper());
         final Method actionMethod = methodOf(mapperClass, "actionOf");
 
@@ -272,7 +274,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
     @Test
     public void shouldReturnActionNameForPOSTAndGETResource() throws Exception {
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithCommandApiDefaults()
                         .with(resource("/case")
                                 .with(httpAction(POST)
                                         .with(mapping()
@@ -290,7 +292,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
-        final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCaseResourceActionMapper");
+        final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCommandApiCaseResourceActionMapper");
         final Object mapperObject = mapperClass.getConstructor(ActionMapperHelper.class).newInstance(new BasicActionMapperHelper());
         final Method actionMethod = methodOf(mapperClass, "actionOf");
 
@@ -307,16 +309,16 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
     @Test
     public void shouldContainNamedAnnotation() throws Exception {
         generator.run(
-                restRamlWithDefaults()
+                restRamlWithQueryApiDefaults()
                         .with(resource("/status")
                                 .with(defaultGetAction())
 
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
 
-        final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultStatusResourceActionMapper");
+        final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultQueryApiStatusResourceActionMapper");
         assertThat(mapperClass.getAnnotation(Named.class), not(nullValue()));
-        assertThat(mapperClass.getAnnotation(Named.class).value(), Matchers.is("DefaultStatusResourceActionMapper"));
+        assertThat(mapperClass.getAnnotation(Named.class).value(), Matchers.is("DefaultQueryApiStatusResourceActionMapper"));
 
     }
 }

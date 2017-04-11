@@ -6,7 +6,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import uk.gov.justice.api.CustomApiRestExampleApplication;
-import uk.gov.justice.api.mapper.DefaultCustomUserIdResourceActionMapper;
+import uk.gov.justice.api.mapper.DefaultCustomApiRestExampleCustomUserIdResourceActionMapper;
 import uk.gov.justice.services.adapter.rest.application.CommonProviders;
 import uk.gov.justice.services.adapter.rest.application.DefaultCommonProviders;
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
@@ -121,7 +121,7 @@ public class DefaultCustomUserIdResourceIT {
             TestServiceContextNameProvider.class,
             DefaultJsonSchemaValidator.class,
             JsonSchemaLoader.class,
-            DefaultCustomUserIdResourceActionMapper.class,
+            DefaultCustomApiRestExampleCustomUserIdResourceActionMapper.class,
             BasicActionMapperHelper.class,
             LoggerProducer.class,
             StringToJsonObjectConverter.class,

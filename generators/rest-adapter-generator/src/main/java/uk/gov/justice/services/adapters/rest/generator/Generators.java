@@ -1,43 +1,26 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
 
+import static java.lang.String.format;
 import static java.util.Comparator.comparing;
-import static uk.gov.justice.services.generators.commons.helper.Names.baseUriPathWithoutContext;
+import static org.apache.commons.lang.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang.StringUtils.isBlank;
+import static uk.gov.justice.services.generators.commons.helper.Names.buildJavaFriendlyName;
 
-import uk.gov.justice.services.core.annotation.Component;
+import uk.gov.justice.services.adapters.rest.uri.BaseUri;
 
 import java.util.Comparator;
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.raml.model.MimeType;
-import org.raml.model.Raml;
+import org.raml.model.Resource;
 
 final class Generators {
-    private static final Pattern PILLAR_AND_TIER_PATTERN = Pattern
-            .compile("(command/api|command/controller|command/handler|query/api|query/controller|query/view|event/api)");
+    private static final String INTERFACE_NAME_SUFFIX = "Resource";
+
 
     private Generators() {
     }
 
-    /**
-     * Derive the framework component name pillar and tier value from the base URI in the RAML.
-     *
-     * @param raml the RAML that provides the base URI
-     * @return the component name derived from the base URI
-     */
-    static Optional<String> componentFromBaseUriIn(final Raml raml) {
-        final Matcher matcher = PILLAR_AND_TIER_PATTERN.matcher(baseUriPathWithoutContext(raml));
-
-        if (matcher.find()) {
-            final String pillarAndTier = matcher.group(1);
-            final String[] sections = pillarAndTier.split("/");
-            return Optional.of(Component.valueOf(sections[0], sections[1]));
-        } else {
-            return Optional.empty();
-        }
-    }
 
     /**
      * Comparator for ordering MimeType by the string representation returned by getType().
@@ -46,6 +29,18 @@ final class Generators {
      */
     static Comparator<MimeType> byMimeTypeOrder() {
         return comparing(MimeType::getType);
+    }
+
+    static String resourceInterfaceNameOf(final Resource resource, final BaseUri baseUri) {
+        final String baseUriBasedPrefix = baseUri.component().isPresent() ? baseUri.component().get().toLowerCase() : baseUri.pathWithoutWebContext();
+        final String resourceInterfaceName = buildJavaFriendlyName(format("%s%s", baseUriBasedPrefix, defaultIfBlank(resource.getDisplayName(),
+                resource.getRelativeUri())));
+
+        return isBlank(resourceInterfaceName) ? "Root" : resourceInterfaceName.concat(INTERFACE_NAME_SUFFIX);
+    }
+
+    static String resourceImplementationNameOf(final Resource resource, final BaseUri baseUri) {
+        return format("Default%s", resourceInterfaceNameOf(resource, baseUri));
     }
 
 }

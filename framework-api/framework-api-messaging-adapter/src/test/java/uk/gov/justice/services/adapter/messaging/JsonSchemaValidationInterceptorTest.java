@@ -9,9 +9,9 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.jms.HeaderConstants.JMS_HEADER_CPPNAME;
 
-import uk.gov.justice.services.core.eventfilter.EventFilter;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonValidationLoggerHelper;
+import uk.gov.justice.services.event.buffer.api.EventFilter;
 import uk.gov.justice.services.messaging.logging.JmsMessageLoggerHelper;
 
 import javax.interceptor.InvocationContext;

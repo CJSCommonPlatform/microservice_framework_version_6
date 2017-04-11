@@ -17,7 +17,7 @@ import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuil
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 
 import uk.gov.justice.services.adapter.messaging.JmsProcessor;
-import uk.gov.justice.services.core.eventfilter.AbstractEventFilter;
+import uk.gov.justice.services.event.buffer.api.AbstractEventFilter;
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 
 import java.io.File;

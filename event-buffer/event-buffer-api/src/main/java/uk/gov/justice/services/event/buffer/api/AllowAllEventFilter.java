@@ -1,4 +1,6 @@
-package uk.gov.justice.services.core.eventfilter;
+package uk.gov.justice.services.event.buffer.api;
+
+import uk.gov.justice.services.event.buffer.api.EventFilter;
 
 import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;

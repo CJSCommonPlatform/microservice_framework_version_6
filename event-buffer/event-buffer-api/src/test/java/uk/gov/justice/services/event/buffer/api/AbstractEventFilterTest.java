@@ -1,8 +1,9 @@
-package uk.gov.justice.services.core.eventfilter;
+package uk.gov.justice.services.event.buffer.api;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 public class AbstractEventFilterTest {

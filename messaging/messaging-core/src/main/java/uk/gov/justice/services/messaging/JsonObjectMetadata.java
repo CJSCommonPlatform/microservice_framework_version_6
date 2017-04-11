@@ -116,7 +116,7 @@ public class JsonObjectMetadata implements Metadata {
      * @return metadata builder
      */
     public static Builder metadataWithDefaults() {
-        return metadataOf(randomUUID(), "dummyName").withStreamId(randomUUID()).createdAt(now());
+        return metadataWithRandomUUIDAndName().createdAt(now());
     }
 
     public static Builder metadataFrom(final Metadata metadata) {

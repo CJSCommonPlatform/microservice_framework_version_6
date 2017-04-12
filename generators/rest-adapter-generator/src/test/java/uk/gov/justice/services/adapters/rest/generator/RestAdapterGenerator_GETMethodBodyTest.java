@@ -22,9 +22,9 @@ import static org.raml.model.ParamType.STRING;
 import static uk.gov.justice.services.core.interceptor.DefaultInterceptorContext.interceptorContextWithInput;
 import static uk.gov.justice.services.generators.test.utils.builder.HeadersBuilder.headersWith;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
+import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpActionWithDefaultMapping;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.mapping;
 import static uk.gov.justice.services.generators.test.utils.builder.QueryParamBuilder.queryParam;
-import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithQueryApiDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithQueryControllerDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
@@ -39,6 +39,7 @@ import uk.gov.justice.services.adapter.rest.mapping.ActionMapperHelper;
 import uk.gov.justice.services.adapter.rest.mapping.BasicActionMapperHelper;
 import uk.gov.justice.services.adapter.rest.parameter.Parameter;
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
+import uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -69,7 +70,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                 restRamlWithQueryApiDefaults()
                         .with(
                                 resource("/path")
-                                        .with(httpAction(GET).withDefaultResponseType())
+                                        .with(httpActionWithDefaultMapping(GET).withDefaultResponseType())
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -93,7 +94,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithQueryApiDefaults().with(
                         resource("/path")
-                                .with(httpAction(GET).withDefaultResponseType())
+                                .with(httpActionWithDefaultMapping(GET).withDefaultResponseType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -121,7 +122,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
                 restRamlWithQueryApiDefaults()
                         .with(
                                 resource("/path2")
-                                        .with(httpAction(GET).withDefaultResponseType())
+                                        .with(httpActionWithDefaultMapping(GET).withDefaultResponseType())
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -140,7 +141,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithQueryControllerDefaults().with(
                         resource("/path")
-                                .with(httpAction(GET).withDefaultResponseType())
+                                .with(httpActionWithDefaultMapping(GET).withDefaultResponseType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -183,7 +184,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithQueryApiDefaults().with(
                         resource("/path")
-                                .with(httpAction(GET).withDefaultResponseType())
+                                .with(httpActionWithDefaultMapping(GET).withDefaultResponseType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -206,7 +207,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithQueryApiDefaults().with(
                         resource("/cake")
-                                .with(httpAction(GET)
+                                .with(httpActionWithDefaultMapping(GET)
                                         .with(mapping()
                                                 .withName("contextA.action1")
                                                 .withResponseType("application/vnd.ctx.query.somemediatype1+json"))
@@ -246,7 +247,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithQueryApiDefaults().with(
                         resource("/recipe")
-                                .with(httpAction(GET)
+                                .with(httpActionWithDefaultMapping(GET)
                                         .with(mapping()
                                                 .withName("contextB.action1")
                                                 .withResponseType("application/vnd.ctx.query.mediatype1+json"))
@@ -279,7 +280,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithQueryApiDefaults().with(
                         resource("/some/path/{paramA}", "paramA")
-                                .with(httpAction(GET).withDefaultResponseType())
+                                .with(httpActionWithDefaultMapping(GET).withDefaultResponseType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -309,7 +310,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithQueryApiDefaults().with(
                         resource("/some/path/{param1}/{param2}", "param1", "param2")
-                                .with(httpAction(GET).withDefaultResponseType())
+                                .with(httpActionWithDefaultMapping(GET).withDefaultResponseType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -340,7 +341,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithQueryApiDefaults().with(
                         resource("/some/path")
-                                .with(httpAction(GET)
+                                .with(httpActionWithDefaultMapping(GET)
                                         .with(queryParam("queryParam"))
                                         .withDefaultResponseType())
                 ).build(),
@@ -372,7 +373,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithQueryApiDefaults().with(
                         resource("/some/path")
-                                .with(httpAction(GET)
+                                .with(httpActionWithDefaultMapping(GET)
                                         .with(
                                                 queryParam("queryParam1").withType(STRING),
                                                 queryParam("queryParam2").withType(INTEGER)
@@ -415,7 +416,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithQueryApiDefaults().with(
                         resource("/some/path")
-                                .with(httpAction(GET)
+                                .with(httpActionWithDefaultMapping(GET)
                                         .with(
                                                 queryParam("queryParam").withType(BOOLEAN)
                                         )
@@ -452,7 +453,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithQueryApiDefaults().with(
                         resource("/some/path/{param}", "param")
-                                .with(httpAction(GET)
+                                .with(httpActionWithDefaultMapping(GET)
                                         .with(queryParam("queryParam"))
                                         .withDefaultResponseType())
                 ).build(),
@@ -487,7 +488,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithQueryApiDefaults().with(
                         resource("/some/path")
-                                .with(httpAction(GET)
+                                .with(httpActionWithDefaultMapping(GET)
                                         .with(queryParam("queryParam1").required(true), queryParam("queryParam2").required(false))
                                         .withDefaultResponseType())
                 ).build(),
@@ -529,7 +530,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithQueryApiDefaults().with(
                         resource("/some/path")
-                                .with(httpAction(GET)
+                                .with(httpActionWithDefaultMapping(GET)
                                         .with(queryParam("queryParam1").required(true))
                                         .withDefaultResponseType())
                 ).build(),

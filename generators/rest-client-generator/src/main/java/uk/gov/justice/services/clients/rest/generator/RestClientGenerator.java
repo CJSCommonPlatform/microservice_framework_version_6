@@ -2,7 +2,6 @@ package uk.gov.justice.services.clients.rest.generator;
 
 import static java.lang.String.format;
 import static javax.lang.model.element.Modifier.FINAL;
-import static org.apache.commons.lang3.StringUtils.capitalize;
 import static uk.gov.justice.services.generators.commons.helper.Actions.isSynchronousAction;
 import static uk.gov.justice.services.generators.commons.helper.Names.buildJavaFriendlyName;
 import static uk.gov.justice.services.generators.commons.helper.Names.nameFrom;
@@ -18,7 +17,6 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.generators.commons.client.AbstractClientGenerator;
 import uk.gov.justice.services.generators.commons.client.ActionMimeTypeDefinition;
-import uk.gov.justice.services.generators.commons.helper.Names;
 import uk.gov.justice.services.generators.commons.mapping.ActionMapping;
 import uk.gov.justice.services.generators.commons.validator.RamlValidationException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -57,7 +55,6 @@ public class RestClientGenerator extends AbstractClientGenerator {
     private static final int SERVICE_PATH_SEGMENT_INDEX = 7;
     private static final int PILLAR_PATH_SEGMENT_INDEX = 4;
     private static final int TIER_PATH_SEGMENT_INDEX = 5;
-
     private static final String SYNC_GET_RETURN_STATEMENT = "return $L.get(def, envelope)";
 
     private static final String ASYNC_POST_STATEMENT = "$L.post(def, $L)";
@@ -165,9 +162,7 @@ public class RestClientGenerator extends AbstractClientGenerator {
 
     @Override
     protected String handlesAnnotationValueOf(final Action ramlAction, final ActionMimeTypeDefinition definition, final GeneratorConfig generatorConfig) {
-        return actionMappingOf(ramlAction, definition.getNameType())
-                .orElseThrow(() -> new RamlValidationException(INVALID_ACTION_MAPPING_ERROR_MSG))
-                .getName();
+        return ActionMapping.valueOf(ramlAction, definition.getNameType()).getName();
     }
 
     private CodeBlock methodStatementsWith(final String actionName, final String processorStatementTemplate) {
@@ -175,11 +170,6 @@ public class RestClientGenerator extends AbstractClientGenerator {
                 .addStatement("final JsonEnvelope $L = $L.withMetadataFrom(envelope, $S).apply(envelope.payload())", OUTPUT_ENVELOPE, ENVELOPER, actionName)
                 .addStatement(processorStatementTemplate, REST_CLIENT_PROCESSOR, OUTPUT_ENVELOPE)
                 .build();
-    }
-
-    private Optional<ActionMapping> actionMappingOf(final Action ramlAction, final MimeType mimeType) {
-        final List<ActionMapping> actionMappings = ActionMapping.listOf(ramlAction.getDescription());
-        return actionMappings.stream().filter(m -> m.mimeTypeFor(ramlAction.getType()).equals(mimeType.getType())).findAny();
     }
 
     private FieldSpec restClientHelperField() {

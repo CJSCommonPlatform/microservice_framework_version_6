@@ -3,7 +3,7 @@ package uk.gov.justice.services.adapters.rest.generator;
 import static org.raml.model.ActionType.HEAD;
 import static org.raml.model.ActionType.OPTIONS;
 import static org.raml.model.ActionType.TRACE;
-import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
+import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpActionWithDefaultMapping;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 
@@ -39,6 +39,6 @@ public class JaxRsInterfaceGeneratorTest {
     private Raml singleResourceWithActionType(final ActionType actionType) {
         return raml()
                 .with(resource()
-                        .with(httpAction(actionType))).build();
+                        .with(httpActionWithDefaultMapping(actionType))).build();
     }
 }

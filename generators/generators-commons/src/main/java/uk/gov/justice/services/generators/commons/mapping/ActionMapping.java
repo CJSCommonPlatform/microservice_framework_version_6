@@ -16,11 +16,14 @@ import uk.gov.justice.services.generators.commons.validator.RamlValidationExcept
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import com.google.common.base.Splitter;
 import org.apache.commons.lang3.StringUtils;
+import org.raml.model.Action;
 import org.raml.model.ActionType;
+import org.raml.model.MimeType;
 
 /**
  * Mapping between media types and framework actions
@@ -92,6 +95,15 @@ public class ActionMapping {
 
         throw new IllegalArgumentException(format("Action %s not supported", httpMethod.toString()));
     }
+
+    public static ActionMapping valueOf(final Action ramlAction, final MimeType mimeType) {
+        final List<ActionMapping> actionMappings = listOf(ramlAction.getDescription());
+        return actionMappings.stream()
+                .filter(m -> m.mimeTypeFor(ramlAction.getType()).equals(mimeType.getType()))
+                .findAny()
+                .orElseThrow(() -> new RamlValidationException(INVALID_ACTION_MAPPING_ERROR_MSG));
+    }
+
 
     private static List<ActionMapping> actionMappingsOf(final String mappingString) {
         if (isNotEmpty(mappingString) && mappingString.contains(MAPPING_BOUNDARY)) {

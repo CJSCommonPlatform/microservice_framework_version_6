@@ -14,6 +14,7 @@ import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.core.annotation.CustomServiceComponent;
+import uk.gov.justice.services.core.annotation.Direct;
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Provider;
 import uk.gov.justice.services.core.annotation.Remote;
@@ -89,6 +90,14 @@ public class AnnotationScannerTest {
 
         verifyIfRemoteServiceComponentFoundEventFiredWith(bean);
     }
+
+    @Test
+    public void shouldFireDirectQueryApiHandlerFoundEventWithRemoteQueryApi() throws Exception {
+        doReturn(TestDirectQueryApiHandler.class).when(bean).getBeanClass();
+
+        verifyIfRemoteServiceComponentFoundEventFiredWith(bean);
+    }
+
 
     @Test
     public void shouldFireServiceComponentFoundEventForFrameworkComponentAnnotation() throws Exception {
@@ -208,6 +217,10 @@ public class AnnotationScannerTest {
     public static class TestRemoteQueryApiHandler {
     }
 
+    @Direct
+    @ServiceComponent(QUERY_API)
+    public static class TestDirectQueryApiHandler {
+    }
 
     @Event(TEST_EVENT_NAME)
     public static class TestEvent {

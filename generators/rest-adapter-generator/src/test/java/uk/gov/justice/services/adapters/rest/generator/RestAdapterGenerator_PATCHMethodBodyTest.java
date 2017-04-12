@@ -9,7 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.raml.model.ActionType.PATCH;
 import static uk.gov.justice.services.core.interceptor.DefaultInterceptorContext.interceptorContextWithInput;
-import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
+import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpActionWithDefaultMapping;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithCommandApiDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
@@ -42,7 +42,7 @@ public class RestAdapterGenerator_PATCHMethodBodyTest extends BaseRestAdapterGen
         generator.run(
                 restRamlWithCommandApiDefaults()
                         .with(resource("/path")
-                                .with(httpAction(PATCH).withHttpActionOfDefaultRequestType())
+                                .with(httpActionWithDefaultMapping(PATCH).withHttpActionOfDefaultRequestType())
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -68,7 +68,7 @@ public class RestAdapterGenerator_PATCHMethodBodyTest extends BaseRestAdapterGen
                 restRamlWithCommandApiDefaults()
                         .with(
                                 resource("/path")
-                                        .with(httpAction(PATCH).withHttpActionOfDefaultRequestType())
+                                        .with(httpActionWithDefaultMapping(PATCH).withHttpActionOfDefaultRequestType())
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 

@@ -134,7 +134,7 @@ public class InterceptorCacheTest {
     @Test
     public void shouldThrowExceptionIfComponentHasNoInterceptorChainProviderRegistered() throws Exception {
         expectedException.expect(InterceptorCacheException.class);
-        expectedException.expectMessage("Component [Unknown Component] does not have any cached Interceptors, check there is an InterceptorChainProvider for this component.");
+        expectedException.expectMessage("Component [Unknown Component] does not have any cached Interceptors, check if there is an InterceptorChainProvider for this component.");
 
         interceptorCache.getInterceptors("Unknown Component");
     }

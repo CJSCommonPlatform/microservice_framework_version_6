@@ -25,8 +25,7 @@ public class DispatcherCache {
 
     private final Map<Pair<String, ServiceComponentLocation>, Dispatcher> dispatcherMap = new ConcurrentHashMap<>();
 
-    @Inject
-    DispatcherFactory dispatcherFactory;
+    private final DispatcherFactory dispatcherFactory = new DispatcherFactory();
 
     /**
      * Return a {@link Dispatcher} for the given {@link InjectionPoint}.

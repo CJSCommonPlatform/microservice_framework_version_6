@@ -113,7 +113,6 @@ public class SenderRequesterHandlerIT {
             AllowAllPolicyEvaluator.class,
             DefaultAccessControlService.class,
             DispatcherCache.class,
-            DispatcherFactory.class,
             PolicyEvaluator.class,
             LoggerProducer.class,
             BeanInstantiater.class,

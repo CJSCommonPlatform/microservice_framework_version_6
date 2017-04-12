@@ -112,7 +112,6 @@ public class CustomServiceComponentHandlerIT {
             AllowAllPolicyEvaluator.class,
             AccessControlService.class,
             DispatcherCache.class,
-            DispatcherFactory.class,
             PolicyEvaluator.class,
             LoggerProducer.class,
             EmptySystemUserProvider.class,

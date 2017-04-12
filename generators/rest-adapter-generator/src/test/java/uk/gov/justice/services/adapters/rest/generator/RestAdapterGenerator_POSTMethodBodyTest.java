@@ -20,7 +20,7 @@ import static org.mockito.Mockito.when;
 import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.services.core.interceptor.DefaultInterceptorContext.interceptorContextWithInput;
 import static uk.gov.justice.services.generators.test.utils.builder.HeadersBuilder.headersWith;
-import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
+import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpActionWithDefaultMapping;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.mapping;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithCommandApiDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
@@ -66,7 +66,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
                 restRamlWithCommandApiDefaults()
                         .with(
                                 resource("/path")
-                                        .with(httpAction(POST).withHttpActionOfDefaultRequestType())
+                                        .with(httpActionWithDefaultMapping(POST).withHttpActionOfDefaultRequestType())
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -92,7 +92,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
                 restRamlWithCommandApiDefaults()
                         .with(
                                 resource("/path")
-                                        .with(httpAction(POST).withHttpActionOfDefaultRequestType())
+                                        .with(httpActionWithDefaultMapping(POST).withHttpActionOfDefaultRequestType())
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -126,7 +126,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
         generator.run(
                 restRamlWithCommandApiDefaults()
                         .with(resource("/path")
-                                .with(httpAction(POST)
+                                .with(httpActionWithDefaultMapping(POST)
                                         .withHttpActionOfDefaultRequestType()
                                         .withResponsesFrom(responses))
                         ).build(),
@@ -157,7 +157,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
         generator.run(
                 restRamlWithCommandApiDefaults()
                         .with(resource("/path")
-                                .with(httpAction(POST).withHttpActionOfDefaultRequestType())
+                                .with(httpActionWithDefaultMapping(POST).withHttpActionOfDefaultRequestType())
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -178,7 +178,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
         generator.run(
                 restRamlWithCommandApiDefaults()
                         .with(resource("/path")
-                                .with(httpAction(POST).withHttpActionOfDefaultRequestType())
+                                .with(httpActionWithDefaultMapping(POST).withHttpActionOfDefaultRequestType())
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -201,7 +201,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
         generator.run(
                 restRamlWithCommandApiDefaults()
                         .with(resource("/some/path/{paramA}", "paramA")
-                                .with(httpAction(POST).withHttpActionOfDefaultRequestType())
+                                .with(httpActionWithDefaultMapping(POST).withHttpActionOfDefaultRequestType())
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -232,7 +232,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
         generator.run(
                 restRamlWithCommandApiDefaults()
                         .with(resource("/some/path/{p1}", "p1")
-                                .with(httpAction(POST,
+                                .with(httpActionWithDefaultMapping(POST,
                                         "application/vnd.type-aa+json",
                                         "application/vnd.type-bb+json")
                                         .with(mapping()
@@ -272,7 +272,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
         generator.run(
                 restRamlWithCommandApiDefaults()
                         .with(resource("/some/path/{param1}/{param2}", "param1", "param2")
-                                .with(httpAction(POST).withHttpActionOfDefaultRequestType())
+                                .with(httpActionWithDefaultMapping(POST).withHttpActionOfDefaultRequestType())
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -305,7 +305,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
         generator.run(
                 restRamlWithCommandApiDefaults().with(
                         resource("/user")
-                                .with(httpAction(POST)
+                                .with(httpActionWithDefaultMapping(POST)
                                         .with(mapping()
                                                 .withName("contextA.someAction")
                                                 .withRequestType("application/vnd.somemediatype1+json"))

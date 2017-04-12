@@ -5,9 +5,11 @@ import static org.raml.model.ActionType.HEAD;
 import static org.raml.model.ActionType.OPTIONS;
 import static org.raml.model.ActionType.POST;
 import static org.raml.model.ActionType.PUT;
-import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
+import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpActionWithDefaultMapping;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
+
+import uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -24,7 +26,7 @@ public class RequestContentTypeRamlValidatorTest {
         new RequestContentTypeRamlValidator(POST).validate(
                 raml()
                         .with(resource()
-                                .with(httpAction(POST, "application/vnd.command1+json")))
+                                .with(httpActionWithDefaultMapping(POST, "application/vnd.command1+json")))
                         .build());
     }
 
@@ -34,8 +36,8 @@ public class RequestContentTypeRamlValidatorTest {
         new RequestContentTypeRamlValidator(POST, PUT).validate(
                 raml()
                         .with(resource()
-                                .with(httpAction(POST, "application/vnd.command1+json"))
-                                .with(httpAction(PUT, "application/vnd.command1+json")))
+                                .with(httpActionWithDefaultMapping(POST, "application/vnd.command1+json"))
+                                .with(httpActionWithDefaultMapping(PUT, "application/vnd.command1+json")))
                         .build());
     }
 
@@ -45,11 +47,11 @@ public class RequestContentTypeRamlValidatorTest {
         new RequestContentTypeRamlValidator(POST).validate(
                 raml()
                         .with(resource()
-                                .with(httpAction(GET, "application/vnd.command1+json"))
-                                .with(httpAction(POST, "application/vnd.command2+json"))
-                                .with(httpAction(HEAD, "application/vnd.command3+json"))
-                                .with(httpAction(PUT, "application/vnd.command4+json"))
-                                .with(httpAction(OPTIONS, "application/vnd.command5+json"))
+                                .with(httpActionWithDefaultMapping(GET, "application/vnd.command1+json"))
+                                .with(httpActionWithDefaultMapping(POST, "application/vnd.command2+json"))
+                                .with(httpActionWithDefaultMapping(HEAD, "application/vnd.command3+json"))
+                                .with(httpActionWithDefaultMapping(PUT, "application/vnd.command4+json"))
+                                .with(httpActionWithDefaultMapping(OPTIONS, "application/vnd.command5+json"))
                         )
                         .build());
     }
@@ -63,7 +65,7 @@ public class RequestContentTypeRamlValidatorTest {
         new RequestContentTypeRamlValidator(POST).validate(
                 raml()
                         .with(resource()
-                                .with(httpAction(POST)))
+                                .with(httpActionWithDefaultMapping(POST)))
                         .build());
     }
 
@@ -76,8 +78,8 @@ public class RequestContentTypeRamlValidatorTest {
         new RequestContentTypeRamlValidator(POST, PUT).validate(
                 raml()
                         .with(resource()
-                                .with(httpAction(POST, "application/vnd.command1+json"))
-                                .with(httpAction(PUT)))
+                                .with(httpActionWithDefaultMapping(POST, "application/vnd.command1+json"))
+                                .with(httpActionWithDefaultMapping(PUT)))
                         .build());
     }
 }

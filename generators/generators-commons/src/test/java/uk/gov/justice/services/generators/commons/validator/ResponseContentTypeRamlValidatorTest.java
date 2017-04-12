@@ -1,13 +1,10 @@
-package uk.gov.justice.services.adapters.rest.validator;
+package uk.gov.justice.services.generators.commons.validator;
 
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.POST;
-import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
+import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpActionWithDefaultMapping;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
-
-import uk.gov.justice.services.generators.commons.validator.RamlValidationException;
-import uk.gov.justice.services.generators.commons.validator.RamlValidator;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -25,7 +22,7 @@ public class ResponseContentTypeRamlValidatorTest {
         validator.validate(
                 raml().with(
                         resource("/some/path")
-                                .with(httpAction(GET).withResponseTypes("application/vnd.user+json"))
+                                .with(httpActionWithDefaultMapping(GET).withResponseTypes("application/vnd.user+json"))
                 ).build());
     }
 
@@ -35,9 +32,9 @@ public class ResponseContentTypeRamlValidatorTest {
         validator.validate(
                 raml()
                         .with(resource("/some/path")
-                                .with(httpAction(GET).withResponseTypes("application/xml")))
+                                .with(httpActionWithDefaultMapping(GET).withResponseTypes("application/xml")))
                         .with(resource("/some/path")
-                                .with(httpAction(POST).withResponseTypes("application/json")))
+                                .with(httpActionWithDefaultMapping(POST).withResponseTypes("application/json")))
                         .build());
     }
 
@@ -50,7 +47,7 @@ public class ResponseContentTypeRamlValidatorTest {
         validator.validate(
                 raml().with(
                         resource("/some/path")
-                                .with(httpAction(GET))
+                                .with(httpActionWithDefaultMapping(GET))
                 ).build());
     }
 }

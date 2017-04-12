@@ -27,8 +27,10 @@ public enum ServiceComponentLocation {
      * @return the service component location
      */
     public static ServiceComponentLocation componentLocationFrom(final InjectionPoint injectionPoint) {
+
         final Class<?> targetClass = injectionPoint.getMember().getDeclaringClass();
         return targetClass.isAnnotationPresent(Adapter.class)
-                || targetClass.isAnnotationPresent(CustomAdapter.class) ? LOCAL : REMOTE;
+                || targetClass.isAnnotationPresent(CustomAdapter.class)
+                || targetClass.isAnnotationPresent(DirectAdapter.class) ? LOCAL : REMOTE;
     }
 }

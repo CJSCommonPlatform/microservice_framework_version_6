@@ -24,7 +24,7 @@ import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
 import static org.raml.model.ActionType.PUT;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.defaultGetAction;
-import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
+import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpActionWithDefaultMapping;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.mapping;
 import static uk.gov.justice.services.generators.test.utils.builder.QueryParamBuilder.queryParam;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithCommandApiDefaults;
@@ -42,13 +42,13 @@ import static uk.gov.justice.services.generators.test.utils.reflection.Reflectio
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.methodsOf;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
+import uk.gov.justice.services.adapter.rest.annotation.PATCH;
 import uk.gov.justice.services.adapter.rest.mapping.ActionMapper;
 import uk.gov.justice.services.adapter.rest.processor.RestProcessor;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.CustomAdapter;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
-import uk.gov.justice.services.adapter.rest.annotation.PATCH;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -119,7 +119,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithDefaults()
                         .with(resource("/some/path")
-                                .with(httpAction(POST, "application/vnd.default+json")
+                                .with(httpActionWithDefaultMapping(POST, "application/vnd.default+json")
                                         .with(mapping()
                                                 .withName("blah")
                                                 .withRequestType("application/vnd.default+json")))
@@ -143,7 +143,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/some/path/{p1}")
-                                .with(httpAction(POST, "application/vnd.ctx.command.cmd-a+json", "application/vnd.ctx.command.cmd-b+json")
+                                .with(httpActionWithDefaultMapping(POST, "application/vnd.ctx.command.cmd-a+json", "application/vnd.ctx.command.cmd-b+json")
                                         .with(mapping().withName("blah1").withRequestType("application/vnd.ctx.command.cmd-a+json"))
                                         .with(mapping().withName("blah2").withRequestType("application/vnd.ctx.command.cmd-b+json")))
 
@@ -176,7 +176,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithDefaults()
                         .with(resource("/some/path")
-                                .with(httpAction(PUT, "application/vnd.default+json")
+                                .with(httpActionWithDefaultMapping(PUT, "application/vnd.default+json")
                                         .with(mapping()
                                                 .withName("blah")
                                                 .withRequestType("application/vnd.default+json")))
@@ -200,7 +200,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithDefaults()
                         .with(resource("/some/path")
-                                .with(httpAction(PATCH, "application/vnd.default+json")
+                                .with(httpActionWithDefaultMapping(PATCH, "application/vnd.default+json")
                                         .with(mapping()
                                                 .withName("blah")
                                                 .withRequestType("application/vnd.default+json")))
@@ -224,7 +224,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithDefaults()
                         .with(resource("/some/path")
-                                .with(httpAction(DELETE, "application/vnd.default+json")
+                                .with(httpActionWithDefaultMapping(DELETE, "application/vnd.default+json")
                                         .with(mapping()
                                                 .withName("blah")
                                                 .withRequestType("application/vnd.default+json")))
@@ -248,7 +248,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithDefaults()
                         .with(resource("/some/path")
-                                .with(httpAction(POST, "application/vnd.default+json")
+                                .with(httpActionWithDefaultMapping(POST, "application/vnd.default+json")
                                         .withResponseTypes("application/vnd.ctx.query.query1+json")
                                         .with(mapping()
                                                 .withName("blah")
@@ -277,7 +277,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithDefaults()
                         .with(resource("/some/path")
-                                .with(httpAction(PUT, "application/vnd.default+json")
+                                .with(httpActionWithDefaultMapping(PUT, "application/vnd.default+json")
                                         .withResponseTypes("application/vnd.ctx.query.query1+json")
                                         .with(mapping()
                                                 .withName("blah")
@@ -306,7 +306,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithDefaults()
                         .with(resource("/some/path")
-                                .with(httpAction(PATCH, "application/vnd.default+json")
+                                .with(httpActionWithDefaultMapping(PATCH, "application/vnd.default+json")
                                         .withResponseTypes("application/vnd.ctx.query.query1+json")
                                         .with(mapping()
                                                 .withName("blah")
@@ -335,7 +335,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithDefaults()
                         .with(resource("/some/path")
-                                .with(httpAction(GET)
+                                .with(httpActionWithDefaultMapping(GET)
                                         .withResponseTypes("application/vnd.ctx.query.query1+json")
                                         .with(mapping().withResponseType("application/vnd.ctx.query.query1+json").withName("blah")))
                         ).build(),
@@ -359,7 +359,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/some/path")
-                                .with(httpAction(GET)
+                                .with(httpActionWithDefaultMapping(GET)
                                         .withResponseTypes(
                                                 "application/vnd.ctx.query.query1+json",
                                                 "application/vnd.ctx.query.query2+json")
@@ -596,7 +596,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithCommandApiDefaults().with(
                         resource("/some/path/{p1}", "p1")
-                                .with(httpAction(POST,
+                                .with(httpActionWithDefaultMapping(POST,
                                         "application/vnd.ctx.command.command-a+json",
                                         "application/vnd.ctx.command.command-b+json",
                                         "application/vnd.ctx.command.command-c+json",
@@ -723,7 +723,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithCommandApiDefaults()
                         .with(resource("/some/path")
-                                .with(httpAction(POST, "application/vnd.default+json")
+                                .with(httpActionWithDefaultMapping(POST, "application/vnd.default+json")
                                         .withResponseTypes("application/vnd.ctx.query.query1+json")
                                         .with(mapping()
                                                 .withName("blah")
@@ -764,7 +764,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithCommandApiDefaults()
                         .with(resource("/some/path")
-                                .with(httpAction(PUT, "application/vnd.default+json")
+                                .with(httpActionWithDefaultMapping(PUT, "application/vnd.default+json")
                                         .withResponseTypes("application/vnd.ctx.query.query1+json")
                                         .with(mapping()
                                                 .withName("blah")
@@ -805,7 +805,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithCommandApiDefaults()
                         .with(resource("/some/path")
-                                .with(httpAction(PATCH, "application/vnd.default+json")
+                                .with(httpActionWithDefaultMapping(PATCH, "application/vnd.default+json")
                                         .withResponseTypes("application/vnd.ctx.query.query1+json")
                                         .with(mapping()
                                                 .withName("blah")
@@ -951,7 +951,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     public void shouldGenerateClassContainingQueryParam() throws Exception {
         generator.run(
                 restRamlWithQueryApiDefaults().with(
-                        resource("/users").with(httpAction(GET)
+                        resource("/users").with(httpActionWithDefaultMapping(GET)
                                 .with(queryParam("surname"))
                                 .withResponseTypes("application/vnd.people.query.search-users+json")
                                 .with(mapping()
@@ -988,7 +988,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
     public void shouldGenerateClassContainingThreeQueryParams() throws Exception {
         generator.run(
                 restRamlWithQueryApiDefaults().with(
-                        resource("/users").with(httpAction(GET)
+                        resource("/users").with(httpActionWithDefaultMapping(GET)
                                 .with(queryParam("surname"), queryParam("firstname"), queryParam("middlename"))
                                 .withResponseTypes("application/vnd.people.query.search-users+json")
                                 .with(mapping()

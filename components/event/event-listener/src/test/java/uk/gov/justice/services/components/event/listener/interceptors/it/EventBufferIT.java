@@ -132,7 +132,6 @@ public class EventBufferIT {
             AllowAllPolicyEvaluator.class,
             DefaultAccessControlService.class,
             DispatcherCache.class,
-            DispatcherFactory.class,
             PolicyEvaluator.class,
 
             StreamBufferOpenEjbAwareJdbcRepository.class,

@@ -26,8 +26,8 @@ import static uk.gov.justice.services.generators.commons.helper.Actions.isSynchr
 import static uk.gov.justice.services.generators.commons.helper.Names.DEFAULT_ANNOTATION_PARAMETER;
 import static uk.gov.justice.services.generators.commons.helper.Names.GENERIC_PAYLOAD_ARGUMENT_NAME;
 import static uk.gov.justice.services.generators.commons.helper.Names.RESOURCE_PACKAGE_NAME;
-import static uk.gov.justice.services.generators.commons.helper.Names.buildResourceMethodName;
-import static uk.gov.justice.services.generators.commons.helper.Names.buildResourceMethodNameWithNoMimeType;
+import static uk.gov.justice.services.generators.commons.helper.Names.resourceMethodNameFrom;
+import static uk.gov.justice.services.generators.commons.helper.Names.resourceMethodNameWithNoMimeTypeFrom;
 import static uk.gov.justice.services.generators.commons.helper.Names.packageNameOf;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
@@ -37,7 +37,7 @@ import uk.gov.justice.services.adapter.rest.parameter.ParameterCollectionBuilder
 import uk.gov.justice.services.adapter.rest.parameter.ParameterCollectionBuilderFactory;
 import uk.gov.justice.services.adapter.rest.parameter.ParameterType;
 import uk.gov.justice.services.adapter.rest.processor.RestProcessor;
-import uk.gov.justice.services.adapters.rest.uri.BaseUri;
+import uk.gov.justice.services.generators.commons.helper.RestResourceBaseUri;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.CustomAdapter;
@@ -127,7 +127,7 @@ class JaxRsImplementationGenerator {
     List<TypeSpec> generateFor(final Raml raml) {
         final Collection<Resource> resources = raml.getResources().values();
         return resources.stream()
-                .map(resource -> generateFor(resource, new BaseUri(raml.getBaseUri())))
+                .map(resource -> generateFor(resource, new RestResourceBaseUri(raml.getBaseUri())))
                 .collect(Collectors.toList());
     }
 
@@ -138,12 +138,11 @@ class JaxRsImplementationGenerator {
      * @param baseUri base uri of the raml
      * @return a {@link TypeSpec} that represents the implementation class
      */
-    private TypeSpec generateFor(final Resource resource, final BaseUri baseUri) {
+    private TypeSpec generateFor(final Resource resource, final RestResourceBaseUri baseUri) {
         final TypeSpec.Builder classSpecBuilder = classSpecFor(resource, baseUri);
 
         resource.getActions().values().forEach(action -> {
-            final Optional<String> component = baseUri.component();
-            classSpecBuilder.addMethods(methodsFor(action, component));
+            classSpecBuilder.addMethods(methodsFor(action, baseUri.component()));
         });
 
         return classSpecBuilder.build();
@@ -156,7 +155,7 @@ class JaxRsImplementationGenerator {
      * @param baseUri the optional component for this class
      * @return a {@link TypeSpec.Builder} that represents the implementation class
      */
-    private TypeSpec.Builder classSpecFor(final Resource resource, final BaseUri baseUri) {
+    private TypeSpec.Builder classSpecFor(final Resource resource, final RestResourceBaseUri baseUri) {
         final String className = resourceImplementationNameOf(resource, baseUri);
 
         final Optional<String> component = baseUri.component();
@@ -269,8 +268,7 @@ class JaxRsImplementationGenerator {
      * @return the {@link MethodSpec} that represents the method for the httpAction
      */
     private MethodSpec processNoActionBody(final Action action, final String responseStrategyName) {
-        final String resourceMethodName = buildResourceMethodNameWithNoMimeType(action);
-        return generateGetResourceMethod(resourceMethodName, action, responseStrategyName);
+        return generateGetResourceMethod(resourceMethodNameWithNoMimeTypeFrom(action), action, responseStrategyName);
     }
 
     /**
@@ -294,7 +292,7 @@ class JaxRsImplementationGenerator {
      * @return - a method specification
      */
     private MethodSpec buildMethodSpecForMimeType(final Action action, final MimeType bodyMimeType, final String responseStrategyName) {
-        final String resourceMethodName = buildResourceMethodName(action, bodyMimeType);
+        final String resourceMethodName = resourceMethodNameFrom(action, bodyMimeType);
         return generateResourceMethod(resourceMethodName, action, bodyMimeType, responseStrategyName);
     }
 
@@ -305,7 +303,7 @@ class JaxRsImplementationGenerator {
      * @param baseUri
      * @return the {@link ClassName} of the interface
      */
-    private ClassName interfaceClassNameFor(final Resource resource, final BaseUri baseUri) {
+    private ClassName interfaceClassNameFor(final Resource resource, final RestResourceBaseUri baseUri) {
         return ClassName.get(packageNameOf(configuration, RESOURCE_PACKAGE_NAME), resourceInterfaceNameOf(resource, baseUri));
     }
 

@@ -132,7 +132,6 @@ public class RemoteExampleQueryApiIT {
             ContextMatcher.class,
             DefaultServerPortProvider.class,
             DispatcherCache.class,
-            DispatcherFactory.class,
             DefaultEnveloper.class,
             InterceptorCache.class,
             InterceptorChainProcessor.class,

@@ -8,7 +8,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.POST;
-import static uk.gov.justice.services.generators.commons.helper.Names.buildResourceMethodNameWithNoMimeType;
+import static uk.gov.justice.services.generators.commons.helper.Names.resourceMethodNameWithNoMimeTypeFrom;
 import static uk.gov.justice.services.generators.commons.helper.Names.camelCase;
 import static uk.gov.justice.services.generators.commons.helper.Names.nameFrom;
 import static uk.gov.justice.services.generators.commons.helper.Names.packageNameOf;
@@ -53,7 +53,7 @@ public class NamesTest {
         final Action action = httpAction().withHttpActionType(POST).withDescription(mappingDescriptionWith(mappingBuilder).build()).build();
 
         action.setResource(resource().withRelativeUri("test").build());
-        final String shortMimeType = Names.buildResourceMethodName(action, new MimeType("application/vnd.command.create-user+json"));
+        final String shortMimeType = Names.resourceMethodNameFrom(action, new MimeType("application/vnd.command.create-user+json"));
         assertThat(shortMimeType, is("postCommandCreateUserTest"));
     }
 
@@ -62,7 +62,7 @@ public class NamesTest {
         final Action action = httpAction().withHttpActionType(POST).build();
 
         action.setResource(resource().withRelativeUri("test").build());
-        final String shortMimeType = Names.buildResourceMethodName(action, new MimeType("application/vnd.command.create-user+json"));
+        final String shortMimeType = Names.resourceMethodNameFrom(action, new MimeType("application/vnd.command.create-user+json"));
         assertThat(shortMimeType, is("postTest"));
     }
 
@@ -72,7 +72,7 @@ public class NamesTest {
         final Action action = httpAction().withHttpActionType(POST).withDescription(mappingDescriptionWith(mappingBuilder).build()).build();
 
         action.setResource(resource().withRelativeUri("test").build());
-        final String shortMimeType = Names.buildResourceMethodName(action, null);
+        final String shortMimeType = Names.resourceMethodNameFrom(action, null);
         assertThat(shortMimeType, is("postTest"));
     }
 
@@ -82,7 +82,7 @@ public class NamesTest {
         final Action action = httpAction().withHttpActionType(GET).withDescription(mappingDescriptionWith(mappingBuilder).build()).build();
 
         action.setResource(resource().withRelativeUri("test").build());
-        final String shortMimeType = Names.buildResourceMethodNameWithNoMimeType(action);
+        final String shortMimeType = Names.resourceMethodNameWithNoMimeTypeFrom(action);
         assertThat(shortMimeType, is("getTest"));
     }
 
@@ -90,7 +90,7 @@ public class NamesTest {
     public void shouldBuildResourceMethodNameWithNoMimeType() throws Exception {
         final Action action = httpAction().withHttpActionType(POST).build();
         action.setResource(resource().withRelativeUri("test").build());
-        final String shortMimeType = buildResourceMethodNameWithNoMimeType(action);
+        final String shortMimeType = resourceMethodNameWithNoMimeTypeFrom(action);
         assertThat(shortMimeType, is("postTest"));
     }
 

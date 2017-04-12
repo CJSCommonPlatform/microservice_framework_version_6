@@ -1,0 +1,59 @@
+#%RAML 0.8
+title: Example Service
+baseUri: http://localhost:8080/rest-adapter-generator/query/api/rest/example
+version: v0.1
+mediaType: application/json
+protocols: [ HTTP, HTTPS ]
+
+/users/{userId}:
+  description: |
+    Get users
+
+  get:
+    description: |
+        ...
+        (mapping):
+            responseType: application/vnd.people.user+json
+            name: people.get-user
+        (mapping):
+            responseType: application/vnd.people.user-summary+json
+            name: people.get-user-summary
+        ...
+    responses:
+        200:
+            body:
+                application/vnd.people.user+json:
+                application/vnd.people.user-summary+json:
+
+/users:
+  description: |
+    Search users
+  get:
+    description: |
+          ...
+          (mapping):
+              responseType: application/vnd.people.users+json
+              name: people.search-users
+          ...
+    queryParameters:
+        lastname:
+            type: string
+            required: true
+        firstname:
+            type: string
+            required: false
+        age:
+            type: integer
+            required: false
+        height:
+            type: number
+            required: false
+        married:
+            type: boolean
+            required: false
+
+
+    responses:
+        200:
+            body:
+                application/vnd.people.users+json:

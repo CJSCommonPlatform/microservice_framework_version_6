@@ -45,6 +45,11 @@ public class ComponentNameUtilTest {
     }
 
     @Test
+    public void shouldReturnClassLevelDirectAdaptorComponent() throws NoSuchFieldException {
+        assertThat(componentFrom(injectionPointWith(DirectAdapterAnnotation.class.getDeclaredField(FIELD_NAME))), equalTo("QUERY_API"));
+    }
+
+    @Test
     public void shouldReturnClassLevelComponentForMethodInjectionPoint() throws NoSuchFieldException {
         assertThat(componentFrom(injectionPointWith(ServiceComponentClassLevelAnnotationMethod.class.getDeclaredMethods()[0])), equalTo("QUERY_API"));
     }
@@ -68,6 +73,8 @@ public class ComponentNameUtilTest {
     public void shouldReturnFieldLevelCustomServiceComponent() throws NoSuchFieldException {
         assertThat(componentFrom(injectionPointWith(CustomServiceFieldLevelAnnotation.class.getDeclaredField(FIELD_NAME))), equalTo("CUSTOM_SERVICE_NAME"));
     }
+
+
 
     @Test(expected = IllegalStateException.class)
     public void shouldThrowExceptionOnMissingComponentAnnotation() throws NoSuchFieldException {
@@ -102,6 +109,14 @@ public class ComponentNameUtilTest {
 
     @Adapter(EVENT_LISTENER)
     public static class AdapterAnnotation {
+
+        @Inject
+        Object field;
+
+    }
+
+    @DirectAdapter(component = QUERY_API, actions = {""})
+    public static class DirectAdapterAnnotation {
 
         @Inject
         Object field;

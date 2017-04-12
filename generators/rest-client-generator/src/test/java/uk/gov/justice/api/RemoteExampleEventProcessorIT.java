@@ -144,7 +144,6 @@ public class RemoteExampleEventProcessorIT {
             ContextMatcher.class,
             DefaultServerPortProvider.class,
             DispatcherCache.class,
-            DispatcherFactory.class,
             EmptySystemUserProvider.class,
             DefaultEnveloper.class,
             InterceptorCache.class,

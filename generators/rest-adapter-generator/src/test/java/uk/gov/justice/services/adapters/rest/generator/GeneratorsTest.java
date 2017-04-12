@@ -7,8 +7,7 @@ import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.adapters.rest.generator.Generators.resourceInterfaceNameOf;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 
-import uk.gov.justice.services.adapters.rest.uri.BaseUri;
-import uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder;
+import uk.gov.justice.services.generators.commons.helper.RestResourceBaseUri;
 
 import java.util.Arrays;
 import java.util.List;
@@ -49,14 +48,14 @@ public class GeneratorsTest {
     @Test
     public void shouldReturnInterfaceNamePrefixedWithComponentName() throws Exception {
         final Resource resource = resource("/abc").withDefaultPostAction().build();
-        final String interfaceName = resourceInterfaceNameOf(resource, new BaseUri("http://localhost:8080/warname/command/api/rest/service"));
+        final String interfaceName = resourceInterfaceNameOf(resource, new RestResourceBaseUri("http://localhost:8080/warname/command/api/rest/service"));
         assertThat(interfaceName, is("CommandApiAbcResource"));
     }
 
     @Test
     public void shouldReturnInterfaceNamePrefixedWithBaseUriPath() throws Exception {
         final Resource resource = resource("/bcd").withDefaultPostAction().build();
-        final String interfaceName = resourceInterfaceNameOf(resource, new BaseUri("http://localhost:8080/warname/base/path"));
+        final String interfaceName = resourceInterfaceNameOf(resource, new RestResourceBaseUri("http://localhost:8080/warname/base/path"));
         assertThat(interfaceName, is("BasePathBcdResource"));
     }
 }

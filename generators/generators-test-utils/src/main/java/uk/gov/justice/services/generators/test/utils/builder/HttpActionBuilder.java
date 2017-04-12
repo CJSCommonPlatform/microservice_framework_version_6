@@ -75,7 +75,7 @@ public class HttpActionBuilder {
                 .withDefaultResponseType();
     }
 
-    public static HttpActionBuilder httpAction(final ActionType actionType, final String... mimeTypes) {
+    public static HttpActionBuilder httpActionWithDefaultMapping(final ActionType actionType, final String... mimeTypes) {
         HttpActionBuilder httpActionBuilder = new HttpActionBuilder()
                 .withHttpActionType(actionType)
                 .with(defaultMapping());
@@ -85,7 +85,7 @@ public class HttpActionBuilder {
         return httpActionBuilder;
     }
 
-    public static HttpActionBuilder httpActionWithNoMapping(final ActionType actionType, final String... mimeTypes) {
+    public static HttpActionBuilder httpAction(final ActionType actionType, final String... mimeTypes) {
         HttpActionBuilder httpActionBuilder = new HttpActionBuilder()
                 .withHttpActionType(actionType);
         for (final String mimeType : mimeTypes) {

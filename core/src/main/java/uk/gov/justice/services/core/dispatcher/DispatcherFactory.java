@@ -8,7 +8,6 @@ import javax.enterprise.context.ApplicationScoped;
 
 import org.slf4j.Logger;
 
-@ApplicationScoped
 public class DispatcherFactory {
 
     private static final Logger LOGGER = getLogger(HandlerRegistry.class);

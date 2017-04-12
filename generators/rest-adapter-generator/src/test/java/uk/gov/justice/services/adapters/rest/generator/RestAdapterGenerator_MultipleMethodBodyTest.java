@@ -9,9 +9,8 @@ import static org.mockito.Mockito.when;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.POST;
 import static org.raml.model.ActionType.PUT;
-import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
+import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpActionWithDefaultMapping;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithCommandApiDefaults;
-import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.methodsOf;
@@ -39,9 +38,9 @@ public class RestAdapterGenerator_MultipleMethodBodyTest extends BaseRestAdapter
         generator.run(
                 restRamlWithCommandApiDefaults()
                         .with(resource("/path")
-                                .with(httpAction(GET).withDefaultResponseType())
-                                .with(httpAction(POST).withHttpActionOfDefaultRequestType())
-                                .with(httpAction(PUT).withHttpActionOfDefaultRequestType())
+                                .with(httpActionWithDefaultMapping(GET).withDefaultResponseType())
+                                .with(httpActionWithDefaultMapping(POST).withHttpActionOfDefaultRequestType())
+                                .with(httpActionWithDefaultMapping(PUT).withHttpActionOfDefaultRequestType())
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 

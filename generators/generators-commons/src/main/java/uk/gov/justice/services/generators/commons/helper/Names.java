@@ -2,8 +2,6 @@ package uk.gov.justice.services.generators.commons.helper;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
-import static org.apache.commons.lang.StringUtils.defaultIfBlank;
-import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.WordUtils.capitalize;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -24,7 +22,6 @@ import java.util.stream.Stream;
 import org.apache.commons.lang.StringUtils;
 import org.raml.model.Action;
 import org.raml.model.MimeType;
-import org.raml.model.Resource;
 
 public final class Names {
 
@@ -48,7 +45,7 @@ public final class Names {
     private Names() {
     }
 
-    public static String buildResourceMethodNameWithNoMimeType(final Action action) {
+    public static String resourceMethodNameWithNoMimeTypeFrom(final Action action) {
         return buildResourceMethodNameWith(action, () -> BLANK);
     }
 
@@ -60,9 +57,9 @@ public final class Names {
         return type + buildJavaFriendlyName(uri + mediaType);
     }
 
-    public static String buildResourceMethodName(final Action action, final MimeType bodyMimeType) {
+    public static String resourceMethodNameFrom(final Action action, final MimeType bodyMimeType) {
         if (null == bodyMimeType) {
-            return buildResourceMethodNameWithNoMimeType(action);
+            return resourceMethodNameWithNoMimeTypeFrom(action);
         }
 
         return buildResourceMethodNameWith(action, () -> {

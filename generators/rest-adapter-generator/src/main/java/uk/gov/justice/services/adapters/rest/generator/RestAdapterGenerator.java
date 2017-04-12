@@ -17,7 +17,7 @@ import static uk.gov.justice.services.generators.commons.helper.Names.packageNam
 
 import uk.gov.justice.raml.core.Generator;
 import uk.gov.justice.raml.core.GeneratorConfig;
-import uk.gov.justice.services.adapters.rest.validator.ResponseContentTypeRamlValidator;
+import uk.gov.justice.services.generators.commons.validator.ResponseContentTypeRamlValidator;
 import uk.gov.justice.services.generators.commons.validator.ActionMappingRamlValidator;
 import uk.gov.justice.services.generators.commons.validator.CompositeRamlValidator;
 import uk.gov.justice.services.generators.commons.validator.ContainsActionsRamlValidator;

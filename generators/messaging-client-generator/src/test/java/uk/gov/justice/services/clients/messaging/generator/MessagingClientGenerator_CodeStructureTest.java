@@ -10,7 +10,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.POST;
-import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
+import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpActionWithDefaultMapping;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.messagingRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
@@ -144,7 +144,7 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
                 messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/cakeshop.controller.command")
-                                .with(httpAction(POST, "application/vnd.cakeshop.actionabc+json")))
+                                .with(httpActionWithDefaultMapping(POST, "application/vnd.cakeshop.actionabc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
 
@@ -165,7 +165,7 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
                 messagingRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/cakeshop.handler.command")
-                                .with(httpAction(GET)
+                                .with(httpActionWithDefaultMapping(GET)
                                         .withResponseTypes("application/vnd.cakeshop.actionabc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
@@ -187,7 +187,7 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
                 restRamlWithDefaults()
                         .with(resource()
                                 .withRelativeUri("/cakeshop.controller.command")
-                                .with(httpAction(POST, "application/vnd.cakeshop.actionabc+json")))
+                                .with(httpActionWithDefaultMapping(POST, "application/vnd.cakeshop.actionabc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
 
@@ -204,7 +204,7 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
                         .withBaseUri("message://event/processor/message/context-with-hyphens")
                         .with(resource()
                                 .withRelativeUri("/cakeshop.controller.command")
-                                .with(httpAction(POST, "application/vnd.cakeshop.actionabc+json")))
+                                .with(httpActionWithDefaultMapping(POST, "application/vnd.cakeshop.actionabc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
 

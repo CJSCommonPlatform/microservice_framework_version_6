@@ -1,8 +1,5 @@
 package uk.gov.justice.services.example.cakeshop.query.view.response;
 
-import uk.gov.justice.services.example.cakeshop.persistence.entity.Recipe;
-
-import java.util.Objects;
 import java.util.UUID;
 
 public class CakeView {

@@ -1,4 +1,4 @@
-package uk.gov.justice.services.raml.lintcheck.configuration;
+package uk.gov.justice.raml.maven.lintchecker.rules.configuration;
 
 import uk.gov.justice.raml.io.files.parser.RamlFileParser;
 

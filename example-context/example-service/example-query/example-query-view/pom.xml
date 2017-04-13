@@ -12,6 +12,10 @@
     <artifactId>example-query-view</artifactId>
     <packaging>war</packaging>
 
+    <properties>
+        <cpp.service-component>QUERY_VIEW</cpp.service-component>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
@@ -64,44 +68,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <build>
-        <finalName>${project.artifactId}</finalName>
-        <plugins>
-            <plugin>
-                <groupId>uk.gov.justice.maven</groupId>
-                <artifactId>raml-maven-plugin</artifactId>
-                <version>${raml-maven-plugin.version}</version>
-                <configuration>
-                    <generatorName>
-                        uk.gov.justice.services.adapters.rest.generator.RestAdapterGenerator
-                    </generatorName>
-                    <sourceDirectory>${basedir}/src/raml</sourceDirectory>
-                    <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
-                    <basePackageName>uk.gov.justice.api</basePackageName>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <phase>generate-sources</phase>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>uk.gov.justice.services</groupId>
-                        <artifactId>rest-adapter-generator</artifactId>
-                        <version>${project.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>javax</groupId>
-                        <artifactId>javaee-api</artifactId>
-                        <version>${javaee-api.version}</version>
-                        <scope>runtime</scope>
-                    </dependency>
-                </dependencies>
-            </plugin>
-        </plugins>
-    </build>
 </project>

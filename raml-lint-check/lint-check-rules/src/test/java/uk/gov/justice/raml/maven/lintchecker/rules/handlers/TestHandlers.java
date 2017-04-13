@@ -1,4 +1,4 @@
-package uk.gov.justice.services.raml.lintcheck.handlers;
+package uk.gov.justice.raml.maven.lintchecker.rules.handlers;
 
 import static uk.gov.justice.services.core.annotation.Component.*;
 

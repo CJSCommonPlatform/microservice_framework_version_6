@@ -1,4 +1,4 @@
-package uk.gov.justice.services.raml.lintcheck.handlers;
+package uk.gov.justice.raml.maven.lintchecker.rules.it.handlers;
 
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -6,9 +6,9 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 /**
  * Misses off @ServiceComponent to test that this handler is filtered out
  */
-public class InvalidHandlers {
+public class InvalidHandlersForTest {
 
-    @Handles("test.thirdcommand")
+    @Handles("test.no.action.for.me")
     public void testThirdCommand(final JsonEnvelope command) {}
 
 }

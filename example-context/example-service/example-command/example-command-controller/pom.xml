@@ -12,6 +12,10 @@
     <artifactId>example-command-controller</artifactId>
     <packaging>war</packaging>
 
+    <properties>
+        <cpp.service-component>COMMAND_CONTROLLER</cpp.service-component>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
@@ -51,79 +55,21 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>
-        <finalName>${project.artifactId}</finalName>
         <plugins>
             <plugin>
                 <groupId>uk.gov.justice.maven</groupId>
                 <artifactId>raml-maven-plugin</artifactId>
-                <version>${raml-maven-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>generate-adapter</id>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <generatorName>uk.gov.justice.raml.jms.core.JmsEndpointGenerator
-                            </generatorName>
-                            <sourceDirectory>${basedir}/src/raml</sourceDirectory>
-                            <outputDirectory>${project.build.directory}/generated-sources
-                            </outputDirectory>
-                            <includes>
-                                <include>**/*.messaging.raml</include>
-                            </includes>
-                            <basePackageName>uk.gov.justice.api</basePackageName>
-
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate-client</id>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <generatorName>
-                                uk.gov.justice.services.clients.messaging.generator.MessagingClientGenerator
-                            </generatorName>
-                            <sourceDirectory>${basedir}/../example-command-handler/src/raml
-                            </sourceDirectory>
-                            <outputDirectory>${project.build.directory}/generated-sources
-                            </outputDirectory>
-                            <basePackageName>uk.gov.justice.api.controller</basePackageName>
-                            <generatorProperties>
-                                <serviceComponent>COMMAND_CONTROLLER</serviceComponent>
-                            </generatorProperties>
-                        </configuration>
-                    </execution>
-                </executions>
                 <dependencies>
                     <dependency>
-                        <groupId>uk.gov.justice.services</groupId>
-                        <artifactId>messaging-adapter-generator</artifactId>
+                        <groupId>uk.gov.justice.services.example</groupId>
+                        <artifactId>example-command-handler</artifactId>
                         <version>${project.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>uk.gov.justice.services</groupId>
-                        <artifactId>messaging-client-generator</artifactId>
-                        <version>${project.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>javax</groupId>
-                        <artifactId>javaee-api</artifactId>
-                        <version>${javaee-api.version}</version>
-                        <scope>runtime</scope>
+                        <classifier>raml</classifier>
                     </dependency>
                 </dependencies>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

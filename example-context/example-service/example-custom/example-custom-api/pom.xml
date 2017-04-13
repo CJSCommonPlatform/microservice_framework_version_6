@@ -12,54 +12,9 @@
     <artifactId>example-custom-api</artifactId>
     <packaging>war</packaging>
 
-    <build>
-        <finalName>${project.artifactId}</finalName>
-        <plugins>
-            <plugin>
-                <groupId>uk.gov.justice.maven</groupId>
-                <artifactId>raml-maven-plugin</artifactId>
-                <version>${raml-maven-plugin.version}</version>
-
-                <executions>
-                    <execution>
-                        <id>rest-adapter-generator</id>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <generatorName>
-                                uk.gov.justice.services.adapters.rest.generator.RestAdapterGenerator
-                            </generatorName>
-                            <sourceDirectory>${basedir}/src/raml</sourceDirectory>
-                            <outputDirectory>${project.build.directory}/generated-sources/api
-                            </outputDirectory>
-                            <basePackageName>uk.gov.justice.api</basePackageName>
-                            <includes>
-                                <include>${project.artifactId}.raml</include>
-                            </includes>
-                            <generatorProperties>
-                                <serviceComponent>CUSTOM_API</serviceComponent>
-                            </generatorProperties>
-                        </configuration>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>uk.gov.justice.services</groupId>
-                        <artifactId>rest-adapter-generator</artifactId>
-                        <version>${project.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>javax</groupId>
-                        <artifactId>javaee-api</artifactId>
-                        <version>${javaee-api.version}</version>
-                        <scope>runtime</scope>
-                    </dependency>
-                </dependencies>
-            </plugin>
-        </plugins>
-    </build>
+    <properties>
+        <cpp.service-component>CUSTOM_API</cpp.service-component>
+    </properties>
 
     <dependencies>
         <dependency>

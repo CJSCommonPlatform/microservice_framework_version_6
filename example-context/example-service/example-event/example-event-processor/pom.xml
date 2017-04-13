@@ -11,6 +11,10 @@
     <artifactId>example-event-processor</artifactId>
     <packaging>war</packaging>
 
+    <properties>
+        <cpp.service-component>EVENT_PROCESSOR</cpp.service-component>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
@@ -35,74 +39,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-
-    <build>
-        <finalName>${project.artifactId}</finalName>
-        <plugins>
-            <plugin>
-                <groupId>uk.gov.justice.maven</groupId>
-                <artifactId>raml-maven-plugin</artifactId>
-                <version>${raml-maven-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>generate-adapter</id>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <generatorName>uk.gov.justice.raml.jms.core.JmsEndpointGenerator</generatorName>
-                            <sourceDirectory>${basedir}/src/raml</sourceDirectory>
-                            <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
-                            <basePackageName>uk.gov.justice.api</basePackageName>
-                            <includes>
-                                <include>**/*cakeshop-event-processor.messaging.raml</include>
-                            </includes>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate-client</id>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <generatorName>uk.gov.justice.services.clients.messaging.generator.MessagingClientGenerator</generatorName>
-                            <sourceDirectory>${basedir}/src/raml</sourceDirectory>
-                            <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
-                            <basePackageName>uk.gov.justice.api</basePackageName>
-                            <includes>
-                                <include>**/*public-event.messaging.raml</include>
-                            </includes>
-                            <generatorProperties>
-                                <serviceComponent>EVENT_PROCESSOR</serviceComponent>
-                            </generatorProperties>
-                        </configuration>
-                    </execution>
-
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>uk.gov.justice.services</groupId>
-                        <artifactId>messaging-adapter-generator</artifactId>
-                        <version>${project.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>uk.gov.justice.services</groupId>
-                        <artifactId>messaging-client-generator</artifactId>
-                        <version>${project.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>javax</groupId>
-                        <artifactId>javaee-api</artifactId>
-                        <version>${javaee-api.version}</version>
-                        <scope>runtime</scope>
-                    </dependency>
-                </dependencies>
-            </plugin>
-        </plugins>
-    </build>
-
-
 </project>

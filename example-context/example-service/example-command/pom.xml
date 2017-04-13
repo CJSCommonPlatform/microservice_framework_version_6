@@ -17,5 +17,4 @@
         <module>example-command-controller</module>
         <module>example-command-handler</module>
     </modules>
-
 </project>

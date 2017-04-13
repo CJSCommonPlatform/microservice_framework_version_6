@@ -1,4 +1,4 @@
-package uk.gov.justice.services.raml.lintcheck.utils;
+package uk.gov.justice.raml.maven.lintchecker.rules.utils;
 
 import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.listOf;
 

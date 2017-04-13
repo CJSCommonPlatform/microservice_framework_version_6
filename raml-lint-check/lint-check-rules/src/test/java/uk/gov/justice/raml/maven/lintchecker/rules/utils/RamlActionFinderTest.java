@@ -1,12 +1,12 @@
-package uk.gov.justice.services.raml.lintcheck.utils;
+package uk.gov.justice.raml.maven.lintchecker.rules.utils;
 
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static uk.gov.justice.services.raml.lintcheck.utils.RamlActionFinder.actionsFrom;
-import static uk.gov.justice.services.raml.lintcheck.configuration.TestConfiguration.testConfig;
 
 import static net.trajano.commons.testing.UtilityClassTestUtil.assertUtilityClassWellDefined;
+
+import uk.gov.justice.raml.maven.lintchecker.rules.configuration.TestConfiguration;
 
 import java.util.Collection;
 
@@ -22,7 +22,7 @@ public class RamlActionFinderTest {
     @SuppressWarnings({"unchecked"})
     @Test
     public void shouldFindActionsFromRamls() {
-        final Collection<String> actions = actionsFrom(testConfig().ramlGET());
+        final Collection<String> actions = RamlActionFinder.actionsFrom(TestConfiguration.testConfig().ramlGET());
         assertThat(actions, hasItems(
                 is("test.firstcommand"),
                 is("test.secondcommand")

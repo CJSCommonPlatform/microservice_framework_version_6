@@ -20,9 +20,7 @@
                     <excludes>
                     </excludes>
                     <rules>
-                        <ActionsHaveHandlers implementation = "uk.gov.justice.services.raml.lintcheck.ActionsHaveHandlers">
-                            <basePackage>uk.gov.justice.services.raml.lintcheck.it.handlers</basePackage>
-                        </ActionsHaveHandlers>
+                        <ActionsHaveHandlers implementation = "uk.gov.justice.raml.maven.lintchecker.rules.ActionsHaveHandlers"/>
                     </rules>
                 </configuration>
                 <dependencies>

@@ -21,7 +21,7 @@ import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
 import static org.raml.model.ActionType.PUT;
 import static org.raml.model.ActionType.TRACE;
-import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
+import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpActionWithDefaultMapping;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.messagingRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
@@ -79,7 +79,7 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
         generator.run(
                 messagingRamlWithDefaults()
                         .with(resource()
-                                .with(httpAction(POST, "application/vnd.cakeshop.actionabc+json")))
+                                .with(httpActionWithDefaultMapping(POST, "application/vnd.cakeshop.actionabc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_API")));
 
@@ -99,7 +99,7 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
         generator.run(
                 messagingRamlWithDefaults()
                         .with(resource()
-                                .with(httpAction(PUT, "application/vnd.cakeshop.actionabc+json")))
+                                .with(httpActionWithDefaultMapping(PUT, "application/vnd.cakeshop.actionabc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_API")));
 
@@ -119,7 +119,7 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
         generator.run(
                 messagingRamlWithDefaults()
                         .with(resource()
-                                .with(httpAction(PATCH, "application/vnd.cakeshop.actionabc+json")))
+                                .with(httpActionWithDefaultMapping(PATCH, "application/vnd.cakeshop.actionabc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_API")));
 
@@ -139,7 +139,7 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
         generator.run(
                 messagingRamlWithDefaults()
                         .with(resource()
-                                .with(httpAction(DELETE, "application/vnd.cakeshop.actionabc+json")))
+                                .with(httpActionWithDefaultMapping(DELETE, "application/vnd.cakeshop.actionabc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_API")));
 
@@ -159,7 +159,7 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
         generator.run(
                 messagingRamlWithDefaults()
                         .with(resource()
-                                .with(httpAction(GET)
+                                .with(httpActionWithDefaultMapping(GET)
                                         .withResponseTypes("application/vnd.cakeshop.actionabc+json")))
 
                         .build(),
@@ -270,7 +270,7 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
         generator.run(
                 messagingRamlWithDefaults()
                         .with(resource()
-                                .with(httpAction(TRACE, "application/vnd.cakeshop.actionabc+json")))
+                                .with(httpActionWithDefaultMapping(TRACE, "application/vnd.cakeshop.actionabc+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
 
@@ -284,7 +284,7 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
         new BCDClientGenerator().run(
                 messagingRamlWithDefaults()
                         .with(resource()
-                                .with(httpAction(GET)))
+                                .with(httpActionWithDefaultMapping(GET)))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder,
                         generatorProperties().withServiceComponentOf("COMMAND_CONTROLLER").build(), singletonList(existingFilePath())));
@@ -302,7 +302,7 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
         new BCDClientGenerator().run(
                 messagingRamlWithDefaults()
                         .with(resource()
-                                .with(httpAction(GET)))
+                                .with(httpActionWithDefaultMapping(GET)))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder,
                         generatorProperties().withServiceComponentOf("COMMAND_CONTROLLER").build(), singletonList(existingFilePath())));

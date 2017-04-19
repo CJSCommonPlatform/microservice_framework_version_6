@@ -22,6 +22,7 @@ import static uk.gov.justice.services.generators.commons.helper.Actions.isSuppor
 import static uk.gov.justice.services.generators.commons.helper.Actions.isSynchronousAction;
 import static uk.gov.justice.services.generators.commons.helper.Actions.responseMimeTypesOf;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
+import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpActionWithDefaultMapping;
 import static uk.gov.justice.services.generators.test.utils.builder.ResponseBuilder.response;
 
 import java.util.HashMap;

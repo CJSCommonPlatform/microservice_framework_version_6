@@ -7,7 +7,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.raml.model.ActionType.PUT;
-import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
+import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpActionWithDefaultMapping;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithCommandApiDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
@@ -35,7 +35,7 @@ public class RestAdapterGenerator_SynchronousPUTMethodBodyTest extends BaseRestA
         generator.run(
                 restRamlWithCommandApiDefaults()
                         .with(resource("/path")
-                                .with(httpAction(PUT).withHttpActionOfDefaultRequestAndResponseType())
+                                .with(httpActionWithDefaultMapping(PUT).withHttpActionOfDefaultRequestAndResponseType())
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 

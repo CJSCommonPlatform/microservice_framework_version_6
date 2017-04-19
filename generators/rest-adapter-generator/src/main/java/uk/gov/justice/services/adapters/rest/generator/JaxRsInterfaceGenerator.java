@@ -14,11 +14,11 @@ import static uk.gov.justice.services.adapters.rest.helper.Multiparts.isMultipar
 import static uk.gov.justice.services.generators.commons.helper.Actions.responseMimeTypesOf;
 import static uk.gov.justice.services.generators.commons.helper.Names.DEFAULT_ANNOTATION_PARAMETER;
 import static uk.gov.justice.services.generators.commons.helper.Names.GENERIC_PAYLOAD_ARGUMENT_NAME;
-import static uk.gov.justice.services.generators.commons.helper.Names.buildResourceMethodName;
-import static uk.gov.justice.services.generators.commons.helper.Names.buildResourceMethodNameWithNoMimeType;
+import static uk.gov.justice.services.generators.commons.helper.Names.resourceMethodNameFrom;
+import static uk.gov.justice.services.generators.commons.helper.Names.resourceMethodNameWithNoMimeTypeFrom;
 
 import uk.gov.justice.services.adapter.rest.annotation.PATCH;
-import uk.gov.justice.services.adapters.rest.uri.BaseUri;
+import uk.gov.justice.services.generators.commons.helper.RestResourceBaseUri;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -66,7 +66,7 @@ class JaxRsInterfaceGenerator {
     public List<TypeSpec> generateFor(final Raml raml) {
         final Collection<Resource> resources = raml.getResources().values();
         return resources.stream()
-                .map((resource) -> generateFor(resource, new BaseUri(raml.getBaseUri())))
+                .map((resource) -> generateFor(resource, new RestResourceBaseUri(raml.getBaseUri())))
                 .collect(toList());
     }
 
@@ -77,7 +77,7 @@ class JaxRsInterfaceGenerator {
      * @param baseUri
      * @return a {@link TypeSpec} that represents the implementation class
      */
-    private TypeSpec generateFor(final Resource resource, final BaseUri baseUri) {
+    private TypeSpec generateFor(final Resource resource, final RestResourceBaseUri baseUri) {
         final TypeSpec.Builder interfaceSpecBuilder = interfaceSpecFor(resource, baseUri);
 
         resource.getActions().values().forEach(action ->
@@ -110,7 +110,7 @@ class JaxRsInterfaceGenerator {
      */
     private MethodSpec processNoActionBody(final Action action,
                                            final Collection<MimeType> responseMimeTypes) {
-        final String resourceMethodName = buildResourceMethodNameWithNoMimeType(action);
+        final String resourceMethodName = resourceMethodNameWithNoMimeTypeFrom(action);
         return generateResourceMethod(action, resourceMethodName, responseMimeTypes).build();
     }
 
@@ -125,7 +125,7 @@ class JaxRsInterfaceGenerator {
         return action.getBody().values().stream()
                 .sorted(byMimeTypeOrder())
                 .map(bodyMimeType -> {
-                    final String resourceMethodName = buildResourceMethodName(action, bodyMimeType);
+                    final String resourceMethodName = resourceMethodNameFrom(action, bodyMimeType);
                     final MethodSpec.Builder methodBuilder = generateResourceMethod(action, resourceMethodName, responseMimeTypes);
                     return addToMethodWithMimeType(methodBuilder, bodyMimeType).build();
                 }).collect(toList());
@@ -138,7 +138,7 @@ class JaxRsInterfaceGenerator {
      * @param baseUri
      * @return a {@link TypeSpec.Builder} that represents the interface
      */
-    private TypeSpec.Builder interfaceSpecFor(final Resource resource, final BaseUri baseUri) {
+    private TypeSpec.Builder interfaceSpecFor(final Resource resource, final RestResourceBaseUri baseUri) {
         return interfaceBuilder(resourceInterfaceNameOf(resource, baseUri))
                 .addModifiers(PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(Path.class)

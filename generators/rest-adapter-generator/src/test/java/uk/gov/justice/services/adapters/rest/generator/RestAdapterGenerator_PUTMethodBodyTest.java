@@ -9,7 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.raml.model.ActionType.PUT;
 import static uk.gov.justice.services.core.interceptor.DefaultInterceptorContext.interceptorContextWithInput;
-import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
+import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpActionWithDefaultMapping;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithCommandApiDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
@@ -42,7 +42,7 @@ public class RestAdapterGenerator_PUTMethodBodyTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithCommandApiDefaults()
                         .with(resource("/path")
-                                .with(httpAction(PUT).withHttpActionOfDefaultRequestType())
+                                .with(httpActionWithDefaultMapping(PUT).withHttpActionOfDefaultRequestType())
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -67,7 +67,7 @@ public class RestAdapterGenerator_PUTMethodBodyTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithCommandApiDefaults()
                         .with(resource("/path")
-                                .with(httpAction(PUT).withHttpActionOfDefaultRequestType())
+                                .with(httpActionWithDefaultMapping(PUT).withHttpActionOfDefaultRequestType())
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 

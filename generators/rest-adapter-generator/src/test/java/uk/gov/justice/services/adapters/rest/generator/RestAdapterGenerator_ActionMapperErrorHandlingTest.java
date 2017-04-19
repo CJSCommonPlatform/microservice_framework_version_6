@@ -12,6 +12,7 @@ import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.N
 import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.REQUEST_TYPE_KEY;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.defaultGetAction;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
+import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpActionWithDefaultMapping;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.mapping;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
@@ -126,7 +127,7 @@ public class RestAdapterGenerator_ActionMapperErrorHandlingTest extends BaseRest
         generator.run(
                 restRamlWithDefaults()
                         .with(resource("/case")
-                                .with(httpAction(POST)
+                                .with(httpActionWithDefaultMapping(POST)
                                         .with(mapping()
                                                 .withName("contextC.someAction")
                                                 .withRequestType("application/vnd.ctx.command.somemediatype1+json"))
@@ -146,7 +147,7 @@ public class RestAdapterGenerator_ActionMapperErrorHandlingTest extends BaseRest
         generator.run(
                 restRamlWithDefaults().with(
                         resource("/user")
-                                .with(httpAction(GET)
+                                .with(httpActionWithDefaultMapping(GET)
                                         .with(mapping()
                                                 .withName("contextA.someAction")
                                                 .withResponseType("application/vnd.mediatype1+json"))
@@ -168,7 +169,7 @@ public class RestAdapterGenerator_ActionMapperErrorHandlingTest extends BaseRest
 
         final Raml raml = restRamlWithDefaults()
                 .with(resource("/some/path")
-                        .with(httpAction(HEAD, "application/vnd.default+json"))
+                        .with(httpActionWithDefaultMapping(HEAD, "application/vnd.default+json"))
                 ).build();
 
         new ActionMappingGenerator().generateFor(raml);
@@ -181,7 +182,7 @@ public class RestAdapterGenerator_ActionMapperErrorHandlingTest extends BaseRest
 
         final Raml raml = restRamlWithDefaults()
                 .with(resource("/some/path")
-                        .with(httpAction(OPTIONS, "application/vnd.default+json"))
+                        .with(httpActionWithDefaultMapping(OPTIONS, "application/vnd.default+json"))
                 ).build();
 
         new ActionMappingGenerator().generateFor(raml);
@@ -194,7 +195,7 @@ public class RestAdapterGenerator_ActionMapperErrorHandlingTest extends BaseRest
 
         final Raml raml = restRamlWithDefaults()
                 .with(resource("/some/path")
-                        .with(httpAction(TRACE, "application/vnd.default+json"))
+                        .with(httpActionWithDefaultMapping(TRACE, "application/vnd.default+json"))
                 ).build();
 
         new ActionMappingGenerator().generateFor(raml);

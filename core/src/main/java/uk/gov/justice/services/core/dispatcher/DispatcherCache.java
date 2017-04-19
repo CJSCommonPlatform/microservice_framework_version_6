@@ -25,8 +25,7 @@ public class DispatcherCache {
 
     private final Map<Pair<String, ServiceComponentLocation>, Dispatcher> dispatcherMap = new ConcurrentHashMap<>();
 
-    @Inject
-    DispatcherFactory dispatcherFactory;
+    private final DispatcherFactory dispatcherFactory = new DispatcherFactory();
 
     /**
      * Return a {@link Dispatcher} for the given {@link InjectionPoint}.
@@ -63,6 +62,7 @@ public class DispatcherCache {
     }
 
     private Dispatcher createDispatcherIfAbsent(final Pair<String, ServiceComponentLocation> component) {
+        System.out.println("createDispatcherIfAbsent for " + component);
         return dispatcherMap.computeIfAbsent(component, c -> dispatcherFactory.createNew());
     }
 }

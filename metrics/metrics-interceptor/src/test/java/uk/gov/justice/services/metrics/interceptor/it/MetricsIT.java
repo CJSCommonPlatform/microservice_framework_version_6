@@ -113,7 +113,6 @@ public class MetricsIT {
             AllowAllPolicyEvaluator.class,
             DefaultAccessControlService.class,
             DispatcherCache.class,
-            DispatcherFactory.class,
             PolicyEvaluator.class,
             LoggerProducer.class,
             EmptySystemUserProvider.class,

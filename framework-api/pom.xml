@@ -26,6 +26,7 @@
         <module>framework-api-rest-client</module>
         <module>framework-api-rest-core</module>
         <module>framework-api-messaging-jms</module>
+        <module>framework-api-direct-adapter</module>
     </modules>
 
 </project>

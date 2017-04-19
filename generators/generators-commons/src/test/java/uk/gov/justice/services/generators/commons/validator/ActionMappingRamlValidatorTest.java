@@ -6,7 +6,7 @@ import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
 import static org.raml.model.ActionType.PUT;
-import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
+import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpActionWithDefaultMapping;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.mapping;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
@@ -35,7 +35,7 @@ public class ActionMappingRamlValidatorTest {
         validator.validate(
                 restRamlWithDefaults()
                         .with(resource("/case")
-                                .with(httpAction(POST)
+                                .with(httpActionWithDefaultMapping(POST)
                                         .with(mapping()
                                                 .withName("context.someAction")
                                                 .withRequestType("application/vnd.somemediatype1+json"))
@@ -54,7 +54,7 @@ public class ActionMappingRamlValidatorTest {
         validator.validate(
                 restRamlWithDefaults()
                         .with(resource("/case")
-                                .with(httpAction(PUT)
+                                .with(httpActionWithDefaultMapping(PUT)
                                         .with(mapping()
                                                 .withName("context.someAction")
                                                 .withRequestType("application/vnd.somemediatype1+json"))
@@ -73,7 +73,7 @@ public class ActionMappingRamlValidatorTest {
         validator.validate(
                 restRamlWithDefaults()
                         .with(resource("/case")
-                                .with(httpAction(PATCH)
+                                .with(httpActionWithDefaultMapping(PATCH)
                                         .with(mapping()
                                                 .withName("context.someAction")
                                                 .withRequestType("application/vnd.somemediatype1+json"))
@@ -92,7 +92,7 @@ public class ActionMappingRamlValidatorTest {
         validator.validate(
                 restRamlWithDefaults()
                         .with(resource("/case")
-                                .with(httpAction(DELETE)
+                                .with(httpActionWithDefaultMapping(DELETE)
                                         .with(mapping()
                                                 .withName("context.someAction")
                                                 .withRequestType("application/vnd.somemediatype1+json"))
@@ -111,7 +111,7 @@ public class ActionMappingRamlValidatorTest {
         validator.validate(
                 restRamlWithDefaults()
                         .with(resource("/case")
-                                .with(httpAction(GET)
+                                .with(httpActionWithDefaultMapping(GET)
                                         .with(mapping()
                                                 .withName("context.someAction")
                                                 .withResponseType("application/vnd.somemediatype2+json"))

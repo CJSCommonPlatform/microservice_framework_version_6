@@ -1,4 +1,4 @@
-package uk.gov.justice.services.adapters.rest.validator;
+package uk.gov.justice.services.generators.commons.validator;
 
 import static java.util.Arrays.asList;
 import static uk.gov.justice.services.generators.commons.helper.Actions.responseMimeTypesOf;

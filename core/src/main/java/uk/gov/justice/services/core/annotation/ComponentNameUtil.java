@@ -31,6 +31,8 @@ public final class ComponentNameUtil {
             return clazz.getAnnotation(CustomServiceComponent.class).value();
         } else if (clazz.isAnnotationPresent(CustomAdapter.class)) {
             return clazz.getAnnotation(CustomAdapter.class).value();
+        } else if (clazz.isAnnotationPresent(DirectAdapter.class)) {
+            return clazz.getAnnotation(DirectAdapter.class).component();
         } else {
             throw new IllegalStateException(format("No annotation found to define component for class %s", clazz));
         }

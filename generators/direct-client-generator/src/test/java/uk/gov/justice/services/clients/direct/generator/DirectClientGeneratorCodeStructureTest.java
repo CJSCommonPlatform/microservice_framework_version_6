@@ -20,6 +20,7 @@ import static uk.gov.justice.services.generators.test.utils.reflection.Reflectio
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.methodsOf;
 
 import uk.gov.justice.services.adapter.direct.SynchronousDirectAdapter;
+import uk.gov.justice.services.adapter.direct.SynchronousDirectAdapterCache;
 import uk.gov.justice.services.core.annotation.Direct;
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -61,7 +62,7 @@ public class DirectClientGeneratorCodeStructureTest extends BaseGeneratorTest {
     }
 
     @Test
-    public void shouldGenerateClassWithInjectedAdapter() throws Exception {
+    public void shouldGenerateClassWithInjectedAdapterCache() throws Exception {
         generator.run(
                 raml()
                         .withBaseUri("http://localhost:8080/warname/query/api/service")
@@ -70,9 +71,9 @@ public class DirectClientGeneratorCodeStructureTest extends BaseGeneratorTest {
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
 
         final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "DirectQueryApiServiceClient");
-        final Field adapterField = clazz.getDeclaredField("adapter");
+        final Field adapterField = clazz.getDeclaredField("adapterCache");
         assertThat(adapterField.getAnnotation(Inject.class), not(nullValue()));
-        assertThat(adapterField.getGenericType(), equalTo(SynchronousDirectAdapter.class));
+        assertThat(adapterField.getGenericType(), equalTo(SynchronousDirectAdapterCache.class));
     }
 
 

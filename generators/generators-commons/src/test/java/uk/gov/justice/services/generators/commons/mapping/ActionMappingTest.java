@@ -27,8 +27,6 @@ import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.l
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.mapping;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingDescriptionBuilder.mappingDescriptionWith;
-import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.raml;
-import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 
 import uk.gov.justice.services.generators.commons.validator.RamlValidationException;
 

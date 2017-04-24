@@ -8,6 +8,7 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithR
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
 
 import uk.gov.justice.services.adapter.direct.SynchronousDirectAdapter;
+import uk.gov.justice.services.adapter.direct.SynchronousDirectAdapterCache;
 import uk.gov.justice.services.common.configuration.GlobalValueProducer;
 import uk.gov.justice.services.common.configuration.JndiBasedServiceContextNameProvider;
 import uk.gov.justice.services.common.configuration.ValueProducer;
@@ -94,7 +95,8 @@ public class QueryApiDirectClientIT {
             ValueProducer.class,
             GlobalValueProducer.class,
 
-            DirectQueryApiRestExampleClient.class,
+            DirectQueryViewRestExampleClient.class,
+            SynchronousDirectAdapterCache.class,
             TestDirectAdapter.class
 
     })

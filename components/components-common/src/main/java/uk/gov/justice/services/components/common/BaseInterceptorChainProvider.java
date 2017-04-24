@@ -16,13 +16,15 @@ import org.apache.commons.lang3.tuple.Pair;
 
 public abstract class BaseInterceptorChainProvider implements InterceptorChainProvider {
 
-    @Override
-    public List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes() {
-        final List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes = new LinkedList<>();
+    final List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes = new LinkedList<>();
+
+    public BaseInterceptorChainProvider(){
         interceptorChainTypes.add(new ImmutablePair<>(1, TotalActionMetricsInterceptor.class));
         interceptorChainTypes.add(new ImmutablePair<>(2, IndividualActionMetricsInterceptor.class));
         interceptorChainTypes.add(new ImmutablePair<>(3000, LocalAuditInterceptor.class));
-        interceptorChainTypes.add(new ImmutablePair<>(4000, LocalAccessControlInterceptor.class));
+    }
+    @Override
+    public List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes() {
         return interceptorChainTypes;
     }
 }

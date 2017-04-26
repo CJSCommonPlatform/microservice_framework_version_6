@@ -41,8 +41,12 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RandomGeneratorTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RandomGeneratorTest.class);
 
     private static final int NUMBER_OF_TIMES = 10000;
     private static final String BIG_DECIMAL_PATTERN = "(-)?(0|(?!0)\\d{1,10})\\.\\d{2}";
@@ -175,6 +179,8 @@ public class RandomGeneratorTest {
         final LocalDateTime endDate = now().plus(Period.ofYears(5)).atStartOfDay();
         final Generator<LocalDate> futureLocalDateGenerator = RandomGenerator.FUTURE_LOCAL_DATE;
 
+        LOGGER.debug("Start date: {} End date: {}", startDate, endDate);
+
         typeCheck(futureLocalDateGenerator, s -> !(s.isBefore(startDate.toLocalDate()) || s.isAfter(endDate.toLocalDate())))
                 .verify(times(NUMBER_OF_TIMES));
     }
@@ -184,6 +190,8 @@ public class RandomGeneratorTest {
         final LocalDateTime startDate = now().atStartOfDay();
         final LocalDateTime endDate = now().minus(Period.ofYears(5)).atStartOfDay();
         final Generator<LocalDate> pastLocalDateGenerator = RandomGenerator.PAST_LOCAL_DATE;
+
+        LOGGER.debug("Start date: {} End date: {}", startDate, endDate);
 
         typeCheck(pastLocalDateGenerator, s -> !(s.isBefore(endDate.toLocalDate()) || s.isAfter(startDate.toLocalDate())))
                 .verify(times(NUMBER_OF_TIMES));
@@ -196,9 +204,11 @@ public class RandomGeneratorTest {
         final Set<ZoneId> randomZones = newHashSet();
         final Generator<ZonedDateTime> futureZonedDateTimeGenerator = RandomGenerator.FUTURE_ZONED_DATE_TIME;
 
+        LOGGER.debug("Start dateTime: {} End dateTime: {}", startDateTime, endDateTime);
+
         typeCheck(futureZonedDateTimeGenerator, s -> {
             randomZones.add(s.getZone());
-            return !(s.isBefore(startDateTime) || s.isAfter(endDateTime));
+            return !(s.isBefore(startDateTime.withZoneSameInstant(s.getZone())) || s.isAfter(endDateTime.withZoneSameInstant(s.getZone())));
         }).verify(times(NUMBER_OF_TIMES));
 
         assertThat(randomZones, hasSize(greaterThan(10)));
@@ -211,9 +221,11 @@ public class RandomGeneratorTest {
         final Set<ZoneId> randomZones = newHashSet();
         final Generator<ZonedDateTime> pastZonedDateTimeGenerator = RandomGenerator.PAST_ZONED_DATE_TIME;
 
+        LOGGER.debug("Start dateTime: {} End dateTime: {}", startDateTime, endDateTime);
+
         typeCheck(pastZonedDateTimeGenerator, s -> {
             randomZones.add(s.getZone());
-            return !(s.isBefore(endDateTime) || s.isAfter(startDateTime));
+            return !(s.isBefore(endDateTime.withZoneSameInstant(s.getZone())) || s.isAfter(startDateTime.withZoneSameInstant(s.getZone())));
         }).verify(times(NUMBER_OF_TIMES));
 
         assertThat(randomZones, hasSize(greaterThan(10)));
@@ -224,6 +236,8 @@ public class RandomGeneratorTest {
         final ZonedDateTime startDateTime = clock.now();
         final ZonedDateTime endDateTime = startDateTime.plus(Period.ofYears(5));
         final Generator<ZonedDateTime> futureZonedDateTimeGenerator = RandomGenerator.FUTURE_UTC_DATE_TIME;
+
+        LOGGER.debug("Start dateTime: {} End dateTime: {}", startDateTime, endDateTime);
 
         typeCheck(futureZonedDateTimeGenerator, s -> {
             assertThat(s.getOffset().getId(), is("Z"));
@@ -238,6 +252,8 @@ public class RandomGeneratorTest {
         final ZonedDateTime startDateTime = clock.now();
         final ZonedDateTime endDateTime = startDateTime.minus(Period.ofYears(5));
         final Generator<ZonedDateTime> pastZonedDateTimeGenerator = RandomGenerator.PAST_UTC_DATE_TIME;
+
+        LOGGER.debug("Start dateTime: {} End dateTime: {}", startDateTime, endDateTime);
 
         typeCheck(pastZonedDateTimeGenerator, s -> {
             assertThat(s.getOffset().getId(), is("Z"));

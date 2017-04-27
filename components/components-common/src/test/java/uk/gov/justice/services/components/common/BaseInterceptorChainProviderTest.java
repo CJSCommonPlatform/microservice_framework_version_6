@@ -25,8 +25,7 @@ public class BaseInterceptorChainProviderTest {
         assertThat(interceptorChainTypes, containsInAnyOrder(
                 new ImmutablePair<>(1, TotalActionMetricsInterceptor.class),
                 new ImmutablePair<>(2, IndividualActionMetricsInterceptor.class),
-                new ImmutablePair<>(3000, LocalAuditInterceptor.class),
-                new ImmutablePair<>(4000, LocalAccessControlInterceptor.class)));
+                new ImmutablePair<>(3000, LocalAuditInterceptor.class)));
     }
 
     public static class TestInterceptorChainProvider extends BaseInterceptorChainProvider {

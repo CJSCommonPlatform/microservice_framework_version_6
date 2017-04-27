@@ -1,8 +1,9 @@
-package uk.gov.justice.services.components.command.controller.interceptors;
+package uk.gov.justice.services.components.command.api.interceptors;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_CONTROLLER;
 
 import uk.gov.justice.services.components.query.controller.interceptors.QueryControllerInterceptorChainProvider;
@@ -28,7 +29,8 @@ public class QueryControllerInterceptorChainProviderTest {
     @Test
     @SuppressWarnings("unchecked")
     public void shouldProvideDefaultInterceptorChainTypes() throws Exception {
-        final List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes = new QueryControllerInterceptorChainProvider().interceptorChainTypes();
+        final List<Pair<Integer, Class<? extends Interceptor>>>
+                interceptorChainTypes = new QueryControllerInterceptorChainProvider().interceptorChainTypes();
 
         assertThat(interceptorChainTypes, containsInAnyOrder(
                 new ImmutablePair<>(1, TotalActionMetricsInterceptor.class),

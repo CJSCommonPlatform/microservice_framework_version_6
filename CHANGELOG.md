@@ -5,6 +5,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Changed
+- Upgrade to use framework parent POM [1.3.0](https://github.com/CJSCommonPlatform/maven-framework-parent-pom/releases/tag/release-1.3.0)
+
 ### Removed
 - Support for default sender destinations removed; senders now always require messaging clients to
 be provided, typically by generating one from the destination RAML.

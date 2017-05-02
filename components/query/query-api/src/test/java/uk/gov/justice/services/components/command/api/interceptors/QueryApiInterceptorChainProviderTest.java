@@ -3,7 +3,6 @@ package uk.gov.justice.services.components.command.api.interceptors;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 
 import uk.gov.justice.services.components.query.api.interceptors.QueryApiInterceptorChainProvider;

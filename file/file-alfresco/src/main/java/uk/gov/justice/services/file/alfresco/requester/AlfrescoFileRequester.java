@@ -29,6 +29,10 @@ public class AlfrescoFileRequester implements FileRequester {
     String alfrescoWorkspacePath;
 
     @Inject
+    @GlobalValue(key = "alfrescoPdfContentWorkspacePath", defaultValue = "/service/api/node/workspace/SpacesStore/")
+    String alfrescoPdfContentWorkspacePath;
+
+    @Inject
     @GlobalValue(key = "alfrescoReadUser")
     String alfrescoReadUser;
 
@@ -38,7 +42,7 @@ public class AlfrescoFileRequester implements FileRequester {
     @Override
     public Optional<InputStream> request(final String fileId, final String fileMimeType, final String fileName) {
         try {
-            return ofNullable(restClient.getAsInputStream(alfrescoUriOf(fileId, fileName),
+            return ofNullable(restClient.getAsInputStream(alfrescoUriOf(fileId, fileName, false),
                     valueOf(fileMimeType), headersWithUserId(alfrescoReadUser)));
         } catch (final NotFoundException nfe) {
             return empty();
@@ -48,7 +52,23 @@ public class AlfrescoFileRequester implements FileRequester {
         }
     }
 
-    private String alfrescoUriOf(final String fileId, final String fileName) {
+    @Override
+    public Optional<InputStream> request(final String fileId, final String fileMimeType, final String fileName, final boolean transformPdf) {
+        try {
+            return ofNullable(restClient.getAsInputStream(alfrescoUriOf(fileId, fileName, transformPdf),
+                    valueOf(fileMimeType), headersWithUserId(alfrescoReadUser)));
+        } catch (final NotFoundException nfe) {
+            return empty();
+        } catch (final ProcessingException | InternalServerErrorException ex) {
+            throw new FileOperationException(format("Error fetching %s from Alfresco with fileId = %s",
+                    fileName, fileId), ex);
+        }
+    }
+
+    private String alfrescoUriOf(final String fileId, final String fileName, final boolean transformPdf) {
+        if(transformPdf) {
+            return format("%s%s?transformpdf=%s", alfrescoPdfContentWorkspacePath, fileId, transformPdf);
+        }
         return format("%s%s/content/%s", alfrescoWorkspacePath, fileId, fileName);
     }
 

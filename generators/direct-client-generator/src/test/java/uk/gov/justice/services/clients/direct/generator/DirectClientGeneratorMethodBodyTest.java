@@ -15,6 +15,7 @@ import static uk.gov.justice.services.generators.test.utils.reflection.Reflectio
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
 
 import uk.gov.justice.services.adapter.direct.SynchronousDirectAdapter;
+import uk.gov.justice.services.adapter.direct.SynchronousDirectAdapterCache;
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
@@ -34,6 +35,9 @@ public class DirectClientGeneratorMethodBodyTest extends BaseGeneratorTest {
     @Mock
     private SynchronousDirectAdapter adapter;
 
+    @Mock
+    private SynchronousDirectAdapterCache adapterCache;
+
     @Before
     public void setUp() throws Exception {
         generator = new DirectClientGenerator();
@@ -45,15 +49,18 @@ public class DirectClientGeneratorMethodBodyTest extends BaseGeneratorTest {
 
         generator.run(
                 raml()
-                        .withBaseUri("http://localhost:8080/warname/query/api/service")
+                        .withBaseUri("http://localhost:8080/warname/query/view/service")
                         .with(defaultGetResource())
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
 
-        final Class<?> generatedClientClass = compiler.compiledClassOf(BASE_PACKAGE, "DirectQueryApiServiceClient");
+        final Class<?> generatedClientClass = compiler.compiledClassOf(BASE_PACKAGE, "DirectQueryViewServiceClient");
         final JsonEnvelope envelopePassedToClient = envelope().build();
 
+        when(adapterCache.directAdapterForComponent("QUERY_VIEW")).thenReturn(adapter);
+
         invokeFirstMethod(generatedClientClass, envelopePassedToClient);
+
 
         verify(adapter).process(envelopePassedToClient);
     }
@@ -63,13 +70,14 @@ public class DirectClientGeneratorMethodBodyTest extends BaseGeneratorTest {
 
         generator.run(
                 raml()
-                        .withBaseUri("http://localhost:8080/warname/query/api/service")
+                        .withBaseUri("http://localhost:8080/warname/query/view/service")
                         .with(defaultGetResource())
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
-        final Class<?> generatedClientClass = compiler.compiledClassOf(BASE_PACKAGE, "DirectQueryApiServiceClient");
+        final Class<?> generatedClientClass = compiler.compiledClassOf(BASE_PACKAGE, "DirectQueryViewServiceClient");
 
         final JsonEnvelope envelopeReturnedByAdapter = envelope().build();
+        when(adapterCache.directAdapterForComponent("QUERY_VIEW")).thenReturn(adapter);
         when(adapter.process(any(JsonEnvelope.class))).thenReturn(envelopeReturnedByAdapter);
 
         final Object result = invokeFirstMethod(generatedClientClass, envelope().build());
@@ -85,7 +93,7 @@ public class DirectClientGeneratorMethodBodyTest extends BaseGeneratorTest {
 
     private Object instanceOf(final Class<?> directClientClass) throws InstantiationException, IllegalAccessException {
         final Object resourceObject = directClientClass.newInstance();
-        setField(resourceObject, "adapter", adapter);
+        setField(resourceObject, "adapterCache", adapterCache);
         setField(resourceObject, "traceLogger", new DefaultTraceLogger());
         return resourceObject;
     }

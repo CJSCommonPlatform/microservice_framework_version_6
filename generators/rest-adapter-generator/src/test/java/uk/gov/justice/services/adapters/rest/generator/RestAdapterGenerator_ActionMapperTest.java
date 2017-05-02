@@ -12,10 +12,9 @@ import static org.raml.model.ActionType.POST;
 import static org.raml.model.ActionType.PUT;
 import static uk.gov.justice.services.generators.test.utils.builder.HeadersBuilder.headersWith;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.defaultGetAction;
-import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
+import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpActionWithDefaultMapping;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.mapping;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithCommandApiDefaults;
-import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithQueryApiDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
@@ -45,7 +44,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
         generator.run(
                 restRamlWithQueryApiDefaults()
                         .with(resource("/user")
-                                .with(httpAction(GET)
+                                .with(httpActionWithDefaultMapping(GET)
                                         .with(mapping()
                                                 .withName("contextA.someAction")
                                                 .withResponseType("application/vnd.ctx.query.somemediatype1+json"))
@@ -86,7 +85,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
         generator.run(
                 restRamlWithQueryApiDefaults()
                         .with(resource("/status")
-                                .with(httpAction(GET)
+                                .with(httpActionWithDefaultMapping(GET)
                                         .with(mapping()
                                                 .withName("ctxA.actionA")
                                                 .withResponseType("application/vnd.ctx.query.mediatype1+json")
@@ -111,7 +110,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
         generator.run(
                 restRamlWithCommandApiDefaults()
                         .with(resource("/case")
-                                .with(httpAction(POST)
+                                .with(httpActionWithDefaultMapping(POST)
                                         .with(mapping()
                                                 .withName("contextB.someAction")
                                                 .withRequestType("application/vnd.ctx.command.somemediatype1+json"))
@@ -144,7 +143,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
         generator.run(
                 restRamlWithCommandApiDefaults()
                         .with(resource("/case")
-                                .with(httpAction(PUT)
+                                .with(httpActionWithDefaultMapping(PUT)
                                         .with(mapping()
                                                 .withName("contextB.someAction")
                                                 .withRequestType("application/vnd.ctx.command.somemediatype1+json"))
@@ -177,7 +176,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
         generator.run(
                 restRamlWithCommandApiDefaults()
                         .with(resource("/case")
-                                .with(httpAction(PATCH)
+                                .with(httpActionWithDefaultMapping(PATCH)
                                         .with(mapping()
                                                 .withName("contextB.someAction")
                                                 .withRequestType("application/vnd.ctx.command.somemediatype1+json"))
@@ -210,7 +209,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
         generator.run(
                 restRamlWithCommandApiDefaults()
                         .with(resource("/case")
-                                .with(httpAction(DELETE)
+                                .with(httpActionWithDefaultMapping(DELETE)
                                         .with(mapping()
                                                 .withName("contextB.someAction")
                                                 .withRequestType("application/vnd.ctx.command.somemediatype1+json"))
@@ -243,7 +242,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
         generator.run(
                 restRamlWithCommandApiDefaults()
                         .with(resource("/case")
-                                .with(httpAction(POST)
+                                .with(httpActionWithDefaultMapping(POST)
                                         .with(mapping()
                                                 .withName("contextC.someAction")
                                                 .withRequestType("application/vnd.ctx.command.somemediatype1+json"))
@@ -276,13 +275,13 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
         generator.run(
                 restRamlWithCommandApiDefaults()
                         .with(resource("/case")
-                                .with(httpAction(POST)
+                                .with(httpActionWithDefaultMapping(POST)
                                         .with(mapping()
                                                 .withName("contextC.commandAction")
                                                 .withRequestType("application/vnd.somemediatype1+json"))
                                         .withMediaType("application/vnd.somemediatype1+json", "json/schema/somemediatype1.json")
                                 )
-                                .with(httpAction(GET)
+                                .with(httpActionWithDefaultMapping(GET)
                                         .with(mapping()
                                                 .withName("contextC.queryAction")
                                                 .withResponseType("application/vnd.mediatype1+json")

@@ -2,6 +2,8 @@ package uk.gov.justice.services.generators.commons.mapping;
 
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.beans.HasPropertyWithValue.hasProperty;
@@ -22,14 +24,18 @@ import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.N
 import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.REQUEST_TYPE_KEY;
 import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.RESPONSE_TYPE_KEY;
 import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.listOf;
+import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.mapping;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingDescriptionBuilder.mappingDescriptionWith;
+import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.raml;
+import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 
 import uk.gov.justice.services.generators.commons.validator.RamlValidationException;
 
 import java.util.List;
 
 import org.junit.Test;
+import org.raml.model.MimeType;
 
 public class ActionMappingTest {
 
@@ -63,6 +69,28 @@ public class ActionMappingTest {
         assertThat(mapping.getResponseType(), is("application/vnd.bbbb+json"));
         assertThat(mapping.mimeTypeFor(GET), is("application/vnd.bbbb+json"));
         assertThat(mapping.getName(), is("actionBCD"));
+    }
+
+
+    @Test
+    public void shouldReturnMappingFromRamlAndMimeType() throws Exception {
+
+        final ActionMapping actionMapping = ActionMapping.valueOf(httpAction(GET)
+                        .withResponseTypes(
+                                "application/vnd.ctx.query2+json",
+                                "application/vnd.ctx.query1+json")
+                        .with(mapping()
+                                .withName("actionABC")
+                                .withResponseType("application/vnd.ctx.query1+json"))
+                        .with(mapping()
+                                .withName("actionBCD")
+                                .withResponseType("application/vnd.ctx.query2+json")).build()
+                , new MimeType("application/vnd.ctx.query1+json"));
+
+        assertThat(actionMapping, not(nullValue()));
+        assertThat(actionMapping.getName(), is("actionABC"));
+        assertThat(actionMapping.getResponseType(), is("application/vnd.ctx.query1+json"));
+
     }
 
     @Test

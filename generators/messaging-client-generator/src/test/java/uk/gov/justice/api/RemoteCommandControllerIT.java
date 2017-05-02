@@ -88,7 +88,6 @@ public class RemoteCommandControllerIT {
             AllowAllPolicyEvaluator.class,
             InterceptorChainProcessor.class,
             DispatcherCache.class,
-            DispatcherFactory.class,
             PolicyEvaluator.class,
             RecordingJmsEnvelopeSender.class,
             RemoteContextaControllerCommand.class,

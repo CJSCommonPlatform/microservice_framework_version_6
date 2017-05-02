@@ -9,7 +9,7 @@ import static uk.gov.justice.services.generators.commons.helper.Names.packageNam
 
 import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.services.adapter.rest.application.CommonProviders;
-import uk.gov.justice.services.adapters.rest.uri.BaseUri;
+import uk.gov.justice.services.generators.commons.helper.RestResourceBaseUri;
 
 import java.util.Collection;
 import java.util.Set;
@@ -70,7 +70,7 @@ class JaxRsApplicationCodeGenerator {
      * @return the {@link TypeSpec.Builder} that defines the class
      */
     private TypeSpec.Builder classSpecFrom(final Raml raml) {
-        final BaseUri baseUri = new BaseUri(raml.getBaseUri());
+        final RestResourceBaseUri baseUri = new RestResourceBaseUri(raml.getBaseUri());
         return classBuilder(applicationNameFrom(baseUri))
                 .addModifiers(PUBLIC)
                 .superclass(Application.class)
@@ -119,7 +119,7 @@ class JaxRsApplicationCodeGenerator {
         return codeBlockBuilder.build();
     }
 
-    private static String applicationNameFrom(final BaseUri baseUri) {
+    private static String applicationNameFrom(final RestResourceBaseUri baseUri) {
         return buildJavaFriendlyName(baseUri.pathWithoutWebContext())
                 .concat(APPLICATION_NAME_SUFFIX);
     }

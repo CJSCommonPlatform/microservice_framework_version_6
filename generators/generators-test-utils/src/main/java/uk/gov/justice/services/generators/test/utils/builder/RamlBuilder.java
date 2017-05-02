@@ -1,7 +1,7 @@
 package uk.gov.justice.services.generators.test.utils.builder;
 
 import static org.raml.model.ActionType.POST;
-import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
+import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpActionWithDefaultMapping;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.defaultGetResource;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.defaultPostResource;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
@@ -85,7 +85,7 @@ public class RamlBuilder {
                 .withDefaultMessagingBaseUri()
                 .with(resource()
                         .withRelativeUri("/somecontext.controller.command")
-                        .with(httpAction(POST, "application/vnd.somecontext.command1+json")));
+                        .with(httpActionWithDefaultMapping(POST, "application/vnd.somecontext.command1+json")));
     }
 
     public RamlBuilder withVersion(final String version) {

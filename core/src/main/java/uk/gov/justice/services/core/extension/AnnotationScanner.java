@@ -1,5 +1,6 @@
 package uk.gov.justice.services.core.extension;
 
+import static java.util.Collections.synchronizedList;
 import static org.slf4j.LoggerFactory.getLogger;
 import static uk.gov.justice.services.core.annotation.ComponentNameUtil.componentFrom;
 import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.componentLocationFrom;
@@ -13,7 +14,6 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.handler.registry.HandlerRegistry;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.enterprise.event.Observes;
@@ -33,7 +33,7 @@ public class AnnotationScanner implements Extension {
 
     private static final Logger LOGGER = getLogger(HandlerRegistry.class);
 
-    private List<Object> events = Collections.synchronizedList(new ArrayList<>());
+    private List<Object> events = synchronizedList(new ArrayList<>());
 
     @SuppressWarnings("unused")
     <T> void processAnnotatedType(@Observes final ProcessAnnotatedType<T> pat) {

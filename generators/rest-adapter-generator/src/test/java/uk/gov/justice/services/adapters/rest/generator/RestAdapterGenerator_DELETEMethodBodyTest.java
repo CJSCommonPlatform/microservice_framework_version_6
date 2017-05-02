@@ -9,9 +9,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.raml.model.ActionType.DELETE;
 import static uk.gov.justice.services.core.interceptor.DefaultInterceptorContext.interceptorContextWithInput;
-import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
+import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpActionWithDefaultMapping;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithCommandApiDefaults;
-import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
@@ -43,7 +42,7 @@ public class RestAdapterGenerator_DELETEMethodBodyTest extends BaseRestAdapterGe
         generator.run(
                 restRamlWithCommandApiDefaults().with(
                         resource("/path")
-                                .with(httpAction(DELETE).withHttpActionOfDefaultRequestType())
+                                .with(httpActionWithDefaultMapping(DELETE).withHttpActionOfDefaultRequestType())
                 ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -69,7 +68,7 @@ public class RestAdapterGenerator_DELETEMethodBodyTest extends BaseRestAdapterGe
                 restRamlWithCommandApiDefaults()
                         .with(
                                 resource("/path")
-                                        .with(httpAction(DELETE).withHttpActionOfDefaultRequestType())
+                                        .with(httpActionWithDefaultMapping(DELETE).withHttpActionOfDefaultRequestType())
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 

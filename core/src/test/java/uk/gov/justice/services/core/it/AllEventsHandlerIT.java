@@ -106,7 +106,6 @@ public class AllEventsHandlerIT {
             AllowAllPolicyEvaluator.class,
             DefaultAccessControlService.class,
             DispatcherCache.class,
-            DispatcherFactory.class,
             PolicyEvaluator.class,
 
             EnvelopeValidationExceptionHandlerProducer.class,

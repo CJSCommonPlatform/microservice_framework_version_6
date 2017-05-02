@@ -1,6 +1,7 @@
-package uk.gov.justice.services.adapters.rest.uri;
+package uk.gov.justice.services.generators.commons.helper;
 
 import static java.util.Optional.empty;
+import static uk.gov.justice.services.generators.commons.helper.Names.buildJavaFriendlyName;
 
 import uk.gov.justice.services.core.annotation.Component;
 
@@ -10,7 +11,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class BaseUri {
+public class RestResourceBaseUri {
 
     private static final Pattern PILLAR_AND_TIER_PATTERN = Pattern
             .compile("(command/api|command/controller|command/handler|query/api|query/controller|query/view|event/api)");
@@ -18,7 +19,7 @@ public class BaseUri {
     private final String pathWithoutWebContext;
     private Optional<String> component;
 
-    public BaseUri(final String baseUriString) {
+    public RestResourceBaseUri(final String baseUriString) {
         this.pathWithoutWebContext = pathWithoutContextFrom(baseUriString);
 
     }
@@ -40,6 +41,10 @@ public class BaseUri {
             component = componentFrom(pathWithoutWebContext);
         }
         return component;
+    }
+
+    public String classNamePrefix() {
+        return buildJavaFriendlyName(component().isPresent() ? component().get().toLowerCase() : pathWithoutWebContext());
     }
 
     private String pathWithoutContextFrom(final String baseUriString) {

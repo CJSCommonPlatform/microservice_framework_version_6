@@ -61,7 +61,7 @@ public class InterceptorCache {
             return new LinkedList<>(componentInterceptors.get(component));
         }
 
-        throw new InterceptorCacheException(format("Component [%s] does not have any cached Interceptors, check there is an InterceptorChainProvider for this component.", component));
+        throw new InterceptorCacheException(format("Component [%s] does not have any cached Interceptors, check if there is an InterceptorChainProvider for this component.", component));
     }
 
     private Map<Class<?>, Interceptor> interceptorInstancesByType() {

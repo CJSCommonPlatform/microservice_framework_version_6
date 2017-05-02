@@ -1,12 +1,14 @@
 package uk.gov.justice.services.generators.test.utils.reflection;
 
 
+import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +21,7 @@ public final class ReflectionUtil {
      */
     public static List<Method> methodsOf(final Class<?> clazz) {
         return Arrays.stream(clazz.getDeclaredMethods()).filter(m -> !m.getName().contains("jacoco") && !m.getName().contains("lambda"))
+                .sorted(comparing(Method::getName))
                 .collect(toList());
     }
 

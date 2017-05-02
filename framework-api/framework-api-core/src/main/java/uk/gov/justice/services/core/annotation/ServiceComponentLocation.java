@@ -15,7 +15,7 @@ public enum ServiceComponentLocation {
      * @return the service component location
      */
     public static ServiceComponentLocation componentLocationFrom(final Class<?> clazz) {
-        return clazz.isAnnotationPresent(Remote.class) ? REMOTE : LOCAL;
+        return (clazz.isAnnotationPresent(Remote.class) || clazz.isAnnotationPresent(Direct.class)) ? REMOTE : LOCAL;
     }
 
     /**
@@ -27,8 +27,10 @@ public enum ServiceComponentLocation {
      * @return the service component location
      */
     public static ServiceComponentLocation componentLocationFrom(final InjectionPoint injectionPoint) {
+
         final Class<?> targetClass = injectionPoint.getMember().getDeclaringClass();
         return targetClass.isAnnotationPresent(Adapter.class)
-                || targetClass.isAnnotationPresent(CustomAdapter.class) ? LOCAL : REMOTE;
+                || targetClass.isAnnotationPresent(CustomAdapter.class)
+                || targetClass.isAnnotationPresent(DirectAdapter.class) ? LOCAL : REMOTE;
     }
 }

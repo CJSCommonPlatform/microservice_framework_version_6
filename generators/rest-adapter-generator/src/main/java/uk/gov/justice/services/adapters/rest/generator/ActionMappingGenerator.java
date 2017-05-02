@@ -12,12 +12,12 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static uk.gov.justice.services.adapters.rest.generator.Generators.resourceImplementationNameOf;
 import static uk.gov.justice.services.generators.commons.helper.Actions.isSupportedActionType;
 import static uk.gov.justice.services.generators.commons.helper.Actions.isSupportedActionTypeWithRequestType;
-import static uk.gov.justice.services.generators.commons.helper.Names.buildResourceMethodName;
-import static uk.gov.justice.services.generators.commons.helper.Names.buildResourceMethodNameWithNoMimeType;
+import static uk.gov.justice.services.generators.commons.helper.Names.resourceMethodNameFrom;
+import static uk.gov.justice.services.generators.commons.helper.Names.resourceMethodNameWithNoMimeTypeFrom;
 
 import uk.gov.justice.services.adapter.rest.mapping.ActionMapper;
 import uk.gov.justice.services.adapter.rest.mapping.ActionMapperHelper;
-import uk.gov.justice.services.adapters.rest.uri.BaseUri;
+import uk.gov.justice.services.generators.commons.helper.RestResourceBaseUri;
 import uk.gov.justice.services.generators.commons.mapping.ActionMapping;
 
 import java.util.Collection;
@@ -48,11 +48,11 @@ public class ActionMappingGenerator {
     public List<TypeSpec> generateFor(final Raml raml) {
         final Collection<Resource> resources = raml.getResources().values();
         return resources.stream()
-                .map(resource -> generateActionMappingFor(resource, new BaseUri(raml.getBaseUri())))
+                .map(resource -> generateActionMappingFor(resource, new RestResourceBaseUri(raml.getBaseUri())))
                 .collect(toList());
     }
 
-    private TypeSpec generateActionMappingFor(final Resource resource, final BaseUri baseUri) {
+    private TypeSpec generateActionMappingFor(final Resource resource, final RestResourceBaseUri baseUri) {
 
         final String className = mapperClassNameOf(resource, baseUri);
         return classBuilder(className)
@@ -115,12 +115,12 @@ public class ActionMappingGenerator {
 
     private String methodNameForAction(final Action ramlAction, final ActionType actionType, final String mediaType) {
         if (isSupportedActionTypeWithRequestType(actionType)) {
-            return buildResourceMethodName(ramlAction, new MimeType(mediaType));
+            return resourceMethodNameFrom(ramlAction, new MimeType(mediaType));
         } else {
-            return buildResourceMethodNameWithNoMimeType(ramlAction);
+            return resourceMethodNameWithNoMimeTypeFrom(ramlAction);
         }
     }
-    private String mapperClassNameOf(final Resource resource, final BaseUri baseUri) {
+    private String mapperClassNameOf(final Resource resource, final RestResourceBaseUri baseUri) {
         return resourceImplementationNameOf(resource, baseUri) + ACTION_MAPPER_CLASS_SUFFIX;
     }
 

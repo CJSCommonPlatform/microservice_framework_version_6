@@ -34,12 +34,6 @@ public class DispatcherCacheTest {
 
     private DispatcherCache dispatcherCache = new DispatcherCache();
 
-    @Before
-    public void setUp() throws Exception {
-        dispatcherCache = new DispatcherCache();
-        dispatcherCache.dispatcherFactory = new DispatcherFactory();
-    }
-
     @Test
     public void shouldReturnTheSameDispatcherForTwoInjectionPoints() throws Exception {
 

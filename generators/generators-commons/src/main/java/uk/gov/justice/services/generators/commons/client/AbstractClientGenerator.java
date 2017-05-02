@@ -22,6 +22,8 @@ import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.Remote;
+import uk.gov.justice.services.generators.commons.validator.CompositeRamlValidator;
+import uk.gov.justice.services.generators.commons.validator.RamlValidator;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.logging.TraceLogger;
 
@@ -56,6 +58,8 @@ public abstract class AbstractClientGenerator implements Generator {
     @Override
     public void run(final Raml raml, final GeneratorConfig generatorConfig) {
 
+        validator().validate(raml);
+
         final TypeSpec.Builder classSpec = classSpecOf(raml, generatorConfig)
                 .addFields(fieldsOf(raml))
                 .addField(FieldSpec.builder(TraceLogger.class, TRACE_LOGGER_FIELD)
@@ -63,6 +67,11 @@ public abstract class AbstractClientGenerator implements Generator {
                         .build())
                 .addMethods(methodsOf(raml, generatorConfig));
         writeClass(generatorConfig, generatorConfig.getBasePackageName(), classSpec.build(), LOGGER);
+    }
+
+    protected RamlValidator validator() {
+        return raml -> {
+        };
     }
 
     protected abstract String classNameOf(final Raml raml);
@@ -74,6 +83,10 @@ public abstract class AbstractClientGenerator implements Generator {
     protected abstract CodeBlock methodBodyOf(Resource resource, Action ramlAction, ActionMimeTypeDefinition definition);
 
     protected abstract String handlesAnnotationValueOf(Action ramlAction, ActionMimeTypeDefinition definition, GeneratorConfig generatorConfig);
+
+    protected Class<?> classAnnotation() {
+        return Remote.class;
+    }
 
     private Stream<MethodSpec> methodsOf(final Resource resource, final GeneratorConfig generationConfig) {
         return resource.getActions().values().stream()
@@ -150,11 +163,6 @@ public abstract class AbstractClientGenerator implements Generator {
         }
     }
 
-    private String methodNameOf(final ActionType actionType, final ActionMimeTypeDefinition definition) {
-        final String actionTypeStr = actionType.name().toLowerCase();
-        return camelCase(format("%s.%s", actionTypeStr, nameFrom(definition.getNameType())));
-    }
-
     private List<MethodSpec> methodsOf(final Raml raml, final GeneratorConfig generatorConfig) {
         return raml.getResources().values().stream()
                 .flatMap(resource -> methodsOf(resource, generatorConfig))
@@ -165,7 +173,7 @@ public abstract class AbstractClientGenerator implements Generator {
         final String className = classNameOf(raml);
         return TypeSpec.classBuilder(className)
                 .addModifiers(PUBLIC, FINAL)
-                .addAnnotation(Remote.class)
+                .addAnnotation(classAnnotation())
                 .addAnnotation(AnnotationSpec.builder(FrameworkComponent.class)
                         .addMember("value", "$S", serviceComponentOf(generatorConfig))
                         .build())

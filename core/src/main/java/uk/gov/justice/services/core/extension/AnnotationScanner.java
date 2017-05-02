@@ -12,7 +12,6 @@ import uk.gov.justice.services.core.annotation.CustomServiceComponent;
 import uk.gov.justice.services.core.annotation.Direct;
 import uk.gov.justice.services.core.annotation.DirectAdapter;
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
-import uk.gov.justice.services.core.annotation.Provider;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.handler.registry.HandlerRegistry;
 
@@ -51,15 +50,12 @@ public class AnnotationScanner implements Extension {
 
     @SuppressWarnings("unused")
     void afterDeploymentValidation(@Observes final AfterDeploymentValidation event, final BeanManager beanManager) {
+
         final Set<Bean<?>> directAdapters = beanManager.getBeans(SynchronousDirectAdapter.class);
         allBeansFrom(beanManager)
                 .filter(this::isServiceComponent)
                 .filter(bean -> isNotDirectComponentWithoutAdapter(bean, directAdapters))
                 .forEach(this::processServiceComponentsForEvents);
-
-        allBeansFrom(beanManager)
-                .filter(this::isFrameworkProvider)
-                .forEach(this::processProviderForEvents);
 
         fireAllCollectedEvents(beanManager);
     }
@@ -70,12 +66,6 @@ public class AnnotationScanner implements Extension {
 
     private boolean isServiceComponent(final Bean<?> bean) {
         return isServiceComponent(bean.getBeanClass());
-    }
-
-
-    private boolean isFrameworkProvider(final Bean<?> bean) {
-        final Class<?> beanClass = bean.getBeanClass();
-        return beanClass.isAnnotationPresent(Provider.class);
     }
 
     private boolean isServiceComponent(final Class<?> beanClass) {
@@ -108,11 +98,6 @@ public class AnnotationScanner implements Extension {
             }
         }
         return true;
-    }
-
-    private void processProviderForEvents(final Bean<?> bean) {
-        events.add(new ProviderFoundEvent(bean));
-        LOGGER.info("Identified Access Control Provider {}", bean.getBeanClass().getSimpleName());
     }
 
     private void fireAllCollectedEvents(final BeanManager beanManager) {

@@ -6,5 +6,5 @@ import java.util.Optional;
 
 public interface PolicyEvaluator {
 
-    Optional<AccessControlViolation> checkAccessPolicyFor(final JsonEnvelope jsonEnvelope);
+    Optional<AccessControlViolation> checkAccessPolicyFor(final String component ,final JsonEnvelope jsonEnvelope);
 }

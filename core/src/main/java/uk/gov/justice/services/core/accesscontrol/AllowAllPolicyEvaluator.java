@@ -16,7 +16,8 @@ import javax.enterprise.inject.Alternative;
 public class AllowAllPolicyEvaluator implements PolicyEvaluator {
 
     @Override
-    public Optional<AccessControlViolation> checkAccessPolicyFor(@SuppressWarnings("unused") final JsonEnvelope jsonEnvelope) {
+    public Optional<AccessControlViolation> checkAccessPolicyFor(final String component,
+                                                                 @SuppressWarnings("unused") final JsonEnvelope jsonEnvelope) {
         return empty();
     }
 }

@@ -21,6 +21,8 @@ public class DefaultInterceptorChainProcessor implements InterceptorChainProcess
 
     @Override
     public Optional<JsonEnvelope> process(final InterceptorContext interceptorContext) {
+        interceptorContext.setInputParameter("component", component);
+
         return new DefaultInterceptorChain(interceptorCache.getInterceptors(component), targetOf(dispatch))
                 .processNext(interceptorContext)
                 .outputEnvelope();
@@ -29,7 +31,9 @@ public class DefaultInterceptorChainProcessor implements InterceptorChainProcess
     @Override
     @Deprecated
     public Optional<JsonEnvelope> process(final JsonEnvelope jsonEnvelope) {
-        return process(interceptorContextWithInput(jsonEnvelope));
+        InterceptorContext context = interceptorContextWithInput(jsonEnvelope);
+        context.setInputParameter("component", component);
+        return process(context);
     }
 
     private Target targetOf(final Function<JsonEnvelope, JsonEnvelope> dispatch) {

@@ -62,9 +62,9 @@ public class DefaultAccessControlServiceTest {
         final Optional<AccessControlViolation> accessControlViolation =
                 of(mock(AccessControlViolation.class));
 
-        when(policyEvaluator.checkAccessPolicyFor(jsonEnvelope)).thenReturn(accessControlViolation);
+        when(policyEvaluator.checkAccessPolicyFor("command",jsonEnvelope)).thenReturn(accessControlViolation);
 
-        assertThat(accessControlService.checkAccessControl(jsonEnvelope),
+        assertThat(accessControlService.checkAccessControl("command",jsonEnvelope),
                 is(sameInstance(accessControlViolation)));
 
         assertLogStatement();
@@ -76,7 +76,7 @@ public class DefaultAccessControlServiceTest {
         System.setProperty(ACCESS_CONTROL_DISABLED_PROPERTY, "true");
 
         final Optional<AccessControlViolation> accessControlViolation =
-                accessControlService.checkAccessControl(jsonEnvelope);
+                accessControlService.checkAccessControl("command",jsonEnvelope);
 
         assertThat(accessControlViolation.isPresent(), is(false));
 
@@ -93,9 +93,9 @@ public class DefaultAccessControlServiceTest {
         final Optional<AccessControlViolation> accessControlViolation =
                 of(mock(AccessControlViolation.class));
 
-        when(policyEvaluator.checkAccessPolicyFor(jsonEnvelope)).thenReturn(accessControlViolation);
+        when(policyEvaluator.checkAccessPolicyFor("command",jsonEnvelope)).thenReturn(accessControlViolation);
 
-        assertThat(accessControlService.checkAccessControl(jsonEnvelope),
+        assertThat(accessControlService.checkAccessControl("command",jsonEnvelope),
                 is(sameInstance(accessControlViolation)));
 
         assertLogStatement();

@@ -12,6 +12,8 @@ import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.handler.Handlers.handlerMethodsFrom;
 
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.core.annotation.Direct;
+import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.handler.exception.HandlerExecutionException;
 import uk.gov.justice.services.core.handler.registry.exception.InvalidHandlerException;
@@ -43,8 +45,6 @@ public class HandlerMethodTest {
     @Mock
     private CheckedExceptionThrowingCommandHandler checkedExcCommandHandler;
 
-    @Mock
-    private PrivateMethodCommandHandler privateMethodCommandHandler;
 
     private JsonEnvelope envelope;
 
@@ -121,6 +121,18 @@ public class HandlerMethodTest {
         new HandlerMethod(synchronousCommandHandler, method(new SynchronousCommandHandler(), "handles"), Object.class);
     }
 
+    @Test
+    public void shouldReturnFalseIfNoDirectAnnotation() throws Exception {
+        final SynchronousCommandHandler handler = new SynchronousCommandHandler();
+        assertThat(new HandlerMethod(new SynchronousCommandHandler(), method(handler, "handles"), JsonEnvelope.class).isDirect(), is(false));
+    }
+
+    @Test
+    public void shouldReturnTrueIfDirectAnnotationPresent() throws Exception {
+        final TestDirectComponentAHandler handler = new TestDirectComponentAHandler();
+        assertThat(new HandlerMethod(handler, method(handler, "handles"), JsonEnvelope.class).isDirect(), is(true));
+    }
+
     private HandlerMethod asyncHandlerInstance() {
         return new HandlerMethod(asynchronousCommandHandler, method(new AsynchronousCommandHandler(), "handles"), Void.TYPE);
     }
@@ -180,5 +192,16 @@ public class HandlerMethodTest {
             return envelope;
         }
     }
+
+
+    @Direct(target = "not_used")
+    @FrameworkComponent("COMPONENT_A")
+    public static class TestDirectComponentAHandler {
+        @Handles("something")
+        public JsonEnvelope handles(final JsonEnvelope envelope) {
+            return envelope;
+        }
+    }
+
 
 }

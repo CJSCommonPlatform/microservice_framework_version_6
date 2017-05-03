@@ -9,8 +9,8 @@ import uk.gov.justice.services.core.handler.exception.MissingHandlerException;
 import uk.gov.justice.services.core.handler.registry.exception.DuplicateHandlerException;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 
@@ -26,7 +26,7 @@ public class HandlerRegistry {
 
     public HandlerRegistry(final Logger logger) {
         this.logger = logger;
-        handlerMethods = new HashMap<>();
+        handlerMethods = new ConcurrentHashMap<>();
     }
 
     public HandlerMethod get(final String name) {
@@ -57,15 +57,24 @@ public class HandlerRegistry {
      */
     private void register(final Object handler, final Method method) {
 
-        final HandlerMethod handlerMethod = new HandlerMethod(handler, method, method.getReturnType());
+        final HandlerMethod newHandlerMethod = new HandlerMethod(handler, method, method.getReturnType());
         final String name = method.getAnnotation(Handles.class).value();
-        if (handlerMethods.containsKey(name)) {
+        if (isDuplicate(newHandlerMethod, name)) {
             throw new DuplicateHandlerException(
                     format("Can't register %s because a command handler method %s has " +
-                            "already been registered for %s ", handlerMethod, handlerMethods.get(name), name));
+                            "already been registered for %s ", newHandlerMethod, handlerMethods.get(name), name));
         }
 
-        logger.info("Registering handler {}, {}", name, handlerMethod.toString());
-        handlerMethods.put(name, handlerMethod);
+        logger.info("Registering handler {}, {}", name, newHandlerMethod.toString());
+
+        if (newHandlerMethod.isDirect()) {
+            handlerMethods.put(name, newHandlerMethod);
+        } else {
+            handlerMethods.putIfAbsent(name, newHandlerMethod);
+        }
+    }
+
+    private boolean isDuplicate(final HandlerMethod newHandlerMethod, final String name) {
+        return handlerMethods.containsKey(name) && newHandlerMethod.isDirect() == handlerMethods.get(name).isDirect();
     }
 }

@@ -6,8 +6,11 @@ import static uk.gov.justice.services.core.annotation.ComponentNameUtil.componen
 import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.componentLocationFrom;
 
 import uk.gov.justice.domain.annotation.Event;
+import uk.gov.justice.services.adapter.direct.SynchronousDirectAdapter;
 import uk.gov.justice.services.core.annotation.AnyLiteral;
 import uk.gov.justice.services.core.annotation.CustomServiceComponent;
+import uk.gov.justice.services.core.annotation.Direct;
+import uk.gov.justice.services.core.annotation.DirectAdapter;
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Provider;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -15,6 +18,9 @@ import uk.gov.justice.services.core.handler.registry.HandlerRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Stream;
 
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.AfterDeploymentValidation;
@@ -45,22 +51,37 @@ public class AnnotationScanner implements Extension {
 
     @SuppressWarnings("unused")
     void afterDeploymentValidation(@Observes final AfterDeploymentValidation event, final BeanManager beanManager) {
-        beanManager.getBeans(Object.class, AnyLiteral.create())
-                .forEach(this::processBean);
+        final Set<Bean<?>> directAdapters = beanManager.getBeans(SynchronousDirectAdapter.class);
+        allBeansFrom(beanManager)
+                .filter(this::isServiceComponent)
+                .filter(bean -> isNotDirectComponentWithoutAdapter(bean, directAdapters))
+                .forEach(this::processServiceComponentsForEvents);
+
+        allBeansFrom(beanManager)
+                .filter(this::isFrameworkProvider)
+                .forEach(this::processProviderForEvents);
 
         fireAllCollectedEvents(beanManager);
     }
 
-    private void processBean(final Bean<?> bean) {
-        final Class<?> beanClass = bean.getBeanClass();
+    private Stream<Bean<?>> allBeansFrom(final BeanManager beanManager) {
+        return beanManager.getBeans(Object.class, AnyLiteral.create()).stream();
+    }
 
-        if (beanClass.isAnnotationPresent(ServiceComponent.class)
+    private boolean isServiceComponent(final Bean<?> bean) {
+        return isServiceComponent(bean.getBeanClass());
+    }
+
+
+    private boolean isFrameworkProvider(final Bean<?> bean) {
+        final Class<?> beanClass = bean.getBeanClass();
+        return beanClass.isAnnotationPresent(Provider.class);
+    }
+
+    private boolean isServiceComponent(final Class<?> beanClass) {
+        return beanClass.isAnnotationPresent(ServiceComponent.class)
                 || beanClass.isAnnotationPresent(FrameworkComponent.class)
-                || beanClass.isAnnotationPresent(CustomServiceComponent.class)) {
-            processServiceComponentsForEvents(bean);
-        } else if (beanClass.isAnnotationPresent(Provider.class)) {
-            processProviderForEvents(bean);
-        }
+                || beanClass.isAnnotationPresent(CustomServiceComponent.class);
     }
 
     /**
@@ -73,6 +94,20 @@ public class AnnotationScanner implements Extension {
         LOGGER.info("Identified ServiceComponent {}", clazz.getSimpleName());
 
         events.add(new ServiceComponentFoundEvent(componentFrom(clazz), bean, componentLocationFrom(clazz)));
+    }
+
+    private boolean isNotDirectComponentWithoutAdapter(final Bean<?> bean, final Set<Bean<?>> directAdapters) {
+        final Class<?> beanClass = bean.getBeanClass();
+        if (beanClass.isAnnotationPresent(Direct.class)) {
+            final String targetComponentName = beanClass.getAnnotation(Direct.class).target();
+            final Optional<Bean<?>> matchingAdapter = directAdapters.stream()
+                    .filter(directAdapter -> directAdapter.getBeanClass().getAnnotation(DirectAdapter.class).value().equals(targetComponentName))
+                    .findAny();
+            if (!matchingAdapter.isPresent()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void processProviderForEvents(final Bean<?> bean) {

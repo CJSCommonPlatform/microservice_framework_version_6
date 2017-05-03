@@ -11,6 +11,8 @@ import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
+import uk.gov.justice.services.core.annotation.Direct;
+import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.handler.HandlerMethod;
@@ -88,6 +90,34 @@ public class HandlerRegistryTest {
         assertThat(testAllEventsHandler.firstRecordedEnvelope(), nullValue());
 
         assertLogStatement("*");
+    }
+
+
+    @Test
+    public void directHandlerShouldReplaceNonDirectHandler() {
+        TestComponentAHandler testComponentAHandler = new TestComponentAHandler();
+        TestDirectComponentAHandler testDirectComponentAHandler = new TestDirectComponentAHandler();
+
+        createRegistryWith(testComponentAHandler, testDirectComponentAHandler);
+        final HandlerMethod handlerMethod = registry.get(COMMAND_NAME);
+        assertHandlerMethodInvokesHandler(handlerMethod, testDirectComponentAHandler);
+    }
+
+    @Test
+    public void shouldIgnoreNonDirectHandlerIfDirectOneRegistered() throws Exception {
+
+        TestComponentAHandler testComponentAHandler = new TestComponentAHandler();
+        TestDirectComponentAHandler testDirectComponentAHandler = new TestDirectComponentAHandler();
+
+        createRegistryWith(testDirectComponentAHandler, testComponentAHandler);
+        final HandlerMethod handlerMethod = registry.get(COMMAND_NAME);
+        assertHandlerMethodInvokesHandler(handlerMethod, testDirectComponentAHandler);
+    }
+
+    @Test(expected = DuplicateHandlerException.class)
+    public void shouldThrowExceptionIfAttemptingToRegisterDuplicateDirectHandler() throws Exception {
+
+        createRegistryWith(new TestDirectComponentAHandler(), new TestDirectComponentAHandlerDuplicate());
     }
 
     @Test(expected = InvalidHandlerException.class)
@@ -238,5 +268,35 @@ public class HandlerRegistryTest {
         }
 
     }
+
+    @FrameworkComponent("COMPONENT_A")
+    public static class TestComponentAHandler extends TestEnvelopeRecorder {
+        @Handles(COMMAND_NAME)
+        public JsonEnvelope handle1(JsonEnvelope envelope) {
+            record(envelope);
+            return envelope;
+        }
+    }
+
+    @Direct(target = "not_used")
+    @FrameworkComponent("COMPONENT_A")
+    public static class TestDirectComponentAHandler extends TestEnvelopeRecorder {
+        @Handles(COMMAND_NAME)
+        public JsonEnvelope handle1(JsonEnvelope envelope) {
+            record(envelope);
+            return envelope;
+        }
+    }
+
+    @Direct(target = "not_used")
+    @FrameworkComponent("COMPONENT_A")
+    public static class TestDirectComponentAHandlerDuplicate extends TestEnvelopeRecorder {
+        @Handles(COMMAND_NAME)
+        public JsonEnvelope handle1(JsonEnvelope envelope) {
+            record(envelope);
+            return envelope;
+        }
+    }
+
 
 }

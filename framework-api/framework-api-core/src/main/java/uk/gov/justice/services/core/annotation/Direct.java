@@ -12,4 +12,5 @@ import javax.enterprise.context.ApplicationScoped;
 @Target(TYPE)
 @ApplicationScoped
 public @interface Direct {
+    String target();
 }

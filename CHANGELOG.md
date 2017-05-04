@@ -12,6 +12,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 - Support for default sender destinations removed; senders now always require messaging clients to
 be provided, typically by generating one from the destination RAML.
 
+### Fixed
+- Test cases for random ZonedDateTime generators and added logging to show more info when they fail
+
 ## [1.5.2] 2017-04-07
 
 ###

@@ -29,7 +29,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-//@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class LocalAccessControlInterceptorTest {
 
     private static final int ACCESS_CONTROL_PRIORITY = 6000;
@@ -61,31 +61,31 @@ public class LocalAccessControlInterceptorTest {
         interceptorChain = new DefaultInterceptorChain(interceptors, target);
     }
 
-//    @Test
-//    public void shouldApplyAccessControlToInputIfLocalComponent() throws Exception {
-//        final InterceptorContext inputContext = interceptorContextWithInput(envelope);
-//        inputContext.setInputParameter("component","command");
-//
-//        when(accessControlService.checkAccessControl("command", envelope)).thenReturn(Optional.empty());
-//
-//        interceptorChain.processNext(inputContext);
-//        //verify(accessControlService).checkAccessControl("command", envelope);
-//    }
+    @Test
+    public void shouldApplyAccessControlToInputIfLocalComponent() throws Exception {
+        final InterceptorContext inputContext = interceptorContextWithInput(envelope);
+        inputContext.setInputParameter("component", "command");
 
-//    @Test
-//    public void shouldThrowAccessControlViolationExceptionIfAccessControlFailsForInput() throws Exception {
-//        final InterceptorContext inputContext = interceptorContextWithInput(envelope);
-//        inputContext.setInputParameter("component","command");
-//        final AccessControlViolation accessControlViolation = new AccessControlViolation("reason");
-//
-//        when(accessControlService.checkAccessControl("command", envelope)).thenReturn(Optional.of(accessControlViolation));
-//        when(accessControlFailureMessageGenerator.errorMessageFrom(envelope, accessControlViolation)).thenReturn("Error message");
-//
-//        exception.expect(AccessControlViolationException.class);
-//        exception.expectMessage("Error message");
-//
-////      ///      interceptorChain.processNext(inputContext);
-//    }
+        when(accessControlService.checkAccessControl("command", envelope)).thenReturn(Optional.empty());
+
+        interceptorChain.processNext(inputContext);
+        verify(accessControlService).checkAccessControl("command", envelope);
+    }
+
+    @Test
+    public void shouldThrowAccessControlViolationExceptionIfAccessControlFailsForInput() throws Exception {
+        final InterceptorContext inputContext = interceptorContextWithInput(envelope);
+        inputContext.setInputParameter("component", "command");
+        final AccessControlViolation accessControlViolation = new AccessControlViolation("reason");
+
+        when(accessControlService.checkAccessControl("command", envelope)).thenReturn(Optional.of(accessControlViolation));
+        when(accessControlFailureMessageGenerator.errorMessageFrom(envelope, accessControlViolation)).thenReturn("Error message");
+
+        exception.expect(AccessControlViolationException.class);
+        exception.expectMessage("Error message");
+
+        interceptorChain.processNext(inputContext);
+    }
 
     @Adapter(COMMAND_API)
     public static class TestCommandLocal {

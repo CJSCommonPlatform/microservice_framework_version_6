@@ -31,7 +31,7 @@ public class DefaultInterceptorChainProcessor implements InterceptorChainProcess
     @Override
     @Deprecated
     public Optional<JsonEnvelope> process(final JsonEnvelope jsonEnvelope) {
-        InterceptorContext context = interceptorContextWithInput(jsonEnvelope);
+        final InterceptorContext context = interceptorContextWithInput(jsonEnvelope);
         context.setInputParameter("component", component);
         return process(context);
     }

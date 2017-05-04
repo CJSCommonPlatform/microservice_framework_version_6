@@ -6,5 +6,5 @@ import java.util.Optional;
 
 public interface AccessControlService {
 
-    Optional<AccessControlViolation> checkAccessControl(final String component,final JsonEnvelope jsonEnvelope);
+    Optional<AccessControlViolation> checkAccessControl(final String component, final JsonEnvelope jsonEnvelope);
 }

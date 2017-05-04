@@ -29,7 +29,7 @@ public class DefaultAccessControlService implements AccessControlService {
         }
 
         logger.trace("Performing access control for action: {}", jsonEnvelope.metadata().name());
-        return policyEvaluator.checkAccessPolicyFor(component,jsonEnvelope);
+        return policyEvaluator.checkAccessPolicyFor(component, jsonEnvelope);
     }
 
     private boolean accessControlDisabled() {

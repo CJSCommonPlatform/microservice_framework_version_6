@@ -33,7 +33,6 @@ public class DefaultInterceptorContext implements InterceptorContext {
      * @return the new InterceptorContext
      */
     public static InterceptorContext interceptorContextWithInput(final JsonEnvelope input) {
-        contextPayloadWith(input);
         return new DefaultInterceptorContext(contextPayloadWith(input), contextPayloadWithNoEnvelope());
     }
 

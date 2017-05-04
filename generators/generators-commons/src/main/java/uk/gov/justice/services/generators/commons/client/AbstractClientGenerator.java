@@ -84,8 +84,8 @@ public abstract class AbstractClientGenerator implements Generator {
 
     protected abstract String handlesAnnotationValueOf(Action ramlAction, ActionMimeTypeDefinition definition, GeneratorConfig generatorConfig);
 
-    protected Class<?> classAnnotation() {
-        return Remote.class;
+    protected AnnotationSpec classAnnotation(final Raml raml) {
+        return AnnotationSpec.builder(Remote.class).build();
     }
 
     private Stream<MethodSpec> methodsOf(final Resource resource, final GeneratorConfig generationConfig) {
@@ -173,7 +173,7 @@ public abstract class AbstractClientGenerator implements Generator {
         final String className = classNameOf(raml);
         return TypeSpec.classBuilder(className)
                 .addModifiers(PUBLIC, FINAL)
-                .addAnnotation(classAnnotation())
+                .addAnnotation(classAnnotation(raml))
                 .addAnnotation(AnnotationSpec.builder(FrameworkComponent.class)
                         .addMember("value", "$S", serviceComponentOf(generatorConfig))
                         .build())

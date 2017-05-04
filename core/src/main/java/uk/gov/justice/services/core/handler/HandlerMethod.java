@@ -3,6 +3,7 @@ package uk.gov.justice.services.core.handler;
 import static java.lang.String.format;
 import static uk.gov.justice.services.messaging.logging.LoggerUtils.trace;
 
+import uk.gov.justice.services.core.annotation.Direct;
 import uk.gov.justice.services.core.handler.exception.HandlerExecutionException;
 import uk.gov.justice.services.core.handler.registry.exception.InvalidHandlerException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -136,5 +137,9 @@ public class HandlerMethod {
         return format("HandlerMethod[ Class: %s method: %s]",
                 handlerInstance != null ? handlerInstance.getClass().getName() : null,
                 handlerMethod != null ? handlerMethod.getName() : null);
+    }
+
+    public boolean isDirect() {
+        return handlerInstance.getClass().isAnnotationPresent(Direct.class);
     }
 }

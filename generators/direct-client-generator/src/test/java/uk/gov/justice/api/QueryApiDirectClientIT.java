@@ -144,7 +144,6 @@ public class QueryApiDirectClientIT {
             this.responseEnvelope = responseEnvelope;
         }
 
-
         @Override
         public JsonEnvelope process(JsonEnvelope envelope) {
             record(envelope);

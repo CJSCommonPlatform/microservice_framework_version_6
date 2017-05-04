@@ -2,8 +2,8 @@ package uk.gov.justice.services.clients.direct.generator;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
-import static javax.lang.model.element.Modifier.STATIC;
 import static org.raml.model.ActionType.GET;
 import static uk.gov.justice.services.generators.commons.helper.Names.buildJavaFriendlyName;
 
@@ -23,10 +23,9 @@ import uk.gov.justice.services.generators.commons.validator.ResponseContentTypeR
 import uk.gov.justice.services.generators.commons.validator.SupportedActionTypesRamlValidator;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
-import java.util.Arrays;
-
 import javax.inject.Inject;
 
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.TypeName;
@@ -38,7 +37,7 @@ import org.raml.model.Resource;
 public class DirectClientGenerator extends AbstractClientGenerator {
 
     private static final String ADAPTER_CACHE_FIELD = "adapterCache";
-    private static final String COMPONENT_CONSTANT_NAME = "COMPONENT_NAME";
+    private static final String COMPONENT_NAME_VARIABLE = "componentName";
 
     @Override
     protected RamlValidator validator() {
@@ -57,17 +56,19 @@ public class DirectClientGenerator extends AbstractClientGenerator {
     }
 
     @Override
-    protected Class<?> classAnnotation() {
-        return Direct.class;
+    protected AnnotationSpec classAnnotation(final Raml raml) {
+        return AnnotationSpec.builder(Direct.class).addMember("target", "$S",
+                new RestResourceBaseUri(raml.getBaseUri()).component()
+                        .orElseThrow(() -> new IllegalArgumentException("Target component could not be derived from RAML")))
+                .build();
     }
 
     @Override
     protected Iterable<FieldSpec> fieldsOf(final Raml raml) {
         return asList(
-                FieldSpec.builder(String.class, COMPONENT_CONSTANT_NAME)
-                        .addModifiers(PRIVATE, STATIC)
-                        .initializer("$S",
-                                new RestResourceBaseUri(raml.getBaseUri()).component().orElseThrow(() -> new IllegalArgumentException("Target component could not be derived from RAML")))
+                FieldSpec.builder(String.class, COMPONENT_NAME_VARIABLE)
+                        .addModifiers(PRIVATE, FINAL)
+                        .initializer("this.getClass().getAnnotation(Direct.class).target()")
                         .build(),
                 FieldSpec.builder(SynchronousDirectAdapterCache.class, ADAPTER_CACHE_FIELD)
                         .addAnnotation(Inject.class)
@@ -82,7 +83,7 @@ public class DirectClientGenerator extends AbstractClientGenerator {
 
     @Override
     protected CodeBlock methodBodyOf(final Resource resource, Action ramlAction, final ActionMimeTypeDefinition definition) {
-        return CodeBlock.of("return $L.directAdapterForComponent($L).process(envelope);", ADAPTER_CACHE_FIELD, COMPONENT_CONSTANT_NAME);
+        return CodeBlock.of("return $L.directAdapterForComponent($L).process(envelope);", ADAPTER_CACHE_FIELD, COMPONENT_NAME_VARIABLE);
     }
 
     @Override

@@ -1,5 +1,7 @@
 package uk.gov.justice.services.core.extension;
 
+import static com.jayway.jsonassert.impl.matcher.IsCollectionWithSize.hasSize;
+import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertThat;
@@ -11,15 +13,20 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLLER;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
+import static uk.gov.justice.services.core.annotation.Component.QUERY_VIEW;
 
 import uk.gov.justice.domain.annotation.Event;
+import uk.gov.justice.services.adapter.direct.SynchronousDirectAdapter;
 import uk.gov.justice.services.core.annotation.CustomServiceComponent;
 import uk.gov.justice.services.core.annotation.Direct;
+import uk.gov.justice.services.core.annotation.DirectAdapter;
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Provider;
 import uk.gov.justice.services.core.annotation.Remote;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.annotation.ServiceComponentLocation;
+import uk.gov.justice.services.core.extension.util.EmptyAfterDeploymentValidation;
+import uk.gov.justice.services.core.extension.util.TestBean;
 
 import java.util.HashSet;
 
@@ -41,8 +48,7 @@ public class AnnotationScannerTest {
 
     private static final String TEST_EVENT_NAME = "Test-Event";
 
-    @Mock
-    private AfterDeploymentValidation afterDeploymentValidation;
+    private static final AfterDeploymentValidation NOT_USED_AFTER_DEPLOYMENT_VALIDATION = new EmptyAfterDeploymentValidation();
 
     @Mock
     private ProcessAnnotatedType processAnnotatedType;
@@ -53,9 +59,6 @@ public class AnnotationScannerTest {
     @Mock
     private BeanManager beanManager;
 
-    @Mock
-    private Bean<Object> bean;
-
     private AnnotationScanner annotationScanner;
 
     @Before
@@ -65,52 +68,36 @@ public class AnnotationScannerTest {
 
     @Test
     public void shouldFireCommandApiFoundEventWithCommandApi() throws Exception {
-        doReturn(TestCommandApiHandler.class).when(bean).getBeanClass();
-
-        verifyIfServiceComponentFoundEventFiredWith(bean);
+        verifyIfServiceComponentFoundEventFiredWith(TestBean.of(TestCommandApiHandler.class));
     }
 
     @Test
     public void shouldFireCommandControllerFoundEventWithCommandController() throws Exception {
-        doReturn(TestCommandController.class).when(bean).getBeanClass();
-
-        verifyIfServiceComponentFoundEventFiredWith(bean);
+        verifyIfServiceComponentFoundEventFiredWith(TestBean.of(TestCommandController.class));
     }
 
     @Test
     public void shouldFireCommandHandlerFoundEventWithCommandHandler() throws Exception {
-        doReturn(TestCommandHandler.class).when(bean).getBeanClass();
 
-        verifyIfServiceComponentFoundEventFiredWith(bean);
+        verifyIfServiceComponentFoundEventFiredWith(TestBean.of(TestCommandHandler.class));
     }
 
     @Test
     public void shouldFireRemoteQueryApiHandlerFoundEventWithRemoteQueryApi() throws Exception {
-        doReturn(TestRemoteQueryApiHandler.class).when(bean).getBeanClass();
 
-        verifyIfRemoteServiceComponentFoundEventFiredWith(bean);
+        verifyIfRemoteServiceComponentFoundEventFiredWith(TestBean.of(TestRemoteQueryApiHandler.class));
     }
-
-    @Test
-    public void shouldFireDirectQueryApiHandlerFoundEventWithRemoteQueryApi() throws Exception {
-        doReturn(TestDirectQueryApiHandler.class).when(bean).getBeanClass();
-
-        verifyIfRemoteServiceComponentFoundEventFiredWith(bean);
-    }
-
 
     @Test
     public void shouldFireServiceComponentFoundEventForFrameworkComponentAnnotation() throws Exception {
-        doReturn(TestFrameworkComponent.class).when(bean).getBeanClass();
 
-        verifyIfServiceComponentFoundEventFiredWith(bean);
+        verifyIfServiceComponentFoundEventFiredWith(TestBean.of(TestFrameworkComponent.class));
     }
 
     @Test
     public void shouldFireServiceComponentFoundEventForCustomServiceComponentAnnotation() throws Exception {
-        doReturn(TestCustomServiceComponent.class).when(bean).getBeanClass();
 
-        verifyIfServiceComponentFoundEventFiredWith(bean);
+        verifyIfServiceComponentFoundEventFiredWith(TestBean.of(TestCustomServiceComponent.class));
     }
 
     @Test
@@ -120,35 +107,61 @@ public class AnnotationScannerTest {
 
     @Test
     public void shouldFireProviderFoundEvent() throws Exception {
-        doReturn(TestProvider.class).when(bean).getBeanClass();
         final ArgumentCaptor<ProviderFoundEvent> captor = ArgumentCaptor.forClass(ProviderFoundEvent.class);
-        mockBeanManagerGetBeansWith(bean);
+        final TestBean handler = TestBean.of(TestProvider.class);
+        mockBeanManagerGetBeansWith(handler);
 
-        annotationScanner.afterDeploymentValidation(afterDeploymentValidation, beanManager);
+        annotationScanner.afterDeploymentValidation(NOT_USED_AFTER_DEPLOYMENT_VALIDATION, beanManager);
 
         verify(beanManager).fireEvent(captor.capture());
         assertThat(captor.getValue(), instanceOf(ProviderFoundEvent.class));
-        assertThat(captor.getValue().getBean(), equalTo(bean));
+        assertThat(captor.getValue().getBean(), equalTo(handler));
     }
 
     @Test
     public void shouldNotFireAnyEventWithNoHandler() throws Exception {
-        doReturn(Object.class).when(bean).getBeanClass();
 
-        mockBeanManagerGetBeansWith(bean);
+        mockBeanManagerGetBeansWith(TestBean.of(Object.class));
 
-        annotationScanner.afterDeploymentValidation(afterDeploymentValidation, beanManager);
+        annotationScanner.afterDeploymentValidation(NOT_USED_AFTER_DEPLOYMENT_VALIDATION, beanManager);
 
         verify(beanManager, never()).fireEvent(any());
     }
 
+    @Test
+    public void shouldFireEventForDirectHandlerIfCorrespondingDirectAdapterExists() throws Exception {
+        final ArgumentCaptor<ServiceComponentFoundEvent> captor = ArgumentCaptor.forClass(ServiceComponentFoundEvent.class);
+
+        doReturn(new HashSet<Bean<Object>>(asList(TestBean.of(TestDirectQueryViewAdapter.class), TestBean.of(TestDirectQueryApiHandler.class)))).when(beanManager).getBeans(any(), any());
+        doReturn(new HashSet<Bean<Object>>(asList(TestBean.of(TestDirectQueryViewAdapter.class)))).when(beanManager).getBeans(SynchronousDirectAdapter.class);
+
+        annotationScanner.afterDeploymentValidation(NOT_USED_AFTER_DEPLOYMENT_VALIDATION, beanManager);
+
+        verify(beanManager).fireEvent(captor.capture());
+        assertThat(captor.getValue(), instanceOf(ServiceComponentFoundEvent.class));
+        assertThat(captor.getValue().getHandlerBean().getBeanClass(), equalTo(TestDirectQueryApiHandler.class));
+        assertThat(captor.getValue().getLocation(), equalTo(ServiceComponentLocation.REMOTE));
+    }
+
+    @Test
+    public void shouldNotFireEventForDirectComponentIfCorrespondingDirectAdapterDoesNotExist() throws Exception {
+
+        doReturn(new HashSet<Bean<Object>>(asList(
+                TestBean.of(OtherTestDirectAdapter.class),
+                TestBean.of(TestDirectQueryApiHandler.class))))
+                .when(beanManager).getBeans(any(), any());
+        doReturn(new HashSet<Bean<Object>>(asList(TestBean.of(OtherTestDirectAdapter.class))))
+                .when(beanManager).getBeans(SynchronousDirectAdapter.class);
+
+        annotationScanner.afterDeploymentValidation(NOT_USED_AFTER_DEPLOYMENT_VALIDATION, beanManager);
+
+        verify(beanManager, never()).fireEvent(any());
+    }
+
+
     @SuppressWarnings("serial")
-    private void mockBeanManagerGetBeansWith(Bean<Object> handler) {
-        doReturn(new HashSet<Bean<Object>>() {
-            {
-                add(handler);
-            }
-        }).when(beanManager).getBeans(any(), any());
+    private void mockBeanManagerGetBeansWith(Bean<Object>... handlers) {
+        doReturn(new HashSet<Bean<Object>>(asList(handlers))).when(beanManager).getBeans(any(), any());
     }
 
     private void mockProcessAnnotatedType() {
@@ -162,7 +175,7 @@ public class AnnotationScannerTest {
         final ArgumentCaptor<ServiceComponentFoundEvent> captor = ArgumentCaptor.forClass(ServiceComponentFoundEvent.class);
         mockBeanManagerGetBeansWith(handler);
 
-        annotationScanner.afterDeploymentValidation(afterDeploymentValidation, beanManager);
+        annotationScanner.afterDeploymentValidation(NOT_USED_AFTER_DEPLOYMENT_VALIDATION, beanManager);
 
         verify(beanManager).fireEvent(captor.capture());
         assertThat(captor.getValue(), instanceOf(ServiceComponentFoundEvent.class));
@@ -173,9 +186,10 @@ public class AnnotationScannerTest {
         final ArgumentCaptor<ServiceComponentFoundEvent> captor = ArgumentCaptor.forClass(ServiceComponentFoundEvent.class);
         mockBeanManagerGetBeansWith(handler);
 
-        annotationScanner.afterDeploymentValidation(afterDeploymentValidation, beanManager);
+        annotationScanner.afterDeploymentValidation(NOT_USED_AFTER_DEPLOYMENT_VALIDATION, beanManager);
 
         verify(beanManager).fireEvent(captor.capture());
+        assertThat(captor.getAllValues(), hasSize(1));
         assertThat(captor.getValue(), instanceOf(ServiceComponentFoundEvent.class));
         assertThat(captor.getValue().getLocation(), equalTo(ServiceComponentLocation.REMOTE));
     }
@@ -186,7 +200,7 @@ public class AnnotationScannerTest {
         mockProcessAnnotatedType();
 
         annotationScanner.processAnnotatedType(processAnnotatedType);
-        annotationScanner.afterDeploymentValidation(afterDeploymentValidation, beanManager);
+        annotationScanner.afterDeploymentValidation(NOT_USED_AFTER_DEPLOYMENT_VALIDATION, beanManager);
 
         verify(beanManager).fireEvent(captor.capture());
         assertThat(captor.getValue(), instanceOf(EventFoundEvent.class));
@@ -217,9 +231,29 @@ public class AnnotationScannerTest {
     public static class TestRemoteQueryApiHandler {
     }
 
-    @Direct
+    @Direct(target = QUERY_VIEW)
     @ServiceComponent(QUERY_API)
     public static class TestDirectQueryApiHandler {
+    }
+
+    @DirectAdapter("QUERY_VIEW")
+    public static class TestDirectQueryViewAdapter {
+
+    }
+
+    @Direct(target = "COMPONENT_B")
+    @FrameworkComponent("COMPONENT_A")
+    public static class TestDirectComponentAHandler {
+    }
+
+    @DirectAdapter("COMPONENT_B")
+    public static class TestDirectComponentBAdapter {
+
+    }
+
+    @Remote
+    @FrameworkComponent("COMPONENT_A")
+    public static class TestRemoteComponentAHandler {
     }
 
     @Event(TEST_EVENT_NAME)
@@ -230,4 +264,11 @@ public class AnnotationScannerTest {
     public static class TestProvider {
 
     }
+
+    @DirectAdapter("OTHER")
+    public static class OtherTestDirectAdapter {
+
+    }
+
+
 }

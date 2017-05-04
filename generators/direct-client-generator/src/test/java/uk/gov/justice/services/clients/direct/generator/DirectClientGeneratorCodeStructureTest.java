@@ -19,7 +19,6 @@ import static uk.gov.justice.services.generators.test.utils.config.GeneratorProp
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.methodsOf;
 
-import uk.gov.justice.services.adapter.direct.SynchronousDirectAdapter;
 import uk.gov.justice.services.adapter.direct.SynchronousDirectAdapterCache;
 import uk.gov.justice.services.core.annotation.Direct;
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
@@ -56,6 +55,7 @@ public class DirectClientGeneratorCodeStructureTest extends BaseGeneratorTest {
         final Class<?> generatedClass = compiler.compiledClassOf("uk.somepackage", "DirectQueryApiServiceClient");
         assertThat(generatedClass.getCanonicalName(), is("uk.somepackage.DirectQueryApiServiceClient"));
         assertThat(generatedClass.getAnnotation(Direct.class), not(nullValue()));
+        assertThat(generatedClass.getAnnotation(Direct.class).target(), is("QUERY_API"));
         assertThat(generatedClass.getAnnotation(FrameworkComponent.class), not(nullValue()));
         assertThat(generatedClass.getAnnotation(FrameworkComponent.class).value(), is("SOME_COMPONENT"));
 

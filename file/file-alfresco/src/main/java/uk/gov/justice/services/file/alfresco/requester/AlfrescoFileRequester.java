@@ -29,7 +29,7 @@ public class AlfrescoFileRequester implements FileRequester {
     String alfrescoWorkspacePath;
 
     @Inject
-    @GlobalValue(key = "alfrescoPdfContentWorkspacePath", defaultValue = "/service/api/node/workspace/SpacesStore/")
+    @GlobalValue(key = "alfrescoPdfContentWorkspacePath", defaultValue = "/service/api/requestpdf/workspace/SpacesStore/")
     String alfrescoPdfContentWorkspacePath;
 
     @Inject
@@ -42,7 +42,7 @@ public class AlfrescoFileRequester implements FileRequester {
     @Override
     public Optional<InputStream> request(final String fileId, final String fileMimeType, final String fileName) {
         try {
-            return ofNullable(restClient.getAsInputStream(alfrescoUriOf(fileId, fileName, false),
+            return ofNullable(restClient.getAsInputStream(alfrescoUriOf(fileId, fileName),
                     valueOf(fileMimeType), headersWithUserId(alfrescoReadUser)));
         } catch (final NotFoundException nfe) {
             return empty();
@@ -53,10 +53,11 @@ public class AlfrescoFileRequester implements FileRequester {
     }
 
     @Override
-    public Optional<InputStream> request(final String fileId, final String fileMimeType, final String fileName, final boolean transformPdf) {
+    public Optional<InputStream> requestPdf(final String fileId, final String fileName) {
+        final String mimeType = "application/pdf";
         try {
-            return ofNullable(restClient.getAsInputStream(alfrescoUriOf(fileId, fileName, transformPdf),
-                    valueOf(fileMimeType), headersWithUserId(alfrescoReadUser)));
+            return ofNullable(restClient.getAsInputStream(alfrescoPdfUriOf(fileId, fileName),
+                    valueOf(mimeType), headersWithUserId(alfrescoReadUser)));
         } catch (final NotFoundException nfe) {
             return empty();
         } catch (final ProcessingException | InternalServerErrorException ex) {
@@ -65,11 +66,13 @@ public class AlfrescoFileRequester implements FileRequester {
         }
     }
 
-    private String alfrescoUriOf(final String fileId, final String fileName, final boolean transformPdf) {
-        if(transformPdf) {
-            return format("%s%s?transformpdf=%s", alfrescoPdfContentWorkspacePath, fileId, transformPdf);
-        }
+    private String alfrescoUriOf(final String fileId, final String fileName) {
         return format("%s%s/content/%s", alfrescoWorkspacePath, fileId, fileName);
+    }
+
+    private String alfrescoPdfUriOf(final String fileId, final String fileName) {
+        return format("%s%s/%s", alfrescoPdfContentWorkspacePath, fileId, fileName);
+
     }
 
 }

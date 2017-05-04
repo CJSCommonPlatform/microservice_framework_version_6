@@ -22,14 +22,12 @@ import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUti
 
 import uk.gov.justice.services.file.alfresco.common.AlfrescoRestClient;
 import uk.gov.justice.services.file.api.FileOperationException;
-import uk.gov.justice.services.test.utils.core.rest.RestClient;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
 
 import javax.ws.rs.ProcessingException;
-import javax.ws.rs.core.MultivaluedMap;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.apache.commons.io.IOUtils;
@@ -51,9 +49,6 @@ public class AlfrescoFileRequesterIT {
 
     private static AlfrescoFileRequester fileRequester;
 
-    private RestClient restClient;
-
-    private MultivaluedMap<String, Object> headers;
 
     @Rule
     public WireMockRule wireMock = new WireMockRule(PORT);

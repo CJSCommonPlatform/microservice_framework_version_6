@@ -29,6 +29,10 @@ public class AlfrescoFileRequester implements FileRequester {
     String alfrescoWorkspacePath;
 
     @Inject
+    @GlobalValue(key = "alfrescoPdfContentWorkspacePath", defaultValue = "/service/api/requestpdf/workspace/SpacesStore/")
+    String alfrescoPdfContentWorkspacePath;
+
+    @Inject
     @GlobalValue(key = "alfrescoReadUser")
     String alfrescoReadUser;
 
@@ -48,8 +52,27 @@ public class AlfrescoFileRequester implements FileRequester {
         }
     }
 
+    @Override
+    public Optional<InputStream> requestPdf(final String fileId, final String fileName) {
+        final String mimeType = "application/pdf";
+        try {
+            return ofNullable(restClient.getAsInputStream(alfrescoPdfUriOf(fileId, fileName),
+                    valueOf(mimeType), headersWithUserId(alfrescoReadUser)));
+        } catch (final NotFoundException nfe) {
+            return empty();
+        } catch (final ProcessingException | InternalServerErrorException ex) {
+            throw new FileOperationException(format("Error fetching %s from Alfresco with fileId = %s",
+                    fileName, fileId), ex);
+        }
+    }
+
     private String alfrescoUriOf(final String fileId, final String fileName) {
         return format("%s%s/content/%s", alfrescoWorkspacePath, fileId, fileName);
+    }
+
+    private String alfrescoPdfUriOf(final String fileId, final String fileName) {
+        return format("%s%s/%s", alfrescoPdfContentWorkspacePath, fileId, fileName);
+
     }
 
 }

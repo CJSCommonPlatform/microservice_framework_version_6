@@ -5,6 +5,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Added
+- Support for PDF generation in Alfresco interface
+
 ### [1.5.2] 2017-04-07
 
 ### Fixed

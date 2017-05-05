@@ -5,16 +5,18 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### [1.6.0] - 2017-05-05
+
 ### Added
 - Support for PDF generation in Alfresco interface
 
-### [1.5.2] 2017-04-07
+### [1.5.2] - 2017-04-07
 
 ### Fixed
 - Service names with hyphens were also breaking other adapters and clients
 - Enveloper was keeping stream metadata from events when enveloping commands
 
-## [1.5.1] 2017-04-05
+## [1.5.1] - 2017-04-05
 
 ### Fixed
 - Event listeners for services with a hyphen in the name generated invalid class names
@@ -581,7 +583,8 @@ turned off by default
 
 - Initial release with basic dispatcher, handler and adapter generation
 
-[Unreleased]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.5.2...HEAD
+[Unreleased]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.6.0...HEAD
+[1.6.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.5.0...release-1.6.0
 [1.5.2]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.5.1...release-1.5.2
 [1.5.1]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.5.0...release-1.5.1
 [1.5.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.4.0...release-1.5.0

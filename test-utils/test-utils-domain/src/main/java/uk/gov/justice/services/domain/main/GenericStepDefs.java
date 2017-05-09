@@ -1,26 +1,17 @@
 package uk.gov.justice.services.domain.main;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import cucumber.api.java.en.Given;
-import cucumber.api.java.en.Then;
-import cucumber.api.java.en.When;
-import org.apache.commons.lang3.StringUtils;
-import org.reflections.Reflections;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 
-import javax.inject.Inject;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -31,8 +22,20 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import javax.inject.Inject;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.google.common.io.Resources;
+import cucumber.api.java.en.Given;
+import cucumber.api.java.en.Then;
+import cucumber.api.java.en.When;
+import org.apache.commons.lang3.StringUtils;
+import org.reflections.Reflections;
 
 public class GenericStepDefs {
     private static final String METADATA = "_metadata";
@@ -43,6 +46,26 @@ public class GenericStepDefs {
     private Aggregate object;
     @Inject
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
+
+    private static Class classWithFullyQualifiedClassName(String className) {
+        Class<?> clazz = null;
+        try {
+            clazz = Class.forName(className);
+        } catch (ClassNotFoundException e) {
+            final Package[] packages = Package.getPackages();
+            for (final Package p : packages) {
+                final String pack = p.getName();
+                final String tentative = pack + "." + StringUtils.capitalize(className);
+                try {
+                    clazz = Class.forName(tentative);
+                } catch (final ClassNotFoundException exception) {
+                    continue;
+                }
+                break;
+            }
+        }
+        return clazz;
+    }
 
     @Given("no previous events")
     public void no_previous_events() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
@@ -106,7 +129,12 @@ public class GenericStepDefs {
     }
 
     private String json(String file) throws IOException {
-        return new String(Files.readAllBytes(Paths.get("src/test/resources/json/" + file + ".json")));
+        try {
+            return Resources.toString(Resources.getResource("json/" + file + ".json"), Charset.defaultCharset());
+        } catch (Exception e) {
+            fail("Error consuming file from location " + file);
+        }
+        return null;
     }
 
     private Object[] methodArgs(List valuesList, List<String> expectedEventNames, ObjectMapper mapper) throws Exception {
@@ -122,26 +150,6 @@ public class GenericStepDefs {
             }
         }
         return objects;
-    }
-
-    private static Class classWithFullyQualifiedClassName(String className) {
-        Class<?> clazz = null;
-        try {
-            clazz = Class.forName(className);
-        } catch (ClassNotFoundException e) {
-            final Package[] packages = Package.getPackages();
-            for (final Package p : packages) {
-                final String pack = p.getName();
-                final String tentative = pack + "." + StringUtils.capitalize(className);
-                try {
-                    clazz = Class.forName(tentative);
-                } catch (final ClassNotFoundException exception) {
-                    continue;
-                }
-                break;
-            }
-        }
-        return clazz;
     }
 
     private void removeMetaDataNode(JsonNode node) {

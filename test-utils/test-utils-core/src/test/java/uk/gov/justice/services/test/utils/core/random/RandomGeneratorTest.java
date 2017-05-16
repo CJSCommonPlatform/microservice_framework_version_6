@@ -25,7 +25,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.str
 
 import uk.gov.justice.services.common.util.Clock;
 import uk.gov.justice.services.common.util.UtcClock;
-import uk.gov.justice.services.test.utils.core.helper.StoppedClock;
+import uk.gov.justice.services.test.utils.common.helper.StoppedClock;
 
 import java.math.BigDecimal;
 import java.net.URI;

@@ -15,7 +15,6 @@ import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.client.Entity.entity;
 import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM_TYPE;
 import static org.apache.commons.io.IOUtils.contentEquals;
-import static org.apache.http.entity.ContentType.APPLICATION_JSON;
 import static org.apache.http.entity.ContentType.APPLICATION_OCTET_STREAM;
 import static org.apache.http.entity.mime.HttpMultipartMode.BROWSER_COMPATIBLE;
 import static org.exparity.hamcrest.date.ZonedDateTimeMatchers.within;
@@ -38,7 +37,7 @@ import uk.gov.justice.services.event.buffer.core.repository.streamstatus.StreamS
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLog;
 import uk.gov.justice.services.example.cakeshop.domain.aggregate.Recipe;
 import uk.gov.justice.services.example.cakeshop.it.util.ApiResponse;
-import uk.gov.justice.services.example.cakeshop.it.util.StandaloneEventLogJdbcRepository;
+import uk.gov.justice.services.test.utils.core.eventsource.TestEventLogRepository;
 import uk.gov.justice.services.example.cakeshop.it.util.StandaloneSnapshotJdbcRepository;
 import uk.gov.justice.services.example.cakeshop.it.util.StandaloneStreamStatusJdbcRepository;
 import uk.gov.justice.services.example.cakeshop.it.util.TestProperties;
@@ -65,7 +64,6 @@ import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
-import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.sql.DataSource;
 import javax.ws.rs.client.Client;
@@ -130,7 +128,7 @@ public class CakeShopIT {
 
     private static final TestProperties TEST_PROPERTIES = new TestProperties("test.properties");
 
-    private static StandaloneEventLogJdbcRepository EVENT_LOG_REPOSITORY;
+    private static TestEventLogRepository EVENT_LOG_REPOSITORY;
     private static StandaloneStreamStatusJdbcRepository STREAM_STATUS_REPOSITORY;
     private static StandaloneSnapshotJdbcRepository SNAPSHOT_REPOSITORY;
     private static ActiveMQConnectionFactory JMS_CONNECTION_FACTORY;
@@ -143,7 +141,7 @@ public class CakeShopIT {
     @BeforeClass
     public static void beforeClass() throws Exception {
         final DataSource eventStoreDataSource = initEventStoreDb();
-        EVENT_LOG_REPOSITORY = new StandaloneEventLogJdbcRepository(eventStoreDataSource);
+        EVENT_LOG_REPOSITORY = new TestEventLogRepository(eventStoreDataSource);
         JMS_CONNECTION_FACTORY = new ActiveMQConnectionFactory(JMS_BROKER_URL);
 
         final DataSource viewStoreDatasource = initViewStoreDb();

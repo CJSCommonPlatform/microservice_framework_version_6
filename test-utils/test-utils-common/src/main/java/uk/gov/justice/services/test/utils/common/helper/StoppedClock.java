@@ -1,4 +1,4 @@
-package uk.gov.justice.services.test.utils.core.helper;
+package uk.gov.justice.services.test.utils.common.helper;
 
 import uk.gov.justice.services.common.util.Clock;
 

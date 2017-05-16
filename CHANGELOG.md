@@ -4,6 +4,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+- Add TestEventLogRepository
 
 ### Changed
 - Interceptor chain now adds the component name to the context so it can be used by the access control interceptor or anything else that needs it

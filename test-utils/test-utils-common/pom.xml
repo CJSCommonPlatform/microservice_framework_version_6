@@ -11,6 +11,11 @@
 
     <artifactId>test-utils-common</artifactId>
     <dependencies>
+        <!-- Leave glassfish at top as the preferred Json provider (even though its for test) -->
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.json</artifactId>
+        </dependency>
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
             <artifactId>messaging-core</artifactId>
@@ -27,6 +32,10 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>json-path-assert</artifactId>
         </dependency>
     </dependencies>
 

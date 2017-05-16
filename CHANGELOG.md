@@ -4,6 +4,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+- Add TestEventLogRepository
 
 ### [1.6.0] - 2017-05-05
 

@@ -14,15 +14,11 @@ import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuil
 import uk.gov.justice.domain.aggregate.TestAggregate;
 import uk.gov.justice.services.eventsourcing.source.core.snapshot.SnapshotService;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.Metadata;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.hamcrest.Matchers;
-import org.hibernate.metamodel.MetadataBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

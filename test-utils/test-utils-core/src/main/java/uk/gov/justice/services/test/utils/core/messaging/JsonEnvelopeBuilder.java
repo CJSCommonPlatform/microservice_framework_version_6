@@ -19,7 +19,7 @@ import javax.json.JsonValue;
 
 /**
  * Implementation of the {@link JsonEnvelope} specifically for testing purposes that include useful
- * builder options. For production code the {@link uk.gov.justice.services.core.enveloper.Enveloper}
+ * builder options. For production code the Enveloper
  * should be used to create envelopes.
  */
 public class JsonEnvelopeBuilder {

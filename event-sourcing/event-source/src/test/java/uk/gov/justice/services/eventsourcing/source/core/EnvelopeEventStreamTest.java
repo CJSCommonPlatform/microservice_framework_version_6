@@ -14,15 +14,11 @@ import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuil
 
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjectMetadata;
-import uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.jayway.jsonassert.impl.matcher.IsCollectionWithSize;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

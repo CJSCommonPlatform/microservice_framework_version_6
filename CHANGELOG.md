@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [1.7.0] - 2017-05-05
 - Add TestEventLogRepository
 
 ### [1.6.0] - 2017-05-05

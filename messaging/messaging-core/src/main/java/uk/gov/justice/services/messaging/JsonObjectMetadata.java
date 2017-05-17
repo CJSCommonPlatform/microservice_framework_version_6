@@ -59,7 +59,6 @@ public class JsonObjectMetadata implements Metadata {
      * @return the {@link JsonObjectMetadata}
      */
     public static Metadata metadataFrom(final JsonObject jsonObject) {
-
         JsonString id = getJsonString(jsonObject, ID)
                 .orElseThrow(() -> new IllegalArgumentException("Missing id field"));
         UUID.fromString(id.getString());
@@ -293,6 +292,11 @@ public class JsonObjectMetadata implements Metadata {
          */
         public Builder withVersion(final long version) {
             json.add(BigDecimal.valueOf(version), VERSION_PATH);
+            return this;
+        }
+
+        public Builder withAdditionalField(final String name, final String value) {
+            json.add(value, name);
             return this;
         }
 

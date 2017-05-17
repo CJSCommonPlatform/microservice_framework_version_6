@@ -85,6 +85,28 @@ public class JsonObjectMetadataBuilderTest {
     }
 
     @Test
+    public void shouldBuildMetadataWithStreamIdAndAnAdditionalField() {
+        final UUID streamId = randomUUID();
+        final Metadata metadata = metadataWithDefaults().withStreamId(streamId)
+                .withAdditionalField("MyField", "MyValue").build();
+
+        assertThat(metadata.streamId().get(), is(streamId));
+        assertThat(metadata.asJsonObject().getString("MyField"), is("MyValue"));
+    }
+
+    @Test
+    public void shouldBuildMetadataWithStreamIdAndMultipleAdditionalFields() {
+        final UUID streamId = randomUUID();
+        final Metadata metadata = metadataWithDefaults().withStreamId(streamId)
+                .withAdditionalField("MyField", "MyValue")
+                .withAdditionalField("MySecondField", "MySecondValue").build();
+
+        assertThat(metadata.streamId().get(), is(streamId));
+        assertThat(metadata.asJsonObject().getString("MyField"), is("MyValue"));
+        assertThat(metadata.asJsonObject().getString("MySecondField"), is("MySecondValue"));
+    }
+
+    @Test
     public void shouldBuildFromMetadataAndOverwriteFields() throws Exception {
         final UUID id = randomUUID();
         final UUID streamId = randomUUID();

@@ -2,6 +2,7 @@ package uk.gov.justice.services.test.utils.core.messaging;
 
 import static java.lang.String.format;
 import static uk.gov.justice.services.test.utils.common.host.TestHostProvider.getHost;
+import static uk.gov.justice.services.test.utils.common.host.TestHostProvider.getArtemisHost;
 
 public class QueueUriProvider {
 
@@ -11,7 +12,15 @@ public class QueueUriProvider {
         return format(BASE_URI_PATTERN, getHost());
     }
 
+    public String getArtemisQueueUri() {
+        return format(BASE_URI_PATTERN, getArtemisHost());
+    }
+
     public static String queueUri() {
         return new QueueUriProvider().getQueueUri();
+    }
+
+    public static String artemisQueueUri(){
+        return new QueueUriProvider().getArtemisQueueUri();
     }
 }

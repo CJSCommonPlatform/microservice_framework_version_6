@@ -27,7 +27,7 @@ public class EventLogJdbcRepository extends AbstractJdbcRepository<EventLog> {
 
     //TODO @mrich 2016-09-29 - Re-enable the date_created field once liquibase scripts are configured
     @Inject
-    Logger logger;
+    protected Logger logger;
 
     @Inject
     EventLogInsertionStrategy eventLogInsertionStrategy;

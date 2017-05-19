@@ -10,7 +10,6 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.time.LocalDate;
 import java.time.Period;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
@@ -71,6 +70,9 @@ public class RandomGenerator {
     }
 
     /**
+     * @param max   the max
+     * @param scale the scale
+     * @return the BigDecimalGenerator
      * @deprecated Use {@link #bigDecimal(Integer min, Integer max, Integer scale)} instead.
      */
     @Deprecated
@@ -79,6 +81,8 @@ public class RandomGenerator {
     }
 
     /**
+     * @param max the max
+     * @return the BigDecimalGenerator
      * @deprecated Use {@link #bigDecimal(Integer min, Integer max, Integer scale)} instead.
      */
     @Deprecated
@@ -87,6 +91,9 @@ public class RandomGenerator {
     }
 
     /**
+     * @param max           the max
+     * @param decimalPlaces the decimal places
+     * @return the DoubleGenerator
      * @deprecated Use {@link #doubleValue(Long min, Long max, Integer scale)} instead.
      */
     @Deprecated

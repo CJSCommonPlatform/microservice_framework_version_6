@@ -17,6 +17,8 @@ public class JsonEnvelopePayloadMatcher extends TypeSafeDiagnosingMatcher<JsonVa
 
     /**
      * Use {@link JsonEnvelopePayloadMatcher#payload} or {@link JsonEnvelopePayloadMatcher#payloadIsJson}
+     *
+     * @return the payload matcher
      */
     @Deprecated
     public static JsonEnvelopePayloadMatcher payLoad() {

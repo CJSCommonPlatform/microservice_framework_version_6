@@ -45,6 +45,7 @@ public class EventStreamManager {
     /**
      * Get the stream of events.
      *
+     * @param id the UUID of the stream
      * @return the stream of events
      */
     public Stream<JsonEnvelope> read(final UUID id) {
@@ -54,6 +55,8 @@ public class EventStreamManager {
     /**
      * Get the stream of events from the given version.
      *
+     * @param id      the UUID of the stream
+     * @param version the version of the stream
      * @return the stream of events
      */
     public Stream<JsonEnvelope> readFrom(final UUID id, final long version) {
@@ -63,6 +66,7 @@ public class EventStreamManager {
     /**
      * Store a stream of events.
      *
+     * @param id     the id of the stream
      * @param events the stream of events to store
      * @return the current stream version
      * @throws EventStreamException if an event could not be appended
@@ -114,8 +118,10 @@ public class EventStreamManager {
     /**
      * Store a stream of events after the given version.
      *
+     * @param id      the id of the stream
      * @param events  the stream of events to store
      * @param version the version to append from
+     * @return the current version
      * @throws EventStreamException if an event could not be appended
      */
     @Transactional(dontRollbackOn = OptimisticLockingRetryException.class)
@@ -129,6 +135,7 @@ public class EventStreamManager {
     /**
      * Get the current (current maximum) sequence id (version number) for a stream
      *
+     * @param id the id of the stream
      * @return the latest sequence id for the provided steam. 0 when stream is empty.
      */
     public long getCurrentVersion(final UUID id) {

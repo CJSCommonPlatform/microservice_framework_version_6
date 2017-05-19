@@ -15,18 +15,16 @@ import javax.jms.Session;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
 
 /**
- * 
- * Send messages to a JMS topic sequentially <br>
+ * Send messages to a JMS topic sequentially
  * or as a parallel stream
- * 
- * Example: <br/>
- * 
- * <code>
  *
- *  TopicSender.of(URI, "public.event").send("JMS Envelope");
- *   
- * </code>
+ * Example:
  *
+ * {@code
+ *
+ * TopicSender.of(URI, "public.event").send("JMS Envelope");
+ *
+ * }
  */
 public class TopicSender {
 
@@ -42,8 +40,8 @@ public class TopicSender {
 
     /**
      * Initialise the sender
-     * 
-     * @param uri of the JMS server
+     *
+     * @param uri   of the JMS server
      * @param topic to send messages to
      */
     private TopicSender(final String uri, final String topic) {
@@ -53,8 +51,8 @@ public class TopicSender {
 
     /**
      * Create an instance of the sender
-     * 
-     * @param uri of the JMS server
+     *
+     * @param uri   of the JMS server
      * @param topic to send messages to
      * @return TopicSender
      */
@@ -65,7 +63,7 @@ public class TopicSender {
 
     /**
      * Send a single message to the configured topic
-     * 
+     *
      * @param msg to send
      * @throws JMSException if unsuccessful
      */
@@ -83,7 +81,7 @@ public class TopicSender {
      * Send a stream of messages to the configured topic <br>
      * <br>
      * Even one of the msgs failing throws a RuntimeException
-     * 
+     *
      * @param msgs to send
      * @throws JMSException if unsuccessful
      */
@@ -103,7 +101,7 @@ public class TopicSender {
      * Send a stream of messages in parallel to the configured topic <br>
      * <br>
      * Even one of the msgs failing throws a RuntimeException
-     * 
+     *
      * @param msgs to send
      * @throws JMSException if unsuccessful
      */
@@ -121,7 +119,7 @@ public class TopicSender {
 
     /**
      * Execute the passed in operation injecting a producer and session
-     * 
+     *
      * @param op to execute
      * @throws JMSException if unsuccessful
      */

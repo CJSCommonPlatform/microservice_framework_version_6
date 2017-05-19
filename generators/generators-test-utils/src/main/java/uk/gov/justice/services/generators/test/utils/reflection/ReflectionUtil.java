@@ -8,7 +8,6 @@ import static org.junit.Assert.assertTrue;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +16,7 @@ public final class ReflectionUtil {
     }
 
     /**
+     * @param clazz - class type
      * @return - list of methods of the clazz
      */
     public static List<Method> methodsOf(final Class<?> clazz) {
@@ -31,6 +31,7 @@ public final class ReflectionUtil {
      * @param object     - object to modify
      * @param fieldName  - name of the field belonging to the object
      * @param fieldValue - value of the field to be set
+     * @throws IllegalAccessException if unable to access field
      */
     public static void setField(final Object object, final String fieldName, final Object fieldValue)
             throws IllegalAccessException {
@@ -42,6 +43,8 @@ public final class ReflectionUtil {
     /**
      * Searches for a field in the given class by reflection
      *
+     * @param clazz     - class type
+     * @param fieldName - name of field in class
      * @return - field belonging to the given clazz with the given fieldName
      */
     public static Field fieldOf(final Class<?> clazz, final String fieldName) {
@@ -54,6 +57,7 @@ public final class ReflectionUtil {
     /**
      * returns first method of the given class
      *
+     * @param clazz - class type
      * @return - first method of the given clazz
      */
     public static Method firstMethodOf(final Class<?> clazz) {
@@ -64,6 +68,8 @@ public final class ReflectionUtil {
     /**
      * returns method of the given class with the given name
      *
+     * @param clazz      - class type
+     * @param methodName - name of method in class
      * @return -  method of the given class with the given name
      */
     public static Method methodOf(final Class<?> clazz, final String methodName) {

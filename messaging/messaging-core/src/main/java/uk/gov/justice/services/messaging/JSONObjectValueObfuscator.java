@@ -21,6 +21,7 @@ public class JSONObjectValueObfuscator {
     /**
      * Obfuscates values in the passed json
      *
+     * @param json the JSONObject to obfuscate
      * @return new json with obfuscatedObject values
      */
     public static JSONObject obfuscated(final JSONObject json) {

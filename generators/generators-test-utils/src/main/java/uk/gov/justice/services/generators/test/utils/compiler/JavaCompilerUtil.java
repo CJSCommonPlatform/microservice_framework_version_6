@@ -8,7 +8,6 @@ import static org.reflections.ReflectionUtils.forNames;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
@@ -50,10 +49,11 @@ public class JavaCompilerUtil {
     /**
      * Compiles and loads a single class
      *
+     * @param basePackage - the base package of the class to be compiled
+     * @return the Class
      * @throws IllegalStateException - if more or less than one classes found
      */
-    public Class<?> compiledClassOf(final String basePackage)
-            throws MalformedURLException {
+    public Class<?> compiledClassOf(final String basePackage) {
         final Set<Class<?>> resourceClasses = compiledClassesOf(basePackage);
         if (resourceClasses.size() != 1) {
             throw new IllegalStateException(format("Expected to find single class but found {0}", resourceClasses));
@@ -64,29 +64,28 @@ public class JavaCompilerUtil {
     /**
      * Compiles then finds a single class.
      *
-     * @param basePackage the base package
+     * @param basePackage              the base package
+     * @param additionalFilterElements the additional filter elements
      * @return the class
      * @throws IllegalStateException - if more or less than one classes found
      */
-    public Class<?> compiledClassOf(final String basePackage, final String... additionalFilterElements)
-            throws MalformedURLException {
+    public Class<?> compiledClassOf(final String basePackage, final String... additionalFilterElements) {
         return compiledClassOf(basePackage, c -> !c.isInterface(), additionalFilterElements);
     }
 
     /**
      * Compiles then finds a single interface class.
      *
-     * @param basePackage the base package
+     * @param basePackage              the base package
+     * @param additionalFilterElements the additional filter elements
      * @return the class
      * @throws IllegalStateException - if more or less than one classes found
      */
-    public Class<?> compiledInterfaceClassOf(final String basePackage, final String... additionalFilterElements)
-            throws MalformedURLException {
+    public Class<?> compiledInterfaceClassOf(final String basePackage, final String... additionalFilterElements) {
         return compiledClassOf(basePackage, Class::isInterface, additionalFilterElements);
     }
 
-    public Class<?> classOf(final Set<Class<?>> classes, final String basePackage, final String... additionalFilterElements)
-            throws MalformedURLException {
+    public Class<?> classOf(final Set<Class<?>> classes, final String basePackage, final String... additionalFilterElements) {
         final Set<Class<?>> resourceClasses = classesMatching(classes,
                 c -> !c.isInterface() && c.getName().equals(join(".", basePackage, join(".", additionalFilterElements))));
         if (resourceClasses.size() != 1) {
@@ -98,10 +97,11 @@ public class JavaCompilerUtil {
     /**
      * Compiles and loads a single interface
      *
+     * @param basePackageName - the base package of the interface to be compiled
+     * @return the Class
      * @throws IllegalStateException - if more or less than one interfaces found
      */
-    public Class<?> compiledInterfaceOf(final String basePackageName)
-            throws MalformedURLException {
+    public Class<?> compiledInterfaceOf(final String basePackageName) {
         final Set<Class<?>> resourceInterfaces = compiledInterfacesOf(basePackageName);
         if (resourceInterfaces.size() != 1) {
             throw new IllegalStateException(
@@ -113,24 +113,27 @@ public class JavaCompilerUtil {
 
     /**
      * compiles and loads specified classes
+     *
+     * @param basePackage - the base package of the classes to be compiled
+     * @return the set of classes
      */
-    public Set<Class<?>> compiledClassesOf(final String basePackage)
-            throws MalformedURLException {
+    public Set<Class<?>> compiledClassesOf(final String basePackage) {
         return compiledClassesAndInterfaces(c -> !c.isInterface(), basePackage);
     }
 
     /**
      * compiles and loads specified interfaces
+     *
+     * @param basePackage - the base package of the interfaces to be compiled
+     * @return the set of classes
      */
-    public Set<Class<?>> compiledInterfacesOf(final String basePackage)
-            throws MalformedURLException {
+    public Set<Class<?>> compiledInterfacesOf(final String basePackage) {
         return compiledClassesAndInterfaces(Class::isInterface, basePackage);
     }
 
     private Class<?> compiledClassOf(final String basePackage,
                                      final Predicate<Class<?>> predicate,
-                                     final String... additionalFilterElements)
-            throws MalformedURLException {
+                                     final String... additionalFilterElements) {
 
         final Set<Class<?>> resourceClasses = compiledClassesAndInterfaces(
                 c -> predicate.test(c) && c.getName().equals(join(".", basePackage, join(".", additionalFilterElements))), basePackage);
@@ -141,23 +144,21 @@ public class JavaCompilerUtil {
     }
 
     private Set<Class<?>> compiledClassesAndInterfaces(final Predicate<? super Class<?>> predicate,
-                                                       final String basePackage)
-            throws MalformedURLException {
+                                                       final String basePackage) {
         return classesMatching(compile(basePackage), predicate);
     }
 
     private Set<Class<?>> classesMatching(final Set<Class<?>> classes,
-                                          final Predicate<? super Class<?>> predicate)
-            throws MalformedURLException {
+                                          final Predicate<? super Class<?>> predicate) {
         return classes.stream().filter(predicate).collect(toSet());
     }
 
-    private Set<Class<?>> compile(final String basePackage) throws MalformedURLException {
+    private Set<Class<?>> compile(final String basePackage) {
         compile();
         return loadClasses(basePackage);
     }
 
-    private Set<Class<?>> loadClasses(final String basePackage) throws MalformedURLException {
+    private Set<Class<?>> loadClasses(final String basePackage) {
         try (URLClassLoader resourceClassLoader = new URLClassLoader(new URL[]{compilationOutputDir.toURI().toURL()})) {
             final Reflections reflections = new Reflections(basePackage, new SubTypesScanner(false), resourceClassLoader);
             return newHashSet(forNames(getClassNames(reflections), resourceClassLoader));

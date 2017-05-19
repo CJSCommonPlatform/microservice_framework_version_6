@@ -47,7 +47,8 @@ public class PollingRestClient {
      *
      * To Use:
      *
-     * <pre><blockquote>
+     * <pre>
+     *  {@code
      *
      *      final String url = "http://localhost:8080/my-context/my/rest/endpoint";
      *      final String mediaType = "application/vnd.notification.query.events+json";
@@ -58,7 +59,8 @@ public class PollingRestClient {
      *
      *      final String json = new PollingRestClient().pollUntilExpectedResponse(pollingRequestParams);
      *
-     * </blockquote></pre>
+     *  }
+     * </pre>
      *
      * The call is configured using <code>PollingRequestParams</code>. This object is most easily
      * created using a <code>PollingRequestParamsBuilder</code> which takes a url and media type and
@@ -72,14 +74,16 @@ public class PollingRestClient {
      *
      * This is best added using the PollingRequestParamsBuilder:
      *
-     * <pre><blockquote>
+     * <pre>
+     *  {@code
      *
      *     final PollingRequestParams pollingRequestParams =
      *          new PollingRequestParamsBuilder(url, mediaType)
      *              .withResponseBodyCondition(json -> json.equals("my-json"))
      *          .build();
      *
-     * </blockquote></pre>
+     *  }
+     * </pre>
      *
      * Expeced status:
      *
@@ -90,17 +94,19 @@ public class PollingRestClient {
      *
      * This is best added using the PollingRequestParamsBuilder:
      *
-     * <pre><blockquote>
+     * <pre>
+     *  {@code
      *
      *     final PollingRequestParams pollingRequestParams =
      *          new PollingRequestParamsBuilder(url, mediaType)
      *              .withExpectedResponseStatus(200)
      *          .build();
      *
-     * </blockquote></pre>
+     *  }
+     * </pre>
      *
      * @param pollingRequestParams all parameters for polling the end point. Best created using the
-     *                             @See PollingRequestParamsBuilder
+     *                             {@link PollingRequestParamsBuilder}
      * @return the response body as a String
      * @throws AssertionError if the request validation fails or no response is found after the
      * specified number of retires

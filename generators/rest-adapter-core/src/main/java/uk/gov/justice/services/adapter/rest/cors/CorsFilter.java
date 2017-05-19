@@ -43,6 +43,8 @@ public class CorsFilter implements ContainerRequestFilter, ContainerResponseFilt
 
     /**
      * Put "*" if you want to accept all origins
+     *
+     * @return set of allowed origins
      */
     public Set<String> getAllowedOrigins() {
         return allowedOrigins;
@@ -50,6 +52,8 @@ public class CorsFilter implements ContainerRequestFilter, ContainerResponseFilt
 
     /**
      * Defaults to true
+     *
+     * @return state of allowCredentials
      */
     public boolean isAllowCredentials() {
         return allowCredentials;
@@ -61,6 +65,8 @@ public class CorsFilter implements ContainerRequestFilter, ContainerResponseFilt
 
     /**
      * Will allow all by default
+     *
+     * @return allowed methods
      */
     public String getAllowedMethods() {
         return allowedMethods;
@@ -68,6 +74,8 @@ public class CorsFilter implements ContainerRequestFilter, ContainerResponseFilt
 
     /**
      * Will allow all by default comma delimited string for Access-Control-Allow-Methods
+     *
+     * @param allowedMethods comma delimited string of allowed methods
      */
     public void setAllowedMethods(final String allowedMethods) {
         this.allowedMethods = allowedMethods;
@@ -79,6 +87,8 @@ public class CorsFilter implements ContainerRequestFilter, ContainerResponseFilt
 
     /**
      * Will allow all by default comma delimited string for Access-Control-Allow-Headers
+     *
+     * @param allowedHeaders comma delimited string of allow headers
      */
     public void setAllowedHeaders(final String allowedHeaders) {
         this.allowedHeaders = allowedHeaders;
@@ -98,6 +108,8 @@ public class CorsFilter implements ContainerRequestFilter, ContainerResponseFilt
 
     /**
      * comma delimited list
+     *
+     * @param exposedHeaders - comma delimited list of exposed headers
      */
     public void setExposedHeaders(final String exposedHeaders) {
         this.exposedHeaders = exposedHeaders;

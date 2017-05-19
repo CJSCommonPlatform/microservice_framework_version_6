@@ -37,6 +37,9 @@ public class RecipeService {
     /**
      * Get recipes by criteria.
      *
+     * @param pageSize   page size to return
+     * @param recipeName recipe name to search for
+     * @param glutenFree optional gluten free
      * @return List of recipes encapsulated in an {@link RecipesView}.   Never returns null.
      */
     public RecipesView getRecipes(final int pageSize, final Optional<String> recipeName, Optional<Boolean> glutenFree) {

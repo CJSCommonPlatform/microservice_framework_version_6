@@ -18,8 +18,8 @@ import org.hamcrest.TypeSafeMatcher;
  * that should hold for a range of data point
  *
  * @param <T> Type of the Property and must have {@link  Generator} implementation for type T Usage:
- *            typeCheck(RandomGenerator.STRING, s -> s.length() == s.toCharArray().length).withPreCondition(s
- *            -> s.length() < 5).verify(times(5));
+ *            {@code typeCheck(RandomGenerator.STRING, s -> s.length() == s.toCharArray().length)
+ *            .withPreCondition(s -> s.length() < 5).verify(times(5)); }
  */
 public class TypeCheck<T> {
 

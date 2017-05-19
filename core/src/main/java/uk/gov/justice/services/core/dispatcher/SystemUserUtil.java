@@ -20,7 +20,7 @@ public class SystemUserUtil {
     /**
      * Replaces userId of the envelope with system userId
      *
-     * @param envelope
+     * @param envelope the JsonEnvelope with userId to be replaced
      * @return envelope with system user id
      */
     public JsonEnvelope asEnvelopeWithSystemUserId(final JsonEnvelope envelope) {

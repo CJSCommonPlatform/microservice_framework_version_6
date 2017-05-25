@@ -16,7 +16,7 @@ public class JmsSessionFactory {
         connectionFactory = new ActiveMQConnectionFactory(queueUri);
 
         try {
-            connection = connectionFactory.createQueueConnection();
+            connection = connectionFactory.createConnection();
             connection.start();
             session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             return session;

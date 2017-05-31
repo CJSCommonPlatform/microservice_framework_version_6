@@ -5,6 +5,8 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [2.0.0-rc1]
+
 ### Changed
 - Upgrade to use framework parent POM [1.3.0](https://github.com/CJSCommonPlatform/maven-framework-parent-pom/releases/tag/release-1.3.0)
 
@@ -587,7 +589,8 @@ turned off by default
 
 - Initial release with basic dispatcher, handler and adapter generation
 
-[Unreleased]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.5.0...HEAD
+[Unreleased]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-2.0.0-rc1...HEAD
+[2.0.0-rc1]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.5.0...release-2.0.0-rc1
 [1.5.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.4.0...release-1.5.0
 [1.4.3]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.4.2...release-1.4.3
 [1.4.2]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.4.1...release-1.4.2

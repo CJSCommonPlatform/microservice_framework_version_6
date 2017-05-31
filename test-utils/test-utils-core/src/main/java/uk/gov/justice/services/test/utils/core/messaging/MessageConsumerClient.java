@@ -1,20 +1,16 @@
 package uk.gov.justice.services.test.utils.core.messaging;
 
 import static java.lang.String.format;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
 import static uk.gov.justice.services.test.utils.core.messaging.QueueUriProvider.queueUri;
 
 import java.util.Optional;
 
 import javax.jms.JMSException;
-import javax.jms.Message;
 import javax.jms.MessageConsumer;
-import javax.jms.TextMessage;
 
 import com.google.common.annotations.VisibleForTesting;
 
-public class MessageConsumerClient implements AutoCloseable {
+public class MessageConsumerClient  implements AutoCloseable {
 
     public static final long TIMEOUT_IN_MILLIS = 20_000;
     public static final String QUEUE_URI = queueUri();
@@ -25,14 +21,16 @@ public class MessageConsumerClient implements AutoCloseable {
     private final MessageConsumerFactory messageConsumerFactory;
 
     private MessageConsumer messageConsumer;
+    private ConsumerClient consumerClient;
 
     public MessageConsumerClient() {
-        this(new MessageConsumerFactory());
+        this(new MessageConsumerFactory(), new ConsumerClient());
     }
 
     @VisibleForTesting
-    MessageConsumerClient(final MessageConsumerFactory messageConsumerFactory) {
+    MessageConsumerClient(final MessageConsumerFactory messageConsumerFactory, final ConsumerClient consumerClient) {
         this.messageConsumerFactory = messageConsumerFactory;
+        this.consumerClient = consumerClient;
     }
 
     public void startConsumer(final String eventName, final String topicName) {
@@ -57,38 +55,20 @@ public class MessageConsumerClient implements AutoCloseable {
     }
 
     public Optional<String> retrieveMessageNoWait() {
-        return retrieve(() -> messageConsumer.receiveNoWait());
+        return consumerClient.retrieveMessageNoWait(messageConsumer);
     }
 
     public Optional<String> retrieveMessage() {
-        return retrieveMessage(TIMEOUT_IN_MILLIS);
+        return consumerClient.retrieveMessage(messageConsumer,TIMEOUT_IN_MILLIS);
     }
 
     public Optional<String> retrieveMessage(final long timeout) {
-        return retrieve(() -> messageConsumer.receive(timeout));
-    }
-
-    private Optional<String> retrieve(final MessageSupplier messageSupplier) {
-
-        if (messageConsumer == null) {
-            throw new MessageConsumerException("Message consumer not started. Please call startConsumer(...) first.");
-        }
-
-        try {
-            final TextMessage message = (TextMessage) messageSupplier.getMessage();
-            if (message == null) {
-                return empty();
-            }
-            return of(message.getText());
-        } catch (final JMSException e) {
-            throw new MessageConsumerException("Failed to retrieve message", e);
-        }
+        return consumerClient.retrieveMessage(messageConsumer,timeout);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
     public void cleanQueue() {
-        while (retrieveMessageNoWait().isPresent()) {
-        }
+        consumerClient.cleanQueue(messageConsumer);
     }
 
     @Override
@@ -100,10 +80,5 @@ public class MessageConsumerClient implements AutoCloseable {
     @VisibleForTesting
     MessageConsumer getMessageConsumer() {
         return messageConsumer;
-    }
-
-    @FunctionalInterface
-    private interface MessageSupplier {
-        Message getMessage() throws JMSException;
     }
 }

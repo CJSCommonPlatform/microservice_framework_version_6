@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+## [1.7.1] - 2017-05-31
+
+### Added
+- Utility for browsing and deleting DLQ messages, backported from separate test utils library
+- Support for adding additional fields when building metadata
+
 ## [1.7.0] - 2017-05-16
 
 ### Added

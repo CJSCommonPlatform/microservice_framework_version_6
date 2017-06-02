@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * To be used in unit & integration tests for testing invocations of handlers, senders etc..
+ * To be used in unit and integration tests for testing invocations of handlers, senders etc..
  */
 public abstract class TestEnvelopeRecorder {
     private final List<JsonEnvelope> recordedEnvelopes = new LinkedList<>();

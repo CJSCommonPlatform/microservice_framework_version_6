@@ -25,14 +25,14 @@ public final class PortFinder {
 
     /**
      * Check if a port is available and return the same, if available. <br>
-     * 
+     *
      * If the specified port is not available try a random port from<br>
      * 8000 to 9000 a random number of tries between 10 and 20<br>
-     * 
+     *
      * If none of the above works return the passed in port
-     * 
-     * @param port
-     * @return
+     *
+     * @param port the port to check
+     * @return the available port
      */
     public static final int getPortWithRandomPortFallback(final int port) {
         int allocatedport = getPort(port);

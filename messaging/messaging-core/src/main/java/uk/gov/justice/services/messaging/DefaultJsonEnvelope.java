@@ -40,6 +40,10 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
     /**
      * Please use the Enveloper for creating real envelopes in production code or the
      * JsonEnvelopeBuilder in test-utils for tests.
+     *
+     * @param metadata the metadata to be added to the JsonEnvelope
+     * @param payload  the JsonValue payload to be added to the JsonEnvelope
+     * @return the JsonEnvelope
      */
     @Deprecated
     public static JsonEnvelope envelopeFrom(final Metadata metadata, final JsonValue payload) {
@@ -49,6 +53,11 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
     /**
      * Please use the Enveloper for creating real envelopes in production code or the
      * JsonEnvelopeBuilder in test-utils for tests.
+     *
+     * @param metadataBuilder the metadata builder to create the metadata to be added to the
+     *                        JsonEnvelope
+     * @param payload         the JsonValue payload to be added to the JsonEnvelope
+     * @return the JsonEnvelope
      */
     @Deprecated
     public static JsonEnvelope envelopeFrom(final JsonObjectMetadata.Builder metadataBuilder, final JsonValue payload) {
@@ -58,6 +67,8 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
     /**
      * Please use the Enveloper for creating real envelopes in production code or the
      * JsonEnvelopeBuilder in test-utils for tests.
+     *
+     * @return the Builder
      */
     @Deprecated
     public static Builder envelope() {
@@ -67,6 +78,9 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
     /**
      * Please use the Enveloper for creating real envelopes in production code or the
      * JsonEnvelopeBuilder in test-utils for tests.
+     *
+     * @param envelope the JsonEnvelope that is added to the builder
+     * @return the Builder
      */
     @Deprecated
     public static Builder envelopeFrom(final JsonEnvelope envelope) {
@@ -229,6 +243,8 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
         /**
          * Please use the Enveloper for creating real envelopes in production code or the
          * JsonEnvelopeBuilder in test-utils for tests.
+         *
+         * @return the JsonEnvelope
          */
         @Deprecated
         public JsonEnvelope build() {

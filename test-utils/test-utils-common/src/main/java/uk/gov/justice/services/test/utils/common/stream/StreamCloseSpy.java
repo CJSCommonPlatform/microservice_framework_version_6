@@ -2,7 +2,7 @@ package uk.gov.justice.services.test.utils.common.stream;
 
 /**
  * Class to be used in unit tests to check if a stream has been closed.
- * <br/>
+ *
  * Usage:
  * <pre>
  * {@code

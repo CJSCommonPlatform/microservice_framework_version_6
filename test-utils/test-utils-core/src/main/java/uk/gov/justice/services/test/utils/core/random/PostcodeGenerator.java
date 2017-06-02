@@ -61,41 +61,41 @@ import static java.lang.String.format;
  * Valid Formats: A indicates an alphabetic character and N indicates a numeric character
  * </p>
  * 
- * <table>
+ * <table summary="">
  * <tr>
  * <th>Outcode</th>
  * <th>Incode</th>
  * <th>Example Postcode</th>
  * </tr>
  * <tr>
- * <td>AN</th>
- * <th>NAA</th>
- * <th>M1 1AA</th>
+ * <td>AN</td>
+ * <td>NAA</td>
+ * <td>M1 1AA</td>
  * </tr>
  * <tr>
- * <td>ANN</th>
- * <th>NAA</th>
- * <th>M10 1NW</th>
+ * <td>ANN</td>
+ * <td>NAA</td>
+ * <td>M10 1NW</td>
  * </tr>
  * <tr>
- * <td>AAN</th>
- * <th>NAA</th>
- * <th>CR2 6NY</th>
+ * <td>AAN</td>
+ * <td>NAA</td>
+ * <td>CR2 6NY</td>
  * </tr>
  * <tr>
- * <td>AANN</th>
- * <th>NAA</th>
- * <th>CN65 1AP</th>
+ * <td>AANN</td>
+ * <td>NAA</td>
+ * <td>CN65 1AP</td>
  * </tr>
  * <tr>
- * <td>ANA</th>
- * <th>NAA</th>
- * <th>M1P 1AA</th>
+ * <td>ANA</td>
+ * <td>NAA</td>
+ * <td>M1P 1AA</td>
  * </tr>
  * <tr>
- * <td>AANA</th>
- * <th>NAA</th>
- * <th>EC1A 1AA</th>
+ * <td>AANA</td>
+ * <td>NAA</td>
+ * <td>EC1A 1AA</td>
  * </tr>
  * </table>
  * 
@@ -104,16 +104,13 @@ import static java.lang.String.format;
  * CIKMOV
  * </p>
  * 
- * <p>
- * 
  * <ul>
  * <li>The letters Q, V and X are not used in the first position</li>
  * <li>The letters I,J and Z are not used in the second position.</li>
  * <li>The only letters to appear in the third position are A, B, C, D, E, F, G, H, J, K, S, T, U
  * and W.</li>
  * </ul>
- * </p>
- * 
+ *
  */
 public class PostcodeGenerator extends Generator<String> {
 

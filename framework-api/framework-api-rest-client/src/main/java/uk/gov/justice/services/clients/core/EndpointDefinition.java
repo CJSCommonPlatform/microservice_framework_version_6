@@ -16,10 +16,11 @@ public class EndpointDefinition {
     /**
      * Constructor.
      *
-     * @param baseUri     the base URI for the endpoint
-     * @param path        the path, with any path parameter names wrapped in curly brackets
-     * @param pathParams  a set defining the path parameters to expect
-     * @param queryParams a set defining the query parameters this endpoint can take
+     * @param baseUri           the base URI for the endpoint
+     * @param path              the path, with any path parameter names wrapped in curly brackets
+     * @param pathParams        a set defining the path parameters to expect
+     * @param queryParams       a set defining the query parameters this endpoint can take
+     * @param responseMediaType the response media type of the endpoint
      */
     public EndpointDefinition(final String baseUri, final String path, final Set<String> pathParams,
                               final Set<QueryParam> queryParams, final String responseMediaType) {

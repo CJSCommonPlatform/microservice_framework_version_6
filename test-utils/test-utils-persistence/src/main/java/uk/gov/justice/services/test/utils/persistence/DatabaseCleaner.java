@@ -20,9 +20,9 @@ import com.google.common.annotations.VisibleForTesting;
  *
  * To use:
  *
- * <pre><blockquote>
- *
- *     @Before
+ * <pre>
+ *  {@code
+ *     {@literal @}Before
  *     public void cleanTheDatabase() {
  *
  *          databaseCleaner.cleanStreamStatusTable(CONTEXT_NAME);
@@ -30,8 +30,8 @@ import com.google.common.annotations.VisibleForTesting;
  *          databaseCleaner.cleanEventLogTable(CONTEXT_NAME);
  *          databaseCleaner.cleanViewStoreTables(CONTEXT_NAME, "table_1", "table_2");
  *     }
- *
- * </blockquote></pre>
+ *  }
+ * </pre>
  *
  */
 public class DatabaseCleaner {

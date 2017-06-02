@@ -76,6 +76,8 @@ public class JsonObjectMetadata implements Metadata {
     /**
      * Create metadata builder
      *
+     * @param id   the metadata UUID
+     * @param name the metadata name
      * @return metadata builder
      */
     public static Builder metadataOf(final UUID id, final String name) {
@@ -85,6 +87,8 @@ public class JsonObjectMetadata implements Metadata {
     /**
      * Create metadata builder
      *
+     * @param id   the metadata UUID
+     * @param name the metadata name
      * @return metadata builder
      */
     public static Builder metadataOf(final String id, final String name) {
@@ -94,6 +98,7 @@ public class JsonObjectMetadata implements Metadata {
     /**
      * Create metadata builder with random id
      *
+     * @param name the metadata name
      * @return metadata builder
      */
     public static Builder metadataWithRandomUUID(final String name) {

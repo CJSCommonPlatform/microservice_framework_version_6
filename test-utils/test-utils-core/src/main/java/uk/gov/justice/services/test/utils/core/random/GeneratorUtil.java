@@ -13,7 +13,7 @@ import java.util.Properties;
 /**
  * Utility class used by the email generator
  *
- * @See EmailAddressGenerator
+ * {@link EmailAddressGenerator}
  */
 public class GeneratorUtil {
 
@@ -42,6 +42,7 @@ public class GeneratorUtil {
      * @param validChars to chose from
      * @param min        length of the string
      * @param max        length of the string
+     * @return the generated String
      */
     public static String generateStringFromCharacters(final char[] validChars, final int min, final int max) {
         final int size = integer(min, max + 1).next();

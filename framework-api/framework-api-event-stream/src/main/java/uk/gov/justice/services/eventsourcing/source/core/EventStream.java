@@ -22,6 +22,7 @@ public interface EventStream {
     /**
      * Get the stream of events from the given version.
      *
+     * @param version the version of the stream
      * @return the stream of events
      */
     Stream<JsonEnvelope> readFrom(final long version);
@@ -39,11 +40,11 @@ public interface EventStream {
      * Store a stream of events.
      *
      * @param stream    the stream of events to store
-     * @param tolerance - tolerance for optimistic lock errors. <ul> <li/>CONSECUTIVE - store the
+     * @param tolerance - tolerance for optimistic lock errors. <ul> <li>CONSECUTIVE - store the
      *                  given stream of events with consecutive versions only, fail in case of an
-     *                  optimistic lock. <li/>NON_CONSECUTIVE - allows to store the given stream of
-     *                  events with non consecutive version ids, but reduces the risk of throwing
-     *                  optimistic lock error in case of a version conflict.</ul>
+     *                  optimistic lock.</li> <li>NON_CONSECUTIVE - allows to store the given stream
+     *                  of events with non consecutive version ids, but reduces the risk of throwing
+     *                  optimistic lock error in case of a version conflict.</li></ul>
      * @return the current stream version
      * @throws EventStreamException if an event could not be appended
      */

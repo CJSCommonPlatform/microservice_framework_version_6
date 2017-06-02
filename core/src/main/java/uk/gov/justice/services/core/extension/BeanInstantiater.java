@@ -16,8 +16,9 @@ public class BeanInstantiater {
     /**
      * Instantiates the bean using CDI BeanManager auto-wiring all the dependencies.
      *
+     * @param <T>  the type of bean
      * @param bean the bean from which to get the instance
-     * @return an instance of the bean
+     * @return an instance of the bean type
      */
     public <T> T instantiate(final Bean<T> bean) {
         return beanManager.getContext(bean.getScope())

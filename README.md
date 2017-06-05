@@ -18,31 +18,3 @@ A Java framework to support applications utilising CQRS and Event Sourcing archi
 * messaging-jms - Communication with JMS queues/topics
 * metrics - Support for health checks in application components
 * persistence - Support for persistence layer, such as deltaspike.
-
-## How to build and deploy locally without access to build repository
-
-#### Project dependencies
-Clone the following CJSCommonPlatform projects into the same directory level:
-* [maven-super-pom](https://github.com/CJSCommonPlatform/maven-super-pom)
-* [maven-parent-pom](https://github.com/CJSCommonPlatform/maven-parent-pom)
-* [maven-common-bom](https://github.com/CJSCommonPlatform/maven-common-bom)
-* [maven-common](https://github.com/CJSCommonPlatform/maven-common)
-* [raml-maven](https://github.com/CJSCommonPlatform/raml-maven)
-* [embedded-artemis](https://github.com/CJSCommonPlatform/embedded-artemis)
-* [maven-framework-parent-pom](https://github.com/CJSCommonPlatform/maven-framework-parent-pom)
-* [test-utils](https://github.com/CJSCommonPlatform/test-utils)
-* [utilities](https://github.com/CJSCommonPlatform/utilities)
-* [file-service](https://github.com/CJSCommonPlatform/file-service)
-* [json-schema](https://github.com/CJSCommonPlatform/json-schema)
-* [wildfly-maven-plugin](https://github.com/CJSCommonPlatform/wildfly-maven-plugin)
-* [microservice_framework](https://github.com/CJSCommonPlatform/microservice_framework)
-
-#### Run dependency installation script
-Run the install-dependencies.sh script from the microservice_framework directory.  This will checkout 
-and install the required versions of each project.
-
-`./install-dependencies.sh`
-
-#### Finally build and verify the Microservice Framework.
-
-`mvn clean verify`

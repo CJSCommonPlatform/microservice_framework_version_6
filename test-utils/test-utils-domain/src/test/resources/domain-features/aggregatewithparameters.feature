@@ -1,6 +1,6 @@
 Feature: AggregateWithParameters
-  Issue with "the"  in Then
-  Issue with "no events" in Then
+  # Issue with "the"  in Then
+  # Issue with "no events" in Then
 
   Scenario: Previous events are applied, so new event occurs, We are testing if the method is ability of the code to select
     the correct method implemented

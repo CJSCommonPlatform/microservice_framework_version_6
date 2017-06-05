@@ -1,11 +1,12 @@
 package uk.gov.justice.services.test.utils.domain;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.io.Resources.getResource;
 import static java.lang.String.format;
 import static java.nio.charset.Charset.defaultCharset;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
-import static org.apache.commons.lang3.StringUtils.capitalize;
+import static java.util.stream.Collectors.toSet;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.domain.annotation.Event;
@@ -13,14 +14,10 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.lang.reflect.Parameter;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -77,23 +74,45 @@ public class AggregateUnderTest {
     }
 
     public void invokeMethod(final String methodName, final String fileContainingArguments) throws Exception {
-        ObjectMapper mapper = new ObjectMapper();//normal mapper to get the map value in correct order
-        final JsonNode jsonNode = mapper.readTree(jsonStringFrom(fileContainingArguments));
-        final Map<String, Object> argumentsMap = mapper.convertValue(jsonNode, Map.class);
 
-        List<Object> valuesList = new ArrayList(argumentsMap.values());
-        checkIfUUID(valuesList);
-        Method method = object.getClass().getMethod(methodName, paramsTypes(methodName));
-        if (argumentsMap.size() == 0) {
-            final List<Object> newEvents = ((Stream<Object>) method.invoke(object, null)).collect(toList());
-            this.generatedEvents.addAll(newEvents);
-        } else {
-            final Object[] args = methodArgs(valuesList, getAllEventNames(argumentsMap), OBJECT_MAPPER);
-            final List<Object> newEvents = ((Stream<Object>) method.invoke(object, args)).collect(toList());
-            this.generatedEvents.addAll(newEvents);
+        final String json = jsonStringFrom(fileContainingArguments);
+        final Set<String> suppliedParamNames = getParamNames(json);
+        final Method method = getMethod(object.getClass(), methodName, suppliedParamNames);
 
+        final Object[] args = getArgs(json, method);
+        final List<Object> newEvents = ((Stream<Object>) method.invoke(object, args)).collect(toList());
+        generatedEvents.addAll(newEvents);
+    }
+
+    private Set<String> getParamNames(final String json) throws IOException {
+        final JsonNode jsonNode = OBJECT_MAPPER.readTree(json);
+        return newHashSet(jsonNode.fieldNames());
+    }
+
+    private Method getMethod(final Class<?> clazz, final String methodName, final Set<String> suppliedParamNames) {
+        final List<Method> methods = stream(clazz.getDeclaredMethods())
+                .filter(m -> m.getName().equals(methodName))
+                .filter(m -> suppliedParamNames.equals(
+                        stream(m.getParameters())
+                                .map(Parameter::getName)
+                                .collect(toSet())))
+                .collect(toList());
+
+        if (methods.size() == 0) {
+            throw new IllegalArgumentException("No method found");
+        } else if (methods.size() > 1 ) {
+            throw new IllegalArgumentException("Too many matching methods found");
         }
 
+        return methods.get(0);
+    }
+
+    private Object[] getArgs(final String json, final Method target) throws IOException {
+        final JsonNode jsonNode = OBJECT_MAPPER.readTree(json);
+        return stream(target.getParameters())
+                .map(p -> OBJECT_MAPPER.convertValue(jsonNode.get(p.getName()), p.getType()))
+                .collect(toList())
+                .toArray();
     }
 
     private static JsonNode jsonNodeFrom(final String fileName) {
@@ -121,20 +140,6 @@ public class AggregateUnderTest {
         }
     }
 
-    private void checkIfUUID(final List argumentValues) {
-        for (int index = 0; index < argumentValues.size(); index++) {
-            try {
-                if (argumentValues.get(index) instanceof String) {
-                    UUID uuid = UUID.fromString((String) argumentValues.get(index));
-                    argumentValues.remove(index);
-                    argumentValues.add(index, uuid);
-                }
-            } catch (IllegalArgumentException exception) {
-                continue;
-            }
-        }
-    }
-
     private static String jsonStringFrom(final String fileName) {
         try {
             return Resources.toString(getResource(format("json/%s.json", fileName)), defaultCharset());
@@ -149,62 +154,6 @@ public class AggregateUnderTest {
 
     public static String eventNameFrom(JsonNode node) {
         return node.get(METADATA).path(NAME).asText();
-    }
-
-    private Object[] methodArgs(List<Object> valuesList, List<String> expectedEventNames, ObjectMapper mapper) throws Exception {
-        Object[] objects = new Object[valuesList.size()];
-        int objectIndexInJson = 0;
-        for (int index = 0; index < valuesList.size(); index++) {
-            if (valuesList.get(index) instanceof HashMap) {
-                objects[index] = mapper.readValue(mapper.writeValueAsString(valuesList.get(index)),
-                        classOf(expectedEventNames.get(objectIndexInJson)));
-                objectIndexInJson = objectIndexInJson + 1;
-            } else {
-                objects[index] = valuesList.get(index);
-            }
-        }
-        return objects;
-    }
-
-    private Class<?>[] paramsTypes(final String methodName) {
-        Class<?>[] paramsTypes = null;
-        for (Method m : this.object.getClass().getDeclaredMethods()) {
-            if (!m.getName().equals(methodName)) {
-                continue;
-            }
-            paramsTypes = m.getParameterTypes();
-        }
-        return paramsTypes;
-    }
-
-    private List<String> getAllEventNames(Map<String, Object> argumentsMap) {
-        final List<String> classNames = new ArrayList();
-        final Iterator it = argumentsMap.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry) it.next();
-            if (pair.getValue() instanceof HashMap) {
-                classNames.add((String) pair.getKey());
-            }
-        }
-        return classNames;
-    }
-
-    private static Class classOf(final String className) {
-        Class<?> clazz = null;
-        try {
-            clazz = Class.forName(className);
-        } catch (ClassNotFoundException e) {
-            final Package[] packages = Package.getPackages();
-            for (final Package p : packages) {
-                try {
-                    clazz = Class.forName(new StringBuilder().append(p.getName()).append(".").append(capitalize(className)).toString());
-                } catch (final ClassNotFoundException exception) {
-                    continue;
-                }
-                break;
-            }
-        }
-        return clazz;
     }
 
     public List<Object> generatedEvents() {

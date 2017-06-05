@@ -1,6 +1,6 @@
 Feature: StatelessAggregate
-  Issue with "the"  in Then
-  Issue with "no events" in Then
+  # Issue with "the"  in Then
+  # Issue with "no events" in Then
 
   Scenario: No previous events
 

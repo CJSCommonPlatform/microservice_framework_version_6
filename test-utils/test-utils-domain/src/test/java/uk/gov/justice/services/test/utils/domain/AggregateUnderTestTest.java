@@ -1,5 +1,7 @@
 package uk.gov.justice.services.test.utils.domain;
 
+import static java.time.ZoneOffset.UTC;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.collection.IsArrayContaining.hasItemInArray;
 import static org.hamcrest.collection.IsArrayContainingInOrder.arrayContaining;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
@@ -12,14 +14,16 @@ import static org.junit.Assert.assertTrue;
 import static uk.gov.justice.services.test.utils.domain.AggregateUnderTest.aggregateUnderTest;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
+import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.test.utils.domain.arg.ComplexArgument;
-import uk.gov.justice.services.test.utils.domain.event.SthDoneWithIntArgEvent;
-import uk.gov.justice.services.test.utils.domain.event.SthDoneWithNoArgsEvent;
 import uk.gov.justice.services.test.utils.domain.event.InitialEventA;
 import uk.gov.justice.services.test.utils.domain.event.InitialEventB;
+import uk.gov.justice.services.test.utils.domain.event.SthDoneWithIntArgEvent;
+import uk.gov.justice.services.test.utils.domain.event.SthDoneWithNoArgsEvent;
 import uk.gov.justice.services.test.utils.domain.event.SthDoneWithStringArgEvent;
 import uk.gov.justice.services.test.utils.domain.event.SthElseDoneEvent;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
@@ -28,11 +32,9 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 
 public class AggregateUnderTestTest {
 
@@ -172,7 +174,6 @@ public class AggregateUnderTestTest {
         assertThat(methodInvocationArgumentsOf(aggregateUnderTest, 0), arrayContaining(123));
     }
 
-    @Ignore("Currently failing")
     @Test
     public void shouldCallMethodWithLongArgFromFile() throws Exception {
         final AggregateUnderTest aggregateUnderTest = aggregateUnderTest()
@@ -181,11 +182,10 @@ public class AggregateUnderTestTest {
         aggregateUnderTest.invokeMethod("doSthWithLongArg", "long-arg-file-123");
 
         assertThat(methodInvocationsCountOf(aggregateUnderTest), is(1));
-        assertThat(methodInvocationArgumentsOf(aggregateUnderTest, 0), is("doSthWithLongArg"));
-        assertThat(methodInvocationArgumentsOf(aggregateUnderTest, 0), arrayContaining(123l));
+        assertThat(nameOfInvokedMethodOn(aggregateUnderTest, 0), is("doSthWithLongArg"));
+        assertThat(methodInvocationArgumentsOf(aggregateUnderTest, 0), arrayContaining(123L));
     }
 
-    @Ignore("Currently failing")
     @Test
     public void shouldCallMethodWithDateTimeArgFromFile() throws Exception {
         final AggregateUnderTest aggregateUnderTest = aggregateUnderTest()
@@ -194,9 +194,9 @@ public class AggregateUnderTestTest {
         aggregateUnderTest.invokeMethod("doSthWithDateTimeArg", "date-time-arg-file");
 
         assertThat(methodInvocationsCountOf(aggregateUnderTest), is(1));
-        assertThat(methodInvocationArgumentsOf(aggregateUnderTest, 0), is("doSthWithDateTimeArg"));
-        assertTrue(((ZonedDateTime) methodInvocationArgumentsOf(aggregateUnderTest, 0)[0])
-                .isEqual(ZonedDateTime.parse("2017-01-21T16:42:03.522Z", DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"))));
+        assertThat(nameOfInvokedMethodOn(aggregateUnderTest, 0), is("doSthWithDateTimeArg"));
+        assertThat(methodInvocationArgumentsOf(aggregateUnderTest, 0)[0],
+                is(ZonedDateTimes.fromString("2017-01-21T16:42:03.522Z").withZoneSameInstant(ZoneId.of("UTC"))));
     }
 
     @Test
@@ -281,13 +281,13 @@ public class AggregateUnderTestTest {
             return Stream.of(new SthElseDoneEvent());
         }
 
-        public Stream<Object> doSthWithDateTimeArg(final ZonedDateTime dateTime) {
-            methodInvocations.add(Pair.of("doSthWithDateTimeArg", new Object[]{dateTime}));
+        public Stream<Object> doSthWithDateTimeArg(final ZonedDateTime dateTimeArg) {
+            methodInvocations.add(Pair.of("doSthWithDateTimeArg", new Object[]{dateTimeArg}));
             return Stream.of(new SthElseDoneEvent());
         }
 
-        public Stream<Object> doSthWithComplexArg(final ComplexArgument complex) {
-            methodInvocations.add(Pair.of("doSthWithComplexArg", new Object[]{complex}));
+        public Stream<Object> doSthWithComplexArg(final ComplexArgument complexArgument) {
+            methodInvocations.add(Pair.of("doSthWithComplexArg", new Object[]{complexArgument}));
             return Stream.of(new SthElseDoneEvent());
         }
 

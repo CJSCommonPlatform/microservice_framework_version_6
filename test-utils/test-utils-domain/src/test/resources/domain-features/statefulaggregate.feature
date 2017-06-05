@@ -1,6 +1,6 @@
 Feature: StatefulAggregate
-  Issue with "the"  in Then
-  Issue with "no events" in Then
+  # Issue with "the"  in Then
+  # Issue with "no events" in Then
 
   Scenario: Previous events are applied if given, but if no previous event is given then no new event occurs
 

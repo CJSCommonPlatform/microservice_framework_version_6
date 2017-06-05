@@ -14,7 +14,7 @@ public class AggregateWithParameters implements uk.gov.justice.domain.aggregate.
     private UUID id;
 
     public Stream<Object> checkOrderParameters(final UUID id,
-                                               final int intvalue,
+                                               final int intValue,
                                                final String stringValue,
                                                final boolean booleanValue) {
         return apply(Stream.of(new SomethingHappened(id)));

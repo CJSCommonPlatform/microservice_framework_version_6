@@ -5,6 +5,8 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [2.0.0-rc2] 2017-06-06
+
 ### Changed
 - Interceptor chain now adds the component name to the context so it can be used by the access control interceptor or anything else that needs it
 
@@ -621,8 +623,13 @@ turned off by default
 
 - Initial release with basic dispatcher, handler and adapter generation
 
-[Unreleased]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-2.0.0-rc1...HEAD
-[2.0.0-rc1]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.5.0...release-2.0.0-rc1
+[Unreleased]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-2.0.0-rc2...HEAD
+[2.0.0-rc2]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-2.0.0-rc1...release-2.0.0-rc2
+[2.0.0-rc1]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.7.1...release-2.0.0-rc1
+[1.7.1]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.7.0...release-1.7.1
+[1.7.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.6.0...release-1.7.0
+[1.6.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.5.0...release-1.6.0
+[1.5.1]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.5.0...release-1.5.1
 [1.5.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.4.0...release-1.5.0
 [1.4.3]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.4.2...release-1.4.3
 [1.4.2]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.4.1...release-1.4.2

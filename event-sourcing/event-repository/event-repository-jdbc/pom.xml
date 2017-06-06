@@ -97,16 +97,17 @@
         </dependency>
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
-            <artifactId>test-utils-persistence</artifactId>
+            <artifactId>test-utils-common</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
-            <artifactId>test-utils-core</artifactId>
+            <artifactId>test-utils-persistence</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
+
     </dependencies>
 
 </project>

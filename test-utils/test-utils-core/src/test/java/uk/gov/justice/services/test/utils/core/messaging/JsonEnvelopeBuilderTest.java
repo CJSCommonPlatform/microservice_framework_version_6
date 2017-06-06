@@ -1,5 +1,6 @@
 package uk.gov.justice.services.test.utils.core.messaging;
 
+
 import static com.jayway.jsonassert.JsonAssert.with;
 import static java.math.BigDecimal.ONE;
 import static java.util.UUID.randomUUID;
@@ -13,7 +14,6 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectMetadata;
 import uk.gov.justice.services.messaging.Metadata;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
 import javax.json.Json;

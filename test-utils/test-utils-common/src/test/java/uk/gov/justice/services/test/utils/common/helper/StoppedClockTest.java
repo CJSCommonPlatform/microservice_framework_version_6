@@ -1,9 +1,10 @@
-package uk.gov.justice.services.test.utils.core.helper;
+package uk.gov.justice.services.test.utils.common.helper;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import uk.gov.justice.services.common.util.Clock;
+import uk.gov.justice.services.test.utils.common.helper.StoppedClock;
 
 import java.time.ZonedDateTime;
 

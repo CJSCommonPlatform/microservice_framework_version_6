@@ -11,9 +11,13 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ### Removed
 - Access control Provider annotation and annotation scanning; this functionality has moved to the access control library
 
-## [2.0.0-rc1]
+## [2.0.0-rc1] 2017-05-31
 
 ### Changed
+- Refactor all framework components that are not internal so that they are provided as interfaces
+via new Framework API modules
+- Rework interceptor chain so that it is specific to a service component, by allowing each component
+to provide an interceptor chain definition rather than using annotation scanning
 - Upgrade to use framework parent POM [1.3.0](https://github.com/CJSCommonPlatform/maven-framework-parent-pom/releases/tag/release-1.3.0)
 
 ### Removed
@@ -22,6 +26,28 @@ be provided, typically by generating one from the destination RAML.
 
 ### Fixed
 - Test cases for random ZonedDateTime generators and added logging to show more info when they fail
+- Javadoc errors
+
+### Added
+- Script for building dependencies locally
+- Support for generating and discovering direct adapters, if a message destination exists locally 
+a service component in the same application
+
+## [1.7.1] 2017-05-16
+
+### Added
+- Utility for browsing and deleting DLQ messages, backported from separate test utils library
+- Support for adding additional fields when building metadata
+
+## [1.7.0] 2017-05-16
+
+### Added
+- Add test event log repository to the test-utils-core module
+
+## [1.6.0] 2017-05-05
+
+### Added
+- Support for PDF generation in Alfresco interface
 
 ## [1.5.2] 2017-04-07
 

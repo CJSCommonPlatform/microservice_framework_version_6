@@ -64,18 +64,21 @@ public class LocalAccessControlInterceptorTest {
     @Test
     public void shouldApplyAccessControlToInputIfLocalComponent() throws Exception {
         final InterceptorContext inputContext = interceptorContextWithInput(envelope);
-        when(accessControlService.checkAccessControl(envelope)).thenReturn(Optional.empty());
+        inputContext.setInputParameter("component", "command");
+
+        when(accessControlService.checkAccessControl("command", envelope)).thenReturn(Optional.empty());
 
         interceptorChain.processNext(inputContext);
-        verify(accessControlService).checkAccessControl(envelope);
+        verify(accessControlService).checkAccessControl("command", envelope);
     }
 
     @Test
     public void shouldThrowAccessControlViolationExceptionIfAccessControlFailsForInput() throws Exception {
         final InterceptorContext inputContext = interceptorContextWithInput(envelope);
+        inputContext.setInputParameter("component", "command");
         final AccessControlViolation accessControlViolation = new AccessControlViolation("reason");
 
-        when(accessControlService.checkAccessControl(envelope)).thenReturn(Optional.of(accessControlViolation));
+        when(accessControlService.checkAccessControl("command", envelope)).thenReturn(Optional.of(accessControlViolation));
         when(accessControlFailureMessageGenerator.errorMessageFrom(envelope, accessControlViolation)).thenReturn("Error message");
 
         exception.expect(AccessControlViolationException.class);

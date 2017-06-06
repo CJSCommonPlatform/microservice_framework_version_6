@@ -21,7 +21,7 @@ public class DefaultAccessControlService implements AccessControlService {
     @Inject
     PolicyEvaluator policyEvaluator;
 
-    public Optional<AccessControlViolation> checkAccessControl(final JsonEnvelope jsonEnvelope) {
+    public Optional<AccessControlViolation> checkAccessControl(final String component, final JsonEnvelope jsonEnvelope) {
 
         if (accessControlDisabled()) {
             logger.trace("Skipping access control due to configuration");
@@ -29,7 +29,7 @@ public class DefaultAccessControlService implements AccessControlService {
         }
 
         logger.trace("Performing access control for action: {}", jsonEnvelope.metadata().name());
-        return policyEvaluator.checkAccessPolicyFor(jsonEnvelope);
+        return policyEvaluator.checkAccessPolicyFor(component, jsonEnvelope);
     }
 
     private boolean accessControlDisabled() {

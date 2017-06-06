@@ -23,13 +23,14 @@ public class LocalAccessControlInterceptor implements Interceptor {
     @Override
     public InterceptorContext process(final InterceptorContext interceptorContext, final InterceptorChain interceptorChain) {
 
-        checkAccessControl(interceptorContext.inputEnvelope());
+        final String component = interceptorContext.getInputParameter("component").get().toString();
+        checkAccessControl(component, interceptorContext.inputEnvelope());
 
         return interceptorChain.processNext(interceptorContext);
     }
 
-    private void checkAccessControl(final JsonEnvelope jsonEnvelope) {
-        final Optional<AccessControlViolation> accessControlViolation = accessControlService.checkAccessControl(jsonEnvelope);
+    private void checkAccessControl(final String component, final JsonEnvelope jsonEnvelope) {
+        final Optional<AccessControlViolation> accessControlViolation = accessControlService.checkAccessControl(component,jsonEnvelope);
 
         if (accessControlViolation.isPresent()) {
             final String errorMessage = accessControlFailureMessageGenerator.errorMessageFrom(

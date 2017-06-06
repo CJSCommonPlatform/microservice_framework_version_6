@@ -22,6 +22,6 @@ public class AllowAllPolicyEvaluatorTest {
 
         final JsonEnvelope jsonEnvelope = mock(JsonEnvelope.class);
 
-        assertThat(allowAllAccessController.checkAccessPolicyFor(jsonEnvelope).isPresent(), is(false));
+        assertThat(allowAllAccessController.checkAccessPolicyFor("command", jsonEnvelope).isPresent(), is(false));
     }
 }

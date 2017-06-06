@@ -5,6 +5,12 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Changed
+- Interceptor chain now adds the component name to the context so it can be used by the access control interceptor or anything else that needs it
+
+### Removed
+- Access control Provider annotation and annotation scanning; this functionality has moved to the access control library
+
 ## [2.0.0-rc1]
 
 ### Changed

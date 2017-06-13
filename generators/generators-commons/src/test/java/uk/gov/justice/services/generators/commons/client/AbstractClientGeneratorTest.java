@@ -7,7 +7,6 @@ import static java.lang.reflect.Modifier.isPrivate;
 import static java.lang.reflect.Modifier.isStatic;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
-import static org.apache.log4j.Level.WARN;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
@@ -15,6 +14,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
+import static org.mockito.Mockito.verify;
 import static org.raml.model.ActionType.DELETE;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.PATCH;
@@ -31,6 +31,7 @@ import static uk.gov.justice.services.generators.test.utils.reflection.Reflectio
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.setField;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
+import uk.gov.justice.raml.core.Generator;
 import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -38,7 +39,6 @@ import uk.gov.justice.services.core.annotation.Remote;
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
-import uk.gov.justice.services.test.utils.common.logger.TestLogAppender;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -53,24 +53,32 @@ import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.TypeName;
-import org.apache.log4j.spi.LoggingEvent;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.raml.model.Action;
 import org.raml.model.Raml;
 import org.raml.model.Resource;
 import org.slf4j.Logger;
 
+@RunWith(MockitoJUnitRunner.class)
 public class AbstractClientGeneratorTest extends BaseGeneratorTest {
 
     private static final String EXISTING_FILE_PATH = "org/raml/test/resource/RemoteBCDController.java";
+    private static final String LOGGER_FIELD = "logger";
+
+    @Mock
+    private Logger logger;
 
     @Before
     public void before() {
         super.before();
         generator = new ABCClientGenerator();
+        overrideLogger(generator, logger);
     }
 
     @Test
@@ -297,9 +305,9 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
     @Test
     public void shouldLogWarningIfClassExists() throws Exception {
 
-        final TestLogAppender testAppender = TestLogAppender.activate();
-
-        new BCDClientGenerator().run(
+        final Generator generator = new BCDClientGenerator();
+        overrideLogger(generator, logger);
+        generator.run(
                 messagingRamlWithDefaults()
                         .with(resource()
                                 .with(httpActionWithDefaultMapping(GET)))
@@ -307,11 +315,7 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder,
                         generatorProperties().withServiceComponentOf("COMMAND_CONTROLLER").build(), singletonList(existingFilePath())));
 
-        testAppender.deactivate();
-
-        final LoggingEvent logEntry = testAppender.firstLogEntry();
-        assertThat(logEntry.getLevel(), is(WARN));
-        assertThat((String) logEntry.getMessage(), containsString("The class RemoteBCDController already exists, skipping code generation."));
+        verify(logger).warn("The class {} already exists, skipping code generation.", "RemoteBCDController");
 
     }
 
@@ -359,5 +363,13 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
         return Paths.get(new File(resource.getPath()).getPath()).getParent().getParent().getParent().getParent().getParent();
     }
 
-
+    private static void overrideLogger(final Generator generator, final Logger logger) {
+        try {
+            final Field field = AbstractClientGenerator.class.getDeclaredField(LOGGER_FIELD);
+            field.setAccessible(true);
+            field.set(generator, logger);
+        } catch (NoSuchFieldException|IllegalAccessException e) {
+            throw new RuntimeException("Could not set logger on generator under test", e);
+        }
+    }
 }

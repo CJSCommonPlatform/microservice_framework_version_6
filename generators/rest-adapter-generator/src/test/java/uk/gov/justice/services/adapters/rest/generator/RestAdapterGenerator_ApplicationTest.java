@@ -8,8 +8,6 @@ import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
-import static org.apache.log4j.Level.WARN;
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.not;
@@ -18,6 +16,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.raml.model.ActionType.GET;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpActionWithDefaultMapping;
@@ -30,7 +29,6 @@ import static uk.gov.justice.services.generators.test.utils.config.GeneratorConf
 
 import uk.gov.justice.services.adapter.rest.application.CommonProviders;
 import uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil;
-import uk.gov.justice.services.test.utils.common.logger.TestLogAppender;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -44,7 +42,6 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
 import com.google.common.reflect.TypeToken;
-import org.apache.log4j.spi.LoggingEvent;
 import org.junit.Test;
 
 public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGeneratorTest {
@@ -214,18 +211,13 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
     @Test
     public void shouldLogWarningIfClassExists() throws Exception {
 
-        final TestLogAppender testLogAppender = TestLogAppender.activate();
-
         generator.run(
                 restRamlWithQueryApiDefaults()
                         .with(resource("/pathA").with(httpActionWithDefaultMapping(GET).withDefaultResponseType()))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap(), singletonList(existingFilePath())));
 
-        testLogAppender.deactivate();
-        final LoggingEvent logEntry = testLogAppender.firstLogEntry();
-        assertThat(logEntry.getLevel(), is(WARN));
-        assertThat((String) logEntry.getMessage(), containsString("The class QueryApiPathAResource already exists, skipping code generation."));
+        verify(logger).warn("The class {} already exists, skipping code generation.", "QueryApiPathAResource");
     }
 
     private Path existingFilePath() {

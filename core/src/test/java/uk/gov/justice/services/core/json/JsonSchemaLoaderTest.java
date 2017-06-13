@@ -1,19 +1,18 @@
 package uk.gov.justice.services.core.json;
 
-import static org.apache.log4j.Level.TRACE;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.verify;
 
-import uk.gov.justice.services.test.utils.common.logger.TestLogAppender;
-
-import org.apache.log4j.spi.LoggingEvent;
 import org.everit.json.schema.Schema;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.slf4j.Logger;
 
 /**
  * Unit tests for the {@link JsonSchemaLoader} class.
@@ -21,7 +20,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class JsonSchemaLoaderTest {
 
-    private JsonSchemaLoader loader = new JsonSchemaLoader();
+    @Mock
+    private Logger logger;
+
+    @InjectMocks
+    private JsonSchemaLoader loader;
 
     @Test
     public void shouldReturnSchemaFromClasspath() {
@@ -31,14 +34,8 @@ public class JsonSchemaLoaderTest {
 
     @Test
     public void shouldLogSchemaName() throws Exception {
-        final TestLogAppender testLogAppender = TestLogAppender.activate();
-
         loader.loadSchema("test-schema");
-        testLogAppender.deactivate();
-        final LoggingEvent logEntry = testLogAppender.firstLogEntry();
-        assertThat(logEntry.getLevel(), is(TRACE));
-        assertThat(logEntry.getMessage(), is("Loading schema /json/schema/test-schema.json"));
-
+        verify(logger).trace("Loading schema {}", "/json/schema/test-schema.json");
     }
 
     @Rule
@@ -58,6 +55,5 @@ public class JsonSchemaLoaderTest {
         expectedException.expectMessage("Unable to load JSON schema /json/schema/malformed-schema.json from classpath");
 
         loader.loadSchema("malformed-schema");
-
     }
 }

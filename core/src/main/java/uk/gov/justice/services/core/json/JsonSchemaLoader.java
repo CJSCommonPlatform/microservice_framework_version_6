@@ -3,6 +3,7 @@ package uk.gov.justice.services.core.json;
 import static java.lang.String.format;
 import static java.nio.charset.Charset.defaultCharset;
 import static org.everit.json.schema.loader.SchemaLoader.load;
+import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.InputStream;
 
@@ -17,7 +18,9 @@ import org.slf4j.LoggerFactory;
  * Service for loading JSON schemas.
  */
 public class JsonSchemaLoader {
-    private static final Logger LOGGER = LoggerFactory.getLogger(JsonSchemaLoader.class);
+
+    private Logger logger = getLogger(JsonSchemaLoader.class);
+
     private final static String SCHEMA_LOCATION_PATTERN = "/json/schema/%s.json";
 
     /**
@@ -39,7 +42,7 @@ public class JsonSchemaLoader {
     }
 
     private InputStream streamOf(final String schemaFile) {
-        LOGGER.trace("Loading schema {}", schemaFile);
+        logger.trace("Loading schema {}", schemaFile);
         final InputStream inputStream = this.getClass().getResourceAsStream(schemaFile);
 
         if (inputStream == null) {

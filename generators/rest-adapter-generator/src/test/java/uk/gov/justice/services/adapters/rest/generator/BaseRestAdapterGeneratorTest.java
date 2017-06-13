@@ -21,6 +21,7 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.slf4j.Logger;
 
 @RunWith(MockitoJUnitRunner.class)
 public abstract class BaseRestAdapterGeneratorTest extends BaseGeneratorTest {
@@ -32,6 +33,7 @@ public abstract class BaseRestAdapterGeneratorTest extends BaseGeneratorTest {
     private static final String VALID_PARAMETER_COLLECTION_BUILDER_FACTORY_FIELD = "validParameterCollectionBuilderFactory";
     private static final String TRACE_LOGGER_FIELD = "traceLogger";
     private static final String HTTP_TRACE_LOGGER_HELPER_FIELD = "httpTraceLoggerHelper";
+    private static final String LOGGER_FIELD = "logger";
 
     @Mock
     protected InterceptorChainProcessor interceptorChainProcessor;
@@ -61,12 +63,20 @@ public abstract class BaseRestAdapterGeneratorTest extends BaseGeneratorTest {
     protected TraceLogger traceLogger;
 
     @Mock
+    protected Logger logger;
+
+    @Mock
     protected HttpTraceLoggerHelper httpTraceLoggerHelper;
 
     @Before
     public void before() {
         super.before();
         generator = new RestAdapterGenerator();
+        try {
+            setField(generator, LOGGER_FIELD, logger);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException("Failed to set mock logger on generator under test", e);
+        }
     }
 
     protected Object getInstanceOf(final Class<?> resourceClass) throws InstantiationException, IllegalAccessException {

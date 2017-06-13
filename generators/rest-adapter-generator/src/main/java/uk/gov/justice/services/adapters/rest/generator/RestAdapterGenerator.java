@@ -36,7 +36,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class RestAdapterGenerator implements Generator {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RestAdapterGenerator.class);
+
+    private Logger logger = LoggerFactory.getLogger(RestAdapterGenerator.class);
+
     private final RamlValidator validator = new CompositeRamlValidator(
             new ContainsResourcesRamlValidator(),
             new ContainsActionsRamlValidator(),
@@ -115,7 +117,7 @@ public class RestAdapterGenerator implements Generator {
         final List<String> implementationNames = new LinkedList<>();
 
         typeSpecs.forEach(typeSpec -> {
-            writeClass(configuration, packageName, typeSpec, LOGGER);
+            writeClass(configuration, packageName, typeSpec, logger);
             implementationNames.add(typeSpec.name);
         });
 

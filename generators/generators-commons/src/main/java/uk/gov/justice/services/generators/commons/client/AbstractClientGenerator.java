@@ -14,15 +14,12 @@ import static uk.gov.justice.services.generators.commons.helper.Actions.isSuppor
 import static uk.gov.justice.services.generators.commons.helper.Actions.isSynchronousAction;
 import static uk.gov.justice.services.generators.commons.helper.GeneratedClassWriter.writeClass;
 import static uk.gov.justice.services.generators.commons.helper.Names.buildResourceMethodNameFromVerbUriAndMimeType;
-import static uk.gov.justice.services.generators.commons.helper.Names.camelCase;
-import static uk.gov.justice.services.generators.commons.helper.Names.nameFrom;
 
 import uk.gov.justice.raml.core.Generator;
 import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.Remote;
-import uk.gov.justice.services.generators.commons.validator.CompositeRamlValidator;
 import uk.gov.justice.services.generators.commons.validator.RamlValidator;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.logging.TraceLogger;
@@ -50,7 +47,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractClientGenerator implements Generator {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractClientGenerator.class);
+
+    protected Logger logger = LoggerFactory.getLogger(AbstractClientGenerator.class);
+
     protected static final String ENVELOPE = "envelope";
     private static final String OK = "200";
     private static final String TRACE_LOGGER_FIELD = "traceLogger";
@@ -66,7 +65,7 @@ public abstract class AbstractClientGenerator implements Generator {
                         .addAnnotation(Inject.class)
                         .build())
                 .addMethods(methodsOf(raml, generatorConfig));
-        writeClass(generatorConfig, generatorConfig.getBasePackageName(), classSpec.build(), LOGGER);
+        writeClass(generatorConfig, generatorConfig.getBasePackageName(), classSpec.build(), logger);
     }
 
     protected RamlValidator validator() {

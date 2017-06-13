@@ -17,7 +17,8 @@ import org.slf4j.LoggerFactory;
  */
 @ApplicationScoped
 public class DefaultJsonSchemaValidator implements JsonSchemaValidator {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultJsonSchemaValidator.class);
+
+    private Logger logger = LoggerFactory.getLogger(DefaultJsonSchemaValidator.class);
     private final Map<String, Schema> schemas = new ConcurrentHashMap<>();
 
     private JsonSchemaLoader loader = new JsonSchemaLoader();
@@ -31,7 +32,7 @@ public class DefaultJsonSchemaValidator implements JsonSchemaValidator {
      */
     @Override
     public void validate(final String payload, final String name) {
-        LOGGER.trace("Performing schema validation for: {}", name);
+        logger.trace("Performing schema validation for: {}", name);
         final JSONObject jsonObject = new JSONObject(payload);
         jsonObject.remove(METADATA);
         schemaOf(name).validate(jsonObject);

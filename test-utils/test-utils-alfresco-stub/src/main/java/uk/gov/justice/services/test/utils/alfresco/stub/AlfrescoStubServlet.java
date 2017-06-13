@@ -1,12 +1,15 @@
 package uk.gov.justice.services.test.utils.alfresco.stub;
 
 import java.io.IOException;
-import java.io.*;
+import java.io.PrintWriter;
 
-import javax.servlet.*;
-import javax.servlet.annotation.*;
-import javax.servlet.http.*;
-
+import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 
 @WebServlet(name = "uploadServlet", urlPatterns = {AlfrescoStubServlet.UPLOAD, AlfrescoStubServlet.RECORDED_REQUESTS, AlfrescoStubServlet.RESET})
 @MultipartConfig

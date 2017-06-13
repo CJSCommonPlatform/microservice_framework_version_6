@@ -89,6 +89,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>uk.gov.justice.utils</groupId>
+            <artifactId>test-utils-logging-simple</artifactId>
+            <type>pom</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>co.unruly</groupId>
             <artifactId>java-8-matchers</artifactId>
             <scope>test</scope>

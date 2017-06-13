@@ -29,12 +29,6 @@
 
         <!-- Test Dependencies -->
         <dependency>
-            <groupId>uk.gov.justice.services</groupId>
-            <artifactId>core</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>

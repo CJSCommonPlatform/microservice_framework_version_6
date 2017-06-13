@@ -47,8 +47,8 @@
 
     <properties>
         <common-bom.version>1.13.0</common-bom.version>
-		<embedded-artemis.version>1.0.0</embedded-artemis.version>
-		<raml-maven-plugin.version>1.5.0</raml-maven-plugin.version>
+        <embedded-artemis.version>1.0.0</embedded-artemis.version>
+        <raml-maven-plugin.version>1.5.0</raml-maven-plugin.version>
         <file.service.version>1.8.0</file.service.version>
         <utilities.version>1.6.0</utilities.version>
         <jboss-ejb3-ext-api.version>2.2.0.Final</jboss-ejb3-ext-api.version>
@@ -63,7 +63,7 @@
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
-			<dependency>
+            <dependency>
                 <groupId>uk.gov.justice.artemis</groupId>
                 <artifactId>embedded-artemis</artifactId>
                 <version>${embedded-artemis.version}</version>

@@ -17,7 +17,6 @@ import uk.gov.justice.domain.aggregate.TestAggregate;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.aggregate.event.EventA;
 import uk.gov.justice.services.core.aggregate.event.EventB;
-import uk.gov.justice.services.core.aggregate.exception.AggregateChangeDetectedException;
 import uk.gov.justice.services.core.extension.EventFoundEvent;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 
@@ -58,7 +57,7 @@ public class DefaultAggregateServiceTest {
     }
 
     @Test
-    public void shouldCreateAggregateFromEmptyStream() throws AggregateChangeDetectedException {
+    public void shouldCreateAggregateFromEmptyStream() {
         when(eventStream.read()).thenReturn(Stream.empty());
         when(eventStream.getId()).thenReturn(STREAM_ID);
         TestAggregate aggregate = aggregateService.get(eventStream, TestAggregate.class);
@@ -69,7 +68,7 @@ public class DefaultAggregateServiceTest {
     }
 
     @Test
-    public void shouldCreateAggregateFromSingletonStream() throws AggregateChangeDetectedException {
+    public void shouldCreateAggregateFromSingletonStream() {
         JsonObject eventPayloadA = mock(JsonObject.class);
         EventA eventA = mock(EventA.class);
         when(jsonObjectToObjectConverter.convert(eventPayloadA, EventA.class)).thenReturn(eventA);
@@ -88,7 +87,7 @@ public class DefaultAggregateServiceTest {
     }
 
     @Test
-    public void shouldCreateAggregateFromStreamOfTwo() throws AggregateChangeDetectedException {
+    public void shouldCreateAggregateFromStreamOfTwo() {
         JsonObject eventPayloadA = mock(JsonObject.class);
         JsonObject eventPayloadB = mock(JsonObject.class);
         EventA eventA = mock(EventA.class);
@@ -116,7 +115,7 @@ public class DefaultAggregateServiceTest {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void shouldThrowExceptionForUnregisteredEvent() throws AggregateChangeDetectedException {
+    public void shouldThrowExceptionForUnregisteredEvent() {
         when(eventStream.getId()).thenReturn(STREAM_ID);
 
         JsonObject eventPayloadA = mock(JsonObject.class);
@@ -128,7 +127,7 @@ public class DefaultAggregateServiceTest {
     }
 
     @Test(expected = RuntimeException.class)
-    public void shouldThrowExceptionForNonInstantiatableEvent() throws AggregateChangeDetectedException {
+    public void shouldThrowExceptionForNonInstantiatableEvent() {
         JsonObject eventPayloadA = mock(JsonObject.class);
         EventA eventA = mock(EventA.class);
         when(jsonObjectToObjectConverter.convert(eventPayloadA, EventA.class)).thenReturn(eventA);

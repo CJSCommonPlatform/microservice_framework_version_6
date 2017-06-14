@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>framework-api-aggregate</artifactId>
+    <artifactId>framework-api-aggregate-service</artifactId>
 
     <dependencies>
         <dependency>

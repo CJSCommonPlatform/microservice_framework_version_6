@@ -18,7 +18,7 @@
         </dependency>
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
-            <artifactId>framework-api-aggregate</artifactId>
+            <artifactId>framework-api-aggregate-service</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

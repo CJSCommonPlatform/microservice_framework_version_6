@@ -7,7 +7,7 @@
     <parent>
         <groupId>uk.gov.justice</groupId>
         <artifactId>maven-framework-parent-pom</artifactId>
-        <version>1.3.0</version>
+        <version>1.5.0</version>
     </parent>
 
     <groupId>uk.gov.justice.services</groupId>
@@ -46,11 +46,13 @@
     </modules>
 
     <properties>
-        <common-bom.version>1.13.0</common-bom.version>
-		<embedded-artemis.version>1.0.0</embedded-artemis.version>
-		<raml-maven-plugin.version>1.5.0</raml-maven-plugin.version>
+        <h2.version>1.3.173</h2.version>
+        <common-bom.version>1.16.0</common-bom.version>
+        <embedded-artemis.version>1.0.0</embedded-artemis.version>
+        <raml-maven-plugin.version>1.5.0</raml-maven-plugin.version>
         <file.service.version>1.8.0</file.service.version>
         <utilities.version>1.6.0</utilities.version>
+        <test-utils.version>1.4.0</test-utils.version>
         <jboss-ejb3-ext-api.version>2.2.0.Final</jboss-ejb3-ext-api.version>
     </properties>
 
@@ -63,7 +65,7 @@
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
-			<dependency>
+            <dependency>
                 <groupId>uk.gov.justice.artemis</groupId>
                 <artifactId>embedded-artemis</artifactId>
                 <version>${embedded-artemis.version}</version>
@@ -83,6 +85,18 @@
                 <groupId>org.jboss.ejb3</groupId>
                 <artifactId>jboss-ejb3-ext-api</artifactId>
                 <version>${jboss-ejb3-ext-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>uk.gov.justice.utils</groupId>
+                <artifactId>test-utils-logging-simple</artifactId>
+                <version>${test-utils.version}</version>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>uk.gov.justice.utils</groupId>
+                <artifactId>test-utils-logging-log4j</artifactId>
+                <version>${test-utils.version}</version>
+                <type>pom</type>
             </dependency>
         </dependencies>
     </dependencyManagement>

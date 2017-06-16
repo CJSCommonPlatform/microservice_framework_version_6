@@ -19,7 +19,7 @@
         <module>framework-api-common</module>
         <module>framework-api-event-source</module>
         <module>framework-api-event-stream</module>
-        <module>framework-api-aggregate</module>
+        <module>framework-api-aggregate-service</module>
         <module>framework-api-all</module>
         <module>framework-api-rest-adapter</module>
         <module>framework-api-messaging-adapter</module>
@@ -27,6 +27,7 @@
         <module>framework-api-rest-core</module>
         <module>framework-api-messaging-jms</module>
         <module>framework-api-direct-adapter</module>
+        <module>framework-api-messaging-client</module>
     </modules>
 
 </project>

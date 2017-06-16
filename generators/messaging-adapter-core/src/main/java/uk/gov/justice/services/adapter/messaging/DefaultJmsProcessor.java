@@ -3,7 +3,6 @@ package uk.gov.justice.services.adapter.messaging;
 import static java.lang.String.format;
 import static uk.gov.justice.services.core.interceptor.DefaultInterceptorContext.interceptorContextWithInput;
 
-import uk.gov.justice.services.adapter.messaging.exception.InvalildJmsMessageTypeException;
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.EnvelopeConverter;

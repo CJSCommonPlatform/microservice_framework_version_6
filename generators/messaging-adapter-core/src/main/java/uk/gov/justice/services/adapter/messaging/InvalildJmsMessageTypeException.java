@@ -1,4 +1,4 @@
-package uk.gov.justice.services.adapter.messaging.exception;
+package uk.gov.justice.services.adapter.messaging;
 
 public class InvalildJmsMessageTypeException extends RuntimeException {
 

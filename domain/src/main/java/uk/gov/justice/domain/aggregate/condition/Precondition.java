@@ -4,7 +4,11 @@ import java.util.function.Supplier;
 
 /**
  * Representation of a precondition that can be asserted, and throw an exception if it isn't met.
+ *
+ * NB: This class is deprecated to discourage use within aggregates. If a use for it is found elsewhere
+ * it will be moved rather than being completely removed in release 3.0.0.
  */
+@Deprecated
 public class Precondition {
 
     private final Supplier<Boolean> assertion;

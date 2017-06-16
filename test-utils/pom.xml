@@ -18,6 +18,7 @@
         <module>test-utils-persistence</module>
         <module>test-utils-common</module>
         <module>test-utils-alfresco-stub</module>
+        <module>test-utils-domain</module>
     </modules>
     <packaging>pom</packaging>
 

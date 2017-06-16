@@ -1,0 +1,7 @@
+{
+  "complexArgument": {
+    "stringArg": "someString",
+    "intArg": 456,
+    "booleanArg": true
+  }
+}

@@ -5,6 +5,14 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [2.0.0-rc3] - 2017-06-16
+
+### Changed
+- Logging dependencies tidied up - all logging implementations excluded from dependencies and tests use new test utils modules for logging
+
+### Removed
+- Precondition class marked as deprecated - will be removed in 3.0.0 unless a differen tuse case is found for it
+
 ## [2.0.0-rc2] 2017-06-06
 
 ### Changed
@@ -623,7 +631,8 @@ turned off by default
 
 - Initial release with basic dispatcher, handler and adapter generation
 
-[Unreleased]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-2.0.0-rc2...HEAD
+[Unreleased]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-2.0.0-rc3...HEAD
+[2.0.0-rc3]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-2.0.0-rc2...release-2.0.0-rc3
 [2.0.0-rc2]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-2.0.0-rc1...release-2.0.0-rc2
 [2.0.0-rc1]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.7.1...release-2.0.0-rc1
 [1.7.1]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.7.0...release-1.7.1

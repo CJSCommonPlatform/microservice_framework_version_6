@@ -32,7 +32,6 @@
         <module>event-sourcing</module>
         <module>common</module>
         <module>persistence</module>
-        <module>domain</module>
         <module>generators</module>
         <module>example-context</module>
         <module>test-utils</module>

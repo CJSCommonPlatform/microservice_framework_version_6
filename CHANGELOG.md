@@ -5,6 +5,11 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [2.0.0-rc4] - 2017-06-19
+
+### Fixed
+- Aggregate snapshot service was pulling in Liquibase due to an incorrect dependency scope
+
 ## [2.0.0-rc3] - 2017-06-16
 
 ### Changed

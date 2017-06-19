@@ -34,6 +34,4 @@ public class  MessagingResourceUriTest {
         assertThat(new MessagingResourceUri("/systemScheduling.handler.command").hyphenated(), is("systemScheduling-handler-command"));
 
     }
-
-
 }

@@ -5,20 +5,20 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import uk.gov.justice.api.PublicEventJmsListener;
-import uk.gov.justice.api.StructureControllerCommandJmsListener;
-import uk.gov.justice.api.StructureEventJmsListener;
-import uk.gov.justice.api.StructureHandlerCommandJmsListener;
+import uk.gov.justice.api.ContextaEventProcessorPublicEventJmsListener;
+import uk.gov.justice.api.Service1CommandControllerStructureControllerCommandJmsListener;
+import uk.gov.justice.api.Service1CommandHandlerStructureHandlerCommandJmsListener;
+import uk.gov.justice.api.Service2EventProcessorStructureEventJmsListener;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsParameterChecker;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsProcessor;
 import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
-import uk.gov.justice.services.event.buffer.api.AllowAllEventFilter;
 import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
 import uk.gov.justice.services.core.json.DefaultJsonValidationLoggerHelper;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
+import uk.gov.justice.services.event.buffer.api.AllowAllEventFilter;
 import uk.gov.justice.services.generators.test.utils.interceptor.RecordingInterceptorChainProcessor;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -67,10 +67,10 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
     @Classes(cdi = true, value = {
             DefaultJmsProcessor.class,
             RecordingInterceptorChainProcessor.class,
-            StructureControllerCommandJmsListener.class,
-            StructureEventJmsListener.class,
-            StructureHandlerCommandJmsListener.class,
-            PublicEventJmsListener.class,
+            Service1CommandControllerStructureControllerCommandJmsListener.class,
+            Service2EventProcessorStructureEventJmsListener.class,
+            Service1CommandHandlerStructureHandlerCommandJmsListener.class,
+            ContextaEventProcessorPublicEventJmsListener.class,
             ObjectMapperProducer.class,
             DefaultEnvelopeConverter.class,
             StringToJsonObjectConverter.class,

@@ -4,6 +4,7 @@ import static com.squareup.javapoet.TypeName.VOID;
 import static uk.gov.justice.services.generators.commons.helper.Names.nameFrom;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
+import uk.gov.justice.services.generators.commons.helper.MessagingBaseUri;
 import uk.gov.justice.services.generators.commons.client.AbstractClientGenerator;
 import uk.gov.justice.services.generators.commons.client.ActionMimeTypeDefinition;
 import uk.gov.justice.services.generators.commons.helper.MessagingResourceUri;
@@ -25,8 +26,10 @@ public class MessagingClientGenerator extends AbstractClientGenerator {
 
     @Override
     protected String classNameOf(final Raml raml) {
-        MessagingResourceUri uri = new MessagingResourceUri(raml.getResources().values().iterator().next().getUri());
-        return String.format("Remote%s", uri.toClassName());
+        final MessagingBaseUri baseUri = new MessagingBaseUri(raml.getBaseUri());
+        final MessagingResourceUri resourceUri = new MessagingResourceUri(raml.getResources().values().iterator().next().getUri());
+
+        return String.format("Remote%s%s", baseUri.toClassName(), resourceUri.toClassName());
     }
 
     @Override

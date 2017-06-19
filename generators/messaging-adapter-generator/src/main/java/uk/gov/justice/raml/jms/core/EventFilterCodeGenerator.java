@@ -11,7 +11,7 @@ import static uk.gov.justice.services.generators.commons.helper.Names.DEFAULT_AN
 import static uk.gov.justice.services.generators.commons.helper.Names.buildJavaFriendlyName;
 import static uk.gov.justice.services.generators.commons.helper.Names.namesListStringFrom;
 
-import uk.gov.justice.raml.jms.uri.BaseUri;
+import uk.gov.justice.services.generators.commons.helper.MessagingBaseUri;
 import uk.gov.justice.services.event.buffer.api.AbstractEventFilter;
 
 import javax.annotation.Priority;
@@ -23,7 +23,7 @@ import org.raml.model.Resource;
 
 class EventFilterCodeGenerator {
 
-    TypeSpec generatedCodeFor(final Resource resource, final BaseUri baseUri) {
+    TypeSpec generatedCodeFor(final Resource resource, final MessagingBaseUri baseUri) {
         return classBuilder(classNameOf(baseUri))
                 .addModifiers(PUBLIC)
                 .superclass(AbstractEventFilter.class)
@@ -42,7 +42,7 @@ class EventFilterCodeGenerator {
      * @param baseUri URI String to convert
      * @return camel case class name
      */
-    private String classNameOf(final BaseUri baseUri) {
+    private String classNameOf(final MessagingBaseUri baseUri) {
         return format("%sEventFilter", buildJavaFriendlyName(baseUri.service()));
     }
 

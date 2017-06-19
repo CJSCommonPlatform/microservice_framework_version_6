@@ -11,7 +11,7 @@ import static uk.gov.justice.raml.jms.core.MediaTypesUtil.mediaTypesFrom;
 import static uk.gov.justice.services.generators.commons.helper.Names.namesListStringFrom;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
-import uk.gov.justice.raml.jms.uri.BaseUri;
+import uk.gov.justice.services.generators.commons.helper.MessagingBaseUri;
 import uk.gov.justice.services.adapter.messaging.JmsLoggerMetadataInterceptor;
 import uk.gov.justice.services.adapter.messaging.JmsProcessor;
 import uk.gov.justice.services.adapter.messaging.JsonSchemaValidationInterceptor;
@@ -78,7 +78,7 @@ class MessageListenerCodeGenerator {
      * @param baseUri  the base URI
      * @return the message listener class specification
      */
-    TypeSpec generatedCodeFor(final Resource resource, final BaseUri baseUri, final boolean listenToAllMessages, final GeneratorConfig configuration) {
+    TypeSpec generatedCodeFor(final Resource resource, final MessagingBaseUri baseUri, final boolean listenToAllMessages, final GeneratorConfig configuration) {
         return classSpecFrom(resource, baseUri, listenToAllMessages, configuration)
                 .addMethod(generateOnMessageMethod())
                 .build();
@@ -93,7 +93,7 @@ class MessageListenerCodeGenerator {
      * @return the {@link TypeSpec.Builder} that defines the class
      */
     private TypeSpec.Builder classSpecFrom(final Resource resource,
-                                           final BaseUri baseUri,
+                                           final MessagingBaseUri baseUri,
                                            final boolean listenToAllMessages,
                                            final GeneratorConfig generatorConfiguration) {
         final MessagingResourceUri resourceUri = new MessagingResourceUri(resource.getUri());
@@ -101,12 +101,12 @@ class MessageListenerCodeGenerator {
 
         if (componentDestinationType.isSupported(component)) {
 
-            final TypeSpec.Builder typeSpecBuilder = classBuilder(classNameOf(resourceUri))
+            final TypeSpec.Builder typeSpecBuilder = classBuilder(classNameOf(baseUri, resourceUri))
                     .addModifiers(PUBLIC)
                     .addSuperinterface(MessageListener.class)
                     .addField(FieldSpec.builder(ClassName.get(Logger.class), LOGGER_FIELD)
                             .addModifiers(PRIVATE, STATIC, FINAL)
-                            .initializer("$T.getLogger($L.class)", LoggerFactory.class, classNameOf(resourceUri))
+                            .initializer("$T.getLogger($L.class)", LoggerFactory.class, classNameOf(baseUri, resourceUri))
                             .build())
                     .addField(FieldSpec.builder(ClassName.get(InterceptorChainProcessor.class), INTERCEPTOR_CHAIN_PROCESS)
                             .addAnnotation(Inject.class)
@@ -180,7 +180,7 @@ class MessageListenerCodeGenerator {
     private AnnotationSpec messageDrivenAnnotation(final String component,
                                                    final Map<ActionType, Action> actions,
                                                    final MessagingResourceUri resourceUri,
-                                                   final BaseUri baseUri, final boolean listenToAllMessages) {
+                                                   final MessagingBaseUri baseUri, final boolean listenToAllMessages) {
 
         final Class<? extends Destination> inputType = componentDestinationType.inputTypeFor(component);
 
@@ -230,11 +230,11 @@ class MessageListenerCodeGenerator {
     /**
      * Convert given URI and component to a camel cased class name
      *
-     * @param resourceUri URI String to convert
+     * @param baseUri URI String to convert
      * @return camel case class name
      */
-    private String classNameOf(final MessagingResourceUri resourceUri) {
-        return format("%sJmsListener", resourceUri.toClassName());
+    private String classNameOf(final MessagingBaseUri baseUri, final MessagingResourceUri resourceUri) {
+        return format("%s%sJmsListener", baseUri.toClassName(), resourceUri.toClassName());
     }
 
     /**
@@ -243,7 +243,7 @@ class MessageListenerCodeGenerator {
      * @param baseUri base uri of the resource
      * @return component the value of the pillar and tier parts of the uri
      */
-    private String componentOf(final BaseUri baseUri) {
+    private String componentOf(final MessagingBaseUri baseUri) {
         return Component.valueOf(baseUri.pillar(), baseUri.tier());
     }
 

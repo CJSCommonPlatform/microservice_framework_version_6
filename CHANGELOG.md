@@ -5,6 +5,12 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [2.0.0-rc5] - 2017-06-20
+
+### Changed
+- Include base URI in class name for generated JMS listeners. This ensures they are unique, but any project that overrides the generated
+class will need to change the class name of their override to match.
+
 ## [2.0.0-rc4] - 2017-06-19
 
 ### Fixed

@@ -8,8 +8,8 @@ import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
-import uk.gov.justice.api.PeopleEventJmsListener;
 import uk.gov.justice.api.Service2EventFilter;
+import uk.gov.justice.api.Service2EventListenerPeopleEventJmsListener;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsParameterChecker;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsProcessor;
 import uk.gov.justice.services.adapter.messaging.JmsLoggerMetadataInterceptor;
@@ -20,6 +20,8 @@ import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.util.UtcClock;
+import uk.gov.justice.services.components.event.listener.interceptors.EventBufferInterceptor;
+import uk.gov.justice.services.components.event.listener.interceptors.EventFilterInterceptor;
 import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
 import uk.gov.justice.services.core.accesscontrol.AllowAllPolicyEvaluator;
 import uk.gov.justice.services.core.accesscontrol.DefaultAccessControlService;
@@ -28,13 +30,11 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
-import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
 import uk.gov.justice.services.core.dispatcher.EmptySystemUserProvider;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandlerProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.event.buffer.api.AllowAllEventFilter;
 import uk.gov.justice.services.core.extension.AnnotationScanner;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.interceptor.Interceptor;
@@ -48,9 +48,8 @@ import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.core.requester.RequesterProducer;
 import uk.gov.justice.services.core.sender.SenderProducer;
-import uk.gov.justice.services.components.event.listener.interceptors.EventBufferInterceptor;
+import uk.gov.justice.services.event.buffer.api.AllowAllEventFilter;
 import uk.gov.justice.services.event.buffer.api.EventBufferService;
-import uk.gov.justice.services.components.event.listener.interceptors.EventFilterInterceptor;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
@@ -99,7 +98,7 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
 
     @Module
     @Classes(cdi = true, value = {
-            PeopleEventJmsListener.class,
+            Service2EventListenerPeopleEventJmsListener.class,
             RecordingEventAAHandler.class,
             AllEventsHandler.class,
             RecordingJsonSchemaValidator.class,

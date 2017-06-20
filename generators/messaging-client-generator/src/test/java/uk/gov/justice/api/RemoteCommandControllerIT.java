@@ -17,7 +17,6 @@ import uk.gov.justice.services.core.accesscontrol.PolicyEvaluator;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
-import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserProvider;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
@@ -90,7 +89,7 @@ public class RemoteCommandControllerIT {
             DispatcherCache.class,
             PolicyEvaluator.class,
             RecordingJmsEnvelopeSender.class,
-            RemoteContextaControllerCommand.class,
+            RemoteService1CommandControllerContextaControllerCommand.class,
             RequesterProducer.class,
             SenderProducer.class,
             ServiceComponentObserver.class,

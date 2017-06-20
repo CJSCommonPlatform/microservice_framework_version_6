@@ -1,7 +1,8 @@
-package uk.gov.justice.raml.jms.uri;
+package uk.gov.justice.services.generators.commons.helper;
 
 
 import static java.lang.String.format;
+import static uk.gov.justice.services.generators.commons.helper.Names.buildJavaFriendlyName;
 
 import uk.gov.justice.services.core.annotation.Component;
 
@@ -11,7 +12,7 @@ import java.util.regex.Pattern;
 /**
  * Parses Raml base uri and exposes it's parts through accessor methods
  */
-public class BaseUri {
+public class MessagingBaseUri {
 
     private static final Pattern MESSAGING_BASE_URI_PATTERN
             = Pattern.compile("message://(event|command|query)/(api|controller|handler|listener|processor)/\\S+/(\\S+)");
@@ -19,7 +20,7 @@ public class BaseUri {
     private final String pillar;
     private final String service;
 
-    public BaseUri(final String uriString) {
+    public MessagingBaseUri(final String uriString) {
         final Matcher m = matcherOf(uriString);
         m.find();
         this.pillar = m.group(1);
@@ -76,4 +77,13 @@ public class BaseUri {
         return format("%s.%s.%s", service(), pillar(), tier());
     }
 
+    /**
+     * Returns a camel case class name with all invalid characters removed
+     *
+     * @return camel case string with all invalid characters removed.
+     */
+    public String toClassName() {
+        final String uncleaned = format("%s %s %s", service(), pillar(), tier());
+        return buildJavaFriendlyName(uncleaned);
+    }
 }

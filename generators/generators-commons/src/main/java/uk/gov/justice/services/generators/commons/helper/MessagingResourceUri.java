@@ -5,10 +5,10 @@ import static org.apache.commons.lang3.text.WordUtils.capitalize;
 
 public class MessagingResourceUri {
 
-    private final String uriString;
+    private final String resourceUri;
 
-    public MessagingResourceUri(String uriString) {
-        this.uriString = uriString;
+    public MessagingResourceUri(final String resourceUri) {
+        this.resourceUri = resourceUri;
     }
 
     /**
@@ -17,7 +17,7 @@ public class MessagingResourceUri {
      * @return messaging destination name
      */
     public String destinationName() {
-        return stripStart(uriString.trim(), "/");
+        return stripStart(resourceUri.trim(), "/");
     }
 
     /**
@@ -27,8 +27,8 @@ public class MessagingResourceUri {
      */
     public String toClassName() {
 
-        String cleaned = uriString.replaceAll("[^A-Za-z0-9_$]", " ");
-        
+        String cleaned = resourceUri.replaceAll("[^A-Za-z0-9_$]", " ");
+
         return capitalize(cleaned, " _$0123456789".toCharArray())
                 .replaceAll(" ", "")
                 .replaceAll("^[0-9]+", "");
@@ -40,6 +40,6 @@ public class MessagingResourceUri {
 
     @Override
     public String toString() {
-        return uriString;
+        return resourceUri;
     }
 }

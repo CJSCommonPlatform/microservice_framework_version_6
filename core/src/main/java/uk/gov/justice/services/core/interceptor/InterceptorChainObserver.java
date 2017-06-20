@@ -29,11 +29,11 @@ public class InterceptorChainObserver implements Extension {
     @SuppressWarnings({"unused"})
     void afterDeploymentValidation(@Observes final AfterDeploymentValidation event, final BeanManager beanManager) {
         beanManager.getBeans(InterceptorChainProvider.class, AnyLiteral.create()).stream()
-                .peek(this::logInteceptorChainProvider)
+                .peek(this::logInterceptorChainProvider)
                 .forEach(interceptorChainProviderBeans::add);
 
         beanManager.getBeans(Interceptor.class, AnyLiteral.create()).stream()
-                .peek(this::logInteceptor)
+                .peek(this::logInterceptor)
                 .forEach(interceptorBeans::add);
     }
 
@@ -45,11 +45,11 @@ public class InterceptorChainObserver implements Extension {
         return interceptorBeans;
     }
 
-    private void logInteceptorChainProvider(final Bean<?> bean) {
-        LOGGER.info("Identified Interceptor Chain Provider {}", bean.getBeanClass().getSimpleName());
+    private void logInterceptorChainProvider(final Bean<?> bean) {
+        LOGGER.info("Found interceptor chain provider {}", bean.getBeanClass().getSimpleName());
     }
 
-    private void logInteceptor(final Bean<?> bean) {
-        LOGGER.info("Identified Dispatcher Interceptor {}", bean.getBeanClass().getSimpleName());
+    private void logInterceptor(final Bean<?> bean) {
+        LOGGER.info("Found interceptor {}", bean.getBeanClass().getSimpleName());
     }
 }

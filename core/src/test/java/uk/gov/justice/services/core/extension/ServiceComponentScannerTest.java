@@ -43,7 +43,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AnnotationScannerTest {
+public class ServiceComponentScannerTest {
 
     private static final String TEST_EVENT_NAME = "Test-Event";
 
@@ -58,11 +58,11 @@ public class AnnotationScannerTest {
     @Mock
     private BeanManager beanManager;
 
-    private AnnotationScanner annotationScanner;
+    private ServiceComponentScanner serviceComponentScanner;
 
     @Before
     public void setup() {
-        annotationScanner = new AnnotationScanner();
+        serviceComponentScanner = new ServiceComponentScanner();
     }
 
     @Test
@@ -109,7 +109,7 @@ public class AnnotationScannerTest {
 
         mockBeanManagerGetBeansWith(TestBean.of(Object.class));
 
-        annotationScanner.afterDeploymentValidation(NOT_USED_AFTER_DEPLOYMENT_VALIDATION, beanManager);
+        serviceComponentScanner.afterDeploymentValidation(NOT_USED_AFTER_DEPLOYMENT_VALIDATION, beanManager);
 
         verify(beanManager, never()).fireEvent(any());
     }
@@ -121,7 +121,7 @@ public class AnnotationScannerTest {
         doReturn(new HashSet<Bean<Object>>(asList(TestBean.of(TestDirectQueryViewAdapter.class), TestBean.of(TestDirectQueryApiHandler.class)))).when(beanManager).getBeans(any(), any());
         doReturn(new HashSet<Bean<Object>>(asList(TestBean.of(TestDirectQueryViewAdapter.class)))).when(beanManager).getBeans(SynchronousDirectAdapter.class);
 
-        annotationScanner.afterDeploymentValidation(NOT_USED_AFTER_DEPLOYMENT_VALIDATION, beanManager);
+        serviceComponentScanner.afterDeploymentValidation(NOT_USED_AFTER_DEPLOYMENT_VALIDATION, beanManager);
 
         verify(beanManager).fireEvent(captor.capture());
         assertThat(captor.getValue(), instanceOf(ServiceComponentFoundEvent.class));
@@ -139,7 +139,7 @@ public class AnnotationScannerTest {
         doReturn(new HashSet<Bean<Object>>(asList(TestBean.of(OtherTestDirectAdapter.class))))
                 .when(beanManager).getBeans(SynchronousDirectAdapter.class);
 
-        annotationScanner.afterDeploymentValidation(NOT_USED_AFTER_DEPLOYMENT_VALIDATION, beanManager);
+        serviceComponentScanner.afterDeploymentValidation(NOT_USED_AFTER_DEPLOYMENT_VALIDATION, beanManager);
 
         verify(beanManager, never()).fireEvent(any());
     }
@@ -161,7 +161,7 @@ public class AnnotationScannerTest {
         final ArgumentCaptor<ServiceComponentFoundEvent> captor = ArgumentCaptor.forClass(ServiceComponentFoundEvent.class);
         mockBeanManagerGetBeansWith(handler);
 
-        annotationScanner.afterDeploymentValidation(NOT_USED_AFTER_DEPLOYMENT_VALIDATION, beanManager);
+        serviceComponentScanner.afterDeploymentValidation(NOT_USED_AFTER_DEPLOYMENT_VALIDATION, beanManager);
 
         verify(beanManager).fireEvent(captor.capture());
         assertThat(captor.getValue(), instanceOf(ServiceComponentFoundEvent.class));
@@ -172,7 +172,7 @@ public class AnnotationScannerTest {
         final ArgumentCaptor<ServiceComponentFoundEvent> captor = ArgumentCaptor.forClass(ServiceComponentFoundEvent.class);
         mockBeanManagerGetBeansWith(handler);
 
-        annotationScanner.afterDeploymentValidation(NOT_USED_AFTER_DEPLOYMENT_VALIDATION, beanManager);
+        serviceComponentScanner.afterDeploymentValidation(NOT_USED_AFTER_DEPLOYMENT_VALIDATION, beanManager);
 
         verify(beanManager).fireEvent(captor.capture());
         assertThat(captor.getAllValues(), hasSize(1));
@@ -185,8 +185,8 @@ public class AnnotationScannerTest {
         final ArgumentCaptor<EventFoundEvent> captor = ArgumentCaptor.forClass(EventFoundEvent.class);
         mockProcessAnnotatedType();
 
-        annotationScanner.processAnnotatedType(processAnnotatedType);
-        annotationScanner.afterDeploymentValidation(NOT_USED_AFTER_DEPLOYMENT_VALIDATION, beanManager);
+        serviceComponentScanner.processAnnotatedType(processAnnotatedType);
+        serviceComponentScanner.afterDeploymentValidation(NOT_USED_AFTER_DEPLOYMENT_VALIDATION, beanManager);
 
         verify(beanManager).fireEvent(captor.capture());
         assertThat(captor.getValue(), instanceOf(EventFoundEvent.class));

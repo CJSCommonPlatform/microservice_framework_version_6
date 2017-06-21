@@ -34,9 +34,9 @@ import org.slf4j.Logger;
 /**
  * Scans all beans and processes framework specific annotations.
  */
-public class AnnotationScanner implements Extension {
+public class ServiceComponentScanner implements Extension {
 
-    private static final Logger LOGGER = getLogger(HandlerRegistry.class);
+    private static final Logger LOGGER = getLogger(ServiceComponentScanner.class);
 
     private List<Object> events = synchronizedList(new ArrayList<>());
 
@@ -81,7 +81,7 @@ public class AnnotationScanner implements Extension {
      */
     private void processServiceComponentsForEvents(final Bean<?> bean) {
         final Class<?> clazz = bean.getBeanClass();
-        LOGGER.info("Identified ServiceComponent {}", clazz.getSimpleName());
+        LOGGER.info("Found class {} as part of component {}", clazz.getSimpleName(), componentFrom(clazz));
 
         events.add(new ServiceComponentFoundEvent(componentFrom(clazz), bean, componentLocationFrom(clazz)));
     }

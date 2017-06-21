@@ -22,13 +22,12 @@ import uk.gov.justice.services.core.annotation.CustomServiceComponent;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
-import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
 import uk.gov.justice.services.core.dispatcher.EmptySystemUserProvider;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandlerProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.core.extension.AnnotationScanner;
+import uk.gov.justice.services.core.extension.ServiceComponentScanner;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.interceptor.Interceptor;
 import uk.gov.justice.services.core.interceptor.InterceptorCache;
@@ -82,7 +81,7 @@ public class CustomServiceComponentHandlerIT {
     @Module
     @Classes(cdi = true, value = {
             CustomComponentHandler.class,
-            AnnotationScanner.class,
+            ServiceComponentScanner.class,
             RequesterProducer.class,
             ServiceComponentObserver.class,
 

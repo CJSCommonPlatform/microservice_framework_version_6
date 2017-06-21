@@ -20,7 +20,7 @@ import uk.gov.justice.services.core.dispatcher.EmptySystemUserProvider;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandlerProducer;
-import uk.gov.justice.services.core.extension.AnnotationScanner;
+import uk.gov.justice.services.core.extension.ServiceComponentScanner;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.interceptor.Interceptor;
 import uk.gov.justice.services.core.interceptor.InterceptorCache;
@@ -75,7 +75,7 @@ public class DirectAdapterIT {
 
     @Module
     @Classes(cdi = true, value = {
-            AnnotationScanner.class,
+            ServiceComponentScanner.class,
             RequesterProducer.class,
             ServiceComponentObserver.class,
             DefaultJsonSchemaValidator.class,

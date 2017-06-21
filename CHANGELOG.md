@@ -5,6 +5,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Changed
+- Improved logging for annotation scanning
+
 ## [2.0.0-rc5] - 2017-06-20
 
 ### Changed

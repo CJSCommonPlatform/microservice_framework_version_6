@@ -10,7 +10,8 @@ public interface AuditService {
     /**
      * Orchestrates the auditing of the action.
      *
-     * @param envelope - the envelope to be audited.
+     * @param envelope the envelope to be audited
+     * @param component the name of the component that the action came into
      */
-    void audit(final JsonEnvelope envelope);
+    void audit(final JsonEnvelope envelope, final String component);
 }

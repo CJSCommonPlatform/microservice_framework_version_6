@@ -24,14 +24,15 @@ public class SimpleAuditClient implements AuditClient {
     ServiceContextNameProvider serviceContextNameProvider;
 
     @Override
-    public void auditEntry(final JsonEnvelope envelope) {
-        logger.info(createAuditMessageFrom(envelope));
+    public void auditEntry(final JsonEnvelope envelope, final String component) {
+        logger.info(createAuditMessageFrom(envelope, component));
     }
 
-    private String createAuditMessageFrom(final JsonEnvelope envelope) {
+    private String createAuditMessageFrom(final JsonEnvelope envelope, final String component) {
 
         return new JSONObject()
                 .put("serviceContext", serviceContextNameProvider.getServiceContextName())
+                .put("component", component)
                 .put("envelope", new JSONObject(envelope.toString()))
                 .toString(2);
     }

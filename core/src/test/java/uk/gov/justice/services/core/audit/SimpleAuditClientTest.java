@@ -21,6 +21,8 @@ import org.slf4j.Logger;
 @RunWith(MockitoJUnitRunner.class)
 public class SimpleAuditClientTest {
 
+    private static final String COMPONENT = "test-component";
+
     @Mock
     Logger logger;
 
@@ -45,7 +47,7 @@ public class SimpleAuditClientTest {
         when(envelope.toString()).thenReturn(envelopeJson);
         when(serviceContextNameProvider.getServiceContextName()).thenReturn(serviceContextName);
 
-        simpleAuditClient.auditEntry(envelope);
+        simpleAuditClient.auditEntry(envelope, COMPONENT);
 
         final ArgumentCaptor<String> argumentCaptor = forClass(String.class);
 
@@ -55,6 +57,7 @@ public class SimpleAuditClientTest {
 
         with(json)
                 .assertEquals("serviceContext", serviceContextName)
+                .assertEquals("component", COMPONENT)
                 .assertEquals("envelope.propertyName", propertyValue);
     }
 }

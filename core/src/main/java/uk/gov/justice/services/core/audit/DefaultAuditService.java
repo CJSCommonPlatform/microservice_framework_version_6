@@ -40,16 +40,18 @@ public class DefaultAuditService implements AuditService {
      * Orchestrates the auditing of the action, uses a blacklist regex pattern to skip auditing if
      * required.
      *
-     * @param envelope - the envelope to be audited.
+     * @param envelope the envelope to be audited
+     * @param component the component that requested the action to be audited
      */
-    public void audit(final JsonEnvelope envelope) {
+    @Override
+    public void audit(final JsonEnvelope envelope, final String component) {
 
         final String actionName = envelope.metadata().name();
 
         if (auditBlacklistPattern.matcher(actionName).matches()) {
             logger.info(format("Skipping auditing of action %s due to configured blacklist pattern %s.", actionName, auditBlacklist));
         } else {
-            auditClient.auditEntry(envelope);
+            auditClient.auditEntry(envelope, component);
         }
     }
 }

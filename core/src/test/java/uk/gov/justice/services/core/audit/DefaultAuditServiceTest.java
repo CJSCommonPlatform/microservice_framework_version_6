@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 public class DefaultAuditServiceTest {
 
     private static final String ACTION_NAME = "test.action";
+    private static final String COMPONENT = "test-component";
 
     @Mock
     private AuditClient auditClient;
@@ -45,9 +46,9 @@ public class DefaultAuditServiceTest {
     @Test
     public void shouldAuditWithDefaultEmptyBlacklist() throws Exception {
         initialisePattern("");
-        auditService.audit(jsonEnvelope);
+        auditService.audit(jsonEnvelope, COMPONENT);
 
-        verify(auditClient, times(1)).auditEntry(jsonEnvelope);
+        verify(auditClient, times(1)).auditEntry(jsonEnvelope, COMPONENT);
     }
 
     @Test
@@ -55,19 +56,19 @@ public class DefaultAuditServiceTest {
         initialisePattern(".*\\.action");
         when(metadata.name()).thenReturn("some-action");
 
-        auditService.audit(jsonEnvelope);
+        auditService.audit(jsonEnvelope, COMPONENT);
 
-        verify(auditClient, times(1)).auditEntry(jsonEnvelope);
+        verify(auditClient, times(1)).auditEntry(jsonEnvelope, COMPONENT);
     }
 
     @Test
     public void shouldNotAuditBlacklistedAction() {
         initialisePattern(".*\\.action");
 
-        auditService.audit(jsonEnvelope);
+        auditService.audit(jsonEnvelope, COMPONENT);
 
         verify(logger, times(1)).info("Skipping auditing of action test.action due to configured blacklist pattern .*\\.action.");
-        verify(auditClient, never()).auditEntry(jsonEnvelope);
+        verify(auditClient, never()).auditEntry(jsonEnvelope, COMPONENT);
     }
 
     private void initialisePattern(final String pattern) {

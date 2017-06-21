@@ -28,7 +28,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class LocalAuditInterceptorTest {
 
-    private static final int AUDIT_PRIORITY = 2000;
+    private static final String COMPONENT = "test-component";
+    private static final String UNKNOWN_COMPONENT = "UNKNOWN";
 
     @Mock
     private JsonEnvelope inputEnvelope;
@@ -57,11 +58,22 @@ public class LocalAuditInterceptorTest {
     @Test
     public void shouldApplyAccessControlToInputIfLocalComponent() throws Exception {
         final InterceptorContext inputContext = interceptorContextWithInput(inputEnvelope);
+        inputContext.setInputParameter("component", COMPONENT);
 
         interceptorChain.processNext(inputContext);
 
-        verify(auditService).audit(inputEnvelope);
-        verify(auditService).audit(outputEnvelope);
+        verify(auditService).audit(inputEnvelope, COMPONENT);
+        verify(auditService).audit(outputEnvelope, COMPONENT);
+    }
+
+    @Test
+    public void shouldUseUnknownComponentIfComponentNotSet() throws Exception {
+        final InterceptorContext inputContext = interceptorContextWithInput(inputEnvelope);
+
+        interceptorChain.processNext(inputContext);
+
+        verify(auditService).audit(inputEnvelope, UNKNOWN_COMPONENT);
+        verify(auditService).audit(outputEnvelope, UNKNOWN_COMPONENT);
     }
 
     @Adapter(COMMAND_API)

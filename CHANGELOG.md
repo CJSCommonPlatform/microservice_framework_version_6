@@ -7,6 +7,8 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ### Changed
 - Improved logging for annotation scanning
+- Add component to audit interceptor so that audit messages can distinguish between components even
+when they are deployed in a single WAR.
 
 ## [2.0.0-rc5] - 2017-06-20
 

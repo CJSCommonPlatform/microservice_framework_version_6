@@ -3,7 +3,7 @@ package uk.gov.justice.raml.jms.validator;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
-import uk.gov.justice.services.generators.commons.helper.MessagingBaseUri;
+import uk.gov.justice.services.generators.commons.helper.MessagingAdapterBaseUri;
 import uk.gov.justice.services.generators.commons.validator.RamlValidationException;
 import uk.gov.justice.services.generators.commons.validator.RamlValidator;
 
@@ -21,7 +21,7 @@ public class BaseUriRamlValidator implements RamlValidator {
         if (isEmpty(raml.getBaseUri())) {
             throw new RamlValidationException(BASE_URI_NOT_SET_MSG);
         }
-        if (!MessagingBaseUri.valid(raml.getBaseUri())) {
+        if (!MessagingAdapterBaseUri.valid(raml.getBaseUri())) {
             throw new RamlValidationException(format(ERROR_MSG, raml.getBaseUri()));
         }
     }

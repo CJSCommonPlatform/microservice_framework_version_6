@@ -46,7 +46,7 @@ public class MessagingClientGenerator_MethodBodyTest extends BaseGeneratorTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
 
-        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteContextEventProcessorCakeshopControllerCommand");
+        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteEventProcessorMessageContextCakeshopControllerCommand");
         final Object instance = instanceOf(generatedClass);
         setField(instance, "traceLogger", mock(TraceLogger.class));
 

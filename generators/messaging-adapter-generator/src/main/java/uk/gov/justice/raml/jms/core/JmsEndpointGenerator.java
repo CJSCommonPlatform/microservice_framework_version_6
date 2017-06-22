@@ -7,7 +7,7 @@ import static uk.gov.justice.services.generators.commons.helper.GeneratedClassWr
 
 import uk.gov.justice.raml.core.Generator;
 import uk.gov.justice.raml.core.GeneratorConfig;
-import uk.gov.justice.services.generators.commons.helper.MessagingBaseUri;
+import uk.gov.justice.services.generators.commons.helper.MessagingAdapterBaseUri;
 import uk.gov.justice.raml.jms.validator.BaseUriRamlValidator;
 import uk.gov.justice.services.generators.commons.validator.CompositeRamlValidator;
 import uk.gov.justice.services.generators.commons.validator.ContainsActionsRamlValidator;
@@ -59,7 +59,7 @@ public class JmsEndpointGenerator implements Generator {
 
 
     private Stream<? extends TypeSpec> generatedClassesFrom(final Raml raml, final Resource resource, final GeneratorConfig configuration) {
-        final MessagingBaseUri baseUri = new MessagingBaseUri(raml.getBaseUri());
+        final MessagingAdapterBaseUri baseUri = new MessagingAdapterBaseUri(raml.getBaseUri());
         final boolean listenToAllMessages = shouldListenToAllMessages(resource, baseUri);
 
         final TypeSpec messageListenerCode = messageListenerCodeGenerator.generatedCodeFor(resource, baseUri, listenToAllMessages, configuration);
@@ -79,11 +79,11 @@ public class JmsEndpointGenerator implements Generator {
     therefore we need all messages with consecutive numbers there. Messages need to be in correct order in order to update the view correctly.
     */
 
-    private boolean shouldGenerateEventFilter(final Resource resource, final MessagingBaseUri baseUri) {
+    private boolean shouldGenerateEventFilter(final Resource resource, final MessagingAdapterBaseUri baseUri) {
         return EVENT_LISTENER.equals(baseUri.component()) && !containsGeneralJsonMimeType(resource.getActions());
     }
 
-    private boolean shouldListenToAllMessages(final Resource resource, final MessagingBaseUri baseUri) {
+    private boolean shouldListenToAllMessages(final Resource resource, final MessagingAdapterBaseUri baseUri) {
         return EVENT_LISTENER.equals(baseUri.component()) || containsGeneralJsonMimeType(resource.getActions());
     }
 

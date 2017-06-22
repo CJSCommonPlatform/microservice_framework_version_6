@@ -89,7 +89,7 @@ public class RemoteCommandControllerIT {
             DispatcherCache.class,
             PolicyEvaluator.class,
             RecordingJmsEnvelopeSender.class,
-            RemoteService1CommandControllerContextaControllerCommand.class,
+            RemoteCommandControllerMessageService1ContextaControllerCommand.class,
             RequesterProducer.class,
             SenderProducer.class,
             ServiceComponentObserver.class,

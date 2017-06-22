@@ -10,9 +10,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Parses Raml base uri and exposes it's parts through accessor methods
+ * Parses RAML base URI for adapters, and exposes it's parts through accessor methods.
+ *
+ * This class enforces the framework conventions for service component names and should be
+ * deprecated at some point in favour of discovering the service component through configuration.
  */
-public class MessagingBaseUri {
+public class MessagingAdapterBaseUri {
 
     private static final Pattern MESSAGING_BASE_URI_PATTERN
             = Pattern.compile("message://(event|command|query)/(api|controller|handler|listener|processor)/\\S+/(\\S+)");
@@ -20,7 +23,7 @@ public class MessagingBaseUri {
     private final String pillar;
     private final String service;
 
-    public MessagingBaseUri(final String uriString) {
+    public MessagingAdapterBaseUri(final String uriString) {
         final Matcher m = matcherOf(uriString);
         m.find();
         this.pillar = m.group(1);

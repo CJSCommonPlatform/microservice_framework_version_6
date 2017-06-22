@@ -8,7 +8,7 @@ import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
-import uk.gov.justice.api.Service2EventFilter;
+import uk.gov.justice.api.Service2EventListenerEventFilter;
 import uk.gov.justice.api.Service2EventListenerPeopleEventJmsListener;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsParameterChecker;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsProcessor;
@@ -35,8 +35,8 @@ import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandlerProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.core.extension.ServiceComponentScanner;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
+import uk.gov.justice.services.core.extension.ServiceComponentScanner;
 import uk.gov.justice.services.core.interceptor.Interceptor;
 import uk.gov.justice.services.core.interceptor.InterceptorCache;
 import uk.gov.justice.services.core.interceptor.InterceptorChainObserver;
@@ -76,7 +76,6 @@ import org.apache.openejb.testing.Module;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-
 @RunWith(ApplicationComposer.class)
 public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
 
@@ -103,7 +102,7 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
             AllEventsHandler.class,
             RecordingJsonSchemaValidator.class,
             RecordingEventBufferService.class,
-            Service2EventFilter.class,
+            Service2EventListenerEventFilter.class,
 
             InterceptorChainProcessorProducer.class,
             InterceptorChainProcessor.class,

@@ -57,7 +57,7 @@ public class JmsEndpointGenerator_EventFilterTest extends BaseGeneratorTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "StructureEventFilter");
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "StructureEventListenerEventFilter");
 
         final AbstractEventFilter eventFilter = (AbstractEventFilter) clazz.newInstance();
 
@@ -109,7 +109,7 @@ public class JmsEndpointGenerator_EventFilterTest extends BaseGeneratorTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "StructureEventFilter");
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "StructureEventListenerEventFilter");
         assertThat(clazz.getAnnotation(ApplicationScoped.class), is(not(nullValue())));
         assertThat(clazz.getAnnotation(Alternative.class), is(not(nullValue())));
         final Priority priorityAnnotation = clazz.getAnnotation(Priority.class);
@@ -129,7 +129,7 @@ public class JmsEndpointGenerator_EventFilterTest extends BaseGeneratorTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "MyHyphenatedServiceEventFilter");
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "MyHyphenatedServiceEventListenerEventFilter");
 
         final AbstractEventFilter eventFilter = (AbstractEventFilter) clazz.newInstance();
 

@@ -5,6 +5,8 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [2.0.0-rc6] - 2017-06-22
+
 ### Changed
 - Improved logging for annotation scanning
 - Add component to audit interceptor so that audit messages can distinguish between components even

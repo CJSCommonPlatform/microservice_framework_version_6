@@ -5,6 +5,40 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [2.0.0] 2017-06-23
+
+### Changed
+- Refactor all framework components that are not internal so that they are provided as interfaces
+via new Framework API modules
+- Rework interceptor chain so that it is specific to a service component, by allowing each component
+to provide an interceptor chain definition rather than using annotation scanning
+- Upgrade to use framework parent POM [1.5.0](https://github.com/CJSCommonPlatform/maven-framework-parent-pom/releases/tag/release-1.5.0)
+- Upgrade to use common BOM [1.16.0](https://github.com/CJSCommonPlatform/maven-common-bom/releases/tag/release-1.16.0)
+- Interceptor chain now adds the component name to the context so it can be used by the access control interceptor or anything else that needs it
+- Logging dependencies tidied up - all logging implementations excluded from dependencies and tests use new test utils modules for logging
+- Generated class names made more unique, including adding the base URI in class name for generated JMS listeners. **Any project that overrides the generated
+class will need to change the class name of their override to match**
+- Improved logging for annotation scanning
+- Add component to audit interceptor so that audit messages can distinguish between components even
+when they are deployed in a single WAR.
+
+### Removed
+- Support for default sender destinations removed; senders now always require messaging clients to
+be provided, typically by generating one from the destination RAML.
+- Access control Provider annotation and annotation scanning; this functionality has moved to the access control library
+- Precondition class marked as deprecated - will be removed in 3.0.0 unless a different use case is found for it
+
+### Fixed
+- Test cases for random ZonedDateTime generators and added logging to show more info when they fail
+- Javadoc errors
+- Aggregate snapshot service was pulling in Liquibase due to an incorrect dependency scope
+- Remove audit from event listener and event processor
+
+### Added
+- Script for building dependencies locally
+- Support for generating and discovering direct adapters, if a message destination exists locally 
+a service component in the same application
+
 ## [2.0.0-rc8] - 2017-06-23
 
 ### Fixed
@@ -659,9 +693,15 @@ turned off by default
 - Initial release with basic dispatcher, handler and adapter generation
 
 [Unreleased]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-2.0.0-rc3...HEAD
+[2.0.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.7.0...release-2.0.0
+[2.0.0-rc8]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-2.0.0-rc7...release-2.0.0-rc8
+[2.0.0-rc7]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-2.0.0-rc6...release-2.0.0-rc7
+[2.0.0-rc6]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-2.0.0-rc5...release-2.0.0-rc6
+[2.0.0-rc5]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-2.0.0-rc4...release-2.0.0-rc5
+[2.0.0-rc4]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-2.0.0-rc3...release-2.0.0-rc4
 [2.0.0-rc3]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-2.0.0-rc2...release-2.0.0-rc3
 [2.0.0-rc2]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-2.0.0-rc1...release-2.0.0-rc2
-[2.0.0-rc1]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.7.1...release-2.0.0-rc1
+[2.0.0-rc1]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.7.0...release-2.0.0-rc1
 [1.7.1]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.7.0...release-1.7.1
 [1.7.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.6.0...release-1.7.0
 [1.6.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.5.0...release-1.6.0

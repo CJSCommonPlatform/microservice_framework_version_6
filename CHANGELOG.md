@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [2.0.0-rc7] - 2017-06-23
+### Changed
+- Message client generated class name no longer enforces base URI pattern
+
 ## [2.0.0-rc6] - 2017-06-22
 
 ### Changed

@@ -32,7 +32,6 @@ public class EventListenerInterceptorChainProviderTest {
         assertThat(interceptorChainTypes, containsInAnyOrder(
                 new ImmutablePair<>(1, TotalActionMetricsInterceptor.class),
                 new ImmutablePair<>(2, IndividualActionMetricsInterceptor.class),
-                new ImmutablePair<>(3000, LocalAuditInterceptor.class),
                 new ImmutablePair<>(1000, EventBufferInterceptor.class),
                 new ImmutablePair<>(2000, EventFilterInterceptor.class)));
     }

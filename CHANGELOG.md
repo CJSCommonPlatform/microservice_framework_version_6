@@ -4,6 +4,8 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Fixed
+- Remove audit from event listener and event processor
 
 ## [2.0.0-rc7] - 2017-06-23
 ### Changed

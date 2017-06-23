@@ -1,7 +1,5 @@
 package uk.gov.justice.services.components.common;
 
-import uk.gov.justice.services.core.accesscontrol.LocalAccessControlInterceptor;
-import uk.gov.justice.services.core.audit.LocalAuditInterceptor;
 import uk.gov.justice.services.core.interceptor.Interceptor;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProvider;
 import uk.gov.justice.services.metrics.interceptor.IndividualActionMetricsInterceptor;
@@ -13,7 +11,6 @@ import java.util.List;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
-
 public abstract class BaseInterceptorChainProvider implements InterceptorChainProvider {
 
     final List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes = new LinkedList<>();
@@ -21,8 +18,8 @@ public abstract class BaseInterceptorChainProvider implements InterceptorChainPr
     public BaseInterceptorChainProvider(){
         interceptorChainTypes.add(new ImmutablePair<>(1, TotalActionMetricsInterceptor.class));
         interceptorChainTypes.add(new ImmutablePair<>(2, IndividualActionMetricsInterceptor.class));
-        interceptorChainTypes.add(new ImmutablePair<>(3000, LocalAuditInterceptor.class));
     }
+
     @Override
     public List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes() {
         return interceptorChainTypes;

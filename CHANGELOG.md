@@ -5,6 +5,8 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [1.7.2] - 2017-06-27
+
 ### Fixed
 - Aggregate snapshot repository did not use aggregate class when retrieving snapshots, so services that use multiple aggregate classes
 on the same stream could get class cast exceptions

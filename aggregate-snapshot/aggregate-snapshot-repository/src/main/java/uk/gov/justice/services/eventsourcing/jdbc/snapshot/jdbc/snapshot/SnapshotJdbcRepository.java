@@ -31,10 +31,10 @@ public class SnapshotJdbcRepository extends AbstractJdbcRepository<AggregateSnap
     private static final String COL_VERSION_ID = "version_id";
     private static final String COL_TYPE = "type";
     private static final String COL_AGGREGATE = "aggregate";
-    private static final String SQL_FIND_LATEST_BY_STREAM_ID = "SELECT * FROM snapshot WHERE stream_id=? ORDER BY version_id DESC";
+    private static final String SQL_FIND_LATEST_BY_STREAM_ID = "SELECT * FROM snapshot WHERE stream_id=? AND type=? ORDER BY version_id DESC";
     private static final String SQL_INSERT_EVENT_LOG = "INSERT INTO snapshot (stream_id, version_id, type, aggregate ) VALUES(?, ?, ?, ?)";
     private static final String DELETE_ALL_SNAPSHOTS_FOR_STREAM_ID_AND_CLASS = "delete from snapshot where stream_id =? and  type=?";
-    private static final String SQL_CURRENT_SNAPSHOT_VERSION_ID = "SELECT version_id FROM snapshot WHERE stream_id=? ORDER BY version_id DESC";
+    private static final String SQL_CURRENT_SNAPSHOT_VERSION_ID = "SELECT version_id FROM snapshot WHERE stream_id=? AND type=? ORDER BY version_id DESC";
     private static final String JNDI_DS_EVENT_STORE_PATTERN = "java:/app/%s/DS.eventstore";
 
     @Inject
@@ -62,6 +62,7 @@ public class SnapshotJdbcRepository extends AbstractJdbcRepository<AggregateSnap
              final PreparedStatement preparedStatement = connection.prepareStatement(SQL_FIND_LATEST_BY_STREAM_ID)) {
 
             preparedStatement.setObject(1, streamId);
+            preparedStatement.setObject(2, clazz.getName());
 
             return extractResults(preparedStatement, clazz);
 
@@ -88,7 +89,9 @@ public class SnapshotJdbcRepository extends AbstractJdbcRepository<AggregateSnap
 
         try (final Connection connection = getDataSource().getConnection();
              final PreparedStatement preparedStatement = connection.prepareStatement(SQL_CURRENT_SNAPSHOT_VERSION_ID)) {
+
             preparedStatement.setObject(1, streamId);
+            preparedStatement.setObject(2, clazz.getName());
 
             try (final ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {

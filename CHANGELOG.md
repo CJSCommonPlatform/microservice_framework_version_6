@@ -5,6 +5,11 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Fixed
+- Aggregate snapshot repository did not use aggregate class when retrieving snapshots, so services that use multiple aggregate classes
+on the same stream could get class cast exceptions
+- Corrected scope of JEE dependency
+
 ## [1.7.1] - 2017-05-31
 
 ### Added

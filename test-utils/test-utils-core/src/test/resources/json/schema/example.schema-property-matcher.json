@@ -1,0 +1,103 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "definitions": {
+    "address": {
+      "type": "object",
+      "properties": {
+        "addressLine1": {
+          "type": "string"
+        },
+        "addressLine2": {
+          "type": "string"
+        },
+        "postCode": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "addressLine1",
+        "postCode"
+      ]
+    },
+    "offence": {
+      "type": "object",
+      "properties": {
+        "offenceId": {
+          "type": "string"
+        },
+        "wording": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "offenceId"
+      ]
+    }
+  },
+  "type": "object",
+  "properties": {
+    "urn": {
+      "id": "/urn",
+      "type": "string"
+    },
+    "id": {
+      "id": "/id",
+      "type": "string"
+    },
+    "anotherProperty": {
+      "id": "/anotherProperty",
+      "type": "string"
+    },
+    "address": {
+      "$ref": "#/definitions/address"
+    },
+    "schemaArray": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "schemaArrayId": {
+            "type": "string"
+          },
+          "schemaArrayReqProperty": {
+            "type": "string"
+          },
+          "schemaArrayProperty": {
+            "type": "integer"
+          },
+          "schemaSubArray": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "subArrayId": {
+                  "type": "string"
+                },
+                "subArrayProperty": {
+                  "type": "string"
+                },
+                "offence": {
+                  "$ref": "#/definitions/offence"
+                }
+              },
+              "required" : [
+                "subArrayId"
+              ]
+            }
+          }
+        },
+        "required" : [
+          "schemaArrayId",
+          "schemaArrayReqProperty"
+        ]
+      }
+    }
+  },
+  "required": [
+    "urn",
+    "id",
+    "address"
+  ]
+}

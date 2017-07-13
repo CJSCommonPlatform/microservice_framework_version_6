@@ -5,6 +5,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Added
+- RandomPersonNameGenerator to generate random readable person names
+
 ### Fixed
 - Aggregate snapshot repository did not use aggregate class when retrieving snapshots, so services that use multiple aggregate classes
 on the same stream could get class cast exceptions

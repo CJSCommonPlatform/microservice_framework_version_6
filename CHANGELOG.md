@@ -5,6 +5,11 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [2.1.0] 2017-07-17
+
+### Added
+- New test matcher for checking schema properties
+
 ### Fixed
 - Aggregate snapshot repository did not use aggregate class when retrieving snapshots, so services that use multiple aggregate classes
 on the same stream could get class cast exceptions
@@ -696,7 +701,8 @@ turned off by default
 
 - Initial release with basic dispatcher, handler and adapter generation
 
-[Unreleased]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-2.0.0-rc3...HEAD
+[Unreleased]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-2.1.0...HEAD
+[2.1.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-2.0.0...release-2.1.0
 [2.0.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.7.0...release-2.0.0
 [2.0.0-rc8]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-2.0.0-rc7...release-2.0.0-rc8
 [2.0.0-rc7]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-2.0.0-rc6...release-2.0.0-rc7

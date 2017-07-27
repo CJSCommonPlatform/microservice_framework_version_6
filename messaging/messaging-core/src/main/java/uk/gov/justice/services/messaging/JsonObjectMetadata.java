@@ -2,128 +2,162 @@ package uk.gov.justice.services.messaging;
 
 import static java.time.ZonedDateTime.now;
 import static java.util.UUID.randomUUID;
-import static uk.gov.justice.services.messaging.JsonObjects.getJsonString;
-import static uk.gov.justice.services.messaging.JsonObjects.getLong;
-import static uk.gov.justice.services.messaging.JsonObjects.getString;
-import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
-import static uk.gov.justice.services.messaging.JsonObjects.getUUIDs;
 
-import uk.gov.justice.services.common.converter.ZonedDateTimes;
-
-import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
-import javax.json.JsonString;
 
 /**
- * Implementation of metadata that uses a JsonObject internally to store the metadata.
+ * @deprecated Use static methods of {@link JsonEnvelope} in production code and
+ * MetadataBuilderFactory in test-utils for tests.
  */
+@Deprecated
 public class JsonObjectMetadata implements Metadata {
 
+    /**
+     * @deprecated Use {@link JsonMetadata#ID}
+     */
+    @Deprecated
     public static final String ID = "id";
+    /**
+     * @deprecated Use {@link JsonMetadata#NAME}
+     */
+    @Deprecated
     public static final String NAME = "name";
+    /**
+     * @deprecated Use {@link JsonMetadata#CREATED_AT}
+     */
+    @Deprecated
     public static final String CREATED_AT = "createdAt";
+    /**
+     * @deprecated Use {@link JsonMetadata#CORRELATION}
+     */
+    @Deprecated
     public static final String CORRELATION = "correlation";
+    /**
+     * @deprecated Use {@link JsonMetadata#CLIENT_ID}
+     */
+    @Deprecated
     public static final String CLIENT_ID = "client";
+    /**
+     * @deprecated Use {@link JsonMetadata#CONTEXT}
+     */
+    @Deprecated
     public static final String CONTEXT = "context";
+    /**
+     * @deprecated Use {@link JsonMetadata#USER_ID}
+     */
+    @Deprecated
     public static final String USER_ID = "user";
+    /**
+     * @deprecated Use {@link JsonMetadata#SESSION_ID}
+     */
+    @Deprecated
     public static final String SESSION_ID = "session";
+    /**
+     * @deprecated Use {@link JsonMetadata#STREAM}
+     */
+    @Deprecated
     public static final String STREAM = "stream";
+    /**
+     * @deprecated Use {@link JsonMetadata#STREAM_ID}
+     */
+    @Deprecated
     public static final String STREAM_ID = "id";
+    /**
+     * @deprecated Use {@link JsonMetadata#VERSION}
+     */
+    @Deprecated
     public static final String VERSION = "version";
+    /**
+     * @deprecated Use {@link JsonMetadata#CAUSATION}
+     */
+    @Deprecated
     public static final String CAUSATION = "causation";
 
-    private static final String[] USER_ID_PATH = {CONTEXT, USER_ID};
-    private static final String[] CLIENT_CORRELATION_PATH = {CORRELATION, CLIENT_ID};
-    private static final String[] VERSION_PATH = {STREAM, VERSION};
-    private static final String[] SESSION_ID_PATH = {CONTEXT, SESSION_ID};
-    private static final String[] STREAM_ID_PATH = {STREAM, STREAM_ID};
+    private final Metadata metadata;
 
-    private final JsonObject metadata;
-
-    private JsonObjectMetadata(final JsonObject metadata) {
+    private JsonObjectMetadata(final Metadata metadata) {
         this.metadata = metadata;
     }
 
     /**
-     * Instantiate a {@link JsonObjectMetadata} object from a {@link JsonObject}.
-     *
      * @param jsonObject the {@link JsonObject} to build the metadata from
-     * @return the {@link JsonObjectMetadata}
+     * @return the {@link Metadata}
+     * @deprecated Use {@link JsonEnvelope#metadataFrom(JsonObject)} in production code and
+     * MetadataBuilderFactory in test-utils for tests.
      */
+    @Deprecated
     public static Metadata metadataFrom(final JsonObject jsonObject) {
-
-        JsonString id = getJsonString(jsonObject, ID)
-                .orElseThrow(() -> new IllegalArgumentException("Missing id field"));
-        UUID.fromString(id.getString());
-
-        JsonString name = getJsonString(jsonObject, NAME)
-                .orElseThrow(() -> new IllegalArgumentException("Missing name field"));
-        if (name.getString().isEmpty()) {
-            throw new IllegalArgumentException("Name field cannot be empty");
-        }
-
-        return new JsonObjectMetadata(jsonObject);
+        return new JsonObjectMetadata(JsonEnvelope.metadataFrom(jsonObject).build());
     }
 
     /**
-     * Create metadata builder
-     *
      * @param id   the metadata UUID
      * @param name the metadata name
      * @return metadata builder
+     * @deprecated Use {@link JsonEnvelope#metadataBuilder()} in production code and
+     * MetadataBuilderFactory in test-utils for tests.
      */
+    @Deprecated
     public static Builder metadataOf(final UUID id, final String name) {
         return new Builder().withId(id).withName(name);
     }
 
     /**
-     * Create metadata builder
-     *
      * @param id   the metadata UUID
      * @param name the metadata name
      * @return metadata builder
+     * @deprecated Use {@link JsonEnvelope#metadataBuilder()} in production code and
+     * MetadataBuilderFactory in test-utils for tests.
      */
+    @Deprecated
     public static Builder metadataOf(final String id, final String name) {
         return metadataOf(UUID.fromString(id), name);
     }
 
     /**
-     * Create metadata builder with random id
-     *
      * @param name the metadata name
      * @return metadata builder
+     * @deprecated Use {@link JsonEnvelope#metadataBuilder()} in production code and
+     * MetadataBuilderFactory in test-utils for tests.
      */
+    @Deprecated
     public static Builder metadataWithRandomUUID(final String name) {
         return metadataOf(randomUUID(), name);
     }
 
     /**
-     * Create metadata builder with random id and dummy name
-     *
      * @return metadata builder
+     * @deprecated Use {@link JsonEnvelope#metadataBuilder()} in production code and
+     * MetadataBuilderFactory in test-utils for tests.
      */
+    @Deprecated
     public static Builder metadataWithRandomUUIDAndName() {
         return metadataWithRandomUUID("dummy");
     }
 
     /**
-     * Create metadata builder with random id and dummy name
-     * To be used in unit tests
-     *
      * @return metadata builder
+     * @deprecated Use {@link JsonEnvelope#metadataBuilder()} in production code and
+     * MetadataBuilderFactory in test-utils for tests.
      */
+    @Deprecated
     public static Builder metadataWithDefaults() {
         return metadataWithRandomUUIDAndName().createdAt(now());
     }
 
+    /**
+     * @param metadata the {@link Metadata} to build the metadata from
+     * @return the {@link Builder}
+     * @deprecated Use {@link JsonEnvelope#metadataFrom(JsonObject)} in production code and
+     * MetadataBuilderFactory in test-utils for tests.
+     */
+    @Deprecated
     public static Builder metadataFrom(final Metadata metadata) {
         return new Builder(metadata);
     }
@@ -131,60 +165,52 @@ public class JsonObjectMetadata implements Metadata {
 
     @Override
     public UUID id() {
-        return getUUID(metadata, ID)
-                .orElseThrow(() -> new IllegalStateException("Missing id field"));
+        return metadata.id();
     }
 
     @Override
     public String name() {
-        return getString(metadata, NAME)
-                .orElseThrow(() -> new IllegalStateException("Missing name field"));
+        return metadata.name();
     }
 
     @Override
     public Optional<String> clientCorrelationId() {
-        return getString(metadata, CLIENT_CORRELATION_PATH);
+        return metadata.clientCorrelationId();
     }
 
     @Override
     public List<UUID> causation() {
-        return getUUIDs(metadata, CAUSATION);
+        return metadata.causation();
     }
 
     @Override
     public Optional<String> userId() {
-        return getString(metadata, USER_ID_PATH);
+        return metadata.userId();
     }
 
     @Override
     public Optional<String> sessionId() {
-        return getString(metadata, SESSION_ID_PATH);
+        return metadata.sessionId();
     }
 
     @Override
     public Optional<UUID> streamId() {
-        return getUUID(metadata, STREAM_ID_PATH);
+        return metadata.streamId();
     }
 
     @Override
     public Optional<Long> version() {
-        return getLong(metadata, VERSION_PATH);
+        return metadata.version();
     }
 
     @Override
     public JsonObject asJsonObject() {
-        return metadata;
+        return metadata.asJsonObject();
     }
 
     @Override
     public Optional<ZonedDateTime> createdAt() {
-        Optional<String> zonedDateTime = getString(metadata, CREATED_AT);
-
-        if (zonedDateTime.isPresent()) {
-            return Optional.of(ZonedDateTimes.fromString(zonedDateTime.get()));
-        }
-
-        return Optional.empty();
+        return metadata.createdAt();
     }
 
     @Override
@@ -201,17 +227,16 @@ public class JsonObjectMetadata implements Metadata {
         return Objects.hash(metadata);
     }
 
-
     public static class Builder {
 
-        private JsonObjectBuilderWrapper json;
+        private final MetadataBuilder metadataBuilder;
 
         private Builder() {
-            json = new JsonObjectBuilderWrapper();
+            metadataBuilder = JsonEnvelope.metadataBuilder();
         }
 
         private Builder(final Metadata metadata) {
-            json = new JsonObjectBuilderWrapper(metadata.asJsonObject());
+            metadataBuilder = JsonEnvelope.metadataFrom(metadata);
         }
 
         /**
@@ -219,7 +244,7 @@ public class JsonObjectMetadata implements Metadata {
          * @return metadata builder
          */
         public Builder withId(final UUID id) {
-            json.add(id.toString(), ID);
+            metadataBuilder.withId(id);
             return this;
         }
 
@@ -228,7 +253,7 @@ public class JsonObjectMetadata implements Metadata {
          * @return metadata builder
          */
         public Builder createdAt(final ZonedDateTime dateCreated) {
-            json.add(ZonedDateTimes.toString(dateCreated), CREATED_AT);
+            metadataBuilder.createdAt(dateCreated);
             return this;
         }
 
@@ -237,7 +262,7 @@ public class JsonObjectMetadata implements Metadata {
          * @return metadata builder
          */
         public Builder withName(final String name) {
-            json.add(name, NAME);
+            metadataBuilder.withName(name);
             return this;
         }
 
@@ -247,11 +272,7 @@ public class JsonObjectMetadata implements Metadata {
          * @return metadata builder
          */
         public Builder withCausation(final UUID... uuid) {
-            final JsonArrayBuilder causationArray = Json.createArrayBuilder();
-            for (UUID id : uuid) {
-                causationArray.add(id.toString());
-            }
-            json.add(causationArray, CAUSATION);
+            metadataBuilder.withCausation(uuid);
             return this;
         }
 
@@ -260,7 +281,7 @@ public class JsonObjectMetadata implements Metadata {
          * @return metadata builder
          */
         public Builder withClientCorrelationId(final String clientId) {
-            json.add(clientId, CLIENT_CORRELATION_PATH);
+            metadataBuilder.withClientCorrelationId(clientId);
             return this;
         }
 
@@ -269,7 +290,7 @@ public class JsonObjectMetadata implements Metadata {
          * @return metadata builder
          */
         public Builder withUserId(final String userId) {
-            json.add(userId, USER_ID_PATH);
+            metadataBuilder.withUserId(userId);
             return this;
         }
 
@@ -278,7 +299,7 @@ public class JsonObjectMetadata implements Metadata {
          * @return metadata builder
          */
         public Builder withSessionId(final String sessionId) {
-            json.add(sessionId, SESSION_ID_PATH);
+            metadataBuilder.withSessionId(sessionId);
             return this;
         }
 
@@ -287,7 +308,7 @@ public class JsonObjectMetadata implements Metadata {
          * @return metadata builder
          */
         public Builder withStreamId(final UUID streamId) {
-            json.add(streamId.toString(), STREAM_ID_PATH);
+            metadataBuilder.withStreamId(streamId);
             return this;
         }
 
@@ -297,12 +318,12 @@ public class JsonObjectMetadata implements Metadata {
          * @return metadata builder
          */
         public Builder withVersion(final long version) {
-            json.add(BigDecimal.valueOf(version), VERSION_PATH);
+            metadataBuilder.withVersion(version);
             return this;
         }
 
         public Metadata build() {
-            return metadataFrom(json.build());
+            return metadataBuilder.build();
         }
     }
 }

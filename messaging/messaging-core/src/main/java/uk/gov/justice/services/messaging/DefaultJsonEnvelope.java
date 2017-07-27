@@ -1,14 +1,6 @@
 package uk.gov.justice.services.messaging;
 
-import static uk.gov.justice.services.messaging.JSONObjectValueObfuscator.obfuscated;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.CORRELATION;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.SESSION_ID;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.USER_ID;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
-import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
-
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.UUID;
 
 import javax.json.Json;
@@ -20,55 +12,47 @@ import javax.json.JsonObjectBuilder;
 import javax.json.JsonString;
 import javax.json.JsonValue;
 
-import org.json.JSONObject;
-import org.json.JSONTokener;
-
 /**
  * Default implementation of an envelope.
  */
+@Deprecated
 public class DefaultJsonEnvelope implements JsonEnvelope {
 
-    private Metadata metadata;
-
-    private JsonValue payload;
+    private JsonEnvelope jsonEnvelope;
 
     public DefaultJsonEnvelope(final Metadata metadata, final JsonValue payload) {
-        this.metadata = metadata;
-        this.payload = payload;
+        jsonEnvelope = JsonEnvelope.envelopeFrom(metadata, payload);
     }
 
     /**
-     * Please use the Enveloper for creating real envelopes in production code or the
-     * JsonEnvelopeBuilder in test-utils for tests.
-     *
      * @param metadata the metadata to be added to the JsonEnvelope
      * @param payload  the JsonValue payload to be added to the JsonEnvelope
      * @return the JsonEnvelope
+     * @deprecated Use the Enveloper for creating real envelopes in production code or the {@link
+     * JsonEnvelope#envelopeFrom(Metadata, JsonValue)} for tests
      */
     @Deprecated
     public static JsonEnvelope envelopeFrom(final Metadata metadata, final JsonValue payload) {
-        return new DefaultJsonEnvelope(metadata, payload);
+        return JsonEnvelope.envelopeFrom(metadata, payload);
     }
 
     /**
-     * Please use the Enveloper for creating real envelopes in production code or the
-     * JsonEnvelopeBuilder in test-utils for tests.
-     *
      * @param metadataBuilder the metadata builder to create the metadata to be added to the
      *                        JsonEnvelope
      * @param payload         the JsonValue payload to be added to the JsonEnvelope
      * @return the JsonEnvelope
+     * @deprecated Use the Enveloper for creating real envelopes in production code or the {@link
+     * JsonEnvelope#envelopeFrom(MetadataBuilder, JsonValue)}
      */
     @Deprecated
-    public static JsonEnvelope envelopeFrom(final JsonObjectMetadata.Builder metadataBuilder, final JsonValue payload) {
+    public static JsonEnvelope envelopeFrom(final uk.gov.justice.services.messaging.JsonObjectMetadata.Builder metadataBuilder, final JsonValue payload) {
         return envelopeFrom(metadataBuilder.build(), payload);
     }
 
     /**
-     * Please use the Enveloper for creating real envelopes in production code or the
-     * JsonEnvelopeBuilder in test-utils for tests.
-     *
      * @return the Builder
+     * @deprecated Use the Enveloper for creating real envelopes in production code or the {@link
+     * JsonEnvelope#envelopeFrom(MetadataBuilder, JsonObjectBuilder)}
      */
     @Deprecated
     public static Builder envelope() {
@@ -76,11 +60,10 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
     }
 
     /**
-     * Please use the Enveloper for creating real envelopes in production code or the
-     * JsonEnvelopeBuilder in test-utils for tests.
-     *
      * @param envelope the JsonEnvelope that is added to the builder
      * @return the Builder
+     * @deprecated Use the Enveloper for creating real envelopes in production code or the
+     * JsonEnvelopeBuilder in test-utils for tests.
      */
     @Deprecated
     public static Builder envelopeFrom(final JsonEnvelope envelope) {
@@ -89,98 +72,63 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
 
     @Override
     public Metadata metadata() {
-        return metadata;
+        return jsonEnvelope.metadata();
     }
 
     @Override
     public JsonValue payload() {
-        return payload;
+        return jsonEnvelope.payload();
     }
 
     @Override
     public JsonObject payloadAsJsonObject() {
-        return (JsonObject) payload;
+        return jsonEnvelope.payloadAsJsonObject();
     }
 
     @Override
     public JsonArray payloadAsJsonArray() {
-        return (JsonArray) payload;
+        return jsonEnvelope.payloadAsJsonArray();
     }
 
     @Override
     public JsonNumber payloadAsJsonNumber() {
-        return (JsonNumber) payload;
+        return jsonEnvelope.payloadAsJsonNumber();
     }
 
     @Override
     public JsonString payloadAsJsonString() {
-        return (JsonString) payload;
+        return jsonEnvelope.payloadAsJsonString();
     }
 
     @Override
     public JsonObject asJsonObject() {
-        return createObjectBuilder(payloadAsJsonObject())
-                .add(METADATA, metadata().asJsonObject()).build();
+        return jsonEnvelope.asJsonObject();
     }
 
-    /**
-     * Prints the json for logging purposes. Removes any potentially sensitive data.
-     *
-     * @return a json String of the envelope
-     */
     @Override
     public String toString() {
-        final JsonObjectBuilder builder = Json.createObjectBuilder();
-
-        if (metadata != null) {
-            builder.add("id", String.valueOf(metadata.id()))
-                    .add("name", metadata.name());
-
-
-            metadata.clientCorrelationId().ifPresent(s -> builder.add(CORRELATION, s));
-            metadata.sessionId().ifPresent(s -> builder.add(SESSION_ID, s));
-            metadata.userId().ifPresent(s -> builder.add(USER_ID, s));
-
-            final JsonArrayBuilder causationBuilder = Json.createArrayBuilder();
-
-            final List<UUID> causes = metadata.causation();
-
-            if (causes != null) {
-                metadata.causation().forEach(uuid -> causationBuilder.add(String.valueOf(uuid)));
-            }
-            builder.add("causation", causationBuilder);
-        }
-        return builder.build().toString();
+        return jsonEnvelope.toString();
     }
 
-    /**
-     * Returns a String of the JsonEnvelope as pretty printed json.
-     *
-     * Caution: the json envelope may contain sensitive data and so this method should not be used
-     * for logging. Use toString() for logging instead.
-     *
-     * @return the json envelope as pretty printed json
-     */
     @Override
     public String toDebugStringPrettyPrint() {
-
-        return jSONPayload().put(METADATA, new JSONObject(metadata.asJsonObject().toString())).toString(2);
+        return jsonEnvelope.toDebugStringPrettyPrint();
     }
 
     @Override
     public String toObfuscatedDebugString() {
-        return obfuscated(jSONPayload()).put(METADATA, new JSONObject(metadata.asJsonObject().toString())).toString(2);
+        return jsonEnvelope.toObfuscatedDebugString();
     }
 
-
-    private JSONObject jSONPayload() {
-        return new JSONObject(new JSONTokener(payload.toString()));
-    }
-
-
+    /**
+     * @deprecated Use the Enveloper for creating real envelopes in production code or the
+     * JsonEnvelopeBuilder in test-utils for tests.
+     */
+    @Deprecated
     public static class Builder {
+
         private JsonObjectBuilderWrapper payload;
-        private JsonObjectMetadata.Builder metadata;
+        private uk.gov.justice.services.messaging.JsonObjectMetadata.Builder metadata;
 
         private Builder() {
             payload = new JsonObjectBuilderWrapper();
@@ -188,7 +136,7 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
 
         public Builder(final JsonEnvelope envelope) {
             payload = new JsonObjectBuilderWrapper(envelope.payloadAsJsonObject());
-            this.metadata = metadataFrom(envelope.metadata());
+            this.metadata = JsonObjectMetadata.metadataFrom(envelope.metadata());
         }
 
         public Builder with(final JsonObjectMetadata.Builder metadata) {
@@ -241,10 +189,9 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
         }
 
         /**
-         * Please use the Enveloper for creating real envelopes in production code or the
-         * JsonEnvelopeBuilder in test-utils for tests.
-         *
          * @return the JsonEnvelope
+         * @deprecated Use the Enveloper for creating real envelopes in production code or the
+         * JsonEnvelopeBuilder in test-utils for tests.
          */
         @Deprecated
         public JsonEnvelope build() {

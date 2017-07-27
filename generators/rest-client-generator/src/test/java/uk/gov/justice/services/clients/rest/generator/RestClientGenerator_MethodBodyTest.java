@@ -32,7 +32,6 @@ import static uk.gov.justice.services.generators.test.utils.config.GeneratorConf
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.setField;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
 import uk.gov.justice.services.adapter.rest.parameter.ParameterType;
 import uk.gov.justice.services.clients.core.EndpointDefinition;
@@ -59,7 +58,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
 
-    private static final JsonEnvelope NOT_USED_ENVELOPE = envelope().build();
+    private static final JsonEnvelope NOT_USED_ENVELOPE = mock(JsonEnvelope.class);
     private static final Map<String, String> NOT_USED_GENERATOR_PROPERTIES = generatorProperties().withServiceComponentOf("QUERY_CONTROLLER").build();
 
     @Mock
@@ -171,7 +170,7 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
         final Object remoteClient = instanceOfRemoteClient(clazz);
         final Method method = firstMethodOf(clazz);
 
-        final JsonEnvelope envelope = envelope().build();
+        final JsonEnvelope envelope = mock(JsonEnvelope.class);
         method.invoke(remoteClient, envelope);
 
         verify(restClientProcessor).get(any(EndpointDefinition.class), same(envelope));

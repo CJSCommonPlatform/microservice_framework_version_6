@@ -7,9 +7,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
 import uk.gov.justice.services.core.annotation.Direct;
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
@@ -153,7 +153,7 @@ public class HandlerRegistryTest {
     private void assertHandlerMethodInvokesHandler(final HandlerMethod handlerMethod, final TestEnvelopeRecorder handler) {
         assertThat(handlerMethod, notNullValue());
 
-        final JsonEnvelope envelope = envelope().build();
+        final JsonEnvelope envelope = mock(JsonEnvelope.class);
         handlerMethod.execute(envelope);
 
         assertThat(handler.firstRecordedEnvelope(), sameInstance(envelope));

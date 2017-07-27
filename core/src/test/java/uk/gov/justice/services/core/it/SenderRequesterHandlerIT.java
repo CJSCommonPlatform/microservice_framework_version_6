@@ -1,6 +1,7 @@
 package uk.gov.justice.services.core.it;
 
 import static java.util.UUID.randomUUID;
+import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertThat;
@@ -8,9 +9,8 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLLER;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_CONTROLLER;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
 
 import uk.gov.justice.services.common.configuration.GlobalValueProducer;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
@@ -31,8 +31,8 @@ import uk.gov.justice.services.core.dispatcher.EmptySystemUserProvider;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.core.extension.ServiceComponentScanner;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
+import uk.gov.justice.services.core.extension.ServiceComponentScanner;
 import uk.gov.justice.services.core.it.util.producer.TestEnvelopeValidationExceptionHandlerProducer;
 import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
@@ -138,7 +138,9 @@ public class SenderRequesterHandlerIT {
     @Test
     public void shouldSendToCorrectSenderWithFieldLevelServiceComponentAnnotation() throws Exception {
         UUID metadataId = randomUUID();
-        commandControllerSender.send(envelope().with(metadataOf(metadataId, "contexta.command.aaa")).withPayloadOf("abc", "someField1").build());
+        commandControllerSender.send(envelopeFrom(
+                metadataBuilder().withId(metadataId).withName("contexta.command.aaa"),
+                createObjectBuilder().add("someField1", "abc")));
 
         assertThat(testCommandController.recordedEnvelopes(), hasSize(1));
         assertThat(testCommandController.firstRecordedEnvelope().metadata().id(), equalTo(metadataId));
@@ -150,10 +152,9 @@ public class SenderRequesterHandlerIT {
     @Test
     public void shouldSendToCorrectRequesterWithFieldLevelServiceComponentAnnotation() throws Exception {
         UUID metadataId = randomUUID();
-        final JsonEnvelope response = queryControllerRequester.request(envelope()
-                .with(metadataOf(metadataId, "contexta.query.aaa"))
-                .withPayloadOf("abc", "someField1")
-                .build());
+        final JsonEnvelope response = queryControllerRequester.request(envelopeFrom(
+                metadataBuilder().withId(metadataId).withName("contexta.query.aaa"),
+                createObjectBuilder().add("someField1", "abc")));
 
         assertThat(testQueryController.recordedEnvelopes(), hasSize(1));
         assertThat(testQueryController.firstRecordedEnvelope().metadata().id(), equalTo(metadataId));
@@ -194,10 +195,9 @@ public class SenderRequesterHandlerIT {
         @Handles("contexta.query.aaa")
         public JsonEnvelope queryAA(final JsonEnvelope query) {
             record(query);
-            return envelope()
-                    .with(metadataWithRandomUUID("contexta.response.aaa"))
-                    .withPayloadOf("abc", "someField1")
-                    .build();
+            return envelopeFrom(
+                    metadataBuilder().withId(randomUUID()).withName("contexta.response.aaa"),
+                    createObjectBuilder().add("someField1", "abc"));
         }
     }
 
@@ -209,10 +209,9 @@ public class SenderRequesterHandlerIT {
         @Handles("contexta.query.aaa")
         public JsonEnvelope queryAA(final JsonEnvelope query) {
             record(query);
-            return envelope()
-                    .with(metadataWithRandomUUID("contexta.response.aaa"))
-                    .withPayloadOf("horses", "someField1")
-                    .build();
+            return envelopeFrom(
+                    metadataBuilder().withId(randomUUID()).withName("contexta.response.aaa"),
+                    createObjectBuilder().add("someField1", "horses"));
         }
     }
 }

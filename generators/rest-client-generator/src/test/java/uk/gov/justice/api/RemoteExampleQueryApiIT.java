@@ -12,11 +12,12 @@ import static java.lang.String.format;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
+import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 
 import uk.gov.justice.services.clients.core.DefaultRestClientHelper;
 import uk.gov.justice.services.clients.core.DefaultRestClientProcessor;
@@ -39,10 +40,7 @@ import uk.gov.justice.services.core.accesscontrol.PolicyEvaluator;
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
-import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
 import uk.gov.justice.services.core.dispatcher.EmptySystemUserProvider;
-import uk.gov.justice.services.core.requester.Requester;
-import uk.gov.justice.services.core.requester.RequesterProducer;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserProvider;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
@@ -54,10 +52,10 @@ import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
 import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
-import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
+import uk.gov.justice.services.core.requester.Requester;
+import uk.gov.justice.services.core.requester.RequesterProducer;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjectMetadata;
 import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
 
 import java.util.Optional;
@@ -98,8 +96,8 @@ public class RemoteExampleQueryApiIT {
 
     private static final String PEOPLE_GET_USER1 = "people.get-user1";
 
-    private static final JsonEnvelope RESPONSE = DefaultJsonEnvelope.envelope()
-            .with(JsonObjectMetadata.metadataWithRandomUUID("people.get-user1"))
+    private static final JsonEnvelope RESPONSE = envelope()
+            .with(metadataWithRandomUUID("people.get-user1"))
             .withPayloadOf("SUCCESS", "result")
             .build();
 

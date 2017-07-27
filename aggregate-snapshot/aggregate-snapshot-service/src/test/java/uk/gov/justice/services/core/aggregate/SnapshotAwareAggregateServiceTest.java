@@ -12,8 +12,9 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 
 import uk.gov.justice.domain.aggregate.PrivateAggregate;
 import uk.gov.justice.domain.aggregate.TestAggregate;
@@ -26,9 +27,7 @@ import uk.gov.justice.services.core.aggregate.exception.AggregateChangeDetectedE
 import uk.gov.justice.services.core.extension.EventFoundEvent;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.snapshot.SnapshotService;
-import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjectMetadata;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -193,9 +192,9 @@ public class SnapshotAwareAggregateServiceTest {
         final TestAggregate aggregate = new TestAggregate();
         final long snapshotVersion = 2L;
 
-        final JsonEnvelope jsonEventA = DefaultJsonEnvelope.envelope().with(JsonObjectMetadata.metadataWithRandomUUID("eventA")).withPayloadOf("value1", "name1").build();
-        final JsonEnvelope jsonEventB = DefaultJsonEnvelope.envelope().with(JsonObjectMetadata.metadataWithRandomUUID("eventB")).withPayloadOf("value2", "name1").build();
-        final JsonEnvelope jsonEventC = DefaultJsonEnvelope.envelope().with(JsonObjectMetadata.metadataWithRandomUUID("eventC")).withPayloadOf("value3", "name1").build();
+        final JsonEnvelope jsonEventA = envelope().with(metadataWithRandomUUID("eventA")).withPayloadOf("value1", "name1").build();
+        final JsonEnvelope jsonEventB = envelope().with(metadataWithRandomUUID("eventB")).withPayloadOf("value2", "name1").build();
+        final JsonEnvelope jsonEventC = envelope().with(metadataWithRandomUUID("eventC")).withPayloadOf("value3", "name1").build();
 
         registerEvent(EventA.class, "eventA");
         registerEvent(EventB.class, "eventB");
@@ -229,9 +228,9 @@ public class SnapshotAwareAggregateServiceTest {
         final UUID streamId = UUID.randomUUID();
         final long currentStreamVersion = 3L;
 
-        final JsonEnvelope jsonEventA = DefaultJsonEnvelope.envelope().with(JsonObjectMetadata.metadataWithRandomUUID("eventA")).withPayloadOf("value1", "name1").build();
-        final JsonEnvelope jsonEventB = DefaultJsonEnvelope.envelope().with(JsonObjectMetadata.metadataWithRandomUUID("eventB")).withPayloadOf("value2", "name1").build();
-        final JsonEnvelope jsonEventC = DefaultJsonEnvelope.envelope().with(JsonObjectMetadata.metadataWithRandomUUID("eventC")).withPayloadOf("value3", "name1").build();
+        final JsonEnvelope jsonEventA = envelope().with(metadataWithRandomUUID("eventA")).withPayloadOf("value1", "name1").build();
+        final JsonEnvelope jsonEventB = envelope().with(metadataWithRandomUUID("eventB")).withPayloadOf("value2", "name1").build();
+        final JsonEnvelope jsonEventC = envelope().with(metadataWithRandomUUID("eventC")).withPayloadOf("value3", "name1").build();
 
         registerEvent(EventA.class, "eventA");
         registerEvent(EventB.class, "eventB");

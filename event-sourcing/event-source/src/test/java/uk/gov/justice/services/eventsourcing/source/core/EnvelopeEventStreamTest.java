@@ -9,8 +9,8 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithDefaults;
 
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -130,7 +130,8 @@ public class EnvelopeEventStreamTest {
         final JsonEnvelope event = envelope().with(metadataWithDefaults()).build();
         final Stream<JsonEnvelope> events = Stream.of(event);
 
-        eventStream.read().forEach(e -> {});
+        eventStream.read().forEach(e -> {
+        });
         eventStream.append(events);
 
         verify(eventStreamManager).appendAfter(eq(STREAM_ID), streamCaptor.capture(), eq(MAX_VERSION));
@@ -157,7 +158,8 @@ public class EnvelopeEventStreamTest {
         final JsonEnvelope event5 = envelope().with(metadataWithDefaults()).build();
         final JsonEnvelope event6 = envelope().with(metadataWithDefaults()).build();
 
-        eventStream.read().forEach(e -> {});
+        eventStream.read().forEach(e -> {
+        });
 
         eventStream.append(Stream.of(event5));
 

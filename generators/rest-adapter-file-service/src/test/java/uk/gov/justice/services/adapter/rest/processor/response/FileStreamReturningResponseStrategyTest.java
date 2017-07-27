@@ -3,15 +3,14 @@ package uk.gov.justice.services.adapter.rest.processor.response;
 import static java.util.Optional.empty;
 import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.OK;
-import static org.apache.commons.io.IOUtils.contentEquals;
 import static org.apache.commons.io.IOUtils.toInputStream;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithDefaults;
 
 import uk.gov.justice.services.fileservice.api.FileRetriever;
 import uk.gov.justice.services.fileservice.api.FileServiceException;

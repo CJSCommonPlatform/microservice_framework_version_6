@@ -1,17 +1,16 @@
 package uk.gov.justice.services.core.requester;
 
-import static co.unruly.matchers.OptionalMatchers.contains;
 import static java.util.UUID.randomUUID;
+import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsSame.sameInstance;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
 
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.dispatcher.Dispatcher;
@@ -21,11 +20,7 @@ import uk.gov.justice.services.core.envelope.EnvelopeValidationException;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandler;
 import uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler;
 import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
-import uk.gov.justice.services.core.requester.Requester;
-import uk.gov.justice.services.core.requester.RequesterProducer;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-
-import java.util.UUID;
 
 import javax.enterprise.inject.spi.InjectionPoint;
 
@@ -71,12 +66,9 @@ public class RequesterProducerTest {
     public void shouldReturnRequesterDelegatingToDispatcher() throws Exception {
 
         final Requester requester = requesterProducer.produceRequester(injectionPoint);
-        final UUID id = randomUUID();
-        final String name = "name123";
-        final String userId = "usr123";
 
-        final JsonEnvelope envelopeToBeDispatched = envelope().with(metadataOf(id, name).withUserId(userId)).build();
-        final JsonEnvelope expectedResponse = envelope().build();
+        final JsonEnvelope envelopeToBeDispatched = mock(JsonEnvelope.class);
+        final JsonEnvelope expectedResponse = mock(JsonEnvelope.class);
 
         when(dispatcher.dispatch(envelopeToBeDispatched)).thenReturn(expectedResponse);
 
@@ -87,9 +79,6 @@ public class RequesterProducerTest {
 
         final JsonEnvelope dispatchedEnvelope = dispatchedEnvelopeCaptor.getValue();
         assertThat(envelopeToBeDispatched, sameInstance(dispatchedEnvelope));
-        assertThat(dispatchedEnvelope.metadata().id(), is(id));
-        assertThat(dispatchedEnvelope.metadata().name(), is(name));
-        assertThat(dispatchedEnvelope.metadata().userId(), contains(userId));
         assertThat(returnedResponse, is(expectedResponse));
 
     }
@@ -99,9 +88,9 @@ public class RequesterProducerTest {
 
         final Requester requester = requesterProducer.produceRequester(injectionPoint);
 
-        final JsonEnvelope originalEnvelope = envelope().with(metadataWithDefaults()).build();
-        final JsonEnvelope envelopeWithSysUserId = envelope().with(metadataWithDefaults()).build();
-        final JsonEnvelope expectedResponse = envelope().build();
+        final JsonEnvelope originalEnvelope = mock(JsonEnvelope.class);
+        final JsonEnvelope envelopeWithSysUserId = mock(JsonEnvelope.class);
+        final JsonEnvelope expectedResponse = mock(JsonEnvelope.class);
 
         when(systemUserUtil.asEnvelopeWithSystemUserId(originalEnvelope)).thenReturn(envelopeWithSysUserId);
         when(dispatcher.dispatch(envelopeWithSysUserId)).thenReturn(expectedResponse);
@@ -124,12 +113,11 @@ public class RequesterProducerTest {
         exception.expectMessage("Message not valid against schema");
 
         when(dispatcher.dispatch(any(JsonEnvelope.class)))
-                .thenReturn(envelope()
-                        .with(metadataWithRandomUUID("some-action"))
-                        .withPayloadOf("value1", "someField1")
-                        .build());
+                .thenReturn(envelopeFrom(
+                        metadataBuilder().withId(randomUUID()).withName("some-action"),
+                        createObjectBuilder().add("someField1", "value1")));
 
-        requesterProducer.produceRequester(injectionPoint).request(envelope().build());
+        requesterProducer.produceRequester(injectionPoint).request(mock(JsonEnvelope.class));
     }
 
     @Test
@@ -137,13 +125,13 @@ public class RequesterProducerTest {
         requesterProducer.envelopeValidationExceptionHandler = new RethrowingValidationExceptionHandler();
 
         when(dispatcher.dispatch(any(JsonEnvelope.class)))
-                .thenReturn(envelope()
-                        .with(metadataWithRandomUUID("some-action"))
-                        .withPayloadOf("value1", "someField1")
-                        .withPayloadOf("value2", "someField2")
-                        .build());
+                .thenReturn(envelopeFrom(
+                        metadataBuilder().withId(randomUUID()).withName("some-action"),
+                        createObjectBuilder()
+                                .add("someField1", "value1")
+                                .add("someField2", "value2")));
 
-        requesterProducer.produceRequester(injectionPoint).request(envelope().build());
+        requesterProducer.produceRequester(injectionPoint).request(mock(JsonEnvelope.class));
 
     }
 

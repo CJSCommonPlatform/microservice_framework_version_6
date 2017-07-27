@@ -6,8 +6,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
+import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithDefaults;
 
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -59,8 +59,8 @@ public final class ServiceComponents {
     /**
      * Verify a single or multiple named methods of a Command handler class.  Verifies there is a
      * ServiceComponent annotation, each method has a Handles annotation, the Sender field is
-     * present, and the sender.send method is called with the original command passed to the
-     * handler method.
+     * present, and the sender.send method is called with the original command passed to the handler
+     * method.
      *
      * @param handlerClass the handler class to verify
      * @param methodNames  the method names to verify

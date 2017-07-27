@@ -5,7 +5,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
+import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
 
 import java.io.StringReader;
 import java.util.List;
@@ -69,7 +69,9 @@ public class DefaultJmsMessageLoggerHelperTest {
     private String envelopeString() {
 
         return createObjectBuilder()
-                .add("_metadata", metadataOf(UUID.fromString(A_MESSAGE_ID), A_NAME)
+                .add("_metadata", metadataBuilder()
+                        .withId(UUID.fromString(A_MESSAGE_ID))
+                        .withName(A_NAME)
                         .withUserId(A_USER_ID)
                         .withSessionId(A_SESSION_ID)
                         .build().asJsonObject())

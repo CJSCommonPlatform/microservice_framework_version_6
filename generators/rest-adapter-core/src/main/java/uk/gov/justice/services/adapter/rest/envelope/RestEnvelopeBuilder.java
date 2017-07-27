@@ -7,17 +7,17 @@ import static uk.gov.justice.services.common.http.HeaderConstants.CAUSATION;
 import static uk.gov.justice.services.common.http.HeaderConstants.CLIENT_CORRELATION_ID;
 import static uk.gov.justice.services.common.http.HeaderConstants.SESSION_ID;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.METADATA;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilderWithFilter;
 import static uk.gov.justice.services.messaging.JsonObjects.getJsonObject;
 
 import uk.gov.justice.services.adapter.rest.exception.BadRequestException;
 import uk.gov.justice.services.adapter.rest.parameter.Parameter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjectMetadata;
 import uk.gov.justice.services.messaging.Metadata;
+import uk.gov.justice.services.messaging.MetadataBuilder;
 
 import java.util.Collection;
 import java.util.List;
@@ -126,9 +126,9 @@ public class RestEnvelopeBuilder {
 
     private Metadata buildMetadata() {
         final Optional<Metadata> payloadMetadata = metadataFromPayloadIfPresent();
-        final JsonObjectMetadata.Builder metadataBuilder = payloadMetadata
-                .map(JsonObjectMetadata::metadataFrom)
-                .orElse(metadataOf(id, this.action));
+        final MetadataBuilder metadataBuilder = payloadMetadata
+                .map(JsonEnvelope::metadataFrom)
+                .orElse(JsonEnvelope.metadataBuilder().withId(id).withName(this.action));
 
         return mergeHeadersIntoMetadata(payloadMetadata, metadataBuilder).build();
     }
@@ -136,10 +136,10 @@ public class RestEnvelopeBuilder {
     private Optional<Metadata> metadataFromPayloadIfPresent() {
         return initialPayload
                 .flatMap(jsonObject -> getJsonObject(jsonObject, METADATA))
-                .map(JsonObjectMetadata::metadataFrom);
+                .map(jsonObject -> metadataFrom(jsonObject).build());
     }
 
-    private JsonObjectMetadata.Builder mergeHeadersIntoMetadata(final Optional<Metadata> metadata, final JsonObjectMetadata.Builder metadataBuilder) {
+    private MetadataBuilder mergeHeadersIntoMetadata(final Optional<Metadata> metadata, final MetadataBuilder metadataBuilder) {
         final Optional<String> correlationId;
         final Optional<String> sessionId;
         final Optional<String> userId;

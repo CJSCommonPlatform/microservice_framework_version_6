@@ -3,13 +3,12 @@ package uk.gov.justice.services.example.cakeshop.command.handler;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
+import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithDefaults;
 
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.example.cakeshop.domain.event.CakeOrdered;
 
-import java.io.IOError;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -45,7 +44,7 @@ public class EventFactoryTest {
 
     }
 
-    @Test (expected = IllegalStateException.class)
+    @Test(expected = IllegalStateException.class)
     public void shouldThrowIllegalStateExceptionOnMapperIOException() throws IOException {
         final ObjectMapper mockedMapper = Mockito.mock(ObjectMapper.class);
         when(mockedMapper.readValue(Mockito.anyString(), Mockito.eq(CakeOrdered.class))).thenThrow(new IOException("Error"));

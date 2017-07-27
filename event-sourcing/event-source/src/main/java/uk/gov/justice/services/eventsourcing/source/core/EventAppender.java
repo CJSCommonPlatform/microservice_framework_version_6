@@ -2,8 +2,8 @@ package uk.gov.justice.services.eventsourcing.source.core;
 
 
 import static java.lang.String.format;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
 
 import uk.gov.justice.services.eventsourcing.publisher.jms.EventPublisher;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepository;
@@ -28,10 +28,9 @@ public class EventAppender {
     /**
      * Stores the event in the event store and publishes it with the given streamId and version.
      *
-     * @param event - the event to be appended
+     * @param event    - the event to be appended
      * @param streamId - id of the stream the event will be part of
-     * @param version - version id of the event in the stream
-     * @throws EventStreamException
+     * @param version  - version id of the event in the stream
      */
     void append(final JsonEnvelope event, final UUID streamId, final long version) throws EventStreamException {
         try {

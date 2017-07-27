@@ -1,7 +1,7 @@
 package uk.gov.justice.services.test.utils.core.enveloper;
 
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
@@ -13,7 +13,7 @@ import javax.json.JsonObject;
 public class EnvelopeFactory {
 
     public static final JsonEnvelope createEnvelope(final String commandName, final JsonObject payload) {
-         return new EnvelopeFactory().create(commandName, payload);
+        return new EnvelopeFactory().create(commandName, payload);
     }
 
     public JsonEnvelope create(final String commandName, final JsonObject payload) {

@@ -2,14 +2,13 @@ package uk.gov.justice.services.test.utils.core.matchers;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.UUID.randomUUID;
+import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.allOf;
 import static org.junit.Assert.assertThat;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonValueNullMatcher.isJsonValueNull;
-
-import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 
 import java.util.UUID;
 
@@ -58,13 +57,13 @@ public class JsonEnvelopePayloadMatcherTest {
     }
 
     private JsonObject payload() {
-        return envelope()
-                .withPayloadOf(ID.toString(), "someId")
-                .withPayloadOf(NAME, "name")
-                .build().payloadAsJsonObject();
+        return createObjectBuilder()
+                .add("someId", ID.toString())
+                .add("name", NAME)
+                .build();
     }
 
     private JsonValue jsonEnvelopeWithJsonValueNullPayload() {
-        return new DefaultJsonEnvelope(metadataWithRandomUUID("event.action").build(), JsonValue.NULL).payload();
+        return envelopeFrom(metadataWithRandomUUID("event.action").build(), JsonValue.NULL).payload();
     }
 }

@@ -39,7 +39,6 @@ import static uk.gov.justice.services.generators.test.utils.config.GeneratorConf
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.methodsOf;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.setField;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
 import uk.gov.justice.services.adapter.messaging.JmsLoggerMetadataInterceptor;
 import uk.gov.justice.services.adapter.messaging.JmsProcessor;
@@ -49,7 +48,6 @@ import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
-import uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.io.File;
@@ -696,7 +694,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
         ArgumentCaptor<Consumer> consumerCaptor = ArgumentCaptor.forClass(Consumer.class);
         verify(jmsProcessor).process(consumerCaptor.capture(), eq(message));
 
-        JsonEnvelope envelope = envelope().build();
+        JsonEnvelope envelope = mock(JsonEnvelope.class);
         final InterceptorContext interceptorContext = interceptorContextWithInput(envelope);
         consumerCaptor.getValue().accept(interceptorContext);
 
@@ -778,7 +776,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleEventListenerPeoplePersonAddedJmsListener");
         Pool poolAnnotation = clazz.getAnnotation(Pool.class);
         assertThat(poolAnnotation, not(nullValue()));
-        assertThat(poolAnnotation .value(), is("people-person-added-event-listener-pool"));
+        assertThat(poolAnnotation.value(), is("people-person-added-event-listener-pool"));
     }
 
     @Test

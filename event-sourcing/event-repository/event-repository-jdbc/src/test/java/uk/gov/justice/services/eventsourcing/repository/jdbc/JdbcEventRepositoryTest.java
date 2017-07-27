@@ -9,9 +9,9 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLog;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLogConverter;
@@ -111,9 +111,9 @@ public class JdbcEventRepositoryTest {
         final EventLog event1 = eventLogOf(streamId1);
         final EventLog event2 = eventLogOf(streamId2);
         final EventLog event3 = eventLogOf(streamId3);
-        final JsonEnvelope envelope1 = envelope().build();
-        final JsonEnvelope envelope2 = envelope().build();
-        final JsonEnvelope envelope3 = envelope().build();
+        final JsonEnvelope envelope1 = mock(JsonEnvelope.class);
+        final JsonEnvelope envelope2 = mock(JsonEnvelope.class);
+        final JsonEnvelope envelope3 = mock(JsonEnvelope.class);
 
 
         when(eventLogJdbcRepository.getStreamIds()).thenReturn(Stream.of(streamId1, streamId2, streamId3));
@@ -144,9 +144,9 @@ public class JdbcEventRepositoryTest {
         final EventLog event1 = eventLogOf(streamId1);
         final EventLog event2 = eventLogOf(streamId2);
         final EventLog event3 = eventLogOf(streamId3);
-        final JsonEnvelope envelope1 = envelope().build();
-        final JsonEnvelope envelope2 = envelope().build();
-        final JsonEnvelope envelope3 = envelope().build();
+        final JsonEnvelope envelope1 = mock(JsonEnvelope.class);
+        final JsonEnvelope envelope2 = mock(JsonEnvelope.class);
+        final JsonEnvelope envelope3 = mock(JsonEnvelope.class);
 
         StreamCloseSpy streamCloseSpy1 = new StreamCloseSpy();
         StreamCloseSpy streamCloseSpy2 = new StreamCloseSpy();

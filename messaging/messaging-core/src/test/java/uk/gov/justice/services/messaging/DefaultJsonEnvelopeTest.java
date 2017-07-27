@@ -1,16 +1,17 @@
 package uk.gov.justice.services.messaging;
 
 import static com.jayway.jsonassert.JsonAssert.with;
+import static java.math.BigDecimal.ONE;
 import static java.util.UUID.randomUUID;
+import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.junit.Assert.assertThat;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 
 import java.util.UUID;
 
+import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
@@ -48,32 +49,32 @@ public class DefaultJsonEnvelopeTest {
 
     @Test
     public void shouldReturnMetadata() {
-        assertThat(envelopeFrom(metadata, payloadAsJsonObject).metadata(), equalTo(metadata));
+        assertThat(new DefaultJsonEnvelope(metadata, payloadAsJsonObject).metadata(), equalTo(metadata));
     }
 
     @Test
     public void shouldReturnPayloadAsJsonValue() {
-        assertThat(envelopeFrom(metadata, payloadAsJsonValue).payload(), equalTo(payloadAsJsonValue));
+        assertThat(new DefaultJsonEnvelope(metadata, payloadAsJsonValue).payload(), equalTo(payloadAsJsonValue));
     }
 
     @Test
     public void shouldReturnPayloadAsJsonObject() {
-        assertThat(envelopeFrom(metadata, payloadAsJsonObject).payloadAsJsonObject(), equalTo(payloadAsJsonObject));
+        assertThat(new DefaultJsonEnvelope(metadata, payloadAsJsonObject).payloadAsJsonObject(), equalTo(payloadAsJsonObject));
     }
 
     @Test
     public void shouldReturnPayloadAsJsonArray() {
-        assertThat(envelopeFrom(metadata, payloadAsJsonArray).payloadAsJsonArray(), equalTo(payloadAsJsonArray));
+        assertThat(new DefaultJsonEnvelope(metadata, payloadAsJsonArray).payloadAsJsonArray(), equalTo(payloadAsJsonArray));
     }
 
     @Test
     public void shouldReturnPayloadAsJsonNumber() {
-        assertThat(envelopeFrom(metadata, payloadAsJsonNumber).payloadAsJsonNumber(), equalTo(payloadAsJsonNumber));
+        assertThat(new DefaultJsonEnvelope(metadata, payloadAsJsonNumber).payloadAsJsonNumber(), equalTo(payloadAsJsonNumber));
     }
 
     @Test
     public void shouldReturnPayloadAsJsonString() {
-        assertThat(envelopeFrom(metadata, payloadAsJsonString).payloadAsJsonString(), equalTo(payloadAsJsonString));
+        assertThat(new DefaultJsonEnvelope(metadata, payloadAsJsonString).payloadAsJsonString(), equalTo(payloadAsJsonString));
     }
 
     @Test
@@ -86,7 +87,7 @@ public class DefaultJsonEnvelopeTest {
 
         final Metadata metadata = metadata(metadataId, metadataName);
         final JsonObject payload = payload(payloadName, payloadValue);
-        final JsonEnvelope jsonEnvelope = envelopeFrom(metadata, payload);
+        final JsonEnvelope jsonEnvelope = new DefaultJsonEnvelope(metadata, payload);
 
         final String json = jsonEnvelope.toDebugStringPrettyPrint();
         with(json)
@@ -104,7 +105,7 @@ public class DefaultJsonEnvelopeTest {
 
         final Metadata metadata = metadata(metadataId, metadataName);
         final JsonObject payload = payload(payloadName, payloadValue);
-        final JsonEnvelope jsonEnvelope = envelopeFrom(metadata, payload);
+        final JsonEnvelope jsonEnvelope = new DefaultJsonEnvelope(metadata, payload);
 
         final JsonObject jsonObject = jsonEnvelope.asJsonObject();
 
@@ -115,18 +116,51 @@ public class DefaultJsonEnvelopeTest {
     }
 
     @Test
+    public void shouldReturnEnvelopeAsString() {
+        final UUID metadataId = randomUUID();
+        final String metadataName = "nameABC123";
+
+        final JsonObject payload = createObjectBuilder()
+                .add("strProperty", "valueA")
+                .add("nested", createObjectBuilder()
+                        .add("strProperty1", "valueB")
+                        .add("uuidProperty1", randomUUID().toString())
+                        .add("numProperty1", 34)
+                        .add("boolProperty1", true))
+                .add("arrayProperty", Json.createArrayBuilder()
+                        .add("value1").add("value2").add("value3"))
+                .build();
+
+        final JsonEnvelope envelope = new DefaultJsonEnvelope(metadataOf(metadataId, metadataName).build(), payload);
+
+        with(envelope.toString())
+                .assertEquals("id", metadataId.toString())
+                .assertEquals("name", metadataName)
+                .assertNotDefined("strProperty")
+                .assertNotDefined("nested.strProperty1")
+                .assertNotDefined("nested.uuidProperty1")
+                .assertNotDefined("nested.numProperty1")
+                .assertNotDefined("nested.boolProperty1")
+                .assertNotDefined("arrayProperty");
+    }
+
+    @Test
     public void shouldReturnStringRepresentationWithObfuscatedValues() throws Exception {
         final UUID metadataId = randomUUID();
         final String metadataName = "nameABC123";
-        final JsonEnvelope envelope = envelope()
-                .with(metadataOf(metadataId, metadataName))
-                .withPayloadOf("valueA", "strProperty")
-                .withPayloadOf("valueB", "nested", "strProperty1")
-                .withPayloadOf(randomUUID(), "nested", "uuidProperty1")
-                .withPayloadOf(34, "nested", "numProperty1")
-                .withPayloadOf(true, "nested", "boolProperty1")
-                .withPayloadOf(new String[]{"value1", "value2", "value3"}, "arrayProperty")
+
+        final JsonObject payload = createObjectBuilder()
+                .add("strProperty", "valueA")
+                .add("nested", createObjectBuilder()
+                        .add("strProperty1", "valueB")
+                        .add("uuidProperty1", randomUUID().toString())
+                        .add("numProperty1", 34)
+                        .add("boolProperty1", true))
+                .add("arrayProperty", Json.createArrayBuilder()
+                        .add("value1").add("value2").add("value3"))
                 .build();
+
+        final JsonEnvelope envelope = new DefaultJsonEnvelope(metadataOf(metadataId, metadataName).build(), payload);
 
         with(envelope.toObfuscatedDebugString())
                 .assertEquals("_metadata.id", metadataId.toString())
@@ -137,7 +171,38 @@ public class DefaultJsonEnvelopeTest {
                 .assertEquals("nested.numProperty1", 0)
                 .assertEquals("nested.boolProperty1", false)
                 .assertThat("arrayProperty", hasItems("xxx", "xxx", "xxx"));
-        ;
+    }
+
+    @Test
+    public void shouldReturnComplexEnvelopeAsJsonObject() {
+        final String metadataName = "metadata name";
+        final UUID metadataId = randomUUID();
+        final JsonObjectMetadata.Builder metadata = metadataOf(metadataId, metadataName);
+        final UUID testId = randomUUID();
+
+        final JsonEnvelope jsonEnvelope = DefaultJsonEnvelope.envelope()
+                .with(metadata)
+                .withPayloadOf(1, "int")
+                .withPayloadOf(Boolean.FALSE, "bool")
+                .withPayloadOf("String", "string")
+                .withPayloadOf(ONE, "bigd")
+                .withPayloadOf(testId, "uuid")
+                .withPayloadOf(new String[]{"value1", "value2", "value3"}, "arrayProperty")
+                .withPayloadOf(Json.createObjectBuilder().add("someData", "data").build(), "jsonObject")
+                .build();
+
+        final JsonObject jsonObject = jsonEnvelope.asJsonObject();
+
+        with(jsonObject.toString())
+                .assertEquals("_metadata.id", metadataId.toString())
+                .assertEquals("_metadata.name", metadataName)
+                .assertEquals("$.int", 1)
+                .assertEquals("$.bool", false)
+                .assertEquals("$.string", "String")
+                .assertEquals("$.bigd", 1)
+                .assertEquals("$.uuid", testId.toString())
+                .assertThat("arrayProperty", hasItems("value1", "value2", "value3"))
+                .assertNotNull("$.jsonObject");
     }
 
     private Metadata metadata(final UUID metadataId, final String metadataName) {

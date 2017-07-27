@@ -1,7 +1,7 @@
 package uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog;
 
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
 
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidStreamIdException;
@@ -65,7 +65,7 @@ public class EventLogConverter {
      * @return metadata from the eventLog.
      */
     public Metadata metadataOf(final EventLog eventLog) {
-        return metadataFrom(stringToJsonObjectConverter.convert(eventLog.getMetadata()));
+        return metadataFrom(stringToJsonObjectConverter.convert(eventLog.getMetadata())).build();
     }
 
     private JsonObject payloadOf(final EventLog eventLog) {

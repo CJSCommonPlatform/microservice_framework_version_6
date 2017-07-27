@@ -1,11 +1,11 @@
 package uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog;
 
+import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUIDAndName;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
 
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.util.Clock;
@@ -50,13 +50,14 @@ public class EventLogConverterTest {
 
     @Test
     public void shouldCreateEventLog() throws Exception {
-        JsonEnvelope envelope = envelope()
-                .with(metadataOf(ID, NAME)
+        JsonEnvelope envelope = envelopeFrom(
+                metadataBuilder()
+                        .withId(ID)
+                        .withName(NAME)
                         .withStreamId(STREAM_ID)
                         .withVersion(SEQUENCE_ID)
-                        .createdAt(clock.now()))
-                .withPayloadOf(PAYLOAD_FIELD_VALUE, PAYLOAD_FIELD_NAME)
-                .build();
+                        .createdAt(clock.now()),
+                createObjectBuilder().add(PAYLOAD_FIELD_NAME, PAYLOAD_FIELD_VALUE));
         EventLog eventLog = eventLogConverter.eventLogOf(envelope);
 
         assertThat(eventLog.getId(), equalTo(ID));
@@ -70,12 +71,12 @@ public class EventLogConverterTest {
 
     @Test(expected = InvalidStreamIdException.class)
     public void shouldThrowExceptionOnNullStreamId() throws Exception {
-        eventLogConverter.eventLogOf(envelope().with(metadataWithRandomUUIDAndName()).build());
+        eventLogConverter.eventLogOf(envelopeFrom(metadataBuilder().withId(ID).withName(NAME), createObjectBuilder()));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionOnMissingCreatedAt() throws Exception {
-        eventLogConverter.eventLogOf((envelope().with(metadataWithRandomUUIDAndName().withStreamId(STREAM_ID)).build()));
+        eventLogConverter.eventLogOf((envelopeFrom(metadataBuilder().withId(ID).withName(NAME).withStreamId(STREAM_ID), createObjectBuilder())));
     }
 
     @Test
@@ -87,7 +88,6 @@ public class EventLogConverterTest {
         String actualPayload = actualEnvelope.payloadAsJsonObject().toString();
         JSONAssert.assertEquals(PAYLOAD_JSON, actualPayload, false);
     }
-
 
 
 }

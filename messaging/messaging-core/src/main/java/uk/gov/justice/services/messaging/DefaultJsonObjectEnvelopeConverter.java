@@ -3,9 +3,9 @@ package uk.gov.justice.services.messaging;
 
 import static javax.json.Json.createObjectBuilder;
 import static javax.json.JsonValue.ValueType.OBJECT;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.METADATA;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
 
 import java.io.StringReader;
 

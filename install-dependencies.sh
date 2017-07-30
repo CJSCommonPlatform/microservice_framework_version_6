@@ -36,9 +36,6 @@ file_service_versions=("release-1.8.0")
 # json-schema
 json_schema_versions=("release-1.4.1.MoJ.Fork")
 
-# wildfly-maven-plugin
-wildfly_maven_plugin_versions=("master")
-
 # Checkout and install given version
 function installVersion {
     git checkout ${1}
@@ -85,8 +82,5 @@ installVersions ${file_service_versions[@]}
 
 cd ../json-schema
 installVersions ${json_schema_versions[@]}
-
-cd ../wildfly-maven-plugin
-installVersions ${wildfly_maven_plugin_versions[@]}
 
 cd ../microservice_framework

@@ -34,7 +34,6 @@ Clone the following CJSCommonPlatform projects into the same directory level:
 * [utilities](https://github.com/CJSCommonPlatform/utilities)
 * [file-service](https://github.com/CJSCommonPlatform/file-service)
 * [json-schema](https://github.com/CJSCommonPlatform/json-schema)
-* [wildfly-maven-plugin](https://github.com/CJSCommonPlatform/wildfly-maven-plugin)
 * [microservice_framework](https://github.com/CJSCommonPlatform/microservice_framework)
 
 #### Run dependency installation script

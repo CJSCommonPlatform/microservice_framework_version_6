@@ -9,14 +9,13 @@
     </parent>
     <artifactId>example-it</artifactId>
     <properties>
-        <jboss.home>${project.build.directory}/wildfly-10.0.0.Final</jboss.home>
+        <wildfly.version>10.0.0.Final</wildfly.version>
+        <jboss.home>${project.build.directory}/wildfly-${wildfly.version}</jboss.home>
         <!-- To be used when running CakeShopIT-->
         <server.config>standalone-test.xml</server.config>
 
         <!-- To be used when running CakeShopPostgresIT-->
         <!--<server.config>standalone-postgres-test.xml</server.config>-->
-
-        <wildfly.keepalive>false</wildfly.keepalive>
     </properties>
 
     <dependencies>
@@ -241,7 +240,7 @@
                 <executions>
                     <execution>
                         <id>unpack-wildfly</id>
-                        <phase>process-test-classes</phase>
+                        <phase>pre-integration-test</phase>
                         <goals>
                             <goal>unpack</goal>
                         </goals>
@@ -259,7 +258,7 @@
                     </execution>
                     <execution>
                         <id>copy-wars</id>
-                        <phase>process-test-classes</phase>
+                        <phase>pre-integration-test</phase>
                         <goals>
                             <goal>copy</goal>
                         </goals>
@@ -369,7 +368,7 @@
                 <executions>
                     <execution>
                         <id>copy-jboss-config</id>
-                        <phase>process-test-classes</phase>
+                        <phase>pre-integration-test</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
@@ -396,7 +395,7 @@
             <!--<executions>-->
             <!--<execution>-->
             <!--<id>copy-jboss-module</id>-->
-            <!--<phase>process-test-classes</phase>-->
+            <!--<phase>pre-integration-test</phase>-->
             <!--<goals>-->
             <!--<goal>copy-resources</goal>-->
             <!--</goals>-->
@@ -427,14 +426,14 @@
                 <executions>
                     <execution>
                         <id>Spawn a new H2 TCP server</id>
-                        <phase>process-test-classes</phase>
+                        <phase>pre-integration-test</phase>
                         <goals>
                             <goal>spawn</goal>
                         </goals>
                     </execution>
                     <execution>
                         <id>Stop a spawned H2 TCP server</id>
-                        <phase>verify</phase>
+                        <phase>post-integration-test</phase>
                         <goals>
                             <goal>stop</goal>
                         </goals>
@@ -452,24 +451,27 @@
             <plugin>
                 <groupId>org.wildfly.plugins</groupId>
                 <artifactId>wildfly-maven-plugin</artifactId>
-                <version>1.0.2.MoJ.Fork</version>
                 <configuration>
                     <jbossHome>${jboss.home}</jbossHome>
                     <serverConfig>${server.config}</serverConfig>
-                    <keepAlive>${wildfly.keepalive}</keepAlive>
+                    <timeout>120</timeout>
                     <!--<jvmArgs>-agentlib:jdwp=transport=dt_socket,address=8888,server=y,suspend=y</jvmArgs>-->
+                    <version>${wildfly.version}</version>
                 </configuration>
                 <executions>
                     <execution>
                         <id>start-server</id>
-                        <phase>process-test-classes</phase>
+                        <phase>pre-integration-test</phase>
                         <goals>
                             <goal>start</goal>
                         </goals>
+                        <configuration>
+                            <startupTimeout>120</startupTimeout>
+                        </configuration>
                     </execution>
                     <execution>
                         <id>stop-server</id>
-                        <phase>verify</phase>
+                        <phase>post-integration-test</phase>
                         <goals>
                             <goal>shutdown</goal>
                         </goals>

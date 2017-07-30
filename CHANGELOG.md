@@ -5,6 +5,13 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Changed
+- Switched to 1.2.0.Alpha6 of the maven-wildfly-plugin, the MoJ fork is not required as the 'start' option keeps the server around in the background
+  as long as the plugin is not skipped ... which it is by default in maven-framework-parent-pom
+- in example-it move the wildfly operations to the pre/post-integration-test phases (where they belong)
+- Switch to bintray for release processes
+- Cleaned up some unnecessary version overrides
+
 ## [2.1.0] 2017-07-17
 
 ### Added

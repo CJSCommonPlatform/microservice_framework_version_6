@@ -13,8 +13,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <version.wildfly.maven.plugin>1.0.2.Final</version.wildfly.maven.plugin>
-        <plugins.raml-maven.version>1.5.0</plugins.raml-maven.version>
+        <plugins.raml-maven.version>${raml-maven-plugin.version}</plugins.raml-maven.version>
         <wiremock.service.version>1.1.0</wiremock.service.version>
         <cpp.service-component>UNKNOWN_SERVICE_COMPONENT</cpp.service-component>
         <skip.mockito.json.validation>true</skip.mockito.json.validation>

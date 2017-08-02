@@ -5,6 +5,8 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [2.2.0] 2017-08-02
+
 ### Changed
 - Use maven-framework-parent-pom 1.6.1, which simply changes the wildfly-maven-plugin to 1.2.0.Alpha6 and stops adding it to every build
 - example-it: move the wildfly operations to the pre/post-integration-test phases (where they belong)

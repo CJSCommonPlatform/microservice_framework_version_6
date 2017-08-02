@@ -7,10 +7,10 @@
 maven_super_pom_versions=("release-1.0.0")
 
 # maven-parent-pom
-maven_parent_pom_versions=("release-1.1.0" "release-1.2.0" "release-1.4.0" "release-1.4.1")
+maven_parent_pom_versions=("release-1.1.0" "release-1.2.0" "release-1.4.0" "release-1.4.1" "release-1.5.0")
 
 # maven-common-bom
-maven_parent_bom_versions=("release-1.9.0" "release-1.13.0" "release-1.15.0")
+maven_parent_bom_versions=("release-1.9.0" "release-1.13.0" "release-1.15.0" "release-1.16.0")
 
 # maven-common
 maven_common_versions=("release-1.6.4" "release-1.6.10" "release-1.6.11")
@@ -22,10 +22,10 @@ raml_maven_versions=("release-1.5.0")
 embedded_artemis_versions=("release-1.0.0")
 
 # maven-framework-parent-pom
-maven_framework_parent_pom_versions=("release-1.2.0" "release-1.3.0")
+maven_framework_parent_pom_versions=("release-1.2.0" "release-1.3.0" "release-1.5.0")
 
 # test-utils
-test_utils_versions=("release-1.2.0")
+test_utils_versions=("release-1.2.0" "release-1.4.0")
 
 # utilities
 utilities_versions=("release-1.6.0")
@@ -44,6 +44,8 @@ function installVersion {
 
 # Checkout and install array of versions
 function installVersions {
+    git checkout master
+    git pull
     versions=("$@")
     for version in ${versions[@]}; do
         installVersion ${version}

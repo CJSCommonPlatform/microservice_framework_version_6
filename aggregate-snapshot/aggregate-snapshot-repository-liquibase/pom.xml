@@ -11,5 +11,7 @@
 
     <artifactId>aggregate-snapshot-repository-liquibase</artifactId>
 
-
+    <properties>
+        <sonar.skip>true</sonar.skip>
+    </properties>
 </project>

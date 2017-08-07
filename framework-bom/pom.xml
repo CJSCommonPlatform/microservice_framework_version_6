@@ -53,11 +53,6 @@
                 <artifactId>framework-api-event-stream</artifactId>
                 <version>${cpp.framework.version}</version>
             </dependency>
-            <dependency>
-                <groupId>uk.gov.justice.services</groupId>
-                <artifactId>framework-api-messaging</artifactId>
-                <version>${cpp.framework.version}</version>
-            </dependency>
 
             <dependency>
                 <groupId>uk.gov.justice.services</groupId>

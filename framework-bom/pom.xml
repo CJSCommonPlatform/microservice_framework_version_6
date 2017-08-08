@@ -186,16 +186,6 @@
             </dependency>
             <dependency>
                 <groupId>uk.gov.justice.services</groupId>
-                <artifactId>file-api</artifactId>
-                <version>${cpp.framework.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>uk.gov.justice.services</groupId>
-                <artifactId>file-alfresco</artifactId>
-                <version>${cpp.framework.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>uk.gov.justice.services</groupId>
                 <artifactId>test-utils-core</artifactId>
                 <version>${cpp.framework.version}</version>
             </dependency>

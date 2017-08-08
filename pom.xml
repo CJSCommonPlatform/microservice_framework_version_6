@@ -39,7 +39,6 @@
         <module>event-buffer</module>
         <module>aggregate</module>
         <module>aggregate-snapshot</module>
-        <module>file</module>
         <module>raml-lint-check</module>
         <module>framework-api</module>
     </modules>

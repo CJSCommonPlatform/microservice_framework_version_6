@@ -1,6 +1,8 @@
 package uk.gov.justice.services.core.envelope;
 
 
+import static java.util.UUID.randomUUID;
+import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
@@ -12,14 +14,13 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
 
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.core.json.SchemaLoadingException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.Metadata;
 
 import javax.json.JsonValue;
 
@@ -55,7 +56,10 @@ public class EnvelopeValidatorTest {
     @Test
     public void shouldValidatePayloadAgainstJsonSchema() throws Exception {
         final String metadataName = "some-name";
-        JsonEnvelope envelope = envelope().with(metadataWithRandomUUID(metadataName)).withPayloadOf("valueABC", "someElement").build();
+
+        final JsonEnvelope envelope = envelopeFrom(
+                metadataBuilder().withId(randomUUID()).withName(metadataName),
+                createObjectBuilder().add("someElement", "valueABC"));
 
         final String jsonStringRepresentation = "dummyJsonStringRepresentation";
         when(objectMapper.writeValueAsString(envelope.payload())).thenReturn(jsonStringRepresentation);
@@ -72,7 +76,7 @@ public class EnvelopeValidatorTest {
         };
         when(objectMapper.writeValueAsString(any())).thenThrow(jsonProcessingException);
 
-        envelopeValidator.validate(envelope().with(metadataWithDefaults()).build());
+        envelopeValidator.validate(envelopeFrom(metadataBuilder().withId(randomUUID()).withName("name"), createObjectBuilder()));
 
         final EnvelopeValidationException exception = handledException();
         assertThat(exception.getCause(), is(jsonProcessingException));
@@ -83,7 +87,9 @@ public class EnvelopeValidatorTest {
     public void shouldHandleJsonValidationException() {
         final ValidationException jsonValidationException = new ValidationException(null, Object.class, null);
         doThrow(jsonValidationException).when(jsonSchemaValidator).validate(anyString(), anyString());
-        envelopeValidator.validate(envelope().with(metadataWithRandomUUID("msgNameABC")).withPayloadOf("SensitiveData", "property1").build());
+        envelopeValidator.validate(envelopeFrom(
+                metadataBuilder().withId(randomUUID()).withName("msgNameABC"),
+                createObjectBuilder().add("property1", "SensitiveData")));
 
         final EnvelopeValidationException exception = handledException();
         assertThat(exception.getCause(), is(jsonValidationException));
@@ -95,7 +101,9 @@ public class EnvelopeValidatorTest {
     public void shouldHandleSchemaLoadingException() {
         final SchemaLoadingException schemaLoadingException = new SchemaLoadingException("Schema does not exists");
         doThrow(schemaLoadingException).when(jsonSchemaValidator).validate(anyString(), anyString());
-        envelopeValidator.validate(envelope().with(metadataWithRandomUUID("BCD")).build());
+        envelopeValidator.validate(envelopeFrom(
+                metadataBuilder().withId(randomUUID()).withName("BCD"),
+                createObjectBuilder()));
 
         final EnvelopeValidationException exception = handledException();
         assertThat(exception.getCause(), is(schemaLoadingException));
@@ -105,19 +113,18 @@ public class EnvelopeValidatorTest {
     @Test
     public void shouldHandleExceptionIfNoMetadataInEnvelope() throws Exception {
 
-        envelopeValidator.validate(envelope().build());
+        envelopeValidator.validate(envelopeFrom((Metadata) null, createObjectBuilder().build()));
 
         final EnvelopeValidationException exception = handledException();
 
         assertThat(exception.getMessage(), is("Metadata not set in the envelope."));
-
 
     }
 
     @Test
     public void shouldSkipValidationIfPayloadNULL() throws Exception {
 
-        envelopeValidator.validate(envelopeFrom(metadataWithRandomUUID("some-name"), JsonValue.NULL));
+        envelopeValidator.validate(envelopeFrom(metadataBuilder().withId(randomUUID()).withName("some-name"), JsonValue.NULL));
 
         verifyZeroInteractions(jsonSchemaValidator);
 

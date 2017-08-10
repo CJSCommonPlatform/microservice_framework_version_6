@@ -2,14 +2,14 @@ package uk.gov.justice.services.core.enveloper;
 
 import static java.util.Optional.empty;
 import static java.util.UUID.randomUUID;
+import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.IsNot.not;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
 
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
@@ -56,10 +56,12 @@ public class DefaultEnveloperTest {
         enveloper.register(new EventFoundEvent(TestEvent.class, TEST_EVENT_NAME));
 
         JsonEnvelope event = enveloper.withMetadataFrom(
-                envelope()
-                        .with(metadataOf(COMMAND_UUID, TEST_EVENT_NAME)
-                                .withCausation(OLD_CAUSATION_ID))
-                        .build())
+                envelopeFrom(
+                        metadataBuilder()
+                                .withId(COMMAND_UUID)
+                                .withName(TEST_EVENT_NAME)
+                                .withCausation(OLD_CAUSATION_ID),
+                        createObjectBuilder()))
                 .apply(new TestEvent("somePayloadValue"));
 
         assertThat(event.metadata().id(), notNullValue());
@@ -73,17 +75,19 @@ public class DefaultEnveloperTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionOnNullEvent() throws JsonProcessingException {
-        enveloper.withMetadataFrom(envelope().build()).apply(null);
+        enveloper.withMetadataFrom(envelopeFrom(metadataBuilder().withId(randomUUID()).withName("name"), createObjectBuilder())).apply(null);
     }
 
     @Test
     public void shouldEnvelopeObjectWithName() throws JsonProcessingException {
 
         JsonEnvelope event = enveloper.withMetadataFrom(
-                envelope()
-                        .with(metadataOf(COMMAND_UUID, TEST_EVENT_NAME)
-                                .withCausation(OLD_CAUSATION_ID))
-                        .build(), TEST_NAME)
+                envelopeFrom(
+                        metadataBuilder()
+                                .withId(COMMAND_UUID)
+                                .withName(TEST_EVENT_NAME)
+                                .withCausation(OLD_CAUSATION_ID),
+                        createObjectBuilder()), TEST_NAME)
                 .apply(new TestEvent());
 
 
@@ -98,10 +102,12 @@ public class DefaultEnveloperTest {
     public void shouldEnvelopeMapNullObjectWithName() throws JsonProcessingException {
 
         JsonEnvelope event = enveloper.withMetadataFrom(
-                envelope()
-                        .with(metadataOf(COMMAND_UUID, TEST_EVENT_NAME)
-                                .withCausation(OLD_CAUSATION_ID))
-                        .build(), TEST_NAME)
+                envelopeFrom(
+                        metadataBuilder()
+                                .withId(COMMAND_UUID)
+                                .withName(TEST_EVENT_NAME)
+                                .withCausation(OLD_CAUSATION_ID),
+                        createObjectBuilder()), TEST_NAME)
                 .apply(null);
 
         assertThat(event.payload(), equalTo(JsonValue.NULL));
@@ -117,9 +123,11 @@ public class DefaultEnveloperTest {
         enveloper.register(new EventFoundEvent(TestEvent.class, TEST_EVENT_NAME));
 
         JsonEnvelope event = enveloper.withMetadataFrom(
-                envelope()
-                        .with(metadataOf(COMMAND_UUID, TEST_EVENT_NAME))
-                        .build())
+                envelopeFrom(
+                        metadataBuilder()
+                                .withId(COMMAND_UUID)
+                                .withName(TEST_EVENT_NAME),
+                        createObjectBuilder()))
                 .apply(new TestEvent());
 
 
@@ -135,7 +143,7 @@ public class DefaultEnveloperTest {
         exception.expect(InvalidEventException.class);
         exception.expectMessage("Failed to map event. No event registered for class java.lang.String");
 
-        enveloper.withMetadataFrom(envelope().build()).apply("InvalidEventObject");
+        enveloper.withMetadataFrom(envelopeFrom(metadataBuilder().withId(randomUUID()).withName("name"), createObjectBuilder())).apply("InvalidEventObject");
     }
 
     @Test
@@ -143,12 +151,13 @@ public class DefaultEnveloperTest {
         enveloper.register(new EventFoundEvent(TestEvent.class, TEST_EVENT_NAME));
 
         JsonEnvelope event = enveloper.withMetadataFrom(
-                envelope()
-                        .with(metadataWithDefaults()
+                envelopeFrom(
+                        metadataBuilder()
+                                .withId(COMMAND_UUID)
+                                .withName(TEST_EVENT_NAME)
                                 .withStreamId(randomUUID())
-                                .withVersion(123l)
-                        )
-                        .build())
+                                .withVersion(123l),
+                        createObjectBuilder()))
                 .apply(new TestEvent());
 
         assertThat(event.metadata().streamId(), is(empty()));

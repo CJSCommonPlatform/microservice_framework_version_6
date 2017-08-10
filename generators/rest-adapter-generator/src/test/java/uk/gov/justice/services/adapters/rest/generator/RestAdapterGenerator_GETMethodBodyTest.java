@@ -13,6 +13,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.raml.model.ActionType.GET;
@@ -32,14 +33,13 @@ import static uk.gov.justice.services.generators.test.utils.config.GeneratorConf
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.setField;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
 import uk.gov.justice.services.adapter.rest.exception.BadRequestException;
 import uk.gov.justice.services.adapter.rest.mapping.ActionMapperHelper;
 import uk.gov.justice.services.adapter.rest.mapping.BasicActionMapperHelper;
 import uk.gov.justice.services.adapter.rest.parameter.Parameter;
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
-import uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -108,7 +108,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         ArgumentCaptor<Function> consumerCaptor = ArgumentCaptor.forClass(Function.class);
         verify(restProcessor).process(anyString(), consumerCaptor.capture(), anyString(), any(HttpHeaders.class), any(Collection.class));
 
-        final InterceptorContext interceptorContext = interceptorContextWithInput(envelope().build());
+        final InterceptorContext interceptorContext = interceptorContextWithInput(mock(JsonEnvelope.class));
         consumerCaptor.getValue().apply(interceptorContext);
 
         verify(interceptorChainProcessor).process(interceptorContext);

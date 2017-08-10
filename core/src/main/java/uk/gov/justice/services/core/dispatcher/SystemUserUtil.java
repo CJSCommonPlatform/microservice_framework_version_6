@@ -1,8 +1,8 @@
 package uk.gov.justice.services.core.dispatcher;
 
 
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
@@ -27,10 +27,9 @@ public class SystemUserUtil {
         final UUID sysUserId = systemUserProvider.getContextSystemUserId()
                 .orElseThrow(() -> new IllegalStateException("System userId not found"));
 
-        return envelope()
-                .with(metadataFrom(envelope.metadata())
-                        .withUserId(sysUserId.toString()))
-                .withPayloadFrom(envelope)
-                .build();
+        return envelopeFrom(
+                metadataFrom(envelope.metadata())
+                        .withUserId(sysUserId.toString()),
+                envelope.payload());
     }
 }

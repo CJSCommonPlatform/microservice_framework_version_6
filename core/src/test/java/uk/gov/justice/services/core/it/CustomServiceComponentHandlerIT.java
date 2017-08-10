@@ -1,13 +1,14 @@
 package uk.gov.justice.services.core.it;
 
 import static java.util.UUID.randomUUID;
+import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.core.interceptor.DefaultInterceptorContext.interceptorContextWithInput;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
 
 import uk.gov.justice.services.common.configuration.GlobalValueProducer;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
@@ -27,8 +28,8 @@ import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandlerProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.core.extension.ServiceComponentScanner;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
+import uk.gov.justice.services.core.extension.ServiceComponentScanner;
 import uk.gov.justice.services.core.interceptor.Interceptor;
 import uk.gov.justice.services.core.interceptor.InterceptorCache;
 import uk.gov.justice.services.core.interceptor.InterceptorChain;
@@ -128,11 +129,13 @@ public class CustomServiceComponentHandlerIT {
     @Test
     public void shouldHandleFrameWorkComponentByName() {
         final UUID metadataId = randomUUID();
-        final JsonEnvelope jsonEnvelope = envelope()
-                .with(metadataOf(metadataId, CUSTOM_XYZ)
+        final JsonEnvelope jsonEnvelope = envelopeFrom(
+                metadataBuilder()
+                        .withId(metadataId)
+                        .withName(CUSTOM_XYZ)
                         .withStreamId(randomUUID())
-                        .withVersion(1L))
-                .build();
+                        .withVersion(1L),
+                createObjectBuilder());
 
         interceptorChainProcessor.process(interceptorContextWithInput(jsonEnvelope));
 

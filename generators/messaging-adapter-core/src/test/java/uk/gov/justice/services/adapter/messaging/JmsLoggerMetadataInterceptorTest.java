@@ -3,6 +3,7 @@ package uk.gov.justice.services.adapter.messaging;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.UUID.randomUUID;
+import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.nullValue;
@@ -10,9 +11,9 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.common.log.LoggerConstants.REQUEST_DATA;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 
 import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -21,7 +22,6 @@ import uk.gov.justice.services.messaging.logging.TraceLogger;
 
 import javax.interceptor.InvocationContext;
 import javax.jms.TextMessage;
-import javax.json.Json;
 import javax.json.JsonObject;
 
 import org.junit.Test;
@@ -70,7 +70,7 @@ public class JmsLoggerMetadataInterceptorTest {
                 .build();
 
         final TextMessage textMessage = mock(TextMessage.class);
-        final JsonObject jsonObject = Json.createObjectBuilder()
+        final JsonObject jsonObject = createObjectBuilder()
                 .add("id", messageId).build();
 
         when(context.getParameters()).thenReturn(new Object[]{textMessage});

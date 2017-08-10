@@ -1,13 +1,13 @@
 package uk.gov.justice.services.core.enveloper;
 
 import static java.lang.String.format;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.CAUSATION;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.CREATED_AT;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.STREAM;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
+import static uk.gov.justice.services.messaging.JsonMetadata.CAUSATION;
+import static uk.gov.justice.services.messaging.JsonMetadata.CREATED_AT;
+import static uk.gov.justice.services.messaging.JsonMetadata.ID;
+import static uk.gov.justice.services.messaging.JsonMetadata.NAME;
+import static uk.gov.justice.services.messaging.JsonMetadata.STREAM;
 
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
@@ -97,7 +97,7 @@ public class DefaultEnveloper implements Enveloper {
                 .add(CREATED_AT, ZonedDateTimes.toString(clock.now()))
                 .build();
 
-        return metadataFrom(jsonObject);
+        return metadataFrom(jsonObject).build();
     }
 
     private JsonArray createCausation(final Metadata metadata) {

@@ -8,12 +8,10 @@ import static uk.gov.justice.services.generators.test.utils.config.GeneratorConf
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.setField;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
-import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
 import uk.gov.justice.services.messaging.logging.TraceLogger;
 
 import java.lang.reflect.Method;
@@ -50,7 +48,7 @@ public class MessagingClientGenerator_MethodBodyTest extends BaseGeneratorTest {
         final Object instance = instanceOf(generatedClass);
         setField(instance, "traceLogger", mock(TraceLogger.class));
 
-        JsonEnvelope envelope = envelope().build();
+        JsonEnvelope envelope = mock(JsonEnvelope.class);
         Method method = firstMethodOf(generatedClass);
         method.invoke(instance, envelope);
 

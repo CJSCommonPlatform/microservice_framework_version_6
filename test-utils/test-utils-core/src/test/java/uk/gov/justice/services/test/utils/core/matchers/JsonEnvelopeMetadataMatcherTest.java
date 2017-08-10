@@ -5,13 +5,13 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.allOf;
 import static org.junit.Assert.assertThat;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
+import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjectMetadata;
 import uk.gov.justice.services.messaging.Metadata;
+import uk.gov.justice.services.messaging.MetadataBuilder;
 
 import java.util.UUID;
 
@@ -257,15 +257,15 @@ public class JsonEnvelopeMetadataMatcherTest {
         ));
     }
 
-    private JsonObjectMetadata.Builder defaultMetadataWithName(final String name) {
+    private MetadataBuilder defaultMetadataWithName(final String name) {
         return defaultMetadataWith(ID, name);
     }
 
-    private JsonObjectMetadata.Builder defaultMetadataRandomIdWithName(final String name) {
+    private MetadataBuilder defaultMetadataRandomIdWithName(final String name) {
         return defaultMetadataWith(randomUUID(), name);
     }
 
-    private JsonObjectMetadata.Builder defaultMetadataWith(final UUID id, final String name) {
+    private MetadataBuilder defaultMetadataWith(final UUID id, final String name) {
         return metadataOf(id, name)
                 .withCausation(CAUSATION_ID)
                 .withUserId(USER_ID)

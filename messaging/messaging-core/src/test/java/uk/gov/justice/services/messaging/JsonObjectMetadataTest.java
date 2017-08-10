@@ -3,19 +3,20 @@ package uk.gov.justice.services.messaging;
 import static javax.json.JsonValue.NULL;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.messaging.JsonEnvelope.METADATA;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.CAUSATION;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.CLIENT_ID;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.CONTEXT;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.CORRELATION;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.SESSION_ID;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.STREAM;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.STREAM_ID;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.USER_ID;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.VERSION;
+import static uk.gov.justice.services.messaging.JsonMetadata.CAUSATION;
+import static uk.gov.justice.services.messaging.JsonMetadata.CLIENT_ID;
+import static uk.gov.justice.services.messaging.JsonMetadata.CONTEXT;
+import static uk.gov.justice.services.messaging.JsonMetadata.CORRELATION;
+import static uk.gov.justice.services.messaging.JsonMetadata.ID;
+import static uk.gov.justice.services.messaging.JsonMetadata.NAME;
+import static uk.gov.justice.services.messaging.JsonMetadata.SESSION_ID;
+import static uk.gov.justice.services.messaging.JsonMetadata.STREAM;
+import static uk.gov.justice.services.messaging.JsonMetadata.STREAM_ID;
+import static uk.gov.justice.services.messaging.JsonMetadata.USER_ID;
+import static uk.gov.justice.services.messaging.JsonMetadata.VERSION;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
 
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
@@ -30,6 +31,7 @@ import javax.json.JsonObject;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
 import com.google.common.testing.EqualsTester;
+import org.hamcrest.core.Is;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -210,6 +212,88 @@ public class JsonObjectMetadataTest {
                 .addEqualityGroup(item9)
                 .addEqualityGroup(item10)
                 .testEquals();
+    }
+
+    @Test
+    public void shouldProvideMetadataBuilderWithUuidAndName() throws Exception {
+        final UUID id = UUID.randomUUID();
+        final String name = "name";
+
+        final Metadata metadata = JsonObjectMetadata.metadataOf(id, name).build();
+
+        assertThat(metadata.id(), Is.is(id));
+        assertThat(metadata.name(), Is.is(name));
+    }
+
+    @Test
+    public void shouldProvideMetadataBuilderWithUuidAsStringAndName() throws Exception {
+        final UUID id = UUID.randomUUID();
+        final String name = "name";
+
+        final Metadata metadata = JsonObjectMetadata.metadataOf(id.toString(), name).build();
+
+        assertThat(metadata.id(), Is.is(id));
+        assertThat(metadata.name(), Is.is(name));
+    }
+
+    @Test
+    public void shouldProvideMetadataBuilderWithRandomUuidAndName() throws Exception {
+        final String name = "name";
+
+        final Metadata metadata = JsonObjectMetadata.metadataWithRandomUUID(name).build();
+
+        assertThat(metadata.id(), notNullValue());
+        assertThat(metadata.name(), Is.is(name));
+    }
+
+    @Test
+    public void shouldProvideMetadataBuilderWithRandomUuidAndDummyName() throws Exception {
+        final Metadata metadata = JsonObjectMetadata.metadataWithRandomUUIDAndName().build();
+
+        assertThat(metadata.id(), notNullValue());
+        assertThat(metadata.name(), Is.is("dummy"));
+    }
+
+    @Test
+    public void shouldProvideMetadataBuilderWithRandomUuidAndDummyNameAndCreatedAt() throws Exception {
+        final Metadata metadata = JsonObjectMetadata.metadataWithDefaults().build();
+
+        assertThat(metadata.id(), notNullValue());
+        assertThat(metadata.name(), Is.is("dummy"));
+        assertThat(metadata.createdAt().isPresent(), Is.is(true));
+    }
+
+    @Test
+    public void shouldProvideMetadataBuilderFromMetadata() throws Exception {
+        final UUID id = UUID.randomUUID();
+        final String name = "name";
+
+        final Metadata originalMetadata = JsonEnvelope.metadataBuilder()
+                .withId(id)
+                .withName(name)
+                .build();
+
+        final Metadata metadata = JsonObjectMetadata.metadataFrom(originalMetadata).build();
+
+        assertThat(metadata.id(), notNullValue());
+        assertThat(metadata.name(), Is.is(name));
+    }
+
+    @Test
+    public void shouldProvideMetadataBuilderFromJsonObject() throws Exception {
+        final UUID id = UUID.randomUUID();
+        final String name = "name";
+
+        final JsonObject jsonObject = JsonEnvelope.metadataBuilder()
+                .withId(id)
+                .withName(name)
+                .build()
+                .asJsonObject();
+
+        final Metadata metadata = JsonObjectMetadata.metadataFrom(jsonObject);
+
+        assertThat(metadata.id(), notNullValue());
+        assertThat(metadata.name(), Is.is(name));
     }
 
     private Metadata metadata(String id, String uuidClientCorrelation, String uuidCausation, String uuidUserId,

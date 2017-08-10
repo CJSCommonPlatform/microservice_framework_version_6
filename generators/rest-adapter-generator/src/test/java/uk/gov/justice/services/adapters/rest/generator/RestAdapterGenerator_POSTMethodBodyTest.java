@@ -15,6 +15,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.raml.model.ActionType.POST;
@@ -30,7 +31,6 @@ import static uk.gov.justice.services.generators.test.utils.config.GeneratorProp
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.methodsOf;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.setField;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
 import uk.gov.justice.services.adapter.rest.mapping.ActionMapperHelper;
 import uk.gov.justice.services.adapter.rest.mapping.BasicActionMapperHelper;
@@ -107,7 +107,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
         verify(restProcessor).process(anyString(), functionCaptor.capture(), anyString(), any(Optional.class), any(HttpHeaders.class),
                 any(Collection.class));
 
-        final JsonEnvelope envelope = envelope().build();
+        final JsonEnvelope envelope = mock(JsonEnvelope.class);
         final InterceptorContext interceptorContext = interceptorContextWithInput(envelope);
         functionCaptor.getValue().apply(interceptorContext);
 
@@ -143,7 +143,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
         verify(restProcessor).process(anyString(), functionCaptor.capture(), anyString(), any(Optional.class), any(HttpHeaders.class),
                 any(Collection.class));
 
-        final JsonEnvelope envelope = envelope().build();
+        final JsonEnvelope envelope = mock(JsonEnvelope.class);
         final InterceptorContext interceptorContext = interceptorContextWithInput(envelope);
         functionCaptor.getValue().apply(interceptorContext);
 

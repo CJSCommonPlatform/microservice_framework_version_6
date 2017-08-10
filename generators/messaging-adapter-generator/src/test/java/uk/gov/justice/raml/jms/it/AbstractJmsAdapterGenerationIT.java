@@ -2,8 +2,10 @@ package uk.gov.justice.raml.jms.it;
 
 import static javax.json.Json.createObjectBuilder;
 import static org.junit.Assert.fail;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
+import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
+
+import uk.gov.justice.artemis.EmbeddedArtemisServer;
 
 import java.util.Properties;
 
@@ -25,22 +27,20 @@ import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.gov.justice.artemis.EmbeddedArtemisServer;
-
 public abstract class AbstractJmsAdapterGenerationIT {
     private static int port = -1;
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractJmsAdapterGenerationIT.class);
 
     private final static ActiveMQConnectionFactory cf = new ActiveMQConnectionFactory(
-                    "tcp://localhost:61616?broker.persistent=false&jms.useAsyncSend=false");
+            "tcp://localhost:61616?broker.persistent=false&jms.useAsyncSend=false");
 
     @BeforeClass
     public static void beforeClass() {
         port = NetworkUtil.getNextAvailablePort();
-        try{
+        try {
             EmbeddedArtemisServer.startServer();
-        }catch(Throwable e){
+        } catch (Throwable e) {
             LOG.error("", e);
             fail(e.getMessage());
         }
@@ -48,9 +48,9 @@ public abstract class AbstractJmsAdapterGenerationIT {
 
     @AfterClass
     public static void afterClass() {
-        try{
+        try {
             EmbeddedArtemisServer.stopServer();
-        }catch(Exception e){
+        } catch (Exception e) {
             LOG.error("", e);
         }
     }
@@ -69,7 +69,7 @@ public abstract class AbstractJmsAdapterGenerationIT {
 
     protected void sendEnvelope(String metadataId, String commandName, Destination queue, JsonObject payload) throws JMSException {
         try (final Connection connection = getConnection();
-                        final Session session = connection.createSession()) {
+             final Session session = connection.createSession()) {
             final TextMessage message = session.createTextMessage();
             message.setText(envelope().with(metadataOf(metadataId, commandName)).toJsonString());
             message.setStringProperty("CPPNAME", commandName);
@@ -78,7 +78,7 @@ public abstract class AbstractJmsAdapterGenerationIT {
             }
         }
     }
-    
+
     private Connection getConnection() throws JMSException {
         final Connection connection = cf.createConnection();
         connection.start();

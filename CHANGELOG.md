@@ -5,6 +5,15 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Added
+- JsonEnvelope and Metadata builder service provider
+- Convenience methods to JsonEnvelope for providing JsonEnvelopes and JsonObjectMetadataBuilders
+- MetadataBuilderFactory in test-utils-core which contains convenience methods for creating 
+JsonObjectMetadataBuilders in tests
+
+### Changed
+- Deprecate DefaultJsonEnvelope, JsonObjectBuilderWrapper and JsonObjectMetadata
+
 ## [2.2.0] 2017-08-02
 
 ### Changed

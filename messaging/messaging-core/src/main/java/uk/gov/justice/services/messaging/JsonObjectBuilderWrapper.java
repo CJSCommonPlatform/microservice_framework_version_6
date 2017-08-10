@@ -11,13 +11,14 @@ import java.util.Map;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import javax.json.JsonValue;
 
+@Deprecated
 class JsonObjectBuilderWrapper {
 
     private JsonObjectBuilder jsonObjectBuilder = createObjectBuilder();
     private final Map<String, Object> entryMap = new HashMap<>();
 
+    @Deprecated
     public JsonObjectBuilderWrapper(final JsonObject jsonObject) {
         jsonObject.forEach((k, v) -> {
             if (v.getValueType() == OBJECT) {
@@ -27,6 +28,7 @@ class JsonObjectBuilderWrapper {
         jsonObjectBuilder = JsonObjects.createObjectBuilder(jsonObject);
     }
 
+    @Deprecated
     public JsonObjectBuilderWrapper() {
         jsonObjectBuilder = createObjectBuilder();
 

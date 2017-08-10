@@ -62,7 +62,13 @@
             <artifactId>aggregate-snapshot-service</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>aggregate</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
+        <!-- Test Dependencies -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -85,8 +91,9 @@
         </dependency>
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
-            <artifactId>aggregate</artifactId>
+            <artifactId>test-utils-core</artifactId>
             <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

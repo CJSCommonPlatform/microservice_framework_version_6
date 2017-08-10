@@ -1,6 +1,7 @@
 package uk.gov.justice.services.messaging;
 
 import static co.unruly.matchers.OptionalMatchers.contains;
+import static java.util.UUID.randomUUID;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -11,10 +12,9 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
+import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
 
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 
@@ -36,7 +36,7 @@ import com.google.common.io.Resources;
 import org.junit.Before;
 import org.junit.Test;
 
-public class JsonObjectEnvelopeConverterTest {
+public class DefaultJsonObjectEnvelopeConverterTest {
 
     private static final String ID = "861c9430-7bc6-4bf0-b549-6534394b8d65";
     private static final String NAME = "test.command.do-something";
@@ -85,7 +85,7 @@ public class JsonObjectEnvelopeConverterTest {
     @Test
     public void shouldReturnJsonStringFromEnvelope() throws Exception {
         final JsonObject input = jsonObjectFromFile("envelope");
-        final Metadata metadata = metadataFrom(input.getJsonObject(METADATA));
+        final Metadata metadata = metadataFrom(input.getJsonObject(METADATA)).build();
         final JsonValue payload = jsonObjectEnvelopeConverter.extractPayloadFromEnvelope(input);
 
         final JsonEnvelope envelope = envelopeFrom(metadata, payload);
@@ -112,7 +112,7 @@ public class JsonObjectEnvelopeConverterTest {
     @Test
     public void shouldRemoveNullsInJsonString() throws Exception {
         final JsonObject input = jsonObjectFromFile("envelope-with-null");
-        final Metadata metadata = metadataFrom(input.getJsonObject(METADATA));
+        final Metadata metadata = metadataFrom(input.getJsonObject(METADATA)).build();
         final JsonValue payload = jsonObjectEnvelopeConverter.extractPayloadFromEnvelope(input);
 
         final JsonEnvelope envelope = envelopeFrom(metadata, payload);
@@ -123,7 +123,7 @@ public class JsonObjectEnvelopeConverterTest {
     @Test
     public void shouldReturnJsonObjectFromEnvelopeWithObjectPayload() throws IOException {
         final JsonObject expectedEnvelope = jsonObjectFromFile("envelope");
-        final Metadata metadata = metadataFrom(expectedEnvelope.getJsonObject(METADATA));
+        final Metadata metadata = metadataFrom(expectedEnvelope.getJsonObject(METADATA)).build();
         final JsonValue payload = jsonObjectEnvelopeConverter.extractPayloadFromEnvelope(expectedEnvelope);
 
         final JsonEnvelope envelope = envelopeFrom(metadata, payload);
@@ -134,19 +134,20 @@ public class JsonObjectEnvelopeConverterTest {
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionOnArrayPayloadType() {
         jsonObjectEnvelopeConverter.fromEnvelope(
-                envelopeFrom(metadataWithDefaults(), createArrayBuilder().add(ARRAY_ITEM_1).add(ARRAY_ITEM_2).build()));
+                envelopeFrom(metadataBuilder().withId(randomUUID()).withName("name"),
+                        createArrayBuilder().add(ARRAY_ITEM_1).add(ARRAY_ITEM_2).build()));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionOnNumberPayloadType() {
         jsonObjectEnvelopeConverter.fromEnvelope(
-                envelopeFrom(metadataWithDefaults(), createObjectBuilder().add(FIELD_NUMBER, 100).build().getJsonNumber(FIELD_NUMBER)));
+                envelopeFrom(metadataBuilder().withId(randomUUID()).withName("name"),
+                        createObjectBuilder().add(FIELD_NUMBER, 100).build().getJsonNumber(FIELD_NUMBER)));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionWhenProvidedEnvelopeWithoutMetadata() throws IOException {
-
-        jsonObjectEnvelopeConverter.fromEnvelope(envelope().build());
+        jsonObjectEnvelopeConverter.fromEnvelope(envelopeFrom((Metadata) null, createObjectBuilder().build()));
     }
 
     @Test(expected = RuntimeException.class)

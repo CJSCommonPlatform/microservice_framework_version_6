@@ -14,6 +14,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.raml.model.ActionType.DELETE;
 import static org.raml.model.ActionType.GET;
@@ -29,7 +30,6 @@ import static uk.gov.justice.services.generators.test.utils.config.GeneratorProp
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.methodsOf;
 import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.setField;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
 import uk.gov.justice.raml.core.Generator;
 import uk.gov.justice.raml.core.GeneratorConfig;
@@ -251,7 +251,7 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
         setField(instance, "traceLogger", new DefaultTraceLogger());
 
         final Method method = firstMethodOf(generatedClass);
-        final Object result = method.invoke(instance, envelope().build());
+        final Object result = method.invoke(instance, mock(JsonEnvelope.class));
         assertThat(result, is(12345678));
     }
 
@@ -368,7 +368,7 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
             final Field field = AbstractClientGenerator.class.getDeclaredField(LOGGER_FIELD);
             field.setAccessible(true);
             field.set(generator, logger);
-        } catch (NoSuchFieldException|IllegalAccessException e) {
+        } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new RuntimeException("Could not set logger on generator under test", e);
         }
     }

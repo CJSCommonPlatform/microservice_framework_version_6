@@ -107,12 +107,10 @@ public class CakeShopIT {
     private static final String RECIPES_RESOURCE_QUERY_URI = "http://localhost:8080/example-query-api/query/api/rest/cakeshop/recipes/";
     private static final String ORDERS_RESOURCE_QUERY_URI = "http://localhost:8080/example-query-api/query/api/rest/cakeshop/orders/";
     private static final String CAKES_RESOURCE_QUERY_URI = "http://localhost:8080/example-query-api/query/api/rest/cakeshop/cakes/";
-    private static final String ALRFRESCO_RECORDED_REQUESTS = "http://localhost:8080/alfresco-stub/recorded-requests";
     private static final String OVEN_RESOURCE_CUSTOM_URI = "http://localhost:8080/example-custom-api/custom/api/rest/cakeshop/ovens/";
 
     private static final String ADD_RECIPE_MEDIA_TYPE = "application/vnd.example.add-recipe+json";
     private static final String RENAME_RECIPE_MEDIA_TYPE = "application/vnd.example.rename-recipe+json";
-    private static final String ADD_RECIPE_FILE_MEDIA_TYPE = "application/vnd.example.add-recipe-file+json";
     private static final String REMOVE_RECIPE_MEDIA_TYPE = "application/vnd.example.remove-recipe+json";
     private static final String MAKE_CAKE_MEDIA_TYPE = "application/vnd.example.make-cake+json";
     private static final String ORDER_CAKE_MEDIA_TYPE = "application/vnd.example.order-cake+json";
@@ -649,23 +647,7 @@ public class CakeShopIT {
 
     }
 
-    @Test
-    public void shouldUploadFileToAlfresco() {
-        sendTo(RECIPES_RESOURCE_URI + "163af847-effb-46a9-96bc-32a0f7526f13")
-                .request()
-                .post(entity(
-                        jsonObject()
-                                .add("fileName", "vanillaCakeRecipe.txt")
-                                .add("fileContent", "Take vanilla and make cake")
-                                .build().toString(),
-                        ADD_RECIPE_FILE_MEDIA_TYPE));
 
-        with(recordedAlfrescoRequests())
-                .assertThat("$[0].fileName", is("vanillaCakeRecipe.txt"))
-                .assertThat("$[0].fileContent", is("Take vanilla and make cake"))
-                .assertThat("$[0].userId", is(TEST_PROPERTIES.value("alfresco.upload.user")));
-
-    }
 
     @Test
     public void shouldReturnStatusWhenQueryingForOvenStatus() throws Exception {
@@ -800,10 +782,6 @@ public class CakeShopIT {
         return connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
     }
 
-    private String recordedAlfrescoRequests() {
-        final Response alrescoStubResponse = sendTo(ALRFRESCO_RECORDED_REQUESTS).request().get();
-        return alrescoStubResponse.readEntity(String.class);
-    }
 
     private Optional<StreamStatus> streamStatus(final String recipeId) {
         return STREAM_STATUS_REPOSITORY.findByStreamId(UUID.fromString(recipeId));

@@ -1,0 +1,48 @@
+#%RAML 0.8
+title: Event Source API
+baseUri: http://localhost:8080/event-source-api/rest
+version: v0.1
+mediaType: application/json
+protocols: [ HTTP, HTTPS ]
+
+/event-streams:
+  description: paginated feed listing all event streams
+  get:
+    description: |
+        ...
+        (mapping):
+            responseType: application/vnd.event-source.event-streams+json
+            name: event-source.get-event-streams
+        ...
+    queryParameters:
+        ref:
+            type: string
+            required: false
+            description: A page reference
+    responses:
+      200:
+        body:
+          application/vnd.event-source.event-streams+json:
+            schema: !include json/schema/event-source.event-streams.json
+            example: !include json/event-source.event-streams.json
+
+/event-streams/{streamId}:
+  description: paginated feed listing all events in the stream
+  get:
+    description: |
+        ...
+        (mapping):
+            responseType: application/vnd.event-source.event-stream+json
+            name: event-source.get-event-stream
+        ...
+    queryParameters:
+        ref:
+            type: string
+            required: false
+            description: A page reference
+    responses:
+      200:
+        body:
+          application/vnd.event-source.events+json:
+            schema: !include json/schema/event-source.event-stream.json
+            example: !include json/event-source.event-stream.json

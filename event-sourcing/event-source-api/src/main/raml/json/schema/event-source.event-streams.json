@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://example.com/example.json",
+  "properties": {
+    "data": {
+      "id": "/properties/data",
+      "items": {
+        "id": "/properties/data/items",
+        "properties": {
+          "href": {
+            "id": "/properties/data/items/properties/href",
+            "type": "string",
+            "format": "uri"
+          },
+          "streamId": {
+            "id": "/properties/data/items/properties/streamId",
+            "type": "string",
+            "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "paging": {
+      "id": "/properties/paging",
+      "properties": {
+        "next": {
+          "id": "/properties/paging/properties/next",
+          "type": "string",
+          "format": "uri"
+        },
+        "previous": {
+          "id": "/properties/paging/properties/previous",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "type": "object"
+}

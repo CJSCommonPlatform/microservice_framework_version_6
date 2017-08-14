@@ -16,6 +16,7 @@
         <module>event-source</module>
         <module>event-publisher</module>
         <module>event-repository</module>
+        <module>event-source-api</module>
     </modules>
 
 </project>

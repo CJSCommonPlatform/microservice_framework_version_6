@@ -6,7 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.common.util.UtcClock;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLog;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.event.Event;
 import uk.gov.justice.services.jdbc.persistence.PreparedStatementWrapper;
 
 import org.junit.Rule;
@@ -20,12 +20,12 @@ import org.slf4j.Logger;
 
 @RunWith(MockitoJUnitRunner.class)
 
-public class EventLogInsertionStrategyProducerTest {
+public class EventInsertionStrategyProducerTest {
 
     private static final int INSERTED = 1;
 
     @Mock
-    private EventLog eventLog;
+    private Event event;
 
     @Mock
     private PreparedStatementWrapper preparedStatement;
@@ -34,7 +34,7 @@ public class EventLogInsertionStrategyProducerTest {
     private Logger logger;
 
     @InjectMocks
-    private EventLogInsertionStrategyProducer strategyProducer;
+    private EventInsertionStrategyProducer strategyProducer;
 
     @Test
     public void shouldProducePostgresStrategy() throws Exception {
@@ -52,10 +52,10 @@ public class EventLogInsertionStrategyProducerTest {
     public void shouldPassRepositoryToPostgresStrategy() throws Exception {
         strategyProducer.strategyClass = "uk.gov.justice.services.eventsourcing.repository.jdbc.PostgresSQLEventLogInsertionStrategy";
 
-        when(eventLog.getCreatedAt()).thenReturn(new UtcClock().now());
+        when(event.getCreatedAt()).thenReturn(new UtcClock().now());
         when(preparedStatement.executeUpdate()).thenReturn(INSERTED);
 
-        strategyProducer.eventLogInsertionStrategy().insert(preparedStatement, eventLog);
+        strategyProducer.eventLogInsertionStrategy().insert(preparedStatement, event);
         verify(preparedStatement).executeUpdate();
     }
 
@@ -63,10 +63,10 @@ public class EventLogInsertionStrategyProducerTest {
     public void shouldPassRepositoryToAnsiStrategy() throws Exception {
         strategyProducer.strategyClass = "uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy";
 
-        when(eventLog.getCreatedAt()).thenReturn(new UtcClock().now());
+        when(event.getCreatedAt()).thenReturn(new UtcClock().now());
         when(preparedStatement.executeUpdate()).thenReturn(INSERTED);
 
-        strategyProducer.eventLogInsertionStrategy().insert(preparedStatement, eventLog);
+        strategyProducer.eventLogInsertionStrategy().insert(preparedStatement, event);
         verify(preparedStatement).executeUpdate();
     }
 

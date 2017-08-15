@@ -1,8 +1,8 @@
 package uk.gov.justice.services.eventsourcing.repository.jdbc;
 
-import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLog;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLogConverter;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLogJdbcRepository;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.event.Event;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventConverter;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidSequenceIdException;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidStreamIdException;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.OptimisticLockingRetryException;
@@ -27,10 +27,10 @@ public class JdbcEventRepository implements EventRepository {
     Logger logger;
 
     @Inject
-    EventLogConverter eventLogConverter;
+    EventConverter eventConverter;
 
     @Inject
-    EventLogJdbcRepository eventLogJdbcRepository;
+    EventJdbcRepository eventJdbcRepository;
 
     @Override
     public Stream<JsonEnvelope> getByStreamId(final UUID streamId) {
@@ -39,8 +39,8 @@ public class JdbcEventRepository implements EventRepository {
         }
 
         logger.trace("Retrieving event stream for {}", streamId);
-        return eventLogJdbcRepository.findByStreamIdOrderBySequenceIdAsc(streamId)
-                .map(eventLogConverter::envelopeOf);
+        return eventJdbcRepository.findByStreamIdOrderBySequenceIdAsc(streamId)
+                .map(eventConverter::envelopeOf);
     }
 
     @Override
@@ -52,25 +52,25 @@ public class JdbcEventRepository implements EventRepository {
         }
 
         logger.trace("Retrieving event stream for {} at sequence {}", streamId, sequenceId);
-        return eventLogJdbcRepository.findByStreamIdFromSequenceIdOrderBySequenceIdAsc(streamId, sequenceId)
-                .map(eventLogConverter::envelopeOf);
+        return eventJdbcRepository.findByStreamIdFromSequenceIdOrderBySequenceIdAsc(streamId, sequenceId)
+                .map(eventConverter::envelopeOf);
 
     }
 
     @Override
     public Stream<JsonEnvelope> getAll() {
         logger.trace("Retrieving all events");
-        return eventLogJdbcRepository.findAll()
-                .map(eventLogConverter::envelopeOf);
+        return eventJdbcRepository.findAll()
+                .map(eventConverter::envelopeOf);
     }
 
     @Override
     @Transactional(dontRollbackOn = OptimisticLockingRetryException.class)
     public void store(final JsonEnvelope envelope) throws StoreEventRequestFailedException {
         try {
-            final EventLog eventLog = eventLogConverter.eventLogOf(envelope);
-            logger.trace("Storing event {} into stream {} at version {}", eventLog.getName(), eventLog.getStreamId(), eventLog.getSequenceId());
-            eventLogJdbcRepository.insert(eventLog);
+            final Event event = eventConverter.eventOf(envelope);
+            logger.trace("Storing event {} into stream {} at version {}", event.getName(), event.getStreamId(), event.getSequenceId());
+            eventJdbcRepository.insert(event);
         } catch (InvalidSequenceIdException ex) {
             throw new StoreEventRequestFailedException(String.format("Could not store event for version %d of stream %s",
                     envelope.metadata().version().orElse(null), envelope.metadata().streamId().orElse(null)), ex);
@@ -79,17 +79,17 @@ public class JdbcEventRepository implements EventRepository {
 
     @Override
     public long getCurrentSequenceIdForStream(final UUID streamId) {
-        return eventLogJdbcRepository.getLatestSequenceIdForStream(streamId);
+        return eventJdbcRepository.getLatestSequenceIdForStream(streamId);
     }
 
     @Override
     public Stream<Stream<JsonEnvelope>> getStreamOfAllEventStreams() {
-        final Stream<UUID> streamIds = eventLogJdbcRepository.getStreamIds();
+        final Stream<UUID> streamIds = eventJdbcRepository.getStreamIds();
         return streamIds
                 .map(id -> {
-                    final Stream<EventLog> eventStream = eventLogJdbcRepository.findByStreamIdOrderBySequenceIdAsc(id);
+                    final Stream<Event> eventStream = eventJdbcRepository.findByStreamIdOrderBySequenceIdAsc(id);
                     streamIds.onClose(eventStream::close);
-                    return eventStream.map(eventLogConverter::envelopeOf);
+                    return eventStream.map(eventConverter::envelopeOf);
                 });
 
     }

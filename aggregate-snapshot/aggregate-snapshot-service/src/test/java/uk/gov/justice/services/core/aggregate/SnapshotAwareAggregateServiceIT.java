@@ -19,7 +19,7 @@ import uk.gov.justice.domain.event.EventA;
 import uk.gov.justice.domain.snapshot.AggregateSnapshot;
 import uk.gov.justice.domain.snapshot.DefaultObjectInputStreamStrategy;
 import uk.gov.justice.domain.snapshot.ObjectInputStreamStrategy;
-import uk.gov.justice.repository.EventLogOpenEjbAwareJdbcRepository;
+import uk.gov.justice.repository.OpenEjbAwareEventJdbcRepository;
 import uk.gov.justice.repository.SnapshotOpenEjbAwareJdbcRepository;
 import uk.gov.justice.services.common.configuration.GlobalValueProducer;
 import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
@@ -34,10 +34,10 @@ import uk.gov.justice.services.core.extension.EventFoundEvent;
 import uk.gov.justice.services.eventsource.DefaultEventDestinationResolver;
 import uk.gov.justice.services.eventsourcing.publisher.jms.JmsEventPublisher;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.EventLogInsertionStrategy;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.EventInsertionStrategy;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.JdbcEventRepository;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLogConverter;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventConverter;
 import uk.gov.justice.services.eventsourcing.source.core.EventAppender;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.EventStreamManager;
@@ -107,7 +107,7 @@ public class SnapshotAwareAggregateServiceIT {
     private uk.gov.justice.repository.SnapshotOpenEjbAwareJdbcRepository snapshotRepository;
 
     @Inject
-    private EventLogOpenEjbAwareJdbcRepository eventLogRepository;
+    private OpenEjbAwareEventJdbcRepository eventRepository;
 
     @Inject
     private SnapshotAwareEventSource eventSource;
@@ -132,14 +132,14 @@ public class SnapshotAwareAggregateServiceIT {
             DefaultObjectInputStreamStrategy.class,
 
             SnapshotOpenEjbAwareJdbcRepository.class,
-            EventLogOpenEjbAwareJdbcRepository.class,
+            OpenEjbAwareEventJdbcRepository.class,
             JdbcEventRepository.class,
             EventRepository.class,
-            TestEventLogInsertionStrategyProducer.class,
+            TestEventInsertionStrategyProducer.class,
 
             LoggerProducer.class,
 
-            EventLogConverter.class,
+            EventConverter.class,
             DefaultEnvelopeConverter.class,
             StringToJsonObjectConverter.class,
             DefaultJsonObjectEnvelopeConverter.class,
@@ -194,7 +194,7 @@ public class SnapshotAwareAggregateServiceIT {
         assertThat(snapshot.get().getVersionId(), equalTo(25L));
 
         assertThat(snapshotRepository.snapshotCount(STREAM_ID), is(1L));
-        assertThat(eventLogRepository.eventLogCount(STREAM_ID), is(25));
+        assertThat(eventRepository.eventCount(STREAM_ID), is(25));
         assertThat(aggregateFromSnapshot.numberOfAppliedEvents(), is(25));
         assertThat(aggregateFromSnapshot.recordedEvents().size(), is(25));
     }
@@ -211,7 +211,7 @@ public class SnapshotAwareAggregateServiceIT {
         assertThat(snapshot, IsNot.not(nullValue()));
         assertThat(snapshot.isPresent(), equalTo(false));
         assertThat(snapshotRepository.snapshotCount(STREAM_ID), is(0L));
-        assertThat(eventLogRepository.eventLogCount(STREAM_ID), is(23));
+        assertThat(eventRepository.eventCount(STREAM_ID), is(23));
     }
 
     @Test
@@ -239,7 +239,7 @@ public class SnapshotAwareAggregateServiceIT {
         assertThat(snapshotChanged.get().getVersionId(), equalTo(25L));
 
         assertThat(snapshotRepository.snapshotCount(STREAM_ID), is(1L));
-        assertThat(eventLogRepository.eventLogCount(STREAM_ID), is(48));
+        assertThat(eventRepository.eventCount(STREAM_ID), is(48));
         TestAggregate aggregateFromSnapshot = snapshotChanged.get().getAggregate(new DefaultObjectInputStreamStrategy());
         assertThat(aggregateFromSnapshot.numberOfAppliedEvents(), is(25));
     }
@@ -273,7 +273,7 @@ public class SnapshotAwareAggregateServiceIT {
         assertThat(newSnapshot.get().getStreamId(), equalTo(STREAM_ID));
         assertThat(newSnapshot.get().getVersionId(), equalTo(initialNumberOfSnapshots * SNAPSHOT_THRESHOLD));
         assertThat(snapshotRepository.snapshotCount(STREAM_ID), is(4L));
-        assertThat(eventLogRepository.eventLogCount(STREAM_ID), is(123));
+        assertThat(eventRepository.eventCount(STREAM_ID), is(123));
         TestAggregate aggregateFromSnapshot2 = (TestAggregate) newSnapshot.get().getAggregate(new DefaultObjectInputStreamStrategy());
         assertThat(aggregateFromSnapshot2.numberOfAppliedEvents(), is(100));
     }
@@ -294,7 +294,7 @@ public class SnapshotAwareAggregateServiceIT {
         assertThat(snapshot.isPresent(), equalTo(false));
 
         assertThat(snapshotRepository.snapshotCount(STREAM_ID), is(0L));
-        assertThat(eventLogRepository.eventLogCount(STREAM_ID), is(24));
+        assertThat(eventRepository.eventCount(STREAM_ID), is(24));
     }
 
     @Test
@@ -316,7 +316,7 @@ public class SnapshotAwareAggregateServiceIT {
         assertThat(snapshot.get().getStreamId(), equalTo(STREAM_ID));
         assertThat(snapshot.get().getVersionId(), equalTo(25L));
         assertThat(snapshotRepository.snapshotCount(STREAM_ID), is(1L));
-        assertThat(eventLogRepository.eventLogCount(STREAM_ID), is(48));
+        assertThat(eventRepository.eventCount(STREAM_ID), is(48));
 
         TestAggregate aggregateFromSnapshot = snapshot.get().getAggregate(new DefaultObjectInputStreamStrategy());
         assertThat(aggregateFromSnapshot.numberOfAppliedEvents(), is(25));
@@ -341,7 +341,7 @@ public class SnapshotAwareAggregateServiceIT {
         assertThat(snapshot.get().getStreamId(), equalTo(STREAM_ID));
         assertThat(snapshot.get().getVersionId(), equalTo(50L));
         assertThat(snapshotRepository.snapshotCount(STREAM_ID), is(2L));
-        assertThat(eventLogRepository.eventLogCount(STREAM_ID), is(50));
+        assertThat(eventRepository.eventCount(STREAM_ID), is(50));
 
         TestAggregate aggregateFromSnapshot = snapshot.get().getAggregate(new DefaultObjectInputStreamStrategy());
         assertThat(aggregateFromSnapshot.numberOfAppliedEvents(), is(50));
@@ -365,7 +365,7 @@ public class SnapshotAwareAggregateServiceIT {
         assertThat(snapshot, IsNot.not(Matchers.nullValue()));
         assertThat(snapshot.isPresent(), equalTo(true));
         assertThat(snapshotRepository.snapshotCount(STREAM_ID), is(4L));
-        assertThat(eventLogRepository.eventLogCount(STREAM_ID), is(100));
+        assertThat(eventRepository.eventCount(STREAM_ID), is(100));
 
 
         final Class newAggregateClass = classGenerator.generatedTestAggregateClassOf(2L, TEST_AGGREGATE_PACKAGE, TEST_AGGREGATE_CLASS_NAME);
@@ -382,7 +382,7 @@ public class SnapshotAwareAggregateServiceIT {
         assertThat(newSnapshot.get().getStreamId(), equalTo(STREAM_ID));
         assertThat(newSnapshot.get().getVersionId(), equalTo(123L));
         assertThat(snapshotRepository.snapshotCount(STREAM_ID), is(1L));
-        assertThat(eventLogRepository.eventLogCount(STREAM_ID), is(123));
+        assertThat(eventRepository.eventCount(STREAM_ID), is(123));
     }
 
     private void initEventDatabase() throws Exception {
@@ -474,10 +474,10 @@ public class SnapshotAwareAggregateServiceIT {
     }
 
     @ApplicationScoped
-    public static class TestEventLogInsertionStrategyProducer {
+    public static class TestEventInsertionStrategyProducer {
 
         @Produces
-        public EventLogInsertionStrategy eventLogInsertionStrategy() {
+        public EventInsertionStrategy eventLogInsertionStrategy() {
             return new AnsiSQLEventLogInsertionStrategy();
         }
     }

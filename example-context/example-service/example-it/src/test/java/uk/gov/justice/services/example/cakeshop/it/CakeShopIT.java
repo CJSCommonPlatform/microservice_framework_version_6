@@ -34,10 +34,10 @@ import uk.gov.justice.domain.snapshot.DefaultObjectInputStreamStrategy;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.aggregate.exception.AggregateChangeDetectedException;
 import uk.gov.justice.services.event.buffer.core.repository.streamstatus.StreamStatus;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLog;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.event.Event;
 import uk.gov.justice.services.example.cakeshop.domain.aggregate.Recipe;
 import uk.gov.justice.services.example.cakeshop.it.util.ApiResponse;
-import uk.gov.justice.services.test.utils.core.eventsource.TestEventLogRepository;
+import uk.gov.justice.services.test.utils.core.eventsource.TestEventRepository;
 import uk.gov.justice.services.example.cakeshop.it.util.StandaloneSnapshotJdbcRepository;
 import uk.gov.justice.services.example.cakeshop.it.util.StandaloneStreamStatusJdbcRepository;
 import uk.gov.justice.services.example.cakeshop.it.util.TestProperties;
@@ -126,7 +126,7 @@ public class CakeShopIT {
 
     private static final TestProperties TEST_PROPERTIES = new TestProperties("test.properties");
 
-    private static TestEventLogRepository EVENT_LOG_REPOSITORY;
+    private static TestEventRepository EVENT_LOG_REPOSITORY;
     private static StandaloneStreamStatusJdbcRepository STREAM_STATUS_REPOSITORY;
     private static StandaloneSnapshotJdbcRepository SNAPSHOT_REPOSITORY;
     private static ActiveMQConnectionFactory JMS_CONNECTION_FACTORY;
@@ -139,7 +139,7 @@ public class CakeShopIT {
     @BeforeClass
     public static void beforeClass() throws Exception {
         final DataSource eventStoreDataSource = initEventStoreDb();
-        EVENT_LOG_REPOSITORY = new TestEventLogRepository(eventStoreDataSource);
+        EVENT_LOG_REPOSITORY = new TestEventRepository(eventStoreDataSource);
         JMS_CONNECTION_FACTORY = new ActiveMQConnectionFactory(JMS_BROKER_URL);
 
         final DataSource viewStoreDatasource = initViewStoreDb();
@@ -215,7 +215,7 @@ public class CakeShopIT {
 
         await().until(() -> eventsWithPayloadContaining(recipeId).size() == 1);
 
-        final EventLog event = eventsWithPayloadContaining(recipeId).get(0);
+        final Event event = eventsWithPayloadContaining(recipeId).get(0);
         assertThat(event.getName(), is("example.recipe-added"));
         with(event.getMetadata())
                 .assertEquals("stream.id", recipeId)
@@ -258,7 +258,7 @@ public class CakeShopIT {
 
         await().until(() -> eventsWithPayloadContaining(recipeId).size() == 1);
 
-        final EventLog event = eventsWithPayloadContaining(recipeId).get(0);
+        final Event event = eventsWithPayloadContaining(recipeId).get(0);
         assertThat(event.getName(), is("example.recipe-added"));
         with(event.getMetadata())
                 .assertEquals("stream.id", recipeId)
@@ -591,11 +591,11 @@ public class CakeShopIT {
 
         await().until(() -> queryForOrder(orderId.toString()).httpCode() == OK);
 
-        final Stream<EventLog> events = EVENT_LOG_REPOSITORY.findByStreamIdOrderBySequenceIdAsc(orderId);
-        final EventLog eventLog = events.findFirst().get();
+        final Stream<Event> events = EVENT_LOG_REPOSITORY.findByStreamIdOrderBySequenceIdAsc(orderId);
+        final Event event = events.findFirst().get();
 
-        assertThat(eventLog.getCreatedAt(), is(notNullValue()));
-        assertThat(eventLog.getCreatedAt(), is(within(10L, SECONDS, new UtcClock().now())));
+        assertThat(event.getCreatedAt(), is(notNullValue()));
+        assertThat(event.getCreatedAt(), is(within(10L, SECONDS, new UtcClock().now())));
     }
 
     @Test
@@ -687,7 +687,7 @@ public class CakeShopIT {
 
         await().until(() -> eventsWithPayloadContaining(recipeId).size() == 2);
 
-        final EventLog event = eventsWithPayloadContaining(recipeId).get(1);
+        final Event event = eventsWithPayloadContaining(recipeId).get(1);
         assertThat(event.getName(), is("example.recipe-photograph-added"));
         with(event.getMetadata())
                 .assertEquals("stream.id", recipeId)
@@ -885,8 +885,8 @@ public class CakeShopIT {
         return createObjectBuilder();
     }
 
-    private List<EventLog> eventsWithPayloadContaining(final String string) {
-        try (final Stream<EventLog> events = EVENT_LOG_REPOSITORY.findAll().filter(e -> e.getPayload().contains(string))) {
+    private List<Event> eventsWithPayloadContaining(final String string) {
+        try (final Stream<Event> events = EVENT_LOG_REPOSITORY.findAll().filter(e -> e.getPayload().contains(string))) {
             return events.collect(toList());
         }
     }

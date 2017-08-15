@@ -6,8 +6,8 @@ import static java.sql.DriverManager.getDriver;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.justice.services.test.utils.common.host.TestHostProvider.getHost;
 
-import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLog;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLogJdbcRepository;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.event.Event;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepository;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -23,48 +23,46 @@ import org.slf4j.LoggerFactory;
 /**
  * Standalone repository class to access event streams. To be used in integration testing
  */
-public class TestEventLogRepository extends EventLogJdbcRepository {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TestEventLogRepository.class);
-    static final String SQL_FIND_ALL = "SELECT * FROM event_log";
+public class TestEventRepository extends EventJdbcRepository {
 
     private final DataSource datasource;
 
-    public TestEventLogRepository(final DataSource datasource) {
+    public TestEventRepository(final DataSource datasource) {
         this.datasource = datasource;
-        this.logger = LOGGER;
+        this.logger = LoggerFactory.getLogger(TestEventRepository.class);
     }
 
-    public TestEventLogRepository(final String url, final String username, final String password, final String driverClassName) {
+    public TestEventRepository(final String url, final String username, final String password, final String driverClassName) {
         final BasicDataSource dataSource = new BasicDataSource();
         dataSource.setDriverClassName(driverClassName);
         dataSource.setUrl(url);
         dataSource.setUsername(username);
         dataSource.setPassword(password);
         this.datasource = dataSource;
-        this.logger = LOGGER;
+        this.logger = LoggerFactory.getLogger(TestEventRepository.class);
 
     }
 
-    public TestEventLogRepository(final String contextName) throws SQLException {
+    public TestEventRepository(final String contextName) throws SQLException {
         this(jdbcUrlFrom(contextName), contextName, contextName, getDriver(jdbcUrlFrom(contextName)).getClass().getName());
     }
 
-    public static TestEventLogRepository forContext(final String contextName) {
+    public static TestEventRepository forContext(final String contextName) {
         try {
-            return new TestEventLogRepository(contextName);
+            return new TestEventRepository(contextName);
         } catch (SQLException e) {
             throw new IllegalArgumentException(format("Error instantiating repository for context: %s", contextName), e);
         }
     }
 
-    public List<EventLog> eventsOfStreamId(final UUID streamId) {
-        try (final Stream<EventLog> events = this.findByStreamIdOrderBySequenceIdAsc(streamId)) {
+    public List<Event> eventsOfStreamId(final UUID streamId) {
+        try (final Stream<Event> events = this.findByStreamIdOrderBySequenceIdAsc(streamId)) {
             return events.collect(toList());
         }
     }
 
-    public List<EventLog> allEvents() {
-        try (final Stream<EventLog> events = this.findAll()) {
+    public List<Event> allEvents() {
+        try (final Stream<Event> events = this.findAll()) {
             return events.collect(toList());
         }
     }

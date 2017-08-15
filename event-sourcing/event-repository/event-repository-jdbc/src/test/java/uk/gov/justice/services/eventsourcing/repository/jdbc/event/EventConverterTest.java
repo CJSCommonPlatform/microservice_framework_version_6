@@ -1,4 +1,4 @@
-package uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog;
+package uk.gov.justice.services.eventsourcing.repository.jdbc.event;
 
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -24,7 +24,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 @RunWith(MockitoJUnitRunner.class)
-public class EventLogConverterTest {
+public class EventConverterTest {
 
     private final static String PAYLOAD_FIELD_NAME = "field";
     private final static String PAYLOAD_FIELD_VALUE = "Value";
@@ -38,14 +38,14 @@ public class EventLogConverterTest {
             "}";
     private final static String PAYLOAD_JSON = "{\"" + PAYLOAD_FIELD_NAME + "\": \"" + PAYLOAD_FIELD_VALUE + "\"}";
 
-    private EventLogConverter eventLogConverter;
+    private EventConverter eventConverter;
     private final Clock clock = new StoppedClock(new UtcClock().now());
 
     @Before
     public void setup() {
-        eventLogConverter = new EventLogConverter();
-        eventLogConverter.stringToJsonObjectConverter = new StringToJsonObjectConverter();
-        eventLogConverter.jsonObjectEnvelopeConverter = new DefaultJsonObjectEnvelopeConverter();
+        eventConverter = new EventConverter();
+        eventConverter.stringToJsonObjectConverter = new StringToJsonObjectConverter();
+        eventConverter.jsonObjectEnvelopeConverter = new DefaultJsonObjectEnvelopeConverter();
     }
 
     @Test
@@ -58,30 +58,30 @@ public class EventLogConverterTest {
                         .withVersion(SEQUENCE_ID)
                         .createdAt(clock.now()),
                 createObjectBuilder().add(PAYLOAD_FIELD_NAME, PAYLOAD_FIELD_VALUE));
-        EventLog eventLog = eventLogConverter.eventLogOf(envelope);
+        Event event = eventConverter.eventOf(envelope);
 
-        assertThat(eventLog.getId(), equalTo(ID));
-        assertThat(eventLog.getName(), equalTo(NAME));
-        assertThat(eventLog.getStreamId(), equalTo(STREAM_ID));
-        assertThat(eventLog.getSequenceId(), equalTo(SEQUENCE_ID));
-        assertThat(eventLog.getCreatedAt(), is(clock.now()));
-        JSONAssert.assertEquals(METADATA_JSON, eventLog.getMetadata(), false);
-        JSONAssert.assertEquals(envelope.payloadAsJsonObject().toString(), eventLog.getPayload(), false);
+        assertThat(event.getId(), equalTo(ID));
+        assertThat(event.getName(), equalTo(NAME));
+        assertThat(event.getStreamId(), equalTo(STREAM_ID));
+        assertThat(event.getSequenceId(), equalTo(SEQUENCE_ID));
+        assertThat(event.getCreatedAt(), is(clock.now()));
+        JSONAssert.assertEquals(METADATA_JSON, event.getMetadata(), false);
+        JSONAssert.assertEquals(envelope.payloadAsJsonObject().toString(), event.getPayload(), false);
     }
 
     @Test(expected = InvalidStreamIdException.class)
     public void shouldThrowExceptionOnNullStreamId() throws Exception {
-        eventLogConverter.eventLogOf(envelopeFrom(metadataBuilder().withId(ID).withName(NAME), createObjectBuilder()));
+        eventConverter.eventOf(envelopeFrom(metadataBuilder().withId(ID).withName(NAME), createObjectBuilder()));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionOnMissingCreatedAt() throws Exception {
-        eventLogConverter.eventLogOf((envelopeFrom(metadataBuilder().withId(ID).withName(NAME).withStreamId(STREAM_ID), createObjectBuilder())));
+        eventConverter.eventOf((envelopeFrom(metadataBuilder().withId(ID).withName(NAME).withStreamId(STREAM_ID), createObjectBuilder())));
     }
 
     @Test
     public void shouldCreateEnvelope() throws Exception {
-        JsonEnvelope actualEnvelope = eventLogConverter.envelopeOf(new EventLog(ID, STREAM_ID, SEQUENCE_ID, NAME, METADATA_JSON, PAYLOAD_JSON, new UtcClock().now()));
+        JsonEnvelope actualEnvelope = eventConverter.envelopeOf(new Event(ID, STREAM_ID, SEQUENCE_ID, NAME, METADATA_JSON, PAYLOAD_JSON, new UtcClock().now()));
 
         assertThat(actualEnvelope.metadata().id(), equalTo(ID));
         assertThat(actualEnvelope.metadata().name(), equalTo(NAME));

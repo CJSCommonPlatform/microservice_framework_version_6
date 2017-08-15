@@ -5,10 +5,10 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.common.converter.ZonedDateTimes.toSqlTimestamp;
-import static uk.gov.justice.services.eventsourcing.repository.jdbc.BaseEventLogInsertStrategy.SQL_INSERT_EVENT_LOG;
+import static uk.gov.justice.services.eventsourcing.repository.jdbc.BaseEventInsertStrategy.SQL_INSERT_EVENT;
 
 import uk.gov.justice.services.common.util.UtcClock;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLog;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.event.Event;
 import uk.gov.justice.services.jdbc.persistence.PreparedStatementWrapper;
 
 import java.time.ZonedDateTime;
@@ -21,10 +21,10 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AnsiSQLEventLogInsertionStrategyTest {
+public class AnsiSQLEventInsertionStrategyTest {
 
     @Mock
-    private EventLog eventLog;
+    private Event event;
 
     @Mock
     private PreparedStatementWrapper preparedStatement;
@@ -42,15 +42,15 @@ public class AnsiSQLEventLogInsertionStrategyTest {
         final String payload = "payload";
         final ZonedDateTime createdAt = new UtcClock().now();
 
-        when(eventLog.getId()).thenReturn(id);
-        when(eventLog.getStreamId()).thenReturn(streamId);
-        when(eventLog.getSequenceId()).thenReturn(sequenceId);
-        when(eventLog.getName()).thenReturn(name);
-        when(eventLog.getMetadata()).thenReturn(metadata);
-        when(eventLog.getPayload()).thenReturn(payload);
-        when(eventLog.getCreatedAt()).thenReturn(createdAt);
+        when(event.getId()).thenReturn(id);
+        when(event.getStreamId()).thenReturn(streamId);
+        when(event.getSequenceId()).thenReturn(sequenceId);
+        when(event.getName()).thenReturn(name);
+        when(event.getMetadata()).thenReturn(metadata);
+        when(event.getPayload()).thenReturn(payload);
+        when(event.getCreatedAt()).thenReturn(createdAt);
 
-        strategy.insert(preparedStatement, eventLog);
+        strategy.insert(preparedStatement, event);
 
         verify(preparedStatement).setObject(1, id);
         verify(preparedStatement).setObject(2, streamId);
@@ -64,6 +64,6 @@ public class AnsiSQLEventLogInsertionStrategyTest {
 
     @Test
     public void shouldReturnTheDefaultSqlInsertStatement() throws Exception {
-        assertThat(strategy.insertStatement(), is(SQL_INSERT_EVENT_LOG));
+        assertThat(strategy.insertStatement(), is(SQL_INSERT_EVENT));
     }
 }

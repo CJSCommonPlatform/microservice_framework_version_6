@@ -10,7 +10,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 
 @ApplicationScoped
-public class EventLogInsertionStrategyProducer {
+public class EventInsertionStrategyProducer {
 
     private static final String INSTANTIATION_ERROR_MSG = "Could not instantiate event log insertion strategy.";
 
@@ -22,11 +22,11 @@ public class EventLogInsertionStrategyProducer {
     Logger logger;
 
     @Produces
-    public EventLogInsertionStrategy eventLogInsertionStrategy() {
+    public EventInsertionStrategy eventLogInsertionStrategy() {
         logger.info("Instantiating {}", strategyClass);
         try {
             final Class<?> clazz = Class.forName(strategyClass);
-            return (EventLogInsertionStrategy) clazz.newInstance();
+            return (EventInsertionStrategy) clazz.newInstance();
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
             throw new IllegalArgumentException(INSTANTIATION_ERROR_MSG, e);
         }

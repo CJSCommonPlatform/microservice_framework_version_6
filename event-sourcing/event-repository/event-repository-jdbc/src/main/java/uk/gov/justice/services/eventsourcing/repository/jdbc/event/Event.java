@@ -1,4 +1,4 @@
-package uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog;
+package uk.gov.justice.services.eventsourcing.repository.jdbc.event;
 
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 
@@ -9,7 +9,7 @@ import java.util.UUID;
 /**
  * Entity class to represent a persisted event.
  */
-public class EventLog {
+public class Event {
 
     private final UUID id;
     private final UUID streamId;
@@ -19,7 +19,7 @@ public class EventLog {
     private final String metadata;
     private final ZonedDateTime createdAt;
 
-    public EventLog(final UUID id, final UUID streamId, final Long sequenceId, final String name, final String metadata, final String payload, final ZonedDateTime createdAt) {
+    public Event(final UUID id, final UUID streamId, final Long sequenceId, final String name, final String metadata, final String payload, final ZonedDateTime createdAt) {
         this.id = id;
         this.streamId = streamId;
         this.sequenceId = sequenceId;
@@ -66,14 +66,14 @@ public class EventLog {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        final EventLog eventLog = (EventLog) o;
-        return Objects.equals(id, eventLog.id) &&
-                Objects.equals(streamId, eventLog.streamId) &&
-                Objects.equals(sequenceId, eventLog.sequenceId) &&
-                Objects.equals(payload, eventLog.payload) &&
-                Objects.equals(metadata, eventLog.metadata) &&
-                Objects.equals(name, eventLog.name) &&
-                Objects.equals(createdAt, eventLog.createdAt);
+        final Event event = (Event) o;
+        return Objects.equals(id, event.id) &&
+                Objects.equals(streamId, event.streamId) &&
+                Objects.equals(sequenceId, event.sequenceId) &&
+                Objects.equals(payload, event.payload) &&
+                Objects.equals(metadata, event.metadata) &&
+                Objects.equals(name, event.name) &&
+                Objects.equals(createdAt, event.createdAt);
     }
 
     @Override
@@ -83,7 +83,7 @@ public class EventLog {
 
     @Override
     public String toString() {
-        return String.format("EventLog [id=%s, streamId=%s, sequenceId=%s, name=%s, payload=%s, metadata=%s, createdAt=$s]", id,
+        return String.format("Event [id=%s, streamId=%s, sequenceId=%s, name=%s, payload=%s, metadata=%s, createdAt=$s]", id,
                 streamId, sequenceId, name, payload, metadata, ZonedDateTimes.toString(createdAt));
     }
 

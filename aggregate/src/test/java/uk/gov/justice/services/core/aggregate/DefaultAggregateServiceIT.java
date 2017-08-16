@@ -24,10 +24,10 @@ import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.extension.EventFoundEvent;
 import uk.gov.justice.services.eventsourcing.publisher.jms.EventPublisher;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.EventLogInsertionStrategy;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.EventInsertionStrategy;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.JdbcEventRepository;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLogConverter;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventConverter;
 import uk.gov.justice.services.eventsourcing.source.core.DefaultEventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EnvelopeEventStream;
 import uk.gov.justice.services.eventsourcing.source.core.EventAppender;
@@ -40,7 +40,7 @@ import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
-import uk.gov.justice.services.repository.EventLogOpenEjbAwareJdbcRepository;
+import uk.gov.justice.services.repository.OpenEjbAwareEventJdbcRepository;
 
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -81,7 +81,7 @@ public class DefaultAggregateServiceIT {
     private DefaultAggregateService aggregateService;
 
     @Inject
-    private EventLogOpenEjbAwareJdbcRepository eventLogRepository;
+    private OpenEjbAwareEventJdbcRepository eventRepository;
 
     @Inject
     private Clock clock;
@@ -93,8 +93,8 @@ public class DefaultAggregateServiceIT {
             AbstractJdbcRepository.class,
             JdbcEventRepository.class,
             EventRepository.class,
-            EventLogOpenEjbAwareJdbcRepository.class,
-            TestEventLogInsertionStrategyProducer.class,
+            OpenEjbAwareEventJdbcRepository.class,
+            TestEventInsertionStrategyProducer.class,
 
             DefaultAggregateService.class,
 
@@ -104,7 +104,7 @@ public class DefaultAggregateServiceIT {
             EventAppender.class,
 
             DefaultEnvelopeConverter.class,
-            EventLogConverter.class,
+            EventConverter.class,
             StringToJsonObjectConverter.class,
             DefaultJsonObjectEnvelopeConverter.class,
             JsonObjectToObjectConverter.class,
@@ -154,7 +154,7 @@ public class DefaultAggregateServiceIT {
         assertThat(aggregate, notNullValue());
         assertThat(aggregate.recordedEvents(), hasSize(1));
         assertThat(aggregate.recordedEvents().get(0).getClass(), equalTo(EventA.class));
-        assertThat(eventLogRepository.eventLogCount(STREAM_ID), is(1));
+        assertThat(eventRepository.eventCount(STREAM_ID), is(1));
 
     }
 
@@ -176,7 +176,7 @@ public class DefaultAggregateServiceIT {
         assertThat(aggregate.recordedEvents(), hasSize(2));
         assertThat(aggregate.recordedEvents().get(0).getClass(), equalTo(EventA.class));
         assertThat(aggregate.recordedEvents().get(1).getClass(), equalTo(EventB.class));
-        assertThat(eventLogRepository.eventLogCount(STREAM_ID), is(2));
+        assertThat(eventRepository.eventCount(STREAM_ID), is(2));
     }
 
     @Test(expected = IllegalStateException.class)
@@ -242,10 +242,10 @@ public class DefaultAggregateServiceIT {
     }
 
     @ApplicationScoped
-    public static class TestEventLogInsertionStrategyProducer {
+    public static class TestEventInsertionStrategyProducer {
 
         @Produces
-        public EventLogInsertionStrategy eventLogInsertionStrategy() {
+        public EventInsertionStrategy eventLogInsertionStrategy() {
             return new AnsiSQLEventLogInsertionStrategy();
         }
     }

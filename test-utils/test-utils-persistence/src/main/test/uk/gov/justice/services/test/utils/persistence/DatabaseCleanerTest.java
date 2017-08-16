@@ -76,7 +76,7 @@ public class DatabaseCleanerTest {
     }
 
     @Test
-    public void shouldCleanTheEventLogTable() throws Exception {
+    public void shouldCleanTheEventTable() throws Exception {
 
         final String tableName = "event_log";
         final String contextName = "my-context";
@@ -87,7 +87,7 @@ public class DatabaseCleanerTest {
         when(testJdbcConnectionProvider.getEventStoreConnection(contextName)).thenReturn(connection);
         when(connection.prepareStatement("DELETE FROM " + tableName)).thenReturn(preparedStatement);
 
-        databaseCleaner.cleanEventLogTable(contextName);
+        databaseCleaner.cleanEventTable(contextName);
 
         verify(preparedStatement).executeUpdate();
         verify(connection).close();

@@ -98,7 +98,6 @@ public class DefaultCustomUserIdResourceIT {
     public Properties properties() {
         return new PropertiesBuilder()
                 .p("httpejbd.port", Integer.toString(port))
-                .p(OpenEjbContainer.OPENEJB_EMBEDDED_REMOTABLE, "true")
                 .build();
     }
 

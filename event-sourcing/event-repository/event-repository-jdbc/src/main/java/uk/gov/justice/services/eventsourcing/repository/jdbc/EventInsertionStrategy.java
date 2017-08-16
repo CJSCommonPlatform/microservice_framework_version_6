@@ -1,12 +1,12 @@
 package uk.gov.justice.services.eventsourcing.repository.jdbc;
 
-import uk.gov.justice.services.eventsourcing.repository.jdbc.eventlog.EventLog;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.event.Event;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidSequenceIdException;
 import uk.gov.justice.services.jdbc.persistence.PreparedStatementWrapper;
 
 import java.sql.SQLException;
 
-public interface EventLogInsertionStrategy {
+public interface EventInsertionStrategy {
 
     /**
      * The Insert Statement as a String for the this Insertion Strategy
@@ -15,5 +15,5 @@ public interface EventLogInsertionStrategy {
      */
     String insertStatement();
 
-    void insert(final PreparedStatementWrapper ps, final EventLog eventLog) throws SQLException, InvalidSequenceIdException;
+    void insert(final PreparedStatementWrapper ps, final Event event) throws SQLException, InvalidSequenceIdException;
 }

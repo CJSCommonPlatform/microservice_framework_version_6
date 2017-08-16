@@ -3,16 +3,20 @@ package uk.gov.justice.services.eventsourcing.source.core;
 import static co.unruly.matchers.OptionalMatchers.contains;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithDefaults;
 
 import uk.gov.justice.services.eventsourcing.publisher.jms.EventPublisher;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepository;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStream;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.StoreEventRequestFailedException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -34,6 +38,9 @@ public class EventAppenderTest {
 
     @Mock
     private EventPublisher eventPublisher;
+
+    @Mock
+    private EventStreamJdbcRepository eventStreamRepository;
 
     @InjectMocks
     private EventAppender eventAppender;
@@ -92,5 +99,43 @@ public class EventAppenderTest {
         eventAppender.append(envelope().with(metadataWithDefaults()).build(), randomUUID(), 1l);
     }
 
+    @Test
+    public void shouldStoreANewEventStream() throws EventStreamException {
+        final UUID eventId = randomUUID();
+        final UUID streamId = randomUUID();
 
+        final long firstStreamEvent = 1L;
+        eventAppender.append(
+                envelope()
+                        .with(metadataOf(eventId, "name456"))
+                        .withPayloadOf("payloadValue456", "someOtherPayloadField")
+                        .build(),
+                streamId,
+                firstStreamEvent);
+
+        final ArgumentCaptor<EventStream> createdEventStream = ArgumentCaptor.forClass(EventStream.class);
+
+        verify(eventStreamRepository).insert(createdEventStream.capture());
+
+        final EventStream eventStream = createdEventStream.getValue();
+        assertThat(eventStream.getStreamId(), is(streamId));
+        assertNull(eventStream.getSequenceNumber());
+    }
+
+    @Test
+    public void shouldNotStoreANewEventStream() throws EventStreamException {
+        final UUID eventId = randomUUID();
+        final UUID streamId = randomUUID();
+        final long secondStreamEvent = 2L;
+
+        eventAppender.append(
+                envelope()
+                        .with(metadataOf(eventId, "name456"))
+                        .withPayloadOf("payloadValue456", "someOtherPayloadField")
+                        .build(),
+                streamId,
+                secondStreamEvent);
+
+        verifyNoMoreInteractions(eventStreamRepository);
+    }
 }

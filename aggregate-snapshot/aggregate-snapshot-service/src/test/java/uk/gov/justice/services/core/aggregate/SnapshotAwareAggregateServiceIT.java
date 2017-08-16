@@ -20,6 +20,7 @@ import uk.gov.justice.domain.snapshot.AggregateSnapshot;
 import uk.gov.justice.domain.snapshot.DefaultObjectInputStreamStrategy;
 import uk.gov.justice.domain.snapshot.ObjectInputStreamStrategy;
 import uk.gov.justice.repository.OpenEjbAwareEventJdbcRepository;
+import uk.gov.justice.repository.OpenEjbAwareEventStreamJdbcRepository;
 import uk.gov.justice.repository.SnapshotOpenEjbAwareJdbcRepository;
 import uk.gov.justice.services.common.configuration.GlobalValueProducer;
 import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
@@ -119,6 +120,9 @@ public class SnapshotAwareAggregateServiceIT {
     private DefaultAggregateService defaultAggregateService;
 
     @Inject
+    private OpenEjbAwareEventStreamJdbcRepository eventStreamJdbcRepository;
+
+    @Inject
     private Clock clock;
 
     @Inject
@@ -133,6 +137,7 @@ public class SnapshotAwareAggregateServiceIT {
 
             SnapshotOpenEjbAwareJdbcRepository.class,
             OpenEjbAwareEventJdbcRepository.class,
+            OpenEjbAwareEventStreamJdbcRepository.class,
             JdbcEventRepository.class,
             EventRepository.class,
             TestEventInsertionStrategyProducer.class,
@@ -197,6 +202,7 @@ public class SnapshotAwareAggregateServiceIT {
         assertThat(eventRepository.eventCount(STREAM_ID), is(25));
         assertThat(aggregateFromSnapshot.numberOfAppliedEvents(), is(25));
         assertThat(aggregateFromSnapshot.recordedEvents().size(), is(25));
+        assertThat(eventStreamJdbcRepository.eventStreamCount(STREAM_ID), is(1));
     }
 
     @Test
@@ -212,6 +218,7 @@ public class SnapshotAwareAggregateServiceIT {
         assertThat(snapshot.isPresent(), equalTo(false));
         assertThat(snapshotRepository.snapshotCount(STREAM_ID), is(0L));
         assertThat(eventRepository.eventCount(STREAM_ID), is(23));
+        assertThat(eventStreamJdbcRepository.eventStreamCount(STREAM_ID), is(1));
     }
 
     @Test
@@ -242,6 +249,7 @@ public class SnapshotAwareAggregateServiceIT {
         assertThat(eventRepository.eventCount(STREAM_ID), is(48));
         TestAggregate aggregateFromSnapshot = snapshotChanged.get().getAggregate(new DefaultObjectInputStreamStrategy());
         assertThat(aggregateFromSnapshot.numberOfAppliedEvents(), is(25));
+        assertThat(eventStreamJdbcRepository.eventStreamCount(STREAM_ID), is(1));
     }
 
     @Test
@@ -276,6 +284,7 @@ public class SnapshotAwareAggregateServiceIT {
         assertThat(eventRepository.eventCount(STREAM_ID), is(123));
         TestAggregate aggregateFromSnapshot2 = (TestAggregate) newSnapshot.get().getAggregate(new DefaultObjectInputStreamStrategy());
         assertThat(aggregateFromSnapshot2.numberOfAppliedEvents(), is(100));
+        assertThat(eventStreamJdbcRepository.eventStreamCount(STREAM_ID), is(1));
     }
 
     @Test
@@ -295,6 +304,7 @@ public class SnapshotAwareAggregateServiceIT {
 
         assertThat(snapshotRepository.snapshotCount(STREAM_ID), is(0L));
         assertThat(eventRepository.eventCount(STREAM_ID), is(24));
+        assertThat(eventStreamJdbcRepository.eventStreamCount(STREAM_ID), is(1));
     }
 
     @Test
@@ -320,6 +330,7 @@ public class SnapshotAwareAggregateServiceIT {
 
         TestAggregate aggregateFromSnapshot = snapshot.get().getAggregate(new DefaultObjectInputStreamStrategy());
         assertThat(aggregateFromSnapshot.numberOfAppliedEvents(), is(25));
+        assertThat(eventStreamJdbcRepository.eventStreamCount(STREAM_ID), is(1));
     }
 
     @Test
@@ -345,6 +356,7 @@ public class SnapshotAwareAggregateServiceIT {
 
         TestAggregate aggregateFromSnapshot = snapshot.get().getAggregate(new DefaultObjectInputStreamStrategy());
         assertThat(aggregateFromSnapshot.numberOfAppliedEvents(), is(50));
+        assertThat(eventStreamJdbcRepository.eventStreamCount(STREAM_ID), is(1));
     }
 
     @Test
@@ -383,6 +395,7 @@ public class SnapshotAwareAggregateServiceIT {
         assertThat(newSnapshot.get().getVersionId(), equalTo(123L));
         assertThat(snapshotRepository.snapshotCount(STREAM_ID), is(1L));
         assertThat(eventRepository.eventCount(STREAM_ID), is(123));
+        assertThat(eventStreamJdbcRepository.eventStreamCount(STREAM_ID), is(1));
     }
 
     private void initEventDatabase() throws Exception {

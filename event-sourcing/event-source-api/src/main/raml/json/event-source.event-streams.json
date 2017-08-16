@@ -10,7 +10,7 @@
     }
   ],
   "paging": {
-    "previous": "http://localhost:8080/event-source-api/rest/event-streams?ref=2955756c-c2e3-44c2-a18d-0a69cb4f4619",
-    "next": "http://localhost:8080/event-source-api/rest/event-streams?ref=7d21dd65-f204-485c-9a7d-60bc34abd04c"
+    "previous": "http://localhost:8080/event-source-api/rest/event-streams?page=1",
+    "next": "http://localhost:8080/event-source-api/rest/event-streams?page=3"
   }
 }

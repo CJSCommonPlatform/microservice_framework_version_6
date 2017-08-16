@@ -1,0 +1,7 @@
+package uk.gov.justice.services.jdbc.persistence;
+
+import java.util.stream.Stream;
+
+public interface PaginationCapableRepository<E> {
+    Stream<E> getPage(final long offset, final long pageSize);
+}

@@ -8,7 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.clients.core.EndpointDefinition;
-import uk.gov.justice.services.common.rest.DefaultServerPortProvider;
+import uk.gov.justice.services.common.http.DefaultServerPortProvider;
 
 import java.util.Optional;
 

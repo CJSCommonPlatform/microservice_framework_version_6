@@ -8,7 +8,7 @@ import uk.gov.justice.services.adapter.rest.filter.LoggerRequestDataFilter;
 import uk.gov.justice.services.adapter.rest.interceptor.JsonSchemaValidationInterceptor;
 import uk.gov.justice.services.adapter.rest.mapper.BadRequestExceptionMapper;
 import uk.gov.justice.services.adapter.rest.mapper.ConflictedResourceExceptionMapper;
-import uk.gov.justice.services.adapter.rest.mapper.ForbiddenRequestExceptionMapper;
+import uk.gov.justice.services.common.rest.ForbiddenRequestExceptionMapper;
 
 import java.util.Set;
 

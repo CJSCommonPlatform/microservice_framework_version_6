@@ -4,6 +4,7 @@ import static java.lang.String.format;
 
 import uk.gov.justice.services.jdbc.persistence.AbstractJdbcRepository;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
+import uk.gov.justice.services.jdbc.persistence.PaginationCapableRepository;
 import uk.gov.justice.services.jdbc.persistence.PreparedStatementWrapper;
 
 import java.sql.ResultSet;
@@ -15,11 +16,12 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.naming.NamingException;
 
 @ApplicationScoped
-public class EventStreamJdbcRepository extends AbstractJdbcRepository<EventStream> {
+public class EventStreamJdbcRepository extends AbstractJdbcRepository<EventStream> implements PaginationCapableRepository<EventStream> {
     private static final String SQL_INSERT_EVENT_STREAM = "INSERT INTO event_stream (stream_id) values (?);";
     private static final String SQL_FIND_ALL = "SELECT * FROM event_stream ORDER BY sequence_number ASC;";
+    private static final String SQL_PAGE = "SELECT * FROM event_stream ORDER BY sequence_number ASC LIMIT ? OFFSET ?;";
 
-    private static final String READING_STREAM_ALL_EXCEPTION = "Exception while reading stream";
+    private static final String READING_STREAM_EXCEPTION = "Exception while reading stream";
 
     private static final String COL_STREAM_ID = "stream_id";
     private static final String COL_SEQUENCE_NUMBER = "sequence_number";
@@ -39,7 +41,19 @@ public class EventStreamJdbcRepository extends AbstractJdbcRepository<EventStrea
         try {
             return streamOf(preparedStatementWrapperOf(SQL_FIND_ALL));
         } catch (SQLException e) {
-            throw new JdbcRepositoryException(READING_STREAM_ALL_EXCEPTION, e);
+            throw new JdbcRepositoryException(READING_STREAM_EXCEPTION, e);
+        }
+    }
+
+    @Override
+    public Stream<EventStream> getPage(final long offset, final long pageSize) {
+        try {
+            final PreparedStatementWrapper ps = preparedStatementWrapperOf(SQL_PAGE);
+            ps.setLong(1, pageSize);
+            ps.setLong(2, offset);
+            return streamOf(ps);
+        } catch (SQLException e) {
+            throw new JdbcRepositoryException(READING_STREAM_EXCEPTION, e);
         }
     }
 

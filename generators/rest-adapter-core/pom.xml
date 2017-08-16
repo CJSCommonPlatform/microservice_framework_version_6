@@ -28,6 +28,11 @@
         </dependency>
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
+            <artifactId>common-rest</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
             <artifactId>core</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -118,5 +123,6 @@
             <artifactId>openejb-core</artifactId>
             <scope>test</scope>
         </dependency>
+
     </dependencies>
 </project>

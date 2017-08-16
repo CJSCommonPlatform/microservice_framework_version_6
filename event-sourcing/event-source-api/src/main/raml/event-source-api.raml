@@ -8,17 +8,11 @@ protocols: [ HTTP, HTTPS ]
 /event-streams:
   description: paginated feed listing all event streams
   get:
-    description: |
-        ...
-        (mapping):
-            responseType: application/vnd.event-source.event-streams+json
-            name: event-source.get-event-streams
-        ...
     queryParameters:
-        ref:
-            type: string
+        page:
+            type: integer
             required: false
-            description: A page reference
+            description: page number
     responses:
       200:
         body:
@@ -29,17 +23,11 @@ protocols: [ HTTP, HTTPS ]
 /event-streams/{streamId}:
   description: paginated feed listing all events in the stream
   get:
-    description: |
-        ...
-        (mapping):
-            responseType: application/vnd.event-source.event-stream+json
-            name: event-source.get-event-stream
-        ...
     queryParameters:
-        ref:
-            type: string
+        page:
+            type: integer
             required: false
-            description: A page reference
+            description: page number
     responses:
       200:
         body:

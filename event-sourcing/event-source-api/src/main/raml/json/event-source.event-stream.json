@@ -23,7 +23,7 @@
     }
   ],
   "paging": {
-    "previous": "http://localhost:8080/event-source-api/rest/event-streams/163af847-effb-46a9-96bc-32a0f7526e15?ref=2955756c-c2e3-44c2-a18d-0a69cb4f4611",
-    "next": "http://localhost:8080/event-source-api/rest/event-streams/163af847-effb-46a9-96bc-32a0f7526e15?ref=7d21dd65-f204-485c-9a7d-60bc34abd04d"
+    "previous": "http://localhost:8080/event-source-api/rest/event-streams/163af847-effb-46a9-96bc-32a0f7526e15?page=4",
+    "next": "http://localhost:8080/event-source-api/rest/event-streams/163af847-effb-46a9-96bc-32a0f7526e15?page=6"
   }
 }

@@ -4,6 +4,8 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Added
+- Record new events stream into event_stream table in Event Store
 
 ### Added
 - JsonEnvelope and Metadata builder service provider

@@ -17,7 +17,6 @@ import java.util.stream.Stream;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -55,6 +54,10 @@ public class TestEventRepository extends EventJdbcRepository {
         }
     }
 
+    private static String jdbcUrlFrom(final String contextName) {
+        return format("jdbc:postgresql://%s/%seventstore", getHost(), contextName);
+    }
+
     public List<Event> eventsOfStreamId(final UUID streamId) {
         try (final Stream<Event> events = this.findByStreamIdOrderBySequenceIdAsc(streamId)) {
             return events.collect(toList());
@@ -70,10 +73,6 @@ public class TestEventRepository extends EventJdbcRepository {
     @Override
     protected DataSource getDataSource() {
         return datasource;
-    }
-
-    private static String jdbcUrlFrom(final String contextName) {
-        return format("jdbc:postgresql://%s/%seventstore", getHost(), contextName);
     }
 
 }

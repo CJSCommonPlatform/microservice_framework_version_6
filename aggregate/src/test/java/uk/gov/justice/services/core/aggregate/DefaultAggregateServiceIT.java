@@ -41,6 +41,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
 import uk.gov.justice.services.repository.OpenEjbAwareEventJdbcRepository;
+import uk.gov.justice.services.repository.OpenEjbAwareEventStreamJdbcRepository;
 
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -84,6 +85,10 @@ public class DefaultAggregateServiceIT {
     private OpenEjbAwareEventJdbcRepository eventRepository;
 
     @Inject
+    private OpenEjbAwareEventStreamJdbcRepository eventStreamRepository;
+
+
+    @Inject
     private Clock clock;
 
     @Module
@@ -97,6 +102,7 @@ public class DefaultAggregateServiceIT {
             TestEventInsertionStrategyProducer.class,
 
             DefaultAggregateService.class,
+            OpenEjbAwareEventStreamJdbcRepository.class,
 
             DefaultEventSource.class,
             EnvelopeEventStream.class,
@@ -137,6 +143,7 @@ public class DefaultAggregateServiceIT {
 
         assertThat(aggregate, notNullValue());
         assertThat(aggregate.recordedEvents(), empty());
+        assertThat(eventStreamRepository.eventStreamCount(STREAM_ID), is(0));
     }
 
     @Test
@@ -155,7 +162,7 @@ public class DefaultAggregateServiceIT {
         assertThat(aggregate.recordedEvents(), hasSize(1));
         assertThat(aggregate.recordedEvents().get(0).getClass(), equalTo(EventA.class));
         assertThat(eventRepository.eventCount(STREAM_ID), is(1));
-
+        assertThat(eventStreamRepository.eventStreamCount(STREAM_ID), is(1));
     }
 
     @Test
@@ -177,6 +184,8 @@ public class DefaultAggregateServiceIT {
         assertThat(aggregate.recordedEvents().get(0).getClass(), equalTo(EventA.class));
         assertThat(aggregate.recordedEvents().get(1).getClass(), equalTo(EventB.class));
         assertThat(eventRepository.eventCount(STREAM_ID), is(2));
+        assertThat(eventStreamRepository.eventStreamCount(STREAM_ID), is(1));
+
     }
 
     @Test(expected = IllegalStateException.class)

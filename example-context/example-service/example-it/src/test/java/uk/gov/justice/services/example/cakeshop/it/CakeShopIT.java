@@ -35,10 +35,8 @@ import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.aggregate.exception.AggregateChangeDetectedException;
 import uk.gov.justice.services.event.buffer.core.repository.streamstatus.StreamStatus;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.Event;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStream;
 import uk.gov.justice.services.example.cakeshop.domain.aggregate.Recipe;
 import uk.gov.justice.services.example.cakeshop.it.util.ApiResponse;
-import uk.gov.justice.services.example.cakeshop.it.util.StandaloneEventStreamJdbcRepository;
 import uk.gov.justice.services.example.cakeshop.it.util.StandaloneSnapshotJdbcRepository;
 import uk.gov.justice.services.example.cakeshop.it.util.StandaloneStreamStatusJdbcRepository;
 import uk.gov.justice.services.example.cakeshop.it.util.TestProperties;
@@ -131,8 +129,6 @@ public class CakeShopIT {
     private static TestEventRepository EVENT_LOG_REPOSITORY;
     private static StandaloneStreamStatusJdbcRepository STREAM_STATUS_REPOSITORY;
     private static StandaloneSnapshotJdbcRepository SNAPSHOT_REPOSITORY;
-    private static StandaloneEventStreamJdbcRepository EVENT_STREAM_REPOSITORY;
-
     private static ActiveMQConnectionFactory JMS_CONNECTION_FACTORY;
     private static DataSource CAKE_SHOP_DS;
 
@@ -149,51 +145,10 @@ public class CakeShopIT {
         final DataSource viewStoreDatasource = initViewStoreDb();
         STREAM_STATUS_REPOSITORY = new StandaloneStreamStatusJdbcRepository(viewStoreDatasource);
         SNAPSHOT_REPOSITORY = new StandaloneSnapshotJdbcRepository(eventStoreDataSource);
-        EVENT_STREAM_REPOSITORY = new StandaloneEventStreamJdbcRepository(eventStoreDataSource);
+
         initFileServiceDb();
 
         Thread.sleep(300);
-    }
-
-    private static DataSource initViewStoreDb() throws Exception {
-        CAKE_SHOP_DS = initDatabase("db.example.url", "db.example.userName", "db.example.password",
-                "liquibase/view-store-db-changelog.xml", "liquibase/event-buffer-changelog.xml");
-        return CAKE_SHOP_DS;
-    }
-
-    private static DataSource initEventStoreDb() throws Exception {
-        return initDatabase("db.eventstore.url", "db.eventstore.userName",
-                "db.eventstore.password", "liquibase/event-store-db-changelog.xml", "liquibase/snapshot-store-db-changelog.xml");
-    }
-
-    private static DataSource initFileServiceDb() throws Exception {
-        return initDatabase("db.fileservice.url", "db.fileservice.userName",
-                "db.fileservice.password", "liquibase/file-service-liquibase-db-changelog.xml");
-    }
-
-    private static DataSource initDatabase(final String dbUrlPropertyName,
-                                           final String dbUserNamePropertyName,
-                                           final String dbPasswordPropertyName,
-                                           final String... liquibaseChangeLogXmls) throws Exception {
-        final BasicDataSource dataSource = new BasicDataSource();
-        dataSource.setDriverClassName(H2_DRIVER);
-
-        dataSource.setUrl(TEST_PROPERTIES.value(dbUrlPropertyName));
-        dataSource.setUsername(TEST_PROPERTIES.value(dbUserNamePropertyName));
-        dataSource.setPassword(TEST_PROPERTIES.value(dbPasswordPropertyName));
-        boolean dropped = false;
-        final JdbcConnection jdbcConnection = new JdbcConnection(dataSource.getConnection());
-
-        for (String liquibaseChangeLogXml : liquibaseChangeLogXmls) {
-            Liquibase liquibase = new Liquibase(liquibaseChangeLogXml,
-                    new ClassLoaderResourceAccessor(), jdbcConnection);
-            if (!dropped) {
-                liquibase.dropAll();
-                dropped = true;
-            }
-            liquibase.update("");
-        }
-        return dataSource;
     }
 
     @Before
@@ -210,58 +165,6 @@ public class CakeShopIT {
     @After
     public void cleanup() throws Exception {
         client.close();
-    }
-
-
-    @Test
-    public void shouldAddANewEventStreamWhenRecipeAdded() throws Exception {
-        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526f88";
-        final Response response = sendTo(RECIPES_RESOURCE_URI + recipeId).request()
-                .post(entity(addRecipeCommand(), ADD_RECIPE_MEDIA_TYPE));
-        assertThat(response.getStatus(), is(ACCEPTED));
-
-        await().until(() -> eventsWithPayloadContaining(recipeId).size() == 1);
-
-        final List<EventStream> eventStreams = EVENT_STREAM_REPOSITORY.findByStreamIdOrderBySequenceIdAsc(UUID.fromString(recipeId)).collect(toList());
-        assertThat(eventStreams.size(), is(1));
-        assertThat(eventStreams.get(0).getStreamId(), is(UUID.fromString(recipeId)));
-        assertThat(eventStreams.get(0).getSequenceNumber(), is(notNullValue()));
-    }
-
-    @Test
-    public void shouldNotAddNewEventStreamOnBadRequest() throws Exception {
-        final UUID recipeId = randomUUID();
-        final Response response = sendTo(RECIPES_RESOURCE_URI + recipeId).request()
-                .post(entity("{}", ADD_RECIPE_MEDIA_TYPE));
-        assertThat(response.getStatus(), is(BAD_REQUEST));
-
-        final List<EventStream> eventStreams = EVENT_STREAM_REPOSITORY.findByStreamIdOrderBySequenceIdAsc(recipeId).collect(toList());
-        assertThat(eventStreams.size(), is(0));
-    }
-
-    @Test
-    public void shouldNotAddANewEventStreamWhenRecipeRename() throws Exception {
-        final String recipeId = randomUUID().toString();
-        final String recipeName = "Original Cheese Cake";
-
-        sendTo(RECIPES_RESOURCE_URI + recipeId).request()
-                .post(recipeEntity(recipeName));
-
-        await().until(() -> queryForRecipe(recipeId).httpCode() == OK);
-
-        final List<EventStream> eventStreams = EVENT_STREAM_REPOSITORY.findByStreamIdOrderBySequenceIdAsc(UUID.fromString(recipeId)).collect(toList());
-        assertThat(eventStreams.size(), is(1));
-        assertThat(eventStreams.get(0).getStreamId(), is(UUID.fromString(recipeId)));
-        assertThat(eventStreams.get(0).getSequenceNumber(), is(notNullValue()));
-
-        sendTo(RECIPES_RESOURCE_URI + recipeId).request()
-                .put(renameRecipeEntity("New Name"));
-
-        await().until(() -> queryForRecipe(recipeId).body().contains("New Name"));
-        final List<EventStream> eventStreamsAfterRename = EVENT_STREAM_REPOSITORY.findByStreamIdOrderBySequenceIdAsc(UUID.fromString(recipeId)).collect(toList());
-        assertThat(eventStreamsAfterRename.size(), is(1));
-        assertThat(eventStreamsAfterRename.get(0).getStreamId(), is(UUID.fromString(recipeId)));
-        assertThat(eventStreamsAfterRename.get(0).getSequenceNumber(), is(notNullValue()));
     }
 
     @Test
@@ -884,6 +787,23 @@ public class CakeShopIT {
         return STREAM_STATUS_REPOSITORY.findByStreamId(UUID.fromString(recipeId));
     }
 
+    private static DataSource initViewStoreDb() throws Exception {
+        CAKE_SHOP_DS = initDatabase("db.example.url", "db.example.userName", "db.example.password",
+                "liquibase/view-store-db-changelog.xml", "liquibase/event-buffer-changelog.xml");
+        return CAKE_SHOP_DS;
+    }
+
+
+    private static DataSource initEventStoreDb() throws Exception {
+        return initDatabase("db.eventstore.url", "db.eventstore.userName",
+                "db.eventstore.password", "liquibase/event-store-db-changelog.xml", "liquibase/snapshot-store-db-changelog.xml");
+    }
+
+    private static DataSource initFileServiceDb() throws Exception {
+        return initDatabase("db.fileservice.url", "db.fileservice.userName",
+                "db.fileservice.password", "liquibase/file-service-liquibase-db-changelog.xml");
+    }
+
     private void closeCakeShopDb() throws SQLException {
         try (final Connection connection = CAKE_SHOP_DS.getConnection()) {
             final Statement statement = connection.createStatement();
@@ -934,6 +854,31 @@ public class CakeShopIT {
                                 .add("quantity", 1)
                         ).build())
                 .build().toString();
+    }
+
+    private static DataSource initDatabase(final String dbUrlPropertyName,
+                                           final String dbUserNamePropertyName,
+                                           final String dbPasswordPropertyName,
+                                           final String... liquibaseChangeLogXmls) throws Exception {
+        final BasicDataSource dataSource = new BasicDataSource();
+        dataSource.setDriverClassName(H2_DRIVER);
+
+        dataSource.setUrl(TEST_PROPERTIES.value(dbUrlPropertyName));
+        dataSource.setUsername(TEST_PROPERTIES.value(dbUserNamePropertyName));
+        dataSource.setPassword(TEST_PROPERTIES.value(dbPasswordPropertyName));
+        boolean dropped = false;
+        final JdbcConnection jdbcConnection = new JdbcConnection(dataSource.getConnection());
+
+        for (String liquibaseChangeLogXml : liquibaseChangeLogXmls) {
+            Liquibase liquibase = new Liquibase(liquibaseChangeLogXml,
+                    new ClassLoaderResourceAccessor(), jdbcConnection);
+            if (!dropped) {
+                liquibase.dropAll();
+                dropped = true;
+            }
+            liquibase.update("");
+        }
+        return dataSource;
     }
 
     private JsonObjectBuilder jsonObject() {

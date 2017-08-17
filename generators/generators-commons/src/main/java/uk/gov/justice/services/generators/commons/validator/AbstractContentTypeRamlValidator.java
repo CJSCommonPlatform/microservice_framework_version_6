@@ -1,7 +1,7 @@
 package uk.gov.justice.services.generators.commons.validator;
 
 import static java.lang.String.format;
-import static org.apache.commons.lang.StringUtils.capitalize;
+import static org.apache.commons.lang3.StringUtils.capitalize;
 
 import java.util.Collection;
 import java.util.List;

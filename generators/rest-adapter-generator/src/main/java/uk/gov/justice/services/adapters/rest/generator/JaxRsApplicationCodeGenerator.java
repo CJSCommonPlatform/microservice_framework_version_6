@@ -2,7 +2,7 @@ package uk.gov.justice.services.adapters.rest.generator;
 
 import static com.squareup.javapoet.TypeSpec.classBuilder;
 import static javax.lang.model.element.Modifier.PUBLIC;
-import static org.apache.commons.lang.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static uk.gov.justice.services.generators.commons.helper.Names.RESOURCE_PACKAGE_NAME;
 import static uk.gov.justice.services.generators.commons.helper.Names.buildJavaFriendlyName;
 import static uk.gov.justice.services.generators.commons.helper.Names.packageNameOf;

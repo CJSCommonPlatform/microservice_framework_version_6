@@ -2,9 +2,9 @@ package uk.gov.justice.services.adapters.rest.generator;
 
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
-import static org.apache.commons.lang.Validate.isTrue;
-import static org.apache.commons.lang.Validate.notEmpty;
-import static org.apache.commons.lang.Validate.notNull;
+import static org.apache.commons.lang3.Validate.isTrue;
+import static org.apache.commons.lang3.Validate.notEmpty;
+import static org.apache.commons.lang3.Validate.notNull;
 import static org.raml.model.ActionType.DELETE;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.PATCH;

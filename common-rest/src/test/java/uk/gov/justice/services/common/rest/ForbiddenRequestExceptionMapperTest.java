@@ -1,4 +1,4 @@
-package uk.gov.justice.services.adapter.rest.mapper;
+package uk.gov.justice.services.common.rest;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasJsonPath;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
@@ -8,28 +8,18 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
 import uk.gov.justice.services.common.exception.ForbiddenRequestException;
-import uk.gov.justice.services.core.accesscontrol.AccessControlViolationException;
 
 import javax.ws.rs.core.Response;
 
-import org.everit.json.schema.Schema;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.slf4j.Logger;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ForbiddenRequestExceptionMapperTest {
 
     private static final String TEST_ERROR_MESSAGE = "Test Error Message.";
-
-    @Mock
-    private Logger logger;
-
-    @Mock
-    private Schema schema;
 
     @InjectMocks
     private ForbiddenRequestExceptionMapper exceptionMapper;

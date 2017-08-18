@@ -1,4 +1,6 @@
-package uk.gov.justice.services.common.rest;
+package uk.gov.justice.services.common.http;
+
+import uk.gov.justice.services.common.rest.ServerPortProvider;
 
 import javax.enterprise.context.ApplicationScoped;
 

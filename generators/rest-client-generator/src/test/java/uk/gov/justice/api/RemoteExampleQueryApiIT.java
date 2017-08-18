@@ -30,7 +30,7 @@ import uk.gov.justice.services.common.configuration.JndiBasedServiceContextNameP
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.justice.services.common.rest.DefaultServerPortProvider;
+import uk.gov.justice.services.common.http.DefaultServerPortProvider;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
 import uk.gov.justice.services.core.accesscontrol.AccessControlViolationException;

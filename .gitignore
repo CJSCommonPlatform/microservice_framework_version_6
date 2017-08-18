@@ -79,3 +79,14 @@ Thumbs.db
 /components/event/event-listener/conf/login.config
 /components/event/event-listener/conf/openejb.xml
 /components/event/event-listener/conf/users.properties
+/event-sourcing/event-source-api/conf/conf.d/
+/event-sourcing/event-source-api/conf/login.config
+/event-sourcing/event-source-api/conf/openejb.xml
+/event-sourcing/event-source-api/conf/groups.properties
+/event-sourcing/event-source-api/conf/users.properties
+/event-sourcing/event-source-api-integration-test/conf/conf.d/cxf-rs.properties
+/event-sourcing/event-source-api-integration-test/conf/login.config
+/event-sourcing/event-source-api-integration-test/conf/openejb.xml
+/event-sourcing/event-source-api-integration-test/conf/groups.properties
+/event-sourcing/event-source-api-integration-test/conf/conf.d/httpejbd.properties
+/event-sourcing/event-source-api-integration-test/conf/users.properties

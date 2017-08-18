@@ -53,4 +53,49 @@ public class EventStreamJdbcRepositoryIT extends AbstractJdbcRepositoryIT<EventS
         assertThat(streams.get(1).getSequenceNumber(), is(2L));
 
     }
+
+    @Test
+    public void shouldReturnPageOfSpecifiedSize() {
+
+        final UUID streamId1 = randomUUID();
+        final UUID streamId2 = randomUUID();
+        final UUID streamId3 = randomUUID();
+        final UUID streamId4 = randomUUID();
+        jdbcRepository.insert(new EventStream(streamId1));
+        jdbcRepository.insert(new EventStream(streamId2));
+        jdbcRepository.insert(new EventStream(streamId3));
+        jdbcRepository.insert(new EventStream(streamId4));
+
+        final List<EventStream> streams = jdbcRepository.getPage(0, 3).collect(toList());
+        assertThat(streams, hasSize(3));
+
+    }
+
+    @Test
+    public void shouldReturnPageWithOffsetAndSize() {
+
+        final UUID streamId5 = randomUUID();
+        final UUID streamId6 = randomUUID();
+        jdbcRepository.insert(new EventStream(randomUUID(), 1L));
+        jdbcRepository.insert(new EventStream(randomUUID(), 2L));
+        jdbcRepository.insert(new EventStream(randomUUID(), 3L));
+        jdbcRepository.insert(new EventStream(randomUUID(), 4L));
+        jdbcRepository.insert(new EventStream(streamId5, 5L));
+        jdbcRepository.insert(new EventStream(streamId6, 6L));
+        jdbcRepository.insert(new EventStream(randomUUID(), 7L));
+
+        final int offset = 4;
+        final int pageSize = 2;
+        final List<EventStream> streams = jdbcRepository.getPage(offset, pageSize).collect(toList());
+        assertThat(streams, hasSize(2));
+
+        assertThat(streams.get(0).getStreamId(), is(streamId5));
+        assertThat(streams.get(0).getSequenceNumber(), is(5L));
+
+        assertThat(streams.get(1).getStreamId(), is(streamId6));
+        assertThat(streams.get(1).getSequenceNumber(), is(6L));
+
+
+    }
+
 }

@@ -22,6 +22,10 @@
             <artifactId>framework-api-common</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
 
         <!-- Test Dependencies -->
         <dependency>
@@ -34,6 +38,8 @@
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
+
+
 
     </dependencies>
 

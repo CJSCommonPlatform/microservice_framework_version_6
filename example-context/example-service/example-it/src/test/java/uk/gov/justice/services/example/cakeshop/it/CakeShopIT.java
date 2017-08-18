@@ -342,20 +342,21 @@ public class CakeShopIT {
     @Test
     public void shouldFailTransactionOnDBFailureAndRedirectEventToDLQ() throws Exception {
         try (final Session jmsSession = jmsSession()) {
-            final MessageConsumer dlqConsumer = queueConsumerOf(jmsSession, "DLQ");
-            clear(dlqConsumer);
+            try(final MessageConsumer dlqConsumer = queueConsumerOf(jmsSession, "DLQ")) {
+                clear(dlqConsumer);
 
-            //closing db to cause transaction error
-            closeCakeShopDb();
+                //closing db to cause transaction error
+                closeCakeShopDb();
 
-            final String recipeId = "363af847-effb-46a9-96bc-32a0f7526f12";
-            addRecipe(recipeId, "Cheesy cheese cake");
+                final String recipeId = "363af847-effb-46a9-96bc-32a0f7526f12";
+                addRecipe(recipeId, "Cheesy cheese cake");
 
-            final TextMessage messageFromDLQ = (TextMessage) dlqConsumer.receive();
+                final TextMessage messageFromDLQ = (TextMessage) dlqConsumer.receive();
 
-            with(messageFromDLQ.getText())
-                    .assertThat("$._metadata.name", equalTo("example.recipe-added"))
-                    .assertThat("$.recipeId", equalTo(recipeId));
+                with(messageFromDLQ.getText())
+                     .assertThat("$._metadata.name", equalTo("example.recipe-added"))
+                     .assertThat("$.recipeId", equalTo(recipeId));
+            }
 
             initViewStoreDb();
         }
@@ -520,17 +521,18 @@ public class CakeShopIT {
     @Test
     public void shouldPublishEventToPublicTopic() throws Exception {
         try (final Session jmsSession = jmsSession()) {
-            final MessageConsumer publicTopicConsumer = topicConsumerOf(jmsSession, "public.event");
+            try(final MessageConsumer publicTopicConsumer = topicConsumerOf(jmsSession, "public.event")) {
 
-            final String recipeId = "163af847-effb-46a9-96bc-32a0f7526e13";
-            sendTo(RECIPES_RESOURCE_URI + recipeId).request()
-                    .post(recipeEntity("Apple pie", false));
+                final String recipeId = "163af847-effb-46a9-96bc-32a0f7526e13";
+                sendTo(RECIPES_RESOURCE_URI + recipeId).request()
+                        .post(recipeEntity("Apple pie", false));
 
-            final TextMessage message = (TextMessage) publicTopicConsumer.receive();
-            with(message.getText())
-                    .assertThat("$._metadata.name", equalTo("example.recipe-added"))
-                    .assertThat("$.recipeId", equalTo(recipeId))
-                    .assertThat("$.name", equalTo("Apple pie"));
+                final TextMessage message = (TextMessage) publicTopicConsumer.receive();
+                with(message.getText())
+                        .assertThat("$._metadata.name", equalTo("example.recipe-added"))
+                        .assertThat("$.recipeId", equalTo(recipeId))
+                        .assertThat("$.name", equalTo("Apple pie"));
+	    }
         }
     }
 

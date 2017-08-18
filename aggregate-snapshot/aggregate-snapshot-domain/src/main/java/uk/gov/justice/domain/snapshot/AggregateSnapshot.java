@@ -1,6 +1,6 @@
 package uk.gov.justice.domain.snapshot;
 
-import static org.apache.commons.lang.SerializationUtils.serialize;
+import static org.apache.commons.lang3.SerializationUtils.serialize;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.services.core.aggregate.exception.AggregateChangeDetectedException;
@@ -11,9 +11,9 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.UUID;
 
-import org.apache.commons.lang.SerializationException;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang3.SerializationException;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public class AggregateSnapshot<T extends Aggregate> implements Serializable {
 

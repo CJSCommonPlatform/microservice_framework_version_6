@@ -3,8 +3,8 @@ package uk.gov.justice.services.adapters.rest.generator;
 
 import static java.lang.String.format;
 import static java.util.Comparator.comparing;
-import static org.apache.commons.lang.StringUtils.defaultIfBlank;
-import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static uk.gov.justice.services.generators.commons.helper.Names.buildJavaFriendlyName;
 
 import uk.gov.justice.services.generators.commons.helper.RestResourceBaseUri;

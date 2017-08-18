@@ -26,6 +26,7 @@
         <module>example-custom</module>
         <module>example-it</module>
         <module>example-liquibase</module>
+        <module>example-single</module>
     </modules>
 
     <build>
@@ -116,6 +117,15 @@
                 </plugin>
             </plugins>
         </pluginManagement>
+        <plugins>
+            <plugin>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <archiveClasses>true</archiveClasses>
+                    <attachClasses>true</attachClasses>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
 
 

@@ -28,6 +28,12 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+
+        <!-- Test Dependencies -->
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
@@ -74,7 +80,8 @@
             <groupId>net.trajano.commons</groupId>
             <artifactId>commons-testing</artifactId>
             <scope>test</scope>
-        </dependency>    </dependencies>
+        </dependency>
+    </dependencies>
 
 
 </project>

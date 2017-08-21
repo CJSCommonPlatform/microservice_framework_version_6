@@ -16,6 +16,7 @@ JsonObjectMetadataBuilders in tests
 ### Changed
 - Deprecate DefaultJsonEnvelope, JsonObjectBuilderWrapper and JsonObjectMetadata
 - Replace usage of Pair in InterceptorChainProvider with InterceptorChainEntry
+- Deprecate JavaCompilerUtil
 
 ### Removed 
 - org.apache.commons commons-lang3 dependency from framework-api-core

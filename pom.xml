@@ -51,7 +51,7 @@
         <raml-maven-plugin.version>1.6.0</raml-maven-plugin.version>
         <file.service.version>1.9.0</file.service.version>
         <utilities.version>1.7.0</utilities.version>
-        <test-utils.version>1.5.0</test-utils.version>
+        <test-utils.version>1.7.0</test-utils.version>
         <jboss-ejb3-ext-api.version>2.2.0.Final</jboss-ejb3-ext-api.version>
 
         <cpp.repo.name>microservice_framework</cpp.repo.name>

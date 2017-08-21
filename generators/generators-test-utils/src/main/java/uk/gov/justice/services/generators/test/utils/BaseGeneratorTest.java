@@ -1,7 +1,7 @@
 package uk.gov.justice.services.generators.test.utils;
 
 import uk.gov.justice.raml.core.Generator;
-import uk.gov.justice.services.generators.test.utils.compiler.JavaCompilerUtil;
+import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil;
 
 import org.junit.Before;
 import org.junit.Rule;

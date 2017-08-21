@@ -510,7 +510,7 @@
                     <location name="/" handler="welcome-content"/>
                     <filter-ref name="server-header"/>
                     <filter-ref name="x-powered-by-header"/>
-                    <filter-ref name="example-single" predicate="regex('^/example-(.*?)/',%R) and not equals('single',${1})" />
+                    <filter-ref name="example-single" predicate="path-prefix('/example-command-api/') or path-prefix('/example-command-controller/') or path-prefix('/example-command-handler/') or path-prefix('/example-event-api/') or path-prefix('/example-event-listener/') or path-prefix('/example-event-processor/') or path-prefix('/example-query-api/') or path-prefix('/examaple-query-controller/') or path-prefix('/example-query-view/')" />
                 </host>
             </server>
             <servlet-container name="default">
@@ -525,7 +525,7 @@
                                  header-value="WildFly/10"/>
                 <response-header name="x-powered-by-header" header-name="X-Powered-By"
                                  header-value="Undertow/1"/>
-                <rewrite-filter name="example-single" target="/example-single/"/>
+                <rewrite name="example-single" target="/example-single$${remaining}"/>
             </filters>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:webservices:2.0">

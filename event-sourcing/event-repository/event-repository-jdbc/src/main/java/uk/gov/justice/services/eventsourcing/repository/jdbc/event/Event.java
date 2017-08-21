@@ -19,7 +19,13 @@ public class Event {
     private final String metadata;
     private final ZonedDateTime createdAt;
 
-    public Event(final UUID id, final UUID streamId, final Long sequenceId, final String name, final String metadata, final String payload, final ZonedDateTime createdAt) {
+    public Event(final UUID id,
+                 final UUID streamId,
+                 final Long sequenceId,
+                 final String name,
+                 final String metadata,
+                 final String payload,
+                 final ZonedDateTime createdAt) {
         this.id = id;
         this.streamId = streamId;
         this.sequenceId = sequenceId;

@@ -12,6 +12,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
+import static uk.gov.justice.services.eventsourcing.source.api.util.TestSystemUserProvider.SYSTEM_USER_ID;
 
 import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.justice.services.common.rest.ForbiddenRequestExceptionMapper;
@@ -23,6 +24,7 @@ import uk.gov.justice.services.eventsourcing.source.api.resource.EventStreamsFee
 import uk.gov.justice.services.eventsourcing.source.api.security.AccessController;
 import uk.gov.justice.services.eventsourcing.source.api.util.OpenEjbAwareEventStreamRepository;
 import uk.gov.justice.services.eventsourcing.source.api.util.TestEventStreamsFeedService;
+import uk.gov.justice.services.eventsourcing.source.api.util.TestSystemUserProvider;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -65,8 +67,6 @@ public class EventStreamsFeedIT {
 
     private static final String BASE_URI_PATTERN = "http://localhost:%d/event-source-api/rest";
     private static int port = -1;
-
-    private static final UUID SYSTEM_USER_ID = randomUUID();
 
     private CloseableHttpClient httpClient;
 
@@ -316,16 +316,6 @@ public class EventStreamsFeedIT {
     public void shouldReturnForbiddenIfNotASystemUser() throws IOException {
         final HttpResponse response = eventStreamsFeedFor(randomUUID());
         assertThat(response.getStatusLine().getStatusCode(), is(FORBIDDEN.getStatusCode()));
-    }
-
-
-    @ApplicationScoped
-    public static class TestSystemUserProvider implements SystemUserProvider {
-
-        @Override
-        public Optional<UUID> getContextSystemUserId() {
-            return Optional.of(SYSTEM_USER_ID);
-        }
     }
 
     private String responseBodyOf(final HttpResponse response) throws IOException {

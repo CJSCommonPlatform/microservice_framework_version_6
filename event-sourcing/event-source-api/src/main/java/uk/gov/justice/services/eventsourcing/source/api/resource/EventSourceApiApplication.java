@@ -10,10 +10,11 @@ import javax.ws.rs.core.Application;
 public class EventSourceApiApplication extends Application {
 
 
-  @Override
-  public Set<Class<?>> getClasses() {
-    Set<Class<?>> classes = new HashSet<>();
-    classes.add(EventStreamsFeedResource.class);
-    return classes;
-  }
+    @Override
+    public Set<Class<?>> getClasses() {
+        Set<Class<?>> classes = new HashSet<>();
+        classes.add(EventStreamsFeedResource.class);
+        classes.add(EventFeedResource.class);
+        return classes;
+    }
 }

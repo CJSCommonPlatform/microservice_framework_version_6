@@ -8,10 +8,12 @@ import uk.gov.justice.services.eventsourcing.repository.jdbc.EventInsertionStrat
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidSequenceIdException;
 import uk.gov.justice.services.jdbc.persistence.AbstractJdbcRepository;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
+import uk.gov.justice.services.jdbc.persistence.PaginationCapableRepository;
 import uk.gov.justice.services.jdbc.persistence.PreparedStatementWrapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -25,15 +27,7 @@ import org.slf4j.Logger;
  * JDBC based repository for event log records.
  */
 @ApplicationScoped
-public class EventJdbcRepository extends AbstractJdbcRepository<Event> {
-
-    private static final String FAILED_TO_READ_STREAM = "Failed to read stream {}";
-
-    @Inject
-    protected Logger logger;
-
-    @Inject
-    EventInsertionStrategy eventInsertionStrategy;
+public class EventJdbcRepository extends AbstractJdbcRepository<Event> implements PaginationCapableRepository<Event> {
 
     /**
      * Column Names
@@ -45,9 +39,7 @@ public class EventJdbcRepository extends AbstractJdbcRepository<Event> {
     static final String COL_METADATA = "metadata";
     static final String COL_PAYLOAD = "payload";
     static final String COL_TIMESTAMP = "date_created";
-
     static final long INITIAL_VERSION = 0L;
-
     /**
      * Statements
      */
@@ -56,10 +48,16 @@ public class EventJdbcRepository extends AbstractJdbcRepository<Event> {
     static final String SQL_FIND_BY_STREAM_ID_AND_SEQUENCE_ID = "SELECT * FROM event_log WHERE stream_id=? AND sequence_id>=? ORDER BY sequence_id ASC";
     static final String SQL_FIND_LATEST_SEQUENCE_ID = "SELECT MAX(sequence_id) FROM event_log WHERE stream_id=?";
     static final String SQL_DISTINCT_STREAM_ID = "SELECT DISTINCT stream_id FROM event_log";
-
+    private static final String FAILED_TO_READ_STREAM = "Failed to read stream {}";
+    private static final String STREAM_ID = "STREAM_ID";
+    private static final String SQL_PAGE = "SELECT * FROM event_log WHERE stream_id=? ORDER BY sequence_id ASC LIMIT ? OFFSET ?;";
     private static final String READING_STREAM_ALL_EXCEPTION = "Exception while reading stream";
     private static final String READING_STREAM_EXCEPTION = "Exception while reading stream %s";
     private static final String JNDI_DS_EVENT_STORE_PATTERN = "java:/app/%s/DS.eventstore";
+    @Inject
+    protected Logger logger;
+    @Inject
+    EventInsertionStrategy eventInsertionStrategy;
 
     /**
      * Insert the given event into the event log.
@@ -194,9 +192,22 @@ public class EventJdbcRepository extends AbstractJdbcRepository<Event> {
                 fromSqlTimestamp(resultSet.getTimestamp(COL_TIMESTAMP)));
     }
 
-
     @Override
     protected String jndiName() throws NamingException {
         return format(JNDI_DS_EVENT_STORE_PATTERN, warFileName());
+    }
+
+    @Override
+    public Stream<Event> getPage(final long offset, final long pageSize,  final Map<String, Object> params) {
+        try {
+            final Object streamId =  params.get(STREAM_ID);
+            final PreparedStatementWrapper ps = preparedStatementWrapperOf(SQL_PAGE);
+            ps.setObject(1, streamId.toString());
+            ps.setLong(2, pageSize);
+            ps.setLong(3, offset);
+            return streamOf(ps);
+        } catch (SQLException e) {
+            throw new JdbcRepositoryException(READING_STREAM_EXCEPTION, e);
+        }
     }
 }

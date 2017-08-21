@@ -36,7 +36,11 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Compiles and loads classes and interfaces from the specified folders
+ *
+ * @deprecated Use {@link uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil} in
+ * test-utils-core dependency
  */
+@Deprecated
 public class JavaCompilerUtil {
     private static final Logger LOG = LoggerFactory.getLogger(JavaCompilerUtil.class);
     private final File codegenOutputDir, compilationOutputDir;
@@ -52,7 +56,9 @@ public class JavaCompilerUtil {
      * @param basePackage - the base package of the class to be compiled
      * @return the Class
      * @throws IllegalStateException - if more or less than one classes found
+     * @deprecated Use {@link uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil}
      */
+    @Deprecated
     public Class<?> compiledClassOf(final String basePackage) {
         final Set<Class<?>> resourceClasses = compiledClassesOf(basePackage);
         if (resourceClasses.size() != 1) {
@@ -68,7 +74,9 @@ public class JavaCompilerUtil {
      * @param additionalFilterElements the additional filter elements
      * @return the class
      * @throws IllegalStateException - if more or less than one classes found
+     * @deprecated Use {@link uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil}
      */
+    @Deprecated
     public Class<?> compiledClassOf(final String basePackage, final String... additionalFilterElements) {
         return compiledClassOf(basePackage, c -> !c.isInterface(), additionalFilterElements);
     }
@@ -80,7 +88,9 @@ public class JavaCompilerUtil {
      * @param additionalFilterElements the additional filter elements
      * @return the class
      * @throws IllegalStateException - if more or less than one classes found
+     * @deprecated Use {@link uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil}
      */
+    @Deprecated
     public Class<?> compiledInterfaceClassOf(final String basePackage, final String... additionalFilterElements) {
         return compiledClassOf(basePackage, Class::isInterface, additionalFilterElements);
     }
@@ -100,7 +110,9 @@ public class JavaCompilerUtil {
      * @param basePackageName - the base package of the interface to be compiled
      * @return the Class
      * @throws IllegalStateException - if more or less than one interfaces found
+     * @deprecated Use {@link uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil}
      */
+    @Deprecated
     public Class<?> compiledInterfaceOf(final String basePackageName) {
         final Set<Class<?>> resourceInterfaces = compiledInterfacesOf(basePackageName);
         if (resourceInterfaces.size() != 1) {
@@ -116,7 +128,9 @@ public class JavaCompilerUtil {
      *
      * @param basePackage - the base package of the classes to be compiled
      * @return the set of classes
+     * @deprecated Use {@link uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil}
      */
+    @Deprecated
     public Set<Class<?>> compiledClassesOf(final String basePackage) {
         return compiledClassesAndInterfaces(c -> !c.isInterface(), basePackage);
     }
@@ -126,7 +140,9 @@ public class JavaCompilerUtil {
      *
      * @param basePackage - the base package of the interfaces to be compiled
      * @return the set of classes
+     * @deprecated Use {@link uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil}
      */
+    @Deprecated
     public Set<Class<?>> compiledInterfacesOf(final String basePackage) {
         return compiledClassesAndInterfaces(Class::isInterface, basePackage);
     }

@@ -1,7 +1,7 @@
 package uk.gov.justice.domain.aggregate.classloader;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
-import uk.gov.justice.services.generators.test.utils.compiler.JavaCompilerUtil;
+import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil;
 
 import java.io.File;
 import java.io.IOException;

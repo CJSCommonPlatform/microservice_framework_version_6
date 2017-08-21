@@ -109,9 +109,9 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("CUSTOM_COMPONENT")));
 
 
-        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceQueryApi");
+        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCustomComponent2ServiceQueryApi");
 
-        assertThat(generatedClass.getCanonicalName(), is("org.raml.test.RemoteServiceQueryApi"));
+        assertThat(generatedClass.getCanonicalName(), is("org.raml.test.RemoteCustomComponent2ServiceQueryApi"));
         assertThat(generatedClass.getAnnotation(Remote.class), not(nullValue()));
         assertThat(generatedClass.getAnnotation(FrameworkComponent.class), not(nullValue()));
         assertThat(generatedClass.getAnnotation(FrameworkComponent.class).value(), is("CUSTOM_COMPONENT"));
@@ -130,7 +130,7 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("QUERY_CONTROLLER")));
 
-        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceQueryApi");
+        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteQueryController2ServiceQueryApi");
         assertThat(generatedClass.getAnnotation(FrameworkComponent.class).value(), is("QUERY_CONTROLLER"));
     }
 
@@ -141,9 +141,9 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
                         .withBaseUri("http://localhost:8080/warname/query/api/rest/service")
                         .withDefaultPostResource()
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("CUSTOM_COMPONENT")));
 
-        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceQueryApi");
+        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCustomComponent2ServiceQueryApi");
 
         final Field logger = generatedClass.getDeclaredField("LOGGER");
         assertThat(logger, not(nullValue()));
@@ -162,9 +162,9 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
                                         .withResponseTypes("application/vnd.cakeshop.query.recipe+json")
                                         .withDescription(GET_MAPPING_ANNOTATION))
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("CUSTOM_COMPONENT")));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCustomComponent2ServiceCommandApi");
         final List<Method> methods = methodsOf(clazz);
         assertThat(methods, hasSize(1));
 
@@ -184,9 +184,9 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
                                 .with(httpAction(POST, "application/vnd.cakeshop.command.create-recipe+json")
                                         .withDescription(POST_MAPPING_ANNOTATION))
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("CUSTOM_COMPONENT")));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCustomComponent2ServiceCommandApi");
         final List<Method> methods = methodsOf(clazz);
         assertThat(methods, hasSize(1));
 
@@ -206,9 +206,9 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
                                 .with(httpAction(PUT, "application/vnd.cakeshop.command.update-recipe+json")
                                         .withDescription(PUT_MAPPING_ANNOTATION))
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("CUSTOM_COMPONENT")));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCustomComponent2ServiceCommandApi");
         final List<Method> methods = methodsOf(clazz);
         assertThat(methods, hasSize(1));
 
@@ -228,9 +228,9 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
                                 .with(httpAction(PATCH, "application/vnd.cakeshop.command.patch-recipe+json")
                                         .withDescription(PATCH_MAPPING_ANNOTATION))
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("CUSTOM_COMPONENT")));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCustomComponent2ServiceCommandApi");
         final List<Method> methods = methodsOf(clazz);
         assertThat(methods, hasSize(1));
 
@@ -250,9 +250,9 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
                                 .with(httpAction(DELETE, "application/vnd.cakeshop.command.delete-recipe+json")
                                         .withDescription(DELETE_MAPPING_ANNOTATION))
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("CUSTOM_COMPONENT")));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCustomComponent2ServiceCommandApi");
         final List<Method> methods = methodsOf(clazz);
         assertThat(methods, hasSize(1));
 
@@ -272,9 +272,9 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
                                 .with(httpAction(POST, "application/vnd.cakeshop.command.create-recipe+json")
                                         .withDescription(POST_MAPPING_ANNOTATION))
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("CUSTOM_COMPONENT")));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceCommandApi");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCustomComponent2ServiceCommandApi");
         final Method method = firstMethodOf(clazz);
         assertThat(method.getName(), equalTo("postSomePathRecipeIdCakeshopCommandCreateRecipe"));
         assertThat(method.getParameterCount(), is(1));
@@ -302,7 +302,7 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
 
         generator.run(
                 restRamlWithTitleVersion().withBaseUri(BASE_URI_WITH_LESS_THAN_EIGHT_PARTS).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("CUSTOM_COMPONENT")));
 
     }
 
@@ -325,9 +325,9 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
                         .withBaseUri(BASE_URI_WITH_HYPHENATED_SERVICE_NAME)
                         .withDefaultPostResource()
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_API")));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("EVENT_PROCESSOR")));
 
-        compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceWithHyphensCommandApi");
+        compiler.compiledClassOf(BASE_PACKAGE, "RemoteEventProcessor2ServiceWithHyphensCommandApi");
     }
 
     @Test
@@ -352,10 +352,10 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
                                 ))
 
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("SOME_COMPONENT")));
 
 
-        assertThat(methodsOf(compiler.compiledClassOf(BASE_PACKAGE, "RemoteServiceQueryApi")), hasSize(0));
+        assertThat(methodsOf(compiler.compiledClassOf(BASE_PACKAGE, "RemoteSomeComponent2ServiceQueryApi")), hasSize(0));
 
     }
 

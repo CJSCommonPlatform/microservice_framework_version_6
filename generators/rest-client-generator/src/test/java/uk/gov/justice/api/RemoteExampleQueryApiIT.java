@@ -147,13 +147,13 @@ public class RemoteExampleQueryApiIT {
             StringToJsonObjectConverter.class,
             SystemUserUtil.class,
             TestSystemUserProvider.class,
-            RemoteExampleQueryController.class,
+            RemoteComponentAbc2ExampleQueryController.class,
             WebTargetFactory.class,
             UtcClock.class,
 
             EmptySystemUserProvider.class,
             ObjectMapperProducer.class,
-            RemoteExampleCommandApi.class,
+            RemoteEventProcessor2ExampleCommandApi.class,
 
             GlobalValueProducer.class,
             EnvelopeValidationExceptionHandlerProducer.class,

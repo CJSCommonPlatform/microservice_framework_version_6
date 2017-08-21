@@ -58,9 +58,9 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_API")));
 
-        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteEventProcessorMessageContextCakeshopControllerCommand");
+        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCommandApi2EventProcessorMessageContextCakeshopControllerCommand");
 
-        assertThat(generatedClass.getCanonicalName(), is("org.raml.test.RemoteEventProcessorMessageContextCakeshopControllerCommand"));
+        assertThat(generatedClass.getCanonicalName(), is("org.raml.test.RemoteCommandApi2EventProcessorMessageContextCakeshopControllerCommand"));
         assertThat(generatedClass.getAnnotation(Remote.class), not(nullValue()));
         assertThat(generatedClass.getAnnotation(FrameworkComponent.class), not(nullValue()));
         assertThat(generatedClass.getAnnotation(FrameworkComponent.class).value(), is("COMMAND_API"));
@@ -77,7 +77,7 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_CONTROLLER")));
 
-        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteEventProcessorMessageContextCakeshopHandlerCommand");
+        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCommandController2EventProcessorMessageContextCakeshopHandlerCommand");
 
         assertThat(generatedClass.getAnnotation(FrameworkComponent.class).value(), is("COMMAND_CONTROLLER"));
     }
@@ -92,7 +92,7 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("EVENT_PROCESSOR")));
 
-        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteEventProcessorMessageContextPublicEvent");
+        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteEventProcessor2EventProcessorMessageContextPublicEvent");
 
         assertThat(generatedClass.getAnnotation(FrameworkComponent.class).value(), is("EVENT_PROCESSOR"));
     }
@@ -105,11 +105,11 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
                                 .withRelativeUri("/cakeshop.controller.command")
                                 .withDefaultPostAction())
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_CONTROLLER")));
 
-        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteEventProcessorMessageContextCakeshopControllerCommand");
+        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCommandController2EventProcessorMessageContextCakeshopControllerCommand");
 
-        Field logger = generatedClass.getDeclaredField("LOGGER");
+        final Field logger = generatedClass.getDeclaredField("LOGGER");
         assertThat(logger, not(nullValue()));
         assertThat(logger.getType(), equalTo(Logger.class));
         assertThat(Modifier.isPrivate(logger.getModifiers()), Matchers.is(true));
@@ -125,11 +125,12 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
                                 .withRelativeUri("/cakeshop.controller.command")
                                 .withDefaultPostAction())
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_CONTROLLER")));
 
-        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteEventProcessorMessageContextCakeshopControllerCommand");
+        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCommandController2EventProcessorMessageContextCakeshopControllerCommand");
 
-        Field sender = generatedClass.getDeclaredField("sender");
+
+        final Field sender = generatedClass.getDeclaredField("sender");
         assertThat(sender, not(nullValue()));
         assertThat(sender.getAnnotation(Inject.class), not(nullValue()));
         assertThat(sender.getType(), equalTo(JmsEnvelopeSender.class));
@@ -145,15 +146,15 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
                                 .withRelativeUri("/cakeshop.controller.command")
                                 .with(httpActionWithDefaultMapping(POST, "application/vnd.cakeshop.actionabc+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_CONTROLLER")));
 
-        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteEventProcessorMessageContextCakeshopControllerCommand");
+        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCommandController2EventProcessorMessageContextCakeshopControllerCommand");
 
         List<Method> methods = methodsOf(generatedClass);
         assertThat(methods, hasSize(1));
 
-        Method method = methods.get(0);
-        Handles handlesAnnotation = method.getAnnotation(Handles.class);
+        final Method method = methods.get(0);
+        final Handles handlesAnnotation = method.getAnnotation(Handles.class);
         assertThat(handlesAnnotation, not(nullValue()));
         assertThat(handlesAnnotation.value(), is("cakeshop.actionabc"));
     }
@@ -167,15 +168,15 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
                                 .with(httpActionWithDefaultMapping(GET)
                                         .withResponseTypes("application/vnd.cakeshop.actionabc+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_CONTROLLER")));
 
-        Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteEventProcessorMessageContextCakeshopHandlerCommand");
+        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCommandController2EventProcessorMessageContextCakeshopHandlerCommand");
 
         List<Method> methods = methodsOf(generatedClass);
         assertThat(methods, hasSize(1));
 
-        Method method = methods.get(0);
-        Handles handlesAnnotation = method.getAnnotation(Handles.class);
+        final Method method = methods.get(0);
+        final Handles handlesAnnotation = method.getAnnotation(Handles.class);
         assertThat(handlesAnnotation, not(nullValue()));
         assertThat(handlesAnnotation.value(), is("cakeshop.actionabc"));
     }
@@ -188,10 +189,10 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
                                 .withRelativeUri("/cakeshop.controller.command")
                                 .with(httpActionWithDefaultMapping(POST, "application/vnd.cakeshop.actionabc+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_CONTROLLER")));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteEventProcessorMessageContextCakeshopControllerCommand");
-        Method method = firstMethodOf(clazz);
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCommandController2EventProcessorMessageContextCakeshopControllerCommand");
+        final Method method = firstMethodOf(clazz);
         assertThat(method.getParameterCount(), is(1));
         assertThat(method.getParameters()[0].getType(), equalTo(JsonEnvelope.class));
     }
@@ -205,9 +206,9 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
                                 .withRelativeUri("/cakeshop.controller.command")
                                 .with(httpActionWithDefaultMapping(POST, "application/vnd.cakeshop.actionabc+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_CONTROLLER")));
 
-        compiler.compiledClassOf(BASE_PACKAGE, "RemoteEventProcessorMessageContextWithHyphensCakeshopControllerCommand");
+        compiler.compiledClassOf(BASE_PACKAGE, "RemoteCommandController2EventProcessorMessageContextWithHyphensCakeshopControllerCommand");
     }
 
     @Rule
@@ -225,7 +226,6 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
     }
-
 
 
 }

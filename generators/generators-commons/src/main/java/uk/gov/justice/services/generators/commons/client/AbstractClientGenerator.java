@@ -73,7 +73,7 @@ public abstract class AbstractClientGenerator implements Generator {
         };
     }
 
-    protected abstract String classNameOf(final Raml raml);
+    protected abstract String classNameOf(final Raml raml, final String serviceComponent);
 
     protected abstract Iterable<FieldSpec> fieldsOf(final Raml raml);
 
@@ -169,12 +169,13 @@ public abstract class AbstractClientGenerator implements Generator {
     }
 
     private TypeSpec.Builder classSpecOf(final Raml raml, final GeneratorConfig generatorConfig) {
-        final String className = classNameOf(raml);
+        final String serviceComponent = serviceComponentOf(generatorConfig);
+        final String className = classNameOf(raml, serviceComponent);
         return TypeSpec.classBuilder(className)
                 .addModifiers(PUBLIC, FINAL)
                 .addAnnotation(classAnnotation(raml))
                 .addAnnotation(AnnotationSpec.builder(FrameworkComponent.class)
-                        .addMember("value", "$S", serviceComponentOf(generatorConfig))
+                        .addMember("value", "$S", serviceComponent)
                         .build())
                 .addField(loggerConstantField(className));
     }

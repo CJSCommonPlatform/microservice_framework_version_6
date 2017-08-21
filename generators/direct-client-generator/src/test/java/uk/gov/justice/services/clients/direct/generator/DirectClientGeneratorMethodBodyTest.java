@@ -52,9 +52,9 @@ public class DirectClientGeneratorMethodBodyTest extends BaseGeneratorTest {
                         .withBaseUri("http://localhost:8080/warname/query/view/service")
                         .with(defaultGetResource())
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("QUERY_API")));
 
-        final Class<?> generatedClientClass = compiler.compiledClassOf(BASE_PACKAGE, "DirectQueryViewServiceClient");
+        final Class<?> generatedClientClass = compiler.compiledClassOf(BASE_PACKAGE, "DirectQueryApi2QueryViewServiceClient");
         final JsonEnvelope envelopePassedToClient = envelope().build();
 
         when(adapterCache.directAdapterForComponent("QUERY_VIEW")).thenReturn(adapter);
@@ -73,8 +73,8 @@ public class DirectClientGeneratorMethodBodyTest extends BaseGeneratorTest {
                         .withBaseUri("http://localhost:8080/warname/query/view/service")
                         .with(defaultGetResource())
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
-        final Class<?> generatedClientClass = compiler.compiledClassOf(BASE_PACKAGE, "DirectQueryViewServiceClient");
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("QUERY_API")));
+        final Class<?> generatedClientClass = compiler.compiledClassOf(BASE_PACKAGE, "DirectQueryApi2QueryViewServiceClient");
 
         final JsonEnvelope envelopeReturnedByAdapter = envelope().build();
         when(adapterCache.directAdapterForComponent("QUERY_VIEW")).thenReturn(adapter);

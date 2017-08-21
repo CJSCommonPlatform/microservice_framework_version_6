@@ -95,7 +95,7 @@ public class QueryApiDirectClientIT {
             ValueProducer.class,
             GlobalValueProducer.class,
 
-            DirectQueryViewRestExampleClient.class,
+            DirectQueryApi2QueryViewRestExampleClient.class,
             SynchronousDirectAdapterCache.class,
             TestDirectAdapter.class
 

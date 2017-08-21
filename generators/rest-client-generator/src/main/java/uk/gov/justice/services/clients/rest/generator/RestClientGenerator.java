@@ -5,7 +5,6 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static uk.gov.justice.services.generators.commons.helper.Actions.isSynchronousAction;
 import static uk.gov.justice.services.generators.commons.helper.Names.buildJavaFriendlyName;
 import static uk.gov.justice.services.generators.commons.helper.Names.nameFrom;
-import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.INVALID_ACTION_MAPPING_ERROR_MSG;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.services.adapter.rest.parameter.ParameterType;
@@ -18,12 +17,9 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.generators.commons.client.AbstractClientGenerator;
 import uk.gov.justice.services.generators.commons.client.ActionMimeTypeDefinition;
 import uk.gov.justice.services.generators.commons.mapping.ActionMapping;
-import uk.gov.justice.services.generators.commons.validator.RamlValidationException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -34,7 +30,6 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.TypeName;
 import org.raml.model.Action;
-import org.raml.model.MimeType;
 import org.raml.model.Raml;
 import org.raml.model.Resource;
 
@@ -69,12 +64,13 @@ public class RestClientGenerator extends AbstractClientGenerator {
     private static final String ASYNC_DELETE_STATEMENT = "$L.delete(def, $L)";
 
     @Override
-    protected String classNameOf(final Raml raml) {
+    protected String classNameOf(final Raml raml, final String serviceComponent) {
         final String[] pathSegments = raml.getBaseUri().split("/");
         if (pathSegments.length != NUMBER_OF_PATH_SEGMENTS) {
             throw new IllegalArgumentException("baseUri must have 8 parts");
         }
-        return format("Remote%s%s%s",
+        return format("Remote%s2%s%s%s",
+                buildJavaFriendlyName(serviceComponent.toLowerCase()),
                 buildJavaFriendlyName(pathSegments[SERVICE_PATH_SEGMENT_INDEX]),
                 buildJavaFriendlyName(pathSegments[PILLAR_PATH_SEGMENT_INDEX]),
                 buildJavaFriendlyName(pathSegments[TIER_PATH_SEGMENT_INDEX]));

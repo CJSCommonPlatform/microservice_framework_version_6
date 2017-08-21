@@ -323,7 +323,7 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
     static class ABCClientGenerator extends AbstractClientGenerator {
 
         @Override
-        protected String classNameOf(final Raml raml) {
+        protected String classNameOf(final Raml raml, final String serviceComponent) {
             return "RemoteABCController";
         }
 
@@ -352,7 +352,7 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
 
     static class BCDClientGenerator extends ABCClientGenerator {
         @Override
-        protected String classNameOf(final Raml raml) {
+        protected String classNameOf(final Raml raml, final String serviceComponent) {
             return "RemoteBCDController";
         }
 

@@ -9,6 +9,7 @@ import uk.gov.justice.services.jdbc.persistence.PreparedStatementWrapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -46,7 +47,7 @@ public class EventStreamJdbcRepository extends AbstractJdbcRepository<EventStrea
     }
 
     @Override
-    public Stream<EventStream> getPage(final long offset, final long pageSize) {
+    public Stream<EventStream> getPage(final long offset, final long pageSize, final Map<String, Object> params) {
         try {
             final PreparedStatementWrapper ps = preparedStatementWrapperOf(SQL_PAGE);
             ps.setLong(1, pageSize);

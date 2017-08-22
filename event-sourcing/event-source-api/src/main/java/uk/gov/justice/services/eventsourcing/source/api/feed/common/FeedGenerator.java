@@ -5,13 +5,14 @@ import static java.util.stream.Collectors.toList;
 import uk.gov.justice.services.jdbc.persistence.PaginationCapableRepository;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.core.UriInfo;
 
 /**
  * Generator of paginated feeds
  *
- * @param <E> - entity generic type
+ * @param <E>  - entity generic type
  * @param <FE> - feed entry generic type
  */
 public class FeedGenerator<E, FE> {
@@ -28,9 +29,9 @@ public class FeedGenerator<E, FE> {
         this.mappingStrategy = mappingStrategy;
     }
 
-    public Feed<FE> feed(final String page, final UriInfo uriInfo) {
+    public Feed<FE> feed(final String page, final UriInfo uriInfo, final Map<String, Object> params) {
         final long pageNumber = Long.valueOf(page);
-        final List<E> entities = entitiesPage(pageSize, pageNumber);
+        final List<E> entities = entitiesPage(pageSize, pageNumber, params);
 
         return feed(uriInfo, pageNumber, entities);
     }
@@ -42,9 +43,9 @@ public class FeedGenerator<E, FE> {
                 new Paging(previousPageHrefFrom(uriInfo, pageNumber), nextPageHrefFrom(uriInfo, entities, pageNumber, pageSize)));
     }
 
-    private List<E> entitiesPage(final long pageSize, final long pageNumber) {
+    private List<E> entitiesPage(final long pageSize, final long pageNumber, final Map<String, Object> params) {
         long offset = (pageNumber - 1) * pageSize;
-        return repository.getPage(offset, pageSize + 1).collect(toList());
+        return repository.getPage(offset, pageSize + 1, params).collect(toList());
     }
 
     private String previousPageHrefFrom(final UriInfo uriInfo, final long pageNumber) {
@@ -65,6 +66,4 @@ public class FeedGenerator<E, FE> {
                 .map(mappingStrategy.toFeedEntry(uriInfo))
                 .collect(toList());
     }
-
-
 }

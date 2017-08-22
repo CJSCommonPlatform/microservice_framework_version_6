@@ -15,7 +15,9 @@ import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 import uk.gov.justice.services.test.utils.persistence.AbstractJdbcRepositoryIT;
 
 import java.time.ZonedDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -151,6 +153,90 @@ public class EventJdbcRepositoryIT extends AbstractJdbcRepositoryIT<EventJdbcRep
     public void shouldThrowExceptionOnDuplicateSequenceId() throws InvalidSequenceIdException {
         jdbcRepository.insert(eventOf(SEQUENCE_ID, STREAM_ID));
         jdbcRepository.insert(eventOf(SEQUENCE_ID, STREAM_ID));
+    }
+
+    @Test
+    public void shouldReturnPageOfSpecifiedSize() throws InvalidSequenceIdException {
+
+        final UUID streamId = randomUUID();
+
+        final Map<String, Object> params = new HashMap();
+        params.put("STREAM_ID", streamId);
+
+        for (long sequence = 1; sequence < 5l; sequence++) {
+            jdbcRepository.insert(eventOf(sequence, streamId));
+        }
+
+        final List<Event> streams = jdbcRepository.getPage(0, 3, params).collect(toList());
+        assertThat(streams, hasSize(3));
+
+    }
+
+    @Test
+    public void shouldReturnPageWithOffsetAndSize() throws InvalidSequenceIdException {
+
+        final UUID streamId = randomUUID();
+
+        final Map<String, Object> params = new HashMap();
+        params.put("STREAM_ID", streamId);
+
+        final int offset = 4;
+        final int pageSize = 2;
+
+        for (long sequence = 1; sequence < 8l; sequence++) {
+            jdbcRepository.insert(eventOf(sequence, streamId));
+        }
+
+        final List<Event> streams = jdbcRepository.getPage(offset, pageSize, params).collect(toList());
+        assertThat(streams, hasSize(2));
+
+        assertThat(streams.get(0).getStreamId(), is(streamId));
+        assertThat(streams.get(0).getSequenceId(), is(5L));
+
+        assertThat(streams.get(1).getStreamId(), is(streamId));
+        assertThat(streams.get(1).getSequenceId(), is(6L));
+
+    }
+
+
+    @Test
+    public void shouldReturnPageOnlyOfRequiredStreamWithOffsetAndSize() throws InvalidSequenceIdException {
+
+        final UUID streamId1 = randomUUID();
+        final UUID streamId2 = randomUUID();
+        final UUID streamId3 = randomUUID();
+
+        final Map<String, Object> params = new HashMap();
+        params.put("STREAM_ID", streamId1);
+
+        final int offset = 4;
+        final int pageSize = 3;
+
+        for (long sequence = 1; sequence < 8l; sequence++) {
+            jdbcRepository.insert(eventOf(sequence, streamId2));
+        }
+
+        for (long sequence = 1; sequence < 9l; sequence++) {
+            jdbcRepository.insert(eventOf(sequence, streamId1));
+        }
+
+        for (long sequence = 1; sequence < 8l; sequence++) {
+            jdbcRepository.insert(eventOf(sequence, streamId3));
+        }
+
+        final List<Event> streams = jdbcRepository.getPage(offset, pageSize, params).collect(toList());
+        assertThat(streams, hasSize(3));
+
+        assertThat(streams.get(0).getStreamId(), is(streamId1));
+        assertThat(streams.get(0).getSequenceId(), is(5L));
+
+        assertThat(streams.get(1).getStreamId(), is(streamId1));
+        assertThat(streams.get(1).getSequenceId(), is(6L));
+
+        assertThat(streams.get(2).getStreamId(), is(streamId1));
+        assertThat(streams.get(2).getSequenceId(), is(7L));
+
+
     }
 
     private Event eventOf(final UUID id, final String name, final UUID streamId, final long sequenceId, final String payloadJSON, final String metadataJSON, final ZonedDateTime timestamp) {

@@ -1,6 +1,7 @@
 package uk.gov.justice.services.eventsourcing.source.api.feed.event;
 
 import static java.util.UUID.randomUUID;
+import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -11,6 +12,7 @@ import uk.gov.justice.services.eventsourcing.source.api.feed.common.Entity2FeedE
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
+import javax.json.JsonObject;
 import javax.ws.rs.core.UriInfo;
 
 import org.jboss.resteasy.spi.ResteasyUriInfo;
@@ -18,11 +20,7 @@ import org.junit.Test;
 
 
 public class Event2FeedEntryMappingStrategyTest {
-
-    private static final String NAME = "Test Name";
-    private static final String PAYLOAD_JSON = "{\"field\": \"Value\"}";
     private static final String METADATA_JSON = "{\"field\": \"Value\"}";
-    private final static ZonedDateTime TIMESTAMP = new UtcClock().now();
 
     private Entity2FeedEntryMappingStrategy<Event, EventEntry> strategy = new Event2FeedEntryMappingStrategy();
 
@@ -37,25 +35,22 @@ public class Event2FeedEntryMappingStrategyTest {
 
         final UUID streamId = randomUUID();
 
-        final EventEntry eventEntryExpected = eventEntryOf(eventId, sequenceId, streamId);
+        final JsonObject payload1 = createObjectBuilder().add("field1", "value1").build();
 
-        final EventEntry eventEntryActual = strategy.toFeedEntry(uriInfo).apply(eventOf(eventId, sequenceId, streamId));
+        final ZonedDateTime eventCreatedAt = new UtcClock().now();
+
+        final Event event = new Event(eventId, streamId, sequenceId, "Test Name1", METADATA_JSON, payload1.toString(), eventCreatedAt);
+
+        final EventEntry eventEntryExpected = new EventEntry(eventId, streamId, "Test Name1", sequenceId, payload1, eventCreatedAt.toString());
+
+        final EventEntry eventEntryActual = strategy.toFeedEntry(uriInfo).apply(event);
 
         assertThat(eventEntryActual.getStreamId().toString(), is(eventEntryExpected.getStreamId()));
         assertThat(eventEntryActual.getSequenceId(), is(eventEntryExpected.getSequenceId()));
         assertThat(eventEntryActual.getName(), is(eventEntryExpected.getName()));
         assertThat(eventEntryActual.getEventId(), is(eventEntryExpected.getEventId()));
-        assertThat(eventEntryActual.getPayload().getPayloadContent(), is(eventEntryExpected.getPayload().getPayloadContent()));
-        assertThat(eventEntryActual.getPayload().getStreamId(), is(eventEntryExpected.getStreamId()));
+        assertThat(eventEntryActual.getPayload(), is(eventEntryExpected.getPayload()));
         assertThat(eventEntryActual.getCreatedAt(), is(eventEntryExpected.getCreatedAt()));
 
-    }
-
-    private EventEntry eventEntryOf(final UUID eventId, final long sequenceId, final UUID streamId) {
-        return new EventEntry(eventId, streamId, NAME, sequenceId, TIMESTAMP, new EventPayload(streamId.toString(), PAYLOAD_JSON));
-    }
-
-    private Event eventOf(final UUID eventId, final long sequenceId, final UUID streamId) {
-        return new Event(eventId, streamId, sequenceId, NAME, METADATA_JSON, PAYLOAD_JSON, TIMESTAMP);
     }
 }

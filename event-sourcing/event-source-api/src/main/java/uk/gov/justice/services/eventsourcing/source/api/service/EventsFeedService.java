@@ -34,6 +34,4 @@ public class EventsFeedService implements FeedService<EventEntry> {
     public Feed<EventEntry> feed(final String page, final UriInfo uriInfo, final Map<String, Object> params) {
         return feedGenerator.feed(page, uriInfo, params);
     }
-
-
 }

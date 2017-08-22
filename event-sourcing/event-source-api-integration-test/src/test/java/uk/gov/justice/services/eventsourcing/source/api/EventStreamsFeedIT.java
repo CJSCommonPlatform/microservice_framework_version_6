@@ -14,10 +14,7 @@ import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.eventsourcing.source.api.util.TestSystemUserProvider.SYSTEM_USER_ID;
 
-import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.justice.services.common.rest.ForbiddenRequestExceptionMapper;
-import uk.gov.justice.services.core.accesscontrol.AccessControlViolationException;
-import uk.gov.justice.services.core.dispatcher.SystemUserProvider;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStream;
 import uk.gov.justice.services.eventsourcing.source.api.resource.EventSourceApiApplication;
 import uk.gov.justice.services.eventsourcing.source.api.resource.EventStreamsFeedResource;
@@ -27,12 +24,10 @@ import uk.gov.justice.services.eventsourcing.source.api.util.TestEventStreamsFee
 import uk.gov.justice.services.eventsourcing.source.api.util.TestSystemUserProvider;
 
 import java.io.IOException;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.UUID;
 
 import javax.annotation.Resource;
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.sql.DataSource;
 
@@ -217,7 +212,6 @@ public class EventStreamsFeedIT {
         final UUID streamId3 = randomUUID();
         final UUID streamId4 = randomUUID();
         final UUID streamId5 = randomUUID();
-
 
         eventStreamRepository.insert(new EventStream(streamId1));
         eventStreamRepository.insert(new EventStream(streamId2));

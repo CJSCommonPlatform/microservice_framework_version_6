@@ -154,7 +154,7 @@ public class RemoteExampleEventProcessorIT {
             ObjectMapperProducer.class,
             ObjectToJsonValueConverter.class,
             PolicyEvaluator.class,
-            RemoteExampleCommandApi.class,
+            RemoteEventProcessor2ExampleCommandApi.class,
             RequesterProducer.class,
             DefaultRestClientHelper.class,
             DefaultRestClientProcessor.class,

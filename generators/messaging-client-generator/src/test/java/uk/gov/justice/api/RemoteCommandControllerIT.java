@@ -72,14 +72,6 @@ public class RemoteCommandControllerIT {
         port = NetworkUtil.getNextAvailablePort();
     }
 
-    @Configuration
-    public Properties properties() {
-        return new PropertiesBuilder()
-                .property("httpejbd.port", Integer.toString(port))
-                .property(OpenEjbContainer.OPENEJB_EMBEDDED_REMOTABLE, "true")
-                .build();
-    }
-
     @Module
     @Classes(cdi = true, value = {
             AccessControlFailureMessageGenerator.class,
@@ -89,7 +81,7 @@ public class RemoteCommandControllerIT {
             DispatcherCache.class,
             PolicyEvaluator.class,
             RecordingJmsEnvelopeSender.class,
-            RemoteCommandControllerMessageService1ContextaControllerCommand.class,
+            RemoteCommandApi2CommandControllerMessageService1ContextaControllerCommand.class,
             RequesterProducer.class,
             SenderProducer.class,
             ServiceComponentObserver.class,
@@ -107,6 +99,14 @@ public class RemoteCommandControllerIT {
     public WebApp war() {
         return new WebApp()
                 .contextRoot("jms-endpoint-test");
+    }
+
+    @Configuration
+    public Properties properties() {
+        return new PropertiesBuilder()
+                .property("httpejbd.port", Integer.toString(port))
+                .property(OpenEjbContainer.OPENEJB_EMBEDDED_REMOTABLE, "true")
+                .build();
     }
 
     @Before

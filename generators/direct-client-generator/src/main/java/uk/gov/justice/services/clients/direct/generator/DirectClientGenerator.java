@@ -51,8 +51,8 @@ public class DirectClientGenerator extends AbstractClientGenerator {
     }
 
     @Override
-    protected String classNameOf(final Raml raml) {
-        return buildJavaFriendlyName(format("Direct%sClient", new RestResourceBaseUri(raml.getBaseUri()).pathWithoutWebContext()));
+    protected String classNameOf(final Raml raml, final String serviceComponent) {
+        return buildJavaFriendlyName(format("Direct_%s2%sClient", serviceComponent.toLowerCase(), new RestResourceBaseUri(raml.getBaseUri()).pathWithoutWebContext()));
     }
 
     @Override

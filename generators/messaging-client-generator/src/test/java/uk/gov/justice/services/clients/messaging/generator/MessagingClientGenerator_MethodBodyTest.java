@@ -42,9 +42,9 @@ public class MessagingClientGenerator_MethodBodyTest extends BaseGeneratorTest {
                                 .withRelativeUri("/cakeshop.controller.command")
                                 .withDefaultPostAction())
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_CONTROLLER")));
 
-        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteEventProcessorMessageContextCakeshopControllerCommand");
+        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCommandController2EventProcessorMessageContextCakeshopControllerCommand");
         final Object instance = instanceOf(generatedClass);
         setField(instance, "traceLogger", mock(TraceLogger.class));
 

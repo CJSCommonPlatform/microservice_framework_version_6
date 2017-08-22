@@ -52,8 +52,8 @@ public class DirectClientGeneratorCodeStructureTest extends BaseGeneratorTest {
                         .build(),
                 configurationWithBasePackage("uk.somepackage", outputFolder, generatorProperties().withServiceComponentOf("SOME_COMPONENT")));
 
-        final Class<?> generatedClass = compiler.compiledClassOf("uk.somepackage", "DirectQueryApiServiceClient");
-        assertThat(generatedClass.getCanonicalName(), is("uk.somepackage.DirectQueryApiServiceClient"));
+        final Class<?> generatedClass = compiler.compiledClassOf("uk.somepackage", "DirectSomeComponent2QueryApiServiceClient");
+        assertThat(generatedClass.getCanonicalName(), is("uk.somepackage.DirectSomeComponent2QueryApiServiceClient"));
         assertThat(generatedClass.getAnnotation(Direct.class), not(nullValue()));
         assertThat(generatedClass.getAnnotation(Direct.class).target(), is("QUERY_API"));
         assertThat(generatedClass.getAnnotation(FrameworkComponent.class), not(nullValue()));
@@ -68,9 +68,9 @@ public class DirectClientGeneratorCodeStructureTest extends BaseGeneratorTest {
                         .withBaseUri("http://localhost:8080/warname/query/api/service")
                         .with(defaultGetResource())
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("SOME_COMPONENT")));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "DirectQueryApiServiceClient");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "DirectSomeComponent2QueryApiServiceClient");
         final Field adapterField = clazz.getDeclaredField("adapterCache");
         assertThat(adapterField.getAnnotation(Inject.class), not(nullValue()));
         assertThat(adapterField.getGenericType(), equalTo(SynchronousDirectAdapterCache.class));
@@ -95,10 +95,10 @@ public class DirectClientGeneratorCodeStructureTest extends BaseGeneratorTest {
                                                 .withResponseType("application/vnd.ctx.query2+json"))
                                 )
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("SOME_COMPONENT")));
 
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "DirectQueryApiServiceClient");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "DirectSomeComponent2QueryApiServiceClient");
         final List<Method> methods = methodsOf(clazz);
         assertThat(methods, hasSize(2));
 
@@ -122,9 +122,9 @@ public class DirectClientGeneratorCodeStructureTest extends BaseGeneratorTest {
                         .withBaseUri("http://localhost:8080/warname/query/api/service")
                         .with(defaultGetResource())
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("SOME_COMPONENT")));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "DirectQueryApiServiceClient");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "DirectSomeComponent2QueryApiServiceClient");
         final Method method = firstMethodOf(clazz);
         assertThat(method.getParameterCount(), is(1));
         assertThat(method.getParameters()[0].getType(), equalTo((JsonEnvelope.class)));
@@ -167,10 +167,10 @@ public class DirectClientGeneratorCodeStructureTest extends BaseGeneratorTest {
                                 ))
 
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withDefaultServiceComponent()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("SOME_COMPONENT")));
 
 
-        assertThat(methodsOf(compiler.compiledClassOf(BASE_PACKAGE, "DirectQueryApiServiceClient")), hasSize(0));
+        assertThat(methodsOf(compiler.compiledClassOf(BASE_PACKAGE, "DirectSomeComponent2QueryApiServiceClient")), hasSize(0));
 
     }
 

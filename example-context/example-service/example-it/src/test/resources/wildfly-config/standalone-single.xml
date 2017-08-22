@@ -176,7 +176,7 @@
                 </managed-scheduled-executor-services>
             </concurrent>
             <default-bindings context-service="java:jboss/ee/concurrency/context/default"
-                              datasource="java:/app/example-command-handler/DS.eventstore"
+                              datasource="java:/app/example-single/DS.eventstore"
                               jms-connection-factory="java:jboss/DefaultJMSConnectionFactory"
                               managed-executor-service="java:jboss/ee/concurrency/executor/default"
                               managed-scheduled-executor-service="java:jboss/ee/concurrency/scheduler/default"
@@ -378,7 +378,7 @@
 
         <subsystem xmlns="urn:jboss:domain:datasources:4.0">
             <datasources>
-                <datasource jndi-name="java:/app/example-command-handler/DS.eventstore"
+                <datasource jndi-name="java:/app/example-single/DS.eventstore"
                             pool-name="DS.example.eventstore" enabled="true"
                             use-java-context="true">
                     <connection-url>${db.eventstore.url}</connection-url>
@@ -436,8 +436,8 @@
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:naming:2.0">
             <bindings>
-                <simple name="java:/app/example-command-api/audit.blacklist" value="example.*" type="java.lang.String"/>
-                <simple name="java:/app/example-command-handler/default.strategy.snapshot.threshold" value="3" type="java.lang.String"/>
+                <simple name="java:/app/example-single/audit.blacklist" value="example.*" type="java.lang.String"/>
+                <simple name="java:/app/example-single/default.strategy.snapshot.threshold" value="3" type="java.lang.String"/>
                 <simple name="java:global/event.buffer.init.strategy" value="uk.gov.justice.services.event.buffer.core.service.AnsiSQLBasedBufferInitialisationStrategy" type="java.lang.String"/>
                 <simple name="java:global/eventlog.insertion.strategy" value="uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy" type="java.lang.String"/>
                 <simple name="java:global/envelope.validation.exception.handler" value="uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler" type="java.lang.String"/>
@@ -510,7 +510,7 @@
                     <location name="/" handler="welcome-content"/>
                     <filter-ref name="server-header"/>
                     <filter-ref name="x-powered-by-header"/>
-                    <filter-ref name="example-single" predicate="path-prefix('/example-command-api/') or path-prefix('/example-command-controller/') or path-prefix('/example-command-handler/') or path-prefix('/example-event-api/') or path-prefix('/example-event-listener/') or path-prefix('/example-event-processor/') or path-prefix('/example-query-api/') or path-prefix('/examaple-query-controller/') or path-prefix('/example-query-view/')" />
+                    <filter-ref name="example-single" predicate="path-prefix('/example-command-api/') or path-prefix('/example-command-controller/') or path-prefix('/example-command-handler/') or path-prefix('/example-event-api/') or path-prefix('/example-event-listener/') or path-prefix('/example-event-processor/') or path-prefix('/example-query-api/') or path-prefix('/example-query-controller/') or path-prefix('/example-query-view/') or path-prefix('/example-custom-api/')" />
                 </host>
             </server>
             <servlet-container name="default">

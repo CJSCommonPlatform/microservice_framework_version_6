@@ -3,6 +3,7 @@ package uk.gov.justice.services.eventsourcing.source.api;
 import static com.jayway.jsonassert.JsonAssert.with;
 import static java.lang.String.format;
 import static java.util.UUID.randomUUID;
+import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.containsString;
@@ -40,6 +41,7 @@ import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
+import javax.json.JsonObject;
 import javax.sql.DataSource;
 
 import com.jayway.jsonpath.JsonPath;
@@ -69,12 +71,7 @@ import org.junit.runner.RunWith;
 @EnableServices("jaxrs")
 @RunWith(ApplicationComposer.class)
 public class EventsFeedIT {
-    private static final String NAME = "Test Name";
-    private static final String PAYLOAD_JSON = "{\"field\": \"Value\"}";
     private static final String METADATA_JSON = "{\"field\": \"Value\"}";
-    private final static ZonedDateTime TIMESTAMP = new UtcClock().now();
-
-
     private static final String LIQUIBASE_EVENT_STORE_CHANGELOG_XML = "liquibase/event-store-db-changelog.xml";
     private static final String BASE_URI_PATTERN = "http://localhost:%d/event-source-api/rest";
     private static int port = -1;
@@ -148,36 +145,50 @@ public class EventsFeedIT {
 
         eventFeedService.initialiseWithPageSize(3);
 
-        eventsRepository.insert(eventOf(1L, streamId));
-        eventsRepository.insert(eventOf(2L, streamId));
-        eventsRepository.insert(eventOf(3L, streamId));
-        eventsRepository.insert(eventOf(4L, streamId));
+        final ZonedDateTime event1CreatedAt = new UtcClock().now();
+        final ZonedDateTime event2CreatedAt = new UtcClock().now();
+        final ZonedDateTime event3CreatedAt = new UtcClock().now();
+
+        final JsonObject payloadEvent1 = createObjectBuilder().add("field1", "value1").build();
+        final JsonObject payloadEvent2 = createObjectBuilder().add("field2", "value2").build();
+        final JsonObject payloadEvent3 = createObjectBuilder().add("field3", "value3").build();
+        final JsonObject payloadEvent4 = createObjectBuilder().add("field4", "value4").build();
+
+        final Event event1 = new Event(randomUUID(), streamId, 1L, "Test Name1", METADATA_JSON, payloadEvent1.toString(), event1CreatedAt);
+        final Event event2 = new Event(randomUUID(), streamId, 2L, "Test Name2", METADATA_JSON, payloadEvent2.toString(), event2CreatedAt);
+        final Event event3 = new Event(randomUUID(), streamId, 3L, "Test Name3", METADATA_JSON, payloadEvent3.toString(), event3CreatedAt);
+        final Event event4 = new Event(randomUUID(), streamId, 4L, "Test Name4", METADATA_JSON, payloadEvent4.toString(), new UtcClock().now());
+
+        eventsRepository.insert(event1);
+        eventsRepository.insert(event2);
+        eventsRepository.insert(event3);
+        eventsRepository.insert(event4);
 
         final HttpResponse response = eventsFeedFor(SYSTEM_USER_ID, streamId);
 
         assertThat(response.getStatusLine().getStatusCode(), is(OK.getStatusCode()));
 
-        with(responseBodyOf(response))
+        final String value = responseBodyOf(response);
+        with(value)
                 .assertThat("$.data", hasSize(3))
 
                 .assertThat("$.data[0].streamId", is(streamId.toString()))
-                .assertThat("$.data[0].name", containsString(NAME))
+                .assertThat("$.data[0].name", containsString("Test Name1"))
                 .assertThat("$.data[0].sequenceId", is(1))
-                .assertThat("$.data[0].payload.streamId", is(streamId.toString()))
-                .assertThat("$.data[0].payload.payloadContent", containsString(PAYLOAD_JSON))
+                .assertThat("$.data[0].createdAt", is(event1CreatedAt.toString()))
+                .assertThat("$.data[0].payload.field1", is("value1"))
 
                 .assertThat("$.data[1].streamId", is(streamId.toString()))
-                .assertThat("$.data[1].name", containsString(NAME))
+                .assertThat("$.data[1].name", containsString("Test Name2"))
                 .assertThat("$.data[1].sequenceId", is(2))
-                .assertThat("$.data[1].payload.streamId", is(streamId.toString()))
-                .assertThat("$.data[1].payload.payloadContent", containsString(PAYLOAD_JSON))
+                .assertThat("$.data[1].createdAt", is(event2CreatedAt.toString()))
+                .assertThat("$.data[1].payload.field2", is("value2"))
 
                 .assertThat("$.data[2].streamId", is(streamId.toString()))
-                .assertThat("$.data[2].name", containsString(NAME))
+                .assertThat("$.data[2].name", containsString("Test Name3"))
                 .assertThat("$.data[2].sequenceId", is(3))
-                .assertThat("$.data[2].payload.streamId", is(streamId.toString()))
-                .assertThat("$.data[2].payload.payloadContent", containsString(PAYLOAD_JSON));
-
+                .assertThat("$.data[2].createdAt", is(event3CreatedAt.toString()))
+                .assertThat("$.data[2].payload.field3", is("value3"));
     }
 
     @Test
@@ -194,9 +205,13 @@ public class EventsFeedIT {
     public void shouldReturnFirstPage() throws Exception {
         final UUID streamId = randomUUID();
 
-        eventsRepository.insert(eventOf(1L, streamId));
-        eventsRepository.insert(eventOf(2L, streamId));
-        eventsRepository.insert(eventOf(3L, streamId));
+        final Event event1 = new Event(randomUUID(), streamId, 1L, "Test Name1", METADATA_JSON, createObjectBuilder().add("field1", "value1").build().toString(), new UtcClock().now());
+        final Event event2 = new Event(randomUUID(), streamId, 2L, "Test Name2", METADATA_JSON, createObjectBuilder().add("field2", "value2").build().toString(), new UtcClock().now());
+        final Event event3 = new Event(randomUUID(), streamId, 3L, "Test Name3", METADATA_JSON, createObjectBuilder().add("field3", "value3").build().toString(), new UtcClock().now());
+
+        eventsRepository.insert(event1);
+        eventsRepository.insert(event2);
+        eventsRepository.insert(event3);
 
         eventFeedService.initialiseWithPageSize(2);
 
@@ -211,9 +226,13 @@ public class EventsFeedIT {
     public void shouldFollowToThe2ndPage() throws Exception {
         final UUID streamId = randomUUID();
 
-        eventsRepository.insert(eventOf(1L, streamId));
-        eventsRepository.insert(eventOf(2L, streamId));
-        eventsRepository.insert(eventOf(3L, streamId));
+        final Event event1 = new Event(randomUUID(), streamId, 1L, "Test Name1", METADATA_JSON, createObjectBuilder().add("field1", "value1").build().toString(), new UtcClock().now());
+        final Event event2 = new Event(randomUUID(), streamId, 2L, "Test Name2", METADATA_JSON, createObjectBuilder().add("field2", "value2").build().toString(), new UtcClock().now());
+        final Event event3 = new Event(randomUUID(), streamId, 3L, "Test Name3", METADATA_JSON, createObjectBuilder().add("field3", "value3").build().toString(), new UtcClock().now());
+
+        eventsRepository.insert(event1);
+        eventsRepository.insert(event2);
+        eventsRepository.insert(event3);
 
         eventFeedService.initialiseWithPageSize(2);
 
@@ -239,11 +258,17 @@ public class EventsFeedIT {
     public void shouldFollowToThe3rdPage() throws Exception {
         final UUID streamId = randomUUID();
 
-        eventsRepository.insert(eventOf(1L, streamId));
-        eventsRepository.insert(eventOf(2L, streamId));
-        eventsRepository.insert(eventOf(3L, streamId));
-        eventsRepository.insert(eventOf(4L, streamId));
-        eventsRepository.insert(eventOf(5L, streamId));
+        final Event event1 = new Event(randomUUID(), streamId, 1L, "Test Name1", METADATA_JSON, createObjectBuilder().add("field1", "value1").build().toString(), new UtcClock().now());
+        final Event event2 = new Event(randomUUID(), streamId, 2L, "Test Name2", METADATA_JSON, createObjectBuilder().add("field2", "value2").build().toString(), new UtcClock().now());
+        final Event event3 = new Event(randomUUID(), streamId, 3L, "Test Name3", METADATA_JSON, createObjectBuilder().add("field3", "value3").build().toString(), new UtcClock().now());
+        final Event event4 = new Event(randomUUID(), streamId, 4L, "Test Name4", METADATA_JSON, createObjectBuilder().add("field4", "value4").build().toString(), new UtcClock().now());
+        final Event event5 = new Event(randomUUID(), streamId, 5L, "Test Name5", METADATA_JSON, createObjectBuilder().add("field5", "value5").build().toString(), new UtcClock().now());
+
+        eventsRepository.insert(event1);
+        eventsRepository.insert(event2);
+        eventsRepository.insert(event3);
+        eventsRepository.insert(event4);
+        eventsRepository.insert(event5);
 
         eventFeedService.initialiseWithPageSize(2);
 
@@ -269,9 +294,13 @@ public class EventsFeedIT {
     public void shouldGoBackToThePreviousPage() throws Exception {
         final UUID streamId = randomUUID();
 
-        eventsRepository.insert(eventOf(1L, streamId));
-        eventsRepository.insert(eventOf(2L, streamId));
-        eventsRepository.insert(eventOf(3L, streamId));
+        final Event event1 = new Event(randomUUID(), streamId, 1L, "Test Name1", METADATA_JSON, createObjectBuilder().add("field1", "value1").build().toString(), new UtcClock().now());
+        final Event event2 = new Event(randomUUID(), streamId, 2L, "Test Name2", METADATA_JSON, createObjectBuilder().add("field2", "value2").build().toString(), new UtcClock().now());
+        final Event event3 = new Event(randomUUID(), streamId, 3L, "Test Name3", METADATA_JSON, createObjectBuilder().add("field3", "value3").build().toString(), new UtcClock().now());
+
+        eventsRepository.insert(event1);
+        eventsRepository.insert(event2);
+        eventsRepository.insert(event3);
 
         eventFeedService.initialiseWithPageSize(2);
 
@@ -301,8 +330,11 @@ public class EventsFeedIT {
     public void shouldNotPresentLinkTo2ndPageIfNoMoreRecords() throws Exception {
         final UUID streamId = randomUUID();
 
-        eventsRepository.insert(eventOf(1L, streamId));
-        eventsRepository.insert(eventOf(2L, streamId));
+        final Event event1 = new Event(randomUUID(), streamId, 1L, "Test Name1", METADATA_JSON, createObjectBuilder().add("field1", "value1").build().toString(), new UtcClock().now());
+        final Event event2 = new Event(randomUUID(), streamId, 2L, "Test Name2", METADATA_JSON, createObjectBuilder().add("field2", "value2").build().toString(), new UtcClock().now());
+
+        eventsRepository.insert(event1);
+        eventsRepository.insert(event2);
 
         eventFeedService.initialiseWithPageSize(2);
 
@@ -318,9 +350,13 @@ public class EventsFeedIT {
 
         final UUID streamId = randomUUID();
 
-        eventsRepository.insert(eventOf(1L, streamId));
-        eventsRepository.insert(eventOf(2L, streamId));
-        eventsRepository.insert(eventOf(3L, streamId));
+        final Event event1 = new Event(randomUUID(), streamId, 1L, "Test Name1", METADATA_JSON, createObjectBuilder().add("feild1", "value1").build().toString(), new UtcClock().now());
+        final Event event2 = new Event(randomUUID(), streamId, 2L, "Test Name2", METADATA_JSON, createObjectBuilder().add("feild2", "value2").build().toString(), new UtcClock().now());
+        final Event event3 = new Event(randomUUID(), streamId, 3L, "Test Name3", METADATA_JSON, createObjectBuilder().add("feild3", "value3").build().toString(), new UtcClock().now());
+
+        eventsRepository.insert(event1);
+        eventsRepository.insert(event2);
+        eventsRepository.insert(event3);
 
         eventFeedService.initialiseWithPageSize(2);
 
@@ -350,9 +386,13 @@ public class EventsFeedIT {
         eventStreamRepository.insert(new EventStream(streamId2));
         eventStreamRepository.insert(new EventStream(streamId3));
 
-        eventsRepository.insert(eventOf(1L, streamId2));
-        eventsRepository.insert(eventOf(2L, streamId2));
-        eventsRepository.insert(eventOf(3L, streamId2));
+        final Event event1 = new Event(randomUUID(), streamId2, 1L, "Test Name1", METADATA_JSON, createObjectBuilder().add("field1", "value1").build().toString(), new UtcClock().now());
+        final Event event2 = new Event(randomUUID(), streamId2, 2L, "Test Name2", METADATA_JSON, createObjectBuilder().add("field2", "value2").build().toString(), new UtcClock().now());
+        final Event event3 = new Event(randomUUID(), streamId2, 3L, "Test Name3", METADATA_JSON, createObjectBuilder().add("field3", "value3").build().toString(), new UtcClock().now());
+
+        eventsRepository.insert(event1);
+        eventsRepository.insert(event2);
+        eventsRepository.insert(event3);
 
         eventFeedService.initialiseWithPageSize(2);
 
@@ -370,8 +410,10 @@ public class EventsFeedIT {
                 .assertThat("$.data", hasSize(2))
                 .assertThat("$.data[0].streamId", is(streamId2.toString()))
                 .assertThat("$.data[0].sequenceId", is(1))
+                .assertThat("$.data[0].payload.field1", is("value1"))
                 .assertThat("$.data[1].streamId", is(streamId2.toString()))
-                .assertThat("$.data[1].sequenceId", is(2));
+                .assertThat("$.data[1].sequenceId", is(2))
+                .assertThat("$.data[1].payload.field2", is("value2"));
 
     }
 
@@ -401,10 +443,6 @@ public class EventsFeedIT {
                 new ClassLoaderResourceAccessor(), new JdbcConnection(dataSource.getConnection()));
         eventStoreLiquibase.dropAll();
         eventStoreLiquibase.update("");
-    }
-
-    private Event eventOf(final long sequenceId, final UUID streamId) {
-        return new Event(randomUUID(), streamId, sequenceId, NAME, METADATA_JSON, PAYLOAD_JSON, TIMESTAMP);
     }
 
     @ApplicationScoped

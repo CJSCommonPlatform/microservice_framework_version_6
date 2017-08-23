@@ -1,23 +1,25 @@
 package uk.gov.justice.services.eventsourcing.source.api.feed.event;
 
-import java.time.ZonedDateTime;
 import java.util.UUID;
+
+import javax.json.JsonObject;
 
 public class EventEntry {
     private final String eventId;
     private final String streamId;
     private final String name;
     private final long sequenceId;
-    private final ZonedDateTime createdAt;
-    private final EventPayload payload;
+    private final String createdAt;
+    private final JsonObject payload;
 
 
     public EventEntry(final UUID eventId,
                       final UUID streamId,
                       final String name,
                       final long sequenceId,
-                      final ZonedDateTime createdAt,
-                      final EventPayload payload) {
+                      final JsonObject payload,
+                      final String createdAt
+    ) {
         this.eventId = eventId.toString();
         this.streamId = streamId.toString();
         this.name = name;
@@ -42,11 +44,11 @@ public class EventEntry {
         return sequenceId;
     }
 
-    public ZonedDateTime getCreatedAt() {
+    public String getCreatedAt() {
         return createdAt;
     }
 
-    public EventPayload getPayload() {
+    public JsonObject getPayload() {
         return payload;
     }
 

@@ -1,6 +1,7 @@
 package uk.gov.justice.services.eventsourcing.source.api.feed.common;
 
 import static java.util.UUID.randomUUID;
+import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.hasSize;
@@ -22,6 +23,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import javax.json.JsonObject;
 import javax.ws.rs.core.UriInfo;
 
 import org.jboss.resteasy.spi.ResteasyUriInfo;
@@ -34,10 +36,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class FeedGeneratorTest {
 
-    private static final String NAME = "Test Name";
-    private static final String PAYLOAD_JSON = "{\"field\": \"Value\"}";
     private static final String METADATA_JSON = "{\"field\": \"Value\"}";
-    private final static ZonedDateTime TIMESTAMP = new UtcClock().now();
 
     @Mock
     private EventJdbcRepository repository;
@@ -66,9 +65,21 @@ public class FeedGeneratorTest {
 
         final Stream.Builder<Event> builder = Stream.builder();
 
-        for (long sequence = 1; sequence < 4l; sequence++) {
-            builder.add(eventOf(sequence, streamId));
-        }
+        final ZonedDateTime event1CreatedAt = new UtcClock().now();
+        final ZonedDateTime event2CreatedAt = new UtcClock().now();
+        final ZonedDateTime event3CreatedAt = new UtcClock().now();
+
+        final JsonObject payloadEvent1 = createObjectBuilder().add("field1", "value1").build();
+        final JsonObject payloadEvent2 = createObjectBuilder().add("field2", "value2").build();
+        final JsonObject payloadEvent3 = createObjectBuilder().add("field3", "value3").build();
+
+        final Event event1 = new Event(randomUUID(), streamId, 1L, "Test Name1", METADATA_JSON, payloadEvent1.toString(), event1CreatedAt);
+        final Event event2 = new Event(randomUUID(), streamId, 2L, "Test Name2", METADATA_JSON, payloadEvent2.toString(), event2CreatedAt);
+        final Event event3 = new Event(randomUUID(), streamId, 3L, "Test Name3", METADATA_JSON, payloadEvent3.toString(), event3CreatedAt);
+
+        builder.add(event1);
+        builder.add(event2);
+        builder.add(event3);
 
         when(repository.getPage(0, 3, params)).thenReturn(builder.build());
 
@@ -80,25 +91,22 @@ public class FeedGeneratorTest {
 
         assertThat(streamData.get(0).getStreamId(), is(streamId.toString()));
 
-        assertThat(streamData.get(0).getName(), is(NAME));
+        assertThat(streamData.get(0).getName(), is("Test Name1"));
 
         assertThat(streamData.get(0).getSequenceId(), is(1L));
 
-        assertThat(streamData.get(0).getCreatedAt(), is(TIMESTAMP));
+        assertThat(streamData.get(0).getCreatedAt(), is(event1CreatedAt.toString()));
 
-        assertThat(streamData.get(0).getPayload(), is(notNullValue()));
-
-        assertThat(streamData.get(0).getPayload().getStreamId(), is(streamId.toString()));
-
-        assertThat(streamData.get(0).getPayload().getPayloadContent(), is(PAYLOAD_JSON));
+        assertThat(streamData.get(0).getPayload(), is(payloadEvent1));
 
         assertThat(streamData.get(1).getStreamId(), is(streamId.toString()));
 
         assertThat(streamData.get(1).getSequenceId(), is(2L));
 
-        assertThat(streamData.get(1).getPayload(), is(notNullValue()));
+        assertThat(streamData.get(1).getPayload(), is(payloadEvent2));
 
-        assertThat(streamData.get(1).getPayload().getStreamId(), is(streamId.toString()));
+        assertThat(streamData.get(1).getCreatedAt(), is(event2CreatedAt.toString()));
+
     }
 
     @Test
@@ -116,9 +124,9 @@ public class FeedGeneratorTest {
 
         final Stream.Builder<Event> builder = Stream.builder();
 
-        for (long sequence = 1; sequence < 2l; sequence++) {
-            builder.add(eventOf(sequence, streamId));
-        }
+        final Event event1 = new Event(randomUUID(), streamId, 1L, "Test Name1", METADATA_JSON, createObjectBuilder().add("field1", "value1").build().toString(), new UtcClock().now());
+
+        builder.add(event1);
 
         when(repository.getPage(0, 3, params)).thenReturn(builder.build());
 
@@ -133,8 +141,6 @@ public class FeedGeneratorTest {
         assertThat(streamData.get(0).getSequenceId(), is(1L));
 
         assertThat(streamData.get(0).getPayload(), is(notNullValue()));
-
-        assertThat(streamData.get(0).getPayload().getStreamId(), is(streamId.toString()));
 
     }
 
@@ -152,9 +158,14 @@ public class FeedGeneratorTest {
 
         final Stream.Builder<Event> builder = Stream.builder();
 
-        for (long sequence = 1; sequence < 3l; sequence++) {
-            builder.add(eventOf(sequence, streamId));
-        }
+        final JsonObject payloadEvent1 = createObjectBuilder().add("field1", "value1").build();
+        final JsonObject payloadEvent2 = createObjectBuilder().add("field2", "value2").build();
+
+        final Event event1 = new Event(randomUUID(), streamId, 1L, "Test Name1", METADATA_JSON, payloadEvent1.toString(), new UtcClock().now());
+        final Event event2 = new Event(randomUUID(), streamId, 2L, "Test Name2", METADATA_JSON, payloadEvent2.toString(), new UtcClock().now());
+
+        builder.add(event1);
+        builder.add(event2);
 
         final FeedGenerator<Event, EventEntry> feedGenerator = new FeedGenerator<>(2L, repository, event2FeedEntryMappingStrategy);
 
@@ -170,17 +181,13 @@ public class FeedGeneratorTest {
 
         assertThat(streamData.get(0).getSequenceId(), is(1L));
 
-        assertThat(streamData.get(0).getPayload(), is(notNullValue()));
-
-        assertThat(streamData.get(0).getPayload().getStreamId(), is(streamId.toString()));
+        assertThat(streamData.get(0).getPayload(), is(payloadEvent1));
 
         assertThat(streamData.get(1).getStreamId(), is(streamId.toString()));
 
         assertThat(streamData.get(1).getSequenceId(), is(2L));
 
-        assertThat(streamData.get(1).getPayload(), is(notNullValue()));
-
-        assertThat(streamData.get(1).getPayload().getStreamId(), is(streamId.toString()));
+        assertThat(streamData.get(1).getPayload(), is(payloadEvent2));
     }
 
     @Test
@@ -195,9 +202,13 @@ public class FeedGeneratorTest {
 
         final Stream.Builder<Event> builder = Stream.builder();
 
-        for (long sequence = 1; sequence < 4l; sequence++) {
-            builder.add(eventOf(sequence, streamId));
-        }
+        final Event event1 = new Event(randomUUID(), streamId, 1L, "Test Name1", METADATA_JSON, createObjectBuilder().add("field1", "value1").build().toString(), new UtcClock().now());
+        final Event event2 = new Event(randomUUID(), streamId, 2L, "Test Name2", METADATA_JSON, createObjectBuilder().add("field2", "value2").build().toString(), new UtcClock().now());
+        final Event event3 = new Event(randomUUID(), streamId, 3L, "Test Name3", METADATA_JSON, createObjectBuilder().add("field3", "value3").build().toString(), new UtcClock().now());
+
+        builder.add(event1);
+        builder.add(event2);
+        builder.add(event3);
 
         when(repository.getPage(0, 3, params)).thenReturn(builder.build());
 
@@ -219,9 +230,11 @@ public class FeedGeneratorTest {
 
         final Stream.Builder<Event> builder = Stream.builder();
 
-        for (long sequence = 1; sequence < 3l; sequence++) {
-            builder.add(eventOf(sequence, streamId));
-        }
+        final Event event1 = new Event(randomUUID(), streamId, 1L, "Test Name1", METADATA_JSON, createObjectBuilder().add("field1", "value1").build().toString(), new UtcClock().now());
+        final Event event2 = new Event(randomUUID(), streamId, 2L, "Test Name2", METADATA_JSON, createObjectBuilder().add("field2", "value2").build().toString(), new UtcClock().now());
+
+        builder.add(event1);
+        builder.add(event2);
 
         when(repository.getPage(0, 3, params)).thenReturn(builder.build());
 
@@ -243,9 +256,13 @@ public class FeedGeneratorTest {
 
         final Stream.Builder<Event> builder = Stream.builder();
 
-        for (long sequence = 1; sequence < 4l; sequence++) {
-            builder.add(eventOf(sequence, streamId));
-        }
+        final Event event1 = new Event(randomUUID(), streamId, 1L, "Test Name1", METADATA_JSON, createObjectBuilder().add("field1", "value1").build().toString(), new UtcClock().now());
+        final Event event2 = new Event(randomUUID(), streamId, 2L, "Test Name2", METADATA_JSON, createObjectBuilder().add("field2", "value2").build().toString(), new UtcClock().now());
+        final Event event3 = new Event(randomUUID(), streamId, 3L, "Test Name3", METADATA_JSON, createObjectBuilder().add("field3", "value3").build().toString(), new UtcClock().now());
+
+        builder.add(event1);
+        builder.add(event2);
+        builder.add(event3);
 
         when(repository.getPage(2, 3, params)).thenReturn(builder.build());
 
@@ -265,9 +282,13 @@ public class FeedGeneratorTest {
 
         final Stream.Builder<Event> builder = Stream.builder();
 
-        for (long sequence = 1; sequence < 4l; sequence++) {
-            builder.add(eventOf(sequence, streamId));
-        }
+        final Event event1 = new Event(randomUUID(), streamId, 1L, "Test Name1", METADATA_JSON, createObjectBuilder().add("field1", "value1").build().toString(), new UtcClock().now());
+        final Event event2 = new Event(randomUUID(), streamId, 2L, "Test Name2", METADATA_JSON, createObjectBuilder().add("field2", "value2").build().toString(), new UtcClock().now());
+        final Event event3 = new Event(randomUUID(), streamId, 3L, "Test Name3", METADATA_JSON, createObjectBuilder().add("field3", "value3").build().toString(), new UtcClock().now());
+
+        builder.add(event1);
+        builder.add(event2);
+        builder.add(event3);
 
         final FeedGenerator<Event, EventEntry> feedGenerator = new FeedGenerator<>(2L, repository, event2FeedEntryMappingStrategy);
 
@@ -294,9 +315,14 @@ public class FeedGeneratorTest {
 
         final Stream.Builder<Event> builder = Stream.builder();
 
-        for (long sequence = 21; sequence < 24; sequence++) {
-            builder.add(eventOf(sequence, streamId));
-        }
+        final Event event1 = new Event(randomUUID(), streamId, 21L, "Test Name1", METADATA_JSON, createObjectBuilder().add("field21", "value21").build().toString(), new UtcClock().now());
+        final Event event2 = new Event(randomUUID(), streamId, 22L, "Test Name2", METADATA_JSON, createObjectBuilder().add("field22", "value22").build().toString(), new UtcClock().now());
+        final Event event3 = new Event(randomUUID(), streamId, 23L, "Test Name3", METADATA_JSON, createObjectBuilder().add("field23", "value23").build().toString(), new UtcClock().now());
+
+        builder.add(event1);
+        builder.add(event2);
+        builder.add(event3);
+
 
         when(repository.getPage(20, 11, params)).thenReturn(builder.build());
 
@@ -316,10 +342,6 @@ public class FeedGeneratorTest {
         assertThat(pageCaptor.getValue(), is(11l));
 
         assertThat(paramsCaptor.getValue().get("STREAM_ID"), is(streamId));
-    }
-
-    private Event eventOf(final long sequenceId, final UUID streamId) {
-        return new Event(randomUUID(), streamId, sequenceId, NAME, METADATA_JSON, PAYLOAD_JSON, TIMESTAMP);
     }
 
 }

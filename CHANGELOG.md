@@ -6,6 +6,14 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ## [Unreleased]
 
 ### Added
+- org.apache.commons commons-lang3 dependency from framework-api-core
+
+### Changed
+- Reverted breaking change of: Replace usage of Pair in InterceptorChainProvider with InterceptorChainEntry
+
+## [2.3.0] 2017-08-23
+
+### Added
 - JsonEnvelope and Metadata builder service provider
 - Convenience methods to JsonEnvelope for providing JsonEnvelopes and JsonObjectMetadataBuilders
 - MetadataBuilderFactory in test-utils-core which contains convenience methods for creating 
@@ -87,9 +95,6 @@ a service component in the same application
 - Improved logging for annotation scanning
 - Add component to audit interceptor so that audit messages can distinguish between components even
 when they are deployed in a single WAR.
-
-### Removed
-- org.apache.commons commons-lang3 dependency from core
 
 ## [2.0.0-rc5] - 2017-06-20
 

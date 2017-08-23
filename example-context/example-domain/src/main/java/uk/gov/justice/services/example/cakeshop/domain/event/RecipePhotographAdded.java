@@ -4,7 +4,7 @@ import uk.gov.justice.domain.annotation.Event;
 
 import java.util.UUID;
 
-@Event("example.recipe-photograph-added")
+@Event("example.events.recipe-photograph-added")
 public class RecipePhotographAdded {
 
     private final UUID recipeId;

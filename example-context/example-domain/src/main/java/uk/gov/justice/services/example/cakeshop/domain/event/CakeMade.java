@@ -4,7 +4,7 @@ import uk.gov.justice.domain.annotation.Event;
 
 import java.util.UUID;
 
-@Event("example.cake-made")
+@Event("example.events.cake-made")
 public class CakeMade {
 
     private final UUID cakeId;

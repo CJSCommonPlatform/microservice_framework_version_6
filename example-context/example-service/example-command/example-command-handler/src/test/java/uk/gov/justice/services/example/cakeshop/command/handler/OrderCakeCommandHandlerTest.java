@@ -39,7 +39,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class OrderCakeCommandHandlerTest {
 
     private static final String COMMAND_NAME = "example.order-cake";
-    private static final String EVENT_NAME = "example.cake-ordered";
+    private static final String EVENT_NAME = "example.events.cake-ordered";
     private static final UUID RECIPE_ID = randomUUID();
     private static final UUID ORDER_ID = randomUUID();
 

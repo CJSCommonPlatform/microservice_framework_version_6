@@ -8,13 +8,11 @@ import uk.gov.justice.services.core.annotation.ServiceComponentLocation;
 import uk.gov.justice.services.core.extension.ServiceComponentFoundEvent;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.spi.InjectionPoint;
-import javax.inject.Inject;
-
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * Creates and caches {@link Dispatcher} for {@link InjectionPoint} or {@link
@@ -23,7 +21,7 @@ import org.apache.commons.lang3.tuple.Pair;
 @ApplicationScoped
 public class DispatcherCache {
 
-    private final Map<Pair<String, ServiceComponentLocation>, Dispatcher> dispatcherMap = new ConcurrentHashMap<>();
+    private final Map<DispatcherKey, Dispatcher> dispatcherMap = new ConcurrentHashMap<>();
 
     private final DispatcherFactory dispatcherFactory = new DispatcherFactory();
 
@@ -34,7 +32,7 @@ public class DispatcherCache {
      * @return the {@link Dispatcher}
      */
     public Dispatcher dispatcherFor(final InjectionPoint injectionPoint) {
-        return createDispatcherIfAbsent(Pair.of(
+        return createDispatcherIfAbsent(new DispatcherKey(
                 componentFrom(injectionPoint), componentLocationFrom(injectionPoint)));
     }
 
@@ -45,7 +43,7 @@ public class DispatcherCache {
      * @return the {@link Dispatcher}
      */
     public Dispatcher dispatcherFor(final ServiceComponentFoundEvent event) {
-        return createDispatcherIfAbsent(Pair.of(
+        return createDispatcherIfAbsent(new DispatcherKey(
                 event.getComponentName(), event.getLocation()));
     }
 
@@ -58,10 +56,35 @@ public class DispatcherCache {
      * @return the {@link Dispatcher}
      */
     public Dispatcher dispatcherFor(final String component, final ServiceComponentLocation location) {
-        return createDispatcherIfAbsent(Pair.of(component, location));
+        return createDispatcherIfAbsent(new DispatcherKey(component, location));
     }
 
-    private Dispatcher createDispatcherIfAbsent(final Pair<String, ServiceComponentLocation> component) {
+    private Dispatcher createDispatcherIfAbsent(final DispatcherKey component) {
         return dispatcherMap.computeIfAbsent(component, c -> dispatcherFactory.createNew());
+    }
+
+    private class DispatcherKey {
+
+        private final String componentType;
+        private final ServiceComponentLocation location;
+
+        private DispatcherKey(final String componentType, final ServiceComponentLocation location) {
+            this.componentType = componentType;
+            this.location = location;
+        }
+
+        @Override
+        public boolean equals(final Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            final DispatcherKey that = (DispatcherKey) o;
+            return Objects.equals(componentType, that.componentType) &&
+                    location == that.location;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(componentType, location);
+        }
     }
 }

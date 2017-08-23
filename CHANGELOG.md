@@ -4,14 +4,13 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
-### Added
-- Record new events stream into event_stream table in Event Store
 
 ### Added
 - JsonEnvelope and Metadata builder service provider
 - Convenience methods to JsonEnvelope for providing JsonEnvelopes and JsonObjectMetadataBuilders
 - MetadataBuilderFactory in test-utils-core which contains convenience methods for creating 
 JsonObjectMetadataBuilders in tests
+- Record new events stream into event_stream table in Event Store
 
 ### Changed
 - Deprecate DefaultJsonEnvelope, JsonObjectBuilderWrapper and JsonObjectMetadata
@@ -20,6 +19,7 @@ JsonObjectMetadataBuilders in tests
 
 ### Removed 
 - org.apache.commons commons-lang3 dependency from framework-api-core
+- org.apache.commons commons-lang3 dependency from core
 
 ## [2.2.0] 2017-08-02
 
@@ -87,6 +87,9 @@ a service component in the same application
 - Improved logging for annotation scanning
 - Add component to audit interceptor so that audit messages can distinguish between components even
 when they are deployed in a single WAR.
+
+### Removed
+- org.apache.commons commons-lang3 dependency from core
 
 ## [2.0.0-rc5] - 2017-06-20
 

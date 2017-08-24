@@ -8,10 +8,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ### Added
 - org.apache.commons commons-lang3 dependency from framework-api-core
 
-### Changed
+## [2.4.0] 2017-08-23
 - Reverted breaking change of: Replace usage of Pair in InterceptorChainProvider with InterceptorChainEntry
 
-## [2.3.0] 2017-08-23
+## [2.3.0] 2017-08-23 (broken)
 
 ### Added
 - JsonEnvelope and Metadata builder service provider

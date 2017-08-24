@@ -37,12 +37,12 @@ import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandlerP
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.extension.ServiceComponentScanner;
+import uk.gov.justice.services.core.interceptor.Interceptor;
 import uk.gov.justice.services.core.interceptor.InterceptorCache;
 import uk.gov.justice.services.core.interceptor.InterceptorChainObserver;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProvider;
-import uk.gov.justice.services.core.interceptor.InterceptorChainEntry;
 import uk.gov.justice.services.core.json.DefaultJsonValidationLoggerHelper;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
@@ -67,6 +67,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.jms.Topic;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.openejb.jee.WebApp;
 import org.apache.openejb.junit.ApplicationComposer;
 import org.apache.openejb.testing.Classes;
@@ -251,10 +253,10 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
         }
 
         @Override
-        public List<InterceptorChainEntry> interceptorChainTypes() {
-            final List<InterceptorChainEntry> interceptorChainTypes = new ArrayList<>();
-            interceptorChainTypes.add(new InterceptorChainEntry(1, EventBufferInterceptor.class));
-            interceptorChainTypes.add(new InterceptorChainEntry(2, EventFilterInterceptor.class));
+        public List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes() {
+            final List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes = new ArrayList<>();
+            interceptorChainTypes.add(new ImmutablePair<>(1, EventBufferInterceptor.class));
+            interceptorChainTypes.add(new ImmutablePair<>(2, EventFilterInterceptor.class));
             return interceptorChainTypes;
         }
     }

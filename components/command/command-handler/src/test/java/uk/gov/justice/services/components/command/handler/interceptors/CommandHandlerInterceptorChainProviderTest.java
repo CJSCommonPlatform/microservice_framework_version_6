@@ -7,14 +7,12 @@ import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
 import uk.gov.justice.services.core.audit.LocalAuditInterceptor;
-import uk.gov.justice.services.core.interceptor.Interceptor;
+import uk.gov.justice.services.core.interceptor.InterceptorChainEntry;
 import uk.gov.justice.services.metrics.interceptor.IndividualActionMetricsInterceptor;
 import uk.gov.justice.services.metrics.interceptor.TotalActionMetricsInterceptor;
 
 import java.util.List;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 
 public class CommandHandlerInterceptorChainProviderTest {
@@ -27,12 +25,12 @@ public class CommandHandlerInterceptorChainProviderTest {
     @Test
     @SuppressWarnings("unchecked")
     public void shouldProvideDefaultInterceptorChainTypes() throws Exception {
-        final List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes = new CommandHandlerInterceptorChainProvider().interceptorChainTypes();
+        final List<InterceptorChainEntry> interceptorChainTypes = new CommandHandlerInterceptorChainProvider().interceptorChainTypes();
 
         assertThat(interceptorChainTypes, containsInAnyOrder(
-                new ImmutablePair<>(1, TotalActionMetricsInterceptor.class),
-                new ImmutablePair<>(2, IndividualActionMetricsInterceptor.class),
-                new ImmutablePair<>(3000, LocalAuditInterceptor.class),
-                new ImmutablePair<>(MAX_VALUE, RetryInterceptor.class)));
+                new InterceptorChainEntry(1, TotalActionMetricsInterceptor.class),
+                new InterceptorChainEntry(2, IndividualActionMetricsInterceptor.class),
+                new InterceptorChainEntry(3000, LocalAuditInterceptor.class),
+                new InterceptorChainEntry(MAX_VALUE, RetryInterceptor.class)));
     }
 }

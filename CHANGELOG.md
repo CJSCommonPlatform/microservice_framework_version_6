@@ -5,7 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
-### Added
+### Changed
+- Replace usage of Pair in InterceptorChainProvider with InterceptorChainEntry
+
+### Removed 
 - org.apache.commons commons-lang3 dependency from framework-api-core
 
 ## [2.4.0] 2017-08-23

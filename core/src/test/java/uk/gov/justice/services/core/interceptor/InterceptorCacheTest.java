@@ -18,8 +18,6 @@ import java.util.List;
 
 import javax.enterprise.inject.spi.Bean;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -162,9 +160,9 @@ public class InterceptorCacheTest {
             }
 
             @Override
-            public List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes() {
-                final List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes = new ArrayList<>();
-                interceptorChainTypes.add(new ImmutablePair<>(1, interceptorClass_1));
+            public List<InterceptorChainEntry> interceptorChainTypes() {
+                final List<InterceptorChainEntry> interceptorChainTypes = new ArrayList<>();
+                interceptorChainTypes.add(new InterceptorChainEntry(1, interceptorClass_1));
                 return interceptorChainTypes;
             }
         });
@@ -203,7 +201,7 @@ public class InterceptorCacheTest {
         }
 
         @Override
-        public List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes() {
+        public List<InterceptorChainEntry> interceptorChainTypes() {
             return emptyList();
         }
     }
@@ -216,10 +214,10 @@ public class InterceptorCacheTest {
         }
 
         @Override
-        public List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes() {
-            final List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes = new ArrayList<>();
-            interceptorChainTypes.add(new ImmutablePair<>(1, InterceptorOne.class));
-            interceptorChainTypes.add(new ImmutablePair<>(3, InterceptorTwo.class));
+        public List<InterceptorChainEntry> interceptorChainTypes() {
+            final List<InterceptorChainEntry> interceptorChainTypes = new ArrayList<>();
+            interceptorChainTypes.add(new InterceptorChainEntry(1, InterceptorOne.class));
+            interceptorChainTypes.add(new InterceptorChainEntry(3, InterceptorTwo.class));
             return interceptorChainTypes;
         }
     }
@@ -232,10 +230,10 @@ public class InterceptorCacheTest {
         }
 
         @Override
-        public List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes() {
-            final List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes = new ArrayList<>();
-            interceptorChainTypes.add(new ImmutablePair<>(1, InterceptorTwo.class));
-            interceptorChainTypes.add(new ImmutablePair<>(2, InterceptorThree.class));
+        public List<InterceptorChainEntry> interceptorChainTypes() {
+            final List<InterceptorChainEntry> interceptorChainTypes = new ArrayList<>();
+            interceptorChainTypes.add(new InterceptorChainEntry(1, InterceptorTwo.class));
+            interceptorChainTypes.add(new InterceptorChainEntry(2, InterceptorThree.class));
             return interceptorChainTypes;
         }
     }
@@ -248,9 +246,9 @@ public class InterceptorCacheTest {
         }
 
         @Override
-        public List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes() {
-            final List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes = new ArrayList<>();
-            interceptorChainTypes.add(new ImmutablePair<>(2, InterceptorThree.class));
+        public List<InterceptorChainEntry> interceptorChainTypes() {
+            final List<InterceptorChainEntry> interceptorChainTypes = new ArrayList<>();
+            interceptorChainTypes.add(new InterceptorChainEntry(2, InterceptorThree.class));
             return interceptorChainTypes;
         }
     }

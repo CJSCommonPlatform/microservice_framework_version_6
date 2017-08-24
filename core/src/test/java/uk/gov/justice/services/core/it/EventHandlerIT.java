@@ -40,6 +40,7 @@ import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProvider;
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
+import uk.gov.justice.services.core.interceptor.InterceptorChainEntry;
 import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.requester.RequesterProducer;
@@ -59,8 +60,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.openejb.jee.Application;
 import org.apache.openejb.jee.WebApp;
 import org.apache.openejb.junit.ApplicationComposer;
@@ -229,9 +228,9 @@ public class EventHandlerIT {
         }
 
         @Override
-        public List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes() {
-            final List<Pair<Integer, Class<? extends Interceptor>>> interceptorTypes = new ArrayList<>();
-            interceptorTypes.add(new ImmutablePair<>(1000, TestInterceptor.class));
+        public List<InterceptorChainEntry> interceptorChainTypes() {
+            final List<InterceptorChainEntry> interceptorTypes = new ArrayList<>();
+            interceptorTypes.add(new InterceptorChainEntry(1000, TestInterceptor.class));
             return interceptorTypes;
         }
     }

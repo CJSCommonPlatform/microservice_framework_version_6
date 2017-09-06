@@ -3,22 +3,18 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>example-event</artifactId>
-        <groupId>uk.gov.justice.services.example</groupId>
+        <artifactId>microservice-framework</artifactId>
+        <groupId>uk.gov.justice.services</groupId>
         <version>3.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>example-event-processor</artifactId>
-    <packaging>war</packaging>
 
-    <properties>
-        <cpp.service-component>EVENT_PROCESSOR</cpp.service-component>
-    </properties>
+    <artifactId>wildfly-vfs</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
-            <artifactId>event-processor</artifactId>
+            <artifactId>core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -27,15 +23,19 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>uk.gov.justice.services</groupId>
-            <artifactId>wildfly-vfs</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.jboss</groupId>
+            <artifactId>jboss-vfs</artifactId>
+            <version>${jboss-vfs.version}</version>
+            <scope>provided</scope>
         </dependency>
-
-        <!-- Test Dependencies -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

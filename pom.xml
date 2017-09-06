@@ -41,6 +41,7 @@
         <module>aggregate-snapshot</module>
         <module>raml-lint-check</module>
         <module>framework-api</module>
+        <module>wildfly-vfs</module>
         <module>common-rest</module>
     </modules>
 
@@ -53,7 +54,7 @@
         <utilities.version>1.9.0</utilities.version>
         <test-utils.version>1.7.0</test-utils.version>
         <jboss-ejb3-ext-api.version>2.2.0.Final</jboss-ejb3-ext-api.version>
-
+        <jboss-vfs.version>3.2.12.Final</jboss-vfs.version>
         <cpp.repo.name>microservice_framework</cpp.repo.name>
     </properties>
 

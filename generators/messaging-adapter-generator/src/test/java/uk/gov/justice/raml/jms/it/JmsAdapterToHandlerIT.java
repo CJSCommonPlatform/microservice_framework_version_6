@@ -43,7 +43,9 @@ import uk.gov.justice.services.core.interceptor.InterceptorChainObserver;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProvider;
+import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
 import uk.gov.justice.services.core.json.DefaultJsonValidationLoggerHelper;
+
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.core.requester.RequesterProducer;
@@ -144,6 +146,8 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
             EnvelopeValidationExceptionHandlerProducer.class,
             DefaultJmsMessageLoggerHelper.class,
             DefaultTraceLogger.class,
+
+            DefaultFileSystemUrlResolverStrategy.class,
             DefaultJsonValidationLoggerHelper.class
     })
     public WebApp war() {

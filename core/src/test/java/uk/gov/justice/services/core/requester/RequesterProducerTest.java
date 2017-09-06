@@ -20,9 +20,8 @@ import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationException;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandler;
 import uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler;
-import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
-import uk.gov.justice.services.core.requester.Requester;
-import uk.gov.justice.services.core.requester.RequesterProducer;
+
+import uk.gov.justice.services.core.json.DefaultJsonSchemaValidatorFactory;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.UUID;
@@ -63,7 +62,7 @@ public class RequesterProducerTest {
     @Before
     public void setUp() throws Exception {
         when(dispatcherCache.dispatcherFor(injectionPoint)).thenReturn(dispatcher);
-        requesterProducer.jsonSchemaValidator = new DefaultJsonSchemaValidator();
+        requesterProducer.jsonSchemaValidator = new DefaultJsonSchemaValidatorFactory().getDefaultJsonSchemaValidator();
         requesterProducer.objectMapper = new ObjectMapperProducer().objectMapper();
     }
 

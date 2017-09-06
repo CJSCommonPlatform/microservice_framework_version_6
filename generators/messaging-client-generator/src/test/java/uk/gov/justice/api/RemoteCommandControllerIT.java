@@ -23,7 +23,9 @@ import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandlerProducer;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
+import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
 import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
+
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.requester.RequesterProducer;
 import uk.gov.justice.services.core.sender.Sender;
@@ -94,7 +96,10 @@ public class RemoteCommandControllerIT {
             DefaultJsonSchemaValidator.class,
             JsonSchemaLoader.class,
             ObjectMapperProducer.class,
-            DefaultTraceLogger.class
+            DefaultTraceLogger.class,
+
+            DefaultFileSystemUrlResolverStrategy.class
+
     })
     public WebApp war() {
         return new WebApp()

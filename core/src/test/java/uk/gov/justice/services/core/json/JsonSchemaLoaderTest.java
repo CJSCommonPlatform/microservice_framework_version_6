@@ -3,6 +3,7 @@ package uk.gov.justice.services.core.json;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.everit.json.schema.Schema;
 import org.junit.Rule;
@@ -11,6 +12,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
 
@@ -22,6 +24,9 @@ public class JsonSchemaLoaderTest {
 
     @Mock
     private Logger logger;
+
+    @Spy
+    private FileSystemUrlResolverStrategy fileSystemUrlResolverStrategy = new DefaultFileSystemUrlResolverStrategy();
 
     @InjectMocks
     private JsonSchemaLoader loader;
@@ -45,7 +50,7 @@ public class JsonSchemaLoaderTest {
     @Test
     public void shouldThrowExceptionIfSchemaNotFound() {
         expectedException.expect(SchemaLoadingException.class);
-        expectedException.expectMessage("JSON schema /json/schema/non-existent.json not found on classpath");
+        expectedException.expectMessage("Unable to load JSON schema /json/schema/non-existent.json from classpath");
         loader.loadSchema("non-existent");
     }
 

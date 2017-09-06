@@ -26,6 +26,11 @@
             <artifactId>javaee-api</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>wildfly-vfs</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- Test Dependencies -->
         <dependency>

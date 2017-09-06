@@ -42,6 +42,7 @@
         <module>file</module>
         <module>raml-lint-check</module>
         <module>framework-api</module>
+        <module>wildfly-vfs</module>
     </modules>
 
     <properties>
@@ -53,7 +54,8 @@
         <utilities.version>1.7.0</utilities.version>
         <test-utils.version>1.5.0</test-utils.version>
         <jboss-ejb3-ext-api.version>2.2.0.Final</jboss-ejb3-ext-api.version>
-
+        <jboss-vfs.version>3.2.12.Final</jboss-vfs.version>
+        <org.everit.json.schema.version>1.6.0</org.everit.json.schema.version>
         <cpp.repo.name>microservice_framework</cpp.repo.name>
     </properties>
 

@@ -22,7 +22,12 @@ import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationException;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandler;
 import uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler;
+import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
 import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
+import uk.gov.justice.services.core.json.DefaultJsonSchemaValidatorFactory;
+import uk.gov.justice.services.core.json.FileSystemUrlResolverStrategy;
+import uk.gov.justice.services.core.json.JsonSchemaLoader;
+import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.UUID;
@@ -37,10 +42,12 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SenderProducerTest {
+
 
     @Mock
     private InjectionPoint injectionPoint;
@@ -54,13 +61,14 @@ public class SenderProducerTest {
     @Mock
     private SystemUserUtil systemUserUtil;
 
+
     @InjectMocks
     private SenderProducer senderProducer;
 
     @Before
     public void setUp() throws Exception {
         when(dispatcherCache.dispatcherFor(injectionPoint)).thenReturn(dispatcher);
-        senderProducer.jsonSchemaValidator = new DefaultJsonSchemaValidator();
+        senderProducer.jsonSchemaValidator = new DefaultJsonSchemaValidatorFactory().getDefaultJsonSchemaValidator();
         senderProducer.objectMapper = new ObjectMapperProducer().objectMapper();
         senderProducer.envelopeValidationExceptionHandler = new RethrowingValidationExceptionHandler();
     }

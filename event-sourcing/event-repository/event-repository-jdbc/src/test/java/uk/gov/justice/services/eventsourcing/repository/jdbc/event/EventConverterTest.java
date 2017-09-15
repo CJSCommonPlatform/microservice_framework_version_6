@@ -37,9 +37,8 @@ public class EventConverterTest {
             "\"name\": \"" + NAME + "\"" +
             "}";
     private final static String PAYLOAD_JSON = "{\"" + PAYLOAD_FIELD_NAME + "\": \"" + PAYLOAD_FIELD_VALUE + "\"}";
-
-    private EventConverter eventConverter;
     private final Clock clock = new StoppedClock(new UtcClock().now());
+    private EventConverter eventConverter;
 
     @Before
     public void setup() {

@@ -35,19 +35,16 @@ public class EventStreamManagerTest {
     private static final Long INITIAL_VERSION = 0L;
     private static final Long CURRENT_VERSION = 5L;
     private static final Long INVALID_VERSION = 8L;
-
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
     @Mock
     private Logger logger;
-
     @Mock
     private EventRepository eventRepository;
-
     @Mock
     private EventAppender eventAppender;
-
     @Mock
     private Stream<JsonEnvelope> eventStream;
-
     @InjectMocks
     private EventStreamManager eventStreamManager;
 
@@ -107,7 +104,6 @@ public class EventStreamManagerTest {
         assertThat(returnedVersion, is(currentVersion + 1));
 
     }
-
 
     @Test(expected = EventStreamException.class)
     public void shouldThrowExceptionOnNullFromVersion() throws Exception {
@@ -230,10 +226,6 @@ public class EventStreamManagerTest {
 
         verify(logger).trace("Retrying appending to stream {}, with version {}", STREAM_ID, currentVersionAfterException + 1);
     }
-
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     @Test
     public void shouldThrowExceptionAfterMaxNumberOfRetriesReached() throws Exception {

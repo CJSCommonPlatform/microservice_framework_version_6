@@ -5,7 +5,7 @@ version: v0.1
 mediaType: application/json
 protocols: [ HTTP, HTTPS ]
 
-/event-streams:
+/event-streams/{offset}/{link}/{pageSize}
   description: paginated feed listing all event streams
   get:
     queryParameters:
@@ -20,14 +20,9 @@ protocols: [ HTTP, HTTPS ]
             schema: !include json/schema/event-source.event-streams.json
             example: !include json/event-source.event-streams.json
 
-/event-streams/{streamId}:
+/event-streams/{streamId}/{offset}/{link}/{pageSize}
   description: paginated feed listing all events in the stream
   get:
-    queryParameters:
-        page:
-            type: integer
-            required: false
-            description: page number
     responses:
       200:
         body:

@@ -29,18 +29,14 @@ import org.slf4j.Logger;
 public class EventStreamManager {
 
     @Inject
-    private Logger logger;
-
-    @Inject
     EventRepository eventRepository;
-
     @Inject
     EventAppender eventAppender;
-
     @Inject
     @GlobalValue(key = "internal.max.retry", defaultValue = "20")
     long maxRetry;
-
+    @Inject
+    private Logger logger;
 
     /**
      * Get the stream of events.

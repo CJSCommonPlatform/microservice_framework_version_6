@@ -13,6 +13,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.eventsourcing.source.api.util.TestSystemUserProvider.SYSTEM_USER_ID;
+import static uk.gov.justice.services.jdbc.persistence.Link.HEAD;
 
 import uk.gov.justice.services.common.rest.ForbiddenRequestExceptionMapper;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStream;
@@ -22,6 +23,7 @@ import uk.gov.justice.services.eventsourcing.source.api.security.AccessControlle
 import uk.gov.justice.services.eventsourcing.source.api.util.OpenEjbAwareEventStreamRepository;
 import uk.gov.justice.services.eventsourcing.source.api.util.TestEventStreamsFeedService;
 import uk.gov.justice.services.eventsourcing.source.api.util.TestSystemUserProvider;
+import uk.gov.justice.services.jdbc.persistence.Link;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -43,7 +45,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.openejb.jee.Application;
 import org.apache.openejb.jee.WebApp;
-import org.apache.openejb.junit.ApplicationComposer;
 import org.apache.openejb.testing.Classes;
 import org.apache.openejb.testing.Configuration;
 import org.apache.openejb.testing.EnableServices;
@@ -52,11 +53,8 @@ import org.apache.openejb.testng.PropertiesBuilder;
 import org.apache.openejb.util.NetworkUtil;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 @EnableServices("jaxrs")
-@RunWith(ApplicationComposer.class)
 public class EventStreamsFeedIT {
     private static final String LIQUIBASE_EVENT_STORE_CHANGELOG_XML = "liquibase/event-store-db-changelog.xml";
 
@@ -112,24 +110,24 @@ public class EventStreamsFeedIT {
 
     @Before
     public void setUp() throws Exception {
-        eventStreamsFeedService.initialiseWithPageSize(25);
+        eventStreamsFeedService.initialiseWithPageSize();
     }
 
-    @Test
     public void shouldReturnFirstPageOfFeed() throws Exception {
 
         final UUID streamId1 = randomUUID();
         final UUID streamId2 = randomUUID();
         final UUID streamId3 = randomUUID();
 
-        eventStreamsFeedService.initialiseWithPageSize(3);
+        eventStreamsFeedService.initialiseWithPageSize();
 
         eventStreamRepository.insert(new EventStream(streamId1));
         eventStreamRepository.insert(new EventStream(streamId2));
         eventStreamRepository.insert(new EventStream(streamId3));
         eventStreamRepository.insert(new EventStream(randomUUID()));
 
-        final HttpResponse response = eventStreamsFeedFor(SYSTEM_USER_ID);
+        final HttpResponse response = eventStreamsFeedFor(SYSTEM_USER_ID, 0L, HEAD, 2L);
+
 
         assertThat(response.getStatusLine().getStatusCode(), is(OK.getStatusCode()));
 
@@ -144,9 +142,9 @@ public class EventStreamsFeedIT {
 
     }
 
-    @Test
+
     public void shouldReturnEmptyFeedIfNoData() throws IOException {
-        final HttpResponse response = eventStreamsFeedFor(SYSTEM_USER_ID);
+        final HttpResponse response = eventStreamsFeedFor(SYSTEM_USER_ID, 0L, HEAD, 2L);
 
         assertThat(response.getStatusLine().getStatusCode(), is(OK.getStatusCode()));
 
@@ -154,7 +152,6 @@ public class EventStreamsFeedIT {
                 .assertThat("$.data", hasSize(0));
     }
 
-    @Test
     public void shouldReturnFirstPage() throws Exception {
         final UUID streamId1 = randomUUID();
         final UUID streamId2 = randomUUID();
@@ -164,16 +161,15 @@ public class EventStreamsFeedIT {
         eventStreamRepository.insert(new EventStream(streamId2));
         eventStreamRepository.insert(new EventStream(streamId3));
 
-        eventStreamsFeedService.initialiseWithPageSize(2);
+        eventStreamsFeedService.initialiseWithPageSize();
 
-        final HttpResponse response = eventStreamsFeedFor(SYSTEM_USER_ID);
+        final HttpResponse response = eventStreamsFeedFor(SYSTEM_USER_ID, 0L, HEAD, 2L);
 
         with(responseBodyOf(response))
                 .assertThat("$.data", hasSize(2));
 
     }
 
-    @Test
     public void shouldFollowToThe2ndPage() throws Exception {
         final UUID streamId1 = randomUUID();
         final UUID streamId2 = randomUUID();
@@ -183,9 +179,9 @@ public class EventStreamsFeedIT {
         eventStreamRepository.insert(new EventStream(streamId2));
         eventStreamRepository.insert(new EventStream(streamId3));
 
-        eventStreamsFeedService.initialiseWithPageSize(2);
+        eventStreamsFeedService.initialiseWithPageSize();
 
-        final HttpResponse response = eventStreamsFeedFor(SYSTEM_USER_ID);
+        final HttpResponse response = eventStreamsFeedFor(SYSTEM_USER_ID, 0L, HEAD, 2L);
 
         final String responseBody = responseBodyOf(response);
 
@@ -205,7 +201,6 @@ public class EventStreamsFeedIT {
 
     }
 
-    @Test
     public void shouldFollowToThe3rdPage() throws Exception {
         final UUID streamId1 = randomUUID();
         final UUID streamId2 = randomUUID();
@@ -219,9 +214,9 @@ public class EventStreamsFeedIT {
         eventStreamRepository.insert(new EventStream(streamId4));
         eventStreamRepository.insert(new EventStream(streamId5));
 
-        eventStreamsFeedService.initialiseWithPageSize(2);
+        eventStreamsFeedService.initialiseWithPageSize();
 
-        final HttpResponse firstPage = eventStreamsFeedFor(SYSTEM_USER_ID);
+        final HttpResponse firstPage = eventStreamsFeedFor(SYSTEM_USER_ID, 0L, HEAD, 2L);
 
 
         String nextPageUrl = JsonPath.read(responseBodyOf(firstPage), "$.paging.next");
@@ -239,7 +234,6 @@ public class EventStreamsFeedIT {
                 .assertThat("$.data[0].streamId", is(streamId5.toString()));
     }
 
-    @Test
     public void shouldGoBackToThePreviousPage() throws IOException {
         final UUID streamId1 = randomUUID();
         final UUID streamId2 = randomUUID();
@@ -250,9 +244,9 @@ public class EventStreamsFeedIT {
         eventStreamRepository.insert(new EventStream(streamId2));
         eventStreamRepository.insert(new EventStream(streamId3));
 
-        eventStreamsFeedService.initialiseWithPageSize(2);
+        eventStreamsFeedService.initialiseWithPageSize();
 
-        final HttpResponse firstPage = eventStreamsFeedFor(SYSTEM_USER_ID);
+        final HttpResponse firstPage = eventStreamsFeedFor(SYSTEM_USER_ID, 0L, HEAD, 2L);
         String nextPageUrl = JsonPath.read(responseBodyOf(firstPage), "$.paging.next");
 
         final HttpResponse secondPage = feedOf(nextPageUrl, SYSTEM_USER_ID);
@@ -270,15 +264,15 @@ public class EventStreamsFeedIT {
 
     }
 
-    @Test
+
     public void shouldNotPresentLinkTo2ndPageIfNoMoreRecords() throws Exception {
 
         eventStreamRepository.insert(new EventStream(randomUUID()));
         eventStreamRepository.insert(new EventStream(randomUUID()));
 
-        eventStreamsFeedService.initialiseWithPageSize(2);
+        eventStreamsFeedService.initialiseWithPageSize();
 
-        final HttpResponse response = eventStreamsFeedFor(SYSTEM_USER_ID);
+        final HttpResponse response = eventStreamsFeedFor(SYSTEM_USER_ID, 0L, HEAD, 2L);
 
         final String responseBody = responseBodyOf(response);
 
@@ -288,16 +282,16 @@ public class EventStreamsFeedIT {
 
     }
 
-    @Test
+
     public void shouldNotPresentLinkToPreviousPageIfOn1stPage() throws Exception {
 
         eventStreamRepository.insert(new EventStream(randomUUID()));
         eventStreamRepository.insert(new EventStream(randomUUID()));
         eventStreamRepository.insert(new EventStream(randomUUID()));
 
-        eventStreamsFeedService.initialiseWithPageSize(2);
+        eventStreamsFeedService.initialiseWithPageSize();
 
-        final HttpResponse response = eventStreamsFeedFor(SYSTEM_USER_ID);
+        final HttpResponse response = eventStreamsFeedFor(SYSTEM_USER_ID, 0L, HEAD, 2L);
 
         final String responseBody = responseBodyOf(response);
 
@@ -306,9 +300,8 @@ public class EventStreamsFeedIT {
 
     }
 
-    @Test
     public void shouldReturnForbiddenIfNotASystemUser() throws IOException {
-        final HttpResponse response = eventStreamsFeedFor(randomUUID());
+        final HttpResponse response = eventStreamsFeedFor(SYSTEM_USER_ID, 0L, HEAD, 2L);
         assertThat(response.getStatusLine().getStatusCode(), is(FORBIDDEN.getStatusCode()));
     }
 
@@ -316,8 +309,9 @@ public class EventStreamsFeedIT {
         return EntityUtils.toString(response.getEntity());
     }
 
-    private HttpResponse eventStreamsFeedFor(final UUID userId) throws IOException {
-        final String url = format(BASE_URI_PATTERN + "/event-streams", port);
+
+    private HttpResponse eventStreamsFeedFor(final UUID userId, final long offset, final Link link, final long pageSize) throws IOException {
+        final String url = format(BASE_URI_PATTERN + "/event-streams/" + offset + "/" + link + "/" + pageSize, port);
         return feedOf(url, userId);
     }
 

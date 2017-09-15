@@ -6,6 +6,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertThat;
 
+import uk.gov.justice.services.jdbc.persistence.Link;
 import uk.gov.justice.services.test.utils.persistence.AbstractJdbcRepositoryIT;
 
 import java.util.HashMap;
@@ -70,7 +71,7 @@ public class EventStreamJdbcRepositoryIT extends AbstractJdbcRepositoryIT<EventS
         jdbcRepository.insert(new EventStream(streamId3));
         jdbcRepository.insert(new EventStream(streamId4));
 
-        final List<EventStream> streams = jdbcRepository.getPage(0, 3, params).collect(toList());
+        final List<EventStream> streams = jdbcRepository.getFeed(0, Link.PREVIOUS, 3, params).collect(toList());
         assertThat(streams, hasSize(3));
 
     }
@@ -93,7 +94,7 @@ public class EventStreamJdbcRepositoryIT extends AbstractJdbcRepositoryIT<EventS
 
         final int offset = 4;
         final int pageSize = 2;
-        final List<EventStream> streams = jdbcRepository.getPage(offset, pageSize, params).collect(toList());
+        final List<EventStream> streams = jdbcRepository.getFeed(offset, Link.PREVIOUS, pageSize, params).collect(toList());
         assertThat(streams, hasSize(2));
 
         assertThat(streams.get(0).getStreamId(), is(streamId5));

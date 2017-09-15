@@ -7,8 +7,7 @@ import javax.enterprise.context.ApplicationScoped;
 @ApplicationScoped
 public class TestEventStreamsFeedService extends EventStreamsFeedService {
 
-    public void initialiseWithPageSize(final int pageSize) {
-        this.pageSize = pageSize;
+    public void initialiseWithPageSize() {
         this.initialise();
     }
 }

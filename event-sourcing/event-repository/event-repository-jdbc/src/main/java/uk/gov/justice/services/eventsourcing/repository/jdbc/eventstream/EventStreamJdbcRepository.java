@@ -4,6 +4,7 @@ import static java.lang.String.format;
 
 import uk.gov.justice.services.jdbc.persistence.AbstractJdbcRepository;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
+import uk.gov.justice.services.jdbc.persistence.Link;
 import uk.gov.justice.services.jdbc.persistence.PaginationCapableRepository;
 import uk.gov.justice.services.jdbc.persistence.PreparedStatementWrapper;
 
@@ -47,7 +48,8 @@ public class EventStreamJdbcRepository extends AbstractJdbcRepository<EventStrea
     }
 
     @Override
-    public Stream<EventStream> getPage(final long offset, final long pageSize, final Map<String, Object> params) {
+    public Stream<EventStream> getFeed(final long offset, final Link link,
+                                       final long pageSize, final Map<String, Object> params) {
         try {
             final PreparedStatementWrapper ps = preparedStatementWrapperOf(SQL_PAGE);
             ps.setLong(1, pageSize);
@@ -57,6 +59,13 @@ public class EventStreamJdbcRepository extends AbstractJdbcRepository<EventStrea
             throw new JdbcRepositoryException(READING_STREAM_EXCEPTION, e);
         }
     }
+
+
+    @Override
+    public boolean recordExists(long offset, Link link, final long pageSize, Map<String, Object> params) {
+        return false;
+    }
+
 
     @Override
     protected String jndiName() throws NamingException {

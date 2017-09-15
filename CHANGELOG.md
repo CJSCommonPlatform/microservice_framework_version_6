@@ -7,13 +7,6 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ### Added
 - org.apache.commons commons-lang3 dependency from framework-api-core
-
-## [2.4.0] 2017-08-23
-- Reverted breaking change of: Replace usage of Pair in InterceptorChainProvider with InterceptorChainEntry
-
-## [2.3.0] 2017-08-23 (broken)
-
-### Added
 - JsonEnvelope and Metadata builder service provider
 - Convenience methods to JsonEnvelope for providing JsonEnvelopes and JsonObjectMetadataBuilders
 - MetadataBuilderFactory in test-utils-core which contains convenience methods for creating 
@@ -29,7 +22,16 @@ JsonObjectMetadataBuilders in tests
 - org.apache.commons commons-lang3 dependency from framework-api-core
 - org.apache.commons commons-lang3 dependency from core
 
-## [2.2.0] 2017-08-02
+## [2.2.1] - 2017-09-01
+
+### Changed
+- Converted to release to bintray
+- Converted example context to run as a single war by default
+
+### Fixed
+- Class conflicts between generated clients in a single war
+
+## [2.2.0] - 2017-08-02
 
 ### Changed
 - Use maven-framework-parent-pom 1.6.1, which simply changes the wildfly-maven-plugin to 1.2.0.Alpha6 and stops adding it to every build
@@ -37,7 +39,7 @@ JsonObjectMetadataBuilders in tests
 - Switch to bintray for release processes
 - Cleaned up some unnecessary version overrides
 
-## [2.1.0] 2017-07-17
+## [2.1.0] - 2017-07-17
 
 ### Added
 - New test matcher for checking schema properties
@@ -46,7 +48,7 @@ JsonObjectMetadataBuilders in tests
 - Aggregate snapshot repository did not use aggregate class when retrieving snapshots, so services that use multiple aggregate classes
 on the same stream could get class cast exceptions
 
-## [2.0.0] 2017-06-23
+## [2.0.0] - 2017-06-23
 
 ### Changed
 - Refactor all framework components that are not internal so that they are provided as interfaces
@@ -115,7 +117,7 @@ class will need to change the class name of their override to match.
 ### Removed
 - Precondition class marked as deprecated - will be removed in 3.0.0 unless a differen tuse case is found for it
 
-## [2.0.0-rc2] 2017-06-06
+## [2.0.0-rc2] - 2017-06-06
 
 ### Changed
 - Interceptor chain now adds the component name to the context so it can be used by the access control interceptor or anything else that needs it
@@ -123,7 +125,7 @@ class will need to change the class name of their override to match.
 ### Removed
 - Access control Provider annotation and annotation scanning; this functionality has moved to the access control library
 
-## [2.0.0-rc1] 2017-05-31
+## [2.0.0-rc1] - 2017-05-31
 
 ### Changed
 - Refactor all framework components that are not internal so that they are provided as interfaces
@@ -145,28 +147,28 @@ be provided, typically by generating one from the destination RAML.
 - Support for generating and discovering direct adapters, if a message destination exists locally 
 a service component in the same application
 
-## [1.7.1] 2017-05-16
+## [1.7.1] - 2017-05-16
 
 ### Added
 - Utility for browsing and deleting DLQ messages, backported from separate test utils library
 - Support for adding additional fields when building metadata
 
-## [1.7.0] 2017-05-16
+## [1.7.0] - 2017-05-16
 
 ### Added
 - Add test event log repository to the test-utils-core module
 
-## [1.6.0] 2017-05-05
+## [1.6.0] - 2017-05-05
 
 ### Added
 - Support for PDF generation in Alfresco interface
 
-## [1.5.2] 2017-04-07
+## [1.5.2] - 2017-04-07
 
 ###
 - Service names with hyphens were also breaking other adapters and clients
 
-## [1.5.1] 2017-04-05
+## [1.5.1] - 2017-04-05
 
 ### Fixed
 - Event listeners for services with a hyphen in the name generated invalid class names
@@ -733,7 +735,10 @@ turned off by default
 
 - Initial release with basic dispatcher, handler and adapter generation
 
-[Unreleased]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-2.1.0...HEAD
+[Unreleased]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-2.2.1...HEAD
+[2.2.1]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-2.2.0...release-2.2.1
+[2.2.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-2.1.0...release-2.2.0
+[2.1.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-2.0.0...release-2.1.0
 [2.1.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-2.0.0...release-2.1.0
 [2.0.0]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-1.7.0...release-2.0.0
 [2.0.0-rc8]: https://github.com/CJSCommonPlatform/microservice_framework/compare/release-2.0.0-rc7...release-2.0.0-rc8

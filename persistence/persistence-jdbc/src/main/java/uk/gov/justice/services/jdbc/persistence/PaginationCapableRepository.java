@@ -4,5 +4,11 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public interface PaginationCapableRepository<E> {
-    Stream<E> getPage(final long offset, final long pageSize, final Map<String, Object> params);
+    Stream<E> getFeed(final long offset,
+                      final Link link,
+                      final long pageSize,
+                      final Map<String, Object> params);
+
+    boolean recordExists(final long offset,
+                        final Map<String, Object> params);
 }

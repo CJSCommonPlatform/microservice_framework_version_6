@@ -1,5 +1,6 @@
 package uk.gov.justice.services.eventsourcing.source.api.feed.common;
 
+import static java.net.URI.create;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -7,16 +8,20 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.jdbc.persistence.Link.HEAD;
+import static uk.gov.justice.services.jdbc.persistence.Link.LAST;
+import static uk.gov.justice.services.jdbc.persistence.Link.NEXT;
+import static uk.gov.justice.services.jdbc.persistence.Link.PREVIOUS;
 
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.Event;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepository;
 import uk.gov.justice.services.eventsourcing.source.api.feed.event.Event2FeedEntryMappingStrategy;
 import uk.gov.justice.services.eventsourcing.source.api.feed.event.EventEntry;
+import uk.gov.justice.services.eventsourcing.source.api.feed.event.EventEntryFeedMaxMinProviderProvider;
+import uk.gov.justice.services.jdbc.persistence.Link;
 
-import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,12 +29,10 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import javax.json.JsonObject;
-import javax.ws.rs.core.UriInfo;
 
 import org.jboss.resteasy.spi.ResteasyUriInfo;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -43,118 +46,120 @@ public class FeedGeneratorTest {
 
     private Event2FeedEntryMappingStrategy event2FeedEntryMappingStrategy = new Event2FeedEntryMappingStrategy();
 
+    private EventEntryFeedMaxMinProviderProvider eventEntryFeedMaxMinProvider = new EventEntryFeedMaxMinProviderProvider();
+
     private static ResteasyUriInfo uriInfoWithAbsoluteUri(final String absoluteUri) {
         return new ResteasyUriInfo(absoluteUri, "", "");
     }
 
     @Test
-    public void shouldReturnFirstPageWhenMoreRecordsThanPageSize() throws Exception {
-
-        long pageSize = 2L;
-
-        final FeedGenerator<Event, EventEntry> feedGenerator = new FeedGenerator<>(pageSize, repository, event2FeedEntryMappingStrategy);
+    public void shouldReturnEventsWhenLessRecordsThanPageSizeWhenLookingForNewerEvents() throws Exception {
 
         final UUID streamId = randomUUID();
 
         final Map<String, Object> params = new HashMap<>();
         params.put("STREAM_ID", streamId);
 
-        final UriInfo uriInfo = new ResteasyUriInfo("http://server:222/context/event-streams" + "/" + streamId, "", "");
+        final FeedGenerator<Event, EventEntry> feedGenerator = new FeedGenerator<>(repository, event2FeedEntryMappingStrategy,
+                eventEntryFeedMaxMinProvider);
 
-        final String page = "1";
+        final ResteasyUriInfo uriInfo = new ResteasyUriInfo(create("http://server:123/context/"), create("event-streams/" + streamId));
 
         final Stream.Builder<Event> builder = Stream.builder();
 
-        final ZonedDateTime event1CreatedAt = new UtcClock().now();
-        final ZonedDateTime event2CreatedAt = new UtcClock().now();
-        final ZonedDateTime event3CreatedAt = new UtcClock().now();
-
-        final JsonObject payloadEvent1 = createObjectBuilder().add("field1", "value1").build();
-        final JsonObject payloadEvent2 = createObjectBuilder().add("field2", "value2").build();
-        final JsonObject payloadEvent3 = createObjectBuilder().add("field3", "value3").build();
-
-        final Event event1 = new Event(randomUUID(), streamId, 1L, "Test Name1", METADATA_JSON, payloadEvent1.toString(), event1CreatedAt);
-        final Event event2 = new Event(randomUUID(), streamId, 2L, "Test Name2", METADATA_JSON, payloadEvent2.toString(), event2CreatedAt);
-        final Event event3 = new Event(randomUUID(), streamId, 3L, "Test Name3", METADATA_JSON, payloadEvent3.toString(), event3CreatedAt);
+        final Event event1 = new Event(randomUUID(), streamId, 3L, "Test Name3", METADATA_JSON, createObjectBuilder().add("field3", "value3").build().toString(), new UtcClock().now());
 
         builder.add(event1);
-        builder.add(event2);
-        builder.add(event3);
 
-        when(repository.getPage(0, 3, params)).thenReturn(builder.build());
+        when(repository.recordExists(4L, params)).thenReturn(true);
 
-        final Feed<EventEntry> feedActual = feedGenerator.feed(page, uriInfo, params);
+        when(repository.recordExists(2L, params)).thenReturn(false);
 
-        final List<EventEntry> streamData = feedActual.getData();
+        when(repository.getFeed(3L, PREVIOUS, 2L, params)).thenReturn(builder.build());
 
-        assertThat(streamData, hasSize(2));
+        final Feed<EventEntry> feedActual = feedGenerator.feed(3L, PREVIOUS, 2L, uriInfo, params);
 
-        assertThat(streamData.get(0).getStreamId(), is(streamId.toString()));
+        final List<EventEntry> feed = feedActual.getData();
 
-        assertThat(streamData.get(0).getName(), is("Test Name1"));
+        final Paging paging = feedActual.getPaging();
 
-        assertThat(streamData.get(0).getSequenceId(), is(1L));
+        assertThat(feed, hasSize(1));
 
-        assertThat(streamData.get(0).getCreatedAt(), is(event1CreatedAt.toString()));
+        assertThat(feed.get(0).getStreamId(), is(streamId.toString()));
 
-        assertThat(streamData.get(0).getPayload(), is(payloadEvent1));
+        assertThat(feed.get(0).getSequenceId(), is(3L));
 
-        assertThat(streamData.get(1).getStreamId(), is(streamId.toString()));
+        assertThat(feed.get(0).getPayload(), is(notNullValue()));
 
-        assertThat(streamData.get(1).getSequenceId(), is(2L));
+        assertThat(paging.getNext(), is(nullValue()));
 
-        assertThat(streamData.get(1).getPayload(), is(payloadEvent2));
+        assertThat(paging.getPrevious(), is("http://server:123/context/event-streams/" + streamId + "/" + 4 + "/" + Link.PREVIOUS
+                + "/" + 2));
 
-        assertThat(streamData.get(1).getCreatedAt(), is(event2CreatedAt.toString()));
+        assertThat(paging.getHead(), is("http://server:123/context/event-streams/" + streamId + "/" + 0 + "/" + Link.HEAD + "/" + 2L));
+
+        assertThat(paging.getLast(), is("http://server:123/context/event-streams/" + streamId + "/" + 0 + "/" + Link.LAST + "/" + 2L));
+
 
     }
 
     @Test
-    public void shouldReturnFirstPageWhenLessRecordsThanPageSize() throws Exception {
+    public void shouldReturnEventsWhenLessRecordsThanPageSizeWhenLookingForOlderEvents() throws Exception {
+
         final UUID streamId = randomUUID();
 
         final Map<String, Object> params = new HashMap<>();
         params.put("STREAM_ID", streamId);
 
-        final FeedGenerator<Event, EventEntry> feedGenerator = new FeedGenerator<>(2L, repository, event2FeedEntryMappingStrategy);
+        final FeedGenerator<Event, EventEntry> feedGenerator = new FeedGenerator<>(repository, event2FeedEntryMappingStrategy,
+                eventEntryFeedMaxMinProvider);
 
-        final UriInfo uriInfo = new ResteasyUriInfo("http://server:222/context/event-streams" + "/" + streamId, "", "");
-
-        final String page = "1";
+        final ResteasyUriInfo uriInfo = new ResteasyUriInfo(create("http://server:123/context/"), create("event-streams/" + streamId));
 
         final Stream.Builder<Event> builder = Stream.builder();
 
-        final Event event1 = new Event(randomUUID(), streamId, 1L, "Test Name1", METADATA_JSON, createObjectBuilder().add("field1", "value1").build().toString(), new UtcClock().now());
+        final Event event1 = new Event(randomUUID(), streamId, 3L, "Test Name3", METADATA_JSON, createObjectBuilder().add("field3", "value3").build().toString(), new UtcClock().now());
 
         builder.add(event1);
 
-        when(repository.getPage(0, 3, params)).thenReturn(builder.build());
+        when(repository.recordExists(4L, params)).thenReturn(false);
 
-        final Feed<EventEntry> feedActual = feedGenerator.feed(page, uriInfo, params);
+        when(repository.recordExists(2L, params)).thenReturn(true);
 
-        final List<EventEntry> streamData = feedActual.getData();
+        when(repository.getFeed(3L, NEXT, 2L, params)).thenReturn(builder.build());
 
-        assertThat(streamData, hasSize(1));
+        final Feed<EventEntry> feedActual = feedGenerator.feed(3L, NEXT, 2L, uriInfo, params);
 
-        assertThat(streamData.get(0).getStreamId(), is(streamId.toString()));
+        final List<EventEntry> feed = feedActual.getData();
 
-        assertThat(streamData.get(0).getSequenceId(), is(1L));
+        final Paging paging = feedActual.getPaging();
 
-        assertThat(streamData.get(0).getPayload(), is(notNullValue()));
+        assertThat(feed, hasSize(1));
 
+        assertThat(feed.get(0).getStreamId(), is(streamId.toString()));
+
+        assertThat(feed.get(0).getSequenceId(), is(3L));
+
+        assertThat(feed.get(0).getPayload(), is(notNullValue()));
+
+        assertThat(paging.getPrevious(), is(nullValue()));
+
+        assertThat(paging.getNext(), is("http://server:123/context/event-streams/" + streamId + "/" + 2 + "/" + Link.NEXT
+                + "/" + 2L));
+
+        assertThat(paging.getHead(), is("http://server:123/context/event-streams/" + streamId + "/" + 0 + "/" + Link.HEAD + "/" + 2L));
+
+        assertThat(paging.getLast(), is("http://server:123/context/event-streams/" + streamId + "/" + 0 + "/" + Link.LAST + "/" + 2L));
     }
 
     @Test
-    public void shouldReturnFeedWhenSameNumberOfRecordsAsPageSize() throws Exception {
-
+    public void shouldReturnFeedWhenSameNumberOfRecordsAsPageSizeWhenLookingForNewerEvents() throws Exception {
         final UUID streamId = randomUUID();
 
         final Map<String, Object> params = new HashMap<>();
         params.put("STREAM_ID", streamId);
 
-        final UriInfo uriInfo = new ResteasyUriInfo("http://server:222/context/event-streams" + "/" + streamId, "", "");
-
-        final String page = "1";
+        final ResteasyUriInfo uriInfo = new ResteasyUriInfo(create("http://server:123/context/"), create("event-streams/" + streamId));
 
         final Stream.Builder<Event> builder = Stream.builder();
 
@@ -163,117 +168,141 @@ public class FeedGeneratorTest {
 
         final Event event1 = new Event(randomUUID(), streamId, 1L, "Test Name1", METADATA_JSON, payloadEvent1.toString(), new UtcClock().now());
         final Event event2 = new Event(randomUUID(), streamId, 2L, "Test Name2", METADATA_JSON, payloadEvent2.toString(), new UtcClock().now());
-
-        builder.add(event1);
         builder.add(event2);
 
-        final FeedGenerator<Event, EventEntry> feedGenerator = new FeedGenerator<>(2L, repository, event2FeedEntryMappingStrategy);
+        builder.add(event1);
 
-        when(repository.getPage(0, 3, params)).thenReturn(builder.build());
+        final FeedGenerator<Event, EventEntry> feedGenerator = new FeedGenerator<>(repository, event2FeedEntryMappingStrategy,
+                eventEntryFeedMaxMinProvider);
 
-        final Feed<EventEntry> feedActual = feedGenerator.feed(page, uriInfo, params);
+        when(repository.recordExists(3L, params)).thenReturn(true);
 
-        final List<EventEntry> streamData = feedActual.getData();
+        when(repository.recordExists(0L, params)).thenReturn(false);
 
-        assertThat(streamData, hasSize(2));
+        when(repository.getFeed(3L, PREVIOUS, 2L, params)).thenReturn(builder.build());
 
-        assertThat(streamData.get(0).getStreamId(), is(streamId.toString()));
+        final Feed<EventEntry> feedActual = feedGenerator.feed(3L, PREVIOUS, 2L, uriInfo, params);
 
-        assertThat(streamData.get(0).getSequenceId(), is(1L));
+        final List<EventEntry> feed = feedActual.getData();
 
-        assertThat(streamData.get(0).getPayload(), is(payloadEvent1));
+        final Paging paging = feedActual.getPaging();
 
-        assertThat(streamData.get(1).getStreamId(), is(streamId.toString()));
+        assertThat(feed, hasSize(2));
 
-        assertThat(streamData.get(1).getSequenceId(), is(2L));
+        assertThat(feed.get(0).getStreamId(), is(streamId.toString()));
+        assertThat(feed.get(0).getSequenceId(), is(2L));
+        assertThat(feed.get(0).getPayload(), is(payloadEvent2));
+        assertThat(feed.get(1).getStreamId(), is(streamId.toString()));
+        assertThat(feed.get(1).getSequenceId(), is(1L));
+        assertThat(feed.get(1).getPayload(), is(payloadEvent1));
 
-        assertThat(streamData.get(1).getPayload(), is(payloadEvent2));
+        assertThat(paging.getNext(), is(nullValue()));
+
+        assertThat(paging.getPrevious(), is("http://server:123/context/event-streams/" + streamId + "/" + 3 + "/" + Link.PREVIOUS
+                + "/" + 2));
+
+        assertThat(paging.getHead(), is("http://server:123/context/event-streams/" + streamId + "/" + 0 + "/" + Link.HEAD + "/" + 2L));
+
+        assertThat(paging.getLast(), is("http://server:123/context/event-streams/" + streamId + "/" + 0 + "/" + Link.LAST + "/" + 2L));
+
     }
 
-    @Test
-    public void shouldReturnLinkTo2ndPage() throws Exception {
 
+    @Test
+    public void shouldReturnFeedWhenSameNumberOfRecordsAsPageSizeWhenLookingForOlderEvents() throws Exception {
         final UUID streamId = randomUUID();
 
         final Map<String, Object> params = new HashMap<>();
         params.put("STREAM_ID", streamId);
 
-        final FeedGenerator<Event, EventEntry> feedGenerator = new FeedGenerator<>(2L, repository, event2FeedEntryMappingStrategy);
 
         final Stream.Builder<Event> builder = Stream.builder();
 
-        final Event event1 = new Event(randomUUID(), streamId, 1L, "Test Name1", METADATA_JSON, createObjectBuilder().add("field1", "value1").build().toString(), new UtcClock().now());
-        final Event event2 = new Event(randomUUID(), streamId, 2L, "Test Name2", METADATA_JSON, createObjectBuilder().add("field2", "value2").build().toString(), new UtcClock().now());
-        final Event event3 = new Event(randomUUID(), streamId, 3L, "Test Name3", METADATA_JSON, createObjectBuilder().add("field3", "value3").build().toString(), new UtcClock().now());
+        final JsonObject payloadEvent4 = createObjectBuilder().add("field4", "value4").build();
+        final JsonObject payloadEvent3 = createObjectBuilder().add("field3", "value3").build();
 
-        builder.add(event1);
-        builder.add(event2);
+        final Event event4 = new Event(randomUUID(), streamId, 4L, "Test Name4", METADATA_JSON, payloadEvent4.toString(), new UtcClock().now());
+        final Event event3 = new Event(randomUUID(), streamId, 3L, "Test Name3", METADATA_JSON, payloadEvent3.toString(), new UtcClock().now());
+
+        builder.add(event4);
         builder.add(event3);
 
-        when(repository.getPage(0, 3, params)).thenReturn(builder.build());
+        final FeedGenerator<Event, EventEntry> feedGenerator = new FeedGenerator<>(repository, event2FeedEntryMappingStrategy,
+                eventEntryFeedMaxMinProvider);
 
-        final Feed<EventEntry> feed = feedGenerator.feed("1", uriInfoWithAbsoluteUri("http://server:123/context/event-streams/" + streamId), params);
 
-        assertThat(feed.getPaging().getNext(), is("http://server:123/context/event-streams/" + streamId + "?page=2"));
+        when(repository.recordExists(5L, params)).thenReturn(false);
 
+        when(repository.recordExists(2L, params)).thenReturn(true);
+
+        when(repository.getFeed(4L, NEXT, 2L, params)).thenReturn(builder.build());
+
+        final ResteasyUriInfo uriInfo = new ResteasyUriInfo(create("http://server:123/context/"), create("event-streams/" + streamId));
+
+        final Feed<EventEntry> feedActual = feedGenerator.feed(4L, NEXT, 2L, uriInfo, params);
+
+        final List<EventEntry> feed = feedActual.getData();
+
+        final Paging paging = feedActual.getPaging();
+
+        assertThat(feed, hasSize(2));
+        assertThat(feed.get(0).getStreamId(), is(streamId.toString()));
+        assertThat(feed.get(0).getSequenceId(), is(4L));
+        assertThat(feed.get(0).getPayload(), is(payloadEvent4));
+        assertThat(feed.get(1).getStreamId(), is(streamId.toString()));
+        assertThat(feed.get(1).getSequenceId(), is(3L));
+        assertThat(feed.get(1).getPayload(), is(payloadEvent3));
+
+        assertThat(paging.getPrevious(), is(nullValue()));
+
+        assertThat(paging.getNext(), is("http://server:123/context/event-streams/" + streamId + "/" + 2 + "/" + Link.NEXT
+                + "/" + 2L));
+
+        assertThat(paging.getHead(), is("http://server:123/context/event-streams/" + streamId + "/" + 0 + "/" + Link.HEAD + "/" + 2L));
+
+        assertThat(paging.getLast(), is("http://server:123/context/event-streams/" + streamId + "/" + 0 + "/" + Link.LAST + "/" + 2L));
     }
 
     @Test
-    public void shouldNotReturnLinkToNextPageIfNoMoreRecords() {
+    public void shouldReturnLinkForPreviousPageIfOnLast() throws Exception {
 
         final UUID streamId = randomUUID();
 
         final Map<String, Object> params = new HashMap<>();
         params.put("STREAM_ID", streamId);
 
-        final FeedGenerator<Event, EventEntry> feedGenerator = new FeedGenerator<>(2L, repository, event2FeedEntryMappingStrategy);
+        final FeedGenerator<Event, EventEntry> feedGenerator = new FeedGenerator<>(repository, event2FeedEntryMappingStrategy,
+                eventEntryFeedMaxMinProvider);
 
         final Stream.Builder<Event> builder = Stream.builder();
 
         final Event event1 = new Event(randomUUID(), streamId, 1L, "Test Name1", METADATA_JSON, createObjectBuilder().add("field1", "value1").build().toString(), new UtcClock().now());
         final Event event2 = new Event(randomUUID(), streamId, 2L, "Test Name2", METADATA_JSON, createObjectBuilder().add("field2", "value2").build().toString(), new UtcClock().now());
 
-        builder.add(event1);
         builder.add(event2);
 
-        when(repository.getPage(0, 3, params)).thenReturn(builder.build());
+        builder.add(event1);
 
-        final Feed<EventEntry> feed = feedGenerator.feed("1", uriInfoWithAbsoluteUri("http://server:123/context/event-streams/" + streamId), params);
+        when(repository.recordExists(3l, params)).thenReturn(true);
+
+        when(repository.getFeed(0l, LAST, 2l, params)).thenReturn(builder.build());
+
+        final ResteasyUriInfo uriInfo = new ResteasyUriInfo(create("http://server:123/context/"), create("event-streams/" + streamId));
+
+        final Feed<EventEntry> feed = feedGenerator.feed(0l, LAST, 2l, uriInfo, params);
+
+        assertThat(feed.getPaging().getPrevious(), is("http://server:123/context/event-streams/" + streamId + "/" + 3 + "/" + Link.PREVIOUS
+                + "/" + 2L));
 
         assertThat(feed.getPaging().getNext(), is(nullValue()));
 
+        assertThat(feed.getPaging().getHead(), is("http://server:123/context/event-streams/" + streamId + "/" + 0 + "/" + Link.HEAD + "/" + 2L));
+
+        assertThat(feed.getPaging().getLast(), is("http://server:123/context/event-streams/" + streamId + "/" + 0 + "/" + Link.LAST + "/" + 2L));
     }
 
     @Test
-    public void shouldReturnLinkToPreviousPage() throws Exception {
-
-        final UUID streamId = randomUUID();
-
-        final Map<String, Object> params = new HashMap<>();
-        params.put("STREAM_ID", streamId);
-
-        final FeedGenerator<Event, EventEntry> feedGenerator = new FeedGenerator<>(2L, repository, event2FeedEntryMappingStrategy);
-
-        final Stream.Builder<Event> builder = Stream.builder();
-
-        final Event event1 = new Event(randomUUID(), streamId, 1L, "Test Name1", METADATA_JSON, createObjectBuilder().add("field1", "value1").build().toString(), new UtcClock().now());
-        final Event event2 = new Event(randomUUID(), streamId, 2L, "Test Name2", METADATA_JSON, createObjectBuilder().add("field2", "value2").build().toString(), new UtcClock().now());
-        final Event event3 = new Event(randomUUID(), streamId, 3L, "Test Name3", METADATA_JSON, createObjectBuilder().add("field3", "value3").build().toString(), new UtcClock().now());
-
-        builder.add(event1);
-        builder.add(event2);
-        builder.add(event3);
-
-        when(repository.getPage(2, 3, params)).thenReturn(builder.build());
-
-        final Feed<EventEntry> feed = feedGenerator.feed("2", uriInfoWithAbsoluteUri("http://server:234/context/event-streams/" + streamId), params);
-
-        assertThat(feed.getPaging().getPrevious(), is("http://server:234/context/event-streams/" + streamId + "?page=1"));
-
-    }
-
-    @Test
-    public void shouldNotReturnLinkToPreviousPageIfOnFirstPage() throws Exception {
+    public void shouldReturnLinkForNextPageIfOnHead() throws Exception {
 
         final UUID streamId = randomUUID();
 
@@ -282,66 +311,30 @@ public class FeedGeneratorTest {
 
         final Stream.Builder<Event> builder = Stream.builder();
 
-        final Event event1 = new Event(randomUUID(), streamId, 1L, "Test Name1", METADATA_JSON, createObjectBuilder().add("field1", "value1").build().toString(), new UtcClock().now());
         final Event event2 = new Event(randomUUID(), streamId, 2L, "Test Name2", METADATA_JSON, createObjectBuilder().add("field2", "value2").build().toString(), new UtcClock().now());
         final Event event3 = new Event(randomUUID(), streamId, 3L, "Test Name3", METADATA_JSON, createObjectBuilder().add("field3", "value3").build().toString(), new UtcClock().now());
 
-        builder.add(event1);
-        builder.add(event2);
         builder.add(event3);
+        builder.add(event2);
 
-        final FeedGenerator<Event, EventEntry> feedGenerator = new FeedGenerator<>(2L, repository, event2FeedEntryMappingStrategy);
+        when(repository.recordExists(1l, params)).thenReturn(true);
 
-        when(repository.getPage(0, 3, params)).thenReturn(builder.build());
+        when(repository.getFeed(0l, HEAD, 2l, params)).thenReturn(builder.build());
 
-        final Feed<EventEntry> feed = feedGenerator.feed("1", uriInfoWithAbsoluteUri("http://server:234/context/streams"), params);
+        final FeedGenerator<Event, EventEntry> feedGenerator = new FeedGenerator<>(repository, event2FeedEntryMappingStrategy,
+                eventEntryFeedMaxMinProvider);
+
+        final ResteasyUriInfo uriInfo = new ResteasyUriInfo(create("http://server:123/context/"), create("event-streams/" + streamId));
+
+        final Feed<EventEntry> feed = feedGenerator.feed(0, HEAD, 2l, uriInfo, params);
 
         assertThat(feed.getPaging().getPrevious(), is(nullValue()));
 
+        assertThat(feed.getPaging().getNext(), is("http://server:123/context/event-streams/" + streamId + "/" + 1 + "/" + Link.NEXT
+                + "/" + 2L));
+
+        assertThat(feed.getPaging().getHead(), is("http://server:123/context/event-streams/" + streamId + "/" + 0 + "/" + Link.HEAD + "/" + 2L));
+
+        assertThat(feed.getPaging().getLast(), is("http://server:123/context/event-streams/" + streamId + "/" + 0 + "/" + Link.LAST + "/" + 2L));
     }
-
-    @Test
-    public void shouldSendSameArgumentsToRepositoryQueryingForPage3() throws Exception {
-        final UUID streamId = randomUUID();
-
-        final Map<String, Object> params = new HashMap<>();
-        params.put("STREAM_ID", streamId);
-
-        final UriInfo uriInfo = new ResteasyUriInfo("http://server:222/context/event-streams" + "/" + streamId, "", "");
-
-        final String page = "3";
-
-        final FeedGenerator<Event, EventEntry> feedGenerator = new FeedGenerator<>(10L, repository, event2FeedEntryMappingStrategy);
-
-        final Stream.Builder<Event> builder = Stream.builder();
-
-        final Event event1 = new Event(randomUUID(), streamId, 21L, "Test Name1", METADATA_JSON, createObjectBuilder().add("field21", "value21").build().toString(), new UtcClock().now());
-        final Event event2 = new Event(randomUUID(), streamId, 22L, "Test Name2", METADATA_JSON, createObjectBuilder().add("field22", "value22").build().toString(), new UtcClock().now());
-        final Event event3 = new Event(randomUUID(), streamId, 23L, "Test Name3", METADATA_JSON, createObjectBuilder().add("field23", "value23").build().toString(), new UtcClock().now());
-
-        builder.add(event1);
-        builder.add(event2);
-        builder.add(event3);
-
-
-        when(repository.getPage(20, 11, params)).thenReturn(builder.build());
-
-        final Feed<EventEntry> feedActual = feedGenerator.feed(page, uriInfo, params);
-
-        final List<EventEntry> streamData = feedActual.getData();
-        assertThat(streamData, hasSize(3));
-
-        final ArgumentCaptor<Long> pageCaptor = ArgumentCaptor.forClass(Long.class);
-        final ArgumentCaptor<Long> offsetCaptor = ArgumentCaptor.forClass(Long.class);
-        final ArgumentCaptor<HashMap> paramsCaptor = ArgumentCaptor.forClass(HashMap.class);
-
-        verify(repository).getPage(offsetCaptor.capture(), pageCaptor.capture(), paramsCaptor.capture());
-
-        assertThat(offsetCaptor.getValue(), is(20L));
-
-        assertThat(pageCaptor.getValue(), is(11l));
-
-        assertThat(paramsCaptor.getValue().get("STREAM_ID"), is(streamId));
-    }
-
 }

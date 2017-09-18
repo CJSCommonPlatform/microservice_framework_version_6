@@ -6,7 +6,9 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy;
@@ -14,10 +16,9 @@ import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidSe
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 import uk.gov.justice.services.test.utils.persistence.AbstractJdbcRepositoryIT;
 
+import java.sql.SQLException;
 import java.time.ZonedDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -156,60 +157,47 @@ public class EventJdbcRepositoryIT extends AbstractJdbcRepositoryIT<EventJdbcRep
     }
 
     @Test
-    public void shouldReturnPageOfSpecifiedSize() throws InvalidSequenceIdException {
+    public void shouldReturnPageOfSpecifiedSize()
+            throws InvalidSequenceIdException, SQLException {
 
         final UUID streamId = randomUUID();
-
-        final Map<String, Object> params = new HashMap();
-        params.put("STREAM_ID", streamId);
 
         for (long sequence = 1; sequence < 5l; sequence++) {
             jdbcRepository.insert(eventOf(sequence, streamId));
         }
 
-        final List<Event> streams = jdbcRepository.getPage(0, 3, params).collect(toList());
+        final List<Event> streams = jdbcRepository.head(streamId, 3).collect(toList());
         assertThat(streams, hasSize(3));
 
     }
 
     @Test
-    public void shouldReturnPageWithOffsetAndSize() throws InvalidSequenceIdException {
+    public void shouldReturnFeedFromOffsetIncludingAndSize() throws InvalidSequenceIdException, SQLException {
 
         final UUID streamId = randomUUID();
-
-        final Map<String, Object> params = new HashMap();
-        params.put("STREAM_ID", streamId);
-
-        final int offset = 4;
-        final int pageSize = 2;
 
         for (long sequence = 1; sequence < 8l; sequence++) {
             jdbcRepository.insert(eventOf(sequence, streamId));
         }
 
-        final List<Event> streams = jdbcRepository.getPage(offset, pageSize, params).collect(toList());
+        final List<Event> streams = jdbcRepository.previous(streamId, 4L, 2L).collect(toList());
         assertThat(streams, hasSize(2));
 
         assertThat(streams.get(0).getStreamId(), is(streamId));
         assertThat(streams.get(0).getSequenceId(), is(5L));
 
         assertThat(streams.get(1).getStreamId(), is(streamId));
-        assertThat(streams.get(1).getSequenceId(), is(6L));
-
+        assertThat(streams.get(1).getSequenceId(), is(4L));
     }
 
-
     @Test
-    public void shouldReturnPageOnlyOfRequiredStreamWithOffsetAndSize() throws InvalidSequenceIdException {
+    public void shouldReturnPageOnlyOfRequiredStreamWithOffsetAndSize() throws InvalidSequenceIdException, SQLException {
 
         final UUID streamId1 = randomUUID();
         final UUID streamId2 = randomUUID();
         final UUID streamId3 = randomUUID();
 
-        final Map<String, Object> params = new HashMap();
-        params.put("STREAM_ID", streamId1);
-
-        final int offset = 4;
+        final String position = "4";
         final int pageSize = 3;
 
         for (long sequence = 1; sequence < 8l; sequence++) {
@@ -224,19 +212,115 @@ public class EventJdbcRepositoryIT extends AbstractJdbcRepositoryIT<EventJdbcRep
             jdbcRepository.insert(eventOf(sequence, streamId3));
         }
 
-        final List<Event> streams = jdbcRepository.getPage(offset, pageSize, params).collect(toList());
+        final List<Event> streams = jdbcRepository.previous(streamId1,4L, 3L).collect(toList());
         assertThat(streams, hasSize(3));
 
         assertThat(streams.get(0).getStreamId(), is(streamId1));
-        assertThat(streams.get(0).getSequenceId(), is(5L));
+        assertThat(streams.get(0).getSequenceId(), is(6L));
 
         assertThat(streams.get(1).getStreamId(), is(streamId1));
-        assertThat(streams.get(1).getSequenceId(), is(6L));
+        assertThat(streams.get(1).getSequenceId(), is(5L));
 
         assertThat(streams.get(2).getStreamId(), is(streamId1));
-        assertThat(streams.get(2).getSequenceId(), is(7L));
+        assertThat(streams.get(2).getSequenceId(), is(4L));
+
+    }
+
+    @Test
+    public void shouldReturnTrueWhenRecordExists() throws InvalidSequenceIdException {
+        final UUID streamId = randomUUID();
+
+        for (long sequence = 1; sequence < 8l; sequence++) {
+            jdbcRepository.insert(eventOf(sequence, streamId));
+        }
+
+        final boolean exists = jdbcRepository.recordExists(streamId,7);
+        assertTrue(exists);
+    }
+
+    @Test
+    public void shouldReturnFalseWhenRecordDoesNotExist() throws InvalidSequenceIdException {
+        final UUID streamId = randomUUID();
+
+        for (long sequence = 1; sequence < 8l; sequence++) {
+            jdbcRepository.insert(eventOf(sequence, streamId));
+        }
+
+        final boolean exists = jdbcRepository.recordExists(streamId,10);
+        assertFalse(exists);
+    }
+
+    @Test
+    public void shouldReturnHeadRecords() throws InvalidSequenceIdException, SQLException {
+        final UUID streamId = randomUUID();
+
+        for (long sequence = 1; sequence < 8l; sequence++) {
+            jdbcRepository.insert(eventOf(sequence, streamId));
+        }
+
+        final List<Event> streams = jdbcRepository.head(streamId,2).collect(toList());
+        assertThat(streams, hasSize(2));
+
+        assertThat(streams.get(0).getStreamId(), is(streamId));
+        assertThat(streams.get(0).getSequenceId(), is(7L));
+
+        assertThat(streams.get(1).getStreamId(), is(streamId));
+        assertThat(streams.get(1).getSequenceId(), is(6L));
+    }
+
+    @Test
+    public void shouldReturnNextRecords() throws InvalidSequenceIdException, SQLException {
+        final UUID streamId = randomUUID();
+
+        for (long sequence = 1; sequence < 8l; sequence++) {
+            jdbcRepository.insert(eventOf(sequence, streamId));
+        }
+
+        final List<Event> streams = jdbcRepository.next(streamId,3L, 2).collect(toList());
+        assertThat(streams, hasSize(2));
+
+        assertThat(streams.get(0).getStreamId(), is(streamId));
+        assertThat(streams.get(0).getSequenceId(), is(3L));
+
+        assertThat(streams.get(1).getStreamId(), is(streamId));
+        assertThat(streams.get(1).getSequenceId(), is(2L));
+    }
+
+    @Test
+    public void shouldReturnPreviousRecords() throws InvalidSequenceIdException, SQLException {
+        final UUID streamId = randomUUID();
+
+        for (long sequence = 1; sequence < 8l; sequence++) {
+            jdbcRepository.insert(eventOf(sequence, streamId));
+        }
+
+        final List<Event> streams = jdbcRepository.previous(streamId,3L, 2).collect(toList());
+        assertThat(streams, hasSize(2));
+
+        assertThat(streams.get(0).getStreamId(), is(streamId));
+        assertThat(streams.get(0).getSequenceId(), is(4L));
+
+        assertThat(streams.get(1).getStreamId(), is(streamId));
+        assertThat(streams.get(1).getSequenceId(), is(3L));
+    }
 
 
+    @Test
+    public void shouldReturnFirstRecords() throws InvalidSequenceIdException, SQLException {
+        final UUID streamId = randomUUID();
+
+        for (long sequence = 1; sequence < 8l; sequence++) {
+            jdbcRepository.insert(eventOf(sequence, streamId));
+        }
+
+        final List<Event> streams = jdbcRepository.first(streamId,2).collect(toList());
+        assertThat(streams, hasSize(2));
+
+        assertThat(streams.get(0).getStreamId(), is(streamId));
+        assertThat(streams.get(0).getSequenceId(), is(2L));
+
+        assertThat(streams.get(1).getStreamId(), is(streamId));
+        assertThat(streams.get(1).getSequenceId(), is(1L));
     }
 
     private Event eventOf(final UUID id, final String name, final UUID streamId, final long sequenceId, final String payloadJSON, final String metadataJSON, final ZonedDateTime timestamp) {

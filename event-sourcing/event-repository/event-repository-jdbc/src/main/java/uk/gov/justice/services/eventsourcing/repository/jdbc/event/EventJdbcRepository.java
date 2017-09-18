@@ -8,12 +8,11 @@ import uk.gov.justice.services.eventsourcing.repository.jdbc.EventInsertionStrat
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidSequenceIdException;
 import uk.gov.justice.services.jdbc.persistence.AbstractJdbcRepository;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
-import uk.gov.justice.services.jdbc.persistence.PaginationCapableRepository;
 import uk.gov.justice.services.jdbc.persistence.PreparedStatementWrapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Map;
+import java.util.Comparator;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -27,7 +26,7 @@ import org.slf4j.Logger;
  * JDBC based repository for event log records.
  */
 @ApplicationScoped
-public class EventJdbcRepository extends AbstractJdbcRepository<Event> implements PaginationCapableRepository<Event> {
+public class EventJdbcRepository extends AbstractJdbcRepository<Event> {
 
     /**
      * Column Names
@@ -49,8 +48,16 @@ public class EventJdbcRepository extends AbstractJdbcRepository<Event> implement
     static final String SQL_FIND_LATEST_SEQUENCE_ID = "SELECT MAX(sequence_id) FROM event_log WHERE stream_id=?";
     static final String SQL_DISTINCT_STREAM_ID = "SELECT DISTINCT stream_id FROM event_log";
     private static final String FAILED_TO_READ_STREAM = "Failed to read stream {}";
-    private static final String STREAM_ID = "STREAM_ID";
-    private static final String SQL_PAGE = "SELECT * FROM event_log WHERE stream_id=? ORDER BY sequence_id ASC LIMIT ? OFFSET ?;";
+
+    /*
+     * Pagination Statements
+     */
+    private static final String SQL_GET_HEAD = "SELECT * FROM event_log t WHERE t.stream_id=?  ORDER BY t.sequence_id DESC LIMIT ?";
+    private static final String SQL_GET_PREVIOUS = "SELECT * FROM event_log t WHERE t.stream_id=? and t.sequence_id  >= ?  ORDER BY t.sequence_id ASC LIMIT ?";
+    private static final String SQL_GET_NEXT = "SELECT * FROM event_log t WHERE t.stream_id=? and t.sequence_id  <= ? ORDER BY t.sequence_id DESC LIMIT ?";
+    private static final String SQL_GET_FIRST = "SELECT * FROM event_log t WHERE t.stream_id=?  ORDER BY t.sequence_id ASC LIMIT ?";
+    private static final String SQL_RECORD_EXIST = "SELECT COUNT(*) FROM event_log t WHERE t.stream_id=? and t.sequence_id  = ?"; //-- Previous
+
     private static final String READING_STREAM_ALL_EXCEPTION = "Exception while reading stream";
     private static final String READING_STREAM_EXCEPTION = "Exception while reading stream %s";
     private static final String JNDI_DS_EVENT_STORE_PATTERN = "java:/app/%s/DS.eventstore";
@@ -66,7 +73,8 @@ public class EventJdbcRepository extends AbstractJdbcRepository<Event> implement
      * @throws InvalidSequenceIdException if the version already exists or is null.
      */
     public void insert(final Event event) throws InvalidSequenceIdException {
-        try (final PreparedStatementWrapper ps = preparedStatementWrapperOf(eventInsertionStrategy.insertStatement())) {
+        try (final PreparedStatementWrapper ps = preparedStatementWrapperOf(
+                eventInsertionStrategy.insertStatement())) {
             eventInsertionStrategy.insert(ps, event);
         } catch (SQLException e) {
             logger.error("Error persisting event to the database", e);
@@ -102,10 +110,12 @@ public class EventJdbcRepository extends AbstractJdbcRepository<Event> implement
      * @param versionFrom the version to read from.
      * @return a stream of {@link Event}. Never returns null.
      */
-    public Stream<Event> findByStreamIdFromSequenceIdOrderBySequenceIdAsc(final UUID streamId, final Long versionFrom) {
+    public Stream<Event> findByStreamIdFromSequenceIdOrderBySequenceIdAsc(final UUID streamId,
+                                                                          final Long versionFrom) {
 
         try {
-            final PreparedStatementWrapper ps = preparedStatementWrapperOf(SQL_FIND_BY_STREAM_ID_AND_SEQUENCE_ID);
+            final PreparedStatementWrapper ps = preparedStatementWrapperOf(
+                    SQL_FIND_BY_STREAM_ID_AND_SEQUENCE_ID);
 
             ps.setObject(1, streamId);
             ps.setLong(2, versionFrom);
@@ -137,7 +147,8 @@ public class EventJdbcRepository extends AbstractJdbcRepository<Event> implement
      * @return latest sequence streamId for the stream.  Returns 0 if stream doesn't exist.
      */
     public long getLatestSequenceIdForStream(final UUID streamId) {
-        try (final PreparedStatementWrapper ps = preparedStatementWrapperOf(SQL_FIND_LATEST_SEQUENCE_ID)) {
+        try (final PreparedStatementWrapper ps = preparedStatementWrapperOf(
+                SQL_FIND_LATEST_SEQUENCE_ID)) {
 
             ps.setObject(1, streamId);
 
@@ -171,7 +182,8 @@ public class EventJdbcRepository extends AbstractJdbcRepository<Event> implement
 
     }
 
-    private Stream<UUID> streamFrom(final PreparedStatementWrapper psWrapper, final ResultSet resultSet) {
+    private Stream<UUID> streamFrom(final PreparedStatementWrapper psWrapper,
+                                    final ResultSet resultSet) {
         return streamOf(psWrapper, resultSet, e -> {
             try {
                 return (UUID) resultSet.getObject(COL_STREAM_ID);
@@ -197,17 +209,55 @@ public class EventJdbcRepository extends AbstractJdbcRepository<Event> implement
         return format(JNDI_DS_EVENT_STORE_PATTERN, warFileName());
     }
 
-    @Override
-    public Stream<Event> getPage(final long offset, final long pageSize,  final Map<String, Object> params) {
+    public boolean recordExists(final UUID streamId, final long position) {
         try {
-            final Object streamId =  params.get(STREAM_ID);
-            final PreparedStatementWrapper ps = preparedStatementWrapperOf(SQL_PAGE);
+            PreparedStatementWrapper ps = preparedStatementWrapperOf(SQL_RECORD_EXIST);
             ps.setObject(1, streamId.toString());
-            ps.setLong(2, pageSize);
-            ps.setLong(3, offset);
-            return streamOf(ps);
+            ps.setLong(2, position);
+            try (ResultSet rs = ps.executeQuery()) {
+                rs.next();
+                return rs.getInt(1) > 0;
+            }
         } catch (SQLException e) {
             throw new JdbcRepositoryException(READING_STREAM_EXCEPTION, e);
         }
+    }
+
+    public Stream<Event> first(final UUID streamId, final long pageSize)
+            throws SQLException {
+        final PreparedStatementWrapper ps;
+        ps = preparedStatementWrapperOf(SQL_GET_FIRST);
+        ps.setObject(1, streamId);
+        ps.setLong(2, pageSize);
+        return reverseOrder(ps);
+    }
+
+    public Stream<Event> next(final UUID streamId, final long position, final long pageSize)
+            throws SQLException {
+        final PreparedStatementWrapper ps = preparedStatementWrapperOf(SQL_GET_NEXT);
+        ps.setObject(1, streamId);
+        ps.setLong(2, position);
+        ps.setLong(3, pageSize);
+        return streamOf(ps);
+    }
+
+    public Stream<Event> previous(final UUID streamId, final long position, final long pageSize)
+            throws SQLException {
+        final PreparedStatementWrapper ps = preparedStatementWrapperOf(SQL_GET_PREVIOUS);
+        ps.setObject(1, streamId);
+        ps.setLong(2, position);
+        ps.setLong(3, pageSize);
+        return reverseOrder(ps);
+    }
+
+    public Stream<Event> head(final UUID streamId, final long pageSize) throws SQLException {
+        final PreparedStatementWrapper ps = preparedStatementWrapperOf(SQL_GET_HEAD);
+        ps.setObject(1, streamId);
+        ps.setLong(2, pageSize);
+        return streamOf(ps);
+    }
+
+    private Stream<Event> reverseOrder(final PreparedStatementWrapper ps) throws SQLException {
+        return streamOf(ps).sorted(Comparator.comparing(Event::getSequenceId).reversed());
     }
 }

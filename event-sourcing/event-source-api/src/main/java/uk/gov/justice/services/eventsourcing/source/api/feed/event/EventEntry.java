@@ -13,12 +13,13 @@ public class EventEntry {
     private final JsonObject payload;
 
 
-    public EventEntry(final UUID eventId,
-                      final UUID streamId,
-                      final String name,
-                      final long sequenceId,
-                      final JsonObject payload,
-                      final String createdAt
+    public EventEntry(
+            final UUID eventId,
+            final UUID streamId,
+            final long sequenceId,
+            final String name,
+            final JsonObject payload,
+            final String createdAt
     ) {
         this.eventId = eventId.toString();
         this.streamId = streamId.toString();

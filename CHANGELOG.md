@@ -5,13 +5,23 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
-## [2.2.0] 2017-08-02
+## [2.2.1] - 2017-09-01
+
+### Changed
+- Converted to release to bintray
+- Converted example context to run as a single war by default
+
+### Fixed
+- Class conflicts between generated clients in a single war
+
+## [2.2.0] - 2017-08-02
 
 ### Changed
 - Use maven-framework-parent-pom 1.6.1, which simply changes the wildfly-maven-plugin to 1.2.0.Alpha6 and stops adding it to every build
 - example-it: move the wildfly operations to the pre/post-integration-test phases (where they belong)
 - Switch to bintray for release processes
 - Cleaned up some unnecessary version overrides
+- Utilities library upgraded to 1.8.1 and file service to 1.11.1 to pick up JSON logging fix
 
 ## [2.1.0] 2017-07-17
 

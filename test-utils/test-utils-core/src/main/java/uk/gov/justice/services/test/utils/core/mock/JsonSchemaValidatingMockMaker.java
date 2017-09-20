@@ -3,10 +3,10 @@ package uk.gov.justice.services.test.utils.core.mock;
 import static java.util.Optional.empty;
 
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.envelope.EnvelopeValidator;
 import uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler;
-import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
+import uk.gov.justice.services.core.json.DefaultJsonSchemaValidatorFactory;
+import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
@@ -30,7 +30,7 @@ public class JsonSchemaValidatingMockMaker implements MockMaker {
     private final MockMaker mockMakerDelegate = new CglibMockMaker();
 
     private final EnvelopeValidator envelopeValidator = new EnvelopeValidator(
-            new DefaultJsonSchemaValidator(),
+            new DefaultJsonSchemaValidatorFactory().getDefaultJsonSchemaValidator(),
             new RethrowingValidationExceptionHandler(),
             new ObjectMapperProducer().objectMapper());
 

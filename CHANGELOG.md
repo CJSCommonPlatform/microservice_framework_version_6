@@ -5,6 +5,8 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [2.2.2] - 2017-09-21
+
 ### Changed
 - Utilities library upgraded to 1.8.1 and file service to 1.11.1 to pick up JSON logging fix
 

@@ -135,9 +135,7 @@ public class DefaultCustomUserIdResourceIT {
             ValidParameterCollectionBuilderFactory.class,
             DefaultTraceLogger.class,
             DefaultHttpTraceLoggerHelper.class,
-
-            DefaultFileSystemUrlResolverStrategy.class,
-            GlobalValueProducer.class
+            DefaultFileSystemUrlResolverStrategy.class
     })
     public WebApp war() {
         return new WebApp()

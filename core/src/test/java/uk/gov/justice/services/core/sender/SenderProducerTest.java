@@ -2,12 +2,12 @@ package uk.gov.justice.services.core.sender;
 
 import static co.unruly.matchers.OptionalMatchers.contains;
 import static java.util.UUID.randomUUID;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsSame.sameInstance;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
@@ -20,13 +20,7 @@ import uk.gov.justice.services.core.dispatcher.Dispatcher;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationException;
-import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandler;
 import uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler;
-import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
-import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
-import uk.gov.justice.services.core.json.DefaultJsonSchemaValidatorFactory;
-import uk.gov.justice.services.core.json.FileSystemUrlResolverStrategy;
-import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
@@ -34,6 +28,8 @@ import java.util.UUID;
 
 import javax.enterprise.inject.spi.InjectionPoint;
 
+import org.everit.json.schema.Schema;
+import org.everit.json.schema.ValidationException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -42,7 +38,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -61,6 +56,9 @@ public class SenderProducerTest {
     @Mock
     private SystemUserUtil systemUserUtil;
 
+    @Mock
+    private JsonSchemaValidator jsonSchemaValidator;
+
 
     @InjectMocks
     private SenderProducer senderProducer;
@@ -68,7 +66,6 @@ public class SenderProducerTest {
     @Before
     public void setUp() throws Exception {
         when(dispatcherCache.dispatcherFor(injectionPoint)).thenReturn(dispatcher);
-        senderProducer.jsonSchemaValidator = new DefaultJsonSchemaValidatorFactory().getDefaultJsonSchemaValidator();
         senderProducer.objectMapper = new ObjectMapperProducer().objectMapper();
         senderProducer.envelopeValidationExceptionHandler = new RethrowingValidationExceptionHandler();
     }
@@ -128,6 +125,10 @@ public class SenderProducerTest {
 
     @Test
     public void shouldThrowExceptionIfResponseNotValidAgainstSchema() throws Exception {
+        doThrow(new ValidationException(mock(Schema.class), "Message not valid against schema", "keyword", "location"))
+                .when(jsonSchemaValidator).validate(any(String.class), any(String.class));
+
+
         senderProducer.envelopeValidationExceptionHandler = new RethrowingValidationExceptionHandler();
 
         exception.expect(EnvelopeValidationException.class);

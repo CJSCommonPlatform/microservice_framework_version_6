@@ -442,7 +442,6 @@
                 <simple name="java:global/eventlog.insertion.strategy" value="uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy" type="java.lang.String"/>
                 <simple name="java:global/envelope.validation.exception.handler" value="uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler" type="java.lang.String"/>
                 <simple name="java:global/fileservice.metadata.sql.provider.strategy" value="uk.gov.justice.services.fileservice.repository.AnsiMetadataSqlProvider" type="java.lang.String"/>
-                <simple name="java:global/file.system.url.resolver.strategy" value="uk.gov.justice.services.core.json.VfsUrlResolverStrategy" type="java.lang.String"/>
             </bindings>
             <remote-naming/>
         </subsystem>

@@ -18,6 +18,8 @@ pom.xml~
 .gitignore~
 activemq-data/
 .sonar
+cxf-rs.properties
+event-sourcing/event-source-api-integration-test/
 
 ### SublimeText ###
 # cache files for sublime text

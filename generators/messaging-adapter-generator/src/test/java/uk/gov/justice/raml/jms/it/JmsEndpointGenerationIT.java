@@ -8,52 +8,22 @@ import static org.junit.Assert.assertTrue;
 import uk.gov.justice.api.ContextaEventProcessorPublicEventJmsListener;
 import uk.gov.justice.api.Service1CommandControllerStructureControllerCommandJmsListener;
 import uk.gov.justice.api.Service1CommandHandlerStructureHandlerCommandJmsListener;
-import uk.gov.justice.api.Service2EventListenerEventFilter;
-import uk.gov.justice.api.Service2EventListenerPeopleEventJmsListener;
 import uk.gov.justice.api.Service2EventProcessorStructureEventJmsListener;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsParameterChecker;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsProcessor;
-import uk.gov.justice.services.adapter.messaging.JmsLoggerMetadataInterceptor;
-import uk.gov.justice.services.adapter.messaging.JsonSchemaValidationInterceptor;
-import uk.gov.justice.services.common.configuration.GlobalValueProducer;
 import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
-import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.justice.services.common.util.UtcClock;
-import uk.gov.justice.services.components.event.listener.interceptors.EventBufferInterceptor;
-import uk.gov.justice.services.components.event.listener.interceptors.EventFilterInterceptor;
-import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
-import uk.gov.justice.services.core.accesscontrol.AllowAllPolicyEvaluator;
-import uk.gov.justice.services.core.accesscontrol.DefaultAccessControlService;
-import uk.gov.justice.services.core.accesscontrol.PolicyEvaluator;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
-import uk.gov.justice.services.core.dispatcher.DispatcherCache;
-import uk.gov.justice.services.core.dispatcher.EmptySystemUserProvider;
-import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
-import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
-import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandlerProducer;
-import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.core.extension.BeanInstantiater;
-import uk.gov.justice.services.core.extension.ServiceComponentScanner;
-import uk.gov.justice.services.core.interceptor.InterceptorCache;
-import uk.gov.justice.services.core.interceptor.InterceptorChainObserver;
-import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
-import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
 import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
 import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
 import uk.gov.justice.services.core.json.DefaultJsonValidationLoggerHelper;
-
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
-import uk.gov.justice.services.core.requester.RequesterProducer;
-import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.event.buffer.api.AllowAllEventFilter;
-import uk.gov.justice.services.event.buffer.api.EventBufferService;
 import uk.gov.justice.services.generators.test.utils.interceptor.RecordingInterceptorChainProcessor;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
-import uk.gov.justice.services.messaging.jms.DefaultJmsEnvelopeSender;
 import uk.gov.justice.services.messaging.logging.DefaultJmsMessageLoggerHelper;
 import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
 
@@ -115,9 +85,7 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
             DefaultJmsMessageLoggerHelper.class,
             DefaultTraceLogger.class,
             DefaultJsonValidationLoggerHelper.class,
-
-            DefaultFileSystemUrlResolverStrategy.class,
-            GlobalValueProducer.class,
+            DefaultFileSystemUrlResolverStrategy.class
     })
     public WebApp war() {
         return new WebApp()

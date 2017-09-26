@@ -35,6 +35,7 @@ import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
+import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
 import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.generators.test.utils.interceptor.RecordingInterceptorChainProcessor;
@@ -150,7 +151,8 @@ public class DefaultUsersUserIdResourceIT {
             ResponseStrategyCache.class,
             ValidParameterCollectionBuilderFactory.class,
             DefaultTraceLogger.class,
-            DefaultHttpTraceLoggerHelper.class
+            DefaultHttpTraceLoggerHelper.class,
+            DefaultFileSystemUrlResolverStrategy.class
     })
     public WebApp war() {
         return new WebApp()

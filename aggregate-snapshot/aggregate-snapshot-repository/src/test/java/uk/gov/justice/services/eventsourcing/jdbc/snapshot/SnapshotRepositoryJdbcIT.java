@@ -8,6 +8,7 @@ import static org.junit.Assert.assertThat;
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.domain.snapshot.AggregateSnapshot;
 import uk.gov.justice.services.eventsourcing.jdbc.snapshot.jdbc.snapshot.SnapshotJdbcRepository;
+import uk.gov.justice.services.test.utils.core.messaging.Poller;
 import uk.gov.justice.services.test.utils.persistence.AbstractJdbcRepositoryIT;
 
 import java.util.ArrayList;
@@ -87,7 +88,8 @@ public class SnapshotRepositoryJdbcIT extends AbstractJdbcRepositoryIT<SnapshotJ
         jdbcRepository.storeSnapshot(aggregateSnapshot2);
         jdbcRepository.storeSnapshot(aggregateSnapshot3);
 
-        final Optional<AggregateSnapshot<RecordingAggregate>> snapshot = jdbcRepository.getLatestSnapshot(STREAM_ID, TYPE);
+        Poller poller = new Poller();
+        final Optional<AggregateSnapshot<RecordingAggregate>> snapshot  = poller.pollUntilFound(() -> jdbcRepository.getLatestSnapshot(STREAM_ID, TYPE));
 
         assertThat(snapshot, notNullValue());
         assertThat(snapshot, is(Optional.of(aggregateSnapshot2)));
@@ -119,7 +121,8 @@ public class SnapshotRepositoryJdbcIT extends AbstractJdbcRepositoryIT<SnapshotJ
 
     @Test
     public void shouldReturnOptionalNullIfNoSnapshotAvailable() {
-        final Optional<AggregateSnapshot<RecordingAggregate>> snapshot = jdbcRepository.getLatestSnapshot(STREAM_ID, TYPE);
+        Poller poller = new Poller();
+        final Optional<AggregateSnapshot<RecordingAggregate>> snapshot  = poller.pollUntilFound(() -> jdbcRepository.getLatestSnapshot(STREAM_ID, TYPE));
 
         assertThat(snapshot.isPresent(), is(false));
     }
@@ -129,7 +132,8 @@ public class SnapshotRepositoryJdbcIT extends AbstractJdbcRepositoryIT<SnapshotJ
         final AggregateSnapshot aggregateSnapshot1 = createSnapshot(STREAM_ID, VERSION_ID, OTHER_TYPE, AGGREGATE);
         jdbcRepository.storeSnapshot(aggregateSnapshot1);
 
-        final Optional<AggregateSnapshot<RecordingAggregate>> snapshot = jdbcRepository.getLatestSnapshot(STREAM_ID, TYPE);
+        Poller poller = new Poller();
+        final Optional<AggregateSnapshot<RecordingAggregate>> snapshot  = poller.pollUntilFound(() -> jdbcRepository.getLatestSnapshot(STREAM_ID, TYPE));
 
         assertThat(snapshot.isPresent(), is(false));
 

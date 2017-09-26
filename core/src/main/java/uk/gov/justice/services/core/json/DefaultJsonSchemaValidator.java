@@ -6,11 +6,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 import org.everit.json.schema.Schema;
 import org.json.JSONObject;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Service for validating JSON payloads against a schema.
@@ -18,10 +18,13 @@ import org.slf4j.LoggerFactory;
 @ApplicationScoped
 public class DefaultJsonSchemaValidator implements JsonSchemaValidator {
 
-    private Logger logger = LoggerFactory.getLogger(DefaultJsonSchemaValidator.class);
     private final Map<String, Schema> schemas = new ConcurrentHashMap<>();
 
-    private JsonSchemaLoader loader = new JsonSchemaLoader();
+    @Inject
+    Logger logger;
+
+    @Inject
+    JsonSchemaLoader loader;
 
     /**
      * Validate a JSON payload against the correct schema for the given message type name. If the

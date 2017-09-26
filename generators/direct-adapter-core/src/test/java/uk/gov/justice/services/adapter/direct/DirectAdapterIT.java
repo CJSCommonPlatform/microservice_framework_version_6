@@ -27,7 +27,10 @@ import uk.gov.justice.services.core.interceptor.InterceptorCache;
 import uk.gov.justice.services.core.interceptor.InterceptorChainObserver;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProvider;
+import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
 import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
+
+import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.requester.RequesterProducer;
 import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
@@ -111,7 +114,10 @@ public class DirectAdapterIT {
             GlobalValueProducer.class,
 
             QueryViewDirectAdapter.class,
-            GetUserRecordingHandler.class
+            GetUserRecordingHandler.class,
+
+            DefaultFileSystemUrlResolverStrategy.class,
+            JsonSchemaLoader.class
 
 
     })

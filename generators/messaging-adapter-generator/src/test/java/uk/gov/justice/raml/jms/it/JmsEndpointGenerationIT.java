@@ -15,6 +15,7 @@ import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
+import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
 import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
 import uk.gov.justice.services.core.json.DefaultJsonValidationLoggerHelper;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
@@ -83,8 +84,8 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
             TestServiceContextNameProvider.class,
             DefaultJmsMessageLoggerHelper.class,
             DefaultTraceLogger.class,
-            DefaultJsonValidationLoggerHelper.class
-
+            DefaultJsonValidationLoggerHelper.class,
+            DefaultFileSystemUrlResolverStrategy.class
     })
     public WebApp war() {
         return new WebApp()

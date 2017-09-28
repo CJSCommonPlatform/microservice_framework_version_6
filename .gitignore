@@ -60,6 +60,9 @@ sftp-config.json
 *.tar
 *.zip
 
+# Maven Wrapper #
+!.mvn/wrapper/maven-wrapper.jar
+
 # Logs and databases #
 ######################
 *.log

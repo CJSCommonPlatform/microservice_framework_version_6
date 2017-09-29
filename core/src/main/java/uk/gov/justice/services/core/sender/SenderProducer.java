@@ -1,5 +1,7 @@
 package uk.gov.justice.services.core.sender;
 
+import static uk.gov.justice.services.core.annotation.ComponentNameUtil.componentFrom;
+
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.dispatcher.DispatcherDelegate;
@@ -47,7 +49,8 @@ public class SenderProducer {
      */
     @Produces
     public Sender produceSender(final InjectionPoint injectionPoint) {
+        final String component = componentFrom(injectionPoint);
         return new DispatcherDelegate(dispatcherCache.dispatcherFor(injectionPoint), systemUserUtil,
-                new EnvelopeValidator(jsonSchemaValidator, envelopeValidationExceptionHandler, objectMapper));
+                new EnvelopeValidator(jsonSchemaValidator, envelopeValidationExceptionHandler, objectMapper, component));
     }
 }

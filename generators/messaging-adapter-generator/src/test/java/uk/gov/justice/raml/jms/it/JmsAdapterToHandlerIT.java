@@ -13,7 +13,7 @@ import uk.gov.justice.api.Service2EventListenerPeopleEventJmsListener;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsParameterChecker;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsProcessor;
 import uk.gov.justice.services.adapter.messaging.JmsLoggerMetadataInterceptor;
-import uk.gov.justice.services.adapter.messaging.JsonSchemaValidationInterceptor;
+import uk.gov.justice.services.adapter.messaging.MessagingJsonSchemaValidationService;
 import uk.gov.justice.services.common.configuration.GlobalValueProducer;
 import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
@@ -121,7 +121,7 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
             SenderProducer.class,
             DefaultJmsEnvelopeSender.class,
             DefaultEnvelopeConverter.class,
-            JsonSchemaValidationInterceptor.class,
+            MessagingJsonSchemaValidationService.class,
             JmsLoggerMetadataInterceptor.class,
             DefaultJmsParameterChecker.class,
             TestServiceContextNameProvider.class,
@@ -163,7 +163,7 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
         sendEnvelope(metadataId, PEOPLE_EVENT_AA, peopleEventsDestination);
         await().until(() -> aaEventHandler.recordedEnvelopes().size() > 0);
 
-        assertThat(jsonSchemaValidator.validatedEventName(), is(PEOPLE_EVENT_AA));
+        assertThat(jsonSchemaValidator.validatedEventName(), is("event_listener/" + PEOPLE_EVENT_AA));
 
         assertThat(bufferService.recordedEnvelopes(), not(empty()));
         assertThat(bufferService.firstRecordedEnvelope().metadata().id().toString(), is(metadataId));

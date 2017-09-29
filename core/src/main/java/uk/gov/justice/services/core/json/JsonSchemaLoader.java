@@ -43,6 +43,9 @@ public class JsonSchemaLoader {
         logger.trace("Loading schema {}", schemaFile);
         try (final InputStream schemaFileStream = this.getClass().getResourceAsStream(schemaFile)){
             final URL schemaUrl = getClass().getResource(schemaFile);
+            if (schemaUrl == null) {
+                throw new SchemaLoadingException(format("Unable to load JSON schema %s from classpath", schemaFile));
+            }
             return SchemaLoader.builder()
                     .resolutionScope(resolveUrl(schemaUrl))
                     .schemaJson(

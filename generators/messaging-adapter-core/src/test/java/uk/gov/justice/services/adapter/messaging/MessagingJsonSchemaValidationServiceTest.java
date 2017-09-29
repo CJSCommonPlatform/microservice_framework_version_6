@@ -1,7 +1,5 @@
 package uk.gov.justice.services.adapter.messaging;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.IsSame.sameInstance;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -14,7 +12,6 @@ import uk.gov.justice.services.core.json.JsonValidationLoggerHelper;
 import uk.gov.justice.services.event.buffer.api.EventFilter;
 import uk.gov.justice.services.messaging.logging.JmsMessageLoggerHelper;
 
-import javax.interceptor.InvocationContext;
 import javax.jms.TextMessage;
 
 import org.everit.json.schema.ValidationException;
@@ -25,26 +22,13 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
 
-/**
- * Unit tests for the {@link JsonSchemaValidationInterceptor} class.
- */
 @RunWith(MockitoJUnitRunner.class)
-public class JsonSchemaValidationInterceptorTest {
+public class MessagingJsonSchemaValidationServiceTest {
+
+    private static final String COMPONENT = "COMMAND_API";
 
     @Mock
     Logger logger;
-
-    @Mock
-    JmsParameterChecker parametersChecker;
-
-    @Mock
-    private JsonSchemaValidator validator;
-
-    @Mock
-    private InvocationContext invocationContext;
-
-    @Mock
-    private EventFilter eventFilter;
 
     @Mock
     private JsonValidationLoggerHelper jsonValidationLoggerHelper;
@@ -52,19 +36,14 @@ public class JsonSchemaValidationInterceptorTest {
     @Mock
     private JmsMessageLoggerHelper jmsMessageLoggerHelper;
 
+    @Mock
+    private JsonSchemaValidator validator;
+
+    @Mock
+    private EventFilter eventFilter;
+
     @InjectMocks
-    private JsonSchemaValidationInterceptor interceptor;
-
-    @Test
-    public void shouldReturnContextProceed() throws Exception {
-        final Object proceed = new Object();
-        final TextMessage message = mock(TextMessage.class);
-
-        when(invocationContext.proceed()).thenReturn(proceed);
-        when(invocationContext.getParameters()).thenReturn(new Object[]{message});
-
-        assertThat(interceptor.validate(invocationContext), sameInstance(proceed));
-    }
+    private MessagingJsonSchemaValidationService service;
 
     @Test
     public void shouldValidateMessage() throws Exception {
@@ -75,11 +54,10 @@ public class JsonSchemaValidationInterceptorTest {
         when(message.getText()).thenReturn(payload);
         when(message.getStringProperty(JMS_HEADER_CPPNAME)).thenReturn(name);
         when(eventFilter.accepts(name)).thenReturn(true);
-        when(invocationContext.getParameters()).thenReturn(new Object[]{message});
 
-        interceptor.validate(invocationContext);
+        service.validate(message, COMPONENT);
 
-        verify(validator).validate(payload, name);
+        verify(validator).validate(payload, "command_api/test-name");
     }
 
     @Test
@@ -91,14 +69,29 @@ public class JsonSchemaValidationInterceptorTest {
         when(message.getText()).thenReturn(payload);
         when(message.getStringProperty(JMS_HEADER_CPPNAME)).thenReturn(name);
         when(eventFilter.accepts(name)).thenReturn(false);
-        when(invocationContext.getParameters()).thenReturn(new Object[]{message});
 
-        interceptor.validate(invocationContext);
+        service.validate(message, COMPONENT);
 
         verifyZeroInteractions(validator);
     }
 
-    @Test(expected = ValidationException.class)
+    @Test
+    public void shouldFallbackToOldJsonSchemasOnFirstValidationFailure() throws Exception {
+        final TextMessage message = mock(TextMessage.class);
+        final String payload = "test payload";
+        final String name = "test-name";
+
+        when(message.getText()).thenReturn(payload);
+        when(message.getStringProperty(JMS_HEADER_CPPNAME)).thenReturn(name);
+        when(eventFilter.accepts(name)).thenReturn(true);
+        doThrow(mock(ValidationException.class)).when(validator).validate(payload, "command_api/test-name");
+
+        service.validate(message, COMPONENT);
+
+        verify(validator).validate(payload, "command_api/test-name");
+    }
+
+    @Test(expected = JsonSchemaValidationException.class)
     public void shouldThrowExceptionIfValidatorFails() throws Exception {
         final TextMessage message = mock(TextMessage.class);
         final String payload = "test payload";
@@ -107,9 +100,10 @@ public class JsonSchemaValidationInterceptorTest {
         when(message.getText()).thenReturn(payload);
         when(message.getStringProperty(JMS_HEADER_CPPNAME)).thenReturn(name);
         when(eventFilter.accepts(name)).thenReturn(true);
-        when(invocationContext.getParameters()).thenReturn(new Object[]{message});
-        doThrow(mock(ValidationException.class)).when(validator).validate(payload, name);
 
-        interceptor.validate(invocationContext);
+        doThrow(mock(ValidationException.class)).when(validator).validate(payload, "command_api/test-name");
+        doThrow(mock(ValidationException.class)).when(validator).validate(payload, "test-name");
+
+        service.validate(message, COMPONENT);
     }
 }

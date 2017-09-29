@@ -11,13 +11,13 @@ import static uk.gov.justice.raml.jms.core.MediaTypesUtil.mediaTypesFrom;
 import static uk.gov.justice.services.generators.commons.helper.Names.namesListStringFrom;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
-import uk.gov.justice.services.generators.commons.helper.MessagingAdapterBaseUri;
 import uk.gov.justice.services.adapter.messaging.JmsLoggerMetadataInterceptor;
 import uk.gov.justice.services.adapter.messaging.JmsProcessor;
-import uk.gov.justice.services.adapter.messaging.JsonSchemaValidationInterceptor;
+import uk.gov.justice.services.adapter.messaging.MessagingJsonSchemaValidationService;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
+import uk.gov.justice.services.generators.commons.helper.MessagingAdapterBaseUri;
 import uk.gov.justice.services.generators.commons.helper.MessagingResourceUri;
 import uk.gov.justice.services.messaging.logging.LoggerUtils;
 
@@ -55,6 +55,7 @@ class MessageListenerCodeGenerator {
     private static final String DEFAULT_ANNOTATION_PARAMETER = "value";
     private static final String ACTIVATION_CONFIG_PARAMETER = "activationConfig";
     private static final String INTERCEPTOR_CHAIN_PROCESS = "interceptorChainProcessor";
+    private static final String JSON_SCHEMA_VALIDATION_SERVICE = "jsonSchemaValidationService";
     private static final String JMS_PROCESSOR_FIELD = "jmsProcessor";
     private static final String LOGGER_FIELD = "LOGGER";
 
@@ -80,7 +81,7 @@ class MessageListenerCodeGenerator {
      */
     TypeSpec generatedCodeFor(final Resource resource, final MessagingAdapterBaseUri baseUri, final boolean listenToAllMessages, final GeneratorConfig configuration) {
         return classSpecFrom(resource, baseUri, listenToAllMessages, configuration)
-                .addMethod(generateOnMessageMethod())
+                .addMethod(generateOnMessageMethod(componentOf(baseUri), resource))
                 .build();
     }
 
@@ -122,7 +123,9 @@ class MessageListenerCodeGenerator {
             if (!containsGeneralJsonMimeType(resource.getActions())) {
                 typeSpecBuilder.addAnnotation(AnnotationSpec.builder(Interceptors.class)
                         .addMember(DEFAULT_ANNOTATION_PARAMETER, "$T.class", JmsLoggerMetadataInterceptor.class)
-                        .addMember(DEFAULT_ANNOTATION_PARAMETER, "$T.class", JsonSchemaValidationInterceptor.class)
+                        .build());
+                typeSpecBuilder.addField(FieldSpec.builder(ClassName.get(MessagingJsonSchemaValidationService.class), JSON_SCHEMA_VALIDATION_SERVICE)
+                        .addAnnotation(Inject.class)
                         .build());
             }
 
@@ -149,11 +152,14 @@ class MessageListenerCodeGenerator {
     /**
      * Generate the onMessage method that processes a JMS message.
      *
+     * @param component - the component the class belongs to.
      * @return the {@link MethodSpec} that represents the onMessage method
      */
-    private MethodSpec generateOnMessageMethod() {
+    private MethodSpec generateOnMessageMethod(final String component, Resource resource) {
 
         final String messageFieldName = "message";
+
+        final CodeBlock codeBlock = generateCodeBlock(component, resource, messageFieldName);
 
         return MethodSpec.methodBuilder("onMessage")
                 .addModifiers(PUBLIC)
@@ -161,11 +167,19 @@ class MessageListenerCodeGenerator {
                 .addParameter(ParameterSpec
                         .builder(Message.class, messageFieldName)
                         .build())
-                .addCode(CodeBlock.builder()
-                        .addStatement("$T.trace(LOGGER, () -> \"Received JMS message\")", LoggerUtils.class)
-                        .addStatement("$L.process($L::process, $L)", JMS_PROCESSOR_FIELD, INTERCEPTOR_CHAIN_PROCESS, messageFieldName)
-                        .build())
+                .addCode(codeBlock)
                 .build();
+    }
+
+    private CodeBlock generateCodeBlock(final String component, final Resource resource, final String messageFieldName) {
+        CodeBlock.Builder codeBlockBuilder = CodeBlock.builder()
+                .addStatement("$T.trace(LOGGER, () -> \"Received JMS message\")", LoggerUtils.class);
+
+        if (!containsGeneralJsonMimeType(resource.getActions())) {
+            codeBlockBuilder.addStatement("$L.validate($L, \"$L\")", JSON_SCHEMA_VALIDATION_SERVICE, messageFieldName, component);
+        }
+
+        return codeBlockBuilder.addStatement("$L.process($L::process, $L)", JMS_PROCESSOR_FIELD, INTERCEPTOR_CHAIN_PROCESS, messageFieldName).build();
     }
 
     /**

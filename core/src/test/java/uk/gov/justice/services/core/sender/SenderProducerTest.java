@@ -2,6 +2,7 @@ package uk.gov.justice.services.core.sender;
 
 import static co.unruly.matchers.OptionalMatchers.contains;
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsSame.sameInstance;
 import static org.junit.Assert.assertThat;
@@ -10,12 +11,18 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
+import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
+import static uk.gov.justice.services.test.utils.common.MemberInjectionPoint.injectionPointWith;
+import static uk.gov.justice.services.test.utils.common.MemberInjectionPoint.injectionPointWithMemberAsFirstMethodOf;
 
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.core.annotation.ComponentNameUtilTest;
+import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.dispatcher.Dispatcher;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
@@ -23,10 +30,20 @@ import uk.gov.justice.services.core.envelope.EnvelopeValidationException;
 import uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.test.utils.common.MemberInjectionPoint;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Member;
+import java.lang.reflect.Type;
+import java.util.Set;
 import java.util.UUID;
 
+import javax.enterprise.inject.spi.Annotated;
+import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
+import javax.inject.Inject;
+import javax.persistence.criteria.CriteriaBuilder;
 
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
@@ -43,8 +60,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class SenderProducerTest {
 
-
-    @Mock
     private InjectionPoint injectionPoint;
 
     @Mock
@@ -65,7 +80,10 @@ public class SenderProducerTest {
 
     @Before
     public void setUp() throws Exception {
+        injectionPoint = injectionPointWith(ServiceComponentClassLevelAnnotation.class.getDeclaredField("field"));
+
         when(dispatcherCache.dispatcherFor(injectionPoint)).thenReturn(dispatcher);
+
         senderProducer.objectMapper = new ObjectMapperProducer().objectMapper();
         senderProducer.envelopeValidationExceptionHandler = new RethrowingValidationExceptionHandler();
     }
@@ -142,7 +160,6 @@ public class SenderProducerTest {
                 .build());
     }
 
-
     @Test
     public void shouldNotThrowExceptionIfPayloadAdheresToJsonSchema() {
         senderProducer.envelopeValidationExceptionHandler = new RethrowingValidationExceptionHandler();
@@ -158,4 +175,11 @@ public class SenderProducerTest {
                         .build());
     }
 
+    @ServiceComponent(COMMAND_HANDLER)
+    public static class ServiceComponentClassLevelAnnotation {
+
+        @ServiceComponent(COMMAND_HANDLER)
+        @Inject
+        Object field;
+    }
 }

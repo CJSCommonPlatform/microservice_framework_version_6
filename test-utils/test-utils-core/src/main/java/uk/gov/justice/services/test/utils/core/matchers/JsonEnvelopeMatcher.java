@@ -122,6 +122,11 @@ public class JsonEnvelopeMatcher extends TypeSafeDiagnosingMatcher<JsonEnvelope>
         return this;
     }
 
+    public JsonEnvelopeMatcher thatMatchesSchemaInComponent(final String component) {
+        this.schemaMatcher = Optional.of(isValidJsonEnvelopeForSchema(component));
+        return this;
+    }
+
     @Override
     public void describeTo(final Description description) {
         description.appendText("JsonEnvelope that contains (");

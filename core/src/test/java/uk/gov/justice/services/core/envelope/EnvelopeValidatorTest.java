@@ -36,6 +36,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class EnvelopeValidatorTest {
 
+    private static final String COMPONENT = "command_handler";
+
     @Mock
     private ObjectMapper objectMapper;
 
@@ -49,7 +51,7 @@ public class EnvelopeValidatorTest {
 
     @Before
     public void setUp() throws Exception {
-        envelopeValidator = new EnvelopeValidator(jsonSchemaValidator, envelopeValidationExceptionHandler, objectMapper);
+        envelopeValidator = new EnvelopeValidator(jsonSchemaValidator, envelopeValidationExceptionHandler, objectMapper, COMPONENT);
     }
 
     @Test
@@ -62,7 +64,7 @@ public class EnvelopeValidatorTest {
 
         envelopeValidator.validate(envelope);
 
-        verify(jsonSchemaValidator).validate(jsonStringRepresentation, metadataName);
+        verify(jsonSchemaValidator).validate(jsonStringRepresentation, COMPONENT + "/" + metadataName);
 
     }
 

@@ -19,7 +19,9 @@ import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.StringStartsWith.startsWith;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.raml.model.ActionType.DELETE;
 import static org.raml.model.ActionType.GET;
@@ -43,13 +45,12 @@ import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
 import uk.gov.justice.services.adapter.messaging.JmsLoggerMetadataInterceptor;
 import uk.gov.justice.services.adapter.messaging.JmsProcessor;
-import uk.gov.justice.services.adapter.messaging.JsonSchemaValidationInterceptor;
+import uk.gov.justice.services.adapter.messaging.MessagingJsonSchemaValidationService;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
-import uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.io.File;
@@ -69,6 +70,7 @@ import javax.interceptor.Interceptors;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 
+import org.everit.json.schema.ValidationException;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
@@ -90,6 +92,9 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
 
     @Mock
     JmsProcessor jmsProcessor;
+
+    @Mock
+    MessagingJsonSchemaValidationService jsonSchemaValidationService;
 
     @Mock
     InterceptorChainProcessor interceptorChainProcessor;
@@ -354,7 +359,6 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorPeopleHandlerCommandJmsListener");
         Interceptors interceptorsAnnotation = clazz.getAnnotation(Interceptors.class);
         assertThat(interceptorsAnnotation, not(nullValue()));
-        assertThat(interceptorsAnnotation.value(), hasItemInArray(JsonSchemaValidationInterceptor.class));
         assertThat(interceptorsAnnotation.value(), hasItemInArray(JmsLoggerMetadataInterceptor.class));
     }
 
@@ -691,6 +695,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
 
         MessageListener jmsListener = (MessageListener) object;
         Message message = mock(Message.class);
+
         jmsListener.onMessage(message);
 
         ArgumentCaptor<Consumer> consumerCaptor = ArgumentCaptor.forClass(Consumer.class);
@@ -701,6 +706,26 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
         consumerCaptor.getValue().accept(interceptorContext);
 
         verify(interceptorChainProcessor).process(interceptorContext);
+    }
+
+    @Test(expected = ValidationException.class)
+    @SuppressWarnings("unchecked")
+    public void shouldNotCallJmsProcessorWhenOnMessageIsInvokedWithInvalidJson() throws Exception {
+        generator.run(raml().withDefaultMessagingResource().build(), configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorSomecontextControllerCommandJmsListener");
+        Object object = instantiate(clazz);
+        assertThat(object, is(instanceOf(MessageListener.class)));
+
+        MessageListener jmsListener = (MessageListener) object;
+        Message message = mock(Message.class);
+
+        doThrow(new ValidationException("")).when(jsonSchemaValidationService).validate(message, "EVENT_PROCESSOR");
+
+        jmsListener.onMessage(message);
+
+        ArgumentCaptor<Consumer> consumerCaptor = ArgumentCaptor.forClass(Consumer.class);
+        verify(jmsProcessor, never()).process(consumerCaptor.capture(), eq(message));
     }
 
     @Test
@@ -778,7 +803,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleEventListenerPeoplePersonAddedJmsListener");
         Pool poolAnnotation = clazz.getAnnotation(Pool.class);
         assertThat(poolAnnotation, not(nullValue()));
-        assertThat(poolAnnotation .value(), is("people-person-added-event-listener-pool"));
+        assertThat(poolAnnotation.value(), is("people-person-added-event-listener-pool"));
     }
 
     @Test
@@ -799,6 +824,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
     private Object instantiate(Class<?> resourceClass) throws InstantiationException, IllegalAccessException {
         Object resourceObject = resourceClass.newInstance();
         setField(resourceObject, "jmsProcessor", jmsProcessor);
+        setField(resourceObject, "jsonSchemaValidationService", jsonSchemaValidationService);
         setField(resourceObject, INTERCEPTOR_CHAIN_PROCESSOR, interceptorChainProcessor);
         return resourceObject;
     }

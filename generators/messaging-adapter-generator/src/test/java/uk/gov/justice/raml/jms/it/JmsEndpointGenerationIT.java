@@ -11,6 +11,7 @@ import uk.gov.justice.api.Service1CommandHandlerStructureHandlerCommandJmsListen
 import uk.gov.justice.api.Service2EventProcessorStructureEventJmsListener;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsParameterChecker;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsProcessor;
+import uk.gov.justice.services.adapter.messaging.MessagingJsonSchemaValidationService;
 import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -40,6 +41,7 @@ import org.apache.openejb.jee.WebApp;
 import org.apache.openejb.junit.ApplicationComposer;
 import org.apache.openejb.testing.Classes;
 import org.apache.openejb.testing.Module;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -76,6 +78,7 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
             DefaultEnvelopeConverter.class,
             StringToJsonObjectConverter.class,
             DefaultJsonObjectEnvelopeConverter.class,
+            MessagingJsonSchemaValidationService.class,
             DefaultJsonSchemaValidator.class,
             JsonSchemaLoader.class,
             LoggerProducer.class,

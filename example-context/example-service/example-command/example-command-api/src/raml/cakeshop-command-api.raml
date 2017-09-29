@@ -24,13 +24,13 @@ protocols: [ HTTP, HTTPS ]
 
     body:
         application/vnd.example.add-recipe+json:
-            schema: !include json/schema/example.add-recipe.json
+            schema: !include json/schema/command_api/example.add-recipe.json
             example: !include json/add-recipe.json
 
         application/vnd.example.remove-recipe+json: !!null
 
         application/vnd.example.add-recipe-file+json:
-            schema: !include json/schema/example.add-recipe-file.json
+            schema: !include json/schema/command_api/example.add-recipe-file.json
             example: !include json/add-recipe-file.json
 
   put:
@@ -43,7 +43,7 @@ protocols: [ HTTP, HTTPS ]
 
     body:
         application/vnd.example.rename-recipe+json:
-            schema: !include json/schema/example.rename-recipe.json
+            schema: !include json/schema/command_api/example.rename-recipe.json
             example: !include json/rename-recipe.json
 
 
@@ -59,7 +59,7 @@ protocols: [ HTTP, HTTPS ]
         ...
     body:
         application/vnd.example.make-cake+json:
-            schema: !include json/schema/example.make-cake.json
+            schema: !include json/schema/command_api/example.make-cake.json
             example: !include json/make-cake.json
 
 
@@ -76,7 +76,7 @@ protocols: [ HTTP, HTTPS ]
         ...
     body:
         application/vnd.example.order-cake+json:
-            schema: !include json/schema/example.order-cake.json
+            schema: !include json/schema/command_api/example.order-cake.json
             example: !include json/order-cake.json
 
 /recipes/{recipeId}/photograph:

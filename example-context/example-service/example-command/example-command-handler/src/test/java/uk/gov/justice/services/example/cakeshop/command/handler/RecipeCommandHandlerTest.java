@@ -117,7 +117,7 @@ public class RecipeCommandHandlerTest {
                                         withJsonPath("$.ingredients[0].name", equalTo("Flour")),
                                         withJsonPath("$.ingredients[0].quantity", equalTo(200))
                                 )))
-                                .thatMatchesSchema()
+                                .thatMatchesSchemaInComponent("command_handler")
                 )));
     }
 
@@ -145,7 +145,7 @@ public class RecipeCommandHandlerTest {
                                 payloadIsJson(allOf(
                                         withJsonPath("$.recipeId", equalTo(RECIPE_ID.toString())),
                                         withJsonPath("$.name", equalTo(RECIPE_NAME))
-                                ))).thatMatchesSchema()
+                                ))).thatMatchesSchemaInComponent("command_handler")
                 )), eq(Tolerance.NON_CONSECUTIVE));
     }
 
@@ -172,7 +172,7 @@ public class RecipeCommandHandlerTest {
                                 payloadIsJson(
                                         withJsonPath("$.recipeId", equalTo(RECIPE_ID.toString()))
                                 ))
-                                .thatMatchesSchema()
+                                .thatMatchesSchemaInComponent("command_handler")
                 )));
 
     }
@@ -202,7 +202,7 @@ public class RecipeCommandHandlerTest {
                                         withJsonPath("$.recipeId", equalTo(RECIPE_ID.toString())),
                                         withJsonPath("$.photoId", equalTo(PHOTO_ID.toString()))
                                 )))
-                                .thatMatchesSchema()
+                                .thatMatchesSchemaInComponent("command_handler")
                 )), eq(Tolerance.NON_CONSECUTIVE));
 
     }

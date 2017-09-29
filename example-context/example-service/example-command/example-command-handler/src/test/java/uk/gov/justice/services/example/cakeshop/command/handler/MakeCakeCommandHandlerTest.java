@@ -48,7 +48,6 @@ public class MakeCakeCommandHandlerTest {
     private static final UUID CAKE_ID = randomUUID();
     private static final UUID RECIPE_ID = randomUUID();
 
-
     @Mock
     private EventSource eventSource;
 
@@ -96,7 +95,7 @@ public class MakeCakeCommandHandlerTest {
                                         withJsonPath("$.cakeId", equalTo(CAKE_ID.toString())),
                                         withJsonPath("$.name", equalTo(cakeName))
                                 )))
-                                .thatMatchesSchema()
+                                .thatMatchesSchemaInComponent("command_handler")
                 )), eq(Tolerance.CONSECUTIVE));
     }
 

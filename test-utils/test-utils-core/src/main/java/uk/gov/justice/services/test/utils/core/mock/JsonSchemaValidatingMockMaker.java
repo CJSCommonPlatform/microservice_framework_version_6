@@ -32,8 +32,8 @@ public class JsonSchemaValidatingMockMaker implements MockMaker {
     private final EnvelopeValidator envelopeValidator = new EnvelopeValidator(
             new DefaultJsonSchemaValidatorFactory().getDefaultJsonSchemaValidator(),
             new RethrowingValidationExceptionHandler(),
-            new ObjectMapperProducer().objectMapper());
-
+            new ObjectMapperProducer().objectMapper(),
+            "command_handler");
 
     @Override
     public <T> T createMock(final MockCreationSettings<T> settings, final MockHandler handler) {

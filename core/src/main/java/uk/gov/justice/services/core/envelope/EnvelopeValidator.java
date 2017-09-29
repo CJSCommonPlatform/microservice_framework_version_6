@@ -20,13 +20,16 @@ public class EnvelopeValidator {
     private final ObjectMapper objectMapper;
     private final JsonSchemaValidator jsonSchemaValidator;
     private final EnvelopeValidationExceptionHandler envelopeValidationExceptionHandler;
+    private final String component;
 
     public EnvelopeValidator(final JsonSchemaValidator jsonSchemaValidator,
                              final EnvelopeValidationExceptionHandler jsonValidationExceptionHandler,
-                             final ObjectMapper objectMapper) {
+                             final ObjectMapper objectMapper,
+                             final String component) {
         this.jsonSchemaValidator = jsonSchemaValidator;
         this.envelopeValidationExceptionHandler = jsonValidationExceptionHandler;
         this.objectMapper = objectMapper;
+        this.component = component;
     }
 
     public void validate(final JsonEnvelope envelope) {
@@ -34,7 +37,7 @@ public class EnvelopeValidator {
             final JsonValue payload = envelope.payload();
             if (!NULL.equals(payload)) {
                 jsonSchemaValidator.validate(
-                        objectMapper.writeValueAsString(payload), metadataOf(envelope).name());
+                        objectMapper.writeValueAsString(payload), component + "/" + metadataOf(envelope).name());
             }
         } catch (final JsonProcessingException e) {
             handle(e, "Error serialising json.");

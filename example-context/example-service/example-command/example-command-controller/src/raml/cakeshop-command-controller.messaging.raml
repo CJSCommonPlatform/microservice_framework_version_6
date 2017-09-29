@@ -6,25 +6,25 @@ version: v1
   post:
     body:
         application/vnd.example.add-recipe+json:
-            schema: !include json/schema/example.add-recipe.json
+            schema: !include json/schema/command_controller/example.add-recipe.json
             example: !include json/add-recipe.json
 
         application/vnd.example.remove-recipe+json:
-            schema: !include json/schema/example.remove-recipe.json
+            schema: !include json/schema/command_controller/example.remove-recipe.json
             example: !include json/remove-recipe.json
 
         application/vnd.example.make-cake+json:
-            schema: !include json/schema/example.make-cake.json
+            schema: !include json/schema/command_controller/example.make-cake.json
             example: !include json/make-cake.json
 
         application/vnd.example.order-cake+json:
-            schema: !include json/schema/example.order-cake.json
+            schema: !include json/schema/command_controller/example.order-cake.json
             example: !include json/order-cake.json
 
         application/vnd.example.rename-recipe+json:
-            schema: !include json/schema/example.rename-recipe.json
+            schema: !include json/schema/command_controller/example.rename-recipe.json
             example: !include json/rename-recipe.json
 
         application/vnd.example.upload-photograph+json:
-            schema: !include json/schema/example.upload-photograph.json
+            schema: !include json/schema/command_controller/example.upload-photograph.json
             example: !include json/upload-photograph.json

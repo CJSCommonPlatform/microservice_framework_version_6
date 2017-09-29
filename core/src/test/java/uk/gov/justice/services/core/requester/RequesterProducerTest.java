@@ -10,12 +10,15 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
+import static uk.gov.justice.services.test.utils.common.MemberInjectionPoint.injectionPointWith;
 
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.dispatcher.Dispatcher;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
@@ -28,6 +31,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import java.util.UUID;
 
 import javax.enterprise.inject.spi.InjectionPoint;
+import javax.inject.Inject;
 
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
@@ -44,7 +48,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class RequesterProducerTest {
 
-    @Mock
     private InjectionPoint injectionPoint;
 
     @Mock
@@ -67,6 +70,8 @@ public class RequesterProducerTest {
 
     @Before
     public void setUp() throws Exception {
+        injectionPoint = injectionPointWith(ServiceComponentClassLevelAnnotation.class.getDeclaredField("field"));
+
         when(dispatcherCache.dispatcherFor(injectionPoint)).thenReturn(dispatcher);
         requesterProducer.objectMapper = new ObjectMapperProducer().objectMapper();
     }
@@ -152,7 +157,14 @@ public class RequesterProducerTest {
                         .build());
 
         requesterProducer.produceRequester(injectionPoint).request(envelope().build());
+    }
 
+    @ServiceComponent(COMMAND_HANDLER)
+    public static class ServiceComponentClassLevelAnnotation {
+
+        @ServiceComponent(COMMAND_HANDLER)
+        @Inject
+        Object field;
     }
 
 }

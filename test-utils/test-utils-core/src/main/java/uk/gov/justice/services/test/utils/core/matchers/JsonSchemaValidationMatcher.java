@@ -32,6 +32,7 @@ public class JsonSchemaValidationMatcher {
 
     private static final Random random = new Random();
     private static final String JSON_SCHEMA_TEMPLATE = "json/schema/%s.json";
+    private static final String QUALIIFIED_JSON_SCHEMA_TEMPLATE = "json/schema/%s/%s.json";
     private static final String RAML_JSON_SCHEMA_TEMPLATE = "raml/" + JSON_SCHEMA_TEMPLATE;
 
     /**
@@ -81,6 +82,19 @@ public class JsonSchemaValidationMatcher {
      * @return matcher
      */
     public static Matcher<JsonEnvelope> isValidJsonEnvelopeForSchema() {
+        return isValidJsonEnvelopeForSchema(null);
+    }
+
+    /**
+     * Validates a JsonEnvelope against the correct schema for the action name provided in the
+     * metadata. Expects to find the schema on the class path in package
+     * 'json/schema/{component}/{action.name}.json' or 'raml/json/schema/{component}/{action.name}.json'.
+     *
+     * @param component - the Service Component the schema belongs to (i.e. "command_handler")
+     *
+     * @return matcher
+     */
+    public static Matcher<JsonEnvelope> isValidJsonEnvelopeForSchema(final String component) {
 
         return new TypeSafeDiagnosingMatcher<JsonEnvelope>() {
             private ValidationException validationException = null;
@@ -91,7 +105,7 @@ public class JsonSchemaValidationMatcher {
                 if (null == validationException) {
 
                     try {
-                        final String pathToJsonSchema = format(JSON_SCHEMA_TEMPLATE, jsonEnvelope.metadata().name());
+                        final String pathToJsonSchema = getJsonSchemaPath(jsonEnvelope.metadata().name(), component);
                         getJsonSchemaFor(pathToJsonSchema).validate(new JSONObject(jsonEnvelope.payloadAsJsonObject().toString()));
                     } catch (final IllegalArgumentException | IOException e) {
                         try {
@@ -113,6 +127,10 @@ public class JsonSchemaValidationMatcher {
                     return false;
                 }
 
+            }
+
+            private String getJsonSchemaPath(final String name, final String component) {
+                return component != null ? format(QUALIIFIED_JSON_SCHEMA_TEMPLATE, component, name) : format(JSON_SCHEMA_TEMPLATE, name);
             }
 
             @Override

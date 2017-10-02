@@ -297,7 +297,11 @@
                     <jbossHome>${jboss.home}</jbossHome>
                     <serverConfig>${server.config}</serverConfig>
                     <timeout>120</timeout>
-                    <!--<jvmArgs>-agentlib:jdwp=transport=dt_socket,address=8888,server=y,suspend=y</jvmArgs>-->
+                    <!--
+                   <java-opts>
+                       <java-opt>-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=8888</java-opt>
+                   </java-opts>
+                   -->
                     <version>${wildfly.version}</version>
                 </configuration>
                 <executions>

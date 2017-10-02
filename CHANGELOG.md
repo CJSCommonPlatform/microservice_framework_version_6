@@ -5,7 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
-### Added
+### Changed
+- Replace usage of Pair in InterceptorChainProvider with InterceptorChainEntry
+
+### Removed 
 - org.apache.commons commons-lang3 dependency from framework-api-core
 - JsonEnvelope and Metadata builder service provider
 - Convenience methods to JsonEnvelope for providing JsonEnvelopes and JsonObjectMetadataBuilders

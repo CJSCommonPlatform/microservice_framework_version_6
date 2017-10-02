@@ -18,7 +18,7 @@ public abstract class BaseEventInsertStrategy implements EventInsertionStrategy 
      * Executes the Insertion into Event Log.
      *
      * @param preparedStatement the prepared statement wrapper to use for executing the update
-     * @param event          the information to set into the prepared statement
+     * @param event             the information to set into the prepared statement
      * @return the value returned from executing the update
      * @throws SQLException               if thrown by the execute update
      * @throws InvalidSequenceIdException if the version already exists or is null

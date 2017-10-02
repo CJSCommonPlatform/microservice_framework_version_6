@@ -13,8 +13,7 @@ public class EventSourceApiApplication extends Application {
     @Override
     public Set<Class<?>> getClasses() {
         Set<Class<?>> classes = new HashSet<>();
-        classes.add(EventStreamsFeedResource.class);
-        classes.add(EventFeedResource.class);
+        classes.add(EventPageResource.class);
         return classes;
     }
 }

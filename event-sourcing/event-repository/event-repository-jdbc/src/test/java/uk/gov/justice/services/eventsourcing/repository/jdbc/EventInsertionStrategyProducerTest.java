@@ -23,16 +23,14 @@ import org.slf4j.Logger;
 public class EventInsertionStrategyProducerTest {
 
     private static final int INSERTED = 1;
-
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
     @Mock
     private Event event;
-
     @Mock
     private PreparedStatementWrapper preparedStatement;
-
     @Mock
     private Logger logger;
-
     @InjectMocks
     private EventInsertionStrategyProducer strategyProducer;
 
@@ -69,9 +67,6 @@ public class EventInsertionStrategyProducerTest {
         strategyProducer.eventLogInsertionStrategy().insert(preparedStatement, event);
         verify(preparedStatement).executeUpdate();
     }
-
-    @Rule
-    public ExpectedException exception = ExpectedException.none();
 
     @Test
     public void shouldThrowExceptionIfClassDoesNotExist() {

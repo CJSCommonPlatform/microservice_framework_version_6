@@ -42,12 +42,14 @@
         "next": {
           "id": "/properties/paging/properties/next",
           "type": "string",
-          "format": "uri"
+          "format": "uri",
+          "required": false
         },
         "previous": {
           "id": "/properties/paging/properties/previous",
           "type": "string",
-          "format": "uri"
+          "format": "uri",
+          "required": false
         }
       },
       "type": "object"

@@ -180,7 +180,7 @@ public class EventJdbcRepositoryIT extends AbstractJdbcRepositoryIT<EventJdbcRep
             jdbcRepository.insert(eventOf(sequence, streamId));
         }
 
-        final List<Event> streams = jdbcRepository.previous(streamId, 4L, 2L).collect(toList());
+        final List<Event> streams = jdbcRepository.forward(streamId, 4L, 2L).collect(toList());
         assertThat(streams, hasSize(2));
 
         assertThat(streams.get(0).getStreamId(), is(streamId));
@@ -197,9 +197,6 @@ public class EventJdbcRepositoryIT extends AbstractJdbcRepositoryIT<EventJdbcRep
         final UUID streamId2 = randomUUID();
         final UUID streamId3 = randomUUID();
 
-        final String position = "4";
-        final int pageSize = 3;
-
         for (long sequence = 1; sequence < 8l; sequence++) {
             jdbcRepository.insert(eventOf(sequence, streamId2));
         }
@@ -212,7 +209,7 @@ public class EventJdbcRepositoryIT extends AbstractJdbcRepositoryIT<EventJdbcRep
             jdbcRepository.insert(eventOf(sequence, streamId3));
         }
 
-        final List<Event> streams = jdbcRepository.previous(streamId1,4L, 3L).collect(toList());
+        final List<Event> streams = jdbcRepository.forward(streamId1, 4L, 3L).collect(toList());
         assertThat(streams, hasSize(3));
 
         assertThat(streams.get(0).getStreamId(), is(streamId1));
@@ -234,7 +231,7 @@ public class EventJdbcRepositoryIT extends AbstractJdbcRepositoryIT<EventJdbcRep
             jdbcRepository.insert(eventOf(sequence, streamId));
         }
 
-        final boolean exists = jdbcRepository.recordExists(streamId,7);
+        final boolean exists = jdbcRepository.recordExists(streamId, 7);
         assertTrue(exists);
     }
 
@@ -246,7 +243,7 @@ public class EventJdbcRepositoryIT extends AbstractJdbcRepositoryIT<EventJdbcRep
             jdbcRepository.insert(eventOf(sequence, streamId));
         }
 
-        final boolean exists = jdbcRepository.recordExists(streamId,10);
+        final boolean exists = jdbcRepository.recordExists(streamId, 10);
         assertFalse(exists);
     }
 
@@ -258,7 +255,7 @@ public class EventJdbcRepositoryIT extends AbstractJdbcRepositoryIT<EventJdbcRep
             jdbcRepository.insert(eventOf(sequence, streamId));
         }
 
-        final List<Event> streams = jdbcRepository.head(streamId,2).collect(toList());
+        final List<Event> streams = jdbcRepository.head(streamId, 2).collect(toList());
         assertThat(streams, hasSize(2));
 
         assertThat(streams.get(0).getStreamId(), is(streamId));
@@ -276,7 +273,7 @@ public class EventJdbcRepositoryIT extends AbstractJdbcRepositoryIT<EventJdbcRep
             jdbcRepository.insert(eventOf(sequence, streamId));
         }
 
-        final List<Event> streams = jdbcRepository.next(streamId,3L, 2).collect(toList());
+        final List<Event> streams = jdbcRepository.backward(streamId, 3L, 2).collect(toList());
         assertThat(streams, hasSize(2));
 
         assertThat(streams.get(0).getStreamId(), is(streamId));
@@ -294,7 +291,7 @@ public class EventJdbcRepositoryIT extends AbstractJdbcRepositoryIT<EventJdbcRep
             jdbcRepository.insert(eventOf(sequence, streamId));
         }
 
-        final List<Event> streams = jdbcRepository.previous(streamId,3L, 2).collect(toList());
+        final List<Event> streams = jdbcRepository.forward(streamId, 3L, 2).collect(toList());
         assertThat(streams, hasSize(2));
 
         assertThat(streams.get(0).getStreamId(), is(streamId));
@@ -313,7 +310,7 @@ public class EventJdbcRepositoryIT extends AbstractJdbcRepositoryIT<EventJdbcRep
             jdbcRepository.insert(eventOf(sequence, streamId));
         }
 
-        final List<Event> streams = jdbcRepository.first(streamId,2).collect(toList());
+        final List<Event> streams = jdbcRepository.first(streamId, 2).collect(toList());
         assertThat(streams, hasSize(2));
 
         assertThat(streams.get(0).getStreamId(), is(streamId));

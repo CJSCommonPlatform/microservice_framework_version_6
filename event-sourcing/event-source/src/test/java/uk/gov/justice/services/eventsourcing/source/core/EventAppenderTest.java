@@ -113,13 +113,12 @@ public class EventAppenderTest {
                 streamId,
                 firstStreamEvent);
 
-        final ArgumentCaptor<EventStream> createdEventStream = ArgumentCaptor.forClass(EventStream.class);
+        final ArgumentCaptor<UUID> streamIdCapture = ArgumentCaptor.forClass(UUID.class);
 
-        verify(eventStreamRepository).insert(createdEventStream.capture());
+        verify(eventStreamRepository).insert(streamIdCapture.capture());
 
-        final EventStream eventStream = createdEventStream.getValue();
-        assertThat(eventStream.getStreamId(), is(streamId));
-        assertNull(eventStream.getSequenceNumber());
+        final UUID streamIdActual = streamIdCapture.getValue();
+        assertThat(streamIdActual, is(streamId));
     }
 
     @Test

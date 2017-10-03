@@ -1,4 +1,4 @@
-package uk.gov.justice.services.eventsourcing.source.api.feed.common;
+package uk.gov.justice.services.eventsourcing.source.api.service;
 
 import java.util.List;
 

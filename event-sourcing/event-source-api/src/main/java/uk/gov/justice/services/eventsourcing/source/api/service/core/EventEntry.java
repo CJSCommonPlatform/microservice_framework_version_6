@@ -1,4 +1,4 @@
-package uk.gov.justice.services.eventsourcing.source.api.feed.event;
+package uk.gov.justice.services.eventsourcing.source.api.service.core;
 
 import java.util.UUID;
 

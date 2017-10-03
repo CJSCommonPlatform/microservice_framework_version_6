@@ -39,6 +39,18 @@
     "paging": {
       "id": "/properties/paging",
       "properties": {
+        "head": {
+          "id": "/properties/paging/properties/head",
+          "type": "string",
+          "format": "uri",
+          "required": true
+        },
+        "first": {
+          "id": "/properties/paging/properties/first",
+          "type": "string",
+          "format": "uri",
+          "required": true
+        },
         "next": {
           "id": "/properties/paging/properties/next",
           "type": "string",

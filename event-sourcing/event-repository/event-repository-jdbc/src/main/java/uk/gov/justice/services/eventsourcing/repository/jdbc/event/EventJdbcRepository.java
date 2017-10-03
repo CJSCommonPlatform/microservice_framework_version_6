@@ -53,8 +53,8 @@ public class EventJdbcRepository extends AbstractJdbcRepository<Event> {
      * Pagination Statements
      */
     private static final String SQL_GET_HEAD = "SELECT * FROM event_log t WHERE t.stream_id=?  ORDER BY t.sequence_id DESC LIMIT ?";
-    private static final String SQL_GET_PREVIOUS = "SELECT * FROM event_log t WHERE t.stream_id=? and t.sequence_id  >= ?  ORDER BY t.sequence_id ASC LIMIT ?";
-    private static final String SQL_GET_NEXT = "SELECT * FROM event_log t WHERE t.stream_id=? and t.sequence_id  <= ? ORDER BY t.sequence_id DESC LIMIT ?";
+    private static final String SQL_GET_FORWARD = "SELECT * FROM event_log t WHERE t.stream_id=? and t.sequence_id  >= ?  ORDER BY t.sequence_id ASC LIMIT ?";
+    private static final String SQL_GET_BACKWARD = "SELECT * FROM event_log t WHERE t.stream_id=? and t.sequence_id  <= ? ORDER BY t.sequence_id DESC LIMIT ?";
     private static final String SQL_GET_FIRST = "SELECT * FROM event_log t WHERE t.stream_id=?  ORDER BY t.sequence_id ASC LIMIT ?";
     private static final String SQL_RECORD_EXIST = "SELECT COUNT(*) FROM event_log t WHERE t.stream_id=? and t.sequence_id  = ?"; //-- Previous
 
@@ -76,7 +76,7 @@ public class EventJdbcRepository extends AbstractJdbcRepository<Event> {
         try (final PreparedStatementWrapper ps = preparedStatementWrapperOf(
                 eventInsertionStrategy.insertStatement())) {
             eventInsertionStrategy.insert(ps, event);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             logger.error("Error persisting event to the database", e);
             throw new JdbcRepositoryException(format("Exception while storing sequence %s of stream %s",
                     event.getSequenceId(), event.getStreamId()), e);
@@ -95,7 +95,7 @@ public class EventJdbcRepository extends AbstractJdbcRepository<Event> {
             final PreparedStatementWrapper ps = preparedStatementWrapperOf(SQL_FIND_BY_STREAM_ID);
             ps.setObject(1, streamId);
             return streamOf(ps);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             logger.warn(FAILED_TO_READ_STREAM, streamId, e);
             throw new JdbcRepositoryException(format(READING_STREAM_EXCEPTION, streamId), e);
         }
@@ -121,7 +121,7 @@ public class EventJdbcRepository extends AbstractJdbcRepository<Event> {
             ps.setLong(2, versionFrom);
 
             return streamOf(ps);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             logger.warn(FAILED_TO_READ_STREAM, streamId, e);
             throw new JdbcRepositoryException(format(READING_STREAM_EXCEPTION, streamId), e);
         }
@@ -135,7 +135,7 @@ public class EventJdbcRepository extends AbstractJdbcRepository<Event> {
     public Stream<Event> findAll() {
         try {
             return streamOf(preparedStatementWrapperOf(SQL_FIND_ALL));
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new JdbcRepositoryException(READING_STREAM_ALL_EXCEPTION, e);
         }
     }
@@ -157,7 +157,7 @@ public class EventJdbcRepository extends AbstractJdbcRepository<Event> {
                 return resultSet.getLong(1);
             }
 
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             logger.warn(FAILED_TO_READ_STREAM, streamId, e);
             throw new JdbcRepositoryException(format(READING_STREAM_EXCEPTION, streamId), e);
         }
@@ -176,7 +176,7 @@ public class EventJdbcRepository extends AbstractJdbcRepository<Event> {
             final PreparedStatementWrapper psWrapper = preparedStatementWrapperOf(SQL_DISTINCT_STREAM_ID);
             final ResultSet resultSet = psWrapper.executeQuery();
             return streamFrom(psWrapper, resultSet);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new JdbcRepositoryException(READING_STREAM_ALL_EXCEPTION, e);
         }
 
@@ -187,21 +187,25 @@ public class EventJdbcRepository extends AbstractJdbcRepository<Event> {
         return streamOf(psWrapper, resultSet, e -> {
             try {
                 return (UUID) resultSet.getObject(COL_STREAM_ID);
-            } catch (SQLException e1) {
+            } catch (final SQLException e1) {
                 throw handled(e1, psWrapper);
             }
         });
     }
 
     @Override
-    protected Event entityFrom(final ResultSet resultSet) throws SQLException {
-        return new Event((UUID) resultSet.getObject(PRIMARY_KEY_ID),
-                (UUID) resultSet.getObject(COL_STREAM_ID),
-                resultSet.getLong(COL_SEQUENCE_ID),
-                resultSet.getString(COL_NAME),
-                resultSet.getString(COL_METADATA),
-                resultSet.getString(COL_PAYLOAD),
-                fromSqlTimestamp(resultSet.getTimestamp(COL_TIMESTAMP)));
+    protected Event entityFrom(final ResultSet resultSet) {
+        try {
+            return new Event((UUID) resultSet.getObject(PRIMARY_KEY_ID),
+                    (UUID) resultSet.getObject(COL_STREAM_ID),
+                    resultSet.getLong(COL_SEQUENCE_ID),
+                    resultSet.getString(COL_NAME),
+                    resultSet.getString(COL_METADATA),
+                    resultSet.getString(COL_PAYLOAD),
+                    fromSqlTimestamp(resultSet.getTimestamp(COL_TIMESTAMP)));
+        } catch (final SQLException e) {
+            throw new JdbcRepositoryException(READING_STREAM_EXCEPTION, e);
+        }
     }
 
     @Override
@@ -218,46 +222,64 @@ public class EventJdbcRepository extends AbstractJdbcRepository<Event> {
                 rs.next();
                 return rs.getInt(1) > 0;
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new JdbcRepositoryException(READING_STREAM_EXCEPTION, e);
         }
     }
 
-    public Stream<Event> first(final UUID streamId, final long pageSize)
-            throws SQLException {
-        final PreparedStatementWrapper ps;
-        ps = preparedStatementWrapperOf(SQL_GET_FIRST);
-        ps.setObject(1, streamId);
-        ps.setLong(2, pageSize);
-        return reverseOrder(ps);
+    public Stream<Event> first(final UUID streamId, final long pageSize) {
+        try {
+            final PreparedStatementWrapper ps;
+            ps = preparedStatementWrapperOf(SQL_GET_FIRST);
+            ps.setObject(1, streamId);
+            ps.setLong(2, pageSize);
+            return reverseOrder(ps);
+        } catch (final SQLException e) {
+            throw new JdbcRepositoryException(READING_STREAM_EXCEPTION, e);
+        }
+
     }
 
-    public Stream<Event> next(final UUID streamId, final long position, final long pageSize)
-            throws SQLException {
-        final PreparedStatementWrapper ps = preparedStatementWrapperOf(SQL_GET_NEXT);
-        ps.setObject(1, streamId);
-        ps.setLong(2, position);
-        ps.setLong(3, pageSize);
-        return streamOf(ps);
+    public Stream<Event> forward(final UUID streamId, final long position, final long pageSize) {
+        try {
+            final PreparedStatementWrapper ps = preparedStatementWrapperOf(SQL_GET_FORWARD);
+            ps.setObject(1, streamId);
+            ps.setLong(2, position);
+            ps.setLong(3, pageSize);
+            return reverseOrder(ps);
+        } catch (final SQLException e) {
+            throw new JdbcRepositoryException(READING_STREAM_EXCEPTION, e);
+        }
     }
 
-    public Stream<Event> previous(final UUID streamId, final long position, final long pageSize)
-            throws SQLException {
-        final PreparedStatementWrapper ps = preparedStatementWrapperOf(SQL_GET_PREVIOUS);
-        ps.setObject(1, streamId);
-        ps.setLong(2, position);
-        ps.setLong(3, pageSize);
-        return reverseOrder(ps);
+    public Stream<Event> backward(final UUID streamId, final long position, final long pageSize) {
+        try {
+            final PreparedStatementWrapper ps = preparedStatementWrapperOf(SQL_GET_BACKWARD);
+            ps.setObject(1, streamId);
+            ps.setLong(2, position);
+            ps.setLong(3, pageSize);
+            return streamOf(ps);
+        } catch (final SQLException e) {
+            throw new JdbcRepositoryException(READING_STREAM_EXCEPTION, e);
+        }
     }
 
-    public Stream<Event> head(final UUID streamId, final long pageSize) throws SQLException {
-        final PreparedStatementWrapper ps = preparedStatementWrapperOf(SQL_GET_HEAD);
-        ps.setObject(1, streamId);
-        ps.setLong(2, pageSize);
-        return streamOf(ps);
+    public Stream<Event> head(final UUID streamId, final long pageSize) {
+        try {
+            final PreparedStatementWrapper ps = preparedStatementWrapperOf(SQL_GET_HEAD);
+            ps.setObject(1, streamId);
+            ps.setLong(2, pageSize);
+            return streamOf(ps);
+        } catch (final SQLException e) {
+            throw new JdbcRepositoryException(READING_STREAM_EXCEPTION, e);
+        }
     }
 
-    private Stream<Event> reverseOrder(final PreparedStatementWrapper ps) throws SQLException {
-        return streamOf(ps).sorted(Comparator.comparing(Event::getSequenceId).reversed());
+    private Stream<Event> reverseOrder(final PreparedStatementWrapper ps) {
+        try {
+            return streamOf(ps).sorted(Comparator.comparing(Event::getSequenceId).reversed());
+        } catch (final SQLException e) {
+            throw new JdbcRepositoryException(READING_STREAM_EXCEPTION, e);
+        }
     }
 }

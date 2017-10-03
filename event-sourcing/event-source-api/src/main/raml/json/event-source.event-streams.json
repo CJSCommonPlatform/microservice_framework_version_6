@@ -1,16 +1,18 @@
 {
   "data": [
     {
-      "streamId": "2955756c-c2e3-44c2-a18d-0a69cb4f4619",
-      "href": "http://localhost:8080/event-source-api/rest/event-streams/2955756c-c2e3-44c2-a18d-0a69cb4f4619"
+      "self": "http://localhost:8080/event-source-api/rest/event-streams/163af847-effb-46a9-96bc-32a0f7526e15/HEAD/BACKWARD/2",
+      "sequenceNumber": 5
     },
     {
-      "streamId": "2955756c-c2e3-44c2-a18d-0a69cb4f4620",
-      "href": "http://localhost:8080/event-source-api/rest/event-streams/2955756c-c2e3-44c2-a18d-0a69cb4f4620"
+      "self": "http://localhost:8080/event-source-api/rest/event-streams/44cb6b25-187f-4c6b-84c0-8666a7d59a8d/HEAD/BACKWARD/2",
+      "sequenceNumber": 4
     }
   ],
   "paging": {
-    "previous": "http://localhost:8080/event-source-api/rest/event-streams?page=1",
-    "next": "http://localhost:8080/event-source-api/rest/event-streams?page=3"
+    "head": "http://localhost:8080/event-source-api/rest/event-streams/HEAD/BACKWARD/2",
+    "first": "http://localhost:8080/event-source-api/rest/event-streams/1/FORWARD/2",
+    "previous": "http://localhost:8080/event-source-api/rest/event-streams/3/BACKWARD/2",
+    "next": "http://localhost:8080/event-source-api/rest/event-streams/6/FORWARD/2"
   }
 }

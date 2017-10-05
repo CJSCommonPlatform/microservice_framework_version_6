@@ -6,7 +6,6 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ## [Unreleased]
 
 ### Added
-- org.apache.commons commons-lang3 dependency from framework-api-core
 - JsonEnvelope and Metadata builder service provider
 - Convenience methods to JsonEnvelope for providing JsonEnvelopes and JsonObjectMetadataBuilders
 - MetadataBuilderFactory in test-utils-core which contains convenience methods for creating 
@@ -15,12 +14,10 @@ JsonObjectMetadataBuilders in tests
 
 ### Changed
 - Deprecate DefaultJsonEnvelope, JsonObjectBuilderWrapper and JsonObjectMetadata
-- Replace usage of Pair in InterceptorChainProvider with InterceptorChainEntry
 - Deprecate JavaCompilerUtil
 - Utilities library upgraded to 1.8.1 and file service to 1.11.1 to pick up JSON logging fix
 
 ### Removed 
-- org.apache.commons commons-lang3 dependency from framework-api-core
 - org.apache.commons commons-lang3 dependency from core
 
 ## [2.2.1] - 2017-09-01

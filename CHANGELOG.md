@@ -5,6 +5,11 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [2.3.0] - 2017-10-05
+
+### Added
+- Support for relative JSON schema references from Jar files
+
 ## [2.2.1] - 2017-09-01
 
 ### Changed

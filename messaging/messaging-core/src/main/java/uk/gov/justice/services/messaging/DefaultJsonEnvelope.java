@@ -1,15 +1,6 @@
 package uk.gov.justice.services.messaging;
 
 
-import static javax.json.Json.createObjectBuilder;
-import static uk.gov.justice.services.common.converter.JSONObjectValueObfuscator.obfuscated;
-import static uk.gov.justice.services.messaging.JsonEnvelopeWriter.writeJsonObject;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.CORRELATION;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.SESSION_ID;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.USER_ID;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
-import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
-
 import java.math.BigDecimal;
 import java.util.UUID;
 

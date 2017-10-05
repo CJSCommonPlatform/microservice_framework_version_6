@@ -37,15 +37,14 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.extension.ServiceComponentScanner;
 import uk.gov.justice.services.core.h2.OpenEjbConfigurationBuilder;
-import uk.gov.justice.services.core.interceptor.Interceptor;
 import uk.gov.justice.services.core.interceptor.InterceptorCache;
+import uk.gov.justice.services.core.interceptor.InterceptorChainEntry;
+import uk.gov.justice.services.core.interceptor.InterceptorChainEntryProvider;
 import uk.gov.justice.services.core.interceptor.InterceptorChainObserver;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
-import uk.gov.justice.services.core.interceptor.InterceptorChainProvider;
 import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
 import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
-
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.requester.RequesterProducer;
 import uk.gov.justice.services.core.sender.SenderProducer;
@@ -75,8 +74,6 @@ import javax.sql.DataSource;
 import liquibase.Liquibase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.resource.ClassLoaderResourceAccessor;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.openejb.jee.Application;
 import org.apache.openejb.jee.WebApp;
 import org.apache.openejb.junit.ApplicationComposer;
@@ -400,7 +397,7 @@ public class EventBufferIT {
 
     }
 
-    public static class EventListenerInterceptorChainProvider implements InterceptorChainProvider {
+    public static class EventListenerInterceptorChainProvider implements InterceptorChainEntryProvider {
 
         @Override
         public String component() {
@@ -408,9 +405,9 @@ public class EventBufferIT {
         }
 
         @Override
-        public List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes() {
-            final List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes = new ArrayList<>();
-            interceptorChainTypes.add(new ImmutablePair<>(1, EventBufferInterceptor.class));
+        public List<InterceptorChainEntry> interceptorChainTypes() {
+            final List<InterceptorChainEntry> interceptorChainTypes = new ArrayList<>();
+            interceptorChainTypes.add(new InterceptorChainEntry(1, EventBufferInterceptor.class));
             return interceptorChainTypes;
         }
     }

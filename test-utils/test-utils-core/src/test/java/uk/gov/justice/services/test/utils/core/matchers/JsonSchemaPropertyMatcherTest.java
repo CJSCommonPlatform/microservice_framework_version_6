@@ -1,11 +1,11 @@
 package uk.gov.justice.services.test.utils.core.matchers;
 
-import org.junit.Test;
-
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonSchemaPropertyMatcher.hasProperty;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonSchemaPropertyMatcher.hasRequiredProperty;
+
+import org.junit.Test;
 
 public class JsonSchemaPropertyMatcherTest {
 

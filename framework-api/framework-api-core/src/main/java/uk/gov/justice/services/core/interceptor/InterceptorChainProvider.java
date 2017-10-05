@@ -4,7 +4,10 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-
+/**
+ * @deprecated Use {@link InterceptorChainEntryProvider}
+ */
+@Deprecated
 public interface InterceptorChainProvider {
 
     /**

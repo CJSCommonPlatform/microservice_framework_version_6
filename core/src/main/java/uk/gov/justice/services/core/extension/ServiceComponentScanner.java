@@ -13,7 +13,6 @@ import uk.gov.justice.services.core.annotation.Direct;
 import uk.gov.justice.services.core.annotation.DirectAdapter;
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
-import uk.gov.justice.services.core.handler.registry.HandlerRegistry;
 
 import java.util.ArrayList;
 import java.util.List;

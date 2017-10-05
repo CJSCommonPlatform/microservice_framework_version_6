@@ -1,23 +1,18 @@
 package uk.gov.justice.services.clients.core.webclient;
 
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
-
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import uk.gov.justice.services.clients.core.EndpointDefinition;
+import uk.gov.justice.services.common.configuration.JndiBasedServiceContextNameProvider;
+
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.*;
-
-import uk.gov.justice.services.clients.core.EndpointDefinition;
-import uk.gov.justice.services.clients.core.webclient.ContextMatcher;
-import uk.gov.justice.services.common.configuration.JndiBasedServiceContextNameProvider;
+import org.mockito.runners.MockitoJUnitRunner;
 
 
 @RunWith(MockitoJUnitRunner.class)

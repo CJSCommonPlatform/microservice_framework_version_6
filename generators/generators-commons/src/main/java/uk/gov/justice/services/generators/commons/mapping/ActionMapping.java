@@ -16,7 +16,6 @@ import uk.gov.justice.services.generators.commons.validator.RamlValidationExcept
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Predicate;
 
 import com.google.common.base.Splitter;

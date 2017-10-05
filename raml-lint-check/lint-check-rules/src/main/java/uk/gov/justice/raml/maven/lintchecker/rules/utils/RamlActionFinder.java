@@ -5,10 +5,7 @@ import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.l
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
-import org.raml.model.Action;
 import org.raml.model.Raml;
 import org.raml.model.Resource;
 

@@ -4,7 +4,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.extension.ServiceComponentFoundEvent;
-import uk.gov.justice.services.core.extension.ServiceComponentScanner;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;

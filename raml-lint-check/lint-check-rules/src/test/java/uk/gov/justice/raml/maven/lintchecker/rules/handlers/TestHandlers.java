@@ -1,6 +1,6 @@
 package uk.gov.justice.raml.maven.lintchecker.rules.handlers;
 
-import static uk.gov.justice.services.core.annotation.Component.*;
+import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;

@@ -5,8 +5,6 @@ import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 
-import uk.gov.justice.services.generators.commons.helper.RestResourceBaseUri;
-
 import java.util.Optional;
 
 import org.junit.Test;

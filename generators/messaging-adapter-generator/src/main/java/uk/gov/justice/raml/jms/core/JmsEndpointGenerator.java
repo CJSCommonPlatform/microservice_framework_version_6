@@ -7,8 +7,8 @@ import static uk.gov.justice.services.generators.commons.helper.GeneratedClassWr
 
 import uk.gov.justice.raml.core.Generator;
 import uk.gov.justice.raml.core.GeneratorConfig;
-import uk.gov.justice.services.generators.commons.helper.MessagingAdapterBaseUri;
 import uk.gov.justice.raml.jms.validator.BaseUriRamlValidator;
+import uk.gov.justice.services.generators.commons.helper.MessagingAdapterBaseUri;
 import uk.gov.justice.services.generators.commons.validator.CompositeRamlValidator;
 import uk.gov.justice.services.generators.commons.validator.ContainsActionsRamlValidator;
 import uk.gov.justice.services.generators.commons.validator.ContainsResourcesRamlValidator;

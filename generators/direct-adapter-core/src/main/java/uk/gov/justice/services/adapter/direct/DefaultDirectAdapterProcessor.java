@@ -1,7 +1,6 @@
 package uk.gov.justice.services.adapter.direct;
 
 import static java.lang.String.format;
-import static org.apache.commons.lang3.ArrayUtils.contains;
 import static uk.gov.justice.services.core.interceptor.DefaultInterceptorContext.interceptorContextWithInput;
 
 import uk.gov.justice.services.core.interceptor.InterceptorContext;

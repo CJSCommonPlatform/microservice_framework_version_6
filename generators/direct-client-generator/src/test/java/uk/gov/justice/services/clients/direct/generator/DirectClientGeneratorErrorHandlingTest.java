@@ -1,4 +1,5 @@
 package uk.gov.justice.services.clients.direct.generator;
+
 import static java.util.Collections.emptyMap;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.HEAD;
@@ -15,9 +16,7 @@ import uk.gov.justice.services.generators.commons.validator.RamlValidationExcept
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 public class DirectClientGeneratorErrorHandlingTest extends BaseGeneratorTest {
 

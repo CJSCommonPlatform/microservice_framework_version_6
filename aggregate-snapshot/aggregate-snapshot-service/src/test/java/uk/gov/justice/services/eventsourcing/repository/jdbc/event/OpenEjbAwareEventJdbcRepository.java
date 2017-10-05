@@ -2,7 +2,6 @@ package uk.gov.justice.services.eventsourcing.repository.jdbc.event;
 
 import static java.lang.String.format;
 
-import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepository;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 
 import java.sql.Connection;

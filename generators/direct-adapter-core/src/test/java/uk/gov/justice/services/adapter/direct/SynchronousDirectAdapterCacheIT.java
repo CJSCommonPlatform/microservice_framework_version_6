@@ -1,7 +1,7 @@
 package uk.gov.justice.services.adapter.direct;
 
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 import uk.gov.justice.services.core.annotation.DirectAdapter;
 import uk.gov.justice.services.messaging.JsonEnvelope;

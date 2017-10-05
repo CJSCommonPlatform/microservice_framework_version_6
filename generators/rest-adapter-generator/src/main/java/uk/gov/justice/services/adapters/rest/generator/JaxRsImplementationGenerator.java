@@ -26,9 +26,9 @@ import static uk.gov.justice.services.generators.commons.helper.Actions.isSynchr
 import static uk.gov.justice.services.generators.commons.helper.Names.DEFAULT_ANNOTATION_PARAMETER;
 import static uk.gov.justice.services.generators.commons.helper.Names.GENERIC_PAYLOAD_ARGUMENT_NAME;
 import static uk.gov.justice.services.generators.commons.helper.Names.RESOURCE_PACKAGE_NAME;
+import static uk.gov.justice.services.generators.commons.helper.Names.packageNameOf;
 import static uk.gov.justice.services.generators.commons.helper.Names.resourceMethodNameFrom;
 import static uk.gov.justice.services.generators.commons.helper.Names.resourceMethodNameWithNoMimeTypeFrom;
-import static uk.gov.justice.services.generators.commons.helper.Names.packageNameOf;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.services.adapter.rest.mapping.ActionMapper;
@@ -37,11 +37,11 @@ import uk.gov.justice.services.adapter.rest.parameter.ParameterCollectionBuilder
 import uk.gov.justice.services.adapter.rest.parameter.ParameterCollectionBuilderFactory;
 import uk.gov.justice.services.adapter.rest.parameter.ParameterType;
 import uk.gov.justice.services.adapter.rest.processor.RestProcessor;
-import uk.gov.justice.services.generators.commons.helper.RestResourceBaseUri;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.CustomAdapter;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
+import uk.gov.justice.services.generators.commons.helper.RestResourceBaseUri;
 import uk.gov.justice.services.messaging.logging.HttpTraceLoggerHelper;
 import uk.gov.justice.services.messaging.logging.TraceLogger;
 

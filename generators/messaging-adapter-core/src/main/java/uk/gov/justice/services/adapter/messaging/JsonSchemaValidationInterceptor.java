@@ -14,7 +14,6 @@ import javax.interceptor.InvocationContext;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
 
-
 import org.everit.json.schema.ValidationException;
 import org.slf4j.Logger;
 

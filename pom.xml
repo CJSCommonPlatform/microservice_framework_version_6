@@ -19,9 +19,9 @@
     <description>Framework for building microservices</description>
 
     <scm>
-        <connection>scm:git:git@github.com:CJSCommonPlatform/microservice_framework.git</connection>
-        <developerConnection>scm:git:git@github.com:CJSCommonPlatform/microservice_framework.git
-        </developerConnection>
+        <connection>${cpp.scm.connection}</connection>
+        <developerConnection>${cpp.scm.developerConnection}</developerConnection>
+        <url>${cpp.scm.url}</url>
     </scm>
 
     <modules>

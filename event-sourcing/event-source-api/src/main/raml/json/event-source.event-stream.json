@@ -4,7 +4,7 @@
       "eventId": "4955756c-c2e3-44c2-a18d-0a69cb4f4655",
       "streamId": "163af847-effb-46a9-96bc-32a0f7526e15",
       "sequenceId": 1,
-      "name": "example.recipe-added",
+      "name": "example.events.recipe-added",
       "payload": {
         "recipeId": "163af847-effb-46a9-96bc-32a0f7526e15",
         "name": "Vanilla cake"
@@ -15,7 +15,7 @@
       "eventId": "1955756c-c2e3-44c2-a18d-0a69cb4f4656",
       "streamId": "163af847-effb-46a9-96bc-32a0f7526e15",
       "sequenceId": 1,
-      "name": "example.recipe-removed",
+      "name": "example.events.recipe-removed",
       "payload": {
         "recipeId": "163af847-effb-46a9-96bc-32a0f7526e15"
       },

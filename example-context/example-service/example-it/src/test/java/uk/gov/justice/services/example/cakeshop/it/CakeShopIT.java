@@ -216,7 +216,7 @@ public class CakeShopIT {
         await().until(() -> eventsWithPayloadContaining(recipeId).size() == 1);
 
         final Event event = eventsWithPayloadContaining(recipeId).get(0);
-        assertThat(event.getName(), is("example.recipe-added"));
+        assertThat(event.getName(), is("example.events.recipe-added"));
         with(event.getMetadata())
                 .assertEquals("stream.id", recipeId)
                 .assertEquals("stream.version", 1);
@@ -259,7 +259,7 @@ public class CakeShopIT {
         await().until(() -> eventsWithPayloadContaining(recipeId).size() == 1);
 
         final Event event = eventsWithPayloadContaining(recipeId).get(0);
-        assertThat(event.getName(), is("example.recipe-added"));
+        assertThat(event.getName(), is("example.events.recipe-added"));
         with(event.getMetadata())
                 .assertEquals("stream.id", recipeId)
                 .assertEquals("stream.version", 1);
@@ -354,7 +354,7 @@ public class CakeShopIT {
                 final TextMessage messageFromDLQ = (TextMessage) dlqConsumer.receive();
 
                 with(messageFromDLQ.getText())
-                     .assertThat("$._metadata.name", equalTo("example.recipe-added"))
+                        .assertThat("$._metadata.name", equalTo("example.events.recipe-added"))
                      .assertThat("$.recipeId", equalTo(recipeId));
             }
 
@@ -529,7 +529,7 @@ public class CakeShopIT {
 
                 final TextMessage message = (TextMessage) publicTopicConsumer.receive();
                 with(message.getText())
-                        .assertThat("$._metadata.name", equalTo("example.recipe-added"))
+                        .assertThat("$._metadata.name", equalTo("example.events.recipe-added"))
                         .assertThat("$.recipeId", equalTo(recipeId))
                         .assertThat("$.name", equalTo("Apple pie"));
 	    }
@@ -690,7 +690,7 @@ public class CakeShopIT {
         await().until(() -> eventsWithPayloadContaining(recipeId).size() == 2);
 
         final Event event = eventsWithPayloadContaining(recipeId).get(1);
-        assertThat(event.getName(), is("example.recipe-photograph-added"));
+        assertThat(event.getName(), is("example.events.recipe-photograph-added"));
         with(event.getMetadata())
                 .assertEquals("stream.id", recipeId)
                 .assertEquals("stream.version", 2);

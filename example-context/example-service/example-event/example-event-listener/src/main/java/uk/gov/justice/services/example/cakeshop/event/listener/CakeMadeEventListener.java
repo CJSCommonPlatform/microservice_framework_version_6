@@ -24,7 +24,7 @@ public class CakeMadeEventListener {
     @Inject
     JsonObjectToObjectConverter converter;
 
-    @Handles("example.cake-made")
+    @Handles("example.events.cake-made")
     public void handle(final JsonEnvelope envelope) {
 
         logger.info("=============> Inside cake-made Event Listener");

@@ -20,7 +20,7 @@ public class CakeMadeEventProcessor {
     @Inject
     Sender sender;
 
-    @Handles("example.cake-made")
+    @Handles("example.events.cake-made")
     public void handle(final JsonEnvelope event) {
 
         logger.info("=============> Inside cake-made Event Processor");

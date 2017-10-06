@@ -49,12 +49,12 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class RecipeCommandHandlerTest {
 
     private static final String ADD_RECIPE_COMMAND_NAME = "example.add-recipe";
-    private static final String ADD_RECIPE_EVENT_NAME = "example.recipe-added";
+    private static final String ADD_RECIPE_EVENT_NAME = "example.events.recipe-added";
     private static final String RENAME_RECIPE_COMMAND_NAME = "example.rename-recipe";
-    private static final String RENAME_RECIPE_EVENT_NAME = "example.recipe-renamed";
+    private static final String RENAME_RECIPE_EVENT_NAME = "example.events.recipe-renamed";
     private static final String REMOVE_RECIPE_COMMAND_NAME = "example.remove-recipe";
-    private static final String REMOVE_RECIPE_EVENT_NAME = "example.recipe-removed";
-    private static final String RECIPE_PHOTOGRAPH_ADDED_EVENT_NAME = "example.recipe-photograph-added";
+    private static final String REMOVE_RECIPE_EVENT_NAME = "example.events.recipe-removed";
+    private static final String RECIPE_PHOTOGRAPH_ADDED_EVENT_NAME = "example.events.recipe-photograph-added";
 
     private static final UUID RECIPE_ID = randomUUID();
     private static final UUID PHOTO_ID = randomUUID();

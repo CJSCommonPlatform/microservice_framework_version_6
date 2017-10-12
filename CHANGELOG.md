@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [2.3.1] - 2017-10-12
+
+Released to avoid conflicts with pevious tags
+
 ## [2.3.0] - 2017-10-05
 
 ### Added

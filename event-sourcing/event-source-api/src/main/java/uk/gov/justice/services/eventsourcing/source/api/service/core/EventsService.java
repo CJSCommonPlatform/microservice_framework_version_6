@@ -1,5 +1,6 @@
-package uk.gov.justice.services.eventsourcing.source.api.service;
+package uk.gov.justice.services.eventsourcing.source.api.service.core;
 
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.justice.services.eventsourcing.repository.jdbc.Direction.BACKWARD;
 import static uk.gov.justice.services.eventsourcing.repository.jdbc.Direction.FORWARD;
@@ -7,14 +8,10 @@ import static uk.gov.justice.services.eventsourcing.repository.jdbc.Direction.FO
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.Direction;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.Position;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.Event;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepository;
-import uk.gov.justice.services.eventsourcing.source.api.feed.event.EventEntry;
 
-import java.sql.SQLException;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
@@ -32,7 +29,7 @@ public class EventsService {
     public List<EventEntry> events(final UUID streamId,
                                    final Position position,
                                    final Direction direction,
-                                   final long pageSize) throws SQLException {
+                                   final long pageSize) {
 
         final List<Event> eventEntries = entitiesPage(streamId, position, direction, pageSize);
         return eventEntries(eventEntries);
@@ -42,7 +39,7 @@ public class EventsService {
             final UUID streamId,
             final Position position,
             final Direction direction,
-            final long pageSize) throws SQLException {
+            final long pageSize) {
         if (position.isHead()) {
             return repository.head(streamId, pageSize).collect(toList());
         }
@@ -52,14 +49,14 @@ public class EventsService {
         }
 
         if (FORWARD.equals(direction)) {
-            return repository.previous(streamId, position.getSequenceId(), pageSize).collect(toList());
+            return repository.forward(streamId, position.getSequenceId(), pageSize).collect(toList());
         }
 
         if (BACKWARD.equals(direction)) {
-            return repository.next(streamId, position.getSequenceId(), pageSize).collect(toList());
+            return repository.backward(streamId, position.getSequenceId(), pageSize).collect(toList());
         }
 
-        return new ArrayList<>();
+        return emptyList();
     }
 
     public boolean recordExists(final UUID streamId, final long sequenceId) {
@@ -68,11 +65,11 @@ public class EventsService {
 
     private List<EventEntry> eventEntries(final List<Event> events) {
         return events.stream()
-                .map(toFeedEntry())
+                .map(toEventEntry())
                 .collect(toList());
     }
 
-    private Function<Event, EventEntry> toFeedEntry() {
+    private Function<Event, EventEntry> toEventEntry() {
         return event -> new EventEntry(
                 event.getId(),
                 event.getStreamId(),

@@ -1,4 +1,4 @@
-package uk.gov.justice.services.eventsourcing.source.api.feed.common;
+package uk.gov.justice.services.eventsourcing.source.api.service;
 
 import java.net.URL;
 import java.util.Optional;
@@ -35,23 +35,26 @@ public class PagingLinks {
 
     public static class PagingLinksBuilder {
 
-        private final URL head;
-        private final URL first;
+        private URL head;
+        private URL first;
 
         private Optional<URL> previous = Optional.empty();
         private Optional<URL> next = Optional.empty();
 
-        public PagingLinksBuilder(final URL head, final URL first) {
-            this.first = first;
-            this.head = head;
+        public static PagingLinksBuilder pagingLinksBuilder(final URL head, final URL first) {
+            final PagingLinksBuilder pagingLinksBuilder = new PagingLinksBuilder();
+            pagingLinksBuilder.head = head;
+            pagingLinksBuilder.first = first;
+
+            return pagingLinksBuilder;
         }
 
-        public PagingLinksBuilder previous(final Optional<URL> previous) {
+        public PagingLinksBuilder withPrevious(final Optional<URL> previous) {
             this.previous = previous;
             return this;
         }
 
-        public PagingLinksBuilder next(final Optional<URL> next) {
+        public PagingLinksBuilder withNext(final Optional<URL> next) {
             this.next = next;
             return this;
         }

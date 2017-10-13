@@ -8,14 +8,15 @@
         "id": "/properties/data/items",
         "properties": {
           "href": {
-            "id": "/properties/data/items/properties/href",
+            "id": "/properties/data/items/properties/self",
             "type": "string",
-            "format": "uri"
+            "format": "uri",
+            "required": true
           },
-          "streamId": {
-            "id": "/properties/data/items/properties/streamId",
-            "type": "string",
-            "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+          "sequenceId": {
+            "id": "/properties/data/items/properties/sequenceId",
+            "type": "integer",
+            "required": true
           }
         },
         "type": "object"
@@ -25,6 +26,18 @@
     "paging": {
       "id": "/properties/paging",
       "properties": {
+        "head": {
+          "id": "/properties/paging/properties/head",
+          "type": "string",
+          "format": "uri",
+          "required": true
+        },
+        "first": {
+          "id": "/properties/paging/properties/first",
+          "type": "string",
+          "format": "uri",
+          "required": true
+        },
         "next": {
           "id": "/properties/paging/properties/next",
           "type": "string",

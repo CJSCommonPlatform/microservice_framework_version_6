@@ -3,7 +3,6 @@ package uk.gov.justice.services.eventsourcing.source.api;
 import static com.jayway.jsonassert.JsonAssert.with;
 import static java.lang.String.format;
 import static java.util.UUID.randomUUID;
-import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.Status.OK;
@@ -20,18 +19,15 @@ import uk.gov.justice.services.adapter.rest.mapper.BadRequestExceptionMapper;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.rest.ForbiddenRequestExceptionMapper;
-import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.Direction;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventInsertionStrategy;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.event.Event;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidSequenceIdException;
-import uk.gov.justice.services.eventsourcing.source.api.resource.EventPageResource;
 import uk.gov.justice.services.eventsourcing.source.api.resource.EventSourceApiApplication;
+import uk.gov.justice.services.eventsourcing.source.api.resource.EventStreamPageResource;
 import uk.gov.justice.services.eventsourcing.source.api.security.AccessController;
-import uk.gov.justice.services.eventsourcing.source.api.service.EventsPageService;
+import uk.gov.justice.services.eventsourcing.source.api.service.EventStreamPageService;
 import uk.gov.justice.services.eventsourcing.source.api.service.UrlLinkFactory;
-import uk.gov.justice.services.eventsourcing.source.api.service.core.EventsService;
+import uk.gov.justice.services.eventsourcing.source.api.service.core.EventStreamService;
 import uk.gov.justice.services.eventsourcing.source.api.service.core.PositionFactory;
 import uk.gov.justice.services.eventsourcing.source.api.service.core.PositionValueFactory;
 import uk.gov.justice.services.eventsourcing.source.api.util.LoggerProducer;
@@ -40,7 +36,6 @@ import uk.gov.justice.services.eventsourcing.source.api.util.OpenEjbAwareEventSt
 import uk.gov.justice.services.eventsourcing.source.api.util.TestSystemUserProvider;
 
 import java.io.IOException;
-import java.time.ZonedDateTime;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -48,7 +43,6 @@ import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
-import javax.json.JsonObject;
 import javax.sql.DataSource;
 
 import com.jayway.jsonpath.JsonPath;
@@ -77,13 +71,13 @@ import org.junit.runner.RunWith;
 
 @EnableServices("jaxrs")
 @RunWith(ApplicationComposer.class)
-public class EventsPageIT {
+public class EventStreamPageIT {
+    private static final String BAD_HEAD_REQUEST = "Invalid request, cannot request PREVIOUS page from HEAD.";
+    private static final String BAD_FIRST_REQUEST = "Invalid request, cannot request NEXT page from FIRST.";
 
-    private static final String METADATA_JSON = "{\"field\": \"Value\"}";
     private static final String LIQUIBASE_EVENT_STORE_CHANGELOG_XML = "liquibase/event-store-db-changelog.xml";
     private static final String BASE_URI_PATTERN = "http://localhost:%d/event-source-api/rest";
-    private static final UUID STREAM_ID = randomUUID();
-    private static final String EVENT_STREAM_URL_PATH_PREFIX = "/event-source-api/rest/event-streams/" + STREAM_ID;
+    private static final String EVENT_STREAM_URL_PATH_PREFIX = "/event-source-api/rest/event-streams";
     public static final int PAGE_SIZE = 2;
     private static int port = -1;
 
@@ -93,7 +87,7 @@ public class EventsPageIT {
     private DataSource dataSource;
 
     @Inject
-    private OpenEjbAwareEventRepository eventsRepository;
+    private OpenEjbAwareEventStreamRepository eventsRepository;
 
     @BeforeClass
     public static void beforeClass() {
@@ -126,15 +120,15 @@ public class EventsPageIT {
     @Classes(cdi = true, value = {
             ObjectMapperProducer.class,
             ObjectToJsonValueConverter.class,
-            EventPageResource.class,
+            EventStreamPageResource.class,
             OpenEjbAwareEventRepository.class,
-            EventsService.class,
+            EventStreamService.class,
             AccessController.class,
             TestSystemUserProvider.class,
             ForbiddenRequestExceptionMapper.class,
             TestEventInsertionStrategyProducer.class,
             OpenEjbAwareEventStreamRepository.class,
-            EventsPageService.class,
+            EventStreamPageService.class,
             LoggerProducer.class,
             PositionFactory.class,
             UrlLinkFactory.class,
@@ -151,101 +145,60 @@ public class EventsPageIT {
 
     @Test
     public void shouldReturnTheFullEventInfo() throws Exception {
-        final UUID streamId = randomUUID();
+        final UUID streamId1 = randomUUID();
+        final UUID streamId2 = randomUUID();
+        final UUID streamId3 = randomUUID();
+        final UUID streamId4 = randomUUID();
+        final UUID streamId5 = randomUUID();
 
-        final ZonedDateTime event3CreatedAt = new UtcClock().now();
-        final ZonedDateTime event2CreatedAt = new UtcClock().now();
+        storeEventStreams(streamId1, streamId2, streamId3, streamId4, streamId5);
 
-        final JsonObject payloadEvent3 = createObjectBuilder().add("field3", "value3").build();
-        final JsonObject payloadEvent2 = createObjectBuilder().add("field2", "value2").build();
-        final JsonObject payloadEvent1 = createObjectBuilder().add("field1", "value1").build();
-
-        final Event event3 = new Event(randomUUID(), streamId, 3L, "Test Name3", METADATA_JSON, payloadEvent3.toString(), event3CreatedAt);
-        final Event event2 = new Event(randomUUID(), streamId, 2L, "Test Name2", METADATA_JSON, payloadEvent2.toString(), event2CreatedAt);
-        final Event event1 = new Event(randomUUID(), streamId, 1L, "Test Name1", METADATA_JSON, payloadEvent1.toString(), new UtcClock().now());
-
-        eventsRepository.insert(event1);
-        eventsRepository.insert(event2);
-        eventsRepository.insert(event3);
-
-        final HttpResponse response = eventsFeedFor(SYSTEM_USER_ID, streamId, "3", BACKWARD, PAGE_SIZE);
+        final HttpResponse response = eventsStreamsFor(SYSTEM_USER_ID, "3", BACKWARD, PAGE_SIZE);
 
         assertThat(response.getStatusLine().getStatusCode(), is(OK.getStatusCode()));
 
         final String value = responseBodyOf(response);
+
+        final String selfLinkForStreamId3 = "/event-source-api/rest/event-streams/" + streamId3 + "/HEAD/BACKWARD/2";
+        final String selfLinkForStreamId2 = "/event-source-api/rest/event-streams/" + streamId2 + "/HEAD/BACKWARD/2";
+
         with(value)
                 .assertThat("$.data", hasSize(2))
 
-                .assertThat("$.data[0].streamId", is(streamId.toString()))
-                .assertThat("$.data[0].name", containsString("Test Name3"))
-                .assertThat("$.data[0].sequenceId", is(3))
-                .assertThat("$.data[0].createdAt", is(event3CreatedAt.toString()))
-                .assertThat("$.data[0].payload.field3", is("value3"))
+                .assertThat("$.data[0].self", containsString(selfLinkForStreamId3))
+                .assertThat("$.data[0].sequenceNumber", is(3))
 
-                .assertThat("$.data[1].streamId", is(streamId.toString()))
-                .assertThat("$.data[1].name", containsString("Test Name2"))
-                .assertThat("$.data[1].sequenceId", is(2))
-                .assertThat("$.data[1].createdAt", is(event2CreatedAt.toString()))
-                .assertThat("$.data[1].payload.field2", is("value2"));
+                .assertThat("$.data[1].self", containsString(selfLinkForStreamId2))
+                .assertThat("$.data[1].sequenceNumber", is(2));
     }
 
     @Test
     public void shouldReturnHeadEvents() throws Exception {
 
-        storeEvents();
+        final UUID streamId1 = randomUUID();
+        final UUID streamId2 = randomUUID();
+        final UUID streamId3 = randomUUID();
+        final UUID streamId4 = randomUUID();
+        final UUID streamId5 = randomUUID();
 
-        final HttpResponse response = eventsFeedFor(SYSTEM_USER_ID, STREAM_ID, "HEAD", BACKWARD, PAGE_SIZE);
+        storeEventStreams(streamId1, streamId2, streamId3, streamId4, streamId5);
 
-        assertThat(response.getStatusLine().getStatusCode(), is(OK.getStatusCode()));
-
-        final String page1 = responseBodyOf(response);
-
-        with(page1)
-                .assertThat("$.data", hasSize(2))
-
-                .assertThat("$.data[0].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[0].sequenceId", is(5))
-
-                .assertThat("$.data[1].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[1].sequenceId", is(4));
-
-        with(page1)
-                .assertNotDefined("$.pagingLinks.next");
-
-        final String page2Url = JsonPath.read(page1, "$.pagingLinks.previous");
-
-        assertThat(page2Url, containsString(EVENT_STREAM_URL_PATH_PREFIX + "/3/BACKWARD/2"));
-
-        assertHeadAndLastLinks(page1);
-    }
-
-    @Test
-    public void shouldThrowExceptionWhenHeadRequestednextAsDirection() throws Exception {
-
-        final HttpResponse response = eventsFeedFor(SYSTEM_USER_ID, STREAM_ID, "HEAD", FORWARD, PAGE_SIZE);
-
-        assertThat(response.getStatusLine().getStatusCode(), is(BAD_REQUEST.getStatusCode()));
-    }
-
-    @Test
-    public void shouldReturnLatestEvents() throws Exception {
-
-        storeEvents();
-
-        final HttpResponse response = eventsFeedFor(SYSTEM_USER_ID, STREAM_ID, "5", BACKWARD, PAGE_SIZE);
+        final HttpResponse response = eventsStreamsFor(SYSTEM_USER_ID, "HEAD", BACKWARD, PAGE_SIZE);
 
         assertThat(response.getStatusLine().getStatusCode(), is(OK.getStatusCode()));
 
         final String page1 = responseBodyOf(response);
+        final String expectedSelfLinkForStreamId5 = "/event-source-api/rest/event-streams/" + streamId5 + "/HEAD/BACKWARD/2";
+        final String expectedSelfLinkForStreamId4 = "/event-source-api/rest/event-streams/" + streamId4 + "/HEAD/BACKWARD/2";
 
         with(page1)
                 .assertThat("$.data", hasSize(2))
 
-                .assertThat("$.data[0].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[0].sequenceId", is(5))
+                .assertThat("$.data[0].self", containsString(expectedSelfLinkForStreamId5))
+                .assertThat("$.data[0].sequenceNumber", is(5))
 
-                .assertThat("$.data[1].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[1].sequenceId", is(4));
+                .assertThat("$.data[1].self", containsString(expectedSelfLinkForStreamId4))
+                .assertThat("$.data[1].sequenceNumber", is(4));
 
         with(page1)
                 .assertNotDefined("$.pagingLinks.next");
@@ -258,90 +211,170 @@ public class EventsPageIT {
     }
 
     @Test
-    public void shouldReturnFirstEvents() throws Exception {
+    public void shouldThrowExceptionWhenHeadRequestednextAsDirection() throws Exception {
 
-        storeEvents();
-
-        final HttpResponse response = eventsFeedFor(SYSTEM_USER_ID, STREAM_ID, "1", FORWARD, PAGE_SIZE);
-
-        assertThat(response.getStatusLine().getStatusCode(), is(OK.getStatusCode()));
-
-        final String page3 = responseBodyOf(response);
-        with(page3)
-                .assertThat("$.data", hasSize(2))
-
-                .assertThat("$.data[0].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[0].sequenceId", is(2))
-
-                .assertThat("$.data[1].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[1].sequenceId", is(1));
-
-        final String page2Url = JsonPath.read(page3, "$.pagingLinks.next");
-
-        assertThat(page2Url, containsString(EVENT_STREAM_URL_PATH_PREFIX + "/3/FORWARD/" + PAGE_SIZE));
-
-        with(page3)
-                .assertNotDefined("$.pagingLinks.previous");
-
-        assertHeadAndLastLinks(page3);
-    }
-
-    @Test
-    public void shouldThrowExceptionWhenFirstRequestedpreviousAsDirection() throws Exception {
-
-        final HttpResponse response = eventsFeedFor(SYSTEM_USER_ID, STREAM_ID, "1", BACKWARD, PAGE_SIZE);
+        final HttpResponse response = eventsStreamsFor(SYSTEM_USER_ID, "HEAD", FORWARD, PAGE_SIZE);
 
         assertThat(response.getStatusLine().getStatusCode(), is(BAD_REQUEST.getStatusCode()));
     }
 
     @Test
+    public void shouldReturnLatestEvents() throws Exception {
+
+        final UUID streamId1 = randomUUID();
+        final UUID streamId2 = randomUUID();
+        final UUID streamId3 = randomUUID();
+        final UUID streamId4 = randomUUID();
+        final UUID streamId5 = randomUUID();
+
+        storeEventStreams(streamId1, streamId2, streamId3, streamId4, streamId5);
+
+        final HttpResponse response = eventsStreamsFor(SYSTEM_USER_ID, "5", BACKWARD, PAGE_SIZE);
+
+        assertThat(response.getStatusLine().getStatusCode(), is(OK.getStatusCode()));
+
+        final String page1 = responseBodyOf(response);
+
+        final String selfLinkForStreamId5 = "/event-source-api/rest/event-streams/" + streamId5 + "/HEAD/BACKWARD/2";
+        final String selfLinkForStreamId4 = "/event-source-api/rest/event-streams/" + streamId4 + "/HEAD/BACKWARD/2";
+
+        with(page1)
+                .assertThat("$.data", hasSize(2))
+
+                .assertThat("$.data[0].self", containsString(selfLinkForStreamId5))
+                .assertThat("$.data[0].sequenceNumber", is(5))
+
+                .assertThat("$.data[1].self", containsString(selfLinkForStreamId4))
+                .assertThat("$.data[1].sequenceNumber", is(4));
+
+        with(page1)
+                .assertNotDefined("$.pagingLinks.next");
+
+        assertHeadAndLastLinks(page1);
+
+        final String page2Url = JsonPath.read(page1, "$.pagingLinks.previous");
+
+        assertThat(page2Url, containsString(EVENT_STREAM_URL_PATH_PREFIX + "/3/BACKWARD/" + PAGE_SIZE));
+    }
+
+
+    @Test
+    public void shouldReturnOldestEvents() throws Exception {
+
+        final UUID streamId1 = randomUUID();
+        final UUID streamId2 = randomUUID();
+        final UUID streamId3 = randomUUID();
+        final UUID streamId4 = randomUUID();
+        final UUID streamId5 = randomUUID();
+
+        storeEventStreams(streamId1, streamId2, streamId3, streamId4, streamId5);
+
+        final HttpResponse response = eventsStreamsFor(SYSTEM_USER_ID, "1", FORWARD, PAGE_SIZE);
+
+        assertThat(response.getStatusLine().getStatusCode(), is(OK.getStatusCode()));
+
+        final String page3 = responseBodyOf(response);
+
+        final String selfLinkForStreamId2 = "/event-source-api/rest/event-streams/" + streamId2 + "/HEAD/BACKWARD/2";
+        final String selfLinkForStreamId1 = "/event-source-api/rest/event-streams/" + streamId1 + "/HEAD/BACKWARD/2";
+
+        with(page3)
+                .assertThat("$.data", hasSize(2))
+
+                .assertThat("$.data[0].self", containsString(selfLinkForStreamId2))
+                .assertThat("$.data[0].sequenceNumber", is(2))
+
+                .assertThat("$.data[1].self", containsString(selfLinkForStreamId1))
+                .assertThat("$.data[1].sequenceNumber", is(1));
+
+        assertHeadAndLastLinks(page3);
+
+        final String page2Url = JsonPath.read(page3, "$.pagingLinks.next");
+        assertThat(page2Url, containsString(EVENT_STREAM_URL_PATH_PREFIX + "/3/FORWARD/" + PAGE_SIZE));
+
+        with(page3)
+                .assertNotDefined("$.pagingLinks.previous");
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenFirstRequestedpreviousAsDirection() throws Exception {
+
+        final HttpResponse response = eventsStreamsFor(SYSTEM_USER_ID, "1", BACKWARD, PAGE_SIZE);
+
+        assertThat(response.getStatusLine().getStatusCode(), is(BAD_REQUEST.getStatusCode()));
+
+    }
+
+    @Test
     public void shouldReturnOlderEventspreviousAndNextLinks() throws Exception {
 
-        storeEvents();
+        final UUID streamId1 = randomUUID();
+        final UUID streamId2 = randomUUID();
+        final UUID streamId3 = randomUUID();
+        final UUID streamId4 = randomUUID();
+        final UUID streamId5 = randomUUID();
 
-        final HttpResponse response = eventsFeedFor(SYSTEM_USER_ID, STREAM_ID, "3", BACKWARD, PAGE_SIZE);
+        storeEventStreams(streamId1, streamId2, streamId3, streamId4, streamId5);
+
+        final HttpResponse response = eventsStreamsFor(SYSTEM_USER_ID, "3", BACKWARD, PAGE_SIZE);
 
         assertThat(response.getStatusLine().getStatusCode(), is(OK.getStatusCode()));
 
         final String page2 = responseBodyOf(response);
+
+        final String selfLinkForStreamId3 = "/event-source-api/rest/event-streams/" + streamId3 + "/HEAD/BACKWARD/2";
+        final String selfLinkForStreamId2 = "/event-source-api/rest/event-streams/" + streamId2 + "/HEAD/BACKWARD/2";
+
         with(page2)
                 .assertThat("$.data", hasSize(2))
 
-                .assertThat("$.data[0].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[0].sequenceId", is(3))
+                .assertThat("$.data[0].self", containsString(selfLinkForStreamId3))
+                .assertThat("$.data[0].sequenceNumber", is(3))
 
-                .assertThat("$.data[1].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[1].sequenceId", is(2));
-
-        final String page1Url = JsonPath.read(page2, "$.pagingLinks.next");
-
-        assertThat(page1Url, containsString(EVENT_STREAM_URL_PATH_PREFIX + "/4/FORWARD/" + PAGE_SIZE));
-
-        final String page3Url = JsonPath.read(page2, "$.pagingLinks.previous");
-
-        assertThat(page3Url, containsString(EVENT_STREAM_URL_PATH_PREFIX + "/1/FORWARD/" + PAGE_SIZE));
+                .assertThat("$.data[1].self", containsString(selfLinkForStreamId2))
+                .assertThat("$.data[1].sequenceNumber", is(2));
 
         assertHeadAndLastLinks(page2);
+
+        final String page3Url = JsonPath.read(page2, "$.pagingLinks.next");
+
+        assertThat(page3Url, containsString(EVENT_STREAM_URL_PATH_PREFIX + "/4/FORWARD/" + PAGE_SIZE));
+
+        final String page1Url = JsonPath.read(page2, "$.pagingLinks.previous");
+
+        assertThat(page1Url, containsString(EVENT_STREAM_URL_PATH_PREFIX + "/1/FORWARD/" + PAGE_SIZE));
     }
+
 
     @Test
     public void shouldReturnNewerEventspreviousAndNextLinks() throws Exception {
 
-        storeEvents();
+        final UUID streamId1 = randomUUID();
+        final UUID streamId2 = randomUUID();
+        final UUID streamId3 = randomUUID();
+        final UUID streamId4 = randomUUID();
+        final UUID streamId5 = randomUUID();
 
-        final HttpResponse response = eventsFeedFor(SYSTEM_USER_ID, STREAM_ID, "3", FORWARD, PAGE_SIZE);
+        storeEventStreams(streamId1, streamId2, streamId3, streamId4, streamId5);
+
+        final HttpResponse response = eventsStreamsFor(SYSTEM_USER_ID, "3", FORWARD, PAGE_SIZE);
 
         assertThat(response.getStatusLine().getStatusCode(), is(OK.getStatusCode()));
 
         final String page2 = responseBodyOf(response);
+
+        final String selfLinkForStreamId4 = "/event-source-api/rest/event-streams/" + streamId4 + "/HEAD/BACKWARD/2";
+
+        final String selfLinkForStreamId3 = "/event-source-api/rest/event-streams/" + streamId3 + "/HEAD/BACKWARD/2";
+
         with(page2)
                 .assertThat("$.data", hasSize(2))
 
-                .assertThat("$.data[0].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[0].sequenceId", is(4))
+                .assertThat("$.data[0].self", containsString(selfLinkForStreamId4))
+                .assertThat("$.data[0].sequenceNumber", is(4))
 
-                .assertThat("$.data[1].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[1].sequenceId", is(3));
+                .assertThat("$.data[1].self", containsString(selfLinkForStreamId3))
+                .assertThat("$.data[1].sequenceNumber", is(3));
 
         final String page1Url = JsonPath.read(page2, "$.pagingLinks.next");
 
@@ -354,12 +387,19 @@ public class EventsPageIT {
         assertHeadAndLastLinks(page2);
     }
 
+
     @Test
     public void shouldNotReturnRecordsForUnknownSequenceId() throws Exception {
 
-        storeEvents();
+        final UUID streamId1 = randomUUID();
+        final UUID streamId2 = randomUUID();
+        final UUID streamId3 = randomUUID();
+        final UUID streamId4 = randomUUID();
+        final UUID streamId5 = randomUUID();
 
-        final HttpResponse response = eventsFeedFor(SYSTEM_USER_ID, STREAM_ID, "6", FORWARD, PAGE_SIZE);
+        storeEventStreams(streamId1, streamId2, streamId3, streamId4, streamId5);
+
+        final HttpResponse response = eventsStreamsFor(SYSTEM_USER_ID, "6", FORWARD, PAGE_SIZE);
 
         assertThat(response.getStatusLine().getStatusCode(), is(OK.getStatusCode()));
 
@@ -373,7 +413,7 @@ public class EventsPageIT {
     @Test
     public void shouldReturnEmptyFeedIfNoDataAndNoPreviousAndNextLinks() throws IOException {
 
-        final HttpResponse response = eventsFeedFor(SYSTEM_USER_ID, STREAM_ID, "5", BACKWARD, PAGE_SIZE);
+        final HttpResponse response = eventsStreamsFor(SYSTEM_USER_ID, "5", BACKWARD, PAGE_SIZE);
 
         assertThat(response.getStatusLine().getStatusCode(), is(OK.getStatusCode()));
 
@@ -392,11 +432,17 @@ public class EventsPageIT {
     }
 
     @Test
-    public void shouldGoPage2FromHead() throws Exception {
+    public void shouldGoToPage2FromHead() throws Exception {
 
-        storeEvents();
+        final UUID streamId1 = randomUUID();
+        final UUID streamId2 = randomUUID();
+        final UUID streamId3 = randomUUID();
+        final UUID streamId4 = randomUUID();
+        final UUID streamId5 = randomUUID();
 
-        final HttpResponse firstPageResponse = eventsFeedFor(SYSTEM_USER_ID, STREAM_ID, "HEAD", BACKWARD, PAGE_SIZE);
+        storeEventStreams(streamId1, streamId2, streamId3, streamId4, streamId5);
+
+        final HttpResponse firstPageResponse = eventsStreamsFor(SYSTEM_USER_ID, "HEAD", BACKWARD, PAGE_SIZE);
 
         assertThat(firstPageResponse.getStatusLine().getStatusCode(), is(OK.getStatusCode()));
 
@@ -413,12 +459,16 @@ public class EventsPageIT {
 
         final String page2 = responseBodyOf(page2HttpResponse);
 
+        final String selfLinkForStreamId3 = "/event-source-api/rest/event-streams/" + streamId3 + "/HEAD/BACKWARD/2";
+
+        final String selfLinkForStreamId2 = "/event-source-api/rest/event-streams/" + streamId2 + "/HEAD/BACKWARD/2";
+
         with(page2)
                 .assertThat("$.data", hasSize(2))
-                .assertThat("$.data[0].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[0].sequenceId", is(3))
-                .assertThat("$.data[1].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[1].sequenceId", is(2));
+                .assertThat("$.data[0].self", containsString(selfLinkForStreamId3))
+                .assertThat("$.data[0].sequenceNumber", is(3))
+                .assertThat("$.data[1].self", containsString(selfLinkForStreamId2))
+                .assertThat("$.data[1].sequenceNumber", is(2));
 
         final String page3Url = JsonPath.read(page2, "$.pagingLinks.next");
         assertThat(page3Url, containsString(EVENT_STREAM_URL_PATH_PREFIX + "/4/FORWARD/" + PAGE_SIZE));
@@ -429,21 +479,32 @@ public class EventsPageIT {
         assertHeadAndLastLinks(page2);
     }
 
+
     @Test
     public void shouldGoToPage3FromPage2() throws Exception {
 
-        storeEvents();
+        final UUID streamId1 = randomUUID();
+        final UUID streamId2 = randomUUID();
+        final UUID streamId3 = randomUUID();
+        final UUID streamId4 = randomUUID();
+        final UUID streamId5 = randomUUID();
 
-        final HttpResponse secondPageResponse = eventsFeedFor(SYSTEM_USER_ID, STREAM_ID, "3", BACKWARD, PAGE_SIZE);
+        storeEventStreams(streamId1, streamId2, streamId3, streamId4, streamId5);
+
+        final HttpResponse secondPageResponse = eventsStreamsFor(SYSTEM_USER_ID, "3", BACKWARD, PAGE_SIZE);
 
         final String page2 = responseBodyOf(secondPageResponse);
 
+        final String selfLinkForStreamId3 = "/event-source-api/rest/event-streams/" + streamId3 + "/HEAD/BACKWARD/2";
+
+        final String selfLinkForStreamId2 = "/event-source-api/rest/event-streams/" + streamId2 + "/HEAD/BACKWARD/2";
+
         with(page2)
                 .assertThat("$.data", hasSize(2))
-                .assertThat("$.data[0].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[0].sequenceId", is(3))
-                .assertThat("$.data[1].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[1].sequenceId", is(2));
+                .assertThat("$.data[0].self", containsString(selfLinkForStreamId3))
+                .assertThat("$.data[0].sequenceNumber", is(3))
+                .assertThat("$.data[1].self", containsString(selfLinkForStreamId2))
+                .assertThat("$.data[1].sequenceNumber", is(2));
 
         final String page3Url = JsonPath.read(page2, "$.pagingLinks.previous");
 
@@ -451,37 +512,47 @@ public class EventsPageIT {
 
         final String page3 = responseBodyOf(page3HttpResponse);
 
+        final String selfLinkForStreamId1 = "/event-source-api/rest/event-streams/" + streamId1 + "/HEAD/BACKWARD/2";
+
         with(page3)
                 .assertThat("$.data", hasSize(2))
-                .assertThat("$.data[0].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[0].sequenceId", is(2))
-                .assertThat("$.data[1].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[1].sequenceId", is(1));
+                .assertThat("$.data[0].self", containsString(selfLinkForStreamId2))
+                .assertThat("$.data[0].sequenceNumber", is(2))
+                .assertThat("$.data[1].self", containsString(selfLinkForStreamId1))
+                .assertThat("$.data[1].sequenceNumber", is(1));
 
         with(page3)
                 .assertNotDefined("$.pagingLinks.previous");
-
-        assertHeadAndLastLinks(page3);
-
         final String page2Url = JsonPath.read(page3, "$.pagingLinks.next");
         assertThat(page2Url, containsString(EVENT_STREAM_URL_PATH_PREFIX + "/3/FORWARD/" + PAGE_SIZE));
+
+        assertHeadAndLastLinks(page3);
     }
 
     @Test
-    public void shouldGoToPage1FromPage2() throws Exception {
+    public void shouldGotoPage1FromPage2() throws Exception {
 
-        storeEvents();
+        final UUID streamId1 = randomUUID();
+        final UUID streamId2 = randomUUID();
+        final UUID streamId3 = randomUUID();
+        final UUID streamId4 = randomUUID();
+        final UUID streamId5 = randomUUID();
 
-        final HttpResponse secondPageResponse = eventsFeedFor(SYSTEM_USER_ID, STREAM_ID, "3", BACKWARD, PAGE_SIZE);
+        storeEventStreams(streamId1, streamId2, streamId3, streamId4, streamId5);
+
+        final HttpResponse secondPageResponse = eventsStreamsFor(SYSTEM_USER_ID, "3", BACKWARD, PAGE_SIZE);
 
         final String page2 = responseBodyOf(secondPageResponse);
 
+        final String selfLinkForStreamId3 = "/event-source-api/rest/event-streams/" + streamId3 + "/HEAD/BACKWARD/2";
+        final String selfLinkForStreamId2 = "/event-source-api/rest/event-streams/" + streamId2 + "/HEAD/BACKWARD/2";
+
         with(page2)
-                .assertThat("$.data", hasSize(PAGE_SIZE))
-                .assertThat("$.data[0].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[0].sequenceId", is(3))
-                .assertThat("$.data[1].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[1].sequenceId", is(PAGE_SIZE));
+                .assertThat("$.data", hasSize(2))
+                .assertThat("$.data[0].self", containsString(selfLinkForStreamId3))
+                .assertThat("$.data[0].sequenceNumber", is(3))
+                .assertThat("$.data[1].self", containsString(selfLinkForStreamId2))
+                .assertThat("$.data[1].sequenceNumber", is(2));
 
         final String page1Url = JsonPath.read(page2, "$.pagingLinks.next");
 
@@ -489,25 +560,28 @@ public class EventsPageIT {
 
         final String page1 = responseBodyOf(page1HttpResponse);
 
+        final String selfLinkForStreamId5 = "/event-source-api/rest/event-streams/" + streamId5 + "/HEAD/BACKWARD/2";
+        final String selfLinkForStreamId4 = "/event-source-api/rest/event-streams/" + streamId4 + "/HEAD/BACKWARD/2";
+
         with(page1)
-                .assertThat("$.data", hasSize(PAGE_SIZE))
-                .assertThat("$.data[0].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[0].sequenceId", is(5))
-                .assertThat("$.data[1].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[1].sequenceId", is(4));
+                .assertThat("$.data", hasSize(2))
+                .assertThat("$.data[0].self", containsString(selfLinkForStreamId5))
+                .assertThat("$.data[0].sequenceNumber", is(5))
+                .assertThat("$.data[1].self", containsString(selfLinkForStreamId4))
+                .assertThat("$.data[1].sequenceNumber", is(4));
+
+        assertHeadAndLastLinks(page1);
 
         with(page1)
                 .assertNotDefined("$.pagingLinks.next");
 
         final String page2Url = JsonPath.read(page1, "$.pagingLinks.previous");
         assertThat(page2Url, containsString(EVENT_STREAM_URL_PATH_PREFIX + "/3/BACKWARD/" + PAGE_SIZE));
-
-        assertHeadAndLastLinks(page1);
     }
 
     @Test
     public void shouldReturnForbiddenIfNotASystemUser() throws IOException {
-        final HttpResponse response = eventsFeedFor(randomUUID(), randomUUID(), "12", BACKWARD, PAGE_SIZE);
+        final HttpResponse response = eventsStreamsFor(randomUUID(), "12", BACKWARD, PAGE_SIZE);
         assertThat(response.getStatusLine().getStatusCode(), is(FORBIDDEN.getStatusCode()));
     }
 
@@ -515,13 +589,11 @@ public class EventsPageIT {
         return EntityUtils.toString(response.getEntity());
     }
 
-    private HttpResponse eventsFeedFor(final UUID userId,
-                                       final UUID streamId,
-                                       final String position,
-                                       final Direction link,
-                                       final long pageSize) throws IOException {
-        final String url = format(BASE_URI_PATTERN + "/event-streams/" + streamId.toString() + "/" + position + "/" + link
-                + "/" + pageSize, port);
+    private HttpResponse eventsStreamsFor(final UUID userId,
+                                          final String position,
+                                          final Direction link,
+                                          final long pageSize) throws IOException {
+        final String url = format(BASE_URI_PATTERN + "/event-streams/" + position + "/" + link + "/" + pageSize, port);
         return feedOf(url, userId);
     }
 
@@ -539,25 +611,24 @@ public class EventsPageIT {
         eventStoreLiquibase.update("");
     }
 
-    private void storeEvents() throws InvalidSequenceIdException {
-        final Event event5 = new Event(randomUUID(), STREAM_ID, 5L, "Test Name5", METADATA_JSON, createObjectBuilder().add("field5", "value5").build().toString(), new UtcClock().now());
-        final Event event4 = new Event(randomUUID(), STREAM_ID, 4L, "Test Name4", METADATA_JSON, createObjectBuilder().add("field4", "value4").build().toString(), new UtcClock().now());
-        final Event event3 = new Event(randomUUID(), STREAM_ID, 3L, "Test Name3", METADATA_JSON, createObjectBuilder().add("field3", "value3").build().toString(), new UtcClock().now());
-        final Event event2 = new Event(randomUUID(), STREAM_ID, 2L, "Test Name2", METADATA_JSON, createObjectBuilder().add("field2", "value2").build().toString(), new UtcClock().now());
-        final Event event1 = new Event(randomUUID(), STREAM_ID, 1L, "Test Name1", METADATA_JSON, createObjectBuilder().add("field1", "value1").build().toString(), new UtcClock().now());
+    private void storeEventStreams(final UUID streamId1,
+                                   final UUID streamId2,
+                                   final UUID streamId3,
+                                   final UUID streamId4,
+                                   final UUID streamId5) {
 
-        eventsRepository.insert(event1);
-        eventsRepository.insert(event2);
-        eventsRepository.insert(event3);
-        eventsRepository.insert(event4);
-        eventsRepository.insert(event5);
+        eventsRepository.insert(streamId1);
+        eventsRepository.insert(streamId2);
+        eventsRepository.insert(streamId3);
+        eventsRepository.insert(streamId4);
+        eventsRepository.insert(streamId5);
     }
 
     private void assertHeadAndLastLinks(String value) {
         final String headUrl = JsonPath.read(value, "$.pagingLinks.head");
-        assertThat(headUrl, containsString(EVENT_STREAM_URL_PATH_PREFIX  + "/HEAD/BACKWARD/" + PAGE_SIZE));
+        assertThat(headUrl, containsString(EVENT_STREAM_URL_PATH_PREFIX + "/HEAD/BACKWARD/" + PAGE_SIZE));
 
         final String firstUrl = JsonPath.read(value, "$.pagingLinks.first");
-        assertThat(firstUrl, containsString(EVENT_STREAM_URL_PATH_PREFIX  + "/1/FORWARD/" + PAGE_SIZE));
+        assertThat(firstUrl, containsString(EVENT_STREAM_URL_PATH_PREFIX + "/1/FORWARD/" + PAGE_SIZE));
     }
 }

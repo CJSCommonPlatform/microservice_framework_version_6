@@ -1,22 +1,20 @@
 package uk.gov.justice.services.eventsourcing.source.api.service;
 
+import static java.util.Collections.emptyList;
 import static uk.gov.justice.services.eventsourcing.repository.jdbc.Direction.BACKWARD;
 import static uk.gov.justice.services.eventsourcing.repository.jdbc.Direction.FORWARD;
-import static uk.gov.justice.services.eventsourcing.repository.jdbc.Position.first;
-import static uk.gov.justice.services.eventsourcing.repository.jdbc.Position.head;
-import static uk.gov.justice.services.eventsourcing.repository.jdbc.Position.positionOf;
+import static uk.gov.justice.services.eventsourcing.source.api.service.PagingLinks.PagingLinksBuilder.pagingLinksBuilder;
+import static uk.gov.justice.services.eventsourcing.source.api.service.core.Position.sequence;
 
 import uk.gov.justice.services.eventsourcing.repository.jdbc.Direction;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.FixedPosition;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.Position;
-import uk.gov.justice.services.eventsourcing.source.api.feed.common.Page;
-import uk.gov.justice.services.eventsourcing.source.api.feed.common.PagingLinks.PagingLinksBuilder;
-import uk.gov.justice.services.eventsourcing.source.api.feed.event.EventEntry;
+import uk.gov.justice.services.eventsourcing.source.api.service.PagingLinks.PagingLinksBuilder;
+import uk.gov.justice.services.eventsourcing.source.api.service.core.EventEntry;
+import uk.gov.justice.services.eventsourcing.source.api.service.core.EventsService;
+import uk.gov.justice.services.eventsourcing.source.api.service.core.Position;
+import uk.gov.justice.services.eventsourcing.source.api.service.core.PositionFactory;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,95 +29,82 @@ import javax.ws.rs.core.UriInfo;
 @ApplicationScoped
 public class EventsPageService {
 
-    private static final int PATH_SEGMENT_EVENT_STREAMS = 0;
-
-    private static final int PATH_SEGMENT_EVENT_STREAM_ID = 1;
-
     private static final long ZERO = 0L;
 
     @Inject
-    private EventsService eventsService;
+    EventsService eventsService;
+
+    @Inject
+    UrlLinkFactory urlLinkFactory;
+
+    @Inject
+    PositionFactory positionFactory;
 
     public Page<EventEntry> pageEvents(final UUID streamId,
-                                       final String position,
+                                       final String positionValue,
                                        final Direction direction,
-                                       final long pageSize,
-                                       final UriInfo uriInfo
-    ) throws SQLException, MalformedURLException {
+                                       final int pageSize,
+                                       final UriInfo uriInfo) throws MalformedURLException {
+        final Position position = positionFactory.createPosition(positionValue);
 
-        final Position positionOf = positionOf(position);
-
-        final List<EventEntry> entities = eventsService.events(streamId, positionOf, direction, pageSize);
-
-        return pageEventsWithLinks(streamId, positionOf, pageSize, uriInfo, entities);
+        return pageEventsWithLinks(
+                streamId,
+                position,
+                pageSize,
+                uriInfo,
+                eventsService.events(streamId, position, direction, pageSize));
     }
 
-    private Page<EventEntry> pageEventsWithLinks(final UUID streamId, final Position position, final long pageSize, final UriInfo uriInfo,
+    private Page<EventEntry> pageEventsWithLinks(final UUID streamId,
+                                                 final Position position,
+                                                 final int pageSize,
+                                                 final UriInfo uriInfo,
                                                  final List<EventEntry> entries) throws MalformedURLException {
 
         if (entries.isEmpty()) {
             return emptyPageWithLinks(pageSize, uriInfo);
         }
 
-        final long maxSequenceId = max(entries);
-        final long minSequenceId = min(entries);
+        final PagingLinksBuilder pagingLinksBuilder = pagingLinksBuilder(
+                urlLinkFactory.createHeadEventsUrlLink(pageSize, uriInfo),
+                (urlLinkFactory.createFirstEventsUrlLink(pageSize, uriInfo)))
+                .withNext(nextUrlLink(streamId, position, pageSize, uriInfo, entries))
+                .withPrevious(previousUrlLink(streamId, position, pageSize, uriInfo, entries));
 
-        final boolean newEventsAvailable = !position.isHead() && eventsService.recordExists(streamId, maxSequenceId + 1);
+        return new Page<>(entries, pagingLinksBuilder.build());
+    }
+
+    private Page<EventEntry> emptyPageWithLinks(final int pageSize, final UriInfo uriInfo) throws MalformedURLException {
+
+        return new Page<>(emptyList(),
+                pagingLinksBuilder(urlLinkFactory.createHeadEventsUrlLink(pageSize, uriInfo), urlLinkFactory.createFirstEventsUrlLink(pageSize, uriInfo))
+                        .build());
+    }
+
+    private Optional<URL> previousUrlLink(final UUID streamId,
+                                          final Position position,
+                                          final int pageSize,
+                                          final UriInfo uriInfo,
+                                          final List<EventEntry> entries) throws MalformedURLException {
+        final long minSequenceId = min(entries);
         final boolean olderEventsAvailable = !position.isFirst() && eventsService.recordExists(streamId, minSequenceId - 1);
 
-        final PagingLinksBuilder pagingLinksBuilder = new PagingLinksBuilder(
-                fixedPositionPageHref(head(), BACKWARD, pageSize, uriInfo),
-                fixedPositionPageHref(first(), FORWARD, pageSize, uriInfo));
-
-        final Optional<URL> previous = newEventsAvailable ? pageHref(positionOf(maxSequenceId + 1), FORWARD, pageSize, uriInfo) : Optional.empty();
-
-        final Optional<URL> next = olderEventsAvailable ? pageHref(positionOf(minSequenceId - 1), BACKWARD, pageSize, uriInfo) : Optional.empty();
-
-        pagingLinksBuilder.previous(previous);
-
-        pagingLinksBuilder.next(next);
-
-        return new Page(entries, pagingLinksBuilder.build());
+        return olderEventsAvailable ?
+                Optional.of(urlLinkFactory.createEventsUrlLink(sequence(minSequenceId - 1), BACKWARD, pageSize, uriInfo)) :
+                Optional.empty();
     }
 
-    private Page<EventEntry> emptyPageWithLinks(long pageSize, UriInfo uriInfo) throws MalformedURLException {
-        final PagingLinksBuilder pagingLinksBuilder = new PagingLinksBuilder(fixedPositionPageHref(head(), BACKWARD, pageSize, uriInfo),
-                fixedPositionPageHref(first(), FORWARD, pageSize, uriInfo));
-        return new Page<>(new ArrayList<>(), pagingLinksBuilder.build());
-    }
+    private Optional<URL> nextUrlLink(final UUID streamId,
+                                      final Position position,
+                                      final int pageSize,
+                                      final UriInfo uriInfo,
+                                      final List<EventEntry> entries) throws MalformedURLException {
+        final long maxSequenceId = max(entries);
+        final boolean newEventsAvailable = !position.isHead() && eventsService.recordExists(streamId, maxSequenceId + 1);
 
-    private Optional<URL> pageHref(final Position position,
-                                   final Direction direction,
-                                   final long pageSize,
-                                   final UriInfo uriInfo) throws MalformedURLException {
-
-        return Optional.of(new URL(uriInfo.getBaseUriBuilder()
-                .path(uriInfo.getPathSegments().get(PATH_SEGMENT_EVENT_STREAMS).getPath())
-                .path(uriInfo.getPathSegments().get(PATH_SEGMENT_EVENT_STREAM_ID).getPath())
-                .path(position.getPosition())
-                .path(urlDirection(position, direction))
-                .path(String.valueOf(pageSize)).build()
-                .toString()));
-    }
-
-    private URL fixedPositionPageHref(final Position position,
-                                      final Direction direction,
-                                      final long pageSize,
-                                      final UriInfo uriInfo) throws MalformedURLException {
-
-        return new URL(uriInfo.getBaseUriBuilder()
-                .path(uriInfo.getPathSegments().get(PATH_SEGMENT_EVENT_STREAMS).getPath())
-                .path(uriInfo.getPathSegments().get(PATH_SEGMENT_EVENT_STREAM_ID).getPath())
-                .path(position.getPosition())
-                .path(urlDirection(position, direction))
-                .path(String.valueOf(pageSize)).build()
-                .toString());
-    }
-
-    private String urlDirection(final Position position, final Direction direction) {
-        final Direction firstDirection = position.getPosition().equals(FixedPosition.FIRST.getPosition()) ? FORWARD : direction;
-        final Direction finalDirection = position.getPosition().equals(FixedPosition.HEAD.getPosition()) ? BACKWARD : firstDirection;
-        return finalDirection.toString();
+        return newEventsAvailable ?
+                Optional.of(urlLinkFactory.createEventsUrlLink(sequence(maxSequenceId + 1), FORWARD, pageSize, uriInfo)) :
+                Optional.empty();
     }
 
     private long min(List<EventEntry> eventStreams) {

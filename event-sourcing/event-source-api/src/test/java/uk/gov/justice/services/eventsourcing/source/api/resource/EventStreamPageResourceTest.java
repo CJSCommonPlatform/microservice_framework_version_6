@@ -16,9 +16,10 @@ import uk.gov.justice.services.adapter.rest.exception.BadRequestException;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.Direction;
 import uk.gov.justice.services.eventsourcing.source.api.security.AccessController;
-import uk.gov.justice.services.eventsourcing.source.api.service.EventsPageService;
+import uk.gov.justice.services.eventsourcing.source.api.service.EventStreamPageEntry;
+import uk.gov.justice.services.eventsourcing.source.api.service.EventStreamPageService;
 import uk.gov.justice.services.eventsourcing.source.api.service.Page;
-import uk.gov.justice.services.eventsourcing.source.api.service.core.EventEntry;
+import uk.gov.justice.services.eventsourcing.source.api.service.core.PositionFactory;
 
 import java.net.URL;
 import java.util.UUID;
@@ -38,10 +39,13 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class EventPageResourceTest {
+public class EventStreamPageResourceTest {
 
     @Mock
-    private EventsPageService eventsPageService;
+    private EventStreamPageService eventsStreamPageService;
+
+    @Mock
+    private PositionFactory positionFactory;
 
     @Mock
     private AccessController accessControlChecker;
@@ -50,47 +54,47 @@ public class EventPageResourceTest {
     private ObjectToJsonValueConverter converter;
 
     @InjectMocks
-    private EventPageResource resource;
+    private EventStreamPageResource resource;
+
+    private static final int PAGE_SIZE = 10;
 
     @Test
     public void shouldReturnFeedReturnedByService() throws Exception {
+
         final UUID streamId = randomUUID();
-        final String position = "2";
-        final String positionValue = "2";
-        final int pageSize = 10;
 
         final UriInfo uriInfo = new ResteasyUriInfo("" + "/" + streamId, "", "");
 
         final URL fixedUrl = new URL("http://localhost:8080/rest/fixed");
 
-        final Page<EventEntry> page = new Page<>(emptyList(), pagingLinksBuilder(fixedUrl, fixedUrl).build());
+        final Page<EventStreamPageEntry> page = new Page<>(emptyList(), pagingLinksBuilder(fixedUrl, fixedUrl).build());
 
-        when(eventsPageService.pageEvents(streamId, position, FORWARD, pageSize, uriInfo)).thenReturn(page);
+        final String position = FIRST;
+
+        when(eventsStreamPageService.pageOfEventStream(position, FORWARD, PAGE_SIZE, uriInfo)).thenReturn(page);
 
         final JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
         jsonObjectBuilder.add("key", "value");
 
         when(converter.convert(page)).thenReturn(jsonObjectBuilder.build());
 
-        resource.events(streamId.toString(), positionValue, FORWARD.toString(), pageSize, uriInfo);
+        resource.events(FIRST, FORWARD.toString(), PAGE_SIZE, uriInfo);
 
-        final ArgumentCaptor<UUID> uuidArgumentCaptor = ArgumentCaptor.forClass(UUID.class);
         final ArgumentCaptor<String> positionCaptor = ArgumentCaptor.forClass(String.class);
         final ArgumentCaptor<Integer> pageSizeCaptor = ArgumentCaptor.forClass(Integer.class);
         final ArgumentCaptor<UriInfo> uriInfoCaptor = ArgumentCaptor.forClass(UriInfo.class);
         final ArgumentCaptor<Direction> directionCaptor = ArgumentCaptor.forClass(Direction.class);
 
-        verify(eventsPageService).pageEvents(uuidArgumentCaptor.capture(), positionCaptor.capture(), directionCaptor.capture(), pageSizeCaptor.capture(), uriInfoCaptor.capture());
+        verify(eventsStreamPageService).pageOfEventStream(positionCaptor.capture(), directionCaptor.capture(), pageSizeCaptor.capture(), uriInfoCaptor.capture());
 
         assertThat(positionCaptor.getValue(), is(position));
 
-        assertThat(pageSizeCaptor.getValue(), is(pageSize));
+        assertThat(pageSizeCaptor.getValue(), is(PAGE_SIZE));
 
         assertThat(uriInfoCaptor.getValue(), is(uriInfo));
 
         assertThat(directionCaptor.getValue(), is(FORWARD));
 
-        assertThat(uuidArgumentCaptor.getValue(), is(streamId));
     }
 
     @Test(expected = BadRequestException.class)
@@ -102,11 +106,11 @@ public class EventPageResourceTest {
 
         final URL fixedUrl = new URL("http://localhost:8080/rest/fixed");
 
-        final Page<EventEntry> page = new Page<>(emptyList(), pagingLinksBuilder(fixedUrl, fixedUrl).build());
+        final Page<EventStreamPageEntry> page = new Page<>(emptyList(), pagingLinksBuilder(fixedUrl, fixedUrl).build());
 
-        when(eventsPageService.pageEvents(UUID.fromString(streamId), HEAD, FORWARD, 10, uriInfo)).thenReturn(page);
+        when(eventsStreamPageService.pageOfEventStream(HEAD, FORWARD, PAGE_SIZE, uriInfo)).thenReturn(page);
 
-        resource.events(streamId, HEAD, FORWARD.toString(), 10, uriInfo);
+        resource.events(HEAD, FORWARD.toString(), PAGE_SIZE, uriInfo);
     }
 
     @Test(expected = BadRequestException.class)
@@ -118,23 +122,20 @@ public class EventPageResourceTest {
 
         final URL fixedUrl = new URL("http://localhost:8080/rest/fixed");
 
-        final Page<EventEntry> page = new Page<>(emptyList(), pagingLinksBuilder(fixedUrl, fixedUrl).build());
+        final Page<EventStreamPageEntry> page = new Page<>(emptyList(), pagingLinksBuilder(fixedUrl, fixedUrl).build());
 
-        when(eventsPageService.pageEvents(UUID.fromString(streamId), FIRST, BACKWARD, 10, uriInfo)).thenReturn(page);
+        when(eventsStreamPageService.pageOfEventStream(FIRST, BACKWARD, PAGE_SIZE, uriInfo)).thenReturn(page);
 
-        resource.events(streamId, FIRST, BACKWARD.toString(), 10, uriInfo);
+        resource.events(FIRST, BACKWARD.toString(), PAGE_SIZE, uriInfo);
     }
 
     @Test
     public void shouldCheckAccessRights() throws Exception {
 
-        final String streamId = randomUUID().toString();
-
         final ResteasyHttpHeaders requestHeaders = new ResteasyHttpHeaders(new MultivaluedHashMap<>());
 
         resource.headers = requestHeaders;
-
-        resource.events(streamId, "3", FORWARD.toString(), 1, new ResteasyUriInfo("", "", ""));
+        resource.events("3", FORWARD.toString(), PAGE_SIZE, new ResteasyUriInfo("", "", ""));
 
         verify(accessControlChecker).checkAccessControl(requestHeaders);
     }

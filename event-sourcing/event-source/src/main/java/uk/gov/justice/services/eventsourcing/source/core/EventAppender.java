@@ -7,7 +7,6 @@ import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
 
 import uk.gov.justice.services.eventsourcing.publisher.jms.EventPublisher;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepository;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStream;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.StoreEventRequestFailedException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
@@ -41,7 +40,7 @@ public class EventAppender {
     void append(final JsonEnvelope event, final UUID streamId, final long version) throws EventStreamException {
         try {
             if (version == INITIAL_STREAM_EVENT) {
-                streamRepository.insert(new EventStream(streamId));
+                streamRepository.insert(streamId);
             }
             final JsonEnvelope eventWithStreamIdAndVersion = eventFrom(event, streamId, version);
             eventRepository.store(eventWithStreamIdAndVersion);

@@ -172,7 +172,7 @@ public class DefaultJsonEnvelopeTest {
                 .assertEquals("_metadata.name", metadataName)
                 .assertEquals("strProperty", "xxx")
                 .assertEquals("nested.strProperty1", "xxx")
-                .assertEquals("nested.uuidProperty1", "xxx")
+                .assertEquals("nested.uuidProperty1", "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx")
                 .assertEquals("nested.numProperty1", 0)
                 .assertEquals("nested.boolProperty1", false)
                 .assertThat("arrayProperty", hasItems("xxx", "xxx", "xxx"));

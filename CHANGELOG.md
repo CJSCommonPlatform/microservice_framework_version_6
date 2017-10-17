@@ -5,6 +5,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+##Changed
+Replaced the JsonObjectObfuscator with the version from utilities that is based on javax.json
+
 ## [2.3.1] - 2017-10-12
 
 Released to avoid conflicts with pevious tags

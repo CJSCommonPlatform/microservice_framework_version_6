@@ -1,6 +1,8 @@
 package uk.gov.justice.services.messaging;
 
-import static uk.gov.justice.services.messaging.JSONObjectValueObfuscator.obfuscated;
+import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.common.converter.JSONObjectValueObfuscator.obfuscated;
+import static uk.gov.justice.services.messaging.JsonEnvelopeWriter.writeJsonObject;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.CORRELATION;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.SESSION_ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.USER_ID;
@@ -19,9 +21,6 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonString;
 import javax.json.JsonValue;
-
-import org.json.JSONObject;
-import org.json.JSONTokener;
 
 /**
  * Default implementation of an envelope.
@@ -130,7 +129,7 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
      */
     @Override
     public String toString() {
-        final JsonObjectBuilder builder = Json.createObjectBuilder();
+        final JsonObjectBuilder builder = createObjectBuilder();
 
         if (metadata != null) {
             builder.add("id", String.valueOf(metadata.id()))
@@ -163,20 +162,15 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
      */
     @Override
     public String toDebugStringPrettyPrint() {
-
-        return jSONPayload().put(METADATA, new JSONObject(metadata.asJsonObject().toString())).toString(2);
+        return writeJsonObject(asJsonObject());
     }
 
     @Override
     public String toObfuscatedDebugString() {
-        return obfuscated(jSONPayload()).put(METADATA, new JSONObject(metadata.asJsonObject().toString())).toString(2);
+        return writeJsonObject(createObjectBuilder((JsonObject) obfuscated(payloadAsJsonObject()))
+                .add(METADATA, metadata.asJsonObject())
+                .build());
     }
-
-
-    private JSONObject jSONPayload() {
-        return new JSONObject(new JSONTokener(payload.toString()));
-    }
-
 
     public static class Builder {
         private JsonObjectBuilderWrapper payload;

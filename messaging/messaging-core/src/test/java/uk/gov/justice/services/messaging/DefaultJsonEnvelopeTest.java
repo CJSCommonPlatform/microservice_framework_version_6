@@ -128,16 +128,18 @@ public class DefaultJsonEnvelopeTest {
                 .withPayloadOf(new String[]{"value1", "value2", "value3"}, "arrayProperty")
                 .build();
 
-        with(envelope.toObfuscatedDebugString())
+
+        final String obfuscatedDebugString = envelope.toObfuscatedDebugString();
+
+        with(obfuscatedDebugString)
                 .assertEquals("_metadata.id", metadataId.toString())
                 .assertEquals("_metadata.name", metadataName)
                 .assertEquals("strProperty", "xxx")
                 .assertEquals("nested.strProperty1", "xxx")
-                .assertEquals("nested.uuidProperty1", "xxx")
+                .assertEquals("nested.uuidProperty1", "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx")
                 .assertEquals("nested.numProperty1", 0)
                 .assertEquals("nested.boolProperty1", false)
                 .assertThat("arrayProperty", hasItems("xxx", "xxx", "xxx"));
-        ;
     }
 
     private Metadata metadata(final UUID metadataId, final String metadataName) {

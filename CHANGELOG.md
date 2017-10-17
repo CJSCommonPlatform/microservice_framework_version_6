@@ -4,6 +4,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+Removed JsonObjectObfuscator with version from utilities that is based on javax.json
 
 ## [2.3.1] - 2017-10-12
 

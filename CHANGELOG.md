@@ -12,6 +12,13 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 JsonObjectMetadataBuilders in tests
 - Record new events stream into event_stream table in Event Store
 
+## [2.3.2] - 2017-10-17
+
+##Changed
+Replaced the JsonObjectObfuscator with the version from utilities that is based on javax.json
+
+## [2.3.1] - 2017-10-12
+
 ### Changed
 - Deprecate DefaultJsonEnvelope, JsonObjectBuilderWrapper and JsonObjectMetadata
 - Deprecate JavaCompilerUtil

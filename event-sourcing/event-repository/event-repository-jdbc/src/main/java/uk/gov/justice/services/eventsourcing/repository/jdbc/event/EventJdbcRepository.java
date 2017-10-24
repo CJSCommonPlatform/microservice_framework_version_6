@@ -6,19 +6,22 @@ import static uk.gov.justice.services.common.converter.ZonedDateTimes.fromSqlTim
 
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventInsertionStrategy;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidSequenceIdException;
-import uk.gov.justice.services.jdbc.persistence.AbstractJdbcRepository;
+import uk.gov.justice.services.jdbc.persistence.JdbcDataSourceProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
+import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
 import uk.gov.justice.services.jdbc.persistence.PreparedStatementWrapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.naming.NamingException;
+import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 
@@ -26,7 +29,7 @@ import org.slf4j.Logger;
  * JDBC based repository for event log records.
  */
 @ApplicationScoped
-public class EventJdbcRepository extends AbstractJdbcRepository<Event> {
+public class EventJdbcRepository {
 
     /**
      * Column Names
@@ -60,11 +63,24 @@ public class EventJdbcRepository extends AbstractJdbcRepository<Event> {
 
     private static final String READING_STREAM_ALL_EXCEPTION = "Exception while reading stream";
     private static final String READING_STREAM_EXCEPTION = "Exception while reading stream %s";
-    private static final String JNDI_DS_EVENT_STORE_PATTERN = "java:/app/%s/DS.eventstore";
+
     @Inject
     protected Logger logger;
     @Inject
     EventInsertionStrategy eventInsertionStrategy;
+
+    @Inject
+    JdbcRepositoryHelper jdbcRepositoryHelper;
+
+    @Inject
+    JdbcDataSourceProvider jdbcDataSourceProvider;
+
+    DataSource dataSource;
+
+    @PostConstruct
+    private void initialiseDataSource() {
+        dataSource = jdbcDataSourceProvider.getDataSource();
+    }
 
     /**
      * Insert the given event into the event log.
@@ -73,8 +89,7 @@ public class EventJdbcRepository extends AbstractJdbcRepository<Event> {
      * @throws InvalidSequenceIdException if the version already exists or is null.
      */
     public void insert(final Event event) throws InvalidSequenceIdException {
-        try (final PreparedStatementWrapper ps = preparedStatementWrapperOf(
-                eventInsertionStrategy.insertStatement())) {
+        try (final PreparedStatementWrapper ps = jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, eventInsertionStrategy.insertStatement())) {
             eventInsertionStrategy.insert(ps, event);
         } catch (final SQLException e) {
             logger.error("Error persisting event to the database", e);
@@ -90,16 +105,14 @@ public class EventJdbcRepository extends AbstractJdbcRepository<Event> {
      * @return a stream of {@link Event}. Never returns null.
      */
     public Stream<Event> findByStreamIdOrderBySequenceIdAsc(final UUID streamId) {
-
         try {
-            final PreparedStatementWrapper ps = preparedStatementWrapperOf(SQL_FIND_BY_STREAM_ID);
+            final PreparedStatementWrapper ps = jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SQL_FIND_BY_STREAM_ID);
             ps.setObject(1, streamId);
-            return streamOf(ps);
+            return jdbcRepositoryHelper.streamOf(ps, entityFromFunction());
         } catch (final SQLException e) {
             logger.warn(FAILED_TO_READ_STREAM, streamId, e);
             throw new JdbcRepositoryException(format(READING_STREAM_EXCEPTION, streamId), e);
         }
-
     }
 
     /**
@@ -114,13 +127,12 @@ public class EventJdbcRepository extends AbstractJdbcRepository<Event> {
                                                                           final Long versionFrom) {
 
         try {
-            final PreparedStatementWrapper ps = preparedStatementWrapperOf(
-                    SQL_FIND_BY_STREAM_ID_AND_SEQUENCE_ID);
+            final PreparedStatementWrapper ps = jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SQL_FIND_BY_STREAM_ID_AND_SEQUENCE_ID);
 
             ps.setObject(1, streamId);
             ps.setLong(2, versionFrom);
 
-            return streamOf(ps);
+            return jdbcRepositoryHelper.streamOf(ps, entityFromFunction());
         } catch (final SQLException e) {
             logger.warn(FAILED_TO_READ_STREAM, streamId, e);
             throw new JdbcRepositoryException(format(READING_STREAM_EXCEPTION, streamId), e);
@@ -134,7 +146,7 @@ public class EventJdbcRepository extends AbstractJdbcRepository<Event> {
      */
     public Stream<Event> findAll() {
         try {
-            return streamOf(preparedStatementWrapperOf(SQL_FIND_ALL));
+            return jdbcRepositoryHelper.streamOf(jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SQL_FIND_ALL), entityFromFunction());
         } catch (final SQLException e) {
             throw new JdbcRepositoryException(READING_STREAM_ALL_EXCEPTION, e);
         }
@@ -147,9 +159,7 @@ public class EventJdbcRepository extends AbstractJdbcRepository<Event> {
      * @return latest sequence streamId for the stream.  Returns 0 if stream doesn't exist.
      */
     public long getLatestSequenceIdForStream(final UUID streamId) {
-        try (final PreparedStatementWrapper ps = preparedStatementWrapperOf(
-                SQL_FIND_LATEST_SEQUENCE_ID)) {
-
+        try (final PreparedStatementWrapper ps = jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SQL_FIND_LATEST_SEQUENCE_ID)) {
             ps.setObject(1, streamId);
 
             ResultSet resultSet = ps.executeQuery();
@@ -173,49 +183,44 @@ public class EventJdbcRepository extends AbstractJdbcRepository<Event> {
      */
     public Stream<UUID> getStreamIds() {
         try {
-            final PreparedStatementWrapper psWrapper = preparedStatementWrapperOf(SQL_DISTINCT_STREAM_ID);
-            final ResultSet resultSet = psWrapper.executeQuery();
-            return streamFrom(psWrapper, resultSet);
+            final PreparedStatementWrapper psWrapper = jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SQL_DISTINCT_STREAM_ID);
+            return streamFrom(psWrapper);
         } catch (final SQLException e) {
             throw new JdbcRepositoryException(READING_STREAM_ALL_EXCEPTION, e);
         }
 
     }
 
-    private Stream<UUID> streamFrom(final PreparedStatementWrapper psWrapper,
-                                    final ResultSet resultSet) {
-        return streamOf(psWrapper, resultSet, e -> {
+    private Stream<UUID> streamFrom(final PreparedStatementWrapper psWrapper) throws SQLException {
+        return jdbcRepositoryHelper.streamOf(psWrapper, e -> {
             try {
-                return (UUID) resultSet.getObject(COL_STREAM_ID);
+                return (UUID) e.getObject(COL_STREAM_ID);
             } catch (final SQLException e1) {
-                throw handled(e1, psWrapper);
+                throw jdbcRepositoryHelper.handled(e1, psWrapper);
             }
         });
     }
 
-    @Override
-    protected Event entityFrom(final ResultSet resultSet) {
-        try {
-            return new Event((UUID) resultSet.getObject(PRIMARY_KEY_ID),
-                    (UUID) resultSet.getObject(COL_STREAM_ID),
-                    resultSet.getLong(COL_SEQUENCE_ID),
-                    resultSet.getString(COL_NAME),
-                    resultSet.getString(COL_METADATA),
-                    resultSet.getString(COL_PAYLOAD),
-                    fromSqlTimestamp(resultSet.getTimestamp(COL_TIMESTAMP)));
-        } catch (final SQLException e) {
-            throw new JdbcRepositoryException(READING_STREAM_EXCEPTION, e);
-        }
-    }
+    protected Function<ResultSet, Event> entityFromFunction() {
 
-    @Override
-    protected String jndiName() throws NamingException {
-        return format(JNDI_DS_EVENT_STORE_PATTERN, warFileName());
+        return resultSet -> {
+            try {
+                return new Event((UUID) resultSet.getObject(PRIMARY_KEY_ID),
+                        (UUID) resultSet.getObject(COL_STREAM_ID),
+                        resultSet.getLong(COL_SEQUENCE_ID),
+                        resultSet.getString(COL_NAME),
+                        resultSet.getString(COL_METADATA),
+                        resultSet.getString(COL_PAYLOAD),
+                        fromSqlTimestamp(resultSet.getTimestamp(COL_TIMESTAMP)));
+            } catch (final SQLException e) {
+                throw new JdbcRepositoryException(e);
+            }
+        };
     }
 
     public boolean recordExists(final UUID streamId, final long position) {
         try {
-            PreparedStatementWrapper ps = preparedStatementWrapperOf(SQL_RECORD_EXIST);
+            final PreparedStatementWrapper ps = jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SQL_RECORD_EXIST);
             ps.setObject(1, streamId.toString());
             ps.setLong(2, position);
             try (ResultSet rs = ps.executeQuery()) {
@@ -230,7 +235,7 @@ public class EventJdbcRepository extends AbstractJdbcRepository<Event> {
     public Stream<Event> first(final UUID streamId, final long pageSize) {
         try {
             final PreparedStatementWrapper ps;
-            ps = preparedStatementWrapperOf(SQL_GET_FIRST);
+            ps = jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SQL_GET_FIRST);
             ps.setObject(1, streamId);
             ps.setLong(2, pageSize);
             return reverseOrder(ps);
@@ -242,7 +247,7 @@ public class EventJdbcRepository extends AbstractJdbcRepository<Event> {
 
     public Stream<Event> forward(final UUID streamId, final long position, final long pageSize) {
         try {
-            final PreparedStatementWrapper ps = preparedStatementWrapperOf(SQL_GET_FORWARD);
+            final PreparedStatementWrapper ps = jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SQL_GET_FORWARD);
             ps.setObject(1, streamId);
             ps.setLong(2, position);
             ps.setLong(3, pageSize);
@@ -254,11 +259,11 @@ public class EventJdbcRepository extends AbstractJdbcRepository<Event> {
 
     public Stream<Event> backward(final UUID streamId, final long position, final long pageSize) {
         try {
-            final PreparedStatementWrapper ps = preparedStatementWrapperOf(SQL_GET_BACKWARD);
+            final PreparedStatementWrapper ps = jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SQL_GET_BACKWARD);
             ps.setObject(1, streamId);
             ps.setLong(2, position);
             ps.setLong(3, pageSize);
-            return streamOf(ps);
+            return jdbcRepositoryHelper.streamOf(ps, entityFromFunction());
         } catch (final SQLException e) {
             throw new JdbcRepositoryException(READING_STREAM_EXCEPTION, e);
         }
@@ -266,10 +271,10 @@ public class EventJdbcRepository extends AbstractJdbcRepository<Event> {
 
     public Stream<Event> head(final UUID streamId, final long pageSize) {
         try {
-            final PreparedStatementWrapper ps = preparedStatementWrapperOf(SQL_GET_HEAD);
+            final PreparedStatementWrapper ps = jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SQL_GET_HEAD);
             ps.setObject(1, streamId);
             ps.setLong(2, pageSize);
-            return streamOf(ps);
+            return jdbcRepositoryHelper.streamOf(ps, entityFromFunction());
         } catch (final SQLException e) {
             throw new JdbcRepositoryException(READING_STREAM_EXCEPTION, e);
         }
@@ -277,7 +282,7 @@ public class EventJdbcRepository extends AbstractJdbcRepository<Event> {
 
     private Stream<Event> reverseOrder(final PreparedStatementWrapper ps) {
         try {
-            return streamOf(ps).sorted(Comparator.comparing(Event::getSequenceId).reversed());
+            return jdbcRepositoryHelper.streamOf(ps, entityFromFunction()).sorted(Comparator.comparing(Event::getSequenceId).reversed());
         } catch (final SQLException e) {
             throw new JdbcRepositoryException(READING_STREAM_EXCEPTION, e);
         }

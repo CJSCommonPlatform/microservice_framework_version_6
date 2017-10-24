@@ -15,7 +15,7 @@ import uk.gov.justice.domain.aggregate.TestAggregate;
 import uk.gov.justice.domain.snapshot.AggregateSnapshot;
 import uk.gov.justice.domain.snapshot.VersionedAggregate;
 import uk.gov.justice.services.core.aggregate.exception.AggregateChangeDetectedException;
-import uk.gov.justice.services.eventsourcing.jdbc.snapshot.jdbc.snapshot.SnapshotRepository;
+import uk.gov.justice.services.eventsourcing.jdbc.snapshot.SnapshotRepository;
 
 import java.util.Optional;
 import java.util.UUID;

@@ -27,6 +27,8 @@ import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.fail;
+import static uk.gov.justice.services.eventsourcing.jdbc.snapshot.StandaloneSnapshotJdbcRepositoryFactory.getSnapshotJdbcRepository;
+import static uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventRepositoryFactory.getEventJdbcRepository;
 import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
 
 import uk.gov.justice.domain.snapshot.AggregateSnapshot;
@@ -34,13 +36,13 @@ import uk.gov.justice.domain.snapshot.DefaultObjectInputStreamStrategy;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.aggregate.exception.AggregateChangeDetectedException;
 import uk.gov.justice.services.event.buffer.core.repository.streamstatus.StreamStatus;
+import uk.gov.justice.services.eventsourcing.jdbc.snapshot.SnapshotJdbcRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.Event;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepository;
 import uk.gov.justice.services.example.cakeshop.domain.aggregate.Recipe;
 import uk.gov.justice.services.example.cakeshop.it.util.ApiResponse;
-import uk.gov.justice.services.example.cakeshop.it.util.StandaloneSnapshotJdbcRepository;
 import uk.gov.justice.services.example.cakeshop.it.util.StandaloneStreamStatusJdbcRepository;
 import uk.gov.justice.services.example.cakeshop.it.util.TestProperties;
-import uk.gov.justice.services.test.utils.core.eventsource.TestEventRepository;
 import uk.gov.justice.services.test.utils.core.http.HttpResponsePoller;
 
 import java.io.File;
@@ -126,9 +128,9 @@ public class CakeShopIT {
 
     private static final TestProperties TEST_PROPERTIES = new TestProperties("test.properties");
 
-    private static TestEventRepository EVENT_LOG_REPOSITORY;
+    private static EventJdbcRepository EVENT_LOG_REPOSITORY;
     private static StandaloneStreamStatusJdbcRepository STREAM_STATUS_REPOSITORY;
-    private static StandaloneSnapshotJdbcRepository SNAPSHOT_REPOSITORY;
+    private static SnapshotJdbcRepository SNAPSHOT_REPOSITORY;
     private static ActiveMQConnectionFactory JMS_CONNECTION_FACTORY;
     private static DataSource CAKE_SHOP_DS;
 
@@ -139,12 +141,12 @@ public class CakeShopIT {
     @BeforeClass
     public static void beforeClass() throws Exception {
         final DataSource eventStoreDataSource = initEventStoreDb();
-        EVENT_LOG_REPOSITORY = new TestEventRepository(eventStoreDataSource);
+        EVENT_LOG_REPOSITORY = getEventJdbcRepository(eventStoreDataSource);
         JMS_CONNECTION_FACTORY = new ActiveMQConnectionFactory(JMS_BROKER_URL);
 
         final DataSource viewStoreDatasource = initViewStoreDb();
         STREAM_STATUS_REPOSITORY = new StandaloneStreamStatusJdbcRepository(viewStoreDatasource);
-        SNAPSHOT_REPOSITORY = new StandaloneSnapshotJdbcRepository(eventStoreDataSource);
+        SNAPSHOT_REPOSITORY = getSnapshotJdbcRepository(eventStoreDataSource);
 
         initFileServiceDb();
 
@@ -468,7 +470,7 @@ public class CakeShopIT {
     }
 
     @Test
-    public void shouldCreateSnapshotOfTheRecipeAggregateAndUseItWhenMakingCakes() throws AggregateChangeDetectedException {
+    public void shouldUseSnapshotWhenMakingCakes() throws AggregateChangeDetectedException {
 
         final String recipeId = "163af847-effb-46a9-96bc-32a0f7526e52";
         final String cakeName = "Delicious cake";
@@ -478,8 +480,11 @@ public class CakeShopIT {
 
         //cake made events belong to the recipe aggregate.
         //snapshot threshold is set to 3 in settings-test.xml so this should cause snapshot to be created
-        makeCake(recipeId, randomUUID().toString());
-        makeCake(recipeId, randomUUID().toString());
+        final String cakeId1 = "b8b138a2-aee8-46ac-bc8d-a4e0b32de424";
+        final String cakeId2 = "a7df425e-ba49-4b53-aaad-7b4b3f796dee";
+
+        makeCake(recipeId, cakeId1);
+        makeCake(recipeId, cakeId2);
 
         await().until(() -> recipeAggregateSnapshotOf(recipeId).isPresent());
 
@@ -487,7 +492,7 @@ public class CakeShopIT {
         final String newCakeName = "Tweaked cake";
         tweakRecipeSnapshotName(recipeId, newCakeName);
 
-        final String lastCakeId = "163af847-effb-46a9-96bc-32a0f7526f03";
+        final String lastCakeId = "7eba6ce5-70e7-452a-b9a9-84acc6011fdf";
         makeCake(recipeId, lastCakeId);
 
         await().until(() -> cakesQueryResult().body().contains(lastCakeId));

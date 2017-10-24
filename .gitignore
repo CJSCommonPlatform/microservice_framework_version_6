@@ -19,6 +19,7 @@ pom.xml~
 activemq-data/
 .sonar
 
+
 ### SublimeText ###
 # cache files for sublime text
 *.tmlanguage.cache
@@ -73,20 +74,13 @@ sftp-config.json
 ehthumbs.db
 Thumbs.db
 
+# Open Ejb Test Generated Files #
+#################################
+
 *.h2.db
 *.trace.db
-/components/event/event-listener/conf/groups.properties
-/components/event/event-listener/conf/login.config
-/components/event/event-listener/conf/openejb.xml
-/components/event/event-listener/conf/users.properties
-/event-sourcing/event-source-api/conf/conf.d/
-/event-sourcing/event-source-api/conf/login.config
-/event-sourcing/event-source-api/conf/openejb.xml
-/event-sourcing/event-source-api/conf/groups.properties
-/event-sourcing/event-source-api/conf/users.properties
-/event-sourcing/event-source-api-integration-test/conf/conf.d/cxf-rs.properties
-/event-sourcing/event-source-api-integration-test/conf/login.config
-/event-sourcing/event-source-api-integration-test/conf/openejb.xml
-/event-sourcing/event-source-api-integration-test/conf/groups.properties
-/event-sourcing/event-source-api-integration-test/conf/conf.d/httpejbd.properties
-/event-sourcing/event-source-api-integration-test/conf/users.properties
+conf/groups.properties
+conf/login.config
+conf/openejb.xml
+conf/users.properties
+conf/conf.d/

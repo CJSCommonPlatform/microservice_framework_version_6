@@ -6,6 +6,7 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsSame.sameInstance;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -19,11 +20,13 @@ import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationException;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandler;
 import uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler;
-import uk.gov.justice.services.core.json.DefaultJsonSchemaValidatorFactory;
+import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.enterprise.inject.spi.InjectionPoint;
 
+import org.everit.json.schema.Schema;
+import org.everit.json.schema.ValidationException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -52,13 +55,15 @@ public class RequesterProducerTest {
     @Mock
     private EnvelopeValidationExceptionHandler envelopeValidationExceptionHandler;
 
+    @Mock
+    private JsonSchemaValidator jsonSchemaValidator;
+
     @InjectMocks
     private RequesterProducer requesterProducer;
 
     @Before
     public void setUp() throws Exception {
         when(dispatcherCache.dispatcherFor(injectionPoint)).thenReturn(dispatcher);
-        requesterProducer.jsonSchemaValidator = new DefaultJsonSchemaValidatorFactory().getDefaultJsonSchemaValidator();
         requesterProducer.objectMapper = new ObjectMapperProducer().objectMapper();
     }
 
@@ -107,6 +112,10 @@ public class RequesterProducerTest {
 
     @Test
     public void shouldThrowExceptionIfResponseNotValidAgainstSchema() throws Exception {
+
+        doThrow(new ValidationException(mock(Schema.class), "Message not valid against schema", "keyword", "location"))
+                .when(jsonSchemaValidator).validate(any(String.class), any(String.class));
+
         requesterProducer.envelopeValidationExceptionHandler = new RethrowingValidationExceptionHandler();
 
         exception.expect(EnvelopeValidationException.class);

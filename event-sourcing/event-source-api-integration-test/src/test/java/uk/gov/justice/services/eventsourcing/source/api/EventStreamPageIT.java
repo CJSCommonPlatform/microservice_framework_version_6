@@ -34,6 +34,8 @@ import uk.gov.justice.services.eventsourcing.source.api.util.LoggerProducer;
 import uk.gov.justice.services.eventsourcing.source.api.util.OpenEjbAwareEventRepository;
 import uk.gov.justice.services.eventsourcing.source.api.util.OpenEjbAwareEventStreamRepository;
 import uk.gov.justice.services.eventsourcing.source.api.util.TestSystemUserProvider;
+import uk.gov.justice.services.jdbc.persistence.JdbcDataSourceProvider;
+import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -43,6 +45,7 @@ import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
+import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
 import com.jayway.jsonpath.JsonPath;
@@ -72,8 +75,6 @@ import org.junit.runner.RunWith;
 @EnableServices("jaxrs")
 @RunWith(ApplicationComposer.class)
 public class EventStreamPageIT {
-    private static final String BAD_HEAD_REQUEST = "Invalid request, cannot request PREVIOUS page from HEAD.";
-    private static final String BAD_FIRST_REQUEST = "Invalid request, cannot request NEXT page from FIRST.";
 
     private static final String LIQUIBASE_EVENT_STORE_CHANGELOG_XML = "liquibase/event-store-db-changelog.xml";
     private static final String BASE_URI_PATTERN = "http://localhost:%d/event-source-api/rest";
@@ -97,6 +98,8 @@ public class EventStreamPageIT {
     @Before
     public void setup() throws Exception {
         httpClient = HttpClients.createDefault();
+        final InitialContext initialContext = new InitialContext();
+        initialContext.bind("java:/app/EventStreamPageIT/DS.eventstore", dataSource);
         initEventDatabase();
     }
 
@@ -124,6 +127,7 @@ public class EventStreamPageIT {
             OpenEjbAwareEventRepository.class,
             EventStreamService.class,
             AccessController.class,
+            AnsiSQLEventLogInsertionStrategy.class,
             TestSystemUserProvider.class,
             ForbiddenRequestExceptionMapper.class,
             TestEventInsertionStrategyProducer.class,
@@ -133,7 +137,9 @@ public class EventStreamPageIT {
             PositionFactory.class,
             UrlLinkFactory.class,
             PositionValueFactory.class,
-            BadRequestExceptionMapper.class
+            BadRequestExceptionMapper.class,
+            JdbcRepositoryHelper.class,
+            JdbcDataSourceProvider.class
     })
 
     public WebApp war() {

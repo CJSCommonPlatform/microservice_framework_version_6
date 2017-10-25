@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.core.IsNull.notNullValue;
+import static uk.gov.justice.services.core.h2.OpenEjbConfigurationBuilder.*;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 
@@ -23,6 +24,7 @@ import uk.gov.justice.services.core.aggregate.event.EventA;
 import uk.gov.justice.services.core.aggregate.event.EventB;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.extension.EventFoundEvent;
+import uk.gov.justice.services.core.h2.OpenEjbConfigurationBuilder;
 import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
 
 import uk.gov.justice.services.eventsourcing.publisher.jms.EventPublisher;
@@ -54,6 +56,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Properties;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -72,6 +75,7 @@ import org.apache.openejb.jee.WebApp;
 import org.apache.openejb.junit.ApplicationComposer;
 import org.apache.openejb.testing.Application;
 import org.apache.openejb.testing.Classes;
+import org.apache.openejb.testing.Configuration;
 import org.apache.openejb.testing.Module;
 import org.junit.Before;
 import org.junit.Test;
@@ -139,11 +143,18 @@ public class DefaultAggregateServiceIT {
             DefaultFileSystemUrlResolverStrategy.class
 
             })
-
     public WebApp war() {
         return new WebApp()
                 .contextRoot("aggregateservice-test")
                 .addServlet("AggregateServiceApp", Application.class.getName());
+    }
+
+    @Configuration
+    public Properties configuration() {
+        return createOpenEjbConfigurationBuilder()
+                .addInitialContext()
+                .addH2EventStore()
+                .build();
     }
 
     @Before

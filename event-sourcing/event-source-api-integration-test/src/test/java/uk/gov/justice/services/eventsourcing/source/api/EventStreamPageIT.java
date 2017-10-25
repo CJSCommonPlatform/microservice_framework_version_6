@@ -11,6 +11,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
+import static uk.gov.justice.services.core.h2.OpenEjbConfigurationBuilder.createOpenEjbConfigurationBuilder;
 import static uk.gov.justice.services.eventsourcing.repository.jdbc.Direction.BACKWARD;
 import static uk.gov.justice.services.eventsourcing.repository.jdbc.Direction.FORWARD;
 import static uk.gov.justice.services.eventsourcing.source.api.util.TestSystemUserProvider.SYSTEM_USER_ID;
@@ -104,9 +105,11 @@ public class EventStreamPageIT {
     }
 
     @Configuration
-    public Properties properties() {
-        return new PropertiesBuilder()
-                .p("httpejbd.port", Integer.toString(port))
+    public Properties configuration() {
+        return createOpenEjbConfigurationBuilder()
+                .addInitialContext()
+                .addHttpEjbPort(port)
+                .addH2EventStore()
                 .build();
     }
 

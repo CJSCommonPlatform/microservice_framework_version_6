@@ -36,6 +36,7 @@ import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandlerP
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.extension.ServiceComponentScanner;
+import uk.gov.justice.services.core.h2.OpenEjbConfigurationBuilder;
 import uk.gov.justice.services.core.interceptor.Interceptor;
 import uk.gov.justice.services.core.interceptor.InterceptorCache;
 import uk.gov.justice.services.core.interceptor.InterceptorChainObserver;
@@ -62,6 +63,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.UUID;
 
 import javax.annotation.Resource;
@@ -79,6 +81,7 @@ import org.apache.openejb.jee.Application;
 import org.apache.openejb.jee.WebApp;
 import org.apache.openejb.junit.ApplicationComposer;
 import org.apache.openejb.testing.Classes;
+import org.apache.openejb.testing.Configuration;
 import org.apache.openejb.testing.Module;
 import org.junit.Before;
 import org.junit.Test;
@@ -164,6 +167,28 @@ public class EventBufferIT {
     public void init() throws Exception {
         initDatabase();
     }
+
+    @Configuration
+    public Properties configuration() {
+        return OpenEjbConfigurationBuilder.createOpenEjbConfigurationBuilder()
+                .addInitialContext()
+                .addh2ViewStore()
+                .build();
+    }
+
+
+    //Uncomment below to test when deplpoyed to the vagrant vm
+    /*
+
+    @Configuration
+    public Properties postgresqlConfiguration() {
+        return OpenEjbConfigurationBuilder.createOpenEjbConfigurationBuilder()
+                .addInitialContext()
+                .addPostgresqlViewStore()
+                .build();
+    }
+
+    */
 
     @Test
     public void shouldAddEventToBufferIfVersionNotOne() {

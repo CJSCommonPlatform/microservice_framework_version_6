@@ -36,7 +36,7 @@ public abstract class AbstractJdbcRepository<T> {
         if (datasource == null) {
             try {
                 datasource = (DataSource) getInitialContext().lookup(jndiName());
-            } catch (NamingException e) {
+            } catch (final NamingException e) {
                 throw new JdbcRepositoryException(e);
             }
         }
@@ -73,7 +73,7 @@ public abstract class AbstractJdbcRepository<T> {
                     }
                     action.accept(resultSetToEntityMapper.apply(resultSet));
                     return true;
-                } catch (SQLException ex) {
+                } catch (final SQLException ex) {
                     throw handled(ex, psWrapper);
                 }
             }
@@ -83,8 +83,8 @@ public abstract class AbstractJdbcRepository<T> {
     private Stream<T> streamOf(final PreparedStatementWrapper psWrapper, final ResultSet resultSet) {
         return streamOf(psWrapper, resultSet, e -> {
             try {
-                return entityFrom(resultSet);
-            } catch (SQLException ex) {
+                return entityFrom(e);
+            } catch (final SQLException ex) {
                 throw handled(ex, psWrapper);
             }
         });

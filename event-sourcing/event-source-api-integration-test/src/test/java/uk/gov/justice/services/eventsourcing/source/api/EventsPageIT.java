@@ -38,6 +38,8 @@ import uk.gov.justice.services.eventsourcing.source.api.util.LoggerProducer;
 import uk.gov.justice.services.eventsourcing.source.api.util.OpenEjbAwareEventRepository;
 import uk.gov.justice.services.eventsourcing.source.api.util.OpenEjbAwareEventStreamRepository;
 import uk.gov.justice.services.eventsourcing.source.api.util.TestSystemUserProvider;
+import uk.gov.justice.services.jdbc.persistence.JdbcDataSourceProvider;
+import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
@@ -49,6 +51,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.json.JsonObject;
+import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
 import com.jayway.jsonpath.JsonPath;
@@ -103,6 +106,8 @@ public class EventsPageIT {
     @Before
     public void setup() throws Exception {
         httpClient = HttpClients.createDefault();
+        InitialContext initialContext = new InitialContext();
+        initialContext.bind("java:/app/EventsPageIT/DS.eventstore", dataSource);
         initEventDatabase();
     }
 
@@ -139,7 +144,9 @@ public class EventsPageIT {
             PositionFactory.class,
             UrlLinkFactory.class,
             PositionValueFactory.class,
-            BadRequestExceptionMapper.class
+            BadRequestExceptionMapper.class,
+            JdbcRepositoryHelper.class,
+            JdbcDataSourceProvider.class
     })
 
     public WebApp war() {
@@ -372,6 +379,8 @@ public class EventsPageIT {
 
     @Test
     public void shouldReturnEmptyFeedIfNoDataAndNoPreviousAndNextLinks() throws IOException {
+
+        eventsRepository.findAll(); // Hit the repo to initialise.
 
         final HttpResponse response = eventsFeedFor(SYSTEM_USER_ID, STREAM_ID, "5", BACKWARD, PAGE_SIZE);
 

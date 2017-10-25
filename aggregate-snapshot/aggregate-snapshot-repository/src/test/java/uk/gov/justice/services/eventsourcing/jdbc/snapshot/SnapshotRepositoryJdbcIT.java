@@ -4,53 +4,62 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.domain.snapshot.AggregateSnapshot;
-import uk.gov.justice.services.eventsourcing.jdbc.snapshot.jdbc.snapshot.SnapshotJdbcRepository;
-import uk.gov.justice.services.test.utils.core.messaging.Poller;
-import uk.gov.justice.services.test.utils.persistence.AbstractJdbcRepositoryIT;
+import uk.gov.justice.services.test.utils.persistence.TestDataSourceFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.slf4j.Logger;
 
-public class SnapshotRepositoryJdbcIT extends AbstractJdbcRepositoryIT<SnapshotJdbcRepository> {
 
-    private static final UUID STREAM_ID = randomUUID();
+@RunWith(MockitoJUnitRunner.class)
+public class SnapshotRepositoryJdbcIT {
+
     private static final Long VERSION_ID = 5L;
     private static final Class<RecordingAggregate> TYPE = RecordingAggregate.class;
     private static final Class<DifferentAggregate> OTHER_TYPE = DifferentAggregate.class;
     private static final byte[] AGGREGATE = "Any String you want".getBytes();
     private static final String LIQUIBASE_SNAPSHOT_STORE_DB_CHANGELOG_XML = "liquibase/snapshot-store-db-changelog.xml";
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    public SnapshotRepositoryJdbcIT() {
-        super(LIQUIBASE_SNAPSHOT_STORE_DB_CHANGELOG_XML);
-    }
+    private final SnapshotJdbcRepository snapshotJdbcRepository = new SnapshotJdbcRepository();
 
     @Before
-    public void initializeDependencies() throws Exception {
-        jdbcRepository = new SnapshotJdbcRepository();
-        registerDataSource();
+    public void initialize() {
+        try {
+            snapshotJdbcRepository.dataSource = new TestDataSourceFactory(LIQUIBASE_SNAPSHOT_STORE_DB_CHANGELOG_XML).createDataSource();
+            snapshotJdbcRepository.logger = mock(Logger.class);
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail("SnapshotJdbcRepository construction failed");
+        }
     }
+
+    @Rule
+    public final ExpectedException expectedException = ExpectedException.none();
 
     @Test
     public void shouldStoreAndRetrieveSnapshot() {
 
-        final AggregateSnapshot aggregateSnapshot = createSnapshot(STREAM_ID, VERSION_ID, TYPE, AGGREGATE);
+        final UUID streamId = randomUUID();
+        final AggregateSnapshot aggregateSnapshot = createSnapshot(streamId, VERSION_ID, TYPE, AGGREGATE);
 
-        jdbcRepository.storeSnapshot(aggregateSnapshot);
+        snapshotJdbcRepository.storeSnapshot(aggregateSnapshot);
 
-        final Optional<AggregateSnapshot<RecordingAggregate>> snapshot = jdbcRepository.getLatestSnapshot(STREAM_ID, TYPE);
+        final Optional<AggregateSnapshot<RecordingAggregate>> snapshot = snapshotJdbcRepository.getLatestSnapshot(streamId, TYPE);
 
         assertThat(snapshot, notNullValue());
         assertThat(snapshot, is(Optional.of(aggregateSnapshot)));
@@ -59,19 +68,21 @@ public class SnapshotRepositoryJdbcIT extends AbstractJdbcRepositoryIT<SnapshotJ
     @Test
     public void shouldRetrieveLatestSnapshot() {
 
-        final AggregateSnapshot aggregateSnapshot1 = createSnapshot(STREAM_ID, VERSION_ID + 1, TYPE, AGGREGATE);
-        final AggregateSnapshot aggregateSnapshot2 = createSnapshot(STREAM_ID, VERSION_ID + 2, TYPE, AGGREGATE);
-        final AggregateSnapshot aggregateSnapshot3 = createSnapshot(STREAM_ID, VERSION_ID + 3, TYPE, AGGREGATE);
-        final AggregateSnapshot aggregateSnapshot4 = createSnapshot(STREAM_ID, VERSION_ID + 4, TYPE, AGGREGATE);
-        final AggregateSnapshot aggregateSnapshot5 = createSnapshot(STREAM_ID, VERSION_ID + 5, TYPE, AGGREGATE);
+        final UUID streamId = randomUUID();
+        
+        final AggregateSnapshot aggregateSnapshot1 = createSnapshot(streamId, VERSION_ID + 1, TYPE, AGGREGATE);
+        final AggregateSnapshot aggregateSnapshot2 = createSnapshot(streamId, VERSION_ID + 2, TYPE, AGGREGATE);
+        final AggregateSnapshot aggregateSnapshot3 = createSnapshot(streamId, VERSION_ID + 3, TYPE, AGGREGATE);
+        final AggregateSnapshot aggregateSnapshot4 = createSnapshot(streamId, VERSION_ID + 4, TYPE, AGGREGATE);
+        final AggregateSnapshot aggregateSnapshot5 = createSnapshot(streamId, VERSION_ID + 5, TYPE, AGGREGATE);
 
-        jdbcRepository.storeSnapshot(aggregateSnapshot1);
-        jdbcRepository.storeSnapshot(aggregateSnapshot2);
-        jdbcRepository.storeSnapshot(aggregateSnapshot3);
-        jdbcRepository.storeSnapshot(aggregateSnapshot4);
-        jdbcRepository.storeSnapshot(aggregateSnapshot5);
+        snapshotJdbcRepository.storeSnapshot(aggregateSnapshot1);
+        snapshotJdbcRepository.storeSnapshot(aggregateSnapshot2);
+        snapshotJdbcRepository.storeSnapshot(aggregateSnapshot3);
+        snapshotJdbcRepository.storeSnapshot(aggregateSnapshot4);
+        snapshotJdbcRepository.storeSnapshot(aggregateSnapshot5);
 
-        final Optional<AggregateSnapshot<RecordingAggregate>> snapshot = jdbcRepository.getLatestSnapshot(STREAM_ID, TYPE);
+        final Optional<AggregateSnapshot<RecordingAggregate>> snapshot = snapshotJdbcRepository.getLatestSnapshot(streamId, TYPE);
 
         assertThat(snapshot, notNullValue());
         assertThat(snapshot, is(Optional.of(aggregateSnapshot5)));
@@ -80,16 +91,17 @@ public class SnapshotRepositoryJdbcIT extends AbstractJdbcRepositoryIT<SnapshotJ
     @Test
     public void shouldRetrieveLatestSnapshotWithCorrectType() {
 
-        final AggregateSnapshot aggregateSnapshot1 = createSnapshot(STREAM_ID, VERSION_ID + 1, TYPE, AGGREGATE);
-        final AggregateSnapshot aggregateSnapshot2 = createSnapshot(STREAM_ID, VERSION_ID + 2, TYPE, AGGREGATE);
-        final AggregateSnapshot aggregateSnapshot3 = createSnapshot(STREAM_ID, VERSION_ID + 3, OTHER_TYPE, AGGREGATE);
+        final UUID streamId = randomUUID();
 
-        jdbcRepository.storeSnapshot(aggregateSnapshot1);
-        jdbcRepository.storeSnapshot(aggregateSnapshot2);
-        jdbcRepository.storeSnapshot(aggregateSnapshot3);
+        final AggregateSnapshot aggregateSnapshot1 = createSnapshot(streamId, VERSION_ID + 1, TYPE, AGGREGATE);
+        final AggregateSnapshot aggregateSnapshot2 = createSnapshot(streamId, VERSION_ID + 2, TYPE, AGGREGATE);
+        final AggregateSnapshot aggregateSnapshot3 = createSnapshot(streamId, VERSION_ID + 3, OTHER_TYPE, AGGREGATE);
 
-        Poller poller = new Poller();
-        final Optional<AggregateSnapshot<RecordingAggregate>> snapshot  = poller.pollUntilFound(() -> jdbcRepository.getLatestSnapshot(STREAM_ID, TYPE));
+        snapshotJdbcRepository.storeSnapshot(aggregateSnapshot1);
+        snapshotJdbcRepository.storeSnapshot(aggregateSnapshot2);
+        snapshotJdbcRepository.storeSnapshot(aggregateSnapshot3);
+
+        final Optional<AggregateSnapshot<RecordingAggregate>> snapshot  = snapshotJdbcRepository.getLatestSnapshot(streamId, TYPE);
 
         assertThat(snapshot, notNullValue());
         assertThat(snapshot, is(Optional.of(aggregateSnapshot2)));
@@ -98,21 +110,23 @@ public class SnapshotRepositoryJdbcIT extends AbstractJdbcRepositoryIT<SnapshotJ
     @Test
     public void shouldRemoveAllSnapshots() {
 
-        final AggregateSnapshot aggregateSnapshot1 = createSnapshot(STREAM_ID, VERSION_ID + 1, TYPE, AGGREGATE);
-        final AggregateSnapshot aggregateSnapshot2 = createSnapshot(STREAM_ID, VERSION_ID + 2, TYPE, AGGREGATE);
-        final AggregateSnapshot aggregateSnapshot3 = createSnapshot(STREAM_ID, VERSION_ID + 3, TYPE, AGGREGATE);
-        final AggregateSnapshot aggregateSnapshot4 = createSnapshot(STREAM_ID, VERSION_ID + 4, TYPE, AGGREGATE);
-        final AggregateSnapshot aggregateSnapshot5 = createSnapshot(STREAM_ID, VERSION_ID + 6, TYPE, AGGREGATE);
+        final UUID streamId = randomUUID();
 
-        jdbcRepository.storeSnapshot(aggregateSnapshot1);
-        jdbcRepository.storeSnapshot(aggregateSnapshot2);
-        jdbcRepository.storeSnapshot(aggregateSnapshot3);
-        jdbcRepository.storeSnapshot(aggregateSnapshot4);
-        jdbcRepository.storeSnapshot(aggregateSnapshot5);
+        final AggregateSnapshot aggregateSnapshot1 = createSnapshot(streamId, VERSION_ID + 1, TYPE, AGGREGATE);
+        final AggregateSnapshot aggregateSnapshot2 = createSnapshot(streamId, VERSION_ID + 2, TYPE, AGGREGATE);
+        final AggregateSnapshot aggregateSnapshot3 = createSnapshot(streamId, VERSION_ID + 3, TYPE, AGGREGATE);
+        final AggregateSnapshot aggregateSnapshot4 = createSnapshot(streamId, VERSION_ID + 4, TYPE, AGGREGATE);
+        final AggregateSnapshot aggregateSnapshot5 = createSnapshot(streamId, VERSION_ID + 6, TYPE, AGGREGATE);
 
-        jdbcRepository.removeAllSnapshots(STREAM_ID, TYPE);
+        snapshotJdbcRepository.storeSnapshot(aggregateSnapshot1);
+        snapshotJdbcRepository.storeSnapshot(aggregateSnapshot2);
+        snapshotJdbcRepository.storeSnapshot(aggregateSnapshot3);
+        snapshotJdbcRepository.storeSnapshot(aggregateSnapshot4);
+        snapshotJdbcRepository.storeSnapshot(aggregateSnapshot5);
 
-        final Optional<AggregateSnapshot<RecordingAggregate>> snapshots = jdbcRepository.getLatestSnapshot(STREAM_ID, TYPE);
+        snapshotJdbcRepository.removeAllSnapshots(streamId, TYPE);
+
+        final Optional<AggregateSnapshot<RecordingAggregate>> snapshots = snapshotJdbcRepository.getLatestSnapshot(streamId, TYPE);
 
         assertThat(snapshots, notNullValue());
         assertThat(snapshots.isPresent(), is(false));
@@ -121,17 +135,20 @@ public class SnapshotRepositoryJdbcIT extends AbstractJdbcRepositoryIT<SnapshotJ
 
     @Test
     public void shouldReturnOptionalNullIfNoSnapshotAvailable() {
-        final Optional<AggregateSnapshot<RecordingAggregate>> snapshot = jdbcRepository.getLatestSnapshot(STREAM_ID, TYPE);
+
+        final UUID streamId = randomUUID();
+        final Optional<AggregateSnapshot<RecordingAggregate>> snapshot  = snapshotJdbcRepository.getLatestSnapshot(streamId, TYPE);
 
         assertThat(snapshot.isPresent(), is(false));
     }
 
     @Test
     public void shouldRetrieveOptionalNullIfOnlySnapshotsOfDifferentTypesAvailable() {
-        final AggregateSnapshot aggregateSnapshot1 = createSnapshot(STREAM_ID, VERSION_ID, OTHER_TYPE, AGGREGATE);
-        jdbcRepository.storeSnapshot(aggregateSnapshot1);
+        final UUID streamId = randomUUID();
+        final AggregateSnapshot aggregateSnapshot1 = createSnapshot(streamId, VERSION_ID, OTHER_TYPE, AGGREGATE);
+        snapshotJdbcRepository.storeSnapshot(aggregateSnapshot1);
 
-        final Optional<AggregateSnapshot<RecordingAggregate>> snapshot = jdbcRepository.getLatestSnapshot(STREAM_ID, TYPE);
+        final Optional<AggregateSnapshot<RecordingAggregate>> snapshot  = snapshotJdbcRepository.getLatestSnapshot(streamId, TYPE);
 
         assertThat(snapshot.isPresent(), is(false));
 

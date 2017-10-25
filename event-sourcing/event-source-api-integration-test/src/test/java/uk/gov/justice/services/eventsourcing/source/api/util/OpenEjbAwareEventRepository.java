@@ -4,7 +4,6 @@ import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepo
 
 public class OpenEjbAwareEventRepository extends EventJdbcRepository {
 
-    @Override
     protected String jndiName() {
         return "java:openejb/Resource/eventStore";
     }

@@ -9,27 +9,30 @@ import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
 
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidSequenceIdException;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
-import uk.gov.justice.services.test.utils.persistence.AbstractJdbcRepositoryIT;
+import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
+import uk.gov.justice.services.test.utils.core.messaging.Poller;
+import uk.gov.justice.services.test.utils.persistence.TestDataSourceFactory;
 
 import java.sql.SQLException;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class EventJdbcRepositoryIT extends AbstractJdbcRepositoryIT<EventJdbcRepository> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(EventJdbcRepository.class);
+public class EventJdbcRepositoryIT {
 
     private static final UUID STREAM_ID = randomUUID();
     private static final Long SEQUENCE_ID = 5L;
@@ -39,17 +42,37 @@ public class EventJdbcRepositoryIT extends AbstractJdbcRepositoryIT<EventJdbcRep
     private static final String LIQUIBASE_EVENT_STORE_DB_CHANGELOG_XML = "liquibase/event-store-db-changelog.xml";
     private final static ZonedDateTime TIMESTAMP = new UtcClock().now();
 
-
-    public EventJdbcRepositoryIT() {
-        super(LIQUIBASE_EVENT_STORE_DB_CHANGELOG_XML);
-    }
+    private final EventJdbcRepository jdbcRepository = new EventJdbcRepository();
 
     @Before
-    public void initializeDependencies() throws Exception {
-        jdbcRepository = new EventJdbcRepository();
-        jdbcRepository.logger = LOGGER;
-        jdbcRepository.eventInsertionStrategy = new AnsiSQLEventLogInsertionStrategy();
-        registerDataSource();
+    public void initialize() {
+        try {
+            jdbcRepository.dataSource = new TestDataSourceFactory(LIQUIBASE_EVENT_STORE_DB_CHANGELOG_XML).createDataSource();
+            jdbcRepository.logger = mock(Logger.class);
+            jdbcRepository.eventInsertionStrategy = new AnsiSQLEventLogInsertionStrategy();
+            jdbcRepository.jdbcRepositoryHelper = new JdbcRepositoryHelper();
+
+            final Poller poller = new Poller();
+
+            poller.pollUntilFound(() -> {
+                try {
+                    jdbcRepository.dataSource.getConnection().prepareStatement("SELECT COUNT (*) FROM event_log;").execute();
+                    return Optional.of("Success");
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    fail("EventJdbcRepository construction failed");
+                    return Optional.empty();
+                }
+            });
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail("EventJdbcRepository construction failed");
+        }
+    }
+
+    @After
+    public void after() throws SQLException {
+        jdbcRepository.dataSource.getConnection().close();
     }
 
     @Test
@@ -125,6 +148,7 @@ public class EventJdbcRepositoryIT extends AbstractJdbcRepositoryIT<EventJdbcRep
 
     @Test
     public void shouldReturnStreamOfStreamIds() throws Exception {
+
         final UUID streamId1 = randomUUID();
         final UUID streamId2 = randomUUID();
         final UUID streamId3 = randomUUID();

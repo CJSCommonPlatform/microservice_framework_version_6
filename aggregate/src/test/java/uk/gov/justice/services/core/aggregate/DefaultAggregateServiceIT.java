@@ -1,5 +1,6 @@
 package uk.gov.justice.services.core.aggregate;
 
+import static java.lang.String.format;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -30,6 +31,7 @@ import uk.gov.justice.services.eventsourcing.repository.jdbc.EventInsertionStrat
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.JdbcEventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventConverter;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepository;
 import uk.gov.justice.services.eventsourcing.source.core.DefaultEventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EnvelopeEventStream;
 import uk.gov.justice.services.eventsourcing.source.core.EventAppender;
@@ -38,13 +40,20 @@ import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.EventStreamManager;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.jdbc.persistence.AbstractJdbcRepository;
+import uk.gov.justice.services.jdbc.persistence.JdbcDataSourceProvider;
+import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
+import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
-import uk.gov.justice.services.repository.OpenEjbAwareEventJdbcRepository;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.event.OpenEjbAwareEventJdbcRepository;
 import uk.gov.justice.services.repository.OpenEjbAwareEventStreamJdbcRepository;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -53,6 +62,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.jms.Destination;
+import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
 import liquibase.Liquibase;
@@ -73,6 +83,7 @@ public class DefaultAggregateServiceIT {
     private static final UUID STREAM_ID = randomUUID();
 
     private static final String LIQUIBASE_EVENT_STORE_CHANGELOG_XML = "liquibase/event-store-db-changelog.xml";
+    private static final String SQL_EVENT_LOG_COUNT_BY_STREAM_ID = "SELECT count(*) FROM event_log WHERE stream_id=? ";
 
     @Resource(name = "openejb/Resource/eventStore")
     private DataSource dataSource;
@@ -82,9 +93,6 @@ public class DefaultAggregateServiceIT {
 
     @Inject
     private DefaultAggregateService aggregateService;
-
-    @Inject
-    private OpenEjbAwareEventJdbcRepository eventRepository;
 
     @Inject
     private OpenEjbAwareEventStreamJdbcRepository eventStreamRepository;
@@ -105,6 +113,10 @@ public class DefaultAggregateServiceIT {
 
             DefaultAggregateService.class,
             OpenEjbAwareEventStreamJdbcRepository.class,
+            EventJdbcRepository.class,
+            JdbcRepositoryHelper.class,
+            JdbcDataSourceProvider.class,
+
 
             DefaultEventSource.class,
             EnvelopeEventStream.class,
@@ -126,7 +138,7 @@ public class DefaultAggregateServiceIT {
 
             DefaultFileSystemUrlResolverStrategy.class
 
-    })
+            })
 
     public WebApp war() {
         return new WebApp()
@@ -136,6 +148,8 @@ public class DefaultAggregateServiceIT {
 
     @Before
     public void init() throws Exception {
+        final InitialContext initialContext = new InitialContext();
+        initialContext.bind("java:/app/DefaultAggregateServiceIT/DS.eventstore", dataSource);
         initDatabase();
     }
 
@@ -165,7 +179,7 @@ public class DefaultAggregateServiceIT {
         assertThat(aggregate, notNullValue());
         assertThat(aggregate.recordedEvents(), hasSize(1));
         assertThat(aggregate.recordedEvents().get(0).getClass(), equalTo(EventA.class));
-        assertThat(eventRepository.eventCount(STREAM_ID), is(1));
+        assertThat(eventCount(STREAM_ID), is(1));
         assertThat(eventStreamRepository.eventStreamCount(STREAM_ID), is(1));
     }
 
@@ -187,7 +201,7 @@ public class DefaultAggregateServiceIT {
         assertThat(aggregate.recordedEvents(), hasSize(2));
         assertThat(aggregate.recordedEvents().get(0).getClass(), equalTo(EventA.class));
         assertThat(aggregate.recordedEvents().get(1).getClass(), equalTo(EventB.class));
-        assertThat(eventRepository.eventCount(STREAM_ID), is(2));
+        assertThat(eventCount(STREAM_ID), is(2));
         assertThat(eventStreamRepository.eventStreamCount(STREAM_ID), is(1));
 
     }
@@ -215,7 +229,7 @@ public class DefaultAggregateServiceIT {
 
     private void initDatabase() throws Exception {
 
-        Liquibase snapshotLiquidBase = new Liquibase(LIQUIBASE_EVENT_STORE_CHANGELOG_XML,
+        final Liquibase snapshotLiquidBase = new Liquibase(LIQUIBASE_EVENT_STORE_CHANGELOG_XML,
                 new ClassLoaderResourceAccessor(), new JdbcConnection(dataSource.getConnection()));
         snapshotLiquidBase.dropAll();
         snapshotLiquidBase.update("");
@@ -234,7 +248,7 @@ public class DefaultAggregateServiceIT {
     public static class DummyJmsEventPublisher implements EventPublisher {
 
         @Override
-        public void publish(JsonEnvelope envelope) {
+        public void publish(final JsonEnvelope envelope) {
 
         }
 
@@ -244,14 +258,33 @@ public class DefaultAggregateServiceIT {
     public static class DummyJmsEnvelopeSender implements JmsEnvelopeSender {
 
         @Override
-        public void send(JsonEnvelope envelope, Destination destination) {
+        public void send(final JsonEnvelope envelope, final Destination destination) {
 
         }
 
         @Override
-        public void send(JsonEnvelope envelope, String destinationName) {
+        public void send(final JsonEnvelope envelope, final String destinationName) {
 
         }
+    }
+
+
+    private int eventCount(final UUID streamId) {
+
+        try (final Connection connection = dataSource.getConnection();
+             final PreparedStatement preparedStatement = connection.prepareStatement(SQL_EVENT_LOG_COUNT_BY_STREAM_ID)) {
+            preparedStatement.setObject(1, streamId);
+
+            try (final ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt(1);
+                }
+                return 0;
+            }
+        } catch (final SQLException e) {
+            throw new JdbcRepositoryException(format("Exception getting count of event log entries for %s", streamId), e);
+        }
+
     }
 
     @ApplicationScoped

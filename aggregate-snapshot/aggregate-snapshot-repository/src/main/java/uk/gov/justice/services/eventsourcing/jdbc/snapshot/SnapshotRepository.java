@@ -1,4 +1,4 @@
-package uk.gov.justice.services.eventsourcing.jdbc.snapshot.jdbc.snapshot;
+package uk.gov.justice.services.eventsourcing.jdbc.snapshot;
 
 
 import uk.gov.justice.domain.aggregate.Aggregate;
@@ -15,9 +15,9 @@ public interface SnapshotRepository {
     /**
      * Store snapshot.
      *
-     * @param AggregateSnapshot the aggregate snapshot
+     * @param aggregateSnapshot the aggregate snapshot
      */
-    void storeSnapshot(final AggregateSnapshot AggregateSnapshot);
+    void storeSnapshot(final AggregateSnapshot aggregateSnapshot);
 
     /**
      * Gets latest snapshot.

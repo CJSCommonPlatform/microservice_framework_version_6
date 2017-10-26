@@ -52,6 +52,8 @@ import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.event.buffer.api.AbstractEventFilter;
 import uk.gov.justice.services.event.buffer.api.AllowAllEventFilter;
 import uk.gov.justice.services.event.buffer.core.service.ConsecutiveEventBufferService;
+import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
+import uk.gov.justice.services.jdbc.persistence.ViewStoreJdbcDataSourceProvider;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
@@ -69,6 +71,7 @@ import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;
 import javax.inject.Inject;
+import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
 import liquibase.Liquibase;
@@ -138,8 +141,6 @@ public class EventBufferAndFilterChainIT {
             DispatcherCache.class,
             PolicyEvaluator.class,
 
-            StreamBufferOpenEjbAwareJdbcRepository.class,
-            StreamStatusOpenEjbAwareJdbcRepository.class,
             ConsecutiveEventBufferService.class,
             AnsiSQLBufferInitialisationStrategyProducer.class,
             EventBufferInterceptor.class,
@@ -156,7 +157,11 @@ public class EventBufferAndFilterChainIT {
 
             DefaultJsonSchemaValidator.class,
             JsonSchemaLoader.class,
-            DefaultTraceLogger.class
+            DefaultTraceLogger.class,
+            JdbcRepositoryHelper.class,
+            ViewStoreJdbcDataSourceProvider.class,
+            StreamBufferOpenEjbAwareJdbcRepository.class,
+            StreamStatusOpenEjbAwareJdbcRepository.class
     })
     public WebApp war() {
         return new WebApp()
@@ -166,6 +171,8 @@ public class EventBufferAndFilterChainIT {
 
     @Before
     public void init() throws Exception {
+        InitialContext initialContext = new InitialContext();
+        initialContext.bind("java:/DS.EventBufferAndFilterChainIT", dataSource);
         initDatabase();
     }
 

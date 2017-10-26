@@ -4,6 +4,8 @@ import static java.util.UUID.randomUUID;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -40,6 +42,7 @@ public class StreamStatusJdbcRepositoryTest {
     public void setUp() throws Exception {
         when(dataSource.getConnection()).thenReturn(connection);
         when(connection.getMetaData()).thenReturn(dbMetadata);
+        repository.jdbcRepositoryHelper = new JdbcRepositoryHelper();
     }
 
     @Test

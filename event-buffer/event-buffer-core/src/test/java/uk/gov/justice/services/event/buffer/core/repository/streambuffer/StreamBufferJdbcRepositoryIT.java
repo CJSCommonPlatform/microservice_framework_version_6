@@ -8,7 +8,8 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertThat;
 
-import uk.gov.justice.services.test.utils.persistence.AbstractJdbcRepositoryIT;
+import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
+import uk.gov.justice.services.test.utils.persistence.TestDataSourceFactory;
 
 import java.util.List;
 import java.util.UUID;
@@ -17,18 +18,20 @@ import org.junit.Before;
 import org.junit.Test;
 
 
-public class StreamBufferJdbcRepositoryIT extends AbstractJdbcRepositoryIT<StreamBufferJdbcRepository> {
+public class StreamBufferJdbcRepositoryIT  {
+
     private static final String LIQUIBASE_STREAM_STATUS_CHANGELOG_XML = "liquibase/event-buffer-changelog.xml";
 
-    public StreamBufferJdbcRepositoryIT() {
-        super(LIQUIBASE_STREAM_STATUS_CHANGELOG_XML);
-    }
+    private TestDataSourceFactory testDataSourceFactory;
+
+    private StreamBufferJdbcRepository jdbcRepository;
 
     @Before
-    public void initializeDependencies() throws Exception {
-        jdbcRepository = new StreamBufferJdbcRepository();
-        registerDataSource();
+    public void initDatabase() throws Exception {
+        testDataSourceFactory = new TestDataSourceFactory(LIQUIBASE_STREAM_STATUS_CHANGELOG_XML);
+        jdbcRepository = new StreamBufferJdbcRepository(testDataSourceFactory.createDataSource(), new JdbcRepositoryHelper());
     }
+
 
     @Test
     public void shouldInsertAndReturnStreamOfdEvents() {

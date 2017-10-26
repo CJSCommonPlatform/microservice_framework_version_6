@@ -27,6 +27,7 @@ import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.fail;
+import static uk.gov.justice.services.event.buffer.core.repository.streamstatus.StandaloneStreamStatusJdbcRepositoryFactory.getSnapshotStreamStatusJdbcRepository;
 import static uk.gov.justice.services.eventsourcing.jdbc.snapshot.StandaloneSnapshotJdbcRepositoryFactory.getSnapshotJdbcRepository;
 import static uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventRepositoryFactory.getEventJdbcRepository;
 import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
@@ -36,6 +37,7 @@ import uk.gov.justice.domain.snapshot.DefaultObjectInputStreamStrategy;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.aggregate.exception.AggregateChangeDetectedException;
 import uk.gov.justice.services.event.buffer.core.repository.streamstatus.StreamStatus;
+import uk.gov.justice.services.event.buffer.core.repository.streamstatus.StreamStatusJdbcRepository;
 import uk.gov.justice.services.eventsourcing.jdbc.snapshot.SnapshotJdbcRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.Event;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepository;
@@ -129,7 +131,7 @@ public class CakeShopIT {
     private static final TestProperties TEST_PROPERTIES = new TestProperties("test.properties");
 
     private static EventJdbcRepository EVENT_LOG_REPOSITORY;
-    private static StandaloneStreamStatusJdbcRepository STREAM_STATUS_REPOSITORY;
+    private static StreamStatusJdbcRepository STREAM_STATUS_REPOSITORY;
     private static SnapshotJdbcRepository SNAPSHOT_REPOSITORY;
     private static ActiveMQConnectionFactory JMS_CONNECTION_FACTORY;
     private static DataSource CAKE_SHOP_DS;
@@ -145,7 +147,7 @@ public class CakeShopIT {
         JMS_CONNECTION_FACTORY = new ActiveMQConnectionFactory(JMS_BROKER_URL);
 
         final DataSource viewStoreDatasource = initViewStoreDb();
-        STREAM_STATUS_REPOSITORY = new StandaloneStreamStatusJdbcRepository(viewStoreDatasource);
+        STREAM_STATUS_REPOSITORY = getSnapshotStreamStatusJdbcRepository(viewStoreDatasource);
         SNAPSHOT_REPOSITORY = getSnapshotJdbcRepository(eventStoreDataSource);
 
         initFileServiceDb();

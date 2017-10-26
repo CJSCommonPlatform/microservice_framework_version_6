@@ -6,6 +6,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 import static uk.gov.justice.services.core.interceptor.DefaultInterceptorContext.interceptorContextWithInput;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
@@ -18,8 +19,6 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.components.event.listener.interceptors.EventBufferInterceptor;
 import uk.gov.justice.services.components.event.listener.interceptors.it.util.buffer.AnsiSQLBufferInitialisationStrategyProducer;
-import uk.gov.justice.services.components.event.listener.interceptors.it.util.repository.StreamBufferOpenEjbAwareJdbcRepository;
-import uk.gov.justice.services.components.event.listener.interceptors.it.util.repository.StreamStatusOpenEjbAwareJdbcRepository;
 import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
 import uk.gov.justice.services.core.accesscontrol.AllowAllPolicyEvaluator;
 import uk.gov.justice.services.core.accesscontrol.DefaultAccessControlService;
@@ -49,8 +48,12 @@ import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.requester.RequesterProducer;
 import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.event.buffer.core.repository.streambuffer.StreamBufferEvent;
+import uk.gov.justice.services.event.buffer.core.repository.streambuffer.StreamBufferJdbcRepository;
 import uk.gov.justice.services.event.buffer.core.repository.streamstatus.StreamStatus;
+import uk.gov.justice.services.event.buffer.core.repository.streamstatus.StreamStatusJdbcRepository;
 import uk.gov.justice.services.event.buffer.core.service.ConsecutiveEventBufferService;
+import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
+import uk.gov.justice.services.jdbc.persistence.ViewStoreJdbcDataSourceProvider;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
@@ -65,9 +68,13 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.UUID;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.naming.InitialContext;
+import javax.naming.NameClassPair;
+import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
@@ -101,10 +108,25 @@ public class EventBufferIT {
     private AbcEventHandler abcEventHandler;
 
     @Inject
-    private StreamBufferOpenEjbAwareJdbcRepository jdbcStreamBufferRepository;
+    private StreamBufferJdbcRepository jdbcStreamBufferRepository;
 
     @Inject
-    private StreamStatusOpenEjbAwareJdbcRepository statusRepository;
+    private StreamStatusJdbcRepository statusRepository;
+
+    @Before
+    public void setup() throws Exception {
+        InitialContext initialContext = new InitialContext();
+        initialContext.bind("java:/DS.EventBufferIT", dataSource);
+        initDatabase();
+    }
+
+    @Configuration
+    public Properties configuration() {
+        return OpenEjbConfigurationBuilder.createOpenEjbConfigurationBuilder()
+                .addInitialContext()
+                .addh2ViewStore()
+                .build();
+    }
 
     @Module
     @Classes(cdi = true, value = {
@@ -135,8 +157,6 @@ public class EventBufferIT {
             DispatcherCache.class,
             PolicyEvaluator.class,
 
-            StreamBufferOpenEjbAwareJdbcRepository.class,
-            StreamStatusOpenEjbAwareJdbcRepository.class,
             ConsecutiveEventBufferService.class,
             AnsiSQLBufferInitialisationStrategyProducer.class,
             LoggerProducer.class,
@@ -151,27 +171,19 @@ public class EventBufferIT {
             EnvelopeValidationExceptionHandlerProducer.class,
             DefaultJsonSchemaValidator.class,
             JsonSchemaLoader.class,
-            DefaultTraceLogger.class
-
+            DefaultTraceLogger.class,
+            JdbcRepositoryHelper.class,
+            ViewStoreJdbcDataSourceProvider.class,
+            StreamBufferJdbcRepository.class,
+            StreamStatusJdbcRepository.class
     })
+
     public WebApp war() {
         return new WebApp()
                 .contextRoot("core-test")
                 .addServlet("TestApp", Application.class.getName());
     }
 
-    @Before
-    public void init() throws Exception {
-        initDatabase();
-    }
-
-    @Configuration
-    public Properties configuration() {
-        return OpenEjbConfigurationBuilder.createOpenEjbConfigurationBuilder()
-                .addInitialContext()
-                .addh2ViewStore()
-                .build();
-    }
 
 
     //Uncomment below to test when deplpoyed to the vagrant vm

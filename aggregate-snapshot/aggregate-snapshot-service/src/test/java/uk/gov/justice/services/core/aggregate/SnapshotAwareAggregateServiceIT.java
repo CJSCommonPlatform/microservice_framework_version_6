@@ -5,6 +5,7 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static uk.gov.justice.services.core.h2.OpenEjbConfigurationBuilder.createOpenEjbConfigurationBuilder;
@@ -20,7 +21,6 @@ import uk.gov.justice.domain.event.EventA;
 import uk.gov.justice.domain.snapshot.AggregateSnapshot;
 import uk.gov.justice.domain.snapshot.DefaultObjectInputStreamStrategy;
 import uk.gov.justice.domain.snapshot.ObjectInputStreamStrategy;
-import uk.gov.justice.repository.OpenEjbAwareEventStreamJdbcRepository;
 import uk.gov.justice.services.common.configuration.GlobalValueProducer;
 import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
 import uk.gov.justice.services.common.configuration.ValueProducer;
@@ -41,6 +41,7 @@ import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.JdbcEventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventConverter;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepository;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepository;
 import uk.gov.justice.services.eventsourcing.source.core.EventAppender;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.EventStreamManager;
@@ -85,15 +86,12 @@ import org.apache.openejb.testing.Application;
 import org.apache.openejb.testing.Configuration;
 import org.apache.openejb.testing.Module;
 import org.hamcrest.Matchers;
-import org.hamcrest.core.IsNot;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(ApplicationComposer.class)
 public class SnapshotAwareAggregateServiceIT {
-
-    private static final UUID STREAM_ID = randomUUID();
 
     private static final String LIQUIBASE_EVENT_STORE_CHANGELOG_XML = "liquibase/event-store-db-changelog.xml";
 
@@ -112,6 +110,7 @@ public class SnapshotAwareAggregateServiceIT {
     private static final String TYPE = TEST_AGGREGATE_PACKAGE + ".TestAggregate";
 
     private static final String SQL_EVENT_LOG_COUNT_BY_STREAM_ID = "SELECT count(*) FROM event_log WHERE stream_id=? ";
+    private static final String SQL_EVENT_STREAM_COUNT_BY_STREAM_ID = "SELECT count(*) FROM event_stream WHERE stream_id=? ";
 
     private static final long SNAPSHOT_THRESHOLD = 25L;
 
@@ -131,9 +130,6 @@ public class SnapshotAwareAggregateServiceIT {
     private DefaultAggregateService defaultAggregateService;
 
     @Inject
-    private OpenEjbAwareEventStreamJdbcRepository eventStreamJdbcRepository;
-
-    @Inject
     private Clock clock;
 
     @Inject
@@ -148,8 +144,8 @@ public class SnapshotAwareAggregateServiceIT {
             SnapshotJdbcRepository.class,
             JdbcDataSourceProvider.class,
 
-            OpenEjbAwareEventStreamJdbcRepository.class,
             JdbcEventRepository.class,
+            EventStreamJdbcRepository.class,
             EventRepository.class,
             TestEventInsertionStrategyProducer.class,
             EventJdbcRepository.class,
@@ -209,35 +205,37 @@ public class SnapshotAwareAggregateServiceIT {
     @Test
     public void shouldStoreABrandNewSnapshotWhenEventCountInTheStreamReachesThreshold() throws Exception {
 
-        appendEventsViaAggregate(SNAPSHOT_THRESHOLD);
+        final UUID streamId = randomUUID();
+        appendEventsViaAggregate(streamId, SNAPSHOT_THRESHOLD);
 
-        final Optional<AggregateSnapshot<TestAggregate>> snapshot = snapshotRepository.getLatestSnapshot(STREAM_ID, TestAggregate.class);
+        final Optional<AggregateSnapshot<TestAggregate>> snapshot = snapshotRepository.getLatestSnapshot(streamId, TestAggregate.class);
 
         final TestAggregate aggregateFromSnapshot = snapshot.get().getAggregate(new DefaultObjectInputStreamStrategy());
 
-        assertThat(snapshot, IsNot.not(nullValue()));
+        assertThat(snapshot, not(nullValue()));
         assertThat(snapshot.isPresent(), equalTo(true));
         assertThat(snapshot.get().getType(), equalTo(TYPE));
-        assertThat(snapshot.get().getStreamId(), equalTo(STREAM_ID));
+        assertThat(snapshot.get().getStreamId(), equalTo(streamId));
         assertThat(snapshot.get().getVersionId(), equalTo(25L));
 
-        assertThat(eventCount(STREAM_ID), is(25));
+        assertThat(rowCount(SQL_EVENT_LOG_COUNT_BY_STREAM_ID, streamId), is(25));
         assertThat(aggregateFromSnapshot.numberOfAppliedEvents(), is(25));
         assertThat(aggregateFromSnapshot.recordedEvents().size(), is(25));
-        assertThat(eventStreamJdbcRepository.eventStreamCount(STREAM_ID), is(1));
+        assertThat(rowCount(SQL_EVENT_STREAM_COUNT_BY_STREAM_ID, streamId), is(1));
     }
 
     @Test
     public void shouldNotStoreABrandNewSnapshotWhenEventCountInTheStreamReachesThresholdNotMet() throws Exception {
 
-        appendEventsViaAggregate(SNAPSHOT_THRESHOLD - 2);
+        final UUID streamId = randomUUID();
+        appendEventsViaAggregate(streamId, SNAPSHOT_THRESHOLD - 2);
 
-        final Optional<AggregateSnapshot<TestAggregate>> snapshot = snapshotRepository.getLatestSnapshot(STREAM_ID, TestAggregate.class);
+        final Optional<AggregateSnapshot<TestAggregate>> snapshot = snapshotRepository.getLatestSnapshot(streamId, TestAggregate.class);
 
-        assertThat(snapshot, IsNot.not(nullValue()));
+        assertThat(snapshot, not(nullValue()));
         assertThat(snapshot.isPresent(), equalTo(false));
-        assertThat(eventCount(STREAM_ID), is(23));
-        assertThat(eventStreamJdbcRepository.eventStreamCount(STREAM_ID), is(1));
+        assertThat(rowCount(SQL_EVENT_LOG_COUNT_BY_STREAM_ID, streamId), is(23));
+        assertThat(rowCount(SQL_EVENT_STREAM_COUNT_BY_STREAM_ID, streamId), is(1));
     }
 
     @Test
@@ -245,122 +243,128 @@ public class SnapshotAwareAggregateServiceIT {
 
         final Class aggregateClass = TestAggregate.class;
 
-        appendEventsViaAggregate(SNAPSHOT_THRESHOLD);
+        final UUID streamId = randomUUID();
+        appendEventsViaAggregate(streamId, SNAPSHOT_THRESHOLD);
 
-        final Optional<AggregateSnapshot> snapshot = snapshotRepository.getLatestSnapshot(STREAM_ID, aggregateClass);
+        final Optional<AggregateSnapshot> snapshot = snapshotRepository.getLatestSnapshot(streamId, aggregateClass);
 
-        assertThat(snapshot, IsNot.not(nullValue()));
+        assertThat(snapshot, not(nullValue()));
         assertThat(snapshot.isPresent(), equalTo(true));
 
-        final EventStream updatedStream = eventSource.getStreamById(STREAM_ID);
-        appendEventsViaAggregate(SNAPSHOT_THRESHOLD - 2);
+        final EventStream updatedStream = eventSource.getStreamById(streamId);
+        appendEventsViaAggregate(streamId, SNAPSHOT_THRESHOLD - 2);
 
-        final Optional<AggregateSnapshot<TestAggregate>> snapshotChanged = snapshotRepository.getLatestSnapshot(STREAM_ID, aggregateClass);
-        assertThat(snapshotChanged, IsNot.not(nullValue()));
+        final Optional<AggregateSnapshot<TestAggregate>> snapshotChanged = snapshotRepository.getLatestSnapshot(streamId, aggregateClass);
+        assertThat(snapshotChanged, not(nullValue()));
         assertThat(snapshotChanged.isPresent(), equalTo(true));
         assertThat(snapshotChanged.get().getType(), equalTo(aggregateClass.getName()));
-        assertThat(snapshotChanged.get().getStreamId(), equalTo(STREAM_ID));
+        assertThat(snapshotChanged.get().getStreamId(), equalTo(streamId));
         assertThat(snapshotChanged.get().getVersionId(), equalTo(25L));
 
-        assertThat(eventCount(STREAM_ID), is(48));
-        TestAggregate aggregateFromSnapshot = snapshotChanged.get().getAggregate(new DefaultObjectInputStreamStrategy());
+        assertThat(rowCount(SQL_EVENT_LOG_COUNT_BY_STREAM_ID, streamId), is(48));
+        final TestAggregate aggregateFromSnapshot = snapshotChanged.get().getAggregate(new DefaultObjectInputStreamStrategy());
         assertThat(aggregateFromSnapshot.numberOfAppliedEvents(), is(25));
-        assertThat(eventStreamJdbcRepository.eventStreamCount(STREAM_ID), is(1));
+        assertThat(rowCount(SQL_EVENT_STREAM_COUNT_BY_STREAM_ID, streamId), is(1));
     }
 
     @Test
     public void shouldCreateNewSnapshotOnAggregateChangeWhenWeHaveMultipleExistingSnapshots() throws Exception {
 
         final Class aggregateClass = TestAggregate.class;
+        final UUID streamId = randomUUID();
 
         final long initialNumberOfSnapshots = 4;
         for (int i = 0; i < initialNumberOfSnapshots; i++) {
-            appendEventsViaAggregate(SNAPSHOT_THRESHOLD);
+            appendEventsViaAggregate(streamId, SNAPSHOT_THRESHOLD);
         }
 
-        final Optional<AggregateSnapshot> snapshot = snapshotRepository.getLatestSnapshot(STREAM_ID, aggregateClass);
+        final Optional<AggregateSnapshot> snapshot = snapshotRepository.getLatestSnapshot(streamId, aggregateClass);
 
-        assertThat(snapshot, IsNot.not(nullValue()));
+        assertThat(snapshot, not(nullValue()));
         assertThat(snapshot.isPresent(), equalTo(true));
 
 
-        appendEventsViaAggregate(SNAPSHOT_THRESHOLD - 2);
+        appendEventsViaAggregate(streamId, SNAPSHOT_THRESHOLD - 2);
 
 
-        final Optional<AggregateSnapshot> newSnapshot = snapshotRepository.getLatestSnapshot(STREAM_ID, aggregateClass);
-        assertThat(newSnapshot, IsNot.not(nullValue()));
+        final Optional<AggregateSnapshot> newSnapshot = snapshotRepository.getLatestSnapshot(streamId, aggregateClass);
+        assertThat(newSnapshot, not(nullValue()));
         assertThat(newSnapshot.isPresent(), equalTo(true));
         assertThat(newSnapshot.get().getType(), equalTo(aggregateClass.getName()));
-        assertThat(newSnapshot.get().getStreamId(), equalTo(STREAM_ID));
+        assertThat(newSnapshot.get().getStreamId(), equalTo(streamId));
         assertThat(newSnapshot.get().getVersionId(), equalTo(initialNumberOfSnapshots * SNAPSHOT_THRESHOLD));
-        assertThat(eventCount(STREAM_ID), is(123));
+        assertThat(rowCount(SQL_EVENT_LOG_COUNT_BY_STREAM_ID, streamId), is(123));
         TestAggregate aggregateFromSnapshot2 = (TestAggregate) newSnapshot.get().getAggregate(new DefaultObjectInputStreamStrategy());
         assertThat(aggregateFromSnapshot2.numberOfAppliedEvents(), is(100));
-        assertThat(eventStreamJdbcRepository.eventStreamCount(STREAM_ID), is(1));
+        assertThat(rowCount(SQL_EVENT_STREAM_COUNT_BY_STREAM_ID, streamId), is(1));
     }
 
     @Test
     public void shouldNotStoreABrandNewSnapshotWhenStrategyDoesNotMandateSavingSnapshot() throws Exception {
 
-        final EventStream stream = eventSource.getStreamById(STREAM_ID);
+        final UUID streamId = randomUUID();
+        final EventStream stream = eventSource.getStreamById(streamId);
 
         final TestAggregate aggregate = aggregateService.get(stream, TestAggregate.class);
-        stream.append(createEventAndApply(24, aggregate));
+        stream.append(createEventAndApply(streamId, 24, aggregate));
 
 
-        final Optional<AggregateSnapshot<TestAggregate>> snapshot = snapshotRepository.getLatestSnapshot(STREAM_ID, TestAggregate.class);
-        assertThat(snapshot, IsNot.not(Matchers.nullValue()));
+        final Optional<AggregateSnapshot<TestAggregate>> snapshot = snapshotRepository.getLatestSnapshot(streamId, TestAggregate.class);
+        assertThat(snapshot, not(nullValue()));
         assertThat(snapshot.isPresent(), equalTo(false));
 
-        assertThat(eventCount(STREAM_ID), is(24));
-        assertThat(eventStreamJdbcRepository.eventStreamCount(STREAM_ID), is(1));
+        assertThat(rowCount(SQL_EVENT_LOG_COUNT_BY_STREAM_ID, streamId), is(24));
+        assertThat(rowCount(SQL_EVENT_STREAM_COUNT_BY_STREAM_ID, streamId), is(1));
     }
 
     @Test
     public void shouldNotStoreANewSnapshotOnTopOfExistingSnapshotsWhenThresholdNotMet() throws Exception {
 
-        appendEventsViaAggregate(SNAPSHOT_THRESHOLD);
+        final UUID streamId = randomUUID();
+        appendEventsViaAggregate(streamId, SNAPSHOT_THRESHOLD);
 
-        final EventStream stream = eventSource.getStreamById(STREAM_ID);
+        final EventStream stream = eventSource.getStreamById(streamId);
         final TestAggregate aggregate = aggregateService.get(stream, TestAggregate.class);
-        stream.append(createEventAndApply(SNAPSHOT_THRESHOLD - 2, aggregate));
+        stream.append(createEventAndApply(streamId, SNAPSHOT_THRESHOLD - 2, aggregate));
 
-        final Optional<AggregateSnapshot<TestAggregate>> snapshot = snapshotRepository.getLatestSnapshot(STREAM_ID, TestAggregate.class);
+        final Optional<AggregateSnapshot<TestAggregate>> snapshot = snapshotRepository.getLatestSnapshot(streamId, TestAggregate.class);
         assertThat(snapshot, notNullValue());
         assertThat(snapshot.isPresent(), equalTo(true));
         assertThat(snapshot.get().getType(), equalTo(TYPE));
-        assertThat(snapshot.get().getStreamId(), equalTo(STREAM_ID));
+        assertThat(snapshot.get().getStreamId(), equalTo(streamId));
         assertThat(snapshot.get().getVersionId(), equalTo(25L));
-        assertThat(eventCount(STREAM_ID), is(48));
+        assertThat(rowCount(SQL_EVENT_LOG_COUNT_BY_STREAM_ID, streamId), is(48));
 
         TestAggregate aggregateFromSnapshot = snapshot.get().getAggregate(new DefaultObjectInputStreamStrategy());
         assertThat(aggregateFromSnapshot.numberOfAppliedEvents(), is(25));
-        assertThat(eventStreamJdbcRepository.eventStreamCount(STREAM_ID), is(1));
+        assertThat(rowCount(SQL_EVENT_STREAM_COUNT_BY_STREAM_ID, streamId), is(1));
     }
 
     @Test
     public void shouldStoreANewSnapshotOnTopOfExistingSnapshot() throws Exception {
 
-        appendEventsViaAggregate(SNAPSHOT_THRESHOLD);
+        final UUID streamId = randomUUID();
+        appendEventsViaAggregate(streamId, SNAPSHOT_THRESHOLD);
 
-        appendEventsViaAggregate(SNAPSHOT_THRESHOLD);
+        appendEventsViaAggregate(streamId, SNAPSHOT_THRESHOLD);
 
-        final Optional<AggregateSnapshot<TestAggregate>> snapshot = snapshotRepository.getLatestSnapshot(STREAM_ID, TestAggregate.class);
-        assertThat(snapshot, IsNot.not(Matchers.nullValue()));
+        final Optional<AggregateSnapshot<TestAggregate>> snapshot = snapshotRepository.getLatestSnapshot(streamId, TestAggregate.class);
+        assertThat(snapshot, not(nullValue()));
         assertThat(snapshot.isPresent(), equalTo(true));
         assertThat(snapshot.get().getType(), equalTo(TYPE));
-        assertThat(snapshot.get().getStreamId(), equalTo(STREAM_ID));
+        assertThat(snapshot.get().getStreamId(), equalTo(streamId));
         assertThat(snapshot.get().getVersionId(), equalTo(50L));
-        assertThat(eventCount(STREAM_ID), is(50));
+        assertThat(rowCount(SQL_EVENT_LOG_COUNT_BY_STREAM_ID, streamId), is(50));
 
         TestAggregate aggregateFromSnapshot = snapshot.get().getAggregate(new DefaultObjectInputStreamStrategy());
         assertThat(aggregateFromSnapshot.numberOfAppliedEvents(), is(50));
-        assertThat(eventStreamJdbcRepository.eventStreamCount(STREAM_ID), is(1));
+        assertThat(rowCount(SQL_EVENT_STREAM_COUNT_BY_STREAM_ID, streamId), is(1));
     }
 
     @Test
     public void shouldRebuildSnapshotOnAggregateModelChange() throws Exception {
 
+        final UUID streamId = randomUUID();
         final DynamicAggregateTestClassGenerator classGenerator = new DynamicAggregateTestClassGenerator();
 
         final Class oldAggregateClass = classGenerator.generatedTestAggregateClassOf(1L, TEST_AGGREGATE_PACKAGE, TEST_AGGREGATE_CLASS_NAME);
@@ -368,14 +372,14 @@ public class SnapshotAwareAggregateServiceIT {
         final long initialNumberOfSnapshots = 4;
 
         for (int i = 1; i <= initialNumberOfSnapshots; i++) {
-            createEventStreamAndApply(SNAPSHOT_THRESHOLD, "context.eventA", oldAggregateClass);
+            createEventStreamAndApply(streamId, SNAPSHOT_THRESHOLD, "context.eventA", oldAggregateClass);
         }
 
-        final Optional<AggregateSnapshot> snapshot = snapshotRepository.getLatestSnapshot(STREAM_ID, oldAggregateClass);
+        final Optional<AggregateSnapshot> snapshot = snapshotRepository.getLatestSnapshot(streamId, oldAggregateClass);
 
-        assertThat(snapshot, IsNot.not(Matchers.nullValue()));
+        assertThat(snapshot, not(nullValue()));
         assertThat(snapshot.isPresent(), equalTo(true));
-        assertThat(eventCount(STREAM_ID), is(100));
+        assertThat(rowCount(SQL_EVENT_LOG_COUNT_BY_STREAM_ID, streamId), is(100));
 
 
         final Class newAggregateClass = classGenerator.generatedTestAggregateClassOf(2L, TEST_AGGREGATE_PACKAGE, TEST_AGGREGATE_CLASS_NAME);
@@ -383,16 +387,16 @@ public class SnapshotAwareAggregateServiceIT {
         snapshotService.setStreamStrategy(
                 new CustomClassLoaderObjectInputStreamStrategy(classLoaderWithGeneratedAggregateLoaded()));
 
-        createEventStreamAndApply(SNAPSHOT_THRESHOLD - 2, "context.eventA", newAggregateClass);
+        createEventStreamAndApply(streamId, SNAPSHOT_THRESHOLD - 2, "context.eventA", newAggregateClass);
 
-        final Optional<AggregateSnapshot> newSnapshot = snapshotRepository.getLatestSnapshot(STREAM_ID, newAggregateClass);
-        assertThat(newSnapshot, IsNot.not(Matchers.nullValue()));
+        final Optional<AggregateSnapshot> newSnapshot = snapshotRepository.getLatestSnapshot(streamId, newAggregateClass);
+        assertThat(newSnapshot, not(nullValue()));
         assertThat(newSnapshot.isPresent(), equalTo(true));
         assertThat(newSnapshot.get().getType(), equalTo(newAggregateClass.getName()));
-        assertThat(newSnapshot.get().getStreamId(), equalTo(STREAM_ID));
+        assertThat(newSnapshot.get().getStreamId(), equalTo(streamId));
         assertThat(newSnapshot.get().getVersionId(), equalTo(123L));
-        assertThat(eventCount(STREAM_ID), is(123));
-        assertThat(eventStreamJdbcRepository.eventStreamCount(STREAM_ID), is(1));
+        assertThat(rowCount(SQL_EVENT_LOG_COUNT_BY_STREAM_ID, streamId), is(123));
+        assertThat(rowCount(SQL_EVENT_STREAM_COUNT_BY_STREAM_ID, streamId), is(1));
     }
 
     private void initEventDatabase() throws Exception {
@@ -416,20 +420,20 @@ public class SnapshotAwareAggregateServiceIT {
         return classLoader;
     }
 
-    private void appendEventsViaAggregate(final long eventCount) throws Exception {
+    private void appendEventsViaAggregate(final UUID streamId, final long eventCount) throws Exception {
 
-        final EventStream eventStream = eventSource.getStreamById(STREAM_ID);
+        final EventStream eventStream = eventSource.getStreamById(streamId);
         TestAggregate aggregateRebuilt = aggregateService.get(eventStream, TestAggregate.class);
-        eventStream.append(createEventAndApply(eventCount, aggregateRebuilt));
+        eventStream.append(createEventAndApply(streamId, eventCount, aggregateRebuilt));
     }
 
-    private Stream<JsonEnvelope> createEventAndApply(final long count, final TestAggregate aggregate) {
+    private Stream<JsonEnvelope> createEventAndApply(final UUID streamId, final long count, final TestAggregate aggregate) {
         final List<JsonEnvelope> envelopes = new LinkedList<>();
         for (int i = 1; i <= count; i++) {
             final JsonEnvelope envelope = envelope()
                     .with(metadataWithRandomUUID("context.eventA")
                             .createdAt(clock.now())
-                            .withStreamId(STREAM_ID))
+                            .withStreamId(streamId))
                     .withPayloadOf("value", "name")
                     .build();
             aggregate.addEvent(envelope);
@@ -438,9 +442,9 @@ public class SnapshotAwareAggregateServiceIT {
         return envelopes.stream();
     }
 
-    private <T extends Aggregate> void createEventStreamAndApply(final long count, final String eventName, final Class<T> aggregateClass) throws EventStreamException {
+    private <T extends Aggregate> void createEventStreamAndApply(final UUID streamId, final long count, final String eventName, final Class<T> aggregateClass) throws EventStreamException {
 
-        final EventStream eventStream = eventSource.getStreamById(STREAM_ID);
+        final EventStream eventStream = eventSource.getStreamById(streamId);
         final T aggregate = aggregateService.get(eventStream, aggregateClass);
 
         final List<JsonEnvelope> envelopes = new LinkedList<>();
@@ -450,7 +454,7 @@ public class SnapshotAwareAggregateServiceIT {
             final JsonEnvelope envelope = envelope()
                     .with(metadataWithRandomUUID(eventName)
                             .createdAt(clock.now())
-                            .withStreamId(STREAM_ID))
+                            .withStreamId(streamId))
                     .withPayloadOf("value", "name")
                     .build();
 
@@ -460,11 +464,13 @@ public class SnapshotAwareAggregateServiceIT {
         eventStream.append(envelopes.stream());
     }
 
-    private int eventCount(final UUID streamId) {
+
+
+    private int rowCount(final String sql, final Object arg) {
 
         try (final Connection connection = dataSource.getConnection();
-             final PreparedStatement preparedStatement = connection.prepareStatement(SQL_EVENT_LOG_COUNT_BY_STREAM_ID)) {
-            preparedStatement.setObject(1, streamId);
+             final PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setObject(1, arg);
 
             try (final ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
@@ -473,7 +479,7 @@ public class SnapshotAwareAggregateServiceIT {
                 return 0;
             }
         } catch (final SQLException e) {
-            throw new JdbcRepositoryException(format("Exception getting count of event log entries for %s", streamId), e);
+            throw new JdbcRepositoryException(format("Exception getting count of entries from [%s] for  [%s]", sql, arg), e);
         }
 
     }

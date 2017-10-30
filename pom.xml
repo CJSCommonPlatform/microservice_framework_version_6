@@ -47,12 +47,12 @@
 
     <properties>
         <h2.version>1.3.173</h2.version>
-        <common-bom.version>1.18.0</common-bom.version>
-        <embedded-artemis.version>1.1.0</embedded-artemis.version>
-        <raml-maven-plugin.version>1.6.0</raml-maven-plugin.version>
-        <file.service.version>1.12.0</file.service.version>
-        <utilities.version>1.9.0</utilities.version>
-        <test-utils.version>1.10.0</test-utils.version>
+        <common-bom.version>1.21.0</common-bom.version>
+        <embedded-artemis.version>1.2.0</embedded-artemis.version>
+        <raml-maven-plugin.version>1.6.1</raml-maven-plugin.version>
+        <file.service.version>1.13.0</file.service.version>
+        <utilities.version>1.10.0</utilities.version>
+        <test-utils.version>1.13.0</test-utils.version>
         <jboss-ejb3-ext-api.version>2.2.0.Final</jboss-ejb3-ext-api.version>
         <cpp.repo.name>microservice_framework</cpp.repo.name>
     </properties>

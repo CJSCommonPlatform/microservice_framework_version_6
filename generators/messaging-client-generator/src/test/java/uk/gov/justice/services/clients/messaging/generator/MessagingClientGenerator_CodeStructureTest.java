@@ -15,8 +15,8 @@ import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
-import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
-import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.methodsOf;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.firstMethodOf;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.methodsOf;
 
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -24,6 +24,7 @@ import uk.gov.justice.services.core.annotation.Remote;
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
+import uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -192,7 +193,7 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_CONTROLLER")));
 
         final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCommandController2EventProcessorMessageContextCakeshopControllerCommand");
-        final Method method = firstMethodOf(clazz);
+        final Method method = firstMethodOf(clazz).get();
         assertThat(method.getParameterCount(), is(1));
         assertThat(method.getParameters()[0].getType(), equalTo(JsonEnvelope.class));
     }

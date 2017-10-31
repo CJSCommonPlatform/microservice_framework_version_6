@@ -6,15 +6,15 @@ import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
-import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
-import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.setField;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.firstMethodOf;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
-import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
 import uk.gov.justice.services.messaging.logging.TraceLogger;
+import uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil;
 
 import java.lang.reflect.Method;
 
@@ -51,7 +51,7 @@ public class MessagingClientGenerator_MethodBodyTest extends BaseGeneratorTest {
         setField(instance, "traceLogger", mock(TraceLogger.class));
 
         JsonEnvelope envelope = envelope().build();
-        Method method = firstMethodOf(generatedClass);
+        Method method = firstMethodOf(generatedClass).get();
         method.invoke(instance, envelope);
 
         verify(sender).send(envelope, "cakeshop.controller.command");

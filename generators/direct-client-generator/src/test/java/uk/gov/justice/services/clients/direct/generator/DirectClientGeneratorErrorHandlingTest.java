@@ -120,5 +120,4 @@ public class DirectClientGeneratorErrorHandlingTest extends BaseGeneratorTest {
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
     }
-
 }

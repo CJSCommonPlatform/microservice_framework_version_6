@@ -11,7 +11,6 @@ import java.util.Map;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import javax.json.JsonValue;
 
 class JsonObjectBuilderWrapper {
 

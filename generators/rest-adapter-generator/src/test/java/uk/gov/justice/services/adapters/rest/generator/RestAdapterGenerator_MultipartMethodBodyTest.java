@@ -13,10 +13,9 @@ import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBu
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.mapping;
 import static uk.gov.justice.services.generators.test.utils.builder.MimeTypeBuilder.multipartWithFileFormParameter;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithCommandApiDefaults;
-import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
-import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.firstMethodOf;
 
 import uk.gov.justice.services.adapter.rest.multipart.FileInputDetails;
 
@@ -63,7 +62,7 @@ public class RestAdapterGenerator_MultipartMethodBodyTest extends BaseRestAdapte
         when(restProcessor.process(anyString(), any(Function.class), anyString(), any(HttpHeaders.class),
                 any(Collection.class), any(List.class))).thenReturn(processorResponse);
 
-        final Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass).get();
 
         final Object result = method.invoke(resourceObject, mock(MultipartFormDataInput.class));
 

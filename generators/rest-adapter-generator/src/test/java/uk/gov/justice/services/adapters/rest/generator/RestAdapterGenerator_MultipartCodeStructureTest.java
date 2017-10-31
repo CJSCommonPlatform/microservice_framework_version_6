@@ -17,9 +17,10 @@ import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
-import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.methodsOf;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.methodsOf;
 
 import uk.gov.justice.services.adapter.rest.multipart.FileInputDetailsFactory;
+import uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

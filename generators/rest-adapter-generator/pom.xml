@@ -116,6 +116,12 @@
             <artifactId>json-path-assert</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.utils</groupId>
+            <artifactId>test-utils-core</artifactId>
+            <version>${test-utils.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

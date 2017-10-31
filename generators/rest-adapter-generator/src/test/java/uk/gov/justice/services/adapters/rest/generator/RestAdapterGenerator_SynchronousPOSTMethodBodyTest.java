@@ -1,5 +1,7 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.firstMethodOf;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.methodsOf;
 import static java.util.Collections.emptyMap;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -11,7 +13,6 @@ import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBu
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithCommandApiDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
-import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -45,7 +46,7 @@ public class RestAdapterGenerator_SynchronousPOSTMethodBodyTest extends BaseRest
         final Response processorResponse = Response.ok().build();
         when(restProcessor.process(anyString(), any(Function.class), anyString(), any(Optional.class), any(HttpHeaders.class), any(Collection.class))).thenReturn(processorResponse);
 
-        final Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass).get();
 
         final Object result = method.invoke(resourceObject, NOT_USED_JSONOBJECT);
 

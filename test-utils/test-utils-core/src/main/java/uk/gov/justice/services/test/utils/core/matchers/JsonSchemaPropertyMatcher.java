@@ -1,5 +1,13 @@
 package uk.gov.justice.services.test.utils.core.matchers;
 
+import static com.google.common.base.Charsets.UTF_8;
+import static java.lang.String.format;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.Optional;
+
 import com.google.common.base.Strings;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
@@ -13,14 +21,6 @@ import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.Optional;
-
-import static com.google.common.base.Charsets.UTF_8;
-import static java.lang.String.format;
 
 public class JsonSchemaPropertyMatcher {
 

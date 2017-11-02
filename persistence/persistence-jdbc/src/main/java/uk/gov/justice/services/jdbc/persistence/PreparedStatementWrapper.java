@@ -7,7 +7,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Deque;
 import java.util.LinkedList;
-import java.util.List;
 
 public class PreparedStatementWrapper implements AutoCloseable {
     private final PreparedStatement preparedStatement;

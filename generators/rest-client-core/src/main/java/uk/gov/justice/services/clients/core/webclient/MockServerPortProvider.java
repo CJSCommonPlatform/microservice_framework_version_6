@@ -4,7 +4,6 @@ import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 
 import uk.gov.justice.services.clients.core.EndpointDefinition;
-import uk.gov.justice.services.clients.core.webclient.ContextMatcher;
 
 import java.util.Optional;
 

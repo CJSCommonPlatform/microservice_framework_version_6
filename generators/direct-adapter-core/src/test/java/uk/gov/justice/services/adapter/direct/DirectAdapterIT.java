@@ -22,14 +22,13 @@ import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandlerProducer;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.extension.ServiceComponentScanner;
-import uk.gov.justice.services.core.interceptor.Interceptor;
 import uk.gov.justice.services.core.interceptor.InterceptorCache;
+import uk.gov.justice.services.core.interceptor.InterceptorChainEntry;
+import uk.gov.justice.services.core.interceptor.InterceptorChainEntryProvider;
 import uk.gov.justice.services.core.interceptor.InterceptorChainObserver;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
-import uk.gov.justice.services.core.interceptor.InterceptorChainProvider;
 import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
 import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
-
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.requester.RequesterProducer;
 import uk.gov.justice.services.core.sender.SenderProducer;
@@ -50,8 +49,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.openejb.jee.Application;
 import org.apache.openejb.jee.WebApp;
 import org.apache.openejb.junit.ApplicationComposer;
@@ -150,7 +147,7 @@ public class DirectAdapterIT {
     }
 
     @ApplicationScoped
-    public static class TestQueryApiInterceptorChainProvider implements InterceptorChainProvider {
+    public static class TestQueryApiInterceptorChainProvider implements InterceptorChainEntryProvider {
 
         @Override
         public String component() {
@@ -158,9 +155,9 @@ public class DirectAdapterIT {
         }
 
         @Override
-        public List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes() {
-            final List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes = new LinkedList<>();
-            interceptorChainTypes.add(new ImmutablePair<>(1, EnvelopeRecordingInterceptor.class));
+        public List<InterceptorChainEntry> interceptorChainTypes() {
+            final List<InterceptorChainEntry> interceptorChainTypes = new LinkedList<>();
+            interceptorChainTypes.add(new InterceptorChainEntry(1, EnvelopeRecordingInterceptor.class));
             return interceptorChainTypes;
         }
     }

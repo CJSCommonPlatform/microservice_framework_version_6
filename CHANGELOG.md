@@ -11,6 +11,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 - MetadataBuilderFactory in test-utils-core which contains convenience methods for creating 
 JsonObjectMetadataBuilders in tests
 - Record new events stream into event_stream table in Event Store
+- InterceptorChainEntryProvider to be used instead of InterceptorChainProvider
 
 ## [2.3.2] - 2017-10-17
 
@@ -23,6 +24,7 @@ Replaced the JsonObjectObfuscator with the version from utilities that is based 
 - Deprecate DefaultJsonEnvelope, JsonObjectBuilderWrapper and JsonObjectMetadata
 - Deprecate JavaCompilerUtil
 - Utilities library upgraded to 1.8.1 and file service to 1.11.1 to pick up JSON logging fix
+- Deprecate InterceptorChainProvider
 
 ### Removed 
 - org.apache.commons commons-lang3 dependency from core

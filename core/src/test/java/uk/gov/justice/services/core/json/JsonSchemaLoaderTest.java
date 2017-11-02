@@ -3,7 +3,6 @@ package uk.gov.justice.services.core.json;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import org.everit.json.schema.Schema;
 import org.junit.Rule;

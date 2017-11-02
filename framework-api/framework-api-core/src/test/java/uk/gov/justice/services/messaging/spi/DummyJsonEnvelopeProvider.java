@@ -3,7 +3,6 @@ package uk.gov.justice.services.messaging.spi;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.justice.services.messaging.MetadataBuilder;
-import uk.gov.justice.services.messaging.spi.JsonEnvelopeProvider;
 
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;

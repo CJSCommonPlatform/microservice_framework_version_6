@@ -5,8 +5,6 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.common.http.DefaultServerPortProvider.DEFAULT_PORT;
 
-import uk.gov.justice.services.common.http.DefaultServerPortProvider;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

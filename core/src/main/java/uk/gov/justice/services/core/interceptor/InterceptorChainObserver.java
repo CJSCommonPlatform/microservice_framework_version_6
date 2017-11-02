@@ -16,8 +16,9 @@ import javax.enterprise.inject.spi.Extension;
 import org.slf4j.Logger;
 
 /**
- * Observes for {@link AfterDeploymentValidation} and adds all {@link InterceptorChainProvider}
- * implementations to the {@link InterceptorCache}
+ * Observes for {@link AfterDeploymentValidation} and adds all {@link InterceptorChainEntryProvider}
+ * and all deprecated {@link InterceptorChainProvider} implementations to the
+ * {@link InterceptorCache}
  */
 public class InterceptorChainObserver implements Extension {
 
@@ -28,6 +29,10 @@ public class InterceptorChainObserver implements Extension {
 
     @SuppressWarnings({"unused"})
     void afterDeploymentValidation(@Observes final AfterDeploymentValidation event, final BeanManager beanManager) {
+        beanManager.getBeans(InterceptorChainEntryProvider.class, AnyLiteral.create()).stream()
+                .peek(this::logInterceptorChainProvider)
+                .forEach(interceptorChainProviderBeans::add);
+
         beanManager.getBeans(InterceptorChainProvider.class, AnyLiteral.create()).stream()
                 .peek(this::logInterceptorChainProvider)
                 .forEach(interceptorChainProviderBeans::add);

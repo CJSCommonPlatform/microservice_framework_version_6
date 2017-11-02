@@ -28,7 +28,31 @@ public class InterceptorChainObserverTest {
     private InterceptorChainObserver interceptorChainObserver;
 
     @Test
-    public void shouldRegisterInterceptorChainProvider() throws Exception {
+    public void shouldRegisterInterceptorChainEntryProvider() throws Exception {
+
+        final BeanManager beanManager = mock(BeanManager.class);
+        final AfterDeploymentValidation event = mock(AfterDeploymentValidation.class);
+
+        final Bean bean_1 = mock(Bean.class);
+        final Bean bean_2 = mock(Bean.class);
+
+        final Set<Bean<?>> beans = new HashSet<>();
+        beans.add(bean_1);
+        beans.add(bean_2);
+
+        when(beanManager.getBeans(eq(InterceptorChainEntryProvider.class), any(AnnotationLiteral.class))).thenReturn(beans);
+        when(bean_1.getBeanClass()).thenReturn(Object.class);
+        when(bean_2.getBeanClass()).thenReturn(Object.class);
+
+        interceptorChainObserver.afterDeploymentValidation(event, beanManager);
+
+        final List<Bean<?>> interceptorBeans = interceptorChainObserver.getInterceptorChainProviderBeans();
+
+        assertThat(interceptorBeans, containsInAnyOrder(bean_1, bean_2));
+    }
+
+    @Test
+    public void shouldRegisterDeprecatedInterceptorChainProvider() throws Exception {
 
         final BeanManager beanManager = mock(BeanManager.class);
         final AfterDeploymentValidation event = mock(AfterDeploymentValidation.class);
@@ -42,6 +66,34 @@ public class InterceptorChainObserverTest {
 
         when(beanManager.getBeans(eq(InterceptorChainProvider.class), any(AnnotationLiteral.class))).thenReturn(beans);
         when(bean_1.getBeanClass()).thenReturn(Object.class);
+        when(bean_2.getBeanClass()).thenReturn(Object.class);
+
+        interceptorChainObserver.afterDeploymentValidation(event, beanManager);
+
+        final List<Bean<?>> interceptorBeans = interceptorChainObserver.getInterceptorChainProviderBeans();
+
+        assertThat(interceptorBeans, containsInAnyOrder(bean_1, bean_2));
+    }
+
+    @Test
+    public void shouldRegisterBothTypesOfInterceptorChainProvider() throws Exception {
+
+        final BeanManager beanManager = mock(BeanManager.class);
+        final AfterDeploymentValidation event = mock(AfterDeploymentValidation.class);
+
+        final Bean bean_1 = mock(Bean.class);
+        final Bean bean_2 = mock(Bean.class);
+
+        final Set<Bean<?>> interceptorChainEntryProviderBeans = new HashSet<>();
+        interceptorChainEntryProviderBeans.add(bean_1);
+
+        final Set<Bean<?>> interceptorChainProviderBeans = new HashSet<>();
+        interceptorChainProviderBeans.add(bean_2);
+
+        when(beanManager.getBeans(eq(InterceptorChainEntryProvider.class), any(AnnotationLiteral.class))).thenReturn(interceptorChainEntryProviderBeans);
+        when(bean_1.getBeanClass()).thenReturn(Object.class);
+
+        when(beanManager.getBeans(eq(InterceptorChainProvider.class), any(AnnotationLiteral.class))).thenReturn(interceptorChainProviderBeans);
         when(bean_2.getBeanClass()).thenReturn(Object.class);
 
         interceptorChainObserver.afterDeploymentValidation(event, beanManager);

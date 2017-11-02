@@ -5,16 +5,12 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
-import uk.gov.justice.services.core.accesscontrol.LocalAccessControlInterceptor;
-import uk.gov.justice.services.core.audit.LocalAuditInterceptor;
-import uk.gov.justice.services.core.interceptor.Interceptor;
+import uk.gov.justice.services.core.interceptor.InterceptorChainEntry;
 import uk.gov.justice.services.metrics.interceptor.IndividualActionMetricsInterceptor;
 import uk.gov.justice.services.metrics.interceptor.TotalActionMetricsInterceptor;
 
 import java.util.List;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 
 public class EventListenerInterceptorChainProviderTest {
@@ -27,12 +23,12 @@ public class EventListenerInterceptorChainProviderTest {
     @Test
     @SuppressWarnings("unchecked")
     public void shouldProvideDefaultInterceptorChainTypes() throws Exception {
-        final List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes = new EventListenerInterceptorChainProvider().interceptorChainTypes();
+        final List<InterceptorChainEntry> interceptorChainTypes = new EventListenerInterceptorChainProvider().interceptorChainTypes();
 
         assertThat(interceptorChainTypes, containsInAnyOrder(
-                new ImmutablePair<>(1, TotalActionMetricsInterceptor.class),
-                new ImmutablePair<>(2, IndividualActionMetricsInterceptor.class),
-                new ImmutablePair<>(1000, EventBufferInterceptor.class),
-                new ImmutablePair<>(2000, EventFilterInterceptor.class)));
+                new InterceptorChainEntry(1, TotalActionMetricsInterceptor.class),
+                new InterceptorChainEntry(2, IndividualActionMetricsInterceptor.class),
+                new InterceptorChainEntry(1000, EventBufferInterceptor.class),
+                new InterceptorChainEntry(2000, EventFilterInterceptor.class)));
     }
 }

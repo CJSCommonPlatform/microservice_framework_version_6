@@ -4,8 +4,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 import uk.gov.justice.services.core.handler.registry.HandlerRegistry;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import org.slf4j.Logger;
 
 public class DispatcherFactory {

@@ -6,8 +6,8 @@ import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
-import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
-import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.setField;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.firstMethodOf;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -48,16 +48,16 @@ public class MessagingClientGenerator_MethodBodyTest extends BaseGeneratorTest {
         final Object instance = instanceOf(generatedClass);
         setField(instance, "traceLogger", mock(TraceLogger.class));
 
-        JsonEnvelope envelope = mock(JsonEnvelope.class);
-        Method method = firstMethodOf(generatedClass);
+        final JsonEnvelope envelope = mock(JsonEnvelope.class);
+        final Method method = firstMethodOf(generatedClass).get();
         method.invoke(instance, envelope);
 
         verify(sender).send(envelope, "cakeshop.controller.command");
 
     }
 
-    private Object instanceOf(Class<?> resourceClass) throws InstantiationException, IllegalAccessException {
-        Object resourceObject = resourceClass.newInstance();
+    private Object instanceOf(final Class<?> resourceClass) throws InstantiationException, IllegalAccessException {
+        final Object resourceObject = resourceClass.newInstance();
         setField(resourceObject, "sender", sender);
         return resourceObject;
     }

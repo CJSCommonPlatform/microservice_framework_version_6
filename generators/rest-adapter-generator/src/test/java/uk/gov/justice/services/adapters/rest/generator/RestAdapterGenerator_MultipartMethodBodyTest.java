@@ -15,9 +15,7 @@ import static uk.gov.justice.services.generators.test.utils.builder.MimeTypeBuil
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithCommandApiDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
-import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
-
-import uk.gov.justice.services.adapter.rest.multipart.FileInputDetails;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.firstMethodOf;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -28,17 +26,9 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
-import org.jboss.resteasy.plugins.providers.multipart.MultipartInput;
 import org.junit.Test;
-import org.mockito.Mock;
 
 public class RestAdapterGenerator_MultipartMethodBodyTest extends BaseRestAdapterGeneratorTest {
-
-    @Mock
-    private List<FileInputDetails> fileInputDetails;
-
-    @Mock
-    private MultipartInput multipartInput;
 
     @SuppressWarnings("unchecked")
     @Test
@@ -62,7 +52,7 @@ public class RestAdapterGenerator_MultipartMethodBodyTest extends BaseRestAdapte
         when(restProcessor.process(anyString(), any(Function.class), anyString(), any(HttpHeaders.class),
                 any(Collection.class), any(List.class))).thenReturn(processorResponse);
 
-        final Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass).get();
 
         final Object result = method.invoke(resourceObject, mock(MultipartFormDataInput.class));
 

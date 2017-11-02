@@ -27,9 +27,9 @@ import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
-import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
-import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.methodsOf;
-import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.setField;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.firstMethodOf;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.methodsOf;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
 import uk.gov.justice.raml.core.Generator;
 import uk.gov.justice.raml.core.GeneratorConfig;
@@ -250,7 +250,7 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
         final Object instance = generatedClass.newInstance();
         setField(instance, "traceLogger", new DefaultTraceLogger());
 
-        final Method method = firstMethodOf(generatedClass);
+        final Method method = firstMethodOf(generatedClass).get();
         final Object result = method.invoke(instance, mock(JsonEnvelope.class));
         assertThat(result, is(12345678));
     }

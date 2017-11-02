@@ -31,8 +31,8 @@ import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
-import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
-import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.setField;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.firstMethodOf;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
 import uk.gov.justice.services.adapter.rest.exception.BadRequestException;
 import uk.gov.justice.services.adapter.rest.mapping.ActionMapperHelper;
@@ -80,7 +80,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         final Response processorResponse = Response.ok().build();
         when(restProcessor.process(anyString(), any(Function.class), anyString(), any(HttpHeaders.class), any(Collection.class))).thenReturn(processorResponse);
 
-        final Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass).get();
 
         final Object result = method.invoke(resourceObject);
 
@@ -101,7 +101,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
         final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultQueryApiPathResource");
         final Object resourceObject = getInstanceOf(resourceClass);
 
-        final Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass).get();
 
         method.invoke(resourceObject);
 
@@ -128,7 +128,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultQueryApiPath2Resource");
 
-        firstMethodOf(resourceClass).invoke(getInstanceOf(resourceClass));
+        firstMethodOf(resourceClass).get().invoke(getInstanceOf(resourceClass));
 
         verify(restProcessor).process(eq("OkStatusEnvelopePayloadEntityResponseStrategy"), any(Function.class), anyString(), any(HttpHeaders.class), any(Collection.class));
 
@@ -147,7 +147,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultQueryControllerPathResource");
 
-        firstMethodOf(resourceClass).invoke(getInstanceOf(resourceClass));
+        firstMethodOf(resourceClass).get().invoke(getInstanceOf(resourceClass));
 
         verify(restProcessor).process(eq("OkStatusEnvelopeEntityResponseStrategy"), any(Function.class), anyString(), any(HttpHeaders.class), any(Collection.class));
 
@@ -171,7 +171,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultQueryApiSomePathResource");
 
-        firstMethodOf(resourceClass).invoke(getInstanceOf(resourceClass));
+        firstMethodOf(resourceClass).get().invoke(getInstanceOf(resourceClass));
 
         verify(restProcessor).process(eq("FileStreamReturningResponseStrategy"), any(Function.class), anyString(), any(HttpHeaders.class), any(Collection.class));
 
@@ -195,7 +195,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         setField(resourceObject, "headers", headers);
 
-        final Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass).get();
         method.invoke(resourceObject);
 
         verify(restProcessor).process(anyString(), any(Function.class), anyString(), eq(headers), any(Collection.class));
@@ -233,7 +233,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         setField(resourceObject, "headers", headersWith("Accept", "application/vnd.ctx.query.somemediatype1+json"));
 
-        final Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass).get();
         method.invoke(resourceObject);
 
 
@@ -265,7 +265,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         setField(resourceObject, "headers", headersWith("Accept", "application/vnd.ctx.query.mediatype1+json"));
 
-        final Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass).get();
         method.invoke(resourceObject);
 
 
@@ -288,7 +288,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         final Object resourceObject = getInstanceOf(resourceClass);
 
-        final Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass).get();
         method.invoke(resourceObject, "paramValue1234");
 
         final ArgumentCaptor<Collection> pathParamsCaptor = ArgumentCaptor.forClass(Collection.class);
@@ -318,7 +318,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         final Object resourceObject = getInstanceOf(resourceClass);
 
-        final Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass).get();
         method.invoke(resourceObject, "paramValueABC", "paramValueDEF");
 
         final ArgumentCaptor<Collection> pathParamsCaptor = ArgumentCaptor.forClass(Collection.class);
@@ -351,7 +351,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         final Object resourceObject = getInstanceOf(resourceClass);
 
-        final Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass).get();
         method.invoke(resourceObject, "paramValue1234");
 
         final ArgumentCaptor<Collection> queryParamsCaptor = ArgumentCaptor.forClass(Collection.class);
@@ -386,7 +386,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         final Object resourceObject = getInstanceOf(resourceClass);
 
-        final Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass).get();
 
         boolean queryParam1IsFirstMethodParameter = method.getParameters()[0].getName().equals("queryParam1");
         if (queryParam1IsFirstMethodParameter) {
@@ -428,7 +428,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         final Object resourceObject = getInstanceOf(resourceClass);
 
-        final Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass).get();
 
         method.invoke(resourceObject, "false");
 
@@ -463,7 +463,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         final Object resourceObject = getInstanceOf(resourceClass);
 
-        final Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass).get();
         method.invoke(resourceObject, "paramValueABC", "paramValueDEF");
 
         final ArgumentCaptor<Collection> paramsCaptor = ArgumentCaptor.forClass(Collection.class);
@@ -498,7 +498,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         final Object resourceObject = getInstanceOf(resourceClass);
 
-        final Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass).get();
 
         boolean queryParam1IsFirstMethodParameter = method.getParameters()[0].getName().equals("queryParam1");
         if (queryParam1IsFirstMethodParameter) {
@@ -540,7 +540,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
         final Object resourceObject = getInstanceOf(resourceClass);
 
-        final Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass).get();
 
         method.invoke(resourceObject, NULL_STRING_VALUE);
     }

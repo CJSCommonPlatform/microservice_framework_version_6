@@ -19,7 +19,7 @@ import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
-import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.methodOf;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.methodOf;
 
 import uk.gov.justice.services.adapter.rest.mapping.ActionMapperHelper;
 import uk.gov.justice.services.adapter.rest.mapping.BasicActionMapperHelper;
@@ -64,7 +64,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
 
         final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultQueryApiUserResourceActionMapper");
         final Object mapperObject = mapperClass.getConstructor(ActionMapperHelper.class).newInstance(new BasicActionMapperHelper());
-        final Method actionMethod = methodOf(mapperClass, "actionOf");
+        final Method actionMethod = methodOf(mapperClass, "actionOf").get();
 
         Object action = actionMethod.invoke(mapperObject, "getUser", "GET",
                 headersWith("Accept", "application/vnd.ctx.query.somemediatype1+json"));
@@ -98,7 +98,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
 
         final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultQueryApiStatusResourceActionMapper");
         final Object mapperObject = mapperClass.getConstructor(ActionMapperHelper.class).newInstance(new BasicActionMapperHelper());
-        final Method actionMethod = methodOf(mapperClass, "actionOf");
+        final Method actionMethod = methodOf(mapperClass, "actionOf").get();
 
         final Object action = actionMethod.invoke(mapperObject, "getStatus", "GET",
                 headersWith("Accept", "application/vnd.ctx.query.mediatype1+json"));
@@ -126,7 +126,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
 
         final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCommandApiCaseResourceActionMapper");
         final Object mapperObject = mapperClass.getConstructor(ActionMapperHelper.class).newInstance(new BasicActionMapperHelper());
-        final Method actionMethod = methodOf(mapperClass, "actionOf");
+        final Method actionMethod = methodOf(mapperClass, "actionOf").get();
 
         Object action = actionMethod.invoke(mapperObject, "postContextBSomeActionCase", "POST",
                 headersWith("Content-Type", "application/vnd.ctx.command.somemediatype1+json"));
@@ -159,7 +159,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
 
         final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCommandApiCaseResourceActionMapper");
         final Object mapperObject = mapperClass.getConstructor(ActionMapperHelper.class).newInstance(new BasicActionMapperHelper());
-        final Method actionMethod = methodOf(mapperClass, "actionOf");
+        final Method actionMethod = methodOf(mapperClass, "actionOf").get();
 
         final Object firstAction = actionMethod.invoke(mapperObject, "putContextBSomeActionCase", "PUT",
                 headersWith("Content-Type", "application/vnd.ctx.command.somemediatype1+json"));
@@ -192,7 +192,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
 
         final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCommandApiCaseResourceActionMapper");
         final Object mapperObject = mapperClass.getConstructor(ActionMapperHelper.class).newInstance(new BasicActionMapperHelper());
-        final Method actionMethod = methodOf(mapperClass, "actionOf");
+        final Method actionMethod = methodOf(mapperClass, "actionOf").get();
 
         final Object firstAction = actionMethod.invoke(mapperObject, "patchContextBSomeActionCase", "PATCH",
                 headersWith("Content-Type", "application/vnd.ctx.command.somemediatype1+json"));
@@ -225,7 +225,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
 
         final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCommandApiCaseResourceActionMapper");
         final Object mapperObject = mapperClass.getConstructor(ActionMapperHelper.class).newInstance(new BasicActionMapperHelper());
-        final Method actionMethod = methodOf(mapperClass, "actionOf");
+        final Method actionMethod = methodOf(mapperClass, "actionOf").get();
 
         final Object firstAction = actionMethod.invoke(mapperObject, "deleteContextBSomeActionCase", "DELETE",
                 headersWith("Content-Type", "application/vnd.ctx.command.somemediatype1+json"));
@@ -258,7 +258,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
 
         final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCommandApiCaseResourceActionMapper");
         final Object mapperObject = mapperClass.getConstructor(ActionMapperHelper.class).newInstance(new BasicActionMapperHelper());
-        final Method actionMethod = methodOf(mapperClass, "actionOf");
+        final Method actionMethod = methodOf(mapperClass, "actionOf").get();
 
         Object action = actionMethod.invoke(mapperObject, "postContextCSomeActionCase", "POST",
                 headersWith("Content-Type", "application/vnd.ctx.command.somemediatype1+json"));
@@ -293,7 +293,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
 
         final Class<?> mapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "DefaultCommandApiCaseResourceActionMapper");
         final Object mapperObject = mapperClass.getConstructor(ActionMapperHelper.class).newInstance(new BasicActionMapperHelper());
-        final Method actionMethod = methodOf(mapperClass, "actionOf");
+        final Method actionMethod = methodOf(mapperClass, "actionOf").get();
 
         Object action = actionMethod.invoke(mapperObject, "postContextCCommandActionCase", "POST",
                 headersWith("Content-Type", "application/vnd.somemediatype1+json"));

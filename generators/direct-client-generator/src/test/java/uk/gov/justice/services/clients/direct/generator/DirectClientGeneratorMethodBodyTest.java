@@ -10,9 +10,9 @@ import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.defaultGetResource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
-import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
-import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.setField;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.firstMethodOf;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
 import uk.gov.justice.services.adapter.direct.SynchronousDirectAdapter;
 import uk.gov.justice.services.adapter.direct.SynchronousDirectAdapterCache;
@@ -87,7 +87,7 @@ public class DirectClientGeneratorMethodBodyTest extends BaseGeneratorTest {
     private Object invokeFirstMethod(Class<?> generatedClass, JsonEnvelope envelope) throws InstantiationException, IllegalAccessException, InvocationTargetException {
         final Object directClient = instanceOf(generatedClass);
 
-        final Method method = firstMethodOf(generatedClass);
+        final Method method = firstMethodOf(generatedClass).get();
         return method.invoke(directClient, envelope);
     }
 

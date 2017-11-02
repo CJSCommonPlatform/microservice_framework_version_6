@@ -1,6 +1,5 @@
 package uk.gov.justice.services.test.utils.persistence;
 
-import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -39,7 +38,7 @@ public class DatabaseCleanerTest {
         when(connection.prepareStatement("DELETE FROM " + table_1)).thenReturn(preparedStatement_1);
         when(connection.prepareStatement("DELETE FROM " + table_2)).thenReturn(preparedStatement_2);
 
-        databaseCleaner.cleanViewStoreTables(contextName, asList(table_1, table_2));
+        databaseCleaner.cleanViewStoreTables(contextName, table_1, table_2);
 
         verify(preparedStatement_1).executeUpdate();
         verify(preparedStatement_2).executeUpdate();
@@ -87,7 +86,7 @@ public class DatabaseCleanerTest {
         when(testJdbcConnectionProvider.getEventStoreConnection(contextName)).thenReturn(connection);
         when(connection.prepareStatement("DELETE FROM " + tableName)).thenReturn(preparedStatement);
 
-        databaseCleaner.cleanEventTable(contextName);
+        databaseCleaner.cleanEventLogTable(contextName);
 
         verify(preparedStatement).executeUpdate();
         verify(connection).close();

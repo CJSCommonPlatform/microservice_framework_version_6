@@ -11,7 +11,7 @@ import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBu
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithCommandApiDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
-import static uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil.firstMethodOf;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.firstMethodOf;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -39,15 +39,15 @@ public class RestAdapterGenerator_SynchronousPUTMethodBodyTest extends BaseRestA
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
-        Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiPathResource");
-        Object resourceObject = getInstanceOf(resourceClass);
+        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiPathResource");
+        final Object resourceObject = getInstanceOf(resourceClass);
 
-        Response processorResponse = Response.ok().build();
+        final Response processorResponse = Response.ok().build();
         when(restProcessor.process(anyString(), any(Function.class), anyString(), any(Optional.class), any(HttpHeaders.class), any(Collection.class))).thenReturn(processorResponse);
 
-        Method method = firstMethodOf(resourceClass);
+        final Method method = firstMethodOf(resourceClass).get();
 
-        Object result = method.invoke(resourceObject, NOT_USED_JSONOBJECT);
+        final Object result = method.invoke(resourceObject, NOT_USED_JSONOBJECT);
 
         assertThat(result, is(processorResponse));
     }

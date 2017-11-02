@@ -26,9 +26,9 @@ import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.defaultPostResource;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
 import uk.gov.justice.services.adapter.rest.application.CommonProviders;
-import uk.gov.justice.services.generators.test.utils.reflection.ReflectionUtil;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -155,7 +155,7 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
         CommonProviders commonProviders = mock(CommonProviders.class);
         when(commonProviders.providers()).thenReturn(newHashSet(JaxRsProviderA.class));
 
-        ReflectionUtil.setField(application, "commonProviders", commonProviders);
+        setField(application, "commonProviders", commonProviders);
 
         Method method = applicationClass.getDeclaredMethod("getClasses");
         Object result = method.invoke(application);
@@ -183,7 +183,7 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
         CommonProviders commonProviders = mock(CommonProviders.class);
         when(commonProviders.providers()).thenReturn(newHashSet(JaxRsProviderA.class, JaxRsProviderB.class));
 
-        ReflectionUtil.setField(application, "commonProviders", commonProviders);
+        setField(application, "commonProviders", commonProviders);
 
         Method method = applicationClass.getDeclaredMethod("getClasses");
         Object result = method.invoke(application);

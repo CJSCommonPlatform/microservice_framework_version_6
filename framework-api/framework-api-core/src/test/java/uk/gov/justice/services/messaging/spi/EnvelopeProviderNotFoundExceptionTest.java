@@ -5,11 +5,11 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
-public class JsonEnvelopeProviderNotFoundExceptionTest {
+public class EnvelopeProviderNotFoundExceptionTest {
 
     @Test
     public void shouldCreateExceptionWithMessage() throws Exception {
-        final JsonEnvelopeProviderNotFoundException exception = new JsonEnvelopeProviderNotFoundException("Test message");
+        final EnvelopeProviderNotFoundException exception = new EnvelopeProviderNotFoundException("Test message");
         assertThat(exception.getMessage(), is("Test message"));
     }
 }

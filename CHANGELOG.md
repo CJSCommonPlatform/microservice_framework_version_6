@@ -5,6 +5,13 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [2.4.1] - 2017-11-06
+
+### Changed
+- Removed duplicated test utilities from test-utils module
+- Use test-utils project version of test utilities
+- Use latest release versions of dependencies to fix OWASP vulnerabilities
+
 ## [2.3.2] - 2017-10-17
 
 ##Changed

@@ -8,7 +8,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.core.IsNull.notNullValue;
-import static uk.gov.justice.services.core.h2.OpenEjbConfigurationBuilder.createOpenEjbConfigurationBuilder;
+import static uk.gov.justice.services.core.h2.OpenEjbConfigurationBuilder.*;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 
@@ -24,7 +24,9 @@ import uk.gov.justice.services.core.aggregate.event.EventA;
 import uk.gov.justice.services.core.aggregate.event.EventB;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.extension.EventFoundEvent;
+import uk.gov.justice.services.core.h2.OpenEjbConfigurationBuilder;
 import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
+
 import uk.gov.justice.services.eventsourcing.publisher.jms.EventPublisher;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventInsertionStrategy;
@@ -32,7 +34,7 @@ import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.JdbcEventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventConverter;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepository;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.event.OpenEjbAwareEventJdbcRepository;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepository;
 import uk.gov.justice.services.eventsourcing.source.core.DefaultEventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EnvelopeEventStream;
 import uk.gov.justice.services.eventsourcing.source.core.EventAppender;
@@ -48,7 +50,6 @@ import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
-import uk.gov.justice.services.repository.OpenEjbAwareEventStreamJdbcRepository;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -86,6 +87,7 @@ public class DefaultAggregateServiceIT {
 
     private static final String LIQUIBASE_EVENT_STORE_CHANGELOG_XML = "liquibase/event-store-db-changelog.xml";
     private static final String SQL_EVENT_LOG_COUNT_BY_STREAM_ID = "SELECT count(*) FROM event_log WHERE stream_id=? ";
+    private static final String SQL_EVENT_STREAM_COUNT_BY_STREAM_ID = "SELECT count(*) FROM event_stream WHERE stream_id=? ";
 
     @Resource(name = "openejb/Resource/eventStore")
     private DataSource dataSource;
@@ -97,10 +99,6 @@ public class DefaultAggregateServiceIT {
     private DefaultAggregateService aggregateService;
 
     @Inject
-    private OpenEjbAwareEventStreamJdbcRepository eventStreamRepository;
-
-
-    @Inject
     private Clock clock;
 
     @Module
@@ -110,15 +108,13 @@ public class DefaultAggregateServiceIT {
             AbstractJdbcRepository.class,
             JdbcEventRepository.class,
             EventRepository.class,
-            OpenEjbAwareEventJdbcRepository.class,
             TestEventInsertionStrategyProducer.class,
 
             DefaultAggregateService.class,
-            OpenEjbAwareEventStreamJdbcRepository.class,
+            EventStreamJdbcRepository.class,
             EventJdbcRepository.class,
             JdbcRepositoryHelper.class,
             JdbcDataSourceProvider.class,
-
 
             DefaultEventSource.class,
             EnvelopeEventStream.class,
@@ -170,7 +166,7 @@ public class DefaultAggregateServiceIT {
 
         assertThat(aggregate, notNullValue());
         assertThat(aggregate.recordedEvents(), empty());
-        assertThat(eventStreamRepository.eventStreamCount(STREAM_ID), is(0));
+        assertThat(rowCount(SQL_EVENT_STREAM_COUNT_BY_STREAM_ID, STREAM_ID), is(0));
     }
 
     @Test
@@ -188,8 +184,8 @@ public class DefaultAggregateServiceIT {
         assertThat(aggregate, notNullValue());
         assertThat(aggregate.recordedEvents(), hasSize(1));
         assertThat(aggregate.recordedEvents().get(0).getClass(), equalTo(EventA.class));
-        assertThat(eventCount(STREAM_ID), is(1));
-        assertThat(eventStreamRepository.eventStreamCount(STREAM_ID), is(1));
+        assertThat(rowCount(SQL_EVENT_LOG_COUNT_BY_STREAM_ID, STREAM_ID), is(1));
+        assertThat(rowCount(SQL_EVENT_STREAM_COUNT_BY_STREAM_ID, STREAM_ID), is(1));
     }
 
     @Test
@@ -210,8 +206,8 @@ public class DefaultAggregateServiceIT {
         assertThat(aggregate.recordedEvents(), hasSize(2));
         assertThat(aggregate.recordedEvents().get(0).getClass(), equalTo(EventA.class));
         assertThat(aggregate.recordedEvents().get(1).getClass(), equalTo(EventB.class));
-        assertThat(eventCount(STREAM_ID), is(2));
-        assertThat(eventStreamRepository.eventStreamCount(STREAM_ID), is(1));
+        assertThat(rowCount(SQL_EVENT_LOG_COUNT_BY_STREAM_ID, STREAM_ID), is(2));
+        assertThat(rowCount(SQL_EVENT_STREAM_COUNT_BY_STREAM_ID, STREAM_ID), is(1));
 
     }
 
@@ -278,11 +274,11 @@ public class DefaultAggregateServiceIT {
     }
 
 
-    private int eventCount(final UUID streamId) {
+    private int rowCount(final String sql, final Object arg) {
 
         try (final Connection connection = dataSource.getConnection();
-             final PreparedStatement preparedStatement = connection.prepareStatement(SQL_EVENT_LOG_COUNT_BY_STREAM_ID)) {
-            preparedStatement.setObject(1, streamId);
+             final PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setObject(1, arg);
 
             try (final ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
@@ -291,7 +287,7 @@ public class DefaultAggregateServiceIT {
                 return 0;
             }
         } catch (final SQLException e) {
-            throw new JdbcRepositoryException(format("Exception getting count of event log entries for %s", streamId), e);
+            throw new JdbcRepositoryException(format("Exception getting count of entries from [%s] for  [%s]", sql, arg), e);
         }
 
     }

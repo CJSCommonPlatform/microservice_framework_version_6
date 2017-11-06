@@ -2,16 +2,23 @@ package uk.gov.justice.services.event.buffer.core.repository.streamstatus;
 
 import static java.lang.String.format;
 
-import uk.gov.justice.services.jdbc.persistence.AbstractViewStoreJdbcRepository;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
+import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
 import uk.gov.justice.services.jdbc.persistence.PreparedStatementWrapper;
+import uk.gov.justice.services.jdbc.persistence.ViewStoreJdbcDataSourceProvider;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
 import java.util.UUID;
 
-public class StreamStatusJdbcRepository extends AbstractViewStoreJdbcRepository<StreamStatus> {
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.sql.DataSource;
+
+@ApplicationScoped
+public class StreamStatusJdbcRepository {
 
     /**
      * Column Names
@@ -27,13 +34,28 @@ public class StreamStatusJdbcRepository extends AbstractViewStoreJdbcRepository<
     private static final String INSERT_ON_CONFLICT_DO_NOTHING = new StringBuilder().append(INSERT).append(" ON CONFLICT DO NOTHING").toString();
     private static final String UPDATE = "UPDATE stream_status SET version=? WHERE stream_id=?";
 
+
+    @Inject
+    JdbcRepositoryHelper jdbcRepositoryHelper;
+
+    @Inject
+    ViewStoreJdbcDataSourceProvider dataSourceProvider;
+
+    DataSource dataSource;
+
+    @PostConstruct
+    private void initialiseDataSource() {
+        dataSource = dataSourceProvider.getDataSource();
+    }
+
+
     /**
      * Insert the given StreamStatus into the stream status table.
      *
      * @param streamStatus the status of the stream to insert
      */
     public void insert(final StreamStatus streamStatus) {
-        try (final PreparedStatementWrapper ps = preparedStatementWrapperOf(INSERT)) {
+        try (final PreparedStatementWrapper ps = jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, INSERT)) {
             executeStatement(ps, streamStatus);
         } catch (SQLException e) {
             throw new JdbcRepositoryException(format("Exception while storing status of the stream: %s", streamStatus), e);
@@ -47,7 +69,7 @@ public class StreamStatusJdbcRepository extends AbstractViewStoreJdbcRepository<
      * @param streamStatus the status of the stream to insert
      */
     public void insertOrDoNothing(final StreamStatus streamStatus) {
-        try (final PreparedStatementWrapper ps = preparedStatementWrapperOf(INSERT_ON_CONFLICT_DO_NOTHING)) {
+        try (final PreparedStatementWrapper ps = jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, INSERT_ON_CONFLICT_DO_NOTHING)) {
             executeStatement(ps, streamStatus);
         } catch (SQLException e) {
             throw new JdbcRepositoryException(format("Exception while storing status of the stream in PostgreSQL: %s", streamStatus), e);
@@ -61,7 +83,7 @@ public class StreamStatusJdbcRepository extends AbstractViewStoreJdbcRepository<
      * @param streamStatus the event to insert
      */
     public void update(final StreamStatus streamStatus) {
-        try (final PreparedStatementWrapper ps = preparedStatementWrapperOf(UPDATE)) {
+        try (final PreparedStatementWrapper ps = jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, UPDATE)) {
             executeStatement(ps, streamStatus);
         } catch (SQLException e) {
             throw new JdbcRepositoryException(format("Exception while updating status of the stream: %s", streamStatus), e);
@@ -76,7 +98,7 @@ public class StreamStatusJdbcRepository extends AbstractViewStoreJdbcRepository<
      */
     public Optional<StreamStatus> findByStreamId(final UUID streamId) {
 
-        try (final PreparedStatementWrapper ps = preparedStatementWrapperOf(SELECT_BY_STREAM_ID)) {
+        try (final PreparedStatementWrapper ps = jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SELECT_BY_STREAM_ID)) {
             ps.setObject(1, streamId);
             return streamStatusFrom(ps);
 
@@ -100,7 +122,7 @@ public class StreamStatusJdbcRepository extends AbstractViewStoreJdbcRepository<
     }
 
 
-    @Override
+
     protected StreamStatus entityFrom(final ResultSet rs) throws SQLException {
         return new StreamStatus((UUID) rs.getObject(PRIMARY_KEY_ID), rs.getLong(COL_VERSION));
     }

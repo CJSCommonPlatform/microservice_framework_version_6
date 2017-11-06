@@ -29,7 +29,7 @@ public class OpenEjbConfigurationBuilderTest {
                 hasEntry("eventStore", "new://Resource?type=DataSource"),
                 hasEntry("eventStore.JdbcDriver", "org.h2.Driver"),
                 hasEntry("eventStore.JdbcUrl", "jdbc:h2:mem:test;MV_STORE=FALSE;MVCC=FALSE"),
-                hasEntry("eventStore.JtaManaged", "false"),
+                hasEntry("eventStore.JtaManaged", "true"),
                 hasEntry("eventStore.UserName", "sa"),
                 hasEntry("eventStore.Password", "sa"),
                 hasEntry("java.naming.factory.initial", "org.apache.openejb.client.LocalInitialContextFactory"))
@@ -58,7 +58,7 @@ public class OpenEjbConfigurationBuilderTest {
                 hasEntry("viewStore", "new://Resource?type=DataSource"),
                 hasEntry("viewStore.JdbcDriver", "org.h2.Driver"),
                 hasEntry("viewStore.JdbcUrl", "jdbc:h2:mem:test;MV_STORE=FALSE;MVCC=FALSE"),
-                hasEntry("viewStore.JtaManaged", "false"),
+                hasEntry("viewStore.JtaManaged", "true"),
                 hasEntry("viewStore.UserName", "sa"),
                 hasEntry("viewStore.Password", "sa"),
                 hasEntry("java.naming.factory.initial", "org.apache.openejb.client.LocalInitialContextFactory"))

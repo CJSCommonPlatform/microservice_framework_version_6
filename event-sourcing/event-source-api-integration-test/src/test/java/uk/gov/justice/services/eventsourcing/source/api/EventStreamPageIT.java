@@ -421,6 +421,7 @@ public class EventStreamPageIT {
     @Test
     public void shouldReturnEmptyFeedIfNoDataAndNoPreviousAndNextLinks() throws IOException {
 
+        eventsRepository.findAll();
         final HttpResponse response = eventsStreamsFor(SYSTEM_USER_ID, "5", BACKWARD, PAGE_SIZE);
 
         assertThat(response.getStatusLine().getStatusCode(), is(OK.getStatusCode()));

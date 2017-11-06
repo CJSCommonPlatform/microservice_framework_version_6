@@ -9,38 +9,63 @@ import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+
+import org.junit.After;
+import org.junit.Assert;
 
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidSequenceIdException;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
-import uk.gov.justice.services.test.utils.persistence.AbstractJdbcRepositoryIT;
+import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
+import uk.gov.justice.services.test.utils.core.messaging.Poller;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class EventStreamJdbcRepositoryIT extends AbstractJdbcRepositoryIT<EventStreamJdbcRepository> {
+import uk.gov.justice.services.test.utils.persistence.TestDataSourceFactory;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EventStreamJdbcRepository.class);
+public class EventStreamJdbcRepositoryIT {
 
     private static final String LIQUIBASE_EVENT_STORE_DB_CHANGELOG_XML = "liquibase/event-store-db-changelog.xml";
 
-    public EventStreamJdbcRepositoryIT() {
-        super(LIQUIBASE_EVENT_STORE_DB_CHANGELOG_XML);
-    }
-
     private static final int PAGE_SIZE = 2;
 
+    private EventStreamJdbcRepository jdbcRepository = new EventStreamJdbcRepository();
+
     @Before
-    public void initializeDependencies() throws Exception {
-        jdbcRepository = new EventStreamJdbcRepository();
-        jdbcRepository.logger = LOGGER;
-        registerDataSource();
+    public void initialize() {
+        try {
+            jdbcRepository.dataSource = new TestDataSourceFactory(LIQUIBASE_EVENT_STORE_DB_CHANGELOG_XML).createDataSource();
+            jdbcRepository.logger = mock(Logger.class);
+            jdbcRepository.eventStreamJdbcRepositoryHelper = new JdbcRepositoryHelper();
+
+            final Poller poller = new Poller();
+
+            poller.pollUntilFound(() -> {
+                try {
+                    jdbcRepository.dataSource.getConnection().prepareStatement("SELECT COUNT (*) FROM event_stream;").execute();
+                    return Optional.of("Success");
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    return Optional.empty();
+                }
+            });
+        } catch (final Exception e) {
+            e.printStackTrace();
+            Assert.fail("EventStreamJdbcRepository construction failed");
+        }
+    }
+
+    @After
+    public void after() throws SQLException {
+        jdbcRepository.dataSource.getConnection().close();
     }
 
     @Test

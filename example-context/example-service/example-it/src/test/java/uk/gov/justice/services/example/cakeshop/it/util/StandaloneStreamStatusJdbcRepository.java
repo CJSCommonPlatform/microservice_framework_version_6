@@ -12,7 +12,6 @@ public class StandaloneStreamStatusJdbcRepository extends StreamStatusJdbcReposi
         this.datasource = datasource;
     }
 
-    @Override
     protected DataSource getDataSource() {
         return datasource;
     }

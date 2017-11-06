@@ -52,7 +52,7 @@ public class OpenEjbConfigurationBuilder {
         configuration.put(dbName, "new://Resource?type=DataSource");
         configuration.put(format("%s.JdbcDriver", dbName), "org.h2.Driver");
         configuration.put(format("%s.JdbcUrl", dbName), "jdbc:h2:mem:test;MV_STORE=FALSE;MVCC=FALSE");
-        configuration.put(format("%s.JtaManaged", dbName), "false");
+        configuration.put(format("%s.JtaManaged", dbName), "true");
         configuration.put(format("%s.UserName", dbName), "sa");
         configuration.put(format("%s.Password", dbName), "sa");
         return this;

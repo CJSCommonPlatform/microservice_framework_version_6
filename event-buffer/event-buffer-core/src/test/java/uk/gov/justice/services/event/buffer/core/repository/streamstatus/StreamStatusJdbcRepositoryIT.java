@@ -6,7 +6,9 @@ import static junit.framework.TestCase.assertTrue;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import uk.gov.justice.services.test.utils.persistence.AbstractJdbcRepositoryIT;
+import uk.gov.justice.services.event.buffer.core.repository.streambuffer.StreamBufferJdbcRepository;
+import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
+import uk.gov.justice.services.test.utils.persistence.TestDataSourceFactory;
 
 import java.sql.SQLException;
 import java.util.Optional;
@@ -18,20 +20,22 @@ import org.junit.Before;
 import org.junit.Test;
 
 
-public class StreamStatusJdbcRepositoryIT extends AbstractJdbcRepositoryIT<StreamStatusJdbcRepository> {
+public class StreamStatusJdbcRepositoryIT {
 
     private static final String LIQUIBASE_STREAM_STATUS_CHANGELOG_XML = "liquibase/event-buffer-changelog.xml";
 
-    public StreamStatusJdbcRepositoryIT() {
-        super(LIQUIBASE_STREAM_STATUS_CHANGELOG_XML);
-    }
+    private TestDataSourceFactory testDataSourceFactory;
 
+    private StreamStatusJdbcRepository jdbcRepository;
 
     @Before
-    public void initializeDependencies() throws Exception {
+    public void initDatabase() throws Exception {
+        testDataSourceFactory = new TestDataSourceFactory(LIQUIBASE_STREAM_STATUS_CHANGELOG_XML);
         jdbcRepository = new StreamStatusJdbcRepository();
-        registerDataSource();
+        jdbcRepository.dataSource = testDataSourceFactory.createDataSource();
+        jdbcRepository.jdbcRepositoryHelper = new JdbcRepositoryHelper();
     }
+
 
     @Test
     public void shouldInsertAndReturnStreamStatus() throws SQLException, NamingException {

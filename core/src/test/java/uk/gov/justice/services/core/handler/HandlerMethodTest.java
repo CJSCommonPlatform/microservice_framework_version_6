@@ -5,7 +5,9 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isA;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,6 +20,7 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.handler.exception.HandlerExecutionException;
 import uk.gov.justice.services.core.handler.registry.exception.InvalidHandlerException;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
+import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.io.IOException;
@@ -31,6 +34,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -44,6 +48,12 @@ public class HandlerMethodTest {
 
     @Mock
     private CheckedExceptionThrowingCommandHandler checkedExcCommandHandler;
+
+    @Spy
+    private AsynchronousPojoCommandHandler asynchronousPojoCommandHandler = new AsynchronousPojoCommandHandler();
+
+    @Spy
+    private SynchronousPojoCommandHandler synchronousPojoCommandHandler = new SynchronousPojoCommandHandler();
 
 
     private JsonEnvelope envelope;
@@ -65,6 +75,22 @@ public class HandlerMethodTest {
         when(synchronousCommandHandler.handles(envelope)).thenReturn(envelope);
         Object result = syncHandlerInstance().execute(envelope);
         assertThat(result, sameInstance(envelope));
+    }
+
+    @Test
+    public void shouldHandlePojoAsynchronously() {
+        Object result = asyncPojoHandlerInstance().execute(envelope);
+        assertThat(result, nullValue());
+    }
+
+    @Test
+    public void shouldHandlePojoSynchronously() {
+        Envelope<TestPojo> result = (Envelope<TestPojo>) syncPojoHandlerInstance().execute(envelope);
+        verify(synchronousPojoCommandHandler).handles(any(Envelope.class));
+        final TestPojo testPojo = result.payload();
+        assertThat(testPojo.getPayloadId(), is("c3f7182b-bd20-4678-ba8b-e7e5ea8629c3"));
+        assertThat(testPojo.getPayloadName(), is("Name of the Payload"));
+        assertThat(testPojo.getPayloadVersion(), is(0L));
     }
 
     @Rule
@@ -137,6 +163,14 @@ public class HandlerMethodTest {
         return new HandlerMethod(asynchronousCommandHandler, method(new AsynchronousCommandHandler(), "handles"), Void.TYPE);
     }
 
+    private HandlerMethod asyncPojoHandlerInstance() {
+        return new HandlerMethod(asynchronousPojoCommandHandler, method(new AsynchronousPojoCommandHandler(), "handles"), Void.TYPE);
+    }
+
+    private HandlerMethod syncPojoHandlerInstance() {
+        return new HandlerMethod(synchronousPojoCommandHandler, method(new SynchronousPojoCommandHandler(), "handles"), Envelope.class);
+    }
+
     private HandlerMethod syncHandlerInstance() {
         return new HandlerMethod(synchronousCommandHandler, method(new SynchronousCommandHandler(), "handles"), JsonEnvelope.class);
     }
@@ -162,6 +196,23 @@ public class HandlerMethodTest {
         @Handles("test-context.command.create-something-else")
         public JsonEnvelope handlesSync(final JsonEnvelope envelope) {
             return envelope;
+        }
+    }
+
+    public static class AsynchronousPojoCommandHandler {
+
+        @Handles("test-context.command.create-something")
+        public void handles(final Envelope<TestPojo> pojo) {
+            assertThat(pojo.payload(), isA(TestPojo.class));
+        }
+    }
+
+    public static class SynchronousPojoCommandHandler {
+
+        @Handles("test-context.command.create-something")
+        public Envelope<TestPojo> handles(final Envelope<TestPojo> pojo) {
+            assertThat(pojo.payload(), isA(TestPojo.class));
+            return pojo;
         }
     }
 
@@ -202,6 +253,4 @@ public class HandlerMethodTest {
             return envelope;
         }
     }
-
-
 }

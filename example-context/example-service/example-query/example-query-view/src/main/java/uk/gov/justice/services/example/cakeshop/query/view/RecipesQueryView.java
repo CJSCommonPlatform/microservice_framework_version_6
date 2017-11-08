@@ -22,23 +22,21 @@ import org.slf4j.Logger;
 @ServiceComponent(Component.QUERY_VIEW)
 public class RecipesQueryView {
 
-    static final String NAME_RESPONSE_RECIPE = "example.get-recipe";
-    static final String NAME_RESPONSE_RECIPE_PHOTO = "example.get-recipe-photograph";
-    static final String NAME_RESPONSE_RECIPE_LIST = "example.search-recipes";
+    private static final String NAME_RESPONSE_RECIPE = "example.get-recipe";
+    private static final String NAME_RESPONSE_RECIPE_PHOTO = "example.get-recipe-photograph";
+    private static final String NAME_RESPONSE_RECIPE_LIST = "example.search-recipes";
+
     private static final Logger LOGGER = getLogger(RecipesQueryView.class);
     private static final String FIELD_RECIPE_ID = "recipeId";
     private static final String FIELD_NAME = "name";
     private static final String PAGESIZE = "pagesize";
     private static final String FIELD_GLUTEN_FREE = "glutenFree";
 
-    private final RecipeService recipeService;
-    private final Enveloper enveloper;
+    @Inject
+    private RecipeService recipeService;
 
     @Inject
-    public RecipesQueryView(RecipeService recipeService, Enveloper enveloper) {
-        this.recipeService = recipeService;
-        this.enveloper = enveloper;
-    }
+    private Enveloper enveloper;
 
     @Handles("example.get-recipe")
     public JsonEnvelope findRecipe(final JsonEnvelope query) {

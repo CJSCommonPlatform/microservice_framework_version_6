@@ -5,6 +5,7 @@ import static uk.gov.justice.services.core.handler.Handlers.handlerMethodsFrom;
 
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.handler.HandlerMethod;
+import uk.gov.justice.services.core.handler.HandlerMethodInvoker;
 import uk.gov.justice.services.core.handler.exception.MissingHandlerException;
 import uk.gov.justice.services.core.handler.registry.exception.DuplicateHandlerException;
 
@@ -21,10 +22,11 @@ import org.slf4j.Logger;
 public class HandlerRegistry {
 
     private final Map<String, HandlerMethod> handlerMethods;
+    private final HandlerMethodInvoker handlerMethodInvoker;
+    private final Logger logger;
 
-    private Logger logger;
-
-    public HandlerRegistry(final Logger logger) {
+    public HandlerRegistry(final HandlerMethodInvoker handlerMethodInvoker, final Logger logger) {
+        this.handlerMethodInvoker = handlerMethodInvoker;
         this.logger = logger;
         handlerMethods = new ConcurrentHashMap<>();
     }
@@ -57,7 +59,7 @@ public class HandlerRegistry {
      */
     private void register(final Object handler, final Method method) {
 
-        final HandlerMethod newHandlerMethod = new HandlerMethod(handler, method, method.getReturnType());
+        final HandlerMethod newHandlerMethod = new HandlerMethod(handler, method, method.getReturnType(), handlerMethodInvoker);
         final String name = method.getAnnotation(Handles.class).value();
         if (isDuplicate(newHandlerMethod, name)) {
             throw new DuplicateHandlerException(

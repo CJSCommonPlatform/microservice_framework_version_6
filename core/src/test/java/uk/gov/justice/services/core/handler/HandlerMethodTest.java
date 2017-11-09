@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.handler.Handlers.handlerMethodsFrom;
 
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.annotation.Direct;
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -55,7 +56,7 @@ public class HandlerMethodTest {
     @Spy
     private SynchronousPojoCommandHandler synchronousPojoCommandHandler = new SynchronousPojoCommandHandler();
 
-
+    private HandlerMethodInvoker handlerMethodInvoker = new HandlerMethodInvoker(new ObjectMapperProducer().objectMapper());
     private JsonEnvelope envelope;
 
     @Before
@@ -84,6 +85,7 @@ public class HandlerMethodTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void shouldHandlePojoSynchronously() {
         Envelope<TestPojo> result = (Envelope<TestPojo>) syncPojoHandlerInstance().execute(envelope);
         verify(synchronousPojoCommandHandler).handles(any(Envelope.class));
@@ -114,7 +116,12 @@ public class HandlerMethodTest {
         expectedException.expect(HandlerExecutionException.class);
         expectedException.expectCause(is(thrownException));
 
-        new HandlerMethod(checkedExcCommandHandler, method(new CheckedExceptionThrowingCommandHandler(), "handles"), JsonEnvelope.class).execute(envelope);
+        new HandlerMethod(
+                checkedExcCommandHandler,
+                method(new CheckedExceptionThrowingCommandHandler(), "handles"),
+                JsonEnvelope.class,
+                handlerMethodInvoker)
+                .execute(envelope);
     }
 
     @Test
@@ -124,55 +131,101 @@ public class HandlerMethodTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionWithNullHandlerInstance() {
-        new HandlerMethod(null, method(new AsynchronousCommandHandler(), "handles"), Void.TYPE);
+        new HandlerMethod(
+                null,
+                method(new AsynchronousCommandHandler(), "handles"),
+                Void.TYPE,
+                handlerMethodInvoker);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionWithNullMethod() {
-        new HandlerMethod(asynchronousCommandHandler, null, Void.TYPE);
+        new HandlerMethod(
+                asynchronousCommandHandler,
+                null,
+                Void.TYPE,
+                handlerMethodInvoker);
     }
 
     @Test(expected = InvalidHandlerException.class)
     public void shouldThrowExceptionWithSynchronousMethod() {
-        new HandlerMethod(asynchronousCommandHandler, method(new AsynchronousCommandHandler(), "handlesSync"), Void.TYPE);
+        new HandlerMethod(
+                asynchronousCommandHandler,
+                method(new AsynchronousCommandHandler(), "handlesSync"),
+                Void.TYPE,
+                handlerMethodInvoker);
     }
 
     @Test(expected = InvalidHandlerException.class)
     public void shouldThrowExceptionWithAsynchronousMethod() {
-        new HandlerMethod(synchronousCommandHandler, method(new SynchronousCommandHandler(), "handlesAsync"), JsonEnvelope.class);
+        new HandlerMethod(
+                synchronousCommandHandler,
+                method(new SynchronousCommandHandler(), "handlesAsync"),
+                JsonEnvelope.class,
+                handlerMethodInvoker);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldOnlyAcceptVoidOrEnvelopeReturnTypes() {
-        new HandlerMethod(synchronousCommandHandler, method(new SynchronousCommandHandler(), "handles"), Object.class);
+        new HandlerMethod(
+                synchronousCommandHandler,
+                method(new SynchronousCommandHandler(), "handles"),
+                Object.class,
+                handlerMethodInvoker);
     }
 
     @Test
     public void shouldReturnFalseIfNoDirectAnnotation() throws Exception {
         final SynchronousCommandHandler handler = new SynchronousCommandHandler();
-        assertThat(new HandlerMethod(new SynchronousCommandHandler(), method(handler, "handles"), JsonEnvelope.class).isDirect(), is(false));
+        assertThat(new HandlerMethod(
+                new SynchronousCommandHandler(),
+                method(handler, "handles"),
+                JsonEnvelope.class,
+                handlerMethodInvoker)
+                .isDirect(), is(false));
     }
 
     @Test
     public void shouldReturnTrueIfDirectAnnotationPresent() throws Exception {
         final TestDirectComponentAHandler handler = new TestDirectComponentAHandler();
-        assertThat(new HandlerMethod(handler, method(handler, "handles"), JsonEnvelope.class).isDirect(), is(true));
+        assertThat(new HandlerMethod(
+                handler,
+                method(handler, "handles"),
+                JsonEnvelope.class,
+                handlerMethodInvoker)
+                .isDirect(), is(true));
     }
 
     private HandlerMethod asyncHandlerInstance() {
-        return new HandlerMethod(asynchronousCommandHandler, method(new AsynchronousCommandHandler(), "handles"), Void.TYPE);
+        return new HandlerMethod(
+                asynchronousCommandHandler,
+                method(new AsynchronousCommandHandler(), "handles"),
+                Void.TYPE,
+                handlerMethodInvoker);
     }
 
     private HandlerMethod asyncPojoHandlerInstance() {
-        return new HandlerMethod(asynchronousPojoCommandHandler, method(new AsynchronousPojoCommandHandler(), "handles"), Void.TYPE);
+        return new HandlerMethod(
+                asynchronousPojoCommandHandler,
+                method(new AsynchronousPojoCommandHandler(), "handles"),
+                Void.TYPE,
+                handlerMethodInvoker);
     }
 
     private HandlerMethod syncPojoHandlerInstance() {
-        return new HandlerMethod(synchronousPojoCommandHandler, method(new SynchronousPojoCommandHandler(), "handles"), Envelope.class);
+        return new HandlerMethod(
+                synchronousPojoCommandHandler,
+                method(new SynchronousPojoCommandHandler(), "handles"),
+                Envelope.class,
+                handlerMethodInvoker);
     }
 
     private HandlerMethod syncHandlerInstance() {
-        return new HandlerMethod(synchronousCommandHandler, method(new SynchronousCommandHandler(), "handles"), JsonEnvelope.class);
+        return new HandlerMethod(
+                synchronousCommandHandler,
+                method(new SynchronousCommandHandler(), "handles"),
+                JsonEnvelope.class,
+                handlerMethodInvoker);
     }
 
     private Method method(final Object object, final String methofName) {

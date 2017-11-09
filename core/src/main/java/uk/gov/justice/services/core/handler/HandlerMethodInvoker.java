@@ -3,7 +3,6 @@ package uk.gov.justice.services.core.handler;
 
 import static java.lang.Class.forName;
 
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
@@ -19,23 +18,27 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class HandlerMethodInvoker {
 
+    private final ObjectMapper objectMapper;
+
+    public HandlerMethodInvoker(final ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
+
     public Object invoke(final Object handlerInstance,
                          final Method handlerMethod,
                          final JsonEnvelope jsonEnvelope)
             throws InvocationTargetException, IllegalAccessException, ClassNotFoundException, IOException {
 
         final Class<?> parameterClass = handlerMethod.getParameterTypes()[0];
-        if(parameterClass == JsonEnvelope.class) {
+        if (parameterClass == JsonEnvelope.class) {
             return handlerMethod.invoke(handlerInstance, jsonEnvelope);
         }
         final Type[] genericParameterTypes = handlerMethod.getGenericParameterTypes();
-        final Type[] parameters = ((ParameterizedType)genericParameterTypes[0]).getActualTypeArguments();
+        final Type[] parameters = ((ParameterizedType) genericParameterTypes[0]).getActualTypeArguments();
 
         final Class<?> envelopeType = forName(parameters[0].getTypeName());
 
         final JsonObject jsonObject = jsonEnvelope.payloadAsJsonObject();
-
-        final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
 
         final Object readValue = objectMapper.readValue(jsonObject.toString(), envelopeType);
 

@@ -27,7 +27,7 @@ public class HandlerMethod {
 
     private final Object handlerInstance;
     private final Method handlerMethod;
-    private final boolean isSynchronous;
+    private final HandlerMethodInvoker handlerMethodInvoker;
 
     /**
      * Constructor with handler method validator.
@@ -36,7 +36,10 @@ public class HandlerMethod {
      * @param method             the method on the handler object
      * @param expectedReturnType the expected return type for the method
      */
-    public HandlerMethod(final Object object, final Method method, final Class<?> expectedReturnType) {
+    public HandlerMethod(final Object object,
+                         final Method method,
+                         final Class<?> expectedReturnType,
+                         final HandlerMethodInvoker handlerMethodInvoker) {
 
         if (object == null) {
             throw new IllegalArgumentException("Handler instance cannot be null");
@@ -57,7 +60,7 @@ public class HandlerMethod {
                     format("Handler methods must take an JsonEnvelope as the argument, not a %s", parameterTypes[0]));
         }
 
-        this.isSynchronous = !isVoid(expectedReturnType);
+        final boolean isSynchronous = !isVoid(expectedReturnType);
 
         if (!isSynchronous && !isVoid(method.getReturnType())) {
             throw new InvalidHandlerException("Asynchronous handler must return void");
@@ -71,6 +74,7 @@ public class HandlerMethod {
 
         this.handlerInstance = object;
         this.handlerMethod = method;
+        this.handlerMethodInvoker = handlerMethodInvoker;
     }
 
     private static boolean isVoid(final Class<?> clazz) {
@@ -78,16 +82,7 @@ public class HandlerMethod {
     }
 
     private static boolean isEnvelope(final Class<?> clazz) {
-        if(clazz.equals(Envelope.class)) {
-            return true;
-        }
-
-        for (Class c : clazz.getInterfaces()) {
-            if (c.equals(Envelope.class)) {
-                return true;
-            }
-        }
-        return false;
+        return Envelope.class.isAssignableFrom(clazz);
     }
 
     /**
@@ -104,8 +99,6 @@ public class HandlerMethod {
                 handlerMethod.getName(),
                 envelope));
         try {
-
-            final HandlerMethodInvoker handlerMethodInvoker = new HandlerMethodInvoker();
             final Object obj = handlerMethodInvoker.invoke(handlerInstance, handlerMethod, envelope);
             trace(LOGGER, () -> {
 

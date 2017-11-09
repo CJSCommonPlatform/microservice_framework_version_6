@@ -6,9 +6,9 @@ import static uk.gov.justice.services.messaging.logging.LoggerUtils.trace;
 import uk.gov.justice.services.core.annotation.Direct;
 import uk.gov.justice.services.core.handler.exception.HandlerExecutionException;
 import uk.gov.justice.services.core.handler.registry.exception.InvalidHandlerException;
+import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
@@ -27,7 +27,6 @@ public class HandlerMethod {
 
     private final Object handlerInstance;
     private final Method handlerMethod;
-
     private final boolean isSynchronous;
 
     /**
@@ -52,7 +51,8 @@ public class HandlerMethod {
             throw new InvalidHandlerException(
                     format("Handles method must have exactly one parameter; found %d", parameterTypes.length));
         }
-        if (parameterTypes[0] != JsonEnvelope.class) {
+
+        if (!isEnvelope(parameterTypes[0])) {
             throw new IllegalArgumentException(
                     format("Handler methods must take an JsonEnvelope as the argument, not a %s", parameterTypes[0]));
         }
@@ -78,7 +78,16 @@ public class HandlerMethod {
     }
 
     private static boolean isEnvelope(final Class<?> clazz) {
-        return JsonEnvelope.class.equals(clazz);
+        if(clazz.equals(Envelope.class)) {
+            return true;
+        }
+
+        for (Class c : clazz.getInterfaces()) {
+            if (c.equals(Envelope.class)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -95,7 +104,9 @@ public class HandlerMethod {
                 handlerMethod.getName(),
                 envelope));
         try {
-            final Object obj = handlerMethod.invoke(handlerInstance, envelope);
+
+            final HandlerMethodInvoker handlerMethodInvoker = new HandlerMethodInvoker();
+            final Object obj = handlerMethodInvoker.invoke(handlerInstance, handlerMethod, envelope);
             trace(LOGGER, () -> {
 
                 final Optional<Object> response = Optional.ofNullable(obj);
@@ -115,9 +126,7 @@ public class HandlerMethod {
 
             return obj;
 
-        } catch (IllegalAccessException ex) {
-            throw handlerExecutionExceptionOf(envelope, ex.getCause());
-        } catch (InvocationTargetException ex) {
+        } catch (Exception ex) {
             if (ex.getCause() instanceof RuntimeException) {
                 throw (RuntimeException) ex.getCause();
             } else {

@@ -2,6 +2,8 @@ package uk.gov.justice.services.core.dispatcher;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.core.handler.HandlerMethodInvoker;
 import uk.gov.justice.services.core.handler.registry.HandlerRegistry;
 
 import org.slf4j.Logger;
@@ -11,6 +13,8 @@ public class DispatcherFactory {
     private static final Logger LOGGER = getLogger(HandlerRegistry.class);
 
     public Dispatcher createNew() {
-        return new Dispatcher(new HandlerRegistry(LOGGER));
+        return new Dispatcher(new HandlerRegistry(
+                new HandlerMethodInvoker(new ObjectMapperProducer().objectMapper()),
+                LOGGER));
     }
 }

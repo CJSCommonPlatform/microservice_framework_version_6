@@ -7,8 +7,10 @@ import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
+import uk.gov.justice.services.core.handler.HandlerMethodInvoker;
 import uk.gov.justice.services.core.handler.exception.MissingHandlerException;
 import uk.gov.justice.services.core.handler.registry.HandlerRegistry;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -44,7 +46,7 @@ public class DispatcherTest {
 
     @Before
     public void setup() {
-        handlerRegistry = new HandlerRegistry(logger);
+        handlerRegistry = new HandlerRegistry(new HandlerMethodInvoker(new ObjectMapperProducer().objectMapper()), logger);
         dispatcher = new Dispatcher(handlerRegistry);
 
         when(envelope.metadata()).thenReturn(metadata);

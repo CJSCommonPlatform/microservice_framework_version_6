@@ -11,11 +11,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.annotation.Direct;
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.handler.HandlerMethod;
+import uk.gov.justice.services.core.handler.HandlerMethodInvoker;
 import uk.gov.justice.services.core.handler.registry.exception.DuplicateHandlerException;
 import uk.gov.justice.services.core.handler.registry.exception.InvalidHandlerException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -160,7 +162,9 @@ public class HandlerRegistryTest {
     }
 
     private void createRegistryWith(Object... handlers) {
-        registry = new HandlerRegistry(logger);
+        registry = new HandlerRegistry(
+                new HandlerMethodInvoker(new ObjectMapperProducer().objectMapper()),
+                logger);
         asList(handlers).forEach(x -> registry.register(x));
     }
 

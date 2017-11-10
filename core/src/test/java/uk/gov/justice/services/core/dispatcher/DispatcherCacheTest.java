@@ -11,6 +11,7 @@ import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.L
 import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.REMOTE;
 import static uk.gov.justice.services.test.utils.common.MemberInjectionPoint.injectionPointWithMemberAsFirstMethodOf;
 
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.extension.ServiceComponentFoundEvent;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
@@ -18,8 +19,12 @@ import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -31,7 +36,12 @@ public class DispatcherCacheTest {
 
     private InjectionPoint adaptorQueryApiInjectionPoint = injectionPointWithMemberAsFirstMethodOf(TestQueryApiAdaptor.class);
 
-    private DispatcherCache dispatcherCache = new DispatcherCache();
+    @Spy
+    private DispatcherFactory dispatcherFactory =
+            new DispatcherFactory(new ObjectMapperProducer().objectMapper());
+
+    @InjectMocks
+    private DispatcherCache dispatcherCache;
 
     @Test
     public void shouldReturnTheSameDispatcherForTwoInjectionPoints() throws Exception {

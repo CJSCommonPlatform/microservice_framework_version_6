@@ -1,6 +1,7 @@
 package uk.gov.justice.services.core.handler;
 
 import static java.lang.String.format;
+import static java.util.UUID.fromString;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
@@ -22,10 +23,12 @@ import uk.gov.justice.services.core.handler.registry.exception.InvalidHandlerExc
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.Metadata;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
+import java.util.UUID;
 
 import com.google.common.io.Resources;
 import org.junit.Before;
@@ -79,18 +82,39 @@ public class HandlerMethodTest {
 
     @Test
     public void shouldHandlePojoAsynchronously() {
-        Object result = asyncPojoHandlerInstance().execute(envelope);
+        final TestPojo testPojo = new TestPojo();
+        final Metadata metadata = Envelope.metadataBuilder()
+                .withId(UUID.randomUUID())
+                .withName("test").build();
+        final Envelope<TestPojo> testPojoEnvelope = Envelope.envelopeFrom(metadata, testPojo);
+        Object result = asyncPojoHandlerInstance().execute(testPojoEnvelope);
         assertThat(result, nullValue());
     }
 
     @Test
     public void shouldHandlePojoSynchronously() {
-        Envelope<TestPojo> result = (Envelope<TestPojo>) syncPojoHandlerInstance().execute(envelope);
+        final TestPojo testPojo = new TestPojo();
+
+        final String payloadId = "3f47ab7e-aecc-4cec-9246-c32066ef5ba1";
+        final String payloadName = "payload name";
+        final long payloadVersion = 200L;
+
+        testPojo.setPayloadId(payloadId);
+        testPojo.setPayloadName(payloadName);
+        testPojo.setPayloadVersion(payloadVersion);
+
+        final Metadata metadata = Envelope.metadataBuilder()
+                .withId(UUID.randomUUID())
+                .withName("test").build();
+
+        final Envelope<TestPojo> requestPojoEnvelope = Envelope.envelopeFrom(metadata, testPojo);
+
+        final Envelope<TestPojo> result = (Envelope<TestPojo>) syncPojoHandlerInstance().execute(requestPojoEnvelope);
         verify(synchronousPojoCommandHandler).handles(any(Envelope.class));
-        final TestPojo testPojo = result.payload();
-        assertThat(testPojo.getPayloadId(), is("c3f7182b-bd20-4678-ba8b-e7e5ea8629c3"));
-        assertThat(testPojo.getPayloadName(), is("Name of the Payload"));
-        assertThat(testPojo.getPayloadVersion(), is(0L));
+        final TestPojo resultPojo = result.payload();
+        assertThat(resultPojo.getPayloadId(), is(payloadId));
+        assertThat(resultPojo.getPayloadName(), is(payloadName));
+        assertThat(resultPojo.getPayloadVersion(), is(payloadVersion));
     }
 
     @Rule

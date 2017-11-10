@@ -25,6 +25,7 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
+import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
 import uk.gov.justice.services.core.dispatcher.EmptySystemUserProvider;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
@@ -103,6 +104,7 @@ public class EventHandlerIT {
             SenderProducer.class,
             DefaultJmsEnvelopeSender.class,
             DefaultEnvelopeConverter.class,
+            DispatcherFactory.class,
 
             StringToJsonObjectConverter.class,
             DefaultJsonObjectEnvelopeConverter.class,

@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.handler.exception.MissingHandlerException;
@@ -17,10 +18,12 @@ import uk.gov.justice.services.test.utils.common.envelope.TestEnvelopeRecorder;
 
 import java.util.List;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
 
@@ -38,6 +41,9 @@ public class DispatcherTest {
     @Mock
     private Metadata metadata;
 
+    @Spy
+    private ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
+
     private Dispatcher dispatcher;
 
     private HandlerRegistry handlerRegistry;
@@ -45,7 +51,7 @@ public class DispatcherTest {
     @Before
     public void setup() {
         handlerRegistry = new HandlerRegistry(logger);
-        dispatcher = new Dispatcher(handlerRegistry);
+        dispatcher = new Dispatcher(handlerRegistry, objectMapper);
 
         when(envelope.metadata()).thenReturn(metadata);
         when(metadata.name()).thenReturn(ACTION_NAME);

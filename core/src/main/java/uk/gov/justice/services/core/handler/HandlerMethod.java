@@ -1,5 +1,6 @@
 package uk.gov.justice.services.core.handler;
 
+import static java.lang.Class.forName;
 import static java.lang.String.format;
 import static uk.gov.justice.services.messaging.logging.LoggerUtils.trace;
 
@@ -10,6 +11,8 @@ import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -28,6 +31,7 @@ public class HandlerMethod {
     private final Object handlerInstance;
     private final Method handlerMethod;
     private final boolean isSynchronous;
+    private final Class<?> envelopeGenericType;
 
     /**
      * Constructor with handler method validator.
@@ -52,9 +56,23 @@ public class HandlerMethod {
                     format("Handles method must have exactly one parameter; found %d", parameterTypes.length));
         }
 
-        if (!isEnvelope(parameterTypes[0])) {
+        final Class<?> envelopeType = parameterTypes[0];
+
+        if (!isEnvelope(envelopeType)) {
             throw new IllegalArgumentException(
-                    format("Handler methods must take an JsonEnvelope as the argument, not a %s", parameterTypes[0]));
+                    format("Handler methods must take an JsonEnvelope or Envelope<T> as the argument, not a %s", envelopeType));
+        }
+
+        if(!envelopeType.equals(JsonEnvelope.class)) {
+            final Type[] genericParameterTypes = method.getGenericParameterTypes();
+            final Type[] parameters = ((ParameterizedType)genericParameterTypes[0]).getActualTypeArguments();
+            try {
+                envelopeGenericType = forName(parameters[0].getTypeName());
+            } catch (ClassNotFoundException e) {
+                throw new HandlerCreationException(e);
+            }
+        } else {
+            envelopeGenericType = JsonEnvelope.class;
         }
 
         this.isSynchronous = !isVoid(expectedReturnType);
@@ -78,16 +96,7 @@ public class HandlerMethod {
     }
 
     private static boolean isEnvelope(final Class<?> clazz) {
-        if(clazz.equals(Envelope.class)) {
-            return true;
-        }
-
-        for (Class c : clazz.getInterfaces()) {
-            if (c.equals(Envelope.class)) {
-                return true;
-            }
-        }
-        return false;
+        return Envelope.class.isAssignableFrom(clazz);
     }
 
     /**
@@ -98,15 +107,14 @@ public class HandlerMethod {
      * null {@link Void}
      */
     @SuppressWarnings("unchecked")
-    public Object execute(final JsonEnvelope envelope) {
+    public <T> Object execute(final Envelope<T> envelope) {
         trace(LOGGER, () -> format("Dispatching to handler %s.%s : %s",
                 handlerInstance.getClass().toString(),
                 handlerMethod.getName(),
                 envelope));
         try {
 
-            final HandlerMethodInvoker handlerMethodInvoker = new HandlerMethodInvoker();
-            final Object obj = handlerMethodInvoker.invoke(handlerInstance, handlerMethod, envelope);
+            final Object obj = handlerMethod.invoke(handlerInstance, envelope);
             trace(LOGGER, () -> {
 
                 final Optional<Object> response = Optional.ofNullable(obj);
@@ -135,7 +143,7 @@ public class HandlerMethod {
         }
     }
 
-    private HandlerExecutionException handlerExecutionExceptionOf(final JsonEnvelope envelope, final Throwable cause) {
+    private HandlerExecutionException handlerExecutionExceptionOf(final Envelope envelope, final Throwable cause) {
         return new HandlerExecutionException(
                 format("Error while invoking handler method %s with parameter %s",
                         handlerMethod, envelope), cause);
@@ -150,5 +158,9 @@ public class HandlerMethod {
 
     public boolean isDirect() {
         return handlerInstance.getClass().isAnnotationPresent(Direct.class);
+    }
+
+    public Class<?> getEnvelopeGenericType() {
+        return envelopeGenericType;
     }
 }

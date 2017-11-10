@@ -40,6 +40,7 @@ import uk.gov.justice.services.core.accesscontrol.PolicyEvaluator;
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
+import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
 import uk.gov.justice.services.core.dispatcher.EmptySystemUserProvider;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserProvider;
@@ -131,6 +132,7 @@ public class RemoteExampleQueryApiIT {
             ContextMatcher.class,
             DefaultServerPortProvider.class,
             DispatcherCache.class,
+            DispatcherFactory.class,
             DefaultEnveloper.class,
             InterceptorCache.class,
             InterceptorChainProcessor.class,

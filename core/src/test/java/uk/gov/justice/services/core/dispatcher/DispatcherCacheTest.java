@@ -38,7 +38,7 @@ public class DispatcherCacheTest {
 
     @Spy
     private DispatcherFactory dispatcherFactory =
-            new DispatcherFactory(new ObjectMapperProducer().objectMapper());
+            new DispatcherFactory(new EnvelopeTypeConverter(new ObjectMapperProducer().objectMapper()), new JsonEnvelopeConverter());
 
     @InjectMocks
     private DispatcherCache dispatcherCache;

@@ -42,6 +42,8 @@ import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
 import uk.gov.justice.services.core.dispatcher.EmptySystemUserProvider;
+import uk.gov.justice.services.core.dispatcher.EnvelopeTypeConverter;
+import uk.gov.justice.services.core.dispatcher.JsonEnvelopeConverter;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserProvider;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
@@ -133,6 +135,8 @@ public class RemoteExampleQueryApiIT {
             DefaultServerPortProvider.class,
             DispatcherCache.class,
             DispatcherFactory.class,
+            EnvelopeTypeConverter.class,
+            JsonEnvelopeConverter.class,
             DefaultEnveloper.class,
             InterceptorCache.class,
             InterceptorChainProcessor.class,

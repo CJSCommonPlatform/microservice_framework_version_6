@@ -15,6 +15,8 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Optional;
 
+import javax.json.JsonValue;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +33,7 @@ public class HandlerMethod {
     private final Object handlerInstance;
     private final Method handlerMethod;
     private final boolean isSynchronous;
-    private final Class<?> envelopeGenericType;
+    private final Class<?> envelopeParameterType;
 
     /**
      * Constructor with handler method validator.
@@ -67,12 +69,12 @@ public class HandlerMethod {
             final Type[] genericParameterTypes = method.getGenericParameterTypes();
             final Type[] parameters = ((ParameterizedType)genericParameterTypes[0]).getActualTypeArguments();
             try {
-                envelopeGenericType = forName(parameters[0].getTypeName());
+                envelopeParameterType = forName(parameters[0].getTypeName());
             } catch (ClassNotFoundException e) {
                 throw new HandlerCreationException(e);
             }
         } else {
-            envelopeGenericType = JsonEnvelope.class;
+            envelopeParameterType = JsonValue.class;
         }
 
         this.isSynchronous = !isVoid(expectedReturnType);
@@ -160,7 +162,7 @@ public class HandlerMethod {
         return handlerInstance.getClass().isAnnotationPresent(Direct.class);
     }
 
-    public Class<?> getEnvelopeGenericType() {
-        return envelopeGenericType;
+    public Class<?> getEnvelopeParameterType() {
+        return envelopeParameterType;
     }
 }

@@ -268,7 +268,6 @@ public class HandlerMethodTest {
         }
     }
 
-
     @Direct(target = "not_used")
     @FrameworkComponent("COMPONENT_A")
     public static class TestDirectComponentAHandler {

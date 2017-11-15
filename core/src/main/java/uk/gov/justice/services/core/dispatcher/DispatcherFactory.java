@@ -6,21 +6,22 @@ import uk.gov.justice.services.core.handler.registry.HandlerRegistry;
 
 import javax.inject.Inject;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 
 public class DispatcherFactory {
 
     private static final Logger LOGGER = getLogger(HandlerRegistry.class);
 
-    private ObjectMapper objectMapper;
+    private EnvelopeTypeConverter envelopeTypeConverter;
+    private JsonEnvelopeConverter jsonEnvelopeConverter;
 
     @Inject
-    public DispatcherFactory(final ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
+    public DispatcherFactory(final EnvelopeTypeConverter envelopeTypeConverter, final JsonEnvelopeConverter jsonEnvelopeConverter) {
+        this.envelopeTypeConverter = envelopeTypeConverter;
+        this.jsonEnvelopeConverter = jsonEnvelopeConverter;
     }
 
     public Dispatcher createNew() {
-        return new Dispatcher(new HandlerRegistry(LOGGER), objectMapper);
+        return new Dispatcher(new HandlerRegistry(LOGGER), envelopeTypeConverter, jsonEnvelopeConverter);
     }
 }

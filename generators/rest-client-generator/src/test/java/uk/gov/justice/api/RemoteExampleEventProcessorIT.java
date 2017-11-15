@@ -53,6 +53,8 @@ import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
 import uk.gov.justice.services.core.dispatcher.EmptySystemUserProvider;
+import uk.gov.justice.services.core.dispatcher.EnvelopeTypeConverter;
+import uk.gov.justice.services.core.dispatcher.JsonEnvelopeConverter;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandlerProducer;
@@ -146,6 +148,8 @@ public class RemoteExampleEventProcessorIT {
             DefaultServerPortProvider.class,
             DispatcherCache.class,
             DispatcherFactory.class,
+            EnvelopeTypeConverter.class,
+            JsonEnvelopeConverter.class,
             EmptySystemUserProvider.class,
             DefaultEnveloper.class,
             InterceptorCache.class,

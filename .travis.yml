@@ -21,7 +21,7 @@ before_install:
 - ln -sfT ${PWD}/target/travis-settings/mvnw mvnw
 - ln -sft ${PWD} ${PWD}/target/travis-settings/.mvn
 install: "${PWD}/target/travis-settings/java/install.sh -e -q -DexcludeGroupIds=uk.gov.justice.service,uk.gov.justice.services"
-script: "${PWD}/target/travis-settings/java/script-install.sh coveralls:report sonar:sonar"
+script: "${PWD}/target/travis-settings/java/script-install.sh -T 4 coveralls:report sonar:sonar"
 after_success: "${PWD}/target/travis-settings/java/after_success.sh"
 notifications:
   slack:

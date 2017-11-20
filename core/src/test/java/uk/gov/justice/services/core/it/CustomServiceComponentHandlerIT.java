@@ -23,7 +23,10 @@ import uk.gov.justice.services.core.annotation.CustomServiceComponent;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
+import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
 import uk.gov.justice.services.core.dispatcher.EmptySystemUserProvider;
+import uk.gov.justice.services.core.dispatcher.EnvelopePayloadTypeConverter;
+import uk.gov.justice.services.core.dispatcher.JsonEnvelopeRepacker;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandlerProducer;
@@ -102,6 +105,9 @@ public class CustomServiceComponentHandlerIT {
             ObjectToJsonValueConverter.class,
             ObjectMapper.class,
             Enveloper.class,
+            DispatcherFactory.class,
+            EnvelopePayloadTypeConverter.class,
+            JsonEnvelopeRepacker.class,
 
             EnvelopeValidationExceptionHandlerProducer.class,
             GlobalValueProducer.class,

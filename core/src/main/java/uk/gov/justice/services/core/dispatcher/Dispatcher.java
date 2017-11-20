@@ -1,5 +1,6 @@
 package uk.gov.justice.services.core.dispatcher;
 
+import uk.gov.justice.services.core.handler.HandlerMethod;
 import uk.gov.justice.services.core.handler.registry.HandlerRegistry;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
@@ -12,9 +13,15 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 public class Dispatcher {
 
     private final HandlerRegistry handlerRegistry;
+    private final EnvelopePayloadTypeConverter typeConverter;
+    private final JsonEnvelopeRepacker jsonEnvelopeRepacker;
 
-    public Dispatcher(final HandlerRegistry handlerRegistry) {
+    public Dispatcher(final HandlerRegistry handlerRegistry,
+                      final EnvelopePayloadTypeConverter typeConverter,
+                      final JsonEnvelopeRepacker jsonEnvelopeRepacker) {
         this.handlerRegistry = handlerRegistry;
+        this.typeConverter = typeConverter;
+        this.jsonEnvelopeRepacker = jsonEnvelopeRepacker;
     }
 
     /**
@@ -25,7 +32,12 @@ public class Dispatcher {
      * @return the envelope returned by the handler method
      */
     public JsonEnvelope dispatch(final JsonEnvelope envelope) {
-        return (JsonEnvelope) handlerRegistry.get(envelope.metadata().name()).execute(envelope);
+
+        final HandlerMethod handlerMethod = handlerRegistry.get(envelope.metadata().name());
+
+        return MethodInvoker
+                .createMethodInvoker(typeConverter, jsonEnvelopeRepacker)
+                .invoke(handlerMethod, envelope);
     }
 
     /**

@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.spi.InjectionPoint;
+import javax.inject.Inject;
 
 /**
  * Creates and caches {@link Dispatcher} for {@link InjectionPoint} or {@link
@@ -23,7 +24,16 @@ public class DispatcherCache {
 
     private final Map<DispatcherKey, Dispatcher> dispatcherMap = new ConcurrentHashMap<>();
 
-    private final DispatcherFactory dispatcherFactory = new DispatcherFactory();
+    private DispatcherFactory dispatcherFactory;
+
+    @Inject
+    public DispatcherCache(final DispatcherFactory dispatcherFactory) {
+        this.dispatcherFactory = dispatcherFactory;
+    }
+
+    public DispatcherCache() {
+
+    }
 
     /**
      * Return a {@link Dispatcher} for the given {@link InjectionPoint}.

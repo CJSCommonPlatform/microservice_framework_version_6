@@ -1,16 +1,8 @@
 package uk.gov.justice.services.core.dispatcher;
 
-import static java.lang.String.format;
-
 import uk.gov.justice.services.core.handler.HandlerMethod;
-import uk.gov.justice.services.core.handler.exception.HandlerExecutionException;
 import uk.gov.justice.services.core.handler.registry.HandlerRegistry;
-import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-
-import java.io.IOException;
-
-import javax.json.JsonValue;
 
 /**
  * Dispatches messages to their corresponding handlers, which could be a command handler, command
@@ -21,15 +13,15 @@ import javax.json.JsonValue;
 public class Dispatcher {
 
     private final HandlerRegistry handlerRegistry;
-    private final EnvelopeTypeConverter typeConverter;
-    private final JsonEnvelopeConverter jsonEnvelopeConverter;
+    private final EnvelopePayloadTypeConverter typeConverter;
+    private final JsonEnvelopeRepacker jsonEnvelopeRepacker;
 
     public Dispatcher(final HandlerRegistry handlerRegistry,
-                      final EnvelopeTypeConverter typeConverter,
-                      final JsonEnvelopeConverter jsonEnvelopeConverter) {
+                      final EnvelopePayloadTypeConverter typeConverter,
+                      final JsonEnvelopeRepacker jsonEnvelopeRepacker) {
         this.handlerRegistry = handlerRegistry;
         this.typeConverter = typeConverter;
-        this.jsonEnvelopeConverter = jsonEnvelopeConverter;
+        this.jsonEnvelopeRepacker = jsonEnvelopeRepacker;
     }
 
     /**
@@ -42,33 +34,11 @@ public class Dispatcher {
     public JsonEnvelope dispatch(final JsonEnvelope envelope) {
 
         final HandlerMethod handlerMethod = handlerRegistry.get(envelope.metadata().name());
-        final Class<?> payloadClass = handlerMethod.getEnvelopeParameterType();
 
-        try {
-            return toJsonEnvelope(
-                    toJsonValueEnvelope(
-                            (Envelope<?>) handlerMethod.execute(
-                                    toTargetEnvelopType(envelope, payloadClass))));
-
-        } catch (IOException e) {
-            throw new HandlerExecutionException(
-                    format("Error while invoking handler method %s with parameter %s",
-                            handlerMethod, envelope), e.getCause());
-        }
+        return MethodInvoker
+                .createMethodInvoker(typeConverter, jsonEnvelopeRepacker)
+                .invoke(handlerMethod, envelope);
     }
-
-    private Envelope<?> toTargetEnvelopType(JsonEnvelope envelope, Class<?> payloadClass) throws IOException {
-        return typeConverter.convert(envelope, payloadClass);
-    }
-
-    private JsonEnvelope toJsonEnvelope(Envelope<JsonValue> envelope) {
-        return jsonEnvelopeConverter.toJsonEnvelope(envelope);
-    }
-
-    private Envelope<JsonValue> toJsonValueEnvelope(Envelope<?> envelope) throws IOException {
-        return typeConverter.convert(envelope, JsonValue.class);
-    }
-
 
     /**
      * Registers the handler instance.

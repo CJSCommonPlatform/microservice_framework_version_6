@@ -60,7 +60,7 @@ public class HandlerMethod {
 
         final Class<?> envelopeType = parameterTypes[0];
 
-        if (!isEnvelope(envelopeType)) {
+        if (!Envelope.class.isAssignableFrom(envelopeType)) {
             throw new IllegalArgumentException(
                     format("Handler methods must take an JsonEnvelope or Envelope<T> as the argument, not a %s", envelopeType));
         }
@@ -82,10 +82,10 @@ public class HandlerMethod {
         if (!isSynchronous && !isVoid(method.getReturnType())) {
             throw new InvalidHandlerException("Asynchronous handler must return void");
         }
-        if (isSynchronous && !isEnvelope(expectedReturnType)) {
+        if (isSynchronous && !Envelope.class.isAssignableFrom(expectedReturnType)) {
             throw new IllegalArgumentException("Synchronous handler method must handle envelopes");
         }
-        if (isSynchronous && !isEnvelope(method.getReturnType())) {
+        if (isSynchronous && !Envelope.class.isAssignableFrom(method.getReturnType())) {
             throw new InvalidHandlerException("Synchronous handler must return an envelope");
         }
 
@@ -97,10 +97,6 @@ public class HandlerMethod {
         return Void.TYPE.equals(clazz);
     }
 
-    private static boolean isEnvelope(final Class<?> clazz) {
-        return Envelope.class.isAssignableFrom(clazz);
-    }
-
     /**
      * Invokes the handler method passing the <code>envelope</code> to it.
      *
@@ -109,7 +105,7 @@ public class HandlerMethod {
      * null {@link Void}
      */
     @SuppressWarnings("unchecked")
-    public <T> Object execute(final Envelope<T> envelope) {
+    public <T> Envelope<T> execute(final Envelope<T> envelope) {
         trace(LOGGER, () -> format("Dispatching to handler %s.%s : %s",
                 handlerInstance.getClass().toString(),
                 handlerMethod.getName(),
@@ -134,7 +130,7 @@ public class HandlerMethod {
                         envelope.metadata().id().toString());
             });
 
-            return obj;
+            return (Envelope<T>) obj;
 
         } catch (Exception ex) {
             if (ex.getCause() instanceof RuntimeException) {

@@ -10,7 +10,6 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
@@ -28,19 +27,13 @@ import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.justice.services.test.utils.common.envelope.TestEnvelopeRecorder;
 
 import java.util.List;
-import java.util.UUID;
 
-import javax.json.Json;
 import javax.json.JsonValue;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
 
@@ -63,7 +56,7 @@ public class DispatcherTest {
     @Before
     public void setup() {
         handlerRegistry = new HandlerRegistry(logger);
-        dispatcher = new Dispatcher(handlerRegistry, new EnvelopeTypeConverter(new ObjectMapperProducer().objectMapper()), new JsonEnvelopeConverter());
+        dispatcher = new Dispatcher(handlerRegistry, new EnvelopePayloadTypeConverter(new ObjectMapperProducer().objectMapper()), new JsonEnvelopeRepacker());
     }
 
     @Test

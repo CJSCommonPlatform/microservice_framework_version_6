@@ -12,16 +12,16 @@ public class DispatcherFactory {
 
     private static final Logger LOGGER = getLogger(HandlerRegistry.class);
 
-    private EnvelopeTypeConverter envelopeTypeConverter;
-    private JsonEnvelopeConverter jsonEnvelopeConverter;
+    private EnvelopePayloadTypeConverter envelopePayloadTypeConverter;
+    private JsonEnvelopeRepacker jsonEnvelopeRepacker;
 
     @Inject
-    public DispatcherFactory(final EnvelopeTypeConverter envelopeTypeConverter, final JsonEnvelopeConverter jsonEnvelopeConverter) {
-        this.envelopeTypeConverter = envelopeTypeConverter;
-        this.jsonEnvelopeConverter = jsonEnvelopeConverter;
+    public DispatcherFactory(final EnvelopePayloadTypeConverter envelopePayloadTypeConverter, final JsonEnvelopeRepacker jsonEnvelopeRepacker) {
+        this.envelopePayloadTypeConverter = envelopePayloadTypeConverter;
+        this.jsonEnvelopeRepacker = jsonEnvelopeRepacker;
     }
 
     public Dispatcher createNew() {
-        return new Dispatcher(new HandlerRegistry(LOGGER), envelopeTypeConverter, jsonEnvelopeConverter);
+        return new Dispatcher(new HandlerRegistry(LOGGER), envelopePayloadTypeConverter, jsonEnvelopeRepacker);
     }
 }

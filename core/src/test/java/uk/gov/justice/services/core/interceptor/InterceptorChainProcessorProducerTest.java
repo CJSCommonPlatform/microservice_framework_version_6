@@ -18,8 +18,8 @@ import uk.gov.justice.services.core.annotation.DirectAdapter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
-import uk.gov.justice.services.core.dispatcher.EnvelopeTypeConverter;
-import uk.gov.justice.services.core.dispatcher.JsonEnvelopeConverter;
+import uk.gov.justice.services.core.dispatcher.EnvelopePayloadTypeConverter;
+import uk.gov.justice.services.core.dispatcher.JsonEnvelopeRepacker;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.test.utils.common.MemberInjectionPoint;
 import uk.gov.justice.services.test.utils.common.envelope.EnvelopeRecordingInterceptor;
@@ -56,7 +56,7 @@ public class InterceptorChainProcessorProducerTest {
     @Before
     public void setUp() throws Exception {
         interceptorChainProcessorProducer.dispatcherCache =
-                new DispatcherCache(new DispatcherFactory(new EnvelopeTypeConverter(new ObjectMapperProducer().objectMapper()), new JsonEnvelopeConverter()));
+                new DispatcherCache(new DispatcherFactory(new EnvelopePayloadTypeConverter(new ObjectMapperProducer().objectMapper()), new JsonEnvelopeRepacker()));
         envelopeRecordingInterceptor.reset();
     }
 

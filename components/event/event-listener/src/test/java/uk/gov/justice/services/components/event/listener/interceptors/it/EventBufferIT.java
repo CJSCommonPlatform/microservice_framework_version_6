@@ -30,8 +30,8 @@ import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
 import uk.gov.justice.services.core.dispatcher.EmptySystemUserProvider;
-import uk.gov.justice.services.core.dispatcher.EnvelopeTypeConverter;
-import uk.gov.justice.services.core.dispatcher.JsonEnvelopeConverter;
+import uk.gov.justice.services.core.dispatcher.EnvelopePayloadTypeConverter;
+import uk.gov.justice.services.core.dispatcher.JsonEnvelopeRepacker;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandlerProducer;
@@ -71,13 +71,10 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.UUID;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.naming.InitialContext;
-import javax.naming.NameClassPair;
-import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
@@ -159,8 +156,8 @@ public class EventBufferIT {
             DefaultAccessControlService.class,
             DispatcherCache.class,
             DispatcherFactory.class,
-            EnvelopeTypeConverter.class,
-            JsonEnvelopeConverter.class,
+            EnvelopePayloadTypeConverter.class,
+            JsonEnvelopeRepacker.class,
             PolicyEvaluator.class,
 
             ConsecutiveEventBufferService.class,

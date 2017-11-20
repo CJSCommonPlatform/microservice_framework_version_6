@@ -19,8 +19,6 @@ import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -38,7 +36,7 @@ public class DispatcherCacheTest {
 
     @Spy
     private DispatcherFactory dispatcherFactory =
-            new DispatcherFactory(new EnvelopeTypeConverter(new ObjectMapperProducer().objectMapper()), new JsonEnvelopeConverter());
+            new DispatcherFactory(new EnvelopePayloadTypeConverter(new ObjectMapperProducer().objectMapper()), new JsonEnvelopeRepacker());
 
     @InjectMocks
     private DispatcherCache dispatcherCache;

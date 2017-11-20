@@ -5,9 +5,9 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.json.JsonValue;
 
-public class JsonEnvelopeConverter {
+public class JsonEnvelopeRepacker {
 
-    public JsonEnvelope toJsonEnvelope(final Envelope<JsonValue> envelope) {
+    public JsonEnvelope repack(final Envelope envelope) {
 
         if(envelope == null) {
             return null;
@@ -16,6 +16,6 @@ public class JsonEnvelopeConverter {
         if(JsonEnvelope.class.isAssignableFrom(envelope.getClass())) {
             return (JsonEnvelope) envelope;
         }
-        return JsonEnvelope.envelopeFrom(envelope.metadata(), envelope.payload());
+        return JsonEnvelope.envelopeFrom(envelope.metadata(), (JsonValue) envelope.payload());
     }
 }

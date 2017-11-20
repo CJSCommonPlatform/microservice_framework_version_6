@@ -16,21 +16,21 @@ import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class JsonEnvelopeConverterTest {
+public class JsonEnvelopeRepackerTest {
 
     @Test
     public void shouldConvertJsonValueEnvelopeToJsonEnvelope() throws JsonProcessingException {
         final Envelope<JsonValue> envelope = mock(Envelope.class);
-        final JsonEnvelopeConverter jsonEnvelopeConverter = new JsonEnvelopeConverter();
-        final JsonEnvelope jsonEnvelope = jsonEnvelopeConverter.toJsonEnvelope(envelope);
+        final JsonEnvelopeRepacker jsonEnvelopeRepacker = new JsonEnvelopeRepacker();
+        final JsonEnvelope jsonEnvelope = jsonEnvelopeRepacker.repack(envelope);
         assertThat(jsonEnvelope, isA(JsonEnvelope.class));
     }
 
     @Test
     public void shouldHandleJsonEnvelope() throws JsonProcessingException {
         final Envelope<JsonValue> envelope = mock(JsonEnvelope.class);
-        final JsonEnvelopeConverter jsonEnvelopeConverter = new JsonEnvelopeConverter();
-        final JsonEnvelope jsonEnvelope = jsonEnvelopeConverter.toJsonEnvelope(envelope);
+        final JsonEnvelopeRepacker jsonEnvelopeRepacker = new JsonEnvelopeRepacker();
+        final JsonEnvelope jsonEnvelope = jsonEnvelopeRepacker.repack(envelope);
         assertTrue(envelope == jsonEnvelope);
     }
 }

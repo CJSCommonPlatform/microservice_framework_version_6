@@ -15,19 +15,14 @@ import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 
 import org.junit.Test;
 
-public class EnvelopeTypeConverterTest {
+public class EnvelopePayloadTypeConverterTest {
 
     @Test
     public void shouldConvertPojoToJsonValue() throws IOException {
@@ -106,7 +101,7 @@ public class EnvelopeTypeConverterTest {
     }
 
     private <T, R> Envelope<T> convert(final Envelope<R> inputEnvelope, final Class<T> clazz) throws IOException {
-        final EnvelopeTypeConverter envelopeConverter = new EnvelopeTypeConverter(new ObjectMapperProducer().objectMapper());
+        final EnvelopePayloadTypeConverter envelopeConverter = new EnvelopePayloadTypeConverter(new ObjectMapperProducer().objectMapper());
         return envelopeConverter.convert(inputEnvelope, clazz);
     }
 

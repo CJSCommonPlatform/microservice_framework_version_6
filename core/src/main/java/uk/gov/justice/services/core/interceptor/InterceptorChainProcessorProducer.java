@@ -4,10 +4,7 @@ import static java.lang.String.format;
 import static uk.gov.justice.services.core.annotation.ComponentNameUtil.componentFrom;
 import static uk.gov.justice.services.messaging.logging.LoggerUtils.trace;
 
-import uk.gov.justice.services.core.dispatcher.Dispatcher;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
-import uk.gov.justice.services.core.dispatcher.JsonEnvelopeConverter;
-import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;

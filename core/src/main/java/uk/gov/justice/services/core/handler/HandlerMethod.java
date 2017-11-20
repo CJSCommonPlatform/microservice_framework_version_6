@@ -33,7 +33,7 @@ public class HandlerMethod {
     private final Object handlerInstance;
     private final Method handlerMethod;
     private final boolean isSynchronous;
-    private final Class<?> envelopeParameterType;
+    private final Class<?> payloadType;
 
     /**
      * Constructor with handler method validator.
@@ -58,23 +58,23 @@ public class HandlerMethod {
                     format("Handles method must have exactly one parameter; found %d", parameterTypes.length));
         }
 
-        final Class<?> envelopeType = parameterTypes[0];
+        final Class<?> methodArgType = parameterTypes[0];
 
-        if (!Envelope.class.isAssignableFrom(envelopeType)) {
+        if (!Envelope.class.isAssignableFrom(methodArgType)) {
             throw new IllegalArgumentException(
-                    format("Handler methods must take an JsonEnvelope or Envelope<T> as the argument, not a %s", envelopeType));
+                    format("Handler methods must take an JsonEnvelope or Envelope<T> as the argument, not a %s", methodArgType));
         }
 
-        if(!envelopeType.equals(JsonEnvelope.class)) {
+        if(!methodArgType.equals(JsonEnvelope.class)) {
             final Type[] genericParameterTypes = method.getGenericParameterTypes();
             final Type[] parameters = ((ParameterizedType)genericParameterTypes[0]).getActualTypeArguments();
             try {
-                envelopeParameterType = forName(parameters[0].getTypeName());
+                payloadType = forName(parameters[0].getTypeName());
             } catch (ClassNotFoundException e) {
                 throw new HandlerCreationException(e);
             }
         } else {
-            envelopeParameterType = JsonValue.class;
+            payloadType = JsonValue.class;
         }
 
         this.isSynchronous = !isVoid(expectedReturnType);
@@ -105,7 +105,7 @@ public class HandlerMethod {
      * null {@link Void}
      */
     @SuppressWarnings("unchecked")
-    public <T> Envelope<T> execute(final Envelope<T> envelope) {
+    public <T> Envelope<T> execute(final Envelope<?> envelope) {
         trace(LOGGER, () -> format("Dispatching to handler %s.%s : %s",
                 handlerInstance.getClass().toString(),
                 handlerMethod.getName(),
@@ -158,7 +158,7 @@ public class HandlerMethod {
         return handlerInstance.getClass().isAnnotationPresent(Direct.class);
     }
 
-    public Class<?> getEnvelopeParameterType() {
-        return envelopeParameterType;
+    public Class<?> getPayloadType() {
+        return payloadType;
     }
 }

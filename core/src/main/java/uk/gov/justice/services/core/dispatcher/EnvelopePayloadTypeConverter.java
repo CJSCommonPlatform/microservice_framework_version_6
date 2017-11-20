@@ -8,6 +8,10 @@ import javax.inject.Inject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ *   Converts Envelope with payload of T to Envelope with payload of R where
+ *   T can be converted to R using a jackson object mapper
+ */
 public class EnvelopePayloadTypeConverter {
 
     private ObjectMapper objectMapper;
@@ -20,6 +24,14 @@ public class EnvelopePayloadTypeConverter {
     public EnvelopePayloadTypeConverter() {
     }
 
+    /**
+     * Converts Envelope with payload of T to Envelope with payload of R where
+     * T can be converted to R using a jackson object mapper
+     *
+     * @param envelope to be converted
+     * @param clazz of the new payload type
+     * @return an envelope of type clazz
+     */
     public <R> Envelope<R> convert(final Envelope<?> envelope, final Class<R> clazz) {
 
         if(envelope == null) { //Asynchronous methods return nulls / voids...

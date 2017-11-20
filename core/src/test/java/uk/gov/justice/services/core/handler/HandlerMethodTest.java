@@ -109,7 +109,7 @@ public class HandlerMethodTest {
 
         final Envelope<TestPojo> requestPojoEnvelope = Envelope.envelopeFrom(metadata, testPojo);
 
-        final Envelope<TestPojo> result = (Envelope<TestPojo>) syncPojoHandlerInstance().execute(requestPojoEnvelope);
+        final Envelope<TestPojo> result = syncPojoHandlerInstance().execute(requestPojoEnvelope);
         verify(synchronousPojoCommandHandler).handles(any(Envelope.class));
         final TestPojo resultPojo = result.payload();
         assertThat(resultPojo.getPayloadId(), is(payloadId));

@@ -7,7 +7,7 @@ import javax.json.JsonValue;
 
 public class JsonEnvelopeRepacker {
 
-    public JsonEnvelope repack(final Envelope envelope) {
+    public JsonEnvelope repack(final Envelope<JsonValue> envelope) {
 
         if(envelope == null) {
             return null;

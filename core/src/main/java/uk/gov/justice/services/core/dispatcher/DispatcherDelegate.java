@@ -7,13 +7,9 @@ import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 public class DispatcherDelegate implements Requester, Sender {
-
     private final Dispatcher dispatcher;
     private final SystemUserUtil systemUserUtil;
     private final EnvelopeValidator envelopeValidator;
-
-
-
 
     public DispatcherDelegate(final Dispatcher dispatcher,
                               final SystemUserUtil systemUserUtil,

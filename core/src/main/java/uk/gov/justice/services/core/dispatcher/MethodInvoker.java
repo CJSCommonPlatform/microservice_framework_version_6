@@ -25,25 +25,27 @@ public class MethodInvoker {
     private MethodInvoker() {
     }
 
+    private MethodInvoker(EnvelopePayloadTypeConverter envelopePayloadTypeConverter, JsonEnvelopeRepacker envelopeRepacker) {
+        this.envelopePayloadTypeConverter = envelopePayloadTypeConverter;
+        this.envelopeRepacker = envelopeRepacker;
+    }
+
     public static MethodInvoker createMethodInvoker(final EnvelopePayloadTypeConverter envelopePayloadTypeConverter,
                                                     final JsonEnvelopeRepacker envelopeRepacker) {
-        final MethodInvoker methodInvoker = new MethodInvoker();
-        methodInvoker.envelopePayloadTypeConverter = envelopePayloadTypeConverter;
-        methodInvoker.envelopeRepacker = envelopeRepacker;
-        return methodInvoker;
+        return new MethodInvoker(envelopePayloadTypeConverter, envelopeRepacker);
     }
 
     public JsonEnvelope invoke(final HandlerMethod handlerMethod, final JsonEnvelope inputEnvelope) {
 
-        final Class<?> payloadClass = handlerMethod.getEnvelopeParameterType();
+        final Class<?> payloadClass = handlerMethod.getPayloadType();
 
         return toJsonEnvelope(
                 toJsonValueEnvelope(
                         handlerMethod.execute(
-                                toTargetEnvelopType(inputEnvelope, payloadClass))));
+                                toTargetEnvelopeType(inputEnvelope, payloadClass))));
     }
 
-    private Envelope<?> toTargetEnvelopType(final JsonEnvelope envelope, final Class<?> payloadClass) {
+    private Envelope<?> toTargetEnvelopeType(final JsonEnvelope envelope, final Class<?> payloadClass) {
         return envelopePayloadTypeConverter.convert(envelope, payloadClass);
     }
 

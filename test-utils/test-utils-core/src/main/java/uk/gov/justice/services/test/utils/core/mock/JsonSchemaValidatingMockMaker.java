@@ -6,6 +6,7 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.envelope.EnvelopeValidator;
 import uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler;
 import uk.gov.justice.services.core.json.DefaultJsonSchemaValidatorFactory;
+import uk.gov.justice.services.core.mapping.NameToMediaTypeConverter;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -32,6 +33,7 @@ public class JsonSchemaValidatingMockMaker implements MockMaker {
     private final EnvelopeValidator envelopeValidator = new EnvelopeValidator(
             new DefaultJsonSchemaValidatorFactory().getDefaultJsonSchemaValidator(),
             new RethrowingValidationExceptionHandler(),
+            new NameToMediaTypeConverter(),
             new ObjectMapperProducer().objectMapper());
 
 

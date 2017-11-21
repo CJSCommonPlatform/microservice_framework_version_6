@@ -1,9 +1,13 @@
 package uk.gov.justice.services.core.json;
 
 import static org.mockito.Matchers.argThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.skyscreamer.jsonassert.JSONCompare.compareJSON;
+
+import uk.gov.justice.services.core.mapping.MediaType;
+import uk.gov.justice.services.core.mapping.NameToMediaTypeConverter;
 
 import org.everit.json.schema.Schema;
 import org.hamcrest.Description;
@@ -19,12 +23,15 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.slf4j.Logger;
 
 /**
- * Unit tests for the {@link DefaultJsonSchemaValidator} class.
+ * Unit tests for the {@link FileBasedJsonSchemaValidator} class.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class DefaultJsonSchemaValidatorTest {
+public class FileBasedJsonSchemaValidatorTest {
 
     private static final String TEST_SCHEMA_NAME = "test-schema";
+
+    @Mock
+    private Schema schema;
 
     @Mock
     private Logger logger;
@@ -33,47 +40,41 @@ public class DefaultJsonSchemaValidatorTest {
     private JsonSchemaLoader loader;
 
     @Mock
-    private Schema schema;
+    private PayloadExtractor payloadExtractor;
+
+    @Mock
+    private NameToMediaTypeConverter nameToMediaTypeConverter;
 
     @InjectMocks
-    private DefaultJsonSchemaValidator validator;
+    private FileBasedJsonSchemaValidator validator;
 
     @Test
     public void shouldValidateUsingCorrectSchema() {
         final String json = "{\"rhubarb\": \"value\"}";
-        when(loader.loadSchema(TEST_SCHEMA_NAME)).thenReturn(schema);
+        final MediaType mediaType = mock(MediaType.class);
 
-        validator.validate(json, TEST_SCHEMA_NAME);
+        when(nameToMediaTypeConverter.convert(mediaType)).thenReturn(TEST_SCHEMA_NAME);
+        when(loader.loadSchema(TEST_SCHEMA_NAME)).thenReturn(schema);
+        when(payloadExtractor.extractPayloadFrom(json)).thenReturn(new JSONObject(json));
+
+        validator.validate(json, mediaType);
 
         verify(schema).validate(argThat(equalToJSONObject(new JSONObject(json))));
-        assertLogStatement();
+        verify(logger).trace("Performing schema validation for: {}", "test-schema");
     }
 
     @Test
     public void shouldAcceptDateTimeWithSingleDigitInSecondsFraction() {
         final String json = "{\"testField\": \"value\", \"created\": \"2011-12-03T10:15:30.1Z\"}";
+        final MediaType mediaType = mock(MediaType.class);
+
+        when(nameToMediaTypeConverter.convert(mediaType)).thenReturn(TEST_SCHEMA_NAME);
         when(loader.loadSchema(TEST_SCHEMA_NAME)).thenReturn(schema);
+        when(payloadExtractor.extractPayloadFrom(json)).thenReturn(new JSONObject(json));
 
-        validator.validate(json, TEST_SCHEMA_NAME);
+        validator.validate(json, mediaType);
 
-        assertLogStatement();
-    }
-
-    @Test
-    public void shouldRemoveMetadataFieldFromJsonToBeValidated() {
-        final String json = "{\"rhubarb\": \"value\"}";
-        final String jsonWithMetadata = "{\"_metadata\": {}, \"rhubarb\": \"value\"}";
-        when(loader.loadSchema(TEST_SCHEMA_NAME)).thenReturn(schema);
-
-        validator.validate(jsonWithMetadata, TEST_SCHEMA_NAME);
-
-        verify(schema).validate(argThat(equalToJSONObject(new JSONObject(json))));
-        assertLogStatement();
-    }
-
-    private void assertLogStatement() {
         verify(logger).trace("Performing schema validation for: {}", "test-schema");
-
     }
 
     private Matcher<JSONObject> equalToJSONObject(final JSONObject jsonObject) {

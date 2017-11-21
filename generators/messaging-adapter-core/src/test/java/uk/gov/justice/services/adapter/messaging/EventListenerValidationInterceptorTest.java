@@ -11,6 +11,8 @@ import static uk.gov.justice.services.messaging.jms.HeaderConstants.JMS_HEADER_C
 
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonValidationLoggerHelper;
+import uk.gov.justice.services.core.mapping.MediaType;
+import uk.gov.justice.services.core.mapping.NameToMediaTypeConverter;
 import uk.gov.justice.services.event.buffer.api.EventFilter;
 import uk.gov.justice.services.messaging.logging.JmsMessageLoggerHelper;
 
@@ -44,6 +46,9 @@ public class EventListenerValidationInterceptorTest {
     private InvocationContext invocationContext;
 
     @Mock
+    private NameToMediaTypeConverter nameToMediaTypeConverter;
+
+    @Mock
     private JsonValidationLoggerHelper jsonValidationLoggerHelper;
 
     @Mock
@@ -71,15 +76,17 @@ public class EventListenerValidationInterceptorTest {
         final TextMessage message = mock(TextMessage.class);
         final String payload = "test payload";
         final String name = "test-name";
+        final MediaType mediaType = mock(MediaType.class);
 
         when(message.getText()).thenReturn(payload);
         when(message.getStringProperty(JMS_HEADER_CPPNAME)).thenReturn(name);
         when(eventFilter.accepts(name)).thenReturn(true);
+        when(nameToMediaTypeConverter.convert(name)).thenReturn(mediaType);
         when(invocationContext.getParameters()).thenReturn(new Object[]{message});
 
         interceptor.validate(invocationContext);
 
-        verify(validator).validate(payload, name);
+        verify(validator).validate(payload, mediaType);
     }
 
     @Test
@@ -103,12 +110,14 @@ public class EventListenerValidationInterceptorTest {
         final TextMessage message = mock(TextMessage.class);
         final String payload = "test payload";
         final String name = "test-name";
+        final MediaType mediaType = mock(MediaType.class);
 
         when(message.getText()).thenReturn(payload);
         when(message.getStringProperty(JMS_HEADER_CPPNAME)).thenReturn(name);
         when(eventFilter.accepts(name)).thenReturn(true);
+        when(nameToMediaTypeConverter.convert(name)).thenReturn(mediaType);
         when(invocationContext.getParameters()).thenReturn(new Object[]{message});
-        doThrow(mock(ValidationException.class)).when(validator).validate(payload, name);
+        doThrow(mock(ValidationException.class)).when(validator).validate(payload, mediaType);
 
         interceptor.validate(invocationContext);
     }

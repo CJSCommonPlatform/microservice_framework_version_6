@@ -2,9 +2,9 @@ package uk.gov.justice.services.adapters.rest.generator;
 
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
-import static org.apache.commons.lang.Validate.isTrue;
-import static org.apache.commons.lang.Validate.notEmpty;
-import static org.apache.commons.lang.Validate.notNull;
+import static org.apache.commons.lang3.Validate.isTrue;
+import static org.apache.commons.lang3.Validate.notEmpty;
+import static org.apache.commons.lang3.Validate.notNull;
 import static org.raml.model.ActionType.DELETE;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.PATCH;
@@ -17,7 +17,7 @@ import static uk.gov.justice.services.generators.commons.helper.Names.packageNam
 
 import uk.gov.justice.raml.core.Generator;
 import uk.gov.justice.raml.core.GeneratorConfig;
-import uk.gov.justice.services.generators.commons.validator.ResponseContentTypeRamlValidator;
+import uk.gov.justice.services.generators.commons.mapping.MediaTypeToSchemaIdGenerator;
 import uk.gov.justice.services.generators.commons.validator.ActionMappingRamlValidator;
 import uk.gov.justice.services.generators.commons.validator.CompositeRamlValidator;
 import uk.gov.justice.services.generators.commons.validator.ContainsActionsRamlValidator;
@@ -25,6 +25,7 @@ import uk.gov.justice.services.generators.commons.validator.ContainsResourcesRam
 import uk.gov.justice.services.generators.commons.validator.MultipartHasFormParameters;
 import uk.gov.justice.services.generators.commons.validator.RamlValidator;
 import uk.gov.justice.services.generators.commons.validator.RequestContentTypeRamlValidator;
+import uk.gov.justice.services.generators.commons.validator.ResponseContentTypeRamlValidator;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -58,6 +59,7 @@ public class RestAdapterGenerator implements Generator {
         final JaxRsImplementationGenerator implementationGenerator = new JaxRsImplementationGenerator(configuration);
         final JaxRsApplicationCodeGenerator applicationGenerator = new JaxRsApplicationCodeGenerator(configuration);
         final ActionMappingGenerator actionMappingGenerator = new ActionMappingGenerator();
+        final MediaTypeToSchemaIdGenerator mediaTypeToSchemaIdGenerator = new MediaTypeToSchemaIdGenerator();
 
         writeToSubPackage(interfaceGenerator.generateFor(raml), configuration, RESOURCE_PACKAGE_NAME);
         final List<String> implementationNames = writeToSubPackage(
@@ -65,6 +67,8 @@ public class RestAdapterGenerator implements Generator {
 
         writeToBasePackage(applicationGenerator.generateFor(raml, implementationNames), configuration);
         writeToSubPackage(actionMappingGenerator.generateFor(raml), configuration, MAPPER_PACKAGE_NAME);
+
+        mediaTypeToSchemaIdGenerator.generateMediaTypeToSchemaIdMapper(raml, configuration);
     }
 
     private void validate(final GeneratorConfig configuration) {

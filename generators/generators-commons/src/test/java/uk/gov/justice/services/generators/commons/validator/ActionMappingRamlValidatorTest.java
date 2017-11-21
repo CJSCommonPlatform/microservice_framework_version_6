@@ -39,8 +39,8 @@ public class ActionMappingRamlValidatorTest {
                                         .with(mapping()
                                                 .withName("context.someAction")
                                                 .withRequestType("application/vnd.somemediatype1+json"))
-                                        .withMediaType("application/vnd.somemediatype1+json", "json/schema/somemediatype1.json")
-                                        .withMediaType("application/vnd.somemediatype2+json", "json/schema/somemediatype2.json")
+                                        .withMediaTypeWithDefaultSchema("application/vnd.somemediatype1+json")
+                                        .withMediaTypeWithDefaultSchema("application/vnd.somemediatype2+json")
                                 )
 
                         ).build());
@@ -58,8 +58,8 @@ public class ActionMappingRamlValidatorTest {
                                         .with(mapping()
                                                 .withName("context.someAction")
                                                 .withRequestType("application/vnd.somemediatype1+json"))
-                                        .withMediaType("application/vnd.somemediatype1+json", "json/schema/somemediatype1.json")
-                                        .withMediaType("application/vnd.somemediatype2+json", "json/schema/somemediatype2.json")
+                                        .withMediaTypeWithDefaultSchema("application/vnd.somemediatype1+json")
+                                        .withMediaTypeWithDefaultSchema("application/vnd.somemediatype2+json")
                                 )
 
                         ).build());
@@ -77,8 +77,8 @@ public class ActionMappingRamlValidatorTest {
                                         .with(mapping()
                                                 .withName("context.someAction")
                                                 .withRequestType("application/vnd.somemediatype1+json"))
-                                        .withMediaType("application/vnd.somemediatype1+json", "json/schema/somemediatype1.json")
-                                        .withMediaType("application/vnd.somemediatype2+json", "json/schema/somemediatype2.json")
+                                        .withMediaTypeWithDefaultSchema("application/vnd.somemediatype1+json")
+                                        .withMediaTypeWithDefaultSchema("application/vnd.somemediatype2+json")
                                 )
 
                         ).build());
@@ -96,8 +96,8 @@ public class ActionMappingRamlValidatorTest {
                                         .with(mapping()
                                                 .withName("context.someAction")
                                                 .withRequestType("application/vnd.somemediatype1+json"))
-                                        .withMediaType("application/vnd.somemediatype1+json", "json/schema/somemediatype1.json")
-                                        .withMediaType("application/vnd.somemediatype2+json", "json/schema/somemediatype2.json")
+                                        .withMediaTypeWithDefaultSchema("application/vnd.somemediatype1+json")
+                                        .withMediaTypeWithDefaultSchema("application/vnd.somemediatype2+json")
                                 )
 
                         ).build());

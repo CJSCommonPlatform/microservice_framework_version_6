@@ -226,7 +226,7 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
         generator.run(
                 restRamlWithCommandApiDefaults()
                         .with(resource("/pathabc/{anId}").with(httpAction().withHttpActionType(POST)
-                                .withMediaType("application/vnd.ctx.defcmd+json", "json/schema/ctx.defcmd.json")
+                                .withMediaTypeWithDefaultSchema("application/vnd.ctx.defcmd+json")
                                 .withResponseTypes("application/vnd.ctx.response+json")
                                 .with(mapping()
                                         .withName("action1")
@@ -258,7 +258,7 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
         generator.run(
                 restRamlWithCommandApiDefaults()
                         .with(resource("/pathabc/{anId}").with(httpAction().withHttpActionType(PUT)
-                                .withMediaType("application/vnd.ctx.defcmd+json", "json/schema/ctx.defcmd.json")
+                                .withMediaTypeWithDefaultSchema("application/vnd.ctx.defcmd+json")
                                 .with(mapping()
                                         .withName("action1")
                                         .withRequestType("application/vnd.ctx.defcmd+json"))))
@@ -288,7 +288,7 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
         generator.run(
                 restRamlWithCommandApiDefaults()
                         .with(resource("/pathabc/{anId}").with(httpAction().withHttpActionType(PUT)
-                                .withMediaType("application/vnd.ctx.defcmd+json", "json/schema/ctx.defcmd.json")
+                                .withMediaTypeWithDefaultSchema("application/vnd.ctx.defcmd+json")
                                 .withResponseTypes("application/vnd.ctx.response+json")
                                 .with(mapping()
                                         .withName("action1")
@@ -320,7 +320,7 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
         generator.run(
                 restRamlWithCommandApiDefaults()
                         .with(resource("/pathabc/{anId}").with(httpAction().withHttpActionType(PATCH)
-                                .withMediaType("application/vnd.ctx.defcmd+json", "json/schema/ctx.defcmd.json")
+                                .withMediaTypeWithDefaultSchema("application/vnd.ctx.defcmd+json")
                                 .with(mapping()
                                         .withName("action1")
                                         .withRequestType("application/vnd.ctx.defcmd+json"))))
@@ -350,7 +350,7 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
         generator.run(
                 restRamlWithCommandApiDefaults()
                         .with(resource("/pathabc/{anId}").with(httpAction().withHttpActionType(PATCH)
-                                .withMediaType("application/vnd.ctx.defcmd+json", "json/schema/ctx.defcmd.json")
+                                .withMediaTypeWithDefaultSchema("application/vnd.ctx.defcmd+json")
                                 .withResponseTypes("application/vnd.ctx.response+json")
                                 .with(mapping()
                                         .withName("action1")
@@ -383,7 +383,7 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
         generator.run(
                 restRamlWithCommandApiDefaults()
                         .with(resource("/pathabc/{anId}").with(httpAction().withHttpActionType(DELETE)
-                                .withMediaType("application/vnd.ctx.defcmd+json", "json/schema/ctx.defcmd.json")
+                                .withMediaTypeWithDefaultSchema("application/vnd.ctx.defcmd+json")
                                 .with(mapping()
                                         .withName("action1")
                                         .withRequestType("application/vnd.ctx.defcmd+json"))))
@@ -444,7 +444,7 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
         generator.run(
                 restRamlWithCommandApiDefaults()
                         .with(resource("/pathabc/{anId}").with(httpAction().withHttpActionType(POST)
-                                .withMediaType("application/vnd.ctx.defcmd+json", "json/schema/ctx.defcmd.json")
+                                .withMediaTypeWithDefaultSchema("application/vnd.ctx.defcmd+json")
                                 .with(mapping()
                                         .withName("action1")
                                         .withRequestType("application/vnd.ctx.defcmd+json"))))

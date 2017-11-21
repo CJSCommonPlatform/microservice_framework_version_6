@@ -7,6 +7,7 @@ import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandler;
 import uk.gov.justice.services.core.envelope.EnvelopeValidator;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
+import uk.gov.justice.services.core.mapping.NameToMediaTypeConverter;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
@@ -34,6 +35,9 @@ public class SenderProducer {
     JsonSchemaValidator jsonSchemaValidator;
 
     @Inject
+    NameToMediaTypeConverter nameToMediaTypeConverter;
+
+    @Inject
     EnvelopeValidationExceptionHandler envelopeValidationExceptionHandler;
 
     /**
@@ -47,7 +51,15 @@ public class SenderProducer {
      */
     @Produces
     public Sender produceSender(final InjectionPoint injectionPoint) {
-        return new DispatcherDelegate(dispatcherCache.dispatcherFor(injectionPoint), systemUserUtil,
-                new EnvelopeValidator(jsonSchemaValidator, envelopeValidationExceptionHandler, objectMapper));
+        final EnvelopeValidator envelopeValidator = new EnvelopeValidator(
+                jsonSchemaValidator,
+                envelopeValidationExceptionHandler,
+                nameToMediaTypeConverter,
+                objectMapper);
+
+        return new DispatcherDelegate(
+                dispatcherCache.dispatcherFor(injectionPoint),
+                systemUserUtil,
+                envelopeValidator);
     }
 }

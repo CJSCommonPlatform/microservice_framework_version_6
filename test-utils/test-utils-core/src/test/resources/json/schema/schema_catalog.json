@@ -1,0 +1,14 @@
+{
+  "name": "test catalog",
+  "groups": [
+    {
+      "name": "test",
+      "schemas": [
+        {
+          "id": "http://justice.gov.uk/schemas/test/example.get-recipe.json",
+          "location": "example.get-recipe.json"
+        }
+      ]
+    }
+  ]
+}

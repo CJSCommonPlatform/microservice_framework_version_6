@@ -22,6 +22,8 @@ import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationException;
 import uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
+import uk.gov.justice.services.core.mapping.MediaType;
+import uk.gov.justice.services.core.mapping.NameToMediaTypeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.UUID;
@@ -59,6 +61,8 @@ public class SenderProducerTest {
     @Mock
     private JsonSchemaValidator jsonSchemaValidator;
 
+    @Mock
+    private NameToMediaTypeConverter nameToMediaTypeConverter;
 
     @InjectMocks
     private SenderProducer senderProducer;
@@ -126,7 +130,7 @@ public class SenderProducerTest {
     @Test
     public void shouldThrowExceptionIfResponseNotValidAgainstSchema() throws Exception {
         doThrow(new ValidationException(mock(Schema.class), "Message not valid against schema", "keyword", "location"))
-                .when(jsonSchemaValidator).validate(any(String.class), any(String.class));
+                .when(jsonSchemaValidator).validate(any(String.class), any(MediaType.class));
 
 
         senderProducer.envelopeValidationExceptionHandler = new RethrowingValidationExceptionHandler();

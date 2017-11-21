@@ -1,5 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/example/query/view/example.query-recipes.json",
   "type": "object",
   "properties": {
     "pagesize": {

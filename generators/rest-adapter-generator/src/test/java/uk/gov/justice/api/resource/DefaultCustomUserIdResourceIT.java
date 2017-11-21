@@ -7,6 +7,9 @@ import static org.junit.Assert.assertThat;
 
 import uk.gov.justice.api.CustomApiRestExampleApplication;
 import uk.gov.justice.api.mapper.DefaultCustomApiRestExampleCustomUserIdResourceActionMapper;
+import uk.gov.justice.api.mapper.RestAdapterGeneratorMediaTypeToSchemaIdMapper;
+import uk.gov.justice.schema.catalog.CatalogProducer;
+import uk.gov.justice.schema.service.SchemaCatalogService;
 import uk.gov.justice.services.adapter.rest.application.CommonProviders;
 import uk.gov.justice.services.adapter.rest.application.DefaultCommonProviders;
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
@@ -24,15 +27,20 @@ import uk.gov.justice.services.adapter.rest.processor.response.AcceptedStatusNoE
 import uk.gov.justice.services.adapter.rest.processor.response.OkStatusEnvelopeEntityResponseStrategy;
 import uk.gov.justice.services.adapter.rest.processor.response.OkStatusEnvelopePayloadEntityResponseStrategy;
 import uk.gov.justice.services.adapter.rest.processor.response.ResponseStrategyHelper;
-import uk.gov.justice.services.common.configuration.GlobalValueProducer;
 import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
+import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
-import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
-
+import uk.gov.justice.services.core.json.FileBasedJsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
+import uk.gov.justice.services.core.json.PayloadExtractor;
+import uk.gov.justice.services.core.json.SchemaCatalogAwareJsonSchemaValidator;
+import uk.gov.justice.services.core.mapping.DefaultSchemaIdMappingCache;
+import uk.gov.justice.services.core.mapping.MediaTypeToSchemaIdMapper;
+import uk.gov.justice.services.core.mapping.NameToMediaTypeConverter;
+import uk.gov.justice.services.core.mapping.SchemaIdMappingObserver;
 import uk.gov.justice.services.generators.test.utils.interceptor.RecordingInterceptorChainProcessor;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -122,8 +130,7 @@ public class DefaultCustomUserIdResourceIT {
             JsonSchemaValidationInterceptor.class,
             LoggerRequestDataFilter.class,
             TestServiceContextNameProvider.class,
-            DefaultJsonSchemaValidator.class,
-            JsonSchemaLoader.class,
+            FileBasedJsonSchemaValidator.class,
             DefaultCustomApiRestExampleCustomUserIdResourceActionMapper.class,
             BasicActionMapperHelper.class,
             LoggerProducer.class,
@@ -133,9 +140,24 @@ public class DefaultCustomUserIdResourceIT {
             DefaultFileInputDetailsFactory.class,
             ResponseStrategyCache.class,
             ValidParameterCollectionBuilderFactory.class,
+            JsonSchemaLoader.class,
             DefaultTraceLogger.class,
             DefaultHttpTraceLoggerHelper.class,
-            DefaultFileSystemUrlResolverStrategy.class
+            DefaultFileSystemUrlResolverStrategy.class,
+
+            RestAdapterGeneratorMediaTypeToSchemaIdMapper.class,
+            SchemaCatalogAwareJsonSchemaValidator.class,
+            PayloadExtractor.class,
+            NameToMediaTypeConverter.class,
+            DefaultSchemaIdMappingCache.class,
+            SchemaIdMappingObserver.class,
+            MediaTypeToSchemaIdMapper.class,
+            BeanInstantiater.class,
+            MediaTypeToSchemaIdMapper.class,
+
+            CatalogProducer.class,
+            SchemaCatalogService.class
+
     })
     public WebApp war() {
         return new WebApp()

@@ -53,13 +53,7 @@ public class DispatcherDelegate implements Requester, Sender {
     }
 
     @Override
-    public void send(final JsonEnvelope envelope) {
-        envelopeValidator.validate(envelope);
-        dispatcher.dispatch(envelope);
-    }
-
-    @Override
-    public <T> void send(final Envelope<T> envelope) {
+    public void send(final Envelope<?> envelope) {
 
         final Envelope<JsonValue> jsonValueEnvelope = envelopePayloadTypeConverter.convert(envelope, JsonValue.class);
         final JsonEnvelope jsonEnvelope = jsonEnvelopeRepacker.repack(jsonValueEnvelope);

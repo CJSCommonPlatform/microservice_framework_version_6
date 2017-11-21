@@ -11,16 +11,9 @@ public interface Sender {
     /**
      * Sends envelope to the next component.  The correct sender is injected by the framework.
      *
-     * @param envelope JsonEnvelope that needs to be sent.
-     */
-    void send(final JsonEnvelope envelope);
-
-    /**
-     * Sends envelope to the next component.  The correct sender is injected by the framework.
-     *
      * @param envelope with payload T that needs to be sent.
      */
-    <T> void send(final Envelope<T> envelope);
+    void send(final Envelope<?> envelope);
 
     /**
      * Sends envelope to the next component setting system user id.

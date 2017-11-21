@@ -112,6 +112,10 @@ public class DispatcherDelegateTest {
 
         final JsonEnvelope envelope = mock(JsonEnvelope.class);
 
+        when(envelopePayloadTypeConverter.convert(any(Envelope.class), eq(JsonValue.class)))
+                .thenReturn(envelope);
+        when(jsonEnvelopeRepacker.repack(envelope)).thenReturn(envelope);
+
         dispatcherDelegate.send(envelope);
 
         verify(dispatcher).dispatch(envelope);
@@ -121,6 +125,10 @@ public class DispatcherDelegateTest {
     public void sendMethodShouldValidateEnvelope() throws Exception {
 
         final JsonEnvelope envelope = mock(JsonEnvelope.class);
+
+        when(envelopePayloadTypeConverter.convert(any(Envelope.class), eq(JsonValue.class)))
+                .thenReturn(envelope);
+        when(jsonEnvelopeRepacker.repack(envelope)).thenReturn(envelope);
 
         dispatcherDelegate.send(envelope);
 

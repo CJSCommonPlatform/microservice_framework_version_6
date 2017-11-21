@@ -1,10 +1,13 @@
 package uk.gov.justice.services.adapter.messaging;
 
 import static java.lang.String.format;
+import static java.util.Optional.of;
 import static uk.gov.justice.services.messaging.jms.HeaderConstants.JMS_HEADER_CPPNAME;
 
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonValidationLoggerHelper;
+import uk.gov.justice.services.core.mapping.MediaType;
+import uk.gov.justice.services.core.mapping.NameToMediaTypeConverter;
 import uk.gov.justice.services.messaging.logging.JmsMessageLoggerHelper;
 
 import javax.inject.Inject;
@@ -28,13 +31,16 @@ public class JsonSchemaValidationInterceptor {
     JmsParameterChecker parametersChecker;
 
     @Inject
-    JsonSchemaValidator validator;
-
-    @Inject
     JsonValidationLoggerHelper jsonValidationLoggerHelper;
 
     @Inject
     JmsMessageLoggerHelper jmsMessageLoggerHelper;
+
+    @Inject
+    JsonSchemaValidator jsonSchemaValidator;
+
+    @Inject
+    NameToMediaTypeConverter nameToMediaTypeConverter;
 
     @AroundInvoke
     protected Object validate(final InvocationContext context) throws Exception {
@@ -56,7 +62,10 @@ public class JsonSchemaValidationInterceptor {
 
     private void validate(final TextMessage message) throws JMSException {
         try {
-            validator.validate(message.getText(), message.getStringProperty(JMS_HEADER_CPPNAME));
+            final String name = message.getStringProperty(JMS_HEADER_CPPNAME);
+            final MediaType mediaType = nameToMediaTypeConverter.convert(name);
+
+            jsonSchemaValidator.validate(message.getText(), name, of(mediaType));
         } catch (ValidationException validationException) {
             logger.debug(format("JSON schema validation has failed for %s due to %s",
                     jmsMessageLoggerHelper.toJmsTraceString(message),

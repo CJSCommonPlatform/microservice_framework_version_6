@@ -40,7 +40,10 @@ import uk.gov.justice.services.core.dispatcher.EnvelopePayloadTypeConverter;
 import uk.gov.justice.services.core.dispatcher.JsonEnvelopeRepacker;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
+import uk.gov.justice.services.core.envelope.EnvelopeInspector;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandlerProducer;
+import uk.gov.justice.services.core.envelope.EnvelopeValidator;
+import uk.gov.justice.services.core.envelope.MediaTypeProvider;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.extension.ServiceComponentScanner;
@@ -54,6 +57,11 @@ import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
 import uk.gov.justice.services.core.json.DefaultJsonValidationLoggerHelper;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
+import uk.gov.justice.services.core.mapping.ActionNameToMediaTypesMappingObserver;
+import uk.gov.justice.services.core.mapping.DefaultMediaTypesMappingCache;
+import uk.gov.justice.services.core.mapping.MediaType;
+import uk.gov.justice.services.core.mapping.NameToMediaTypeConverter;
+import uk.gov.justice.services.core.mapping.SchemaIdMappingObserver;
 import uk.gov.justice.services.core.requester.RequesterProducer;
 import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.event.buffer.api.AllowAllEventFilter;
@@ -69,6 +77,7 @@ import uk.gov.justice.services.test.utils.common.envelope.TestEnvelopeRecorder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.annotation.Resource;
@@ -96,9 +105,6 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
 
     @Inject
     private Service2EventListenerEventFilter recordingEventListenerEventFilter;
-
-    @Inject
-    private TestService2EventListenerPeopleEventJmsListener eventListenerPeopleEventJmsListener;
 
     @Inject
     private EventListenerValidationInterceptor eventListenerValidationInterceptor;
@@ -171,7 +177,19 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
             DefaultTraceLogger.class,
 
             DefaultFileSystemUrlResolverStrategy.class,
-            DefaultJsonValidationLoggerHelper.class
+            DefaultJsonValidationLoggerHelper.class,
+
+            NameToMediaTypeConverter.class,
+            DefaultMediaTypesMappingCache.class,
+            ActionNameToMediaTypesMappingObserver.class,
+            SchemaIdMappingObserver.class,
+
+            SenderProducer.class,
+            MediaTypeProvider.class,
+            EnvelopeValidator.class,
+            EnvelopeInspector.class,
+            RequesterProducer.class
+
     })
     public WebApp war() {
         return new WebApp()
@@ -270,10 +288,19 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
 
         private String validatedEventName;
 
+        @Inject
+        NameToMediaTypeConverter nameToMediaTypeConverter;
+
         @Override
-        public void validate(final String payload, final String name) {
-            this.validatedEventName = name;
+        public void validate(final String payload, final String actionName) {
+            this.validatedEventName = actionName;
         }
+
+        @Override
+        public void validate(final String payload, final String actionName, final Optional<MediaType> mediaType) {
+            this.validatedEventName = actionName;
+        }
+
 
         public String validatedEventName() {
             return validatedEventName;

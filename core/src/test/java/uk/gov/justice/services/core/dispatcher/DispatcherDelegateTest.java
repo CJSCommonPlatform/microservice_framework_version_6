@@ -6,7 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import uk.gov.justice.services.core.envelope.EnvelopeValidator;
+import uk.gov.justice.services.core.envelope.RequestResponseEnvelopeValidator;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
@@ -34,13 +34,13 @@ public class DispatcherDelegateTest {
     private EnvelopePayloadTypeConverter envelopePayloadTypeConverter;
 
     @Mock
-    private EnvelopeValidator envelopeValidator;
+    private RequestResponseEnvelopeValidator requestResponseEnvelopeValidator;
 
     private DispatcherDelegate dispatcherDelegate;
 
     @Before
     public void setUp() throws Exception {
-        dispatcherDelegate = new DispatcherDelegate(dispatcher, systemUserUtil, envelopeValidator, envelopePayloadTypeConverter, jsonEnvelopeRepacker);
+        dispatcherDelegate = new DispatcherDelegate(dispatcher, systemUserUtil, requestResponseEnvelopeValidator, envelopePayloadTypeConverter, jsonEnvelopeRepacker);
     }
 
     @Test
@@ -73,7 +73,6 @@ public class DispatcherDelegateTest {
         verify(dispatcher).dispatch(any(JsonEnvelope.class));
     }
 
-
     @Test
     public void requestMethodShouldValidateEnvelope() throws Exception {
         final JsonEnvelope envelope = mock(JsonEnvelope.class);
@@ -87,7 +86,7 @@ public class DispatcherDelegateTest {
 
         dispatcherDelegate.request(envelope);
 
-        verify(envelopeValidator).validate(response);
+        verify(requestResponseEnvelopeValidator).validateResponse(response);
     }
 
     @Test
@@ -104,7 +103,7 @@ public class DispatcherDelegateTest {
 
         dispatcherDelegate.request(envelope, Object.class);
 
-        verify(envelopeValidator).validate(response);
+        verify(requestResponseEnvelopeValidator).validateResponse(response);
     }
 
     @Test
@@ -132,7 +131,7 @@ public class DispatcherDelegateTest {
 
         dispatcherDelegate.send(envelope);
 
-        verify(envelopeValidator).validate(envelope);
+        verify(requestResponseEnvelopeValidator).validateRequest(envelope);
     }
 
     @Test
@@ -146,7 +145,6 @@ public class DispatcherDelegateTest {
         verify(dispatcher).dispatch(envelopeWithSysUserId);
     }
 
-
     @Test
     public void requestAsAdminMethodShouldValidateResponse() {
         final JsonEnvelope response = mock(JsonEnvelope.class);
@@ -154,9 +152,8 @@ public class DispatcherDelegateTest {
 
         dispatcherDelegate.requestAsAdmin(mock(JsonEnvelope.class));
 
-        verify(envelopeValidator).validate(response);
+        verify(requestResponseEnvelopeValidator).validateResponse(response);
     }
-
 
     @Test
     public void sendAsAdminMethodShouldDelegateEnvelopeReturnedBySystemUserUtil() {
@@ -175,8 +172,6 @@ public class DispatcherDelegateTest {
 
         dispatcherDelegate.sendAsAdmin(envelope);
 
-        verify(envelopeValidator).validate(envelope);
+        verify(requestResponseEnvelopeValidator).validateRequest(envelope);
     }
-
-
 }

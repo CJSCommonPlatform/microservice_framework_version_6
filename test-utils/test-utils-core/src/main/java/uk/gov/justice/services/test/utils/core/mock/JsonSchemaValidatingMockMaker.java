@@ -3,9 +3,15 @@ package uk.gov.justice.services.test.utils.core.mock;
 import static java.util.Optional.empty;
 
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.core.envelope.EnvelopeInspector;
+import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandler;
 import uk.gov.justice.services.core.envelope.EnvelopeValidator;
+import uk.gov.justice.services.core.envelope.MediaTypeProvider;
+import uk.gov.justice.services.core.envelope.RequestResponseEnvelopeValidator;
 import uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler;
 import uk.gov.justice.services.core.json.DefaultJsonSchemaValidatorFactory;
+import uk.gov.justice.services.core.json.MediaTypesMappingCacheMock;
+import uk.gov.justice.services.core.mapping.NameToMediaTypeConverter;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -13,6 +19,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import java.util.List;
 import java.util.Optional;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.mockito.internal.creation.cglib.CglibMockMaker;
 import org.mockito.invocation.Invocation;
 import org.mockito.invocation.MockHandler;
@@ -29,10 +36,21 @@ public class JsonSchemaValidatingMockMaker implements MockMaker {
 
     private final MockMaker mockMakerDelegate = new CglibMockMaker();
 
+    private final EnvelopeValidationExceptionHandler envelopeValidationExceptionHandler = new RethrowingValidationExceptionHandler();
+    private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
+    private final MediaTypesMappingCacheMock mediaTypesMappingCache = new MediaTypesMappingCacheMock();
+
     private final EnvelopeValidator envelopeValidator = new EnvelopeValidator(
             new DefaultJsonSchemaValidatorFactory().getDefaultJsonSchemaValidator(),
-            new RethrowingValidationExceptionHandler(),
-            new ObjectMapperProducer().objectMapper());
+            objectMapper,
+            envelopeValidationExceptionHandler
+    );
+
+    private final RequestResponseEnvelopeValidator requestResponseEnvelopeValidator = new RequestResponseEnvelopeValidator(
+            envelopeValidator,
+            new NameToMediaTypeConverter(),
+            new MediaTypeProvider(mediaTypesMappingCache),
+            new EnvelopeInspector());
 
 
     @Override
@@ -60,7 +78,7 @@ public class JsonSchemaValidatingMockMaker implements MockMaker {
     }
 
     private void validateAgainstJsonSchema(final MethodInvocationReport methodInvocationReport) {
-        envelopeToValidateFrom(methodInvocationReport).ifPresent(envelopeValidator::validate);
+        envelopeToValidateFrom(methodInvocationReport).ifPresent(requestResponseEnvelopeValidator::validateRequest);
     }
 
     private Optional<JsonEnvelope> envelopeToValidateFrom(final MethodInvocationReport mockMethodInvocationReport) {

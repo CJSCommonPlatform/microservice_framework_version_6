@@ -1,36 +1,33 @@
 package uk.gov.justice.services.core.envelope;
 
-
-import static java.util.UUID.randomUUID;
-import static javax.json.Json.createObjectBuilder;
-import static org.hamcrest.CoreMatchers.containsString;
+import static java.util.Optional.of;
+import static javax.json.JsonValue.NULL;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.core.AllOf.allOf;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
 
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.core.json.SchemaLoadingException;
+import uk.gov.justice.services.core.mapping.MediaType;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.Metadata;
+
+import java.util.Optional;
 
 import javax.json.JsonValue;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.everit.json.schema.ValidationException;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -38,102 +35,170 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class EnvelopeValidatorTest {
 
     @Mock
-    private ObjectMapper objectMapper;
+    private JsonSchemaValidator jsonSchemaValidator;
 
     @Mock
-    private JsonSchemaValidator jsonSchemaValidator;
+    private ObjectMapper objectMapper;
 
     @Mock
     private EnvelopeValidationExceptionHandler envelopeValidationExceptionHandler;
 
+    @Captor
+    private ArgumentCaptor<EnvelopeValidationException> exceptionArgumentCaptor;
+
+
+    @InjectMocks
     private EnvelopeValidator envelopeValidator;
 
-    @Before
-    public void setUp() throws Exception {
-        envelopeValidator = new EnvelopeValidator(jsonSchemaValidator, envelopeValidationExceptionHandler, objectMapper);
+    @Test
+    public void shouldValidateThePayloadOfAJsonEnvelope() throws Exception {
+
+        final String actionName = "example.action-name";
+        final Optional<MediaType> mediaType = of(new MediaType("application/vnd.example.action-name+json"));
+        final String payloadJson = "{\"some\": \"json\"}";
+
+        final JsonEnvelope jsonEnvelope = mock(JsonEnvelope.class);
+        final JsonValue payload = mock(JsonValue.class);
+
+        when(jsonEnvelope.payload()).thenReturn(payload);
+        when(objectMapper.writeValueAsString(payload)).thenReturn(payloadJson);
+
+        envelopeValidator.validate(jsonEnvelope, actionName, mediaType);
+
+        verify(jsonSchemaValidator).validate(
+                payloadJson,
+                actionName,
+                mediaType);
     }
 
     @Test
-    public void shouldValidatePayloadAgainstJsonSchema() throws Exception {
-        final String metadataName = "some-name";
+    public void shouldDoNothingIfTheEnvelopePayloadIsNull() throws Exception {
 
-        final JsonEnvelope envelope = envelopeFrom(
-                metadataBuilder().withId(randomUUID()).withName(metadataName),
-                createObjectBuilder().add("someElement", "valueABC"));
+        final String actionName = "example.action-name";
+        final Optional<MediaType> mediaType = of(new MediaType("application/vnd.example.action-name+json"));
 
-        final String jsonStringRepresentation = "dummyJsonStringRepresentation";
-        when(objectMapper.writeValueAsString(envelope.payload())).thenReturn(jsonStringRepresentation);
+        final JsonEnvelope jsonEnvelope = mock(JsonEnvelope.class);
 
-        envelopeValidator.validate(envelope);
+        when(jsonEnvelope.payload()).thenReturn(NULL);
 
-        verify(jsonSchemaValidator).validate(jsonStringRepresentation, metadataName);
+        envelopeValidator.validate(jsonEnvelope, actionName, mediaType);
 
+        verifyZeroInteractions(objectMapper);
+        verifyZeroInteractions(jsonSchemaValidator);
     }
 
     @Test
-    public void shouldHandleJsonSerialisationException() throws Exception {
-        final JsonProcessingException jsonProcessingException = new JsonProcessingException("") {
-        };
-        when(objectMapper.writeValueAsString(any())).thenThrow(jsonProcessingException);
+    public void shouldHandleAJsonProcessingException() throws Exception {
 
-        envelopeValidator.validate(envelopeFrom(metadataBuilder().withId(randomUUID()).withName("name"), createObjectBuilder()));
+        final JsonProcessingException jsonProcessingException = new JsonGenerationException("Ooops");
 
-        final EnvelopeValidationException exception = handledException();
-        assertThat(exception.getCause(), is(jsonProcessingException));
-        assertThat(exception.getMessage(), is("Error serialising json."));
-    }
+        final String actionName = "example.action-name";
+        final Optional<MediaType> mediaType = of(new MediaType("application/vnd.example.action-name+json"));
 
-    @Test
-    public void shouldHandleJsonValidationException() {
-        final ValidationException jsonValidationException = new ValidationException(null, Object.class, null);
-        doThrow(jsonValidationException).when(jsonSchemaValidator).validate(anyString(), anyString());
-        envelopeValidator.validate(envelopeFrom(
-                metadataBuilder().withId(randomUUID()).withName("msgNameABC"),
-                createObjectBuilder().add("property1", "SensitiveData")));
+        final JsonEnvelope jsonEnvelope = mock(JsonEnvelope.class);
+        final JsonValue payload = mock(JsonValue.class);
 
-        final EnvelopeValidationException exception = handledException();
-        assertThat(exception.getCause(), is(jsonValidationException));
-        assertThat(exception.getMessage(), allOf(containsString("Message not valid against schema"),
-                containsString("msgNameABC"), containsString("property1"), not(containsString("SensitiveData"))));
-    }
+        when(jsonEnvelope.payload()).thenReturn(payload);
+        when(objectMapper.writeValueAsString(payload)).thenThrow(jsonProcessingException);
 
-    @Test
-    public void shouldHandleSchemaLoadingException() {
-        final SchemaLoadingException schemaLoadingException = new SchemaLoadingException("Schema does not exists");
-        doThrow(schemaLoadingException).when(jsonSchemaValidator).validate(anyString(), anyString());
-        envelopeValidator.validate(envelopeFrom(
-                metadataBuilder().withId(randomUUID()).withName("BCD"),
-                createObjectBuilder()));
+        envelopeValidator.validate(jsonEnvelope, actionName, mediaType);
 
-        final EnvelopeValidationException exception = handledException();
-        assertThat(exception.getCause(), is(schemaLoadingException));
-        assertThat(exception.getMessage(), is("Could not load json schema that matches message type BCD."));
-    }
+        verify(envelopeValidationExceptionHandler).handle(exceptionArgumentCaptor.capture());
 
-    @Test
-    public void shouldHandleExceptionIfNoMetadataInEnvelope() throws Exception {
+        final EnvelopeValidationException envelopeValidationException = exceptionArgumentCaptor.getValue();
 
-        envelopeValidator.validate(envelopeFrom((Metadata) null, createObjectBuilder().build()));
-
-        final EnvelopeValidationException exception = handledException();
-
-        assertThat(exception.getMessage(), is("Metadata not set in the envelope."));
-
-    }
-
-    @Test
-    public void shouldSkipValidationIfPayloadNULL() throws Exception {
-
-        envelopeValidator.validate(envelopeFrom(metadataBuilder().withId(randomUUID()).withName("some-name"), JsonValue.NULL));
+        assertThat(envelopeValidationException.getMessage(), is("Error serialising json."));
+        assertThat(envelopeValidationException.getCause(), is(jsonProcessingException));
 
         verifyZeroInteractions(jsonSchemaValidator);
-
     }
 
+    @Test
+    public void shouldHandleASchemaLoadingException() throws Exception {
 
-    private EnvelopeValidationException handledException() {
-        ArgumentCaptor<EnvelopeValidationException> exceptionCaptor = ArgumentCaptor.forClass(EnvelopeValidationException.class);
-        verify(envelopeValidationExceptionHandler).handle(exceptionCaptor.capture());
-        return exceptionCaptor.getValue();
+        final SchemaLoadingException schemaLoadingException = new SchemaLoadingException("Ooops");
+
+        final String actionName = "exaple.action-name";
+        final String payloadJson = "{\"some\": \"json\"}";
+        final Optional<MediaType> mediaType = of(new MediaType("application/vnd.example.action-name+json"));
+
+        final JsonEnvelope jsonEnvelope = mock(JsonEnvelope.class);
+        final JsonValue payload = mock(JsonValue.class);
+
+        when(jsonEnvelope.payload()).thenReturn(payload);
+        when(objectMapper.writeValueAsString(payload)).thenReturn(payloadJson);
+        doThrow(schemaLoadingException).when(jsonSchemaValidator).validate(
+                payloadJson,
+                actionName,
+                mediaType);
+
+        envelopeValidator.validate(jsonEnvelope, actionName, mediaType);
+
+        verify(envelopeValidationExceptionHandler).handle(exceptionArgumentCaptor.capture());
+
+        final EnvelopeValidationException envelopeValidationException = exceptionArgumentCaptor.getValue();
+
+        assertThat(envelopeValidationException.getMessage(), is("Could not load json schema that matches message type exaple.action-name."));
+        assertThat(envelopeValidationException.getCause(), is(schemaLoadingException));
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
+    public void shouldHandleAValidationException() throws Exception {
+
+        final ValidationException validationException = new ValidationException("Ooops");
+
+        final String actionName = "exaple.action-name";
+        final String payloadJson = "{\"some\": \"json\"}";
+        final Optional<MediaType> mediaType = of(new MediaType("application/vnd.example.action-name+json"));
+
+        final JsonEnvelope jsonEnvelope = mock(JsonEnvelope.class);
+        final JsonValue payload = mock(JsonValue.class);
+
+        when(jsonEnvelope.payload()).thenReturn(payload);
+        when(objectMapper.writeValueAsString(payload)).thenReturn(payloadJson);
+        when(jsonEnvelope.toObfuscatedDebugString()).thenReturn("debug-json");
+
+        doThrow(validationException).when(jsonSchemaValidator).validate(
+                payloadJson,
+                actionName,
+                mediaType);
+
+        envelopeValidator.validate(jsonEnvelope, actionName, mediaType);
+
+        verify(envelopeValidationExceptionHandler).handle(exceptionArgumentCaptor.capture());
+
+        final EnvelopeValidationException envelopeValidationException = exceptionArgumentCaptor.getValue();
+
+        assertThat(envelopeValidationException.getMessage(), is("Message not valid against schema: \ndebug-json"));
+        assertThat(envelopeValidationException.getCause(), is(validationException));
+    }
+
+    @Test
+    public void shouldHandleAEnvelopeValidationException() throws Exception {
+
+        final EnvelopeValidationException envelopeValidationException = new EnvelopeValidationException("Ooops");
+
+        final String actionName = "exaple.action-name";
+        final String payloadJson = "{\"some\": \"json\"}";
+        final Optional<MediaType> mediaType = of(new MediaType("application/vnd.example.action-name+json"));
+
+        final JsonEnvelope jsonEnvelope = mock(JsonEnvelope.class);
+        final JsonValue payload = mock(JsonValue.class);
+
+        when(jsonEnvelope.payload()).thenReturn(payload);
+        when(objectMapper.writeValueAsString(payload)).thenReturn(payloadJson);
+        when(jsonEnvelope.toObfuscatedDebugString()).thenReturn("debug-json");
+
+        doThrow(envelopeValidationException).when(jsonSchemaValidator).validate(
+                payloadJson,
+                actionName,
+                mediaType);
+
+        envelopeValidator.validate(jsonEnvelope, actionName, mediaType);
+
+        verify(envelopeValidationExceptionHandler).handle(exceptionArgumentCaptor.capture());
+
+        assertThat(exceptionArgumentCaptor.getValue(), is(envelopeValidationException));
     }
 }

@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/example/query/api/people.user-summary.json",
+  "type": "object",
+  "properties": {
+    "userUrn": {
+      "id": "/urn",
+      "type": "string"
+    }
+  },
+  "required": [
+    "userUrn"
+  ]
+}
+

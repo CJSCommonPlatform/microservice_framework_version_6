@@ -9,6 +9,7 @@ import uk.gov.justice.raml.core.Generator;
 import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.raml.jms.validator.BaseUriRamlValidator;
 import uk.gov.justice.services.generators.commons.helper.MessagingAdapterBaseUri;
+import uk.gov.justice.services.generators.commons.mapping.MediaTypeToSchemaIdGenerator;
 import uk.gov.justice.services.generators.commons.validator.CompositeRamlValidator;
 import uk.gov.justice.services.generators.commons.validator.ContainsActionsRamlValidator;
 import uk.gov.justice.services.generators.commons.validator.ContainsResourcesRamlValidator;
@@ -27,10 +28,11 @@ import org.slf4j.LoggerFactory;
  * Generates JMS endpoint classes out of RAML object
  */
 public class JmsEndpointGenerator implements Generator {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(JmsEndpointGenerator.class);
     private final MessageListenerCodeGenerator messageListenerCodeGenerator = new MessageListenerCodeGenerator();
     private final EventFilterCodeGenerator eventFilterCodeGenerator = new EventFilterCodeGenerator();
-
+    private final MediaTypeToSchemaIdGenerator mediaTypeToSchemaIdGenerator = new MediaTypeToSchemaIdGenerator();
 
     private final RamlValidator validator = new CompositeRamlValidator(
             new ContainsResourcesRamlValidator(),
@@ -55,8 +57,9 @@ public class JmsEndpointGenerator implements Generator {
                 .filter(resource -> resource.getAction(POST) != null)
                 .flatMap(resource -> generatedClassesFrom(raml, resource, configuration))
                 .forEach(generatedClass -> writeClass(configuration, configuration.getBasePackageName(), generatedClass, LOGGER));
-    }
 
+        mediaTypeToSchemaIdGenerator.generateMediaTypeToSchemaIdMapper(raml, configuration);
+    }
 
     private Stream<? extends TypeSpec> generatedClassesFrom(final Raml raml, final Resource resource, final GeneratorConfig configuration) {
         final MessagingAdapterBaseUri baseUri = new MessagingAdapterBaseUri(raml.getBaseUri());

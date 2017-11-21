@@ -1,5 +1,6 @@
 package uk.gov.justice.services.adapter.rest.interceptor;
 
+import static java.util.Optional.of;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Matchers.argThat;
@@ -11,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.adapter.rest.exception.BadRequestException;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
+import uk.gov.justice.services.core.mapping.NameToMediaTypeConverter;
 import uk.gov.justice.services.messaging.exception.InvalidMediaTypeException;
 
 import java.io.ByteArrayInputStream;
@@ -43,9 +45,11 @@ import org.slf4j.Logger;
 public class JsonSchemaValidationInterceptorTest {
 
     private static final String PAYLOAD = "test payload";
-    private static final String NAME = "test-name";
-    private static final String MEDIA_TYPE = "application";
+    private static final String MEDIA_TYPE_TYPE = "application";
     private static final String MEDIA_SUBTYPE = "vnd.test-name+json";
+    private static final MediaType MEDIA_TYPE = new MediaType(MEDIA_TYPE_TYPE, MEDIA_SUBTYPE);
+    private static final uk.gov.justice.services.core.mapping.MediaType CONVERTED_MEDIA_TYPE
+            = new uk.gov.justice.services.core.mapping.MediaType(MEDIA_TYPE_TYPE, MEDIA_SUBTYPE);
     private static final String NON_JSON_MEDIA_SUBTYPE = "vnd.test-name+xml";
 
     @Mock
@@ -58,62 +62,82 @@ public class JsonSchemaValidationInterceptorTest {
     private Object proceed = mock(Object.class);
 
     @Mock
-    private JsonSchemaValidator validator;
+    private JsonSchemaValidator jsonSchemaValidator;
+
+    @Mock
+    private NameToMediaTypeConverter nameToMediaTypeConverter; 
 
     @InjectMocks
-    private JsonSchemaValidationInterceptor interceptor;
+    private JsonSchemaValidationInterceptor jsonSchemaValidationInterceptor;
 
     @Before
     public void setup() throws Exception {
         when(context.getInputStream()).thenReturn(inputStream(PAYLOAD));
-        when(context.getMediaType()).thenReturn(new MediaType(MEDIA_TYPE, MEDIA_SUBTYPE));
+        when(context.getMediaType()).thenReturn(MEDIA_TYPE);
         when(context.proceed()).thenReturn(proceed);
     }
 
     @Test
     public void shouldReturnResultOfContextProceed() throws Exception {
-        assertThat(interceptor.aroundReadFrom(context), equalTo(proceed));
+        assertThat(jsonSchemaValidationInterceptor.aroundReadFrom(context), equalTo(proceed));
     }
 
     @Test
     public void shouldSetInputStreamToOriginalPayload() throws Exception {
-        interceptor.aroundReadFrom(context);
+        jsonSchemaValidationInterceptor.aroundReadFrom(context);
         verify(context).setInputStream(argThat(inputStreamEqualTo(PAYLOAD)));
     }
 
     @Test
     public void shouldValidatePayloadAgainstSchema() throws Exception {
-        interceptor.aroundReadFrom(context);
-        verify(validator).validate(PAYLOAD, NAME);
+
+        final String actionName = "example.action-name";
+
+        when(nameToMediaTypeConverter.convert(CONVERTED_MEDIA_TYPE)).thenReturn(actionName);
+
+        jsonSchemaValidationInterceptor.aroundReadFrom(context);
+
+        verify(jsonSchemaValidator).validate(PAYLOAD, actionName, of(CONVERTED_MEDIA_TYPE));
     }
 
     @Test
     public void shouldSkipValidationIfNonJsonPayloadType() throws Exception {
-        when(context.getMediaType()).thenReturn(new MediaType(MEDIA_TYPE, NON_JSON_MEDIA_SUBTYPE));
-        interceptor.aroundReadFrom(context);
-        verify(validator, never()).validate(PAYLOAD, NAME);
+
+        final String actionName = "example.action-name";
+
+        when(nameToMediaTypeConverter.convert(CONVERTED_MEDIA_TYPE)).thenReturn(actionName);
+        when(context.getMediaType()).thenReturn(new MediaType(MEDIA_TYPE_TYPE, NON_JSON_MEDIA_SUBTYPE));
+
+        jsonSchemaValidationInterceptor.aroundReadFrom(context);
+        verify(jsonSchemaValidator, never()).validate(PAYLOAD, actionName, of(CONVERTED_MEDIA_TYPE));
     }
 
     @Test(expected = BadRequestException.class)
     @SuppressWarnings("unchecked")
     public void shouldThrowBadRequestExceptionIfValidatorFailsWithValidationException() throws Exception {
         final MultivaluedMap<String, String> headers = new MultivaluedHashMap();
+        final String actionName = "example.action-name";
 
-        doThrow(new ValidationException("")).when(validator).validate(PAYLOAD, NAME);
+        when(nameToMediaTypeConverter.convert(CONVERTED_MEDIA_TYPE)).thenReturn(actionName);
+
+        doThrow(new ValidationException("")).when(jsonSchemaValidator).validate(PAYLOAD, actionName, of(CONVERTED_MEDIA_TYPE));
         when(context.getHeaders()).thenReturn(headers);
 
-        interceptor.aroundReadFrom(context);
+        jsonSchemaValidationInterceptor.aroundReadFrom(context);
     }
 
     @Test(expected = BadRequestException.class)
     @SuppressWarnings("unchecked")
     public void shouldThrowBadRequestExceptionIfValidatorFailsWithInvalidMediaTypeException() throws Exception {
         final MultivaluedMap<String, String> headers = new MultivaluedHashMap();
+        final String actionName = "example.action-name";
 
-        doThrow(new InvalidMediaTypeException("", mock(Exception.class))).when(validator).validate(PAYLOAD, NAME);
+        when(nameToMediaTypeConverter.convert(CONVERTED_MEDIA_TYPE)).thenReturn(actionName);
+
+        doThrow(new InvalidMediaTypeException("", mock(Exception.class))).when(jsonSchemaValidator).validate(PAYLOAD, actionName, of(CONVERTED_MEDIA_TYPE));
         when(context.getHeaders()).thenReturn(headers);
 
-        interceptor.aroundReadFrom(context);
+        jsonSchemaValidationInterceptor.aroundReadFrom(context);
     }
 
     private InputStream inputStream(final String input) throws IOException {

@@ -6,7 +6,6 @@ import static junit.framework.TestCase.assertTrue;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import uk.gov.justice.services.event.buffer.core.repository.streambuffer.StreamBufferJdbcRepository;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
 import uk.gov.justice.services.test.utils.persistence.TestDataSourceFactory;
 

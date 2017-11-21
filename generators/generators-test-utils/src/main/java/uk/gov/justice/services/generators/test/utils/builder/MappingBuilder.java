@@ -11,8 +11,14 @@ public class MappingBuilder {
     private static final String RESPONSE_TYPE = "responseType";
     private static final String MAPPING_TEMPLATE =
             "(mapping):\n" +
-            "    {0}: {1}\n" +
-            "    name: {2}\n";
+                    "    {0}: {1}\n" +
+                    "    name: {2}\n";
+
+    private static final String REQUEST_AND_RESPONSE_MAPPING_TEMPLATE =
+            "(mapping):\n" +
+                    "    {0}: {1}\n" +
+                    "    {2}: {3}\n" +
+                    "    name: {4}\n";
 
     private String requestType;
     private String responseType;
@@ -45,7 +51,18 @@ public class MappingBuilder {
     }
 
     public String build() {
-        return format(MAPPING_TEMPLATE, requestType != null ? REQUEST_TYPE : RESPONSE_TYPE,
-                requestType != null ? requestType : responseType, name);
+        if (null != requestType && null != responseType) {
+            return format(REQUEST_AND_RESPONSE_MAPPING_TEMPLATE,
+                    REQUEST_TYPE,
+                    requestType,
+                    RESPONSE_TYPE,
+                    responseType,
+                    name);
+        }
+
+        return format(MAPPING_TEMPLATE,
+                requestType != null ? REQUEST_TYPE : RESPONSE_TYPE,
+                requestType != null ? requestType : responseType,
+                name);
     }
 }

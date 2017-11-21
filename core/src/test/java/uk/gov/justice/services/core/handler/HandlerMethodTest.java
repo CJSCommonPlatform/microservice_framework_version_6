@@ -1,7 +1,6 @@
 package uk.gov.justice.services.core.handler;
 
 import static java.lang.String.format;
-import static java.util.UUID.fromString;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;

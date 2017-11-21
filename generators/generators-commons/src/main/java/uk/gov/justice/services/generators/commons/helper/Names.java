@@ -3,11 +3,11 @@ package uk.gov.justice.services.generators.commons.helper;
 import static java.util.stream.Collectors.joining;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.listOf;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
 import uk.gov.justice.services.generators.commons.client.ActionMimeTypeDefinition;
 import uk.gov.justice.services.generators.commons.mapping.ActionMapping;
+import uk.gov.justice.services.generators.commons.mapping.ActionMappingParser;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -63,7 +63,7 @@ public final class Names {
 
         return buildResourceMethodNameWith(action, () -> {
             if (!isEmpty(action.getDescription())) {
-                final Optional<ActionMapping> mapping = listOf(action.getDescription()).stream()
+                final Optional<ActionMapping> mapping = new ActionMappingParser().listOf(action.getDescription()).stream()
                         .filter(actionMapping -> filterActionMapping(actionMapping, bodyMimeType.getType()))
                         .findFirst();
 

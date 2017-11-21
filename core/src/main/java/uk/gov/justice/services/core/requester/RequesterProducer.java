@@ -3,6 +3,8 @@ package uk.gov.justice.services.core.requester;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.dispatcher.DispatcherDelegate;
+import uk.gov.justice.services.core.dispatcher.EnvelopePayloadTypeConverter;
+import uk.gov.justice.services.core.dispatcher.JsonEnvelopeRepacker;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandler;
 import uk.gov.justice.services.core.envelope.EnvelopeValidator;
@@ -33,6 +35,12 @@ public class RequesterProducer {
     @Inject
     EnvelopeValidationExceptionHandler envelopeValidationExceptionHandler;
 
+    @Inject
+    EnvelopePayloadTypeConverter envelopePayloadTypeConverter;
+
+    @Inject
+    JsonEnvelopeRepacker jsonEnvelopeRepacker;
+
     /**
      * Produces the correct implementation of a requester depending on the {@link ServiceComponent}
      * annotation at the injection point.
@@ -45,6 +53,6 @@ public class RequesterProducer {
     @Produces
     public Requester produceRequester(final InjectionPoint injectionPoint) {
         return new DispatcherDelegate(dispatcherCache.dispatcherFor(injectionPoint), systemUserUtil,
-                new EnvelopeValidator(jsonSchemaValidator, envelopeValidationExceptionHandler, objectMapper));
+                new EnvelopeValidator(jsonSchemaValidator, envelopeValidationExceptionHandler, objectMapper), envelopePayloadTypeConverter, jsonEnvelopeRepacker);
     }
 }

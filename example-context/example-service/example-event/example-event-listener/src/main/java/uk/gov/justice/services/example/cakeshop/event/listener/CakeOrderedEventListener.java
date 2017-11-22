@@ -7,7 +7,7 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.example.cakeshop.persistence.CakeOrderRepository;
 import uk.gov.justice.services.example.cakeshop.persistence.entity.CakeOrder;
-import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.Envelope;
 
 import javax.inject.Inject;
 
@@ -26,9 +26,7 @@ public class CakeOrderedEventListener {
     JsonObjectToObjectConverter converter;
 
     @Handles("example.cake-ordered")
-    public void handle(final JsonEnvelope envelope) {
-        logger.info("=============> Inside cake-ordered Event Listener: " + envelope);
-        final CakeOrder cakeOrder = converter.convert(envelope.payloadAsJsonObject(), CakeOrder.class);
-        repository.save(cakeOrder);
+    public void handle(final Envelope<CakeOrder> envelope) {
+        repository.save(envelope.payload());
     }
 }

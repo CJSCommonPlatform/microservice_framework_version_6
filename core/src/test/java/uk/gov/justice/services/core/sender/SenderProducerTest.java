@@ -6,6 +6,7 @@ import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsSame.sameInstance;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -17,15 +18,20 @@ import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.dispatcher.Dispatcher;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
+import uk.gov.justice.services.core.dispatcher.EnvelopePayloadTypeConverter;
+import uk.gov.justice.services.core.dispatcher.JsonEnvelopeRepacker;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationException;
 import uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
+import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.UUID;
 
 import javax.enterprise.inject.spi.InjectionPoint;
+import javax.inject.Inject;
+import javax.json.JsonValue;
 
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
@@ -58,6 +64,12 @@ public class SenderProducerTest {
     @Mock
     private JsonSchemaValidator jsonSchemaValidator;
 
+    @Mock
+    EnvelopePayloadTypeConverter envelopePayloadTypeConverter;
+
+    @Mock
+    JsonEnvelopeRepacker jsonEnvelopeRepacker;
+
 
     @InjectMocks
     private SenderProducer senderProducer;
@@ -85,6 +97,10 @@ public class SenderProducerTest {
         final JsonEnvelope expectedResponse = envelopeFrom(metadataBuilder().withId(randomUUID()).withName("name"), createObjectBuilder());
 
         when(dispatcher.dispatch(envelopeToBeDispatched)).thenReturn(expectedResponse);
+        when(envelopePayloadTypeConverter.convert(any(Envelope.class), eq(JsonValue.class)))
+                .thenReturn(envelopeToBeDispatched);
+        when(jsonEnvelopeRepacker.repack(envelopeToBeDispatched)).thenReturn(envelopeToBeDispatched);
+
 
         sender.send(envelopeToBeDispatched);
 
@@ -114,6 +130,10 @@ public class SenderProducerTest {
         final JsonEnvelope expectedResponse = envelopeFrom(metadataBuilder().withId(randomUUID()).withName("name"), createObjectBuilder());
 
         when(systemUserUtil.asEnvelopeWithSystemUserId(originalEnvelope)).thenReturn(envelopeWithSysUserId);
+        when(envelopePayloadTypeConverter.convert(any(Envelope.class), eq(JsonValue.class)))
+                .thenReturn(originalEnvelope);
+        when(jsonEnvelopeRepacker.repack(originalEnvelope)).thenReturn(originalEnvelope);
+
         when(dispatcher.dispatch(envelopeWithSysUserId)).thenReturn(expectedResponse);
 
         sender.sendAsAdmin(originalEnvelope);
@@ -138,9 +158,15 @@ public class SenderProducerTest {
         when(dispatcher.dispatch(any(JsonEnvelope.class)))
                 .thenReturn(null);
 
-        senderProducer.produceSender(injectionPoint).send(envelopeFrom(
+        final JsonEnvelope envelope = envelopeFrom(
                 metadataBuilder().withId(randomUUID()).withName("some-action"),
-                createObjectBuilder()));
+                createObjectBuilder());
+
+        when(envelopePayloadTypeConverter.convert(any(Envelope.class), eq(JsonValue.class)))
+                .thenReturn(envelope);
+        when(jsonEnvelopeRepacker.repack(envelope)).thenReturn(envelope);
+
+        senderProducer.produceSender(injectionPoint).send(envelope);
     }
 
 
@@ -151,14 +177,20 @@ public class SenderProducerTest {
         when(dispatcher.dispatch(any(JsonEnvelope.class)))
                 .thenReturn(null);
 
+        final JsonEnvelope envelope = envelopeFrom(
+                metadataBuilder()
+                        .withId(randomUUID())
+                        .withName("some-action"),
+                createObjectBuilder()
+                        .add("someField1", "value1")
+                        .add("someField2", "value2"));
+
+        when(envelopePayloadTypeConverter.convert(any(Envelope.class), eq(JsonValue.class)))
+                .thenReturn(envelope);
+        when(jsonEnvelopeRepacker.repack(envelope)).thenReturn(envelope);
+
         senderProducer.produceSender(injectionPoint)
-                .send(envelopeFrom(
-                        metadataBuilder()
-                                .withId(randomUUID())
-                                .withName("some-action"),
-                        createObjectBuilder()
-                                .add("someField1", "value1")
-                                .add("someField2", "value2")));
+                .send(envelope);
     }
 
 }

@@ -6,6 +6,7 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsSame.sameInstance;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -16,14 +17,18 @@ import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.dispatcher.Dispatcher;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
+import uk.gov.justice.services.core.dispatcher.EnvelopePayloadTypeConverter;
+import uk.gov.justice.services.core.dispatcher.JsonEnvelopeRepacker;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationException;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandler;
 import uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
+import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.enterprise.inject.spi.InjectionPoint;
+import javax.json.JsonValue;
 
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
@@ -58,6 +63,12 @@ public class RequesterProducerTest {
     @Mock
     private JsonSchemaValidator jsonSchemaValidator;
 
+    @Mock
+    private JsonEnvelopeRepacker jsonEnvelopeRepacker;
+
+    @Mock
+    private EnvelopePayloadTypeConverter envelopePayloadTypeConverter;
+
     @InjectMocks
     private RequesterProducer requesterProducer;
 
@@ -74,6 +85,10 @@ public class RequesterProducerTest {
 
         final JsonEnvelope envelopeToBeDispatched = mock(JsonEnvelope.class);
         final JsonEnvelope expectedResponse = mock(JsonEnvelope.class);
+
+        when(envelopePayloadTypeConverter.convert(any(Envelope.class), eq(JsonValue.class)))
+                .thenReturn(envelopeToBeDispatched);
+        when(jsonEnvelopeRepacker.repack(envelopeToBeDispatched)).thenReturn(envelopeToBeDispatched);
 
         when(dispatcher.dispatch(envelopeToBeDispatched)).thenReturn(expectedResponse);
 

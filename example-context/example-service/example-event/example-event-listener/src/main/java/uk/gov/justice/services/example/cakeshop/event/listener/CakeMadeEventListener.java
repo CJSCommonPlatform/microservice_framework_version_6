@@ -4,11 +4,9 @@ import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
-import uk.gov.justice.services.example.cakeshop.domain.event.CakeMade;
 import uk.gov.justice.services.example.cakeshop.persistence.CakeRepository;
 import uk.gov.justice.services.example.cakeshop.persistence.entity.Cake;
 import uk.gov.justice.services.messaging.Envelope;
-import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.inject.Inject;
 

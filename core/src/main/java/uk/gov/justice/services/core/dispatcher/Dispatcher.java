@@ -2,6 +2,7 @@ package uk.gov.justice.services.core.dispatcher;
 
 import uk.gov.justice.services.core.handler.HandlerMethod;
 import uk.gov.justice.services.core.handler.registry.HandlerRegistry;
+import uk.gov.justice.services.core.handler.registry.NullEnvelopeException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 /**
@@ -33,7 +34,12 @@ public class Dispatcher {
      */
     public JsonEnvelope dispatch(final JsonEnvelope envelope) {
 
-        final HandlerMethod handlerMethod = handlerRegistry.get(envelope.metadata().name());
+        final HandlerMethod handlerMethod;
+        try {
+            handlerMethod = handlerRegistry.get(envelope.metadata().name());
+        } catch (NullPointerException e) {
+            throw new NullEnvelopeException("Envelope cannot be null", e);
+        }
 
         return MethodInvoker
                 .createMethodInvoker(typeConverter, jsonEnvelopeRepacker)

@@ -95,7 +95,6 @@ public class DispatcherTest {
     @Test(expected = NullEnvelopeException.class)
     public void shouldHandleANullEnvelope() throws Exception {
         final SynchronousTestHandler synchronousTestHandler = new SynchronousTestHandler();
-
         final JsonEnvelope envelope = null;
 
         dispatcher.register(synchronousTestHandler);

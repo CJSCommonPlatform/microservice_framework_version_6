@@ -27,6 +27,9 @@ public class CakeOrderedEventListener {
 
     @Handles("example.cake-ordered")
     public void handle(final Envelope<CakeOrder> envelope) {
+        //Best practice is to handle a value object rather than an entity
+        //because the event typically would not cover an entire entity.
+        //But we have not here as this example is so simple.
         repository.save(envelope.payload());
     }
 }

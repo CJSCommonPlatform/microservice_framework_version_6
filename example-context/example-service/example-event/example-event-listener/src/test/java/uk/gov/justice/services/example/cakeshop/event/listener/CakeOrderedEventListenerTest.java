@@ -3,6 +3,7 @@ package uk.gov.justice.services.example.cakeshop.event.listener;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.example.cakeshop.persistence.CakeOrderRepository;
@@ -37,7 +38,7 @@ public class CakeOrderedEventListenerTest {
 
         final Envelope<CakeOrder> envelope = mock(Envelope.class);
         final CakeOrder cakeOrderObject = new CakeOrder(UUID.randomUUID(), UUID.randomUUID(), ZonedDateTime.now());
-        Mockito.when(envelope.payload()).thenReturn(cakeOrderObject);
+        when(envelope.payload()).thenReturn(cakeOrderObject);
 
         listener.handle(envelope);
 

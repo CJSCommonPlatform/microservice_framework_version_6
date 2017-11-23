@@ -113,6 +113,26 @@
                         <argLine>${argLine} -Xmx64m</argLine>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.pitest</groupId>
+                    <artifactId>pitest-maven</artifactId>
+                    <version>1.2.4</version>
+                    <executions>
+                        <execution>
+                            <phase>test</phase>
+                            <goals>
+                                <goal>mutationCoverage</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <failWhenNoMutations>false</failWhenNoMutations>
+                        <threads>5</threads>
+                        <excludedClasses>
+                           <excludedClass>*IT</excludedClass>
+                        </excludedClasses>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -123,6 +143,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.pitest</groupId>
+                <artifactId>pitest-maven</artifactId>
             </plugin>
         </plugins>
     </build>

@@ -63,6 +63,18 @@
         </dependency>
     </dependencies>
 
-
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.pitest</groupId>
+                <artifactId>pitest-maven</artifactId>
+                <configuration>
+                    <excludedClasses>
+                        <excludedClass>uk.gov.justice.services.metrics.interceptor.it.MetricsIT</excludedClass>
+                    </excludedClasses>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

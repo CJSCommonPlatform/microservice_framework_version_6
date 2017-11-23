@@ -92,11 +92,11 @@ public class JsonSchemaValidationMatcher {
 
                     try {
                         final String pathToJsonSchema = format(JSON_SCHEMA_TEMPLATE, jsonEnvelope.metadata().name());
-                        getJsonSchemaFor(pathToJsonSchema).validate(new JSONObject(jsonEnvelope.payloadAsJsonObject().toString()));
+                        getJsonSchemaFor(pathToJsonSchema).validate(new JSONObject(jsonEnvelope.payload().toString()));
                     } catch (final IllegalArgumentException | IOException e) {
                         try {
                             final String pathToJsonSchema = format(RAML_JSON_SCHEMA_TEMPLATE, jsonEnvelope.metadata().name());
-                            getJsonSchemaFor(pathToJsonSchema).validate(new JSONObject(jsonEnvelope.payloadAsJsonObject().toString()));
+                            getJsonSchemaFor(pathToJsonSchema).validate(new JSONObject(jsonEnvelope.payload().toString()));
                         } catch (final IOException ioe) {
                             throw new IllegalArgumentException(ioe);
                         }

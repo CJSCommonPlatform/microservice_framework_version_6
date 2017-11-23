@@ -13,6 +13,9 @@ JsonObjectMetadataBuilders in tests
 - Record new events stream into event_stream table in Event Store
 - InterceptorChainEntryProvider to be used instead of InterceptorChainProvider
 
+### Fixed
+- Allow json schema to be validated for json null values
+
 ## [2.3.2] - 2017-10-17
 
 ##Changed

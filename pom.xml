@@ -12,7 +12,7 @@
 
     <groupId>uk.gov.justice.services</groupId>
     <artifactId>microservice-framework</artifactId>
-    <version>2.4.4-SNAPSHOT</version>
+    <version>2.5.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Microservice Framework</name>
@@ -50,9 +50,9 @@
         <common-bom.version>1.21.0</common-bom.version>
         <embedded-artemis.version>1.2.0</embedded-artemis.version>
         <raml-maven-plugin.version>1.6.1</raml-maven-plugin.version>
-        <file.service.version>1.14.0</file.service.version>
-        <utilities.version>1.11.0</utilities.version>
-        <test-utils.version>1.15.0</test-utils.version>
+        <file.service.version>1.13.0</file.service.version>
+        <utilities.version>1.10.0</utilities.version>
+        <test-utils.version>1.13.1</test-utils.version>
         <jboss-ejb3-ext-api.version>2.2.0.Final</jboss-ejb3-ext-api.version>
         <cpp.repo.name>microservice_framework</cpp.repo.name>
     </properties>

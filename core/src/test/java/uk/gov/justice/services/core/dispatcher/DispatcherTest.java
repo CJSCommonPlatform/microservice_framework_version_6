@@ -21,6 +21,7 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.handler.TestPojo;
 import uk.gov.justice.services.core.handler.exception.MissingHandlerException;
 import uk.gov.justice.services.core.handler.registry.HandlerRegistry;
+import uk.gov.justice.services.core.handler.registry.NullEnvelopeException;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
@@ -84,6 +85,17 @@ public class DispatcherTest {
                 .add("aField", "aValue").build();
 
         final JsonEnvelope envelope = envelopeFrom(metadata, payload);
+
+        dispatcher.register(synchronousTestHandler);
+        dispatcher.dispatch(envelope);
+
+        assertThat(synchronousTestHandler.envelope, equalTo(envelope));
+    }
+
+    @Test(expected = NullEnvelopeException.class)
+    public void shouldHandleANullEnvelope() throws Exception {
+        final SynchronousTestHandler synchronousTestHandler = new SynchronousTestHandler();
+        final JsonEnvelope envelope = null;
 
         dispatcher.register(synchronousTestHandler);
         dispatcher.dispatch(envelope);

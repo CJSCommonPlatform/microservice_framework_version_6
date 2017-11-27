@@ -17,13 +17,18 @@ import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderF
 
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.sender.Sender;
+import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.test.utils.core.mock.SkipJsonValidationListener;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import javax.el.MethodNotFoundException;
 
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
@@ -74,9 +79,18 @@ public class HandlerMethodMatcher extends TypeSafeDiagnosingMatcher<Class<?>> {
     @Override
     protected boolean matchesSafely(final Class<?> handlerClass, final Description description) {
 
-        final Method method;
+        Method method = null;
         try {
-            method = handlerClass.getMethod(methodName, JsonEnvelope.class);
+            final List<Method> methods = Arrays.asList(handlerClass.getDeclaredMethods());
+            for (final Method method1 : methods) {
+                if (method1.getName() == methodName && validType(method1.getParameterTypes()[0])) {
+                    method = method1;
+                }
+            }
+
+            if (method == null) {
+                throw new MethodNotFoundException(format("Method %s is not matched for class %s", methodName, handlerClass));
+            }
         } catch (final Exception ex) {
             description
                     .appendText("Class ")
@@ -113,6 +127,10 @@ public class HandlerMethodMatcher extends TypeSafeDiagnosingMatcher<Class<?>> {
         }
 
         return true;
+    }
+
+    private boolean validType(final Class<?> aClass) {
+        return Envelope.class.isAssignableFrom(aClass);
     }
 
     private boolean isSenderPassThrough(final Class<?> handlerClass, final Method method) throws Exception {

@@ -41,9 +41,9 @@ import javax.json.JsonValue;
 @ApplicationScoped
 public class DefaultEnveloper implements Enveloper {
 
-    Clock clock;
-
-    ObjectToJsonValueConverter objectToJsonValueConverter;
+    private Clock clock;
+    private ObjectToJsonValueConverter objectToJsonValueConverter;
+    private ConcurrentHashMap<Class<?>, String> eventMap = new ConcurrentHashMap<>();
 
     DefaultEnveloper() {
     }
@@ -54,7 +54,6 @@ public class DefaultEnveloper implements Enveloper {
         this.objectToJsonValueConverter = objectToJsonValueConverter;
     }
 
-    private ConcurrentHashMap<Class<?>, String> eventMap = new ConcurrentHashMap<>();
 
     /**
      * Register method, invoked automatically to register all event classes into the eventMap.

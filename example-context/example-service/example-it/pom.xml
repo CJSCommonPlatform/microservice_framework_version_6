@@ -17,7 +17,9 @@
         <!-- To be used when running CakeShopPostgresIT-->
         <!--<server.config>standalone-postgres-test.xml</server.config>-->
 
-        <example.use-single-war>false</example.use-single-war>
+
+        <!-- Single war is used by default, to run example-it with multiple wars set the system example.use-multiple-war property to true: -->
+        <!-- mvn clean install -Dexample.use-multiple-war=true -->
     </properties>
 
     <dependencies>
@@ -329,12 +331,14 @@
     </build>
 
     <profiles>
+        <!-- Single war is used by default, to run example-it with multiple wars set the system example.use-multiple-war property to true: -->
+        <!-- mvn clean install -Dexample.use-multiple-war=true -->
         <profile>
             <id>single-war</id>
             <activation>
                 <property>
-                    <name>example.use-single-war</name>
-                    <value>true</value>
+                    <name>example.use-multiple-war</name>
+                    <value>!true</value>
                 </property>
             </activation>
             <properties>
@@ -374,12 +378,14 @@
             </build>
         </profile>
 
+        <!-- Single war is used by default, to run example-it with multiple wars set the system example.use-multiple-war property to true: -->
+        <!-- mvn clean install -Dexample.use-multiple-war=true -->
         <profile>
             <id>multi-war</id>
             <activation>
                 <property>
-                    <name>example.use-single-war</name>
-                    <value>!true</value>
+                    <name>example.use-multiple-war</name>
+                    <value>true</value>
                 </property>
             </activation>
             <dependencies>

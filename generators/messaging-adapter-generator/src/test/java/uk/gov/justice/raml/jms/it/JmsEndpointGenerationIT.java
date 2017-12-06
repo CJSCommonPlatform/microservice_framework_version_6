@@ -8,9 +8,12 @@ import static org.junit.Assert.assertTrue;
 import uk.gov.justice.api.ContextaEventProcessorPublicEventJmsListener;
 import uk.gov.justice.api.Service1CommandControllerStructureControllerCommandJmsListener;
 import uk.gov.justice.api.Service1CommandHandlerStructureHandlerCommandJmsListener;
+import uk.gov.justice.api.Service2EventListenerEventFilter;
+import uk.gov.justice.api.Service2EventListenerPeopleEventJmsListener;
 import uk.gov.justice.api.Service2EventProcessorStructureEventJmsListener;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsParameterChecker;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsProcessor;
+import uk.gov.justice.services.adapter.messaging.EventListenerValidationInterceptor;
 import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -61,6 +64,9 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
     @Resource(name = "structure.event")
     private Topic structureEventsDestination;
 
+    @Resource(name = "people.event")
+    private Topic peopleEventsDestination;
+
     @Resource(name = "public.event")
     private Topic publicEventsDestination;
 
@@ -70,6 +76,8 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
             RecordingInterceptorChainProcessor.class,
             Service1CommandControllerStructureControllerCommandJmsListener.class,
             Service2EventProcessorStructureEventJmsListener.class,
+            Service2EventListenerPeopleEventJmsListener.class,
+            Service2EventListenerEventFilter.class,
             Service1CommandHandlerStructureHandlerCommandJmsListener.class,
             ContextaEventProcessorPublicEventJmsListener.class,
             ObjectMapperProducer.class,
@@ -80,6 +88,7 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
             JsonSchemaLoader.class,
             LoggerProducer.class,
             AllowAllEventFilter.class,
+            EventListenerValidationInterceptor.class,
             DefaultJmsParameterChecker.class,
             TestServiceContextNameProvider.class,
             DefaultJmsMessageLoggerHelper.class,
@@ -91,7 +100,6 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
         return new WebApp()
                 .contextRoot("jms-endpoint-test");
     }
-
 
     @Test
     public void commandControllerDispatcherShouldReceiveCommandA() throws JMSException {
@@ -184,7 +192,7 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
 
 
     @Test
-    public void eventListenerDispatcherShouldNotReceiveACommandUnspecifiedInMessageSelector()
+    public void eventListenerDispatcherShouldNotReceiveAnEventUnspecifiedInMessageSelector()
             throws JMSException, InterruptedException {
 
         String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d21";
@@ -192,6 +200,19 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
 
         sendEnvelope(metadataId, commandName, structureEventsDestination);
         assertTrue(interceptorChainProcessor.notFoundEnvelopeWithMetadataOf("id", metadataId));
+    }
+
+    @Test
+    public void eventListenerDispatcherShouldReceiveAnEventSpecifiedInMessageSelector()
+            throws JMSException, InterruptedException {
+
+        String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d21";
+        String eventName = "people.eventaa";
+
+        sendEnvelope(metadataId, eventName, peopleEventsDestination);
+        JsonEnvelope receivedEnvelope = interceptorChainProcessor.awaitForEnvelopeWithMetadataOf("id", metadataId);
+        assertThat(receivedEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
+        assertThat(receivedEnvelope.metadata().name(), is(eventName));
 
     }
 

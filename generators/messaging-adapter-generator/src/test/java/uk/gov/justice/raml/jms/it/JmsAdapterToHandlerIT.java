@@ -1,17 +1,21 @@
 package uk.gov.justice.raml.jms.it;
 
 import static com.jayway.awaitility.Awaitility.await;
+import static javax.json.Json.createObjectBuilder;
+import static junit.framework.TestCase.assertTrue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
+import static uk.gov.justice.services.messaging.jms.HeaderConstants.JMS_HEADER_CPPNAME;
 
 import uk.gov.justice.api.Service2EventListenerEventFilter;
 import uk.gov.justice.api.Service2EventListenerPeopleEventJmsListener;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsParameterChecker;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsProcessor;
+import uk.gov.justice.services.adapter.messaging.EventListenerValidationInterceptor;
 import uk.gov.justice.services.adapter.messaging.JmsLoggerMetadataInterceptor;
 import uk.gov.justice.services.adapter.messaging.JsonSchemaValidationInterceptor;
 import uk.gov.justice.services.common.configuration.GlobalValueProducer;
@@ -58,6 +62,7 @@ import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.DefaultJmsEnvelopeSender;
+import uk.gov.justice.services.messaging.jms.exception.JmsConverterException;
 import uk.gov.justice.services.messaging.logging.DefaultJmsMessageLoggerHelper;
 import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
 import uk.gov.justice.services.test.utils.common.envelope.TestEnvelopeRecorder;
@@ -69,7 +74,11 @@ import java.util.stream.Stream;
 import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.jms.JMSException;
+import javax.jms.Session;
+import javax.jms.TextMessage;
 import javax.jms.Topic;
+import javax.json.JsonObject;
 
 import org.apache.openejb.jee.WebApp;
 import org.apache.openejb.junit.ApplicationComposer;
@@ -86,6 +95,15 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
     private Topic peopleEventsDestination;
 
     @Inject
+    private Service2EventListenerEventFilter recordingEventListenerEventFilter;
+
+    @Inject
+    private TestService2EventListenerPeopleEventJmsListener eventListenerPeopleEventJmsListener;
+
+    @Inject
+    private EventListenerValidationInterceptor eventListenerValidationInterceptor;
+
+    @Inject
     private RecordingEventAAHandler aaEventHandler;
 
     @Inject
@@ -99,12 +117,14 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
 
     @Module
     @Classes(cdi = true, value = {
+            EventListenerValidationInterceptor.class,
+            TestService2EventListenerPeopleEventJmsListener.class,
+            Service2EventListenerEventFilter.class,
             Service2EventListenerPeopleEventJmsListener.class,
             RecordingEventAAHandler.class,
             AllEventsHandler.class,
             RecordingJsonSchemaValidator.class,
             RecordingEventBufferService.class,
-            Service2EventListenerEventFilter.class,
 
             InterceptorChainProcessorProducer.class,
             InterceptorChainProcessor.class,
@@ -158,13 +178,32 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
                 .contextRoot("jms-adapter-to-aaEventHandler-test");
     }
 
+    public TextMessage textMessage(final String message, final Session session, final String eventName) {
+        try {
+            final TextMessage textMessage = session.createTextMessage(message);
+            textMessage.setStringProperty(JMS_HEADER_CPPNAME, eventName);
+            return textMessage;
+        } catch (JMSException e) {
+            throw new JmsConverterException(String.format("Exception while creating message %s", message), e);
+        }
+    }
+
     @Test
     public void shouldProcessSupportedEventThroughJsonValidator_EventBufferAndHandler() throws Exception {
         final String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d01";
         Thread.sleep(300);
 
-        sendEnvelope(metadataId, PEOPLE_EVENT_AA, peopleEventsDestination);
+        final String messageStr = "textMessage";
+
+        final JsonObject jsonMessage = createObjectBuilder().add("message", messageStr).build();
+
+        sendEnvelope(metadataId, PEOPLE_EVENT_AA, peopleEventsDestination, jsonMessage);
+
         await().until(() -> aaEventHandler.recordedEnvelopes().size() > 0);
+
+        assertTrue(eventListenerValidationInterceptor.shouldValidate(textMessage(messageStr, getSession(), PEOPLE_EVENT_AA)));
+
+        assertTrue(recordingEventListenerEventFilter.accepts(PEOPLE_EVENT_AA));
 
         assertThat(jsonSchemaValidator.validatedEventName(), is(PEOPLE_EVENT_AA));
 
@@ -173,7 +212,6 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
 
         assertThat(aaEventHandler.recordedEnvelopes(), not(empty()));
         assertThat(aaEventHandler.firstRecordedEnvelope().metadata().id().toString(), is(metadataId));
-
     }
 
 
@@ -250,6 +288,11 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
         public String getServiceContextName() {
             return "test-component";
         }
+    }
+
+    @ApplicationScoped
+    public static class TestService2EventListenerPeopleEventJmsListener extends Service2EventListenerPeopleEventJmsListener {
+
     }
 
     public static class EventListenerInterceptorChainProvider implements InterceptorChainEntryProvider {

@@ -5,6 +5,8 @@ import static org.junit.Assert.fail;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 
+import uk.gov.justice.artemis.EmbeddedArtemisServer;
+
 import java.util.Properties;
 
 import javax.jms.Connection;
@@ -24,8 +26,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import uk.gov.justice.artemis.EmbeddedArtemisServer;
 
 public abstract class AbstractJmsAdapterGenerationIT {
     private static int port = -1;
@@ -90,4 +90,11 @@ public abstract class AbstractJmsAdapterGenerationIT {
         return connection;
     }
 
+    protected Session getSession() throws JMSException {
+        try {
+            return getConnection().createSession(false, Session.AUTO_ACKNOWLEDGE);
+        } catch (JMSException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

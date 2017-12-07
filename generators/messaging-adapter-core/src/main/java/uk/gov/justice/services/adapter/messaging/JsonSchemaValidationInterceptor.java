@@ -33,9 +33,6 @@ public class JsonSchemaValidationInterceptor {
     JsonSchemaValidator validator;
 
     @Inject
-    EventFilter eventFilter;
-
-    @Inject
     JsonValidationLoggerHelper jsonValidationLoggerHelper;
 
     @Inject
@@ -48,12 +45,15 @@ public class JsonSchemaValidationInterceptor {
         parametersChecker.check(parameters);
 
         final TextMessage message = (TextMessage) parameters[0];
-        final String messageName = message.getStringProperty(JMS_HEADER_CPPNAME);
-        if (eventFilter.accepts(messageName)) {
+        if (shouldValidate(message)) {
             validate(message);
         }
 
         return context.proceed();
+    }
+
+    protected boolean shouldValidate(final TextMessage message) throws JMSException {
+        return true;
     }
 
     private void validate(final TextMessage message) throws JMSException {

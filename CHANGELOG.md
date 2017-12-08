@@ -5,6 +5,11 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [2.4.2] - 2017-12-08
+
+### Fixed
+- The issue, where there are no schema validations of command handler due to single war class loading EventFilter of Event Listener for handlers which then skips validation due to no match on the names with events.
+
 ## [2.4.1] - 2017-11-06
 
 ### Changed

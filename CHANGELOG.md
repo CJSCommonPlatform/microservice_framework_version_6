@@ -6,6 +6,12 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ## [Unreleased]
 
 ## [2.4.2] - 2017-12-08
+### Changed
+- Upgrade File Service to 1.14.0
+- Upgrade Utilities to 1.11.0
+- Upgrade Test Utils to 1.15.0
+
+## [2.4.2] - 2017-12-08
 
 ### Fixed
 - The issue, where there are no schema validations of command handler due to single war class loading EventFilter of Event Listener for handlers which then skips validation due to no match on the names with events.

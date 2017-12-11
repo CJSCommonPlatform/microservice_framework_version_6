@@ -5,7 +5,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
-## [2.4.2] - 2017-12-08
+## [2.4.3] - 2017-12-11
 ### Changed
 - Upgrade File Service to 1.14.0
 - Upgrade Utilities to 1.11.0

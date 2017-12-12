@@ -5,7 +5,6 @@ import static uk.gov.justice.services.messaging.jms.HeaderConstants.JMS_HEADER_C
 
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonValidationLoggerHelper;
-import uk.gov.justice.services.event.buffer.api.EventFilter;
 import uk.gov.justice.services.messaging.logging.JmsMessageLoggerHelper;
 
 import javax.inject.Inject;
@@ -32,9 +31,6 @@ public class JsonSchemaValidationInterceptor {
     JsonSchemaValidator validator;
 
     @Inject
-    EventFilter eventFilter;
-
-    @Inject
     JsonValidationLoggerHelper jsonValidationLoggerHelper;
 
     @Inject
@@ -47,12 +43,15 @@ public class JsonSchemaValidationInterceptor {
         parametersChecker.check(parameters);
 
         final TextMessage message = (TextMessage) parameters[0];
-        final String messageName = message.getStringProperty(JMS_HEADER_CPPNAME);
-        if (eventFilter.accepts(messageName)) {
+        if (shouldValidate(message)) {
             validate(message);
         }
 
         return context.proceed();
+    }
+
+    protected boolean shouldValidate(final TextMessage message) throws JMSException {
+        return true;
     }
 
     private void validate(final TextMessage message) throws JMSException {

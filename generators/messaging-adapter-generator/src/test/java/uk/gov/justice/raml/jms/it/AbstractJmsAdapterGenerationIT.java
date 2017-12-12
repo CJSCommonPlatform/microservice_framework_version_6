@@ -90,4 +90,11 @@ public abstract class AbstractJmsAdapterGenerationIT {
         return connection;
     }
 
+    protected Session getSession() throws JMSException {
+        try {
+            return getConnection().createSession(false, Session.AUTO_ACKNOWLEDGE);
+        } catch (JMSException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

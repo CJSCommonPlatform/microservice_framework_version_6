@@ -6,11 +6,13 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
+import static uk.gov.justice.raml.jms.core.JmsEndPointGeneratorUtil.shouldGenerateEventFilter;
 import static uk.gov.justice.raml.jms.core.MediaTypesUtil.containsGeneralJsonMimeType;
 import static uk.gov.justice.raml.jms.core.MediaTypesUtil.mediaTypesFrom;
 import static uk.gov.justice.services.generators.commons.helper.Names.namesListStringFrom;
 
 import uk.gov.justice.raml.core.GeneratorConfig;
+import uk.gov.justice.services.adapter.messaging.EventListenerValidationInterceptor;
 import uk.gov.justice.services.adapter.messaging.JmsLoggerMetadataInterceptor;
 import uk.gov.justice.services.adapter.messaging.JmsProcessor;
 import uk.gov.justice.services.adapter.messaging.JsonSchemaValidationInterceptor;
@@ -52,6 +54,7 @@ import org.slf4j.LoggerFactory;
  */
 class MessageListenerCodeGenerator {
 
+    private static final String CLASS_NAME = "$T.class";
     private static final String DEFAULT_ANNOTATION_PARAMETER = "value";
     private static final String ACTIVATION_CONFIG_PARAMETER = "activationConfig";
     private static final String INTERCEPTOR_CHAIN_PROCESS = "interceptorChainProcessor";
@@ -115,15 +118,21 @@ class MessageListenerCodeGenerator {
                             .addAnnotation(Inject.class)
                             .build())
                     .addAnnotation(AnnotationSpec.builder(Adapter.class)
+
                             .addMember(DEFAULT_ANNOTATION_PARAMETER, "$S", component)
                             .build())
                     .addAnnotation(messageDrivenAnnotation(component, resource.getActions(), resourceUri, baseUri, listenToAllMessages));
 
             if (!containsGeneralJsonMimeType(resource.getActions())) {
-                typeSpecBuilder.addAnnotation(AnnotationSpec.builder(Interceptors.class)
-                        .addMember(DEFAULT_ANNOTATION_PARAMETER, "$T.class", JmsLoggerMetadataInterceptor.class)
-                        .addMember(DEFAULT_ANNOTATION_PARAMETER, "$T.class", JsonSchemaValidationInterceptor.class)
-                        .build());
+                AnnotationSpec.Builder builder = AnnotationSpec.builder(Interceptors.class)
+                        .addMember(DEFAULT_ANNOTATION_PARAMETER, CLASS_NAME, JmsLoggerMetadataInterceptor.class);
+
+                if (shouldGenerateEventFilter(resource, baseUri)) {
+                    builder = builder.addMember(DEFAULT_ANNOTATION_PARAMETER, CLASS_NAME, EventListenerValidationInterceptor.class);
+                } else {
+                    builder = builder.addMember(DEFAULT_ANNOTATION_PARAMETER, CLASS_NAME, JsonSchemaValidationInterceptor.class);
+                }
+                typeSpecBuilder.addAnnotation(builder.build());
             }
 
             if (shouldAddCustomPoolConfiguration(generatorConfiguration)) {

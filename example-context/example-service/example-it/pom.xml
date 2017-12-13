@@ -121,13 +121,6 @@
         <dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>artemis-jms-client</artifactId>
-            <version>1.2.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.jboss.logging</groupId>
-                    <artifactId>jboss-logging</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
@@ -397,12 +390,6 @@
                 </dependency>
                 <dependency>
                     <groupId>uk.gov.justice.services.example</groupId>
-                    <artifactId>example-command-controller</artifactId>
-                    <version>${project.version}</version>
-                    <type>war</type>
-                </dependency>
-                <dependency>
-                    <groupId>uk.gov.justice.services.example</groupId>
                     <artifactId>example-command-handler</artifactId>
                     <version>${project.version}</version>
                     <type>war</type>
@@ -460,14 +447,6 @@
                                             <version>${project.version}</version>
                                             <type>war</type>
                                             <destFileName>example-command-api.war</destFileName>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>uk.gov.justice.services.example</groupId>
-                                            <artifactId>example-command-controller</artifactId>
-                                            <version>${project.version}</version>
-                                            <type>war</type>
-                                            <destFileName>example-command-controller.war
-                                            </destFileName>
                                         </artifactItem>
                                         <artifactItem>
                                             <groupId>uk.gov.justice.services.example</groupId>

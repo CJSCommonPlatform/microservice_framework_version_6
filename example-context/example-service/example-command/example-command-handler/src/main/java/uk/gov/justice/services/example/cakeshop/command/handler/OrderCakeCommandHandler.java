@@ -33,7 +33,7 @@ public class OrderCakeCommandHandler {
     @Inject
     Enveloper enveloper;
 
-    @Handles("example.order-cake")
+    @Handles("example.command.order-cake")
     public void handle(final JsonEnvelope command) throws EventStreamException {
 
         LOGGER.info("=============> Inside order-cake Command Handler");

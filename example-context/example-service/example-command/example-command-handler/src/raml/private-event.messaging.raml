@@ -7,7 +7,7 @@ version: v1
     body:
         application/vnd.example.recipe-added+json:
             schema: !include json/schema/example.recipe-added.json
-            example: !include json/add-recipe.json
+            example: !include json/command.add-recipe.json
 
         application/vnd.example.recipe-removed+json:
             schema: !include json/schema/example.recipe-removed.json
@@ -15,7 +15,7 @@ version: v1
 
         application/vnd.example.cake-made+json:
             schema: !include json/schema/example.cake-made.json
-            example: !include json/make-cake.json
+            example: !include json/command.make-cake.json
 
         application/vnd.example.cake-ordered+json:
 

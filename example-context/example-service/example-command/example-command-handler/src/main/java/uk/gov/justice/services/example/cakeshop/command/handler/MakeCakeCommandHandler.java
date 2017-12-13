@@ -38,7 +38,7 @@ public class MakeCakeCommandHandler {
     @Inject
     Enveloper enveloper;
 
-    @Handles("example.make-cake")
+    @Handles("example.command.make-cake")
     public void makeCake(final JsonEnvelope command) throws EventStreamException {
         LOGGER.info("=============> Inside make-cake Command Handler");
 

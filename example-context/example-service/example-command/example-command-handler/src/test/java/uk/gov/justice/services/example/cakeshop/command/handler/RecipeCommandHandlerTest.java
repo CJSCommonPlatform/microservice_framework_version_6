@@ -48,11 +48,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class RecipeCommandHandlerTest {
 
-    private static final String ADD_RECIPE_COMMAND_NAME = "example.add-recipe";
+    private static final String ADD_RECIPE_COMMAND_NAME = "example.command.add-recipe";
     private static final String ADD_RECIPE_EVENT_NAME = "example.recipe-added";
-    private static final String RENAME_RECIPE_COMMAND_NAME = "example.rename-recipe";
+    private static final String RENAME_RECIPE_COMMAND_NAME = "example.command.rename-recipe";
     private static final String RENAME_RECIPE_EVENT_NAME = "example.recipe-renamed";
-    private static final String REMOVE_RECIPE_COMMAND_NAME = "example.remove-recipe";
+    private static final String REMOVE_RECIPE_COMMAND_NAME = "example.command.remove-recipe";
     private static final String REMOVE_RECIPE_EVENT_NAME = "example.recipe-removed";
     private static final String RECIPE_PHOTOGRAPH_ADDED_EVENT_NAME = "example.recipe-photograph-added";
 
@@ -79,7 +79,7 @@ public class RecipeCommandHandlerTest {
     @Test
     public void shouldHaveCorrectHandlesAnnotation() throws Exception {
         assertThat(recipeCommandHandler, isHandler(COMMAND_HANDLER)
-                .with(method("addRecipe").thatHandles("example.add-recipe")));
+                .with(method("addRecipe").thatHandles("example.command.add-recipe")));
     }
 
     @Test

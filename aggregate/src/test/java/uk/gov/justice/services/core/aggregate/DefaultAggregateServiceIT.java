@@ -24,7 +24,6 @@ import uk.gov.justice.services.core.aggregate.event.EventA;
 import uk.gov.justice.services.core.aggregate.event.EventB;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.extension.EventFoundEvent;
-import uk.gov.justice.services.core.h2.OpenEjbConfigurationBuilder;
 import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
 
 import uk.gov.justice.services.eventsourcing.publisher.jms.EventPublisher;
@@ -38,9 +37,11 @@ import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventSt
 import uk.gov.justice.services.eventsourcing.source.core.DefaultEventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EnvelopeEventStream;
 import uk.gov.justice.services.eventsourcing.source.core.EventAppender;
+import uk.gov.justice.services.eventsourcing.source.core.PublishingEventAppender;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.EventStreamManager;
+import uk.gov.justice.services.eventsourcing.source.core.SystemEventService;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.jdbc.persistence.AbstractJdbcRepository;
 import uk.gov.justice.services.jdbc.persistence.JdbcDataSourceProvider;
@@ -120,6 +121,8 @@ public class DefaultAggregateServiceIT {
             EnvelopeEventStream.class,
             EventStreamManager.class,
             EventAppender.class,
+            PublishingEventAppender.class,
+            SystemEventService.class,
 
             DefaultEnvelopeConverter.class,
             EventConverter.class,

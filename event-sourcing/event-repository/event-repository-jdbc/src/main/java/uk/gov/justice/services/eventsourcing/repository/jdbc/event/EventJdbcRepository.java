@@ -59,10 +59,13 @@ public class EventJdbcRepository {
     private static final String SQL_GET_FORWARD = "SELECT * FROM event_log t WHERE t.stream_id=? and t.sequence_id  >= ?  ORDER BY t.sequence_id ASC LIMIT ?";
     private static final String SQL_GET_BACKWARD = "SELECT * FROM event_log t WHERE t.stream_id=? and t.sequence_id  <= ? ORDER BY t.sequence_id DESC LIMIT ?";
     private static final String SQL_GET_FIRST = "SELECT * FROM event_log t WHERE t.stream_id=?  ORDER BY t.sequence_id ASC LIMIT ?";
-    private static final String SQL_RECORD_EXIST = "SELECT COUNT(*) FROM event_log t WHERE t.stream_id=? and t.sequence_id  = ?"; //-- Previous
+    private static final String SQL_RECORD_EXIST = "SELECT COUNT(*) FROM event_log t WHERE t.stream_id=? and t.sequence_id  = ?";
+    private static final String SQL_DELETE_STREAM = "DELETE FROM event_log t WHERE t.stream_id=?";
 
     private static final String READING_STREAM_ALL_EXCEPTION = "Exception while reading stream";
     private static final String READING_STREAM_EXCEPTION = "Exception while reading stream %s";
+    private static final String DELETING_STREAM_EXCEPTION = "Exception while deleting stream %s";
+    private static final String DELETING_STREAM_EXCEPTION_DETAILS = DELETING_STREAM_EXCEPTION + ", expected %d rows to be updated but was %d";
 
     @Inject
     protected Logger logger;
@@ -285,6 +288,24 @@ public class EventJdbcRepository {
             return jdbcRepositoryHelper.streamOf(ps, entityFromFunction()).sorted(Comparator.comparing(Event::getSequenceId).reversed());
         } catch (final SQLException e) {
             throw new JdbcRepositoryException(READING_STREAM_EXCEPTION, e);
+        }
+    }
+
+    public void clear(final UUID streamId) {
+        final long eventCount = getLatestSequenceIdForStream(streamId);
+
+        try {
+            final PreparedStatementWrapper ps = jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SQL_DELETE_STREAM);
+            ps.setObject(1, streamId);
+
+            final int deletedRows = ps.executeUpdate();
+
+            if (deletedRows != eventCount) {
+                // Rollback, something went wrong
+                throw new JdbcRepositoryException(format(DELETING_STREAM_EXCEPTION_DETAILS, streamId, eventCount, deletedRows));
+            }
+        } catch (final SQLException e) {
+            throw new JdbcRepositoryException(format(DELETING_STREAM_EXCEPTION, streamId), e);
         }
     }
 }

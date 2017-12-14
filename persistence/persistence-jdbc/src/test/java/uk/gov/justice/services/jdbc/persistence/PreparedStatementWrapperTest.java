@@ -11,6 +11,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -113,6 +115,30 @@ public class PreparedStatementWrapperTest {
         ps.setLong(parameterIndex, lng);
 
         verify(preparedStatement).setLong(parameterIndex, lng);
+    }
+
+    @Test
+    public void shouldDelegateSetBooleanMethodCall() throws SQLException {
+        final String query = "dummy";
+        when(connection.prepareStatement(query)).thenReturn(preparedStatement);
+        final PreparedStatementWrapper ps = PreparedStatementWrapper.valueOf(connection, query);
+        final int parameterIndex = 2;
+        final Boolean bool = false;
+        ps.setBoolean(parameterIndex, bool);
+
+        verify(preparedStatement).setBoolean(parameterIndex, bool);
+    }
+
+    @Test
+    public void shouldDelegateSetTimestampMethodCall() throws SQLException {
+        final String query = "dummy";
+        when(connection.prepareStatement(query)).thenReturn(preparedStatement);
+        final PreparedStatementWrapper ps = PreparedStatementWrapper.valueOf(connection, query);
+        final int parameterIndex = 2;
+        final Timestamp timestamp = Timestamp.valueOf(LocalDateTime.now());
+        ps.setTimestamp(parameterIndex, timestamp);
+
+        verify(preparedStatement).setTimestamp(parameterIndex, timestamp);
     }
 
     @Test

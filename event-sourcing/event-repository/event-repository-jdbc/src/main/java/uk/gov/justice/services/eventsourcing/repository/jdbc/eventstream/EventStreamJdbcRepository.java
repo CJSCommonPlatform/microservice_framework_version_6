@@ -22,8 +22,10 @@ import org.slf4j.Logger;
 @ApplicationScoped
 public class EventStreamJdbcRepository {
 
-    private static final String SQL_INSERT_EVENT_STREAM = "INSERT INTO event_stream (stream_id) values (?);";
-    private static final String SQL_FIND_ALL = "SELECT * FROM event_stream ORDER BY sequence_number ASC;";
+    private static final String SQL_INSERT_EVENT_STREAM = "INSERT INTO event_stream (stream_id, active) values (?, ?)";
+    private static final String SQL_UPDATE_EVENT_STREAM_ACTIVE = "UPDATE event_stream SET active=? WHERE stream_id=?";
+    private static final String SQL_DELETE_EVENT_STREAM = "DELETE FROM event_stream t WHERE t.stream_id=?";
+    private static final String SQL_FIND_ALL = "SELECT * FROM event_stream ORDER BY sequence_number ASC";
 
     private static final String READING_STREAM_EXCEPTION = "Exception while reading stream";
 
@@ -40,6 +42,7 @@ public class EventStreamJdbcRepository {
 
     private static final String COL_STREAM_ID = "stream_id";
     private static final String COL_SEQUENCE_NUMBER = "sequence_number";
+    private static final String COL_ACTIVE = "active";
 
     @Inject
     protected Logger logger;
@@ -59,11 +62,39 @@ public class EventStreamJdbcRepository {
 
 
     public void insert(final UUID streamId) {
+        insert(streamId, true);
+    }
+
+    public void insert(final UUID streamId, final boolean active) {
         try (final PreparedStatementWrapper ps = eventStreamJdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SQL_INSERT_EVENT_STREAM)) {
             ps.setObject(1, streamId);
+            ps.setBoolean(2, active);
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new JdbcRepositoryException(format("Exception while storing stream %s", streamId), e);
+        }
+    }
+
+    public void markActive(final UUID streamId, final boolean active) {
+        try {
+            final PreparedStatementWrapper ps = eventStreamJdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SQL_UPDATE_EVENT_STREAM_ACTIVE);
+            ps.setBoolean(1, active);
+            ps.setObject(2, streamId);
+
+            ps.executeUpdate();
+        } catch (final SQLException e) {
+            throw new JdbcRepositoryException(format("Exception while update stream %s active status to %s", streamId, active), e);
+        }
+    }
+
+    public void delete(final UUID streamId) {
+        try {
+            final PreparedStatementWrapper ps = eventStreamJdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SQL_DELETE_EVENT_STREAM);
+            ps.setObject(1, streamId);
+
+            ps.executeUpdate();
+        } catch (final SQLException e) {
+            throw new JdbcRepositoryException(format("Exception while deleting stream %s", streamId), e);
         }
     }
 
@@ -82,7 +113,8 @@ public class EventStreamJdbcRepository {
         return resultSet1 -> {
             try {
                 return new EventStream((UUID) resultSet1.getObject(COL_STREAM_ID),
-                                              resultSet1.getLong(COL_SEQUENCE_NUMBER));
+                                              resultSet1.getLong(COL_SEQUENCE_NUMBER),
+                                              resultSet1.getBoolean(COL_ACTIVE));
             } catch (final SQLException e) {
                 throw new JdbcRepositoryException(e);
             }

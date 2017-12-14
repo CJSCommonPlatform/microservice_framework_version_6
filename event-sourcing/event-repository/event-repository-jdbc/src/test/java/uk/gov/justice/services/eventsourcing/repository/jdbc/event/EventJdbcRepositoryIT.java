@@ -325,7 +325,6 @@ public class EventJdbcRepositoryIT {
         assertThat(streams.get(1).getSequenceId(), is(3L));
     }
 
-
     @Test
     public void shouldReturnFirstRecords() throws InvalidSequenceIdException, SQLException {
         final UUID streamId = randomUUID();
@@ -342,6 +341,25 @@ public class EventJdbcRepositoryIT {
 
         assertThat(streams.get(1).getStreamId(), is(streamId));
         assertThat(streams.get(1).getSequenceId(), is(1L));
+    }
+
+    @Test
+    public void shouldDeleteStream() throws InvalidSequenceIdException {
+        jdbcRepository.insert(eventOf(1, STREAM_ID));
+        jdbcRepository.insert(eventOf(2, STREAM_ID));
+        jdbcRepository.insert(eventOf(3, STREAM_ID));
+
+        final Long latestSequenceId = jdbcRepository.getLatestSequenceIdForStream(STREAM_ID);
+        assertThat(latestSequenceId, equalTo(3L));
+
+        jdbcRepository.clear(STREAM_ID);
+
+        final Stream<Event> emptyEvents = jdbcRepository.findByStreamIdOrderBySequenceIdAsc(STREAM_ID);
+        assertThat(emptyEvents.count(), equalTo(0L));
+
+        final Long deletedStreamLatestSequenceId = jdbcRepository.getLatestSequenceIdForStream(STREAM_ID);
+        assertThat(deletedStreamLatestSequenceId, equalTo(0L));
+
     }
 
     private Event eventOf(final UUID id, final String name, final UUID streamId, final long sequenceId, final String payloadJSON, final String metadataJSON, final ZonedDateTime timestamp) {

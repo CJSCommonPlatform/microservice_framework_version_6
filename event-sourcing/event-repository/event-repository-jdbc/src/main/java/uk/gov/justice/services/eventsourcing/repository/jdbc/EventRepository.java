@@ -63,4 +63,11 @@ public interface EventRepository {
      * @return the stream of envelope streams
      */
     Stream<Stream<JsonEnvelope>> getStreamOfAllEventStreams();
+
+    /**
+     * Clears all of the events from a stream.
+     *
+     * @param id - the id of the stream that is to be Cleared.
+     */
+    void clear(final UUID id);
 }

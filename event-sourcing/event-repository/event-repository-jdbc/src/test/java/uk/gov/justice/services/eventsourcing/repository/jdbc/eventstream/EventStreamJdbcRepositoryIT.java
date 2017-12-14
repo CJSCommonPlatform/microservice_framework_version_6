@@ -114,12 +114,15 @@ public class EventStreamJdbcRepositoryIT {
 
         assertThat(streams.get(0).getStreamId(), is(streamId6));
         assertThat(streams.get(0).getSequenceNumber(), is(6L));
+        assertThat(streams.get(0).isActive(), is(true));
 
         assertThat(streams.get(1).getStreamId(), is(streamId5));
         assertThat(streams.get(1).getSequenceNumber(), is(5L));
+        assertThat(streams.get(1).isActive(), is(true));
 
         assertThat(streams.get(2).getStreamId(), is(streamId4));
         assertThat(streams.get(2).getSequenceNumber(), is(4L));
+        assertThat(streams.get(2).isActive(), is(true));
     }
 
     @Test
@@ -230,4 +233,43 @@ public class EventStreamJdbcRepositoryIT {
         assertThat(streamOfStreams.get(1).getSequenceNumber(), is(1L));
     }
 
+    @Test
+    public void shouldMarkStreamAsInactive() {
+        final UUID streamId = randomUUID();
+        jdbcRepository.insert(streamId);
+
+        Optional<EventStream> eventStream = jdbcRepository.findAll().findFirst();
+
+        assertTrue(eventStream.isPresent());
+        assertTrue(eventStream.get().isActive());
+
+        jdbcRepository.markActive(streamId, false);
+
+        assertFalse(jdbcRepository.findAll().findFirst().get().isActive());
+    }
+
+    @Test
+    public void shouldDeleteStream() {
+        final UUID streamId = randomUUID();
+        jdbcRepository.insert(streamId);
+
+        Optional<EventStream> eventStream = jdbcRepository.findAll().findFirst();
+
+        assertTrue(eventStream.isPresent());
+
+        jdbcRepository.delete(streamId);
+
+        assertFalse(jdbcRepository.findAll().findFirst().isPresent());
+    }
+
+    @Test
+    public void shouldInsertNewStreamAsInactive() {
+        final UUID streamId = randomUUID();
+        jdbcRepository.insert(streamId, false);
+
+        Optional<EventStream> eventStream = jdbcRepository.findAll().findFirst();
+
+        assertTrue(eventStream.isPresent());
+        assertFalse(eventStream.get().isActive());
+    }
 }

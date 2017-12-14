@@ -2,10 +2,15 @@ package uk.gov.justice.services.eventsourcing.source.core;
 
 
 import static java.lang.String.format;
+import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.concat;
+import static java.util.stream.Stream.of;
 
 import uk.gov.justice.services.common.configuration.GlobalValue;
+import uk.gov.justice.services.common.util.Clock;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepository;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.OptimisticLockingRetryException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.VersionMismatchException;
@@ -30,13 +35,25 @@ public class EventStreamManager {
 
     @Inject
     EventRepository eventRepository;
+
+    @Inject
+    EventStreamJdbcRepository streamRepository;
+
     @Inject
     EventAppender eventAppender;
+
+    @Inject
+    Clock clock;
+
     @Inject
     @GlobalValue(key = "internal.max.retry", defaultValue = "20")
     long maxRetry;
+
     @Inject
     private Logger logger;
+
+    @Inject
+    SystemEventService systemEventService;
 
     /**
      * Get the stream of events.
@@ -123,9 +140,40 @@ public class EventStreamManager {
     @Transactional(dontRollbackOn = OptimisticLockingRetryException.class)
     public long appendAfter(final UUID id, final Stream<JsonEnvelope> events, final Long version) throws EventStreamException {
         if (version == null) {
-            throw new EventStreamException(String.format("Failed to append to stream %s. Version must not be null.", id));
+            throw new EventStreamException(format("Failed to append to stream %s. Version must not be null.", id));
         }
         return append(id, events, Optional.of(version));
+    }
+
+    /**
+     * Clones the stream of events from one stream on to a new stream, to create a backup. This
+     * operation does not alter the existing stream. The new stream is marked as inactive in the
+     * stream repository and a system event is appended to the copy that points to its origin
+     * streamId.
+     *
+     * @param id - the id of the stream to clone
+     * @return the id of the cloned stream
+     */
+    public UUID cloneAsAncestor(final UUID id) throws EventStreamException {
+        final UUID clonedId = randomUUID();
+
+        final Stream<JsonEnvelope> existingStream = eventRepository.getByStreamId(id);
+
+        final JsonEnvelope systemEvent = systemEventService.clonedEventFor(id);
+
+        append(clonedId, concat(existingStream, of(systemEvent)));
+
+        streamRepository.markActive(clonedId, false);
+
+        return clonedId;
+    }
+
+    /**
+     * Clears the stream, deleting all associated events from the event_log, it does not update the
+     * event_stream.
+     */
+    public void clear(final UUID id) {
+        eventRepository.clear(id);
     }
 
     /**
@@ -155,13 +203,13 @@ public class EventStreamManager {
 
     private void validateEvents(final UUID id, final List<JsonEnvelope> envelopeList) throws EventStreamException {
         if (envelopeList.stream().anyMatch(e -> e.metadata().version().isPresent())) {
-            throw new EventStreamException(String.format("Failed to append to stream %s. Version must be empty.", id));
+            throw new EventStreamException(format("Failed to append to stream %s. Version must be empty.", id));
         }
     }
 
     private void validateVersion(final UUID id, final Long versionFrom, final Long currentVersion) throws VersionMismatchException {
         if (versionFrom > currentVersion) {
-            throw new VersionMismatchException(String.format("Failed to append to stream %s due to a version mismatch; expected %d, found %d",
+            throw new VersionMismatchException(format("Failed to append to stream %s due to a version mismatch; expected %d, found %d",
                     id, versionFrom, currentVersion));
         } else if (versionFrom < currentVersion) {
             throw new OptimisticLockingRetryException(format("Optimistic locking failure while storing version %s of stream %s which is already at %s",

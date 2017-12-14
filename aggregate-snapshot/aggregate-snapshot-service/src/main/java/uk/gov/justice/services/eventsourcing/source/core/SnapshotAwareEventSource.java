@@ -1,5 +1,6 @@
 package uk.gov.justice.services.eventsourcing.source.core;
 
+import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.eventsourcing.source.core.snapshot.SnapshotService;
 
 import java.util.UUID;
@@ -31,6 +32,16 @@ public class SnapshotAwareEventSource implements EventSource {
      */
     public EventStream getStreamById(final UUID streamId) {
         return new SnapshotAwareEnvelopeEventStream(streamId, eventStreamManager, snapshotService);
+    }
+
+    @Override
+    public UUID cloneStream(final UUID streamId) throws EventStreamException {
+        return eventStreamManager.cloneAsAncestor(streamId);
+    }
+
+    @Override
+    public void clearStream(final UUID streamId) throws EventStreamException {
+        eventStreamManager.clear(streamId);
     }
 
 }

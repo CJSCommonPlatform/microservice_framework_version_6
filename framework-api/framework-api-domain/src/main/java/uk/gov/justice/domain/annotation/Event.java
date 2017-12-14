@@ -14,5 +14,8 @@ import java.lang.annotation.Target;
 @Retention(RUNTIME)
 @Target(TYPE)
 public @interface Event {
+
+    public static final String SYSTEM_EVENTS = "system.events.";
+
     String value();
 }

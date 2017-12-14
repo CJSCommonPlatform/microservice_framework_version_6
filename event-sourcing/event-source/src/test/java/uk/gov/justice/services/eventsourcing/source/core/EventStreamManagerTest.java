@@ -1,20 +1,31 @@
 package uk.gov.justice.services.eventsourcing.source.core;
 
+import static java.util.UUID.randomUUID;
+import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.spi.DefaultJsonMetadata.metadataBuilder;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithDefaults;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUIDAndName;
 
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepository;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.OptimisticLockingRetryException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.VersionMismatchException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.spi.DefaultJsonEnvelopeProvider;
 
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -23,6 +34,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -42,11 +55,21 @@ public class EventStreamManagerTest {
     @Mock
     private EventRepository eventRepository;
     @Mock
+    private EventStreamJdbcRepository eventStreamJdbcRepository;
+    @Mock
     private EventAppender eventAppender;
     @Mock
     private Stream<JsonEnvelope> eventStream;
+    @Mock
+    private SystemEventService systemEventService;
     @InjectMocks
     private EventStreamManager eventStreamManager;
+
+    @Captor
+    private ArgumentCaptor<JsonEnvelope> eventCaptor;
+
+    @Captor
+    private ArgumentCaptor<Long> versionCaptor;
 
     @Test
     public void shouldAppendToStream() throws Exception {
@@ -277,6 +300,40 @@ public class EventStreamManagerTest {
         }
 
         verify(logger).warn("Failed to append to stream {} due to concurrency issues, returning to handler.", STREAM_ID);
+    }
 
+    @Test
+    public void shouldCloneStream() throws EventStreamException {
+        final JsonEnvelope event1 = buildEnvelope("test.events.event1");
+        final JsonEnvelope event2 = buildEnvelope("test.events.event2");
+        final JsonEnvelope systemEvent = buildEnvelope("system.events.cloned");
+        when(eventRepository.getByStreamId(STREAM_ID)).thenReturn(Stream.of(event1, event2));
+        when(eventRepository.getCurrentSequenceIdForStream(STREAM_ID)).thenReturn(0L);
+        when(systemEventService.clonedEventFor(STREAM_ID)).thenReturn(systemEvent);
+
+        final UUID clonedId = eventStreamManager.cloneAsAncestor(STREAM_ID);
+
+        assertThat(clonedId, is(notNullValue()));
+        assertThat(clonedId, is(not(STREAM_ID)));
+
+        verify(eventAppender, times(3)).append(eventCaptor.capture(), eq(clonedId), versionCaptor.capture());
+        assertThat(eventCaptor.getAllValues(), hasItems(event1, event2, systemEvent));
+        assertThat(versionCaptor.getAllValues(), hasItems(1L, 2L, 3L));
+
+        verify(eventStreamJdbcRepository).markActive(clonedId, false);
+    }
+
+    @Test
+    public void shouldClearEventStream() throws EventStreamException {
+        eventStreamManager.clear(STREAM_ID);
+
+        verify(eventRepository).clear(STREAM_ID);
+        verifyNoMoreInteractions(eventRepository, eventAppender);
+    }
+
+    private JsonEnvelope buildEnvelope(final String eventName) {
+        return DefaultJsonEnvelopeProvider.provider().envelopeFrom(
+                metadataBuilder().withId(randomUUID()).withStreamId(STREAM_ID).withName(eventName),
+                createObjectBuilder().add("field", "value").build());
     }
 }

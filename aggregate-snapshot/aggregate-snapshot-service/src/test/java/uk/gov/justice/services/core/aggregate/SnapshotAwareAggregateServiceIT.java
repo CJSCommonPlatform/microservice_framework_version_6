@@ -43,10 +43,12 @@ import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventConverte
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepository;
 import uk.gov.justice.services.eventsourcing.source.core.EventAppender;
+import uk.gov.justice.services.eventsourcing.source.core.PublishingEventAppender;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.EventStreamManager;
 import uk.gov.justice.services.eventsourcing.source.core.SnapshotAwareEnvelopeEventStream;
 import uk.gov.justice.services.eventsourcing.source.core.SnapshotAwareEventSource;
+import uk.gov.justice.services.eventsourcing.source.core.SystemEventService;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.eventsourcing.source.core.snapshot.DefaultSnapshotService;
 import uk.gov.justice.services.eventsourcing.source.core.snapshot.DefaultSnapshotStrategy;
@@ -85,7 +87,6 @@ import org.apache.openejb.junit.ApplicationComposer;
 import org.apache.openejb.testing.Application;
 import org.apache.openejb.testing.Configuration;
 import org.apache.openejb.testing.Module;
-import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -170,7 +171,9 @@ public class SnapshotAwareAggregateServiceIT {
             SnapshotAwareEventSource.class,
             SnapshotAwareEnvelopeEventStream.class,
             EventStreamManager.class,
+            SystemEventService.class,
             EventAppender.class,
+            PublishingEventAppender.class,
             DefaultSnapshotStrategy.class,
             ValueProducer.class,
             DefaultSnapshotService.class,

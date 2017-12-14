@@ -19,6 +19,8 @@ import uk.gov.justice.services.core.aggregate.event.EventA;
 import uk.gov.justice.services.core.aggregate.event.EventB;
 import uk.gov.justice.services.core.extension.EventFoundEvent;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
+import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
+import uk.gov.justice.services.messaging.JsonObjectMetadata;
 
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -111,6 +113,36 @@ public class DefaultAggregateServiceTest {
         assertThat(aggregate.recordedEvents().get(1), equalTo(eventB));
         verify(logger).info("Registering event {}, {} with DefaultAggregateService", "eventA", EventA.class);
         verify(logger).info("Registering event {}, {} with DefaultAggregateService", "eventB", EventB.class);
+        verify(logger).trace("Recreating aggregate for instance {} of aggregate type {}", STREAM_ID, TestAggregate.class);
+    }
+
+    @Test
+    public void shouldCreateAggregateFromStreamOfThreeWithAFilteredOutSystemEvent() {
+        JsonObject eventPayloadA = mock(JsonObject.class);
+        JsonObject eventPayloadB = mock(JsonObject.class);
+
+        EventA eventA = mock(EventA.class);
+        EventB eventB = mock(EventB.class);
+        when(jsonObjectToObjectConverter.convert(eventPayloadA, EventA.class)).thenReturn(eventA);
+        when(jsonObjectToObjectConverter.convert(eventPayloadB, EventB.class)).thenReturn(eventB);
+        when(eventStream.read()).thenReturn(Stream.of(
+                envelopeFrom(metadataWithRandomUUID("eventA"), eventPayloadA),
+                envelopeFrom(metadataWithRandomUUID("eventB"), eventPayloadB),
+                envelopeFrom(metadataWithRandomUUID("system.events.eventC"), eventPayloadB)));
+
+        when(eventStream.getId()).thenReturn(STREAM_ID);
+
+        aggregateService.register(new EventFoundEvent(EventA.class, "eventA"));
+        aggregateService.register(new EventFoundEvent(EventB.class, "eventB"));
+
+        TestAggregate aggregate = aggregateService.get(eventStream, TestAggregate.class);
+
+        assertThat(aggregate, notNullValue());
+        assertThat(aggregate.recordedEvents(), hasSize(2));
+        assertThat(aggregate.recordedEvents().get(0), equalTo(eventA));
+        assertThat(aggregate.recordedEvents().get(1), equalTo(eventB));
+        verify(logger).info("Registering event {}, {} with DefaultAggregateService", "eventA" , EventA.class);
+        verify(logger).info("Registering event {}, {} with DefaultAggregateService", "eventB" , EventB.class);
         verify(logger).trace("Recreating aggregate for instance {} of aggregate type {}", STREAM_ID, TestAggregate.class);
     }
 

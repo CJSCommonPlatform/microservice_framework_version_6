@@ -81,7 +81,7 @@
                 <dependencies>
                     <dependency>
                         <groupId>uk.gov.justice.services.example</groupId>
-                        <artifactId>example-command-controller</artifactId>
+                        <artifactId>example-command-handler</artifactId>
                         <version>${project.version}</version>
                         <classifier>raml</classifier>
                     </dependency>

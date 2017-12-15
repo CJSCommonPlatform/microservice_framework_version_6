@@ -131,8 +131,8 @@ public class RestAdapterGenerator_ActionMapperErrorHandlingTest extends BaseRest
                                         .with(mapping()
                                                 .withName("contextC.someAction")
                                                 .withRequestType("application/vnd.ctx.command.somemediatype1+json"))
-                                        .withMediaType("application/vnd.ctx.command.somemediatype1+json", "json/schema/somemediatype1.json")
-                                        .withMediaType("application/vnd.ctx.command.somemediatype2+json", "json/schema/somemediatype2.json")
+                                        .withMediaTypeWithDefaultSchema("application/vnd.ctx.command.somemediatype1+json")
+                                        .withMediaTypeWithDefaultSchema("application/vnd.ctx.command.somemediatype2+json")
                                 )
 
                         ).build(),

@@ -17,6 +17,10 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.json</artifactId>
+        </dependency>
+        <dependency>
             <groupId>uk.gov.justice.services</groupId>
             <artifactId>framework-api-core</artifactId>
             <version>${project.version}</version>
@@ -33,6 +37,10 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.utils</groupId>
+            <artifactId>utilities-core</artifactId>
         </dependency>
 
         <!-- Test Dependencies -->
@@ -63,11 +71,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.glassfish</groupId>
-            <artifactId>javax.json</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>uk.gov.justice.services</groupId>
             <artifactId>generators-test-utils</artifactId>
             <version>${project.version}</version>
@@ -76,6 +79,12 @@
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
             <artifactId>test-utils-common</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>core</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>

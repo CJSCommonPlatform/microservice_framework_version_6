@@ -12,6 +12,8 @@ import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 
+import uk.gov.justice.schema.catalog.CatalogProducer;
+import uk.gov.justice.schema.service.SchemaCatalogService;
 import uk.gov.justice.services.common.configuration.GlobalValueProducer;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
@@ -35,9 +37,13 @@ import uk.gov.justice.services.core.extension.ServiceComponentScanner;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.it.util.producer.TestEnvelopeValidationExceptionHandlerProducer;
 import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
-import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
-
+import uk.gov.justice.services.core.json.FileBasedJsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
+import uk.gov.justice.services.core.json.PayloadExtractor;
+import uk.gov.justice.services.core.json.SchemaCatalogAwareJsonSchemaValidator;
+import uk.gov.justice.services.core.mapping.DefaultSchemaIdMappingCache;
+import uk.gov.justice.services.core.mapping.NameToMediaTypeConverter;
+import uk.gov.justice.services.core.mapping.SchemaIdMappingObserver;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.requester.RequesterProducer;
 import uk.gov.justice.services.core.sender.Sender;
@@ -122,16 +128,24 @@ public class SenderRequesterHandlerIT {
             UtcClock.class,
             DefaultFileSystemUrlResolverStrategy.class,
 
-
             TestEnvelopeValidationExceptionHandlerProducer.class,
             GlobalValueProducer.class,
-            DefaultJsonSchemaValidator.class,
+            FileBasedJsonSchemaValidator.class,
             JsonSchemaLoader.class,
             DefaultTraceLogger.class,
             TestCommandController.class,
             TestCommandApi.class,
             TestQueryApi.class,
-            TestQueryController.class
+            TestQueryController.class,
+
+            SchemaCatalogAwareJsonSchemaValidator.class,
+            PayloadExtractor.class,
+            NameToMediaTypeConverter.class,
+            DefaultSchemaIdMappingCache.class,
+            SchemaIdMappingObserver.class,
+
+            CatalogProducer.class,
+            SchemaCatalogService.class
     })
     public WebApp war() {
         return new WebApp()

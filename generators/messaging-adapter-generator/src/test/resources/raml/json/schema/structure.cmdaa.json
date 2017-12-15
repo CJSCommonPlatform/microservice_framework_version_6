@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/example/command/controller/structure.commanda.json",
+  "type": "object",
+  "properties": {
+    "userUrn": {
+      "id": "/urn",
+      "type": "string"
+    }
+  },
+  "required": [
+    "userUrn"
+  ]
+}

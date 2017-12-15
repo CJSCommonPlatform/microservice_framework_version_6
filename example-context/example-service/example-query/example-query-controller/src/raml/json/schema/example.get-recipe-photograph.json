@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "",
+  "id": "http://justice.gov.uk/example/query/controller/example.get-recipe-photgraph.json",
   "type": "object",
   "properties": {
     "name": {

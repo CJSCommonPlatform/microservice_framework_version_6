@@ -14,6 +14,9 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithD
 import uk.gov.justice.api.QueryApiRestExampleApplication;
 import uk.gov.justice.api.mapper.DefaultQueryApiUsersResourceActionMapper;
 import uk.gov.justice.api.mapper.DefaultQueryApiUsersUserIdResourceActionMapper;
+import uk.gov.justice.api.mapper.RestAdapterGeneratorMediaTypeToSchemaIdMapper;
+import uk.gov.justice.schema.catalog.CatalogProducer;
+import uk.gov.justice.schema.service.SchemaCatalogService;
 import uk.gov.justice.services.adapter.rest.application.CommonProviders;
 import uk.gov.justice.services.adapter.rest.application.DefaultCommonProviders;
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
@@ -35,9 +38,16 @@ import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
+import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
-import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
+import uk.gov.justice.services.core.json.FileBasedJsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
+import uk.gov.justice.services.core.json.PayloadExtractor;
+import uk.gov.justice.services.core.json.SchemaCatalogAwareJsonSchemaValidator;
+import uk.gov.justice.services.core.mapping.DefaultSchemaIdMappingCache;
+import uk.gov.justice.services.core.mapping.MediaTypeToSchemaIdMapper;
+import uk.gov.justice.services.core.mapping.NameToMediaTypeConverter;
+import uk.gov.justice.services.core.mapping.SchemaIdMappingObserver;
 import uk.gov.justice.services.generators.test.utils.interceptor.RecordingInterceptorChainProcessor;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -138,7 +148,7 @@ public class DefaultUsersUserIdResourceIT {
             JsonSchemaValidationInterceptor.class,
             LoggerRequestDataFilter.class,
             TestServiceContextNameProvider.class,
-            DefaultJsonSchemaValidator.class,
+            FileBasedJsonSchemaValidator.class,
             JsonSchemaLoader.class,
             DefaultQueryApiUsersUserIdResourceActionMapper.class,
             DefaultQueryApiUsersResourceActionMapper.class,
@@ -152,7 +162,21 @@ public class DefaultUsersUserIdResourceIT {
             ValidParameterCollectionBuilderFactory.class,
             DefaultTraceLogger.class,
             DefaultHttpTraceLoggerHelper.class,
-            DefaultFileSystemUrlResolverStrategy.class
+            DefaultFileSystemUrlResolverStrategy.class,
+            RestAdapterGeneratorMediaTypeToSchemaIdMapper.class,
+            SchemaCatalogAwareJsonSchemaValidator.class,
+            PayloadExtractor.class,
+            NameToMediaTypeConverter.class,
+
+            DefaultSchemaIdMappingCache.class,
+            SchemaIdMappingObserver.class,
+            MediaTypeToSchemaIdMapper.class,
+            BeanInstantiater.class,
+            MediaTypeToSchemaIdMapper.class,
+
+            CatalogProducer.class,
+            SchemaCatalogService.class
+
     })
     public WebApp war() {
         return new WebApp()

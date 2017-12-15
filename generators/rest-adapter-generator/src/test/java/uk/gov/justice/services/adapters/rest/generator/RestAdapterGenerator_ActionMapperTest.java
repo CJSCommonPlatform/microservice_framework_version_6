@@ -117,8 +117,8 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
                                         .with(mapping()
                                                 .withName("contextB.someOtherAction")
                                                 .withRequestType("application/vnd.ctx.command.somemediatype2+json"))
-                                        .withMediaType("application/vnd.ctx.command.somemediatype1+json", "json/schema/somemediatype1.json")
-                                        .withMediaType("application/vnd.ctx.command.somemediatype2+json", "json/schema/somemediatype2.json")
+                                        .withMediaTypeWithDefaultSchema("application/vnd.ctx.command.somemediatype1+json")
+                                        .withMediaTypeWithDefaultSchema("application/vnd.ctx.command.somemediatype2+json")
                                 )
 
                         ).build(),
@@ -150,8 +150,8 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
                                         .with(mapping()
                                                 .withName("contextB.someOtherAction")
                                                 .withRequestType("application/vnd.ctx.command.somemediatype2+json"))
-                                        .withMediaType("application/vnd.ctx.command.somemediatype1+json", "json/schema/somemediatype1.json")
-                                        .withMediaType("application/vnd.ctx.command.somemediatype2+json", "json/schema/somemediatype2.json")
+                                        .withMediaTypeWithDefaultSchema("application/vnd.ctx.command.somemediatype1+json")
+                                        .withMediaTypeWithDefaultSchema("application/vnd.ctx.command.somemediatype2+json")
                                 )
 
                         ).build(),
@@ -183,8 +183,8 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
                                         .with(mapping()
                                                 .withName("contextB.someOtherAction")
                                                 .withRequestType("application/vnd.ctx.command.somemediatype2+json"))
-                                        .withMediaType("application/vnd.ctx.command.somemediatype1+json", "json/schema/somemediatype1.json")
-                                        .withMediaType("application/vnd.ctx.command.somemediatype2+json", "json/schema/somemediatype2.json")
+                                        .withMediaTypeWithDefaultSchema("application/vnd.ctx.command.somemediatype1+json")
+                                        .withMediaTypeWithDefaultSchema("application/vnd.ctx.command.somemediatype2+json")
                                 )
 
                         ).build(),
@@ -216,8 +216,8 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
                                         .with(mapping()
                                                 .withName("contextB.someOtherAction")
                                                 .withRequestType("application/vnd.ctx.command.somemediatype2+json"))
-                                        .withMediaType("application/vnd.ctx.command.somemediatype1+json", "json/schema/somemediatype1.json")
-                                        .withMediaType("application/vnd.ctx.command.somemediatype2+json", "json/schema/somemediatype2.json")
+                                        .withMediaTypeWithDefaultSchema("application/vnd.ctx.command.somemediatype1+json")
+                                        .withMediaTypeWithDefaultSchema("application/vnd.ctx.command.somemediatype2+json")
                                 )
 
                         ).build(),
@@ -249,8 +249,8 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
                                         .with(mapping()
                                                 .withName("contextD.someAction")
                                                 .withRequestType("application/vnd.ctx.command.somemediatype2+json"))
-                                        .withMediaType("application/vnd.ctx.command.somemediatype1+json", "json/schema/somemediatype1.json")
-                                        .withMediaType("application/vnd.ctx.command.somemediatype2+json", "json/schema/somemediatype2.json")
+                                        .withMediaTypeWithDefaultSchema("application/vnd.ctx.command.somemediatype1+json")
+                                        .withMediaTypeWithDefaultSchema("application/vnd.ctx.command.somemediatype2+json")
                                 )
 
                         ).build(),
@@ -279,7 +279,7 @@ public class RestAdapterGenerator_ActionMapperTest extends BaseRestAdapterGenera
                                         .with(mapping()
                                                 .withName("contextC.commandAction")
                                                 .withRequestType("application/vnd.somemediatype1+json"))
-                                        .withMediaType("application/vnd.somemediatype1+json", "json/schema/somemediatype1.json")
+                                        .withMediaTypeWithDefaultSchema("application/vnd.somemediatype1+json")
                                 )
                                 .with(httpActionWithDefaultMapping(GET)
                                         .with(mapping()

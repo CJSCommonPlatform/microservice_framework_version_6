@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "",
+  "id": "http://justice.gov.uk/example/event/listener/example.recipe-added.json",
   "type": "object",
   "properties": {
     "recipeId": {

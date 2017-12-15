@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [2.5.0] - 2017-12-15
+### Added 
+- Catalog generation for all json schema files. Add an id into a json schema to use.
+
 ## [2.4.3] - 2017-12-11
 ### Changed
 - Upgrade File Service to 1.14.0

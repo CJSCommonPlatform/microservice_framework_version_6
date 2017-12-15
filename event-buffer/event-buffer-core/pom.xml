@@ -30,6 +30,7 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
+
         <!-- Test Dependencies -->
         <dependency>
             <groupId>junit</groupId>
@@ -93,6 +94,12 @@
             <groupId>uk.gov.justice.services</groupId>
             <artifactId>test-utils-core</artifactId>
             <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.utils</groupId>
+            <artifactId>test-utils-core</artifactId>
+            <version>${test-utils.version}</version>
             <scope>test</scope>
         </dependency>
 

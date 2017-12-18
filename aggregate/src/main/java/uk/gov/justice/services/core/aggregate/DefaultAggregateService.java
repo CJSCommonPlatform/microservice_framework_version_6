@@ -1,6 +1,7 @@
 package uk.gov.justice.services.core.aggregate;
 
 import static java.lang.String.format;
+import static uk.gov.justice.domain.annotation.Event.SYSTEM_EVENTS;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -57,7 +58,7 @@ public class DefaultAggregateService implements AggregateService {
     public <T extends Aggregate> T applyEvents(final Stream<JsonEnvelope> events, final T aggregate) {
         logger.trace("Apply events for aggregate: {}", aggregate.getClass());
         try (final Stream<JsonEnvelope> e1 = events){
-            aggregate.applyForEach(events.map(this::convertEnvelopeToEvent));
+            aggregate.applyForEach(events.filter(e -> !e.metadata().name().startsWith(SYSTEM_EVENTS)).map(this::convertEnvelopeToEvent));
             return aggregate;
         }
     }

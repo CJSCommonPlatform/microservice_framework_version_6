@@ -55,6 +55,14 @@ public class PreparedStatementWrapper implements AutoCloseable {
         }
     }
 
+    public void setBoolean(final int parameterIndex, final boolean bool) throws SQLException {
+        try {
+            this.preparedStatement.setBoolean(parameterIndex, bool);
+        } catch (SQLException e) {
+            handle(e, this);
+        }
+    }
+
     public ResultSet executeQuery() throws SQLException {
         ResultSet resultSet = null;
         try {

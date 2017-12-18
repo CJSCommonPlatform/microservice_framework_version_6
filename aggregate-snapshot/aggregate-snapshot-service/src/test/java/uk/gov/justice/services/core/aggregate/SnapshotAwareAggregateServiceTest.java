@@ -35,6 +35,7 @@ import java.util.stream.Stream;
 
 import javax.json.JsonObject;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -75,11 +76,14 @@ public class SnapshotAwareAggregateServiceTest {
         defaultAggregateService.register(new EventFoundEvent(clazz, name));
     }
 
-    @Test
-    public void shouldCreateAggregateFromEmptyStream() throws AggregateChangeDetectedException {
+    @Before
+    public void setup() {
         defaultAggregateService.logger = logger;
         defaultAggregateService.jsonObjectToObjectConverter = jsonObjectToObjectConverter;
+    }
 
+    @Test
+    public void shouldCreateAggregateFromEmptyStream() throws AggregateChangeDetectedException {
         when(eventStream.getId()).thenReturn(STREAM_ID);
         when(snapshotService.getLatestVersionedAggregate(STREAM_ID, TestAggregate.class)).thenReturn(Optional.of(new VersionedAggregate<>(INITIAL_AGGREGATE_VERSION, new TestAggregate())));
         when(eventStream.readFrom(NEXT_AGGREGATE_VERSION)).thenReturn(Stream.empty());
@@ -94,8 +98,7 @@ public class SnapshotAwareAggregateServiceTest {
     @Test
     public void shouldCreateAggregateFromStreamWithOneEvent() throws AggregateChangeDetectedException {
         Optional<VersionedAggregate<TestAggregate>> versionedAggregate = Optional.empty();
-        defaultAggregateService.logger = logger;
-        defaultAggregateService.jsonObjectToObjectConverter = jsonObjectToObjectConverter;
+
         final EventA eventA = new EventA();
         final JsonObject eventPayloadA = mock(JsonObject.class);
 
@@ -120,9 +123,6 @@ public class SnapshotAwareAggregateServiceTest {
 
     @Test
     public void shouldCreateAggregateFromStreamWithTwoEvents() throws AggregateChangeDetectedException {
-
-        defaultAggregateService.logger = logger;
-        defaultAggregateService.jsonObjectToObjectConverter = jsonObjectToObjectConverter;
         final EventA eventA = new EventA();
         final EventB eventB = mock(EventB.class);
         final JsonObject eventPayloadA = mock(JsonObject.class);
@@ -149,6 +149,42 @@ public class SnapshotAwareAggregateServiceTest {
         verify(logger).info("Registering event {}, {} with DefaultAggregateService", "eventB", EventB.class);
         verify(logger).trace("Recreating aggregate for instance {} of aggregate type {}", STREAM_ID, TestAggregate.class);
         verify(logger).trace("SnapshotAwareAggregateService Recreating aggregate for instance {} of aggregate type {}", STREAM_ID, TestAggregate.class);
+    }
+
+    @Test
+    public void shouldCreateAggregateFromStreamOfThreeWithAFilteredOutSystemEvent() throws AggregateChangeDetectedException {
+        final Optional<VersionedAggregate<TestAggregate>> versionedAggregate = Optional.empty();
+
+        JsonObject eventPayloadA = mock(JsonObject.class);
+        JsonObject eventPayloadB = mock(JsonObject.class);
+
+        EventA eventA = mock(EventA.class);
+        EventB eventB = mock(EventB.class);
+
+        when(jsonObjectToObjectConverter.convert(eventPayloadA, EventA.class)).thenReturn(eventA);
+        when(jsonObjectToObjectConverter.convert(eventPayloadB, EventB.class)).thenReturn(eventB);
+        when(eventStream.getId()).thenReturn(STREAM_ID);
+        when(eventStream.read()).thenReturn(Stream.of(
+                envelopeFrom(metadataWithRandomUUID("eventA"), eventPayloadA),
+                envelopeFrom(metadataWithRandomUUID("eventB"), eventPayloadB),
+                envelopeFrom(metadataWithRandomUUID("system.events.eventC"), eventPayloadB)));
+
+        when(snapshotService.getLatestVersionedAggregate(STREAM_ID, TestAggregate.class)).thenReturn(versionedAggregate);
+
+        when(eventStream.getId()).thenReturn(STREAM_ID);
+
+        registerEvent(EventA.class, "eventA");
+        registerEvent(EventB.class, "eventB");
+
+        TestAggregate aggregate = aggregateService.get(eventStream, TestAggregate.class);
+
+        assertThat(aggregate, notNullValue());
+        assertThat(aggregate.recordedEvents(), hasSize(2));
+        assertThat(aggregate.recordedEvents().get(0), equalTo(eventA));
+        assertThat(aggregate.recordedEvents().get(1), equalTo(eventB));
+        verify(logger).info("Registering event {}, {} with DefaultAggregateService", "eventA" , EventA.class);
+        verify(logger).info("Registering event {}, {} with DefaultAggregateService", "eventB" , EventB.class);
+        verify(logger).trace("Recreating aggregate for instance {} of aggregate type {}", STREAM_ID, TestAggregate.class);
     }
 
     @Test(expected = IllegalStateException.class)

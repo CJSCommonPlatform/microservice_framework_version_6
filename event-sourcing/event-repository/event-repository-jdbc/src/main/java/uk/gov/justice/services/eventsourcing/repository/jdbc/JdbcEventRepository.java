@@ -54,7 +54,6 @@ public class JdbcEventRepository implements EventRepository {
         logger.trace("Retrieving event stream for {} at sequence {}", streamId, sequenceId);
         return eventJdbcRepository.findByStreamIdFromSequenceIdOrderBySequenceIdAsc(streamId, sequenceId)
                 .map(eventConverter::envelopeOf);
-
     }
 
     @Override
@@ -92,5 +91,10 @@ public class JdbcEventRepository implements EventRepository {
                     return eventStream.map(eventConverter::envelopeOf);
                 });
 
+    }
+
+    @Override
+    public void clear(final UUID id) {
+        eventJdbcRepository.clear(id);
     }
 }

@@ -218,6 +218,13 @@ public class JdbcEventRepositoryTest {
         assertThat(jdbcEventRepository.getCurrentSequenceIdForStream(STREAM_ID), equalTo(VERSION_1));
     }
 
+    @Test
+    public void shouldDeleteStream() {
+        jdbcEventRepository.clear(STREAM_ID);
+
+        verify(eventJdbcRepository).clear(STREAM_ID);
+    }
+
     private Event eventOf(final UUID streamId) {
         return new Event(null, streamId, null, null, null, null, null);
     }

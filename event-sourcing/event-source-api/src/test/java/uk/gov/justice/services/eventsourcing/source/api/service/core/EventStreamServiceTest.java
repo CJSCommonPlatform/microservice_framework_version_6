@@ -41,8 +41,8 @@ public class EventStreamServiceTest {
         final UUID streamId3 = randomUUID();
         final UUID streamId4 = randomUUID();
 
-        final EventStream eventStream3 = new EventStream(streamId3, 3L);
-        final EventStream eventStream4 = new EventStream(streamId4, 4L);
+        final EventStream eventStream3 = new EventStream(streamId3, 3L, false);
+        final EventStream eventStream4 = new EventStream(streamId4, 4L, false);
 
         final Stream.Builder<EventStream> eventStreamBuilder = Stream.builder();
 
@@ -73,8 +73,8 @@ public class EventStreamServiceTest {
 
         final Stream.Builder<EventStream> eventStreamBuilder = Stream.builder();
 
-        final EventStream eventStream1 = new EventStream(streamId1, 1L);
-        final EventStream eventStream2 = new EventStream(streamId2, 2L);
+        final EventStream eventStream1 = new EventStream(streamId1, 1L, false);
+        final EventStream eventStream2 = new EventStream(streamId2, 2L, false);
 
         eventStreamBuilder.add(eventStream2);
         eventStreamBuilder.add(eventStream1);
@@ -104,8 +104,8 @@ public class EventStreamServiceTest {
 
         final Stream.Builder<EventStream> eventStreamBuilder = Stream.builder();
 
-        final EventStream eventStream2 = new EventStream(streamId2, 2L);
-        final EventStream eventStream3 = new EventStream(streamId3, 3L);
+        final EventStream eventStream2 = new EventStream(streamId2, 2L, false);
+        final EventStream eventStream3 = new EventStream(streamId3, 3L, false);
 
         eventStreamBuilder.add(eventStream3);
         eventStreamBuilder.add(eventStream2);
@@ -138,8 +138,8 @@ public class EventStreamServiceTest {
 
         final Stream.Builder<EventStream> eventStreamBuilder = Stream.builder();
 
-        final EventStream eventStream5 = new EventStream(streamId5, 5L);
-        final EventStream eventStream4 = new EventStream(streamId4, 4L);
+        final EventStream eventStream5 = new EventStream(streamId5, 5L, false);
+        final EventStream eventStream4 = new EventStream(streamId4, 4L, false);
 
         eventStreamBuilder.add(eventStream5);
         eventStreamBuilder.add(eventStream4);

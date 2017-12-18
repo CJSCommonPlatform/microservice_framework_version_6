@@ -29,7 +29,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class EventAppenderTest {
+public class PublishingEventAppenderTest {
 
     @Mock
     private EventRepository eventRepository;
@@ -41,7 +41,7 @@ public class EventAppenderTest {
     private EventStreamJdbcRepository eventStreamRepository;
 
     @InjectMocks
-    private EventAppender eventAppender;
+    private PublishingEventAppender eventAppender;
 
     @Test
     public void shouldStoreEventInRepo() throws Exception {

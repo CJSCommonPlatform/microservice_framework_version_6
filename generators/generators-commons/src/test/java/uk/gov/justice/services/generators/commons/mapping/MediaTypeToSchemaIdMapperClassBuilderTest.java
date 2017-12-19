@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.core.annotation.SchemaIdMapper;
 import uk.gov.justice.services.core.mapping.MediaType;
+import uk.gov.justice.services.core.mapping.MediaTypeToSchemaIdMapper;
 import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil;
 
 import java.io.File;
@@ -59,7 +60,7 @@ public class MediaTypeToSchemaIdMapperClassBuilderTest {
                 new MediaTypeToSchemaId(mediaType_4, "schemaId_4")
         );
 
-        when(schemaMappingClassNameGenerator.createMappingClassNameFrom(baseUri)).thenReturn(simpleName);
+        when(schemaMappingClassNameGenerator.createMappingClassNameFrom(baseUri, MediaTypeToSchemaIdMapper.class)).thenReturn(simpleName);
 
         final TypeSpec typeSpec = mediaTypeToSchemaIdMapperClassBuilder.typeSpecWith(baseUri, mediaTypeToSchemaIds);
 
@@ -84,6 +85,7 @@ public class MediaTypeToSchemaIdMapperClassBuilderTest {
         assertThat(schemaIds.get(mediaType_4), is("schemaId_4"));
     }
 
+    @SuppressWarnings("ConstantConditions")
     private Class<?> writeSourceFileAndCompile(final String packageName, final TypeSpec typeSpec) throws IOException {
 
         final File outputFolderRoot = outputFolder.getRoot();

@@ -1,6 +1,7 @@
 package uk.gov.justice.services.adapter.rest.interceptor;
 
 import static java.lang.String.format;
+import static java.util.Optional.of;
 import static uk.gov.justice.services.adapter.rest.envelope.MediaTypes.JSON_MEDIA_TYPE_SUFFIX;
 import static uk.gov.justice.services.adapter.rest.envelope.MediaTypes.charsetFrom;
 import static uk.gov.justice.services.core.json.JsonValidationLogger.toValidationTrace;
@@ -9,6 +10,7 @@ import static uk.gov.justice.services.messaging.logging.HttpMessageLoggerHelper.
 import uk.gov.justice.services.adapter.rest.exception.BadRequestException;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.core.mapping.MediaType;
+import uk.gov.justice.services.core.mapping.NameToMediaTypeConverter;
 import uk.gov.justice.services.messaging.exception.InvalidMediaTypeException;
 
 import java.io.ByteArrayInputStream;
@@ -37,6 +39,9 @@ public class JsonSchemaValidationInterceptor implements ReaderInterceptor {
     @Inject
     JsonSchemaValidator restJsonSchemaValidator;
 
+    @Inject
+    NameToMediaTypeConverter nameToMediaTypeConverter;
+
     @Override
     public Object aroundReadFrom(final ReaderInterceptorContext context) throws IOException, WebApplicationException {
 
@@ -47,7 +52,7 @@ public class JsonSchemaValidationInterceptor implements ReaderInterceptor {
             final String payload = IOUtils.toString(context.getInputStream(), charset);
 
             try {
-                restJsonSchemaValidator.validate(payload, mediaType);
+                restJsonSchemaValidator.validate(payload, nameToMediaTypeConverter.convert(mediaType), of(mediaType));
             } catch (ValidationException ex) {
                 final String message = format("JSON schema validation has failed on %s due to %s ",
                         toHttpHeaderTrace(context.getHeaders()),

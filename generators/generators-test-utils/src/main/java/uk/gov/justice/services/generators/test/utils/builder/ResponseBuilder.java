@@ -29,6 +29,13 @@ public class ResponseBuilder {
         return this;
     }
 
+    public ResponseBuilder withBodyTypes(final MimeType... responseTypes) {
+        stream(responseTypes).forEach(type ->
+                this.responseBody.put(type.toString(), type)
+        );
+        return this;
+    }
+
     public Response build() {
         final Response response = new Response();
         response.setDescription(description);

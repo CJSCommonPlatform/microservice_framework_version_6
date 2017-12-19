@@ -6,7 +6,6 @@ import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.
 import uk.gov.justice.schema.catalog.Catalog;
 import uk.gov.justice.schema.catalog.CatalogObjectFactory;
 import uk.gov.justice.schema.service.SchemaCatalogService;
-import uk.gov.justice.services.core.mapping.NameToMediaTypeConverter;
 
 public class DefaultJsonSchemaValidatorFactory {
 
@@ -18,10 +17,9 @@ public class DefaultJsonSchemaValidatorFactory {
         final PayloadExtractor payloadExtractor = new PayloadExtractor();
 
         final FileBasedJsonSchemaValidator fileBasedJsonSchemaValidator = new FileBasedJsonSchemaValidator();
-        fileBasedJsonSchemaValidator.loader = loader;
+        fileBasedJsonSchemaValidator.jsonSchemaLoader = loader;
         fileBasedJsonSchemaValidator.logger = getLogger(FileBasedJsonSchemaValidator.class);
         fileBasedJsonSchemaValidator.payloadExtractor = payloadExtractor;
-        fileBasedJsonSchemaValidator.nameToMediaTypeConverter = new NameToMediaTypeConverter();
 
         final SchemaCatalogAwareJsonSchemaValidator schemaCatalogAwareJsonSchemaValidator = new SchemaCatalogAwareJsonSchemaValidator();
         schemaCatalogAwareJsonSchemaValidator.logger = getLogger(SchemaCatalogAwareJsonSchemaValidator.class);
@@ -30,7 +28,12 @@ public class DefaultJsonSchemaValidatorFactory {
         schemaCatalogAwareJsonSchemaValidator.schemaCatalogService = aSchemaCatalogService();
         schemaCatalogAwareJsonSchemaValidator.schemaIdMappingCache = new SchemaIdMappingCacheMock().initialize();
 
-        return schemaCatalogAwareJsonSchemaValidator;
+        final BackwardsCompatibleJsonSchemaValidator backwardsCompatibleJsonSchemaValidator = new BackwardsCompatibleJsonSchemaValidator();
+
+        backwardsCompatibleJsonSchemaValidator.schemaCatalogAwareJsonSchemaValidator = schemaCatalogAwareJsonSchemaValidator;
+        backwardsCompatibleJsonSchemaValidator.fileBasedJsonSchemaValidator = fileBasedJsonSchemaValidator;
+
+        return backwardsCompatibleJsonSchemaValidator;
     }
 
     private SchemaCatalogService aSchemaCatalogService() {

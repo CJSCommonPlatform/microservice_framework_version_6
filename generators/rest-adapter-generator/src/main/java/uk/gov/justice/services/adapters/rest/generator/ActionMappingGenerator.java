@@ -19,6 +19,7 @@ import uk.gov.justice.services.adapter.rest.mapping.ActionMapper;
 import uk.gov.justice.services.adapter.rest.mapping.ActionMapperHelper;
 import uk.gov.justice.services.generators.commons.helper.RestResourceBaseUri;
 import uk.gov.justice.services.generators.commons.mapping.ActionMapping;
+import uk.gov.justice.services.generators.commons.mapping.ActionMappingParser;
 
 import java.util.Collection;
 import java.util.List;
@@ -78,7 +79,7 @@ public class ActionMappingGenerator {
 
         //NOTE: there's a bit of ambiguity here: ramlActions (http methods) are not framework actions
         resource.getActions().values().forEach(ramlAction -> {
-            final List<ActionMapping> actionMappings = ActionMapping.listOf(ramlAction.getDescription());
+            final List<ActionMapping> actionMappings = new ActionMappingParser().listOf(ramlAction.getDescription());
             final ActionType actionType = ramlAction.getType();
 
             if (isSupportedActionType(actionType)) {
@@ -120,6 +121,7 @@ public class ActionMappingGenerator {
             return resourceMethodNameWithNoMimeTypeFrom(ramlAction);
         }
     }
+
     private String mapperClassNameOf(final Resource resource, final RestResourceBaseUri baseUri) {
         return resourceImplementationNameOf(resource, baseUri) + ACTION_MAPPER_CLASS_SUFFIX;
     }

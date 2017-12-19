@@ -51,7 +51,10 @@ protocols: [ HTTP, HTTPS ]
         200:
             body:
                 application/vnd.people.user+json:
+                  schema: !include json/schema/people.user.json
                 application/vnd.people.user-summary+json:
+                  schema: !include json/schema/people.user-summary.json
+
   put:
     description: |
         ...

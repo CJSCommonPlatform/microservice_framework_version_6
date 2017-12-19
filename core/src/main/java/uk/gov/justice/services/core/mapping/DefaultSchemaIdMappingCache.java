@@ -53,5 +53,4 @@ public class DefaultSchemaIdMappingCache implements SchemaIdMappingCache {
     private Stream<Entry<MediaType, String>> mapEntriesFrom(final Bean<?> bean) {
         return ((MediaTypeToSchemaIdMapper) beanInstantiater.instantiate(bean)).getMediaTypeToSchemaIdMap().entrySet().stream();
     }
-
 }

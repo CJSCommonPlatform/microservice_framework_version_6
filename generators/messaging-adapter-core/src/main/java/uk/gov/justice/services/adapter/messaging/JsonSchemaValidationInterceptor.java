@@ -1,6 +1,7 @@
 package uk.gov.justice.services.adapter.messaging;
 
 import static java.lang.String.format;
+import static java.util.Optional.of;
 import static uk.gov.justice.services.messaging.jms.HeaderConstants.JMS_HEADER_CPPNAME;
 
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
@@ -64,7 +65,7 @@ public class JsonSchemaValidationInterceptor {
             final String name = message.getStringProperty(JMS_HEADER_CPPNAME);
             final MediaType mediaType = nameToMediaTypeConverter.convert(name);
 
-            jsonSchemaValidator.validate(message.getText(), mediaType);
+            jsonSchemaValidator.validate(message.getText(), name, of(mediaType));
         } catch (ValidationException validationException) {
             logger.debug(format("JSON schema validation has failed for %s due to %s",
                     jmsMessageLoggerHelper.toJmsTraceString(message),

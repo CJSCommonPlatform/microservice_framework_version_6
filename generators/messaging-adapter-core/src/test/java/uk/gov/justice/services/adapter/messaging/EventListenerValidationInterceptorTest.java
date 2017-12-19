@@ -1,5 +1,6 @@
 package uk.gov.justice.services.adapter.messaging;
 
+import static java.util.Optional.of;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsSame.sameInstance;
 import static org.mockito.Mockito.doThrow;
@@ -86,7 +87,7 @@ public class EventListenerValidationInterceptorTest {
 
         interceptor.validate(invocationContext);
 
-        verify(validator).validate(payload, mediaType);
+        verify(validator).validate(payload, name, of(mediaType));
     }
 
     @Test
@@ -117,7 +118,7 @@ public class EventListenerValidationInterceptorTest {
         when(eventFilter.accepts(name)).thenReturn(true);
         when(nameToMediaTypeConverter.convert(name)).thenReturn(mediaType);
         when(invocationContext.getParameters()).thenReturn(new Object[]{message});
-        doThrow(mock(ValidationException.class)).when(validator).validate(payload, mediaType);
+        doThrow(mock(ValidationException.class)).when(validator).validate(payload, name, of(mediaType));
 
         interceptor.validate(invocationContext);
     }

@@ -17,6 +17,7 @@ import static uk.gov.justice.services.generators.commons.helper.Names.packageNam
 
 import uk.gov.justice.raml.core.Generator;
 import uk.gov.justice.raml.core.GeneratorConfig;
+import uk.gov.justice.services.generators.commons.mapping.ActionNameToMediaTypesGenerator;
 import uk.gov.justice.services.generators.commons.mapping.MediaTypeToSchemaIdGenerator;
 import uk.gov.justice.services.generators.commons.validator.ActionMappingRamlValidator;
 import uk.gov.justice.services.generators.commons.validator.CompositeRamlValidator;
@@ -60,6 +61,7 @@ public class RestAdapterGenerator implements Generator {
         final JaxRsApplicationCodeGenerator applicationGenerator = new JaxRsApplicationCodeGenerator(configuration);
         final ActionMappingGenerator actionMappingGenerator = new ActionMappingGenerator();
         final MediaTypeToSchemaIdGenerator mediaTypeToSchemaIdGenerator = new MediaTypeToSchemaIdGenerator();
+        final ActionNameToMediaTypesGenerator actionNameToMediaTypesGenerator = new ActionNameToMediaTypesGenerator();
 
         writeToSubPackage(interfaceGenerator.generateFor(raml), configuration, RESOURCE_PACKAGE_NAME);
         final List<String> implementationNames = writeToSubPackage(
@@ -69,6 +71,7 @@ public class RestAdapterGenerator implements Generator {
         writeToSubPackage(actionMappingGenerator.generateFor(raml), configuration, MAPPER_PACKAGE_NAME);
 
         mediaTypeToSchemaIdGenerator.generateMediaTypeToSchemaIdMapper(raml, configuration);
+        actionNameToMediaTypesGenerator.generateActionNameToMediaTypes(raml, configuration);
     }
 
     private void validate(final GeneratorConfig configuration) {

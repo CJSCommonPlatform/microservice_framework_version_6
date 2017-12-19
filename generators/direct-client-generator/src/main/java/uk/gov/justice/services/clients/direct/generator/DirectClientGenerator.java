@@ -13,7 +13,7 @@ import uk.gov.justice.services.core.annotation.Direct;
 import uk.gov.justice.services.generators.commons.client.AbstractClientGenerator;
 import uk.gov.justice.services.generators.commons.client.ActionMimeTypeDefinition;
 import uk.gov.justice.services.generators.commons.helper.RestResourceBaseUri;
-import uk.gov.justice.services.generators.commons.mapping.ActionMapping;
+import uk.gov.justice.services.generators.commons.mapping.ActionMappingParser;
 import uk.gov.justice.services.generators.commons.validator.ActionMappingRamlValidator;
 import uk.gov.justice.services.generators.commons.validator.CompositeRamlValidator;
 import uk.gov.justice.services.generators.commons.validator.ContainsActionsRamlValidator;
@@ -88,6 +88,6 @@ public class DirectClientGenerator extends AbstractClientGenerator {
 
     @Override
     protected String handlesAnnotationValueOf(final Action ramlAction, final ActionMimeTypeDefinition definition, final GeneratorConfig generatorConfig) {
-        return ActionMapping.valueOf(ramlAction, definition.getNameType()).getName();
+        return new ActionMappingParser().valueOf(ramlAction, definition.getNameType()).getName();
     }
 }

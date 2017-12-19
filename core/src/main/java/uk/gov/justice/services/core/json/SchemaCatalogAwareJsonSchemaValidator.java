@@ -1,5 +1,7 @@
 package uk.gov.justice.services.core.json;
 
+import static java.lang.String.format;
+
 import uk.gov.justice.schema.service.SchemaCatalogService;
 import uk.gov.justice.services.core.mapping.MediaType;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingCache;
@@ -17,7 +19,7 @@ import org.slf4j.Logger;
  * Service for validating JSON payloads against a schema contained in a catalog.
  */
 @ApplicationScoped
-public class SchemaCatalogAwareJsonSchemaValidator implements JsonSchemaValidator {
+public class SchemaCatalogAwareJsonSchemaValidator {
 
     @Inject
     Logger logger;
@@ -34,34 +36,20 @@ public class SchemaCatalogAwareJsonSchemaValidator implements JsonSchemaValidato
     @Inject
     PayloadExtractor payloadExtractor;
 
-    /**
-     * Validate a JSON payload against a schema contained in the schema catalog for the given message
-     * type name. If the JSON contains metadata, this is removed first.  If no schema for the media type
-     * can be found then it falls back to checking for schemas on the class path.
-     *
-     * @param envelopeJson the payload to validate
-     * @param mediaType    the message type
-     */
-    @Override
-    public void validate(final String envelopeJson, final MediaType mediaType) {
+    public void validate(final String envelopeJson, final String actionName, final Optional<MediaType> mediaTypeOptional) {
 
-        final Optional<Schema> schema = getSchema(mediaType);
+        mediaTypeOptional.ifPresent(mediaType -> doValidate(envelopeJson, actionName, mediaType));
+    }
+
+    private void doValidate(final String envelopeJson, final String actionName, final MediaType mediaType) {
+        final Optional<Schema> schema = schemaIdMappingCache.schemaIdFor(mediaType).flatMap(schemaCatalogService::findSchema);
+
         if (schema.isPresent()) {
-            logger.info("Performing schema validation with catalog schema for: {}", mediaType);
+            logger.info(format("Performing schema validation with catalog schema for action '%s' and mediaType '%s", actionName, mediaType));
             final JSONObject payload = payloadExtractor.extractPayloadFrom(envelopeJson);
             schema.get().validate(payload);
         } else {
-            logger.info("Falling back to file base schema lookup, no catalog schema found for: {}", mediaType);
-            doValidationWithoutMappedSchema(envelopeJson, mediaType);
+            fileBasedJsonSchemaValidator.validateWithoutSchemaCatalog(envelopeJson, actionName);
         }
-    }
-
-    private Optional<Schema> getSchema(final MediaType mediaType) {
-        return schemaIdMappingCache.schemaIdFor(mediaType)
-                .flatMap(schemaCatalogService::findSchema);
-    }
-
-    private void doValidationWithoutMappedSchema(final String envelopeJson, final MediaType mediaType) {
-        fileBasedJsonSchemaValidator.validate(envelopeJson, mediaType);
     }
 }

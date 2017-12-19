@@ -35,4 +35,12 @@ public class MediaTypeToSchemaId {
     public int hashCode() {
         return Objects.hash(mediaType, schemaId);
     }
+
+    @Override
+    public String toString() {
+        return "MediaTypeToSchemaId{" +
+                "mediaType=" + mediaType +
+                ", schemaId='" + schemaId + '\'' +
+                '}';
+    }
 }

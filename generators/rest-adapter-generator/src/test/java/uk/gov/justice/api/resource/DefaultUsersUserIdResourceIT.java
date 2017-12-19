@@ -38,12 +38,17 @@ import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
+import uk.gov.justice.services.core.envelope.EnvelopeInspector;
+import uk.gov.justice.services.core.envelope.MediaTypeProvider;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
+import uk.gov.justice.services.core.json.BackwardsCompatibleJsonSchemaValidator;
 import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
 import uk.gov.justice.services.core.json.FileBasedJsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.json.PayloadExtractor;
 import uk.gov.justice.services.core.json.SchemaCatalogAwareJsonSchemaValidator;
+import uk.gov.justice.services.core.mapping.ActionNameToMediaTypesMappingObserver;
+import uk.gov.justice.services.core.mapping.DefaultMediaTypesMappingCache;
 import uk.gov.justice.services.core.mapping.DefaultSchemaIdMappingCache;
 import uk.gov.justice.services.core.mapping.MediaTypeToSchemaIdMapper;
 import uk.gov.justice.services.core.mapping.NameToMediaTypeConverter;
@@ -175,7 +180,13 @@ public class DefaultUsersUserIdResourceIT {
             MediaTypeToSchemaIdMapper.class,
 
             CatalogProducer.class,
-            SchemaCatalogService.class
+            SchemaCatalogService.class,
+
+            DefaultMediaTypesMappingCache.class,
+            ActionNameToMediaTypesMappingObserver.class,
+            MediaTypeProvider.class,
+            BackwardsCompatibleJsonSchemaValidator.class,
+            EnvelopeInspector.class
 
     })
     public WebApp war() {

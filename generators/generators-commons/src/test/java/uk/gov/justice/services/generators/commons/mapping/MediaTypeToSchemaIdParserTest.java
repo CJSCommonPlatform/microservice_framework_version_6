@@ -3,6 +3,7 @@ package uk.gov.justice.services.generators.commons.mapping;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
+import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
 import static org.raml.model.ActionType.PUT;
@@ -29,11 +30,13 @@ public class MediaTypeToSchemaIdParserTest {
     private static final String SCHEMA_ID_2 = "http://justice.gov.uk/example/command/api/command2.json";
     private static final String SCHEMA_ID_3 = "http://justice.gov.uk/example/command/api/command3.json";
     private static final String SCHEMA_ID_4 = "http://justice.gov.uk/example/command/api/command4.json";
+    private static final String SCHEMA_ID_5 = "http://justice.gov.uk/example/command/api/command5.json";
 
     private static final MediaType MEDIA_TYPE_1 = new MediaType("application/vnd.ctx.command.command1+json");
     private static final MediaType MEDIA_TYPE_2 = new MediaType("application/vnd.ctx.command.command2+json");
     private static final MediaType MEDIA_TYPE_3 = new MediaType("application/vnd.ctx.command.command3+json");
     private static final MediaType MEDIA_TYPE_4 = new MediaType("application/vnd.ctx.command.command4+json");
+    private static final MediaType MEDIA_TYPE_5 = new MediaType("application/vnd.ctx.command.command5+json");
 
     @Mock
     private SchemaIdParser schemaIdParser;
@@ -70,6 +73,27 @@ public class MediaTypeToSchemaIdParserTest {
                 new MediaTypeToSchemaId(MEDIA_TYPE_2, SCHEMA_ID_2),
                 new MediaTypeToSchemaId(MEDIA_TYPE_3, SCHEMA_ID_3),
                 new MediaTypeToSchemaId(MEDIA_TYPE_4, SCHEMA_ID_4)
+        ));
+    }
+
+    @Test
+    public void shouldProduceListOfMediaTypeForGet() throws Exception {
+
+        final MimeType mimeType_1 = createMimeTypeWith(MEDIA_TYPE_1.toString());
+        final MimeType mimeType_5 = createMimeTypeWith(MEDIA_TYPE_5.toString());
+
+        when(schemaIdParser.schemaIdFrom(mimeType_1)).thenReturn(Optional.of(SCHEMA_ID_1));
+        when(schemaIdParser.schemaIdFrom(mimeType_5)).thenReturn(Optional.of(SCHEMA_ID_5));
+
+        final List<MediaTypeToSchemaId> mediaTypeToSchemaIds = mediaTypeToSchemaIdParser.parseFrom(restRamlWithQueryApiDefaults()
+                .with(resource("/user")
+                        .with(httpActionWithDefaultMapping(GET)
+                                .withResponseTypes(mimeType_1, mimeType_5))
+                ).build());
+
+        assertThat(mediaTypeToSchemaIds, hasItems(
+                new MediaTypeToSchemaId(MEDIA_TYPE_1, SCHEMA_ID_1),
+                new MediaTypeToSchemaId(MEDIA_TYPE_5, SCHEMA_ID_5)
         ));
     }
 

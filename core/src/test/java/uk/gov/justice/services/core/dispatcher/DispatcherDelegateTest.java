@@ -5,7 +5,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 
-import uk.gov.justice.services.core.envelope.EnvelopeValidator;
+import uk.gov.justice.services.core.envelope.RequestResponseEnvelopeValidator;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import org.junit.Before;
@@ -24,13 +24,13 @@ public class DispatcherDelegateTest {
     private SystemUserUtil systemUserUtil;
 
     @Mock
-    private EnvelopeValidator envelopeValidator;
+    private RequestResponseEnvelopeValidator requestResponseEnvelopeValidator;
 
     private DispatcherDelegate dispatcherDelegate;
 
     @Before
     public void setUp() throws Exception {
-        dispatcherDelegate = new DispatcherDelegate(dispatcher, systemUserUtil, envelopeValidator);
+        dispatcherDelegate = new DispatcherDelegate(dispatcher, systemUserUtil, requestResponseEnvelopeValidator);
     }
 
     @Test
@@ -42,7 +42,6 @@ public class DispatcherDelegateTest {
         verify(dispatcher).dispatch(envelope);
     }
 
-
     @Test
     public void requestMethodShouldValidateEnvelope() throws Exception {
         final JsonEnvelope response = envelope().build();
@@ -50,7 +49,7 @@ public class DispatcherDelegateTest {
 
         dispatcherDelegate.request(envelope().build());
 
-        verify(envelopeValidator).validate(response);
+        verify(requestResponseEnvelopeValidator).validateResponse(response);
     }
 
     @Test
@@ -70,7 +69,7 @@ public class DispatcherDelegateTest {
 
         dispatcherDelegate.send(envelope);
 
-        verify(envelopeValidator).validate(envelope);
+        verify(requestResponseEnvelopeValidator).validateRequest(envelope);
     }
 
     @Test
@@ -84,7 +83,6 @@ public class DispatcherDelegateTest {
         verify(dispatcher).dispatch(envelopeWithSysUserId);
     }
 
-
     @Test
     public void requestAsAdminMethodShouldValidateResponse() {
         final JsonEnvelope response = envelope().build();
@@ -92,9 +90,8 @@ public class DispatcherDelegateTest {
 
         dispatcherDelegate.requestAsAdmin(envelope().build());
 
-        verify(envelopeValidator).validate(response);
+        verify(requestResponseEnvelopeValidator).validateResponse(response);
     }
-
 
     @Test
     public void sendAsAdminMethodShouldDelegateEnvelopeReturnedBySystemUserUtil() {
@@ -113,8 +110,6 @@ public class DispatcherDelegateTest {
 
         dispatcherDelegate.sendAsAdmin(envelope);
 
-        verify(envelopeValidator).validate(envelope);
+        verify(requestResponseEnvelopeValidator).validateRequest(envelope);
     }
-
-
 }

@@ -27,7 +27,9 @@ import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.dispatcher.EmptySystemUserProvider;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
+import uk.gov.justice.services.core.envelope.EnvelopeInspector;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandlerProducer;
+import uk.gov.justice.services.core.envelope.MediaTypeProvider;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.extension.ServiceComponentScanner;
@@ -39,11 +41,14 @@ import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProvider;
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
+import uk.gov.justice.services.core.json.BackwardsCompatibleJsonSchemaValidator;
 import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
 import uk.gov.justice.services.core.json.FileBasedJsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.json.PayloadExtractor;
 import uk.gov.justice.services.core.json.SchemaCatalogAwareJsonSchemaValidator;
+import uk.gov.justice.services.core.mapping.ActionNameToMediaTypesMappingObserver;
+import uk.gov.justice.services.core.mapping.DefaultMediaTypesMappingCache;
 import uk.gov.justice.services.core.mapping.DefaultSchemaIdMappingCache;
 import uk.gov.justice.services.core.mapping.NameToMediaTypeConverter;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingObserver;
@@ -136,7 +141,17 @@ public class CustomServiceComponentHandlerIT {
             SchemaIdMappingObserver.class,
 
             CatalogProducer.class,
-            SchemaCatalogService.class
+            SchemaCatalogService.class,
+
+            DefaultMediaTypesMappingCache.class,
+            ActionNameToMediaTypesMappingObserver.class,
+
+            SenderProducer.class,
+            MediaTypeProvider.class,
+            EnvelopeInspector.class,
+            RequesterProducer.class,
+            BackwardsCompatibleJsonSchemaValidator.class
+
     })
     public WebApp war() {
         return new WebApp()

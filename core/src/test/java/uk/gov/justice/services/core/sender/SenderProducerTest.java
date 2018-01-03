@@ -1,43 +1,27 @@
 package uk.gov.justice.services.core.sender;
 
-import static co.unruly.matchers.OptionalMatchers.contains;
-import static java.util.UUID.randomUUID;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsSame.sameInstance;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.dispatcher.Dispatcher;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
+import uk.gov.justice.services.core.dispatcher.DispatcherDelegate;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
-import uk.gov.justice.services.core.envelope.EnvelopeValidationException;
-import uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler;
-import uk.gov.justice.services.core.json.JsonSchemaValidator;
-import uk.gov.justice.services.core.mapping.MediaType;
+import uk.gov.justice.services.core.envelope.EnvelopeInspector;
+import uk.gov.justice.services.core.envelope.EnvelopeValidator;
+import uk.gov.justice.services.core.envelope.MediaTypeProvider;
+import uk.gov.justice.services.core.envelope.RequestResponseEnvelopeValidator;
 import uk.gov.justice.services.core.mapping.NameToMediaTypeConverter;
-import uk.gov.justice.services.messaging.JsonEnvelope;
 
-import java.util.UUID;
+import java.lang.reflect.Field;
 
 import javax.enterprise.inject.spi.InjectionPoint;
 
-import org.everit.json.schema.Schema;
-import org.everit.json.schema.ValidationException;
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -45,12 +29,14 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class SenderProducerTest {
 
+    @Mock
+    NameToMediaTypeConverter nameToMediaTypeConverter;
 
     @Mock
-    private InjectionPoint injectionPoint;
+    MediaTypeProvider mediaTypeProvider;
 
     @Mock
-    private Dispatcher dispatcher;
+    EnvelopeInspector envelopeInspector;
 
     @Mock
     private DispatcherCache dispatcherCache;
@@ -58,108 +44,38 @@ public class SenderProducerTest {
     @Mock
     private SystemUserUtil systemUserUtil;
 
-    @Mock
-    private JsonSchemaValidator jsonSchemaValidator;
-
-    @Mock
-    private NameToMediaTypeConverter nameToMediaTypeConverter;
-
     @InjectMocks
     private SenderProducer senderProducer;
 
-    @Before
-    public void setUp() throws Exception {
+    @Test
+    public void shouldCreateANewSenderDispatcherDelegate() throws Exception {
+
+        final InjectionPoint injectionPoint = mock(InjectionPoint.class);
+        final Dispatcher dispatcher = mock(Dispatcher.class);
+
         when(dispatcherCache.dispatcherFor(injectionPoint)).thenReturn(dispatcher);
-        senderProducer.objectMapper = new ObjectMapperProducer().objectMapper();
-        senderProducer.envelopeValidationExceptionHandler = new RethrowingValidationExceptionHandler();
+
+        final DispatcherDelegate dispatcherDelegate = (DispatcherDelegate) senderProducer.produceSender(injectionPoint);
+
+        assertThat(privateField("dispatcher", dispatcherDelegate, Dispatcher.class), is(dispatcher));
+        assertThat(privateField("systemUserUtil", dispatcherDelegate, SystemUserUtil.class), is(systemUserUtil));
+
+        final RequestResponseEnvelopeValidator requestResponseEnvelopeValidator = privateField("requestResponseEnvelopeValidator", dispatcherDelegate, RequestResponseEnvelopeValidator.class);
+
+        assertThat(privateField("envelopeValidator", requestResponseEnvelopeValidator, EnvelopeValidator.class), is(notNullValue()));
+        assertThat(privateField("nameToMediaTypeConverter", requestResponseEnvelopeValidator, NameToMediaTypeConverter.class), is(nameToMediaTypeConverter));
+        assertThat(privateField("mediaTypeProvider", requestResponseEnvelopeValidator, MediaTypeProvider.class), is(mediaTypeProvider));
+        assertThat(privateField("envelopeInspector", requestResponseEnvelopeValidator, EnvelopeInspector.class), is(envelopeInspector));
+
     }
 
-    @Test
-    public void shouldReturnSenderDelegatingToDispatcher() throws Exception {
+    @SuppressWarnings("unchecked")
+    private <T> T privateField(final String fieldName, final Object object, final Class<T> clazz) throws Exception {
 
-        final Sender sender = senderProducer.produceSender(injectionPoint);
-        final UUID id = randomUUID();
-        final String name = "some-action";
-        final String userId = "usr123";
+        final Field field = object.getClass().getDeclaredField(fieldName);
 
-        final JsonEnvelope envelopeToBeDispatched = envelope()
-                .with(metadataOf(id, name).withUserId(userId))
-                .withPayloadOf("value1", "someField1")
-                .withPayloadOf("value2", "someField2")
-                .build();
-        final JsonEnvelope expectedResponse = envelope().build();
+        field.setAccessible(true);
 
-        when(dispatcher.dispatch(envelopeToBeDispatched)).thenReturn(expectedResponse);
-
-        sender.send(envelopeToBeDispatched);
-
-        ArgumentCaptor<JsonEnvelope> dispatchedEnvelopeCaptor = ArgumentCaptor.forClass(JsonEnvelope.class);
-        verify(dispatcher).dispatch(dispatchedEnvelopeCaptor.capture());
-
-        final JsonEnvelope dispatchedEnvelope = dispatchedEnvelopeCaptor.getValue();
-        assertThat(envelopeToBeDispatched, sameInstance(dispatchedEnvelope));
-        assertThat(dispatchedEnvelope.metadata().id(), is(id));
-        assertThat(dispatchedEnvelope.metadata().name(), is(name));
-        assertThat(dispatchedEnvelope.metadata().userId(), contains(userId));
+        return (T) field.get(object);
     }
-
-    @Test
-    public void shouldDelegateAdminRequestSubstitutingUserId() throws Exception {
-
-        final Sender sender = senderProducer.produceSender(injectionPoint);
-
-        final JsonEnvelope originalEnvelope = envelope()
-                .with(metadataWithRandomUUID("some-action"))
-                .withPayloadOf("value1", "someField1")
-                .withPayloadOf("value2", "someField2")
-                .build();
-        final JsonEnvelope envelopeWithSysUserId = envelope().with(metadataWithDefaults()).build();
-        final JsonEnvelope expectedResponse = envelope().build();
-
-        when(systemUserUtil.asEnvelopeWithSystemUserId(originalEnvelope)).thenReturn(envelopeWithSysUserId);
-        when(dispatcher.dispatch(envelopeWithSysUserId)).thenReturn(expectedResponse);
-
-        sender.sendAsAdmin(originalEnvelope);
-
-        verify(dispatcher).dispatch(envelopeWithSysUserId);
-    }
-
-    @Rule
-    public ExpectedException exception = ExpectedException.none();
-
-    @Test
-    public void shouldThrowExceptionIfResponseNotValidAgainstSchema() throws Exception {
-        doThrow(new ValidationException(mock(Schema.class), "Message not valid against schema", "keyword", "location"))
-                .when(jsonSchemaValidator).validate(any(String.class), any(MediaType.class));
-
-
-        senderProducer.envelopeValidationExceptionHandler = new RethrowingValidationExceptionHandler();
-
-        exception.expect(EnvelopeValidationException.class);
-        exception.expectMessage("Message not valid against schema");
-
-        when(dispatcher.dispatch(any(JsonEnvelope.class)))
-                .thenReturn(null);
-
-        senderProducer.produceSender(injectionPoint).send(envelope()
-                .with(metadataWithRandomUUID("some-action"))
-                .build());
-    }
-
-
-    @Test
-    public void shouldNotThrowExceptionIfPayloadAdheresToJsonSchema() {
-        senderProducer.envelopeValidationExceptionHandler = new RethrowingValidationExceptionHandler();
-
-        when(dispatcher.dispatch(any(JsonEnvelope.class)))
-                .thenReturn(null);
-
-        senderProducer.produceSender(injectionPoint)
-                .send(envelope()
-                        .with(metadataWithRandomUUID("some-action"))
-                        .withPayloadOf("value1", "someField1")
-                        .withPayloadOf("value2", "someField2")
-                        .build());
-    }
-
 }

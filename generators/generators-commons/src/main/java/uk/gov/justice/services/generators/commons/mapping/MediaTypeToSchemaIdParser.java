@@ -2,6 +2,9 @@ package uk.gov.justice.services.generators.commons.mapping;
 
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.justice.services.generators.commons.helper.Actions.isSupportedActionType;
+import static uk.gov.justice.services.generators.commons.helper.Actions.isSupportedActionTypeWithResponseTypeOnly;
+import static uk.gov.justice.services.generators.commons.helper.Actions.responseMimeTypesOf;
 
 import uk.gov.justice.services.core.mapping.MediaType;
 
@@ -86,19 +89,27 @@ public class MediaTypeToSchemaIdParser {
      * @return Stream of Optional {@link MediaTypeToSchemaId} or empty Stream if getBody() returns null
      */
     private Stream<Optional<MediaTypeToSchemaId>> processAction(final Action action) {
-        return ofNullable(action.getBody())
-                .map(this::processMimeTypes)
-                .orElseGet(Stream::empty);
+        final ActionType actionType = action.getType();
+
+        if (isSupportedActionType(actionType)) {
+            if (isSupportedActionTypeWithResponseTypeOnly(actionType)) {
+                return processMimeTypes(responseMimeTypesOf(action));
+            } else {
+                return processMimeTypes(action.getBody().values());
+            }
+        }
+
+        return Stream.empty();
     }
 
     /**
      * Process the MimeTypes
      *
-     * @param stringMimeTypeMap the Map of MimeTypes
+     * @param mimeTypes the Map of MimeTypes
      * @return Stream of Optional {@link MediaTypeToSchemaId}
      */
-    private Stream<Optional<MediaTypeToSchemaId>> processMimeTypes(final Map<String, MimeType> stringMimeTypeMap) {
-        return stringMimeTypeMap.values().stream()
+    private Stream<Optional<MediaTypeToSchemaId>> processMimeTypes(final Collection<MimeType> mimeTypes) {
+        return mimeTypes.stream()
                 .map(this::createMediaTypeToSchemaId);
     }
 

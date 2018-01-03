@@ -26,19 +26,19 @@ import org.slf4j.Logger;
 public class SchemaCatalogAwareJsonSchemaValidatorTest {
 
     @Mock
-    private Logger logger;
+    Logger logger;
 
     @Mock
-    private FileBasedJsonSchemaValidator fileBasedJsonSchemaValidator;
+    FileBasedJsonSchemaValidator fileBasedJsonSchemaValidator;
 
     @Mock
-    private SchemaIdMappingCache schemaIdMappingCache;
+    SchemaIdMappingCache schemaIdMappingCache;
 
     @Mock
-    private SchemaCatalogService schemaCatalogService;
+    SchemaCatalogService schemaCatalogService;
 
     @Mock
-    private PayloadExtractor payloadExtractor;
+    PayloadExtractor payloadExtractor;
 
     @InjectMocks
     private SchemaCatalogAwareJsonSchemaValidator schemaCatalogAwareJsonSchemaValidator;
@@ -47,6 +47,7 @@ public class SchemaCatalogAwareJsonSchemaValidatorTest {
     public void shouldLoadTheCorrectSchemaUsingTheCatalogServiceAndValidate() throws Exception {
 
         final String uri = "http://space.time.gov.uk/mind/command/api/initiate-warp-speed.json";
+        final String actionName = "command.api.initiate-warp-speed";
         final Optional<String> schemaId = of(uri);
         final MediaType mediaType = new MediaType("application", "vnd.mind.command.initiate-warp-speed+json");
 
@@ -59,33 +60,18 @@ public class SchemaCatalogAwareJsonSchemaValidatorTest {
         when(schemaCatalogService.findSchema(uri)).thenReturn(of(schema));
         when(payloadExtractor.extractPayloadFrom(envelopeJson)).thenReturn(payload);
 
-        schemaCatalogAwareJsonSchemaValidator.validate(envelopeJson, mediaType);
+        schemaCatalogAwareJsonSchemaValidator.validate(envelopeJson, actionName, of(mediaType));
 
-        verify(logger).info("Performing schema validation with catalog schema for: {}", mediaType);
+        verify(logger).info("Performing schema validation with catalog schema for action 'command.api.initiate-warp-speed' and mediaType 'application/vnd.mind.command.initiate-warp-speed+json");
         verify(schema).validate(payload);
         verifyZeroInteractions(fileBasedJsonSchemaValidator);
     }
 
     @Test
-    public void shouldValidateUsingTheVanillaJsonSchemaValidatorIfNoSchemaMappedToTheSchemaId() throws Exception {
-
-        final MediaType mediaType = new MediaType("application", "vnd.mind.command.initiate-warp-speed+json");
-        final Optional<String> schemaId = empty();
-
-        final String envelopeJson = "{\"envelope\": \"json\"}";
-
-        when(schemaIdMappingCache.schemaIdFor(mediaType)).thenReturn(schemaId);
-
-        schemaCatalogAwareJsonSchemaValidator.validate(envelopeJson, mediaType);
-
-        verify(logger).info("Falling back to file base schema lookup, no catalog schema found for: {}", mediaType);
-        verify(fileBasedJsonSchemaValidator).validate(envelopeJson, mediaType);
-    }
-
-    @Test
-    public void shouldValidateUsingTheVanillaJsonSchemaValidatorIfTheCatalogServiceDoesNotHaveTheCorrectSchemaMapped() throws Exception {
+    public void shouldFallBackToFileBasedSchemaValidationIfNoSchemaFoundInTheCatalogCache() throws Exception {
 
         final String uri = "http://space.time.gov.uk/mind/command/api/initiate-warp-speed.json";
+        final String actionName = "command.api.initiate-warp-speed";
         final Optional<String> schemaId = of(uri);
         final MediaType mediaType = new MediaType("application", "vnd.mind.command.initiate-warp-speed+json");
 
@@ -94,9 +80,11 @@ public class SchemaCatalogAwareJsonSchemaValidatorTest {
         when(schemaIdMappingCache.schemaIdFor(mediaType)).thenReturn(schemaId);
         when(schemaCatalogService.findSchema(uri)).thenReturn(empty());
 
-        schemaCatalogAwareJsonSchemaValidator.validate(envelopeJson, mediaType);
+        schemaCatalogAwareJsonSchemaValidator.validate(envelopeJson, actionName, of(mediaType));
 
-        verify(logger).info("Falling back to file base schema lookup, no catalog schema found for: {}", mediaType);
-        verify(fileBasedJsonSchemaValidator).validate(envelopeJson, mediaType);
+        verify(fileBasedJsonSchemaValidator).validateWithoutSchemaCatalog(envelopeJson, actionName);;
+
+        verifyZeroInteractions(logger);
+        verifyZeroInteractions(payloadExtractor);
     }
 }

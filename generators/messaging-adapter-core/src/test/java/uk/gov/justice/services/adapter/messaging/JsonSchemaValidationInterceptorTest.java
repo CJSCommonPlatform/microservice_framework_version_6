@@ -1,5 +1,6 @@
 package uk.gov.justice.services.adapter.messaging;
 
+import static java.util.Optional.of;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsSame.sameInstance;
 import static org.mockito.Mockito.doThrow;
@@ -53,17 +54,25 @@ public class JsonSchemaValidationInterceptorTest {
     private JmsMessageLoggerHelper jmsMessageLoggerHelper;
 
     @InjectMocks
-    private JsonSchemaValidationInterceptor interceptor;
+    private JsonSchemaValidationInterceptor jsonSchemaValidationInterceptor;
 
     @Test
     public void shouldReturnContextProceed() throws Exception {
+
+        final String payload = "{\"the\": \"payload\"}";
+
         final Object proceed = new Object();
         final TextMessage message = mock(TextMessage.class);
+        final MediaType mediaType = mock(MediaType.class);
+
+        final String actionName = message.getStringProperty(JMS_HEADER_CPPNAME);
 
         when(invocationContext.proceed()).thenReturn(proceed);
         when(invocationContext.getParameters()).thenReturn(new Object[]{message});
+        when(message.getText()).thenReturn(payload);
+        when(nameToMediaTypeConverter.convert(actionName)).thenReturn(mediaType);
 
-        assertThat(interceptor.validate(invocationContext), sameInstance(proceed));
+        assertThat(jsonSchemaValidationInterceptor.validate(invocationContext), sameInstance(proceed));
     }
 
     @Test
@@ -78,9 +87,9 @@ public class JsonSchemaValidationInterceptorTest {
         when(invocationContext.getParameters()).thenReturn(new Object[]{message});
         when(nameToMediaTypeConverter.convert(name)).thenReturn(mediaType);
 
-        interceptor.validate(invocationContext);
+        jsonSchemaValidationInterceptor.validate(invocationContext);
 
-        verify(jsonSchemaValidator).validate(payload, mediaType);
+        verify(jsonSchemaValidator).validate(payload, name, of(mediaType));
     }
 
     @Test(expected = ValidationException.class)
@@ -95,8 +104,8 @@ public class JsonSchemaValidationInterceptorTest {
         when(invocationContext.getParameters()).thenReturn(new Object[]{message});
         when(nameToMediaTypeConverter.convert(name)).thenReturn(mediaType);
 
-        doThrow(mock(ValidationException.class)).when(jsonSchemaValidator).validate(payload, mediaType);
+        doThrow(mock(ValidationException.class)).when(jsonSchemaValidator).validate(payload, name, of(mediaType));
 
-        interceptor.validate(invocationContext);
+        jsonSchemaValidationInterceptor.validate(invocationContext);
     }
 }

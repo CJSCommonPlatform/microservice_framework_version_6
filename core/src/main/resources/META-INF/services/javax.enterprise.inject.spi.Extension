@@ -1,3 +1,4 @@
 uk.gov.justice.services.core.extension.ServiceComponentScanner
 uk.gov.justice.services.core.interceptor.InterceptorChainObserver
 uk.gov.justice.services.core.mapping.SchemaIdMappingObserver
+uk.gov.justice.services.core.mapping.ActionNameToMediaTypesMappingObserver

@@ -1,15 +1,14 @@
 package uk.gov.justice.services.core.envelope;
 
-
 import static java.lang.String.format;
 import static javax.json.JsonValue.NULL;
 
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.core.json.SchemaLoadingException;
 import uk.gov.justice.services.core.mapping.MediaType;
-import uk.gov.justice.services.core.mapping.NameToMediaTypeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.Metadata;
+
+import java.util.Optional;
 
 import javax.json.JsonValue;
 
@@ -19,51 +18,39 @@ import org.everit.json.schema.ValidationException;
 
 public class EnvelopeValidator {
 
-    private final ObjectMapper objectMapper;
     private final JsonSchemaValidator jsonSchemaValidator;
+    private final ObjectMapper objectMapper;
     private final EnvelopeValidationExceptionHandler envelopeValidationExceptionHandler;
-    private final NameToMediaTypeConverter nameToMediaTypeConverter;
 
-    public EnvelopeValidator(final JsonSchemaValidator jsonSchemaValidator,
-                             final EnvelopeValidationExceptionHandler jsonValidationExceptionHandler,
-                             final NameToMediaTypeConverter nameToMediaTypeConverter,
-                             final ObjectMapper objectMapper) {
+    public EnvelopeValidator(
+            final JsonSchemaValidator jsonSchemaValidator,
+            final ObjectMapper objectMapper,
+            final EnvelopeValidationExceptionHandler envelopeValidationExceptionHandler) {
         this.jsonSchemaValidator = jsonSchemaValidator;
-        this.envelopeValidationExceptionHandler = jsonValidationExceptionHandler;
-        this.nameToMediaTypeConverter = nameToMediaTypeConverter;
         this.objectMapper = objectMapper;
+        this.envelopeValidationExceptionHandler = envelopeValidationExceptionHandler;
     }
 
-    public void validate(final JsonEnvelope envelope) {
+    public void validate(final JsonEnvelope jsonEnvelope, final String actionName, final Optional<MediaType> mediaType) {
         try {
-            final JsonValue payload = envelope.payload();
+            final JsonValue payload = jsonEnvelope.payload();
             if (!NULL.equals(payload)) {
 
-                final MediaType mediaType = nameToMediaTypeConverter.convert(metadataOf(envelope).name());
                 jsonSchemaValidator.validate(
-                        objectMapper.writeValueAsString(payload), mediaType);
+                        objectMapper.writeValueAsString(payload),
+                        actionName,
+                        mediaType);
             }
         } catch (final JsonProcessingException e) {
-            handle(e, "Error serialising json.");
-        } catch (SchemaLoadingException e) {
-            handle(e, format("Could not load json schema that matches message type %s.", envelope.metadata().name()));
+            envelopeValidationExceptionHandler.handle(new EnvelopeValidationException("Error serialising json.", e));
+        } catch (final SchemaLoadingException e) {
+            envelopeValidationExceptionHandler.handle(new EnvelopeValidationException(
+                    format("Could not load json schema that matches message type %s.", actionName), e));
         } catch (final ValidationException e) {
-            handle(e, format("Message not valid against schema: \n%s", envelope.toObfuscatedDebugString()));
+            envelopeValidationExceptionHandler.handle(new EnvelopeValidationException(
+                    format("Message not valid against schema: \n%s", jsonEnvelope.toObfuscatedDebugString()), e));
         } catch (final EnvelopeValidationException e) {
             envelopeValidationExceptionHandler.handle(e);
         }
-
-    }
-
-    private Metadata metadataOf(final JsonEnvelope envelope) {
-        final Metadata metadata = envelope.metadata();
-        if (metadata == null) {
-            throw new EnvelopeValidationException("Metadata not set in the envelope.");
-        }
-        return metadata;
-    }
-
-    private void handle(final Exception e, final String message) {
-        envelopeValidationExceptionHandler.handle(new EnvelopeValidationException(message, e));
     }
 }

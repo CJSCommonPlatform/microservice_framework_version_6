@@ -4,8 +4,11 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.dispatcher.DispatcherDelegate;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
+import uk.gov.justice.services.core.envelope.EnvelopeInspector;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandler;
 import uk.gov.justice.services.core.envelope.EnvelopeValidator;
+import uk.gov.justice.services.core.envelope.MediaTypeProvider;
+import uk.gov.justice.services.core.envelope.RequestResponseEnvelopeValidator;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.core.mapping.NameToMediaTypeConverter;
 
@@ -16,26 +19,33 @@ import javax.inject.Inject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+@SuppressWarnings("CdiInjectionPointsInspection")
 @ApplicationScoped
 public class RequesterProducer {
+
+    @Inject
+    JsonSchemaValidator jsonSchemaValidator;
+
+    @Inject
+    ObjectMapper objectMapper;
+
+    @Inject
+    EnvelopeValidationExceptionHandler envelopeValidationExceptionHandler;
+
+    @Inject
+    NameToMediaTypeConverter nameToMediaTypeConverter;
+
+    @Inject
+    MediaTypeProvider mediaTypeProvider;
+
+    @Inject
+    EnvelopeInspector envelopeInspector;
 
     @Inject
     DispatcherCache dispatcherCache;
 
     @Inject
     SystemUserUtil systemUserUtil;
-
-    @Inject
-    ObjectMapper objectMapper;
-
-    @Inject
-    JsonSchemaValidator jsonSchemaValidator;
-
-    @Inject
-    NameToMediaTypeConverter nameToMediaTypeConverter;
-
-    @Inject
-    EnvelopeValidationExceptionHandler envelopeValidationExceptionHandler;
 
     /**
      * Produces the correct implementation of a requester depending on the {@link ServiceComponent}
@@ -48,15 +58,22 @@ public class RequesterProducer {
      */
     @Produces
     public Requester produceRequester(final InjectionPoint injectionPoint) {
+
         final EnvelopeValidator envelopeValidator = new EnvelopeValidator(
                 jsonSchemaValidator,
-                envelopeValidationExceptionHandler,
+                objectMapper,
+                envelopeValidationExceptionHandler
+        );
+
+        final RequestResponseEnvelopeValidator requestResponseEnvelopeValidator = new RequestResponseEnvelopeValidator(
+                envelopeValidator,
                 nameToMediaTypeConverter,
-                objectMapper);
+                mediaTypeProvider,
+                envelopeInspector);
 
         return new DispatcherDelegate(
                 dispatcherCache.dispatcherFor(injectionPoint),
                 systemUserUtil,
-                envelopeValidator);
+                requestResponseEnvelopeValidator);
     }
 }

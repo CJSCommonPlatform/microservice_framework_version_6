@@ -4,8 +4,6 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Stream.of;
 
-import uk.gov.justice.services.core.mapping.MediaTypeToSchemaIdMapper;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -22,7 +20,7 @@ public class SchemaMappingClassNameGenerator {
      * @param baseUri the base URI to process
      * @return the class name
      */
-    public String createMappingClassNameFrom(final String baseUri) {
+    public String createMappingClassNameFrom(final String baseUri, final Class<?> interfaceClass) {
 
         try {
             final String path = new URI(baseUri).getPath();
@@ -31,7 +29,7 @@ public class SchemaMappingClassNameGenerator {
                     .map(StringUtils::capitalize)
                     .collect(joining());
 
-            return javaStyleContextName + MediaTypeToSchemaIdMapper.class.getSimpleName();
+            return javaStyleContextName + interfaceClass.getSimpleName();
         } catch (final URISyntaxException e) {
             throw new RamlBaseUriSyntaxException(format("Failed to convert base uri from raml '%s' into a URI", baseUri), e);
         }

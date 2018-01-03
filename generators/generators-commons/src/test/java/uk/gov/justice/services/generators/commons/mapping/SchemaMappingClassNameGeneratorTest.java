@@ -5,6 +5,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import uk.gov.justice.services.core.mapping.MediaTypeToSchemaIdMapper;
+
 import java.net.URISyntaxException;
 
 import org.junit.Test;
@@ -23,7 +25,7 @@ public class SchemaMappingClassNameGeneratorTest {
 
         final String baseUri = "http://localhost:8080/test-command-api/command/api/rest/test";
 
-        final String mappingClassName = schemaMappingClassNameGenerator.createMappingClassNameFrom(baseUri);
+        final String mappingClassName = schemaMappingClassNameGenerator.createMappingClassNameFrom(baseUri, MediaTypeToSchemaIdMapper.class);
 
         assertThat(mappingClassName, is("TestCommandApiMediaTypeToSchemaIdMapper"));
     }
@@ -32,7 +34,7 @@ public class SchemaMappingClassNameGeneratorTest {
     public void shouldFailIfTheBaseUriCannotBeConvertedToAUri() throws Exception {
 
         try {
-            schemaMappingClassNameGenerator.createMappingClassNameFrom("not a uri");
+            schemaMappingClassNameGenerator.createMappingClassNameFrom("not a uri", MediaTypeToSchemaIdMapper.class);
             fail();
         } catch (final RamlBaseUriSyntaxException expected) {
             assertThat(expected.getMessage(), is("Failed to convert base uri from raml 'not a uri' into a URI"));

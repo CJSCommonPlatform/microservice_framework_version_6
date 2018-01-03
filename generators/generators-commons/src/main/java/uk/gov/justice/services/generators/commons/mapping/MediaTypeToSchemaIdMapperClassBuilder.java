@@ -32,7 +32,7 @@ public class MediaTypeToSchemaIdMapperClassBuilder {
 
     public TypeSpec typeSpecWith(final String name, final List<MediaTypeToSchemaId> mediaTypesToSchemaIds) {
 
-        final String classSimpleName = schemaMappingClassNameGenerator.createMappingClassNameFrom(name);
+        final String classSimpleName = schemaMappingClassNameGenerator.createMappingClassNameFrom(name, MediaTypeToSchemaIdMapper.class);
 
         return classBuilder(classSimpleName)
                 .addModifiers(PUBLIC)

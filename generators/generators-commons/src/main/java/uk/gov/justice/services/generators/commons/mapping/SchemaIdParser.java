@@ -27,7 +27,8 @@ public class SchemaIdParser {
      * @return schema id String or empty if not found
      */
     public Optional<String> schemaIdFrom(final MimeType mimeType) {
-        return ofNullable(mimeType.getSchema()).flatMap(s -> schemaIdFrom(s, mimeType));
+        return ofNullable(mimeType.getSchema())
+                .flatMap(s -> schemaIdFrom(s, mimeType));
     }
 
     private Optional<String> schemaIdFrom(final String schemaJson, final MimeType mimeType) {

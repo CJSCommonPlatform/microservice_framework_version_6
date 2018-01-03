@@ -5,6 +5,11 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [2.5.1] - 2018-01-03
+### Added
+- Now generating mapping file for action name to media type, used when validating requests
+
+
 ## [2.5.0] - 2017-12-15
 ### Added 
 - Catalog generation for all json schema files. Add an id into a json schema to use.

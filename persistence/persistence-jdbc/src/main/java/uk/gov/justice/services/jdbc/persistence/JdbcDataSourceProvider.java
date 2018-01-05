@@ -3,11 +3,13 @@ package uk.gov.justice.services.jdbc.persistence;
 import static java.lang.String.format;
 
 import javax.annotation.Resource;
+import javax.enterprise.context.ApplicationScoped;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+@ApplicationScoped
 public class JdbcDataSourceProvider {
 
     private static final String JNDI_DS_EVENT_STORE_PATTERN = "java:/app/%s/DS.eventstore";

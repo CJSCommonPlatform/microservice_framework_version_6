@@ -25,11 +25,13 @@ import uk.gov.justice.services.common.configuration.GlobalValueProducer;
 import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
 import uk.gov.justice.services.common.configuration.ValueProducer;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.util.Clock;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
+import uk.gov.justice.services.core.enveloper.DefaultEnveloper;
 import uk.gov.justice.services.core.extension.EventFoundEvent;
 import uk.gov.justice.services.eventsource.DefaultEventDestinationResolver;
 import uk.gov.justice.services.eventsourcing.jdbc.snapshot.SnapshotJdbcRepository;
@@ -171,6 +173,8 @@ public class SnapshotAwareAggregateServiceIT {
             SnapshotAwareEventSource.class,
             SnapshotAwareEnvelopeEventStream.class,
             EventStreamManager.class,
+            DefaultEnveloper.class,
+            ObjectToJsonValueConverter.class,
             SystemEventService.class,
             EventAppender.class,
             PublishingEventAppender.class,

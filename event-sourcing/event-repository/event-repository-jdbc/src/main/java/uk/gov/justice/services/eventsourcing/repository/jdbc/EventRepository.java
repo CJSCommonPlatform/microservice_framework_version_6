@@ -65,6 +65,13 @@ public interface EventRepository {
     Stream<Stream<JsonEnvelope>> getStreamOfAllEventStreams();
 
     /**
+     * Returns stream of all active envelope streams. Envelopes in the nested stream are ordered by sequenceId
+     *
+     * @return the stream of active envelope streams
+     */
+    Stream<Stream<JsonEnvelope>> getStreamOfAllActiveEventStreams();
+
+    /**
      * Clears all of the events from a stream.
      *
      * @param id - the id of the stream that is to be Cleared.

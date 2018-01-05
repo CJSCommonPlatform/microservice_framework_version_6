@@ -1,5 +1,6 @@
 package uk.gov.justice.services.eventsourcing.source.core;
 
+import static java.util.Optional.empty;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -19,6 +20,7 @@ import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuil
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithDefaults;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUIDAndName;
 
+import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.OptimisticLockingRetryException;
@@ -26,10 +28,13 @@ import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamEx
 import uk.gov.justice.services.eventsourcing.source.core.exception.VersionMismatchException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.spi.DefaultJsonEnvelopeProvider;
+import uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -62,6 +67,8 @@ public class EventStreamManagerTest {
     private Stream<JsonEnvelope> eventStream;
     @Mock
     private SystemEventService systemEventService;
+
+    private Enveloper enveloper = EnveloperFactory.createEnveloper();
     @InjectMocks
     private EventStreamManager eventStreamManager;
 
@@ -70,6 +77,11 @@ public class EventStreamManagerTest {
 
     @Captor
     private ArgumentCaptor<Long> versionCaptor;
+
+    @Before
+    public void setup() {
+        eventStreamManager.enveloper = enveloper;
+    }
 
     @Test
     public void shouldAppendToStream() throws Exception {
@@ -303,7 +315,32 @@ public class EventStreamManagerTest {
     }
 
     @Test
-    public void shouldCloneStream() throws EventStreamException {
+    public void shouldCloneStreamWithBlankVersions() throws EventStreamException {
+        final JsonEnvelope event = buildEnvelope("test.events.event1");
+        final JsonEnvelope systemEvent = buildEnvelope("system.events.cloned");
+        when(eventRepository.getByStreamId(STREAM_ID)).thenReturn(Stream.of(event));
+        when(eventRepository.getCurrentSequenceIdForStream(STREAM_ID)).thenReturn(0L);
+        when(systemEventService.clonedEventFor(STREAM_ID)).thenReturn(systemEvent);
+
+        final UUID clonedId = eventStreamManager.cloneAsAncestor(STREAM_ID);
+
+        assertThat(clonedId, is(notNullValue()));
+        assertThat(clonedId, is(not(STREAM_ID)));
+
+        verify(eventAppender, times(2)).append(eventCaptor.capture(), eq(clonedId), versionCaptor.capture());
+        final List<JsonEnvelope> clonedEvents = eventCaptor.getAllValues();
+
+        assertThat(versionCaptor.getAllValues(), hasItems(1L, 2L));
+        assertThat(clonedEvents, hasItems(systemEvent));
+        final JsonEnvelope clonedEvent = clonedEvents.get(0);
+        assertThat(clonedEvent.metadata().name(), is("test.events.event1"));
+        assertThat(clonedEvent.metadata().version(), is(empty()));
+
+        verify(eventStreamJdbcRepository).markActive(clonedId, false);
+    }
+
+    @Test
+    public void shouldCloneAllEventsOnAStream() throws EventStreamException {
         final JsonEnvelope event1 = buildEnvelope("test.events.event1");
         final JsonEnvelope event2 = buildEnvelope("test.events.event2");
         final JsonEnvelope systemEvent = buildEnvelope("system.events.cloned");
@@ -317,7 +354,6 @@ public class EventStreamManagerTest {
         assertThat(clonedId, is(not(STREAM_ID)));
 
         verify(eventAppender, times(3)).append(eventCaptor.capture(), eq(clonedId), versionCaptor.capture());
-        assertThat(eventCaptor.getAllValues(), hasItems(event1, event2, systemEvent));
         assertThat(versionCaptor.getAllValues(), hasItems(1L, 2L, 3L));
 
         verify(eventStreamJdbcRepository).markActive(clonedId, false);

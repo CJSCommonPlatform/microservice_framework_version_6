@@ -16,6 +16,7 @@ import uk.gov.justice.domain.aggregate.PrivateAggregate;
 import uk.gov.justice.domain.aggregate.TestAggregate;
 import uk.gov.justice.services.common.configuration.GlobalValueProducer;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.util.Clock;
@@ -23,6 +24,7 @@ import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.aggregate.event.EventA;
 import uk.gov.justice.services.core.aggregate.event.EventB;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
+import uk.gov.justice.services.core.enveloper.DefaultEnveloper;
 import uk.gov.justice.services.core.extension.EventFoundEvent;
 import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
 
@@ -120,6 +122,8 @@ public class DefaultAggregateServiceIT {
             DefaultEventSource.class,
             EnvelopeEventStream.class,
             EventStreamManager.class,
+            DefaultEnveloper.class,
+            ObjectToJsonValueConverter.class,
             EventAppender.class,
             PublishingEventAppender.class,
             SystemEventService.class,

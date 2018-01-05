@@ -9,6 +9,7 @@ import static java.util.stream.Stream.of;
 
 import uk.gov.justice.services.common.configuration.GlobalValue;
 import uk.gov.justice.services.common.util.Clock;
+import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.OptimisticLockingRetryException;
@@ -54,6 +55,9 @@ public class EventStreamManager {
 
     @Inject
     SystemEventService systemEventService;
+
+    @Inject
+    Enveloper enveloper;
 
     /**
      * Get the stream of events.
@@ -161,7 +165,7 @@ public class EventStreamManager {
 
         final JsonEnvelope systemEvent = systemEventService.clonedEventFor(id);
 
-        append(clonedId, concat(existingStream, of(systemEvent)));
+        append(clonedId, concat(existingStream.map(this::stripMetadataFrom), of(systemEvent)));
 
         streamRepository.markActive(clonedId, false);
 
@@ -215,5 +219,16 @@ public class EventStreamManager {
             throw new OptimisticLockingRetryException(format("Optimistic locking failure while storing version %s of stream %s which is already at %s",
                     versionFrom + 1, id, currentVersion));
         }
+    }
+
+    /**
+     * Clears the version (and other metadata) from the events so they can be appended as fresh
+     * events.
+     *
+     * @param event - the event to have its metadata cleared
+     * @return the event with cleared metadata
+     */
+    private JsonEnvelope stripMetadataFrom(final JsonEnvelope event) {
+        return enveloper.withMetadataFrom(event, event.metadata().name()).apply(event.payload());
     }
 }

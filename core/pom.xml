@@ -41,7 +41,7 @@
         <dependency>
             <groupId>uk.gov.justice.schema</groupId>
             <artifactId>schema-service</artifactId>
-            <version>${schema-service.version}</version>
+            <version>${json-schema-catalog.version}</version>
         </dependency>
         <dependency>
             <groupId>javax.enterprise</groupId>

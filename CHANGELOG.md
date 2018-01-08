@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [2.5.2] - 2018-01-08
+### Changed
+- Now using maven-framework-parent-pom 1.10.1
+
 ## [2.5.1] - 2018-01-03
 ### Added
 - Now generating mapping file for action name to media type, used when validating requests

@@ -3,6 +3,8 @@ package uk.gov.justice.services.eventsourcing.repository.jdbc;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.Event;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventConverter;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepository;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStream;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidSequenceIdException;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidStreamIdException;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.OptimisticLockingRetryException;
@@ -31,6 +33,9 @@ public class JdbcEventRepository implements EventRepository {
 
     @Inject
     EventJdbcRepository eventJdbcRepository;
+
+    @Inject
+    EventStreamJdbcRepository eventStreamJdbcRepository;
 
     @Override
     public Stream<JsonEnvelope> getByStreamId(final UUID streamId) {
@@ -84,13 +89,23 @@ public class JdbcEventRepository implements EventRepository {
     @Override
     public Stream<Stream<JsonEnvelope>> getStreamOfAllEventStreams() {
         final Stream<UUID> streamIds = eventJdbcRepository.getStreamIds();
+        return getStreams(streamIds);
+    }
+
+
+    @Override
+    public Stream<Stream<JsonEnvelope>> getStreamOfAllActiveEventStreams() {
+        final Stream<UUID> streamIds = eventStreamJdbcRepository.findActive().map(EventStream::getStreamId);
+        return getStreams(streamIds);
+    }
+
+    private Stream<Stream<JsonEnvelope>> getStreams(final Stream<UUID> streamIds) {
         return streamIds
                 .map(id -> {
                     final Stream<Event> eventStream = eventJdbcRepository.findByStreamIdOrderBySequenceIdAsc(id);
                     streamIds.onClose(eventStream::close);
                     return eventStream.map(eventConverter::envelopeOf);
                 });
-
     }
 
     @Override

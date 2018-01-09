@@ -11,25 +11,24 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
-import org.junit.After;
-import org.junit.Assert;
-
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidSequenceIdException;
-import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
 import uk.gov.justice.services.test.utils.core.messaging.Poller;
+import uk.gov.justice.services.test.utils.persistence.TestDataSourceFactory;
 
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
-
-import uk.gov.justice.services.test.utils.persistence.TestDataSourceFactory;
 
 public class EventStreamJdbcRepositoryIT {
 
@@ -80,8 +79,8 @@ public class EventStreamJdbcRepositoryIT {
     }
 
 
-    @Test(expected = JdbcRepositoryException.class)
-    public void shouldThrowExceptionOnDuplicateStreamId() throws InvalidSequenceIdException {
+    @Test
+    public void shouldNotThrowExceptionOnDuplicateStreamId() throws InvalidSequenceIdException {
         final UUID streamID = randomUUID();
         jdbcRepository.insert(streamID);
         jdbcRepository.insert(streamID);
@@ -246,6 +245,18 @@ public class EventStreamJdbcRepositoryIT {
         jdbcRepository.markActive(streamId, false);
 
         assertFalse(jdbcRepository.findAll().findFirst().get().isActive());
+    }
+
+    @Test
+    public void shouldFindActiveStreams() {
+        final UUID streamId = randomUUID();
+        jdbcRepository.insert(streamId, false);
+
+        assertThat(jdbcRepository.findAll().collect(toList()).size(), is(1));
+        assertThat(jdbcRepository.findActive().collect(toList()).size(), is(0));
+
+        jdbcRepository.markActive(streamId, true);
+        assertThat(jdbcRepository.findActive().collect(toList()).size(), is(1));
     }
 
     @Test

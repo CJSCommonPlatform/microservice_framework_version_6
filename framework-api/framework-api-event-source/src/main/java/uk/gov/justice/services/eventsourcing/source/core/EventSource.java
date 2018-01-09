@@ -15,7 +15,7 @@ public interface EventSource {
      * @param streamId - the stream id of the stream to be retrieved
      * @return the {@link EventStream}
      */
-    public EventStream getStreamById(final UUID streamId);
+    EventStream getStreamById(final UUID streamId);
 
 
     /**

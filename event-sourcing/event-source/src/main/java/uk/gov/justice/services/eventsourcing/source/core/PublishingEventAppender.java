@@ -2,6 +2,7 @@ package uk.gov.justice.services.eventsourcing.source.core;
 
 
 import static java.lang.String.format;
+import static uk.gov.justice.services.eventsourcing.source.core.EventSourceConstants.INITIAL_EVENT_VERSION;
 
 import uk.gov.justice.services.eventsourcing.publisher.jms.EventPublisher;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepository;
@@ -22,8 +23,6 @@ import javax.inject.Inject;
 @Priority(1)
 public class PublishingEventAppender implements EventAppender {
 
-    public static final long INITIAL_STREAM_EVENT = 1L;
-
     @Inject
     EventRepository eventRepository;
 
@@ -43,7 +42,7 @@ public class PublishingEventAppender implements EventAppender {
     @Override
     public void append(final JsonEnvelope event, final UUID streamId, final long version) throws EventStreamException {
         try {
-            if (version == INITIAL_STREAM_EVENT) {
+            if (version == INITIAL_EVENT_VERSION) {
                 streamRepository.insert(streamId);
             }
             final JsonEnvelope eventWithStreamIdAndVersion = eventFrom(event, streamId, version);

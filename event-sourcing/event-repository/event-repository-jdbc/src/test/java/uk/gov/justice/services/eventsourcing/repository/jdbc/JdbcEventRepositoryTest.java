@@ -16,6 +16,8 @@ import static org.mockito.Mockito.when;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.Event;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventConverter;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepository;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStream;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidSequenceIdException;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidStreamIdException;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.StoreEventRequestFailedException;
@@ -47,6 +49,9 @@ public class JdbcEventRepositoryTest {
 
     @Mock
     private EventJdbcRepository eventJdbcRepository;
+
+    @Mock
+    private EventStreamJdbcRepository eventStreamJdbcRepository;
 
     @Mock
     private EventConverter eventConverter;
@@ -123,6 +128,39 @@ public class JdbcEventRepositoryTest {
         when(eventConverter.envelopeOf(event3)).thenReturn(envelope3);
 
         final Stream<Stream<JsonEnvelope>> streamOfStreams = jdbcEventRepository.getStreamOfAllEventStreams();
+
+        final List<Stream<JsonEnvelope>> listOfStreams = streamOfStreams.collect(toList());
+        assertThat(listOfStreams, hasSize(3));
+
+        assertThat(listOfStreams.get(0).findFirst().get(), is(envelope1));
+        assertThat(listOfStreams.get(1).findFirst().get(), is(envelope2));
+        assertThat(listOfStreams.get(2).findFirst().get(), is(envelope3));
+    }
+
+    @Test
+    public void shouldGetActiveStreamOfStreams() throws Exception {
+        final UUID streamId1 = UUID.fromString("4b4e80a0-76f7-476c-b75b-527e38fb251e");
+        final UUID streamId2 = UUID.fromString("4b4e80a0-76f7-476c-b75b-527e38fb252e");
+        final UUID streamId3 = UUID.fromString("4b4e80a0-76f7-476c-b75b-527e38fb253e");
+
+        final Event event1 = eventOf(streamId1);
+        final Event event2 = eventOf(streamId2);
+        final Event event3 = eventOf(streamId3);
+        final JsonEnvelope envelope1 = mock(JsonEnvelope.class);
+        final JsonEnvelope envelope2 = mock(JsonEnvelope.class);
+        final JsonEnvelope envelope3 = mock(JsonEnvelope.class);
+
+        when(eventStreamJdbcRepository.findActive()).thenReturn(Stream.of(new EventStream(streamId1), new EventStream(streamId2), new EventStream(streamId3)));
+        when(eventJdbcRepository.findByStreamIdOrderBySequenceIdAsc(streamId1)).thenReturn(Stream.of(event1));
+        when(eventJdbcRepository.findByStreamIdOrderBySequenceIdAsc(streamId2)).thenReturn(Stream.of(event2));
+        when(eventJdbcRepository.findByStreamIdOrderBySequenceIdAsc(streamId3)).thenReturn(Stream.of(event3));
+
+        when(eventConverter.envelopeOf(event1)).thenReturn(envelope1);
+        when(eventConverter.envelopeOf(event2)).thenReturn(envelope2);
+        when(eventConverter.envelopeOf(event3)).thenReturn(envelope3);
+
+
+        final Stream<Stream<JsonEnvelope>> streamOfStreams = jdbcEventRepository.getStreamOfAllActiveEventStreams();
 
         final List<Stream<JsonEnvelope>> listOfStreams = streamOfStreams.collect(toList());
         assertThat(listOfStreams, hasSize(3));

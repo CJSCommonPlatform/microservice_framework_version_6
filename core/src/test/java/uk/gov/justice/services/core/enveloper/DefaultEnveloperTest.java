@@ -55,7 +55,7 @@ public class DefaultEnveloperTest {
     public void shouldEnvelopeEventObject() throws JsonProcessingException {
         enveloper.register(new EventFoundEvent(TestEvent.class, TEST_EVENT_NAME));
 
-        JsonEnvelope event = enveloper.withMetadataFrom(
+        final JsonEnvelope event = enveloper.withMetadataFrom(
                 envelopeFrom(
                         metadataBuilder()
                                 .withId(COMMAND_UUID)
@@ -81,7 +81,7 @@ public class DefaultEnveloperTest {
     @Test
     public void shouldEnvelopeObjectWithName() throws JsonProcessingException {
 
-        JsonEnvelope event = enveloper.withMetadataFrom(
+        final JsonEnvelope event = enveloper.withMetadataFrom(
                 envelopeFrom(
                         metadataBuilder()
                                 .withId(COMMAND_UUID)
@@ -101,7 +101,7 @@ public class DefaultEnveloperTest {
     @Test
     public void shouldEnvelopeMapNullObjectWithName() throws JsonProcessingException {
 
-        JsonEnvelope event = enveloper.withMetadataFrom(
+        final JsonEnvelope event = enveloper.withMetadataFrom(
                 envelopeFrom(
                         metadataBuilder()
                                 .withId(COMMAND_UUID)
@@ -122,7 +122,7 @@ public class DefaultEnveloperTest {
     public void shouldEnvelopeObjectWithoutCausation() throws JsonProcessingException {
         enveloper.register(new EventFoundEvent(TestEvent.class, TEST_EVENT_NAME));
 
-        JsonEnvelope event = enveloper.withMetadataFrom(
+        final JsonEnvelope event = enveloper.withMetadataFrom(
                 envelopeFrom(
                         metadataBuilder()
                                 .withId(COMMAND_UUID)
@@ -150,7 +150,7 @@ public class DefaultEnveloperTest {
     public void shouldRemoveStreamMetadata() throws JsonProcessingException {
         enveloper.register(new EventFoundEvent(TestEvent.class, TEST_EVENT_NAME));
 
-        JsonEnvelope event = enveloper.withMetadataFrom(
+        final JsonEnvelope event = enveloper.withMetadataFrom(
                 envelopeFrom(
                         metadataBuilder()
                                 .withId(COMMAND_UUID)
@@ -158,6 +158,24 @@ public class DefaultEnveloperTest {
                                 .withStreamId(randomUUID())
                                 .withVersion(123l),
                         createObjectBuilder()))
+                .apply(new TestEvent());
+
+        assertThat(event.metadata().streamId(), is(empty()));
+        assertThat(event.metadata().version(), is(empty()));
+    }
+
+    @Test
+    public void shouldRemoveStreamMetadataWithName() throws JsonProcessingException {
+        enveloper.register(new EventFoundEvent(TestEvent.class, TEST_EVENT_NAME));
+
+        final JsonEnvelope event = enveloper.withMetadataFrom(
+                envelopeFrom(
+                        metadataBuilder()
+                                .withId(COMMAND_UUID)
+                                .withName(TEST_EVENT_NAME)
+                                .withStreamId(randomUUID())
+                                .withVersion(123l),
+                        createObjectBuilder()), "new.name")
                 .apply(new TestEvent());
 
         assertThat(event.metadata().streamId(), is(empty()));

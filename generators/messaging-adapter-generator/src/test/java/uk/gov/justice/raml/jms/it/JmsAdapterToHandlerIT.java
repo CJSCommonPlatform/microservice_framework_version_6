@@ -288,6 +288,11 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
         NameToMediaTypeConverter nameToMediaTypeConverter;
 
         @Override
+        public void validate(final String payload, final String actionName) {
+            this.validatedEventName = actionName;
+        }
+
+        @Override
         public void validate(final String payload, final String actionName, final Optional<MediaType> mediaType) {
             this.validatedEventName = actionName;
         }

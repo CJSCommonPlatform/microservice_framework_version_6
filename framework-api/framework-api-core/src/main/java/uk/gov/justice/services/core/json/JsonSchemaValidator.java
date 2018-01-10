@@ -6,5 +6,9 @@ import java.util.Optional;
 
 public interface JsonSchemaValidator {
 
-    void validate(final String payload, final String actionName, final Optional<MediaType> mediaType);
+    void validate(final String payload, final String actionName);
+
+    default void validate(final String payload, final String actionName, final Optional<MediaType> mediaType) {
+        validate(payload, actionName);
+    }
 }

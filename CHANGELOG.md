@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [2.5.3] - 2018-01-11
+### Fixed
+- Backwards compatible issue with JsonSchemaValidator
+
 ## [2.5.2] - 2018-01-08
 ### Changed
 - Now using maven-framework-parent-pom 1.10.1

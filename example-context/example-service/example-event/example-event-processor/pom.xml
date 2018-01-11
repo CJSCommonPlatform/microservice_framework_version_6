@@ -5,7 +5,7 @@
     <parent>
         <artifactId>example-event</artifactId>
         <groupId>uk.gov.justice.services.example</groupId>
-        <version>2.5.3-SNAPSHOT</version>
+        <version>2.5.3</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>example-event-processor</artifactId>

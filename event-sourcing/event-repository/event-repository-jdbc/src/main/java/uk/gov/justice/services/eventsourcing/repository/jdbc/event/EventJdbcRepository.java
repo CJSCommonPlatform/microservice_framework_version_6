@@ -41,7 +41,7 @@ public class EventJdbcRepository {
     static final String COL_METADATA = "metadata";
     static final String COL_PAYLOAD = "payload";
     static final String COL_TIMESTAMP = "date_created";
-    static final long INITIAL_VERSION = 0L;
+
     /**
      * Statements
      */
@@ -50,7 +50,7 @@ public class EventJdbcRepository {
     static final String SQL_FIND_BY_STREAM_ID_AND_SEQUENCE_ID = "SELECT * FROM event_log WHERE stream_id=? AND sequence_id>=? ORDER BY sequence_id ASC";
     static final String SQL_FIND_LATEST_SEQUENCE_ID = "SELECT MAX(sequence_id) FROM event_log WHERE stream_id=?";
     static final String SQL_DISTINCT_STREAM_ID = "SELECT DISTINCT stream_id FROM event_log";
-    private static final String FAILED_TO_READ_STREAM = "Failed to read stream {}";
+    static final String SQL_DELETE_STREAM = "DELETE FROM event_log t WHERE t.stream_id=?";
 
     /*
      * Pagination Statements
@@ -60,15 +60,21 @@ public class EventJdbcRepository {
     private static final String SQL_GET_BACKWARD = "SELECT * FROM event_log t WHERE t.stream_id=? and t.sequence_id  <= ? ORDER BY t.sequence_id DESC LIMIT ?";
     private static final String SQL_GET_FIRST = "SELECT * FROM event_log t WHERE t.stream_id=?  ORDER BY t.sequence_id ASC LIMIT ?";
     private static final String SQL_RECORD_EXIST = "SELECT COUNT(*) FROM event_log t WHERE t.stream_id=? and t.sequence_id  = ?";
-    private static final String SQL_DELETE_STREAM = "DELETE FROM event_log t WHERE t.stream_id=?";
 
+    /*
+     * Error Messages
+     */
     private static final String READING_STREAM_ALL_EXCEPTION = "Exception while reading stream";
     private static final String READING_STREAM_EXCEPTION = "Exception while reading stream %s";
     private static final String DELETING_STREAM_EXCEPTION = "Exception while deleting stream %s";
     private static final String DELETING_STREAM_EXCEPTION_DETAILS = DELETING_STREAM_EXCEPTION + ", expected %d rows to be updated but was %d";
+    private static final String FAILED_TO_READ_STREAM = "Failed to read stream {}";
+
+    private static final long NO_EXISTING_VERSION = 0L;
 
     @Inject
     protected Logger logger;
+
     @Inject
     EventInsertionStrategy eventInsertionStrategy;
 
@@ -111,6 +117,7 @@ public class EventJdbcRepository {
         try {
             final PreparedStatementWrapper ps = jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SQL_FIND_BY_STREAM_ID);
             ps.setObject(1, streamId);
+
             return jdbcRepositoryHelper.streamOf(ps, entityFromFunction());
         } catch (final SQLException e) {
             logger.warn(FAILED_TO_READ_STREAM, streamId, e);
@@ -128,10 +135,8 @@ public class EventJdbcRepository {
      */
     public Stream<Event> findByStreamIdFromSequenceIdOrderBySequenceIdAsc(final UUID streamId,
                                                                           final Long versionFrom) {
-
         try {
             final PreparedStatementWrapper ps = jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SQL_FIND_BY_STREAM_ID_AND_SEQUENCE_ID);
-
             ps.setObject(1, streamId);
             ps.setLong(2, versionFrom);
 
@@ -175,7 +180,7 @@ public class EventJdbcRepository {
             throw new JdbcRepositoryException(format(READING_STREAM_EXCEPTION, streamId), e);
         }
 
-        return INITIAL_VERSION;
+        return NO_EXISTING_VERSION;
     }
 
 
@@ -205,7 +210,6 @@ public class EventJdbcRepository {
     }
 
     protected Function<ResultSet, Event> entityFromFunction() {
-
         return resultSet -> {
             try {
                 return new Event((UUID) resultSet.getObject(PRIMARY_KEY_ID),
@@ -222,8 +226,7 @@ public class EventJdbcRepository {
     }
 
     public boolean recordExists(final UUID streamId, final long position) {
-        try {
-            final PreparedStatementWrapper ps = jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SQL_RECORD_EXIST);
+        try (final PreparedStatementWrapper ps = jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SQL_RECORD_EXIST)) {
             ps.setObject(1, streamId.toString());
             ps.setLong(2, position);
             try (ResultSet rs = ps.executeQuery()) {
@@ -294,8 +297,7 @@ public class EventJdbcRepository {
     public void clear(final UUID streamId) {
         final long eventCount = getLatestSequenceIdForStream(streamId);
 
-        try {
-            final PreparedStatementWrapper ps = jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SQL_DELETE_STREAM);
+        try (final PreparedStatementWrapper ps = jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SQL_DELETE_STREAM)) {
             ps.setObject(1, streamId);
 
             final int deletedRows = ps.executeUpdate();

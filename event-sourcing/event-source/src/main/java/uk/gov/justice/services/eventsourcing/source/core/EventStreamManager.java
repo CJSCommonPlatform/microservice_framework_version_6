@@ -158,16 +158,19 @@ public class EventStreamManager {
      * @param id - the id of the stream to clone
      * @return the id of the cloned stream
      */
+    @Transactional
     public UUID cloneAsAncestor(final UUID id) throws EventStreamException {
-        final UUID clonedId = randomUUID();
 
         final Stream<JsonEnvelope> existingStream = eventRepository.getByStreamId(id);
 
         final JsonEnvelope systemEvent = systemEventService.clonedEventFor(id);
 
+        final UUID clonedId = randomUUID();
         append(clonedId, concat(existingStream.map(this::stripMetadataFrom), of(systemEvent)));
 
         streamRepository.markActive(clonedId, false);
+
+        existingStream.close();
 
         return clonedId;
     }

@@ -64,7 +64,6 @@ public class EventStreamJdbcRepository {
         dataSource = jdbcDataSourceProvider.getDataSource();
     }
 
-
     public void insert(final UUID streamId) {
         insert(streamId, true);
     }
@@ -74,6 +73,7 @@ public class EventStreamJdbcRepository {
             try (final PreparedStatementWrapper ps = eventStreamJdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SQL_INSERT_EVENT_STREAM)) {
                 ps.setObject(1, streamId);
                 ps.setBoolean(2, active);
+
                 ps.executeUpdate();
             } catch (SQLException e) {
                 throw new JdbcRepositoryException(format("Exception while storing stream %s", streamId), e);
@@ -82,8 +82,7 @@ public class EventStreamJdbcRepository {
     }
 
     public void markActive(final UUID streamId, final boolean active) {
-        try {
-            final PreparedStatementWrapper ps = eventStreamJdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SQL_UPDATE_EVENT_STREAM_ACTIVE);
+        try (final PreparedStatementWrapper ps = eventStreamJdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SQL_UPDATE_EVENT_STREAM_ACTIVE)) {
             ps.setBoolean(1, active);
             ps.setObject(2, streamId);
 
@@ -94,8 +93,7 @@ public class EventStreamJdbcRepository {
     }
 
     public void delete(final UUID streamId) {
-        try {
-            final PreparedStatementWrapper ps = eventStreamJdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SQL_DELETE_EVENT_STREAM);
+        try (final PreparedStatementWrapper ps = eventStreamJdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SQL_DELETE_EVENT_STREAM)) {
             ps.setObject(1, streamId);
 
             ps.executeUpdate();
@@ -131,17 +129,17 @@ public class EventStreamJdbcRepository {
         }
     }
 
-    protected Function<ResultSet, EventStream> entityFromFunction() {
+    public boolean recordExists(final long sequenceNumber) {
+        try (final PreparedStatementWrapper ps = eventStreamJdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SQL_RECORD_EXIST)) {
+            ps.setLong(1, sequenceNumber);
+            try (ResultSet rs = ps.executeQuery()) {
+                rs.next();
 
-        return resultSet1 -> {
-            try {
-                return new EventStream((UUID) resultSet1.getObject(COL_STREAM_ID),
-                        resultSet1.getLong(COL_SEQUENCE_NUMBER),
-                        resultSet1.getBoolean(COL_ACTIVE));
-            } catch (final SQLException e) {
-                throw new JdbcRepositoryException(e);
+                return rs.getInt(1) > 0;
             }
-        };
+        } catch (final SQLException e) {
+            throw new JdbcRepositoryException(READING_STREAM_EXCEPTION, e);
+        }
     }
 
     public Stream<EventStream> first(final long pageSize) {
@@ -187,18 +185,18 @@ public class EventStreamJdbcRepository {
         }
     }
 
-    public boolean recordExists(final long sequenceNumber) {
-        try {
-            final PreparedStatementWrapper ps = eventStreamJdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SQL_RECORD_EXIST);
-            ps.setLong(1, sequenceNumber);
-            try (ResultSet rs = ps.executeQuery()) {
-                rs.next();
-                return rs.getInt(1) > 0;
+    protected Function<ResultSet, EventStream> entityFromFunction() {
+        return resultSet1 -> {
+            try {
+                return new EventStream((UUID) resultSet1.getObject(COL_STREAM_ID),
+                        resultSet1.getLong(COL_SEQUENCE_NUMBER),
+                        resultSet1.getBoolean(COL_ACTIVE));
+            } catch (final SQLException e) {
+                throw new JdbcRepositoryException(e);
             }
-        } catch (final SQLException e) {
-            throw new JdbcRepositoryException(READING_STREAM_EXCEPTION, e);
-        }
+        };
     }
+
 
     private Stream<EventStream> reverseOrder(final PreparedStatementWrapper ps) {
         try {

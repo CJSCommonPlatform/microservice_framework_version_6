@@ -344,13 +344,19 @@ public class EventJdbcRepositoryIT {
     }
 
     @Test
-    public void shouldDeleteStream() throws InvalidSequenceIdException {
+    public void shouldClearStream() throws InvalidSequenceIdException {
         jdbcRepository.insert(eventOf(1, STREAM_ID));
         jdbcRepository.insert(eventOf(2, STREAM_ID));
         jdbcRepository.insert(eventOf(3, STREAM_ID));
+        jdbcRepository.insert(eventOf(4, STREAM_ID));
+        jdbcRepository.insert(eventOf(5, STREAM_ID));
+        jdbcRepository.insert(eventOf(6, STREAM_ID));
+        jdbcRepository.insert(eventOf(7, STREAM_ID));
+        jdbcRepository.insert(eventOf(8, STREAM_ID));
+        jdbcRepository.insert(eventOf(9, STREAM_ID));
 
         final Long latestSequenceId = jdbcRepository.getLatestSequenceIdForStream(STREAM_ID);
-        assertThat(latestSequenceId, equalTo(3L));
+        assertThat(latestSequenceId, equalTo(9L));
 
         jdbcRepository.clear(STREAM_ID);
 
@@ -359,7 +365,6 @@ public class EventJdbcRepositoryIT {
 
         final Long deletedStreamLatestSequenceId = jdbcRepository.getLatestSequenceIdForStream(STREAM_ID);
         assertThat(deletedStreamLatestSequenceId, equalTo(0L));
-
     }
 
     private Event eventOf(final UUID id, final String name, final UUID streamId, final long sequenceId, final String payloadJSON, final String metadataJSON, final ZonedDateTime timestamp) {

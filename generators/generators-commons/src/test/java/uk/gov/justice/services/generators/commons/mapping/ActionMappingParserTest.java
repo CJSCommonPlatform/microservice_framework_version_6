@@ -23,7 +23,6 @@ import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.M
 import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.NAME_KEY;
 import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.REQUEST_TYPE_KEY;
 import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.RESPONSE_TYPE_KEY;
-import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.listOf;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.mapping;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingDescriptionBuilder.mappingDescriptionWith;
@@ -35,12 +34,14 @@ import java.util.List;
 import org.junit.Test;
 import org.raml.model.MimeType;
 
-public class ActionMappingTest {
+public class ActionMappingParserTest {
+
+    private final ActionMappingParser actionMappingParser = new ActionMappingParser();
 
     @Test
     public void shouldCreateSingleMappingWithRequestTypeFromString() throws Exception {
 
-        final List<ActionMapping> mappings = listOf(mappingDescriptionWith(
+        final List<ActionMapping> mappings = actionMappingParser.listOf(mappingDescriptionWith(
                 mapping()
                         .withRequestType("application/vnd.aaaa+json")
                         .withName("actionA"))
@@ -56,7 +57,7 @@ public class ActionMappingTest {
     @Test
     public void shouldCreateSingleMappingWithResponseTypeFromString() throws Exception {
 
-        final List<ActionMapping> mappings = listOf(mappingDescriptionWith(
+        final List<ActionMapping> mappings = actionMappingParser.listOf(mappingDescriptionWith(
                 mapping()
                         .withResponseType("application/vnd.bbbb+json")
                         .withName("actionBCD"))
@@ -73,7 +74,7 @@ public class ActionMappingTest {
     @Test
     public void shouldReturnMappingFromRamlAndMimeType() throws Exception {
 
-        final ActionMapping actionMapping = ActionMapping.valueOf(httpAction(GET)
+        final ActionMapping actionMapping = actionMappingParser.valueOf(httpAction(GET)
                         .withResponseTypes(
                                 "application/vnd.ctx.query2+json",
                                 "application/vnd.ctx.query1+json")
@@ -94,7 +95,7 @@ public class ActionMappingTest {
     @Test
     public void shouldReturnResponseTypeForGetAction() throws Exception {
 
-        final List<ActionMapping> mappings = listOf(mappingDescriptionWith(
+        final List<ActionMapping> mappings = actionMappingParser.listOf(mappingDescriptionWith(
                 mapping()
                         .withResponseType("application/vnd.bbbb+json")
                         .withName("actionBCD"))
@@ -107,7 +108,7 @@ public class ActionMappingTest {
     @Test
     public void shouldReturnRequestTypeForDeletePatchPostAndPutAction() throws Exception {
 
-        final List<ActionMapping> mappings = listOf(mappingDescriptionWith(
+        final List<ActionMapping> mappings = actionMappingParser.listOf(mappingDescriptionWith(
                 mapping()
                         .withRequestType("application/vnd.aaaa+json")
                         .withName("actionA"))
@@ -123,7 +124,7 @@ public class ActionMappingTest {
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionForHeadAction() throws Exception {
 
-        final List<ActionMapping> mappings = listOf(mappingDescriptionWith(
+        final List<ActionMapping> mappings = actionMappingParser.listOf(mappingDescriptionWith(
                 mapping()
                         .withResponseType("application/vnd.bbbb+json")
                         .withRequestType("application/vnd.aaaa+json")
@@ -137,7 +138,7 @@ public class ActionMappingTest {
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionForTraceAction() throws Exception {
 
-        final List<ActionMapping> mappings = listOf(mappingDescriptionWith(
+        final List<ActionMapping> mappings = actionMappingParser.listOf(mappingDescriptionWith(
                 mapping()
                         .withResponseType("application/vnd.bbbb+json")
                         .withRequestType("application/vnd.aaaa+json")
@@ -151,7 +152,7 @@ public class ActionMappingTest {
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionForOptionsAction() throws Exception {
 
-        final List<ActionMapping> mappings = listOf(mappingDescriptionWith(
+        final List<ActionMapping> mappings = actionMappingParser.listOf(mappingDescriptionWith(
                 mapping()
                         .withResponseType("application/vnd.bbbb+json")
                         .withRequestType("application/vnd.aaaa+json")
@@ -166,7 +167,7 @@ public class ActionMappingTest {
     @SuppressWarnings("unchecked")
     public void shouldCreateMappingsCollections() throws Exception {
 
-        final List<ActionMapping> mappings = listOf(mappingDescriptionWith(
+        final List<ActionMapping> mappings = actionMappingParser.listOf(mappingDescriptionWith(
                 mapping()
                         .withRequestType("application/vnd.aaaa+json")
                         .withName("actionA"),
@@ -183,7 +184,7 @@ public class ActionMappingTest {
     @Test
     public void shouldCreateMappingIfPrefixedByOtherText() throws Exception {
 
-        final List<ActionMapping> mappings = listOf("Pre description of action" +
+        final List<ActionMapping> mappings = actionMappingParser.listOf("Pre description of action" +
                 mappingDescriptionWith(
                         mapping()
                                 .withRequestType("application/vnd.aaaa+json")
@@ -200,7 +201,7 @@ public class ActionMappingTest {
     @Test
     public void shouldCreateMappingIfSuffixedByOtherText() throws Exception {
 
-        final List<ActionMapping> mappings = listOf(mappingDescriptionWith(
+        final List<ActionMapping> mappings = actionMappingParser.listOf(mappingDescriptionWith(
                 mapping()
                         .withRequestType("application/vnd.aaaa+json")
                         .withName("actionA"))
@@ -215,18 +216,18 @@ public class ActionMappingTest {
 
     @Test(expected = RamlValidationException.class)
     public void shouldFailWithNoMapping() throws Exception {
-        listOf(MAPPING_BOUNDARY + "\n" +
+        actionMappingParser.listOf(MAPPING_BOUNDARY + "\n" +
                 MAPPING_BOUNDARY + "\n");
     }
 
     @Test(expected = RamlValidationException.class)
     public void shouldFailWithNull() throws Exception {
-        listOf(null);
+        actionMappingParser.listOf(null);
     }
 
     @Test(expected = RamlValidationException.class)
     public void shouldFailWithMultipleRequests() throws Exception {
-        listOf(MAPPING_BOUNDARY + "\n" +
+        actionMappingParser.listOf(MAPPING_BOUNDARY + "\n" +
                 MAPPING_SEPARATOR + "\n" +
                 REQUEST_TYPE_KEY + ": application/vnd.aaaa+json\n" +
                 REQUEST_TYPE_KEY + ": application/vnd.aaaa+json\n" +
@@ -236,7 +237,7 @@ public class ActionMappingTest {
 
     @Test(expected = RamlValidationException.class)
     public void shouldFailWithStartMappingBoundaryMissing() throws Exception {
-        listOf(MAPPING_SEPARATOR + "\n" +
+        actionMappingParser.listOf(MAPPING_SEPARATOR + "\n" +
                 REQUEST_TYPE_KEY + ": application/vnd.aaaa+json\n" +
                 NAME_KEY + ": actionA\n" +
                 MAPPING_BOUNDARY + "\n");
@@ -244,7 +245,7 @@ public class ActionMappingTest {
 
     @Test(expected = RamlValidationException.class)
     public void shouldFailWithEndMappingBoundaryMissing() throws Exception {
-        listOf(MAPPING_BOUNDARY + "\n" +
+        actionMappingParser.listOf(MAPPING_BOUNDARY + "\n" +
                 MAPPING_SEPARATOR + "\n" +
                 REQUEST_TYPE_KEY + ": application/vnd.aaaa+json\n" +
                 NAME_KEY + ": actionA\n");
@@ -252,7 +253,7 @@ public class ActionMappingTest {
 
     @Test(expected = RamlValidationException.class)
     public void shouldFailWithExtraCharacterAfterName() throws Exception {
-        listOf(MAPPING_BOUNDARY + "\n" +
+        actionMappingParser.listOf(MAPPING_BOUNDARY + "\n" +
                 MAPPING_SEPARATOR + "\n" +
                 REQUEST_TYPE_KEY + ": application/vnd.aaaa+json\n" +
                 NAME_KEY + ".: actionA\n" +
@@ -261,7 +262,7 @@ public class ActionMappingTest {
 
     @Test(expected = RamlValidationException.class)
     public void shouldFailWithMultipleResponses() throws Exception {
-        listOf(MAPPING_BOUNDARY + "\n" +
+        actionMappingParser.listOf(MAPPING_BOUNDARY + "\n" +
                 MAPPING_SEPARATOR + "\n" +
                 RESPONSE_TYPE_KEY + ": application/vnd.aaaa+json\n" +
                 RESPONSE_TYPE_KEY + ": application/vnd.aaaa+json\n" +
@@ -271,7 +272,7 @@ public class ActionMappingTest {
 
     @Test(expected = RamlValidationException.class)
     public void shouldFailWithMissingRequestFieldSeparator() throws Exception {
-        listOf(MAPPING_BOUNDARY + "\n" +
+        actionMappingParser.listOf(MAPPING_BOUNDARY + "\n" +
                 MAPPING_SEPARATOR + "\n" +
                 REQUEST_TYPE_KEY + " application/vnd.aaaa+json\n" +
                 NAME_KEY + ": actionA\n" +
@@ -280,7 +281,7 @@ public class ActionMappingTest {
 
     @Test(expected = RamlValidationException.class)
     public void shouldFailWithMissingNameFieldSeparator() throws Exception {
-        listOf(MAPPING_BOUNDARY + "\n" +
+        actionMappingParser.listOf(MAPPING_BOUNDARY + "\n" +
                 MAPPING_SEPARATOR + "\n" +
                 REQUEST_TYPE_KEY + ": application/vnd.aaaa+json\n" +
                 NAME_KEY + " actionA\n" +
@@ -289,7 +290,7 @@ public class ActionMappingTest {
 
     @Test(expected = RamlValidationException.class)
     public void shouldFailWithMissingRequestOrResponse() throws Exception {
-        listOf(MAPPING_BOUNDARY + "\n" +
+        actionMappingParser.listOf(MAPPING_BOUNDARY + "\n" +
                 MAPPING_SEPARATOR + "\n" +
                 NAME_KEY + ": actionA\n" +
                 MAPPING_BOUNDARY + "\n");
@@ -297,7 +298,7 @@ public class ActionMappingTest {
 
     @Test(expected = RamlValidationException.class)
     public void shouldFailWithMissingName() throws Exception {
-        listOf(MAPPING_BOUNDARY + "\n" +
+        actionMappingParser.listOf(MAPPING_BOUNDARY + "\n" +
                 MAPPING_SEPARATOR + "\n" +
                 REQUEST_TYPE_KEY + ": application/vnd.aaaa+json\n" +
                 MAPPING_BOUNDARY + "\n");

@@ -29,7 +29,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class JsonSchemaValidatingMockTest {
 
-
     @Test
     public void shouldPassWhenPayloadPassedToSenderAdheresToSchema() throws Exception {
 
@@ -56,7 +55,6 @@ public class JsonSchemaValidatingMockTest {
                         .with(metadataWithRandomUUID("example.add-recipe"))
                         .withPayloadOf(true, "glutenFree")
                         .build());
-
     }
 
     @Test
@@ -73,7 +71,6 @@ public class JsonSchemaValidatingMockTest {
                         .build());
     }
 
-
     @Test
     public void shouldPassWhenPayloadReturnedByRequesterAdheresToSchema() throws Exception {
 
@@ -87,7 +84,6 @@ public class JsonSchemaValidatingMockTest {
 
         new RequestingHandler(requester).handle(envelope().build());
     }
-
 
     @Test
     public void shouldThrowExceptionWhenPayloadReturnedByRequesterDoesNotAdhereToSchema() {
@@ -104,9 +100,7 @@ public class JsonSchemaValidatingMockTest {
                 .build());
 
         new RequestingHandler(requester).handle(envelope().build());
-
     }
-
 
     @Test
     public void shouldSkipValidationIfSkippingListenerAddedToConfig() {
@@ -116,7 +110,6 @@ public class JsonSchemaValidatingMockTest {
                 .handle(envelope()
                         .with(metadataWithRandomUUID("unknown"))
                         .build());
-
     }
 
     @Test
@@ -129,7 +122,6 @@ public class JsonSchemaValidatingMockTest {
                         .build());
     }
 
-
     public static class SendingHandler {
         private Sender sender;
 
@@ -140,7 +132,6 @@ public class JsonSchemaValidatingMockTest {
         public void handle(final JsonEnvelope envelope) {
             sender.send(envelope);
         }
-
     }
 
     public static class RequestingHandler {
@@ -153,7 +144,6 @@ public class JsonSchemaValidatingMockTest {
         public JsonEnvelope handle(final JsonEnvelope envelope) {
             return requester.request(envelope);
         }
-
     }
 
     public static class OtherHandler {
@@ -167,8 +157,5 @@ public class JsonSchemaValidatingMockTest {
         public void handle(final JsonEnvelope envelope) {
             someInterface.process(envelope);
         }
-
     }
-
-
 }

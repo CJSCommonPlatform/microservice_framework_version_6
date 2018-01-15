@@ -30,17 +30,18 @@ public class JsonSchemaLoader {
 
     /**
      * Locate a JSON schema file on the classpath and load it.
-     * @param name the logical name for the JSON type
+     *
+     * @param actionName the logical name for the JSON type
      * @return the schema
      */
-    public Schema loadSchema(final String name) {
-        final String schemaFile = format(SCHEMA_LOCATION_PATTERN, name);
+    public Schema loadSchema(final String actionName) {
+        final String schemaFile = format(SCHEMA_LOCATION_PATTERN, actionName);
         return load(schemaFile);
     }
 
     private Schema load(final String schemaFile) {
         logger.trace("Loading schema {}", schemaFile);
-        try (final InputStream schemaFileStream = this.getClass().getResourceAsStream(schemaFile)){
+        try (final InputStream schemaFileStream = this.getClass().getResourceAsStream(schemaFile)) {
             final URL schemaUrl = getClass().getResource(schemaFile);
             return SchemaLoader.builder()
                     .resolutionScope(resolveUrl(schemaUrl))

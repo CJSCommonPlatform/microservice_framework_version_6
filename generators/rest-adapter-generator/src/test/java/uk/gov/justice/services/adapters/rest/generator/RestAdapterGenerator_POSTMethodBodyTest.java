@@ -310,7 +310,7 @@ public class RestAdapterGenerator_POSTMethodBodyTest extends BaseRestAdapterGene
                                                 .withName("contextA.someAction")
                                                 .withRequestType("application/vnd.somemediatype1+json"))
 
-                                        .withMediaType("application/vnd.somemediatype1+json", "json/schema/somemediatype1.json")
+                                        .withMediaTypeWithDefaultSchema("application/vnd.somemediatype1+json")
                                         .withHttpActionResponseAndNoBody()
                                 )
                 ).build(),

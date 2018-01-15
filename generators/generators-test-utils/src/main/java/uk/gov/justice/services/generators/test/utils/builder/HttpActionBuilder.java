@@ -1,5 +1,6 @@
 package uk.gov.justice.services.generators.test.utils.builder;
 
+import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static java.util.Arrays.stream;
 import static javax.ws.rs.core.Response.Status.OK;
@@ -31,6 +32,27 @@ import org.raml.model.parameter.QueryParameter;
  * Builds RAML http action (not to be confused with framework's action)
  */
 public class HttpActionBuilder {
+
+
+    public static final String VALID_JSON_SCHEMA = "{\n" +
+            "  \"$schema\": \"http://json-schema.org/draft-04/schema#\",\n" +
+            "  \"id\": \"%s\",\n" +
+            "  \"type\": \"object\",\n" +
+            "  \"properties\": {\n" +
+            "    \"userUrn\": {\n" +
+            "      \"type\": \"string\"\n" +
+            "    }\n" +
+            "  },\n" +
+            "  \"required\": [\n" +
+            "    \"userUrn\"\n" +
+            "  ]\n" +
+            "}";
+
+    public static final String SCHEMA_ID = "http://justice.gov.uk/test/schema.json";
+
+    private static final String COMMAND_MEDIA_TYPE = "application/vnd.ctx.command.defcmd+json";
+    private static final String QUERY_MEDIA_TYPE = "application/vnd.ctx.query.defquery+json";
+    private static final String ACTION_NAME = "action1";
 
     private final Map<String, MimeType> body = new HashMap<>();
     private final Map<String, QueryParameter> queryParameters = new HashMap<>();
@@ -80,7 +102,7 @@ public class HttpActionBuilder {
                 .withHttpActionType(actionType)
                 .with(defaultMapping());
         for (final String mimeType : mimeTypes) {
-            httpActionBuilder = httpActionBuilder.withMediaType(mimeType, "json/schema/some.schema.json");
+            httpActionBuilder = httpActionBuilder.withMediaTypeWithDefaultSchema(mimeType);
         }
         return httpActionBuilder;
     }
@@ -89,7 +111,7 @@ public class HttpActionBuilder {
         HttpActionBuilder httpActionBuilder = new HttpActionBuilder()
                 .withHttpActionType(actionType);
         for (final String mimeType : mimeTypes) {
-            httpActionBuilder = httpActionBuilder.withMediaType(mimeType, "");
+            httpActionBuilder = httpActionBuilder.withMediaTypeWithSchema(mimeType, Optional.of(format(VALID_JSON_SCHEMA, SCHEMA_ID)));
         }
         return httpActionBuilder;
     }
@@ -100,26 +122,26 @@ public class HttpActionBuilder {
     }
 
     public HttpActionBuilder withHttpActionOfDefaultRequestType() {
-        return withMediaType("application/vnd.ctx.command.defcmd+json", "json/schema/ctx.command.defcmd.json")
+        return withMediaTypeWithDefaultSchema(COMMAND_MEDIA_TYPE)
                 .with(mapping()
-                        .withName("action1")
-                        .withRequestType("application/vnd.ctx.command.defcmd+json"));
+                        .withName(ACTION_NAME)
+                        .withRequestType(COMMAND_MEDIA_TYPE));
     }
 
     public HttpActionBuilder withDefaultResponseType() {
-        return withResponseTypes("application/vnd.ctx.query.defquery+json")
+        return withResponseTypes(QUERY_MEDIA_TYPE)
                 .with(mapping()
-                        .withName("action1")
-                        .withResponseType("application/vnd.ctx.query.defquery+json"));
+                        .withName(ACTION_NAME)
+                        .withResponseType(QUERY_MEDIA_TYPE));
     }
 
     public HttpActionBuilder withHttpActionOfDefaultRequestAndResponseType() {
-        return withMediaType("application/vnd.ctx.command.defcmd+json", "json/schema/ctx.command.defcmd.json")
-                .withResponseTypes("application/vnd.ctx.query.defquery+json")
+        return withMediaTypeWithDefaultSchema(COMMAND_MEDIA_TYPE)
+                .withResponseTypes(QUERY_MEDIA_TYPE)
                 .with(mapping()
-                        .withName("action1")
-                        .withRequestType("application/vnd.ctx.command.defcmd+json")
-                        .withResponseType("application/vnd.ctx.query.defquery+json"));
+                        .withName(ACTION_NAME)
+                        .withRequestType(COMMAND_MEDIA_TYPE)
+                        .withResponseType(QUERY_MEDIA_TYPE));
     }
 
     public HttpActionBuilder withNullResponseType() {
@@ -145,6 +167,11 @@ public class HttpActionBuilder {
         return this;
     }
 
+    public HttpActionBuilder withResponseTypes(final MimeType... responseTypes) {
+        responses.add(response().withBodyTypes(responseTypes).build());
+        return this;
+    }
+
     public HttpActionBuilder withResponsesFrom(final Map<String, Response> responses) {
         this.responseMap.putAll(responses);
         return this;
@@ -163,30 +190,35 @@ public class HttpActionBuilder {
         return this;
     }
 
-    public HttpActionBuilder withMediaType(final MimeType mimeType, final Optional<String> schema) {
+    public HttpActionBuilder withMediaTypeWithSchema(final MimeType mimeType, final Optional<String> schema) {
         schema.ifPresent(mimeType::setSchema);
         body.put(mimeType.toString(), mimeType);
         return this;
     }
 
+    public HttpActionBuilder withMediaTypeWithDefaultSchema(final MimeType mimeType) {
+        body.put(mimeType.toString(), mimeType);
+        return this;
+    }
+
     public HttpActionBuilder withMediaTypeWithoutSchema(final MimeType mimeType) {
-        return withMediaType(mimeType, Optional.empty());
+        return withMediaTypeWithSchema(mimeType, Optional.empty());
     }
 
     public HttpActionBuilder withMediaTypeWithoutSchema(final MimeTypeBuilder mimeType) {
-        return withMediaType(mimeType.build(), Optional.empty());
+        return withMediaTypeWithSchema(mimeType.build(), Optional.empty());
     }
 
-    public HttpActionBuilder withMediaType(final String stringMimeType, final Optional<String> schema) {
-        return withMediaType(new MimeType(stringMimeType), schema);
+    public HttpActionBuilder withMediaTypeWithSchema(final String stringMimeType, final Optional<String> schema) {
+        return withMediaTypeWithSchema(new MimeType(stringMimeType), schema);
     }
 
-    public HttpActionBuilder withMediaType(final String stringMimeType, final String schema) {
-        return withMediaType(new MimeType(stringMimeType), Optional.of(schema));
+    public HttpActionBuilder withMediaTypeWithDefaultSchema(final String stringMimeType) {
+        return withMediaTypeWithSchema(new MimeType(stringMimeType), Optional.of(format(VALID_JSON_SCHEMA, SCHEMA_ID)));
     }
 
     public HttpActionBuilder withMediaTypeWithoutSchema(final String stringMimeType) {
-        return withMediaType(stringMimeType, Optional.empty());
+        return withMediaTypeWithSchema(stringMimeType, Optional.empty());
     }
 
     public HttpActionBuilder withDescription(final String description) {

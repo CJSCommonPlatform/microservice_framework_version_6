@@ -12,6 +12,8 @@ import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuil
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 
+import uk.gov.justice.schema.catalog.CatalogProducer;
+import uk.gov.justice.schema.service.SchemaCatalogService;
 import uk.gov.justice.services.common.configuration.GlobalValueProducer;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
@@ -33,7 +35,10 @@ import uk.gov.justice.services.core.dispatcher.EnvelopePayloadTypeConverter;
 import uk.gov.justice.services.core.dispatcher.JsonEnvelopeRepacker;
 import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
+import uk.gov.justice.services.core.envelope.EnvelopeInspector;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandlerProducer;
+import uk.gov.justice.services.core.envelope.EnvelopeValidator;
+import uk.gov.justice.services.core.envelope.MediaTypeProvider;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.extension.ServiceComponentScanner;
@@ -43,9 +48,17 @@ import uk.gov.justice.services.core.interceptor.InterceptorChainEntryProvider;
 import uk.gov.justice.services.core.interceptor.InterceptorChainObserver;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
+import uk.gov.justice.services.core.json.BackwardsCompatibleJsonSchemaValidator;
 import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
-import uk.gov.justice.services.core.json.DefaultJsonSchemaValidator;
+import uk.gov.justice.services.core.json.FileBasedJsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
+import uk.gov.justice.services.core.json.PayloadExtractor;
+import uk.gov.justice.services.core.json.SchemaCatalogAwareJsonSchemaValidator;
+import uk.gov.justice.services.core.mapping.ActionNameToMediaTypesMappingObserver;
+import uk.gov.justice.services.core.mapping.DefaultMediaTypesMappingCache;
+import uk.gov.justice.services.core.mapping.DefaultSchemaIdMappingCache;
+import uk.gov.justice.services.core.mapping.NameToMediaTypeConverter;
+import uk.gov.justice.services.core.mapping.SchemaIdMappingObserver;
 import uk.gov.justice.services.core.requester.RequesterProducer;
 import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.event.buffer.api.AbstractEventFilter;
@@ -139,9 +152,28 @@ public class EventFilterIT {
 
             GlobalValueProducer.class,
             EnvelopeValidationExceptionHandlerProducer.class,
-            DefaultJsonSchemaValidator.class,
+            FileBasedJsonSchemaValidator.class,
             JsonSchemaLoader.class,
-            DefaultTraceLogger.class
+            DefaultTraceLogger.class,
+
+            SchemaCatalogAwareJsonSchemaValidator.class,
+            PayloadExtractor.class,
+            NameToMediaTypeConverter.class,
+            DefaultSchemaIdMappingCache.class,
+            SchemaIdMappingObserver.class,
+
+            CatalogProducer.class,
+            SchemaCatalogService.class,
+
+            DefaultMediaTypesMappingCache.class,
+            ActionNameToMediaTypesMappingObserver.class,
+
+            SenderProducer.class,
+            MediaTypeProvider.class,
+            EnvelopeValidator.class,
+            EnvelopeInspector.class,
+            RequesterProducer.class,
+            BackwardsCompatibleJsonSchemaValidator.class
     })
     public WebApp war() {
         return new WebApp()

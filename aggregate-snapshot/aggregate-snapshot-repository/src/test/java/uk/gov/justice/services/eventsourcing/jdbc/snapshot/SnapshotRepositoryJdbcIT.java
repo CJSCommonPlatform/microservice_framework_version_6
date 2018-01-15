@@ -17,6 +17,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -68,7 +69,7 @@ public class SnapshotRepositoryJdbcIT {
     public void shouldRetrieveLatestSnapshot() {
 
         final UUID streamId = randomUUID();
-        
+
         final AggregateSnapshot aggregateSnapshot1 = createSnapshot(streamId, VERSION_ID + 1, TYPE, AGGREGATE);
         final AggregateSnapshot aggregateSnapshot2 = createSnapshot(streamId, VERSION_ID + 2, TYPE, AGGREGATE);
         final AggregateSnapshot aggregateSnapshot3 = createSnapshot(streamId, VERSION_ID + 3, TYPE, AGGREGATE);

@@ -3,9 +3,9 @@ package uk.gov.justice.services.generators.commons.validator;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.listOf;
 
 import uk.gov.justice.services.generators.commons.helper.Actions;
+import uk.gov.justice.services.generators.commons.mapping.ActionMappingParser;
 
 import java.util.Collection;
 import java.util.Set;
@@ -19,11 +19,13 @@ import org.raml.model.Resource;
  */
 public class ActionMappingRamlValidator extends AbstractResourceRamlValidator {
 
+    private final ActionMappingParser actionMappingParser = new ActionMappingParser();
+
     @Override
     protected void validate(final Resource resource) {
         resource.getActions().values().forEach(ramlAction -> {
             final Set<String> mediaTypesInMapping =
-                    listOf(ramlAction.getDescription())
+                    actionMappingParser.listOf(ramlAction.getDescription())
                             .stream()
                             .map(am -> am.mimeTypeFor(ramlAction.getType()))
                             .collect(toSet());

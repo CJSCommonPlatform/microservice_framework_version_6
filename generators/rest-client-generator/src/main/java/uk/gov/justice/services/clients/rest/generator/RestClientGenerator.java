@@ -16,7 +16,7 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.generators.commons.client.AbstractClientGenerator;
 import uk.gov.justice.services.generators.commons.client.ActionMimeTypeDefinition;
-import uk.gov.justice.services.generators.commons.mapping.ActionMapping;
+import uk.gov.justice.services.generators.commons.mapping.ActionMappingParser;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.HashSet;
@@ -158,7 +158,7 @@ public class RestClientGenerator extends AbstractClientGenerator {
 
     @Override
     protected String handlesAnnotationValueOf(final Action ramlAction, final ActionMimeTypeDefinition definition, final GeneratorConfig generatorConfig) {
-        return ActionMapping.valueOf(ramlAction, definition.getNameType()).getName();
+        return new ActionMappingParser().valueOf(ramlAction, definition.getNameType()).getName();
     }
 
     private CodeBlock methodStatementsWith(final String actionName, final String processorStatementTemplate) {

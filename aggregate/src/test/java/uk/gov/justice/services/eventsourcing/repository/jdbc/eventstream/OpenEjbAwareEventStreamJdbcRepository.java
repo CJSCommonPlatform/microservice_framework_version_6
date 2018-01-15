@@ -1,15 +1,17 @@
 package uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream;
 
+import static java.lang.String.format;
+
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 
-import javax.inject.Inject;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
 
-import static java.lang.String.format;
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,6 +1,6 @@
 package uk.gov.justice.raml.maven.lintchecker.rules.utils;
 
-import static uk.gov.justice.services.generators.commons.mapping.ActionMapping.listOf;
+import uk.gov.justice.services.generators.commons.mapping.ActionMappingParser;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,7 +20,7 @@ public final class RamlActionFinder {
         final List<String> actionNames = new ArrayList<>();
 
         resources.forEach(resource -> resource.getActions().values()
-                .forEach(action -> listOf(action.getDescription())
+                .forEach(action -> new ActionMappingParser().listOf(action.getDescription())
                         .forEach(actionMapping -> actionNames.add(actionMapping.getName()))));
         return actionNames;
     }

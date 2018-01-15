@@ -6,9 +6,13 @@ import uk.gov.justice.services.core.dispatcher.DispatcherDelegate;
 import uk.gov.justice.services.core.dispatcher.EnvelopePayloadTypeConverter;
 import uk.gov.justice.services.core.dispatcher.JsonEnvelopeRepacker;
 import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
+import uk.gov.justice.services.core.envelope.EnvelopeInspector;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandler;
 import uk.gov.justice.services.core.envelope.EnvelopeValidator;
+import uk.gov.justice.services.core.envelope.MediaTypeProvider;
+import uk.gov.justice.services.core.envelope.RequestResponseEnvelopeValidator;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
+import uk.gov.justice.services.core.mapping.NameToMediaTypeConverter;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
@@ -24,19 +28,28 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class SenderProducer {
 
     @Inject
-    DispatcherCache dispatcherCache;
-
-    @Inject
-    SystemUserUtil systemUserUtil;
+    JsonSchemaValidator jsonSchemaValidator;
 
     @Inject
     ObjectMapper objectMapper;
 
     @Inject
-    JsonSchemaValidator jsonSchemaValidator;
+    EnvelopeValidationExceptionHandler envelopeValidationExceptionHandler;
 
     @Inject
-    EnvelopeValidationExceptionHandler envelopeValidationExceptionHandler;
+    NameToMediaTypeConverter nameToMediaTypeConverter;
+
+    @Inject
+    MediaTypeProvider mediaTypeProvider;
+
+    @Inject
+    EnvelopeInspector envelopeInspector;
+
+    @Inject
+    DispatcherCache dispatcherCache;
+
+    @Inject
+    SystemUserUtil systemUserUtil;
 
     @Inject
     EnvelopePayloadTypeConverter envelopePayloadTypeConverter;
@@ -55,7 +68,23 @@ public class SenderProducer {
      */
     @Produces
     public Sender produceSender(final InjectionPoint injectionPoint) {
-        return new DispatcherDelegate(dispatcherCache.dispatcherFor(injectionPoint), systemUserUtil,
-                new EnvelopeValidator(jsonSchemaValidator, envelopeValidationExceptionHandler, objectMapper), envelopePayloadTypeConverter, jsonEnvelopeRepacker);
+        final EnvelopeValidator envelopeValidator = new EnvelopeValidator(
+                jsonSchemaValidator,
+                objectMapper,
+                envelopeValidationExceptionHandler
+        );
+
+        final RequestResponseEnvelopeValidator requestResponseEnvelopeValidator = new RequestResponseEnvelopeValidator(
+                envelopeValidator,
+                nameToMediaTypeConverter,
+                mediaTypeProvider,
+                envelopeInspector);
+
+        return new DispatcherDelegate(
+                dispatcherCache.dispatcherFor(injectionPoint),
+                systemUserUtil,
+                requestResponseEnvelopeValidator,
+                envelopePayloadTypeConverter,
+                jsonEnvelopeRepacker);
     }
 }

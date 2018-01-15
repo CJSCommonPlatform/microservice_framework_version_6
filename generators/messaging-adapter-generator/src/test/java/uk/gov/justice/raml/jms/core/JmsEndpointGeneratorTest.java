@@ -162,7 +162,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
 
         File packageDir = new File(outputFolder.getRoot().getAbsolutePath() + BASE_PACKAGE_FOLDER);
         File[] files = packageDir.listFiles();
-        assertThat(files, nullValue());
+        assertThat(files.length, is(1));
     }
 
     @SuppressWarnings("unchecked")
@@ -532,7 +532,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/structure.controller.command")
                                 .with(httpAction()
                                         .withHttpActionType(POST)
-                                        .withMediaType("application/vnd.structure.test-cmd+json", "json/schema/test-cmd.json")))
+                                        .withMediaTypeWithDefaultSchema("application/vnd.structure.test-cmd+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -551,7 +551,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/structure.controller.command")
                                 .with(httpAction()
                                         .withHttpActionType(POST)
-                                        .withMediaType("application/vnd.structure.test-cmd+json", "json/schema/test-cmd.json")))
+                                        .withMediaTypeWithDefaultSchema("application/vnd.structure.test-cmd+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -571,7 +571,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/structure.event")
                                 .with(httpAction()
                                         .withHttpActionType(POST)
-                                        .withMediaType("application/vnd.structure.test-event+json", "json/schema/test-event.json")))
+                                        .withMediaTypeWithDefaultSchema("application/vnd.structure.test-event+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -589,7 +589,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/structure.event")
                                 .with(httpAction()
                                         .withHttpActionType(POST)
-                                        .withMediaType("application/vnd.structure.events.test-event+json", "json/schema/test-event.json")))
+                                        .withMediaTypeWithDefaultSchema("application/vnd.structure.events.test-event+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 
@@ -650,8 +650,8 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/people.controller.command")
                                 .with(httpAction()
                                         .withHttpActionType(POST)
-                                        .withMediaType("application/vnd.people.command1+json", "json/schema/command1.json")
-                                        .withMediaType("application/vnd.people.command2+json", "json/schema/command2.json")))
+                                        .withMediaTypeWithDefaultSchema("application/vnd.people.command1+json")
+                                        .withMediaTypeWithDefaultSchema("application/vnd.people.command2+json")))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
 

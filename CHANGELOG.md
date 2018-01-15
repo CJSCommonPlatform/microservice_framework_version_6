@@ -13,6 +13,41 @@ JsonObjectMetadataBuilders in tests
 - Record new events stream into event_stream table in Event Store
 - InterceptorChainEntryProvider to be used instead of InterceptorChainProvider
 
+## [2.5.3] - 2018-01-11
+### Fixed
+- Backwards compatible issue with JsonSchemaValidator
+
+## [2.5.2] - 2018-01-08
+### Changed
+- Now using maven-framework-parent-pom 1.10.1
+
+## [2.5.1] - 2018-01-03
+### Added
+- Now generating mapping file for action name to media type, used when validating requests
+
+
+## [2.5.0] - 2017-12-15
+### Added 
+- Catalog generation for all json schema files. Add an id into a json schema to use.
+
+## [2.4.3] - 2017-12-11
+### Changed
+- Upgrade File Service to 1.14.0
+- Upgrade Utilities to 1.11.0
+- Upgrade Test Utils to 1.15.0
+
+## [2.4.2] - 2017-12-08
+
+### Fixed
+- The issue, where there are no schema validations of command handler due to single war class loading EventFilter of Event Listener for handlers which then skips validation due to no match on the names with events.
+
+## [2.4.1] - 2017-11-06
+
+### Changed
+- Removed duplicated test utilities from test-utils module
+- Use test-utils project version of test utilities
+- Use latest release versions of dependencies to fix OWASP vulnerabilities
+
 ## [2.3.2] - 2017-10-17
 
 ##Changed

@@ -40,7 +40,6 @@
         <module>aggregate</module>
         <module>aggregate-snapshot</module>
         <module>raml-lint-check</module>
-        <module>framework-api</module>
         <module>wildfly-vfs</module>
         <module>common-rest</module>
     </modules>
@@ -58,6 +57,7 @@
         <test-utils.version>1.15.0</test-utils.version>
         <utilities.version>1.11.0</utilities.version>
         <generator-maven-plugin.version>2.3.0</generator-maven-plugin.version>
+        <framework-api.version>1.0.0</framework-api.version>
     </properties>
 
     <dependencyManagement>
@@ -100,6 +100,13 @@
                 <groupId>uk.gov.justice.utils</groupId>
                 <artifactId>test-utils-logging-log4j</artifactId>
                 <version>${test-utils.version}</version>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>uk.gov.justice.framework-api</groupId>
+                <artifactId>framework-api-bom</artifactId>
+                <version>${framework-api.version}</version>
+                <scope>import</scope>
                 <type>pom</type>
             </dependency>
         </dependencies>

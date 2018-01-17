@@ -41,6 +41,7 @@
         <module>raml-lint-check</module>
         <module>wildfly-vfs</module>
         <module>common-rest</module>
+        <module>interceptors</module>
     </modules>
 
     <properties>

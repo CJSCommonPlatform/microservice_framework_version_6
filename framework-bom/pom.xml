@@ -83,47 +83,12 @@
 
             <dependency>
                 <groupId>uk.gov.justice.services</groupId>
-                <artifactId>command-api</artifactId>
+                <artifactId>command-handler-interceptors</artifactId>
                 <version>${cpp.framework.version}</version>
             </dependency>
             <dependency>
                 <groupId>uk.gov.justice.services</groupId>
-                <artifactId>command-controller</artifactId>
-                <version>${cpp.framework.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>uk.gov.justice.services</groupId>
-                <artifactId>command-handler</artifactId>
-                <version>${cpp.framework.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>uk.gov.justice.services</groupId>
-                <artifactId>event-api</artifactId>
-                <version>${cpp.framework.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>uk.gov.justice.services</groupId>
-                <artifactId>event-processor</artifactId>
-                <version>${cpp.framework.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>uk.gov.justice.services</groupId>
-                <artifactId>event-listener</artifactId>
-                <version>${cpp.framework.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>uk.gov.justice.services</groupId>
-                <artifactId>query-api</artifactId>
-                <version>${cpp.framework.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>uk.gov.justice.services</groupId>
-                <artifactId>query-controller</artifactId>
-                <version>${cpp.framework.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>uk.gov.justice.services</groupId>
-                <artifactId>query-view</artifactId>
+                <artifactId>event-listener-interceptors</artifactId>
                 <version>${cpp.framework.version}</version>
             </dependency>
 
@@ -198,6 +163,27 @@
             <dependency>
                 <groupId>uk.gov.justice.services</groupId>
                 <artifactId>event-source</artifactId>
+                <version>${cpp.framework.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>uk.gov.justice.services</groupId>
+                <artifactId>event-publisher-jms</artifactId>
+                <version>${cpp.framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>uk.gov.justice.services</groupId>
+                <artifactId>event-repository-jdbc</artifactId>
+                <version>${cpp.framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>uk.gov.justice.services</groupId>
+                <artifactId>aggregate-snapshot-service</artifactId>
+                <version>${cpp.framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>uk.gov.justice.services</groupId>
+                <artifactId>aggregate</artifactId>
                 <version>${cpp.framework.version}</version>
             </dependency>
         </dependencies>

@@ -14,14 +14,12 @@ import javax.inject.Inject;
  */
 public class LocalAuditInterceptor implements Interceptor {
 
-    private static final String UNKNOWN_COMPONENT = "UNKNOWN";
-
     @Inject
     AuditService auditService;
 
     @Override
     public InterceptorContext process(final InterceptorContext interceptorContext, final InterceptorChain interceptorChain) {
-        final String component = (String) interceptorContext.getInputParameter("component").orElse(UNKNOWN_COMPONENT);
+        final String component = interceptorContext.getComponentName();
         recordAudit(interceptorContext.inputEnvelope(), component);
 
         final InterceptorContext outputContext = interceptorChain.processNext(interceptorContext);

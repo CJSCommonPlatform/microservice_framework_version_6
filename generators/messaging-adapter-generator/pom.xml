@@ -35,12 +35,6 @@
 
         <!-- Test Dependencies -->
         <dependency>
-            <groupId>uk.gov.justice.services</groupId>
-            <artifactId>event-listener</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>uk.gov.justice.utils</groupId>
             <artifactId>test-utils-logging-simple</artifactId>
             <type>pom</type>
@@ -155,8 +149,9 @@
         </dependency>
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
-            <artifactId>test-utils-core</artifactId>
+            <artifactId>event-listener-interceptors</artifactId>
             <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>

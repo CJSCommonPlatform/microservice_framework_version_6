@@ -79,4 +79,20 @@ public class DefaultInterceptorContextTest {
     public void shouldThrowExceptionIfInputNotSet() throws Exception {
         interceptorContextWithInput(null).inputEnvelope();
     }
+
+    @Test
+    public void shouldGetComponentName() {
+        final InterceptorContext interceptorContext = interceptorContextWithInput(input);
+
+        interceptorContext.setInputParameter("component", "testComponent");
+
+        assertThat(interceptorContext.getComponentName(), is("testComponent"));
+    }
+
+    @Test
+    public void shouldGetDefaultUnknownComponentNameIfNotSet() {
+        final InterceptorContext interceptorContext = interceptorContextWithInput(input);
+
+        assertThat(interceptorContext.getComponentName(), is("UNKNOWN"));
+    }
 }

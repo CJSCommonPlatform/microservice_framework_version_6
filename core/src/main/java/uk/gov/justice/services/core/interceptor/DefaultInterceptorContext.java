@@ -10,6 +10,8 @@ import java.util.Optional;
 
 public class DefaultInterceptorContext implements InterceptorContext {
 
+    private static final String UNKNOWN_COMPONENT = "UNKNOWN";
+
     private final ContextPayload input;
     private final ContextPayload output;
 
@@ -78,5 +80,10 @@ public class DefaultInterceptorContext implements InterceptorContext {
 
     public ContextPayload outputContext() {
         return output;
+    }
+
+    @Override
+    public String getComponentName() {
+        return (String) getInputParameter("component").orElse(UNKNOWN_COMPONENT);
     }
 }

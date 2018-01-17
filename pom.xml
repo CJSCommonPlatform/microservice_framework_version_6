@@ -27,7 +27,6 @@
     <modules>
         <module>messaging</module>
         <module>core</module>
-        <module>metrics</module>
         <module>components</module>
         <module>event-sourcing</module>
         <module>common</module>

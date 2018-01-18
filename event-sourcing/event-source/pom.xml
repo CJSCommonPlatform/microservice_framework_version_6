@@ -5,7 +5,7 @@
     <parent>
         <artifactId>event-sourcing</artifactId>
         <groupId>uk.gov.justice.services</groupId>
-        <version>3.0.0</version>
+        <version>3.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 

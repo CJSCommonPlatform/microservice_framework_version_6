@@ -1,7 +1,10 @@
 package uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream;
 
 import static java.lang.String.format;
+import static uk.gov.justice.services.common.converter.ZonedDateTimes.fromSqlTimestamp;
+import static uk.gov.justice.services.common.converter.ZonedDateTimes.toSqlTimestamp;
 
+import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.jdbc.persistence.JdbcDataSourceProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
@@ -25,7 +28,7 @@ import org.slf4j.Logger;
 public class EventStreamJdbcRepository {
 
     private static final String SQL_FIND_EVENT_STREAM = "SELECT * FROM event_stream s WHERE s.stream_id=?";
-    private static final String SQL_INSERT_EVENT_STREAM = "INSERT INTO event_stream (stream_id, active) values (?, ?)";
+    private static final String SQL_INSERT_EVENT_STREAM = "INSERT INTO event_stream (stream_id, date_created, active) values (?, ?, ?)";
     private static final String SQL_UPDATE_EVENT_STREAM_ACTIVE = "UPDATE event_stream SET active=? WHERE stream_id=?";
     private static final String SQL_DELETE_EVENT_STREAM = "DELETE FROM event_stream t WHERE t.stream_id=?";
     private static final String SQL_FIND_ALL = "SELECT * FROM event_stream ORDER BY sequence_number ASC";
@@ -47,6 +50,7 @@ public class EventStreamJdbcRepository {
     private static final String COL_STREAM_ID = "stream_id";
     private static final String COL_SEQUENCE_NUMBER = "sequence_number";
     private static final String COL_ACTIVE = "active";
+    private static final String COL_DATE_CREATED = "date_created";
 
     @Inject
     protected Logger logger;
@@ -56,6 +60,9 @@ public class EventStreamJdbcRepository {
 
     @Inject
     JdbcDataSourceProvider jdbcDataSourceProvider;
+
+    @Inject
+    UtcClock clock;
 
     DataSource dataSource;
 
@@ -72,7 +79,8 @@ public class EventStreamJdbcRepository {
         if (!isExistingStream(streamId)) {
             try (final PreparedStatementWrapper ps = eventStreamJdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SQL_INSERT_EVENT_STREAM)) {
                 ps.setObject(1, streamId);
-                ps.setBoolean(2, active);
+                ps.setTimestamp(2, toSqlTimestamp(clock.now()));
+                ps.setBoolean(3, active);
 
                 ps.executeUpdate();
             } catch (SQLException e) {
@@ -186,17 +194,17 @@ public class EventStreamJdbcRepository {
     }
 
     protected Function<ResultSet, EventStream> entityFromFunction() {
-        return resultSet1 -> {
+        return resultSet -> {
             try {
-                return new EventStream((UUID) resultSet1.getObject(COL_STREAM_ID),
-                        resultSet1.getLong(COL_SEQUENCE_NUMBER),
-                        resultSet1.getBoolean(COL_ACTIVE));
+                return new EventStream((UUID) resultSet.getObject(COL_STREAM_ID),
+                        resultSet.getLong(COL_SEQUENCE_NUMBER),
+                        resultSet.getBoolean(COL_ACTIVE),
+                        fromSqlTimestamp(resultSet.getTimestamp(COL_DATE_CREATED)));
             } catch (final SQLException e) {
                 throw new JdbcRepositoryException(e);
             }
         };
     }
-
 
     private Stream<EventStream> reverseOrder(final PreparedStatementWrapper ps) {
         try {

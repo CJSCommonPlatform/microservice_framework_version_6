@@ -148,6 +148,7 @@ public class EventsPageIT {
             PositionValueFactory.class,
             BadRequestExceptionMapper.class,
             JdbcRepositoryHelper.class,
+            UtcClock.class,
             JdbcDataSourceProvider.class
     })
 

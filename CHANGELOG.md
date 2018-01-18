@@ -5,13 +5,31 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [3.0.0] - 2018-01-18
+
 ### Added
 - JsonEnvelope and Metadata builder service provider
+- Introduced event_stream table to the event-store, with accompanying repository and services
+- Event-Store Restful API, including paginated feeds
+- POJO support to HandlerMethods
+- Event-Store operations for cloning, clearing and marking streams as inactive
+- Add schema catalog generation and validation
+
+### Changed
+- Switched to use Apache commons-lang3 library instead of commons-lang
+- Update dependencies for OWASP fixes
+- Upgraded example application to deploy as a Single war
+- Updated example application schemas to avoid conflicts when deployed as a single war
 - Convenience methods to JsonEnvelope for providing JsonEnvelopes and JsonObjectMetadataBuilders
 - MetadataBuilderFactory in test-utils-core which contains convenience methods for creating 
 JsonObjectMetadataBuilders in tests
-- Record new events stream into event_stream table in Event Store
 - InterceptorChainEntryProvider to be used instead of InterceptorChainProvider
+
+### Removed
+- Moved framework-api into a new [repository](https://github.com/CJSCommonPlatform/framework-api)
+- Moved metrics into a new [repository](https://github.com/CJSCommonPlatform/metrics)
+- Component modules and Interceptor chain providers
+- Unused dependencies, such as hamcrest-date
 
 ## [2.5.3] - 2018-01-11
 ### Fixed

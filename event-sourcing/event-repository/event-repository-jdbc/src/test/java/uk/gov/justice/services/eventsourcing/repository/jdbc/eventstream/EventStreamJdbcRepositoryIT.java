@@ -11,12 +11,14 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
+import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidSequenceIdException;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
 import uk.gov.justice.services.test.utils.core.messaging.Poller;
 import uk.gov.justice.services.test.utils.persistence.TestDataSourceFactory;
 
 import java.sql.SQLException;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -38,12 +40,15 @@ public class EventStreamJdbcRepositoryIT {
 
     private EventStreamJdbcRepository jdbcRepository = new EventStreamJdbcRepository();
 
+    private final static ZonedDateTime TIMESTAMP = new UtcClock().now();
+
     @Before
     public void initialize() {
         try {
             jdbcRepository.dataSource = new TestDataSourceFactory(LIQUIBASE_EVENT_STORE_DB_CHANGELOG_XML).createDataSource();
             jdbcRepository.logger = mock(Logger.class);
             jdbcRepository.eventStreamJdbcRepositoryHelper = new JdbcRepositoryHelper();
+            jdbcRepository.clock = new UtcClock();
 
             final Poller poller = new Poller();
 

@@ -11,9 +11,11 @@ import static uk.gov.justice.services.eventsourcing.source.api.service.core.Posi
 import static uk.gov.justice.services.eventsourcing.source.api.service.core.Position.head;
 import static uk.gov.justice.services.eventsourcing.source.api.service.core.Position.sequence;
 
+import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStream;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepository;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -33,6 +35,8 @@ public class EventStreamServiceTest {
     @InjectMocks
     private EventStreamService service;
 
+    private final static ZonedDateTime TIMESTAMP = new UtcClock().now();
+
     @Test
     public void shouldReturnHeadEvents() throws Exception {
 
@@ -41,8 +45,8 @@ public class EventStreamServiceTest {
         final UUID streamId3 = randomUUID();
         final UUID streamId4 = randomUUID();
 
-        final EventStream eventStream3 = new EventStream(streamId3, 3L, false);
-        final EventStream eventStream4 = new EventStream(streamId4, 4L, false);
+        final EventStream eventStream3 = buildEventStreamOf(streamId3, 3L, false);
+        final EventStream eventStream4 = buildEventStreamOf(streamId4, 4L, false);
 
         final Stream.Builder<EventStream> eventStreamBuilder = Stream.builder();
 
@@ -73,8 +77,8 @@ public class EventStreamServiceTest {
 
         final Stream.Builder<EventStream> eventStreamBuilder = Stream.builder();
 
-        final EventStream eventStream1 = new EventStream(streamId1, 1L, false);
-        final EventStream eventStream2 = new EventStream(streamId2, 2L, false);
+        final EventStream eventStream1 = buildEventStreamOf(streamId1, 1L, false);
+        final EventStream eventStream2 = buildEventStreamOf(streamId2, 2L, false);
 
         eventStreamBuilder.add(eventStream2);
         eventStreamBuilder.add(eventStream1);
@@ -104,8 +108,8 @@ public class EventStreamServiceTest {
 
         final Stream.Builder<EventStream> eventStreamBuilder = Stream.builder();
 
-        final EventStream eventStream2 = new EventStream(streamId2, 2L, false);
-        final EventStream eventStream3 = new EventStream(streamId3, 3L, false);
+        final EventStream eventStream2 = buildEventStreamOf(streamId2, 2L, false);
+        final EventStream eventStream3 = buildEventStreamOf(streamId3, 3L, false);
 
         eventStreamBuilder.add(eventStream3);
         eventStreamBuilder.add(eventStream2);
@@ -138,8 +142,8 @@ public class EventStreamServiceTest {
 
         final Stream.Builder<EventStream> eventStreamBuilder = Stream.builder();
 
-        final EventStream eventStream5 = new EventStream(streamId5, 5L, false);
-        final EventStream eventStream4 = new EventStream(streamId4, 4L, false);
+        final EventStream eventStream5 = buildEventStreamOf(streamId5, 5L, false);
+        final EventStream eventStream4 = buildEventStreamOf(streamId4, 4L, false);
 
         eventStreamBuilder.add(eventStream5);
         eventStreamBuilder.add(eventStream4);
@@ -168,4 +172,9 @@ public class EventStreamServiceTest {
 
         assertThat(service.recordExists( sequenceId),is(true));
     }
+
+    private EventStream buildEventStreamOf(final UUID streamId, final Long sequence, final boolean active) {
+        return new EventStream(streamId, sequence, active, TIMESTAMP);
+    }
+
 }

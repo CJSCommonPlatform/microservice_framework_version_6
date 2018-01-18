@@ -13,6 +13,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.Event;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventConverter;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepository;
@@ -26,6 +27,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.justice.services.test.utils.common.stream.StreamCloseSpy;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -67,6 +69,8 @@ public class JdbcEventRepositoryTest {
 
     @InjectMocks
     private JdbcEventRepository jdbcEventRepository;
+
+    private final static ZonedDateTime TIMESTAMP = new UtcClock().now();
 
     @Test
     public void shouldGetByStreamId() throws Exception {
@@ -150,7 +154,7 @@ public class JdbcEventRepositoryTest {
         final JsonEnvelope envelope2 = mock(JsonEnvelope.class);
         final JsonEnvelope envelope3 = mock(JsonEnvelope.class);
 
-        when(eventStreamJdbcRepository.findActive()).thenReturn(Stream.of(new EventStream(streamId1), new EventStream(streamId2), new EventStream(streamId3)));
+        when(eventStreamJdbcRepository.findActive()).thenReturn(Stream.of(buildEventStreamFor(streamId1, 1L), buildEventStreamFor(streamId2, 2L), buildEventStreamFor(streamId3, 3L)));
         when(eventJdbcRepository.findByStreamIdOrderBySequenceIdAsc(streamId1)).thenReturn(Stream.of(event1));
         when(eventJdbcRepository.findByStreamIdOrderBySequenceIdAsc(streamId2)).thenReturn(Stream.of(event2));
         when(eventJdbcRepository.findByStreamIdOrderBySequenceIdAsc(streamId3)).thenReturn(Stream.of(event3));
@@ -168,6 +172,10 @@ public class JdbcEventRepositoryTest {
         assertThat(listOfStreams.get(0).findFirst().get(), is(envelope1));
         assertThat(listOfStreams.get(1).findFirst().get(), is(envelope2));
         assertThat(listOfStreams.get(2).findFirst().get(), is(envelope3));
+    }
+
+    private EventStream buildEventStreamFor(final UUID streamId, final Long sequence) {
+        return new EventStream(streamId, sequence, true, TIMESTAMP);
     }
 
     @Test

@@ -20,6 +20,7 @@ import uk.gov.justice.services.adapter.rest.mapper.BadRequestExceptionMapper;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.rest.ForbiddenRequestExceptionMapper;
+import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.Direction;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventInsertionStrategy;
@@ -141,6 +142,7 @@ public class EventStreamPageIT {
             PositionValueFactory.class,
             BadRequestExceptionMapper.class,
             JdbcRepositoryHelper.class,
+            UtcClock.class,
             JdbcDataSourceProvider.class
     })
 

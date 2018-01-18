@@ -9,15 +9,11 @@
 
         <sql>
             UPDATE event_stream
-            SET date_created = streams.date_created
-                FROM
-                    (SELECT
-                        stream_id AS stream_id,
-                        MIN(date_created) AS date_created
-                        FROM event_log
-                        GROUP BY stream_id) AS streams
-                WHERE
-                event_stream.stream_id = streams.stream_id
+                SET date_created = (SELECT
+                                      MIN(date_created)
+                                    FROM event_log
+                                    WHERE
+                                      stream_id = event_stream.stream_id);
         </sql>
 
     </changeSet>

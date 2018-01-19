@@ -11,15 +11,15 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.common.log.LoggerConstants.REQUEST_DATA;
-import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
-import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
-import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
 
 import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.logging.JmsMessageLoggerHelper;
 import uk.gov.justice.services.messaging.logging.TraceLogger;
 
+import java.util.UUID;
 import javax.interceptor.InvocationContext;
 import javax.jms.TextMessage;
 import javax.json.JsonObject;
@@ -59,19 +59,20 @@ public class JmsLoggerMetadataInterceptorTest {
     @Test
     @SuppressWarnings("deprecation")
     public void shouldAddMetadataFromEnvelopeToMappedDiagnosticContext() throws Exception {
-        final String messageId = randomUUID().toString();
+        final UUID messageId = randomUUID();
         final String clientCorrelationId = randomUUID().toString();
         final String name = "someName";
 
-        final JsonEnvelope jsonEnvelope = envelope()
-                .with(metadataOf(messageId, name)
-                        .withClientCorrelationId(clientCorrelationId))
-                .withPayloadOf("data", "someData")
-                .build();
+        final JsonEnvelope jsonEnvelope =  envelopeFrom(metadataBuilder()
+                        .withId(messageId)
+                        .withName(name)
+                        .withClientCorrelationId(clientCorrelationId),
+                createObjectBuilder()
+                        .add("data", "someData"));
 
         final TextMessage textMessage = mock(TextMessage.class);
         final JsonObject jsonObject = createObjectBuilder()
-                .add("id", messageId).build();
+                .add("id", messageId.toString()).build();
 
         when(context.getParameters()).thenReturn(new Object[]{textMessage});
         when(textMessage.getText()).thenReturn(jsonEnvelope.toDebugStringPrettyPrint());
@@ -80,7 +81,7 @@ public class JmsLoggerMetadataInterceptorTest {
 
         when(context.proceed()).thenAnswer(invocationOnMock -> {
             assertThat(MDC.get(REQUEST_DATA), isJson(
-                    withJsonPath("$.metadata.id", equalTo(messageId))
+                    withJsonPath("$.metadata.id", equalTo(messageId.toString()))
             ));
             return null;
         });
@@ -95,10 +96,11 @@ public class JmsLoggerMetadataInterceptorTest {
     public void shouldProceedWithContextAndReturnResult() throws Exception {
         final Object expectedResult = mock(Object.class);
 
-        final JsonEnvelope jsonEnvelope = envelope()
-                .with(metadataWithRandomUUID("someName"))
-                .withPayloadOf("data", "someData")
-                .build();
+        final JsonEnvelope jsonEnvelope =  envelopeFrom(metadataBuilder()
+                        .withId(UUID.randomUUID())
+                        .withName("someName"),
+                createObjectBuilder()
+                        .add("data", "someData"));
 
         final TextMessage textMessage = mock(TextMessage.class);
 

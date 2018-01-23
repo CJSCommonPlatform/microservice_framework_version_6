@@ -106,7 +106,7 @@
                 <dependencies>
                     <dependency>
                         <groupId>uk.gov.justice.services.example</groupId>
-                        <artifactId>example-query-controller</artifactId>
+                        <artifactId>example-query-view</artifactId>
                         <version>${project.version}</version>
                         <classifier>raml</classifier>
                     </dependency>
@@ -114,5 +114,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

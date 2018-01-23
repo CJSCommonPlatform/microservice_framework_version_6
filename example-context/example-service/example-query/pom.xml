@@ -14,7 +14,6 @@
 
     <modules>
         <module>example-query-api</module>
-        <module>example-query-controller</module>
         <module>example-query-view</module>
     </modules>
 

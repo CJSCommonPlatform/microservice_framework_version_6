@@ -19,7 +19,7 @@ import static uk.gov.justice.services.adapters.rest.generator.Generators.resourc
 import static uk.gov.justice.services.adapters.rest.helper.Multiparts.isMultipartResource;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_CONTROLLER;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_VIEW;
-import static uk.gov.justice.services.generators.commons.config.GeneratorProperties.serviceComponentOf;
+import static uk.gov.justice.services.generators.commons.config.GeneratorPropertiesHelper.serviceComponentOf;
 import static uk.gov.justice.services.generators.commons.helper.Actions.isSupportedActionType;
 import static uk.gov.justice.services.generators.commons.helper.Actions.isSupportedActionTypeWithResponseTypeOnly;
 import static uk.gov.justice.services.generators.commons.helper.Actions.isSynchronousAction;
@@ -30,7 +30,7 @@ import static uk.gov.justice.services.generators.commons.helper.Names.packageNam
 import static uk.gov.justice.services.generators.commons.helper.Names.resourceMethodNameFrom;
 import static uk.gov.justice.services.generators.commons.helper.Names.resourceMethodNameWithNoMimeTypeFrom;
 
-import uk.gov.justice.raml.core.GeneratorConfig;
+import uk.gov.justice.maven.generator.io.files.parser.core.GeneratorConfig;
 import uk.gov.justice.services.adapter.rest.mapping.ActionMapper;
 import uk.gov.justice.services.adapter.rest.multipart.FileInputDetailsFactory;
 import uk.gov.justice.services.adapter.rest.parameter.ParameterCollectionBuilder;

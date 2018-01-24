@@ -153,14 +153,17 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
     <build>
         <plugins>
             <plugin>
-                <groupId>uk.gov.justice.maven</groupId>
-                <artifactId>raml-maven-plugin</artifactId>
-                <version>${raml-maven-plugin.version}</version>
+                <groupId>uk.gov.justice.maven.generator</groupId>
+                <artifactId>generator-plugin</artifactId>
+                <version>${generator-maven-plugin.version}</version>
                 <configuration>
                     <generatorName>uk.gov.justice.raml.jms.core.JmsEndpointGenerator</generatorName>
+                    <parserName>uk.gov.justice.maven.generator.io.files.parser.RamlFileParser
+                    </parserName>
                     <sourceDirectory>${basedir}/src/test/resources/raml</sourceDirectory>
                     <outputDirectory>${project.build.directory}/generated-test-sources
                     </outputDirectory>
@@ -177,7 +180,7 @@
                             <includes>
                                 <include>**/all-events-processor.raml</include>
                             </includes>
-                            <generatorProperties>
+                            <generatorProperties implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
                                 <serviceComponent>EVENT_PROCESSOR</serviceComponent>
                             </generatorProperties>
                         </configuration>
@@ -192,7 +195,7 @@
                             <includes>
                                 <include>**/command-controller.raml</include>
                             </includes>
-                            <generatorProperties>
+                            <generatorProperties implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
                                 <serviceComponent>COMMAND_CONTROLLER</serviceComponent>
                             </generatorProperties>
                         </configuration>
@@ -207,7 +210,7 @@
                             <includes>
                                 <include>**/command-handler.raml</include>
                             </includes>
-                            <generatorProperties>
+                            <generatorProperties implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
                                 <serviceComponent>COMMAND_HANDLER</serviceComponent>
                             </generatorProperties>
                         </configuration>
@@ -222,7 +225,7 @@
                             <includes>
                                 <include>**/event-listener.raml</include>
                             </includes>
-                            <generatorProperties>
+                            <generatorProperties implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
                                 <serviceComponent>EVENT_LISTENER</serviceComponent>
                             </generatorProperties>
                         </configuration>
@@ -237,7 +240,7 @@
                             <includes>
                                 <include>**/custom-event-listener.raml</include>
                             </includes>
-                            <generatorProperties>
+                            <generatorProperties implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
                                 <serviceComponent>CUSTOM_EVENT_LISTENER</serviceComponent>
                             </generatorProperties>
                         </configuration>
@@ -252,7 +255,7 @@
                             <includes>
                                 <include>**/event-processor.raml</include>
                             </includes>
-                            <generatorProperties>
+                            <generatorProperties implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
                                 <serviceComponent>EVENT_PROCESSOR</serviceComponent>
                             </generatorProperties>
                         </configuration>
@@ -269,6 +272,11 @@
                         <artifactId>javaee-api</artifactId>
                         <version>${javaee-api.version}</version>
                         <scope>runtime</scope>
+                    </dependency>
+                    <dependency>
+                        <groupId>uk.gov.justice.maven.generator</groupId>
+                        <artifactId>raml-parser</artifactId>
+                        <version>${generator-maven-plugin.version}</version>
                     </dependency>
                 </dependencies>
             </plugin>

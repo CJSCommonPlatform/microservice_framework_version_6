@@ -10,10 +10,10 @@ import static uk.gov.justice.services.generators.test.utils.builder.MappingBuild
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithQueryApiDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
-import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
 
 import uk.gov.justice.services.core.mapping.MediaType;
 import uk.gov.justice.services.core.mapping.MediaTypeToSchemaIdMapper;
+import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
 
 import java.util.Map;
 
@@ -39,7 +39,7 @@ public class RestAdapterGenerator_MediaTypeToSchemaIdMapperTest extends BaseRest
                                         .withResponseTypes(mimeType_1)
                                 )
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> schemaIdMapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "WarnameMediaTypeToSchemaIdMapper");
         final MediaTypeToSchemaIdMapper instance = (MediaTypeToSchemaIdMapper) schemaIdMapperClass.newInstance();

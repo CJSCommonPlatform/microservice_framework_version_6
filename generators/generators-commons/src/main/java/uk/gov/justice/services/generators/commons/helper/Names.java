@@ -4,7 +4,7 @@ import static java.util.stream.Collectors.joining;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
-import uk.gov.justice.raml.core.GeneratorConfig;
+import uk.gov.justice.maven.generator.io.files.parser.core.GeneratorConfig;
 import uk.gov.justice.services.generators.commons.client.ActionMimeTypeDefinition;
 import uk.gov.justice.services.generators.commons.mapping.ActionMapping;
 import uk.gov.justice.services.generators.commons.mapping.ActionMappingParser;

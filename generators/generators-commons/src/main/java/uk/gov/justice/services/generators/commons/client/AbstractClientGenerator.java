@@ -8,15 +8,15 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static uk.gov.justice.services.generators.commons.client.ActionMimeTypeDefinition.definitionWithRequest;
 import static uk.gov.justice.services.generators.commons.client.ActionMimeTypeDefinition.definitionWithRequestAndResponse;
-import static uk.gov.justice.services.generators.commons.config.GeneratorProperties.serviceComponentOf;
+import static uk.gov.justice.services.generators.commons.config.GeneratorPropertiesHelper.serviceComponentOf;
 import static uk.gov.justice.services.generators.commons.helper.Actions.isSupportedActionType;
 import static uk.gov.justice.services.generators.commons.helper.Actions.isSupportedActionTypeWithRequestType;
 import static uk.gov.justice.services.generators.commons.helper.Actions.isSynchronousAction;
 import static uk.gov.justice.services.generators.commons.helper.GeneratedClassWriter.writeClass;
 import static uk.gov.justice.services.generators.commons.helper.Names.buildResourceMethodNameFromVerbUriAndMimeType;
 
-import uk.gov.justice.raml.core.Generator;
-import uk.gov.justice.raml.core.GeneratorConfig;
+import uk.gov.justice.maven.generator.io.files.parser.core.Generator;
+import uk.gov.justice.maven.generator.io.files.parser.core.GeneratorConfig;
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.Remote;
@@ -46,7 +46,7 @@ import org.raml.model.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractClientGenerator implements Generator {
+public abstract class AbstractClientGenerator implements Generator<Raml> {
 
     protected Logger logger = LoggerFactory.getLogger(AbstractClientGenerator.class);
 

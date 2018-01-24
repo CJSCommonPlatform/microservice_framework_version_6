@@ -6,7 +6,6 @@ import static java.lang.Boolean.FALSE;
 import static java.lang.reflect.Modifier.isAbstract;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
-import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -29,6 +28,7 @@ import static uk.gov.justice.services.generators.test.utils.config.GeneratorConf
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
 import uk.gov.justice.services.adapter.rest.application.CommonProviders;
+import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -54,7 +54,7 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
                 raml()
                         .withBaseUri("http://localhost:8080/warname/command/api/rest/service")
                         .with(defaultPostResource()).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceApplication");
 
@@ -67,7 +67,7 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
                 raml()
                         .withBaseUri("http://localhost:8080/warname/command/api/rest/service-with-hyphens")
                         .with(defaultPostResource()).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceWithHyphensApplication");
 
@@ -80,7 +80,7 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
                 raml()
                         .withBaseUri("http://localhost:8080/warname/command/api/rest/service")
                         .with(defaultPostResource()).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceApplication");
 
@@ -95,7 +95,7 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
                         .withBaseUri("http://localhost:8080/warname/command/api/rest/service")
                         .with(defaultPostResource()
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceApplication");
         assertThat(applicationClass.getSuperclass(), equalTo(Application.class));
@@ -108,7 +108,7 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
                         .withBaseUri("http://localhost:8080/warname/command/api/rest/service")
                         .with(defaultPostResource()
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceApplication");
 
@@ -123,7 +123,7 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
                 raml()
                         .withBaseUri("http://localhost:8080/warname/command/api/rest/service")
                         .with(defaultPostResource()).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceApplication");
 
@@ -146,7 +146,7 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
                         .with(resource("/pathA").with(httpActionWithDefaultMapping(GET).withDefaultResponseType()))
                         .with(resource("/pathB").with(httpActionWithDefaultMapping(GET).withDefaultResponseType()))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         Set<Class<?>> compiledClasses = compiler.compiledClassesOf(BASE_PACKAGE);
         Class<?> applicationClass = compiler.classOf(compiledClasses, BASE_PACKAGE, "CommandApiRestServiceApplication");
@@ -174,7 +174,7 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
                 restRamlWithDefaults()
                         .with(resource("/pathA").with(httpActionWithDefaultMapping(GET).withDefaultResponseType()))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         Set<Class<?>> compiledClasses = compiler.compiledClassesOf(BASE_PACKAGE);
         Class<?> applicationClass = compiler.classOf(compiledClasses, BASE_PACKAGE, "CommandApiRestServiceApplication");
@@ -201,7 +201,7 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
                 restRamlWithQueryApiDefaults()
                         .with(resource("/pathA").with(httpActionWithDefaultMapping(GET).withDefaultResponseType()))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap(), singletonList(sourcePath)));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties(), singletonList(sourcePath)));
 
         Path outputPath = Paths.get(outputFolder.newFile().getAbsolutePath(), EXISTING_FILE_PATH);
 
@@ -215,7 +215,7 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
                 restRamlWithQueryApiDefaults()
                         .with(resource("/pathA").with(httpActionWithDefaultMapping(GET).withDefaultResponseType()))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap(), singletonList(existingFilePath())));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties(), singletonList(existingFilePath())));
 
         verify(logger).warn("The class {} already exists, skipping code generation.", "QueryApiPathAResource");
     }

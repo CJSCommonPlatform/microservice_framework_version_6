@@ -2,10 +2,10 @@ package uk.gov.justice.services.clients.messaging.generator;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static uk.gov.justice.config.GeneratorPropertiesFactory.generatorProperties;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.messagingRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
-import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 

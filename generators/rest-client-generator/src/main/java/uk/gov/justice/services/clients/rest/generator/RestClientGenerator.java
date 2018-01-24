@@ -6,7 +6,7 @@ import static uk.gov.justice.services.generators.commons.helper.Actions.isSynchr
 import static uk.gov.justice.services.generators.commons.helper.Names.buildJavaFriendlyName;
 import static uk.gov.justice.services.generators.commons.helper.Names.nameFrom;
 
-import uk.gov.justice.raml.core.GeneratorConfig;
+import uk.gov.justice.maven.generator.io.files.parser.core.GeneratorConfig;
 import uk.gov.justice.services.adapter.rest.parameter.ParameterType;
 import uk.gov.justice.services.clients.core.EndpointDefinition;
 import uk.gov.justice.services.clients.core.QueryParam;

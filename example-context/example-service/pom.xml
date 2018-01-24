@@ -234,80 +234,6 @@
                                     </rules>
                                 </configuration>
                             </execution>
-                            <execution>
-                                <id>generate-rest-adapters</id>
-                                <goals>
-                                    <goal>generate</goal>
-                                </goals>
-                                <phase>generate-sources</phase>
-                                <configuration>
-                                    <generatorName>
-                                        uk.gov.justice.services.adapters.rest.generator.RestAdapterGenerator
-                                    </generatorName>
-                                    <sourceDirectory>${basedir}/src/raml</sourceDirectory>
-                                    <outputDirectory>${project.build.directory}/generated-sources
-                                    </outputDirectory>
-                                    <basePackageName>uk.gov.justice.api</basePackageName>
-                                    <generatorProperties>
-                                        <serviceComponent>${cpp.service-component}
-                                        </serviceComponent>
-                                    </generatorProperties>
-                                    <excludes>
-                                        <exclude>**/*.messaging.raml</exclude>
-                                    </excludes>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>generate-messaging-adapters</id>
-                                <goals>
-                                    <goal>generate</goal>
-                                </goals>
-                                <phase>generate-sources</phase>
-                                <configuration>
-                                    <generatorName>
-                                        uk.gov.justice.raml.jms.core.JmsEndpointGenerator
-                                    </generatorName>
-                                    <sourceDirectory>${basedir}/src/raml</sourceDirectory>
-                                    <outputDirectory>${project.build.directory}/generated-sources
-                                    </outputDirectory>
-                                    <basePackageName>uk.gov.justice.api</basePackageName>
-                                    <generatorProperties>
-                                        <serviceComponent>${cpp.service-component}
-                                        </serviceComponent>
-                                    </generatorProperties>
-                                    <excludes>
-                                        <exclude>**/*public-event.messaging.raml</exclude>
-                                        <exclude>**/*private-event.messaging.raml</exclude>
-                                    </excludes>
-                                    <includes>
-                                        <include>**/*.messaging.raml</include>
-                                    </includes>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>generate-src-raml-message-clients</id>
-                                <goals>
-                                    <goal>generate</goal>
-                                </goals>
-                                <phase>generate-sources</phase>
-                                <configuration>
-                                    <generatorName>
-                                        uk.gov.justice.services.clients.messaging.generator.MessagingClientGenerator
-                                    </generatorName>
-                                    <sourceDirectory>${basedir}/src/raml</sourceDirectory>
-                                    <outputDirectory>${project.build.directory}/generated-sources
-                                    </outputDirectory>
-                                    <basePackageName>uk.gov.justice.api</basePackageName>
-                                    <generatorProperties>
-                                        <serviceComponent>${cpp.service-component}
-                                        </serviceComponent>
-                                    </generatorProperties>
-                                    <includes>
-                                        <include>**/*public-event.messaging.raml</include>
-                                        <include>**/*private-event.messaging.raml</include>
-                                    </includes>
-                                </configuration>
-                            </execution>
                         </executions>
                         <dependencies>
                             <dependency>
@@ -320,26 +246,6 @@
                                 <artifactId>javaee-api</artifactId>
                                 <version>7.0</version>
                                 <scope>runtime</scope>
-                            </dependency>
-                            <dependency>
-                                <groupId>uk.gov.justice.services</groupId>
-                                <artifactId>messaging-adapter-generator</artifactId>
-                                <version>${project.version}</version>
-                            </dependency>
-                            <dependency>
-                                <groupId>uk.gov.justice.services</groupId>
-                                <artifactId>messaging-client-generator</artifactId>
-                                <version>${project.version}</version>
-                            </dependency>
-                            <dependency>
-                                <groupId>uk.gov.justice.services</groupId>
-                                <artifactId>rest-adapter-generator</artifactId>
-                                <version>${project.version}</version>
-                            </dependency>
-                            <dependency>
-                                <groupId>uk.gov.justice.services</groupId>
-                                <artifactId>messaging-adapter-generator</artifactId>
-                                <version>${project.version}</version>
                             </dependency>
                         </dependencies>
                     </plugin>
@@ -427,6 +333,10 @@
                         <artifactId>generator-plugin</artifactId>
                         <groupId>uk.gov.justice.maven.generator</groupId>
                         <version>${generator-maven-plugin.version}</version>
+                        <configuration>
+                            <parserName>uk.gov.justice.maven.generator.io.files.parser.RamlFileParser
+                            </parserName>
+                        </configuration>
                         <executions>
                             <execution>
                                 <id>schema-catalog-generation</id>
@@ -442,12 +352,110 @@
                                 </goals>
                                 <phase>generate-sources</phase>
                             </execution>
+                            <execution>
+                                <id>generate-rest-adapters</id>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                                <phase>generate-sources</phase>
+                                <configuration>
+                                    <generatorName>
+                                        uk.gov.justice.services.adapters.rest.generator.RestAdapterGenerator
+                                    </generatorName>
+                                    <sourceDirectory>${basedir}/src/raml</sourceDirectory>
+                                    <outputDirectory>${project.build.directory}/generated-sources
+                                    </outputDirectory>
+                                    <basePackageName>uk.gov.justice.api</basePackageName>
+                                    <generatorProperties implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
+                                        <serviceComponent>${cpp.service-component}
+                                        </serviceComponent>
+                                    </generatorProperties>
+                                    <excludes>
+                                        <exclude>**/*.messaging.raml</exclude>
+                                    </excludes>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>generate-messaging-adapters</id>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                                <phase>generate-sources</phase>
+                                <configuration>
+                                    <generatorName>
+                                        uk.gov.justice.raml.jms.core.JmsEndpointGenerator
+                                    </generatorName>
+                                    <sourceDirectory>${basedir}/src/raml</sourceDirectory>
+                                    <outputDirectory>${project.build.directory}/generated-sources
+                                    </outputDirectory>
+                                    <basePackageName>uk.gov.justice.api</basePackageName>
+                                    <generatorProperties implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
+                                        <serviceComponent>${cpp.service-component}</serviceComponent>
+                                    </generatorProperties>
+                                    <excludes>
+                                        <exclude>**/*public-event.messaging.raml</exclude>
+                                        <exclude>**/*private-event.messaging.raml</exclude>
+                                    </excludes>
+                                    <includes>
+                                        <include>**/*.messaging.raml</include>
+                                    </includes>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>generate-src-raml-message-clients</id>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                                <phase>generate-sources</phase>
+                                <configuration>
+                                    <generatorName>
+                                        uk.gov.justice.services.clients.messaging.generator.MessagingClientGenerator
+                                    </generatorName>
+                                    <sourceDirectory>${basedir}/src/raml</sourceDirectory>
+                                    <outputDirectory>${project.build.directory}/generated-sources
+                                    </outputDirectory>
+                                    <basePackageName>uk.gov.justice.api</basePackageName>
+                                    <generatorProperties  implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
+                                        <serviceComponent>${cpp.service-component}
+                                        </serviceComponent>
+                                    </generatorProperties>
+                                    <includes>
+                                        <include>**/*public-event.messaging.raml</include>
+                                        <include>**/*private-event.messaging.raml</include>
+                                    </includes>
+                                </configuration>
+                            </execution>
                         </executions>
                         <dependencies>
                             <dependency>
                                 <groupId>uk.gov.justice.schema</groupId>
                                 <artifactId>catalog-generation</artifactId>
                                 <version>${json-schema-catalog.version}</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>uk.gov.justice.maven.generator</groupId>
+                                <artifactId>raml-parser</artifactId>
+                                <version>${generator-maven-plugin.version}</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>uk.gov.justice.services</groupId>
+                                <artifactId>messaging-adapter-generator</artifactId>
+                                <version>${project.version}</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>uk.gov.justice.services</groupId>
+                                <artifactId>messaging-client-generator</artifactId>
+                                <version>${project.version}</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>uk.gov.justice.services</groupId>
+                                <artifactId>rest-adapter-generator</artifactId>
+                                <version>${project.version}</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>uk.gov.justice.services</groupId>
+                                <artifactId>messaging-adapter-generator</artifactId>
+                                <version>${project.version}</version>
                             </dependency>
                         </dependencies>
                     </plugin>

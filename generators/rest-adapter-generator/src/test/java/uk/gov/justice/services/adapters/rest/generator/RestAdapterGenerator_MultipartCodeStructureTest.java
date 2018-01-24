@@ -1,6 +1,5 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
-import static java.util.Collections.emptyMap;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
@@ -20,6 +19,7 @@ import static uk.gov.justice.services.generators.test.utils.config.GeneratorConf
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.methodsOf;
 
 import uk.gov.justice.services.adapter.rest.multipart.FileInputDetailsFactory;
+import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -52,7 +52,7 @@ public class RestAdapterGenerator_MultipartCodeStructureTest extends BaseRestAda
                                                 .withName("upload")
                                                 .withRequestType(MULTIPART_FORM_DATA)))
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
@@ -79,7 +79,7 @@ public class RestAdapterGenerator_MultipartCodeStructureTest extends BaseRestAda
                                                 .withName("upload")
                                                 .withRequestType(MULTIPART_FORM_DATA)))
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
@@ -107,7 +107,7 @@ public class RestAdapterGenerator_MultipartCodeStructureTest extends BaseRestAda
                                 .withPathParam("paramA")
                                 .withPathParam("paramB")
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
@@ -145,7 +145,7 @@ public class RestAdapterGenerator_MultipartCodeStructureTest extends BaseRestAda
                                                 .withName("upload")
                                                 .withRequestType(MULTIPART_FORM_DATA)))
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> resourceInterface = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
         final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
@@ -167,7 +167,7 @@ public class RestAdapterGenerator_MultipartCodeStructureTest extends BaseRestAda
                                                 .withName("upload")
                                                 .withRequestType(MULTIPART_FORM_DATA)))
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
 

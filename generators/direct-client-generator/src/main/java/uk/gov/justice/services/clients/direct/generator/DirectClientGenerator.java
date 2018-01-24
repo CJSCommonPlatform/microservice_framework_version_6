@@ -7,7 +7,7 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static org.raml.model.ActionType.GET;
 import static uk.gov.justice.services.generators.commons.helper.Names.buildJavaFriendlyName;
 
-import uk.gov.justice.raml.core.GeneratorConfig;
+import uk.gov.justice.maven.generator.io.files.parser.core.GeneratorConfig;
 import uk.gov.justice.services.adapter.direct.SynchronousDirectAdapterCache;
 import uk.gov.justice.services.core.annotation.Direct;
 import uk.gov.justice.services.generators.commons.client.AbstractClientGenerator;

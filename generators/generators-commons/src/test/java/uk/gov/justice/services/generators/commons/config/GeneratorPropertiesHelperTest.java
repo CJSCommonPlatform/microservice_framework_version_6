@@ -1,6 +1,5 @@
 package uk.gov.justice.services.generators.commons.config;
 
-import static java.util.Collections.emptyMap;
 import static net.trajano.commons.testing.UtilityClassTestUtil.assertUtilityClassWellDefined;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -10,48 +9,42 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_CONTROLLER;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_VIEW;
-import static uk.gov.justice.services.generators.commons.config.GeneratorProperties.serviceComponentOf;
+import static uk.gov.justice.services.generators.commons.config.GeneratorPropertiesFactory.generatorProperties;
+import static uk.gov.justice.services.generators.commons.config.GeneratorPropertiesHelper.serviceComponentOf;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.emptyPathConfigurationWith;
-import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
 
-import java.util.Map;
+import uk.gov.justice.maven.generator.io.files.parser.core.GeneratorProperties;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-public class GeneratorPropertiesTest {
+public class GeneratorPropertiesHelperTest {
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
 
-    private static final Map<String, String> QUERY_API_PROPERTY = generatorProperties()
-            .withServiceComponentOf(QUERY_API)
-            .build();
+    private static final GeneratorProperties QUERY_API_PROPERTY = generatorProperties()
+            .withServiceComponentOf(QUERY_API);
 
-    private static final Map<String, String> QUERY_CONTROLLER_PROPERTY = generatorProperties()
-            .withServiceComponentOf(QUERY_CONTROLLER)
-            .build();
+    private static final uk.gov.justice.maven.generator.io.files.parser.core.GeneratorProperties QUERY_CONTROLLER_PROPERTY = generatorProperties()
+            .withServiceComponentOf(QUERY_CONTROLLER);
 
-    private static final Map<String, String> QUERY_VIEW_PROPERTY = generatorProperties()
-            .withServiceComponentOf(QUERY_VIEW)
-            .build();
+    private static final uk.gov.justice.maven.generator.io.files.parser.core.GeneratorProperties QUERY_VIEW_PROPERTY = generatorProperties()
+            .withServiceComponentOf(QUERY_VIEW);
 
-    private static final Map<String, String> COMMAND_API_PROPERTY = generatorProperties()
-            .withServiceComponentOf(COMMAND_API)
-            .build();
+    private static final uk.gov.justice.maven.generator.io.files.parser.core.GeneratorProperties COMMAND_API_PROPERTY = generatorProperties()
+            .withServiceComponentOf(COMMAND_API);
 
-    private static final Map<String, String> COMMAND_CONTROLLER_PROPERTY = generatorProperties()
-            .withServiceComponentOf(COMMAND_CONTROLLER)
-            .build();
+    private static final uk.gov.justice.maven.generator.io.files.parser.core.GeneratorProperties COMMAND_CONTROLLER_PROPERTY = generatorProperties()
+            .withServiceComponentOf(COMMAND_CONTROLLER);
 
-    private static final Map<String, String> COMMAND_HANDLER_PROPERTY = generatorProperties()
-            .withServiceComponentOf(COMMAND_HANDLER)
-            .build();
+    private static final uk.gov.justice.maven.generator.io.files.parser.core.GeneratorProperties COMMAND_HANDLER_PROPERTY = generatorProperties()
+            .withServiceComponentOf(COMMAND_HANDLER);
 
     @Test
     public void shouldBeWellDefinedUtilityClass() {
-        assertUtilityClassWellDefined(GeneratorProperties.class);
+        assertUtilityClassWellDefined(GeneratorPropertiesHelper.class);
     }
 
     @Test
@@ -97,6 +90,6 @@ public class GeneratorPropertiesTest {
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("serviceComponent generator property not set in the plugin config");
 
-        serviceComponentOf(emptyPathConfigurationWith(emptyMap()));
+        serviceComponentOf(emptyPathConfigurationWith(new CommonGeneratorProperties()));
     }
 }

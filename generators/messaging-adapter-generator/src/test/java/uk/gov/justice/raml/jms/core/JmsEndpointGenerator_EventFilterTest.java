@@ -15,14 +15,14 @@ import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBu
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
-import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
 
+import uk.gov.justice.maven.generator.io.files.parser.core.GeneratorProperties;
+import uk.gov.justice.raml.jms.config.GeneratorPropertiesFactory;
 import uk.gov.justice.services.adapter.messaging.JmsProcessor;
 import uk.gov.justice.services.event.buffer.api.AbstractEventFilter;
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 
 import java.io.File;
-import java.util.Map;
 
 import javax.enterprise.context.ApplicationScoped;
 
@@ -38,13 +38,13 @@ public class JmsEndpointGenerator_EventFilterTest extends BaseGeneratorTest {
     @Mock
     private JmsProcessor jmsProcessor;
 
-    private Map<String, String> generatorProperties;
+    private GeneratorProperties generatorProperties;
 
     @Before
     public void setup() throws Exception {
         super.before();
         generator = new JmsEndpointGenerator();
-        generatorProperties = generatorProperties().withServiceComponentOf(EVENT_LISTENER).build();
+        generatorProperties = new GeneratorPropertiesFactory().withServiceComponentOf(EVENT_LISTENER);
     }
 
     @Test

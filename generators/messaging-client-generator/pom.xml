@@ -86,13 +86,14 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>uk.gov.justice.maven</groupId>
-                <artifactId>raml-maven-plugin</artifactId>
-                <version>${raml-maven-plugin.version}</version>
+                <groupId>uk.gov.justice.maven.generator</groupId>
+                <artifactId>generator-plugin</artifactId>
+                <version>${generator-maven-plugin.version}</version>
                 <configuration>
                     <generatorName>
                         uk.gov.justice.services.clients.messaging.generator.MessagingClientGenerator
                     </generatorName>
+                    <parserName>uk.gov.justice.maven.generator.io.files.parser.RamlFileParser</parserName>
                     <sourceDirectory>${basedir}/src/test/resources/raml</sourceDirectory>
                     <outputDirectory>${project.build.directory}/generated-test-sources
                     </outputDirectory>
@@ -109,7 +110,7 @@
                             <includes>
                                 <include>**/*command-controller.raml</include>
                             </includes>
-                            <generatorProperties>
+                            <generatorProperties implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
                                 <serviceComponent>COMMAND_API</serviceComponent>
                             </generatorProperties>
                         </configuration>
@@ -119,6 +120,11 @@
                     <dependency>
                         <groupId>uk.gov.justice.services</groupId>
                         <artifactId>messaging-client-generator</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>uk.gov.justice.services</groupId>
+                        <artifactId>generators-commons</artifactId>
                         <version>${project.version}</version>
                     </dependency>
                     <dependency>

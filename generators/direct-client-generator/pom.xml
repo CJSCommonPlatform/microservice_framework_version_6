@@ -18,11 +18,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>uk.gov.justice.maven</groupId>
-            <artifactId>raml-generator-core</artifactId>
-            <version>${raml-maven-plugin.version}</version>
-        </dependency>
-        <dependency>
             <groupId>uk.gov.justice.services</groupId>
             <artifactId>generators-commons</artifactId>
             <version>${project.version}</version>
@@ -101,13 +96,14 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>uk.gov.justice.maven</groupId>
-                <artifactId>raml-maven-plugin</artifactId>
-                <version>${raml-maven-plugin.version}</version>
+                <groupId>uk.gov.justice.maven.generator</groupId>
+                <artifactId>generator-plugin</artifactId>
+                <version>${generator-maven-plugin.version}</version>
                 <configuration>
                     <generatorName>
                         uk.gov.justice.services.clients.direct.generator.DirectClientGenerator
                     </generatorName>
+                    <parserName>uk.gov.justice.maven.generator.io.files.parser.RamlFileParser</parserName>
                     <sourceDirectory>${basedir}/src/test/resources/raml</sourceDirectory>
                     <outputDirectory>${project.build.directory}/generated-test-sources
                     </outputDirectory>
@@ -124,7 +120,7 @@
                             <includes>
                                 <include>**/example.raml</include>
                             </includes>
-                            <generatorProperties>
+                            <generatorProperties implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
                                 <serviceComponent>QUERY_API</serviceComponent>
                             </generatorProperties>
                         </configuration>

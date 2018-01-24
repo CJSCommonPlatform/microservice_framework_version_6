@@ -5,7 +5,7 @@ import static java.lang.String.format;
 import static uk.gov.justice.services.generators.commons.helper.Names.JAVA_FILENAME_SUFFIX;
 import static uk.gov.justice.services.generators.commons.helper.Names.RESOURCE_PACKAGE_NAME;
 
-import uk.gov.justice.raml.core.GeneratorConfig;
+import uk.gov.justice.maven.generator.io.files.parser.core.GeneratorConfig;
 
 import java.io.File;
 import java.io.IOException;

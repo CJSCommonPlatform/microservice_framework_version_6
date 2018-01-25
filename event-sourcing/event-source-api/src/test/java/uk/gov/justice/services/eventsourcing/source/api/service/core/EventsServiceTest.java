@@ -13,6 +13,7 @@ import static uk.gov.justice.services.eventsourcing.source.api.service.core.Posi
 import static uk.gov.justice.services.eventsourcing.source.api.service.core.Position.head;
 import static uk.gov.justice.services.eventsourcing.source.api.service.core.Position.sequence;
 
+import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.Event;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepository;
@@ -255,7 +256,8 @@ public class EventsServiceTest {
 
         assertThat(eventEntries.get(0).getSequenceId(), is(4L));
 
-        assertThat(eventEntries.get(0).getCreatedAt(), is(event4CreatedAt.toString()));
+        assertThat(eventEntries.get(0).getCreatedAt(), is(ZonedDateTimes.toString
+                (event4CreatedAt)));
 
         assertThat(eventEntries.get(0).getPayload(), is(notNullValue()));
 
@@ -269,7 +271,8 @@ public class EventsServiceTest {
 
         assertThat(eventEntries.get(1).getPayload(), is(payload3));
 
-        assertThat(eventEntries.get(1).getCreatedAt(), is(event3CreatedAt.toString()));
+        assertThat(eventEntries.get(1).getCreatedAt(), is(ZonedDateTimes.toString
+                (event3CreatedAt)));
     }
 
     @Test

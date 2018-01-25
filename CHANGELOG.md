@@ -5,6 +5,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+###
+- Added schema catalog generation plugin to example service
+
 ## [3.1.0] - 2018-01-23
 
 ### Fixed

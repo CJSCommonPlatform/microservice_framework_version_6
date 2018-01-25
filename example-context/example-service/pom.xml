@@ -115,6 +115,63 @@
                         </dependency>
                     </dependencies>
                 </plugin>
+
+                <plugin>
+                    <artifactId>generator-plugin</artifactId>
+                    <groupId>uk.gov.justice.maven.generator</groupId>
+                    <version>${generator-maven-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>schema-catalog-generation</id>
+                            <configuration>
+                                <generatorName>uk.gov.justice.schema.catalog.generation.maven.MavenCatalogGeneratorFactory</generatorName>
+                                <parserName>uk.gov.justice.schema.catalog.generation.io.parser.ListOfUriParser</parserName>
+                                <sourceDirectory>src/raml/json/schema</sourceDirectory>
+                                <outputDirectory>${project.build.directory}/generated-resources</outputDirectory>
+                                <includes>
+                                    <include>**/*.json</include>
+                                </includes>
+                                <excludes>
+                                </excludes>
+                                <generatorProperties implementation="uk.gov.justice.schema.catalog.generation.maven.CatalogGeneratorProperties">
+                                    <catalogName>${project.artifactId}</catalogName>
+                                    <jsonSchemaPath>json/schema/</jsonSchemaPath>
+                                </generatorProperties>
+                            </configuration>
+                            <goals>
+                                <goal>generate</goal>
+                            </goals>
+                            <phase>generate-sources</phase>
+                        </execution>
+                        <execution>
+                            <id>raml-schema-catalog-generation</id>
+                            <configuration>
+                                <generatorName>uk.gov.justice.schema.catalog.generation.maven.MavenCatalogGeneratorFactory</generatorName>
+                                <parserName>uk.gov.justice.schema.catalog.generation.io.parser.ListOfUriParser</parserName>
+                                <sourceDirectory>src/raml/json/schema</sourceDirectory>
+                                <outputDirectory>${project.build.directory}/raml-jar</outputDirectory>
+                                <includes>
+                                    <include>**/*.json</include>
+                                </includes>
+                                <generatorProperties implementation="uk.gov.justice.schema.catalog.generation.maven.CatalogGeneratorProperties">
+                                    <catalogName>${project.artifactId}</catalogName>
+                                    <jsonSchemaPath>raml/json/schema/</jsonSchemaPath>
+                                </generatorProperties>
+                            </configuration>
+                            <goals>
+                                <goal>generate</goal>
+                            </goals>
+                            <phase>generate-sources</phase>
+                        </execution>
+                    </executions>
+                    <dependencies>
+                        <dependency>
+                            <groupId>uk.gov.justice.schema</groupId>
+                            <artifactId>catalog-generation</artifactId>
+                            <version>${json-schema-catalog.version}</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -353,6 +410,47 @@
                         </executions>
                     </plugin>
 
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>catalog-generation</id>
+            <activation>
+                <file>
+                    <exists>src/raml</exists>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>generator-plugin</artifactId>
+                        <groupId>uk.gov.justice.maven.generator</groupId>
+                        <version>${generator-maven-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>schema-catalog-generation</id>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                                <phase>generate-sources</phase>
+                            </execution>
+                            <execution>
+                                <id>raml-schema-catalog-generation</id>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                                <phase>generate-sources</phase>
+                            </execution>
+                        </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>uk.gov.justice.schema</groupId>
+                                <artifactId>catalog-generation</artifactId>
+                                <version>${json-schema-catalog.version}</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
                 </plugins>
             </build>
         </profile>

@@ -14,14 +14,14 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;
 
 @ApplicationScoped
-public class SynchronousDirectAdapterCache {
+public class DefaultSynchronousDirectAdapterCache implements SynchronousDirectAdapterCache {
 
     private final Map<String, SynchronousDirectAdapter> adapters = new ConcurrentHashMap<>();
 
     @Inject
     private BeanManager beanManager;
 
-
+    @Override
     public SynchronousDirectAdapter directAdapterForComponent(final String component) {
         return adapters.computeIfAbsent(component, a -> adapterFromContext(component));
     }

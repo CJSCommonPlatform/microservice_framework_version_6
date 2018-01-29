@@ -17,14 +17,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(ApplicationComposer.class)
-public class SynchronousDirectAdapterCacheIT {
+public class DefaultSynchronousDirectAdapterCacheIT {
 
     @Inject
-    private SynchronousDirectAdapterCache adapterCache;
+    private DefaultSynchronousDirectAdapterCache adapterCache;
 
     @Module
     @Classes(cdi = true, value = {
-            SynchronousDirectAdapterCache.class,
+            DefaultSynchronousDirectAdapterCache.class,
             DirectAdapterAbc.class,
             DirectAdapterBcd.class
 

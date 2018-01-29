@@ -28,9 +28,9 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>uk.gov.justice.services</groupId>
-            <artifactId>direct-adapter-core</artifactId>
-            <version>${project.version}</version>
+            <groupId>uk.gov.justice.framework-api</groupId>
+            <artifactId>framework-api-direct-adapter</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.raml</groupId>
@@ -42,7 +42,12 @@
         </dependency>
 
         <!-- Test Dependencies -->
-
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>direct-adapter-core</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -135,6 +140,11 @@
                         <groupId>uk.gov.justice.services</groupId>
                         <artifactId>direct-client-generator</artifactId>
                         <version>${project.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>uk.gov.justice.framework-api</groupId>
+                        <artifactId>framework-api-direct-adapter</artifactId>
+                        <version>${framework-api.version}</version>
                     </dependency>
                     <dependency>
                         <groupId>javax</groupId>

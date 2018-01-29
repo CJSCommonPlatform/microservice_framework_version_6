@@ -83,12 +83,6 @@ public class DirectAdapterIT {
     @Inject
     QueryViewDirectAdapter directAdapter;
 
-    @Inject
-    EnvelopeRecordingInterceptor testInterceptor;
-
-    @Inject
-    GetUserRecordingHandler testHandler;
-
     @Module
     @Classes(cdi = true, value = {
             ServiceComponentScanner.class,
@@ -130,6 +124,7 @@ public class DirectAdapterIT {
 
             QueryViewDirectAdapter.class,
             GetUserRecordingHandler.class,
+            DefaultDirectAdapterProcessor.class,
 
             DefaultFileSystemUrlResolverStrategy.class,
             JsonSchemaLoader.class,
@@ -158,6 +153,12 @@ public class DirectAdapterIT {
                 .contextRoot("direct-adapter-test")
                 .addServlet("TestApp", Application.class.getName());
     }
+
+    @Inject
+    EnvelopeRecordingInterceptor testInterceptor;
+
+    @Inject
+    GetUserRecordingHandler testHandler;
 
 
     @Test

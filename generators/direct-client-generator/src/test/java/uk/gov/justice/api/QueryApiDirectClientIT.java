@@ -9,8 +9,8 @@ import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderF
 
 import uk.gov.justice.schema.catalog.CatalogProducer;
 import uk.gov.justice.schema.service.SchemaCatalogService;
+import uk.gov.justice.services.adapter.direct.DefaultSynchronousDirectAdapterCache;
 import uk.gov.justice.services.adapter.direct.SynchronousDirectAdapter;
-import uk.gov.justice.services.adapter.direct.SynchronousDirectAdapterCache;
 import uk.gov.justice.services.common.configuration.GlobalValueProducer;
 import uk.gov.justice.services.common.configuration.JndiBasedServiceContextNameProvider;
 import uk.gov.justice.services.common.configuration.ValueProducer;
@@ -117,7 +117,7 @@ public class QueryApiDirectClientIT {
             JsonSchemaLoader.class,
 
             DirectQueryApi2QueryViewRestExampleClient.class,
-            SynchronousDirectAdapterCache.class,
+            DefaultSynchronousDirectAdapterCache.class,
             TestDirectAdapter.class,
 
             SchemaCatalogService.class,

@@ -18,6 +18,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -25,6 +26,9 @@ public class QueryViewDirectAdapterTest {
 
     @Mock
     private InterceptorChainProcessor interceptorChainProcessor;
+
+    @Spy
+    private DirectAdapterProcessor directAdapterProcessor = new DefaultDirectAdapterProcessor();
 
     @InjectMocks
     private QueryViewDirectAdapter directAdapter;

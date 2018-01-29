@@ -13,7 +13,8 @@ public class QueryViewDirectAdapter implements SynchronousDirectAdapter {
   @Inject
   InterceptorChainProcessor interceptorChainProcessor;
 
-  DirectAdapterProcessor directAdapterProcessor = new DefaultDirectAdapterProcessor();
+  @Inject
+  DirectAdapterProcessor directAdapterProcessor;
 
   @Override
   public JsonEnvelope process(JsonEnvelope envelope) {

@@ -65,7 +65,7 @@ public class JsonSchemaValidationInterceptorTest {
     private JsonSchemaValidator jsonSchemaValidator;
 
     @Mock
-    private NameToMediaTypeConverter nameToMediaTypeConverter; 
+    private NameToMediaTypeConverter nameToMediaTypeConverter;
 
     @InjectMocks
     private JsonSchemaValidationInterceptor jsonSchemaValidationInterceptor;

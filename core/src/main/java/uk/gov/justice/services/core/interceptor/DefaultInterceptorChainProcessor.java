@@ -1,6 +1,6 @@
 package uk.gov.justice.services.core.interceptor;
 
-import static uk.gov.justice.services.core.interceptor.DefaultInterceptorContext.interceptorContextWithInput;
+import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
 

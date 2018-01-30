@@ -3,7 +3,7 @@ package uk.gov.justice.services.core.accesscontrol;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
-import static uk.gov.justice.services.core.interceptor.DefaultInterceptorContext.interceptorContextWithInput;
+import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
 
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.interceptor.DefaultInterceptorChain;

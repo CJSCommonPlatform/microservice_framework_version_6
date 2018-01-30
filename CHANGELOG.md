@@ -5,6 +5,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Changed
+ - SPI for InterceptorContext.interceptorContextWithInput()
+
 ###
 - Added schema catalog generation plugin to example service
 

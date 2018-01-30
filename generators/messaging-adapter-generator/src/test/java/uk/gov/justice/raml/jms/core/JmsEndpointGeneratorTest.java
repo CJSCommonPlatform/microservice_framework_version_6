@@ -30,7 +30,7 @@ import static org.raml.model.ActionType.POST;
 import static org.raml.model.ActionType.TRACE;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLLER;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
-import static uk.gov.justice.services.core.interceptor.DefaultInterceptorContext.interceptorContextWithInput;
+import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.messagingRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.raml;

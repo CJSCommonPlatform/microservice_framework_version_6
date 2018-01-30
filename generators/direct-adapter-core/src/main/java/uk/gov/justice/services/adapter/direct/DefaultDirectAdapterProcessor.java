@@ -1,7 +1,7 @@
 package uk.gov.justice.services.adapter.direct;
 
 import static java.lang.String.format;
-import static uk.gov.justice.services.core.interceptor.DefaultInterceptorContext.interceptorContextWithInput;
+import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
 
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
 import uk.gov.justice.services.messaging.JsonEnvelope;

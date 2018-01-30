@@ -7,7 +7,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
-import static uk.gov.justice.services.core.interceptor.DefaultInterceptorContext.interceptorContextWithInput;
+import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
 import static uk.gov.justice.services.test.utils.common.MemberInjectionPoint.injectionPointWith;

@@ -19,15 +19,12 @@ import uk.gov.justice.services.core.envelope.MediaTypeProvider;
 import uk.gov.justice.services.core.envelope.RequestResponseEnvelopeValidator;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.core.mapping.NameToMediaTypeConverter;
-import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.lang.reflect.Field;
 
 import javax.enterprise.inject.spi.InjectionPoint;
-import javax.inject.Inject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;

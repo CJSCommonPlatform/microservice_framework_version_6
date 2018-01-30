@@ -1,7 +1,5 @@
 package uk.gov.justice.services.core.interceptor;
 
-import static uk.gov.justice.services.core.interceptor.DefaultContextPayload.contextPayloadWith;
-import static uk.gov.justice.services.core.interceptor.DefaultContextPayload.contextPayloadWithNoEnvelope;
 import static uk.gov.justice.services.core.interceptor.DefaultContextPayload.copyWithEnvelope;
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -22,7 +20,7 @@ public class DefaultInterceptorContext implements InterceptorContext {
      * @param input  the input ContextPayload
      * @param output the output ContextPayload
      */
-    private DefaultInterceptorContext(final ContextPayload input, final ContextPayload output) {
+    public DefaultInterceptorContext(final ContextPayload input, final ContextPayload output) {
         this.input = input;
         this.output = output;
     }
@@ -31,11 +29,13 @@ public class DefaultInterceptorContext implements InterceptorContext {
      * Create an interceptor context with an input {@link ContextPayload} that wraps the input
      * envelope, an output {@link ContextPayload} with no envelope and an injection point.
      *
-     * @param input the input JsonEnvelope
+     * @param inputEnvelope the input JsonEnvelope
      * @return the new InterceptorContext
+     * @deprecated Use InterceptorContext.interceptorContextWithInput() provided by DefaultInterceptorContextProvider
      */
-    public static InterceptorContext interceptorContextWithInput(final JsonEnvelope input) {
-        return new DefaultInterceptorContext(contextPayloadWith(input), contextPayloadWithNoEnvelope());
+    @Deprecated
+    public static InterceptorContext interceptorContextWithInput(final JsonEnvelope inputEnvelope) {
+        return InterceptorContext.interceptorContextWithInput(inputEnvelope);
     }
 
     public InterceptorContext copyWithInput(final JsonEnvelope inputEnvelope) {

@@ -3,7 +3,7 @@ package uk.gov.justice.services.core.interceptor;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
-import static uk.gov.justice.services.core.interceptor.DefaultInterceptorContext.interceptorContextWithInput;
+import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
 

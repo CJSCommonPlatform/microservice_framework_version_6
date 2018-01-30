@@ -2,7 +2,7 @@ package uk.gov.justice.services.adapter.rest.processor;
 
 import static java.lang.String.format;
 import static java.util.Optional.empty;
-import static uk.gov.justice.services.core.interceptor.DefaultInterceptorContext.interceptorContextWithInput;
+import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
 
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
 import uk.gov.justice.services.adapter.rest.multipart.FileBasedInterceptorContextFactory;

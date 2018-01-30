@@ -8,7 +8,7 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 
-public class DefaultJsonEnvelopeProvider extends JsonEnvelopeProvider {
+public class DefaultJsonEnvelopeProvider implements JsonEnvelopeProvider {
 
     @Override
     public JsonEnvelope envelopeFrom(final Metadata metadata, final JsonValue payload) {

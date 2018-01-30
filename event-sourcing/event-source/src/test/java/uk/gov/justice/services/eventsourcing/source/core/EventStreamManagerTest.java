@@ -15,6 +15,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.spi.DefaultJsonMetadata.metadataBuilder;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithDefaults;
@@ -27,7 +28,6 @@ import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.Optimisti
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.VersionMismatchException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.spi.DefaultJsonEnvelopeProvider;
 import uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory;
 
 import java.util.List;
@@ -368,7 +368,7 @@ public class EventStreamManagerTest {
     }
 
     private JsonEnvelope buildEnvelope(final String eventName) {
-        return DefaultJsonEnvelopeProvider.provider().envelopeFrom(
+        return envelopeFrom(
                 metadataBuilder().withId(randomUUID()).withStreamId(STREAM_ID).withName(eventName),
                 createObjectBuilder().add("field", "value").build());
     }

@@ -41,7 +41,7 @@ public class ResponseStrategyHelper {
         if (result.isPresent()) {
             final JsonEnvelope outputEnvelope = result.get();
 
-            if (outputEnvelope.payload() == NULL || outputEnvelope.payload() == null) {
+            if (outputEnvelope.payload() == null || outputEnvelope.payload() == NULL) {
                 return status(NOT_FOUND).build();
             } else {
                 return okResponseCreator.apply(outputEnvelope);

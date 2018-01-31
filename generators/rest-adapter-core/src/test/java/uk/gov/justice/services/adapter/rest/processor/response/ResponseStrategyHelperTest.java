@@ -51,8 +51,17 @@ public class ResponseStrategyHelperTest {
     }
 
     @Test
-    public void shouldReturnNotFoundResponse() throws Exception {
+    public void shouldReturnNotFoundResponseForJsonValueNull() throws Exception {
         when(jsonEnvelope.payload()).thenReturn(JsonValue.NULL);
+
+        final Response response = responseStrategyHelper.responseFor("action.name", Optional.of(jsonEnvelope), function);
+
+        assertThat(response.getStatus(), equalTo(NOT_FOUND.getStatusCode()));
+    }
+
+    @Test
+    public void shouldReturnNotFoundResponseForNullPojo() throws Exception {
+        when(jsonEnvelope.payload()).thenReturn(null);
 
         final Response response = responseStrategyHelper.responseFor("action.name", Optional.of(jsonEnvelope), function);
 

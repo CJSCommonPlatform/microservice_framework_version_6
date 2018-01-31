@@ -43,6 +43,7 @@ public class ResponseStrategyHelperTest {
     @Test
     public void shouldCallApplyOnFunctionOnOkResponse() throws Exception {
         when(function.apply(jsonEnvelope)).thenReturn(response);
+        when(jsonEnvelope.payload()).thenReturn(JsonValue.TRUE);
 
         final Response result = responseStrategyHelper.responseFor("action.name", Optional.of(jsonEnvelope), function);
 

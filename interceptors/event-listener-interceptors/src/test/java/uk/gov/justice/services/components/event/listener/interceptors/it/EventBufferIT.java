@@ -57,6 +57,7 @@ import uk.gov.justice.services.core.json.PayloadExtractor;
 import uk.gov.justice.services.core.json.SchemaCatalogAwareJsonSchemaValidator;
 import uk.gov.justice.services.core.mapping.ActionNameToMediaTypesMappingObserver;
 import uk.gov.justice.services.core.mapping.DefaultMediaTypesMappingCache;
+import uk.gov.justice.services.core.mapping.DefaultNameToMediaTypeConverter;
 import uk.gov.justice.services.core.mapping.DefaultSchemaIdMappingCache;
 import uk.gov.justice.services.core.mapping.NameToMediaTypeConverter;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingObserver;
@@ -194,7 +195,7 @@ public class EventBufferIT {
 
             SchemaCatalogAwareJsonSchemaValidator.class,
             PayloadExtractor.class,
-            NameToMediaTypeConverter.class,
+            DefaultNameToMediaTypeConverter.class,
             DefaultSchemaIdMappingCache.class,
             SchemaIdMappingObserver.class,
 

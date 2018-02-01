@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
+## [3.1.2] - 2018-02-01
+Note 3.1.1 release failed because the framework-bom version did not update
+### Fixed
+- Pojo handlers support null payloads
+
 ## [3.1.1] - 2018-02-01
 ### Fixed
 - Pojo handlers support null payloads

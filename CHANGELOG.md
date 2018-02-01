@@ -3,12 +3,15 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [3.1.1] - 2018-02-01
+### Fixed
+- Pojo handlers support null payloads
 
 ## [3.1.0] - 2018-01-23
 
 ### Fixed
 - Reinstate TestEventRepository test utility.
+
 
 ## [3.0.0] - 2018-01-18
 

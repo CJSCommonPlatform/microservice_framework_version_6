@@ -10,10 +10,10 @@ import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class NameToMediaTypeConverterTest {
+public class DefaultNameToMediaTypeConverterTest {
 
     @InjectMocks
-    private NameToMediaTypeConverter nameToMediaTypeConverter;
+    private DefaultNameToMediaTypeConverter nameToMediaTypeConverter;
 
     @Test
     public void shouldConvertNameToMediaType() throws Exception {

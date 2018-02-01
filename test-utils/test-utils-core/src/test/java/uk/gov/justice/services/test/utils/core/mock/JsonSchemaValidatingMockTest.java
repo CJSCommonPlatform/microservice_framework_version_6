@@ -15,6 +15,7 @@ import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderF
 
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationException;
+import uk.gov.justice.services.core.json.JsonSchemaValidatonException;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -47,9 +48,11 @@ public class JsonSchemaValidatingMockTest {
     public void shouldThrowExceptionWhenPayloadPassedToSenderDoesNotAdhereToSchema() {
 
         exception.expect(MockitoException.class);
-        exception.expectCause(allOf(instanceOf(EnvelopeValidationException.class),
-                hasProperty("message", containsString("Message not valid against schema"))));
+        //exception.expectCause(allOf(instanceOf(JsonSchemaValidatonException.class)));
 
+        exception.expectCause(allOf(instanceOf(JsonSchemaValidatonException.class),
+                hasProperty("message", containsString("#: required key [name] not found"))));
+        // TODO: Add hasProperty("message", containsString("..."))
         new SendingHandler(mock(Sender.class)).handle(
                 envelope()
                         .with(metadataWithRandomUUID("example.add-recipe"))
@@ -89,8 +92,10 @@ public class JsonSchemaValidatingMockTest {
     public void shouldThrowExceptionWhenPayloadReturnedByRequesterDoesNotAdhereToSchema() {
 
         exception.expect(MockitoException.class);
-        exception.expectCause(allOf(instanceOf(EnvelopeValidationException.class),
-                hasProperty("message", containsString("Message not valid against schema"))));
+        //exception.expectCause(allOf(instanceOf(JsonSchemaValidatonException.class)));
+        exception.expectCause(allOf(instanceOf(JsonSchemaValidatonException.class),
+                hasProperty("message", containsString("#: required key [glutenFree] not found"))));
+        // TODO: Add hasProperty("message", containsString("..."))
 
         final Requester requester = mock(Requester.class);
 

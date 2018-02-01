@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 /**
  * Convert from {@link MediaType} to Action Name and from Action Name to {@link MediaType}
  */
-public class NameToMediaTypeConverter {
+public class DefaultNameToMediaTypeConverter implements NameToMediaTypeConverter {
 
     private static final String TYPE = "application";
     private static final String SUBTYPE_PREFIX = "vnd.";

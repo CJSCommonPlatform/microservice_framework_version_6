@@ -15,54 +15,39 @@ import javax.json.JsonObjectBuilder;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
 
+/**
+ * @deprecated Use injected jsonValidationLoggerHelper methods
+ */
 public final class JsonValidationLogger {
 
     private JsonValidationLogger(){}
 
+    /**
+     * @deprecated Use jsonValidationLoggerHelper.toValidationTrace(JsonSchemaValidatonException jsonSchemaValidatonException)
+     */
+    public static String toValidationTrace(final JsonSchemaValidatonException jsonSchemaValidatonException) {
+        return new DefaultJsonValidationLoggerHelper().toValidationTrace(jsonSchemaValidatonException);
+    }
+
+    /**
+     * @deprecated Use jsonValidationLoggerHelper.toJsonObject(JsonSchemaValidatonException jsonSchemaValidatonException)
+     */
+    public static JsonObject toJsonObject(final JsonSchemaValidatonException jsonSchemaValidatonException) {
+        return new DefaultJsonValidationLoggerHelper().toJsonObject(jsonSchemaValidatonException);
+    }
+
+    /**
+     * @deprecated Use jsonValidationLoggerHelper.toValidationTrace(ValidationException validationException)
+     */
     public static String toValidationTrace(final ValidationException validationException) {
-        return toJsonObject(validationException).toString();
+        return new DefaultJsonValidationLoggerHelper().toValidationTrace(validationException);
     }
 
+    /**
+     * @deprecated Use jsonValidationLoggerHelper.toJsonObject(JsonSchemaValidatonException jsonSchemaValidatonException)
+     */
     public static JsonObject toJsonObject(final ValidationException validationException) {
-        return buildResponse(validationException);
-    }
-
-    private static JsonObject buildResponse(final ValidationException validationException) {
-
-        final JsonObjectBuilder builder = createObjectBuilder();
-
-        Optional.ofNullable(validationException.getMessage())
-                .ifPresent(message -> builder.add("message", message));
-        Optional.ofNullable(validationException.getViolatedSchema())
-                .ifPresent(schema -> builder.add("violatedSchema", getSchemaName(schema)));
-        Optional.ofNullable(validationException.getPointerToViolation())
-                .ifPresent(violation -> builder.add("violation", violation));
-
-        final JsonArrayBuilder arrayBuilder = createArrayBuilder();
-        validationException.getCausingExceptions()
-                .forEach(exception -> arrayBuilder.add(buildResponse(exception)));
-        builder.add("causingExceptions", arrayBuilder.build());
-
-        return builder.build();
-    }
-
-    private static String getSchemaName(final Schema schema) {
-
-        final List<String> elements = new ArrayList<>();
-
-        if(schema.getTitle() != null) {
-            elements.add(schema.getTitle());
-        }
-
-        if(schema.getId() != null) {
-            elements.add(schema.getId());
-        }
-
-        if(schema.getDescription() != null) {
-            elements.add(schema.getDescription());
-        }
-
-        return join(" - ", elements);
+        return new DefaultJsonValidationLoggerHelper().toJsonObject(validationException);
     }
 
 }

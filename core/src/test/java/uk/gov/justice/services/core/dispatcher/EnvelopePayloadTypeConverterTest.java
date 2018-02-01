@@ -36,6 +36,16 @@ public class EnvelopePayloadTypeConverterTest {
     }
 
     @Test
+    public void shouldHandleNullPojo() throws IOException {
+
+        final TestObject testObject = null;
+        final Envelope<TestObject> inputEnvelope = getEnvelope(testObject);
+        final Envelope<DifferentTestObject> differentTestObjectEnvelope = convert(inputEnvelope, DifferentTestObject.class);
+
+        assertThat(differentTestObjectEnvelope.payload(), nullValue());
+    }
+
+    @Test
     public void shouldConvertJsonValueToPojo() throws IOException {
 
         final JsonObject payload = createObjectBuilder().add("myString", "newTest").build();

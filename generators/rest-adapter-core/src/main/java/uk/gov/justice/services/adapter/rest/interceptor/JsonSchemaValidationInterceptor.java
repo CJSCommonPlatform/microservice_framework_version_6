@@ -4,14 +4,15 @@ import static java.lang.String.format;
 import static java.util.Optional.of;
 import static uk.gov.justice.services.adapter.rest.envelope.MediaTypes.JSON_MEDIA_TYPE_SUFFIX;
 import static uk.gov.justice.services.adapter.rest.envelope.MediaTypes.charsetFrom;
-import static uk.gov.justice.services.core.json.JsonValidationLogger.toValidationTrace;
-import static uk.gov.justice.services.messaging.logging.HttpMessageLoggerHelper.toHttpHeaderTrace;
 
 import uk.gov.justice.services.adapter.rest.exception.BadRequestException;
+import uk.gov.justice.services.core.json.JsonSchemaValidatonException;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
+import uk.gov.justice.services.core.json.JsonValidationLoggerHelper;
 import uk.gov.justice.services.core.mapping.MediaType;
 import uk.gov.justice.services.core.mapping.NameToMediaTypeConverter;
 import uk.gov.justice.services.messaging.exception.InvalidMediaTypeException;
+import uk.gov.justice.services.messaging.logging.HttpTraceLoggerHelper;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -23,7 +24,6 @@ import javax.ws.rs.ext.ReaderInterceptor;
 import javax.ws.rs.ext.ReaderInterceptorContext;
 
 import org.apache.commons.io.IOUtils;
-import org.everit.json.schema.ValidationException;
 import org.slf4j.Logger;
 
 /**
@@ -42,6 +42,12 @@ public class JsonSchemaValidationInterceptor implements ReaderInterceptor {
     @Inject
     NameToMediaTypeConverter nameToMediaTypeConverter;
 
+    @Inject
+    JsonValidationLoggerHelper jsonValidationLoggerHelper;
+
+    @Inject
+    HttpTraceLoggerHelper httpTraceLoggerHelper;
+
     @Override
     public Object aroundReadFrom(final ReaderInterceptorContext context) throws IOException, WebApplicationException {
 
@@ -53,12 +59,12 @@ public class JsonSchemaValidationInterceptor implements ReaderInterceptor {
 
             try {
                 restJsonSchemaValidator.validate(payload, nameToMediaTypeConverter.convert(mediaType), of(mediaType));
-            } catch (ValidationException ex) {
+            } catch (JsonSchemaValidatonException jsonSchemaValidatonException) {
                 final String message = format("JSON schema validation has failed on %s due to %s ",
-                        toHttpHeaderTrace(context.getHeaders()),
-                        toValidationTrace(ex));
+                        httpTraceLoggerHelper.toHttpHeaderTrace(context.getHeaders()),
+                        jsonValidationLoggerHelper.toValidationTrace(jsonSchemaValidatonException));
                 logger.debug(message);
-                throw new BadRequestException(message, ex);
+                throw new BadRequestException(message, jsonSchemaValidatonException);
 
             } catch (InvalidMediaTypeException ex) {
                 throw new BadRequestException(ex.getMessage(), ex);

@@ -38,6 +38,10 @@ public class EnvelopePayloadTypeConverter {
             return null;
         }
 
+        if(envelope.payload() == null){
+            return envelopeFrom(envelope.metadata(), null);
+        }
+
         if(clazz.isAssignableFrom(envelope.payload().getClass())) {
             return (Envelope<R>) envelope;
         }

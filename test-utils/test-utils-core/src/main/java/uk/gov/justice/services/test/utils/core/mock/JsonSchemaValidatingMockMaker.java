@@ -12,7 +12,6 @@ import uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandle
 import uk.gov.justice.services.core.json.DefaultJsonSchemaValidatorFactory;
 import uk.gov.justice.services.core.json.MediaTypesMappingCacheMock;
 import uk.gov.justice.services.core.mapping.DefaultNameToMediaTypeConverter;
-import uk.gov.justice.services.core.mapping.NameToMediaTypeConverter;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;

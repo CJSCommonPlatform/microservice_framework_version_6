@@ -42,9 +42,9 @@ import uk.gov.justice.services.core.json.PayloadExtractor;
 import uk.gov.justice.services.core.json.SchemaCatalogAwareJsonSchemaValidator;
 import uk.gov.justice.services.core.mapping.ActionNameToMediaTypesMappingObserver;
 import uk.gov.justice.services.core.mapping.DefaultMediaTypesMappingCache;
+import uk.gov.justice.services.core.mapping.DefaultNameToMediaTypeConverter;
 import uk.gov.justice.services.core.mapping.DefaultSchemaIdMappingCache;
 import uk.gov.justice.services.core.mapping.MediaTypeToSchemaIdMapper;
-import uk.gov.justice.services.core.mapping.NameToMediaTypeConverter;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingObserver;
 import uk.gov.justice.services.generators.test.utils.interceptor.RecordingInterceptorChainProcessor;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
@@ -151,7 +151,7 @@ public class DefaultCustomUserIdResourceIT {
             RestAdapterGeneratorMediaTypeToSchemaIdMapper.class,
             SchemaCatalogAwareJsonSchemaValidator.class,
             PayloadExtractor.class,
-            NameToMediaTypeConverter.class,
+            DefaultNameToMediaTypeConverter.class,
             DefaultSchemaIdMappingCache.class,
             SchemaIdMappingObserver.class,
             MediaTypeToSchemaIdMapper.class,

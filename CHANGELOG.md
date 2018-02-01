@@ -6,6 +6,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ## [Unreleased]
 
 ### Changed
+ - Move DefaultJsonValidationLoggerHelper to core
+ - Use JsonSchemaValidatonException instead of org.everit.json.schema.ValidationException
+
+### Changed
  - SPI for InterceptorContext.interceptorContextWithInput()
 
 ###

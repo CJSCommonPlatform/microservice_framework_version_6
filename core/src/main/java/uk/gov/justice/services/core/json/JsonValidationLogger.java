@@ -19,6 +19,14 @@ public final class JsonValidationLogger {
 
     private JsonValidationLogger(){}
 
+    public static String toValidationTrace(final JsonSchemaValidatonException jsonSchemaValidatonException) {
+        return toJsonObject(jsonSchemaValidatonException).toString();
+    }
+
+    public static JsonObject toJsonObject(final JsonSchemaValidatonException jsonSchemaValidatonException) {
+        return buildResponse((ValidationException) jsonSchemaValidatonException.getCause());
+    }
+
     public static String toValidationTrace(final ValidationException validationException) {
         return toJsonObject(validationException).toString();
     }

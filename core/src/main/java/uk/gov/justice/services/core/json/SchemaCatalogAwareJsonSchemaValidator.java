@@ -60,7 +60,7 @@ public class SchemaCatalogAwareJsonSchemaValidator {
             try {
                 schema.get().validate(payload);
             } catch(ValidationException ex){
-                throw new JsonSchemaValidatonException(ex.getMessage(), ex);
+                throw new JsonSchemaValidationException(ex.getMessage(), ex);
             }
         } else {
             fileBasedJsonSchemaValidator.validateWithoutSchemaCatalog(envelopeJson, actionName);

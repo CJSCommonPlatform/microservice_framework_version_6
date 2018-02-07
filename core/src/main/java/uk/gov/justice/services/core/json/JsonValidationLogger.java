@@ -1,51 +1,45 @@
 package uk.gov.justice.services.core.json;
 
-import static java.lang.String.join;
-import static javax.json.Json.createArrayBuilder;
-import static javax.json.Json.createObjectBuilder;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
 
-import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
 
 /**
  * @deprecated Use injected jsonValidationLoggerHelper methods
  */
+@Deprecated
 public final class JsonValidationLogger {
 
     private JsonValidationLogger(){}
 
     /**
-     * @deprecated Use jsonValidationLoggerHelper.toValidationTrace(JsonSchemaValidatonException jsonSchemaValidatonException)
+     * @deprecated Use jsonValidationLoggerHelper.toValidationTrace(JsonSchemaValidationException JsonSchemaValidationException)
      */
-    public static String toValidationTrace(final JsonSchemaValidatonException jsonSchemaValidatonException) {
-        return new DefaultJsonValidationLoggerHelper().toValidationTrace(jsonSchemaValidatonException);
+    @Deprecated
+    public static String toValidationTrace(final JsonSchemaValidationException JsonSchemaValidationException) {
+        return new DefaultJsonValidationLoggerHelper().toValidationTrace(JsonSchemaValidationException);
     }
 
     /**
-     * @deprecated Use jsonValidationLoggerHelper.toJsonObject(JsonSchemaValidatonException jsonSchemaValidatonException)
+     * @deprecated Use jsonValidationLoggerHelper.toJsonObject(JsonSchemaValidationException JsonSchemaValidationException)
      */
-    public static JsonObject toJsonObject(final JsonSchemaValidatonException jsonSchemaValidatonException) {
-        return new DefaultJsonValidationLoggerHelper().toJsonObject(jsonSchemaValidatonException);
+    @Deprecated
+    public static JsonObject toJsonObject(final JsonSchemaValidationException JsonSchemaValidationException) {
+        return new DefaultJsonValidationLoggerHelper().toJsonObject(JsonSchemaValidationException);
     }
 
     /**
      * @deprecated Use jsonValidationLoggerHelper.toValidationTrace(ValidationException validationException)
      */
+    @Deprecated
     public static String toValidationTrace(final ValidationException validationException) {
         return new DefaultJsonValidationLoggerHelper().toValidationTrace(validationException);
     }
 
     /**
-     * @deprecated Use jsonValidationLoggerHelper.toJsonObject(JsonSchemaValidatonException jsonSchemaValidatonException)
+     * @deprecated Use jsonValidationLoggerHelper.toJsonObject(JsonSchemaValidationException JsonSchemaValidationException)
      */
+    @Deprecated
     public static JsonObject toJsonObject(final ValidationException validationException) {
         return new DefaultJsonValidationLoggerHelper().toJsonObject(validationException);
     }

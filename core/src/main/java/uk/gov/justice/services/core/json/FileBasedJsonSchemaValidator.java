@@ -42,7 +42,7 @@ public class FileBasedJsonSchemaValidator {
         try {
             schemaOf(actionName).validate(payload);
         } catch(ValidationException ex) {
-            throw new JsonSchemaValidatonException(ex.getMessage(), ex);
+            throw new JsonSchemaValidationException(ex.getMessage(), ex);
         }
 
     }

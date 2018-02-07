@@ -6,10 +6,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ## [Unreleased]
 
 ### Changed
+ - Remove dependencies on core in messaging-adapter-core and partly in rest-adapter-core
  - Move DefaultJsonValidationLoggerHelper to core
- - Use JsonSchemaValidatonException instead of org.everit.json.schema.ValidationException
-
-### Changed
+ - Use JsonSchemaValidationException instead of org.everit.json.schema.ValidationException
  - SPI for InterceptorContext.interceptorContextWithInput()
 
 ###

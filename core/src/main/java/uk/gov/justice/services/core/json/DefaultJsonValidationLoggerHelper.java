@@ -17,25 +17,27 @@ import org.everit.json.schema.ValidationException;
 
 public class DefaultJsonValidationLoggerHelper implements JsonValidationLoggerHelper {
 
-    public String toValidationTrace(final JsonSchemaValidatonException jsonSchemaValidatonException) {
-        return toJsonObject(jsonSchemaValidatonException).toString();
+    public String toValidationTrace(final JsonSchemaValidationException JsonSchemaValidationException) {
+        return toJsonObject(JsonSchemaValidationException).toString();
     }
 
-    public JsonObject toJsonObject(final JsonSchemaValidatonException jsonSchemaValidatonException) {
-        if (jsonSchemaValidatonException == null) {
-            throw new RuntimeException("jsonSchemaValidatonException is null.");
+    public JsonObject toJsonObject(final JsonSchemaValidationException JsonSchemaValidationException) {
+        if (JsonSchemaValidationException == null) {
+            throw new RuntimeException("JsonSchemaValidationException is null.");
         }
-        if (jsonSchemaValidatonException.getCause() != null &&
-                jsonSchemaValidatonException.getCause().getClass().isAssignableFrom(ValidationException.class)) {
-            return buildResponse((ValidationException) jsonSchemaValidatonException.getCause());
+        if (JsonSchemaValidationException.getCause() != null &&
+                JsonSchemaValidationException.getCause().getClass().isAssignableFrom(ValidationException.class)) {
+            return buildResponse((ValidationException) JsonSchemaValidationException.getCause());
         }
-        throw new RuntimeException(jsonSchemaValidatonException + " is not type of ValidationException.");
+        throw new RuntimeException(JsonSchemaValidationException + " is not type of ValidationException.");
     }
 
+    @Deprecated
     public String toValidationTrace(final ValidationException validationException) {
         return toJsonObject(validationException).toString();
     }
 
+    @Deprecated
     public JsonObject toJsonObject(final ValidationException validationException) {
         return buildResponse(validationException);
     }

@@ -4,7 +4,7 @@ import static java.lang.String.format;
 import static java.util.Optional.of;
 import static uk.gov.justice.services.messaging.jms.HeaderConstants.JMS_HEADER_CPPNAME;
 
-import uk.gov.justice.services.core.json.JsonSchemaValidatonException;
+import uk.gov.justice.services.core.json.JsonSchemaValidationException;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonValidationLoggerHelper;
 import uk.gov.justice.services.core.mapping.MediaType;
@@ -66,11 +66,11 @@ public class JsonSchemaValidationInterceptor {
             final MediaType mediaType = nameToMediaTypeConverter.convert(name);
 
             jsonSchemaValidator.validate(message.getText(), name, of(mediaType));
-        } catch (JsonSchemaValidatonException jsonSchemaValidatonException) {
+        } catch (JsonSchemaValidationException JsonSchemaValidationException) {
             logger.debug(format("JSON schema validation has failed for %s due to %s",
                     jmsMessageLoggerHelper.toJmsTraceString(message),
-                    jsonValidationLoggerHelper.toValidationTrace(jsonSchemaValidatonException)));
-            throw jsonSchemaValidatonException;
+                    jsonValidationLoggerHelper.toValidationTrace(JsonSchemaValidationException)));
+            throw JsonSchemaValidationException;
         }
     }
 }

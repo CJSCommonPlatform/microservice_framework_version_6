@@ -9,7 +9,7 @@ import static org.junit.Assert.assertThat;
 
 import uk.gov.justice.services.adapter.rest.exception.BadRequestException;
 import uk.gov.justice.services.core.json.DefaultJsonValidationLoggerHelper;
-import uk.gov.justice.services.core.json.JsonSchemaValidatonException;
+import uk.gov.justice.services.core.json.JsonSchemaValidationException;
 import uk.gov.justice.services.core.json.JsonValidationLoggerHelper;
 
 import javax.ws.rs.core.Response;
@@ -55,9 +55,9 @@ public class BadRequestExceptionMapperTest {
     @Test
     public void shouldAddJsonValidationErrorsToResponse() {
         final ValidationException validationException = new ValidationException(schema, "Test Json");
-        final JsonSchemaValidatonException jsonSchemaValidatonException = new JsonSchemaValidatonException(validationException.getMessage(), validationException);
+        final JsonSchemaValidationException JsonSchemaValidationException = new JsonSchemaValidationException(validationException.getMessage(), validationException);
         final BadRequestException badRequestException = new BadRequestException(TEST_ERROR_MESSAGE,
-                jsonSchemaValidatonException);
+                JsonSchemaValidationException);
         final Response response = exceptionMapper.toResponse(badRequestException);
         final String body = response.getEntity().toString();
         assertThat(body, hasJsonPath("$.validationErrors.message", equalTo("#: Test Json")));

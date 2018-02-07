@@ -11,7 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.adapter.rest.exception.BadRequestException;
-import uk.gov.justice.services.core.json.JsonSchemaValidatonException;
+import uk.gov.justice.services.core.json.JsonSchemaValidationException;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonValidationLoggerHelper;
 import uk.gov.justice.services.core.mapping.NameToMediaTypeConverter;
@@ -29,7 +29,6 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.ReaderInterceptorContext;
 
 import com.google.common.io.CharStreams;
-import org.everit.json.schema.ValidationException;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
@@ -129,7 +128,7 @@ public class JsonSchemaValidationInterceptorTest {
 
         when(nameToMediaTypeConverter.convert(CONVERTED_MEDIA_TYPE)).thenReturn(actionName);
 
-        doThrow(new JsonSchemaValidatonException("")).when(jsonSchemaValidator).validate(PAYLOAD, actionName, of(CONVERTED_MEDIA_TYPE));
+        doThrow(new JsonSchemaValidationException("")).when(jsonSchemaValidator).validate(PAYLOAD, actionName, of(CONVERTED_MEDIA_TYPE));
         when(context.getHeaders()).thenReturn(headers);
 
         jsonSchemaValidationInterceptor.aroundReadFrom(context);

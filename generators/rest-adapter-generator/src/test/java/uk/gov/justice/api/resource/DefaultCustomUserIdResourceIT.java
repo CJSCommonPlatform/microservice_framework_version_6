@@ -36,6 +36,7 @@ import uk.gov.justice.services.core.envelope.MediaTypeProvider;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.json.BackwardsCompatibleJsonSchemaValidator;
 import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
+import uk.gov.justice.services.core.json.DefaultJsonValidationLoggerHelper;
 import uk.gov.justice.services.core.json.FileBasedJsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.json.PayloadExtractor;
@@ -51,8 +52,6 @@ import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.logging.DefaultHttpTraceLoggerHelper;
 import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
-
-import uk.gov.justice.services.core.json.DefaultJsonValidationLoggerHelper;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Properties;

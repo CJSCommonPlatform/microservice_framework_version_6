@@ -6,7 +6,7 @@ import static uk.gov.justice.services.adapter.rest.envelope.MediaTypes.JSON_MEDI
 import static uk.gov.justice.services.adapter.rest.envelope.MediaTypes.charsetFrom;
 
 import uk.gov.justice.services.adapter.rest.exception.BadRequestException;
-import uk.gov.justice.services.core.json.JsonSchemaValidatonException;
+import uk.gov.justice.services.core.json.JsonSchemaValidationException;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonValidationLoggerHelper;
 import uk.gov.justice.services.core.mapping.MediaType;
@@ -59,12 +59,12 @@ public class JsonSchemaValidationInterceptor implements ReaderInterceptor {
 
             try {
                 restJsonSchemaValidator.validate(payload, nameToMediaTypeConverter.convert(mediaType), of(mediaType));
-            } catch (JsonSchemaValidatonException jsonSchemaValidatonException) {
+            } catch (JsonSchemaValidationException JsonSchemaValidationException) {
                 final String message = format("JSON schema validation has failed on %s due to %s ",
                         httpTraceLoggerHelper.toHttpHeaderTrace(context.getHeaders()),
-                        jsonValidationLoggerHelper.toValidationTrace(jsonSchemaValidatonException));
+                        jsonValidationLoggerHelper.toValidationTrace(JsonSchemaValidationException));
                 logger.debug(message);
-                throw new BadRequestException(message, jsonSchemaValidatonException);
+                throw new BadRequestException(message, JsonSchemaValidationException);
 
             } catch (InvalidMediaTypeException ex) {
                 throw new BadRequestException(ex.getMessage(), ex);

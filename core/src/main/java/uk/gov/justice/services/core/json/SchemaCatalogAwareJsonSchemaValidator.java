@@ -12,6 +12,7 @@ import javax.faces.bean.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.everit.json.schema.Schema;
+import org.everit.json.schema.ValidationException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
@@ -56,7 +57,11 @@ public class SchemaCatalogAwareJsonSchemaValidator {
         if (schema.isPresent()) {
             logger.info(format("Performing schema validation with catalog schema for action '%s' and mediaType '%s", actionName, mediaType));
             final JSONObject payload = payloadExtractor.extractPayloadFrom(envelopeJson);
-            schema.get().validate(payload);
+            try {
+                schema.get().validate(payload);
+            } catch(ValidationException ex){
+                throw new JsonSchemaValidationException(ex.getMessage(), ex);
+            }
         } else {
             fileBasedJsonSchemaValidator.validateWithoutSchemaCatalog(envelopeJson, actionName);
         }

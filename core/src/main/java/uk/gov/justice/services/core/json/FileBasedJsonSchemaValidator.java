@@ -7,6 +7,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.everit.json.schema.Schema;
+import org.everit.json.schema.ValidationException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
@@ -37,7 +38,13 @@ public class FileBasedJsonSchemaValidator {
     public void validateWithoutSchemaCatalog(final String envelopeJson, final String actionName) {
         logger.info("Falling back to file based schema lookup, no catalog schema found for: {}", actionName);
         final JSONObject payload = payloadExtractor.extractPayloadFrom(envelopeJson);
-        schemaOf(actionName).validate(payload);
+
+        try {
+            schemaOf(actionName).validate(payload);
+        } catch(ValidationException ex) {
+            throw new JsonSchemaValidationException(ex.getMessage(), ex);
+        }
+
     }
 
     private Schema schemaOf(final String actionName) {

@@ -22,6 +22,7 @@ import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.rest.ForbiddenRequestExceptionMapper;
 import uk.gov.justice.services.common.util.UtcClock;
+import uk.gov.justice.services.core.json.DefaultJsonValidationLoggerHelper;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.Direction;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventInsertionStrategy;
@@ -149,7 +150,8 @@ public class EventsPageIT {
             BadRequestExceptionMapper.class,
             JdbcRepositoryHelper.class,
             UtcClock.class,
-            JdbcDataSourceProvider.class
+            JdbcDataSourceProvider.class,
+            DefaultJsonValidationLoggerHelper.class
     })
 
     public WebApp war() {

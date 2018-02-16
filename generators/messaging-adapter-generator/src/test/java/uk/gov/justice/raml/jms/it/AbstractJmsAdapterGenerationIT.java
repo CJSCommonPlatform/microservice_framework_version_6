@@ -28,12 +28,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractJmsAdapterGenerationIT {
+
     private static int port = -1;
-
     private static final Logger LOG = LoggerFactory.getLogger(AbstractJmsAdapterGenerationIT.class);
-
+    private static final String JMS_PORT = System.getProperty("random.jms.port");
     private final static ActiveMQConnectionFactory cf = new ActiveMQConnectionFactory(
-            "tcp://localhost:61616?broker.persistent=false&jms.useAsyncSend=false");
+            "tcp://localhost:" + JMS_PORT + "?broker.persistent=false&jms.useAsyncSend=false");
 
     @BeforeClass
     public static void beforeClass() {

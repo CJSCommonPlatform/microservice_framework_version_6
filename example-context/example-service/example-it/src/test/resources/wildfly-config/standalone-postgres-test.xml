@@ -595,7 +595,7 @@
         <socket-binding name="iiop-ssl" interface="unsecure" port="3529"/>
         <socket-binding name="txn-recovery-environment" port="4712"/>
         <socket-binding name="txn-status-manager" port="4713"/>
-        <socket-binding name="activemq-5x" port="61616"/>
+        <socket-binding name="activemq-5x" port="${random-jms-port}"/>
         <outbound-socket-binding name="mail-smtp">
             <remote-destination host="localhost" port="25"/>
         </outbound-socket-binding>

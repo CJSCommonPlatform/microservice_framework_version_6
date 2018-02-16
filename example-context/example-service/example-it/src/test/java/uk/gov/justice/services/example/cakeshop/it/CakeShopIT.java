@@ -125,7 +125,8 @@ public class CakeShopIT {
     private static final String JMS_USERNAME = "jmsuser";
 
     private static final String JMS_PASSWORD = "jms@user123";
-    private static final String JMS_BROKER_URL = "tcp://localhost:61616";
+    private static final String JMS_PORT = System.getProperty("random.jms.port");
+    private static final String JMS_BROKER_URL = "tcp://localhost:" + JMS_PORT;
 
     private static final TestProperties TEST_PROPERTIES = new TestProperties("test.properties");
 

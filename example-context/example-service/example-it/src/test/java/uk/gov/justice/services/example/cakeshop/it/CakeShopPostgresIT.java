@@ -59,9 +59,9 @@ public class CakeShopPostgresIT {
 
     //Postgres driver used when testing against postgres setup
     private static final String POSTGRES_DRIVER = "org.postgresql.Driver";
-
-    private static final String RECIPES_RESOURCE_URI = "http://localhost:8080/example-command-api/command/api/rest/cakeshop/recipes/";
-    private static final String RECIPES_RESOURCE_QUERY_URI = "http://localhost:8080/example-query-api/query/api/rest/cakeshop/recipes/";
+    private static final String RANDOM_HTTP_PORT = System.getProperty("random.http.port");
+    private static final String RECIPES_RESOURCE_URI = "http://localhost:" + RANDOM_HTTP_PORT + "/example-command-api/command/api/rest/cakeshop/recipes/";
+    private static final String RECIPES_RESOURCE_QUERY_URI = "http://localhost:" + RANDOM_HTTP_PORT + "/example-query-api/query/api/rest/cakeshop/recipes/";
     private static final String ADD_RECIPE_MEDIA_TYPE = "application/vnd.example.add-recipe+json";
     private static final String RENAME_RECIPE_MEDIA_TYPE = "application/vnd.example.rename-recipe+json";
     private static final String QUERY_RECIPE_MEDIA_TYPE = "application/vnd.example.recipe+json";
@@ -69,8 +69,8 @@ public class CakeShopPostgresIT {
     private static final String JMS_USERNAME = "jmsuser";
 
     private static final String JMS_PASSWORD = "jms@user123";
-    private static final String JMS_PORT = System.getProperty("random.jms.port");
-    private static final String JMS_BROKER_URL = "tcp://localhost:" + JMS_PORT;
+    private static final String RANDOM_JMS_PORT = System.getProperty("random.jms.port");
+    private static final String JMS_BROKER_URL = "tcp://localhost:" + RANDOM_JMS_PORT;
 
     private static final TestProperties TEST_PROPERTIES = new TestProperties("test-vagrant-postgres.properties");
 

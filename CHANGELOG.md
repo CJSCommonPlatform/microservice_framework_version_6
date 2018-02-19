@@ -6,6 +6,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ## [Unreleased]
 
 ### Changed
+ - Randomise JMS and HTTP ports for integration tests
  - Move LoggerUtils to utilities as part of rest-adapter dependency update
  - Remove dependencies on core in messaging-adapter-core and partly in rest-adapter-core
  - Move DefaultJsonValidationLoggerHelper to core

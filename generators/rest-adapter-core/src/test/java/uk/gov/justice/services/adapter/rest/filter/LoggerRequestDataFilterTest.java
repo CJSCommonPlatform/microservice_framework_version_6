@@ -31,7 +31,9 @@ import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderF
 
 import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 
 import java.io.ByteArrayInputStream;
 
@@ -73,6 +75,9 @@ public class LoggerRequestDataFilterTest {
 
     @Mock
     private ServiceContextNameProvider serviceContextNameProvider;
+
+    @Spy
+    private JsonObjectEnvelopeConverter jsonObjectEnvelopeConverter = new DefaultJsonObjectEnvelopeConverter();
 
     @Spy
     private StringToJsonObjectConverter stringToJsonObjectConverter = new StringToJsonObjectConverter();

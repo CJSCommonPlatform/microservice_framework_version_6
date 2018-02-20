@@ -11,9 +11,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.adapter.rest.exception.BadRequestException;
+import uk.gov.justice.services.core.json.JsonSchemaValidationException;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
+import uk.gov.justice.services.core.json.JsonValidationLoggerHelper;
 import uk.gov.justice.services.core.mapping.NameToMediaTypeConverter;
 import uk.gov.justice.services.messaging.exception.InvalidMediaTypeException;
+import uk.gov.justice.services.messaging.logging.HttpTraceLoggerHelper;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -26,7 +29,6 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.ReaderInterceptorContext;
 
 import com.google.common.io.CharStreams;
-import org.everit.json.schema.ValidationException;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
@@ -63,6 +65,12 @@ public class JsonSchemaValidationInterceptorTest {
 
     @Mock
     private JsonSchemaValidator jsonSchemaValidator;
+
+    @Mock
+    private JsonValidationLoggerHelper jsonValidationLoggerHelper;
+
+    @Mock
+    private HttpTraceLoggerHelper httpTraceLoggerHelper;
 
     @Mock
     private NameToMediaTypeConverter nameToMediaTypeConverter;
@@ -120,7 +128,7 @@ public class JsonSchemaValidationInterceptorTest {
 
         when(nameToMediaTypeConverter.convert(CONVERTED_MEDIA_TYPE)).thenReturn(actionName);
 
-        doThrow(new ValidationException("")).when(jsonSchemaValidator).validate(PAYLOAD, actionName, of(CONVERTED_MEDIA_TYPE));
+        doThrow(new JsonSchemaValidationException("")).when(jsonSchemaValidator).validate(PAYLOAD, actionName, of(CONVERTED_MEDIA_TYPE));
         when(context.getHeaders()).thenReturn(headers);
 
         jsonSchemaValidationInterceptor.aroundReadFrom(context);

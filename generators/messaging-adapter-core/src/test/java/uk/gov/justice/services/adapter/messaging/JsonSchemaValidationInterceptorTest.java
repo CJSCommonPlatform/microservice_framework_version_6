@@ -3,12 +3,14 @@ package uk.gov.justice.services.adapter.messaging;
 import static java.util.Optional.of;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsSame.sameInstance;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.jms.HeaderConstants.JMS_HEADER_CPPNAME;
 
+import uk.gov.justice.services.core.json.JsonSchemaValidationException;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonValidationLoggerHelper;
 import uk.gov.justice.services.core.mapping.MediaType;
@@ -18,7 +20,6 @@ import uk.gov.justice.services.messaging.logging.JmsMessageLoggerHelper;
 import javax.interceptor.InvocationContext;
 import javax.jms.TextMessage;
 
-import org.everit.json.schema.ValidationException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -92,20 +93,28 @@ public class JsonSchemaValidationInterceptorTest {
         verify(jsonSchemaValidator).validate(payload, name, of(mediaType));
     }
 
-    @Test(expected = ValidationException.class)
+    @Test
     public void shouldThrowExceptionIfValidatorFails() throws Exception {
         final TextMessage message = mock(TextMessage.class);
         final String payload = "test payload";
         final String name = "test-name";
         final MediaType mediaType = mock(MediaType.class);
+        final JsonSchemaValidationException jsonSchemaValidationException = mock(JsonSchemaValidationException.class);
 
         when(message.getText()).thenReturn(payload);
         when(message.getStringProperty(JMS_HEADER_CPPNAME)).thenReturn(name);
         when(invocationContext.getParameters()).thenReturn(new Object[]{message});
         when(nameToMediaTypeConverter.convert(name)).thenReturn(mediaType);
 
-        doThrow(mock(ValidationException.class)).when(jsonSchemaValidator).validate(payload, name, of(mediaType));
+        doThrow(jsonSchemaValidationException).when(jsonSchemaValidator).validate(payload, name, of(mediaType));
+        when(jmsMessageLoggerHelper.toJmsTraceString(message)).thenReturn("message");
+        when(jsonValidationLoggerHelper.toValidationTrace(jsonSchemaValidationException)).thenReturn("jsonSchemaValidationException");
 
-        jsonSchemaValidationInterceptor.validate(invocationContext);
+        try {
+            jsonSchemaValidationInterceptor.validate(invocationContext);
+            fail();
+        } catch (final JsonSchemaValidationException e) {
+            verify(logger).debug("JSON schema validation has failed for message due to jsonSchemaValidationException");
+        }
     }
 }

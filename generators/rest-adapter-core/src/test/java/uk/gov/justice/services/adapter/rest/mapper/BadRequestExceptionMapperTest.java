@@ -8,6 +8,9 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
 import uk.gov.justice.services.adapter.rest.exception.BadRequestException;
+import uk.gov.justice.services.core.json.DefaultJsonValidationLoggerHelper;
+import uk.gov.justice.services.core.json.JsonSchemaValidationException;
+import uk.gov.justice.services.core.json.JsonValidationLoggerHelper;
 
 import javax.ws.rs.core.Response;
 
@@ -17,6 +20,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
 
@@ -30,6 +34,9 @@ public class BadRequestExceptionMapperTest {
 
     @Mock
     private Schema schema;
+
+    @Spy
+    private JsonValidationLoggerHelper jsonValidationLoggerHelper = new DefaultJsonValidationLoggerHelper();
 
     @InjectMocks
     private BadRequestExceptionMapper exceptionMapper;
@@ -48,8 +55,9 @@ public class BadRequestExceptionMapperTest {
     @Test
     public void shouldAddJsonValidationErrorsToResponse() {
         final ValidationException validationException = new ValidationException(schema, "Test Json");
+        final JsonSchemaValidationException jsonSchemaValidationException = new JsonSchemaValidationException(validationException.getMessage(), validationException);
         final BadRequestException badRequestException = new BadRequestException(TEST_ERROR_MESSAGE,
-                validationException);
+                jsonSchemaValidationException);
         final Response response = exceptionMapper.toResponse(badRequestException);
         final String body = response.getEntity().toString();
         assertThat(body, hasJsonPath("$.validationErrors.message", equalTo("#: Test Json")));

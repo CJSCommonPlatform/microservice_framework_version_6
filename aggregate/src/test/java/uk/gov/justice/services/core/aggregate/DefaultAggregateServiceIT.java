@@ -38,10 +38,10 @@ import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventSt
 import uk.gov.justice.services.eventsourcing.source.core.DefaultEventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EnvelopeEventStream;
 import uk.gov.justice.services.eventsourcing.source.core.EventAppender;
-import uk.gov.justice.services.eventsourcing.source.core.PublishingEventAppender;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.EventStreamManager;
+import uk.gov.justice.services.eventsourcing.source.core.PublishingEventAppender;
 import uk.gov.justice.services.eventsourcing.source.core.SystemEventService;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.jdbc.persistence.AbstractJdbcRepository;

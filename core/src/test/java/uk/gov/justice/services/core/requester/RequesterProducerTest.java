@@ -1,6 +1,5 @@
 package uk.gov.justice.services.core.requester;
 
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;

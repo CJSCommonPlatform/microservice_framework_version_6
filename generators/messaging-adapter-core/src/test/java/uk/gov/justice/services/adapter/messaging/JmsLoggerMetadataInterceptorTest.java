@@ -20,6 +20,7 @@ import uk.gov.justice.services.messaging.logging.JmsMessageLoggerHelper;
 import uk.gov.justice.services.messaging.logging.TraceLogger;
 
 import java.util.UUID;
+
 import javax.interceptor.InvocationContext;
 import javax.jms.TextMessage;
 import javax.json.JsonObject;

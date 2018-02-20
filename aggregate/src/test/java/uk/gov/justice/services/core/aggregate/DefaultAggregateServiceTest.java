@@ -19,8 +19,6 @@ import uk.gov.justice.services.core.aggregate.event.EventA;
 import uk.gov.justice.services.core.aggregate.event.EventB;
 import uk.gov.justice.services.core.extension.EventFoundEvent;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
-import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjectMetadata;
 
 import java.util.UUID;
 import java.util.stream.Stream;

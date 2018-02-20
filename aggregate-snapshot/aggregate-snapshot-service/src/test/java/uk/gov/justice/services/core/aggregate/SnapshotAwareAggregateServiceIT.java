@@ -45,9 +45,9 @@ import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventConverte
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepository;
 import uk.gov.justice.services.eventsourcing.source.core.EventAppender;
-import uk.gov.justice.services.eventsourcing.source.core.PublishingEventAppender;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.EventStreamManager;
+import uk.gov.justice.services.eventsourcing.source.core.PublishingEventAppender;
 import uk.gov.justice.services.eventsourcing.source.core.SnapshotAwareEnvelopeEventStream;
 import uk.gov.justice.services.eventsourcing.source.core.SnapshotAwareEventSource;
 import uk.gov.justice.services.eventsourcing.source.core.SystemEventService;

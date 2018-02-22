@@ -33,7 +33,7 @@
       <!-- Connectors -->
       <connectors>
          <!-- Netty --> 
-         <connector name="netty">tcp://localhost:61616</connector>
+         <connector name="netty">tcp://localhost:${random.jms.port}</connector>
          <connector name="in-vm">vm://0</connector>
       </connectors>
 
@@ -42,8 +42,7 @@
          <!-- In VM acceptor -->
          <acceptor name="in-vm">vm://0</acceptor>
          <!-- Netty TCP Acceptor -->
-         <acceptor name="netty">tcp://localhost:61616</acceptor>
-          
+         <acceptor name="netty">tcp://localhost:${random.jms.port}</acceptor>
       </acceptors>
 
 	  <queues>

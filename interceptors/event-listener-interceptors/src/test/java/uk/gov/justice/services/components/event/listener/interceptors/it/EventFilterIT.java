@@ -72,6 +72,7 @@ import uk.gov.justice.services.test.utils.common.envelope.TestEnvelopeRecorder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.annotation.Priority;
@@ -240,6 +241,12 @@ public class EventFilterIT {
     public static class AbcAllowingEventFilter extends AbstractEventFilter {
         public AbcAllowingEventFilter() {
             super(EVENT_ABC);
+        }
+
+        //TODO fix
+        @Override
+        public Set<String> getSupportedEvents() {
+            return null;
         }
     }
 

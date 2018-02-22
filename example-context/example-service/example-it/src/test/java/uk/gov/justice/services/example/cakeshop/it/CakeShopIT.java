@@ -45,6 +45,7 @@ import uk.gov.justice.services.example.cakeshop.domain.aggregate.Recipe;
 import uk.gov.justice.services.example.cakeshop.it.util.ApiResponse;
 import uk.gov.justice.services.example.cakeshop.it.util.TestProperties;
 import uk.gov.justice.services.test.utils.core.http.HttpResponsePoller;
+import uk.gov.justice.services.test.utils.core.messaging.MessageProducerClient;
 
 import java.io.File;
 import java.io.IOException;
@@ -67,7 +68,10 @@ import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
+import javax.json.Json;
+import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
 import javax.sql.DataSource;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
@@ -95,6 +99,7 @@ import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class CakeShopIT {
@@ -176,6 +181,12 @@ public class CakeShopIT {
         final Response response = sendTo(RECIPES_RESOURCE_URI + recipeId).request()
                 .post(entity(addRecipeCommand(), ADD_RECIPE_MEDIA_TYPE));
         assertThat(response.getStatus(), is(ACCEPTED));
+
+
+//        MessageProducerClient client = new MessageProducerClient();
+//        client.startProducer("other.event");
+//        JsonObject jsonObject = Json.createObjectBuilder().build();
+//        client.sendMessage("other.cake-made", jsonObject);
     }
 
     @Test

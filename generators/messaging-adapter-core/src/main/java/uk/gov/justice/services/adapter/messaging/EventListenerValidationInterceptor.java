@@ -2,16 +2,21 @@ package uk.gov.justice.services.adapter.messaging;
 
 import static uk.gov.justice.services.messaging.jms.HeaderConstants.JMS_HEADER_CPPNAME;
 
-import uk.gov.justice.services.event.buffer.api.EventFilter;
+import uk.gov.justice.services.event.buffer.api.EventFilterRegistry;
 
 import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
 
+import org.slf4j.Logger;
+
 public class EventListenerValidationInterceptor extends JsonSchemaValidationInterceptor {
 
     @Inject
-    EventFilter eventFilter;
+    Logger logger;
+
+    @Inject
+    EventFilterRegistry eventFilter;
 
     @Override
     public boolean shouldValidate(final TextMessage message) throws JMSException {

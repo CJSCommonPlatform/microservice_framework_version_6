@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jboss-deployment-structure>
+    <deployment>
+        <exclude-subsystems>
+            <subsystem name="jaxrs"/>
+        </exclude-subsystems>
+        <exclusions>
+            <module name="com.fasterxml.jackson.core.jackson-annotations"/>
+            <module name="com.fasterxml.jackson.core.jackson-core"/>
+            <module name="com.fasterxml.jackson.core.jackson-databind"/>
+            <module name="com.fasterxml.jackson.core.jackson-jaxrs-base"/>
+            <module name="com.fasterxml.jackson.core.jackson-jaxrs-json-provider"/>
+            <module name="com.fasterxml.jackson.core.jackson-module-jaxb-annotations"/>
+            <module name="org.jboss.resteasy.resteasy-jackson-provider" />
+            <module name="org.jboss.resteasy.resteasy-jackson2-provider" />        </exclusions>
+    </deployment>
+</jboss-deployment-structure>

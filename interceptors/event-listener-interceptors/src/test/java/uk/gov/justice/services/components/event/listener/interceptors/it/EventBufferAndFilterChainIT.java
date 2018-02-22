@@ -80,6 +80,7 @@ import uk.gov.justice.services.test.utils.common.envelope.TestEnvelopeRecorder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.annotation.Priority;
@@ -301,6 +302,12 @@ public class EventBufferAndFilterChainIT {
     public static class SupportedEventAllowingEventFilter extends AbstractEventFilter {
         public SupportedEventAllowingEventFilter() {
             super(EVENT_SUPPORTED_ABC);
+        }
+
+        // TODO fix
+        @Override
+        public Set<String> getSupportedEvents() {
+            return null;
         }
     }
 

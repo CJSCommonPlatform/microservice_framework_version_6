@@ -1,0 +1,30 @@
+#%RAML 0.8
+title: API Using media type in the URL
+baseUri: message://event/listener/message/other
+version: v1
+/other.event:
+  post:
+    body:
+        application/vnd.other.recipe-added+json:
+            schema: !include json/schema/other.recipe-added.json
+            example: !include json/add-recipe.json
+
+        application/vnd.other.recipe-removed+json:
+            schema: !include json/schema/other.recipe-removed.json
+            example: !include json/recipe-removed.json
+
+        application/vnd.other.cake-made+json:
+            schema: !include json/schema/other.cake-made.json
+            example: !include json/make-cake.json
+
+        application/vnd.other.cake-ordered+json:
+            schema: !include json/schema/other.cake-ordered.json
+            example: !include json/cake-ordered.json
+
+        application/vnd.other.recipe-renamed+json:
+            schema: !include json/schema/other.recipe-renamed.json
+            example: !include json/recipe-renamed.json
+
+        application/vnd.other.recipe-photograph-added+json:
+            schema: !include json/schema/other.recipe-photograph-added.json
+            example: !include json/recipe-photograph-added.json

@@ -19,6 +19,10 @@ public abstract class AbstractEventFilter implements EventFilter {
         addAll(allowedEventNames, eventNames);
     }
 
+    public Set<String> getSupportedEvents() {
+        return allowedEventNames;
+    }
+
     @Override
     public boolean accepts(final String eventName) {
         return allowedEventNames.contains(eventName);

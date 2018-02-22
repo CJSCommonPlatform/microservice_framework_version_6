@@ -30,6 +30,8 @@ import static org.junit.Assert.fail;
 import static uk.gov.justice.services.event.buffer.core.repository.streamstatus.StandaloneStreamStatusJdbcRepositoryFactory.getSnapshotStreamStatusJdbcRepository;
 import static uk.gov.justice.services.eventsourcing.jdbc.snapshot.StandaloneSnapshotJdbcRepositoryFactory.getSnapshotJdbcRepository;
 import static uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventRepositoryFactory.getEventJdbcRepository;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
 import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
 
 import uk.gov.justice.domain.snapshot.AggregateSnapshot;
@@ -44,6 +46,7 @@ import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepo
 import uk.gov.justice.services.example.cakeshop.domain.aggregate.Recipe;
 import uk.gov.justice.services.example.cakeshop.it.util.ApiResponse;
 import uk.gov.justice.services.example.cakeshop.it.util.TestProperties;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.test.utils.core.http.HttpResponsePoller;
 
 import java.io.File;
@@ -63,10 +66,12 @@ import java.util.stream.Stream;
 
 import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
+import javax.jms.MessageProducer;
 import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
+import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.sql.DataSource;
 import javax.ws.rs.client.Client;
@@ -347,7 +352,7 @@ public class CakeShopIT {
     @Test
     public void shouldFailTransactionOnDBFailureAndRedirectEventToDLQ() throws Exception {
         try (final Session jmsSession = jmsSession()) {
-            try(final MessageConsumer dlqConsumer = queueConsumerOf(jmsSession, "DLQ")) {
+            try (final MessageConsumer dlqConsumer = queueConsumerOf(jmsSession, "DLQ")) {
                 clear(dlqConsumer);
 
                 //closing db to cause transaction error
@@ -359,8 +364,8 @@ public class CakeShopIT {
                 final TextMessage messageFromDLQ = (TextMessage) dlqConsumer.receive();
 
                 with(messageFromDLQ.getText())
-                     .assertThat("$._metadata.name", equalTo("example.recipe-added"))
-                     .assertThat("$.recipeId", equalTo(recipeId));
+                        .assertThat("$._metadata.name", equalTo("example.recipe-added"))
+                        .assertThat("$.recipeId", equalTo(recipeId));
             }
 
             initViewStoreDb();
@@ -380,6 +385,63 @@ public class CakeShopIT {
         await().until(() -> {
             final String responseBody = recipesQueryResult(singletonList(new BasicNameValuePair("pagesize", "30"))).body();
             return responseBody.contains(recipeId) && responseBody.contains(recipeId2);
+        });
+
+        final ApiResponse response = recipesQueryResult();
+        assertThat(response.httpCode(), is(OK));
+
+        with(response.body())
+                .assertThat("$.recipes[?(@.id=='" + recipeId + "')].name", hasItem("Cheesy cheese cake"))
+                .assertThat("$.recipes[?(@.id=='" + recipeId2 + "')].name", hasItem("Chocolate muffin"));
+    }
+
+    @Test
+    public void shouldReturnRecipeFromOtherEventListener() throws Exception {
+        //adding 1 recipe as normal
+        final UUID recipeId = UUID.randomUUID();
+        addRecipe(recipeId.toString(), "Cheesy cheese cake");
+
+        //adding 1 recipe as other event
+        final UUID recipeId2 = UUID.randomUUID();
+
+        try (final Session jmsSession = jmsSession()) {
+            final Topic topic = jmsSession.createTopic("other.event");
+
+            try (final MessageProducer producer = jmsSession.createProducer(topic);) {
+
+                final JsonObject jsonObject = jsonObject()
+                        .add("recipeId", recipeId2.toString())
+                        .add("name", "Chocolate muffin")
+                        .add("glutenFree", true)
+                        .add("ingredients", createArrayBuilder()
+                                .add(createObjectBuilder()
+                                        .add("name", "someIngredient")
+                                        .add("quantity", 1)
+                                ).build()
+                        ).build();
+
+                final JsonEnvelope jsonEnvelope = envelopeFrom(
+                        metadataBuilder()
+                                .withId(UUID.randomUUID())
+                                .withName("other.recipe-added")
+                                .withStreamId(recipeId2)
+                                .withVersion(1L)
+                                .build(),
+                        jsonObject);
+
+                @SuppressWarnings("deprecation") final String json = jsonEnvelope.toDebugStringPrettyPrint();
+                final TextMessage message = jmsSession.createTextMessage();
+
+                message.setText(json);
+                message.setStringProperty("CPPNAME", "other.recipe-added");
+
+                producer.send(message);
+            }
+        }
+
+        await().until(() -> {
+            final String responseBody = recipesQueryResult(singletonList(new BasicNameValuePair("pagesize", "30"))).body();
+            return responseBody.contains(recipeId.toString()) && responseBody.contains(recipeId2.toString());
         });
 
         final ApiResponse response = recipesQueryResult();
@@ -529,7 +591,7 @@ public class CakeShopIT {
     @Test
     public void shouldPublishEventToPublicTopic() throws Exception {
         try (final Session jmsSession = jmsSession()) {
-            try(final MessageConsumer publicTopicConsumer = topicConsumerOf(jmsSession, "public.event")) {
+            try (final MessageConsumer publicTopicConsumer = topicConsumerOf(jmsSession, "public.event")) {
 
                 final String recipeId = "163af847-effb-46a9-96bc-32a0f7526e13";
                 sendTo(RECIPES_RESOURCE_URI + recipeId).request()
@@ -540,7 +602,7 @@ public class CakeShopIT {
                         .assertThat("$._metadata.name", equalTo("example.recipe-added"))
                         .assertThat("$.recipeId", equalTo(recipeId))
                         .assertThat("$.name", equalTo("Apple pie"));
-	    }
+            }
         }
     }
 
@@ -656,7 +718,6 @@ public class CakeShopIT {
                 .assertThat("$.name", equalTo(recipeName));
 
     }
-
 
 
     @Test

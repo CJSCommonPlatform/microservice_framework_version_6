@@ -43,12 +43,30 @@ public class ComponentDestinationTypeTest {
     }
 
     @Test
+    public void shouldReturnDestinationTypeForCustomComponents() throws Exception {
+        assertThat(componentDestinationType.inputTypeFor("CUSTOM_COMMAND_API"), equalTo(Queue.class));
+        assertThat(componentDestinationType.inputTypeFor("CUSTOM_COMMAND_CONTROLLER"), equalTo(Queue.class));
+        assertThat(componentDestinationType.inputTypeFor("CUSTOM_COMMAND_HANDLER"), equalTo(Queue.class));
+        assertThat(componentDestinationType.inputTypeFor("CUSTOM_EVENT_PROCESSOR"), equalTo(Topic.class));
+        assertThat(componentDestinationType.inputTypeFor("CUSTOM_EVENT_LISTENER"), equalTo(Topic.class));
+    }
+
+    @Test
     public void shouldReturnTrueForSupportedComponents() throws Exception {
         assertThat(componentDestinationType.isSupported(COMMAND_API), equalTo(true));
         assertThat(componentDestinationType.isSupported(COMMAND_CONTROLLER), equalTo(true));
         assertThat(componentDestinationType.isSupported(COMMAND_HANDLER), equalTo(true));
         assertThat(componentDestinationType.isSupported(EVENT_PROCESSOR), equalTo(true));
         assertThat(componentDestinationType.isSupported(EVENT_LISTENER), equalTo(true));
+    }
+
+    @Test
+    public void shouldReturnTrueForSupportedCustomComponents() throws Exception {
+        assertThat(componentDestinationType.isSupported("CUSTOM_COMMAND_API"), equalTo(true));
+        assertThat(componentDestinationType.isSupported("CUSTOM_COMMAND_CONTROLLER"), equalTo(true));
+        assertThat(componentDestinationType.isSupported("CUSTOM_COMMAND_HANDLER"), equalTo(true));
+        assertThat(componentDestinationType.isSupported("CUSTOM_EVENT_PROCESSOR"), equalTo(true));
+        assertThat(componentDestinationType.isSupported("CUSTOM_EVENT_LISTENER"), equalTo(true));
     }
 
     @Test

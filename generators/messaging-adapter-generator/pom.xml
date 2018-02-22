@@ -32,6 +32,11 @@
             <groupId>org.jboss.ejb3</groupId>
             <artifactId>jboss-ejb3-ext-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>event-listener-interceptors</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- Test Dependencies -->
         <dependency>
@@ -147,13 +152,6 @@
             <artifactId>embedded-artemis</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>uk.gov.justice.services</groupId>
-            <artifactId>event-listener-interceptors</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-
     </dependencies>
     <build>
         <plugins>
@@ -170,10 +168,94 @@
                 </configuration>
                 <executions>
                     <execution>
+                        <id>generate-all-event-processor</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <phase>generate-test-sources</phase>
+                        <configuration>
+                            <includes>
+                                <include>**/all-events-processor.raml</include>
+                            </includes>
+                            <generatorProperties>
+                                <serviceComponent>EVENT_PROCESSOR</serviceComponent>
+                            </generatorProperties>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-command-controller</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>generate-test-sources</phase>
+                        <configuration>
+                            <includes>
+                                <include>**/command-controller.raml</include>
+                            </includes>
+                            <generatorProperties>
+                                <serviceComponent>COMMAND_CONTROLLER</serviceComponent>
+                            </generatorProperties>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-command-handler</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>generate-test-sources</phase>
+                        <configuration>
+                            <includes>
+                                <include>**/command-handler.raml</include>
+                            </includes>
+                            <generatorProperties>
+                                <serviceComponent>COMMAND_HANDLER</serviceComponent>
+                            </generatorProperties>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-event-listener</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>generate-test-sources</phase>
+                        <configuration>
+                            <includes>
+                                <include>**/event-listener.raml</include>
+                            </includes>
+                            <generatorProperties>
+                                <serviceComponent>EVENT_LISTENER</serviceComponent>
+                            </generatorProperties>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-custom-event-listener</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>generate-test-sources</phase>
+                        <configuration>
+                            <includes>
+                                <include>**/custom-event-listener.raml</include>
+                            </includes>
+                            <generatorProperties>
+                                <serviceComponent>CUSTOM_EVENT_LISTENER</serviceComponent>
+                            </generatorProperties>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-event-processor</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>generate-test-sources</phase>
+                        <configuration>
+                            <includes>
+                                <include>**/event-processor.raml</include>
+                            </includes>
+                            <generatorProperties>
+                                <serviceComponent>EVENT_PROCESSOR</serviceComponent>
+                            </generatorProperties>
+                        </configuration>
                     </execution>
                 </executions>
                 <dependencies>

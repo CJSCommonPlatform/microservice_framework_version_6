@@ -56,7 +56,7 @@ public class JsonSchemaValidationInterceptor {
         return context.proceed();
     }
 
-    protected boolean shouldValidate(final TextMessage message) throws JMSException {
+    public boolean shouldValidate(final TextMessage message) throws JMSException {
         return true;
     }
 

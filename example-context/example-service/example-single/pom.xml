@@ -31,6 +31,12 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>other-event-listener</artifactId>
+            <version>${project.version}</version>
+            <classifier>classes</classifier>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>example-event-processor</artifactId>
             <version>${project.version}</version>
             <classifier>classes</classifier>

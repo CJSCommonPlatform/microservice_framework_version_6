@@ -124,10 +124,12 @@
                 </handlers>
             </root-logger>
             <formatter name="PATTERN">
-                <pattern-formatter pattern="%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{1}] %X{frameworkRequestData} %s%e%n"/>
+                <pattern-formatter
+                        pattern="%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{1}] %X{frameworkRequestData} %s%e%n"/>
             </formatter>
             <formatter name="COLOR-PATTERN">
-                <pattern-formatter pattern="%K{level}%d{HH:mm:ss,SSS} %-5p [%c{1}] %X{frameworkRequestData} %s%e%n"/>
+                <pattern-formatter
+                        pattern="%K{level}%d{HH:mm:ss,SSS} %-5p [%c{1}] %X{frameworkRequestData} %s%e%n"/>
             </formatter>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:batch-jberet:1.0">
@@ -362,6 +364,7 @@
                            entries="example.controller.command"/>
                 <jms-queue name="example.handler.command" entries="example.handler.command"/>
                 <jms-topic name="example.event" entries="example.event"/>
+                <jms-topic name="other.event" entries="other.event"/>
                 <jms-topic name="public.event" entries="public.event"/>
 
                 <connection-factory name="InVmConnectionFactory" entries="java:/ConnectionFactory"
@@ -410,7 +413,8 @@
                         <check-valid-connection-sql>select 1</check-valid-connection-sql>
                     </validation>
                 </datasource>
-               <datasource jndi-name="java:/DS.fileservice" pool-name="DS.fileservice" enabled="true"
+                <datasource jndi-name="java:/DS.fileservice" pool-name="DS.fileservice"
+                            enabled="true"
                             use-java-context="true">
                     <connection-url>${db.fileservice.url}</connection-url>
                     <driver>h2</driver>
@@ -436,12 +440,22 @@
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:naming:2.0">
             <bindings>
-                <simple name="java:/app/example-command-api/audit.blacklist" value="example.*" type="java.lang.String"/>
-                <simple name="java:/app/example-command-handler/default.strategy.snapshot.threshold" value="3" type="java.lang.String"/>
-                <simple name="java:global/event.buffer.init.strategy" value="uk.gov.justice.services.event.buffer.core.service.AnsiSQLBasedBufferInitialisationStrategy" type="java.lang.String"/>
-                <simple name="java:global/eventlog.insertion.strategy" value="uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy" type="java.lang.String"/>
-                <simple name="java:global/envelope.validation.exception.handler" value="uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler" type="java.lang.String"/>
-                <simple name="java:global/fileservice.metadata.sql.provider.strategy" value="uk.gov.justice.services.fileservice.repository.AnsiMetadataSqlProvider" type="java.lang.String"/>
+                <simple name="java:/app/example-command-api/audit.blacklist" value="example.*"
+                        type="java.lang.String"/>
+                <simple name="java:/app/example-command-handler/default.strategy.snapshot.threshold"
+                        value="3" type="java.lang.String"/>
+                <simple name="java:global/event.buffer.init.strategy"
+                        value="uk.gov.justice.services.event.buffer.core.service.AnsiSQLBasedBufferInitialisationStrategy"
+                        type="java.lang.String"/>
+                <simple name="java:global/eventlog.insertion.strategy"
+                        value="uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy"
+                        type="java.lang.String"/>
+                <simple name="java:global/envelope.validation.exception.handler"
+                        value="uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler"
+                        type="java.lang.String"/>
+                <simple name="java:global/fileservice.metadata.sql.provider.strategy"
+                        value="uk.gov.justice.services.fileservice.repository.AnsiMetadataSqlProvider"
+                        type="java.lang.String"/>
             </bindings>
             <remote-naming/>
         </subsystem>

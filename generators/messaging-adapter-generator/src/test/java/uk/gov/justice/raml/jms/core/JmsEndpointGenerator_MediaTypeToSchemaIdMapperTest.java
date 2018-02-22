@@ -3,6 +3,7 @@ package uk.gov.justice.raml.jms.core;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.raml.model.ActionType.POST;
+import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLLER;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.SCHEMA_ID;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.messagingRamlWithDefaults;
@@ -38,7 +39,7 @@ public class JmsEndpointGenerator_MediaTypeToSchemaIdMapperTest extends BaseGene
                                 .withRelativeUri("/structure.controller.command")
                                 .with(httpAction(POST, MEDIA_TYPE_1.toString())))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf(COMMAND_CONTROLLER).build()));
 
         final Class<?> schemaIdMapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "ProcessorMediaTypeToSchemaIdMapper");
         final MediaTypeToSchemaIdMapper instance = (MediaTypeToSchemaIdMapper) schemaIdMapperClass.newInstance();

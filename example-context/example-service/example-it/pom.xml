@@ -444,6 +444,12 @@
                 </dependency>
                 <dependency>
                     <groupId>uk.gov.justice.services.example</groupId>
+                    <artifactId>example-event-listenerb</artifactId>
+                    <version>${project.version}</version>
+                    <type>war</type>
+                </dependency>
+                <dependency>
+                    <groupId>uk.gov.justice.services.example</groupId>
                     <artifactId>example-event-processor</artifactId>
                     <version>${project.version}</version>
                     <type>war</type>
@@ -485,6 +491,13 @@
                                             <version>${project.version}</version>
                                             <type>war</type>
                                             <destFileName>example-event-listener.war</destFileName>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>uk.gov.justice.services.example</groupId>
+                                            <artifactId>example-event-listenerb</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>war</type>
+                                            <destFileName>example-event-listenerb.war</destFileName>
                                         </artifactItem>
                                         <artifactItem>
                                             <groupId>uk.gov.justice.services.example</groupId>

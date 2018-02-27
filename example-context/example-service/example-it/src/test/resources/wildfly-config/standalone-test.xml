@@ -556,11 +556,11 @@
     <socket-binding-group name="standard-sockets" default-interface="public"
                           port-offset="${jboss.socket.binding.port-offset:0}">
         <socket-binding name="management-http" interface="management"
-                        port="${jboss.management.http.port:9990}"/>
+                        port="${random-management-port}"/>
         <socket-binding name="management-https" interface="management"
                         port="${jboss.management.https.port:9993}"/>
         <socket-binding name="ajp" port="${jboss.ajp.port:8009}"/>
-        <socket-binding name="http" port="${jboss.http.port:8080}"/>
+        <socket-binding name="http" port="${random-http-port}"/>
         <socket-binding name="https" port="${jboss.https.port:8443}"/>
         <socket-binding name="iiop" interface="unsecure" port="3528"/>
         <socket-binding name="iiop-ssl" interface="unsecure" port="3529"/>

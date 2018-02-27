@@ -18,7 +18,6 @@ public class ContextMatcher {
     public boolean isSameContext(final EndpointDefinition definition) {
         final String currentServiceName = extractServiceFromContext(contextNameProvider.getServiceContextName());
         final String remoteServiceName = extractServiceFromContext(extractContextFromUri(definition.getBaseUri()));
-
         return currentServiceName.equals(remoteServiceName);
     }
 

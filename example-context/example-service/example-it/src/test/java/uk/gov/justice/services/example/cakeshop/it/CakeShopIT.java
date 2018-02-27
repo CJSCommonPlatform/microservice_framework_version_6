@@ -104,13 +104,14 @@ public class CakeShopIT {
     private static final int NOT_FOUND = 404;
     private static final int BAD_REQUEST = 400;
     private static final String H2_DRIVER = "org.h2.Driver";
-    private static final String RECIPES_RESOURCE_URI = "http://localhost:8080/example-command-api/command/api/rest/cakeshop/recipes/";
+    private static final String RANDOM_HTTP_PORT = System.getProperty("random.http.port");
+    private static final String RECIPES_RESOURCE_URI = "http://localhost:" + RANDOM_HTTP_PORT + "/example-command-api/command/api/rest/cakeshop/recipes/";
     private static final String CAKES_RESOURCE_URI = RECIPES_RESOURCE_URI + "%s/cakes/%s";
-    private static final String ORDERS_RESOURCE_URI = "http://localhost:8080/example-command-api/command/api/rest/cakeshop/orders/";
-    private static final String RECIPES_RESOURCE_QUERY_URI = "http://localhost:8080/example-query-api/query/api/rest/cakeshop/recipes/";
-    private static final String ORDERS_RESOURCE_QUERY_URI = "http://localhost:8080/example-query-api/query/api/rest/cakeshop/orders/";
-    private static final String CAKES_RESOURCE_QUERY_URI = "http://localhost:8080/example-query-api/query/api/rest/cakeshop/cakes/";
-    private static final String OVEN_RESOURCE_CUSTOM_URI = "http://localhost:8080/example-custom-api/custom/api/rest/cakeshop/ovens/";
+    private static final String ORDERS_RESOURCE_URI = "http://localhost:" + RANDOM_HTTP_PORT + "/example-command-api/command/api/rest/cakeshop/orders/";
+    private static final String RECIPES_RESOURCE_QUERY_URI = "http://localhost:" + RANDOM_HTTP_PORT + "/example-query-api/query/api/rest/cakeshop/recipes/";
+    private static final String ORDERS_RESOURCE_QUERY_URI = "http://localhost:" + RANDOM_HTTP_PORT + "/example-query-api/query/api/rest/cakeshop/orders/";
+    private static final String CAKES_RESOURCE_QUERY_URI = "http://localhost:" + RANDOM_HTTP_PORT + "/example-query-api/query/api/rest/cakeshop/cakes/";
+    private static final String OVEN_RESOURCE_CUSTOM_URI = "http://localhost:" + RANDOM_HTTP_PORT + "/example-custom-api/custom/api/rest/cakeshop/ovens/";
 
     private static final String ADD_RECIPE_MEDIA_TYPE = "application/vnd.example.add-recipe+json";
     private static final String RENAME_RECIPE_MEDIA_TYPE = "application/vnd.example.rename-recipe+json";
@@ -125,8 +126,8 @@ public class CakeShopIT {
     private static final String JMS_USERNAME = "jmsuser";
 
     private static final String JMS_PASSWORD = "jms@user123";
-    private static final String JMS_PORT = System.getProperty("random.jms.port");
-    private static final String JMS_BROKER_URL = "tcp://localhost:" + JMS_PORT;
+    private static final String RANDOM_JMS_PORT = System.getProperty("random.jms.port");
+    private static final String JMS_BROKER_URL = "tcp://localhost:" + RANDOM_JMS_PORT;
 
     private static final TestProperties TEST_PROPERTIES = new TestProperties("test.properties");
 
@@ -295,7 +296,7 @@ public class CakeShopIT {
 
     @Test
     public void shouldReturn200WhenPostingQueryForRecipes() throws Exception {
-        final Response response = sendTo("http://localhost:8080/example-query-api/query/api/rest/cakeshop/recipes")
+        final Response response = sendTo("http://localhost:" + RANDOM_HTTP_PORT + "/example-query-api/query/api/rest/cakeshop/recipes")
                 .request()
                 .accept("application/vnd.example.recipes+json")
                 .post(entity(

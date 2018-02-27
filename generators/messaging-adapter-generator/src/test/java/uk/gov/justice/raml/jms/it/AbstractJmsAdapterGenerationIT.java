@@ -31,9 +31,9 @@ public abstract class AbstractJmsAdapterGenerationIT {
 
     private static int port = -1;
     private static final Logger LOG = LoggerFactory.getLogger(AbstractJmsAdapterGenerationIT.class);
-    private static final String JMS_PORT = System.getProperty("random.jms.port");
+    private static final String RANDOM_JMS_PORT = System.getProperty("random.jms.port");
     private final static ActiveMQConnectionFactory cf = new ActiveMQConnectionFactory(
-            "tcp://localhost:" + JMS_PORT + "?broker.persistent=false&jms.useAsyncSend=false");
+            "tcp://localhost:" + RANDOM_JMS_PORT + "?broker.persistent=false&jms.useAsyncSend=false");
 
     @BeforeClass
     public static void beforeClass() {

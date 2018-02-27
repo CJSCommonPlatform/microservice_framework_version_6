@@ -291,9 +291,11 @@
                     <jbossHome>${jboss.home}</jbossHome>
                     <serverConfig>${server.config}</serverConfig>
                     <timeout>120</timeout>
+                    <javaOpts>-DDEFAULT_PORT=${random-http-port}</javaOpts>
                     <java-opts>
                         <!--<java-opt>-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=8888</java-opt>-->
                     </java-opts>
+                    <port>${random-management-port}</port>
                     <version>${wildfly.version}</version>
                 </configuration>
                 <executions>
@@ -322,6 +324,7 @@
                 <configuration>
                     <systemPropertyVariables>
                         <random.jms.port>${random-jms-port}</random.jms.port>
+                        <random.http.port>${random-http-port}</random.http.port>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
@@ -339,6 +342,8 @@
                         <configuration>
                             <portNames>
                                 <portName>random-jms-port</portName>
+                                <portName>random-http-port</portName>
+                                <portName>random-management-port</portName>
                             </portNames>
                         </configuration>
                     </execution>

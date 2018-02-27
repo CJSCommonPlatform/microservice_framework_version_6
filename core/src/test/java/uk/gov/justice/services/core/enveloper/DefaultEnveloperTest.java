@@ -23,7 +23,6 @@ import java.util.UUID;
 
 import javax.json.JsonValue;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -45,14 +44,14 @@ public class DefaultEnveloperTest {
     private DefaultEnveloper enveloper;
 
     @Before
-    public void setup() throws JsonProcessingException {
+    public void setup() throws Exception {
         enveloper = new DefaultEnveloper(
                 new UtcClock(),
                 new ObjectToJsonValueConverter(new ObjectMapperProducer().objectMapper()));
     }
 
     @Test
-    public void shouldEnvelopeEventObject() throws JsonProcessingException {
+    public void shouldEnvelopeEventObject() throws Exception {
         enveloper.register(new EventFoundEvent(TestEvent.class, TEST_EVENT_NAME));
 
         final JsonEnvelope event = enveloper.withMetadataFrom(
@@ -74,12 +73,12 @@ public class DefaultEnveloperTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void shouldThrowExceptionOnNullEvent() throws JsonProcessingException {
+    public void shouldThrowExceptionOnNullEvent() throws Exception {
         enveloper.withMetadataFrom(envelopeFrom(metadataBuilder().withId(randomUUID()).withName("name"), createObjectBuilder())).apply(null);
     }
 
     @Test
-    public void shouldEnvelopeObjectWithName() throws JsonProcessingException {
+    public void shouldEnvelopeObjectWithName() throws Exception {
 
         final JsonEnvelope event = enveloper.withMetadataFrom(
                 envelopeFrom(
@@ -99,7 +98,7 @@ public class DefaultEnveloperTest {
     }
 
     @Test
-    public void shouldEnvelopeMapNullObjectWithName() throws JsonProcessingException {
+    public void shouldEnvelopeMapNullObjectWithName() throws Exception {
 
         final JsonEnvelope event = enveloper.withMetadataFrom(
                 envelopeFrom(
@@ -119,7 +118,7 @@ public class DefaultEnveloperTest {
     }
 
     @Test
-    public void shouldEnvelopeObjectWithoutCausation() throws JsonProcessingException {
+    public void shouldEnvelopeObjectWithoutCausation() throws Exception {
         enveloper.register(new EventFoundEvent(TestEvent.class, TEST_EVENT_NAME));
 
         final JsonEnvelope event = enveloper.withMetadataFrom(
@@ -147,7 +146,7 @@ public class DefaultEnveloperTest {
     }
 
     @Test
-    public void shouldRemoveStreamMetadata() throws JsonProcessingException {
+    public void shouldRemoveStreamMetadata() throws Exception {
         enveloper.register(new EventFoundEvent(TestEvent.class, TEST_EVENT_NAME));
 
         final JsonEnvelope event = enveloper.withMetadataFrom(
@@ -165,7 +164,7 @@ public class DefaultEnveloperTest {
     }
 
     @Test
-    public void shouldRemoveStreamMetadataWithName() throws JsonProcessingException {
+    public void shouldRemoveStreamMetadataWithName() throws Exception {
         enveloper.register(new EventFoundEvent(TestEvent.class, TEST_EVENT_NAME));
 
         final JsonEnvelope event = enveloper.withMetadataFrom(

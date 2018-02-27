@@ -19,7 +19,6 @@ import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuil
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 
 import uk.gov.justice.services.core.aggregate.AggregateService;
-import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.example.cakeshop.domain.event.CakeOrdered;
@@ -28,11 +27,11 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -55,11 +54,13 @@ public class OrderCakeCommandHandlerTest {
     @Mock
     private EventFactory eventFactory;
 
-    @Spy
-    private Enveloper enveloper = createEnveloperWithEvents(CakeOrdered.class);
-
     @InjectMocks
     private OrderCakeCommandHandler orderCakeCommandHandler;
+
+    @Before
+    public void setup() throws Exception {
+        createEnveloperWithEvents(CakeOrdered.class);
+    }
 
     @Test
     public void shouldHaveCorrectHandlesAnnotation() throws Exception {

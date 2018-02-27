@@ -3,7 +3,7 @@ package uk.gov.justice.services.test.utils.core.matchers;
 import static java.lang.String.format;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 
-import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.Metadata;
 
 import java.util.Arrays;
@@ -50,7 +50,7 @@ public class JsonEnvelopeMetadataMatcher extends TypeSafeDiagnosingMatcher<Metad
      * @param jsonEnvelope the JsonEnvelope to extract the metadata from
      * @return the matcher instance
      */
-    public static JsonEnvelopeMetadataMatcher withMetadataEnvelopedFrom(final JsonEnvelope jsonEnvelope) {
+    public static JsonEnvelopeMetadataMatcher withMetadataEnvelopedFrom(final Envelope<?> jsonEnvelope) {
         return metadata().envelopedWith(jsonEnvelope.metadata());
     }
 

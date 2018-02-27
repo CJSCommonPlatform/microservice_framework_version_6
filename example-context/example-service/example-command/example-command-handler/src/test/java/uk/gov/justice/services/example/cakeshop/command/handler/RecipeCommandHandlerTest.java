@@ -6,6 +6,7 @@ import static java.util.UUID.randomUUID;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.mockito.Matchers.argThat;
@@ -13,7 +14,9 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
+import static uk.gov.justice.services.messaging.Envelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
 import static uk.gov.justice.services.test.utils.core.matchers.EventStreamMatcher.eventStreamAppendedWith;
 import static uk.gov.justice.services.test.utils.core.matchers.HandlerMatcher.isHandler;
@@ -25,7 +28,6 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStrea
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
 
 import uk.gov.justice.services.core.aggregate.AggregateService;
-import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.Tolerance;
@@ -34,15 +36,16 @@ import uk.gov.justice.services.example.cakeshop.domain.event.RecipeAdded;
 import uk.gov.justice.services.example.cakeshop.domain.event.RecipePhotographAdded;
 import uk.gov.justice.services.example.cakeshop.domain.event.RecipeRemoved;
 import uk.gov.justice.services.example.cakeshop.domain.event.RecipeRenamed;
+import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.UUID;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -70,11 +73,13 @@ public class RecipeCommandHandlerTest {
     @Mock
     private AggregateService aggregateService;
 
-    @Spy
-    private Enveloper enveloper = createEnveloperWithEvents(RecipeAdded.class, RecipeRenamed.class, RecipeRemoved.class, RecipePhotographAdded.class);
-
     @InjectMocks
     private RecipeCommandHandler recipeCommandHandler;
+
+    @Before
+    public void setup() throws Exception {
+        createEnveloperWithEvents(RecipeAdded.class, RecipeRenamed.class, RecipeRemoved.class, RecipePhotographAdded.class);
+    }
 
     @Test
     public void shouldHaveCorrectHandlesAnnotation() throws Exception {
@@ -123,19 +128,20 @@ public class RecipeCommandHandlerTest {
 
     @Test
     public void shouldHandleRenameRecipeCommand() throws Exception {
-        final UUID commandId = randomUUID();
 
-        final JsonEnvelope command = envelopeFrom(
-                metadataOf(commandId, RENAME_RECIPE_COMMAND_NAME),
-                createObjectBuilder()
-                        .add("recipeId", RECIPE_ID.toString())
-                        .add("name", RECIPE_NAME)
-                        .build());
+        final Envelope<RenameRecipe> command = envelopeFrom(
+                metadataBuilder()
+                        .withName("Name")
+                        .withId(UUID.randomUUID())
+                        .withClientCorrelationId("asdsfd")
+                        .build(),
+                new RenameRecipe(RECIPE_ID.toString(), RECIPE_NAME));
 
         when(eventSource.getStreamById(RECIPE_ID)).thenReturn(eventStream);
         when(aggregateService.get(eventStream, Recipe.class)).thenReturn(existingRecipe());
-
         recipeCommandHandler.renameRecipe(command);
+
+        assertThat(command.payload().getName(), is(RECIPE_NAME));
 
         verify(eventStream).append(
                 argThat(streamContaining(

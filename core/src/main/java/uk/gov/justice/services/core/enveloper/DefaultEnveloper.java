@@ -1,6 +1,7 @@
 package uk.gov.justice.services.core.enveloper;
 
 import static java.lang.String.format;
+import static uk.gov.justice.services.messaging.Envelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
 import static uk.gov.justice.services.messaging.JsonMetadata.CAUSATION;
@@ -15,6 +16,7 @@ import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.common.util.Clock;
 import uk.gov.justice.services.core.enveloper.exception.InvalidEventException;
 import uk.gov.justice.services.core.extension.EventFoundEvent;
+import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjects;
 import uk.gov.justice.services.messaging.Metadata;
@@ -41,11 +43,13 @@ import javax.json.JsonValue;
 @ApplicationScoped
 public class DefaultEnveloper implements Enveloper {
 
-    Clock clock;
+    private static ConcurrentHashMap<Class<?>, String> eventMap = new ConcurrentHashMap<>();
 
-    ObjectToJsonValueConverter objectToJsonValueConverter;
+    private Clock clock;
 
-    DefaultEnveloper() {
+    private ObjectToJsonValueConverter objectToJsonValueConverter;
+
+    public DefaultEnveloper() {
     }
 
     @Inject
@@ -53,8 +57,6 @@ public class DefaultEnveloper implements Enveloper {
         this.clock = clock;
         this.objectToJsonValueConverter = objectToJsonValueConverter;
     }
-
-    private ConcurrentHashMap<Class<?>, String> eventMap = new ConcurrentHashMap<>();
 
     /**
      * Register method, invoked automatically to register all event classes into the eventMap.
@@ -65,15 +67,26 @@ public class DefaultEnveloper implements Enveloper {
         eventMap.putIfAbsent(event.getClazz(), event.getEventName());
     }
 
+    @Override
     public Function<Object, JsonEnvelope> withMetadataFrom(final JsonEnvelope envelope) {
-        return x -> envelopeFrom(buildMetaData(x, envelope.metadata()), objectToJsonValueConverter.convert(x));
+        return x -> envelopeFrom(buildMetaData(x, envelope.metadata(), clock), objectToJsonValueConverter.convert(x));
     }
 
+    @Override
     public Function<Object, JsonEnvelope> withMetadataFrom(final JsonEnvelope envelope, final String name) {
-        return x -> envelopeFrom(buildMetaData(envelope.metadata(), name), x == null ? JsonValue.NULL : objectToJsonValueConverter.convert(x));
+        return x -> envelopeFrom(buildMetaData(envelope.metadata(), name, clock), x == null ? JsonValue.NULL : objectToJsonValueConverter.convert(x));
     }
 
-    private Metadata buildMetaData(final Object eventObject, final Metadata metadata) {
+    public Function<Object, JsonEnvelope> toEnvelopeWithMetadataFrom(final Envelope<?> envelope) {
+        return x -> envelopeFrom(buildMetaData(x, envelope.metadata(), clock), objectToJsonValueConverter.convert(x));
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> EnveloperBuilder<T> envelop(final T payload) {
+        return new DefaultEnveloperBuilder<>(payload);
+    }
+
+    private Metadata buildMetaData(final Object eventObject, final Metadata metadata, final Clock clock) {
         if (eventObject == null) {
             throw new IllegalArgumentException("Event object should not be null");
         }
@@ -82,12 +95,12 @@ public class DefaultEnveloper implements Enveloper {
             throw new InvalidEventException(format("Failed to map event. No event registered for %s", eventObject.getClass()));
         }
 
-        return buildMetaData(metadata, eventMap.get(eventObject.getClass()));
+        return buildMetaData(metadata, eventMap.get(eventObject.getClass()), clock);
     }
 
-    private Metadata buildMetaData(final Metadata metadata, final String name) {
+    private Metadata buildMetaData(final Metadata metadata, final String name, final Clock clock) {
 
-        JsonObjectBuilder metadataBuilder = JsonObjects.createObjectBuilderWithFilter(metadata.asJsonObject(),
+        final JsonObjectBuilder metadataBuilder = JsonObjects.createObjectBuilderWithFilter(metadata.asJsonObject(),
                 x -> !Arrays.asList(ID, NAME, CAUSATION, STREAM).contains(x));
 
         final JsonObject jsonObject = metadataBuilder
@@ -101,12 +114,42 @@ public class DefaultEnveloper implements Enveloper {
     }
 
     private JsonArray createCausation(final Metadata metadata) {
-        JsonArrayBuilder causation = Json.createArrayBuilder();
+        final JsonArrayBuilder causation = Json.createArrayBuilder();
+
         if (metadata.asJsonObject().containsKey(CAUSATION)) {
             metadata.asJsonObject().getJsonArray(CAUSATION).forEach(causation::add);
         }
-        causation.add(metadata.id().toString());
 
-        return causation.build();
+        return causation
+                .add(metadata.id().toString())
+                .build();
     }
+
+    private class DefaultEnveloperBuilder<T> implements EnveloperBuilder {
+
+        private String name;
+        private T payload;
+
+        private DefaultEnveloperBuilder(final T payload) {
+            this.payload = payload;
+        }
+
+        private void setName(final String name) {
+            this.name = name;
+        }
+
+        @Override
+        public EnveloperBuilder withName(final String name) {
+            this.setName(name);
+            return this;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public Envelope withMetadataFrom(final Envelope envelope) {
+            return envelopeFrom(buildMetaData(envelope.metadata(), this.name, clock), this.payload);
+        }
+
+    }
+
 }

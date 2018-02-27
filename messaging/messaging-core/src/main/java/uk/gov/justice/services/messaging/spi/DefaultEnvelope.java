@@ -6,7 +6,7 @@ import uk.gov.justice.services.messaging.Metadata;
 /**
  * Default implementation of an envelope.
  */
-public class DefaultEnvelope <T> implements Envelope<T> {
+public class DefaultEnvelope<T> implements Envelope<T> {
 
     private final Metadata metadata;
 

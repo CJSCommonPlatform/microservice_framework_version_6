@@ -2,7 +2,6 @@ package uk.gov.justice.raml.jms.core;
 
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyMap;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -11,16 +10,19 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsCollectionContaining.hasItem;
 import static org.junit.Assert.assertThat;
 import static org.raml.model.ActionType.POST;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
+import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
 
 import uk.gov.justice.services.adapter.messaging.JmsProcessor;
 import uk.gov.justice.services.event.buffer.api.AbstractEventFilter;
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 
 import java.io.File;
+import java.util.Map;
 
 import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
@@ -38,10 +40,13 @@ public class JmsEndpointGenerator_EventFilterTest extends BaseGeneratorTest {
     @Mock
     private JmsProcessor jmsProcessor;
 
+    private Map<String, String> generatorProperties;
+
     @Before
     public void setup() throws Exception {
         super.before();
         generator = new JmsEndpointGenerator();
+        generatorProperties = generatorProperties().withServiceComponentOf(EVENT_LISTENER).build();
     }
 
     @Test
@@ -55,7 +60,7 @@ public class JmsEndpointGenerator_EventFilterTest extends BaseGeneratorTest {
                                         .withMediaTypeWithoutSchema("application/vnd.structure.eventA+json")
                                         .withMediaTypeWithoutSchema("application/vnd.structure.eventB+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "StructureEventListenerEventFilter");
 
@@ -77,7 +82,7 @@ public class JmsEndpointGenerator_EventFilterTest extends BaseGeneratorTest {
                                         .withMediaTypeWithoutSchema("application/vnd.structure.eventA+json")
                                         .withMediaTypeWithoutSchema("application/vnd.structure.eventB+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
         final File packageDir = new File(outputFolder.getRoot().getAbsolutePath() + BASE_PACKAGE_FOLDER);
         assertThat(asList(packageDir.listFiles()), not(hasItem(hasProperty("name", containsString("EventFilter")))));
@@ -94,7 +99,7 @@ public class JmsEndpointGenerator_EventFilterTest extends BaseGeneratorTest {
                                         .withHttpActionType(POST)
                                         .withMediaTypeWithoutSchema("application/json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
         final File packageDir = new File(outputFolder.getRoot().getAbsolutePath() + BASE_PACKAGE_FOLDER);
         assertThat(asList(packageDir.listFiles()), not(hasItem(hasProperty("name", containsString("EventFilter")))));
@@ -107,7 +112,7 @@ public class JmsEndpointGenerator_EventFilterTest extends BaseGeneratorTest {
                         .withBaseUri("message://event/listener/message/structure")
                         .with(resource().withDefaultPostAction())
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "StructureEventListenerEventFilter");
         assertThat(clazz.getAnnotation(ApplicationScoped.class), is(not(nullValue())));
@@ -127,7 +132,7 @@ public class JmsEndpointGenerator_EventFilterTest extends BaseGeneratorTest {
                                         .withHttpActionType(POST)
                                         .withMediaTypeWithoutSchema("application/vnd.structure.eventA+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "MyHyphenatedServiceEventListenerEventFilter");
 

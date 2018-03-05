@@ -11,11 +11,11 @@ import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 import static uk.gov.justice.services.messaging.jms.HeaderConstants.JMS_HEADER_CPPNAME;
 
+import uk.gov.justice.api.EventValidationInterceptor;
 import uk.gov.justice.api.Service2EventListenerEventFilter;
 import uk.gov.justice.api.Service2EventListenerPeopleEventJmsListener;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsParameterChecker;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsProcessor;
-import uk.gov.justice.services.adapter.messaging.EventListenerValidationInterceptor;
 import uk.gov.justice.services.adapter.messaging.JmsLoggerMetadataInterceptor;
 import uk.gov.justice.services.adapter.messaging.JsonSchemaValidationInterceptor;
 import uk.gov.justice.services.common.configuration.GlobalValueProducer;
@@ -108,7 +108,7 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
     private Service2EventListenerEventFilter recordingEventListenerEventFilter;
 
     @Inject
-    private EventListenerValidationInterceptor eventListenerValidationInterceptor;
+    private EventValidationInterceptor eventListenerValidationInterceptor;
 
     @Inject
     private RecordingEventAAHandler aaEventHandler;
@@ -124,7 +124,7 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
 
     @Module
     @Classes(cdi = true, value = {
-            EventListenerValidationInterceptor.class,
+            EventValidationInterceptor.class,
             TestService2EventListenerPeopleEventJmsListener.class,
             Service2EventListenerEventFilter.class,
             Service2EventListenerPeopleEventJmsListener.class,

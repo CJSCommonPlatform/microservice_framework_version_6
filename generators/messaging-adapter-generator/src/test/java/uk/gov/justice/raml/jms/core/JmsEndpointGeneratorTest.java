@@ -1,7 +1,6 @@
 package uk.gov.justice.raml.jms.core;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyMap;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
@@ -30,7 +29,9 @@ import static org.raml.model.ActionType.POST;
 import static org.raml.model.ActionType.TRACE;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLLER;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
-import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
+import static uk.gov.justice.services.core.interceptor.DefaultInterceptorContext.interceptorContextWithInput;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.messagingRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.raml;
@@ -58,6 +59,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import javax.ejb.ActivationConfigProperty;
@@ -92,10 +94,14 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
     @Mock
     InterceptorChainProcessor interceptorChainProcessor;
 
+    private Map<String, String> generatorProperties;
+
     @Before
     public void setup() throws Exception {
         super.before();
         generator = new JmsEndpointGenerator();
+        generatorProperties = generatorProperties().withDefaultServiceComponent().build();
+
     }
 
     @Test
@@ -106,7 +112,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/structure.controller.command")
                                 .withDefaultPostAction())
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
         File packageDir = new File(outputFolder.getRoot().getAbsolutePath() + BASE_PACKAGE_FOLDER);
         assertThat(asList(packageDir.listFiles()),
@@ -122,7 +128,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/structure.event")
                                 .withDefaultPostAction())
                         .build(),
-                configurationWithBasePackage("uk.somepackage", outputFolder, emptyMap()));
+                configurationWithBasePackage("uk.somepackage", outputFolder, generatorProperties));
 
         Class<?> compiledClass = compiler.compiledClassOf("uk.somepackage", "ContextWithHyphensEventProcessorStructureEventJmsListener");
         assertThat(compiledClass.getName(), is("uk.somepackage.ContextWithHyphensEventProcessorStructureEventJmsListener"));
@@ -140,13 +146,14 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/people.controller.command")
                                 .withDefaultPostAction())
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
         File packageDir = new File(outputFolder.getRoot().getAbsolutePath() + BASE_PACKAGE_FOLDER);
-        assertThat(asList(packageDir.listFiles()),
+        final File[] a = packageDir.listFiles();
+        assertThat(asList(a),
                 hasItems(hasProperty("name", equalTo("ContextEventProcessorPeopleControllerCommandJmsListener.java")),
-                        hasProperty("name", equalTo("ContextEventProcessorStructureControllerCommandJmsListener.java"))));
-
+                        hasProperty("name", equalTo("ContextEventProcessorStructureControllerCommandJmsListener.java"))
+                ));
     }
 
     @Test
@@ -158,7 +165,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .with(httpAction(GET)
                                         .withResponseTypes("application/vnd.cakeshop.actionabc+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
         File packageDir = new File(outputFolder.getRoot().getAbsolutePath() + BASE_PACKAGE_FOLDER);
         File[] files = packageDir.listFiles();
@@ -178,7 +185,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .with(httpAction(GET)
                                         .withResponseTypes("application/vnd.cakeshop.actionabc+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
         File packageDir = new File(outputFolder.getRoot().getAbsolutePath() + BASE_PACKAGE_FOLDER);
         File[] files = packageDir.listFiles();
@@ -202,7 +209,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/structure.controller.command")
                                 .withDefaultPostAction())
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
         List<String> lines = Files.readAllLines(Paths.get(path + "/ContextEventProcessorStructureControllerCommandJmsListener.java"));
         assertThat(lines.get(0), not(containsString("Old file content")));
@@ -216,7 +223,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/structure.controller.command")
                                 .withDefaultPostAction())
                         .build(),
-                configurationWithBasePackage("uk.somepackage", outputFolder, emptyMap()));
+                configurationWithBasePackage("uk.somepackage", outputFolder, generatorProperties));
 
         Class<?> clazz = compiler.compiledClassOf("uk.somepackage", "ContextEventProcessorStructureControllerCommandJmsListener");
         assertThat(clazz.getName(), is("uk.somepackage.ContextEventProcessorStructureControllerCommandJmsListener"));
@@ -230,7 +237,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/structure.controller.command")
                                 .withDefaultPostAction())
                         .build(),
-                configurationWithBasePackage("uk.somepackage", outputFolder, emptyMap()));
+                configurationWithBasePackage("uk.somepackage", outputFolder, generatorProperties));
 
         Class<?> resourceClass = compiler.compiledClassOf("uk.somepackage", "ContextEventProcessorStructureControllerCommandJmsListener");
 
@@ -250,7 +257,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/structure.controller.command")
                                 .withDefaultPostAction())
                         .build(),
-                configurationWithBasePackage("uk.package2", outputFolder, emptyMap()));
+                configurationWithBasePackage("uk.package2", outputFolder, generatorProperties));
 
         Class<?> clazz = compiler.compiledClassOf("uk.package2", "ContextEventProcessorStructureControllerCommandJmsListener");
         assertThat(clazz.getName(), is("uk.package2.ContextEventProcessorStructureControllerCommandJmsListener"));
@@ -264,7 +271,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/structure.event")
                                 .withDefaultPostAction())
                         .build(),
-                configurationWithBasePackage("uk.somepackage", outputFolder, emptyMap()));
+                configurationWithBasePackage("uk.somepackage", outputFolder, generatorProperties));
 
         Class<?> compiledClass = compiler.compiledClassOf("uk.somepackage", "ContextEventProcessorStructureEventJmsListener");
         assertThat(compiledClass.getName(), is("uk.somepackage.ContextEventProcessorStructureEventJmsListener"));
@@ -279,7 +286,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/people.some.queue")
                                 .with(httpAction(POST, "application/vnd.people.abc+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf(COMMAND_HANDLER).build()));
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "AbcCommandHandlerPeopleSomeQueueJmsListener");
         Adapter adapterAnnotation = clazz.getAnnotation(Adapter.class);
         assertThat(adapterAnnotation, not(nullValue()));
@@ -295,7 +302,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/people.some.query")
                                 .with(httpAction(POST, "application/vnd.people.abc+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf(COMMAND_CONTROLLER).build()));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "AbcCommandControllerPeopleSomeQueryJmsListener");
         Adapter adapterAnnotation = clazz.getAnnotation(Adapter.class);
@@ -313,13 +320,36 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/people.event")
                                 .with(httpAction(POST, "application/vnd.people.abc+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf(EVENT_LISTENER).build()));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleEventListenerPeopleEventJmsListener");
         Adapter adapterAnnotation = clazz.getAnnotation(Adapter.class);
         assertThat(adapterAnnotation, not(nullValue()));
         assertThat(adapterAnnotation.value(), is(Component.EVENT_LISTENER));
 
+    }
+
+    @Test
+    public void shouldCreateJmsEndpointAnnotatedWithCustomEventListenerAdapter() throws Exception {
+        generator.run(
+                raml()
+                        .withBaseUri("message://event/listener/message/custom")
+                        .with(resource()
+                                .withRelativeUri("/people.event")
+                                .with(httpAction(POST, "application/vnd.people.abc+json")))
+                        .build(),
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("CUSTOM_EVENT_LISTENER").build()));
+
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "CustomEventListenerPeopleEventJmsListener");
+        Adapter adapterAnnotation = clazz.getAnnotation(Adapter.class);
+        assertThat(adapterAnnotation, not(nullValue()));
+        assertThat(adapterAnnotation.value(), is("CUSTOM_EVENT_LISTENER"));
+
+        final Class<?> customEventFilterInterceptor = compiler.compiledClassOf(BASE_PACKAGE, "CustomEventFilterInterceptor");
+        final Field eventFilter = customEventFilterInterceptor.getDeclaredField("eventFilter");
+        final Class<?> customEventFilterClass = eventFilter.getType();
+
+        assertThat(customEventFilterClass.getName(), is("uk.test.CustomEventListenerEventFilter"));
     }
 
     @Test
@@ -331,7 +361,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/people.event")
                                 .with(httpAction(POST, "application/vnd.people.abc+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf(EVENT_PROCESSOR).build()));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleEventProcessorPeopleEventJmsListener");
         Adapter adapterAnnotation = clazz.getAnnotation(Adapter.class);
@@ -348,7 +378,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/people.handler.command")
                                 .with(httpAction(POST, "application/vnd.people.abc+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorPeopleHandlerCommandJmsListener");
         Interceptors interceptorsAnnotation = clazz.getAnnotation(Interceptors.class);
         assertThat(interceptorsAnnotation, not(nullValue()));
@@ -364,7 +394,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/people.handler.command")
                                 .with(httpAction(POST, "application/json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorPeopleHandlerCommandJmsListener");
         Interceptors interceptorsAnnotation = clazz.getAnnotation(Interceptors.class);
         assertThat(interceptorsAnnotation, nullValue());
@@ -374,7 +404,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
 
     @Test
     public void shouldCreateJmsEndpointImplementingMessageListener() throws Exception {
-        generator.run(raml().withDefaultMessagingResource().build(), configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+        generator.run(raml().withDefaultMessagingResource().build(), configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorSomecontextControllerCommandJmsListener");
         assertThat(clazz.getInterfaces().length, equalTo(1));
@@ -383,7 +413,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
 
     @Test
     public void shouldCreateJmsEndpointWithAnnotatedInterceptorChainProcessorProperty() throws Exception {
-        generator.run(raml().withDefaultMessagingResource().build(), configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+        generator.run(raml().withDefaultMessagingResource().build(), configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorSomecontextControllerCommandJmsListener");
         Field chainProcessField = clazz.getDeclaredField(INTERCEPTOR_CHAIN_PROCESSOR);
@@ -395,7 +425,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
 
     @Test
     public void shouldCreateJmsEndpointWithAnnotatedJmsProcessorProperty() throws Exception {
-        generator.run(raml().withDefaultMessagingResource().build(), configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+        generator.run(raml().withDefaultMessagingResource().build(), configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorSomecontextControllerCommandJmsListener");
         Field jmsProcessorField = clazz.getDeclaredField("jmsProcessor");
@@ -413,7 +443,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/people.controller.command")
                                 .with(httpAction(POST, "application/vnd.people.abc+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorPeopleControllerCommandJmsListener");
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
@@ -430,7 +460,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/structure.controller.command")
                                 .with(httpAction(POST, "application/vnd.structure.abc+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorStructureControllerCommandJmsListener");
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
@@ -447,7 +477,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/structure.handler.command")
                                 .with(httpAction(POST, "application/vnd.structure.abc+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorStructureHandlerCommandJmsListener");
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
@@ -465,7 +495,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/structure.event")
                                 .with(httpAction(POST, "application/vnd.structure.abc+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorStructureEventJmsListener");
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
@@ -482,7 +512,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/structure.something")
                                 .with(httpAction(POST, "application/vnd.structure.abc+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleCommandControllerStructureSomethingJmsListener");
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
@@ -499,7 +529,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/lifecycle.blah")
                                 .with(httpAction(POST, "application/vnd.lifecycle.abc+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "AaaCommandHandlerLifecycleBlahJmsListener");
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
@@ -515,7 +545,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/people.event")
                                 .with(httpAction(POST, "application/vnd.people.abc+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf(EVENT_LISTENER).build()));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorPeopleEventJmsListener");
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
@@ -534,7 +564,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                         .withHttpActionType(POST)
                                         .withMediaTypeWithDefaultSchema("application/vnd.structure.test-cmd+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorStructureControllerCommandJmsListener");
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
@@ -553,7 +583,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                         .withHttpActionType(POST)
                                         .withMediaTypeWithDefaultSchema("application/vnd.structure.test-cmd+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorStructureControllerCommandJmsListener");
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
@@ -573,7 +603,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                         .withHttpActionType(POST)
                                         .withMediaTypeWithDefaultSchema("application/vnd.structure.test-event+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventListenerStructureEventJmsListener");
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
@@ -591,7 +621,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                         .withHttpActionType(POST)
                                         .withMediaTypeWithDefaultSchema("application/vnd.structure.events.test-event+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorStructureEventJmsListener");
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
@@ -611,7 +641,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                         .withHttpActionType(POST)
                                         .withMediaTypeWithoutSchema("application/json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorSomeEventJmsListener");
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
@@ -633,7 +663,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .with(httpAction(PATCH, "application/vnd.structure.test-cmd6+json"))
                                 .with(httpAction(TRACE, "application/vnd.structure.test-cmd7+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorStructureControllerCommandJmsListener");
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
@@ -653,7 +683,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                         .withMediaTypeWithDefaultSchema("application/vnd.people.command1+json")
                                         .withMediaTypeWithDefaultSchema("application/vnd.people.command2+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorPeopleControllerCommandJmsListener");
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
@@ -666,7 +696,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
 
     @Test
     public void shouldCreateJmsEndpointWithOnMessage() throws Exception {
-        generator.run(raml().withDefaultMessagingResource().build(), configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+        generator.run(raml().withDefaultMessagingResource().build(), configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorSomecontextControllerCommandJmsListener");
 
@@ -681,7 +711,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
     @Test
     @SuppressWarnings("unchecked")
     public void shouldCallJmsProcessorWhenOnMessageIsInvoked() throws Exception {
-        generator.run(raml().withDefaultMessagingResource().build(), configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+        generator.run(raml().withDefaultMessagingResource().build(), configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorSomecontextControllerCommandJmsListener");
         Object object = instantiate(clazz);
@@ -709,7 +739,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/people.event")
                                 .with(httpAction(POST, "application/vnd.context1.event.abc+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf(EVENT_LISTENER).build()));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleEventListenerPeopleEventJmsListener");
         ActivationConfigProperty[] activationConfig = clazz.getAnnotation(MessageDriven.class).activationConfig();
@@ -732,7 +762,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/people.controller.command")
                                 .with(httpAction(POST, "application/vnd.people.event.abc+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleCommandControllerPeopleControllerCommandJmsListener");
         ActivationConfigProperty[] activationConfig = clazz.getAnnotation(MessageDriven.class).activationConfig();
@@ -754,7 +784,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/structure.event")
                                 .with(httpAction(POST, "application/vnd.structure.abc+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorStructureEventJmsListener");
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
@@ -772,7 +802,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/people.person-added")
                                 .with(httpAction(POST, "application/vnd.people.abc+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withCustomMDBPool()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf(EVENT_LISTENER).withCustomMDBPool()));
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleEventListenerPeoplePersonAddedJmsListener");
         Pool poolAnnotation = clazz.getAnnotation(Pool.class);
         assertThat(poolAnnotation, not(nullValue()));
@@ -787,7 +817,7 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
                                 .withRelativeUri("/people.person-added")
                                 .with(httpAction(POST, "application/vnd.people.abc+json")))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
         Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleEventListenerPeoplePersonAddedJmsListener");
         Pool poolAnnotation = clazz.getAnnotation(Pool.class);
         assertThat(poolAnnotation, nullValue());

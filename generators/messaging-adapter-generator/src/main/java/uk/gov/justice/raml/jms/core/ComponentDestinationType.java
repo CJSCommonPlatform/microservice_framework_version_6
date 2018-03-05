@@ -40,6 +40,26 @@ public class ComponentDestinationType {
      *                                  Component}
      */
     public Class<? extends Destination> inputTypeFor(final String component) {
+        if (component.contains(COMMAND_API)) {
+            return components.get(COMMAND_API);
+        }
+
+        if (component.contains(COMMAND_CONTROLLER)) {
+            return components.get(COMMAND_CONTROLLER);
+        }
+
+        if (component.contains(COMMAND_HANDLER)) {
+            return components.get(COMMAND_HANDLER);
+        }
+
+        if (component.contains(EVENT_PROCESSOR)) {
+            return components.get(EVENT_PROCESSOR);
+        }
+
+        if (component.contains(EVENT_LISTENER)) {
+            return components.get(EVENT_LISTENER);
+        }
+
         if (components.containsKey(component)) {
             return components.get(component);
         }
@@ -47,8 +67,12 @@ public class ComponentDestinationType {
         throw new IllegalArgumentException("No input destination type defined for service component of type " + component);
     }
 
-
     public boolean isSupported(final String component) {
-        return components.containsKey(component);
+        return component.contains(COMMAND_API)
+                || component.contains(COMMAND_CONTROLLER)
+                || component.contains(COMMAND_HANDLER)
+                || component.contains(EVENT_PROCESSOR)
+                || component.contains(EVENT_LISTENER)
+                || components.containsKey(component);
     }
 }

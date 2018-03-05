@@ -1,0 +1,10 @@
+#%RAML 0.8
+title: API Using media type in the URL
+baseUri: message://event/listener/message/other
+version: v1
+/other.event:
+  post:
+    body:
+        application/vnd.other.recipe-added+json:
+            schema: !include json/schema/other.recipe-added.json
+            example: !include json/add-recipe.json

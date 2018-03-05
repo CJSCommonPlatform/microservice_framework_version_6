@@ -5,6 +5,10 @@ import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
 import uk.gov.justice.services.generators.commons.helper.MessagingAdapterBaseUri;
 
+import java.util.Map;
+
+import org.raml.model.Action;
+import org.raml.model.ActionType;
 import org.raml.model.Resource;
 
 public class JmsEndPointGeneratorUtil {
@@ -26,7 +30,7 @@ public class JmsEndPointGeneratorUtil {
         return EVENT_LISTENER.equals(baseUri.component()) && !containsGeneralJsonMimeType(resource.getActions());
     }
 
-    static boolean shouldListenToAllMessages(final Resource resource, final MessagingAdapterBaseUri baseUri) {
-        return EVENT_LISTENER.equals(baseUri.component()) || containsGeneralJsonMimeType(resource.getActions());
+    static boolean shouldListenToAllMessages(final Map<ActionType, Action> resourceActions, final MessagingAdapterBaseUri baseUri) {
+        return EVENT_LISTENER.equals(baseUri.component()) || containsGeneralJsonMimeType(resourceActions);
     }
 }

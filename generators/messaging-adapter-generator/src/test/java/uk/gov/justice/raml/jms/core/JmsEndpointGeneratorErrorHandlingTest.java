@@ -2,11 +2,15 @@ package uk.gov.justice.raml.jms.core;
 
 import static java.util.Collections.emptyMap;
 import static org.raml.model.ActionType.POST;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
+import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpAction;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
+import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
 
+import uk.gov.justice.services.generators.commons.config.GeneratorProperties;
 import uk.gov.justice.services.generators.commons.validator.RamlValidationException;
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 
@@ -26,7 +30,6 @@ public class JmsEndpointGeneratorErrorHandlingTest extends BaseGeneratorTest {
         super.before();
         generator = new JmsEndpointGenerator();
     }
-
 
     @Test
     public void shouldThrowExceptionIfNoResourcesInRaml() throws Exception {
@@ -98,7 +101,7 @@ public class JmsEndpointGeneratorErrorHandlingTest extends BaseGeneratorTest {
     }
 
     @Test
-    public void shouldThrowExceptionWhenUnsupportedFrameworkComponentSetInBaseUri() throws Exception {
+    public void shouldThrowExceptionWhenUnsupportedFrameworkComponent() throws Exception {
         exception.expect(IllegalStateException.class);
         exception.expectMessage("JMS Endpoint generation is unsupported for framework component type QUERY_API");
 
@@ -109,7 +112,6 @@ public class JmsEndpointGeneratorErrorHandlingTest extends BaseGeneratorTest {
                                 .withRelativeUri("/structure.event")
                                 .withDefaultPostAction())
                         .build(),
-                configurationWithBasePackage("uk.somepackage", outputFolder, emptyMap()));
+                configurationWithBasePackage("uk.somepackage", outputFolder, generatorProperties().withServiceComponentOf(QUERY_API).build()));
     }
-
 }

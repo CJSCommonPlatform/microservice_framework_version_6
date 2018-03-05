@@ -14,6 +14,7 @@
 
     <modules>
         <module>example-event-listener</module>
+        <module>other-event-listener</module>
         <module>example-event-processor</module>
     </modules>
 </project>

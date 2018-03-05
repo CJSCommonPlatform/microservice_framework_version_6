@@ -7,6 +7,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import uk.gov.justice.raml.jms.core.ClassNameFactory;
 import uk.gov.justice.services.core.interceptor.Interceptor;
 import uk.gov.justice.services.core.interceptor.InterceptorChain;
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
@@ -35,16 +36,17 @@ public class EventFilterInterceptorCodeGeneratorTest {
     @Test
     public void shouldGenerateAWorkingEventFilterInterceptorThatUsesACustomEventFilter() throws Exception {
 
-        final String componentName = "MY_CUSTOM_EVENT_LISTENER";
-
         final String packageName = "uk.gov.justice.api.interceptor.filter";
         final String simpleName = "MyCustomEventFilterInterceptor";
 
         final ClassName eventFilterClassName = get(MyCustomEventFilter.class);
+        final ClassNameFactory classNameFactory = mock(ClassNameFactory.class);
+
+        when(classNameFactory.classNameWith("EventFilterInterceptor")).thenReturn(simpleName);
 
         final TypeSpec typeSpec = eventFilterInterceptorCodeGenerator.generate(
                 eventFilterClassName,
-                componentName);
+                classNameFactory);
 
         final File outputDirectory = getOutputDirectory("./target/test-generation");
         builder(packageName, typeSpec)

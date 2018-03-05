@@ -8,6 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.jms.HeaderConstants.JMS_HEADER_CPPNAME;
 
+import uk.gov.justice.raml.jms.core.ClassNameFactory;
 import uk.gov.justice.services.adapter.messaging.JsonSchemaValidationInterceptor;
 import uk.gov.justice.services.messaging.jms.HeaderConstants;
 import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil;
@@ -39,16 +40,18 @@ public class EventValidationInterceptorCodeGeneratorTest {
         final String packageName = "uk.gov.justice.api.interceptor.filter";
         final String simpleName = "MyCustomEventValidationInterceptor";
 
-        final String componentName = "MY_CUSTOM_EVENT_LISTENER";
         final ClassName eventFilterClassName = get(MyCustomEventFilter.class);
+        final ClassNameFactory classNameFactory = mock(ClassNameFactory.class);
+
+        when(classNameFactory.classNameWith("EventValidationInterceptor")).thenReturn(simpleName);
 
         final TypeSpec typeSpec = eventValidationInterceptorCodeGenerator.generate(
                 eventFilterClassName,
-                componentName);
+                classNameFactory);
 
         final File codeGenerationOutputDirectory = getDirectory(CODE_GENERATION_OUTPUT_DIRECTORY);
         final File compilationOutputDirectory = getDirectory(COMPILATION_OUTPUT_DIRECTORY);
-        
+
         builder(packageName, typeSpec)
                 .addStaticImport(get(HeaderConstants.class), "JMS_HEADER_CPPNAME")
                 .build()

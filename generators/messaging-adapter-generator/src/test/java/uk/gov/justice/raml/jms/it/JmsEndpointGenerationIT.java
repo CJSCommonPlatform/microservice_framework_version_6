@@ -6,10 +6,10 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import uk.gov.justice.api.ContextaEventProcessorPublicEventJmsListener;
-import uk.gov.justice.api.EventValidationInterceptor;
 import uk.gov.justice.api.Service1CommandControllerStructureControllerCommandJmsListener;
 import uk.gov.justice.api.Service1CommandHandlerStructureHandlerCommandJmsListener;
-import uk.gov.justice.api.Service2EventListenerEventFilter;
+import uk.gov.justice.api.Service2EventListenerPeopleEventEventFilter;
+import uk.gov.justice.api.Service2EventListenerPeopleEventEventValidationInterceptor;
 import uk.gov.justice.api.Service2EventListenerPeopleEventJmsListener;
 import uk.gov.justice.api.Service2EventProcessorStructureEventJmsListener;
 import uk.gov.justice.api.mapper.ListenerMediaTypeToSchemaIdMapper;
@@ -90,7 +90,7 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
             Service1CommandControllerStructureControllerCommandJmsListener.class,
             Service2EventProcessorStructureEventJmsListener.class,
             Service2EventListenerPeopleEventJmsListener.class,
-            Service2EventListenerEventFilter.class,
+            Service2EventListenerPeopleEventEventFilter.class,
             Service1CommandHandlerStructureHandlerCommandJmsListener.class,
             ContextaEventProcessorPublicEventJmsListener.class,
             ObjectMapperProducer.class,
@@ -101,7 +101,7 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
             JsonSchemaLoader.class,
             LoggerProducer.class,
             AllowAllEventFilter.class,
-            EventValidationInterceptor.class,
+            Service2EventListenerPeopleEventEventValidationInterceptor.class,
             DefaultJmsParameterChecker.class,
             TestServiceContextNameProvider.class,
             DefaultJmsMessageLoggerHelper.class,

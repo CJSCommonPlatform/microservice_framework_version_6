@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet
+            id="event-buffer-002"
+            author="TechPod"
+            logicalFilePath="002-add-source-to-stream-buffer.changelog.xml">
+
+        <dropPrimaryKey
+                constraintName="stream_buffer_pkey"
+                tableName="stream_buffer"
+        />
+
+        <addColumn
+                tableName="stream_buffer">
+            <column
+                    name="source"
+                    type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <addPrimaryKey
+                tableName="stream_buffer"
+                constraintName="stream_buffer_pkey"
+                columnNames="stream_id,source,version"/>
+
+        <rollback>
+            <dropPrimaryKey
+                    constraintName="stream_buffer_pkey"
+                    tableName="stream_buffer"
+            />
+            <dropColumn tableName="stream_buffer">
+                <column
+                        name="source"
+                        type="varchar(100)"/>
+            </dropColumn>
+            <addPrimaryKey
+                    tableName="stream_buffer"
+                    constraintName="stream_buffer_pkey"
+                    columnNames="stream_id,version"/>
+        </rollback>
+
+    </changeSet>
+</databaseChangeLog>

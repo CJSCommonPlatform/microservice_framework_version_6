@@ -1,5 +1,7 @@
 package uk.gov.justice.services.event.buffer.core.service;
 
+import static java.util.Optional.of;
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
@@ -35,39 +37,43 @@ public class AnsiSQLBasedBufferInitialisationStrategyTest {
     @Test
     public void shouldAddZeroStatusIfItDoesNotExist() throws Exception {
 
-        final UUID streamId = UUID.randomUUID();
-        when(streamStatusRepository.findByStreamId(streamId)).thenReturn(Optional.empty());
-        bufferInitialisationStrategy.initialiseBuffer(streamId);
+        final UUID streamId = randomUUID();
+        final String source = "a source";
+        when(streamStatusRepository.findByStreamIdAndSource(streamId, source)).thenReturn(Optional.empty());
+        bufferInitialisationStrategy.initialiseBuffer(streamId, source);
 
-        verify(streamStatusRepository).insert(new StreamStatus(streamId, 0L));
+        verify(streamStatusRepository).insert(new StreamStatus(streamId, 0L, source));
     }
 
     @Test
     public void shouldReturnVersionZeroIfBufferStatusDoesNotExist() throws Exception {
 
-        final UUID streamId = UUID.randomUUID();
-        when(streamStatusRepository.findByStreamId(streamId)).thenReturn(Optional.empty());
-        assertThat(bufferInitialisationStrategy.initialiseBuffer(streamId), is(0L));
+        final UUID streamId = randomUUID();
+        final String source = "a source";
+        when(streamStatusRepository.findByStreamIdAndSource(streamId, source)).thenReturn(Optional.empty());
+        assertThat(bufferInitialisationStrategy.initialiseBuffer(streamId, source), is(0L));
 
     }
 
     @Test
     public void shouldNotAddStatusIfItExists() throws Exception {
-        final UUID streamId = UUID.randomUUID();
-        when(streamStatusRepository.findByStreamId(streamId)).thenReturn(Optional.of(new StreamStatus(streamId, 3L)));
-        bufferInitialisationStrategy.initialiseBuffer(streamId);
+        final UUID streamId = randomUUID();
+        final String source = "a source";
+        when(streamStatusRepository.findByStreamIdAndSource(streamId, source)).thenReturn(of(new StreamStatus(streamId, 3L, source)));
+        bufferInitialisationStrategy.initialiseBuffer(streamId, source);
 
-        verify(streamStatusRepository).findByStreamId(streamId);
+        verify(streamStatusRepository).findByStreamIdAndSource(streamId, source);
         verifyNoMoreInteractions(streamStatusRepository);
     }
 
     @Test
     public void shouldReturnCurrentVersionIfItExists() throws Exception {
-        final UUID streamId = UUID.randomUUID();
+        final UUID streamId = randomUUID();
+        final String source = "a source";
         final long currentVersion = 3L;
-        when(streamStatusRepository.findByStreamId(streamId)).thenReturn(Optional.of(new StreamStatus(streamId, currentVersion)));
-        bufferInitialisationStrategy.initialiseBuffer(streamId);
+        when(streamStatusRepository.findByStreamIdAndSource(streamId, source)).thenReturn(of(new StreamStatus(streamId, currentVersion, source)));
+        bufferInitialisationStrategy.initialiseBuffer(streamId, source);
 
-        assertThat(bufferInitialisationStrategy.initialiseBuffer(streamId), is(currentVersion));
+        assertThat(bufferInitialisationStrategy.initialiseBuffer(streamId, source), is(currentVersion));
     }
 }

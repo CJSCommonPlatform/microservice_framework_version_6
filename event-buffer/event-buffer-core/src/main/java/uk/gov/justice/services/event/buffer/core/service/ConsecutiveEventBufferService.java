@@ -19,6 +19,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 @ApplicationScoped
@@ -61,8 +62,9 @@ public class ConsecutiveEventBufferService implements EventBufferService {
 
         final UUID streamId = incomingEvent.metadata().streamId().orElseThrow(() -> new IllegalStateException("Event must have a a streamId "));
         final long incomingEventVersion = versionOf(incomingEvent);
+        final String source = getSource(incomingEvent);
 
-        final long currentVersion = bufferInitialisationStrategy.initialiseBuffer(streamId);
+        final long currentVersion = bufferInitialisationStrategy.initialiseBuffer(streamId, source);
 
         if (incomingEventObsolete(incomingEventVersion, currentVersion)) {
             logger.warn("Message : {} is an obsolete version", incomingEvent);
@@ -75,7 +77,7 @@ public class ConsecutiveEventBufferService implements EventBufferService {
 
         } else {
             logger.trace("Message : {} version is valid sending stream to dispatcher", incomingEvent);
-            streamStatusRepository.update(new StreamStatus(streamId, incomingEventVersion));
+            streamStatusRepository.update(new StreamStatus(streamId, incomingEventVersion, source));
             return bufferedEvents(streamId, incomingEvent, incomingEventVersion);
         }
     }
@@ -93,9 +95,13 @@ public class ConsecutiveEventBufferService implements EventBufferService {
     }
 
     private Stream<JsonEnvelope> bufferedEvents(final UUID streamId, final JsonEnvelope incomingEvent, final long incomingEventVersion) {
-        return concat(Stream.of(incomingEvent), consecutiveEventStreamFromBuffer(streamBufferRepository.streamById(streamId), incomingEventVersion)
+        final String source = getSource(incomingEvent);
+        return concat(Stream.of(incomingEvent), consecutiveEventStreamFromBuffer(streamBufferRepository.findStreamByIdAndSource(streamId, source), incomingEventVersion)
                 .peek(streamBufferEvent -> streamBufferRepository.remove(streamBufferEvent))
-                .peek(streamBufferEvent -> streamStatusRepository.update(new StreamStatus(streamBufferEvent.getStreamId(), streamBufferEvent.getVersion())))
+                .peek(streamBufferEvent -> streamStatusRepository.update(new StreamStatus(
+                        streamBufferEvent.getStreamId(),
+                        streamBufferEvent.getVersion(),
+                        source)))
                 .map(streamBufferEvent -> jsonObjectEnvelopeConverter.asEnvelope(streamBufferEvent.getEvent())));
     }
 
@@ -103,7 +109,8 @@ public class ConsecutiveEventBufferService implements EventBufferService {
         streamBufferRepository.insert(
                 new StreamBufferEvent(streamId,
                         incomingEventVersion,
-                        jsonObjectEnvelopeConverter.asJsonString(incomingEvent)));
+                        jsonObjectEnvelopeConverter.asJsonString(incomingEvent),
+                        getSource(incomingEvent)));
 
     }
 
@@ -117,5 +124,9 @@ public class ConsecutiveEventBufferService implements EventBufferService {
 
     private boolean incomingEventObsolete(final long incomingEventVersion, final long currentVersion) {
         return incomingEventVersion - currentVersion <= 0;
+    }
+
+    private String getSource(final JsonEnvelope incomingEvent) {
+        return StringUtils.substringBefore(incomingEvent.metadata().name(), ".");
     }
 }

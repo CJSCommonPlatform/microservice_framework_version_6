@@ -15,9 +15,9 @@ public class PostgreSQLBasedBufferInitialisationStrategy implements BufferInitia
     }
 
     @Override
-    public long initialiseBuffer(final UUID streamId) {
-        streamStatusRepository.insertOrDoNothing(new StreamStatus(streamId, INITIAL_VERSION));
-        return streamStatusRepository.findByStreamId(streamId)
+    public long initialiseBuffer(final UUID streamId, final String source) {
+        streamStatusRepository.insertOrDoNothing(new StreamStatus(streamId, INITIAL_VERSION, source));
+        return streamStatusRepository.findByStreamIdAndSource(streamId, source)
                 .orElseThrow(() -> new IllegalStateException("stream status cannot be empty"))
                 .getVersion();
     }

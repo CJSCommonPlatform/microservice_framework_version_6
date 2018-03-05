@@ -118,15 +118,17 @@ public class CakeShopIT {
     private static final String CAKES_RESOURCE_QUERY_URI = "http://localhost:" + RANDOM_HTTP_PORT + "/example-query-api/query/api/rest/cakeshop/cakes/";
     private static final String OVEN_RESOURCE_CUSTOM_URI = "http://localhost:" + RANDOM_HTTP_PORT + "/example-custom-api/custom/api/rest/cakeshop/ovens/";
 
-    private static final String ADD_RECIPE_MEDIA_TYPE = "application/vnd.example.add-recipe+json";
-    private static final String RENAME_RECIPE_MEDIA_TYPE = "application/vnd.example.rename-recipe+json";
-    private static final String REMOVE_RECIPE_MEDIA_TYPE = "application/vnd.example.remove-recipe+json";
-    private static final String MAKE_CAKE_MEDIA_TYPE = "application/vnd.example.make-cake+json";
-    private static final String ORDER_CAKE_MEDIA_TYPE = "application/vnd.example.order-cake+json";
-    private static final String QUERY_RECIPE_MEDIA_TYPE = "application/vnd.example.recipe+json";
-    private static final String QUERY_RECIPES_MEDIA_TYPE = "application/vnd.example.recipes+json";
-    private static final String QUERY_CAKES_MEDIA_TYPE = "application/vnd.example.cakes+json";
-    private static final String QUERY_ORDER_MEDIA_TYPE = "application/vnd.example.order+json";
+    private static final String SOURCE = "example";
+
+    private static final String ADD_RECIPE_MEDIA_TYPE = "application/vnd." + SOURCE + ".add-recipe+json";
+    private static final String RENAME_RECIPE_MEDIA_TYPE = "application/vnd." + SOURCE + ".rename-recipe+json";
+    private static final String REMOVE_RECIPE_MEDIA_TYPE = "application/vnd." + SOURCE + ".remove-recipe+json";
+    private static final String MAKE_CAKE_MEDIA_TYPE = "application/vnd." + SOURCE + ".make-cake+json";
+    private static final String ORDER_CAKE_MEDIA_TYPE = "application/vnd." + SOURCE + ".order-cake+json";
+    private static final String QUERY_RECIPE_MEDIA_TYPE = "application/vnd." + SOURCE + ".recipe+json";
+    private static final String QUERY_RECIPES_MEDIA_TYPE = "application/vnd." + SOURCE + ".recipes+json";
+    private static final String QUERY_CAKES_MEDIA_TYPE = "application/vnd." + SOURCE + ".cakes+json";
+    private static final String QUERY_ORDER_MEDIA_TYPE = "application/vnd." + SOURCE + ".order+json";
 
     private static final String JMS_USERNAME = "jmsuser";
 
@@ -692,8 +694,8 @@ public class CakeShopIT {
         sendTo(RECIPES_RESOURCE_URI + recipeId).request()
                 .post(entity(addRecipeCommand(), ADD_RECIPE_MEDIA_TYPE));
 
-        await().until(() -> streamStatus(recipeId).isPresent());
-        assertThat(streamStatus(recipeId).get().getVersion(), is(1L));
+        await().until(() -> streamStatus(recipeId, SOURCE).isPresent());
+        assertThat(streamStatus(recipeId, SOURCE).get().getVersion(), is(1L));
     }
 
     @Test
@@ -854,8 +856,8 @@ public class CakeShopIT {
     }
 
 
-    private Optional<StreamStatus> streamStatus(final String recipeId) {
-        return STREAM_STATUS_REPOSITORY.findByStreamId(UUID.fromString(recipeId));
+    private Optional<StreamStatus> streamStatus(final String recipeId, final String source) {
+        return STREAM_STATUS_REPOSITORY.findByStreamIdAndSource(UUID.fromString(recipeId), source);
     }
 
     private static DataSource initViewStoreDb() throws Exception {

@@ -49,13 +49,14 @@ public class StreamStatusJdbcRepositoryTest {
     public void shouldAttemptToInsert() throws Exception {
         //this is postgreSQL only, so we can't write repository level integration test,
 
+        final String source = "a source";
 
-        when(connection.prepareStatement("INSERT INTO stream_status (version, stream_id) VALUES(?, ?) ON CONFLICT DO NOTHING"))
+        when(connection.prepareStatement("INSERT INTO stream_status (version, stream_id, source) VALUES (?, ?, ?) ON CONFLICT DO NOTHING"))
                 .thenReturn(statement);
 
         final UUID streamId = randomUUID();
         final long version = 1l;
-        repository.insertOrDoNothing(new StreamStatus(streamId, version));
+        repository.insertOrDoNothing(new StreamStatus(streamId, version, source));
 
         verify(statement).setLong(1, version);
         verify(statement).setObject(2, streamId);

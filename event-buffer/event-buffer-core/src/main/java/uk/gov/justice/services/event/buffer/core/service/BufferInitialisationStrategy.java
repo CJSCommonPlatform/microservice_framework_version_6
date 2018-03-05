@@ -12,7 +12,7 @@ public interface BufferInitialisationStrategy {
      * @param streamId - id of the stream to be initialised
      * @return - version of the last event that was in order
      */
-    long initialiseBuffer(final UUID streamId);
+    long initialiseBuffer(final UUID streamId, final String source);
 
 
 }

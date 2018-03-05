@@ -4,19 +4,20 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * Entity to represent event stream status
  */
 public class StreamStatus {
 
-    private UUID streamId;
-    private long version;
+    private final UUID streamId;
+    private final long version;
+    private final String source;
 
-    public StreamStatus(final UUID streamId, final long version) {
+    public StreamStatus(final UUID streamId, final long version, final String source) {
         this.streamId = streamId;
         this.version = version;
+        this.source = source;
     }
 
     public UUID getStreamId() {
@@ -27,12 +28,17 @@ public class StreamStatus {
         return version;
     }
 
+    public String getSource() {
+        return source;
+    }
+
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("streamId", streamId)
-                .append("version", version)
-                .toString();
+        return "StreamStatus{" +
+                "streamId=" + streamId +
+                ", version=" + version +
+                ", source='" + source + '\'' +
+                '}';
     }
 
     @Override
@@ -46,6 +52,7 @@ public class StreamStatus {
         return new EqualsBuilder()
                 .append(streamId, that.streamId)
                 .append(version, that.version)
+                .append(source, that.source)
                 .isEquals();
     }
 
@@ -54,6 +61,7 @@ public class StreamStatus {
         return new HashCodeBuilder(17, 37)
                 .append(streamId)
                 .append(version)
+                .append(source)
                 .toHashCode();
     }
 }

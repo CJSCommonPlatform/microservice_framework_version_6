@@ -1,5 +1,7 @@
 package uk.gov.justice.services.event.buffer.core.service;
 
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -34,27 +36,30 @@ public class PostgreSQLBasedBufferInitialisationStrategyTest {
     @Test
     public void shouldTryInsertingZeroBufferStatus() throws Exception {
         final UUID streamId = randomUUID();
-        when(streamStatusRepository.findByStreamId(streamId)).thenReturn(Optional.of(new StreamStatus(streamId, 3)));
-        bufferInitialisationStrategy.initialiseBuffer(streamId);
+        final String source = "a source";
+        when(streamStatusRepository.findByStreamIdAndSource(streamId, source)).thenReturn(of(new StreamStatus(streamId, 3, source)));
+        bufferInitialisationStrategy.initialiseBuffer(streamId, source);
 
-        verify(streamStatusRepository).insertOrDoNothing(new StreamStatus(streamId, 0));
+        verify(streamStatusRepository).insertOrDoNothing(new StreamStatus(streamId, 0, source));
     }
 
     @Test
     public void shouldReturnCurrentVersion() {
         final UUID streamId = randomUUID();
-        when(streamStatusRepository.findByStreamId(streamId)).thenReturn(Optional.of(new StreamStatus(streamId, 3)));
+        final String source = "a source";
+        when(streamStatusRepository.findByStreamIdAndSource(streamId, source)).thenReturn(of(new StreamStatus(streamId, 3, source)));
 
-        final long currentVersion = bufferInitialisationStrategy.initialiseBuffer(streamId);
+        final long currentVersion = bufferInitialisationStrategy.initialiseBuffer(streamId, source);
         assertThat(currentVersion, is(3L));
     }
 
     @Test(expected = IllegalStateException.class)
     public void shouldThrowExceptionIfStatusNotFound() throws Exception {
         final UUID streamId = randomUUID();
-        when(streamStatusRepository.findByStreamId(streamId)).thenReturn(Optional.empty());
+        final String source = "a source";
+        when(streamStatusRepository.findByStreamIdAndSource(streamId, source)).thenReturn(empty());
 
-        bufferInitialisationStrategy.initialiseBuffer(streamId);
+        bufferInitialisationStrategy.initialiseBuffer(streamId, source);
 
     }
 }

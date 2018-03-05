@@ -6,18 +6,20 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 
 public class StreamBufferEvent implements Comparable<StreamBufferEvent> {
-    private UUID streamId;
-    private long version;
-    private String event;
+    private final UUID streamId;
+    private final long version;
+    private final String event;
+    private final String source;
 
-    public StreamBufferEvent(final UUID streamId, final long version, final String event) {
+    public StreamBufferEvent(final UUID streamId, final long version, final String event,
+                             final String source) {
         this.streamId = streamId;
         this.version = version;
         this.event = event;
+        this.source = source;
     }
 
     public UUID getStreamId() {
@@ -32,41 +34,52 @@ public class StreamBufferEvent implements Comparable<StreamBufferEvent> {
         return event;
     }
 
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this)
-                .append("streamId", streamId)
-                .append("version", version)
-                .append("event", event)
-                .toString();
+    public String getSource() {
+        return source;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
+    public String toString() {
+        return "StreamBufferEvent{" +
+                "streamId=" + streamId +
+                ", version=" + version +
+                ", event='" + event + '\'' +
+                ", source='" + source + '\'' +
+                '}';
+    }
 
-        if (o == null || getClass() != o.getClass()) return false;
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
 
-        StreamBufferEvent that = (StreamBufferEvent) o;
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        final StreamBufferEvent that = (StreamBufferEvent) o;
 
         return new EqualsBuilder()
-                .append(version, that.version)
-                .append(streamId, that.streamId)
-                .append(event, that.event)
+                .append(getVersion(), that.getVersion())
+                .append(getStreamId(), that.getStreamId())
+                .append(getEvent(), that.getEvent())
+                .append(getSource(), that.getSource())
                 .isEquals();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-                .append(streamId)
-                .append(version)
-                .append(event)
+                .append(getStreamId())
+                .append(getVersion())
+                .append(getEvent())
+                .append(getSource())
                 .toHashCode();
     }
 
     @Override
-    public int compareTo(StreamBufferEvent streamBufferEvent) {
+    public int compareTo(final StreamBufferEvent streamBufferEvent) {
         return toIntExact(this.getVersion() - streamBufferEvent.getVersion());
     }
 }

@@ -21,13 +21,14 @@ import javax.sql.DataSource;
 @ApplicationScoped
 public class StreamBufferJdbcRepository {
 
-    private static final String INSERT = "INSERT INTO stream_buffer (stream_id, version, event) VALUES(?, ?, ?)";
-    private static final String SELECT_BY_STREAM_ID = "SELECT * FROM stream_buffer WHERE stream_id=? ORDER BY version";
-    private static final String DELETE_BY_STREAM_ID_VERSION = "DELETE FROM stream_buffer WHERE stream_id=? AND version=?";
+    private static final String INSERT = "INSERT INTO stream_buffer (stream_id, version, event, source) VALUES (?, ?, ?, ?)";
+    private static final String SELECT_STREAM_BUFFER_BY_STREAM_ID_AND_SOURCE = "SELECT stream_id, version, event, source FROM stream_buffer WHERE stream_id=? AND source=? ORDER BY version";
+    private static final String DELETE_BY_STREAM_ID_VERSION = "DELETE FROM stream_buffer WHERE stream_id=? AND version=? AND source=?";
 
     private static final String STREAM_ID = "stream_id";
     private static final String VERSION = "version";
     private static final String EVENT = "event";
+    private static final String SOURCE = "source";
 
     @Inject
     private JdbcRepositoryHelper jdbcRepositoryHelper;
@@ -56,16 +57,19 @@ public class StreamBufferJdbcRepository {
             ps.setObject(1, bufferedEvent.getStreamId());
             ps.setLong(2, bufferedEvent.getVersion());
             ps.setString(3, bufferedEvent.getEvent());
+            ps.setString(4, bufferedEvent.getSource());
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new JdbcRepositoryException(format("Exception while storing event in the buffer: %s", bufferedEvent), e);
         }
     }
 
-    public Stream<StreamBufferEvent> streamById(final UUID id) {
+    public Stream<StreamBufferEvent> findStreamByIdAndSource(final UUID id, final String source) {
         try {
-            final PreparedStatementWrapper ps = jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SELECT_BY_STREAM_ID);
+            final PreparedStatementWrapper ps = jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SELECT_STREAM_BUFFER_BY_STREAM_ID_AND_SOURCE);
             ps.setObject(1, id);
+            ps.setString(2, source);
+
             return jdbcRepositoryHelper.streamOf(ps, entityFromFunction());
 
         } catch (SQLException e) {
@@ -78,6 +82,7 @@ public class StreamBufferJdbcRepository {
         try (final PreparedStatementWrapper ps = jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, DELETE_BY_STREAM_ID_VERSION)) {
             ps.setObject(1, streamBufferEvent.getStreamId());
             ps.setLong(2, streamBufferEvent.getVersion());
+            ps.setString(3, streamBufferEvent.getSource());
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new JdbcRepositoryException(format("Exception while removing event from the buffer: %s", streamBufferEvent), e);
@@ -90,7 +95,9 @@ public class StreamBufferJdbcRepository {
             try {
                 return new StreamBufferEvent((UUID) resultSet.getObject(STREAM_ID),
                                                     resultSet.getLong(VERSION),
-                                                    resultSet.getString(EVENT));
+                                                    resultSet.getString(EVENT),
+                                                    resultSet.getString(SOURCE)
+                        );
             } catch (final SQLException e) {
                 throw new JdbcRepositoryException("Unexpected SQLException mapping ResultSet to StreamBufferEntity instance", e);
             }

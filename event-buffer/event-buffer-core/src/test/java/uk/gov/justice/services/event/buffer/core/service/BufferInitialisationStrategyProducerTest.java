@@ -1,6 +1,7 @@
 package uk.gov.justice.services.event.buffer.core.service;
 
 
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
@@ -50,20 +51,22 @@ public class BufferInitialisationStrategyProducerTest {
     public void shouldPassRepositoryToPostgresStrategy() throws Exception {
         strategyProducer.strategyClass = "uk.gov.justice.services.event.buffer.core.service.PostgreSQLBasedBufferInitialisationStrategy";
         final BufferInitialisationStrategy bufferInitialisationStrategy = strategyProducer.bufferInitialisationStrategy();
-        final UUID streamId = UUID.randomUUID();
-        when(streamStatusRepository.findByStreamId(streamId)).thenReturn(Optional.of(new StreamStatus(streamId, 0L)));
-        bufferInitialisationStrategy.initialiseBuffer(streamId);
-        verify(streamStatusRepository).findByStreamId(streamId);
+        final UUID streamId = randomUUID();
+        final String source = "a source";
+        when(streamStatusRepository.findByStreamIdAndSource(streamId, source)).thenReturn(Optional.of(new StreamStatus(streamId, 0L, source)));
+        bufferInitialisationStrategy.initialiseBuffer(streamId, source);
+        verify(streamStatusRepository).findByStreamIdAndSource(streamId, source);
     }
 
     @Test
     public void shouldPassRepositoryToAnsiStrategy() throws Exception {
         strategyProducer.strategyClass = "uk.gov.justice.services.event.buffer.core.service.AnsiSQLBasedBufferInitialisationStrategy";
         final BufferInitialisationStrategy bufferInitialisationStrategy = strategyProducer.bufferInitialisationStrategy();
-        final UUID streamId = UUID.randomUUID();
-        when(streamStatusRepository.findByStreamId(streamId)).thenReturn(Optional.of(new StreamStatus(streamId, 0L)));
-        bufferInitialisationStrategy.initialiseBuffer(streamId);
-        verify(streamStatusRepository).findByStreamId(streamId);
+        final UUID streamId = randomUUID();
+        final String source = "a source";
+        when(streamStatusRepository.findByStreamIdAndSource(streamId, source)).thenReturn(Optional.of(new StreamStatus(streamId, 0L, source)));
+        bufferInitialisationStrategy.initialiseBuffer(streamId, source);
+        verify(streamStatusRepository).findByStreamIdAndSource(streamId, source);
     }
 
     @Rule

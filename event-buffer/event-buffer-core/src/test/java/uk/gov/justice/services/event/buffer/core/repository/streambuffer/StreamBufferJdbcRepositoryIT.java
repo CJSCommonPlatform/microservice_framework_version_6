@@ -55,44 +55,76 @@ public class StreamBufferJdbcRepositoryIT {
     }
 
     @Test
-    public void shouldInsertAndReturnStreamOfdEvents() {
+    public void shouldInsertAndReturnStreamOfEvents() {
         final UUID id1 = randomUUID();
         final UUID id2 = randomUUID();
+        final String source = "source";
 
-        jdbcRepository.insert(new StreamBufferEvent(id1, 2L, "someOtherEvent"));
-        jdbcRepository.insert(new StreamBufferEvent(id1, 1L, "someEvent"));
-        jdbcRepository.insert(new StreamBufferEvent(id1, 3L, "event"));
-        jdbcRepository.insert(new StreamBufferEvent(id2, 1L, "anotherEvent"));
+        jdbcRepository.insert(new StreamBufferEvent(id1, 2L, "eventVersion_2", source));
+        jdbcRepository.insert(new StreamBufferEvent(id1, 1L, "eventVersion_1", source));
+        jdbcRepository.insert(new StreamBufferEvent(id1, 3L, "eventVersion_3", source));
+        jdbcRepository.insert(new StreamBufferEvent(id2, 1L, "eventVersion_1", source));
 
-        final List<StreamBufferEvent> events = jdbcRepository.streamById(id1)
+        final List<StreamBufferEvent> events = jdbcRepository.findStreamByIdAndSource(id1, source)
                 .collect(toList());
 
         assertThat(events, hasSize(3));
 
         assertThat(events.get(0).getStreamId(), is(id1));
         assertThat(events.get(0).getVersion(), is(1L));
-        assertThat(events.get(0).getEvent(), is("someEvent"));
+        assertThat(events.get(0).getEvent(), is("eventVersion_1"));
+        assertThat(events.get(0).getSource(), is(source));
 
         assertThat(events.get(1).getStreamId(), is(id1));
         assertThat(events.get(1).getVersion(), is(2L));
-        assertThat(events.get(1).getEvent(), is("someOtherEvent"));
+        assertThat(events.get(1).getEvent(), is("eventVersion_2"));
+        assertThat(events.get(1).getSource(), is(source));
 
         assertThat(events.get(2).getStreamId(), is(id1));
         assertThat(events.get(2).getVersion(), is(3L));
-        assertThat(events.get(2).getEvent(), is("event"));
+        assertThat(events.get(2).getEvent(), is("eventVersion_3"));
+        assertThat(events.get(2).getSource(), is(source));
+    }
+
+    @Test
+    public void shouldNotReturnEventsIfTheyHaveADifferentSource() {
+        final UUID id1 = randomUUID();
+        final UUID id2 = randomUUID();
+        final String source = "source";
+
+        jdbcRepository.insert(new StreamBufferEvent(id1, 2L, "eventVersion_2", "a-different-source"));
+        jdbcRepository.insert(new StreamBufferEvent(id1, 1L, "eventVersion_1", source));
+        jdbcRepository.insert(new StreamBufferEvent(id1, 3L, "eventVersion_3", source));
+        jdbcRepository.insert(new StreamBufferEvent(id2, 1L, "eventVersion_1", source));
+
+        final List<StreamBufferEvent> events = jdbcRepository.findStreamByIdAndSource(id1, source)
+                .collect(toList());
+
+        assertThat(events, hasSize(2));
+
+        assertThat(events.get(0).getStreamId(), is(id1));
+        assertThat(events.get(0).getVersion(), is(1L));
+        assertThat(events.get(0).getEvent(), is("eventVersion_1"));
+        assertThat(events.get(0).getSource(), is(source));
+
+        assertThat(events.get(1).getStreamId(), is(id1));
+        assertThat(events.get(1).getVersion(), is(3L));
+        assertThat(events.get(1).getEvent(), is("eventVersion_3"));
+        assertThat(events.get(1).getSource(), is(source));
     }
 
     @Test
     public void shouldRemoveFromBuffer() {
         final UUID id1 = randomUUID();
-        final StreamBufferEvent streamBufferEvent = new StreamBufferEvent(id1, 2L, "someOtherEvent");
+        final String source = "someOtherSource";
+        final StreamBufferEvent streamBufferEvent = new StreamBufferEvent(id1, 2L, "someOtherEvent", source);
 
         jdbcRepository.insert(streamBufferEvent);
 
-        assertThat(jdbcRepository.streamById(id1).collect(toList()), hasItem(streamBufferEvent));
+        assertThat(jdbcRepository.findStreamByIdAndSource(id1, source).collect(toList()), hasItem(streamBufferEvent));
 
         jdbcRepository.remove(streamBufferEvent);
 
-        assertThat(jdbcRepository.streamById(id1).collect(toList()), empty());
+        assertThat(jdbcRepository.findStreamByIdAndSource(id1, source).collect(toList()), empty());
     }
 }

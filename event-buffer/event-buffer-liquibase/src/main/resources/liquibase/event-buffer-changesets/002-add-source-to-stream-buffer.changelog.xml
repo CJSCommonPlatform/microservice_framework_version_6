@@ -18,7 +18,8 @@
                 tableName="stream_buffer">
             <column
                     name="source"
-                    type="varchar(100)">
+                    type="varchar(100)"
+                    defaultValue="unknown">
                 <constraints nullable="false"/>
             </column>
         </addColumn>

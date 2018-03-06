@@ -17,7 +17,8 @@
         <addColumn tableName="stream_status">
             <column
                     name="source"
-                    type="varchar(100)">
+                    type="varchar(100)"
+                    defaultValue="unknown">
                 <constraints nullable="false"/>
             </column>
         </addColumn>
@@ -25,7 +26,7 @@
         <addPrimaryKey
                 tableName="stream_status"
                 constraintName="stream_status_pkey"
-                columnNames="stream_id,version,source"
+                columnNames="stream_id,source"
         />
 
         <rollback>

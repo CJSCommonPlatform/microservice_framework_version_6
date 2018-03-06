@@ -76,13 +76,15 @@ class MessageListenerCodeGenerator {
      * @param baseUri                        the base URI
      * @param generatorPropertyParser        used to query the generator properties
      * @param validationInterceptorClassName the validation interceptor class name
+     * @param classNameFactory               creates the class name for this generated class
      * @return the message listener class specification
      */
-    TypeSpec generatedCodeFor(final Resource resource,
-                              final MessagingAdapterBaseUri baseUri,
-                              final GeneratorPropertyParser generatorPropertyParser,
-                              final ClassName validationInterceptorClassName) {
-        return classSpecFrom(resource, baseUri, generatorPropertyParser, validationInterceptorClassName)
+    TypeSpec generate(final Resource resource,
+                      final MessagingAdapterBaseUri baseUri,
+                      final GeneratorPropertyParser generatorPropertyParser,
+                      final ClassName validationInterceptorClassName,
+                      final ClassNameFactory classNameFactory) {
+        return classSpecFrom(resource, baseUri, generatorPropertyParser, validationInterceptorClassName, classNameFactory)
                 .addMethod(generateOnMessageMethod())
                 .build();
     }
@@ -99,20 +101,22 @@ class MessageListenerCodeGenerator {
     private TypeSpec.Builder classSpecFrom(final Resource resource,
                                            final MessagingAdapterBaseUri baseUri,
                                            final GeneratorPropertyParser generatorPropertyParser,
-                                           final ClassName validationInterceptorClassName) {
+                                           final ClassName validationInterceptorClassName,
+                                           final ClassNameFactory classNameFactory) {
 
         final String serviceComponent = generatorPropertyParser.serviceComponent();
 
         if (componentDestinationType.isSupported(serviceComponent)) {
 
             final MessagingResourceUri resourceUri = new MessagingResourceUri(resource.getUri());
+            final String jmsListenerClassName = classNameFactory.classNameWith("JmsListener");
 
-            final TypeSpec.Builder typeSpecBuilder = classBuilder(classNameOf(baseUri, resourceUri))
+            final TypeSpec.Builder typeSpecBuilder = classBuilder(jmsListenerClassName)
                     .addModifiers(PUBLIC)
                     .addSuperinterface(MessageListener.class)
                     .addField(FieldSpec.builder(ClassName.get(Logger.class), LOGGER_FIELD)
                             .addModifiers(PRIVATE, STATIC, FINAL)
-                            .initializer("$T.getLogger($L.class)", LoggerFactory.class, classNameOf(baseUri, resourceUri))
+                            .initializer("$T.getLogger($L.class)", LoggerFactory.class, jmsListenerClassName)
                             .build())
                     .addField(FieldSpec.builder(ClassName.get(InterceptorChainProcessor.class), INTERCEPTOR_CHAIN_PROCESS)
                             .addAnnotation(Inject.class)
@@ -227,16 +231,6 @@ class MessageListenerCodeGenerator {
                 .addMember("propertyName", "$S", name)
                 .addMember("propertyValue", "$S", value)
                 .build();
-    }
-
-    /**
-     * Convert given URI and component to a camel cased class name
-     *
-     * @param baseUri URI String to convert
-     * @return camel case class name
-     */
-    private String classNameOf(final MessagingAdapterBaseUri baseUri, final MessagingResourceUri resourceUri) {
-        return format("%s%sJmsListener", baseUri.toClassName(), resourceUri.toClassName());
     }
 
     /**

@@ -8,6 +8,7 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
+import uk.gov.justice.raml.jms.core.ClassNameFactory;
 import uk.gov.justice.services.components.event.listener.interceptors.EventBufferInterceptor;
 import uk.gov.justice.services.core.interceptor.InterceptorChainEntry;
 import uk.gov.justice.services.core.interceptor.InterceptorChainEntryProvider;
@@ -57,15 +58,11 @@ public class EventListenerInterceptorChainProviderCodeGenerator {
 
     private static final String CLASS_NAME_SUFFIX = "EventListenerInterceptorChainProvider";
 
-    private final EventListenerGeneratedClassesNameGenerator eventListenerGeneratedClassesNameGenerator = new EventListenerGeneratedClassesNameGenerator();
+    public TypeSpec generate(final ClassName eventFilterInterceptorClassName,
+                             final String componentName,
+                             final ClassNameFactory classNameFactory) {
 
-    public TypeSpec generate(final ClassName eventFilterInterceptorClassName, final String componentName) {
-
-        final String interceptorChainProviderClassName = eventListenerGeneratedClassesNameGenerator.interceptorNameFrom(
-                componentName,
-                CLASS_NAME_SUFFIX);
-
-        return classBuilder(interceptorChainProviderClassName)
+        return classBuilder(classNameFactory.classNameWith(CLASS_NAME_SUFFIX))
                 .addModifiers(PUBLIC)
                 .addSuperinterface(InterceptorChainEntryProvider.class)
                 .addField(createInterceptorChainEntriesMapField())

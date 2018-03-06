@@ -5,6 +5,7 @@ import static com.squareup.javapoet.TypeSpec.classBuilder;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
+import uk.gov.justice.raml.jms.core.ClassNameFactory;
 import uk.gov.justice.services.core.interceptor.Interceptor;
 import uk.gov.justice.services.core.interceptor.InterceptorChain;
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
@@ -43,23 +44,19 @@ public class EventFilterInterceptorCodeGenerator {
     private static final String CLASS_NAME_SUFFIX = "EventFilterInterceptor";
     private static final String EVENT_FILTER_FIELD_NAME = "eventFilter";
 
-    private final EventListenerGeneratedClassesNameGenerator eventListenerGeneratedClassesNameGenerator = new EventListenerGeneratedClassesNameGenerator();
     private final EventFilterFieldCodeGenerator eventFilterFieldCodeGenerator = new EventFilterFieldCodeGenerator();
 
     /**
      * Generate a custom EventFilterInterceptor which uses a custom {@see uk.gov.justice.services.event.buffer.api.EventFilter}
      *
      * @param eventFilterClassName The class name of the custom EventFilter
-     * @param componentName        The Component name. Should name should contain the term 'EVENT_LISTENER' as in 'MY_CUSTOM_EVENT_LISTENER'
+     * @param classNameFactory     creates the class name for this generated class
      * @return a TypeSpec that will generate the java source file
      */
-    public TypeSpec generate(final ClassName eventFilterClassName, final String componentName) {
+    public TypeSpec generate(final ClassName eventFilterClassName,
+                             final ClassNameFactory classNameFactory) {
 
-        final String eventListenerInterceptorClassName = eventListenerGeneratedClassesNameGenerator.interceptorNameFrom(
-                componentName,
-                CLASS_NAME_SUFFIX);
-
-        return classBuilder(eventListenerInterceptorClassName)
+        return classBuilder(classNameFactory.classNameWith(CLASS_NAME_SUFFIX))
                 .addModifiers(PUBLIC)
                 .addSuperinterface(Interceptor.class)
                 .addField(eventFilterFieldCodeGenerator.createEventFilterField(eventFilterClassName))

@@ -11,8 +11,10 @@ import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 import static uk.gov.justice.services.messaging.jms.HeaderConstants.JMS_HEADER_CPPNAME;
 
-import uk.gov.justice.api.EventValidationInterceptor;
-import uk.gov.justice.api.Service2EventListenerEventFilter;
+import uk.gov.justice.api.Service2EventListenerPeopleEventEventFilter;
+import uk.gov.justice.api.Service2EventListenerPeopleEventEventFilterInterceptor;
+import uk.gov.justice.api.Service2EventListenerPeopleEventEventListenerInterceptorChainProvider;
+import uk.gov.justice.api.Service2EventListenerPeopleEventEventValidationInterceptor;
 import uk.gov.justice.api.Service2EventListenerPeopleEventJmsListener;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsParameterChecker;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsProcessor;
@@ -25,7 +27,6 @@ import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.components.event.listener.interceptors.EventBufferInterceptor;
-import uk.gov.justice.services.components.event.listener.interceptors.EventFilterInterceptor;
 import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
 import uk.gov.justice.services.core.accesscontrol.AllowAllPolicyEvaluator;
 import uk.gov.justice.services.core.accesscontrol.DefaultAccessControlService;
@@ -48,8 +49,6 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.extension.ServiceComponentScanner;
 import uk.gov.justice.services.core.interceptor.InterceptorCache;
-import uk.gov.justice.services.core.interceptor.InterceptorChainEntry;
-import uk.gov.justice.services.core.interceptor.InterceptorChainEntryProvider;
 import uk.gov.justice.services.core.interceptor.InterceptorChainObserver;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
@@ -76,8 +75,6 @@ import uk.gov.justice.services.messaging.logging.DefaultJmsMessageLoggerHelper;
 import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
 import uk.gov.justice.services.test.utils.common.envelope.TestEnvelopeRecorder;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -105,10 +102,10 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
     private Topic peopleEventsDestination;
 
     @Inject
-    private Service2EventListenerEventFilter recordingEventListenerEventFilter;
+    private Service2EventListenerPeopleEventEventFilter recordingEventListenerEventFilter;
 
     @Inject
-    private EventValidationInterceptor eventListenerValidationInterceptor;
+    private Service2EventListenerPeopleEventEventValidationInterceptor eventListenerValidationInterceptor;
 
     @Inject
     private RecordingEventAAHandler aaEventHandler;
@@ -124,10 +121,13 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
 
     @Module
     @Classes(cdi = true, value = {
-            EventValidationInterceptor.class,
             TestService2EventListenerPeopleEventJmsListener.class,
-            Service2EventListenerEventFilter.class,
+            Service2EventListenerPeopleEventEventFilter.class,
+            Service2EventListenerPeopleEventEventFilterInterceptor.class,
+            Service2EventListenerPeopleEventEventListenerInterceptorChainProvider.class,
+            Service2EventListenerPeopleEventEventValidationInterceptor.class,
             Service2EventListenerPeopleEventJmsListener.class,
+
             RecordingEventAAHandler.class,
             AllEventsHandler.class,
             RecordingJsonSchemaValidator.class,
@@ -137,9 +137,7 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
             InterceptorChainProcessor.class,
             InterceptorCache.class,
             InterceptorChainObserver.class,
-            EventFilterInterceptor.class,
             EventBufferInterceptor.class,
-            EventListenerInterceptorChainProvider.class,
 
             ServiceComponentScanner.class,
             RequesterProducer.class,
@@ -321,21 +319,5 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
     @ApplicationScoped
     public static class TestService2EventListenerPeopleEventJmsListener extends Service2EventListenerPeopleEventJmsListener {
 
-    }
-
-    public static class EventListenerInterceptorChainProvider implements InterceptorChainEntryProvider {
-
-        @Override
-        public String component() {
-            return EVENT_LISTENER;
-        }
-
-        @Override
-        public List<InterceptorChainEntry> interceptorChainTypes() {
-            final List<InterceptorChainEntry> interceptorChainTypes = new ArrayList<>();
-            interceptorChainTypes.add(new InterceptorChainEntry(1, EventBufferInterceptor.class));
-            interceptorChainTypes.add(new InterceptorChainEntry(2, EventFilterInterceptor.class));
-            return interceptorChainTypes;
-        }
     }
 }

@@ -3,9 +3,16 @@ package uk.gov.justice.raml.jms.it;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-import uk.gov.justice.api.CustomEventListenerEventFilter;
+import uk.gov.justice.api.CustomEventListenerExampleEventEventFilter;
+import uk.gov.justice.api.CustomEventListenerExampleEventEventFilterInterceptor;
+import uk.gov.justice.api.CustomEventListenerExampleEventEventListenerInterceptorChainProvider;
+import uk.gov.justice.api.CustomEventListenerExampleEventEventValidationInterceptor;
+import uk.gov.justice.api.CustomEventListenerExampleEventJmsListener;
+import uk.gov.justice.api.CustomEventListenerPeopleEventEventFilter;
+import uk.gov.justice.api.CustomEventListenerPeopleEventEventFilterInterceptor;
+import uk.gov.justice.api.CustomEventListenerPeopleEventEventListenerInterceptorChainProvider;
+import uk.gov.justice.api.CustomEventListenerPeopleEventEventValidationInterceptor;
 import uk.gov.justice.api.CustomEventListenerPeopleEventJmsListener;
-import uk.gov.justice.api.CustomEventValidationInterceptor;
 import uk.gov.justice.api.mapper.ListenerMediaTypeToSchemaIdMapper;
 import uk.gov.justice.schema.catalog.CatalogProducer;
 import uk.gov.justice.schema.service.SchemaCatalogService;
@@ -42,7 +49,6 @@ import java.util.UUID;
 import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.jms.JMSException;
 import javax.jms.Topic;
 
 import org.apache.openejb.jee.WebApp;
@@ -61,9 +67,19 @@ public class JmsEndpointGenerationCustomIT extends AbstractJmsAdapterGenerationI
     @Classes(cdi = true, value = {
             DefaultJmsProcessor.class,
             RecordingInterceptorChainProcessor.class,
-            CustomEventListenerEventFilter.class,
+
+            CustomEventListenerPeopleEventEventFilter.class,
+            CustomEventListenerPeopleEventEventFilterInterceptor.class,
+            CustomEventListenerPeopleEventEventListenerInterceptorChainProvider.class,
+            CustomEventListenerPeopleEventEventValidationInterceptor.class,
             CustomEventListenerPeopleEventJmsListener.class,
-            CustomEventValidationInterceptor.class,
+
+            CustomEventListenerExampleEventEventFilter.class,
+            CustomEventListenerExampleEventEventFilterInterceptor.class,
+            CustomEventListenerExampleEventEventListenerInterceptorChainProvider.class,
+            CustomEventListenerExampleEventEventValidationInterceptor.class,
+            CustomEventListenerExampleEventJmsListener.class,
+
             ObjectMapperProducer.class,
             DefaultEnvelopeConverter.class,
             StringToJsonObjectConverter.class,
@@ -109,19 +125,33 @@ public class JmsEndpointGenerationCustomIT extends AbstractJmsAdapterGenerationI
     @Resource(name = "people.event")
     private Topic peopleEventsDestination;
 
-    @Test
-    public void eventListenerDispatcherShouldReceiveCustomEventSpecifiedInMessageSelector()
-            throws JMSException, InterruptedException {
+    @Resource(name = "example.event")
+    private Topic exampleEventDestination;
 
-        Thread.sleep(300);
+    @Test
+    public void eventListenerDispatcherShouldReceiveCustomEventSpecifiedInMessageSelector() throws Exception {
+
         final String metadataId = "861c9430-7bc6-4bf0-b549-6534b3457c56";
         final String eventName = "people.eventbb";
 
         sendEnvelope(metadataId, eventName, peopleEventsDestination);
+
         final JsonEnvelope receivedEnvelope = interceptorChainProcessor.awaitForEnvelopeWithMetadataOf("id", metadataId);
         assertThat(receivedEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
         assertThat(receivedEnvelope.metadata().name(), is(eventName));
+    }
 
+    @Test
+    public void eventListenerDispatcherShouldReceiveCustomExampleEventSpecifiedInMessageSelector() throws Exception {
+
+        final String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d61";
+        final String eventName = "example.eventaa";
+
+        sendEnvelope(metadataId, eventName, exampleEventDestination);
+
+        final JsonEnvelope receivedEnvelope = interceptorChainProcessor.awaitForEnvelopeWithMetadataOf("id", metadataId);
+        assertThat(receivedEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
+        assertThat(receivedEnvelope.metadata().name(), is(eventName));
     }
 
     @ApplicationScoped

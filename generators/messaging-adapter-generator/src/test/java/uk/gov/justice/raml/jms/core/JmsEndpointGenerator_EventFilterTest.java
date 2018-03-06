@@ -24,9 +24,7 @@ import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 import java.io.File;
 import java.util.Map;
 
-import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Alternative;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -62,7 +60,7 @@ public class JmsEndpointGenerator_EventFilterTest extends BaseGeneratorTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "StructureEventListenerEventFilter");
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "StructureEventListenerSomecontextControllerCommandEventFilter");
 
         final AbstractEventFilter eventFilter = (AbstractEventFilter) clazz.newInstance();
 
@@ -114,12 +112,8 @@ public class JmsEndpointGenerator_EventFilterTest extends BaseGeneratorTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "StructureEventListenerEventFilter");
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "StructureEventListenerSomecontextControllerCommandEventFilter");
         assertThat(clazz.getAnnotation(ApplicationScoped.class), is(not(nullValue())));
-        assertThat(clazz.getAnnotation(Alternative.class), is(not(nullValue())));
-        final Priority priorityAnnotation = clazz.getAnnotation(Priority.class);
-        assertThat(priorityAnnotation, is(not(nullValue())));
-        assertThat(priorityAnnotation.value(), is(2));
     }
 
     @Test
@@ -134,7 +128,7 @@ public class JmsEndpointGenerator_EventFilterTest extends BaseGeneratorTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "MyHyphenatedServiceEventListenerEventFilter");
+        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "MyHyphenatedServiceEventListenerSomecontextControllerCommandEventFilter");
 
         final AbstractEventFilter eventFilter = (AbstractEventFilter) clazz.newInstance();
 

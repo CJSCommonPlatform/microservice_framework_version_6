@@ -8,3 +8,10 @@ version: v1
         application/vnd.people.eventbb+json:
             schema: !include json/schema/people.eventbb.json
             example: !include json/eventbb.json
+
+/example.event:
+  post:
+    body:
+        application/vnd.example.eventaa+json:
+            schema: !include json/schema/example.eventaa.json
+            example: !include json/eventaa.json

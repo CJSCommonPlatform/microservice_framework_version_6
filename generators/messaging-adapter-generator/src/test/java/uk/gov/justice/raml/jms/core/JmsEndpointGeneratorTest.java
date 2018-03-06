@@ -345,11 +345,11 @@ public class JmsEndpointGeneratorTest extends BaseGeneratorTest {
         assertThat(adapterAnnotation, not(nullValue()));
         assertThat(adapterAnnotation.value(), is("CUSTOM_EVENT_LISTENER"));
 
-        final Class<?> customEventFilterInterceptor = compiler.compiledClassOf(BASE_PACKAGE, "CustomEventFilterInterceptor");
+        final Class<?> customEventFilterInterceptor = compiler.compiledClassOf(BASE_PACKAGE, "CustomEventListenerPeopleEventEventFilterInterceptor");
         final Field eventFilter = customEventFilterInterceptor.getDeclaredField("eventFilter");
         final Class<?> customEventFilterClass = eventFilter.getType();
 
-        assertThat(customEventFilterClass.getName(), is("uk.test.CustomEventListenerEventFilter"));
+        assertThat(customEventFilterClass.getName(), is("uk.test.CustomEventListenerPeopleEventEventFilter"));
     }
 
     @Test

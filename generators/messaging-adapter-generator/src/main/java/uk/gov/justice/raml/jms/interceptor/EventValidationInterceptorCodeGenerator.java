@@ -5,6 +5,7 @@ import static com.squareup.javapoet.TypeSpec.classBuilder;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
+import uk.gov.justice.raml.jms.core.ClassNameFactory;
 import uk.gov.justice.services.adapter.messaging.JsonSchemaValidationInterceptor;
 
 import javax.jms.JMSException;
@@ -41,17 +42,12 @@ public class EventValidationInterceptorCodeGenerator {
 
     private static final String CLASS_NAME_SUFFIX = "EventValidationInterceptor";
 
-    private final EventListenerGeneratedClassesNameGenerator eventListenerGeneratedClassesNameGenerator = new EventListenerGeneratedClassesNameGenerator();
     private final EventFilterFieldCodeGenerator eventFilterFieldCodeGenerator = new EventFilterFieldCodeGenerator();
 
-    public TypeSpec generate(final ClassName eventFilterClassName, final String componentName) {
+    public TypeSpec generate(final ClassName eventFilterClassName,
+                             final ClassNameFactory classNameFactory) {
 
-        final String eventValidationInterceptorClassName = eventListenerGeneratedClassesNameGenerator.interceptorNameFrom(
-                componentName,
-                CLASS_NAME_SUFFIX);
-
-
-        return classBuilder(eventValidationInterceptorClassName)
+        return classBuilder(classNameFactory.classNameWith(CLASS_NAME_SUFFIX))
                 .addModifiers(PUBLIC)
                 .superclass(JsonSchemaValidationInterceptor.class)
                 .addField(eventFilterFieldCodeGenerator.createEventFilterField(eventFilterClassName))

@@ -4,7 +4,10 @@ import static com.squareup.javapoet.JavaFile.builder;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import uk.gov.justice.raml.jms.core.ClassNameFactory;
 import uk.gov.justice.services.components.event.listener.interceptors.EventBufferInterceptor;
 import uk.gov.justice.services.core.interceptor.InterceptorChainEntry;
 import uk.gov.justice.services.core.interceptor.InterceptorChainEntryProvider;
@@ -38,10 +41,14 @@ public class EventListenerInterceptorChainProviderCodeGeneratorTest {
         final String simpleName = "MyCustomEventListenerInterceptorChainProvider";
 
         final ClassName eventFilterInterceptorClassName = ClassName.get(StubEventFilterInterceptor.class);
+        final ClassNameFactory classNameFactory = mock(ClassNameFactory.class);
+
+        when(classNameFactory.classNameWith("EventListenerInterceptorChainProvider")).thenReturn(simpleName);
 
         final TypeSpec typeSpec = eventListenerInterceptorChainProviderCodeGenerator.generate(
                 eventFilterInterceptorClassName,
-                componentName);
+                componentName,
+                classNameFactory);
 
         final File codeGenerationOutputDirectory = getDirectory(CODE_GENERATION_OUTPUT_DIRECTORY);
         final File compilationOutputDirectory = getDirectory(COMPILATION_OUTPUT_DIRECTORY);

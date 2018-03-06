@@ -13,6 +13,7 @@ import uk.gov.justice.raml.jms.validator.BaseUriRamlValidator;
 import uk.gov.justice.services.adapter.messaging.JsonSchemaValidationInterceptor;
 import uk.gov.justice.services.generators.commons.config.GeneratorPropertyParser;
 import uk.gov.justice.services.generators.commons.helper.MessagingAdapterBaseUri;
+import uk.gov.justice.services.generators.commons.helper.MessagingResourceUri;
 import uk.gov.justice.services.generators.commons.mapping.MediaTypeToSchemaIdGenerator;
 import uk.gov.justice.services.generators.commons.validator.CompositeRamlValidator;
 import uk.gov.justice.services.generators.commons.validator.ContainsActionsRamlValidator;
@@ -81,20 +82,23 @@ public class JmsEndpointGenerator implements Generator {
 
         final Stream.Builder<TypeSpec> streamBuilder = Stream.builder();
 
+        final MessagingResourceUri resourceUri = new MessagingResourceUri(resource.getUri());
         final MessagingAdapterBaseUri baseUri = new MessagingAdapterBaseUri(raml.getBaseUri());
+        final ClassNameFactory classNameFactory = new ClassNameFactory(baseUri, resourceUri);
+
         final ClassName validationClassName;
 
         if (shouldGenerateEventFilter(resource, baseUri)) {
 
             final String serviceComponent = generatorPropertyParser.serviceComponent();
-            final TypeSpec eventFilterTypeSpec = eventFilterCodeGenerator.generatedCodeFor(resource, baseUri);
+            final TypeSpec eventFilterTypeSpec = eventFilterCodeGenerator.generate(resource, classNameFactory);
             final ClassName eventFilterClassName = ClassName.get(basePackageName, eventFilterTypeSpec.name);
 
             streamBuilder.add(eventFilterTypeSpec);
 
             final TypeSpec eventFilterInterceptor = eventFilterInterceptorCodeGenerator.generate(
                     eventFilterClassName,
-                    serviceComponent);
+                    classNameFactory);
 
             streamBuilder.add(eventFilterInterceptor);
 
@@ -102,7 +106,7 @@ public class JmsEndpointGenerator implements Generator {
 
             final TypeSpec eventValidationInterceptor = eventValidationInterceptorCodeGenerator.generate(
                     eventFilterClassName,
-                    serviceComponent);
+                    classNameFactory);
 
             streamBuilder.add(eventValidationInterceptor);
 
@@ -110,7 +114,8 @@ public class JmsEndpointGenerator implements Generator {
 
             final TypeSpec eventInterceptorChainProvider = eventListenerInterceptorChainProviderCodeGenerator.generate(
                     eventFilterInterceptorClassName,
-                    serviceComponent);
+                    serviceComponent,
+                    classNameFactory);
 
             streamBuilder.add(eventInterceptorChainProvider);
 
@@ -118,11 +123,12 @@ public class JmsEndpointGenerator implements Generator {
             validationClassName = ClassName.get(JsonSchemaValidationInterceptor.class);
         }
 
-        final TypeSpec messageListenerTypeSpec = messageListenerCodeGenerator.generatedCodeFor(
+        final TypeSpec messageListenerTypeSpec = messageListenerCodeGenerator.generate(
                 resource,
                 baseUri,
                 generatorPropertyParser,
-                validationClassName);
+                validationClassName,
+                classNameFactory);
 
         streamBuilder.add(messageListenerTypeSpec);
 

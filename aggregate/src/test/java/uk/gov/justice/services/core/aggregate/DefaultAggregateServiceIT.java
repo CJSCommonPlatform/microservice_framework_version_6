@@ -16,6 +16,7 @@ import uk.gov.justice.domain.aggregate.PrivateAggregate;
 import uk.gov.justice.domain.aggregate.TestAggregate;
 import uk.gov.justice.services.common.configuration.GlobalValueProducer;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -29,9 +30,8 @@ import uk.gov.justice.services.core.extension.EventFoundEvent;
 import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
 import uk.gov.justice.services.eventsourcing.publisher.jms.EventPublisher;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.DefaultEventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventInsertionStrategy;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepository;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.JdbcEventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventConverter;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepository;
@@ -108,8 +108,7 @@ public class DefaultAggregateServiceIT {
             LoggerProducer.class,
 
             AbstractJdbcRepository.class,
-            JdbcEventRepository.class,
-            EventRepository.class,
+            DefaultEventRepository.class,
             TestEventInsertionStrategyProducer.class,
 
             DefaultAggregateService.class,
@@ -117,16 +116,17 @@ public class DefaultAggregateServiceIT {
             EventJdbcRepository.class,
             JdbcRepositoryHelper.class,
             JdbcDataSourceProvider.class,
-
+            EventStreamManager.class,
+            EventStreamJdbcRepository.class,
             DefaultEventSource.class,
             EnvelopeEventStream.class,
             EventStreamManager.class,
             DefaultEnveloper.class,
             ObjectToJsonValueConverter.class,
+            ObjectToJsonObjectConverter.class,
             EventAppender.class,
             PublishingEventAppender.class,
             SystemEventService.class,
-
             DefaultEnvelopeConverter.class,
             EventConverter.class,
             StringToJsonObjectConverter.class,
@@ -142,7 +142,7 @@ public class DefaultAggregateServiceIT {
 
             DefaultFileSystemUrlResolverStrategy.class
 
-            })
+    })
     public WebApp war() {
         return new WebApp()
                 .contextRoot("aggregateservice-test")

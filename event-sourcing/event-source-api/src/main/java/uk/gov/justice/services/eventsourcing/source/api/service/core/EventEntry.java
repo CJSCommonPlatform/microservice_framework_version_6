@@ -8,7 +8,7 @@ public class EventEntry {
     private final String eventId;
     private final String streamId;
     private final String name;
-    private final long sequenceId;
+    private final long position;
     private final String createdAt;
     private final JsonObject payload;
 
@@ -16,7 +16,7 @@ public class EventEntry {
     public EventEntry(
             final UUID eventId,
             final UUID streamId,
-            final long sequenceId,
+            final long position,
             final String name,
             final JsonObject payload,
             final String createdAt
@@ -25,7 +25,7 @@ public class EventEntry {
         this.streamId = streamId.toString();
         this.name = name;
         this.createdAt = createdAt;
-        this.sequenceId = sequenceId;
+        this.position = position;
         this.payload = payload;
     }
 
@@ -41,8 +41,8 @@ public class EventEntry {
         return name;
     }
 
-    public long getSequenceId() {
-        return sequenceId;
+    public long getPosition() {
+        return position;
     }
 
     public String getCreatedAt() {

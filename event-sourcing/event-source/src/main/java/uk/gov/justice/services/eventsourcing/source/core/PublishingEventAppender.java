@@ -6,7 +6,6 @@ import static uk.gov.justice.services.eventsourcing.source.core.EventSourceConst
 
 import uk.gov.justice.services.eventsourcing.publisher.jms.EventPublisher;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepository;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.StoreEventRequestFailedException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -27,9 +26,6 @@ public class PublishingEventAppender implements EventAppender {
     EventRepository eventRepository;
 
     @Inject
-    EventStreamJdbcRepository streamRepository;
-
-    @Inject
     EventPublisher eventPublisher;
 
     /**
@@ -43,10 +39,10 @@ public class PublishingEventAppender implements EventAppender {
     public void append(final JsonEnvelope event, final UUID streamId, final long version) throws EventStreamException {
         try {
             if (version == INITIAL_EVENT_VERSION) {
-                streamRepository.insert(streamId);
+                eventRepository.createEventStream(streamId);
             }
             final JsonEnvelope eventWithStreamIdAndVersion = eventFrom(event, streamId, version);
-            eventRepository.store(eventWithStreamIdAndVersion);
+            eventRepository.storeEvent(eventWithStreamIdAndVersion);
             eventPublisher.publish(eventWithStreamIdAndVersion);
         } catch (StoreEventRequestFailedException e) {
             throw new EventStreamException(format("Failed to append event to the event store %s", event.metadata().id()), e);

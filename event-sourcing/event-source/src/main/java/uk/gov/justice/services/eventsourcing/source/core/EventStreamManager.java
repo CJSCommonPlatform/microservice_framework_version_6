@@ -8,10 +8,8 @@ import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 
 import uk.gov.justice.services.common.configuration.GlobalValue;
-import uk.gov.justice.services.common.util.Clock;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepository;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.OptimisticLockingRetryException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.VersionMismatchException;
@@ -38,13 +36,7 @@ public class EventStreamManager {
     EventRepository eventRepository;
 
     @Inject
-    EventStreamJdbcRepository streamRepository;
-
-    @Inject
     EventAppender eventAppender;
-
-    @Inject
-    Clock clock;
 
     @Inject
     @GlobalValue(key = "internal.max.retry", defaultValue = "20")
@@ -66,18 +58,18 @@ public class EventStreamManager {
      * @return the stream of events
      */
     public Stream<JsonEnvelope> read(final UUID id) {
-        return eventRepository.getByStreamId(id);
+        return eventRepository.getEventsByStreamId(id);
     }
 
     /**
      * Get the stream of events from the given version.
      *
      * @param id      the UUID of the stream
-     * @param version the version of the stream
+     * @param position the version of the stream
      * @return the stream of events
      */
-    public Stream<JsonEnvelope> readFrom(final UUID id, final long version) {
-        return eventRepository.getByStreamIdAndSequenceId(id, version);
+    public Stream<JsonEnvelope> readFrom(final UUID id, final long position) {
+        return eventRepository.getEventsByStreamIdFromPosition(id, position);
     }
 
     /**
@@ -96,8 +88,8 @@ public class EventStreamManager {
 
     /**
      * Store a stream of events without enforcing consecutive version ids. Reduces risk of throwing
-     * optimistic lock error. To be use instead of the append method, when it's acceptable to store
-     * events with non consecutive version ids
+     * optimistic lock error. To be use instead of the append method, when it's acceptable to
+     * store events with non consecutive version ids
      *
      * @param streamId - id of the stream to append to
      * @param events   the stream of events to store
@@ -107,7 +99,7 @@ public class EventStreamManager {
     @Transactional(dontRollbackOn = OptimisticLockingRetryException.class)
     public long appendNonConsecutively(final UUID streamId, final Stream<JsonEnvelope> events) throws EventStreamException {
         final List<JsonEnvelope> envelopeList = events.collect(toList());
-        long currentVersion = eventRepository.getCurrentSequenceIdForStream(streamId);
+        long currentVersion = eventRepository.getStreamSize(streamId);
 
         validateEvents(streamId, envelopeList);
 
@@ -124,7 +116,7 @@ public class EventStreamManager {
                         logger.warn("Failed to append to stream {} due to concurrency issues, returning to handler.", streamId);
                         throw e;
                     }
-                    currentVersion = eventRepository.getCurrentSequenceIdForStream(streamId);
+                    currentVersion = eventRepository.getStreamSize(streamId);
                     logger.trace("Retrying appending to stream {}, with version {}", streamId, currentVersion + 1);
                 }
             }
@@ -161,14 +153,14 @@ public class EventStreamManager {
     @Transactional
     public UUID cloneAsAncestor(final UUID id) throws EventStreamException {
 
-        final Stream<JsonEnvelope> existingStream = eventRepository.getByStreamId(id);
+        final Stream<JsonEnvelope> existingStream = eventRepository.getEventsByStreamId(id);
 
         final JsonEnvelope systemEvent = systemEventService.clonedEventFor(id);
 
         final UUID clonedId = randomUUID();
         append(clonedId, concat(existingStream.map(this::stripMetadataFrom), of(systemEvent)));
 
-        streamRepository.markActive(clonedId, false);
+        eventRepository.markEventStreamActive(clonedId, false);
 
         existingStream.close();
 
@@ -180,36 +172,44 @@ public class EventStreamManager {
      * event_stream.
      */
     public void clear(final UUID id) {
-        eventRepository.clear(id);
+        eventRepository.clearEventsForStream(id);
     }
 
     /**
-     * Get the current (current maximum) sequence id (version number) for a stream
+     * Get the latest position number for a stream
      *
      * @param id the id of the stream
-     * @return the latest sequence id for the provided steam. 0 when stream is empty.
+     * @return the latest position number for the provided steam. 0 when stream is empty.
      */
-    public long getCurrentVersion(final UUID id) {
-        return eventRepository.getCurrentSequenceIdForStream(id);
+    public long getSize(final UUID id) {
+        return eventRepository.getStreamSize(id);
     }
 
-    private long append(final UUID id, final Stream<JsonEnvelope> events, final Optional<Long> versionFrom) throws EventStreamException {
+    /**
+     * Get the position of the stream within the streams
+     ** @return the latest position number for the provided steam.
+     */
+    public long getStreamPosition(final UUID streamId) {
+        return eventRepository.getStreamPosition(streamId);
+    }
+
+    private long append(final UUID id, final Stream<JsonEnvelope> events, final Optional<Long> positionFrom) throws EventStreamException {
         final List<JsonEnvelope> envelopeList = events.collect(toList());
 
-        long currentVersion = eventRepository.getCurrentSequenceIdForStream(id);
-        if (versionFrom.isPresent()) {
-            validateVersion(id, versionFrom.get(), currentVersion);
+        long currentPosition = eventRepository.getStreamSize(id);
+        if (positionFrom.isPresent()) {
+            validateVersion(id, positionFrom.get(), currentPosition);
         }
         validateEvents(id, envelopeList);
 
         for (final JsonEnvelope event : envelopeList) {
-            eventAppender.append(event, id, ++currentVersion);
+            eventAppender.append(event, id, ++currentPosition);
         }
-        return currentVersion;
+        return currentPosition;
     }
 
     private void validateEvents(final UUID id, final List<JsonEnvelope> envelopeList) throws EventStreamException {
-        if (envelopeList.stream().anyMatch(e -> e.metadata().version().isPresent())) {
+        if (envelopeList.stream().anyMatch(e -> e.metadata().position().isPresent())) {
             throw new EventStreamException(format("Failed to append to stream %s. Version must be empty.", id));
         }
     }

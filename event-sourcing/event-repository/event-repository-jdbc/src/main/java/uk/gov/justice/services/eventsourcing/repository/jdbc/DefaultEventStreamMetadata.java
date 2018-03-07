@@ -1,17 +1,20 @@
-package uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream;
+package uk.gov.justice.services.eventsourcing.repository.jdbc;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-public class EventStream {
+/**
+ *  Implementation of {@link EventStreamMetadata}
+ */
+public class DefaultEventStreamMetadata implements EventStreamMetadata {
 
     private final UUID streamId;
-    private Long position;
-    private boolean active;
-    private ZonedDateTime createdAt;
+    private final long position;
+    private final boolean active;
+    private final ZonedDateTime createdAt;
 
-    public EventStream(final UUID streamId,
-                       final Long position,
+    public DefaultEventStreamMetadata(final UUID streamId,
+                       final long position,
                        final boolean active,
                        final ZonedDateTime createdAt) {
         this.streamId = streamId;
@@ -24,7 +27,7 @@ public class EventStream {
         return streamId;
     }
 
-    public Long getPosition() {
+    public long getPosition() {
         return position;
     }
 

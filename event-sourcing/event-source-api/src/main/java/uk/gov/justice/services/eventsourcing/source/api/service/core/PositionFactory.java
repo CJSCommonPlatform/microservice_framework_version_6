@@ -6,7 +6,7 @@ import static uk.gov.justice.services.eventsourcing.source.api.service.core.Fixe
 import static uk.gov.justice.services.eventsourcing.source.api.service.core.FixedPositionValue.HEAD;
 import static uk.gov.justice.services.eventsourcing.source.api.service.core.Position.first;
 import static uk.gov.justice.services.eventsourcing.source.api.service.core.Position.head;
-import static uk.gov.justice.services.eventsourcing.source.api.service.core.Position.sequence;
+import static uk.gov.justice.services.eventsourcing.source.api.service.core.Position.position;
 
 import uk.gov.justice.services.adapter.rest.exception.BadRequestException;
 
@@ -23,7 +23,7 @@ public class PositionFactory {
         }
 
         try {
-            return sequence(valueOf(position));
+            return position(valueOf(position));
         } catch (NumberFormatException e) {
             throw new BadRequestException(format("Position should be numeral, provided value: %s", position));
         }

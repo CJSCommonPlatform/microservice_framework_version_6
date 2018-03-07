@@ -22,8 +22,7 @@ import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderF
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUIDAndName;
 
 import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepository;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepository;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.DefaultEventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.OptimisticLockingRetryException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.VersionMismatchException;
@@ -58,9 +57,7 @@ public class EventStreamManagerTest {
     @Mock
     private Logger logger;
     @Mock
-    private EventRepository eventRepository;
-    @Mock
-    private EventStreamJdbcRepository eventStreamJdbcRepository;
+    private DefaultEventRepository eventRepository;
     @Mock
     private EventAppender eventAppender;
     @Mock
@@ -69,6 +66,7 @@ public class EventStreamManagerTest {
     private SystemEventService systemEventService;
 
     private Enveloper enveloper = EnveloperFactory.createEnveloper();
+
     @InjectMocks
     private EventStreamManager eventStreamManager;
 
@@ -85,7 +83,7 @@ public class EventStreamManagerTest {
 
     @Test
     public void shouldAppendToStream() throws Exception {
-        when(eventRepository.getCurrentSequenceIdForStream(STREAM_ID)).thenReturn(INITIAL_VERSION);
+        when(eventRepository.getStreamPosition(STREAM_ID)).thenReturn(INITIAL_VERSION);
 
         final JsonEnvelope event = envelope().with(metadataWithRandomUUIDAndName()).build();
 
@@ -102,7 +100,7 @@ public class EventStreamManagerTest {
 
     @Test
     public void shouldAppendToStreamFromVersion() throws Exception {
-        when(eventRepository.getCurrentSequenceIdForStream(STREAM_ID)).thenReturn(CURRENT_VERSION);
+        when(eventRepository.getStreamSize(STREAM_ID)).thenReturn(CURRENT_VERSION);
         final long expectedVersion = CURRENT_VERSION + 1;
 
         final JsonEnvelope event = envelope().with(metadataWithRandomUUIDAndName()).build();
@@ -114,7 +112,7 @@ public class EventStreamManagerTest {
     @Test
     public void appendToStreamShouldReturnCurrentVersion() throws Exception {
 
-        when(eventRepository.getCurrentSequenceIdForStream(STREAM_ID)).thenReturn(6L);
+        when(eventRepository.getStreamSize(STREAM_ID)).thenReturn(6L);
 
         long returnedVersion = eventStreamManager.append(STREAM_ID, Stream.of(
                 envelope()
@@ -129,7 +127,7 @@ public class EventStreamManagerTest {
     public void appendAfterShouldReturnCurrentVersion() throws Exception {
 
         final long currentVersion = 4L;
-        when(eventRepository.getCurrentSequenceIdForStream(STREAM_ID)).thenReturn(currentVersion);
+        when(eventRepository.getStreamSize(STREAM_ID)).thenReturn(currentVersion);
 
         long returnedVersion = eventStreamManager.appendAfter(
                 STREAM_ID,
@@ -147,51 +145,51 @@ public class EventStreamManagerTest {
 
     @Test(expected = VersionMismatchException.class)
     public void shouldThrowExceptionWhenEventsAreMissing() throws Exception {
-        when(eventRepository.getCurrentSequenceIdForStream(STREAM_ID)).thenReturn(CURRENT_VERSION);
+        when(eventRepository.getStreamPosition(STREAM_ID)).thenReturn(CURRENT_VERSION);
 
         eventStreamManager.appendAfter(STREAM_ID, Stream.of(envelope().with(metadataWithDefaults()).build()), INVALID_VERSION);
     }
 
     @Test(expected = OptimisticLockingRetryException.class)
     public void shouldThrowExceptionWhenVersionAlreadyExists() throws Exception {
-        when(eventRepository.getCurrentSequenceIdForStream(STREAM_ID)).thenReturn(CURRENT_VERSION + 1);
+        when(eventRepository.getStreamSize(STREAM_ID)).thenReturn(CURRENT_VERSION + 1);
 
         eventStreamManager.appendAfter(STREAM_ID, Stream.of(envelope().with(metadataWithDefaults()).build()), CURRENT_VERSION);
     }
 
     @Test
     public void shouldReadStream() {
-        when(eventRepository.getByStreamId(STREAM_ID)).thenReturn(eventStream);
+        when(eventRepository.getEventsByStreamId(STREAM_ID)).thenReturn(eventStream);
 
         Stream<JsonEnvelope> actualEnvelopeEventStream = eventStreamManager.read(STREAM_ID);
 
         assertThat(actualEnvelopeEventStream, equalTo(eventStream));
-        verify(eventRepository).getByStreamId(STREAM_ID);
+        verify(eventRepository).getEventsByStreamId(STREAM_ID);
     }
 
     @Test
     public void shouldReadStreamFromVersion() {
-        when(eventRepository.getByStreamIdAndSequenceId(STREAM_ID, CURRENT_VERSION)).thenReturn(eventStream);
-        when(eventRepository.getCurrentSequenceIdForStream(STREAM_ID)).thenReturn(CURRENT_VERSION);
+        when(eventRepository.getEventsByStreamIdFromPosition(STREAM_ID, CURRENT_VERSION)).thenReturn(eventStream);
+        when(eventRepository.getStreamPosition(STREAM_ID)).thenReturn(CURRENT_VERSION);
 
         Stream<JsonEnvelope> actualEnvelopeEventStream = eventStreamManager.readFrom(STREAM_ID, CURRENT_VERSION);
 
         assertThat(actualEnvelopeEventStream, equalTo(eventStream));
-        verify(eventRepository).getByStreamIdAndSequenceId(STREAM_ID, CURRENT_VERSION);
+        verify(eventRepository).getEventsByStreamIdFromPosition(STREAM_ID, CURRENT_VERSION);
     }
 
     @Test
     public void shouldGetCurrentVersion() {
-        when(eventRepository.getCurrentSequenceIdForStream(STREAM_ID)).thenReturn(CURRENT_VERSION);
-        Long actualCurrentVersion = eventStreamManager.getCurrentVersion(STREAM_ID);
+        when(eventRepository.getStreamSize(STREAM_ID)).thenReturn(CURRENT_VERSION);
+        final Long actualCurrentVersion = eventStreamManager.getSize(STREAM_ID);
 
         assertThat(actualCurrentVersion, equalTo(CURRENT_VERSION));
-        verify(eventRepository).getCurrentSequenceIdForStream(STREAM_ID);
+        verify(eventRepository).getStreamSize(STREAM_ID);
     }
 
     @Test
     public void shouldAppendNonConsecutively() throws Exception {
-        when(eventRepository.getCurrentSequenceIdForStream(STREAM_ID)).thenReturn(CURRENT_VERSION);
+        when(eventRepository.getStreamSize(STREAM_ID)).thenReturn(CURRENT_VERSION);
 
         final JsonEnvelope event1 = envelope().with(metadataWithDefaults()).build();
         final JsonEnvelope event2 = envelope().with(metadataWithDefaults()).build();
@@ -205,7 +203,7 @@ public class EventStreamManagerTest {
 
     @Test
     public void shouldReturnCurrentVersionWhenAppendingNonConsecutively() throws Exception {
-        when(eventRepository.getCurrentSequenceIdForStream(STREAM_ID)).thenReturn(CURRENT_VERSION);
+        when(eventRepository.getStreamSize(STREAM_ID)).thenReturn(CURRENT_VERSION);
 
         final JsonEnvelope event1 = envelope().with(metadataWithDefaults()).build();
         final JsonEnvelope event2 = envelope().with(metadataWithDefaults()).build();
@@ -222,7 +220,7 @@ public class EventStreamManagerTest {
         final long currentVersion = 6L;
         final long currentVersionAfterException = 11L;
 
-        when(eventRepository.getCurrentSequenceIdForStream(STREAM_ID))
+        when(eventRepository.getStreamSize(STREAM_ID))
                 .thenReturn(currentVersion).thenReturn(currentVersionAfterException);
 
 
@@ -247,7 +245,7 @@ public class EventStreamManagerTest {
         final long currentVersion = 6L;
         final long currentVersionAfterException = 11L;
 
-        when(eventRepository.getCurrentSequenceIdForStream(STREAM_ID))
+        when(eventRepository.getStreamSize(STREAM_ID))
                 .thenReturn(currentVersion).thenReturn(currentVersionAfterException);
 
 
@@ -270,7 +268,7 @@ public class EventStreamManagerTest {
         final long currentVersionAfterException1 = 11L;
         final long currentVersionAfterException2 = 12L;
 
-        when(eventRepository.getCurrentSequenceIdForStream(STREAM_ID))
+        when(eventRepository.getStreamSize(STREAM_ID))
                 .thenReturn(currentVersion)
                 .thenReturn(currentVersionAfterException1)
                 .thenReturn(currentVersionAfterException2);
@@ -295,7 +293,7 @@ public class EventStreamManagerTest {
         final long currentVersionAfterException1 = 11L;
         final long currentVersionAfterException2 = 12L;
 
-        when(eventRepository.getCurrentSequenceIdForStream(STREAM_ID))
+        when(eventRepository.getStreamSize(STREAM_ID))
                 .thenReturn(currentVersion)
                 .thenReturn(currentVersionAfterException1)
                 .thenReturn(currentVersionAfterException2);
@@ -318,8 +316,8 @@ public class EventStreamManagerTest {
     public void shouldCloneStreamWithBlankVersions() throws EventStreamException {
         final JsonEnvelope event = buildEnvelope("test.events.event1");
         final JsonEnvelope systemEvent = buildEnvelope("system.events.cloned");
-        when(eventRepository.getByStreamId(STREAM_ID)).thenReturn(Stream.of(event));
-        when(eventRepository.getCurrentSequenceIdForStream(STREAM_ID)).thenReturn(0L);
+        when(eventRepository.getEventsByStreamId(STREAM_ID)).thenReturn(Stream.of(event));
+        when(eventRepository.getStreamPosition(STREAM_ID)).thenReturn(0L);
         when(systemEventService.clonedEventFor(STREAM_ID)).thenReturn(systemEvent);
 
         final UUID clonedId = eventStreamManager.cloneAsAncestor(STREAM_ID);
@@ -336,7 +334,7 @@ public class EventStreamManagerTest {
         assertThat(clonedEvent.metadata().name(), is("test.events.event1"));
         assertThat(clonedEvent.metadata().version(), is(empty()));
 
-        verify(eventStreamJdbcRepository).markActive(clonedId, false);
+        verify(eventRepository).markEventStreamActive(clonedId, false);
     }
 
     @Test
@@ -344,8 +342,8 @@ public class EventStreamManagerTest {
         final JsonEnvelope event1 = buildEnvelope("test.events.event1");
         final JsonEnvelope event2 = buildEnvelope("test.events.event2");
         final JsonEnvelope systemEvent = buildEnvelope("system.events.cloned");
-        when(eventRepository.getByStreamId(STREAM_ID)).thenReturn(Stream.of(event1, event2));
-        when(eventRepository.getCurrentSequenceIdForStream(STREAM_ID)).thenReturn(0L);
+        when(eventRepository.getEventsByStreamId(STREAM_ID)).thenReturn(Stream.of(event1, event2));
+        when(eventRepository.getStreamPosition(STREAM_ID)).thenReturn(0L);
         when(systemEventService.clonedEventFor(STREAM_ID)).thenReturn(systemEvent);
 
         final UUID clonedId = eventStreamManager.cloneAsAncestor(STREAM_ID);
@@ -356,16 +354,17 @@ public class EventStreamManagerTest {
         verify(eventAppender, times(3)).append(eventCaptor.capture(), eq(clonedId), versionCaptor.capture());
         assertThat(versionCaptor.getAllValues(), hasItems(1L, 2L, 3L));
 
-        verify(eventStreamJdbcRepository).markActive(clonedId, false);
+        verify(eventRepository).markEventStreamActive(clonedId, false);
     }
 
     @Test
     public void shouldClearEventStream() throws EventStreamException {
         eventStreamManager.clear(STREAM_ID);
 
-        verify(eventRepository).clear(STREAM_ID);
+        verify(eventRepository).clearEventsForStream(STREAM_ID);
         verifyNoMoreInteractions(eventRepository, eventAppender);
     }
+
 
     private JsonEnvelope buildEnvelope(final String eventName) {
         return envelopeFrom(

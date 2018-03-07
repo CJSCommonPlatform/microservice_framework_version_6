@@ -6,15 +6,14 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithDefaults;
 
 import uk.gov.justice.services.eventsourcing.publisher.jms.EventPublisher;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepository;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepository;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.DefaultEventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.StoreEventRequestFailedException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -32,13 +31,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class PublishingEventAppenderTest {
 
     @Mock
-    private EventRepository eventRepository;
+    private DefaultEventRepository eventRepository;
 
     @Mock
     private EventPublisher eventPublisher;
-
-    @Mock
-    private EventStreamJdbcRepository eventStreamRepository;
 
     @InjectMocks
     private PublishingEventAppender eventAppender;
@@ -58,7 +54,7 @@ public class PublishingEventAppenderTest {
 
         ArgumentCaptor<JsonEnvelope> envelopeCaptor = ArgumentCaptor.forClass(JsonEnvelope.class);
 
-        verify(eventRepository).store(envelopeCaptor.capture());
+        verify(eventRepository).storeEvent(envelopeCaptor.capture());
 
         final JsonEnvelope storedEnvelope = envelopeCaptor.getValue();
         assertThat(storedEnvelope.metadata().streamId(), contains(streamId));
@@ -93,7 +89,7 @@ public class PublishingEventAppenderTest {
 
     @Test(expected = EventStreamException.class)
     public void shouldThrowExceptionWhenStoreEventRequestFails() throws Exception {
-        doThrow(StoreEventRequestFailedException.class).when(eventRepository).store(any());
+        doThrow(StoreEventRequestFailedException.class).when(eventRepository).storeEvent(any());
         eventAppender.append(envelope().with(metadataWithDefaults()).build(), randomUUID(), 1l);
     }
 
@@ -113,7 +109,7 @@ public class PublishingEventAppenderTest {
 
         final ArgumentCaptor<UUID> streamIdCapture = ArgumentCaptor.forClass(UUID.class);
 
-        verify(eventStreamRepository).insert(streamIdCapture.capture());
+        verify(eventRepository).createEventStream(streamIdCapture.capture());
 
         final UUID streamIdActual = streamIdCapture.getValue();
         assertThat(streamIdActual, is(streamId));
@@ -133,6 +129,7 @@ public class PublishingEventAppenderTest {
                 streamId,
                 secondStreamEvent);
 
-        verifyNoMoreInteractions(eventStreamRepository);
+        verify(eventRepository,times(0)).
+                createEventStream(streamId);
     }
 }

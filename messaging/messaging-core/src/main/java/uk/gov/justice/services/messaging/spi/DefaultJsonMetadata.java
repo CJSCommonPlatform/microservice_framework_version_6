@@ -123,6 +123,11 @@ public class DefaultJsonMetadata extends JsonMetadata {
     }
 
     @Override
+    public Optional<Long> position() {
+        return getLong(metadata, VERSION_PATH);
+    }
+
+    @Override
     public JsonObject asJsonObject() {
         return metadata;
     }

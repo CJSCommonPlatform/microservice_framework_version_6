@@ -133,6 +133,12 @@ public class DefaultJsonMetadataTest {
     }
 
     @Test
+    public void shouldReturnStreamPosition() throws Exception {
+        assertThat(metadata.position().isPresent(), is(true));
+        assertThat(metadata.position().get(), equalTo(STREAM_VERSION));
+    }
+
+    @Test
     public void shouldReturnJsonObject() throws Exception {
         assertThat(metadata.asJsonObject(), equalTo(jsonObject));
     }

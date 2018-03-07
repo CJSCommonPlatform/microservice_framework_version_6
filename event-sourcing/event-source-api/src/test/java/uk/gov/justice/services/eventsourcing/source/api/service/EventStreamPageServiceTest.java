@@ -9,15 +9,15 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.eventsourcing.repository.jdbc.Direction.BACKWARD;
-import static uk.gov.justice.services.eventsourcing.repository.jdbc.Direction.FORWARD;
+import static uk.gov.justice.services.eventsourcing.source.api.service.core.Direction.BACKWARD;
+import static uk.gov.justice.services.eventsourcing.source.api.service.core.Direction.FORWARD;
 import static uk.gov.justice.services.eventsourcing.source.api.service.core.FixedPositionValue.FIRST;
 import static uk.gov.justice.services.eventsourcing.source.api.service.core.FixedPositionValue.HEAD;
 import static uk.gov.justice.services.eventsourcing.source.api.service.core.Position.first;
 import static uk.gov.justice.services.eventsourcing.source.api.service.core.Position.head;
-import static uk.gov.justice.services.eventsourcing.source.api.service.core.Position.sequence;
+import static uk.gov.justice.services.eventsourcing.source.api.service.core.Position.position;
 
-import uk.gov.justice.services.eventsourcing.repository.jdbc.Direction;
+import uk.gov.justice.services.eventsourcing.source.api.service.core.Direction;
 import uk.gov.justice.services.eventsourcing.source.api.service.core.EventStreamEntry;
 import uk.gov.justice.services.eventsourcing.source.api.service.core.EventStreamService;
 import uk.gov.justice.services.eventsourcing.source.api.service.core.Position;
@@ -68,19 +68,19 @@ public class EventStreamPageServiceTest {
 
         eventStreams.add(eventStreamEntry1);
 
-        when(service.recordExists(4L)).thenReturn(true);
+        when(service.eventStreamExists(4L)).thenReturn(true);
 
-        when(service.recordExists(2L)).thenReturn(false);
+        when(service.eventStreamExists(2L)).thenReturn(false);
 
-        final Position position = sequence(3L);
+        final Position position = position(3L);
         when(positionFactory.createPosition("3")).thenReturn(position);
-        when(service.eventStream(position, FORWARD, 2)).thenReturn(eventStreams);
+        when(service.eventStreams(position, FORWARD, 2)).thenReturn(eventStreams);
 
         final URL streamId3SelfUrl = new URL(BASE_URL + EVENT_STREAM_PATH + streamId3 + "/HEAD/BACKWARD/2");
         when(urlLinkFactory.createEventStreamSelfUrlLink(streamId3.toString(), 2, uriInfo)).thenReturn(streamId3SelfUrl);
 
         final URL nextUrl = new URL(BASE_URL + EVENT_STREAM_PATH + "/4/FORWARD/2");
-        when(urlLinkFactory.createEventStreamUrlLink(sequence(4L), FORWARD, 2, uriInfo)).thenReturn(nextUrl);
+        when(urlLinkFactory.createEventStreamUrlLink(position(4L), FORWARD, 2, uriInfo)).thenReturn(nextUrl);
 
         final URL headURL = new URL(BASE_URL + EVENT_STREAM_PATH + "/HEAD/BACKWARD/2");
         when(urlLinkFactory.createHeadEventStreamsUrlLink(2, uriInfo)).thenReturn(headURL);
@@ -116,13 +116,13 @@ public class EventStreamPageServiceTest {
 
         eventStreams.add(eventsStream1);
 
-        when(service.recordExists(4L)).thenReturn(false);
+        when(service.eventStreamExists(4L)).thenReturn(false);
 
-        when(service.recordExists(2L)).thenReturn(true);
+        when(service.eventStreamExists(2L)).thenReturn(true);
 
-        final Position position = sequence(3L);
+        final Position position = position(3L);
         when(positionFactory.createPosition("3")).thenReturn(position);
-        when(service.eventStream(position, BACKWARD, 2L)).thenReturn(eventStreams);
+        when(service.eventStreams(position, BACKWARD, 2L)).thenReturn(eventStreams);
 
         final URL headURL = new URL(BASE_URL + EVENT_STREAM_PATH + "/HEAD/BACKWARD/2");
         when(urlLinkFactory.createHeadEventStreamsUrlLink(2, uriInfo)).thenReturn(headURL);
@@ -134,7 +134,7 @@ public class EventStreamPageServiceTest {
         when(urlLinkFactory.createEventStreamSelfUrlLink(streamId3.toString(), 2, uriInfo)).thenReturn(streamId3SelfUrl);
 
         final URL previousUrl = new URL(BASE_URL + EVENT_STREAM_PATH + "/2/BACKWARD/2");
-        when(urlLinkFactory.createEventStreamUrlLink(sequence(2L), BACKWARD, 2, uriInfo)).thenReturn(previousUrl);
+        when(urlLinkFactory.createEventStreamUrlLink(position(2L), BACKWARD, 2, uriInfo)).thenReturn(previousUrl);
 
         final Page<EventStreamPageEntry> feedActual = eventStreamPageService.pageOfEventStream("3", BACKWARD, PAGE_SIZE, uriInfo);
 
@@ -166,13 +166,13 @@ public class EventStreamPageServiceTest {
         eventStreams.add(eventsStream2);
         eventStreams.add(eventsStream1);
 
-        when(service.recordExists(3L)).thenReturn(true);
+        when(service.eventStreamExists(3L)).thenReturn(true);
 
-        when(service.recordExists(0L)).thenReturn(false);
+        when(service.eventStreamExists(0L)).thenReturn(false);
 
-        final Position position = sequence(3L);
+        final Position position = position(3L);
         when(positionFactory.createPosition("3")).thenReturn(position);
-        when(service.eventStream(position, FORWARD, 2L)).thenReturn(eventStreams);
+        when(service.eventStreams(position, FORWARD, 2L)).thenReturn(eventStreams);
 
         final URL headURL = new URL(BASE_URL + EVENT_STREAM_PATH + "/HEAD/BACKWARD/2");
         when(urlLinkFactory.createHeadEventStreamsUrlLink(2, uriInfo)).thenReturn(headURL);
@@ -220,12 +220,12 @@ public class EventStreamPageServiceTest {
         eventStreams.add(event4);
         eventStreams.add(event3);
 
-        when(service.recordExists(5L)).thenReturn(false);
-        when(service.recordExists(2L)).thenReturn(true);
+        when(service.eventStreamExists(5L)).thenReturn(false);
+        when(service.eventStreamExists(2L)).thenReturn(true);
 
-        final Position position = sequence(4L);
+        final Position position = position(4L);
         when(positionFactory.createPosition("4")).thenReturn(position);
-        when(service.eventStream(position, BACKWARD, 2L)).thenReturn(eventStreams);
+        when(service.eventStreams(position, BACKWARD, 2L)).thenReturn(eventStreams);
 
         final ResteasyUriInfo uriInfo = new ResteasyUriInfo(create(BASE_URL), create(EVENT_STREAM_PATH));
 
@@ -242,7 +242,7 @@ public class EventStreamPageServiceTest {
         when(urlLinkFactory.createEventStreamSelfUrlLink(streamId4.toString(), 2, uriInfo)).thenReturn(streamId4SelfUrl);
 
         final URL previousUrl = new URL(BASE_URL + EVENT_STREAM_PATH + "/2/BACKWARD/2");
-        when(urlLinkFactory.createEventStreamUrlLink(sequence(2L), BACKWARD, 2, uriInfo)).thenReturn(previousUrl);
+        when(urlLinkFactory.createEventStreamUrlLink(position(2L), BACKWARD, 2, uriInfo)).thenReturn(previousUrl);
 
         final Page<EventStreamPageEntry> feedActual = eventStreamPageService.pageOfEventStream("4", BACKWARD, PAGE_SIZE, uriInfo);
 
@@ -278,10 +278,10 @@ public class EventStreamPageServiceTest {
         eventStreams.add(event2);
         eventStreams.add(event1);
 
-        when(service.recordExists(3L)).thenReturn(true);
+        when(service.eventStreamExists(3L)).thenReturn(true);
 
         when(positionFactory.createPosition(FIRST)).thenReturn(first());
-        when(service.eventStream(first(), FORWARD, 2L)).thenReturn(eventStreams);
+        when(service.eventStreams(first(), FORWARD, 2L)).thenReturn(eventStreams);
 
         final URL headURL = new URL(BASE_URL + EVENT_STREAM_PATH + "/HEAD/BACKWARD/2");
         when(urlLinkFactory.createHeadEventStreamsUrlLink(2, uriInfo)).thenReturn(headURL);
@@ -296,7 +296,7 @@ public class EventStreamPageServiceTest {
         when(urlLinkFactory.createEventStreamSelfUrlLink(streamId1, 2, uriInfo)).thenReturn(streamId1SelfUrl);
 
         final URL nextUrl = new URL(BASE_URL + EVENT_STREAM_PATH + "/3/FORWARD/2");
-        when(urlLinkFactory.createEventStreamUrlLink(sequence(3L), FORWARD, 2, uriInfo)).thenReturn(nextUrl);
+        when(urlLinkFactory.createEventStreamUrlLink(position(3L), FORWARD, 2, uriInfo)).thenReturn(nextUrl);
 
         final Page<EventStreamPageEntry> feed = eventStreamPageService.pageOfEventStream(FIRST, FORWARD, PAGE_SIZE, uriInfo);
 
@@ -320,10 +320,10 @@ public class EventStreamPageServiceTest {
         eventStreams.add(event3);
         eventStreams.add(event2);
 
-        when(service.recordExists(1L)).thenReturn(true);
+        when(service.eventStreamExists(1L)).thenReturn(true);
 
         when(positionFactory.createPosition(HEAD)).thenReturn(head());
-        when(service.eventStream(head(), BACKWARD, 2L)).thenReturn(eventStreams);
+        when(service.eventStreams(head(), BACKWARD, 2L)).thenReturn(eventStreams);
 
         final URL headURL = new URL(BASE_URL + EVENT_STREAM_PATH + "/HEAD/BACKWARD/2");
         when(urlLinkFactory.createHeadEventStreamsUrlLink(2, uriInfo)).thenReturn(headURL);
@@ -338,7 +338,7 @@ public class EventStreamPageServiceTest {
         when(urlLinkFactory.createEventStreamSelfUrlLink(streamId2, 2, uriInfo)).thenReturn(streamId2SelfUrl);
 
         final URL previousUrl = new URL(BASE_URL + EVENT_STREAM_PATH + "/1/BACKWARD/2");
-        when(urlLinkFactory.createEventStreamUrlLink(sequence(1L), BACKWARD, 2, uriInfo)).thenReturn(previousUrl);
+        when(urlLinkFactory.createEventStreamUrlLink(position(1L), BACKWARD, 2, uriInfo)).thenReturn(previousUrl);
 
         final Page<EventStreamPageEntry> pageOfEventStream = eventStreamPageService.pageOfEventStream(HEAD, BACKWARD, PAGE_SIZE, uriInfo);
 
@@ -352,13 +352,13 @@ public class EventStreamPageServiceTest {
     @Test
     public void shouldReturnEmptyListWithPagingLinks() throws Exception {
         final UUID streamId = randomUUID();
-        final Position sequence = sequence(3L);
+        final Position sequence = position(3L);
         final Direction backward = BACKWARD;
         final ResteasyUriInfo uriInfo = new ResteasyUriInfo(create("http://server:123/context/"),
                 create("event-streams/" + streamId));
 
         final List<EventStreamEntry> entries = emptyList();
-        when(service.eventStream(sequence, backward, 2)).thenReturn(entries);
+        when(service.eventStreams(sequence, backward, 2)).thenReturn(entries);
 
         final URL headURL = new URL(BASE_URL + EVENT_STREAM_PATH + "/HEAD/BACKWARD/2");
         when(urlLinkFactory.createHeadEventStreamsUrlLink(2, uriInfo)).thenReturn(headURL);

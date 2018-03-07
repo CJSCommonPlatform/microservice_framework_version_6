@@ -4,7 +4,7 @@ import static java.lang.String.format;
 import static uk.gov.justice.services.common.converter.ZonedDateTimes.toSqlTimestamp;
 
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.Event;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidSequenceIdException;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidPositionException;
 import uk.gov.justice.services.jdbc.persistence.PreparedStatementWrapper;
 
 import java.sql.SQLException;
@@ -21,11 +21,11 @@ public abstract class BaseEventInsertStrategy implements EventInsertionStrategy 
      * @param event             the information to set into the prepared statement
      * @return the value returned from executing the update
      * @throws SQLException               if thrown by the execute update
-     * @throws InvalidSequenceIdException if the version already exists or is null
+     * @throws InvalidPositionException if an event already exists at the specified position.
      */
-    protected int executeStatement(final PreparedStatementWrapper preparedStatement, final Event event) throws SQLException, InvalidSequenceIdException {
+    protected int executeStatement(final PreparedStatementWrapper preparedStatement, final Event event) throws SQLException, InvalidPositionException {
         if (event.getSequenceId() == null) {
-            throw new InvalidSequenceIdException(format("Version is null for stream %s", event.getStreamId()));
+            throw new InvalidPositionException(format("Version is null for stream %s", event.getStreamId()));
         }
 
         preparedStatement.setObject(1, event.getId());

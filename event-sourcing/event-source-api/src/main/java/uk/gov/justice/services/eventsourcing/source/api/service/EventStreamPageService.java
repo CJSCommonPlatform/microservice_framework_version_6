@@ -1,13 +1,13 @@
 package uk.gov.justice.services.eventsourcing.source.api.service;
 
 import static java.util.Collections.emptyList;
-import static uk.gov.justice.services.eventsourcing.repository.jdbc.Direction.BACKWARD;
-import static uk.gov.justice.services.eventsourcing.repository.jdbc.Direction.FORWARD;
 import static uk.gov.justice.services.eventsourcing.source.api.service.PagingLinks.PagingLinksBuilder.pagingLinksBuilder;
-import static uk.gov.justice.services.eventsourcing.source.api.service.core.Position.sequence;
+import static uk.gov.justice.services.eventsourcing.source.api.service.core.Direction.BACKWARD;
+import static uk.gov.justice.services.eventsourcing.source.api.service.core.Direction.FORWARD;
+import static uk.gov.justice.services.eventsourcing.source.api.service.core.Position.position;
 
-import uk.gov.justice.services.eventsourcing.repository.jdbc.Direction;
 import uk.gov.justice.services.eventsourcing.source.api.service.PagingLinks.PagingLinksBuilder;
+import uk.gov.justice.services.eventsourcing.source.api.service.core.Direction;
 import uk.gov.justice.services.eventsourcing.source.api.service.core.EventStreamEntry;
 import uk.gov.justice.services.eventsourcing.source.api.service.core.EventStreamService;
 import uk.gov.justice.services.eventsourcing.source.api.service.core.Position;
@@ -47,7 +47,7 @@ public class EventStreamPageService {
                 position,
                 pageSize,
                 uriInfo,
-                eventStreamService.eventStream(position, direction, pageSize));
+                eventStreamService.eventStreams(position, direction, pageSize));
     }
 
     private Page<EventStreamPageEntry> pageOfEventStreamWithLinks(final Position position,
@@ -96,9 +96,9 @@ public class EventStreamPageService {
                                           final UriInfo uriInfo,
                                           final List<EventStreamEntry> entries) throws MalformedURLException {
         final long minSequenceId = min(entries);
-        final boolean olderEventsAvailable = !position.isFirst() && eventStreamService.recordExists(minSequenceId - 1L);
+        final boolean olderEventsAvailable = !position.isFirst() && eventStreamService.eventStreamExists(minSequenceId - 1L);
 
-        return olderEventsAvailable ? Optional.of(urlLinkFactory.createEventStreamUrlLink(sequence(minSequenceId - 1L), BACKWARD, pageSize, uriInfo)) : Optional.empty();
+        return olderEventsAvailable ? Optional.of(urlLinkFactory.createEventStreamUrlLink(position(minSequenceId - 1L), BACKWARD, pageSize, uriInfo)) : Optional.empty();
     }
 
     private Optional<URL> nextUrlLink(final Position position,
@@ -106,9 +106,9 @@ public class EventStreamPageService {
                                       final UriInfo uriInfo,
                                       final List<EventStreamEntry> entries) throws MalformedURLException {
         final long maxSequenceId = max(entries);
-        final boolean newEventsAvailable = !position.isHead() && eventStreamService.recordExists(maxSequenceId + 1L);
+        final boolean newEventsAvailable = !position.isHead() && eventStreamService.eventStreamExists(maxSequenceId + 1L);
 
-        return newEventsAvailable ? Optional.of(urlLinkFactory.createEventStreamUrlLink(sequence(maxSequenceId + 1L), FORWARD, pageSize, uriInfo)) : Optional.empty();
+        return newEventsAvailable ? Optional.of(urlLinkFactory.createEventStreamUrlLink(position(maxSequenceId + 1L), FORWARD, pageSize, uriInfo)) : Optional.empty();
     }
 
     private long min(List<EventStreamEntry> eventStreams) {

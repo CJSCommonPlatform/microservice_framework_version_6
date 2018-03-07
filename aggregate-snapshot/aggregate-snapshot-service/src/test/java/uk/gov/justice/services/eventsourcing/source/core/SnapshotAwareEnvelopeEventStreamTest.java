@@ -58,14 +58,14 @@ public class SnapshotAwareEnvelopeEventStreamTest {
     }
 
     @Test
-    public void shouldReturnStreamFromVersion() throws Exception {
+    public void shouldReturnStreamFromPosition() throws Exception {
 
-        final long version = 10L;
+        final long position = 10L;
         final JsonEnvelope event = envelope().with(metadataWithDefaults().withVersion(1L)).build();
 
-        when(eventStreamManager.readFrom(STREAM_ID, version)).thenReturn(Stream.of(event));
+        when(eventStreamManager.readFrom(STREAM_ID, position)).thenReturn(Stream.of(event));
 
-        Stream<JsonEnvelope> stream = eventStream.readFrom(version);
+        Stream<JsonEnvelope> stream = eventStream.readFrom(position);
 
         List<JsonEnvelope> events = stream.collect(toList());
         assertThat(events, hasSize(1));
@@ -81,20 +81,20 @@ public class SnapshotAwareEnvelopeEventStreamTest {
     }
 
     @Test
-    public void shouldAppendStreamAfterVersion() throws Exception {
+    public void shouldAppendStreamAfterAfterPosition() throws Exception {
         final Stream<JsonEnvelope> stream = Stream.of(envelope().build());
-        final long version = 11L;
-        eventStream.appendAfter(stream, version);
+        final long position = 11L;
+        eventStream.appendAfter(stream, position);
 
-        verify(eventStreamManager).appendAfter(STREAM_ID, stream, version);
+        verify(eventStreamManager).appendAfter(STREAM_ID, stream, position);
     }
 
     @Test
-    public void shouldReturnCurrentVersion() throws Exception {
-        final long version = 11L;
-        when(eventStreamManager.getCurrentVersion(STREAM_ID)).thenReturn(version);
+    public void shouldReturnSize() throws Exception {
+        final long size = 11L;
+        when(eventStreamManager.getSize(STREAM_ID)).thenReturn(size);
 
-        assertThat(eventStream.getCurrentVersion(), is(version));
+        assertThat(eventStream.size(), is(size));
     }
 
     @Test

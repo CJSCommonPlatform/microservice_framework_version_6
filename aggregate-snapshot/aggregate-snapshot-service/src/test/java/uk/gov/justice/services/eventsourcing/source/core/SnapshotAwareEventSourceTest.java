@@ -10,9 +10,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import uk.gov.justice.services.eventsourcing.repository.jdbc.DefaultEventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.DefaultEventStreamMetadata;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventStreamMetadata;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 
 import java.util.List;
@@ -26,18 +27,18 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DefaultEventSourceTest {
+public class SnapshotAwareEventSourceTest {
 
     private static final UUID STREAM_ID = randomUUID();
-
-    @InjectMocks
-    DefaultEventSource eventSource;
 
     @Mock
     private EventStreamManager eventStreamManager;
 
     @Mock
-    private EventRepository eventRepository;
+    private DefaultEventRepository eventRepository;
+
+    @InjectMocks
+    SnapshotAwareEventSource eventSource;
 
     @Test
     public void shouldReturnEventStream() {
@@ -63,14 +64,15 @@ public class DefaultEventSourceTest {
     }
 
     @Test
-    public void shouldGetEventStreamsByPosition() {
+    public void shouldGetEventStreamsFromPosition() {
         final UUID streamId = randomUUID();
         final long position = 1L;
 
-        final Stream<EventStreamMetadata> eventStreamObjectStream = Stream.of(new DefaultEventStreamMetadata(streamId, position, true, now()));
-        when(eventRepository.getEventStreamsFromPosition(position)).thenReturn(eventStreamObjectStream);
+        final Stream<EventStreamMetadata> eventStreamMetadatas = Stream.of(new DefaultEventStreamMetadata(streamId, position, true, now()));
+        when(eventRepository.getEventStreamsFromPosition(position)).thenReturn(eventStreamMetadatas);
+        when(eventStreamManager.getStreamPosition(streamId)).thenReturn(1l);
 
-        final Stream<uk.gov.justice.services.eventsourcing.source.core.EventStream> eventStreams = eventSource.getStreamsFrom(position);
+        final Stream<uk.gov.justice.services.eventsourcing.source.core.EventStream> eventStreams= eventSource.getStreamsFrom(position);
         List<uk.gov.justice.services.eventsourcing.source.core.EventStream> eventStreamList = eventStreams.collect(toList());
 
         assertThat(eventStreamList.size(), is(1));
@@ -80,14 +82,13 @@ public class DefaultEventSourceTest {
         assertThat(eventStreamList.get(0).getPosition(), is(position));
     }
 
-
     @Test
     public void shouldReturnEmptyStream() {
-        final long position = 9L;
+        final long sequenceNumber = 9L;
 
-        when(eventRepository.getEventStreamsFromPosition(position)).thenReturn(Stream.empty());
+        when(eventRepository.getEventStreamsFromPosition(sequenceNumber)).thenReturn(Stream.empty());
 
-        final Stream<uk.gov.justice.services.eventsourcing.source.core.EventStream> eventStreams = eventSource.getStreamsFrom(position);
+        final Stream<uk.gov.justice.services.eventsourcing.source.core.EventStream> eventStreams = eventSource.getStreamsFrom(sequenceNumber);
         List<uk.gov.justice.services.eventsourcing.source.core.EventStream> eventStreamList = eventStreams.collect(toList());
 
         assertThat(eventStreamList.size(), is(0));

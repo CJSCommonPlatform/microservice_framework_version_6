@@ -6,6 +6,9 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
+import static uk.gov.justice.raml.jms.core.ClassNameFactory.EVENT_VALIDATION_INTERCEPTOR;
+import static uk.gov.justice.raml.jms.core.ClassNameFactory.JMS_LISTENER;
+import static uk.gov.justice.raml.jms.core.JmsEndPointGeneratorUtil.shouldGenerateEventFilter;
 import static uk.gov.justice.raml.jms.core.JmsEndPointGeneratorUtil.shouldListenToAllMessages;
 import static uk.gov.justice.raml.jms.core.MediaTypesUtil.containsGeneralJsonMimeType;
 import static uk.gov.justice.raml.jms.core.MediaTypesUtil.mediaTypesFrom;
@@ -13,6 +16,7 @@ import static uk.gov.justice.services.generators.commons.helper.Names.namesListS
 
 import uk.gov.justice.services.adapter.messaging.JmsLoggerMetadataInterceptor;
 import uk.gov.justice.services.adapter.messaging.JmsProcessor;
+import uk.gov.justice.services.adapter.messaging.JsonSchemaValidationInterceptor;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.generators.commons.config.GeneratorPropertyParser;
@@ -72,19 +76,17 @@ class MessageListenerCodeGenerator {
     /**
      * Create an implementation of the {@link MessageListener}.
      *
-     * @param resource                       the resource definition this listener is being generated for
-     * @param baseUri                        the base URI
-     * @param generatorPropertyParser        used to query the generator properties
-     * @param validationInterceptorClassName the validation interceptor class name
-     * @param classNameFactory               creates the class name for this generated class
+     * @param resource                the resource definition this listener is being generated for
+     * @param baseUri                 the base URI
+     * @param generatorPropertyParser used to query the generator properties
+     * @param classNameFactory        creates the class name for this generated class
      * @return the message listener class specification
      */
     TypeSpec generate(final Resource resource,
                       final MessagingAdapterBaseUri baseUri,
                       final GeneratorPropertyParser generatorPropertyParser,
-                      final ClassName validationInterceptorClassName,
                       final ClassNameFactory classNameFactory) {
-        return classSpecFrom(resource, baseUri, generatorPropertyParser, validationInterceptorClassName, classNameFactory)
+        return classSpecFrom(resource, baseUri, generatorPropertyParser, classNameFactory)
                 .addMethod(generateOnMessageMethod())
                 .build();
     }
@@ -92,16 +94,14 @@ class MessageListenerCodeGenerator {
     /**
      * Generate the @link MessageListener} class implementation.
      *
-     * @param resource                       the resource definition this listener is being generated for
-     * @param baseUri                        the base URI
-     * @param generatorPropertyParser        used to query the generator properties
-     * @param validationInterceptorClassName the validation interceptor class name
+     * @param resource                the resource definition this listener is being generated for
+     * @param baseUri                 the base URI
+     * @param generatorPropertyParser used to query the generator properties
      * @return the {@link TypeSpec.Builder} that defines the class
      */
     private TypeSpec.Builder classSpecFrom(final Resource resource,
                                            final MessagingAdapterBaseUri baseUri,
                                            final GeneratorPropertyParser generatorPropertyParser,
-                                           final ClassName validationInterceptorClassName,
                                            final ClassNameFactory classNameFactory) {
 
         final String serviceComponent = generatorPropertyParser.serviceComponent();
@@ -109,14 +109,14 @@ class MessageListenerCodeGenerator {
         if (componentDestinationType.isSupported(serviceComponent)) {
 
             final MessagingResourceUri resourceUri = new MessagingResourceUri(resource.getUri());
-            final String jmsListenerClassName = classNameFactory.classNameWith("JmsListener");
+            final ClassName className = classNameFactory.classNameFor(JMS_LISTENER);
 
-            final TypeSpec.Builder typeSpecBuilder = classBuilder(jmsListenerClassName)
+            final TypeSpec.Builder typeSpecBuilder = classBuilder(className)
                     .addModifiers(PUBLIC)
                     .addSuperinterface(MessageListener.class)
                     .addField(FieldSpec.builder(ClassName.get(Logger.class), LOGGER_FIELD)
                             .addModifiers(PRIVATE, STATIC, FINAL)
-                            .initializer("$T.getLogger($L.class)", LoggerFactory.class, jmsListenerClassName)
+                            .initializer("$T.getLogger($L.class)", LoggerFactory.class, className)
                             .build())
                     .addField(FieldSpec.builder(ClassName.get(InterceptorChainProcessor.class), INTERCEPTOR_CHAIN_PROCESS)
                             .addAnnotation(Inject.class)
@@ -132,7 +132,7 @@ class MessageListenerCodeGenerator {
             if (!containsGeneralJsonMimeType(resource.getActions())) {
                 AnnotationSpec.Builder builder = AnnotationSpec.builder(Interceptors.class)
                         .addMember(DEFAULT_ANNOTATION_PARAMETER, CLASS_NAME, JmsLoggerMetadataInterceptor.class)
-                        .addMember(DEFAULT_ANNOTATION_PARAMETER, CLASS_NAME, validationInterceptorClassName);
+                        .addMember(DEFAULT_ANNOTATION_PARAMETER, CLASS_NAME, getValidationInterceptorClassName(classNameFactory, resource, baseUri));
 
                 typeSpecBuilder.addAnnotation(builder.build());
             }
@@ -147,6 +147,17 @@ class MessageListenerCodeGenerator {
         }
 
         throw new IllegalStateException(format("JMS Endpoint generation is unsupported for framework component type %s", serviceComponent));
+    }
+
+    private ClassName getValidationInterceptorClassName(final ClassNameFactory classNameFactory,
+                                                        final Resource resource,
+                                                        final MessagingAdapterBaseUri baseUri) {
+
+        if (shouldGenerateEventFilter(resource, baseUri)) {
+            return classNameFactory.classNameFor(EVENT_VALIDATION_INTERCEPTOR);
+        }
+
+        return ClassName.get(JsonSchemaValidationInterceptor.class);
     }
 
     private String poolNameFrom(final MessagingResourceUri resourceUri, final String component) {

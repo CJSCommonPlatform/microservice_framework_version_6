@@ -6,6 +6,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.raml.jms.core.ClassNameFactory.EVENT_FILTER_INTERCEPTOR;
+import static uk.gov.justice.raml.jms.core.ClassNameFactory.EVENT_LISTENER_INTERCEPTOR_CHAIN_PROVIDER;
 
 import uk.gov.justice.raml.jms.core.ClassNameFactory;
 import uk.gov.justice.services.components.event.listener.interceptors.EventBufferInterceptor;
@@ -40,13 +42,14 @@ public class EventListenerInterceptorChainProviderCodeGeneratorTest {
         final String packageName = "uk.gov.justice.api.interceptor.filter";
         final String simpleName = "MyCustomEventListenerInterceptorChainProvider";
 
+        final ClassName eventListenerInterceptorChainProviderClassName = ClassName.get(packageName, simpleName);
         final ClassName eventFilterInterceptorClassName = ClassName.get(StubEventFilterInterceptor.class);
         final ClassNameFactory classNameFactory = mock(ClassNameFactory.class);
 
-        when(classNameFactory.classNameWith("EventListenerInterceptorChainProvider")).thenReturn(simpleName);
+        when(classNameFactory.classNameFor(EVENT_LISTENER_INTERCEPTOR_CHAIN_PROVIDER)).thenReturn(eventListenerInterceptorChainProviderClassName);
+        when(classNameFactory.classNameFor(EVENT_FILTER_INTERCEPTOR)).thenReturn(eventFilterInterceptorClassName);
 
         final TypeSpec typeSpec = eventListenerInterceptorChainProviderCodeGenerator.generate(
-                eventFilterInterceptorClassName,
                 componentName,
                 classNameFactory);
 

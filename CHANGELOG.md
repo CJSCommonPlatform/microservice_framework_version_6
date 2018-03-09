@@ -5,6 +5,11 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [4.0.0] - 2018-03-09
+
+### Added
+- Schema catalog generation plugin to example service
+
 ### Changed
  - Randomise JMS and HTTP ports for integration tests
  - Move LoggerUtils to utilities as part of rest-adapter dependency update
@@ -12,9 +17,6 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
  - Move DefaultJsonValidationLoggerHelper to core
  - Use JsonSchemaValidatonException instead of org.everit.json.schema.ValidationException
  - SPI for InterceptorContext.interceptorContextWithInput()
-
-###
-- Added schema catalog generation plugin to example service
 
 ## [3.1.0] - 2018-01-23
 

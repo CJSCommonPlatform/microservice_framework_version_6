@@ -10,7 +10,6 @@ import uk.gov.justice.raml.jms.interceptor.EventFilterInterceptorCodeGenerator;
 import uk.gov.justice.raml.jms.interceptor.EventListenerInterceptorChainProviderCodeGenerator;
 import uk.gov.justice.raml.jms.interceptor.EventValidationInterceptorCodeGenerator;
 import uk.gov.justice.raml.jms.validator.BaseUriRamlValidator;
-import uk.gov.justice.services.adapter.messaging.JsonSchemaValidationInterceptor;
 import uk.gov.justice.services.generators.commons.config.GeneratorPropertyParser;
 import uk.gov.justice.services.generators.commons.helper.MessagingAdapterBaseUri;
 import uk.gov.justice.services.generators.commons.helper.MessagingResourceUri;
@@ -23,7 +22,6 @@ import uk.gov.justice.services.generators.commons.validator.RequestContentTypeRa
 
 import java.util.stream.Stream;
 
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeSpec;
 import org.raml.model.Raml;
 import org.raml.model.Resource;
@@ -84,53 +82,25 @@ public class JmsEndpointGenerator implements Generator {
 
         final MessagingResourceUri resourceUri = new MessagingResourceUri(resource.getUri());
         final MessagingAdapterBaseUri baseUri = new MessagingAdapterBaseUri(raml.getBaseUri());
-        final ClassNameFactory classNameFactory = new ClassNameFactory(baseUri, resourceUri);
-
-        final ClassName validationClassName;
+        final ClassNameFactory classNameFactory = new ClassNameFactory(baseUri, resourceUri, basePackageName);
 
         if (shouldGenerateEventFilter(resource, baseUri)) {
 
-            final String serviceComponent = generatorPropertyParser.serviceComponent();
-            final TypeSpec eventFilterTypeSpec = eventFilterCodeGenerator.generate(resource, classNameFactory);
-            final ClassName eventFilterClassName = ClassName.get(basePackageName, eventFilterTypeSpec.name);
+            streamBuilder
+                    .add(eventFilterCodeGenerator.generate(resource, classNameFactory))
+                    .add(eventFilterInterceptorCodeGenerator.generate(classNameFactory))
+                    .add(eventValidationInterceptorCodeGenerator.generate(classNameFactory))
+                    .add(eventListenerInterceptorChainProviderCodeGenerator.generate(
+                            generatorPropertyParser.serviceComponent(),
+                            classNameFactory));
 
-            streamBuilder.add(eventFilterTypeSpec);
-
-            final TypeSpec eventFilterInterceptor = eventFilterInterceptorCodeGenerator.generate(
-                    eventFilterClassName,
-                    classNameFactory);
-
-            streamBuilder.add(eventFilterInterceptor);
-
-            final ClassName eventFilterInterceptorClassName = ClassName.get(basePackageName, eventFilterInterceptor.name);
-
-            final TypeSpec eventValidationInterceptor = eventValidationInterceptorCodeGenerator.generate(
-                    eventFilterClassName,
-                    classNameFactory);
-
-            streamBuilder.add(eventValidationInterceptor);
-
-            validationClassName = ClassName.get(basePackageName, eventValidationInterceptor.name);
-
-            final TypeSpec eventInterceptorChainProvider = eventListenerInterceptorChainProviderCodeGenerator.generate(
-                    eventFilterInterceptorClassName,
-                    serviceComponent,
-                    classNameFactory);
-
-            streamBuilder.add(eventInterceptorChainProvider);
-
-        } else {
-            validationClassName = ClassName.get(JsonSchemaValidationInterceptor.class);
         }
 
-        final TypeSpec messageListenerTypeSpec = messageListenerCodeGenerator.generate(
+        streamBuilder.add(messageListenerCodeGenerator.generate(
                 resource,
                 baseUri,
                 generatorPropertyParser,
-                validationClassName,
-                classNameFactory);
-
-        streamBuilder.add(messageListenerTypeSpec);
+                classNameFactory));
 
         return streamBuilder.build();
     }

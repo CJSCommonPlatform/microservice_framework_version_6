@@ -3,6 +3,7 @@ package uk.gov.justice.raml.jms.core;
 import static com.squareup.javapoet.MethodSpec.constructorBuilder;
 import static com.squareup.javapoet.TypeSpec.classBuilder;
 import static javax.lang.model.element.Modifier.PUBLIC;
+import static uk.gov.justice.raml.jms.core.ClassNameFactory.EVENT_FILTER;
 import static uk.gov.justice.raml.jms.core.MediaTypesUtil.mediaTypesFrom;
 import static uk.gov.justice.services.generators.commons.helper.Names.namesListStringFrom;
 
@@ -17,7 +18,7 @@ class EventFilterCodeGenerator {
 
     TypeSpec generate(final Resource resource, final ClassNameFactory classNameFactory) {
 
-        return classBuilder(classNameFactory.classNameWith("EventFilter"))
+        return classBuilder(classNameFactory.classNameFor(EVENT_FILTER))
                 .addModifiers(PUBLIC)
                 .superclass(AbstractEventFilter.class)
                 .addAnnotation(ApplicationScoped.class)

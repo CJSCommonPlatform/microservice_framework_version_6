@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import uk.gov.justice.services.generators.commons.helper.MessagingAdapterBaseUri;
 import uk.gov.justice.services.generators.commons.helper.MessagingResourceUri;
 
+import com.squareup.javapoet.ClassName;
 import org.junit.Test;
 
 public class ClassNameFactoryTest {
@@ -16,12 +17,14 @@ public class ClassNameFactoryTest {
     public void shouldCreateClassNameFromBaseUriResourceUriAndClassNameSuffix() {
         final MessagingAdapterBaseUri baseUri = mock(MessagingAdapterBaseUri.class);
         final MessagingResourceUri resourceUri = mock(MessagingResourceUri.class);
+        final String basePackageName = "base.package";
 
         when(baseUri.toClassName()).thenReturn("BaseUri");
         when(resourceUri.toClassName()).thenReturn("ResourceUri");
 
-        final String className = new ClassNameFactory(baseUri, resourceUri).classNameWith("ClassNameSuffix");
+        final ClassName className = new ClassNameFactory(baseUri, resourceUri, basePackageName).classNameFor("ClassNameSuffix");
 
-        assertThat(className, is("BaseUriResourceUriClassNameSuffix"));
+        assertThat(className.packageName(), is(basePackageName));
+        assertThat(className.simpleName(), is("BaseUriResourceUriClassNameSuffix"));
     }
 }

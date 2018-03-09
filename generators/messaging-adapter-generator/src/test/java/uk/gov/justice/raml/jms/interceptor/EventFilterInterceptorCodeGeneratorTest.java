@@ -6,6 +6,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.raml.jms.core.ClassNameFactory.EVENT_FILTER;
+import static uk.gov.justice.raml.jms.core.ClassNameFactory.EVENT_FILTER_INTERCEPTOR;
 
 import uk.gov.justice.raml.jms.core.ClassNameFactory;
 import uk.gov.justice.services.core.interceptor.Interceptor;
@@ -39,13 +41,14 @@ public class EventFilterInterceptorCodeGeneratorTest {
         final String packageName = "uk.gov.justice.api.interceptor.filter";
         final String simpleName = "MyCustomEventFilterInterceptor";
 
+        final ClassName eventFilterInterceptorClassName = get(packageName, simpleName);
         final ClassName eventFilterClassName = get(MyCustomEventFilter.class);
         final ClassNameFactory classNameFactory = mock(ClassNameFactory.class);
 
-        when(classNameFactory.classNameWith("EventFilterInterceptor")).thenReturn(simpleName);
+        when(classNameFactory.classNameFor(EVENT_FILTER_INTERCEPTOR)).thenReturn(eventFilterInterceptorClassName);
+        when(classNameFactory.classNameFor(EVENT_FILTER)).thenReturn(eventFilterClassName);
 
         final TypeSpec typeSpec = eventFilterInterceptorCodeGenerator.generate(
-                eventFilterClassName,
                 classNameFactory);
 
         final File outputDirectory = getOutputDirectory("./target/test-generation");

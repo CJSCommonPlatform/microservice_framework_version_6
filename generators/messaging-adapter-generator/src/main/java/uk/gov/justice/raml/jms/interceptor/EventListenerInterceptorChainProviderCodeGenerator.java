@@ -7,6 +7,8 @@ import static com.squareup.javapoet.TypeSpec.classBuilder;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
+import static uk.gov.justice.raml.jms.core.ClassNameFactory.EVENT_FILTER_INTERCEPTOR;
+import static uk.gov.justice.raml.jms.core.ClassNameFactory.EVENT_LISTENER_INTERCEPTOR_CHAIN_PROVIDER;
 
 import uk.gov.justice.raml.jms.core.ClassNameFactory;
 import uk.gov.justice.services.components.event.listener.interceptors.EventBufferInterceptor;
@@ -56,13 +58,13 @@ import com.squareup.javapoet.TypeSpec;
  */
 public class EventListenerInterceptorChainProviderCodeGenerator {
 
-    private static final String CLASS_NAME_SUFFIX = "EventListenerInterceptorChainProvider";
-
-    public TypeSpec generate(final ClassName eventFilterInterceptorClassName,
-                             final String componentName,
+    public TypeSpec generate(final String componentName,
                              final ClassNameFactory classNameFactory) {
 
-        return classBuilder(classNameFactory.classNameWith(CLASS_NAME_SUFFIX))
+        final ClassName className = classNameFactory.classNameFor(EVENT_LISTENER_INTERCEPTOR_CHAIN_PROVIDER);
+        final ClassName eventFilterInterceptorClassName = classNameFactory.classNameFor(EVENT_FILTER_INTERCEPTOR);
+
+        return classBuilder(className)
                 .addModifiers(PUBLIC)
                 .addSuperinterface(InterceptorChainEntryProvider.class)
                 .addField(createInterceptorChainEntriesMapField())

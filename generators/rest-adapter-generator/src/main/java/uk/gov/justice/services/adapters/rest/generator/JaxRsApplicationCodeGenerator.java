@@ -7,7 +7,7 @@ import static uk.gov.justice.services.generators.commons.helper.Names.RESOURCE_P
 import static uk.gov.justice.services.generators.commons.helper.Names.buildJavaFriendlyName;
 import static uk.gov.justice.services.generators.commons.helper.Names.packageNameOf;
 
-import uk.gov.justice.raml.core.GeneratorConfig;
+import uk.gov.justice.maven.generator.io.files.parser.core.GeneratorConfig;
 import uk.gov.justice.services.adapter.rest.application.CommonProviders;
 import uk.gov.justice.services.generators.commons.helper.RestResourceBaseUri;
 

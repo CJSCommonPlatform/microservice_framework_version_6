@@ -1,7 +1,6 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
 
-import static java.util.Collections.emptyMap;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
@@ -11,6 +10,7 @@ import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 
+import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
 import uk.gov.justice.services.generators.commons.validator.RamlValidationException;
 
 import org.junit.Rule;
@@ -34,7 +34,7 @@ public class RestAdapterGeneratorErrorHandlingTest {
 
         generator.run(
                 raml().build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
     }
 
@@ -48,7 +48,7 @@ public class RestAdapterGeneratorErrorHandlingTest {
                 raml()
                         .with(resource("/path"))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
     }
 
     @Test
@@ -62,7 +62,7 @@ public class RestAdapterGeneratorErrorHandlingTest {
                         resource("/path")
                                 .with(httpActionWithDefaultMapping(POST))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
     }
 
     @Test
@@ -76,7 +76,7 @@ public class RestAdapterGeneratorErrorHandlingTest {
                         resource("/path")
                                 .with(httpActionWithDefaultMapping(GET))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
     }
 
     @Test
@@ -90,7 +90,7 @@ public class RestAdapterGeneratorErrorHandlingTest {
                         resource("/path")
                                 .with(httpActionWithDefaultMapping(PATCH))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
     }
 
     @Test
@@ -104,7 +104,7 @@ public class RestAdapterGeneratorErrorHandlingTest {
                         resource("/path")
                                 .with(httpActionWithDefaultMapping(PATCH))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
     }
 
     @Test
@@ -118,6 +118,6 @@ public class RestAdapterGeneratorErrorHandlingTest {
                         resource("/path")
                                 .with(httpActionWithDefaultMapping(PATCH))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
     }
 }

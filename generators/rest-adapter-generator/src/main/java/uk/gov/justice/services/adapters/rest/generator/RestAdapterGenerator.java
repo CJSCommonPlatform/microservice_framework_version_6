@@ -15,8 +15,8 @@ import static uk.gov.justice.services.generators.commons.helper.Names.MAPPER_PAC
 import static uk.gov.justice.services.generators.commons.helper.Names.RESOURCE_PACKAGE_NAME;
 import static uk.gov.justice.services.generators.commons.helper.Names.packageNameOf;
 
-import uk.gov.justice.raml.core.Generator;
-import uk.gov.justice.raml.core.GeneratorConfig;
+import uk.gov.justice.maven.generator.io.files.parser.core.Generator;
+import uk.gov.justice.maven.generator.io.files.parser.core.GeneratorConfig;
 import uk.gov.justice.services.generators.commons.mapping.ActionNameToMediaTypesGenerator;
 import uk.gov.justice.services.generators.commons.mapping.MediaTypeToSchemaIdGenerator;
 import uk.gov.justice.services.generators.commons.validator.ActionMappingRamlValidator;
@@ -37,7 +37,7 @@ import org.raml.model.Raml;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RestAdapterGenerator implements Generator {
+public class RestAdapterGenerator implements Generator<Raml> {
 
     private Logger logger = LoggerFactory.getLogger(RestAdapterGenerator.class);
 

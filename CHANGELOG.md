@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Changed
+- Added schema catalog generation plugin to example service
+- Updated to latest raml generator plugin
+
 ## [4.0.0] - 2018-03-09
 
 ### Added

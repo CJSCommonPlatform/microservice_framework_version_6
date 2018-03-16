@@ -1,7 +1,6 @@
 package uk.gov.justice.services.clients.messaging.generator;
 
 
-import static java.util.Collections.emptyMap;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -10,17 +9,18 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.POST;
+import static uk.gov.justice.config.GeneratorPropertiesFactory.generatorProperties;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpActionWithDefaultMapping;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.messagingRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
-import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.methodsOf;
 
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.Remote;
+import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
@@ -30,7 +30,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -220,10 +219,9 @@ public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTes
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("serviceComponent generator property not set in the plugin config");
 
-        Map<String, String> generatorProperties = emptyMap();
         generator.run(
                 messagingRamlWithDefaults().withDefaultMessagingResource().build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
     }
 

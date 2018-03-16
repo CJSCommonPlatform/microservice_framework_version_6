@@ -1,6 +1,5 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
-import static java.util.Collections.emptyMap;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -16,6 +15,8 @@ import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.firstMethodOf;
+
+import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -43,7 +44,7 @@ public class RestAdapterGenerator_MultipartMethodBodyTest extends BaseRestAdapte
                                                 .withName("upload")
                                                 .withRequestType(MULTIPART_FORM_DATA)))
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
         final Object resourceObject = getInstanceOf(resourceClass);

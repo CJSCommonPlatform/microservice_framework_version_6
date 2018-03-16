@@ -101,14 +101,40 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>uk.gov.justice.maven</groupId>
-                <artifactId>raml-maven-plugin</artifactId>
+                <artifactId>generator-plugin</artifactId>
+                <groupId>uk.gov.justice.maven.generator</groupId>
+                <version>${generator-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>external-ramls</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <generatorName >
+                                uk.gov.justice.services.clients.rest.generator.RestClientGenerator
+                            </generatorName>
+                            <parserName>uk.gov.justice.maven.generator.io.files.parser.RamlFileParser</parserName>
+                            <basePackageName>uk.gov.justice.api</basePackageName>
+                            <generatorProperties  implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
+                                <serviceComponent>${cpp.service-component}
+                                </serviceComponent>
+                            </generatorProperties>
+                        </configuration>
+                    </execution>
+                </executions>
                 <dependencies>
                     <dependency>
                         <groupId>uk.gov.justice.services.example</groupId>
                         <artifactId>example-query-view</artifactId>
                         <version>${project.version}</version>
                         <classifier>raml</classifier>
+                    </dependency>
+                    <dependency>
+                        <groupId>uk.gov.justice.services</groupId>
+                        <artifactId>rest-client-generator</artifactId>
+                        <version>${project.version}</version>
                     </dependency>
                 </dependencies>
             </plugin>

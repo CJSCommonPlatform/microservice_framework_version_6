@@ -1,6 +1,5 @@
 package uk.gov.justice.services.clients.direct.generator;
 
-import static java.util.Collections.emptyMap;
 import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.HEAD;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.defaultGetAction;
@@ -10,8 +9,8 @@ import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
-import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
 
+import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
 import uk.gov.justice.services.generators.commons.validator.RamlValidationException;
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 
@@ -37,7 +36,7 @@ public class DirectClientGeneratorErrorHandlingTest extends BaseGeneratorTest {
                                 )
 
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
     }
 
     @Test
@@ -53,7 +52,7 @@ public class DirectClientGeneratorErrorHandlingTest extends BaseGeneratorTest {
                                         .withResponseTypes("application/vnd.ctx.query.defquery+json")
                                 )
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().build()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
     }
 
     @Test
@@ -64,7 +63,7 @@ public class DirectClientGeneratorErrorHandlingTest extends BaseGeneratorTest {
 
         generator.run(
                 raml().build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
     }
 
@@ -78,7 +77,7 @@ public class DirectClientGeneratorErrorHandlingTest extends BaseGeneratorTest {
                 raml()
                         .with(resource("/path"))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
     }
 
     @Test
@@ -92,7 +91,7 @@ public class DirectClientGeneratorErrorHandlingTest extends BaseGeneratorTest {
                         .with(resource("/path")
                                 .with(httpActionWithDefaultMapping(GET))
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
     }
 
     @Test
@@ -103,7 +102,7 @@ public class DirectClientGeneratorErrorHandlingTest extends BaseGeneratorTest {
 
         generator.run(
                 restRamlWithDefaults().withDefaultPostResource().build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
     }
 
@@ -117,7 +116,7 @@ public class DirectClientGeneratorErrorHandlingTest extends BaseGeneratorTest {
                         .with(resource("/some/path")
                                 .with(httpAction().withHttpActionType(HEAD))
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
     }
 
 }

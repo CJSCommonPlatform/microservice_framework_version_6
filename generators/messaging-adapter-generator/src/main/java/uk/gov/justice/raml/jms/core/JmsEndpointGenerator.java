@@ -4,13 +4,13 @@ import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.raml.jms.core.JmsEndPointGeneratorUtil.shouldGenerateEventFilter;
 import static uk.gov.justice.services.generators.commons.helper.GeneratedClassWriter.writeClass;
 
-import uk.gov.justice.raml.core.Generator;
-import uk.gov.justice.raml.core.GeneratorConfig;
+import uk.gov.justice.maven.generator.io.files.parser.core.Generator;
+import uk.gov.justice.maven.generator.io.files.parser.core.GeneratorConfig;
 import uk.gov.justice.raml.jms.interceptor.EventFilterInterceptorCodeGenerator;
 import uk.gov.justice.raml.jms.interceptor.EventListenerInterceptorChainProviderCodeGenerator;
 import uk.gov.justice.raml.jms.interceptor.EventValidationInterceptorCodeGenerator;
 import uk.gov.justice.raml.jms.validator.BaseUriRamlValidator;
-import uk.gov.justice.services.generators.commons.config.GeneratorPropertyParser;
+import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
 import uk.gov.justice.services.generators.commons.helper.MessagingAdapterBaseUri;
 import uk.gov.justice.services.generators.commons.helper.MessagingResourceUri;
 import uk.gov.justice.services.generators.commons.mapping.MediaTypeToSchemaIdGenerator;
@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Generates JMS endpoint classes out of RAML object
  */
-public class JmsEndpointGenerator implements Generator {
+public class JmsEndpointGenerator implements Generator<Raml> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JmsEndpointGenerator.class);
     private final MessageListenerCodeGenerator messageListenerCodeGenerator = new MessageListenerCodeGenerator();
@@ -58,14 +58,14 @@ public class JmsEndpointGenerator implements Generator {
     @Override
     public void run(final Raml raml, final GeneratorConfig configuration) {
 
-        final GeneratorPropertyParser generatorPropertyParser = new GeneratorPropertyParser(configuration);
+        final CommonGeneratorProperties commonGeneratorProperties = (CommonGeneratorProperties) configuration.getGeneratorProperties();
         final String basePackageName = configuration.getBasePackageName();
 
         validator.validate(raml);
 
         raml.getResources().values().stream()
                 .filter(resource -> resource.getAction(POST) != null)
-                .flatMap(resource -> generatedClassesFrom(raml, resource, generatorPropertyParser, basePackageName))
+                .flatMap(resource -> generatedClassesFrom(raml, resource, commonGeneratorProperties, basePackageName))
                 .forEach(generatedClass ->
                         writeClass(configuration, basePackageName, generatedClass, LOGGER)
                 );
@@ -75,7 +75,7 @@ public class JmsEndpointGenerator implements Generator {
 
     private Stream<TypeSpec> generatedClassesFrom(final Raml raml,
                                                   final Resource resource,
-                                                  final GeneratorPropertyParser generatorPropertyParser,
+                                                  final CommonGeneratorProperties commonGeneratorProperties,
                                                   final String basePackageName) {
 
         final Stream.Builder<TypeSpec> streamBuilder = Stream.builder();
@@ -91,7 +91,7 @@ public class JmsEndpointGenerator implements Generator {
                     .add(eventFilterInterceptorCodeGenerator.generate(classNameFactory))
                     .add(eventValidationInterceptorCodeGenerator.generate(classNameFactory))
                     .add(eventListenerInterceptorChainProviderCodeGenerator.generate(
-                            generatorPropertyParser.serviceComponent(),
+                            commonGeneratorProperties.getServiceComponent(),
                             classNameFactory));
 
         }
@@ -99,7 +99,7 @@ public class JmsEndpointGenerator implements Generator {
         streamBuilder.add(messageListenerCodeGenerator.generate(
                 resource,
                 baseUri,
-                generatorPropertyParser,
+                commonGeneratorProperties,
                 classNameFactory));
 
         return streamBuilder.build();

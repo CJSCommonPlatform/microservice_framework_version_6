@@ -5,7 +5,6 @@ import static java.lang.Boolean.FALSE;
 import static java.lang.reflect.Modifier.isFinal;
 import static java.lang.reflect.Modifier.isPrivate;
 import static java.lang.reflect.Modifier.isStatic;
-import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -22,20 +21,21 @@ import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
 import static org.raml.model.ActionType.PUT;
 import static org.raml.model.ActionType.TRACE;
+import static uk.gov.justice.services.generators.commons.config.GeneratorPropertiesFactory.generatorProperties;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpActionWithDefaultMapping;
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.messagingRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
-import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.methodsOf;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
-import uk.gov.justice.raml.core.Generator;
-import uk.gov.justice.raml.core.GeneratorConfig;
+import uk.gov.justice.maven.generator.io.files.parser.core.Generator;
+import uk.gov.justice.maven.generator.io.files.parser.core.GeneratorConfig;
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.Remote;
+import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
 import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
@@ -47,7 +47,6 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Map;
 
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
@@ -264,15 +263,14 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("serviceComponent generator property not set in the plugin config");
 
-        final Map<String, String> generatorProperties = emptyMap();
         generator.run(
                 messagingRamlWithDefaults().withDefaultMessagingResource().build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
     }
 
     @Test
-    public void shouldThrowExceptionIfActionOtherThanPOSTorGET() {
+    public void shouldThrowExceptionIfActionOtherThanPOSTorGET() throws Exception {
         exception.expect(IllegalStateException.class);
         exception.expectMessage(containsString("Unsupported httpAction type TRACE"));
         generator.run(
@@ -295,7 +293,7 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
                                 .with(httpActionWithDefaultMapping(GET)))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder,
-                        generatorProperties().withServiceComponentOf("COMMAND_CONTROLLER").build(), singletonList(existingFilePath())));
+                        generatorProperties().withServiceComponentOf("COMMAND_CONTROLLER"), singletonList(existingFilePath())));
 
         Path outputPath = Paths.get(outputFolder.newFile().getAbsolutePath(), EXISTING_FILE_PATH);
 
@@ -313,7 +311,7 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
                                 .with(httpActionWithDefaultMapping(GET)))
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder,
-                        generatorProperties().withServiceComponentOf("COMMAND_CONTROLLER").build(), singletonList(existingFilePath())));
+                        generatorProperties().withServiceComponentOf("COMMAND_CONTROLLER"), singletonList(existingFilePath())));
 
         verify(logger).warn("The class {} already exists, skipping code generation.", "RemoteBCDController");
 
@@ -363,7 +361,7 @@ public class AbstractClientGeneratorTest extends BaseGeneratorTest {
         return Paths.get(new File(resource.getPath()).getPath()).getParent().getParent().getParent().getParent().getParent();
     }
 
-    private static void overrideLogger(final Generator generator, final Logger logger) {
+    private static void overrideLogger(final Generator<Raml> generator, final Logger logger) {
         try {
             final Field field = AbstractClientGenerator.class.getDeclaredField(LOGGER_FIELD);
             field.setAccessible(true);

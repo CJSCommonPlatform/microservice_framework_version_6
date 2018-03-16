@@ -19,7 +19,7 @@ import uk.gov.justice.services.adapter.messaging.JmsProcessor;
 import uk.gov.justice.services.adapter.messaging.JsonSchemaValidationInterceptor;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
-import uk.gov.justice.services.generators.commons.config.GeneratorPropertyParser;
+import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
 import uk.gov.justice.services.generators.commons.helper.MessagingAdapterBaseUri;
 import uk.gov.justice.services.generators.commons.helper.MessagingResourceUri;
 import uk.gov.justice.services.messaging.logging.LoggerUtils;
@@ -76,17 +76,17 @@ class MessageListenerCodeGenerator {
     /**
      * Create an implementation of the {@link MessageListener}.
      *
-     * @param resource                the resource definition this listener is being generated for
-     * @param baseUri                 the base URI
-     * @param generatorPropertyParser used to query the generator properties
-     * @param classNameFactory        creates the class name for this generated class
+     * @param resource                  the resource definition this listener is being generated for
+     * @param baseUri                   the base URI
+     * @param commonGeneratorProperties used to query the generator properties
+     * @param classNameFactory          creates the class name for this generated class
      * @return the message listener class specification
      */
     TypeSpec generate(final Resource resource,
                       final MessagingAdapterBaseUri baseUri,
-                      final GeneratorPropertyParser generatorPropertyParser,
+                      final CommonGeneratorProperties commonGeneratorProperties,
                       final ClassNameFactory classNameFactory) {
-        return classSpecFrom(resource, baseUri, generatorPropertyParser, classNameFactory)
+        return classSpecFrom(resource, baseUri, commonGeneratorProperties, classNameFactory)
                 .addMethod(generateOnMessageMethod())
                 .build();
     }
@@ -94,17 +94,17 @@ class MessageListenerCodeGenerator {
     /**
      * Generate the @link MessageListener} class implementation.
      *
-     * @param resource                the resource definition this listener is being generated for
-     * @param baseUri                 the base URI
-     * @param generatorPropertyParser used to query the generator properties
+     * @param resource                  the resource definition this listener is being generated for
+     * @param baseUri                   the base URI
+     * @param commonGeneratorProperties used to query the generator properties
      * @return the {@link TypeSpec.Builder} that defines the class
      */
     private TypeSpec.Builder classSpecFrom(final Resource resource,
                                            final MessagingAdapterBaseUri baseUri,
-                                           final GeneratorPropertyParser generatorPropertyParser,
+                                           final CommonGeneratorProperties commonGeneratorProperties,
                                            final ClassNameFactory classNameFactory) {
 
-        final String serviceComponent = generatorPropertyParser.serviceComponent();
+        final String serviceComponent = commonGeneratorProperties.getServiceComponent();
 
         if (componentDestinationType.isSupported(serviceComponent)) {
 
@@ -137,7 +137,7 @@ class MessageListenerCodeGenerator {
                 typeSpecBuilder.addAnnotation(builder.build());
             }
 
-            if (generatorPropertyParser.shouldAddCustomPoolConfiguration()) {
+            if (shouldAddCustomPoolConfiguration(commonGeneratorProperties)) {
                 typeSpecBuilder.addAnnotation(AnnotationSpec.builder(Pool.class)
                         .addMember(DEFAULT_ANNOTATION_PARAMETER, "$S", poolNameFrom(resourceUri, serviceComponent))
                         .build());
@@ -162,6 +162,10 @@ class MessageListenerCodeGenerator {
 
     private String poolNameFrom(final MessagingResourceUri resourceUri, final String component) {
         return format("%s-%s-pool", resourceUri.hyphenated(), component.toLowerCase().replace("_", "-"));
+    }
+
+    private boolean shouldAddCustomPoolConfiguration(final CommonGeneratorProperties commonGeneratorProperties) {
+        return Boolean.valueOf(commonGeneratorProperties.getCustomMDBPool());
     }
 
     /**

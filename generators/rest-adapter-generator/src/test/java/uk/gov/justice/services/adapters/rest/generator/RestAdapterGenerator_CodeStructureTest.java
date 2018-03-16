@@ -7,7 +7,6 @@ import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 import static java.nio.file.Paths.get;
 import static java.util.Arrays.stream;
-import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
@@ -23,6 +22,7 @@ import static org.raml.model.ActionType.GET;
 import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
 import static org.raml.model.ActionType.PUT;
+import static uk.gov.justice.config.GeneratorPropertiesFactory.generatorProperties;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.defaultGetAction;
 import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder.httpActionWithDefaultMapping;
 import static uk.gov.justice.services.generators.test.utils.builder.MappingBuilder.mapping;
@@ -37,11 +37,10 @@ import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuil
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.defaultPutResource;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
-import static uk.gov.justice.services.generators.test.utils.config.GeneratorPropertiesBuilder.generatorProperties;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.methodsOf;
 
-import uk.gov.justice.raml.core.GeneratorConfig;
+import uk.gov.justice.maven.generator.io.files.parser.core.GeneratorConfig;
 import uk.gov.justice.services.adapter.rest.annotation.PATCH;
 import uk.gov.justice.services.adapter.rest.mapping.ActionMapper;
 import uk.gov.justice.services.adapter.rest.processor.RestProcessor;
@@ -49,6 +48,7 @@ import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.CustomAdapter;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
+import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -87,7 +87,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         .with(defaultPostResource()
                                 .withRelativeUri("some/path"))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
@@ -101,7 +101,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
         final String basePackageName = "uk.gov.test1";
 
         java.nio.file.Path outputPath = get(outputFolder.getRoot().getAbsolutePath());
-        final GeneratorConfig config = new GeneratorConfig(outputPath, outputPath, basePackageName, emptyMap(), singletonList(outputPath.getParent()));
+        final GeneratorConfig config = new GeneratorConfig(outputPath, outputPath, basePackageName, new CommonGeneratorProperties(), singletonList(outputPath.getParent()));
         generator.run(
                 restRamlWithDefaults()
                         .with(defaultPostResource())
@@ -124,7 +124,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                                                 .withName("blah")
                                                 .withRequestType("application/vnd.default+json")))
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
@@ -148,7 +148,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                                         .with(mapping().withName("blah2").withRequestType("application/vnd.ctx.command.cmd-b+json")))
 
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
@@ -181,7 +181,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                                                 .withName("blah")
                                                 .withRequestType("application/vnd.default+json")))
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
@@ -205,7 +205,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                                                 .withName("blah")
                                                 .withRequestType("application/vnd.default+json")))
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
@@ -229,7 +229,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                                                 .withName("blah")
                                                 .withRequestType("application/vnd.default+json")))
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
@@ -255,7 +255,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                                                 .withRequestType("application/vnd.default+json")
                                                 .withResponseType("application/vnd.ctx.query.query1+json")))
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
@@ -284,7 +284,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                                                 .withRequestType("application/vnd.default+json")
                                                 .withResponseType("application/vnd.ctx.query.query1+json")))
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
@@ -313,7 +313,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                                                 .withRequestType("application/vnd.default+json")
                                                 .withResponseType("application/vnd.ctx.query.query1+json")))
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
@@ -339,7 +339,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                                         .withResponseTypes("application/vnd.ctx.query.query1+json")
                                         .with(mapping().withResponseType("application/vnd.ctx.query.query1+json").withName("blah")))
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
@@ -371,7 +371,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                                                 .withResponseType("application/vnd.ctx.query.query2+json"))
                                 )
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
@@ -394,7 +394,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                 restRamlWithDefaults()
                         .with(defaultPostResource())
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
@@ -414,7 +414,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                                 .withRelativeUri("/some/path/{param1}")
                                 .withPathParam("param1")
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
@@ -445,7 +445,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                                 .withPathParam("paramA")
                                 .withPathParam("paramB")
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
 
@@ -479,7 +479,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         .with(defaultPostResource()
                                 .withRelativeUri("/some/path")
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> resourceInterface = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
         final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
@@ -497,7 +497,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         .with(defaultPostResource()
                                 .withRelativeUri("/some/path")
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
 
@@ -512,7 +512,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         .withBaseUri("http://localhost:8080/warname/command/api/rest/service")
                         .with(resource("/some/path").withDefaultPostAction()
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
 
@@ -529,7 +529,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         .with(resource("/some/path")
                                 .withDefaultPostAction()
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultQueryApiSomePathResource");
 
@@ -570,7 +570,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         .with(resource("/some/path")
                                 .withDefaultPostAction()
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
     }
 
     @Test
@@ -580,7 +580,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         .with(defaultPostResource()
                                 .withRelativeUri("/some/path")
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
 
@@ -608,7 +608,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
 
                                 )
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathP1Resource");
 
@@ -625,7 +625,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                                 .withRelativeUri("/some/path/{paramA}")
                                 .withPathParam("paramA")
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathParamAResource");
 
@@ -654,7 +654,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                                 .withPathParam("paramB")
                                 .withPathParam("paramC")
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathParamAParamBParamCResource");
 
@@ -692,7 +692,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         .with(defaultPostResource()
                                 .withRelativeUri("/some/path")
                         ).build(),
-                new GeneratorConfig(outputPath, outputPath, basePackageName, emptyMap(), singletonList(outputPath.getParent())));
+                new GeneratorConfig(outputPath, outputPath, basePackageName, new CommonGeneratorProperties(), singletonList(outputPath.getParent())));
 
         final Class<?> resourceImplementation = compiler.compiledClassOf(basePackageName, "resource", "DefaultCommandApiSomePathResource");
 
@@ -707,7 +707,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         .with(defaultPostResource()
                                 .withRelativeUri("/some/path")
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
         final List<Method> methods = methodsOf(class1);
@@ -730,7 +730,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                                                 .withRequestType("application/vnd.default+json")
                                                 .withResponseType("application/vnd.ctx.query.query1+json")))
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
         final List<Method> methods = methodsOf(class1);
@@ -748,7 +748,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         .with(defaultPutResource()
                                 .withRelativeUri("/some/path")
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
         final List<Method> methods = methodsOf(class1);
@@ -771,7 +771,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                                                 .withRequestType("application/vnd.default+json")
                                                 .withResponseType("application/vnd.ctx.query.query1+json")))
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
         final List<Method> methods = methodsOf(class1);
@@ -789,7 +789,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         .with(defaultPatchResource()
                                 .withRelativeUri("/some/path")
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
         final List<Method> methods = methodsOf(class1);
@@ -812,7 +812,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                                                 .withRequestType("application/vnd.default+json")
                                                 .withResponseType("application/vnd.ctx.query.query1+json")))
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
         final List<Method> methods = methodsOf(class1);
@@ -830,7 +830,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         .with(defaultDeleteResource()
                                 .withRelativeUri("/some/path")
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> class1 = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
         final List<Method> methods = methodsOf(class1);
@@ -848,7 +848,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         .with(defaultPostResource()
                                 .withRelativeUri("/some/path")
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
         final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
 
         final Field chainProcess = resourceClass.getDeclaredField(INTERCEPTOR_CHAIN_PROCESSOR);
@@ -865,7 +865,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         .with(defaultPostResource()
                                 .withRelativeUri("/some/path")
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
         final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
 
         final Field logger = resourceClass.getDeclaredField("LOGGER");
@@ -883,7 +883,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         .with(defaultGetResource()
                                 .withRelativeUri("/some/path"))
                         .build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
         final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
 
         final Field dispatcher = resourceClass.getDeclaredField(INTERCEPTOR_CHAIN_PROCESSOR);
@@ -898,7 +898,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
         generator.run(
                 restRamlWithCommandApiDefaults()
                         .with(resource("/user").with(defaultGetAction())).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiUserResource");
 
@@ -918,7 +918,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         .with(defaultPostResource()
                                 .withRelativeUri("/some/path")
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
         final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
 
         final Field dispatcher = resourceClass.getDeclaredField("headers");
@@ -935,7 +935,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                         .with(defaultPostResource()
                                 .withRelativeUri("/some/path")
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
 
@@ -958,7 +958,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                                         .withName("blah")
                                         .withResponseType("application/vnd.people.query.search-users+json")))
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap())
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties())
         );
 
         final Class<?> implementation = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultQueryApiUsersResource");
@@ -996,7 +996,7 @@ public class RestAdapterGenerator_CodeStructureTest extends BaseRestAdapterGener
                                         .withResponseType("application/vnd.people.query.search-users+json"))
                         )
                 ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap())
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties())
         );
 
         final Class<?> implementation = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultQueryApiUsersResource");

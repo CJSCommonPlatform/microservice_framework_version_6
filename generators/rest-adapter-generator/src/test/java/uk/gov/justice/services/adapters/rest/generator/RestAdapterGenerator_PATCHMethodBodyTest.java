@@ -1,6 +1,5 @@
 package uk.gov.justice.services.adapters.rest.generator;
 
-import static java.util.Collections.emptyMap;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
@@ -17,6 +16,7 @@ import static uk.gov.justice.services.generators.test.utils.config.GeneratorConf
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.firstMethodOf;
 
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
+import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.lang.reflect.Method;
@@ -44,7 +44,7 @@ public class RestAdapterGenerator_PATCHMethodBodyTest extends BaseRestAdapterGen
                         .with(resource("/path")
                                 .with(httpActionWithDefaultMapping(PATCH).withHttpActionOfDefaultRequestType())
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiPathResource");
         final Object resourceObject = getInstanceOf(resourceClass);
@@ -70,7 +70,7 @@ public class RestAdapterGenerator_PATCHMethodBodyTest extends BaseRestAdapterGen
                                 resource("/path")
                                         .with(httpActionWithDefaultMapping(PATCH).withHttpActionOfDefaultRequestType())
                         ).build(),
-                configurationWithBasePackage(BASE_PACKAGE, outputFolder, emptyMap()));
+                configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
         final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiPathResource");
         final Object resourceObject = getInstanceOf(resourceClass);

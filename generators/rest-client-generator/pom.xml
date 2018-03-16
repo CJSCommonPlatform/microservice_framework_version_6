@@ -100,13 +100,14 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>uk.gov.justice.maven</groupId>
-                <artifactId>raml-maven-plugin</artifactId>
-                <version>${raml-maven-plugin.version}</version>
+                <groupId>uk.gov.justice.maven.generator</groupId>
+                <artifactId>generator-plugin</artifactId>
+                <version>${generator-maven-plugin.version}</version>
                 <configuration>
                     <generatorName>
                         uk.gov.justice.services.clients.rest.generator.RestClientGenerator
                     </generatorName>
+                    <parserName>uk.gov.justice.maven.generator.io.files.parser.RamlFileParser</parserName>
                     <sourceDirectory>${basedir}/src/test/resources/raml</sourceDirectory>
                     <outputDirectory>${project.build.directory}/generated-test-sources
                     </outputDirectory>
@@ -123,7 +124,7 @@
                             <includes>
                                 <include>**/*query-controller.raml</include>
                             </includes>
-                            <generatorProperties>
+                            <generatorProperties  implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
                                 <serviceComponent>COMPONENT_ABC</serviceComponent>
                             </generatorProperties>
                         </configuration>
@@ -138,7 +139,7 @@
                             <includes>
                                 <include>**/*command-api.raml</include>
                             </includes>
-                            <generatorProperties>
+                            <generatorProperties  implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
                                 <serviceComponent>EVENT_PROCESSOR</serviceComponent>
                             </generatorProperties>
                         </configuration>

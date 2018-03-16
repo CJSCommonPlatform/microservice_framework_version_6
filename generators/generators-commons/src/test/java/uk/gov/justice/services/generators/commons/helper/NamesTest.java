@@ -17,7 +17,7 @@ import static uk.gov.justice.services.generators.test.utils.builder.MappingBuild
 import static uk.gov.justice.services.generators.test.utils.builder.MappingDescriptionBuilder.mappingDescriptionWith;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 
-import uk.gov.justice.raml.core.GeneratorConfig;
+import uk.gov.justice.maven.generator.io.files.parser.core.GeneratorConfig;
 import uk.gov.justice.services.generators.commons.client.ActionMimeTypeDefinition;
 import uk.gov.justice.services.generators.test.utils.builder.HttpActionBuilder;
 import uk.gov.justice.services.generators.test.utils.builder.MappingBuilder;

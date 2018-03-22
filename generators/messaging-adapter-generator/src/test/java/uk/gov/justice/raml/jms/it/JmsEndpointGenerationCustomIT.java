@@ -3,17 +3,17 @@ package uk.gov.justice.raml.jms.it;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-import uk.gov.justice.api.CustomEventListenerExampleEventEventFilter;
-import uk.gov.justice.api.CustomEventListenerExampleEventEventFilterInterceptor;
-import uk.gov.justice.api.CustomEventListenerExampleEventEventListenerInterceptorChainProvider;
-import uk.gov.justice.api.CustomEventListenerExampleEventEventValidationInterceptor;
-import uk.gov.justice.api.CustomEventListenerExampleEventJmsListener;
-import uk.gov.justice.api.CustomEventListenerPeopleEventEventFilter;
-import uk.gov.justice.api.CustomEventListenerPeopleEventEventFilterInterceptor;
-import uk.gov.justice.api.CustomEventListenerPeopleEventEventListenerInterceptorChainProvider;
-import uk.gov.justice.api.CustomEventListenerPeopleEventEventValidationInterceptor;
-import uk.gov.justice.api.CustomEventListenerPeopleEventJmsListener;
-import uk.gov.justice.api.mapper.ListenerMediaTypeToSchemaIdMapper;
+import uk.gov.justice.api.ExampleCustomEventListenerExampleEventEventFilter;
+import uk.gov.justice.api.ExampleCustomEventListenerExampleEventEventFilterInterceptor;
+import uk.gov.justice.api.ExampleCustomEventListenerExampleEventEventListenerInterceptorChainProvider;
+import uk.gov.justice.api.ExampleCustomEventListenerExampleEventEventValidationInterceptor;
+import uk.gov.justice.api.ExampleCustomEventListenerExampleEventJmsListener;
+import uk.gov.justice.api.ExampleCustomEventListenerPeopleEventEventFilter;
+import uk.gov.justice.api.ExampleCustomEventListenerPeopleEventEventFilterInterceptor;
+import uk.gov.justice.api.ExampleCustomEventListenerPeopleEventEventListenerInterceptorChainProvider;
+import uk.gov.justice.api.ExampleCustomEventListenerPeopleEventEventValidationInterceptor;
+import uk.gov.justice.api.ExampleCustomEventListenerPeopleEventJmsListener;
+import uk.gov.justice.api.mapper.ExampleCustomEventListenerMediaTypeToSchemaIdMapper;
 import uk.gov.justice.schema.catalog.CatalogProducer;
 import uk.gov.justice.schema.service.SchemaCatalogService;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsParameterChecker;
@@ -68,17 +68,17 @@ public class JmsEndpointGenerationCustomIT extends AbstractJmsAdapterGenerationI
             DefaultJmsProcessor.class,
             RecordingInterceptorChainProcessor.class,
 
-            CustomEventListenerPeopleEventEventFilter.class,
-            CustomEventListenerPeopleEventEventFilterInterceptor.class,
-            CustomEventListenerPeopleEventEventListenerInterceptorChainProvider.class,
-            CustomEventListenerPeopleEventEventValidationInterceptor.class,
-            CustomEventListenerPeopleEventJmsListener.class,
+            ExampleCustomEventListenerPeopleEventEventFilter.class,
+            ExampleCustomEventListenerPeopleEventEventFilterInterceptor.class,
+            ExampleCustomEventListenerPeopleEventEventListenerInterceptorChainProvider.class,
+            ExampleCustomEventListenerPeopleEventEventValidationInterceptor.class,
+            ExampleCustomEventListenerPeopleEventJmsListener.class,
 
-            CustomEventListenerExampleEventEventFilter.class,
-            CustomEventListenerExampleEventEventFilterInterceptor.class,
-            CustomEventListenerExampleEventEventListenerInterceptorChainProvider.class,
-            CustomEventListenerExampleEventEventValidationInterceptor.class,
-            CustomEventListenerExampleEventJmsListener.class,
+            ExampleCustomEventListenerExampleEventEventFilter.class,
+            ExampleCustomEventListenerExampleEventEventFilterInterceptor.class,
+            ExampleCustomEventListenerExampleEventEventListenerInterceptorChainProvider.class,
+            ExampleCustomEventListenerExampleEventEventValidationInterceptor.class,
+            ExampleCustomEventListenerExampleEventJmsListener.class,
 
             ObjectMapperProducer.class,
             DefaultEnvelopeConverter.class,
@@ -95,7 +95,7 @@ public class JmsEndpointGenerationCustomIT extends AbstractJmsAdapterGenerationI
             DefaultJsonValidationLoggerHelper.class,
             DefaultFileSystemUrlResolverStrategy.class,
 
-            ListenerMediaTypeToSchemaIdMapper.class,
+            ExampleCustomEventListenerMediaTypeToSchemaIdMapper.class,
             SchemaCatalogAwareJsonSchemaValidator.class,
             PayloadExtractor.class,
             DefaultNameToMediaTypeConverter.class,

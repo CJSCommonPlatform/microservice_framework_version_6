@@ -1,0 +1,14 @@
+subscription_descriptor:
+  spec_version: 1.0.0
+  service: service2
+  service_component: EVENT_PROCESSOR
+  subscriptions:
+    - name: subscription1
+      events:
+        - name: structure.eventbb
+          schema_uri: http://justice.gov.uk/json/schema/structure.eventbb.json
+      eventsource:
+        name: service2
+        location:
+          jms_uri:  jms:topic:structure.event
+          rest_uri: http://localhost:8080/example/event-source-api/rest

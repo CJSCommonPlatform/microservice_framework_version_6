@@ -12,17 +12,24 @@ import static uk.gov.justice.services.generators.test.utils.config.GeneratorConf
 
 import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
 import uk.gov.justice.services.generators.commons.validator.RamlValidationException;
-import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
 
-public class DirectClientGeneratorErrorHandlingTest extends BaseGeneratorTest {
+public class DirectClientGeneratorErrorHandlingTest {
 
-    @Before
-    public void setUp() throws Exception {
-        generator = new DirectClientGenerator();
-    }
+    private static final String BASE_PACKAGE = "org.raml.test";
+
+    @Rule
+    public TemporaryFolder outputFolder = new TemporaryFolder();
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
+    private final DirectClientGenerator generator = new DirectClientGenerator();
+
     @Test
     public void shouldThrowExceptionIfMappingInDescriptionFieldSyntacticallyIncorrect() throws Exception {
         thrown.expect(RamlValidationException.class);

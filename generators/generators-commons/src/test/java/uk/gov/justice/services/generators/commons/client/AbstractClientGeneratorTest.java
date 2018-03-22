@@ -36,9 +36,9 @@ import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.Remote;
 import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
-import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
+import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -56,6 +56,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -65,19 +66,26 @@ import org.raml.model.Resource;
 import org.slf4j.Logger;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AbstractClientGeneratorTest extends BaseGeneratorTest {
+public class AbstractClientGeneratorTest {
 
     private static final String EXISTING_FILE_PATH = "org/raml/test/resource/RemoteBCDController.java";
     private static final String LOGGER_FIELD = "logger";
+    private static final String BASE_PACKAGE = "org.raml.test";
 
     @Mock
     private Logger logger;
 
+    @Rule
+    public TemporaryFolder outputFolder = new TemporaryFolder();
+
+    private final ABCClientGenerator generator = new ABCClientGenerator();
+
+    private JavaCompilerUtil compiler;
+
     @Before
     public void before() {
-        super.before();
-        generator = new ABCClientGenerator();
         overrideLogger(generator, logger);
+        compiler = new JavaCompilerUtil(outputFolder.getRoot(), outputFolder.getRoot());
     }
 
     @Test

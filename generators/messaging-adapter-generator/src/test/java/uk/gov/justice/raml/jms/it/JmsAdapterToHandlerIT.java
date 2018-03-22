@@ -207,7 +207,7 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
 
     @Test
     public void shouldProcessSupportedEventThroughJsonValidator_EventBufferAndHandler() throws Exception {
-        final String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d01";
+        final String metadataId = "861c9430-7bc6-4bf0-b549-6534b3457c56";
         Thread.sleep(300);
 
         final String messageStr = "textMessage";

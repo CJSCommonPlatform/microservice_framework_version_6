@@ -15,8 +15,8 @@ public class ActionNameToMediaTypesGenerator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActionNameToMediaTypesGenerator.class);
     private final ActionNameToMediaTypesParser actionNameToMediaTypesParser = new ActionNameToMediaTypesParser(new ActionMappingParser());
-    private final SchemaMappingClassNameGenerator schemaMappingClassNameGenerator = new SchemaMappingClassNameGenerator();
-    private final ActionNameToMediaTypesMapperClassBuilder nameToMediaTypesMapperClassBuilder = new ActionNameToMediaTypesMapperClassBuilder(schemaMappingClassNameGenerator);
+    private final RamlSchemaMappingClassNameGenerator ramlSchemaMappingClassNameGenerator = new RamlSchemaMappingClassNameGenerator();
+    private final ActionNameToMediaTypesMapperClassBuilder nameToMediaTypesMapperClassBuilder = new ActionNameToMediaTypesMapperClassBuilder(ramlSchemaMappingClassNameGenerator);
 
     public void generateActionNameToMediaTypes(final Raml raml, final GeneratorConfig configuration) {
 

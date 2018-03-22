@@ -21,9 +21,9 @@ import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.Remote;
 import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
-import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
+import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -38,13 +38,24 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
 import org.slf4j.Logger;
 
-public class MessagingClientGenerator_CodeStructureTest extends BaseGeneratorTest {
+public class MessagingClientGenerator_CodeStructureTest  {
+
+    private static final String BASE_PACKAGE = "org.raml.test";
+
+    private final MessagingClientGenerator generator = new MessagingClientGenerator();
+
+    private JavaCompilerUtil compiler;
+
+    @Rule
+    public TemporaryFolder outputFolder = new TemporaryFolder();
+
+
     @Before
     public void before() {
-        super.before();
-        generator = new MessagingClientGenerator();
+        compiler = new JavaCompilerUtil(outputFolder.getRoot(), outputFolder.getRoot());
     }
 
     @Test

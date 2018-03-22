@@ -29,15 +29,15 @@ public class ActionNameToMediaTypesMapperClassBuilder {
 
     private static final String FIELD_NAME = "mappings";
 
-    private final SchemaMappingClassNameGenerator schemaMappingClassNameGenerator;
+    private final RamlSchemaMappingClassNameGenerator ramlSchemaMappingClassNameGenerator;
 
-    public ActionNameToMediaTypesMapperClassBuilder(final SchemaMappingClassNameGenerator schemaMappingClassNameGenerator) {
-        this.schemaMappingClassNameGenerator = schemaMappingClassNameGenerator;
+    public ActionNameToMediaTypesMapperClassBuilder(final RamlSchemaMappingClassNameGenerator ramlSchemaMappingClassNameGenerator) {
+        this.ramlSchemaMappingClassNameGenerator = ramlSchemaMappingClassNameGenerator;
     }
 
     public TypeSpec generate(final List<ActionNameMapping> actionNameMappings, final String baseUri) {
 
-        final String classSimpleName = schemaMappingClassNameGenerator.createMappingClassNameFrom(baseUri, ActionNameToMediaTypesMapper.class);
+        final String classSimpleName = ramlSchemaMappingClassNameGenerator.createMappingClassNameFrom(baseUri, ActionNameToMediaTypesMapper.class);
 
         return classBuilder(classSimpleName)
                 .addModifiers(PUBLIC)

@@ -30,8 +30,8 @@ import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.Remote;
 import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
-import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -46,12 +46,13 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
+public class RestClientGenerator_CodeStructureTest {
 
     private static final String GET_MAPPING_ANNOTATION = mappingDescriptionWith(
             mapping()
@@ -91,10 +92,16 @@ public class RestClientGenerator_CodeStructureTest extends BaseGeneratorTest {
     @Rule
     public ExpectedException exception = ExpectedException.none();
 
+    @Rule
+    public TemporaryFolder outputFolder = new TemporaryFolder();
+
+    private final RestClientGenerator generator = new RestClientGenerator();
+
+    private JavaCompilerUtil compiler;
+
     @Before
     public void before() {
-        super.before();
-        generator = new RestClientGenerator();
+        compiler = new JavaCompilerUtil(outputFolder.getRoot(), outputFolder.getRoot());
     }
 
     @Test

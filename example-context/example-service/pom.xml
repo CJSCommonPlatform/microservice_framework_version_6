@@ -170,6 +170,11 @@
                             <artifactId>catalog-generation</artifactId>
                             <version>${json-schema-catalog.version}</version>
                         </dependency>
+                        <dependency>
+                            <groupId>uk.gov.justice.maven.generator</groupId>
+                            <artifactId>parser-common</artifactId>
+                            <version>${generator-maven-plugin.version}</version>
+                        </dependency>
                     </dependencies>
                 </plugin>
             </plugins>
@@ -383,7 +388,7 @@
                                 <phase>generate-sources</phase>
                                 <configuration>
                                     <generatorName>
-                                        uk.gov.justice.raml.jms.core.JmsEndpointGenerator
+                                        uk.gov.justice.raml.jms.core.JmsEndpointGeneratorFactory
                                     </generatorName>
                                     <sourceDirectory>${basedir}/src/raml</sourceDirectory>
                                     <outputDirectory>${project.build.directory}/generated-sources

@@ -27,6 +27,6 @@ public class PositionValueFactoryTest {
     public void shouldReturnPositionValueForSequence() throws Exception {
 
         final PositionValueFactory positionValueFactory = new PositionValueFactory();
-        assertThat(positionValueFactory.getPositionValue(Position.sequence(3L)), is("3"));
+        assertThat(positionValueFactory.getPositionValue(Position.position(3L)), is("3"));
     }
 }

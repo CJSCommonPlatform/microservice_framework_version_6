@@ -11,16 +11,16 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.eventsourcing.repository.jdbc.Direction.BACKWARD;
-import static uk.gov.justice.services.eventsourcing.repository.jdbc.Direction.FORWARD;
+import static uk.gov.justice.services.eventsourcing.source.api.service.core.Direction.BACKWARD;
+import static uk.gov.justice.services.eventsourcing.source.api.service.core.Direction.FORWARD;
 import static uk.gov.justice.services.eventsourcing.source.api.service.core.FixedPositionValue.FIRST;
 import static uk.gov.justice.services.eventsourcing.source.api.service.core.FixedPositionValue.HEAD;
 import static uk.gov.justice.services.eventsourcing.source.api.service.core.Position.first;
 import static uk.gov.justice.services.eventsourcing.source.api.service.core.Position.head;
-import static uk.gov.justice.services.eventsourcing.source.api.service.core.Position.sequence;
+import static uk.gov.justice.services.eventsourcing.source.api.service.core.Position.position;
 
 import uk.gov.justice.services.common.util.UtcClock;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.Direction;
+import uk.gov.justice.services.eventsourcing.source.api.service.core.Direction;
 import uk.gov.justice.services.eventsourcing.source.api.service.core.EventEntry;
 import uk.gov.justice.services.eventsourcing.source.api.service.core.EventsService;
 import uk.gov.justice.services.eventsourcing.source.api.service.core.Position;
@@ -71,17 +71,17 @@ public class EventsPageServiceTest {
 
         events.add(event1);
 
-        when(service.recordExists(streamId, 4L)).thenReturn(true);
+        when(service.eventExists(streamId, 4L)).thenReturn(true);
 
-        when(service.recordExists(streamId, 2L)).thenReturn(false);
+        when(service.eventExists(streamId, 2L)).thenReturn(false);
 
-        final Position position = sequence(3L);
+        final Position position = position(3L);
         when(positionFactory.createPosition("3")).thenReturn(position);
 
         when(service.events(streamId, position, FORWARD, 2L)).thenReturn(events);
 
         final URL nextUrl = new URL(BASE_URL + EVENT_STREAM_PATH + streamId + "/4/FORWARD/2");
-        when(urlLinkFactory.createEventsUrlLink(sequence(4L), FORWARD, 2, uriInfo)).thenReturn(nextUrl);
+        when(urlLinkFactory.createEventsUrlLink(position(4L), FORWARD, 2, uriInfo)).thenReturn(nextUrl);
 
         final URL headURL = new URL(BASE_URL + EVENT_STREAM_PATH + streamId + "/HEAD/BACKWARD/2");
         when(urlLinkFactory.createHeadEventsUrlLink(2, uriInfo)).thenReturn(headURL);
@@ -99,7 +99,7 @@ public class EventsPageServiceTest {
 
         assertThat(pageEventsData.get(0).getStreamId(), is(streamId.toString()));
 
-        assertThat(pageEventsData.get(0).getSequenceId(), is(3L));
+        assertThat(pageEventsData.get(0).getPosition(), is(3L));
 
         assertThat(pageEventsData.get(0).getPayload(), is(notNullValue()));
 
@@ -123,7 +123,7 @@ public class EventsPageServiceTest {
         when(urlLinkFactory.createFirstEventsUrlLink(2, uriInfo)).thenReturn(firstURL);
 
         final URL previousUrl = new URL(BASE_URL + EVENT_STREAM_PATH + streamId + "/2/BACKWARD/2");
-        when(urlLinkFactory.createEventsUrlLink(sequence(2L), BACKWARD, 2, uriInfo)).thenReturn(previousUrl);
+        when(urlLinkFactory.createEventsUrlLink(position(2L), BACKWARD, 2, uriInfo)).thenReturn(previousUrl);
 
         final List<EventEntry> events = new ArrayList<>();
 
@@ -131,11 +131,11 @@ public class EventsPageServiceTest {
 
         events.add(event1);
 
-        when(service.recordExists(streamId, 4L)).thenReturn(false);
+        when(service.eventExists(streamId, 4L)).thenReturn(false);
 
-        when(service.recordExists(streamId, 2L)).thenReturn(true);
+        when(service.eventExists(streamId, 2L)).thenReturn(true);
 
-        final Position position = sequence(3L);
+        final Position position = position(3L);
         when(positionFactory.createPosition("3")).thenReturn(position);
         when(service.events(streamId, position, BACKWARD, 2L)).thenReturn(events);
 
@@ -149,7 +149,7 @@ public class EventsPageServiceTest {
 
         assertThat(feed.get(0).getStreamId(), is(streamId.toString()));
 
-        assertThat(feed.get(0).getSequenceId(), is(3L));
+        assertThat(feed.get(0).getPosition(), is(3L));
 
         assertThat(feed.get(0).getPayload(), is(notNullValue()));
 
@@ -181,14 +181,14 @@ public class EventsPageServiceTest {
         events.add(event2);
         events.add(event1);
 
-        when(service.recordExists(streamId, 3L)).thenReturn(true);
+        when(service.eventExists(streamId, 3L)).thenReturn(true);
 
-        when(service.recordExists(streamId, 0L)).thenReturn(false);
+        when(service.eventExists(streamId, 0L)).thenReturn(false);
 
         final URL nextUrl = new URL(BASE_URL + EVENT_STREAM_PATH + streamId + "/3/FORWARD/2");
-        when(urlLinkFactory.createEventsUrlLink(sequence(3L), FORWARD, 2, uriInfo)).thenReturn(nextUrl);
+        when(urlLinkFactory.createEventsUrlLink(position(3L), FORWARD, 2, uriInfo)).thenReturn(nextUrl);
 
-        final Position position = sequence(3L);
+        final Position position = position(3L);
         when(positionFactory.createPosition("3")).thenReturn(position);
         when(service.events(streamId, position, FORWARD, 2L)).thenReturn(events);
 
@@ -201,10 +201,10 @@ public class EventsPageServiceTest {
         assertThat(feed, hasSize(2));
 
         assertThat(feed.get(0).getStreamId(), is(streamId.toString()));
-        assertThat(feed.get(0).getSequenceId(), is(2L));
+        assertThat(feed.get(0).getPosition(), is(2L));
         assertThat(feed.get(0).getPayload(), is(payloadEvent2));
         assertThat(feed.get(1).getStreamId(), is(streamId.toString()));
-        assertThat(feed.get(1).getSequenceId(), is(1L));
+        assertThat(feed.get(1).getPosition(), is(1L));
         assertThat(feed.get(1).getPayload(), is(payloadEvent1));
 
         assertThat(pagingLinks.getNext().get(), is(nextUrl));
@@ -229,11 +229,11 @@ public class EventsPageServiceTest {
         events.add(event4);
         events.add(event3);
 
-        when(service.recordExists(streamId, 5L)).thenReturn(false);
+        when(service.eventExists(streamId, 5L)).thenReturn(false);
 
-        when(service.recordExists(streamId, 2L)).thenReturn(true);
+        when(service.eventExists(streamId, 2L)).thenReturn(true);
 
-        final Position position = sequence(4L);
+        final Position position = position(4L);
         when(positionFactory.createPosition("4")).thenReturn(position);
         when(service.events(streamId, position, BACKWARD, 2)).thenReturn(events);
 
@@ -246,7 +246,7 @@ public class EventsPageServiceTest {
         when(urlLinkFactory.createFirstEventsUrlLink(2, uriInfo)).thenReturn(firstURL);
 
         final URL previousUrl = new URL(BASE_URL + EVENT_STREAM_PATH + streamId + "/2/BACKWARD/2");
-        when(urlLinkFactory.createEventsUrlLink(sequence(2L), BACKWARD, 2, uriInfo)).thenReturn(previousUrl);
+        when(urlLinkFactory.createEventsUrlLink(position(2L), BACKWARD, 2, uriInfo)).thenReturn(previousUrl);
 
         final Page<EventEntry> feedActual = eventsPageService.pageEvents(streamId, "4", BACKWARD, 2, uriInfo);
 
@@ -256,10 +256,10 @@ public class EventsPageServiceTest {
 
         assertThat(feed, hasSize(2));
         assertThat(feed.get(0).getStreamId(), is(streamId.toString()));
-        assertThat(feed.get(0).getSequenceId(), is(4L));
+        assertThat(feed.get(0).getPosition(), is(4L));
         assertThat(feed.get(0).getPayload(), is(payloadEvent4));
         assertThat(feed.get(1).getStreamId(), is(streamId.toString()));
-        assertThat(feed.get(1).getSequenceId(), is(3L));
+        assertThat(feed.get(1).getPosition(), is(3L));
         assertThat(feed.get(1).getPayload(), is(payloadEvent3));
 
         assertThat(pagingLinks.getNext(), is(empty()));
@@ -283,7 +283,7 @@ public class EventsPageServiceTest {
 
         events.add(event1);
 
-        when(service.recordExists(streamId, 3L)).thenReturn(true);
+        when(service.eventExists(streamId, 3L)).thenReturn(true);
 
         when(positionFactory.createPosition("1")).thenReturn(first());
         when(service.events(streamId, first(), FORWARD, 2L)).thenReturn(events);
@@ -297,7 +297,7 @@ public class EventsPageServiceTest {
         when(urlLinkFactory.createFirstEventsUrlLink(2, uriInfo)).thenReturn(firstURL);
 
         final URL nextUrl = new URL(BASE_URL + EVENT_STREAM_PATH + streamId + "/3/FORWARD/2");
-        when(urlLinkFactory.createEventsUrlLink(sequence(3L), FORWARD, 2, uriInfo)).thenReturn(nextUrl);
+        when(urlLinkFactory.createEventsUrlLink(position(3L), FORWARD, 2, uriInfo)).thenReturn(nextUrl);
 
         final Page<EventEntry> feed = eventsPageService.pageEvents(streamId, FIRST, FORWARD, 2, uriInfo);
         final PagingLinks pagingLinks = feed.getPagingLinks();
@@ -321,7 +321,7 @@ public class EventsPageServiceTest {
         events.add(event3);
         events.add(event2);
 
-        when(service.recordExists(streamId, 1L)).thenReturn(true);
+        when(service.eventExists(streamId, 1L)).thenReturn(true);
 
         when(positionFactory.createPosition(HEAD)).thenReturn(head());
         when(service.events(streamId, head(), BACKWARD, 2L)).thenReturn(events);
@@ -335,7 +335,7 @@ public class EventsPageServiceTest {
         when(urlLinkFactory.createFirstEventsUrlLink(2, uriInfo)).thenReturn(firstURL);
 
         final URL previousURL = new URL(BASE_URL + EVENT_STREAM_PATH + "/" + streamId + "1/FORWARD/2");
-        when(urlLinkFactory.createEventsUrlLink(sequence(1L), BACKWARD, 2, uriInfo)).thenReturn(previousURL);
+        when(urlLinkFactory.createEventsUrlLink(position(1L), BACKWARD, 2, uriInfo)).thenReturn(previousURL);
 
         final Page<EventEntry> feed = eventsPageService.pageEvents(streamId, HEAD, BACKWARD, 2, uriInfo);
 
@@ -348,7 +348,7 @@ public class EventsPageServiceTest {
     @Test
     public void shouldReturnEmptyListWithPagingLinks() throws Exception {
         final UUID streamId = randomUUID();
-        final Position sequence = sequence(3L);
+        final Position sequence = position(3L);
         final Direction backward = BACKWARD;
         final ResteasyUriInfo uriInfo = new ResteasyUriInfo(create("http://server:123/context/"),
                 create("event-st¬reams/" + streamId));

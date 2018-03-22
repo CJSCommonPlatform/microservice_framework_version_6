@@ -3,7 +3,7 @@ package uk.gov.justice.services.eventsourcing.repository.jdbc;
 import static java.lang.String.format;
 
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.Event;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidSequenceIdException;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidPositionException;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.OptimisticLockingRetryException;
 import uk.gov.justice.services.jdbc.persistence.PreparedStatementWrapper;
 
@@ -25,10 +25,10 @@ public class PostgresSQLEventLogInsertionStrategy extends BaseEventInsertStrateg
      *
      * @param event the event to insert
      * @throws SQLException               if thrown from {@link BaseEventInsertStrategy#executeStatement}
-     * @throws InvalidSequenceIdException if the version already exists or is null.
+     * @throws InvalidPositionException if the version already exists or is null.
      */
     @Override
-    public void insert(final PreparedStatementWrapper ps, final Event event) throws SQLException, InvalidSequenceIdException {
+    public void insert(final PreparedStatementWrapper ps, final Event event) throws SQLException, InvalidPositionException {
         final int updatedRows = executeStatement(ps, event);
 
         if (updatedRows == 0) {

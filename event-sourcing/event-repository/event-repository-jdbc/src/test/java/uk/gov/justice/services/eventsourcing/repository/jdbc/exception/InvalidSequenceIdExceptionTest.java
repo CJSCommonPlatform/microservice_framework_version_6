@@ -10,7 +10,7 @@ public class InvalidSequenceIdExceptionTest {
 
     @Test
     public void shouldCreateInstanceOfInvalidSequenceIdExceptionWithMessage() throws Exception {
-        final InvalidSequenceIdException exception = new InvalidSequenceIdException("Test message");
+        final InvalidPositionException exception = new InvalidPositionException("Test message");
         assertThat(exception.getMessage(), is("Test message"));
         assertThat(exception, instanceOf(Exception.class));
     }

@@ -13,23 +13,30 @@ public class EnvelopeEventStream implements EventStream {
 
     private final EventStreamManager eventStreamManager;
     private final UUID id;
-    private volatile Optional<Long> lastReadVersion = Optional.empty();
+    private volatile Optional<Long> lastReadPosition = Optional.empty();
+    private long position;
 
-    EnvelopeEventStream(final UUID id, final EventStreamManager eventStreamManager) {
+    public EnvelopeEventStream(final UUID id, final EventStreamManager eventStreamManager) {
         this.id = id;
         this.eventStreamManager = eventStreamManager;
+    }
+
+    public EnvelopeEventStream(final UUID id, final long position, final EventStreamManager eventStreamManager) {
+        this.id = id;
+        this.eventStreamManager = eventStreamManager;
+        this.position = position;
     }
 
     @Override
     public Stream<JsonEnvelope> read() {
         markAsReadFrom(0L);
-        return eventStreamManager.read(id).map(this::recordCurrentVersion);
+        return eventStreamManager.read(id).map(this::recordCurrentPosition);
     }
 
     @Override
-    public Stream<JsonEnvelope> readFrom(final long version) {
-        markAsReadFrom(version - 1);
-        return eventStreamManager.readFrom(id, version).map(this::recordCurrentVersion);
+    public Stream<JsonEnvelope> readFrom(final long position) {
+        markAsReadFrom(position - 1);
+        return eventStreamManager.readFrom(id, position).map(this::recordCurrentPosition);
     }
 
     @Override
@@ -43,22 +50,38 @@ public class EnvelopeEventStream implements EventStream {
             case NON_CONSECUTIVE:
                 return eventStreamManager.appendNonConsecutively(id, events);
             default:
-                final Optional<Long> lastReadVersion = this.lastReadVersion;
+                final Optional<Long> lastReadVersion = this.lastReadPosition;
                 return lastReadVersion.isPresent()
-                        ? eventStreamManager.appendAfter(id, events.map(this::incrementLastReadVersion), lastReadVersion.get())
+                        ? eventStreamManager.appendAfter(id, events.map(this::incrementLastReadPosition), lastReadVersion.get())
                         : eventStreamManager.append(id, events);
         }
     }
 
     @Override
-    public long appendAfter(final Stream<JsonEnvelope> events, final long version) throws EventStreamException {
-        return eventStreamManager.appendAfter(id, events, version);
+    public long appendAfter(final Stream<JsonEnvelope> events, final long position) throws EventStreamException {
+        return eventStreamManager.appendAfter(id, events, position);
     }
 
     @Override
+    public long getPosition() {
+        if (position == 0) {
+            position = eventStreamManager.getStreamPosition(id);
+            return position;
+        }
+        return position;
+    }
+
+    @SuppressWarnings("squid:S4144")
+    @Override
     public long getCurrentVersion() {
-        final Optional<Long> lastReadVersion = this.lastReadVersion;
-        return lastReadVersion.isPresent() ? lastReadVersion.get() : eventStreamManager.getCurrentVersion(id);
+        final Optional<Long> lastReadPosition = this.lastReadPosition;
+        return lastReadPosition.isPresent() ? lastReadPosition.get() : eventStreamManager.getSize(id);
+    }
+
+    @Override
+    public long size() {
+        final Optional<Long> lastReadPosition = this.lastReadPosition;
+        return lastReadPosition.isPresent() ? lastReadPosition.get() : eventStreamManager.getSize(id);
     }
 
     @Override
@@ -66,22 +89,22 @@ public class EnvelopeEventStream implements EventStream {
         return id;
     }
 
-    private JsonEnvelope recordCurrentVersion(final JsonEnvelope event) {
-        lastReadVersion = Optional.of(
-                event.metadata().version()
+    private JsonEnvelope recordCurrentPosition(final JsonEnvelope event) {
+        lastReadPosition = Optional.of(
+                event.metadata().position()
                         .orElseThrow(() -> new IllegalStateException("Missing version in event from event store")));
         return event;
     }
 
-    private synchronized JsonEnvelope incrementLastReadVersion(final JsonEnvelope event) {
-        lastReadVersion = lastReadVersion.map(version -> version + 1);
+    private synchronized JsonEnvelope incrementLastReadPosition(final JsonEnvelope event) {
+        lastReadPosition = lastReadPosition.map(version -> version + 1);
         return event;
     }
 
-    private synchronized void markAsReadFrom(final long version) {
-        if (lastReadVersion.isPresent()) {
+    private synchronized void markAsReadFrom(final long position) {
+        if (lastReadPosition.isPresent()) {
             throw new IllegalStateException("Event stream has already been read");
         }
-        lastReadVersion = Optional.of(version);
+        lastReadPosition = Optional.of(position);
     }
 }

@@ -67,7 +67,7 @@ public class TestEventRepository extends EventJdbcRepository {
     }
 
     public List<Event> eventsOfStreamId(final UUID streamId) {
-        try (final Stream<Event> events = this.findByStreamIdOrderBySequenceIdAsc(streamId)) {
+        try (final Stream<Event> events = this.findByStreamIdOrderByPositionAsc(streamId)) {
             return events.collect(toList());
         }
     }

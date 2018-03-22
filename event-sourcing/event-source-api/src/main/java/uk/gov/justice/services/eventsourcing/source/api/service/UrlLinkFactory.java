@@ -1,12 +1,12 @@
 package uk.gov.justice.services.eventsourcing.source.api.service;
 
 import static java.lang.String.valueOf;
-import static uk.gov.justice.services.eventsourcing.repository.jdbc.Direction.BACKWARD;
-import static uk.gov.justice.services.eventsourcing.repository.jdbc.Direction.FORWARD;
+import static uk.gov.justice.services.eventsourcing.source.api.service.core.Direction.BACKWARD;
+import static uk.gov.justice.services.eventsourcing.source.api.service.core.Direction.FORWARD;
 import static uk.gov.justice.services.eventsourcing.source.api.service.core.Position.first;
 import static uk.gov.justice.services.eventsourcing.source.api.service.core.Position.head;
 
-import uk.gov.justice.services.eventsourcing.repository.jdbc.Direction;
+import uk.gov.justice.services.eventsourcing.source.api.service.core.Direction;
 import uk.gov.justice.services.eventsourcing.source.api.service.core.Position;
 import uk.gov.justice.services.eventsourcing.source.api.service.core.PositionValueFactory;
 

@@ -12,33 +12,57 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.core.h2.OpenEjbConfigurationBuilder.createOpenEjbConfigurationBuilder;
-import static uk.gov.justice.services.eventsourcing.repository.jdbc.Direction.BACKWARD;
-import static uk.gov.justice.services.eventsourcing.repository.jdbc.Direction.FORWARD;
+import static uk.gov.justice.services.eventsourcing.source.api.service.core.Direction.BACKWARD;
+import static uk.gov.justice.services.eventsourcing.source.api.service.core.Direction.FORWARD;
 import static uk.gov.justice.services.eventsourcing.source.api.util.TestSystemUserProvider.SYSTEM_USER_ID;
 
 import uk.gov.justice.services.adapter.rest.mapper.BadRequestExceptionMapper;
+import uk.gov.justice.services.common.configuration.GlobalValueProducer;
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.rest.ForbiddenRequestExceptionMapper;
 import uk.gov.justice.services.common.util.UtcClock;
+import uk.gov.justice.services.core.enveloper.DefaultEnveloper;
 import uk.gov.justice.services.core.json.DefaultJsonValidationLoggerHelper;
+import uk.gov.justice.services.core.json.JsonValidationLoggerHelper;
+import uk.gov.justice.services.eventsource.DefaultEventDestinationResolver;
+import uk.gov.justice.services.eventsourcing.publisher.jms.EventPublisher;
+import uk.gov.justice.services.eventsourcing.publisher.jms.JmsEventPublisher;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.Direction;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.DefaultEventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventInsertionStrategy;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventConverter;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepository;
 import uk.gov.justice.services.eventsourcing.source.api.resource.EventSourceApiApplication;
 import uk.gov.justice.services.eventsourcing.source.api.resource.EventStreamPageResource;
 import uk.gov.justice.services.eventsourcing.source.api.security.AccessController;
 import uk.gov.justice.services.eventsourcing.source.api.service.EventStreamPageService;
 import uk.gov.justice.services.eventsourcing.source.api.service.UrlLinkFactory;
+import uk.gov.justice.services.eventsourcing.source.api.service.core.Direction;
 import uk.gov.justice.services.eventsourcing.source.api.service.core.EventStreamService;
 import uk.gov.justice.services.eventsourcing.source.api.service.core.PositionFactory;
 import uk.gov.justice.services.eventsourcing.source.api.service.core.PositionValueFactory;
 import uk.gov.justice.services.eventsourcing.source.api.util.LoggerProducer;
-import uk.gov.justice.services.eventsourcing.source.api.util.OpenEjbAwareEventRepository;
 import uk.gov.justice.services.eventsourcing.source.api.util.OpenEjbAwareEventStreamRepository;
 import uk.gov.justice.services.eventsourcing.source.api.util.TestSystemUserProvider;
+import uk.gov.justice.services.eventsourcing.source.core.DefaultEventSource;
+import uk.gov.justice.services.eventsourcing.source.core.EventAppender;
+import uk.gov.justice.services.eventsourcing.source.core.EventSource;
+import uk.gov.justice.services.eventsourcing.source.core.EventStreamManager;
+import uk.gov.justice.services.eventsourcing.source.core.PublishingEventAppender;
+import uk.gov.justice.services.eventsourcing.source.core.SystemEventService;
 import uk.gov.justice.services.jdbc.persistence.JdbcDataSourceProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
+import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
+import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
+import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
+import uk.gov.justice.services.messaging.jms.DefaultJmsEnvelopeSender;
+import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
+import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
+import uk.gov.justice.services.messaging.logging.TraceLogger;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -128,14 +152,13 @@ public class EventStreamPageIT {
             ObjectMapperProducer.class,
             ObjectToJsonValueConverter.class,
             EventStreamPageResource.class,
-            OpenEjbAwareEventRepository.class,
+            OpenEjbAwareEventStreamRepository.class,
             EventStreamService.class,
             AccessController.class,
             AnsiSQLEventLogInsertionStrategy.class,
             TestSystemUserProvider.class,
             ForbiddenRequestExceptionMapper.class,
             TestEventInsertionStrategyProducer.class,
-            OpenEjbAwareEventStreamRepository.class,
             EventStreamPageService.class,
             LoggerProducer.class,
             PositionFactory.class,
@@ -145,7 +168,33 @@ public class EventStreamPageIT {
             JdbcRepositoryHelper.class,
             UtcClock.class,
             JdbcDataSourceProvider.class,
-            DefaultJsonValidationLoggerHelper.class
+            JsonValidationLoggerHelper.class,
+            BadRequestExceptionMapper.class,
+            DefaultJsonValidationLoggerHelper.class,
+            EventSource.class,
+            DefaultEventSource.class,
+            EventStreamManager.class,
+            EventAppender.class,
+            PublishingEventAppender.class,
+            DefaultEventRepository.class,
+            EventConverter.class,
+            SystemEventService.class,
+            StringToJsonObjectConverter.class,
+            JsonObjectEnvelopeConverter.class,
+            GlobalValueProducer.class,
+            DefaultEnveloper.class,
+            EventPublisher.class,
+            JmsEventPublisher.class,
+            DefaultEventDestinationResolver.class,
+            DefaultJsonObjectEnvelopeConverter.class,
+            EventJdbcRepository.class,
+            ObjectToJsonObjectConverter.class,
+            DefaultJmsEnvelopeSender.class,
+            EnvelopeConverter.class,
+            TraceLogger.class,
+            DefaultTraceLogger.class,
+            DefaultEnvelopeConverter.class,
+            JsonObjectToObjectConverter.class
     })
 
     public WebApp war() {

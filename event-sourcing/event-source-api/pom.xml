@@ -23,6 +23,19 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>uk.gov.justice.framework-api</groupId>
+            <artifactId>framework-api-event-stream</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.framework-api</groupId>
+            <artifactId>framework-api-event-source</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>event-source</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>uk.gov.justice.services</groupId>
             <artifactId>common-rest</artifactId>
             <version>${project.version}</version>
@@ -46,6 +59,10 @@
             <groupId>net.trajano.commons</groupId>
             <artifactId>commons-testing</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
         </dependency>
     </dependencies>
 

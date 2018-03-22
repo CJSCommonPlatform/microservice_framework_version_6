@@ -204,6 +204,11 @@ public class JsonObjectMetadata implements Metadata {
     }
 
     @Override
+    public Optional<Long> position() {
+        return metadata.position();
+    }
+
+    @Override
     public JsonObject asJsonObject() {
         return metadata.asJsonObject();
     }

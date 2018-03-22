@@ -2,7 +2,7 @@ package uk.gov.justice.services.eventsourcing.source.api.service.core;
 
 public class Position {
     private static final int FIRST_SEQUENCE = 1;
-    private final long sequenceId;
+    private final long position;
     private final boolean head;
     private final boolean first;
 
@@ -14,9 +14,13 @@ public class Position {
         return new Position(1L, false, true);
     }
 
-    public static Position sequence(final long sequenceId) {
-        final boolean first = sequenceId == FIRST_SEQUENCE;
-        return new Position(sequenceId, false, first);
+    public static Position empty() {
+        return new Position(1L, false, false);
+    }
+
+    public static Position position(final long position) {
+        final boolean first = position == FIRST_SEQUENCE;
+        return new Position(position, false, first);
     }
 
     @Override
@@ -24,29 +28,29 @@ public class Position {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Position position = (Position) o;
+        Position positionObject = (Position) o;
 
-        if (sequenceId != position.sequenceId) return false;
-        if (head != position.head) return false;
-        return first == position.first;
+        if (position != positionObject.position) return false;
+        if (head != positionObject.head) return false;
+        return first == positionObject.first;
     }
 
     @Override
     public int hashCode() {
-        int result = (int) (sequenceId ^ (sequenceId >>> 32));
+        int result = (int) (position ^ (position >>> 32));
         result = 31 * result + (head ? 1 : 0);
         result = 31 * result + (first ? 1 : 0);
         return result;
     }
 
-    private Position(final long sequenceId, final boolean head, final boolean first) {
-        this.sequenceId = sequenceId;
+    private Position(final long position, final boolean head, final boolean first) {
+        this.position = position;
         this.head = head;
         this.first = first;
     }
 
-    public long getSequenceId() {
-        return sequenceId;
+    public long getPosition() {
+        return position;
     }
 
     public boolean isHead() {

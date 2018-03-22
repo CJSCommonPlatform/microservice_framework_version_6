@@ -14,11 +14,11 @@ import java.util.stream.StreamSupport;
 import javax.sql.DataSource;
 
 /**
- *
  * Provides methods for returning result sets as streams
- *
  */
 public class JdbcRepositoryHelper {
+
+    private static final int FETCH_SIZE = 50;
 
     public PreparedStatementWrapper preparedStatementWrapperOf(final DataSource dataSource, final String query) throws SQLException {
         return valueOf(dataSource.getConnection(), query);
@@ -27,6 +27,7 @@ public class JdbcRepositoryHelper {
     public <T> Stream<T> streamOf(final PreparedStatementWrapper psWrapper, final Function<ResultSet, T> function) throws SQLException {
 
         final ResultSet resultSet = psWrapper.executeQuery();
+        resultSet.setFetchSize(FETCH_SIZE);
 
         return internalStreamOf(psWrapper, resultSet, function);
     }

@@ -20,7 +20,7 @@ public class PositionFactoryTest {
         final Position position = factory.createPosition(HEAD);
         assertThat(position.isHead(), is(true));
         assertThat(position.isFirst(), is(false));
-        assertThat(position.getSequenceId(), is(-1L));
+        assertThat(position.getPosition(), is(-1L));
     }
 
     @Test
@@ -30,7 +30,7 @@ public class PositionFactoryTest {
         final Position position = factory.createPosition(FIRST);
         assertThat(position.isHead(), is(false));
         assertThat(position.isFirst(), is(true));
-        assertThat(position.getSequenceId(), is(1L));
+        assertThat(position.getPosition(), is(1L));
     }
 
     @Test
@@ -51,6 +51,6 @@ public class PositionFactoryTest {
         final Position position = factory.createPosition("4");
         assertThat(position.isHead(), is(false));
         assertThat(position.isFirst(), is(false));
-        assertThat(position.getSequenceId(), is(4L));
+        assertThat(position.getPosition(), is(4L));
     }
 }

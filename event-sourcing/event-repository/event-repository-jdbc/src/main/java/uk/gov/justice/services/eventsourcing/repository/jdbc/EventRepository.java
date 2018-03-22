@@ -1,6 +1,5 @@
 package uk.gov.justice.services.eventsourcing.repository.jdbc;
 
-
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.StoreEventRequestFailedException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
@@ -15,28 +14,28 @@ import javax.transaction.Transactional;
 public interface EventRepository {
 
     /**
-     * Get a stream of envelopes
+     * Get a stream of event envelopes, ordered by position ascending.
      *
-     * @return the stream of envelopes. Never returns null.
+     * @return the stream of event envelopes. Never returns null.
      */
-    Stream<JsonEnvelope> getAll();
+    Stream<JsonEnvelope> getEvents();
 
     /**
-     * Get a stream of envelopes, ordered by sequence id.
+     * Get a stream of events ordered by ascending position.
      *
      * @param streamId the id of the stream to retrieve
      * @return the stream of envelopes. Never returns null.
      */
-    Stream<JsonEnvelope> getByStreamId(final UUID streamId);
+    Stream<JsonEnvelope> getEventsByStreamId(final UUID streamId);
 
     /**
-     * Get a stream of envelopes from a given version, ordered by sequence id.
+     * Get a stream of event envelopes from a given position, ordered by position ascending.
      *
      * @param streamId   the id of the stream to retrieve
-     * @param sequenceId the sequence id to read the stream from
+     * @param position the position to read the stream from
      * @return the stream of envelopes. Never returns null.
      */
-    Stream<JsonEnvelope> getByStreamIdAndSequenceId(final UUID streamId, final Long sequenceId);
+    Stream<JsonEnvelope> getEventsByStreamIdFromPosition(final UUID streamId, final Long position);
 
     /**
      * Stores the given envelope into the event stream.
@@ -46,26 +45,28 @@ public interface EventRepository {
      *                                          will wrap the underlying cause.
      */
     @Transactional
-    void store(final JsonEnvelope envelope) throws StoreEventRequestFailedException;
+    void storeEvent(final JsonEnvelope envelope) throws StoreEventRequestFailedException;
 
     /**
-     * Returns the latest sequence Id for the given stream id.
+     * Returns the position for the given stream id.
      *
      * @param streamId id of the stream.
-     * @return latest sequence id for the stream.  Returns 0 if stream doesn't exist. Never returns
+     * @return position for the stream.  Returns 0 if stream doesn't exist. Never returns
      * null.
      */
-    long getCurrentSequenceIdForStream(final UUID streamId);
+    long getStreamSize(final UUID streamId);
 
     /**
-     * Returns stream of envelope streams. Envelopes in the nested stream are ordered by sequenceId
+     * Returns stream of envelope streams. Envelopes in the nested stream are ordered by position
+     * ascending
      *
      * @return the stream of envelope streams
      */
     Stream<Stream<JsonEnvelope>> getStreamOfAllEventStreams();
 
     /**
-     * Returns stream of all active envelope streams. Envelopes in the nested stream are ordered by sequenceId
+     * Returns stream of all active event envelope stream. Envelopes in the nested stream are
+     * ordered by position ascending
      *
      * @return the stream of active envelope streams
      */
@@ -76,5 +77,45 @@ public interface EventRepository {
      *
      * @param id - the id of the stream that is to be Cleared.
      */
-    void clear(final UUID id);
+    void clearEventsForStream(final UUID id);
+
+    /**
+     * Get a stream of EventStream, ordered by position.
+     *
+     * @param position the position of the stream to retrieve
+     * @return the stream of EventStreamObject. Never returns null.
+     */
+    Stream<EventStreamMetadata> getEventStreamsFromPosition(final long position);
+
+    /**
+     * Mark the stream as active or inactive.
+     *
+     * @param streamId the streamId of the stream to mark active.
+     * @param active   indicates if the stream is active.
+     */
+    void markEventStreamActive(final UUID streamId, final boolean active);
+
+    /**
+     * Creates an event stream record with automatic position.
+     *
+     * @param streamId the streamId of the stream to save.
+     */
+    void createEventStream(final UUID streamId);
+
+
+    /**
+     * Returns the stream position.
+     *
+     * @return the latest stream position in the event streams.
+     */
+    long getStreamPosition(final UUID streamId);
+
+    /**
+     * Returns stream of EventStreamMetadata
+     * ascending
+     *
+     * @return the stream of envelope streams
+     */
+    Stream<EventStreamMetadata> getStreams();
+
 }

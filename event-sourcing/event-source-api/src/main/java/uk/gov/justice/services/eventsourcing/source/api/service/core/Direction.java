@@ -1,4 +1,4 @@
-package uk.gov.justice.services.eventsourcing.repository.jdbc;
+package uk.gov.justice.services.eventsourcing.source.api.service.core;
 
 
 public enum Direction {

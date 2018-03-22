@@ -665,7 +665,7 @@ public class CakeShopIT {
 
         await().until(() -> queryForOrder(orderId.toString()).httpCode() == OK);
 
-        final Stream<Event> events = EVENT_LOG_REPOSITORY.findByStreamIdOrderBySequenceIdAsc(orderId);
+        final Stream<Event> events = EVENT_LOG_REPOSITORY.findByStreamIdOrderByPositionAsc(orderId);
         final Event event = events.findFirst().get();
 
         assertThat(event.getCreatedAt(), is(notNullValue()));

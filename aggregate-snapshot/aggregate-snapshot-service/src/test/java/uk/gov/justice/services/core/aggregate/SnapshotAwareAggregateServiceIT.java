@@ -25,6 +25,7 @@ import uk.gov.justice.services.common.configuration.GlobalValueProducer;
 import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
 import uk.gov.justice.services.common.configuration.ValueProducer;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -39,8 +40,7 @@ import uk.gov.justice.services.eventsourcing.jdbc.snapshot.SnapshotRepository;
 import uk.gov.justice.services.eventsourcing.publisher.jms.JmsEventPublisher;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventInsertionStrategy;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepository;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.JdbcEventRepository;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.DefaultEventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventConverter;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepository;
@@ -147,9 +147,8 @@ public class SnapshotAwareAggregateServiceIT {
             SnapshotJdbcRepository.class,
             JdbcDataSourceProvider.class,
 
-            JdbcEventRepository.class,
             EventStreamJdbcRepository.class,
-            EventRepository.class,
+            DefaultEventRepository.class,
             TestEventInsertionStrategyProducer.class,
             EventJdbcRepository.class,
             JdbcRepositoryHelper.class,
@@ -167,7 +166,6 @@ public class SnapshotAwareAggregateServiceIT {
             JmsEventPublisher.class,
             DummyJmsEnvelopeSender.class,
             DefaultEventDestinationResolver.class,
-
             DefaultAggregateService.class,
             SnapshotAwareAggregateService.class,
             SnapshotAwareEventSource.class,
@@ -183,7 +181,8 @@ public class SnapshotAwareAggregateServiceIT {
             DefaultSnapshotService.class,
             UtcClock.class,
             TestServiceContextNameProvider.class,
-            GlobalValueProducer.class
+            GlobalValueProducer.class,
+            ObjectToJsonObjectConverter.class
     })
 
     public WebApp war() {
@@ -470,7 +469,6 @@ public class SnapshotAwareAggregateServiceIT {
         }
         eventStream.append(envelopes.stream());
     }
-
 
 
     private int rowCount(final String sql, final Object arg) {

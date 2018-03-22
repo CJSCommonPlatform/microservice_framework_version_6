@@ -1,7 +1,7 @@
 package uk.gov.justice.services.eventsourcing.source.api.resource;
 
 
-import static uk.gov.justice.services.eventsourcing.repository.jdbc.Direction.valueOf;
+import static uk.gov.justice.services.eventsourcing.source.api.service.core.Direction.valueOf;
 import static uk.gov.justice.services.eventsourcing.source.api.resource.RequestValidator.validateRequest;
 
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;

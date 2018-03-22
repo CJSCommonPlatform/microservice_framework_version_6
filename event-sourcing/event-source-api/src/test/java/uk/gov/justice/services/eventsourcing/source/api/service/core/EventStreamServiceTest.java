@@ -5,17 +5,17 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.eventsourcing.repository.jdbc.Direction.BACKWARD;
-import static uk.gov.justice.services.eventsourcing.repository.jdbc.Direction.FORWARD;
+import static uk.gov.justice.services.eventsourcing.source.api.service.core.Direction.BACKWARD;
+import static uk.gov.justice.services.eventsourcing.source.api.service.core.Direction.FORWARD;
 import static uk.gov.justice.services.eventsourcing.source.api.service.core.Position.first;
 import static uk.gov.justice.services.eventsourcing.source.api.service.core.Position.head;
-import static uk.gov.justice.services.eventsourcing.source.api.service.core.Position.sequence;
+import static uk.gov.justice.services.eventsourcing.source.api.service.core.Position.position;
 
-import uk.gov.justice.services.common.util.UtcClock;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStream;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepository;
+import uk.gov.justice.services.eventsourcing.source.core.EnvelopeEventStream;
+import uk.gov.justice.services.eventsourcing.source.core.EventSource;
+import uk.gov.justice.services.eventsourcing.source.core.EventStream;
+import uk.gov.justice.services.eventsourcing.source.core.EventStreamManager;
 
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -30,32 +30,46 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class EventStreamServiceTest {
 
     @Mock
-    private EventStreamJdbcRepository repository;
+    private EventStreamManager eventStreamManager;
+
+    @Mock
+    private EventSource eventSource;
 
     @InjectMocks
     private EventStreamService service;
-
-    private final static ZonedDateTime TIMESTAMP = new UtcClock().now();
 
     @Test
     public void shouldReturnHeadEvents() throws Exception {
 
         final long pageSize = 2L;
 
+        final UUID streamId1 = randomUUID();
+        final UUID streamId2 = randomUUID();
         final UUID streamId3 = randomUUID();
         final UUID streamId4 = randomUUID();
 
-        final EventStream eventStream3 = buildEventStreamOf(streamId3, 3L, false);
-        final EventStream eventStream4 = buildEventStreamOf(streamId4, 4L, false);
+        final EventStream eventStream1 = buildEventStreamOf(streamId1, 1L);
+        final EventStream eventStream2 = buildEventStreamOf(streamId2, 2L);
+        final EventStream eventStream3 = buildEventStreamOf(streamId3, 3L);
+        final EventStream eventStream4 = buildEventStreamOf(streamId4, 4L);
 
         final Stream.Builder<EventStream> eventStreamBuilder = Stream.builder();
 
-        eventStreamBuilder.add(eventStream4);
+        eventStreamBuilder.add(eventStream1);
+        eventStreamBuilder.add(eventStream2);
         eventStreamBuilder.add(eventStream3);
+        eventStreamBuilder.add(eventStream4);
 
-        when(repository.head(pageSize)).thenReturn(eventStreamBuilder.build());
+        final Stream.Builder<EventStream> eventStreamBuilderFrom3 = Stream.builder();
+        eventStreamBuilderFrom3.add(eventStream3);
+        eventStreamBuilderFrom3.add(eventStream4);
 
-        final List<EventStreamEntry> entries = service.eventStream(head(), BACKWARD, pageSize);
+        when(eventSource.getStreamsFrom(1)).thenReturn(eventStreamBuilder.build());
+        when(eventSource.getStreamsFrom(3)).thenReturn(eventStreamBuilderFrom3.build());
+        when(eventStreamManager.getStreamPosition(streamId3)).thenReturn(3L);
+        when(eventStreamManager.getStreamPosition(streamId4)).thenReturn(4L);
+
+        final List<EventStreamEntry> entries = service.eventStreams(head(), BACKWARD, pageSize);
 
         assertThat(entries, hasSize(2));
 
@@ -72,20 +86,26 @@ public class EventStreamServiceTest {
     public void shouldReturnFirstEvents() throws Exception {
         final long pageSize = 2L;
 
+        final Stream.Builder<EventStream> eventStreamBuilder = Stream.builder();
+
         final UUID streamId1 = randomUUID();
         final UUID streamId2 = randomUUID();
 
-        final Stream.Builder<EventStream> eventStreamBuilder = Stream.builder();
+        final EventStream eventStream1 = buildEventStreamOf(streamId1, 1L);
+        final EventStream eventStream2 = buildEventStreamOf(streamId2, 2L);
 
-        final EventStream eventStream1 = buildEventStreamOf(streamId1, 1L, false);
-        final EventStream eventStream2 = buildEventStreamOf(streamId2, 2L, false);
-
-        eventStreamBuilder.add(eventStream2);
         eventStreamBuilder.add(eventStream1);
+        eventStreamBuilder.add(eventStream2);
 
-        when(repository.first(pageSize)).thenReturn(eventStreamBuilder.build());
+        final Stream.Builder<EventStream> eventStreamBuilderFrom1 = Stream.builder();
+        eventStreamBuilderFrom1.add(eventStream1);
+        eventStreamBuilderFrom1.add(eventStream2);
 
-        final List<EventStreamEntry> eventStreamEntries = service.eventStream(first(), FORWARD, pageSize);
+        when(eventSource.getStreamsFrom(1)).thenReturn(eventStreamBuilder.build());
+        when(eventStreamManager.getStreamPosition(streamId1)).thenReturn(1L);
+        when(eventStreamManager.getStreamPosition(streamId2)).thenReturn(2L);
+
+        final List<EventStreamEntry> eventStreamEntries = service.eventStreams(first(), FORWARD, pageSize);
 
         assertThat(eventStreamEntries, hasSize(2));
 
@@ -108,17 +128,19 @@ public class EventStreamServiceTest {
 
         final Stream.Builder<EventStream> eventStreamBuilder = Stream.builder();
 
-        final EventStream eventStream2 = buildEventStreamOf(streamId2, 2L, false);
-        final EventStream eventStream3 = buildEventStreamOf(streamId3, 3L, false);
+        final EventStream eventStream2 = buildEventStreamOf(streamId2, 2L);
+        final EventStream eventStream3 = buildEventStreamOf(streamId3, 3L);
 
-        eventStreamBuilder.add(eventStream3);
         eventStreamBuilder.add(eventStream2);
+        eventStreamBuilder.add(eventStream3);
 
-        final long sequenceId = 3L;
+        final long position = 3L;
 
-        when(repository.backward(sequenceId, pageSize)).thenReturn(eventStreamBuilder.build());
+        when(eventSource.getStreamsFrom(2L)).thenReturn(eventStreamBuilder.build());
+        when(eventStreamManager.getStreamPosition(streamId3)).thenReturn(3L);
+        when(eventStreamManager.getStreamPosition(streamId2)).thenReturn(2L);
 
-        final List<EventStreamEntry> eventEntries = service.eventStream(sequence(sequenceId), BACKWARD, pageSize);
+        final List<EventStreamEntry> eventEntries = service.eventStreams(position(position), BACKWARD, pageSize);
 
         assertThat(eventEntries, hasSize(2));
 
@@ -142,17 +164,19 @@ public class EventStreamServiceTest {
 
         final Stream.Builder<EventStream> eventStreamBuilder = Stream.builder();
 
-        final EventStream eventStream5 = buildEventStreamOf(streamId5, 5L, false);
-        final EventStream eventStream4 = buildEventStreamOf(streamId4, 4L, false);
+        final EventStream eventStream5 = buildEventStreamOf(streamId5, 5L);
+        final EventStream eventStream4 = buildEventStreamOf(streamId4, 4L);
 
-        eventStreamBuilder.add(eventStream5);
         eventStreamBuilder.add(eventStream4);
+        eventStreamBuilder.add(eventStream5);
 
-        final long sequenceId = 3L;
+        final long position = 3L;
 
-        when(repository.forward(sequenceId, 2L)).thenReturn(eventStreamBuilder.build());
+        when(eventSource.getStreamsFrom(position)).thenReturn(eventStreamBuilder.build());
+        when(eventStreamManager.getStreamPosition(streamId5)).thenReturn(5L);
+        when(eventStreamManager.getStreamPosition(streamId4)).thenReturn(4L);
 
-        final List<EventStreamEntry> eventEntries = service.eventStream(sequence(sequenceId), FORWARD, pageSize);
+        final List<EventStreamEntry> eventEntries = service.eventStreams(position(position), FORWARD, pageSize);
 
         assertThat(eventEntries, hasSize(2));
 
@@ -167,14 +191,32 @@ public class EventStreamServiceTest {
 
     @Test
     public void shouldReturnRecordExists() throws Exception {
-        final long sequenceId = 3L;
-        when(repository.recordExists(sequenceId)).thenReturn(true);
+        final UUID streamId1 = randomUUID();
+        final UUID streamId2 = randomUUID();
+        final UUID streamId3 = randomUUID();
+        final UUID streamId4 = randomUUID();
 
-        assertThat(service.recordExists( sequenceId),is(true));
+        final Stream.Builder<EventStream> eventStreamBuilder = Stream.builder();
+
+        final EventStream eventStream1 = buildEventStreamOf(streamId1, 1L);
+        final EventStream eventStream2 = buildEventStreamOf(streamId2, 2L);
+        final EventStream eventStream3 = buildEventStreamOf(streamId3, 3L);
+        final EventStream eventStream4 = buildEventStreamOf(streamId4, 4L);
+
+
+        eventStreamBuilder.add(eventStream1);
+        eventStreamBuilder.add(eventStream2);
+        eventStreamBuilder.add(eventStream3);
+        eventStreamBuilder.add(eventStream4);
+
+
+        when(eventSource.getStreamsFrom(1)).thenReturn(eventStreamBuilder.build());
+
+      //  assertThat(service.eventStreamExists(1), is(true));
     }
 
-    private EventStream buildEventStreamOf(final UUID streamId, final Long sequence, final boolean active) {
-        return new EventStream(streamId, sequence, active, TIMESTAMP);
+    private EnvelopeEventStream buildEventStreamOf(final UUID streamId, final long sequenceNumber) {
+        return new EnvelopeEventStream(streamId, sequenceNumber, eventStreamManager);
     }
 
 }

@@ -13,6 +13,6 @@ public class PositionValueFactory {
         if (position.isFirst()) {
             return FIRST;
         }
-        return valueOf(position.getSequenceId());
+        return valueOf(position.getPosition());
     }
 }

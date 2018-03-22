@@ -1,5 +1,7 @@
 package uk.gov.justice.services.eventsourcing.source.core;
 
+
+import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -30,9 +32,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class EnvelopeEventStreamTest {
 
-    public static final Long VERSION = 3L;
-    public static final Long MAX_VERSION = 4L;
-    private static final UUID STREAM_ID = UUID.randomUUID();
+    public static final Long POSITION = 3L;
+    public static final Long CURRENT_POSITION = 4L;
+    public static final Long CURRENT_STREAM_POSITION = 8L;
+
+    private static final UUID STREAM_ID = randomUUID();
 
     @Mock
     EventStreamManager eventStreamManager;
@@ -56,7 +60,7 @@ public class EnvelopeEventStreamTest {
                 envelope().with(metadataWithDefaults().withVersion(2L)).build(),
                 envelope().with(metadataWithDefaults().withVersion(3L)).build(),
                 envelope().with(metadataWithDefaults().withVersion(4L)).build()));
-        when(eventStreamManager.readFrom(STREAM_ID, VERSION)).thenReturn(Stream.of(
+        when(eventStreamManager.readFrom(STREAM_ID, POSITION)).thenReturn(Stream.of(
                 envelope().with(metadataWithDefaults().withVersion(3L)).build(),
                 envelope().with(metadataWithDefaults().withVersion(4L)).build()
         ));
@@ -71,9 +75,9 @@ public class EnvelopeEventStreamTest {
 
     @Test
     public void shouldReturnStreamFromVersion() throws Exception {
-        eventStream.readFrom(VERSION);
+        eventStream.readFrom(POSITION);
 
-        verify(eventStreamManager).readFrom(STREAM_ID, VERSION);
+        verify(eventStreamManager).readFrom(STREAM_ID, POSITION);
     }
 
     @Test
@@ -85,9 +89,9 @@ public class EnvelopeEventStreamTest {
 
     @Test
     public void shouldAppendStreamAfterVersion() throws Exception {
-        eventStream.appendAfter(stream, VERSION);
+        eventStream.appendAfter(stream, POSITION);
 
-        verify(eventStreamManager).appendAfter(STREAM_ID, stream, VERSION);
+        verify(eventStreamManager).appendAfter(STREAM_ID, stream, POSITION);
     }
 
     @Test
@@ -106,14 +110,14 @@ public class EnvelopeEventStreamTest {
 
 
     @Test
-    public void shouldReturnCurrentVersion() throws Exception {
-        eventStream.getCurrentVersion();
+    public void shouldReturnSize() throws Exception {
+        eventStream.size();
 
-        verify(eventStreamManager).getCurrentVersion(STREAM_ID);
+        verify(eventStreamManager).getSize(STREAM_ID);
     }
 
     @Test
-    public void shouldGetId() throws Exception {
+    public void shouldGetEventStreamId() throws Exception {
         final UUID actualId = eventStream.getId();
 
         assertThat(actualId, equalTo(STREAM_ID));
@@ -134,7 +138,7 @@ public class EnvelopeEventStreamTest {
         });
         eventStream.append(events);
 
-        verify(eventStreamManager).appendAfter(eq(STREAM_ID), streamCaptor.capture(), eq(MAX_VERSION));
+        verify(eventStreamManager).appendAfter(eq(STREAM_ID), streamCaptor.capture(), eq(CURRENT_POSITION));
         final List<JsonEnvelope> appendedEvents = streamCaptor.getValue().collect(toList());
         assertThat(appendedEvents, hasSize(1));
         assertThat(appendedEvents.get(0), is(event));
@@ -167,7 +171,7 @@ public class EnvelopeEventStreamTest {
         final List<JsonEnvelope> appendedEvents1 = streamCaptor.getValue().collect(toList());
         assertThat(appendedEvents1, hasSize(1));
         assertThat(appendedEvents1.get(0), is(event5));
-        assertThat(versionCaptor.getValue(), equalTo(MAX_VERSION));
+        assertThat(versionCaptor.getValue(), equalTo(CURRENT_POSITION));
 
         eventStream.append(Stream.of(event6));
 
@@ -175,6 +179,20 @@ public class EnvelopeEventStreamTest {
         final List<JsonEnvelope> appendedEvents2 = streamCaptor.getValue().collect(toList());
         assertThat(appendedEvents2, hasSize(1));
         assertThat(appendedEvents2.get(0), is(event6));
-        assertThat(versionCaptor.getValue(), equalTo(MAX_VERSION + 1));
+        assertThat(versionCaptor.getValue(), equalTo(CURRENT_POSITION + 1));
+    }
+
+    @Test
+    public void shouldGetStreamPosition(){
+        when(eventStreamManager.getStreamPosition(STREAM_ID)).thenReturn(CURRENT_STREAM_POSITION);
+        assertThat(eventStream.getPosition(), is(CURRENT_STREAM_POSITION));
+        verify(eventStreamManager).getStreamPosition(STREAM_ID);
+    }
+
+    @Test
+    public void shouldGetStreamSize(){
+        when(eventStreamManager.getSize(STREAM_ID)).thenReturn(CURRENT_POSITION);
+        assertThat(eventStream.size(), is(CURRENT_POSITION));
+        verify(eventStreamManager).getSize(STREAM_ID);
     }
 }

@@ -16,21 +16,30 @@ import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.
 
 import uk.gov.justice.services.adapter.direct.SynchronousDirectAdapter;
 import uk.gov.justice.services.adapter.direct.SynchronousDirectAdapterCache;
-import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
+import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DirectClientGeneratorMethodBodyTest extends BaseGeneratorTest {
+public class DirectClientGeneratorMethodBodyTest {
+
+    private static final String BASE_PACKAGE = "org.raml.test";
+
+    private JavaCompilerUtil compiler;
+
+    @Rule
+    public TemporaryFolder outputFolder = new TemporaryFolder();
 
     @Mock
     private SynchronousDirectAdapter adapter;
@@ -38,9 +47,11 @@ public class DirectClientGeneratorMethodBodyTest extends BaseGeneratorTest {
     @Mock
     private SynchronousDirectAdapterCache adapterCache;
 
+    private final DirectClientGenerator generator = new DirectClientGenerator();
+
     @Before
     public void setUp() throws Exception {
-        generator = new DirectClientGenerator();
+        compiler = new JavaCompilerUtil(outputFolder.getRoot(), outputFolder.getRoot());
     }
 
 

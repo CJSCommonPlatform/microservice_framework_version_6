@@ -13,18 +13,20 @@ import uk.gov.justice.services.adapter.rest.processor.response.AcceptedStatusNoE
 import uk.gov.justice.services.adapter.rest.processor.response.OkStatusEnvelopeEntityResponseStrategy;
 import uk.gov.justice.services.adapter.rest.processor.response.OkStatusEnvelopePayloadEntityResponseStrategy;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
-import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 import uk.gov.justice.services.messaging.logging.HttpTraceLoggerHelper;
 import uk.gov.justice.services.messaging.logging.TraceLogger;
+import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil;
 
 import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
 
 @RunWith(MockitoJUnitRunner.class)
-public abstract class BaseRestAdapterGeneratorTest extends BaseGeneratorTest {
+public abstract class BaseRestAdapterGeneratorTest {
 
     private static final String INTERCEPTOR_CHAIN_PROCESSOR = "interceptorChainProcessor";
     private static final String REST_PROCESSOR = "restProcessor";
@@ -68,10 +70,20 @@ public abstract class BaseRestAdapterGeneratorTest extends BaseGeneratorTest {
     @Mock
     protected HttpTraceLoggerHelper httpTraceLoggerHelper;
 
+    @Rule
+    public TemporaryFolder outputFolder = new TemporaryFolder();
+
+    protected final RestAdapterGenerator generator = new RestAdapterGenerator();
+
+    protected static final String BASE_PACKAGE = "org.raml.test";
+
+    protected JavaCompilerUtil compiler;
+
     @Before
     public void before() {
-        super.before();
-        generator = new RestAdapterGenerator();
+
+        compiler = new JavaCompilerUtil(outputFolder.getRoot(), outputFolder.getRoot());
+
         try {
             setField(generator, LOGGER_FIELD, logger);
         } catch (IllegalAccessException e) {

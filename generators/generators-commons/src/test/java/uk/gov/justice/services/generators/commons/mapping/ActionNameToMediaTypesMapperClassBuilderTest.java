@@ -31,8 +31,8 @@ public class ActionNameToMediaTypesMapperClassBuilderTest {
     @Rule
     public TemporaryFolder outputFolder = new TemporaryFolder();
 
-    private final SchemaMappingClassNameGenerator schemaMappingClassNameGenerator = new SchemaMappingClassNameGenerator();
-    private final ActionNameToMediaTypesMapperClassBuilder actionNameToMediaTypesMapperClassBuilder = new ActionNameToMediaTypesMapperClassBuilder(schemaMappingClassNameGenerator);
+    private final RamlSchemaMappingClassNameGenerator ramlSchemaMappingClassNameGenerator = new RamlSchemaMappingClassNameGenerator();
+    private final ActionNameToMediaTypesMapperClassBuilder actionNameToMediaTypesMapperClassBuilder = new ActionNameToMediaTypesMapperClassBuilder(ramlSchemaMappingClassNameGenerator);
 
     @Test
     public void shouldGenerateAMediaTypeToNameMapper() throws Exception {

@@ -1,0 +1,16 @@
+subscription_descriptor:
+  spec_version: 1.0.0
+  service: example
+  service_component: EVENT_PROCESSOR
+  subscriptions:
+    - name: Example Private Events
+      events:
+        - name: example.recipe-added
+          schema_uri: http://justice.gov.uk/example/event/example.recipe-added.json
+        - name: example.cake-made
+          schema_uri: http://justice.gov.uk/example/event/example.cake-made.json
+      eventsource:
+        name: Example Private Events
+        location:
+          jms_uri:  jms:topic:example.event
+          rest_uri: http://localhost:8080/example/event-source-api/rest

@@ -1,0 +1,19 @@
+{
+  "recipeId": "",
+  "name": "Eton Mess",
+  "glutenFree": false,
+  "ingredients": [
+    {
+      "name": "custard",
+      "quantity": 2
+    },
+    {
+      "name": "egg",
+      "quantity": 6
+    },
+    {
+      "name": "sugar",
+      "quantity": 500
+    }
+  ]
+}

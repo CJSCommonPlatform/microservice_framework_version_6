@@ -23,8 +23,8 @@ import uk.gov.justice.services.core.annotation.Direct;
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
-import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -34,13 +34,28 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
 
-public class DirectClientGeneratorCodeStructureTest extends BaseGeneratorTest {
+public class DirectClientGeneratorCodeStructureTest {
+
+    private static final String BASE_PACKAGE = "org.raml.test";
+
+    private final DirectClientGenerator generator = new DirectClientGenerator();
+
+    private JavaCompilerUtil compiler;
+
+    @Rule
+    public TemporaryFolder outputFolder = new TemporaryFolder();
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Before
     public void setUp() throws Exception {
-        generator = new DirectClientGenerator();
+        compiler = new JavaCompilerUtil(outputFolder.getRoot(), outputFolder.getRoot());
     }
 
     @Test

@@ -1,0 +1,14 @@
+subscription_descriptor:
+  spec_version: 1.0.0
+  service: service2
+  service_component: EVENT_LISTENER
+  subscriptions:
+    - name: subscription1
+      events:
+        - name: people.eventaa
+          schema_uri: http://justice.gov.uk/json/schema/people.eventaa.json
+      eventsource:
+        name: service2
+        location:
+          jms_uri:  jms:topic:people.event
+          rest_uri: http://localhost:8080/example/event-source-api/rest

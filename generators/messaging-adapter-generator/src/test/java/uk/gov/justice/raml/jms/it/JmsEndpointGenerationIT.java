@@ -12,7 +12,7 @@ import uk.gov.justice.api.Service2EventListenerPeopleEventEventFilter;
 import uk.gov.justice.api.Service2EventListenerPeopleEventEventValidationInterceptor;
 import uk.gov.justice.api.Service2EventListenerPeopleEventJmsListener;
 import uk.gov.justice.api.Service2EventProcessorStructureEventJmsListener;
-import uk.gov.justice.api.mapper.ListenerMediaTypeToSchemaIdMapper;
+import uk.gov.justice.api.mapper.ContextaEventProcessorMediaTypeToSchemaIdMapper;
 import uk.gov.justice.schema.catalog.CatalogProducer;
 import uk.gov.justice.schema.service.SchemaCatalogService;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsParameterChecker;
@@ -109,7 +109,7 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
             DefaultJsonValidationLoggerHelper.class,
             DefaultFileSystemUrlResolverStrategy.class,
 
-            ListenerMediaTypeToSchemaIdMapper.class,
+            ContextaEventProcessorMediaTypeToSchemaIdMapper.class,
             SchemaCatalogAwareJsonSchemaValidator.class,
             PayloadExtractor.class,
             DefaultNameToMediaTypeConverter.class,

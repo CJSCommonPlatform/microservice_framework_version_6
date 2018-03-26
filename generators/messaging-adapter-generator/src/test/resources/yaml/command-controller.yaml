@@ -1,0 +1,16 @@
+subscription_descriptor:
+  spec_version: 1.0.0
+  service: service1
+  service_component: COMMAND_CONTROLLER
+  subscriptions:
+    - name: subscription1
+      events:
+        - name: structure.commanda
+          schema_uri: http://justice.gov.uk/json/schema/structure.commanda.json
+        - name: structure.commandb
+          schema_uri: http://justice.gov.uk/json/schema/structure.commandb.json
+      eventsource:
+        name: service1
+        location:
+          jms_uri:  jms:queue:structure.controller.command
+          rest_uri: http://localhost:8080/example/event-source-api/rest

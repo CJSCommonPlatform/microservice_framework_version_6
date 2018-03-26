@@ -37,7 +37,11 @@
             <artifactId>event-listener-interceptors</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>uk.gov.justice.maven.generator</groupId>
+            <artifactId>subscription-descriptor-parser</artifactId>
+            <version>${generator-maven-plugin.version}</version>
+        </dependency>
         <!-- Test Dependencies -->
         <dependency>
             <groupId>uk.gov.justice.utils</groupId>
@@ -152,6 +156,12 @@
             <artifactId>embedded-artemis</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.maven.generator</groupId>
+            <artifactId>generator-maven-test-utils</artifactId>
+            <version>${generator-maven-plugin.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -161,7 +171,7 @@
                 <artifactId>generator-plugin</artifactId>
                 <version>${generator-maven-plugin.version}</version>
                 <configuration>
-                    <generatorName>uk.gov.justice.raml.jms.core.JmsEndpointGenerator</generatorName>
+                    <generatorName>uk.gov.justice.raml.jms.core.JmsEndpointGeneratorFactory</generatorName>
                     <parserName>uk.gov.justice.maven.generator.io.files.parser.RamlFileParser
                     </parserName>
                     <sourceDirectory>${basedir}/src/test/resources/raml</sourceDirectory>
@@ -260,6 +270,116 @@
                             </generatorProperties>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>generate-command-controller-subscritpion</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>generate-test-sources</phase>
+                        <configuration>
+                            <generatorName>uk.gov.justice.subscription.jms.core.SubscriptionJmsEndpointGeneratorFactory</generatorName>
+                            <parserName>uk.gov.justice.maven.generator.io.files.parser.SubscriptionDescriptorFileParserFactory
+                            </parserName>
+                            <sourceDirectory>${basedir}/src/test/resources/yaml</sourceDirectory>
+                            <outputDirectory>${project.build.directory}/generated-test-sources
+                            </outputDirectory>
+                            <basePackageName>uk.gov.justice.api.subscription</basePackageName>
+                            <includes>
+                                <include>**/command-controller.yaml</include>
+                            </includes>
+                            <generatorProperties implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
+                                <serviceComponent>COMMAND_CONTROLLER</serviceComponent>
+                            </generatorProperties>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-command-handler-subscritpion</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>generate-test-sources</phase>
+                        <configuration>
+                            <generatorName>uk.gov.justice.subscription.jms.core.SubscriptionJmsEndpointGeneratorFactory</generatorName>
+                            <parserName>uk.gov.justice.maven.generator.io.files.parser.SubscriptionDescriptorFileParserFactory
+                            </parserName>
+                            <sourceDirectory>${basedir}/src/test/resources/yaml</sourceDirectory>
+                            <outputDirectory>${project.build.directory}/generated-test-sources
+                            </outputDirectory>
+                            <basePackageName>uk.gov.justice.api.subscription</basePackageName>
+                            <includes>
+                                <include>**/command-handler.yaml</include>
+                            </includes>
+                            <generatorProperties implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
+                                <serviceComponent>COMMAND_HANDLER</serviceComponent>
+                            </generatorProperties>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-event-listener-subscritpion</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>generate-test-sources</phase>
+                        <configuration>
+                            <generatorName>uk.gov.justice.subscription.jms.core.SubscriptionJmsEndpointGeneratorFactory</generatorName>
+                            <parserName>uk.gov.justice.maven.generator.io.files.parser.SubscriptionDescriptorFileParserFactory
+                            </parserName>
+                            <sourceDirectory>${basedir}/src/test/resources/yaml</sourceDirectory>
+                            <outputDirectory>${project.build.directory}/generated-test-sources
+                            </outputDirectory>
+                            <basePackageName>uk.gov.justice.api.subscription</basePackageName>
+                            <includes>
+                                <include>**/event-listener.yaml</include>
+                            </includes>
+                            <generatorProperties implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
+                                <serviceComponent>EVENT_LISTENER</serviceComponent>
+                            </generatorProperties>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-custom-event-listener-subscritpion</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>generate-test-sources</phase>
+                        <configuration>
+                            <generatorName>uk.gov.justice.subscription.jms.core.SubscriptionJmsEndpointGeneratorFactory</generatorName>
+                            <parserName>uk.gov.justice.maven.generator.io.files.parser.SubscriptionDescriptorFileParserFactory
+                            </parserName>
+                            <sourceDirectory>${basedir}/src/test/resources/yaml</sourceDirectory>
+                            <outputDirectory>${project.build.directory}/generated-test-sources
+                            </outputDirectory>
+                            <basePackageName>uk.gov.justice.api.subscription</basePackageName>
+                            <includes>
+                                <include>**/custom-event-listener.yaml</include>
+                            </includes>
+                            <generatorProperties implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
+                                <serviceComponent>CUSTOM_EVENT_LISTENER</serviceComponent>
+                            </generatorProperties>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-event-processor-subscritpion</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>generate-test-sources</phase>
+                        <configuration>
+                            <generatorName>uk.gov.justice.subscription.jms.core.SubscriptionJmsEndpointGeneratorFactory</generatorName>
+                            <parserName>uk.gov.justice.maven.generator.io.files.parser.SubscriptionDescriptorFileParserFactory
+                            </parserName>
+                            <sourceDirectory>${basedir}/src/test/resources/yaml</sourceDirectory>
+                            <outputDirectory>${project.build.directory}/generated-test-sources
+                            </outputDirectory>
+                            <basePackageName>uk.gov.justice.api.subscription</basePackageName>
+                            <includes>
+                                <include>**/event-processor.yaml</include>
+                            </includes>
+                            <generatorProperties implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
+                                <serviceComponent>EVENT_PROCESSOR</serviceComponent>
+                            </generatorProperties>
+                        </configuration>
+                    </execution>
                 </executions>
                 <dependencies>
                     <dependency>
@@ -276,6 +396,11 @@
                     <dependency>
                         <groupId>uk.gov.justice.maven.generator</groupId>
                         <artifactId>raml-parser</artifactId>
+                        <version>${generator-maven-plugin.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>uk.gov.justice.maven.generator</groupId>
+                        <artifactId>subscription-descriptor-parser</artifactId>
                         <version>${generator-maven-plugin.version}</version>
                     </dependency>
                 </dependencies>

@@ -1,0 +1,14 @@
+subscription_descriptor:
+  spec_version: 1.0.0
+  service: service1
+  service_component: COMMAND_HANDLER
+  subscriptions:
+    - name: subscription1
+      events:
+        - name: structure.cmdaa
+          schema_uri: http://justice.gov.uk/json/schema/structure.cmdaa.json
+      eventsource:
+        name: service1
+        location:
+          jms_uri:  jms:queue:structure.handler.command
+          rest_uri: http://localhost:8080/example/event-source-api/rest

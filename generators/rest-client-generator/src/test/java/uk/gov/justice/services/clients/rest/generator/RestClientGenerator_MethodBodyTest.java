@@ -38,9 +38,9 @@ import uk.gov.justice.services.clients.core.EndpointDefinition;
 import uk.gov.justice.services.clients.core.RestClientHelper;
 import uk.gov.justice.services.clients.core.RestClientProcessor;
 import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.generators.test.utils.BaseGeneratorTest;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
+import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -48,16 +48,21 @@ import java.util.function.Function;
 
 import com.google.common.collect.ImmutableSet;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
+public class RestClientGenerator_MethodBodyTest {
 
     private static final JsonEnvelope NOT_USED_ENVELOPE = mock(JsonEnvelope.class);
+
+    private static final String BASE_PACKAGE = "org.raml.test";
 
     @Mock
     private RestClientProcessor restClientProcessor;
@@ -68,10 +73,20 @@ public class RestClientGenerator_MethodBodyTest extends BaseGeneratorTest {
     @Mock
     private Enveloper enveloper;
 
+    @Rule
+    public TemporaryFolder outputFolder = new TemporaryFolder();
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
+    private final RestClientGenerator generator = new RestClientGenerator();
+
+    private JavaCompilerUtil compiler;
+
+
     @Before
     public void before() {
-        super.before();
-        generator = new RestClientGenerator();
+        compiler = new JavaCompilerUtil(outputFolder.getRoot(), outputFolder.getRoot());
     }
 
     @Test

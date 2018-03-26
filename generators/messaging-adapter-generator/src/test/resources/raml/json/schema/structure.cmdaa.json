@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/example/command/controller/structure.commanda.json",
+  "id": "http://justice.gov.uk/example/command/controller/structure.cmdaa.json",
   "type": "object",
   "properties": {
     "userUrn": {

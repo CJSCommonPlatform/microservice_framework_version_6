@@ -18,7 +18,7 @@ import static uk.gov.justice.services.generators.commons.helper.Names.packageNam
 import uk.gov.justice.maven.generator.io.files.parser.core.Generator;
 import uk.gov.justice.maven.generator.io.files.parser.core.GeneratorConfig;
 import uk.gov.justice.services.generators.commons.mapping.ActionNameToMediaTypesGenerator;
-import uk.gov.justice.services.generators.commons.mapping.MediaTypeToSchemaIdGenerator;
+import uk.gov.justice.services.generators.commons.mapping.RamlMediaTypeToSchemaIdGenerator;
 import uk.gov.justice.services.generators.commons.validator.ActionMappingRamlValidator;
 import uk.gov.justice.services.generators.commons.validator.CompositeRamlValidator;
 import uk.gov.justice.services.generators.commons.validator.ContainsActionsRamlValidator;
@@ -60,7 +60,7 @@ public class RestAdapterGenerator implements Generator<Raml> {
         final JaxRsImplementationGenerator implementationGenerator = new JaxRsImplementationGenerator(configuration);
         final JaxRsApplicationCodeGenerator applicationGenerator = new JaxRsApplicationCodeGenerator(configuration);
         final ActionMappingGenerator actionMappingGenerator = new ActionMappingGenerator();
-        final MediaTypeToSchemaIdGenerator mediaTypeToSchemaIdGenerator = new MediaTypeToSchemaIdGenerator();
+        final RamlMediaTypeToSchemaIdGenerator ramlMediaTypeToSchemaIdGenerator = new RamlMediaTypeToSchemaIdGenerator();
         final ActionNameToMediaTypesGenerator actionNameToMediaTypesGenerator = new ActionNameToMediaTypesGenerator();
 
         writeToSubPackage(interfaceGenerator.generateFor(raml), configuration, RESOURCE_PACKAGE_NAME);
@@ -70,7 +70,7 @@ public class RestAdapterGenerator implements Generator<Raml> {
         writeToBasePackage(applicationGenerator.generateFor(raml, implementationNames), configuration);
         writeToSubPackage(actionMappingGenerator.generateFor(raml), configuration, MAPPER_PACKAGE_NAME);
 
-        mediaTypeToSchemaIdGenerator.generateMediaTypeToSchemaIdMapper(raml, configuration);
+        ramlMediaTypeToSchemaIdGenerator.generateMediaTypeToSchemaIdMapper(raml, configuration);
         actionNameToMediaTypesGenerator.generateActionNameToMediaTypes(raml, configuration);
     }
 

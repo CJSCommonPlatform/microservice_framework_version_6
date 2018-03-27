@@ -1,0 +1,16 @@
+---
+subscription_descriptor:
+  spec_version: 1.0.0
+  service: exampleContext
+  service_component: EVENT_LISTENER
+  subscriptions:
+    - name: subscription_1
+      events:
+        - name: event_1
+          schema_uri: schema_1.json
+      eventsource:
+        name: exampleContextEventSource
+        location:
+          jms_uri:  jms:topic:example.event
+          rest_uri: http://localhost:8080/example/event-source-api/rest
+...

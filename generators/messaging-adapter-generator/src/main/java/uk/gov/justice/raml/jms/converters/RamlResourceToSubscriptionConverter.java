@@ -2,10 +2,10 @@ package uk.gov.justice.raml.jms.converters;
 
 import static org.raml.model.ActionType.POST;
 
-import uk.gov.justice.domain.subscriptiondescriptor.Event;
-import uk.gov.justice.domain.subscriptiondescriptor.Eventsource;
-import uk.gov.justice.domain.subscriptiondescriptor.Location;
-import uk.gov.justice.domain.subscriptiondescriptor.Subscription;
+import uk.gov.justice.subscription.domain.Event;
+import uk.gov.justice.subscription.domain.Eventsource;
+import uk.gov.justice.subscription.domain.Location;
+import uk.gov.justice.subscription.domain.Subscription;
 
 import java.util.Collection;
 import java.util.List;

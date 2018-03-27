@@ -15,7 +15,7 @@ import static org.raml.model.ActionType.PATCH;
 import static org.raml.model.ActionType.POST;
 import static org.raml.model.ActionType.TRACE;
 
-import uk.gov.justice.domain.subscriptiondescriptor.Subscription;
+import uk.gov.justice.subscription.domain.Subscription;
 
 import java.util.Collection;
 import java.util.List;

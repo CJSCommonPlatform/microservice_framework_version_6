@@ -1,8 +1,8 @@
 package uk.gov.justice.raml.jms.converters;
 
-import uk.gov.justice.domain.subscriptiondescriptor.Subscription;
-import uk.gov.justice.domain.subscriptiondescriptor.SubscriptionDescriptor;
-import uk.gov.justice.domain.subscriptiondescriptor.SubscriptionDescriptorDef;
+import uk.gov.justice.subscription.domain.Subscription;
+import uk.gov.justice.subscription.domain.SubscriptionDescriptor;
+import uk.gov.justice.subscription.domain.SubscriptionDescriptorDef;
 
 import java.util.List;
 

@@ -1,0 +1,147 @@
+{
+  "$id": "http://example.com/example.json",
+  "type": "object",
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "properties": {
+    "subscription_descriptor": {
+      "$id": "/properties/subscription_descriptor",
+      "type": "object",
+      "properties": {
+        "spec_version": {
+          "$id": "/properties/subscription_descriptor/properties/spec_version",
+          "type": "string",
+          "title": "The Spec_version Schema ",
+          "examples": [
+            "1.0.0"
+          ]
+        },
+        "service": {
+          "$id": "/properties/subscription_descriptor/properties/service",
+          "type": "string",
+          "title": "The Service Schema ",
+          "examples": [
+            "examplecontext"
+          ]
+        },
+        "service_component": {
+          "$id": "/properties/subscription_descriptor/properties/service_component",
+          "type": "string",
+          "title": "The Service_component Schema ",
+          "examples": [
+            "EVENT_LISTENER"
+          ]
+        },
+        "subscriptions": {
+          "$id": "/properties/subscription_descriptor/properties/subscriptions",
+          "type": "array",
+          "items": {
+            "$id": "/properties/subscription_descriptor/properties/subscriptions/items",
+            "type": "object",
+            "properties": {
+              "name": {
+                "$id": "/properties/subscription_descriptor/properties/subscriptions/items/properties/name",
+                "type": "string",
+                "title": "The Name Schema ",
+                "examples": [
+                  "subscription1"
+                ]
+              },
+              "events": {
+                "$id": "/properties/subscription_descriptor/properties/subscriptions/items/properties/events",
+                "type": "array",
+                "items": {
+                  "$id": "/properties/subscription_descriptor/properties/subscriptions/items/properties/events/items",
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "$id": "/properties/subscription_descriptor/properties/subscriptions/items/properties/events/items/properties/name",
+                      "type": "string",
+                      "title": "The Name Schema ",
+                      "examples": [
+                        "example.recipe-added"
+                      ]
+                    },
+                    "schema_uri": {
+                      "$id": "/properties/subscription_descriptor/properties/subscriptions/items/properties/events/items/properties/schema_uri",
+                      "type": "string",
+                      "title": "The Schema_uri Schema ",
+                      "pattern": "^http|https:(\\/?\\/?)[^\\s]+$",
+                      "examples": [
+                        "http://justice.gov.uk/json/schemas/domains/example/example.recipe-added.json"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "schema_uri"
+                  ]
+                }
+              },
+              "eventsource": {
+                "$id": "/properties/subscription_descriptor/properties/subscriptions/items/properties/eventsource",
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "$id": "/properties/subscription_descriptor/properties/subscriptions/items/properties/eventsource/properties/name",
+                    "type": "string",
+                    "title": "The Name of event source ",
+                    "examples": [
+                      "examplecontext"
+                    ]
+                  },
+                  "location": {
+                    "$id": "/properties/subscription_descriptor/properties/subscriptions/items/properties/eventsource/properties/location",
+                    "type": "object",
+                    "properties": {
+                      "jms_uri": {
+                        "$id": "/properties/subscription_descriptor/properties/subscriptions/items/properties/eventsource/properties/location/properties/jms_uri",
+                        "type": "string",
+                        "title": "The Jms_uri Schema ",
+                        "pattern": "^jms:(\\/?\\/?)[^\\s]+$",
+                        "examples": [
+                          "jms:topic:example.event?timeToLive=1000"
+                        ]
+                      },
+                      "rest_uri": {
+                        "$id": "/properties/subscription_descriptor/properties/subscriptions/items/properties/eventsource/properties/location/properties/rest_uri",
+                        "type": "string",
+                        "title": "The Rest_uri Schema ",
+                        "pattern": "^http|https:(\\/?\\/?)[^\\s]+$",
+                        "examples": [
+                          "http://justice.gov.uk/json/schemas/domains/example/example.recipe-added.json"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "jms_uri",
+                      "rest_uri"
+                    ]
+                  }
+                },
+                "required": [
+                  "name",
+                  "location"
+                ]
+              }
+            },
+            "required": [
+              "name",
+              "events",
+              "eventsource"
+            ]
+          }
+        }
+      },
+      "required": [
+        "spec_version",
+        "service",
+        "service_component",
+        "subscriptions"
+      ]
+    }
+  },
+  "required": [
+    "subscription_descriptor"
+  ]
+}

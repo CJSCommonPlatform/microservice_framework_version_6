@@ -2,9 +2,9 @@ package uk.gov.justice.raml.jms.converters;
 
 import static java.lang.String.format;
 
-import uk.gov.justice.domain.subscriptiondescriptor.Event;
 import uk.gov.justice.services.generators.commons.mapping.SchemaIdParser;
 import uk.gov.justice.services.generators.commons.mapping.SchemaParsingException;
+import uk.gov.justice.subscription.domain.Event;
 
 import org.raml.model.MimeType;
 

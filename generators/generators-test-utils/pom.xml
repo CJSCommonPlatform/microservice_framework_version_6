@@ -47,11 +47,6 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
-        <dependency>
-            <groupId>uk.gov.justice.maven.generator</groupId>
-            <artifactId>subscription-descriptor-parser</artifactId>
-            <version>${generator-maven-plugin.version}</version>
-        </dependency>
     </dependencies>
 
 </project>

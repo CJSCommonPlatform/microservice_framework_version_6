@@ -2,18 +2,18 @@ package uk.gov.justice.subscription.jms.core;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.justice.domain.EventBuilder.event;
-import static uk.gov.justice.domain.EventsourceBuilder.eventsource;
-import static uk.gov.justice.domain.LocationBuilder.location;
-import static uk.gov.justice.domain.SubscriptionBuilder.subscription;
-import static uk.gov.justice.domain.SubscriptionDescriptorBuilder.subscriptionDescriptor;
+import static uk.gov.justice.subscription.domain.builders.EventBuilder.event;
+import static uk.gov.justice.subscription.domain.builders.EventsourceBuilder.eventsource;
+import static uk.gov.justice.subscription.domain.builders.LocationBuilder.location;
+import static uk.gov.justice.subscription.domain.builders.SubscriptionBuilder.subscription;
+import static uk.gov.justice.subscription.domain.builders.SubscriptionDescriptorBuilder.subscriptionDescriptor;
 
-import uk.gov.justice.domain.subscriptiondescriptor.Event;
-import uk.gov.justice.domain.subscriptiondescriptor.Subscription;
-import uk.gov.justice.domain.subscriptiondescriptor.SubscriptionDescriptor;
 import uk.gov.justice.maven.generator.io.files.parser.core.GeneratorProperties;
 import uk.gov.justice.raml.jms.config.GeneratorPropertiesFactory;
 import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
+import uk.gov.justice.subscription.domain.Event;
+import uk.gov.justice.subscription.domain.Subscription;
+import uk.gov.justice.subscription.domain.SubscriptionDescriptor;
 
 import com.squareup.javapoet.TypeSpec;
 import org.junit.Test;

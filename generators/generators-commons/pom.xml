@@ -53,9 +53,9 @@
             <artifactId>utilities-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>uk.gov.justice.maven.generator</groupId>
-            <artifactId>subscription-descriptor-parser</artifactId>
-            <version>${generator-maven-plugin.version}</version>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>event-subscription</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <!-- Test Dependencies -->

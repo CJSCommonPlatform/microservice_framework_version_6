@@ -25,11 +25,6 @@
             <groupId>uk.gov.justice.utils</groupId>
             <artifactId>utilities-core</artifactId>
         </dependency>
-        <dependency>
-            <groupId>uk.gov.justice.maven.generator</groupId>
-            <artifactId>subscription-descriptor-parser</artifactId>
-            <version>${generator-maven-plugin.version}</version>
-        </dependency>
 
         <!--Test Dependencies -->
         <dependency>

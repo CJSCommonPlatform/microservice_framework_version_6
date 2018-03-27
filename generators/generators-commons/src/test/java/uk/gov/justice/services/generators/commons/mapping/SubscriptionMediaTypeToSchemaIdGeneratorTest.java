@@ -5,7 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 
-import uk.gov.justice.domain.subscriptiondescriptor.Event;
+import uk.gov.justice.subscription.domain.Event;
 import uk.gov.justice.services.core.mapping.MediaType;
 import uk.gov.justice.services.core.mapping.MediaTypeToSchemaIdMapper;
 import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;

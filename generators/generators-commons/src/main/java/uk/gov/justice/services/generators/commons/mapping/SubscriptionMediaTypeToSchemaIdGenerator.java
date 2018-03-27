@@ -4,7 +4,7 @@ import static uk.gov.justice.services.generators.commons.helper.GeneratedClassWr
 import static uk.gov.justice.services.generators.commons.helper.Names.MAPPER_PACKAGE_NAME;
 import static uk.gov.justice.services.generators.commons.helper.Names.packageNameOf;
 
-import uk.gov.justice.domain.subscriptiondescriptor.Event;
+import uk.gov.justice.subscription.domain.Event;
 import uk.gov.justice.maven.generator.io.files.parser.core.GeneratorConfig;
 
 import java.util.List;

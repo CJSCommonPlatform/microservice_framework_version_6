@@ -26,9 +26,9 @@ public class SubscriptionDescriptorParser {
         this.subscriptionDescriptorFileValidator = subscriptionDescriptorFileValidator;
     }
 
-    public SubscriptionDescriptor read(final Path filePath) {
+    public SubscriptionDescriptor read(final Path absolutePath) {
         try {
-            subscriptionDescriptorFileValidator.validate(filePath);
+            subscriptionDescriptorFileValidator.validate(absolutePath);
 
             final ObjectMapper mapper = new ObjectMapper(new YAMLFactory())
                     .registerModule(new Jdk8Module())
@@ -36,13 +36,13 @@ public class SubscriptionDescriptorParser {
 
             mapper.setPropertyNamingStrategy(PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
 
-            return mapper.readValue(filePath.toFile(), SubscriptionDescriptorDef.class).getSubscriptionDescriptor();
+            return mapper.readValue(absolutePath.toFile(), SubscriptionDescriptorDef.class).getSubscriptionDescriptor();
         } catch (final NoSuchFileException e) {
-            throw new SubscriptionDescriptorException(format("No such subscriptions YAML file %s ", filePath), e);
+            throw new SubscriptionDescriptorException(format("No such subscriptions YAML file %s ", absolutePath), e);
         } catch (final ValidationException e) {
-            throw new SubscriptionDescriptorException(format("Failed to validate subscriptions yaml file %s ", filePath), e);
+            throw new SubscriptionDescriptorException(format("Failed to validate subscriptions yaml file %s ", absolutePath), e);
         } catch (final IOException e) {
-            throw new SubscriptionDescriptorException(format("Failed to read subscriptions yaml file %s ", filePath), e);
+            throw new SubscriptionDescriptorException(format("Failed to read subscriptions yaml file %s ", absolutePath), e);
         }
     }
 }

@@ -12,9 +12,6 @@ import static uk.gov.justice.subscription.jms.core.ClassNameFactory.JMS_LISTENER
 import static uk.gov.justice.subscription.jms.core.JmsEndPointGeneratorUtil.shouldGenerateEventFilter;
 import static uk.gov.justice.subscription.jms.core.JmsEndPointGeneratorUtil.shouldListenToAllMessages;
 
-import uk.gov.justice.domain.subscriptiondescriptor.Event;
-import uk.gov.justice.domain.subscriptiondescriptor.Subscription;
-import uk.gov.justice.domain.subscriptiondescriptor.SubscriptionDescriptor;
 import uk.gov.justice.services.adapter.messaging.JmsLoggerMetadataInterceptor;
 import uk.gov.justice.services.adapter.messaging.JmsProcessor;
 import uk.gov.justice.services.adapter.messaging.JsonSchemaValidationInterceptor;
@@ -22,6 +19,9 @@ import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
 import uk.gov.justice.services.messaging.logging.LoggerUtils;
+import uk.gov.justice.subscription.domain.Event;
+import uk.gov.justice.subscription.domain.Subscription;
+import uk.gov.justice.subscription.domain.SubscriptionDescriptor;
 
 import java.util.List;
 

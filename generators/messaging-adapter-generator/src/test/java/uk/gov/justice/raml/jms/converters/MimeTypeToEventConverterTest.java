@@ -8,9 +8,9 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import uk.gov.justice.domain.subscriptiondescriptor.Event;
 import uk.gov.justice.services.generators.commons.mapping.SchemaIdParser;
 import uk.gov.justice.services.generators.commons.mapping.SchemaParsingException;
+import uk.gov.justice.subscription.domain.Event;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

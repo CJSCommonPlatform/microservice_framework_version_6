@@ -6,9 +6,9 @@ import static java.util.stream.Collectors.joining;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static uk.gov.justice.subscription.jms.core.ClassNameFactory.EVENT_FILTER;
 
-import uk.gov.justice.domain.subscriptiondescriptor.Event;
-import uk.gov.justice.domain.subscriptiondescriptor.Subscription;
 import uk.gov.justice.services.event.buffer.api.AbstractEventFilter;
+import uk.gov.justice.subscription.domain.Event;
+import uk.gov.justice.subscription.domain.Subscription;
 
 import javax.enterprise.context.ApplicationScoped;
 

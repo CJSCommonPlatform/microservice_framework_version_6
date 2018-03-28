@@ -1,11 +1,11 @@
 package uk.gov.justice.raml.jms.core;
 
-import uk.gov.justice.domain.subscriptiondescriptor.SubscriptionDescriptorDef;
 import uk.gov.justice.maven.generator.io.files.parser.core.Generator;
 import uk.gov.justice.maven.generator.io.files.parser.core.GeneratorConfig;
 import uk.gov.justice.raml.jms.converters.RamlToJmsSubscriptionConverter;
 import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
 import uk.gov.justice.services.generators.commons.validator.RamlValidator;
+import uk.gov.justice.subscription.domain.SubscriptionDescriptorDef;
 import uk.gov.justice.subscription.jms.core.SubscriptionJmsEndpointGenerator;
 
 import org.raml.model.Raml;

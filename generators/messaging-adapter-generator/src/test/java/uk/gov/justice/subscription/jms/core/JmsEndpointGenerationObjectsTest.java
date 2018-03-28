@@ -1,28 +1,9 @@
 package uk.gov.justice.subscription.jms.core;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.*;
-
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.when;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.*;
 
 import uk.gov.justice.raml.jms.converters.EventNameExtractor;
 import uk.gov.justice.raml.jms.converters.JmsUriGenerator;
@@ -41,12 +22,16 @@ import uk.gov.justice.services.generators.commons.validator.ContainsActionsRamlV
 import uk.gov.justice.services.generators.commons.validator.ContainsResourcesRamlValidator;
 import uk.gov.justice.services.generators.commons.validator.RamlValidator;
 import uk.gov.justice.services.generators.commons.validator.RequestContentTypeRamlValidator;
-import uk.gov.justice.subscription.jms.core.SubscriptionJmsEndpointGenerator;
 import uk.gov.justice.subscription.jms.interceptor.EventFilterInterceptorCodeGenerator;
 import uk.gov.justice.subscription.jms.interceptor.EventListenerInterceptorChainProviderCodeGenerator;
 import uk.gov.justice.subscription.jms.interceptor.EventValidationInterceptorCodeGenerator;
 
 import java.lang.reflect.Field;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.runners.MockitoJUnitRunner;
 
 
 @RunWith(MockitoJUnitRunner.class)

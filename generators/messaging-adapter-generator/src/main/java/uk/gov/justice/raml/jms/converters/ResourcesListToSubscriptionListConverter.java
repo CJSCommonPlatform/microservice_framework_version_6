@@ -3,7 +3,7 @@ package uk.gov.justice.raml.jms.converters;
 import static java.util.stream.Collectors.toList;
 import static org.raml.model.ActionType.POST;
 
-import uk.gov.justice.domain.subscriptiondescriptor.Subscription;
+import uk.gov.justice.subscription.domain.Subscription;
 
 import java.util.Collection;
 import java.util.List;

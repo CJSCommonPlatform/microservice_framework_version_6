@@ -2,7 +2,7 @@ package uk.gov.justice.subscription.jms.core;
 
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
-import uk.gov.justice.domain.subscriptiondescriptor.Event;
+import uk.gov.justice.subscription.domain.Event;
 
 import java.util.List;
 

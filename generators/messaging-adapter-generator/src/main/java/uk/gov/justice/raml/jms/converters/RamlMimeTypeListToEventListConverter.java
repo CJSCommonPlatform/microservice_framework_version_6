@@ -4,7 +4,7 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
-import uk.gov.justice.domain.subscriptiondescriptor.Event;
+import uk.gov.justice.subscription.domain.Event;
 
 import java.util.Collection;
 import java.util.List;

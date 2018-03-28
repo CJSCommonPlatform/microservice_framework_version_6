@@ -1,17 +1,16 @@
 package uk.gov.justice.subscription.jms.core;
 
-
 import static java.util.stream.Collectors.toList;
 import static uk.gov.justice.services.generators.commons.helper.GeneratedClassWriter.writeClass;
 import static uk.gov.justice.subscription.jms.core.JmsEndPointGeneratorUtil.shouldGenerateEventFilter;
 
-import uk.gov.justice.domain.subscriptiondescriptor.Event;
-import uk.gov.justice.domain.subscriptiondescriptor.Subscription;
-import uk.gov.justice.domain.subscriptiondescriptor.SubscriptionDescriptor;
 import uk.gov.justice.maven.generator.io.files.parser.core.Generator;
 import uk.gov.justice.maven.generator.io.files.parser.core.GeneratorConfig;
 import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
 import uk.gov.justice.services.generators.commons.mapping.SubscriptionMediaTypeToSchemaIdGenerator;
+import uk.gov.justice.subscription.domain.Event;
+import uk.gov.justice.subscription.domain.Subscription;
+import uk.gov.justice.subscription.domain.SubscriptionDescriptor;
 import uk.gov.justice.subscription.jms.interceptor.EventFilterInterceptorCodeGenerator;
 import uk.gov.justice.subscription.jms.interceptor.EventListenerInterceptorChainProviderCodeGenerator;
 import uk.gov.justice.subscription.jms.interceptor.EventValidationInterceptorCodeGenerator;

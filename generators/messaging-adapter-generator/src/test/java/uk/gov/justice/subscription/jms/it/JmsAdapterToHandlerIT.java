@@ -2,12 +2,12 @@ package uk.gov.justice.subscription.jms.it;
 
 import static com.jayway.awaitility.Awaitility.await;
 import static javax.json.Json.createObjectBuilder;
-import static junit.framework.TestCase.assertTrue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 import static uk.gov.justice.services.messaging.jms.HeaderConstants.JMS_HEADER_CPPNAME;
 

@@ -6,10 +6,10 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
-import uk.gov.justice.domain.subscriptiondescriptor.Event;
 import uk.gov.justice.services.core.annotation.SchemaIdMapper;
 import uk.gov.justice.services.core.mapping.MediaType;
 import uk.gov.justice.services.core.mapping.MediaTypeToSchemaIdMapper;
+import uk.gov.justice.subscription.domain.Event;
 
 import java.util.HashMap;
 import java.util.List;

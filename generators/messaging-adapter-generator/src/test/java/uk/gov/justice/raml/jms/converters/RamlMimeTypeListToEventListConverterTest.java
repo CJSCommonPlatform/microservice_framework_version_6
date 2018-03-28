@@ -6,7 +6,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import uk.gov.justice.domain.subscriptiondescriptor.Event;
+import uk.gov.justice.subscription.domain.Event;
 
 import java.util.List;
 

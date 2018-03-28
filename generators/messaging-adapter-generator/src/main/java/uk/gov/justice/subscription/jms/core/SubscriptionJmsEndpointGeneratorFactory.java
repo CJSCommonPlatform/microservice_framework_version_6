@@ -1,7 +1,7 @@
 package uk.gov.justice.subscription.jms.core;
 
-import uk.gov.justice.domain.subscriptiondescriptor.SubscriptionDescriptor;
 import uk.gov.justice.maven.generator.io.files.parser.core.GeneratorFactory;
+import uk.gov.justice.subscription.domain.SubscriptionDescriptor;
 
 public class SubscriptionJmsEndpointGeneratorFactory implements GeneratorFactory<SubscriptionDescriptor> {
 

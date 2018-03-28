@@ -1,5 +1,6 @@
 package uk.gov.justice.subscription.jms.core;
 
+import static java.nio.file.Files.write;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -20,11 +21,6 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static uk.gov.justice.domain.EventBuilder.event;
-import static uk.gov.justice.domain.EventsourceBuilder.eventsource;
-import static uk.gov.justice.domain.LocationBuilder.location;
-import static uk.gov.justice.domain.SubscriptionBuilder.subscription;
-import static uk.gov.justice.domain.SubscriptionDescriptorBuilder.subscriptionDescriptor;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLLER;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
@@ -33,10 +29,12 @@ import static uk.gov.justice.services.core.interceptor.DefaultInterceptorContext
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.methodsOf;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
+import static uk.gov.justice.subscription.domain.builders.EventBuilder.event;
+import static uk.gov.justice.subscription.domain.builders.EventsourceBuilder.eventsource;
+import static uk.gov.justice.subscription.domain.builders.LocationBuilder.location;
+import static uk.gov.justice.subscription.domain.builders.SubscriptionBuilder.subscription;
+import static uk.gov.justice.subscription.domain.builders.SubscriptionDescriptorBuilder.subscriptionDescriptor;
 
-import uk.gov.justice.domain.subscriptiondescriptor.Event;
-import uk.gov.justice.domain.subscriptiondescriptor.Subscription;
-import uk.gov.justice.domain.subscriptiondescriptor.SubscriptionDescriptor;
 import uk.gov.justice.maven.generator.io.files.parser.core.Generator;
 import uk.gov.justice.maven.generator.io.files.parser.core.GeneratorProperties;
 import uk.gov.justice.raml.jms.config.GeneratorPropertiesFactory;
@@ -49,6 +47,9 @@ import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil;
+import uk.gov.justice.subscription.domain.Event;
+import uk.gov.justice.subscription.domain.Subscription;
+import uk.gov.justice.subscription.domain.SubscriptionDescriptor;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -196,7 +197,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
         String path = outputFolder.getRoot().getAbsolutePath() + BASE_PACKAGE_FOLDER;
         File packageDir = new File(path);
         packageDir.mkdirs();
-        Files.write(Paths.get(path + "/StructureControllerCommandJmsListener.java"),
+        write(Paths.get(path + "/StructureControllerCommandJmsListener.java"),
                 Collections.singletonList("Old file content"));
         SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.controller.command", "my-context.events.something-happened",serviceName,  componentName);
 

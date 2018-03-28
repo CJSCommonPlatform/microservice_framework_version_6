@@ -7,17 +7,17 @@ import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.raml.model.ActionType.POST;
-import static uk.gov.justice.domain.EventBuilder.event;
-import static uk.gov.justice.domain.EventsourceBuilder.eventsource;
-import static uk.gov.justice.domain.LocationBuilder.location;
-import static uk.gov.justice.domain.SubscriptionBuilder.subscription;
-import static uk.gov.justice.domain.SubscriptionDescriptorBuilder.subscriptionDescriptor;
-import static uk.gov.justice.domain.SubscriptionDescriptorDefBuilder.subscriptionDescriptorDef;
+import static uk.gov.justice.subscription.domain.builders.EventBuilder.event;
+import static uk.gov.justice.subscription.domain.builders.EventsourceBuilder.eventsource;
+import static uk.gov.justice.subscription.domain.builders.LocationBuilder.location;
+import static uk.gov.justice.subscription.domain.builders.SubscriptionBuilder.subscription;
+import static uk.gov.justice.subscription.domain.builders.SubscriptionDescriptorBuilder.subscriptionDescriptor;
+import static uk.gov.justice.subscription.domain.builders.SubscriptionDescriptorDefBuilder.subscriptionDescriptorDef;
 
-import uk.gov.justice.domain.subscriptiondescriptor.Event;
-import uk.gov.justice.domain.subscriptiondescriptor.Subscription;
-import uk.gov.justice.domain.subscriptiondescriptor.SubscriptionDescriptor;
-import uk.gov.justice.domain.subscriptiondescriptor.SubscriptionDescriptorDef;
+import uk.gov.justice.subscription.domain.Event;
+import uk.gov.justice.subscription.domain.Subscription;
+import uk.gov.justice.subscription.domain.SubscriptionDescriptor;
+import uk.gov.justice.subscription.domain.SubscriptionDescriptorDef;
 
 import java.util.HashMap;
 

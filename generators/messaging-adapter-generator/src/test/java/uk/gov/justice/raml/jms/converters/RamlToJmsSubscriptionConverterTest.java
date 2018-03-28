@@ -8,9 +8,9 @@ import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import uk.gov.justice.domain.subscriptiondescriptor.Subscription;
-import uk.gov.justice.domain.subscriptiondescriptor.SubscriptionDescriptor;
-import uk.gov.justice.domain.subscriptiondescriptor.SubscriptionDescriptorDef;
+import uk.gov.justice.subscription.domain.Subscription;
+import uk.gov.justice.subscription.domain.SubscriptionDescriptor;
+import uk.gov.justice.subscription.domain.SubscriptionDescriptorDef;
 
 import java.util.List;
 

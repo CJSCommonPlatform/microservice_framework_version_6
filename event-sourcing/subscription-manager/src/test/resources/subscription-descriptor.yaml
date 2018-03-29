@@ -1,21 +1,21 @@
 ---
 subscription_descriptor:
   spec_version: 1.0.0
-  service: exampleContext
+  service: examplecontext
   service_component: EVENT_LISTENER
   subscriptions:
-    - name: subscription_1
+    - name: subscription1
       events:
         - name: example.recipe-added
           schema_uri: http://justice.gov.uk/json/schemas/domains/example/example.recipe-added.json
         - name: example.recipe-deleted
           schema_uri: http://justice.gov.uk/json/schemas/domains/example/example.recipe-deleted.json
       eventsource:
-        name: exampleContextEventSource
+        name: examplecontext
         location:
           jms_uri:  jms:topic:example.event
           rest_uri: http://localhost:8080/example/event-source-api/rest
-    - name: subscription_2
+    - name: subscription2
       events:
         - name: people.person-added
           schema_uri: http://justice.gov.uk/json/schemas/domains/people/people.person-added.json

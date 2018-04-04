@@ -30,7 +30,7 @@ public class SubscriptionManagerProducerTest {
     private SubscriptionDescriptorRegistry subscriptionDescriptorRegistry;
 
     @Mock
-    private SubscriptionNameAnnotationExtractor subscriptionNameAnnotationExtractor;
+    private QualifierAnnotationExtractor qualifierAnnotationExtractor;
 
     @InjectMocks
     private SubscriptionManagerProducer subscriptionManagerProducer;
@@ -44,7 +44,7 @@ public class SubscriptionManagerProducerTest {
         final EventSource eventSource = mock(EventSource.class);
         final Subscription subscription = mock(Subscription.class);
 
-        when(subscriptionNameAnnotationExtractor.getFrom(injectionPoint)).thenReturn(subscriptionName);
+        when(qualifierAnnotationExtractor.getFrom(injectionPoint, SubscriptionName.class)).thenReturn(subscriptionName);
         when(eventsourceInstance.select(subscriptionName).get()).thenReturn(eventSource);
         when(subscriptionDescriptorRegistry.getSubscription(subscriptionName.value())).thenReturn(subscription);
 
@@ -61,7 +61,7 @@ public class SubscriptionManagerProducerTest {
 
         final SubscriptionName subscriptionName = mock(SubscriptionName.class);
 
-        when(subscriptionNameAnnotationExtractor.getFrom(injectionPoint)).thenReturn(subscriptionName);
+        when(qualifierAnnotationExtractor.getFrom(injectionPoint, SubscriptionName.class)).thenReturn(subscriptionName);
         when(eventsourceInstance.select(subscriptionName)).thenReturn(null);
         when(subscriptionName.value()).thenReturn("my-subscription");
 

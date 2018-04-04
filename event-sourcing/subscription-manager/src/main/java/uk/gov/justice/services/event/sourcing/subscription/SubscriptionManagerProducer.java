@@ -7,6 +7,7 @@ import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.subscription.domain.Subscription;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -16,18 +17,19 @@ import javax.inject.Inject;
 public class SubscriptionManagerProducer {
 
     @Inject
+    @Any
     Instance<EventSource> eventsourceInstance;
-
+    
     @Inject
     SubscriptionDescriptorRegistry subscriptionDescriptorRegistry;
 
     @Inject
-    SubscriptionNameAnnotationExtractor subscriptionNameAnnotationExtractor;
+    QualifierAnnotationExtractor qualifierAnnotationExtractor;
 
     @Produces
     public SubscriptionManager subscriptionManager(final InjectionPoint injectionPoint) {
 
-        final SubscriptionName subscriptionName = subscriptionNameAnnotationExtractor.getFrom(injectionPoint);
+        final SubscriptionName subscriptionName = qualifierAnnotationExtractor.getFrom(injectionPoint, SubscriptionName.class);
 
         final Instance<EventSource> eventSourceInstance = eventsourceInstance.select(subscriptionName);
 

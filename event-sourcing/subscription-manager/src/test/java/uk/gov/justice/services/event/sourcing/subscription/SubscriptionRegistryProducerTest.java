@@ -55,7 +55,7 @@ public class SubscriptionRegistryProducerTest {
                 mock(InjectionPoint.class)
         );
 
-        assertThat(subscriptionDescriptorRegistry.getSubscriptionFor(service_1), is(of(subscriptionDescriptor_1)));
-        assertThat(subscriptionDescriptorRegistry.getSubscriptionFor(service_2), is(of(subscriptionDescriptor_2)));
+        assertThat(subscriptionDescriptorRegistry.getSubscriptionDescriptorFor(service_1), is(of(subscriptionDescriptor_1)));
+        assertThat(subscriptionDescriptorRegistry.getSubscriptionDescriptorFor(service_2), is(of(subscriptionDescriptor_2)));
     }
 }

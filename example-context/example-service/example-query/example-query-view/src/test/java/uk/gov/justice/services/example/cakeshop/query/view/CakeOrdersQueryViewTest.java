@@ -45,7 +45,7 @@ public class CakeOrdersQueryViewTest {
     }
 
     @Test
-    public void shouldReturnOrder() {
+    public void shouldReturnPojoOrder() {
 
         final UUID orderId = UUID.randomUUID();
         final UUID recipeId = UUID.randomUUID();

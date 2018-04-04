@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.test.utils.core.matchers.EmptyStreamMatcher.isEmptyStream;
 
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
+import uk.gov.justice.services.eventsourcing.source.core.Tolerance;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
@@ -103,6 +104,7 @@ public class EventStreamMatcher extends TypeSafeDiagnosingMatcher<EventStream> {
     private Optional<JsonEnvelopeStreamMatcher> jsonEnvelopeStreamMatcher = Optional.empty();
     private Optional<EmptyStreamMatcher> emptyStreamMatcher = Optional.empty();
     private Optional<Long> version = Optional.empty();
+    private Optional<Tolerance> tolerance = Optional.empty();
 
     public static EventStreamMatcher eventStreamAppendedWith(final JsonEnvelopeStreamMatcher jsonEnvelopeStreamMatcher) {
         return new EventStreamMatcher().with(jsonEnvelopeStreamMatcher);
@@ -143,6 +145,8 @@ public class EventStreamMatcher extends TypeSafeDiagnosingMatcher<EventStream> {
 
             if (version.isPresent()) {
                 verify(eventStream).appendAfter(argumentCaptor.capture(), eq(version.get()));
+            } else if (tolerance.isPresent()) {
+                verify(eventStream).append(argumentCaptor.capture(), eq(tolerance.get()));
             } else {
                 verify(eventStream).append(argumentCaptor.capture());
             }
@@ -176,6 +180,11 @@ public class EventStreamMatcher extends TypeSafeDiagnosingMatcher<EventStream> {
 
     private EventStreamMatcher afterVersion(final Long version) {
         this.version = Optional.of(version);
+        return this;
+    }
+
+    public EventStreamMatcher withToleranceOf(final Tolerance tolerance) {
+        this.tolerance = Optional.of(tolerance);
         return this;
     }
 }

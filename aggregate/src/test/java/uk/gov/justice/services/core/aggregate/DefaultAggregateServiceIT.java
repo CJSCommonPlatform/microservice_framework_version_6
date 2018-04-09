@@ -39,6 +39,8 @@ import uk.gov.justice.services.eventsourcing.source.core.DefaultEventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EnvelopeEventStream;
 import uk.gov.justice.services.eventsourcing.source.core.EventAppender;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
+import uk.gov.justice.services.eventsourcing.source.core.EventSourceNameExtractor;
+import uk.gov.justice.services.eventsourcing.source.core.EventSourceProducer;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.EventStreamManager;
 import uk.gov.justice.services.eventsourcing.source.core.PublishingEventAppender;
@@ -140,7 +142,10 @@ public class DefaultAggregateServiceIT {
 
             GlobalValueProducer.class,
 
-            DefaultFileSystemUrlResolverStrategy.class
+            DefaultFileSystemUrlResolverStrategy.class,
+
+            EventSourceProducer.class,
+            EventSourceNameExtractor.class
 
     })
     public WebApp war() {

@@ -55,6 +55,8 @@ import uk.gov.justice.services.eventsourcing.source.api.util.TestSystemUserProvi
 import uk.gov.justice.services.eventsourcing.source.core.DefaultEventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventAppender;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
+import uk.gov.justice.services.eventsourcing.source.core.EventSourceNameExtractor;
+import uk.gov.justice.services.eventsourcing.source.core.EventSourceProducer;
 import uk.gov.justice.services.eventsourcing.source.core.EventStreamManager;
 import uk.gov.justice.services.eventsourcing.source.core.PublishingEventAppender;
 import uk.gov.justice.services.eventsourcing.source.core.SystemEventService;
@@ -199,7 +201,10 @@ public class EventsPageIT {
             DefaultTraceLogger.class,
             DefaultEnvelopeConverter.class,
             JsonObjectToObjectConverter.class,
-            ObjectToJsonObjectConverter.class
+            ObjectToJsonObjectConverter.class,
+
+            EventSourceProducer.class,
+            EventSourceNameExtractor.class
     })
 
     public WebApp war() {

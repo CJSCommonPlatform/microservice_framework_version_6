@@ -8,13 +8,13 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Vetoed;
 import javax.inject.Inject;
 
 /**
  * Source of event streams.
  */
-@ApplicationScoped
+@Vetoed
 public class DefaultEventSource implements EventSource {
 
     @Inject

@@ -6,7 +6,7 @@ import uk.gov.justice.subscription.jms.core.JmsEndpointGenerationObjects;
 import com.google.common.annotations.VisibleForTesting;
 import org.raml.model.Raml;
 
-public class JmsEndpointGeneratorFactory implements GeneratorFactory<Raml>  {
+public class JmsEndpointGeneratorFactory implements GeneratorFactory<Raml> {
 
     private final JmsEndpointGenerationObjects jmsEndpointGenerationObjects;
 

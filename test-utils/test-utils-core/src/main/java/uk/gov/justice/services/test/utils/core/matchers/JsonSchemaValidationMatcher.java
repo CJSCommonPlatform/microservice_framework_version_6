@@ -1,236 +1,189 @@
 package uk.gov.justice.services.test.utils.core.matchers;
 
-import static com.google.common.base.Charsets.UTF_8;
-import static com.google.common.collect.Lists.newArrayList;
-import static java.lang.String.format;
-import static org.hamcrest.core.IsNot.not;
+import static uk.gov.justice.schema.catalog.test.utils.SchemaCatalogResolver.schemaCatalogResolver;
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Random;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
-import org.everit.json.schema.loader.SchemaLoader;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.hamcrest.TypeSafeMatcher;
+import org.hamcrest.core.IsNot;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
 
 public class JsonSchemaValidationMatcher {
 
     private static final Random random = new Random();
     private static final String JSON_SCHEMA_TEMPLATE = "json/schema/%s.json";
-    private static final String RAML_JSON_SCHEMA_TEMPLATE = "raml/" + JSON_SCHEMA_TEMPLATE;
+    private static final String RAML_JSON_SCHEMA_TEMPLATE = "raml/json/schema/%s.json";
+    private static final String VALIDATION_ERROR = " to fail validation against schema ";
+    private static final String VALIDTAE_SCHEMA = " to validate against schema ";
+    private static final String JSON_FILE = "json file ";
+    private static final String VALIDATION_SUCCESS = "validation passed";
 
-    /**
-     * Matcher to validate json content against a schema
-     *
-     * @param pathToJsonSchema path to json schema
-     * @return matcher
-     */
+
     public static Matcher<String> isValidForSchema(final String pathToJsonSchema) {
-
         return new TypeSafeMatcher<String>() {
+
             private String pathToJsonFile;
-            private Exception exception = null;
+            private ValidationException exception = null;
 
             @Override
             protected boolean matchesSafely(final String pathToJsonFile) {
                 this.pathToJsonFile = pathToJsonFile;
+
                 try {
                     getJsonSchemaFor(pathToJsonSchema).validate(getJsonObjectFor(pathToJsonFile));
-                } catch (final ValidationException e) {
-                    exception = e;
+                    return true;
+                } catch (ValidationException var3) {
+                    this.exception = var3;
                     return false;
-                } catch (final IOException e) {
-                    throw new IllegalArgumentException(e);
+                } catch (IOException var4) {
+                    throw new IllegalArgumentException(var4);
                 }
-                return true;
             }
 
             @Override
             public void describeTo(final Description description) {
-                description.appendText("json file ").appendValue(pathToJsonFile)
-                        .appendText(" to validate against schema ").appendValue(pathToJsonSchema);
+                description.appendText(JSON_FILE).appendValue(this.pathToJsonFile).appendText(VALIDTAE_SCHEMA).appendValue(pathToJsonSchema);
             }
 
             @Override
             protected void describeMismatchSafely(final String pathToJsonFile, final Description mismatchDescription) {
-                mismatchDescription.appendText("validation failed with message ").appendValue(exception.getMessage());
+                mismatchDescription.appendText("validation failed with message ").appendValue(this.exception.toJSON());
             }
         };
     }
 
-    /**
-     * Validates a JsonEnvelope against the correct schema for the action name provided in the
-     * metadata. Expects to find the schema on the class path in package
-     * 'json/schema/{action.name}.json' or 'raml/json/schema/{action.name}.json'.
-     *
-     * @return matcher
-     */
     public static Matcher<JsonEnvelope> isValidJsonEnvelopeForSchema() {
-
         return new TypeSafeDiagnosingMatcher<JsonEnvelope>() {
             private ValidationException validationException = null;
 
             @Override
             protected boolean matchesSafely(final JsonEnvelope jsonEnvelope, final Description description) {
-
-                if (null == validationException) {
-
+                if (null == this.validationException) {
                     try {
-                        final String pathToJsonSchema = format(JSON_SCHEMA_TEMPLATE, jsonEnvelope.metadata().name());
-                        getJsonSchemaFor(pathToJsonSchema).validate(new JSONObject(jsonEnvelope.payloadAsJsonObject().toString()));
-                    } catch (final IllegalArgumentException | IOException e) {
+                        String e = String.format(JSON_SCHEMA_TEMPLATE, jsonEnvelope.metadata().name());
+                        getJsonSchemaFor(e).validate(new JSONObject(jsonEnvelope.payloadAsJsonObject().toString()));
+                    } catch (IOException | IllegalArgumentException var6) {
                         try {
-                            final String pathToJsonSchema = format(RAML_JSON_SCHEMA_TEMPLATE, jsonEnvelope.metadata().name());
-                            getJsonSchemaFor(pathToJsonSchema).validate(new JSONObject(jsonEnvelope.payloadAsJsonObject().toString()));
-                        } catch (final IOException ioe) {
-                            throw new IllegalArgumentException(ioe);
+                            String ioe = String.format(RAML_JSON_SCHEMA_TEMPLATE, jsonEnvelope.metadata().name());
+                            getJsonSchemaFor(ioe).validate(new JSONObject(jsonEnvelope.payloadAsJsonObject().toString()));
+                        } catch (IOException var5) {
+                            throw new IllegalArgumentException(var5);
                         }
-                    } catch (final ValidationException e) {
-                        validationException = e;
+                    } catch (ValidationException var7) {
+                        this.validationException = var7;
                         return false;
                     }
 
                     return true;
                 } else {
-                    description
-                            .appendText("Schema validation failed with message: ")
-                            .appendValue(validationException.getMessage());
+                    description.appendText("Schema validation failed with message: ").appendValue(this.validationException.getMessage());
                     return false;
                 }
-
             }
 
             @Override
             public void describeTo(final Description description) {
-                description.appendText("JsonEnvelope validated against schema found on classpath at 'raml/json/schema/' ");
+                description.appendText("JsonEnvelope validated against schema found on classpath at \'raml/json/schema/\' ");
             }
         };
     }
 
-    /**
-     * Matcher to validate json content against a schema
-     *
-     * @param pathToJsonSchema path to json schema
-     * @return matcher
-     */
     public static Matcher<String> isNotValidForSchema(final String pathToJsonSchema) {
-        return not(isValidForSchema(pathToJsonSchema));
+        return IsNot.not(isValidForSchema(pathToJsonSchema));
     }
 
-    /**
-     * Matcher to validate json content and failure message against a schema
-     *
-     * @param pathToJsonSchema path to json schema
-     * @param errorMessage     expected error message
-     * @return matcher
-     */
     public static Matcher<String> failsValidationWithMessage(final String pathToJsonSchema, final String errorMessage) {
-
         return new TypeSafeMatcher<String>() {
             private String pathToJsonFile;
-            private Exception exception = null;
+            private ValidationException exception = null;
 
             @Override
             protected boolean matchesSafely(final String pathToJsonFile) {
                 this.pathToJsonFile = pathToJsonFile;
+
                 try {
                     getJsonSchemaFor(pathToJsonSchema).validate(getJsonObjectFor(pathToJsonFile));
-                } catch (final ValidationException e) {
-                    exception = e;
-                    return e.getMessage().equals(errorMessage);
-                } catch (final IOException e) {
-                    throw new IllegalArgumentException(e);
+                    return false;
+                } catch (final ValidationException validationException) {
+                    this.exception = validationException;
+                    return validationException.getMessage().equals(errorMessage);
+                } catch (final IOException ioException) {
+                    throw new IllegalArgumentException(ioException);
                 }
-                return false;
             }
 
             @Override
             public void describeTo(final Description description) {
-                if (exception == null) {
-                    description.appendText("json file ").appendValue(pathToJsonFile)
-                            .appendText(" to fail validation against schema ").appendValue(pathToJsonSchema);
+                if (this.exception == null) {
+                    description.appendText(JSON_FILE).appendValue(this.pathToJsonFile).appendText(VALIDATION_ERROR).appendValue(pathToJsonSchema);
                 } else {
-                    description.appendText("json file ").appendValue(pathToJsonFile)
-                            .appendText(" to fail validation against schema ").appendValue(pathToJsonSchema)
-                            .appendText(" with message ").appendValue(errorMessage);
+                    description.appendText(JSON_FILE).appendValue(this.pathToJsonFile).appendText(VALIDATION_ERROR).appendValue(pathToJsonSchema).appendText(" with message ").appendValue(errorMessage);
                 }
+
             }
 
             @Override
             protected void describeMismatchSafely(final String pathToJsonFile, final Description mismatchDescription) {
-                if (exception == null) {
-                    mismatchDescription.appendText("validation passed");
+                if (this.exception == null) {
+                    mismatchDescription.appendText(VALIDATION_SUCCESS);
                 } else {
-                    mismatchDescription.appendText("validation failed with message ").appendValue(exception.getMessage());
+                    mismatchDescription.appendText("validation failed with message ").appendValue(this.exception.toJSON());
                 }
+
             }
         };
     }
 
-    /**
-     * Matcher to validate json content after a field is been removed randomly. By default the field
-     * would be removed from the root of the json.
-     *
-     * @param pathToJsonSchema path to json schema
-     * @return matcher
-     */
     public static Matcher<String> failsValidationForAnyMissingField(final String pathToJsonSchema) {
-        return failsValidationForAnyMissingField(pathToJsonSchema, null);
+        return failsValidationForAnyMissingField(pathToJsonSchema, (String) null);
     }
 
-    /**
-     * Matcher to validate json content after a field is been removed randomly. XPath to parent
-     * field would be used as a reference, from where one of the child field will be removed and
-     * validated against the schema.
-     * Note: Implementation is limited to removal of json objects
-     *
-     * @param pathToJsonSchema path to json schema
-     * @param xpathToParent    slash separated path to parent field. Null or empty to point to
-     *                         root.
-     * @return matcher
-     */
     public static Matcher<String> failsValidationForAnyMissingField(final String pathToJsonSchema, final String xpathToParent) {
-
         return new TypeSafeMatcher<String>() {
+
             private String pathToJsonFile;
 
             @Override
             protected boolean matchesSafely(final String pathToJsonFile) {
                 this.pathToJsonFile = pathToJsonFile;
+
                 try {
                     getJsonSchemaFor(pathToJsonSchema).validate(getJsonObjectWithAMissingField(pathToJsonFile, xpathToParent));
-                } catch (final ValidationException e) {
+                    return false;
+                } catch (ValidationException var3) {
                     return true;
-                } catch (final IOException e) {
-                    throw new IllegalArgumentException(e);
+                } catch (IOException var4) {
+                    throw new IllegalArgumentException(var4);
                 }
-                return false;
             }
 
             @Override
             public void describeTo(final Description description) {
-                description.appendText("json file ").appendValue(pathToJsonFile)
-                        .appendText(" to fail validation against schema ").appendValue(pathToJsonSchema);
+                description.appendText(JSON_FILE).appendValue(this.pathToJsonFile).appendText(VALIDATION_ERROR).appendValue(pathToJsonSchema);
             }
 
             @Override
             protected void describeMismatchSafely(final String pathToJsonFile, final Description mismatchDescription) {
-                mismatchDescription.appendText("validation passed");
+                mismatchDescription.appendText(VALIDATION_SUCCESS);
             }
         };
     }
@@ -240,33 +193,32 @@ public class JsonSchemaValidationMatcher {
     }
 
     private static Schema getJsonSchemaFor(final String pathToJsonSchema) throws IOException {
-        final String jsonSchema = getJsonContentFrom(pathToJsonSchema);
-        final JSONObject rawSchema = new JSONObject(new JSONTokener(jsonSchema));
-        return SchemaLoader.load(rawSchema);
+        return schemaCatalogResolver().loadSchema(getJsonContentFrom(pathToJsonSchema));
     }
 
     private static String getJsonContentFrom(final String pathToJsonSchema) throws IOException {
-        final String jsonContent;
-        if (Paths.get(pathToJsonSchema).isAbsolute()) {
-            jsonContent = Files.toString(new File(pathToJsonSchema), UTF_8);
+        String jsonContent;
+        if (Paths.get(pathToJsonSchema, "").isAbsolute()) {
+            jsonContent = Files.toString(new File(pathToJsonSchema), Charsets.UTF_8);
         } else {
-            jsonContent = Resources.toString(Resources.getResource(pathToJsonSchema), UTF_8);
+            jsonContent = Resources.toString(Resources.getResource(pathToJsonSchema), Charsets.UTF_8);
         }
+
         return jsonContent;
     }
 
     private static JSONObject getJsonObjectWithAMissingField(final String pathToJsonFile, final String xpathToParent) throws IOException {
         final JSONObject jsonObject = getJsonObjectFor(pathToJsonFile);
-
         JSONObject parentJsonObject = jsonObject;
+        String key;
         if (!Strings.isNullOrEmpty(xpathToParent)) {
-            for (String key : Splitter.onPattern("/").omitEmptyStrings().split(xpathToParent)) {
-                parentJsonObject = (JSONObject) parentJsonObject.get(key);
+            for (Iterator keysAsArray = Splitter.onPattern("/").omitEmptyStrings().split(xpathToParent).iterator(); keysAsArray.hasNext(); parentJsonObject = (JSONObject) parentJsonObject.get(key)) {
+                key = (String) keysAsArray.next();
             }
         }
 
-        final List<String> keysAsArray = newArrayList(parentJsonObject.keySet());
-        parentJsonObject.remove(keysAsArray.get(random.nextInt(keysAsArray.size())));
+        final ArrayList keysAsArray1 = Lists.newArrayList(parentJsonObject.keySet());
+        parentJsonObject.remove((String) keysAsArray1.get(random.nextInt(keysAsArray1.size())));
         return jsonObject;
     }
 }

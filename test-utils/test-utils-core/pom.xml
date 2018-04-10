@@ -116,6 +116,11 @@
             <artifactId>hamcrest-matchers</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.schema</groupId>
+            <artifactId>catalog-test-utils</artifactId>
+            <version>${json-schema-catalog.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

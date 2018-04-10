@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/core/data-types.json",
+  "definitions": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    },
+    "dateTime": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

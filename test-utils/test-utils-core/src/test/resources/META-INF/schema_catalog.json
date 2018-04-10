@@ -2,11 +2,16 @@
   "name": "test catalog",
   "groups": [
     {
-      "name": "test",
+      "baseLocation": "json/schema/",
+      "name": "testName",
       "schemas": [
         {
           "id": "http://justice.gov.uk/schemas/test/example.get-recipe.json",
           "location": "example.get-recipe.json"
+        },
+        {
+          "id": "http://justice.gov.uk/json/schemas/core/data-types.json",
+          "location": "data-types.json"
         }
       ]
     }

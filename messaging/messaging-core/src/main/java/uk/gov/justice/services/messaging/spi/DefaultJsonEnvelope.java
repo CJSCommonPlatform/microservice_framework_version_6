@@ -4,6 +4,7 @@ import static uk.gov.justice.services.common.converter.JSONObjectValueObfuscator
 import static uk.gov.justice.services.messaging.JsonEnvelopeWriter.writeJsonObject;
 import static uk.gov.justice.services.messaging.JsonMetadata.CORRELATION;
 import static uk.gov.justice.services.messaging.JsonMetadata.SESSION_ID;
+import static uk.gov.justice.services.messaging.JsonMetadata.SOURCE;
 import static uk.gov.justice.services.messaging.JsonMetadata.USER_ID;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 
@@ -84,6 +85,7 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
             metadata.clientCorrelationId().ifPresent(s -> builder.add(CORRELATION, s));
             metadata.sessionId().ifPresent(s -> builder.add(SESSION_ID, s));
             metadata.userId().ifPresent(s -> builder.add(USER_ID, s));
+            metadata.source().ifPresent(s -> builder.add(SOURCE, s));
 
             final JsonArrayBuilder causationBuilder = Json.createArrayBuilder();
 

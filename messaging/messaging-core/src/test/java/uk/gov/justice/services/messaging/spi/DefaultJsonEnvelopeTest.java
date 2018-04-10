@@ -86,33 +86,37 @@ public class DefaultJsonEnvelopeTest {
     public void shouldPrettyPrintAsJsonWhenCallingToDebugString() throws Exception {
 
         final String metadataName = "metadata name";
+        final String metadataSource = "metadata source";
         final UUID metadataId = randomUUID();
         final String payloadName = "payloadName";
         final String payloadValue = "payloadValue";
 
-        final JsonEnvelope jsonEnvelope = envelopeFrom(metadata(metadataId, metadataName), payload(payloadName, payloadValue));
+        final JsonEnvelope jsonEnvelope = envelopeFrom(metadata(metadataId, metadataName, metadataSource), payload(payloadName, payloadValue));
 
         final String json = jsonEnvelope.toDebugStringPrettyPrint();
         with(json)
                 .assertEquals("_metadata.id", metadataId.toString())
                 .assertEquals("_metadata.name", metadataName)
+                .assertEquals("_metadata.source", metadataSource)
                 .assertEquals("$.payloadName", payloadValue);
     }
 
     @Test
     public void shouldReturnEnvelopeAsJsonObject() {
         final String metadataName = "metadata name";
+        final String metadataSource = "metadata source";
         final UUID metadataId = randomUUID();
         final String payloadName = "payloadName";
         final String payloadValue = "payloadValue";
 
-        final JsonEnvelope jsonEnvelope = envelopeFrom(metadata(metadataId, metadataName), payload(payloadName, payloadValue));
+        final JsonEnvelope jsonEnvelope = envelopeFrom(metadata(metadataId, metadataName, metadataSource), payload(payloadName, payloadValue));
 
         final JsonObject jsonObject = jsonEnvelope.asJsonObject();
 
         with(jsonObject.toString())
                 .assertEquals("_metadata.id", metadataId.toString())
                 .assertEquals("_metadata.name", metadataName)
+                .assertEquals("_metadata.source", metadataSource)
                 .assertEquals("$.payloadName", payloadValue);
     }
 
@@ -120,9 +124,10 @@ public class DefaultJsonEnvelopeTest {
     public void shouldReturnEnvelopeAsString() {
         final UUID metadataId = randomUUID();
         final String metadataName = "nameABC123";
+        final String source = "sourceName";
 
         final JsonEnvelope envelope = envelopeFrom(
-                metadataBuilder().withId(metadataId).withName(metadataName),
+                metadataBuilder().withId(metadataId).withName(metadataName).withSource(source),
                 createObjectBuilder()
                         .add("strProperty", "valueA")
                         .add("nested", createObjectBuilder()
@@ -139,6 +144,7 @@ public class DefaultJsonEnvelopeTest {
         with(envelope.toString())
                 .assertEquals("id", metadataId.toString())
                 .assertEquals("name", metadataName)
+                .assertEquals("source" , source)
                 .assertNotDefined("strProperty")
                 .assertNotDefined("nested.strProperty1")
                 .assertNotDefined("nested.uuidProperty1")
@@ -151,9 +157,10 @@ public class DefaultJsonEnvelopeTest {
     public void shouldReturnStringRepresentationWithObfuscatedValues() throws Exception {
         final UUID metadataId = randomUUID();
         final String metadataName = "nameABC123";
+        final String source = "sourceName";
 
         final JsonEnvelope envelope = envelopeFrom(
-                metadataBuilder().withId(metadataId).withName(metadataName),
+                metadataBuilder().withId(metadataId).withName(metadataName).withSource(source),
                 createObjectBuilder()
                         .add("strProperty", "valueA")
                         .add("nested", createObjectBuilder()
@@ -170,6 +177,7 @@ public class DefaultJsonEnvelopeTest {
         with(envelope.toObfuscatedDebugString())
                 .assertEquals("_metadata.id", metadataId.toString())
                 .assertEquals("_metadata.name", metadataName)
+                .assertEquals("_metadata.source", source)
                 .assertEquals("strProperty", "xxx")
                 .assertEquals("nested.strProperty1", "xxx")
                 .assertEquals("nested.uuidProperty1", "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx")
@@ -178,8 +186,8 @@ public class DefaultJsonEnvelopeTest {
                 .assertThat("arrayProperty", hasItems("xxx", "xxx", "xxx"));
     }
 
-    private MetadataBuilder metadata(final UUID metadataId, final String metadataName) {
-        return metadataBuilder().withId(metadataId).withName(metadataName);
+    private MetadataBuilder metadata(final UUID metadataId, final String metadataName, final String metadataSource) {
+        return metadataBuilder().withId(metadataId).withName(metadataName).withSource(metadataSource);
     }
 
     private JsonObjectBuilder payload(final String payloadName, final String payloadValue) {

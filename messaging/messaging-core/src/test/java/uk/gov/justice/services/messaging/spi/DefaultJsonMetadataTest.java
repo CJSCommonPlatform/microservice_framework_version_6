@@ -13,6 +13,7 @@ import static uk.gov.justice.services.messaging.JsonMetadata.CORRELATION;
 import static uk.gov.justice.services.messaging.JsonMetadata.ID;
 import static uk.gov.justice.services.messaging.JsonMetadata.NAME;
 import static uk.gov.justice.services.messaging.JsonMetadata.SESSION_ID;
+import static uk.gov.justice.services.messaging.JsonMetadata.SOURCE;
 import static uk.gov.justice.services.messaging.JsonMetadata.STREAM;
 import static uk.gov.justice.services.messaging.JsonMetadata.STREAM_ID;
 import static uk.gov.justice.services.messaging.JsonMetadata.USER_ID;
@@ -48,6 +49,7 @@ public class DefaultJsonMetadataTest {
     private static final String UUID_STREAM_ID = "f29e0415-3a3b-48d8-b301-d34faa58662a";
     private static final String MESSAGE_NAME = "logical.message.name";
     private static final Long STREAM_VERSION = 99L;
+    private static final String SOURCE_NAME = "source.name";
 
     private JsonObject jsonObject;
     private Metadata metadata;
@@ -57,6 +59,7 @@ public class DefaultJsonMetadataTest {
         jsonObject = createObjectBuilder()
                 .add(ID, UUID_ID)
                 .add(NAME, MESSAGE_NAME)
+                .add(SOURCE, SOURCE_NAME)
                 .add(CORRELATION, createObjectBuilder()
                         .add(CLIENT_ID, UUID_CLIENT_CORRELATION)
                 )
@@ -112,6 +115,12 @@ public class DefaultJsonMetadataTest {
     public void shouldReturnUserId() throws Exception {
         assertThat(metadata.userId().isPresent(), is(true));
         assertThat(metadata.userId().get(), equalTo(UUID_USER_ID));
+    }
+
+    @Test
+    public void shouldReturnSource() throws Exception {
+        assertThat(metadata.source().isPresent(), is(true));
+        assertThat(metadata.source().get(), equalTo(SOURCE_NAME));
     }
 
     @Test
@@ -196,16 +205,16 @@ public class DefaultJsonMetadataTest {
     @Test
     public void shouldTestEqualsAndHashCode() {
 
-        final Metadata item1 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, STREAM_VERSION);
-        final Metadata item2 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, STREAM_VERSION);
-        final Metadata item3 = metadata(UUID.randomUUID().toString(), UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, STREAM_VERSION);
-        final Metadata item4 = metadata(UUID_ID, UUID.randomUUID().toString(), UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, STREAM_VERSION);
-        final Metadata item5 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID.randomUUID().toString(), UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, STREAM_VERSION);
-        final Metadata item6 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID.randomUUID().toString(), UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, STREAM_VERSION);
-        final Metadata item7 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID.randomUUID().toString(), UUID_STREAM_ID, MESSAGE_NAME, STREAM_VERSION);
-        final Metadata item8 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID.randomUUID().toString(), MESSAGE_NAME, STREAM_VERSION);
-        final Metadata item9 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, "dummy name", STREAM_VERSION);
-        final Metadata item10 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, 0L);
+        final Metadata item1 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, STREAM_VERSION, SOURCE_NAME);
+        final Metadata item2 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, STREAM_VERSION, SOURCE_NAME);
+        final Metadata item3 = metadata(UUID.randomUUID().toString(), UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, STREAM_VERSION, SOURCE_NAME);
+        final Metadata item4 = metadata(UUID_ID, UUID.randomUUID().toString(), UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, STREAM_VERSION, SOURCE_NAME);
+        final Metadata item5 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID.randomUUID().toString(), UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, STREAM_VERSION, SOURCE_NAME);
+        final Metadata item6 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID.randomUUID().toString(), UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, STREAM_VERSION, SOURCE_NAME);
+        final Metadata item7 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID.randomUUID().toString(), UUID_STREAM_ID, MESSAGE_NAME, STREAM_VERSION, SOURCE_NAME);
+        final Metadata item8 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID.randomUUID().toString(), MESSAGE_NAME, STREAM_VERSION, SOURCE_NAME);
+        final Metadata item9 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, "dummy name", STREAM_VERSION, SOURCE_NAME);
+        final Metadata item10 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, 0L, SOURCE_NAME);
 
         new EqualsTester()
                 .addEqualityGroup(item1, item2)
@@ -220,12 +229,13 @@ public class DefaultJsonMetadataTest {
                 .testEquals();
     }
 
-    private Metadata metadata(String id, String uuidClientCorrelation, String uuidCausation, String uuidUserId,
-                              String uuidSessionId, String uuidStreamId, String messageName, Long streamVersion) {
+    private Metadata metadata(final String id, final String uuidClientCorrelation, final String uuidCausation, final String uuidUserId,
+                              final String uuidSessionId, final String uuidStreamId, final String messageName, final Long streamVersion, final String source) {
         return metadataBuilderFrom(
                 createObjectBuilder()
                         .add(ID, id)
                         .add(NAME, messageName)
+                        .add(SOURCE, source)
                         .add(CORRELATION, createObjectBuilder()
                                 .add(CLIENT_ID, uuidClientCorrelation)
                         )

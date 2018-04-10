@@ -139,6 +139,11 @@ public class DefaultJsonMetadata extends JsonMetadata {
     }
 
     @Override
+    public Optional<String> source() {
+        return getString(metadata, SOURCE);
+    }
+
+    @Override
     @SuppressWarnings({"squid:MethodCyclomaticComplexity", "squid:S1067", "squid:S00122"})
     public boolean equals(final Object o) {
         if (this == o) return true;
@@ -224,6 +229,12 @@ public class DefaultJsonMetadata extends JsonMetadata {
         @Override
         public MetadataBuilder withVersion(final long version) {
             json.add(BigDecimal.valueOf(version), VERSION_PATH);
+            return this;
+        }
+
+        @Override
+        public MetadataBuilder withSource(final String source) {
+            json.add(source, SOURCE);
             return this;
         }
 

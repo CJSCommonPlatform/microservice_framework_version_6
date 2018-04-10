@@ -219,6 +219,9 @@ public class JsonObjectMetadata implements Metadata {
     }
 
     @Override
+    public Optional<String> source() { return metadata.source(); }
+
+    @Override
     @SuppressWarnings({"squid:MethodCyclomaticComplexity", "squid:S1067", "squid:S00122"})
     public boolean equals(final Object o) {
         if (this == o) return true;

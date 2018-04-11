@@ -1,9 +1,10 @@
 package uk.gov.justice.subscription.jms.core;
 
+import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.subscription.domain.builders.EventBuilder.event;
-import static uk.gov.justice.subscription.domain.builders.EventsourceBuilder.eventsource;
+import static uk.gov.justice.subscription.domain.builders.EventSourceBuilder.eventsource;
 import static uk.gov.justice.subscription.domain.builders.LocationBuilder.location;
 import static uk.gov.justice.subscription.domain.builders.SubscriptionBuilder.subscription;
 import static uk.gov.justice.subscription.domain.builders.SubscriptionDescriptorBuilder.subscriptionDescriptor;
@@ -11,9 +12,14 @@ import static uk.gov.justice.subscription.domain.builders.SubscriptionDescriptor
 import uk.gov.justice.maven.generator.io.files.parser.core.GeneratorProperties;
 import uk.gov.justice.raml.jms.config.GeneratorPropertiesFactory;
 import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
-import uk.gov.justice.subscription.domain.Event;
-import uk.gov.justice.subscription.domain.Subscription;
-import uk.gov.justice.subscription.domain.SubscriptionDescriptor;
+import uk.gov.justice.subscription.domain.eventsource.EventSource;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.Event;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptor;
+import uk.gov.justice.subscription.jms.parser.SubscriptionWrapper;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import com.squareup.javapoet.TypeSpec;
 import org.junit.Test;
@@ -22,7 +28,7 @@ import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MessageListenerCodeGeneratorTest  {
+public class MessageListenerCodeGeneratorTest {
 
     @InjectMocks
     private MessageListenerCodeGenerator messageListenerCodeGenerator;
@@ -46,18 +52,24 @@ public class MessageListenerCodeGeneratorTest  {
                 .build();
 
 
+        final EventSource eventSource = eventsource()
+                .withName("eventsource")
+                .withLocation(location()
+                        .withJmsUri(jmsUri)
+                        .withRestUri("http://localhost:8080/example/event-source-api/rest")
+                        .build())
+                .build();
+
+        final List<EventSource> eventSources = new ArrayList();
+        eventSources.add(eventSource);
+
         final Subscription subscription = subscription()
                 .withName("subscription")
                 .withEvent(event_1)
                 .withEvent(event_2)
-                .withEventsource(eventsource()
-                        .withName("eventsource")
-                        .withLocation(location()
-                                .withJmsUri(jmsUri)
-                                .withRestUri("http://localhost:8080/example/event-source-api/rest")
-                                .build())
-                        .build())
+                .withEventSourceName("eventsource")
                 .build();
+
         final SubscriptionDescriptor subscriptionDescriptor = subscriptionDescriptor()
                 .withSpecVersion("1.0.0")
                 .withService(serviceName)
@@ -65,12 +77,14 @@ public class MessageListenerCodeGeneratorTest  {
                 .withSubscription(subscription)
                 .build();
 
+        final SubscriptionWrapper subscriptionWrapper = new SubscriptionWrapper(subscriptionDescriptor, eventSources);
+
         final ClassNameFactory classNameFactory =
                 new ClassNameFactory(basePackageName, serviceName, componentName, jmsUri);
 
         GeneratorProperties generatorProperties = new GeneratorPropertiesFactory().withCustomMDBPool();
 
-        final TypeSpec typeSpec = messageListenerCodeGenerator.generate(subscriptionDescriptor, subscription, (CommonGeneratorProperties) generatorProperties, classNameFactory);
+        final TypeSpec typeSpec = messageListenerCodeGenerator.generate(subscriptionWrapper, subscription, (CommonGeneratorProperties) generatorProperties, classNameFactory);
 
         assertThat(typeSpec.toString(), is("@uk.gov.justice.services.core.annotation.Adapter(\"EVENT_LISTENER\")\n" +
                 "@javax.ejb.MessageDriven(\n" +
@@ -122,19 +136,23 @@ public class MessageListenerCodeGeneratorTest  {
                 .withSchemaUri("http://justice.gov.uk/json/schemas/domains/example/my-context.events.something-else-happened.json")
                 .build();
 
+        final EventSource eventsource = eventsource()
+                .withName("eventSource")
+                .withLocation(location()
+                        .withJmsUri(jmsUri)
+                        .withRestUri("http://localhost:8080/example/event-source-api/rest")
+                        .build())
+                .build();
+
+        final List<EventSource> eventSources = singletonList(eventsource);
 
         final Subscription subscription = subscription()
                 .withName("subscription")
                 .withEvent(event_1)
                 .withEvent(event_2)
-                .withEventsource(eventsource()
-                        .withName("eventsource")
-                        .withLocation(location()
-                                .withJmsUri(jmsUri)
-                                .withRestUri("http://localhost:8080/example/event-source-api/rest")
-                                .build())
-                        .build())
+                .withEventSourceName("eventSource")
                 .build();
+
         final SubscriptionDescriptor subscriptionDescriptor = subscriptionDescriptor()
                 .withSpecVersion("1.0.0")
                 .withService(serviceName)
@@ -145,9 +163,11 @@ public class MessageListenerCodeGeneratorTest  {
         final ClassNameFactory classNameFactory =
                 new ClassNameFactory(basePackageName, serviceName, componentName, jmsUri);
 
-        GeneratorProperties generatorProperties = new GeneratorPropertiesFactory().withServiceComponentOf(componentName);
+        final GeneratorProperties generatorProperties = new GeneratorPropertiesFactory().withServiceComponentOf(componentName);
 
-        final TypeSpec typeSpec = messageListenerCodeGenerator.generate(subscriptionDescriptor, subscription, (CommonGeneratorProperties) generatorProperties, classNameFactory);
+        final SubscriptionWrapper subscriptionWrapper = new SubscriptionWrapper(subscriptionDescriptor, eventSources);
+
+        final TypeSpec typeSpec = messageListenerCodeGenerator.generate(subscriptionWrapper, subscription, (CommonGeneratorProperties) generatorProperties, classNameFactory);
 
         assertThat(typeSpec.toString(), is("@uk.gov.justice.services.core.annotation.Adapter(\"COMMAND_HANDLER\")\n" +
                 "@javax.ejb.MessageDriven(\n" +
@@ -196,18 +216,22 @@ public class MessageListenerCodeGeneratorTest  {
                 .withSchemaUri("http://justice.gov.uk/json/schemas/domains/example/my-context.events.something-else-happened.json")
                 .build();
 
+        final EventSource eventSource = eventsource()
+                .withName("eventsource")
+                .withLocation(location()
+                        .withJmsUri(jmsUri)
+                        .withRestUri("http://localhost:8080/example/event-source-api/rest")
+                        .build())
+                .build();
+
+        final List<EventSource> eventSources = new ArrayList();
+        eventSources.add(eventSource);
 
         final Subscription subscription = subscription()
                 .withName("subscription")
                 .withEvent(event_1)
                 .withEvent(event_2)
-                .withEventsource(eventsource()
-                        .withName("eventsource")
-                        .withLocation(location()
-                                .withJmsUri(jmsUri)
-                                .withRestUri("http://localhost:8080/example/event-source-api/rest")
-                                .build())
-                        .build())
+                .withEventSourceName("eventsource")
                 .build();
         final SubscriptionDescriptor subscriptionDescriptor = subscriptionDescriptor()
                 .withSpecVersion("1.0.0")
@@ -221,7 +245,9 @@ public class MessageListenerCodeGeneratorTest  {
 
         GeneratorProperties generatorProperties = new GeneratorPropertiesFactory().withServiceComponentOf("COMMAND_API");
 
-        final TypeSpec typeSpec = messageListenerCodeGenerator.generate(subscriptionDescriptor, subscription, (CommonGeneratorProperties) generatorProperties, classNameFactory);
+        final SubscriptionWrapper subscriptionWrapper = new SubscriptionWrapper(subscriptionDescriptor, eventSources);
+
+        final TypeSpec typeSpec = messageListenerCodeGenerator.generate(subscriptionWrapper, subscription, (CommonGeneratorProperties) generatorProperties, classNameFactory);
 
         assertThat(typeSpec.toString(), is("@uk.gov.justice.services.core.annotation.Adapter(\"COMMAND_API\")\n" +
                 "@javax.ejb.MessageDriven(\n" +

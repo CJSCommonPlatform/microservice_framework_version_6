@@ -10,8 +10,8 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import uk.gov.justice.subscription.domain.Subscription;
-import uk.gov.justice.subscription.domain.SubscriptionDescriptor;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptor;
 
 import java.util.Map;
 import java.util.Optional;

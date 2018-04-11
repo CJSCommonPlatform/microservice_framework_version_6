@@ -1,0 +1,30 @@
+event_sources:
+- name: command.controller.service
+  location:
+    jms_uri:  jms:queue:structure.controller.command
+    rest_uri: http://localhost:8080/example/event-source-api/rest
+
+- name: command.handler.service
+  location:
+    jms_uri:  jms:queue:structure.handler.command
+    rest_uri: http://localhost:8080/example/event-source-api/rest
+
+- name: custom.people.service
+  location:
+    jms_uri:  jms:topic:people.event
+    rest_uri: http://localhost:8080/example/event-source-api/rest
+
+- name: custom.example.service
+  location:
+    jms_uri:  jms:topic:example.event
+    rest_uri: http://localhost:8080/example/event-source-api/rest
+
+- name: event.listener.service
+  location:
+    jms_uri:  jms:topic:people.event
+    rest_uri: http://localhost:8080/example/event-source-api/rest
+
+- name: event.processor.service
+  location:
+    jms_uri:  jms:topic:structure.event
+    rest_uri: http://localhost:8080/example/event-source-api/rest

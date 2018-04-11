@@ -7,8 +7,4 @@ subscription_descriptor:
       events:
         - name: structure.cmdaa
           schema_uri: http://justice.gov.uk/json/schema/structure.cmdaa.json
-      eventsource:
-        name: service1
-        location:
-          jms_uri:  jms:queue:structure.handler.command
-          rest_uri: http://localhost:8080/example/event-source-api/rest
+      event_source_name: command.handler.service

@@ -4,9 +4,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.subscription.domain.builders.EventBuilder.event;
 
-import uk.gov.justice.subscription.domain.Event;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.Event;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 public class EventBuilderTest {

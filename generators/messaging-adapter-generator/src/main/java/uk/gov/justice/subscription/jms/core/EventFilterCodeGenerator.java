@@ -7,8 +7,8 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static uk.gov.justice.subscription.jms.core.ClassNameFactory.EVENT_FILTER;
 
 import uk.gov.justice.services.event.buffer.api.AbstractEventFilter;
-import uk.gov.justice.subscription.domain.Event;
-import uk.gov.justice.subscription.domain.Subscription;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.Event;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
 
 import javax.enterprise.context.ApplicationScoped;
 

@@ -1,8 +1,7 @@
 package uk.gov.justice.subscription.domain.builders;
 
-import uk.gov.justice.subscription.domain.Event;
-import uk.gov.justice.subscription.domain.Eventsource;
-import uk.gov.justice.subscription.domain.Subscription;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.Event;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +10,7 @@ public final class SubscriptionBuilder {
 
     private String name;
     private final List<Event> events = new ArrayList<>();
-    private Eventsource eventsource;
+    private String eventSourceName;
 
     private SubscriptionBuilder() {
     }
@@ -35,12 +34,12 @@ public final class SubscriptionBuilder {
         return this;
     }
 
-    public SubscriptionBuilder withEventsource(final Eventsource eventsource) {
-        this.eventsource = eventsource;
+    public SubscriptionBuilder withEventSourceName(final String eventSourceName) {
+        this.eventSourceName = eventSourceName;
         return this;
     }
 
     public Subscription build() {
-        return new Subscription(name, events, eventsource);
+        return new Subscription(name, events, eventSourceName);
     }
 }

@@ -1,7 +1,7 @@
 package uk.gov.justice.subscription.domain.builders;
 
-import uk.gov.justice.subscription.domain.Subscription;
-import uk.gov.justice.subscription.domain.SubscriptionDescriptor;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptor;
 
 import java.util.ArrayList;
 import java.util.List;

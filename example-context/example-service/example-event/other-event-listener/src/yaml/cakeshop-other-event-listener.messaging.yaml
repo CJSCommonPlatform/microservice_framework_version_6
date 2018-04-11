@@ -7,8 +7,4 @@ subscription_descriptor:
       events:
         - name: other.recipe-added
           schema_uri: http://justice.gov.uk/example/event/other.recipe-added.json
-      eventsource:
-        name: Other Private Events
-        location:
-          jms_uri:  jms:topic:other.event
-          rest_uri: http://localhost:8080/example/event-source-api/rest
+      event_source_name: private.event.source

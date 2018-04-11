@@ -1,11 +1,14 @@
 package uk.gov.justice.subscription.domain.builders;
 
-import uk.gov.justice.subscription.domain.Location;
+import uk.gov.justice.subscription.domain.eventsource.Location;
+
+import java.util.Optional;
 
 public final class LocationBuilder {
     
     private String jmsUri;
     private String restUri;
+    private String dataSource;
 
     private LocationBuilder() {
     }
@@ -24,7 +27,13 @@ public final class LocationBuilder {
         return this;
     }
 
+    public LocationBuilder withDataSource(final String dataSource) {
+        this.dataSource = dataSource;
+        return this;
+    }
+
+
     public Location build() {
-        return new Location(jmsUri, restUri);
+        return new Location(jmsUri, restUri, Optional.ofNullable(dataSource));
     }
 }

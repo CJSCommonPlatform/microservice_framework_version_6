@@ -3,8 +3,9 @@ package uk.gov.justice.services.event.sourcing.subscription;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
-import uk.gov.justice.subscription.domain.SubscriptionDescriptor;
-import uk.gov.justice.subscription.file.read.SubscriptionDescriptorParser;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptor;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptorDef;
+import uk.gov.justice.subscription.yaml.parser.YamlParser;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -22,7 +23,7 @@ public class SubscriptionRegistryProducer {
     SubscriptionDescriptorFileFinder subscriptionDescriptorFileFinder;
 
     @Inject
-    SubscriptionDescriptorParser subscriptionDescriptorParser;
+    YamlParser yamlParser;
 
     @Produces
     public SubscriptionDescriptorRegistry subscriptionDescriptorRegistry(@SuppressWarnings("unused") final InjectionPoint injectionPoint) {
@@ -30,7 +31,7 @@ public class SubscriptionRegistryProducer {
         final List<Path> subscriptionFilePaths = subscriptionDescriptorFileFinder.findOnClasspath();
 
         final List<SubscriptionDescriptor> subscriptionDescriptors = subscriptionFilePaths.stream()
-                .map(subscriptionDescriptorParser::read)
+                .map(yamlPath -> yamlParser.parseYamlFrom(yamlPath, SubscriptionDescriptorDef.class).getSubscriptionDescriptor())
                 .collect(toList());
 
         final Map<String, SubscriptionDescriptor> byServiceName = subscriptionDescriptors

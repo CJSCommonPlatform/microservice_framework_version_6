@@ -19,9 +19,11 @@ import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
 import uk.gov.justice.services.messaging.logging.LoggerUtils;
-import uk.gov.justice.subscription.domain.Event;
-import uk.gov.justice.subscription.domain.Subscription;
-import uk.gov.justice.subscription.domain.SubscriptionDescriptor;
+import uk.gov.justice.subscription.domain.eventsource.EventSource;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.Event;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptor;
+import uk.gov.justice.subscription.jms.parser.SubscriptionWrapper;
 
 import java.util.List;
 
@@ -72,17 +74,17 @@ public class MessageListenerCodeGenerator {
     /**
      * Create an implementation of the {@link MessageListener}.
      *
-     * @param subscriptionDescriptor    the subscription descriptor
-     * @param subscription              the subscription
-     * @param commonGeneratorProperties used to query the generator properties
-     * @param classNameFactory          creates the class name for this generated class
+     * @param subscriptionWrapper the subscription descriptor Wrapper
+     * @param subscription                  the subscription
+     * @param commonGeneratorProperties     used to query the generator properties
+     * @param classNameFactory              creates the class name for this generated class
      * @return the message listener class specification
      */
-    TypeSpec generate(final SubscriptionDescriptor subscriptionDescriptor,
+    TypeSpec generate(final SubscriptionWrapper subscriptionWrapper,
                       final Subscription subscription,
                       final CommonGeneratorProperties commonGeneratorProperties,
                       final ClassNameFactory classNameFactory) {
-        return classSpecFrom(subscriptionDescriptor, subscription, commonGeneratorProperties, classNameFactory)
+        return classSpecFrom(subscriptionWrapper, subscription, commonGeneratorProperties, classNameFactory)
                 .addMethod(generateOnMessageMethod())
                 .build();
     }
@@ -90,23 +92,24 @@ public class MessageListenerCodeGenerator {
     /**
      * Generate the @link MessageListener} class implementation.
      *
-     * @param subscriptionDescriptor    the subscription descriptor
-     * @param subscription              the subscription
-     * @param commonGeneratorProperties used to query the generator properties
-     * @param classNameFactory          creates the class name for this generated class
+     * @param subscriptionWrapper the subscription descriptor Wrapper
+     * @param subscription                  the subscription
+     * @param commonGeneratorProperties     used to query the generator properties
+     * @param classNameFactory              creates the class name for this generated class
      * @return the {@link TypeSpec.Builder} that defines the class
      */
-    private TypeSpec.Builder classSpecFrom(final SubscriptionDescriptor subscriptionDescriptor,
+    private TypeSpec.Builder classSpecFrom(final SubscriptionWrapper subscriptionWrapper,
                                            final Subscription subscription,
                                            final CommonGeneratorProperties commonGeneratorProperties,
                                            final ClassNameFactory classNameFactory) {
-
+        final SubscriptionDescriptor subscriptionDescriptor = subscriptionWrapper.getSubscriptionDescriptor();
         final String serviceComponent = subscriptionDescriptor.getServiceComponent().toUpperCase();
 
         if (componentDestinationType.isSupported(serviceComponent)) {
 
             final ClassName className = classNameFactory.classNameFor(JMS_LISTENER);
-            String destination = destinationFromJmsUri(subscription.getEventsource().getLocation().getJmsUri());
+            final EventSource eventSource = subscriptionWrapper.getEventSourceByName(subscription.getEventSourceName());
+            final String destination = destinationFromJmsUri(eventSource.getLocation().getJmsUri());
 
             final TypeSpec.Builder typeSpecBuilder = classBuilder(className)
                     .addModifiers(PUBLIC)
@@ -124,7 +127,7 @@ public class MessageListenerCodeGenerator {
                     .addAnnotation(AnnotationSpec.builder(Adapter.class)
                             .addMember(DEFAULT_ANNOTATION_PARAMETER, "$S", serviceComponent)
                             .build())
-                    .addAnnotation(messageDrivenAnnotation(serviceComponent, subscriptionDescriptor.getService(), subscription));
+                    .addAnnotation(messageDrivenAnnotation(serviceComponent, subscriptionDescriptor.getService(), subscription, destination));
 
             if (!subscription.getEvents().isEmpty()) {
                 AnnotationSpec.Builder builder = AnnotationSpec.builder(Interceptors.class)
@@ -202,11 +205,10 @@ public class MessageListenerCodeGenerator {
      */
     private AnnotationSpec messageDrivenAnnotation(final String component,
                                                    final String service,
-                                                   final Subscription subscription) {
+                                                   final Subscription subscription,
+                                                   final String destination) {
 
         final Class<? extends Destination> inputType = componentDestinationType.inputTypeFor(component);
-
-        String destination = destinationFromJmsUri(subscription.getEventsource().getLocation().getJmsUri());
 
         AnnotationSpec.Builder builder = AnnotationSpec.builder(MessageDriven.class)
                 .addMember(ACTIVATION_CONFIG_PARAMETER, "$L",

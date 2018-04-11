@@ -3,6 +3,7 @@ package uk.gov.justice.subscription.jms.core;
 import static java.nio.file.Files.write;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -11,7 +12,6 @@ import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItemInArray;
-import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
@@ -30,7 +30,7 @@ import static uk.gov.justice.services.generators.test.utils.config.GeneratorConf
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.methodsOf;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.justice.subscription.domain.builders.EventBuilder.event;
-import static uk.gov.justice.subscription.domain.builders.EventsourceBuilder.eventsource;
+import static uk.gov.justice.subscription.domain.builders.EventSourceBuilder.eventsource;
 import static uk.gov.justice.subscription.domain.builders.LocationBuilder.location;
 import static uk.gov.justice.subscription.domain.builders.SubscriptionBuilder.subscription;
 import static uk.gov.justice.subscription.domain.builders.SubscriptionDescriptorBuilder.subscriptionDescriptor;
@@ -47,9 +47,11 @@ import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil;
-import uk.gov.justice.subscription.domain.Event;
-import uk.gov.justice.subscription.domain.Subscription;
-import uk.gov.justice.subscription.domain.SubscriptionDescriptor;
+import uk.gov.justice.subscription.domain.eventsource.EventSource;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.Event;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptor;
+import uk.gov.justice.subscription.jms.parser.SubscriptionWrapper;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -103,15 +105,14 @@ public class SubscriptionJmsEndpointGeneratorTest {
     InterceptorChainProcessor interceptorChainProcessor;
 
     private GeneratorProperties generatorProperties;
-    private  JavaCompilerUtil compiler;
-    private Generator<SubscriptionDescriptor> generator;
+    private JavaCompilerUtil compiler;
+    private Generator<SubscriptionWrapper> generator;
     private final String serviceName = "context";
     private final String componentName = "EVENT_PROCESSOR";
 
 
     @Before
     public void setup() throws Exception {
-
         generator = new JmsEndpointGenerationObjects().subscriptionJmsEndpointGenerator();
         compiler = new JavaCompilerUtil(outputFolder.getRoot(), outputFolder.getRoot());
         generatorProperties = new GeneratorPropertiesFactory().withDefaultServiceComponent();
@@ -119,24 +120,23 @@ public class SubscriptionJmsEndpointGeneratorTest {
 
     @Test
     public void shouldCreateJmsClass() throws Exception {
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.controller.command", "my-context.events.something-happened",serviceName,  componentName);
-
-        generator.run(subscriptionDescriptor,
+        final SubscriptionWrapper subscriptionWrapper = setUpMessageSubscription("jms:topic:structure.controller.command", "my-context.events.something-happened", serviceName, componentName);
+        generator.run(subscriptionWrapper,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        File packageDir = new File(outputFolder.getRoot().getAbsolutePath() + BASE_PACKAGE_FOLDER);
+        final File packageDir = new File(outputFolder.getRoot().getAbsolutePath() + BASE_PACKAGE_FOLDER);
         assertThat(asList(packageDir.listFiles()),
                 hasItem(hasProperty("name", equalTo("ContextEventProcessorStructureControllerCommandJmsListener.java"))));
     }
 
     @Test
     public void shouldCreateClassContainsHyphens() throws Exception {
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.event", "some event", "context-with-hyphens", componentName);
+        final SubscriptionWrapper subscriptionWrapper = setUpMessageSubscription("jms:topic:structure.event", "some event", "context-with-hyphens", componentName);
 
-        generator.run(subscriptionDescriptor,
+        generator.run(subscriptionWrapper,
                 configurationWithBasePackage("uk.somepackage", outputFolder, generatorProperties));
 
-        Class<?> compiledClass = compiler.compiledClassOf("uk.somepackage", "ContextWithHyphensEventProcessorStructureEventJmsListener");
+        final Class<?> compiledClass = compiler.compiledClassOf("uk.somepackage", "ContextWithHyphensEventProcessorStructureEventJmsListener");
         assertThat(compiledClass.getName(), is("uk.somepackage.ContextWithHyphensEventProcessorStructureEventJmsListener"));
     }
 
@@ -146,45 +146,53 @@ public class SubscriptionJmsEndpointGeneratorTest {
 
         String structureJmsUri = "jms:topic:structure.controller.command";
         String peopleJmsUri = "jms:topic:people.controller.command";
-        Event event = event()
+
+        final Event event = event()
                 .withName("my-context.events.something-happened")
                 .withSchemaUri("http://justice.gov.uk/json/schemas/domains/example/my-context.events.something-happened.json")
                 .build();
-        Subscription subscription = subscription()
-                .withName("subscription")
-                .withEvent(event)
-                .withEventsource(eventsource()
-                        .withName("eventsource")
-                        .withLocation(location()
-                                .withJmsUri(structureJmsUri)
-                                .withRestUri("http://localhost:8080/example/event-source-api/rest")
-                                .build())
+
+        final EventSource eventsource = eventsource()
+                .withName("eventSource")
+                .withLocation(location()
+                        .withJmsUri(structureJmsUri)
+                        .withRestUri("http://localhost:8080/example/event-source-api/rest")
                         .build())
                 .build();
 
-        Subscription subscription2 = subscription()
-                .withName("subscription2")
-                .withEvent(event)
-                .withEventsource(eventsource()
-                        .withName("eventsource")
-                        .withLocation(location()
-                                .withJmsUri(peopleJmsUri)
-                                .withRestUri("http://localhost:8080/example/event-source-api/rest")
-                                .build())
+        final EventSource eventsource2 = eventsource()
+                .withName("eventSource2")
+                .withLocation(location()
+                        .withJmsUri(peopleJmsUri)
+                        .withRestUri("http://localhost:8080/example/event-source-api/rest")
                         .build())
                 .build();
-        SubscriptionDescriptor subscriptionDescriptor = subscriptionDescriptor()
+
+        final Subscription subscription = subscription()
+                .withName("subscription")
+                .withEvent(event)
+                .withEventSourceName("eventSource")
+                .build();
+
+        final Subscription subscription2 = subscription()
+                .withName("subscription2")
+                .withEvent(event)
+                .withEventSourceName("eventSource2")
+                .build();
+
+        final SubscriptionDescriptor subscriptionDescriptor = subscriptionDescriptor()
                 .withSpecVersion("1.0.0")
                 .withService(serviceName)
                 .withServiceComponent(componentName)
                 .withSubscription(subscription)
+                .withSubscription(subscription2)
                 .build();
-        subscriptionDescriptor.getSubscriptions().add(subscription2);
 
-        generator.run(subscriptionDescriptor,
+        final SubscriptionWrapper subscriptionWrapper = new SubscriptionWrapper(subscriptionDescriptor, asList(eventsource, eventsource2));
+        generator.run(subscriptionWrapper,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        File packageDir = new File(outputFolder.getRoot().getAbsolutePath() + BASE_PACKAGE_FOLDER);
+        final File packageDir = new File(outputFolder.getRoot().getAbsolutePath() + BASE_PACKAGE_FOLDER);
         final File[] a = packageDir.listFiles();
         assertThat(asList(a),
                 hasItems(hasProperty("name", equalTo("ContextEventProcessorPeopleControllerCommandJmsListener.java")),
@@ -194,41 +202,41 @@ public class SubscriptionJmsEndpointGeneratorTest {
 
     @Test
     public void shouldOverwriteJmsClass() throws Exception {
-        String path = outputFolder.getRoot().getAbsolutePath() + BASE_PACKAGE_FOLDER;
-        File packageDir = new File(path);
+        final String path = outputFolder.getRoot().getAbsolutePath() + BASE_PACKAGE_FOLDER;
+        final File packageDir = new File(path);
         packageDir.mkdirs();
         write(Paths.get(path + "/StructureControllerCommandJmsListener.java"),
                 Collections.singletonList("Old file content"));
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.controller.command", "my-context.events.something-happened",serviceName,  componentName);
+        final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.controller.command", "my-context.events.something-happened", serviceName, componentName);
 
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        List<String> lines = Files.readAllLines(Paths.get(path + "/ContextEventProcessorStructureControllerCommandJmsListener.java"));
+        final List<String> lines = Files.readAllLines(Paths.get(path + "/ContextEventProcessorStructureControllerCommandJmsListener.java"));
         assertThat(lines.get(0), not(containsString("Old file content")));
     }
 
     @Test
     public void shouldCreateJmsEndpointNamedAfterTopic() throws Exception {
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.controller.command", "my-context.events.something-happened",serviceName,  componentName);
+        final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.controller.command", "my-context.events.something-happened", serviceName, componentName);
 
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage("uk.somepackage", outputFolder, generatorProperties));
 
-        Class<?> clazz = compiler.compiledClassOf("uk.somepackage", "ContextEventProcessorStructureControllerCommandJmsListener");
+        final Class<?> clazz = compiler.compiledClassOf("uk.somepackage", "ContextEventProcessorStructureControllerCommandJmsListener");
         assertThat(clazz.getName(), is("uk.somepackage.ContextEventProcessorStructureControllerCommandJmsListener"));
     }
 
     @Test
     public void shouldCreateLoggerConstant() throws Exception {
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.controller.command", "my-context.events.something-happened",serviceName,  componentName);
+        final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.controller.command", "my-context.events.something-happened", serviceName, componentName);
 
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage("uk.somepackage", outputFolder, generatorProperties));
 
-        Class<?> resourceClass = compiler.compiledClassOf("uk.somepackage", "ContextEventProcessorStructureControllerCommandJmsListener");
+        final Class<?> resourceClass = compiler.compiledClassOf("uk.somepackage", "ContextEventProcessorStructureControllerCommandJmsListener");
 
-        Field logger = resourceClass.getDeclaredField("LOGGER");
+        final Field logger = resourceClass.getDeclaredField("LOGGER");
         assertThat(logger, CoreMatchers.not(nullValue()));
         assertThat(logger.getType(), CoreMatchers.equalTo(Logger.class));
         assertThat(Modifier.isPrivate(logger.getModifiers()), Matchers.is(true));
@@ -238,49 +246,48 @@ public class SubscriptionJmsEndpointGeneratorTest {
 
     @Test
     public void shouldCreateJmsEndpointInADifferentPackage() throws Exception {
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.controller.command", "my-context.events.something-happened",serviceName,  componentName);
+        final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.controller.command", "my-context.events.something-happened", serviceName, componentName);
 
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage("uk.package2", outputFolder, generatorProperties));
 
-        Class<?> clazz = compiler.compiledClassOf("uk.package2", "ContextEventProcessorStructureControllerCommandJmsListener");
+        final Class<?> clazz = compiler.compiledClassOf("uk.package2", "ContextEventProcessorStructureControllerCommandJmsListener");
         assertThat(clazz.getName(), is("uk.package2.ContextEventProcessorStructureControllerCommandJmsListener"));
     }
 
     @Test
     public void shouldCreateJmsEventProcessorNamedAfterDestinationNameAndContextName() throws Exception {
-
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.event", "some event", "context", componentName);
+        final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.event", "some event", "context", componentName);
 
 
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage("uk.somepackage", outputFolder, generatorProperties));
 
-        Class<?> compiledClass = compiler.compiledClassOf("uk.somepackage", "ContextEventProcessorStructureEventJmsListener");
+        final Class<?> compiledClass = compiler.compiledClassOf("uk.somepackage", "ContextEventProcessorStructureEventJmsListener");
         assertThat(compiledClass.getName(), is("uk.somepackage.ContextEventProcessorStructureEventJmsListener"));
     }
 
     @Test
     public void shouldCreateJmsEndpointAnnotatedWithCommandHandlerAdapter() throws Exception {
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.some.queue", "people.abc", "abc", "COMMAND_HANDLER");
+        final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.some.queue", "people.abc", "abc", "COMMAND_HANDLER");
 
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new GeneratorPropertiesFactory().withServiceComponentOf(COMMAND_HANDLER)));
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "AbcCommandHandlerPeopleSomeQueueJmsListener");
-        Adapter adapterAnnotation = clazz.getAnnotation(Adapter.class);
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "AbcCommandHandlerPeopleSomeQueueJmsListener");
+        final Adapter adapterAnnotation = clazz.getAnnotation(Adapter.class);
         assertThat(adapterAnnotation, not(nullValue()));
         assertThat(adapterAnnotation.value(), is(COMMAND_HANDLER));
     }
 
     @Test
     public void shouldCreateJmsEndpointAnnotatedWithControllerCommandAdapter() throws Exception {
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.some.query", "people.abc", "abc", "COMMAND_CONTROLLER");
+        final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.some.query", "people.abc", "abc", "COMMAND_CONTROLLER");
 
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new GeneratorPropertiesFactory().withServiceComponentOf(COMMAND_CONTROLLER)));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "AbcCommandControllerPeopleSomeQueryJmsListener");
-        Adapter adapterAnnotation = clazz.getAnnotation(Adapter.class);
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "AbcCommandControllerPeopleSomeQueryJmsListener");
+        final Adapter adapterAnnotation = clazz.getAnnotation(Adapter.class);
         assertThat(adapterAnnotation, not(nullValue()));
         assertThat(adapterAnnotation.value(), is(COMMAND_CONTROLLER));
 
@@ -288,13 +295,13 @@ public class SubscriptionJmsEndpointGeneratorTest {
 
     @Test
     public void shouldCreateJmsEndpointAnnotatedWithEventListenerAdapter() throws Exception {
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.event", "people.abc", "people", "EVENT_LISTENER");
+        final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.event", "people.abc", "people", "EVENT_LISTENER");
 
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new GeneratorPropertiesFactory().withServiceComponentOf(EVENT_LISTENER)));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleEventListenerPeopleEventJmsListener");
-        Adapter adapterAnnotation = clazz.getAnnotation(Adapter.class);
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleEventListenerPeopleEventJmsListener");
+        final Adapter adapterAnnotation = clazz.getAnnotation(Adapter.class);
         assertThat(adapterAnnotation, not(nullValue()));
         assertThat(adapterAnnotation.value(), is(Component.EVENT_LISTENER));
 
@@ -303,13 +310,14 @@ public class SubscriptionJmsEndpointGeneratorTest {
     @Test
     public void shouldCreateJmsEndpointAnnotatedWithCustomEventListenerAdapter() throws Exception {
 
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.event", "people.abc", "custom", "CUSTOM_EVENT_LISTENER");
+        final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.event", "people.abc", "custom", "CUSTOM_EVENT_LISTENER");
 
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new GeneratorPropertiesFactory().withServiceComponentOf("CUSTOM_EVENT_LISTENER")));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "CustomCustomEventListenerPeopleEventJmsListener");
-        Adapter adapterAnnotation = clazz.getAnnotation(Adapter.class);
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "CustomCustomEventListenerPeopleEventJmsListener");
+        final Adapter adapterAnnotation = clazz.getAnnotation(Adapter.class);
+
         assertThat(adapterAnnotation, not(nullValue()));
         assertThat(adapterAnnotation.value(), is("CUSTOM_EVENT_LISTENER"));
 
@@ -323,13 +331,14 @@ public class SubscriptionJmsEndpointGeneratorTest {
     @Test
     public void shouldCreateJmsEndpointAnnotatedWithEventProcessorAdapter() throws Exception {
 
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.event", "people.abc", "people", componentName);
+        final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.event", "people.abc", "people", componentName);
 
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new GeneratorPropertiesFactory().withServiceComponentOf(EVENT_PROCESSOR)));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleEventProcessorPeopleEventJmsListener");
-        Adapter adapterAnnotation = clazz.getAnnotation(Adapter.class);
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleEventProcessorPeopleEventJmsListener");
+        final Adapter adapterAnnotation = clazz.getAnnotation(Adapter.class);
+
         assertThat(adapterAnnotation, not(nullValue()));
         assertThat(adapterAnnotation.value(), is(Component.EVENT_PROCESSOR));
 
@@ -338,12 +347,13 @@ public class SubscriptionJmsEndpointGeneratorTest {
     @Test
     public void shouldCreateJmsEndpointAnnotatedWithInterceptors() throws Exception {
 
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.handler.command", "people.abc", serviceName, componentName);
+        final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.handler.command", "people.abc", serviceName, componentName);
 
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorPeopleHandlerCommandJmsListener");
-        Interceptors interceptorsAnnotation = clazz.getAnnotation(Interceptors.class);
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorPeopleHandlerCommandJmsListener");
+        final Interceptors interceptorsAnnotation = clazz.getAnnotation(Interceptors.class);
+
         assertThat(interceptorsAnnotation, not(nullValue()));
         assertThat(interceptorsAnnotation.value(), hasItemInArray(JsonSchemaValidationInterceptor.class));
         assertThat(interceptorsAnnotation.value(), hasItemInArray(JmsLoggerMetadataInterceptor.class));
@@ -351,11 +361,12 @@ public class SubscriptionJmsEndpointGeneratorTest {
 
     @Test
     public void shouldCreateJmsEndpointImplementingMessageListener() throws Exception {
-        SubscriptionDescriptor subscriptionDescriptor =  setUpMessageSubscription("jms:topic:somecontext.controller.command", "somecontext.command1", serviceName, componentName);
+        final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:somecontext.controller.command", "somecontext.command1", serviceName, componentName);
 
         generator.run(subscriptionDescriptor, configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorSomecontextControllerCommandJmsListener");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorSomecontextControllerCommandJmsListener");
+
         assertThat(clazz.getInterfaces().length, equalTo(1));
         assertThat(clazz.getInterfaces()[0], equalTo(MessageListener.class));
     }
@@ -363,12 +374,13 @@ public class SubscriptionJmsEndpointGeneratorTest {
     @Test
     public void shouldCreateJmsEndpointWithAnnotatedInterceptorChainProcessorProperty() throws Exception {
 
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:somecontext.controller.command", "somecontext.command1", serviceName, componentName);
+        final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:somecontext.controller.command", "somecontext.command1", serviceName, componentName);
 
         generator.run(subscriptionDescriptor, configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorSomecontextControllerCommandJmsListener");
-        Field chainProcessField = clazz.getDeclaredField(INTERCEPTOR_CHAIN_PROCESSOR);
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorSomecontextControllerCommandJmsListener");
+        final Field chainProcessField = clazz.getDeclaredField(INTERCEPTOR_CHAIN_PROCESSOR);
+
         assertThat(chainProcessField, not(nullValue()));
         assertThat(chainProcessField.getType(), CoreMatchers.equalTo((InterceptorChainProcessor.class)));
         assertThat(chainProcessField.getAnnotations(), arrayWithSize(1));
@@ -378,12 +390,13 @@ public class SubscriptionJmsEndpointGeneratorTest {
     @Test
     public void shouldCreateJmsEndpointWithAnnotatedJmsProcessorProperty() throws Exception {
 
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:somecontext.controller.command", "somecontext.command1", serviceName, componentName);
+        final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:somecontext.controller.command", "somecontext.command1", serviceName, componentName);
 
         generator.run(subscriptionDescriptor, configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorSomecontextControllerCommandJmsListener");
-        Field jmsProcessorField = clazz.getDeclaredField("jmsProcessor");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorSomecontextControllerCommandJmsListener");
+        final Field jmsProcessorField = clazz.getDeclaredField("jmsProcessor");
+
         assertThat(jmsProcessorField, not(nullValue()));
         assertThat(jmsProcessorField.getType(), CoreMatchers.equalTo((JmsProcessor.class)));
         assertThat(jmsProcessorField.getAnnotations(), arrayWithSize(1));
@@ -393,12 +406,13 @@ public class SubscriptionJmsEndpointGeneratorTest {
     @Test
     public void shouldCreateAnnotatedCommandControllerEndpointWithDestinationLookupProperty() throws Exception {
 
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.controller.command", "people.abc", serviceName, "EVENT_PROCESSOR");
+        final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.controller.command", "people.abc", serviceName, "EVENT_PROCESSOR");
 
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorPeopleControllerCommandJmsListener");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorPeopleControllerCommandJmsListener");
+
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("destinationLookup")),
@@ -407,12 +421,13 @@ public class SubscriptionJmsEndpointGeneratorTest {
 
     @Test
     public void shouldCreateAnnotatedCommandControllerEndpointWithDestinationLookupProperty2() throws Exception {
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.controller.command", "my-context.events.something-happened",serviceName,  componentName);
+        final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.controller.command", "my-context.events.something-happened", serviceName, componentName);
 
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorStructureControllerCommandJmsListener");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorStructureControllerCommandJmsListener");
+
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("destinationLookup")),
@@ -422,13 +437,14 @@ public class SubscriptionJmsEndpointGeneratorTest {
     @Test
     public void shouldCreateAnnotatedCommandHandlerEndpointWithDestinationLookupProperty3() throws Exception {
 
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.handler.command", "people.abc", serviceName, componentName);
+        final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.handler.command", "people.abc", serviceName, componentName);
 
 
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorStructureHandlerCommandJmsListener");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorStructureHandlerCommandJmsListener");
+
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("destinationLookup")),
@@ -438,12 +454,13 @@ public class SubscriptionJmsEndpointGeneratorTest {
     @Test
     public void shouldCreateAnnotatedEventListenerEndpointWithDestinationLookupProperty3() throws Exception {
 
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.event", "structure.abc", serviceName, componentName);
+        final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.event", "structure.abc", serviceName, componentName);
 
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorStructureEventJmsListener");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorStructureEventJmsListener");
+
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("destinationLookup")),
@@ -453,12 +470,13 @@ public class SubscriptionJmsEndpointGeneratorTest {
     @Test
     public void shouldCreateAnnotatedControllerCommandEndpointWithQueueAsDestinationType() throws Exception {
 
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:queue:structure.something", "structure.abc", "people", "COMMAND_CONTROLLER");
+        final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:queue:structure.something", "structure.abc", "people", "COMMAND_CONTROLLER");
 
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleCommandControllerStructureSomethingJmsListener");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleCommandControllerStructureSomethingJmsListener");
+
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("destinationType")),
@@ -468,12 +486,13 @@ public class SubscriptionJmsEndpointGeneratorTest {
     @Test
     public void shouldCreateAnnotatedCommandHandlerEndpointWithQueueAsDestinationType() throws Exception {
 
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:lifecycle.blah", "lifecycle.abc", "aaa", "COMMAND_HANDLER");
+        final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:lifecycle.blah", "lifecycle.abc", "aaa", "COMMAND_HANDLER");
 
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "AaaCommandHandlerLifecycleBlahJmsListener");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "AaaCommandHandlerLifecycleBlahJmsListener");
+
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("destinationType")),
@@ -482,12 +501,13 @@ public class SubscriptionJmsEndpointGeneratorTest {
 
     @Test
     public void shouldCreateAnnotatedEventListenerEndpointWithQueueAsDestinationType() throws Exception {
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.event", "people.abc",serviceName, "EVENT_PROCESSOR");
+        final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.event", "people.abc", serviceName, "EVENT_PROCESSOR");
 
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new GeneratorPropertiesFactory().withServiceComponentOf(EVENT_LISTENER)));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorPeopleEventJmsListener");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorPeopleEventJmsListener");
+
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("destinationType")),
@@ -497,12 +517,13 @@ public class SubscriptionJmsEndpointGeneratorTest {
     @Test
     public void shouldCreateAnnotatedJmsEndpointWithMessageSelectorContainingOneCommandWithAPost() throws Exception {
 
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.controller.command", "structure.test-cmd",serviceName, "EVENT_PROCESSOR");
+        final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.controller.command", "structure.test-cmd", serviceName, "EVENT_PROCESSOR");
 
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorStructureControllerCommandJmsListener");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorStructureControllerCommandJmsListener");
+
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("messageSelector")),
@@ -511,12 +532,13 @@ public class SubscriptionJmsEndpointGeneratorTest {
 
     @Test
     public void shouldCreateAnnotatedJmsEndpointFromMediaTypeWithoutPillar() throws Exception {
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.controller.command", "structure.test-cmd",serviceName, "EVENT_PROCESSOR");
+        final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.controller.command", "structure.test-cmd", serviceName, "EVENT_PROCESSOR");
 
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorStructureControllerCommandJmsListener");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorStructureControllerCommandJmsListener");
+
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("messageSelector")),
@@ -525,12 +547,13 @@ public class SubscriptionJmsEndpointGeneratorTest {
 
     @Test
     public void shouldNotAddMessageSelectorForEventListener() throws Exception {
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.event", "structure.test-event",serviceName, "EVENT_LISTENER");
+        final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.event", "structure.test-event", serviceName, "EVENT_LISTENER");
 
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventListenerStructureEventJmsListener");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventListenerStructureEventJmsListener");
+
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 not(hasItemInArray(propertyName(equalTo("messageSelector")))));
@@ -538,12 +561,13 @@ public class SubscriptionJmsEndpointGeneratorTest {
 
     @Test
     public void shouldCreateAnnotatedJmsEndpointWithMessageSelectorContainingOneEvent_PluralPillarName() throws Exception {
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.event", "structure.events.test-event",serviceName,  componentName);
+        final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.event", "structure.events.test-event", serviceName, componentName);
 
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorStructureEventJmsListener");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorStructureEventJmsListener");
+
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("messageSelector")),
@@ -553,12 +577,13 @@ public class SubscriptionJmsEndpointGeneratorTest {
     @Test
     public void shouldOnlyCreateMessageSelectorForPostActionAndIgnoreAllOtherActions() throws Exception {
 
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.controller.command", "structure.test-cmd1",serviceName,  componentName);
+        final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.controller.command", "structure.test-cmd1", serviceName, componentName);
 
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorStructureControllerCommandJmsListener");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorStructureControllerCommandJmsListener");
+
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("messageSelector")),
@@ -567,40 +592,47 @@ public class SubscriptionJmsEndpointGeneratorTest {
 
     @Test
     public void shouldCreateAnnotatedJmsEndpointWithMessageSelectorContainingTwoCommand() throws Exception {
-        String jmsUri = "jms:topic:people.controller.command";
+       final String jmsUri = "jms:topic:people.controller.command";
 
-        Event event1  = event()
+        final Event event = event()
                 .withName("people.command1")
                 .withSchemaUri("http://justice.gov.uk/json/schemas/domains/example/people.command1.json")
                 .build();
+
         Event event2  = event()
                 .withName("people.command2")
                 .withSchemaUri("http://justice.gov.uk/json/schemas/domains/example/people.command2.json")
                 .build();
-        Subscription subscription = subscription()
-                .withName("subscription")
-                .withEvent(event1)
-                .withEventsource(eventsource()
-                        .withName("eventsource")
-                        .withLocation(location()
-                                .withJmsUri(jmsUri)
-                                .withRestUri("http://localhost:8080/example/event-source-api/rest")
-                                .build())
+
+        final EventSource eventsource = eventsource()
+                .withName("eventSource")
+                .withLocation(location()
+                        .withJmsUri(jmsUri)
+                        .withRestUri("http://localhost:8080/example/event-source-api/rest")
                         .build())
                 .build();
-        subscription.getEvents().add(event2);
 
-        SubscriptionDescriptor subscriptionDescriptor = subscriptionDescriptor()
+        final Subscription subscription = subscription()
+                .withName("subscription")
+                .withEvent(event)
+                .withEvent(event2)
+                .withEventSourceName("eventSource")
+                .build();
+
+        final SubscriptionDescriptor subscriptionDescriptor = subscriptionDescriptor()
                 .withSpecVersion("1.0.0")
                 .withService(serviceName)
                 .withServiceComponent(componentName)
                 .withSubscription(subscription)
                 .build();
 
-        generator.run(subscriptionDescriptor,
+        final SubscriptionWrapper subscriptionWrapper = new SubscriptionWrapper(subscriptionDescriptor, asList(eventsource));
+
+        generator.run(subscriptionWrapper,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorPeopleControllerCommandJmsListener");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorPeopleControllerCommandJmsListener");
+
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("messageSelector")),
@@ -611,14 +643,17 @@ public class SubscriptionJmsEndpointGeneratorTest {
 
     @Test
     public void shouldCreateJmsEndpointWithOnMessage() throws Exception {
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:somecontext.controller.command", "somecontext.command1",serviceName,  componentName);
+        final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:somecontext.controller.command", "somecontext.command1", serviceName, componentName);
         generator.run(subscriptionDescriptor, configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorSomecontextControllerCommandJmsListener");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorSomecontextControllerCommandJmsListener");
 
-        List<Method> methods = methodsOf(clazz);
+        final List<Method> methods = methodsOf(clazz);
+
         assertThat(methods, hasSize(1));
-        Method method = methods.get(0);
+
+        final Method method = methods.get(0);
+
         assertThat(method.getReturnType(), CoreMatchers.equalTo(void.class));
         assertThat(method.getParameterCount(), Matchers.is(1));
         assertThat(method.getParameters()[0].getType(), CoreMatchers.equalTo(Message.class));
@@ -627,22 +662,24 @@ public class SubscriptionJmsEndpointGeneratorTest {
     @Test
     @SuppressWarnings("unchecked")
     public void shouldCallJmsProcessorWhenOnMessageIsInvoked() throws Exception {
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:somecontext.controller.command", "somecontext.command1",serviceName,  componentName);
+        final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:somecontext.controller.command", "somecontext.command1", serviceName, componentName);
 
         generator.run(subscriptionDescriptor, configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorSomecontextControllerCommandJmsListener");
-        Object object = instantiate(clazz);
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorSomecontextControllerCommandJmsListener");
+        final Object object = instantiate(clazz);
+
         assertThat(object, is(instanceOf(MessageListener.class)));
 
-        MessageListener jmsListener = (MessageListener) object;
-        Message message = mock(Message.class);
+        final MessageListener jmsListener = (MessageListener) object;
+        final Message message = mock(Message.class);
+
         jmsListener.onMessage(message);
 
-        ArgumentCaptor<Consumer> consumerCaptor = ArgumentCaptor.forClass(Consumer.class);
+        final ArgumentCaptor<Consumer> consumerCaptor = ArgumentCaptor.forClass(Consumer.class);
         verify(jmsProcessor).process(consumerCaptor.capture(), eq(message));
 
-        JsonEnvelope envelope = mock(JsonEnvelope.class);
+        final JsonEnvelope envelope = mock(JsonEnvelope.class);
         final InterceptorContext interceptorContext = interceptorContextWithInput(envelope);
         consumerCaptor.getValue().accept(interceptorContext);
 
@@ -651,13 +688,14 @@ public class SubscriptionJmsEndpointGeneratorTest {
 
     @Test
     public void shouldCreateDurableTopicSubscriber() throws Exception {
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.event", "context1.event.abc","people",  "EVENT_LISTENER");
+        final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.event", "context1.event.abc", "people", "EVENT_LISTENER");
 
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new GeneratorPropertiesFactory().withServiceComponentOf(EVENT_LISTENER)));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleEventListenerPeopleEventJmsListener");
-        ActivationConfigProperty[] activationConfig = clazz.getAnnotation(MessageDriven.class).activationConfig();
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleEventListenerPeopleEventJmsListener");
+        final ActivationConfigProperty[] activationConfig = clazz.getAnnotation(MessageDriven.class).activationConfig();
+
         assertThat(activationConfig, hasItemInArray(
                 allOf(propertyName(equalTo("destinationType")), propertyValue(equalTo("javax.jms.Topic")))));
         assertThat(activationConfig, hasItemInArray(
@@ -671,13 +709,14 @@ public class SubscriptionJmsEndpointGeneratorTest {
 
     @Test
     public void shouldNotContainDurableSubscriberPropertiesIfItsNotTopic() throws Exception {
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.controller.command", "people.event.abc","people",  "COMMAND_CONTROLLER");
+        final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.controller.command", "people.event.abc", "people", "COMMAND_CONTROLLER");
 
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleCommandControllerPeopleControllerCommandJmsListener");
-        ActivationConfigProperty[] activationConfig = clazz.getAnnotation(MessageDriven.class).activationConfig();
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleCommandControllerPeopleControllerCommandJmsListener");
+        final ActivationConfigProperty[] activationConfig = clazz.getAnnotation(MessageDriven.class).activationConfig();
+
         assertThat(activationConfig, hasItemInArray(allOf(
                 propertyName(equalTo("destinationType")),
                 propertyValue(equalTo("javax.jms.Queue")))));
@@ -689,12 +728,13 @@ public class SubscriptionJmsEndpointGeneratorTest {
 
     @Test
     public void shouldCreateAnnotatedEventListenerEndpointWithSharedSubscriptionsPropertySetToTrue() throws Exception {
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.event", "structure.abc",serviceName,  componentName);
+        final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.event", "structure.abc", serviceName, componentName);
 
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorStructureEventJmsListener");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorStructureEventJmsListener");
+
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
                 hasItemInArray(allOf(propertyName(equalTo("shareSubscriptions")),
@@ -704,31 +744,31 @@ public class SubscriptionJmsEndpointGeneratorTest {
 
     @Test
     public void shouldCreateJmsEndpointAnnotatedWithPoolConfiguration() throws Exception {
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.person-added", "people.abc","people",  "EVENT_LISTENER");
+        final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.person-added", "people.abc", "people", "EVENT_LISTENER");
 
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new GeneratorPropertiesFactory().withCustomMDBPool()));
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleEventListenerPeoplePersonAddedJmsListener");
-        Pool poolAnnotation = clazz.getAnnotation(Pool.class);
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleEventListenerPeoplePersonAddedJmsListener");
+        final Pool poolAnnotation = clazz.getAnnotation(Pool.class);
+
         assertThat(poolAnnotation, not(nullValue()));
         assertThat(poolAnnotation.value(), is("people-person-added-event-listener-pool"));
     }
 
     @Test
     public void shouldCreateJmsEndpointAnnotatedWithoutPoolConfiguration() throws Exception {
-        SubscriptionDescriptor subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.person-added", "people.abc","people",  "EVENT_LISTENER");
-
+        final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.person-added", "people.abc", "people", "EVENT_LISTENER");
 
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleEventListenerPeoplePersonAddedJmsListener");
+        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleEventListenerPeoplePersonAddedJmsListener");
         Pool poolAnnotation = clazz.getAnnotation(Pool.class);
-        assertThat(poolAnnotation, nullValue());
 
+        assertThat(poolAnnotation, nullValue());
     }
 
-    private Object instantiate(Class<?> resourceClass) throws InstantiationException, IllegalAccessException {
-        Object resourceObject = resourceClass.newInstance();
+    private Object instantiate(final Class<?> resourceClass) throws InstantiationException, IllegalAccessException {
+        final Object resourceObject = resourceClass.newInstance();
         setField(resourceObject, "jmsProcessor", jmsProcessor);
         setField(resourceObject, INTERCEPTOR_CHAIN_PROCESSOR, interceptorChainProcessor);
         return resourceObject;
@@ -737,13 +777,13 @@ public class SubscriptionJmsEndpointGeneratorTest {
     private FeatureMatcher<ActivationConfigProperty, String> propertyName(Matcher<String> matcher) {
         return new FeatureMatcher<ActivationConfigProperty, String>(matcher, "propertyName", "propertyName") {
             @Override
-            protected String featureValueOf(ActivationConfigProperty actual) {
+            protected String featureValueOf(final ActivationConfigProperty actual) {
                 return actual.propertyName();
             }
         };
     }
 
-    private FeatureMatcher<ActivationConfigProperty, String> propertyValue(Matcher<String> matcher) {
+    private FeatureMatcher<ActivationConfigProperty, String> propertyValue(final Matcher<String> matcher) {
         return new FeatureMatcher<ActivationConfigProperty, String>(matcher, "propertyValue", "propertyValue") {
             @Override
             protected String featureValueOf(ActivationConfigProperty actual) {
@@ -752,28 +792,33 @@ public class SubscriptionJmsEndpointGeneratorTest {
         };
     }
 
-    private SubscriptionDescriptor setUpMessageSubscription(String jmsUri, String eventName, String serviceName, String componentName) {
-        Event event = event()
+    private SubscriptionWrapper setUpMessageSubscription(final String jmsUri, final String eventName, final String serviceName, final String componentName) {
+        final Event event = event()
                 .withName(eventName)
-                .withSchemaUri("http://justice.gov.uk/json/schemas/domains/example/"+eventName+".json")
+                .withSchemaUri("http://justice.gov.uk/json/schemas/domains/example/" + eventName + ".json")
                 .build();
-        Subscription subscription = subscription()
-                .withName("subscription")
-                .withEvent(event)
-                .withEventsource(eventsource()
-                        .withName("eventsource")
-                        .withLocation(location()
-                                .withJmsUri(jmsUri)
-                                .withRestUri("http://localhost:8080/example/event-source-api/rest")
-                                .build())
+
+        final EventSource eventsource = eventsource()
+                .withName("eventSource")
+                .withLocation(location()
+                        .withJmsUri(jmsUri)
+                        .withRestUri("http://localhost:8080/example/event-source-api/rest")
                         .build())
                 .build();
 
-        return subscriptionDescriptor()
+        final Subscription subscription = subscription()
+                .withName("subscription")
+                .withEvent(event)
+                .withEventSourceName("eventSource")
+                .build();
+
+        final SubscriptionDescriptor subscriptionDescriptor = subscriptionDescriptor()
                 .withSpecVersion("1.0.0")
                 .withService(serviceName)
                 .withServiceComponent(componentName)
                 .withSubscription(subscription)
                 .build();
+
+        return new SubscriptionWrapper(subscriptionDescriptor, asList(eventsource));
     }
 }

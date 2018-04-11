@@ -1,7 +1,7 @@
 package uk.gov.justice.subscription.domain.builders;
 
-import uk.gov.justice.subscription.domain.SubscriptionDescriptor;
-import uk.gov.justice.subscription.domain.SubscriptionDescriptorDef;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptor;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptorDef;
 
 public final class SubscriptionDescriptorDefBuilder {
     

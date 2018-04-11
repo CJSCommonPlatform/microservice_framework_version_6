@@ -3,22 +3,25 @@ subscription_descriptor:
   service: example
   service_component: EVENT_LISTENER
   subscriptions:
-    - name: Example Private Events
+    - name: private event subscriptions
       events:
         - name: example.recipe-added
           schema_uri: http://justice.gov.uk/example/event/example.recipe-added.json
+
         - name: example.recipe-removed
           schema_uri: http://justice.gov.uk/example/event/example.recipe-removed.json
+
         - name: example.cake-made
           schema_uri: http://justice.gov.uk/example/event/example.cake-made.json
+
         - name: example.cake-ordered
           schema_uri: http://justice.gov.uk/example/event/listener/example.cake-ordered.json
+
         - name: example.recipe-renamed
           schema_uri: http://justice.gov.uk/example/event/example.recipe-renamed.json
+
         - name: example.recipe-photograph-added
           schema_uri: http://justice.gov.uk/example/event/example.recipe-photograph-added.json
-      eventsource:
-        name: Example Private Events
-        location:
-          jms_uri:  jms:topic:example.event
-          rest_uri: http://localhost:8080/example/event-source-api/rest
+      event_source_name: private.event.source
+
+

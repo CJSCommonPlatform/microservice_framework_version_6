@@ -2,6 +2,7 @@ package uk.gov.justice.services.test.utils.core.matchers;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static java.lang.String.format;
+import static uk.gov.justice.schema.catalog.test.utils.SchemaCatalogResolver.schemaCatalogResolver;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,12 +16,9 @@ import org.everit.json.schema.ArraySchema;
 import org.everit.json.schema.ObjectSchema;
 import org.everit.json.schema.ReferenceSchema;
 import org.everit.json.schema.Schema;
-import org.everit.json.schema.loader.SchemaLoader;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
-import org.json.JSONObject;
-import org.json.JSONTokener;
 
 public class JsonSchemaPropertyMatcher {
 
@@ -91,8 +89,7 @@ public class JsonSchemaPropertyMatcher {
     }
 
     private static ObjectSchema getObjectSchemaFromFile(final String pathToJsonSchema) {
-        final String jsonSchema = getJsonContentFrom(pathToJsonSchema);
-        final Schema rawSchema = SchemaLoader.load(new JSONObject(new JSONTokener(jsonSchema)));
+        final Schema rawSchema = schemaCatalogResolver().loadSchema(getJsonContentFrom(pathToJsonSchema));
         return Optional.of(rawSchema)
                 .filter(ObjectSchema.class::isInstance)
                 .map(ObjectSchema.class::cast)

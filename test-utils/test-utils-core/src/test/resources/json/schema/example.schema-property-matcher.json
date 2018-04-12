@@ -12,6 +12,9 @@
         },
         "postCode": {
           "type": "string"
+        },
+        "test": {
+          "$ref":"http://justice.gov.uk/json/schemas/core/data-types.json#/definitions/uuid"
         }
       },
       "additionalProperties": false,
@@ -82,13 +85,13 @@
                   "$ref": "#/definitions/offence"
                 }
               },
-              "required" : [
+              "required": [
                 "subArrayId"
               ]
             }
           }
         },
-        "required" : [
+        "required": [
           "schemaArrayId",
           "schemaArrayReqProperty"
         ]

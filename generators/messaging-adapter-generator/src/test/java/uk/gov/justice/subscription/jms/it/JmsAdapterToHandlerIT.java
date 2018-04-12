@@ -16,7 +16,6 @@ import uk.gov.justice.api.subscription.Service2EventListenerPeopleEventEventFilt
 import uk.gov.justice.api.subscription.Service2EventListenerPeopleEventEventListenerInterceptorChainProvider;
 import uk.gov.justice.api.subscription.Service2EventListenerPeopleEventEventValidationInterceptor;
 import uk.gov.justice.api.subscription.Service2EventListenerPeopleEventJmsListener;
-import uk.gov.justice.raml.jms.it.AbstractJmsAdapterGenerationIT;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsParameterChecker;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsProcessor;
 import uk.gov.justice.services.adapter.messaging.JmsLoggerMetadataInterceptor;

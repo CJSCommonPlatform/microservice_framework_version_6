@@ -2,14 +2,6 @@ package uk.gov.justice.subscription.jms.core;
 
 import static org.raml.model.ActionType.POST;
 
-import uk.gov.justice.raml.jms.converters.EventNameExtractor;
-import uk.gov.justice.raml.jms.converters.JmsUriGenerator;
-import uk.gov.justice.raml.jms.converters.MimeTypeToEventConverter;
-import uk.gov.justice.raml.jms.converters.RamlMimeTypeListToEventListConverter;
-import uk.gov.justice.raml.jms.converters.RamlResourceToSubscriptionConverter;
-import uk.gov.justice.raml.jms.converters.RamlToJmsSubscriptionConverter;
-import uk.gov.justice.raml.jms.converters.ResourcesListToSubscriptionListConverter;
-import uk.gov.justice.raml.jms.converters.SubscriptionNamesGenerator;
 import uk.gov.justice.raml.jms.core.JmsEndpointGenerator;
 import uk.gov.justice.raml.jms.validator.BaseUriRamlValidator;
 import uk.gov.justice.services.generators.commons.mapping.SchemaIdParser;
@@ -25,11 +17,7 @@ import uk.gov.justice.subscription.jms.interceptor.EventValidationInterceptorCod
 public class JmsEndpointGenerationObjects {
 
     public JmsEndpointGenerator jmsEndpointGenerator() {
-        return new JmsEndpointGenerator(
-                compositeRamlValidator(),
-                subscriptionJmsEndpointGenerator(),
-                ramlToJmsSubscriptionConverter()
-        );
+        return new JmsEndpointGenerator();
     }
 
     public CompositeRamlValidator compositeRamlValidator() {
@@ -89,49 +77,6 @@ public class JmsEndpointGenerationObjects {
 
     public EventListenerInterceptorChainProviderCodeGenerator eventListenerInterceptorChainProviderCodeGenerator() {
         return new EventListenerInterceptorChainProviderCodeGenerator();
-    }
-
-    public RamlToJmsSubscriptionConverter ramlToJmsSubscriptionConverter() {
-        return new RamlToJmsSubscriptionConverter(
-                subscriptionNamesGenerator(),
-                resourcesListToSubscriptionListConverter()
-        );
-    }
-
-    public ResourcesListToSubscriptionListConverter resourcesListToSubscriptionListConverter() {
-        return new ResourcesListToSubscriptionListConverter(ramlResourceToSubscriptionConverter());
-    }
-
-    public SubscriptionNamesGenerator subscriptionNamesGenerator() {
-        return new SubscriptionNamesGenerator();
-    }
-
-    public RamlResourceToSubscriptionConverter ramlResourceToSubscriptionConverter() {
-        return new RamlResourceToSubscriptionConverter(
-                subscriptionNamesGenerator(),
-                ramlMimeTypeListToEventListConverter(),
-                jmsUriGenerator()
-        );
-    }
-
-    public JmsUriGenerator jmsUriGenerator() {
-        return new JmsUriGenerator();
-    }
-
-    public RamlMimeTypeListToEventListConverter ramlMimeTypeListToEventListConverter() {
-        return new RamlMimeTypeListToEventListConverter(
-                mimeTypeToEventConverter());
-    }
-
-    public MimeTypeToEventConverter mimeTypeToEventConverter() {
-        return new MimeTypeToEventConverter(
-                eventNameExtractor(),
-                schemaIdParser()
-        );
-    }
-
-    public EventNameExtractor eventNameExtractor() {
-        return new EventNameExtractor();
     }
 
     public SchemaIdParser schemaIdParser() {

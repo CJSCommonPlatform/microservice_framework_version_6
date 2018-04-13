@@ -6,8 +6,6 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
 
-import uk.gov.justice.subscription.file.read.YamlFileToJsonObjectConverter;
-
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -26,7 +24,7 @@ public class YamlFileToJsonObjectConverterTest {
     }
 
     @Test
-    public void shouldThrowExceptionWhenlToConvertYamlToJsonObjectAUnavailableFile() {
+    public void shouldThrowIOExceptionWhenFileDoesNotExist() {
 
         final YamlFileToJsonObjectConverter converter = new YamlFileToJsonObjectConverter();
         final Path thisPathDoesNotExist = get("no-subscription.yaml");

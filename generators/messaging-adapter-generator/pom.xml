@@ -42,6 +42,11 @@
             <artifactId>event-subscription</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.maven.generator</groupId>
+            <artifactId>parser-common</artifactId>
+            <version>${generator-maven-plugin.version}</version>
+        </dependency>
 
         
         <!-- Test Dependencies -->
@@ -165,14 +170,10 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>uk.gov.justice.maven.generator</groupId>
-            <artifactId>parser-common</artifactId>
-            <version>${generator-maven-plugin.version}</version>
-        </dependency>
-        <dependency>
             <groupId>uk.gov.justice.services</groupId>
             <artifactId>event-subscription-test-utils</artifactId>
             <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

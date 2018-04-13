@@ -243,7 +243,7 @@ public class DefaultEventRepositoryTest {
     @Test
     public void shouldStoreEventEnvelope() throws Exception {
         final String name = "name123";
-        final Event event = new Event(null, STREAM_ID, POSITION, name, null, null, now());
+        final Event event = new Event(null, STREAM_ID, POSITION, name, null, null, now(), "source");
         when(eventConverter.eventOf(envelope)).thenReturn(event);
 
         defaultEventRepository.storeEvent(envelope);
@@ -369,6 +369,6 @@ public class DefaultEventRepositoryTest {
     }
 
     private Event eventOf(final UUID streamId) {
-        return new Event(null, streamId, null, null, null, null, null);
+        return new Event(null, streamId, null, null, null, null, null, null);
     }
 }

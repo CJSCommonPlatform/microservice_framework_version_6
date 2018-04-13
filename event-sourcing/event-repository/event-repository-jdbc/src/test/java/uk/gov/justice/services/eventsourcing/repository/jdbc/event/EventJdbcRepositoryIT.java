@@ -41,6 +41,8 @@ public class EventJdbcRepositoryIT {
     private static final String METADATA_JSON = "{\"field\": \"Value\"}";
     private static final String LIQUIBASE_EVENT_STORE_DB_CHANGELOG_XML = "liquibase/event-store-db-changelog.xml";
     private final static ZonedDateTime TIMESTAMP = new UtcClock().now();
+    private final static String SOURCE = "source";
+
 
     private final EventJdbcRepository jdbcRepository = new EventJdbcRepository();
 
@@ -204,15 +206,16 @@ public class EventJdbcRepositoryIT {
         assertThat(deletedStreamLatestSequenceId, equalTo(0L));
     }
 
-    private Event eventOf(final UUID id, final String name, final UUID streamId, final long sequenceId, final String payloadJSON, final String metadataJSON, final ZonedDateTime timestamp) {
-        return new Event(id, streamId, sequenceId, name, metadataJSON, payloadJSON, timestamp);
+    private Event eventOf(final UUID id, final String name, final UUID streamId, final long sequenceId, final String payloadJSON, final String metadataJSON,
+                          final ZonedDateTime timestamp, final String source) {
+        return new Event(id, streamId, sequenceId, name, metadataJSON, payloadJSON, timestamp, source);
     }
 
     private Event eventOf(final long sequenceId, final UUID streamId) {
-        return eventOf(randomUUID(), NAME, streamId, sequenceId, PAYLOAD_JSON, METADATA_JSON, TIMESTAMP);
+        return eventOf(randomUUID(), NAME, streamId, sequenceId, PAYLOAD_JSON, METADATA_JSON, TIMESTAMP, SOURCE);
     }
 
     private Event eventOf(final UUID id, final long sequenceId) {
-        return eventOf(id, NAME, STREAM_ID, sequenceId, PAYLOAD_JSON, METADATA_JSON, TIMESTAMP);
+        return eventOf(id, NAME, STREAM_ID, sequenceId, PAYLOAD_JSON, METADATA_JSON, TIMESTAMP, SOURCE);
     }
 }

@@ -1,4 +1,4 @@
-package uk.gov.justice.services.eventsourcing.repository.jdbc.event;
+    package uk.gov.justice.services.eventsourcing.repository.jdbc.event;
 
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
@@ -45,7 +45,9 @@ public class EventConverter {
                 eventMetadata
                         .createdAt()
                         .map(createdAt -> createdAt)
-                        .orElseThrow(() -> new IllegalArgumentException("createdAt field missing in envelope")));
+                        .orElseThrow(() -> new IllegalArgumentException("createdAt field missing in envelope")
+                        ),
+                eventMetadata.source().orElse(null));
     }
 
     /**

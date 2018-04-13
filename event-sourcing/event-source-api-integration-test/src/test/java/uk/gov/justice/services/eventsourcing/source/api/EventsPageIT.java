@@ -601,7 +601,9 @@ public class EventsPageIT {
                     .withVersion(i)
                     .build();
 
-            final Event event = new Event(randomUUID(), STREAM_ID, valueOf(i), "Test Name" + i, metadata.asJsonObject().toString(), createObjectBuilder().add("field" + i, "value" + i).build().toString(), new UtcClock().now());
+            final Event event = new Event(randomUUID(), STREAM_ID, valueOf(i), "Test Name" + i,
+                    metadata.asJsonObject().toString(), createObjectBuilder().add("field" + i, "value" + i).build().toString(),
+                    new UtcClock().now(),"source");
             eventsRepository.insert(event);
         }
     }

@@ -40,6 +40,8 @@ public class EventJdbcRepository {
     static final String COL_METADATA = "metadata";
     static final String COL_PAYLOAD = "payload";
     static final String COL_TIMESTAMP = "date_created";
+    static final String COL_SOURCE = "source";
+
 
     /**
      * Statements
@@ -210,7 +212,8 @@ public class EventJdbcRepository {
                         resultSet.getString(COL_NAME),
                         resultSet.getString(COL_METADATA),
                         resultSet.getString(COL_PAYLOAD),
-                        fromSqlTimestamp(resultSet.getTimestamp(COL_TIMESTAMP)));
+                        fromSqlTimestamp(resultSet.getTimestamp(COL_TIMESTAMP)),
+                        resultSet.getString(COL_SOURCE));
             } catch (final SQLException e) {
                 throw new JdbcRepositoryException(e);
             }

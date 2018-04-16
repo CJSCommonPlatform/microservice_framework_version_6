@@ -47,15 +47,15 @@
     <properties>
         <cpp.repo.name>microservice_framework</cpp.repo.name>
 
-        <common-bom.version>1.23.0</common-bom.version>
+        <common-bom.version>1.24.0</common-bom.version>
         <embedded-artemis.version>1.2.0</embedded-artemis.version>
-        <file.service.version>1.15.0</file.service.version>
+        <file.service.version>1.16.0</file.service.version>
         <h2.version>1.3.173</h2.version>
         <jboss-ejb3-ext-api.version>2.2.0.Final</jboss-ejb3-ext-api.version>
         <jboss-vfs.version>3.2.12.Final</jboss-vfs.version>
         <raml-maven-plugin.version>1.6.1</raml-maven-plugin.version>
         <test-utils.version>1.16.2</test-utils.version>
-        <utilities.version>1.12.0</utilities.version>
+        <utilities.version>1.13.0</utilities.version>
         <generator-maven-plugin.version>2.5.0-M2</generator-maven-plugin.version>
         <framework-api.version>3.0.0-M4</framework-api.version>
     </properties>

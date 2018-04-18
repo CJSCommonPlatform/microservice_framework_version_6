@@ -23,6 +23,7 @@ public class RecipeAddedEventProcessor {
     @Handles("example.recipe-added")
     public void recipeAdded(final JsonEnvelope event) {
         LOGGER.info("=============> Inside recipe-added Event Processor");
+
         sender.send(event);
 
     }

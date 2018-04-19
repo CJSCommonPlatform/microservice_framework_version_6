@@ -11,7 +11,6 @@ import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.Metadata;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

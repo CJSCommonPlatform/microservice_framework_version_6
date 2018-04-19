@@ -52,7 +52,7 @@ public class MessageListenerCodeGeneratorTest {
                 .build();
 
 
-        final EventSource eventSource = eventsource()
+        final EventSource eventSourceDefinition = eventsource()
                 .withName("eventsource")
                 .withLocation(location()
                         .withJmsUri(jmsUri)
@@ -60,8 +60,8 @@ public class MessageListenerCodeGeneratorTest {
                         .build())
                 .build();
 
-        final List<EventSource> eventSources = new ArrayList();
-        eventSources.add(eventSource);
+        final List<EventSource> eventSourceDefinitions = new ArrayList();
+        eventSourceDefinitions.add(eventSourceDefinition);
 
         final Subscription subscription = subscription()
                 .withName("subscription")
@@ -77,7 +77,7 @@ public class MessageListenerCodeGeneratorTest {
                 .withSubscription(subscription)
                 .build();
 
-        final SubscriptionWrapper subscriptionWrapper = new SubscriptionWrapper(subscriptionDescriptor, eventSources);
+        final SubscriptionWrapper subscriptionWrapper = new SubscriptionWrapper(subscriptionDescriptor, eventSourceDefinitions);
 
         final ClassNameFactory classNameFactory =
                 new ClassNameFactory(basePackageName, serviceName, componentName, jmsUri);
@@ -144,7 +144,7 @@ public class MessageListenerCodeGeneratorTest {
                         .build())
                 .build();
 
-        final List<EventSource> eventSources = singletonList(eventsource);
+        final List<EventSource> eventSourceDefinitions = singletonList(eventsource);
 
         final Subscription subscription = subscription()
                 .withName("subscription")
@@ -165,7 +165,7 @@ public class MessageListenerCodeGeneratorTest {
 
         final GeneratorProperties generatorProperties = new GeneratorPropertiesFactory().withServiceComponentOf(componentName);
 
-        final SubscriptionWrapper subscriptionWrapper = new SubscriptionWrapper(subscriptionDescriptor, eventSources);
+        final SubscriptionWrapper subscriptionWrapper = new SubscriptionWrapper(subscriptionDescriptor, eventSourceDefinitions);
 
         final TypeSpec typeSpec = messageListenerCodeGenerator.generate(subscriptionWrapper, subscription, (CommonGeneratorProperties) generatorProperties, classNameFactory);
 
@@ -216,7 +216,7 @@ public class MessageListenerCodeGeneratorTest {
                 .withSchemaUri("http://justice.gov.uk/json/schemas/domains/example/my-context.events.something-else-happened.json")
                 .build();
 
-        final EventSource eventSource = eventsource()
+        final EventSource eventSourceDefinition = eventsource()
                 .withName("eventsource")
                 .withLocation(location()
                         .withJmsUri(jmsUri)
@@ -224,8 +224,8 @@ public class MessageListenerCodeGeneratorTest {
                         .build())
                 .build();
 
-        final List<EventSource> eventSources = new ArrayList();
-        eventSources.add(eventSource);
+        final List<EventSource> eventSourceDefinitions = new ArrayList();
+        eventSourceDefinitions.add(eventSourceDefinition);
 
         final Subscription subscription = subscription()
                 .withName("subscription")
@@ -245,7 +245,7 @@ public class MessageListenerCodeGeneratorTest {
 
         GeneratorProperties generatorProperties = new GeneratorPropertiesFactory().withServiceComponentOf("COMMAND_API");
 
-        final SubscriptionWrapper subscriptionWrapper = new SubscriptionWrapper(subscriptionDescriptor, eventSources);
+        final SubscriptionWrapper subscriptionWrapper = new SubscriptionWrapper(subscriptionDescriptor, eventSourceDefinitions);
 
         final TypeSpec typeSpec = messageListenerCodeGenerator.generate(subscriptionWrapper, subscription, (CommonGeneratorProperties) generatorProperties, classNameFactory);
 

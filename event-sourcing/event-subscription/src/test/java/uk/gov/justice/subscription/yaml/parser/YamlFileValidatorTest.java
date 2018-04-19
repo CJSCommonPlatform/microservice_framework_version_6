@@ -9,11 +9,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import uk.gov.justice.subscription.yaml.parser.YamlFileToJsonObjectConverter;
-import uk.gov.justice.subscription.yaml.parser.YamlFileValidator;
-import uk.gov.justice.subscription.yaml.parser.YamlParserException;
-import uk.gov.justice.subscription.yaml.parser.YamlSchemaLoader;
-
 import java.io.IOException;
 import java.nio.file.Path;
 

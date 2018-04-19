@@ -8,8 +8,8 @@ import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import uk.gov.justice.services.core.cdi.SubscriptionName;
 import uk.gov.justice.services.event.sourcing.subscription.dummies.DummyEventListener;
+import uk.gov.justice.services.subscription.annotation.SubscriptionName;
 
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
@@ -55,7 +55,7 @@ public class QualifierAnnotationExtractorTest {
             qualifierAnnotationExtractor.getFrom(injectionPoint, SubscriptionName.class);
             fail();
         } catch (final SubscriptionManagerProducerException expected) {
-            assertThat(expected.getMessage(), is("Failed to find 'uk.gov.justice.services.core.cdi.SubscriptionName' annotation on bean 'uk.gov.justice.services.event.sourcing.subscription.dummies.DummyEventListener'"));
+            assertThat(expected.getMessage(), is("Failed to find 'uk.gov.justice.services.subscription.annotation.SubscriptionName' annotation on bean 'uk.gov.justice.services.event.sourcing.subscription.dummies.DummyEventListener'"));
         }
     }
 }

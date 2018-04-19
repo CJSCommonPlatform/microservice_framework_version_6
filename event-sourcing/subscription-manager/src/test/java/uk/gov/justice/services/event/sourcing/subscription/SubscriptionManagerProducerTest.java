@@ -4,12 +4,15 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.subscription.domain.builders.SubscriptionBuilder.subscription;
 
-import uk.gov.justice.services.core.cdi.SubscriptionName;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
+import uk.gov.justice.services.subscription.annotation.SubscriptionName;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
+import uk.gov.justice.subscription.registry.SubscriptionDescriptorRegistry;
 
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -45,7 +48,7 @@ public class SubscriptionManagerProducerTest {
         final Subscription subscription = mock(Subscription.class);
 
         when(qualifierAnnotationExtractor.getFrom(injectionPoint, SubscriptionName.class)).thenReturn(subscriptionName);
-        when(eventsourceInstance.select(subscriptionName).get()).thenReturn(eventSource);
+        when(eventsourceInstance.select(any(EventSourceNameQualifier.class)).get()).thenReturn(eventSource);
         when(subscriptionDescriptorRegistry.getSubscription(subscriptionName.value())).thenReturn(subscription);
 
         final SubscriptionManager subscriptionManager = subscriptionManagerProducer.subscriptionManager(injectionPoint);
@@ -58,18 +61,20 @@ public class SubscriptionManagerProducerTest {
     public void shouldThrowASubscriptioManagerProducerExceptionIfTheEventSourceInstanceReturnsANull() throws Exception {
 
         final InjectionPoint injectionPoint = mock(InjectionPoint.class);
-
         final SubscriptionName subscriptionName = mock(SubscriptionName.class);
 
-        when(qualifierAnnotationExtractor.getFrom(injectionPoint, SubscriptionName.class)).thenReturn(subscriptionName);
-        when(eventsourceInstance.select(subscriptionName)).thenReturn(null);
-        when(subscriptionName.value()).thenReturn("my-subscription");
+        final Subscription subscription = subscription()
+                .withEventSourceName("eventSourceName")
+                .build();
 
+        when(qualifierAnnotationExtractor.getFrom(injectionPoint, SubscriptionName.class)).thenReturn(subscriptionName);
+        when(subscriptionDescriptorRegistry.getSubscription(subscriptionName.value())).thenReturn(subscription);
+        when(eventsourceInstance.select(any(EventSourceNameQualifier.class))).thenReturn(null);
         try {
             subscriptionManagerProducer.subscriptionManager(injectionPoint);
             fail();
         } catch (final SubscriptionManagerProducerException expected) {
-            assertThat(expected.getMessage(), is("Failed to find instance of event souce with Qualifier 'my-subscription'"));
+            assertThat(expected.getMessage(), is("Failed to find instance of event source with Qualifier 'eventSourceName'"));
         }
     }
 }

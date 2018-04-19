@@ -65,6 +65,11 @@ import uk.gov.justice.services.messaging.jms.DefaultJmsEnvelopeSender;
 import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
 import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
 import uk.gov.justice.services.messaging.logging.TraceLogger;
+import uk.gov.justice.subscription.ParserProducer;
+import uk.gov.justice.subscription.YamlFileFinder;
+import uk.gov.justice.subscription.registry.EventSourceRegistryProducer;
+import uk.gov.justice.subscription.yaml.parser.YamlParser;
+import uk.gov.justice.subscription.yaml.parser.YamlSchemaLoader;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -198,7 +203,12 @@ public class EventStreamPageIT {
             DefaultEnvelopeConverter.class,
             JsonObjectToObjectConverter.class,
             EventSourceProducer.class,
-            EventSourceNameExtractor.class
+            EventSourceNameExtractor.class,
+            EventSourceRegistryProducer.class,
+            ParserProducer.class,
+            YamlFileFinder.class,
+            YamlParser.class,
+            YamlSchemaLoader.class
     })
 
     public WebApp war() {

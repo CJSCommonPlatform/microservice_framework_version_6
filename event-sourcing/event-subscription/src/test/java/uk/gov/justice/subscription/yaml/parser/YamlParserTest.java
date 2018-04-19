@@ -26,7 +26,7 @@ public class YamlParserTest {
     @Test
     public void shouldParseSubscriptionPathAsSubscriptionDescriptorDef() {
 
-        final Path path = getFromClasspath("subscription.yaml");
+        final Path path = getFromClasspath("subscription-descriptor.yaml");
 
         final YamlParser yamlParser = new YamlParser();
 

@@ -1,0 +1,6 @@
+event_sources:
+- name: private.event.source
+  location:
+    jms_uri:  jms:topic:example.event
+    rest_uri: http://localhost:8080/example/event-source-api/rest
+

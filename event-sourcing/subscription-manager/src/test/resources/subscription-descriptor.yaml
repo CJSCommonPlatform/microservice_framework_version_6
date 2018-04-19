@@ -1,30 +1,27 @@
----
 subscription_descriptor:
   spec_version: 1.0.0
-  service: examplecontext
+  service: example
   service_component: EVENT_LISTENER
   subscriptions:
-    - name: subscription1
+    - name: private event subscriptions
       events:
         - name: example.recipe-added
-          schema_uri: http://justice.gov.uk/json/schemas/domains/example/example.recipe-added.json
-        - name: example.recipe-deleted
-          schema_uri: http://justice.gov.uk/json/schemas/domains/example/example.recipe-deleted.json
-      eventsource:
-        name: examplecontext
-        location:
-          jms_uri:  jms:topic:example.event
-          rest_uri: http://localhost:8080/example/event-source-api/rest
-    - name: subscription2
-      events:
-        - name: people.person-added
-          schema_uri: http://justice.gov.uk/json/schemas/domains/people/people.person-added.json
-        - name: people.person-removed
-          schema_uri: http://justice.gov.uk/json/schemas/domains/people/people.person-removed.json
+          schema_uri: http://justice.gov.uk/example/event/example.recipe-added.json
 
-      eventsource:
-          name: people
-          location:
-           jms_uri:  jms:topic:people.event
-           rest_uri: http://localhost:8080/people/event-source-api/rest
-...
+        - name: example.recipe-removed
+          schema_uri: http://justice.gov.uk/example/event/example.recipe-removed.json
+
+        - name: example.cake-made
+          schema_uri: http://justice.gov.uk/example/event/example.cake-made.json
+
+        - name: example.cake-ordered
+          schema_uri: http://justice.gov.uk/example/event/listener/example.cake-ordered.json
+
+        - name: example.recipe-renamed
+          schema_uri: http://justice.gov.uk/example/event/example.recipe-renamed.json
+
+        - name: example.recipe-photograph-added
+          schema_uri: http://justice.gov.uk/example/event/example.recipe-photograph-added.json
+      event_source_name: private.event.source
+
+

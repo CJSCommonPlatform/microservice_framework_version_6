@@ -1,4 +1,4 @@
-package uk.gov.justice.services.event.sourcing.subscription;
+package uk.gov.justice.services.eventsourcing.source.core;
 
 import static com.google.common.collect.ImmutableSet.of;
 import static java.util.Collections.emptySet;
@@ -6,12 +6,11 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.core.cdi.EventSourceName.DEFAULT_EVENT_SOURCE_NAME;
+import static uk.gov.justice.services.eventsourcing.source.core.annotation.EventSourceName.DEFAULT_EVENT_SOURCE_NAME;
 
-import uk.gov.justice.services.core.cdi.EventSourceName;
-import uk.gov.justice.services.event.sourcing.subscription.dummies.DummyCommandHandlerWithDefaultEventSource;
-import uk.gov.justice.services.event.sourcing.subscription.dummies.DummyCommandHandlerWithNamedEventSource;
-import uk.gov.justice.services.eventsourcing.source.core.EventSourceNameExtractor;
+import uk.gov.justice.services.eventsourcing.source.core.annotation.EventSourceName;
+import uk.gov.justice.services.eventsourcing.source.core.dummies.DummyCommandHandlerWithDefaultEventSource;
+import uk.gov.justice.services.eventsourcing.source.core.dummies.DummyCommandHandlerWithNamedEventSource;
 
 import javax.enterprise.inject.spi.InjectionPoint;
 

@@ -38,6 +38,7 @@ public class DefaultEnveloperTest {
     private static final UUID COMMAND_UUID = randomUUID();
     private static final UUID OLD_CAUSATION_ID = randomUUID();
     private static final String TEST_NAME = "test.query.query-response";
+    private final UUID STREAM_ID = UUID.randomUUID();
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
@@ -60,12 +61,14 @@ public class DefaultEnveloperTest {
                         metadataBuilder()
                                 .withId(COMMAND_UUID)
                                 .withName(TEST_EVENT_NAME)
+                                .withStreamId(STREAM_ID)
                                 .withCausation(OLD_CAUSATION_ID),
                         createObjectBuilder()))
                 .apply(new TestEvent("somePayloadValue"));
 
         assertThat(event.metadata().id(), notNullValue());
         assertThat(event.metadata().id(), not(equalTo(COMMAND_UUID)));
+        assertThat(event.metadata().streamId().get(), equalTo(STREAM_ID));
         assertThat(event.metadata().name(), equalTo(TEST_EVENT_NAME));
         assertThat(event.metadata().causation().size(), equalTo(2));
         assertThat(event.metadata().causation().get(0), equalTo(OLD_CAUSATION_ID));
@@ -160,7 +163,6 @@ public class DefaultEnveloperTest {
                         createObjectBuilder()))
                 .apply(new TestEvent());
 
-        assertThat(event.metadata().streamId(), is(empty()));
         assertThat(event.metadata().version(), is(empty()));
     }
 
@@ -178,7 +180,6 @@ public class DefaultEnveloperTest {
                         createObjectBuilder()), "new.name")
                 .apply(new TestEvent());
 
-        assertThat(event.metadata().streamId(), is(empty()));
         assertThat(event.metadata().version(), is(empty()));
     }
 

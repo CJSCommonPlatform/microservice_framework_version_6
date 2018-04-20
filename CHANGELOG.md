@@ -3,7 +3,9 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [4.0.1] - 2018-04-20
+### Added
+- StreamId now persisted by enveloper for metadata
 
 ## [4.0.0] - 2018-03-09
 

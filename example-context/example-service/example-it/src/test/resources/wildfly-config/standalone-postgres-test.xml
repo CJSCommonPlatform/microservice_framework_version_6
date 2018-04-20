@@ -471,6 +471,7 @@
                 <simple name="java:/app/example-command-api/audit.blacklist" value="example.*" type="java.lang.String"/>
                 <simple name="java:global/event.buffer.init.strategy" value="uk.gov.justice.services.event.buffer.core.service.AnsiSQLBasedBufferInitialisationStrategy" type="java.lang.String"/>
                 <simple name="java:global/eventlog.insertion.strategy" value="uk.gov.justice.services.eventsourcing.repository.jdbc.PostgresSQLEventLogInsertionStrategy" type="java.lang.String"/>
+                <simple name="java:global/envelope.validation.exception.handler" value="uk.gov.justice.services.core.envelope.LoggingValidationExceptionHandler" type="java.lang.String"/>
             </bindings>
             <remote-naming/>
         </subsystem>

@@ -8,6 +8,10 @@ import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.example.cakeshop.persistence.CakeRepository;
 import uk.gov.justice.services.example.cakeshop.persistence.entity.Cake;
 import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.Metadata;
+
+import java.util.Optional;
+import java.util.UUID;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,6 +36,9 @@ public class CakeMadeEventListenerTest {
         final Envelope<Cake> envelope = mock(Envelope.class);
         final Cake cake = mock(Cake.class);
         when(envelope.payload()).thenReturn(cake);
+        final Metadata metadata = mock(Metadata.class);
+        when(envelope.metadata()).thenReturn(metadata);
+        when(metadata.streamId()).thenReturn(Optional.empty());
         cakeMadeEventListener.handle(envelope);
 
         verify(cakeRepository).save(cake);

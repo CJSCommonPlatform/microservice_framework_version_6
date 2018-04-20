@@ -8,6 +8,7 @@ import static uk.gov.justice.services.messaging.JsonMetadata.CREATED_AT;
 import static uk.gov.justice.services.messaging.JsonMetadata.ID;
 import static uk.gov.justice.services.messaging.JsonMetadata.NAME;
 import static uk.gov.justice.services.messaging.JsonMetadata.STREAM;
+import static uk.gov.justice.services.messaging.JsonMetadata.STREAM_ID;
 
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
@@ -89,6 +90,8 @@ public class DefaultEnveloper implements Enveloper {
 
         JsonObjectBuilder metadataBuilder = JsonObjects.createObjectBuilderWithFilter(metadata.asJsonObject(),
                 x -> !Arrays.asList(ID, NAME, CAUSATION, STREAM).contains(x));
+
+        metadata.streamId().ifPresent(uuid -> metadataBuilder.add(STREAM, Json.createObjectBuilder().add(STREAM_ID, uuid.toString()).build()));
 
         final JsonObject jsonObject = metadataBuilder
                 .add(ID, UUID.randomUUID().toString())

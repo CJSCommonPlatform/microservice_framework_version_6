@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
+
+## [3.1.3] - 2018-04-20
+### Added
+- Enveloper no longer swallows the streamId (response service requires it)
+
 ## [3.1.2] - 2018-02-01
 Note 3.1.1 release failed because the framework-bom version did not update
 ### Fixed

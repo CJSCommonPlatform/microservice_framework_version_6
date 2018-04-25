@@ -3,14 +3,14 @@ package uk.gov.justice.subscription.domain.builders;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
-import static uk.gov.justice.subscription.domain.builders.EventsourceBuilder.eventsource;
+import static uk.gov.justice.subscription.domain.builders.EventSourceBuilder.eventsource;
 
-import uk.gov.justice.subscription.domain.Eventsource;
-import uk.gov.justice.subscription.domain.Location;
+import uk.gov.justice.subscription.domain.eventsource.EventSource;
+import uk.gov.justice.subscription.domain.eventsource.Location;
 
 import org.junit.Test;
 
-public class EventsourceBuilderTest {
+public class EventSourceBuilderTest {
 
     @Test
     public void shouldBuildAnEventsource() throws Exception {
@@ -18,7 +18,7 @@ public class EventsourceBuilderTest {
         final String name = "name";
         final Location location = mock(Location.class);
 
-        final Eventsource eventsource = eventsource()
+        final EventSource eventsource = eventsource()
                 .withName(name)
                 .withLocation(location)
                 .build();

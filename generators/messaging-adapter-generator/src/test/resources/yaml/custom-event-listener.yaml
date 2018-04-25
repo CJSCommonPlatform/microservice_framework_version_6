@@ -7,17 +7,10 @@ subscription_descriptor:
       events:
         - name: people.eventbb
           schema_uri: http://justice.gov.uk/json/schema/people.eventbb.json
-      eventsource:
-        name: custom
-        location:
-          jms_uri:  jms:topic:people.event
-          rest_uri: http://localhost:8080/example/event-source-api/rest
+      event_source_name: custom.people.service
+
     - name: subscription2
       events:
         - name: example.eventaa
           schema_uri: http://justice.gov.uk/json/schema/example.eventaa.json
-      eventsource:
-        name: custom
-        location:
-          jms_uri:  jms:topic:example.event
-          rest_uri: http://localhost:8080/example/event-source-api/rest
+      event_source_name: custom.example.service

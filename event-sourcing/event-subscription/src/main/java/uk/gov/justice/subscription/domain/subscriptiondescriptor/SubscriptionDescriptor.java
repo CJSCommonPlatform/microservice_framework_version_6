@@ -1,4 +1,4 @@
-package uk.gov.justice.subscription.domain;
+package uk.gov.justice.subscription.domain.subscriptiondescriptor;
 
 import java.util.List;
 

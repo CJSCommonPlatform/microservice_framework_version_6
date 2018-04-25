@@ -1,6 +1,6 @@
 package uk.gov.justice.subscription.domain.builders;
 
-import uk.gov.justice.subscription.domain.Event;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.Event;
 
 public class EventBuilder {
 

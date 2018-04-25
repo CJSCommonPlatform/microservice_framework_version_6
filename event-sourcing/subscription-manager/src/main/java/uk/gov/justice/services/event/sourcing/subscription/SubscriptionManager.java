@@ -1,7 +1,7 @@
 package uk.gov.justice.services.event.sourcing.subscription;
 
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
-import uk.gov.justice.subscription.domain.Subscription;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
 
 public class SubscriptionManager {
 

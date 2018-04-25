@@ -8,16 +8,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.raml.model.ActionType.POST;
 import static uk.gov.justice.subscription.domain.builders.EventBuilder.event;
-import static uk.gov.justice.subscription.domain.builders.EventsourceBuilder.eventsource;
-import static uk.gov.justice.subscription.domain.builders.LocationBuilder.location;
 import static uk.gov.justice.subscription.domain.builders.SubscriptionBuilder.subscription;
-import static uk.gov.justice.subscription.domain.builders.SubscriptionDescriptorBuilder.subscriptionDescriptor;
-import static uk.gov.justice.subscription.domain.builders.SubscriptionDescriptorDefBuilder.subscriptionDescriptorDef;
 
-import uk.gov.justice.subscription.domain.Event;
-import uk.gov.justice.subscription.domain.Subscription;
-import uk.gov.justice.subscription.domain.SubscriptionDescriptor;
-import uk.gov.justice.subscription.domain.SubscriptionDescriptorDef;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.Event;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
 
 import java.util.HashMap;
 
@@ -59,24 +53,8 @@ public class EventFilterCodeGeneratorTest {
                 .withName("subscription")
                 .withEvent(event_1)
                 .withEvent(event_2)
-                .withEventsource(eventsource()
-                        .withName("eventsource")
-                        .withLocation(location()
-                                .withJmsUri(jmsUri)
-                                .withRestUri("http://localhost:8080/example/event-source-api/rest")
-                                .build())
-                        .build())
-                .build();
-        final SubscriptionDescriptor subscriptionDescriptor = subscriptionDescriptor()
-                .withSpecVersion("1.0.0")
-                .withService(serviceName)
-                .withServiceComponent(componentName)
-                .withSubscription(subscription)
                 .build();
 
-        final SubscriptionDescriptorDef subscriptionDescriptorDef = subscriptionDescriptorDef()
-                .withSubscriptionDescriptor(subscriptionDescriptor)
-                .build();
 
         final HashMap<ActionType, Action> actions = new HashMap<>();
         final Resource resource = new Resource();

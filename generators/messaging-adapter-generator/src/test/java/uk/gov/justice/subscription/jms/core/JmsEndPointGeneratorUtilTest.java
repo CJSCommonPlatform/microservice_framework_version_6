@@ -7,7 +7,7 @@ import static uk.gov.justice.subscription.domain.builders.EventBuilder.event;
 import static uk.gov.justice.subscription.jms.core.JmsEndPointGeneratorUtil.shouldGenerateEventFilter;
 import static uk.gov.justice.subscription.jms.core.JmsEndPointGeneratorUtil.shouldListenToAllMessages;
 
-import uk.gov.justice.subscription.domain.Event;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.Event;
 
 import org.junit.Test;
 

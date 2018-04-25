@@ -1,18 +1,23 @@
 package uk.gov.justice.subscription.jms.parser;
 
 import static java.util.Arrays.asList;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import uk.gov.justice.subscription.domain.SubscriptionDescriptor;
-import uk.gov.justice.subscription.file.read.SubscriptionDescriptorParser;
+import uk.gov.justice.subscription.domain.eventsource.EventSource;
+import uk.gov.justice.subscription.domain.eventsource.EventSources;
+import uk.gov.justice.subscription.domain.eventsource.Location;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptor;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptorDef;
+import uk.gov.justice.subscription.yaml.parser.YamlFileValidator;
+import uk.gov.justice.subscription.yaml.parser.YamlParser;
 
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,40 +29,39 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class SubscriptionDescriptorFileParserTest {
 
     @Mock
-    private SubscriptionDescriptorParser subscriptionDescriptorParser;
+    private YamlParser yamlParser;
+
+    @Mock
+    private YamlFileValidator yamlFileValidator;
 
     @InjectMocks
     private SubscriptionDescriptorFileParser subscriptionDescriptorFileParser;
 
 
     @Test
-    public void shouldParseEverySubsctiptionYamlFileIntoASubscriptionDescriptor() throws Exception {
+    public void shouldCreateSubscriptionWrappers() throws Exception {
 
-        final Path baseDir = mock(Path.class, RETURNS_DEEP_STUBS.get());
+        final EventSources eventSources = mock(EventSources.class);
+        final Path baseDir = mock(Path.class);
+        final Path subscriptionPath = mock(Path.class);
+        final Path eventSourcePath = mock(Path.class);
+        final Path resolvedPath = mock(Path.class);
+        final SubscriptionDescriptor subscriptionDescriptor = mock(SubscriptionDescriptor.class);
+        final SubscriptionDescriptorDef subscriptionDescriptorDef = mock(SubscriptionDescriptorDef.class);
 
-        final Path subscriptionFile_1 = mock(Path.class);
-        final Path subscriptionFile_2 = mock(Path.class);
+        final Collection<Path> paths = asList(subscriptionPath, eventSourcePath);
 
-        final Path filePath_1 = mock(Path.class);
-        final Path filePath_2 = mock(Path.class);
+        when(subscriptionPath.endsWith("event-sources.yaml")).thenReturn(false);
+        when(eventSourcePath.endsWith("event-sources.yaml")).thenReturn(true);
+        when(baseDir.resolve(subscriptionPath)).thenReturn(resolvedPath);
+        when(yamlParser.parseYamlFrom(resolvedPath, SubscriptionDescriptorDef.class)).thenReturn(subscriptionDescriptorDef);
+        when(subscriptionDescriptorDef.getSubscriptionDescriptor()).thenReturn(subscriptionDescriptor);
+        when(eventSources.getEventSources()).thenReturn(asList(new EventSource("eventSourceName", mock(Location.class))));
 
-        final SubscriptionDescriptor subscriptionDescriptor_1 = mock(SubscriptionDescriptor.class);
-        final SubscriptionDescriptor subscriptionDescriptor_2 = mock(SubscriptionDescriptor.class);
+        final List<SubscriptionWrapper> subscriptionWrappers = subscriptionDescriptorFileParser.getSubscriptionWrappers(baseDir, paths, eventSources);
 
-        when(baseDir.resolve(subscriptionFile_1).toAbsolutePath()).thenReturn(filePath_1);
-        when(baseDir.resolve(subscriptionFile_2).toAbsolutePath()).thenReturn(filePath_2);
-
-        when(subscriptionDescriptorParser.read(filePath_1)).thenReturn(subscriptionDescriptor_1);
-        when(subscriptionDescriptorParser.read(filePath_2)).thenReturn(subscriptionDescriptor_2);
-
-        final Collection<SubscriptionDescriptor> subscriptionDescriptors = subscriptionDescriptorFileParser.parse(
-                baseDir,
-                asList(subscriptionFile_1, subscriptionFile_2)
-        );
-
-        assertThat(subscriptionDescriptors.size(), is(2));
-
-        assertThat(subscriptionDescriptors, hasItem(subscriptionDescriptor_1));
-        assertThat(subscriptionDescriptors, hasItem(subscriptionDescriptor_2));
+        assertThat(subscriptionWrappers.size(), is(1));
+        assertThat(subscriptionWrappers.get(0).getSubscriptionDescriptor() , is(subscriptionDescriptor));
+        assertThat(subscriptionWrappers.get(0).getEventSourceByName("eventSourceName") , is(notNullValue()));
     }
 }

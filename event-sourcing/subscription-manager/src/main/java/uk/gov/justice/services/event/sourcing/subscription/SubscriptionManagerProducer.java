@@ -4,7 +4,7 @@ import static java.lang.String.format;
 
 import uk.gov.justice.services.core.cdi.SubscriptionName;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
-import uk.gov.justice.subscription.domain.Subscription;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;

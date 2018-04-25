@@ -3,8 +3,8 @@ package uk.gov.justice.services.event.sourcing.subscription;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 
-import uk.gov.justice.subscription.domain.Subscription;
-import uk.gov.justice.subscription.domain.SubscriptionDescriptor;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptor;
 
 import java.util.Collection;
 import java.util.Map;

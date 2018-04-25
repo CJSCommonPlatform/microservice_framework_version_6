@@ -7,8 +7,9 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import uk.gov.justice.subscription.domain.SubscriptionDescriptor;
-import uk.gov.justice.subscription.file.read.SubscriptionDescriptorParser;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptor;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptorDef;
+import uk.gov.justice.subscription.yaml.parser.YamlParser;
 
 import java.nio.file.Path;
 
@@ -28,7 +29,7 @@ public class SubscriptionRegistryProducerTest {
     SubscriptionDescriptorFileFinder subscriptionDescriptorFileFinder;
 
     @Mock
-    SubscriptionDescriptorParser subscriptionDescriptorParser;
+    YamlParser yamlParser;
 
     @InjectMocks
     private SubscriptionRegistryProducer subscriptionRegistryProducer;
@@ -39,6 +40,9 @@ public class SubscriptionRegistryProducerTest {
         final Path path_1 = mock(Path.class);
         final Path path_2 = mock(Path.class);
 
+        final SubscriptionDescriptorDef subscriptionDescriptorDef_1 = mock(SubscriptionDescriptorDef.class);
+        final SubscriptionDescriptorDef subscriptionDescriptorDef_2 = mock(SubscriptionDescriptorDef.class);
+
         final SubscriptionDescriptor subscriptionDescriptor_1 = mock(SubscriptionDescriptor.class);
         final SubscriptionDescriptor subscriptionDescriptor_2 = mock(SubscriptionDescriptor.class);
 
@@ -46,8 +50,13 @@ public class SubscriptionRegistryProducerTest {
         final String service_2 = "service_2";
 
         when(subscriptionDescriptorFileFinder.findOnClasspath()).thenReturn(asList(path_1,path_2));
-        when(subscriptionDescriptorParser.read(path_1)).thenReturn(subscriptionDescriptor_1);
-        when(subscriptionDescriptorParser.read(path_2)).thenReturn(subscriptionDescriptor_2);
+
+        when(yamlParser.parseYamlFrom(path_1, SubscriptionDescriptorDef.class)).thenReturn(subscriptionDescriptorDef_1);
+        when(yamlParser.parseYamlFrom(path_2, SubscriptionDescriptorDef.class)).thenReturn(subscriptionDescriptorDef_2);
+
+        when(subscriptionDescriptorDef_1.getSubscriptionDescriptor()).thenReturn(subscriptionDescriptor_1);
+        when(subscriptionDescriptorDef_2.getSubscriptionDescriptor()).thenReturn(subscriptionDescriptor_2);
+
         when(subscriptionDescriptor_1.getService()).thenReturn(service_1);
         when(subscriptionDescriptor_2.getService()).thenReturn(service_2);
 

@@ -9,8 +9,4 @@ subscription_descriptor:
           schema_uri: http://justice.gov.uk/json/schema/structure.commanda.json
         - name: structure.commandb
           schema_uri: http://justice.gov.uk/json/schema/structure.commandb.json
-      eventsource:
-        name: service1
-        location:
-          jms_uri:  jms:queue:structure.controller.command
-          rest_uri: http://localhost:8080/example/event-source-api/rest
+      event_source_name: command.controller.service

@@ -592,14 +592,14 @@ public class SubscriptionJmsEndpointGeneratorTest {
 
     @Test
     public void shouldCreateAnnotatedJmsEndpointWithMessageSelectorContainingTwoCommand() throws Exception {
-       final String jmsUri = "jms:topic:people.controller.command";
+        final String jmsUri = "jms:topic:people.controller.command";
 
         final Event event = event()
                 .withName("people.command1")
                 .withSchemaUri("http://justice.gov.uk/json/schemas/domains/example/people.command1.json")
                 .build();
 
-        Event event2  = event()
+        final Event event2 = event()
                 .withName("people.command2")
                 .withSchemaUri("http://justice.gov.uk/json/schemas/domains/example/people.command2.json")
                 .build();

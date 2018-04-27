@@ -4,8 +4,8 @@ import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
-import uk.gov.justice.services.core.cdi.SubscriptionName;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.subscription.annotation.SubscriptionName;
 
 @SuppressWarnings("unused")
 @ServiceComponent(EVENT_LISTENER)

@@ -2,9 +2,10 @@ package uk.gov.justice.services.event.sourcing.subscription;
 
 import static java.lang.String.format;
 
-import uk.gov.justice.services.core.cdi.SubscriptionName;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
+import uk.gov.justice.services.subscription.annotation.SubscriptionName;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
+import uk.gov.justice.subscription.registry.SubscriptionDescriptorRegistry;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
@@ -19,7 +20,7 @@ public class SubscriptionManagerProducer {
     @Inject
     @Any
     Instance<EventSource> eventsourceInstance;
-    
+
     @Inject
     SubscriptionDescriptorRegistry subscriptionDescriptorRegistry;
 
@@ -27,19 +28,21 @@ public class SubscriptionManagerProducer {
     QualifierAnnotationExtractor qualifierAnnotationExtractor;
 
     @Produces
+    @SubscriptionName
     public SubscriptionManager subscriptionManager(final InjectionPoint injectionPoint) {
 
         final SubscriptionName subscriptionName = qualifierAnnotationExtractor.getFrom(injectionPoint, SubscriptionName.class);
+        final Subscription subscription = subscriptionDescriptorRegistry.getSubscription(subscriptionName.value());
 
-        final Instance<EventSource> eventSourceInstance = eventsourceInstance.select(subscriptionName);
+        final EventSourceNameQualifier eventSourceNameQualifier = new EventSourceNameQualifier(subscription.getEventSourceName());
 
-        if(eventSourceInstance != null) {
-            final EventSource eventSource = eventSourceInstance.get();
-            final Subscription subscription = subscriptionDescriptorRegistry.getSubscription(subscriptionName.value());
+        final Instance<EventSource> eventSourceInstance = eventsourceInstance.select(eventSourceNameQualifier);
 
-            return new SubscriptionManager(subscription, eventSource);
+        if (eventSourceInstance == null) {
+            throw new SubscriptionManagerProducerException(format("Failed to find instance of event source with Qualifier '%s'", subscription.getEventSourceName()));
         }
 
-        throw new SubscriptionManagerProducerException(format("Failed to find instance of event souce with Qualifier '%s'", subscriptionName.value()));
+        final EventSource eventSource = eventSourceInstance.get();
+        return new SubscriptionManager(subscription, eventSource);
     }
 }

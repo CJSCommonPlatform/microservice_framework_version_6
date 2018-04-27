@@ -54,6 +54,11 @@ import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
+import uk.gov.justice.subscription.ParserProducer;
+import uk.gov.justice.subscription.YamlFileFinder;
+import uk.gov.justice.subscription.registry.EventSourceRegistryProducer;
+import uk.gov.justice.subscription.yaml.parser.YamlParser;
+import uk.gov.justice.subscription.yaml.parser.YamlSchemaLoader;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -145,8 +150,13 @@ public class DefaultAggregateServiceIT {
             DefaultFileSystemUrlResolverStrategy.class,
 
             EventSourceProducer.class,
-            EventSourceNameExtractor.class
+            EventSourceNameExtractor.class,
 
+            EventSourceRegistryProducer.class,
+            ParserProducer.class,
+            YamlFileFinder.class,
+            YamlParser.class,
+            YamlSchemaLoader.class
     })
     public WebApp war() {
         return new WebApp()

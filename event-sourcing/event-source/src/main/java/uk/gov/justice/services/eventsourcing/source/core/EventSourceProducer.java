@@ -1,6 +1,11 @@
 package uk.gov.justice.services.eventsourcing.source.core;
 
-import static uk.gov.justice.services.core.cdi.EventSourceName.DEFAULT_EVENT_SOURCE_NAME;
+import static uk.gov.justice.services.eventsourcing.source.core.annotation.EventSourceName.DEFAULT_EVENT_SOURCE_NAME;
+
+import uk.gov.justice.services.eventsourcing.source.core.annotation.EventSourceName;
+import uk.gov.justice.subscription.registry.EventSourceRegistry;
+
+import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
@@ -17,18 +22,29 @@ public class EventSourceProducer {
     @Inject
     EventSourceNameExtractor eventSourceNameExtractor;
 
+    @Inject
+    EventSourceRegistry eventSourceRegistry;
+
     @Produces
+    public EventSource eventSource() {
+        return create(DefaultEventSource.class);
+    }
+
+    @Produces
+    @EventSourceName
     public EventSource eventSource(final InjectionPoint injectionPoint) {
 
         final String eventSourceName = eventSourceNameExtractor.getEventSourceNameFromQualifier(injectionPoint);
 
         if (DEFAULT_EVENT_SOURCE_NAME.equals(eventSourceName)) {
-            return create(DefaultEventSource.class);
+            return eventSource();
+        } else {
+            final Optional<uk.gov.justice.subscription.domain.eventsource.EventSource> eventSourceFor = eventSourceRegistry.getEventSourceFor(eventSourceName);
+            return eventSourceFor
+                    .map(eventSource -> eventSource())
+                    .orElseThrow(() -> new UnsatisfiedResolutionException("Use of non default EventSources not yet implemented"));
         }
-
-        throw new UnsatisfiedResolutionException("Use of non default EventSources not yet implemented");
     }
-
 
     @SuppressWarnings("unchecked")
     EventSource create(final Class<? extends EventSource> eventSourceClass) {

@@ -7,7 +7,6 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static uk.gov.justice.subscription.domain.builders.SubscriptionBuilder.subscription;
 
-import uk.gov.justice.subscription.domain.eventsource.EventSource;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Event;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
 

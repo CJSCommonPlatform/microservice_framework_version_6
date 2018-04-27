@@ -6,7 +6,8 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.core.cdi.EventSourceName.DEFAULT_EVENT_SOURCE_NAME;
+import static uk.gov.justice.services.eventsourcing.source.core.annotation.EventSourceName.DEFAULT_EVENT_SOURCE_NAME;
+
 
 import uk.gov.justice.services.common.configuration.GlobalValueProducer;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
@@ -33,6 +34,11 @@ import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
 import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
 import uk.gov.justice.services.messaging.logging.TraceLogger;
 import uk.gov.justice.services.test.utils.common.helper.StoppedClock;
+import uk.gov.justice.subscription.ParserProducer;
+import uk.gov.justice.subscription.YamlFileFinder;
+import uk.gov.justice.subscription.registry.EventSourceRegistryProducer;
+import uk.gov.justice.subscription.yaml.parser.YamlParser;
+import uk.gov.justice.subscription.yaml.parser.YamlSchemaLoader;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
@@ -78,7 +84,13 @@ import org.slf4j.Logger;
         JmsEnvelopeSender.class,
         DefaultJmsEnvelopeSender.class,
         EnvelopeConverter.class,
-        DefaultEnvelopeConverter.class})
+        DefaultEnvelopeConverter.class,
+        EventSourceRegistryProducer.class,
+        ParserProducer.class,
+        YamlFileFinder.class,
+        YamlParser.class,
+        YamlSchemaLoader.class
+})
 public class EventSourceProducerTest {
 
     @Produces

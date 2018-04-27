@@ -58,9 +58,9 @@ public class SubscriptionJmsEndpointGenerator implements Generator<SubscriptionW
     /**
      * Generates JMS endpoint classes from a SubscriptionDescriptorDef document.
      *
-     * @param subscriptionWrapper          the subscriptionWrapper document
-     * @param configuration contains package of generated sources, as well as source and destination
-     *                      folders
+     * @param subscriptionWrapper the subscriptionWrapper document
+     * @param configuration       contains package of generated sources, as well as source and destination
+     *                            folders
      */
     @Override
     public void run(final SubscriptionWrapper subscriptionWrapper, final GeneratorConfig configuration) {
@@ -102,13 +102,13 @@ public class SubscriptionJmsEndpointGenerator implements Generator<SubscriptionW
         final String componentName = subscriptionDescriptor.getServiceComponent();
 
 
-        final EventSource eventSource = subscriptionWrapper.getEventSourceByName( subscription.getEventSourceName());
+        final EventSource eventSourceDefinition = subscriptionWrapper.getEventSourceByName(subscription.getEventSourceName());
 
         final ClassNameFactory classNameFactory = new ClassNameFactory(
                 basePackageName,
                 contextName,
                 componentName,
-                eventSource.getLocation().getJmsUri());
+                eventSourceDefinition.getLocation().getJmsUri());
 
         if (shouldGenerateEventFilter(subscription.getEvents(), componentName)) {
 

@@ -74,10 +74,10 @@ public class MessageListenerCodeGenerator {
     /**
      * Create an implementation of the {@link MessageListener}.
      *
-     * @param subscriptionWrapper the subscription descriptor Wrapper
-     * @param subscription                  the subscription
-     * @param commonGeneratorProperties     used to query the generator properties
-     * @param classNameFactory              creates the class name for this generated class
+     * @param subscriptionWrapper       the subscription descriptor Wrapper
+     * @param subscription              the subscription
+     * @param commonGeneratorProperties used to query the generator properties
+     * @param classNameFactory          creates the class name for this generated class
      * @return the message listener class specification
      */
     TypeSpec generate(final SubscriptionWrapper subscriptionWrapper,
@@ -92,10 +92,10 @@ public class MessageListenerCodeGenerator {
     /**
      * Generate the @link MessageListener} class implementation.
      *
-     * @param subscriptionWrapper the subscription descriptor Wrapper
-     * @param subscription                  the subscription
-     * @param commonGeneratorProperties     used to query the generator properties
-     * @param classNameFactory              creates the class name for this generated class
+     * @param subscriptionWrapper       the subscription descriptor Wrapper
+     * @param subscription              the subscription
+     * @param commonGeneratorProperties used to query the generator properties
+     * @param classNameFactory          creates the class name for this generated class
      * @return the {@link TypeSpec.Builder} that defines the class
      */
     private TypeSpec.Builder classSpecFrom(final SubscriptionWrapper subscriptionWrapper,
@@ -108,8 +108,8 @@ public class MessageListenerCodeGenerator {
         if (componentDestinationType.isSupported(serviceComponent)) {
 
             final ClassName className = classNameFactory.classNameFor(JMS_LISTENER);
-            final EventSource eventSource = subscriptionWrapper.getEventSourceByName(subscription.getEventSourceName());
-            final String destination = destinationFromJmsUri(eventSource.getLocation().getJmsUri());
+            final EventSource eventSourceDefinition = subscriptionWrapper.getEventSourceByName(subscription.getEventSourceName());
+            final String destination = destinationFromJmsUri(eventSourceDefinition.getLocation().getJmsUri());
 
             final TypeSpec.Builder typeSpecBuilder = classBuilder(className)
                     .addModifiers(PUBLIC)

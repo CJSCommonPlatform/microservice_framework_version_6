@@ -1,19 +1,20 @@
 package uk.gov.justice.subscription;
 
 import static java.nio.file.Paths.get;
-import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptor;
-import uk.gov.justice.subscription.yaml.parser.YamlFileToJsonObjectConverter;
 import uk.gov.justice.subscription.yaml.parser.YamlFileValidator;
 import uk.gov.justice.subscription.yaml.parser.YamlParser;
 import uk.gov.justice.subscription.yaml.parser.YamlSchemaLoader;
+import uk.gov.justice.subscription.yaml.parser.YamlToJsonObjectConverter;
 
-import java.nio.file.Path;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,15 +30,18 @@ public class SubscriptionDescriptorsParserTest {
         final YamlParser yamlParser = new YamlParser();
         final YamlSchemaLoader yamlSchemaLoader = new YamlSchemaLoader();
         final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
-        final YamlFileValidator yamlFileValidator = new YamlFileValidator(new YamlFileToJsonObjectConverter(yamlParser, objectMapper), yamlSchemaLoader);
+        final YamlFileValidator yamlFileValidator = new YamlFileValidator(new YamlToJsonObjectConverter(yamlParser, objectMapper), yamlSchemaLoader);
 
         subscriptionDescriptorsParser = new SubscriptionDescriptorsParser(yamlParser, yamlFileValidator);
     }
 
     @Test
-    public void shouldName() throws Exception {
-        final Path path = getFromClasspath("subscription-descriptor.yaml");
-        final List<SubscriptionDescriptor> subscriptionDescriptorList = subscriptionDescriptorsParser.getSubscriptionDescriptorsFrom(asList(path)).collect(toList());
+    public void shouldParseSubscriptionDescriptorYamlUrl() throws Exception {
+        final URL url = getFromClasspath("yaml/subscription-descriptor.yaml");
+
+        final List<SubscriptionDescriptor> subscriptionDescriptorList = subscriptionDescriptorsParser
+                .getSubscriptionDescriptorsFrom(singletonList(url))
+                .collect(toList());
 
         assertThat(subscriptionDescriptorList.size(), is(1));
         assertThat(subscriptionDescriptorList.get(0).getSubscriptions().size(), is(2));
@@ -47,7 +51,7 @@ public class SubscriptionDescriptorsParserTest {
     }
 
     @SuppressWarnings("ConstantConditions")
-    private Path getFromClasspath(final String name) {
-        return get(getClass().getClassLoader().getResource(name).getPath());
+    private URL getFromClasspath(final String name) throws MalformedURLException {
+        return get(getClass().getClassLoader().getResource(name).getPath()).toUri().toURL();
     }
 }

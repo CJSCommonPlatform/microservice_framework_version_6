@@ -50,6 +50,24 @@
                                     </resources>
                                 </configuration>
                             </execution>
+                            <execution>
+                                <id>copy-yaml-resources</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>
+                                        ${basedir}/target/generated-resources/yaml
+                                    </outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>src/yaml</directory>
+                                            <filtering>true</filtering>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
                         </executions>
                     </plugin>
 
@@ -110,7 +128,7 @@
                                         </serviceComponent>
                                     </generatorProperties>
                                     <includes>
-                                        <include>**/*.messaging.yaml</include>
+                                        <include>**/subscription-descriptor.yaml</include>
                                         <include>**/event-sources.yaml</include>
                                     </includes>
                                 </configuration>

@@ -3,13 +3,13 @@ subscription_descriptor:
   service: custom
   service_component: EVENT_LISTENER
   subscriptions:
-    - name: subscription1
+    - name: custom 1
       events:
         - name: people.eventbb
           schema_uri: http://justice.gov.uk/json/schema/people.eventbb.json
       event_source_name: custom.people.service
 
-    - name: subscription2
+    - name: custom 2
       events:
         - name: example.eventaa
           schema_uri: http://justice.gov.uk/json/schema/example.eventaa.json

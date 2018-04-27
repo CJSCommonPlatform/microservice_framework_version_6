@@ -16,6 +16,9 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.Unmanaged;
 import javax.inject.Inject;
 
+/**
+ * Producer for EventSource, backwards compatible supports Named and Unnamed EventSource injection points
+ */
 @ApplicationScoped
 public class EventSourceProducer {
 
@@ -25,11 +28,23 @@ public class EventSourceProducer {
     @Inject
     EventSourceRegistry eventSourceRegistry;
 
+    /**
+     * Backwards compatible support for Unnamed EventSource injection points
+     *
+     * @return {@link EventSource}
+     */
     @Produces
     public EventSource eventSource() {
         return create(DefaultEventSource.class);
     }
 
+    /**
+     * Support for Named EventSource injection points.  Annotate injection point with
+     * {@code @EventSourceName("name")}
+     *
+     * @param injectionPoint the injection point for the EventSource
+     * @return {@link EventSource}
+     */
     @Produces
     @EventSourceName
     public EventSource eventSource(final InjectionPoint injectionPoint) {
@@ -47,7 +62,7 @@ public class EventSourceProducer {
     }
 
     @SuppressWarnings("unchecked")
-    EventSource create(final Class<? extends EventSource> eventSourceClass) {
+    private EventSource create(final Class<? extends EventSource> eventSourceClass) {
 
         final BeanManager beanManager = CDI.current().getBeanManager();
         final Unmanaged<EventSource> unmanaged = new Unmanaged(beanManager, eventSourceClass);

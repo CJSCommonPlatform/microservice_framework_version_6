@@ -11,7 +11,9 @@ import uk.gov.justice.subscription.SubscriptionDescriptorsParser;
 import uk.gov.justice.subscription.domain.eventsource.EventSource;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptor;
 
+import java.net.URL;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
@@ -28,6 +30,9 @@ public class SubscriptionDescriptorFileParserTest {
     @Mock
     private SubscriptionDescriptorsParser subscriptionDescriptorsParser;
 
+    @Mock
+    private PathToUrlResolver pathToUrlResolver;
+
     @InjectMocks
     private SubscriptionDescriptorFileParser subscriptionDescriptorFileParser;
 
@@ -37,18 +42,16 @@ public class SubscriptionDescriptorFileParserTest {
         final EventSource eventSourceDefinition = mock(EventSource.class);
         final SubscriptionDescriptor subscriptionDescriptor = mock(SubscriptionDescriptor.class);
 
-        final Path baseDir = mock(Path.class);
-        final Path subscriptionPath = mock(Path.class);
-        final Path eventSourcePath = mock(Path.class);
-        final Path resolvedPath = mock(Path.class);
+        final Path baseDir = Paths.get("/yaml");
+        final Path eventSourcePath = Paths.get("event-sources.yaml");
+        final Path subscriptionDescriptorPath = Paths.get("subscription-descriptor.yaml");
+        final Collection<Path> paths = asList(subscriptionDescriptorPath, eventSourcePath);
 
-        final Collection<Path> paths = asList(subscriptionPath, eventSourcePath);
+        final URL subscriptionDescriptorUrl = new URL("file:/subscription-descriptor.yaml");
+        final List<URL> urlList = singletonList(subscriptionDescriptorUrl);
 
-        when(subscriptionPath.endsWith("event-sources.yaml")).thenReturn(false);
-        when(eventSourcePath.endsWith("event-sources.yaml")).thenReturn(true);
-        when(baseDir.resolve(subscriptionPath)).thenReturn(resolvedPath);
-
-        when(subscriptionDescriptorsParser.getSubscriptionDescriptorsFrom(singletonList(resolvedPath))).thenReturn(Stream.of(subscriptionDescriptor));
+        when(pathToUrlResolver.resolveToUrl(baseDir, subscriptionDescriptorPath)).thenReturn(subscriptionDescriptorUrl);
+        when(subscriptionDescriptorsParser.getSubscriptionDescriptorsFrom(urlList)).thenReturn(Stream.of(subscriptionDescriptor));
         when(eventSourceDefinition.getName()).thenReturn("eventSourceName");
 
         final List<SubscriptionWrapper> subscriptionWrappers = subscriptionDescriptorFileParser.getSubscriptionWrappers(baseDir, paths, singletonList(eventSourceDefinition));

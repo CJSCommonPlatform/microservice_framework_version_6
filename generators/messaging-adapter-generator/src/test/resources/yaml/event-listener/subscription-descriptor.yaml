@@ -3,7 +3,7 @@ subscription_descriptor:
   service: service2
   service_component: EVENT_LISTENER
   subscriptions:
-    - name: subscription1
+    - name: event listener 1
       events:
         - name: people.eventaa
           schema_uri: http://justice.gov.uk/json/schema/people.eventaa.json

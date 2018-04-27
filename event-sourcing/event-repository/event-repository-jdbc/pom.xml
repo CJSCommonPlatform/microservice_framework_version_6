@@ -97,15 +97,11 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>uk.gov.justice.utils</groupId>
             <artifactId>test-utils-logging-simple</artifactId>
             <type>pom</type>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>uk.gov.justice.framework-api</groupId>
-            <artifactId>framework-api-event-stream</artifactId>
         </dependency>
     </dependencies>
 

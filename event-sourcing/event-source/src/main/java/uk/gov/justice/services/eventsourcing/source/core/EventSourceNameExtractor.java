@@ -10,7 +10,6 @@ import javax.enterprise.inject.spi.InjectionPoint;
 @ApplicationScoped
 public class EventSourceNameExtractor {
 
-    @SuppressWarnings("unchecked")
     public String getEventSourceNameFromQualifier(final InjectionPoint injectionPoint) {
 
         return injectionPoint.getQualifiers().stream()

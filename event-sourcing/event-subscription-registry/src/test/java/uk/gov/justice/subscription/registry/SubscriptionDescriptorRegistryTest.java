@@ -19,7 +19,7 @@ import org.junit.Test;
 public class SubscriptionDescriptorRegistryTest {
 
     @Test
-    public void shouldMaintainARegistryOfServiceNamesToSubscriptionDescriptions() throws Exception {
+    public void shouldMaintainARegistryOfServiceComponentNamesToSubscriptionDescriptions() throws Exception {
 
         final String event_listener = "EVENT_LISTENER";
         final String event_processor = "EVENT_PROCESSOR";
@@ -86,7 +86,7 @@ public class SubscriptionDescriptorRegistryTest {
 
         final SubscriptionDescriptorRegistry subscriptionDescriptorRegistry = new SubscriptionDescriptorRegistry(subscriptionDescriptors);
 
-        assertThat(subscriptionDescriptorRegistry.getSubscription("subscription_2_1"), is(subscription_2_1));
+        assertThat(subscriptionDescriptorRegistry.getSubscriptionFor("subscription_2_1"), is(subscription_2_1));
     }
 
     @Test
@@ -123,7 +123,7 @@ public class SubscriptionDescriptorRegistryTest {
         final SubscriptionDescriptorRegistry subscriptionDescriptorRegistry = new SubscriptionDescriptorRegistry(subscriptionDescriptors);
 
         try {
-            subscriptionDescriptorRegistry.getSubscription(thisSubscriptionDoesNotExist);
+            subscriptionDescriptorRegistry.getSubscriptionFor(thisSubscriptionDoesNotExist);
             fail();
         } catch (final RegistryException expected) {
             assertThat(expected.getMessage(), is("Failed to find subscription 'thisSubscriptionDoesNotExist' in registry"));
@@ -146,7 +146,7 @@ public class SubscriptionDescriptorRegistryTest {
                 subscriptionDescriptor_2
         );
         try {
-           new SubscriptionDescriptorRegistry(subscriptionDescriptors);
+            new SubscriptionDescriptorRegistry(subscriptionDescriptors);
             fail();
         } catch (final RegistryException expected) {
             assertThat(expected.getMessage(), is("Duplicate subscription descriptor for service component: EVENT_LISTENER"));

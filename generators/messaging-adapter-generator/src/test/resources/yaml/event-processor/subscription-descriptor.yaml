@@ -3,7 +3,7 @@ subscription_descriptor:
   service: service2
   service_component: EVENT_PROCESSOR
   subscriptions:
-    - name: subscription1
+    - name: event processor 1
       events:
         - name: structure.eventbb
           schema_uri: http://justice.gov.uk/json/schema/structure.eventbb.json

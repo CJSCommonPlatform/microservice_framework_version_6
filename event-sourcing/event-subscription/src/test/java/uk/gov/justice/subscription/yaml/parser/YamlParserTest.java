@@ -15,7 +15,8 @@ import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDes
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptorDef;
 
 import java.io.FileNotFoundException;
-import java.nio.file.Path;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,13 +25,13 @@ import org.junit.Test;
 public class YamlParserTest {
 
     @Test
-    public void shouldParseSubscriptionPathAsSubscriptionDescriptorDef() {
+    public void shouldParseSubscriptionPathAsSubscriptionDescriptorDef() throws Exception {
 
-        final Path path = getFromClasspath("subscription-descriptor.yaml");
+        final URL url = getFromClasspath("yaml/subscription-descriptor.yaml");
 
         final YamlParser yamlParser = new YamlParser();
 
-        final SubscriptionDescriptor subscriptionDescriptor = yamlParser.parseYamlFrom(path, SubscriptionDescriptorDef.class).getSubscriptionDescriptor();
+        final SubscriptionDescriptor subscriptionDescriptor = yamlParser.parseYamlFrom(url, SubscriptionDescriptorDef.class).getSubscriptionDescriptor();
 
         assertThat(subscriptionDescriptor.getService(), is("examplecontext"));
         assertThat(subscriptionDescriptor.getServiceComponent(), is("EVENT_LISTENER"));
@@ -52,13 +53,13 @@ public class YamlParserTest {
     }
 
     @Test
-    public void shouldParseEventSourcesPathAsEventSources() {
+    public void shouldParseEventSourcesPathAsEventSources() throws Exception {
 
-        final Path path = getFromClasspath("event-sources.yaml");
+        final URL url = getFromClasspath("yaml/event-sources.yaml");
 
         final YamlParser yamlParser = new YamlParser();
 
-        final EventSources eventSources = yamlParser.parseYamlFrom(path, EventSources.class);
+        final EventSources eventSources = yamlParser.parseYamlFrom(url, EventSources.class);
 
         final List<EventSource> eventSourceList = eventSources.getEventSources();
         assertThat(eventSourceList.size(), is(2));
@@ -77,12 +78,12 @@ public class YamlParserTest {
     }
 
     @Test
-    public void shouldThrowFileNotFoundException() {
+    public void shouldThrowFileNotFoundException() throws Exception {
 
-        final Path path = get("this-subscription-does-not-exist.yaml").toAbsolutePath();
+        final URL url = get("this-subscription-does-not-exist.yaml").toUri().toURL();
         try {
             final YamlParser yamlParser = new YamlParser();
-            yamlParser.parseYamlFrom(path, SubscriptionDescriptorDef.class);
+            yamlParser.parseYamlFrom(url, SubscriptionDescriptorDef.class);
             fail();
         } catch (final YamlParserException e) {
             assertThat(e.getCause(), is(instanceOf(FileNotFoundException.class)));
@@ -92,7 +93,7 @@ public class YamlParserTest {
     }
 
     @SuppressWarnings("ConstantConditions")
-    private Path getFromClasspath(final String name) {
-        return get(getClass().getClassLoader().getResource(name).getPath());
+    private URL getFromClasspath(final String name) throws MalformedURLException {
+        return get(getClass().getClassLoader().getResource(name).getPath()).toUri().toURL();
     }
 }

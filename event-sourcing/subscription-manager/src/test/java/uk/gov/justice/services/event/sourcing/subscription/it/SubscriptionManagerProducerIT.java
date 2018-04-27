@@ -1,22 +1,35 @@
 package uk.gov.justice.services.event.sourcing.subscription.it;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
-import static uk.gov.justice.services.eventsourcing.source.core.annotation.EventSourceName.DEFAULT_EVENT_SOURCE_NAME;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.fieldValue;
 
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.core.annotation.Adapter;
+import uk.gov.justice.services.core.cdi.LoggerProducer;
+import uk.gov.justice.services.core.dispatcher.DispatcherCache;
+import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
+import uk.gov.justice.services.core.dispatcher.EnvelopePayloadTypeConverter;
+import uk.gov.justice.services.core.dispatcher.JsonEnvelopeRepacker;
+import uk.gov.justice.services.core.interceptor.InterceptorCache;
+import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
+import uk.gov.justice.services.event.sourcing.subscription.DefaultSubscriptionManager;
 import uk.gov.justice.services.event.sourcing.subscription.QualifierAnnotationExtractor;
-import uk.gov.justice.services.event.sourcing.subscription.SubscriptionManager;
 import uk.gov.justice.services.event.sourcing.subscription.SubscriptionManagerProducer;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.annotation.EventSourceName;
+import uk.gov.justice.services.subscription.SubscriptionManager;
 import uk.gov.justice.services.subscription.annotation.SubscriptionName;
 import uk.gov.justice.subscription.ParserProducer;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
 import uk.gov.justice.subscription.registry.SubscriptionDescriptorRegistryProducer;
 import uk.gov.justice.subscription.yaml.parser.YamlParser;
 import uk.gov.justice.subscription.yaml.parser.YamlSchemaLoader;
+
+import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
@@ -37,10 +50,21 @@ import org.junit.runner.RunWith;
         SubscriptionManagerProducer.class,
         SubscriptionDescriptorRegistryProducer.class,
         QualifierAnnotationExtractor.class,
+        InterceptorChainProcessorProducer.class,
+        DispatcherCache.class,
+        InterceptorCache.class,
+        LoggerProducer.class,
+        DispatcherFactory.class,
+        JsonEnvelopeRepacker.class,
+        EnvelopePayloadTypeConverter.class,
+
         SubscriptionManagerProducerIT.TestEventSourceProducer.class,
         SubscriptionManagerProducerIT.TestClass.class
 })
 public class SubscriptionManagerProducerIT {
+
+    private static final String SUBSCRIPTION_NAME = "private event subscriptions";
+    private static final String EVENT_SOURCE_NAME = "private.event.source";
 
     @Inject
     TestEventSourceProducer testEventSourceProducer;
@@ -53,16 +77,28 @@ public class SubscriptionManagerProducerIT {
 
         final SubscriptionManager subscriptionManager = testClass.getSubscriptionManager();
 
-        assertThat(subscriptionManager, is(notNullValue()));
-        assertThat(subscriptionManager.getEventSource(), is(testEventSourceProducer.eventSource));
-        assertThat(subscriptionManager.getSubscription().getName(), is("private event subscriptions"));
+        assertThat(subscriptionManager, is(instanceOf(DefaultSubscriptionManager.class)));
+
+        final DefaultSubscriptionManager defaultSubscriptionManager = (DefaultSubscriptionManager) subscriptionManager;
+
+        final Optional<Object> actualEventSource = fieldValue(defaultSubscriptionManager, "eventSource");
+        assertThat(actualEventSource, is(Optional.ofNullable(testEventSourceProducer.getEventSource())));
+
+        final Optional<Object> subscription = fieldValue(defaultSubscriptionManager, "subscription");
+        assertThat(subscription.isPresent(), is(true));
+        assertThat(((Subscription) subscription.get()).getName(), is(SUBSCRIPTION_NAME));
+        assertThat(((Subscription) subscription.get()).getEventSourceName(), is(EVENT_SOURCE_NAME));
+
+        final Optional<Object> interceptorChainProcessor = fieldValue(defaultSubscriptionManager, "interceptorChainProcessor");
+        assertThat(interceptorChainProcessor.isPresent(), is(true));
     }
 
     @ApplicationScoped
+    @Adapter(EVENT_LISTENER)
     public static class TestClass {
 
         @Inject
-        @SubscriptionName("private event subscriptions")
+        @SubscriptionName(SUBSCRIPTION_NAME)
         SubscriptionManager subscriptionManager;
 
         public SubscriptionManager getSubscriptionManager() {
@@ -70,9 +106,10 @@ public class SubscriptionManagerProducerIT {
         }
     }
 
+    @ApplicationScoped
     public static class TestEventSourceProducer {
 
-        public EventSource eventSource;
+        private EventSource eventSource;
 
         @Inject
         QualifierAnnotationExtractor qualifierAnnotationExtractor;
@@ -82,12 +119,16 @@ public class SubscriptionManagerProducerIT {
         public EventSource eventSource(final InjectionPoint injectionPoint) {
             final EventSourceName eventSourceName = qualifierAnnotationExtractor.getFrom(injectionPoint, EventSourceName.class);
 
-            if (DEFAULT_EVENT_SOURCE_NAME.equals(eventSourceName.value())) {
+            if (eventSourceName.value().equals(EVENT_SOURCE_NAME)) {
                 eventSource = mock(EventSource.class);
                 return eventSource;
             }
 
             return null;
+        }
+
+        public EventSource getEventSource() {
+            return eventSource;
         }
     }
 

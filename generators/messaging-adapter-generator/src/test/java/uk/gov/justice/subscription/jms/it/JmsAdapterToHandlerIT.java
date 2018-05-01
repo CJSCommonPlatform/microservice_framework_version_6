@@ -59,6 +59,7 @@ import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.core.mapping.ActionNameToMediaTypesMappingObserver;
 import uk.gov.justice.services.core.mapping.DefaultMediaTypesMappingCache;
 import uk.gov.justice.services.core.mapping.DefaultNameToMediaTypeConverter;
+import uk.gov.justice.services.core.mapping.MappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.MediaType;
 import uk.gov.justice.services.core.mapping.NameToMediaTypeConverter;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingObserver;
@@ -183,8 +184,9 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
             MediaTypeProvider.class,
             EnvelopeValidator.class,
             EnvelopeInspector.class,
-            RequesterProducer.class
+            RequesterProducer.class,
 
+            MappingCacheInitialiser.class
     })
     public WebApp war() {
         return new WebApp()

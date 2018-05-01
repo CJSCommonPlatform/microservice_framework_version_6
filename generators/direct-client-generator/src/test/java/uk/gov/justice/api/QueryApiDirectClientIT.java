@@ -43,6 +43,7 @@ import uk.gov.justice.services.core.mapping.ActionNameToMediaTypesMappingObserve
 import uk.gov.justice.services.core.mapping.DefaultMediaTypesMappingCache;
 import uk.gov.justice.services.core.mapping.DefaultNameToMediaTypeConverter;
 import uk.gov.justice.services.core.mapping.DefaultSchemaIdMappingCache;
+import uk.gov.justice.services.core.mapping.MappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingObserver;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.requester.RequesterProducer;
@@ -134,8 +135,9 @@ public class QueryApiDirectClientIT {
             ActionNameToMediaTypesMappingObserver.class,
             MediaTypeProvider.class,
             BackwardsCompatibleJsonSchemaValidator.class,
-            EnvelopeInspector.class
+            EnvelopeInspector.class,
 
+            MappingCacheInitialiser.class
     })
     public WebApp war() {
         return new WebApp()

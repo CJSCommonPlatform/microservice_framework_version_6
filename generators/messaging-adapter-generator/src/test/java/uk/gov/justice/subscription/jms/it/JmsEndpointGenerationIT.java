@@ -33,6 +33,7 @@ import uk.gov.justice.services.core.mapping.ActionNameToMediaTypesMappingObserve
 import uk.gov.justice.services.core.mapping.DefaultMediaTypesMappingCache;
 import uk.gov.justice.services.core.mapping.DefaultNameToMediaTypeConverter;
 import uk.gov.justice.services.core.mapping.DefaultSchemaIdMappingCache;
+import uk.gov.justice.services.core.mapping.MappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.MediaTypeToSchemaIdMapper;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingObserver;
 import uk.gov.justice.services.event.buffer.api.AllowAllEventFilter;
@@ -125,7 +126,9 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
             DefaultMediaTypesMappingCache.class,
             ActionNameToMediaTypesMappingObserver.class,
 
-            BackwardsCompatibleJsonSchemaValidator.class
+            BackwardsCompatibleJsonSchemaValidator.class,
+
+            MappingCacheInitialiser.class
     })
     public WebApp war() {
         return new WebApp()

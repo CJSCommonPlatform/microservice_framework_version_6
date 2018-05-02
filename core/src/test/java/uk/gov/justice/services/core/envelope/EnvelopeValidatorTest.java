@@ -170,7 +170,10 @@ public class EnvelopeValidatorTest {
 
         final EnvelopeValidationException envelopeValidationException = exceptionArgumentCaptor.getValue();
 
-        assertThat(envelopeValidationException.getMessage(), is("Message not valid against schema: \ndebug-json"));
+        final String exceptionMessage = "Message not valid against schema: " +
+                "\ndebug-json : validation error: {\"message\":\"#: Ooops\"," +
+                "\"violation\":\"#\",\"causingExceptions\":[]}";
+        assertThat(envelopeValidationException.getMessage(), is(exceptionMessage));
         assertThat(envelopeValidationException.getCause(), is(validationException));
     }
 

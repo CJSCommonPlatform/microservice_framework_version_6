@@ -3,7 +3,7 @@ subscription_descriptor:
   service: example
   service_component: EVENT_PROCESSOR
   subscriptions:
-    - name: Example Private Events
+    - name: event processor subscription
       events:
         - name: example.recipe-added
           schema_uri: http://justice.gov.uk/example/event/example.recipe-added.json

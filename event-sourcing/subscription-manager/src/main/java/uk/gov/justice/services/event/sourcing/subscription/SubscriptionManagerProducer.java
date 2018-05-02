@@ -2,7 +2,10 @@ package uk.gov.justice.services.event.sourcing.subscription;
 
 import static java.lang.String.format;
 
+import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
+import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
+import uk.gov.justice.services.subscription.SubscriptionManager;
 import uk.gov.justice.services.subscription.annotation.SubscriptionName;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
 import uk.gov.justice.subscription.registry.SubscriptionDescriptorRegistry;
@@ -25,6 +28,9 @@ public class SubscriptionManagerProducer {
     SubscriptionDescriptorRegistry subscriptionDescriptorRegistry;
 
     @Inject
+    InterceptorChainProcessorProducer interceptorChainProcessorProducer;
+
+    @Inject
     QualifierAnnotationExtractor qualifierAnnotationExtractor;
 
     @Produces
@@ -32,7 +38,7 @@ public class SubscriptionManagerProducer {
     public SubscriptionManager subscriptionManager(final InjectionPoint injectionPoint) {
 
         final SubscriptionName subscriptionName = qualifierAnnotationExtractor.getFrom(injectionPoint, SubscriptionName.class);
-        final Subscription subscription = subscriptionDescriptorRegistry.getSubscription(subscriptionName.value());
+        final Subscription subscription = subscriptionDescriptorRegistry.getSubscriptionFor(subscriptionName.value());
 
         final EventSourceNameQualifier eventSourceNameQualifier = new EventSourceNameQualifier(subscription.getEventSourceName());
 
@@ -42,7 +48,9 @@ public class SubscriptionManagerProducer {
             throw new SubscriptionManagerProducerException(format("Failed to find instance of event source with Qualifier '%s'", subscription.getEventSourceName()));
         }
 
+        final InterceptorChainProcessor interceptorChainProcessor = interceptorChainProcessorProducer.produceProcessor(injectionPoint);
+
         final EventSource eventSource = eventSourceInstance.get();
-        return new SubscriptionManager(subscription, eventSource);
+        return new DefaultSubscriptionManager(subscription, eventSource, interceptorChainProcessor);
     }
 }

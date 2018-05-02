@@ -13,14 +13,14 @@
 
     <dependencies>
         <dependency>
-            <groupId>uk.gov.justice.services</groupId>
-            <artifactId>event-subscription</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>event-subscription</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
@@ -32,14 +32,21 @@
             <artifactId>framework-api-event-source</artifactId>
         </dependency>
         <dependency>
+            <groupId>uk.gov.justice.framework-api</groupId>
+            <artifactId>framework-api-subscription</artifactId>
+        </dependency>
+        <dependency>
             <groupId>uk.gov.justice.services</groupId>
             <artifactId>event-source</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>uk.gov.justice.framework-api</groupId>
+            <artifactId>framework-api-messaging-adapter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.framework-api</groupId>
             <artifactId>framework-api-subscription</artifactId>
-            <version>${framework-api.version}</version>
         </dependency>
 
         <!--Test Dependencies-->
@@ -67,6 +74,12 @@
             <groupId>uk.gov.justice.services</groupId>
             <artifactId>event-subscription-test-utils</artifactId>
             <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.utils</groupId>
+            <artifactId>test-utils-core</artifactId>
+            <version>${test-utils.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

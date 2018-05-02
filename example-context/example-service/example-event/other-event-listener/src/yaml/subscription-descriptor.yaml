@@ -3,7 +3,7 @@ subscription_descriptor:
   service: example
   service_component: OTHER_EVENT_LISTENER
   subscriptions:
-    - name: Other Private Events
+    - name: other event listener subscription
       events:
         - name: other.recipe-added
           schema_uri: http://justice.gov.uk/example/event/other.recipe-added.json

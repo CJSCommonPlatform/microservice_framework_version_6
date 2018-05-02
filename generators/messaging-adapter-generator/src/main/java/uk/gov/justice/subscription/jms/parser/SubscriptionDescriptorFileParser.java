@@ -5,22 +5,29 @@ import static java.util.stream.Collectors.toList;
 import uk.gov.justice.subscription.SubscriptionDescriptorsParser;
 import uk.gov.justice.subscription.domain.eventsource.EventSource;
 
+import java.net.URL;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class SubscriptionDescriptorFileParser {
 
     private final SubscriptionDescriptorsParser subscriptionDescriptorsParser;
+    private final PathToUrlResolver pathToUrlResolver;
 
-    public SubscriptionDescriptorFileParser(final SubscriptionDescriptorsParser subscriptionDescriptorsParser) {
+    public SubscriptionDescriptorFileParser(final SubscriptionDescriptorsParser subscriptionDescriptorsParser,
+                                            final PathToUrlResolver pathToUrlResolver) {
         this.subscriptionDescriptorsParser = subscriptionDescriptorsParser;
+        this.pathToUrlResolver = pathToUrlResolver;
     }
 
-    public List<SubscriptionWrapper> getSubscriptionWrappers(final Path baseDir, final Collection<Path> paths, final List<EventSource> eventSourceDefinitions) {
-        final List<Path> subscriptionPaths = paths.stream()
-                .filter(path -> !isEventSource(path))
-                .map(baseDir::resolve)
+    public List<SubscriptionWrapper> getSubscriptionWrappers(final Path baseDir,
+                                                             final Collection<Path> paths,
+                                                             final List<EventSource> eventSourceDefinitions) {
+        final List<URL> subscriptionPaths = paths.stream()
+                .filter(isNotEventSource)
+                .map(path -> pathToUrlResolver.resolveToUrl(baseDir, path))
                 .collect(toList());
 
         return subscriptionDescriptorsParser.getSubscriptionDescriptorsFrom(subscriptionPaths)
@@ -28,7 +35,5 @@ public class SubscriptionDescriptorFileParser {
                 .collect(toList());
     }
 
-    private boolean isEventSource(Path path) {
-        return path.endsWith("event-sources.yaml");
-    }
+    private Predicate<Path> isNotEventSource = path -> !path.endsWith("event-sources.yaml");
 }

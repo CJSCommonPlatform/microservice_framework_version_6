@@ -18,6 +18,7 @@ import uk.gov.justice.api.subscription.Service2EventListenerPeopleEventEventVali
 import uk.gov.justice.api.subscription.Service2EventListenerPeopleEventJmsListener;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsParameterChecker;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsProcessor;
+import uk.gov.justice.services.adapter.messaging.DefaultSubscriptionJmsProcessor;
 import uk.gov.justice.services.adapter.messaging.JmsLoggerMetadataInterceptor;
 import uk.gov.justice.services.adapter.messaging.JsonSchemaValidationInterceptor;
 import uk.gov.justice.services.common.configuration.GlobalValueProducer;
@@ -59,8 +60,8 @@ import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.core.mapping.ActionNameToMediaTypesMappingObserver;
 import uk.gov.justice.services.core.mapping.DefaultMediaTypesMappingCache;
 import uk.gov.justice.services.core.mapping.DefaultNameToMediaTypeConverter;
-import uk.gov.justice.services.core.mapping.MediaTypesMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.MediaType;
+import uk.gov.justice.services.core.mapping.MediaTypesMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.NameToMediaTypeConverter;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingObserver;
@@ -68,6 +69,11 @@ import uk.gov.justice.services.core.requester.RequesterProducer;
 import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.event.buffer.api.AllowAllEventFilter;
 import uk.gov.justice.services.event.buffer.api.EventBufferService;
+import uk.gov.justice.services.event.sourcing.subscription.QualifierAnnotationExtractor;
+import uk.gov.justice.services.event.sourcing.subscription.SubscriptionManagerProducer;
+import uk.gov.justice.services.eventsourcing.source.core.EventSource;
+import uk.gov.justice.services.eventsourcing.source.core.EventStream;
+import uk.gov.justice.services.eventsourcing.source.core.annotation.EventSourceName;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
@@ -76,12 +82,19 @@ import uk.gov.justice.services.messaging.jms.exception.JmsConverterException;
 import uk.gov.justice.services.messaging.logging.DefaultJmsMessageLoggerHelper;
 import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
 import uk.gov.justice.services.test.utils.common.envelope.TestEnvelopeRecorder;
+import uk.gov.justice.subscription.ParserProducer;
+import uk.gov.justice.subscription.YamlFileFinder;
+import uk.gov.justice.subscription.registry.SubscriptionDescriptorRegistryProducer;
+import uk.gov.justice.subscription.yaml.parser.YamlParser;
+import uk.gov.justice.subscription.yaml.parser.YamlSchemaLoader;
 
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.Session;
@@ -95,11 +108,13 @@ import org.apache.openejb.testing.Classes;
 import org.apache.openejb.testing.Module;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 @RunWith(ApplicationComposer.class)
 public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
 
     private static final String PEOPLE_EVENT_AA = "people.eventaa";
+
     @Resource(name = "people.event")
     private Topic peopleEventsDestination;
 
@@ -188,7 +203,18 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
             RequesterProducer.class,
 
             MediaTypesMappingCacheInitialiser.class,
-            SchemaIdMappingCacheInitialiser.class
+            SchemaIdMappingCacheInitialiser.class,
+
+            DefaultSubscriptionJmsProcessor.class,
+            SubscriptionManagerProducer.class,
+            QualifierAnnotationExtractor.class,
+            SubscriptionDescriptorRegistryProducer.class,
+            YamlFileFinder.class,
+            ParserProducer.class,
+            YamlParser.class,
+            YamlSchemaLoader.class,
+
+            TestEventSourceProducer.class
     })
     public WebApp war() {
         return new WebApp()
@@ -300,5 +326,40 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
     @ApplicationScoped
     public static class TestService2EventListenerPeopleEventJmsListener extends Service2EventListenerPeopleEventJmsListener {
 
+    }
+
+    @ApplicationScoped
+    public static class TestEventSourceProducer {
+
+        @Produces
+        @EventSourceName
+        public EventSource eventSource() {
+            return new EventSource() {
+                @Override
+                public EventStream getStreamById(final UUID streamId) {
+                    throw new NotImplementedException();
+                }
+
+                @Override
+                public Stream<EventStream> getStreams() {
+                    throw new NotImplementedException();
+                }
+
+                @Override
+                public Stream<EventStream> getStreamsFrom(final long position) {
+                    throw new NotImplementedException();
+                }
+
+                @Override
+                public UUID cloneStream(final UUID streamId) {
+                    throw new NotImplementedException();
+                }
+
+                @Override
+                public void clearStream(final UUID streamId) {
+                    throw new NotImplementedException();
+                }
+            };
+        }
     }
 }

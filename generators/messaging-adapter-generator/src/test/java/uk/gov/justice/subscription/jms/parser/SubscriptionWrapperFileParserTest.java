@@ -25,7 +25,7 @@ public class SubscriptionWrapperFileParserTest {
 
         final List<Path> yamlPaths = asList(
                 getFromClasspath("yaml/event-sources.yaml"),
-                getFromClasspath("yaml/command-controller.yaml"));
+                getFromClasspath("yaml/event-processor/subscription-descriptor.yaml"));
         final Collection<SubscriptionWrapper> subscriptionWrapperCollection = subscriptionWrapperFileParser.parse(path, yamlPaths);
 
         assertThat(subscriptionWrapperCollection.size(), is(1));
@@ -33,7 +33,7 @@ public class SubscriptionWrapperFileParserTest {
         final SubscriptionWrapper subscriptionWrapper = subscriptionWrapperCollection.iterator().next();
 
         assertThat(subscriptionWrapper.getSubscriptionDescriptor(), is(notNullValue()));
-        assertThat(subscriptionWrapper.getEventSourceByName("command.controller.service"), is(notNullValue()));
+        assertThat(subscriptionWrapper.getEventSourceByName("event.processor.service").getName(), is("event.processor.service"));
     }
 
     @Test
@@ -44,7 +44,7 @@ public class SubscriptionWrapperFileParserTest {
             final List<Path> yamlPaths = asList(
                     getFromClasspath("yaml/event-sources.yaml"),
                     getFromClasspath("yaml/event-sources.yaml"),
-                    getFromClasspath("yaml/command-controller.yaml"));
+                    getFromClasspath("yaml/event-processor/subscription-descriptor.yaml"));
             subscriptionWrapperFileParser.parse(path, yamlPaths);
             fail();
         } catch (final Exception expected) {

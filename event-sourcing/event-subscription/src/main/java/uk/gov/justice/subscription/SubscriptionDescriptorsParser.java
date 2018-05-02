@@ -5,10 +5,13 @@ import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDes
 import uk.gov.justice.subscription.yaml.parser.YamlFileValidator;
 import uk.gov.justice.subscription.yaml.parser.YamlParser;
 
-import java.nio.file.Path;
+import java.net.URL;
 import java.util.Collection;
 import java.util.stream.Stream;
 
+/**
+ * Parse YAML URLs into {@link SubscriptionDescriptor}s
+ */
 public class SubscriptionDescriptorsParser {
 
     private YamlParser yamlParser;
@@ -19,13 +22,19 @@ public class SubscriptionDescriptorsParser {
         this.yamlFileValidator = yamlFileValidator;
     }
 
-    public Stream<SubscriptionDescriptor> getSubscriptionDescriptorsFrom(final Collection<Path> paths) {
-        return paths.stream()
+    /**
+     * Return a Stream of {@link SubscriptionDescriptor} from a Collection of YAML URLs
+     *
+     * @param urls the YAML URLs to parse
+     * @return Stream of {@link SubscriptionDescriptor}
+     */
+    public Stream<SubscriptionDescriptor> getSubscriptionDescriptorsFrom(final Collection<URL> urls) {
+        return urls.stream()
                 .map(this::parseSubscriptionDescriptorFromYaml);
     }
 
-    private SubscriptionDescriptor parseSubscriptionDescriptorFromYaml(final Path path) {
-        yamlFileValidator.validateSubscription(path);
-        return yamlParser.parseYamlFrom(path, SubscriptionDescriptorDef.class).getSubscriptionDescriptor();
+    private SubscriptionDescriptor parseSubscriptionDescriptorFromYaml(final URL url) {
+        yamlFileValidator.validateSubscription(url);
+        return yamlParser.parseYamlFrom(url, SubscriptionDescriptorDef.class).getSubscriptionDescriptor();
     }
 }

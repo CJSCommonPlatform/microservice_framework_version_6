@@ -444,7 +444,7 @@
                 </dependency>
                 <dependency>
                     <groupId>uk.gov.justice.services.example</groupId>
-                    <artifactId>example-event-listenerb</artifactId>
+                    <artifactId>other-event-listener</artifactId>
                     <version>${project.version}</version>
                     <type>war</type>
                 </dependency>

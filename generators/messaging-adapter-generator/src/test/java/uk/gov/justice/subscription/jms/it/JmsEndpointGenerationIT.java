@@ -1,57 +1,75 @@
 package uk.gov.justice.subscription.jms.it;
 
-import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import uk.gov.justice.api.subscription.Service1CommandControllerStructureControllerCommandJmsListener;
-import uk.gov.justice.api.subscription.Service1CommandHandlerStructureHandlerCommandJmsListener;
 import uk.gov.justice.api.subscription.Service2EventListenerPeopleEventEventFilter;
 import uk.gov.justice.api.subscription.Service2EventListenerPeopleEventEventValidationInterceptor;
 import uk.gov.justice.api.subscription.Service2EventListenerPeopleEventJmsListener;
 import uk.gov.justice.api.subscription.Service2EventProcessorStructureEventJmsListener;
-import uk.gov.justice.api.subscription.mapper.CustomEventListenerMediaTypeToSchemaIdMapper;
 import uk.gov.justice.raml.jms.it.AbstractJmsAdapterGenerationIT;
-import uk.gov.justice.schema.catalog.CatalogProducer;
-import uk.gov.justice.schema.service.SchemaCatalogService;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsParameterChecker;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsProcessor;
-import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
+import uk.gov.justice.services.adapter.messaging.DefaultSubscriptionJmsProcessor;
+import uk.gov.justice.services.adapter.messaging.JmsLoggerMetadataInterceptor;
+import uk.gov.justice.services.adapter.messaging.JsonSchemaValidationInterceptor;
+import uk.gov.justice.services.common.configuration.GlobalValueProducer;
+import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.common.util.UtcClock;
+import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
+import uk.gov.justice.services.core.accesscontrol.AllowAllPolicyEvaluator;
+import uk.gov.justice.services.core.accesscontrol.DefaultAccessControlService;
+import uk.gov.justice.services.core.accesscontrol.PolicyEvaluator;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
+import uk.gov.justice.services.core.dispatcher.DispatcherCache;
+import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
+import uk.gov.justice.services.core.dispatcher.EmptySystemUserProvider;
+import uk.gov.justice.services.core.dispatcher.EnvelopePayloadTypeConverter;
+import uk.gov.justice.services.core.dispatcher.JsonEnvelopeRepacker;
+import uk.gov.justice.services.core.dispatcher.ServiceComponentObserver;
+import uk.gov.justice.services.core.dispatcher.SystemUserUtil;
+import uk.gov.justice.services.core.envelope.EnvelopeInspector;
+import uk.gov.justice.services.core.envelope.EnvelopeValidationExceptionHandlerProducer;
+import uk.gov.justice.services.core.envelope.EnvelopeValidator;
+import uk.gov.justice.services.core.envelope.MediaTypeProvider;
+import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
-import uk.gov.justice.services.core.json.BackwardsCompatibleJsonSchemaValidator;
+import uk.gov.justice.services.core.extension.ServiceComponentScanner;
 import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
 import uk.gov.justice.services.core.json.DefaultJsonValidationLoggerHelper;
-import uk.gov.justice.services.core.json.FileBasedJsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
-import uk.gov.justice.services.core.json.PayloadExtractor;
-import uk.gov.justice.services.core.json.SchemaCatalogAwareJsonSchemaValidator;
+import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.core.mapping.ActionNameToMediaTypesMappingObserver;
 import uk.gov.justice.services.core.mapping.DefaultMediaTypesMappingCache;
 import uk.gov.justice.services.core.mapping.DefaultNameToMediaTypeConverter;
-import uk.gov.justice.services.core.mapping.DefaultSchemaIdMappingCache;
+import uk.gov.justice.services.core.mapping.MediaType;
 import uk.gov.justice.services.core.mapping.MediaTypesMappingCacheInitialiser;
-import uk.gov.justice.services.core.mapping.MediaTypeToSchemaIdMapper;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingObserver;
+import uk.gov.justice.services.core.requester.RequesterProducer;
+import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.event.buffer.api.AllowAllEventFilter;
-import uk.gov.justice.services.generators.test.utils.interceptor.RecordingInterceptorChainProcessor;
+import uk.gov.justice.services.generators.test.utils.interceptor.EnvelopeRecorder;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
+import uk.gov.justice.services.messaging.jms.DefaultJmsEnvelopeSender;
 import uk.gov.justice.services.messaging.logging.DefaultJmsMessageLoggerHelper;
 import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
+import uk.gov.justice.services.subscription.SubscriptionManager;
+import uk.gov.justice.services.subscription.annotation.SubscriptionName;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.jms.JMSException;
-import javax.jms.Queue;
 import javax.jms.Topic;
 
 import org.apache.openejb.jee.WebApp;
@@ -68,13 +86,7 @@ import org.junit.runner.RunWith;
 public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
 
     @Inject
-    RecordingInterceptorChainProcessor interceptorChainProcessor;
-
-    @Resource(name = "structure.handler.command")
-    private Queue commandHandlerDestination;
-
-    @Resource(name = "structure.controller.command")
-    private Queue commandControllerDestination;
+    RecordingSubscriptionManager recordingSubscriptionManager;
 
     @Resource(name = "structure.event")
     private Topic structureEventsDestination;
@@ -82,55 +94,72 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
     @Resource(name = "people.event")
     private Topic peopleEventsDestination;
 
-    @Resource(name = "public.event")
-    private Topic publicEventsDestination;
-
     @Module
     @Classes(cdi = true, value = {
             DefaultJmsProcessor.class,
-            RecordingInterceptorChainProcessor.class,
-            Service1CommandControllerStructureControllerCommandJmsListener.class,
             Service2EventProcessorStructureEventJmsListener.class,
             Service2EventListenerPeopleEventJmsListener.class,
             Service2EventListenerPeopleEventEventFilter.class,
-            Service1CommandHandlerStructureHandlerCommandJmsListener.class,
-            ObjectMapperProducer.class,
+            Service2EventListenerPeopleEventEventValidationInterceptor.class,
+
+            RecordingJsonSchemaValidator.class,
+
+            ServiceComponentScanner.class,
+            RequesterProducer.class,
+            ServiceComponentObserver.class,
+            DefaultJmsProcessor.class,
+            SenderProducer.class,
+            DefaultJmsEnvelopeSender.class,
             DefaultEnvelopeConverter.class,
+            JsonSchemaValidationInterceptor.class,
+            JmsLoggerMetadataInterceptor.class,
+            DefaultJmsParameterChecker.class,
+            JmsAdapterToHandlerIT.TestServiceContextNameProvider.class,
+            JsonSchemaLoader.class,
             StringToJsonObjectConverter.class,
             DefaultJsonObjectEnvelopeConverter.class,
-            FileBasedJsonSchemaValidator.class,
-            JsonSchemaLoader.class,
+            ObjectToJsonValueConverter.class,
+            ObjectMapperProducer.class,
+            Enveloper.class,
+            AccessControlFailureMessageGenerator.class,
+            AllowAllPolicyEvaluator.class,
+            DefaultAccessControlService.class,
+            DispatcherCache.class,
+            DispatcherFactory.class,
+            EnvelopePayloadTypeConverter.class,
+            JsonEnvelopeRepacker.class,
+            PolicyEvaluator.class,
             LoggerProducer.class,
             AllowAllEventFilter.class,
-            Service2EventListenerPeopleEventEventValidationInterceptor.class,
-            DefaultJmsParameterChecker.class,
-            TestServiceContextNameProvider.class,
+            EmptySystemUserProvider.class,
+            SystemUserUtil.class,
+            BeanInstantiater.class,
+            UtcClock.class,
+            GlobalValueProducer.class,
+            EnvelopeValidationExceptionHandlerProducer.class,
             DefaultJmsMessageLoggerHelper.class,
             DefaultTraceLogger.class,
-            DefaultJsonValidationLoggerHelper.class,
+
             DefaultFileSystemUrlResolverStrategy.class,
+            DefaultJsonValidationLoggerHelper.class,
 
-            CustomEventListenerMediaTypeToSchemaIdMapper.class,
-            SchemaCatalogAwareJsonSchemaValidator.class,
-            PayloadExtractor.class,
             DefaultNameToMediaTypeConverter.class,
-
-            DefaultSchemaIdMappingCache.class,
-            SchemaIdMappingObserver.class,
-            MediaTypeToSchemaIdMapper.class,
-            BeanInstantiater.class,
-            MediaTypeToSchemaIdMapper.class,
-
-            CatalogProducer.class,
-            SchemaCatalogService.class,
-
             DefaultMediaTypesMappingCache.class,
             ActionNameToMediaTypesMappingObserver.class,
-
-            BackwardsCompatibleJsonSchemaValidator.class,
+            SchemaIdMappingObserver.class,
 
             MediaTypesMappingCacheInitialiser.class,
-            SchemaIdMappingCacheInitialiser.class
+            SchemaIdMappingCacheInitialiser.class,
+
+            SenderProducer.class,
+            MediaTypeProvider.class,
+            EnvelopeValidator.class,
+            EnvelopeInspector.class,
+            RequesterProducer.class,
+
+            DefaultSubscriptionJmsProcessor.class,
+            TestSubscriptionManagerProducer.class,
+            RecordingSubscriptionManager.class
     })
     public WebApp war() {
         return new WebApp()
@@ -138,77 +167,7 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
     }
 
     @Test
-    public void commandControllerDispatcherShouldReceiveCommandA() throws JMSException {
-
-        final String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d65";
-        final String commandName = "structure.commanda";
-
-        sendEnvelope(metadataId, commandName, commandControllerDestination);
-
-        final JsonEnvelope receivedEnvelope = interceptorChainProcessor.awaitForEnvelopeWithMetadataOf("id", metadataId);
-        assertThat(receivedEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
-        assertThat(receivedEnvelope.metadata().name(), is(commandName));
-    }
-
-    @Test
-    public void commandControllerDispatcherShouldReceiveCommandB() throws JMSException {
-
-        final String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d11";
-        final String commandName = "structure.commandb";
-
-        sendEnvelope(metadataId, commandName, commandControllerDestination);
-
-        final JsonEnvelope receivedEnvelope = interceptorChainProcessor.awaitForEnvelopeWithMetadataOf("id", metadataId);
-        assertThat(receivedEnvelope.metadata().name(), is(commandName));
-        assertThat(receivedEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
-    }
-
-    @Test
-    public void commandControllerDispatcherShouldNotReceiveACommandUnspecifiedInMessageSelector()
-            throws JMSException, InterruptedException {
-
-        final String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d12";
-        final String commandName = "structure.commandc";
-
-        sendEnvelope(metadataId, commandName, commandControllerDestination);
-        assertTrue(interceptorChainProcessor.notFoundEnvelopeWithMetadataOf("id", metadataId));
-    }
-
-    @Test
-    public void commandHandlerDispatcherShouldReceiveCommandA() throws JMSException {
-
-        final String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d61";
-        final String commandName = "structure.cmdaa";
-
-        sendEnvelope(metadataId, commandName, commandHandlerDestination);
-
-        final JsonEnvelope receivedEnvelope = interceptorChainProcessor.awaitForEnvelopeWithMetadataOf("id", metadataId);
-        assertThat(receivedEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
-        assertThat(receivedEnvelope.metadata().name(), is(commandName));
-    }
-
-    @Test
-    public void commandHandlerDispatcherShouldNotReceiveACommandUnspecifiedInMessageSelector() throws JMSException {
-
-        final String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d13";
-        final String commandName = "structure.cmdcc";
-
-        sendEnvelope(metadataId, commandName, commandHandlerDestination);
-        assertTrue(interceptorChainProcessor.notFoundEnvelopeWithMetadataOf("id", metadataId));
-    }
-
-    @Test
-    public void dispatcherShouldNotReceiveAMessageNotAdheringToSchema() throws JMSException {
-
-        final String metadataId = "961c9430-7bc6-4bf0-b549-6534394b8d13";
-        final String commandName = "people.create-user";
-
-        sendEnvelope(metadataId, commandName, commandHandlerDestination, createObjectBuilder().add("non_existent_field", "value").build());
-        assertTrue(interceptorChainProcessor.notFoundEnvelopeWithMetadataOf("id", metadataId));
-    }
-
-    @Test
-    public void eventProcessorDispatcherShouldReceiveEvent() throws JMSException, InterruptedException {
+    public void eventProcessorDispatcherShouldReceiveEvent() throws JMSException {
 
         //There's an issue in OpenEJB causing tests that involve JMS topics to fail.
         //On slower machines (e.g. travis) topic consumers tend to be registered after this test starts,
@@ -220,43 +179,74 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
 
         sendEnvelope(metadataId, eventName, structureEventsDestination);
 
-        final JsonEnvelope receivedEnvelope = interceptorChainProcessor.awaitForEnvelopeWithMetadataOf("id", metadataId);
+        final JsonEnvelope receivedEnvelope = recordingSubscriptionManager.awaitForEnvelopeWithMetadataOf("id", metadataId);
         assertThat(receivedEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
         assertThat(receivedEnvelope.metadata().name(), is(eventName));
     }
 
 
     @Test
-    public void eventListenerDispatcherShouldNotReceiveAnEventUnspecifiedInMessageSelector()
-            throws JMSException, InterruptedException {
+    public void eventListenerDispatcherShouldNotReceiveAnEventUnspecifiedInMessageSelector() throws JMSException {
 
         final String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d21";
         final String commandName = "structure.eventcc";
 
         sendEnvelope(metadataId, commandName, structureEventsDestination);
-        assertTrue(interceptorChainProcessor.notFoundEnvelopeWithMetadataOf("id", metadataId));
+        assertTrue(recordingSubscriptionManager.notFoundEnvelopeWithMetadataOf("id", metadataId));
     }
 
     @Test
-    public void eventListenerDispatcherShouldReceiveAnEventSpecifiedInMessageSelector()
-            throws JMSException, InterruptedException {
+    public void eventListenerDispatcherShouldReceiveAnEventSpecifiedInMessageSelector() throws JMSException {
 
         final String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d21";
         final String eventName = "people.eventaa";
 
         sendEnvelope(metadataId, eventName, peopleEventsDestination);
-        final JsonEnvelope receivedEnvelope = interceptorChainProcessor.awaitForEnvelopeWithMetadataOf("id", metadataId);
+        final JsonEnvelope receivedEnvelope = recordingSubscriptionManager.awaitForEnvelopeWithMetadataOf("id", metadataId);
         assertThat(receivedEnvelope.metadata().id(), is(UUID.fromString(metadataId)));
         assertThat(receivedEnvelope.metadata().name(), is(eventName));
 
     }
 
     @ApplicationScoped
-    public static class TestServiceContextNameProvider implements ServiceContextNameProvider {
+    public static class TestSubscriptionManagerProducer {
+
+        @Inject
+        RecordingSubscriptionManager recordingSubscriptionManager;
+
+        @Produces
+        @SubscriptionName
+        public SubscriptionManager subscriptionManager() {
+            return recordingSubscriptionManager;
+        }
+    }
+
+    @ApplicationScoped
+    public static class RecordingSubscriptionManager extends EnvelopeRecorder implements SubscriptionManager {
 
         @Override
-        public String getServiceContextName() {
-            return "test-component";
+        public void process(final JsonEnvelope jsonEnvelope) {
+            record(jsonEnvelope);
+        }
+    }
+
+    @ApplicationScoped
+    public static class RecordingJsonSchemaValidator implements JsonSchemaValidator {
+
+        private String validatedEventName;
+
+        @Override
+        public void validate(final String payload, final String actionName) {
+            this.validatedEventName = actionName;
+        }
+
+        @Override
+        public void validate(final String payload, final String actionName, final Optional<MediaType> mediaType) {
+            this.validatedEventName = actionName;
+        }
+
+        public String validatedEventName() {
+            return validatedEventName;
         }
     }
 }

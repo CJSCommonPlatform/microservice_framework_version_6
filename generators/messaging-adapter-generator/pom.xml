@@ -48,7 +48,6 @@
             <version>${generator-maven-plugin.version}</version>
         </dependency>
 
-        
         <!-- Test Dependencies -->
         <dependency>
             <groupId>uk.gov.justice.utils</groupId>
@@ -175,6 +174,18 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>subscription-manager</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>event-subscription-registry</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -184,7 +195,8 @@
                 <artifactId>generator-plugin</artifactId>
                 <version>${generator-maven-plugin.version}</version>
                 <configuration>
-                    <generatorName>uk.gov.justice.raml.jms.core.JmsEndpointGeneratorFactory</generatorName>
+                    <generatorName>uk.gov.justice.raml.jms.core.JmsEndpointGeneratorFactory
+                    </generatorName>
                     <parserName>uk.gov.justice.maven.generator.io.files.parser.RamlFileParser
                     </parserName>
                     <sourceDirectory>${basedir}/src/test/resources/raml</sourceDirectory>
@@ -203,7 +215,8 @@
                             <includes>
                                 <include>**/all-events-processor.raml</include>
                             </includes>
-                            <generatorProperties implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
+                            <generatorProperties
+                                    implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
                                 <serviceComponent>EVENT_PROCESSOR</serviceComponent>
                             </generatorProperties>
                         </configuration>
@@ -218,7 +231,8 @@
                             <includes>
                                 <include>**/command-controller.raml</include>
                             </includes>
-                            <generatorProperties implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
+                            <generatorProperties
+                                    implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
                                 <serviceComponent>COMMAND_CONTROLLER</serviceComponent>
                             </generatorProperties>
                         </configuration>
@@ -233,7 +247,8 @@
                             <includes>
                                 <include>**/command-handler.raml</include>
                             </includes>
-                            <generatorProperties implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
+                            <generatorProperties
+                                    implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
                                 <serviceComponent>COMMAND_HANDLER</serviceComponent>
                             </generatorProperties>
                         </configuration>
@@ -248,7 +263,8 @@
                             <includes>
                                 <include>**/event-listener.raml</include>
                             </includes>
-                            <generatorProperties implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
+                            <generatorProperties
+                                    implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
                                 <serviceComponent>EVENT_LISTENER</serviceComponent>
                             </generatorProperties>
                         </configuration>
@@ -263,7 +279,8 @@
                             <includes>
                                 <include>**/custom-event-listener.raml</include>
                             </includes>
-                            <generatorProperties implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
+                            <generatorProperties
+                                    implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
                                 <serviceComponent>CUSTOM_EVENT_LISTENER</serviceComponent>
                             </generatorProperties>
                         </configuration>
@@ -278,54 +295,9 @@
                             <includes>
                                 <include>**/event-processor.raml</include>
                             </includes>
-                            <generatorProperties implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
+                            <generatorProperties
+                                    implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
                                 <serviceComponent>EVENT_PROCESSOR</serviceComponent>
-                            </generatorProperties>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate-command-controller-subscription</id>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <phase>generate-test-sources</phase>
-                        <configuration>
-                            <generatorName>uk.gov.justice.subscription.jms.core.SubscriptionJmsEndpointGeneratorFactory</generatorName>
-                            <parserName>uk.gov.justice.subscription.jms.parser.SubscriptionWrapperFileParserFactory
-                            </parserName>
-                            <sourceDirectory>${basedir}/src/test/resources/yaml</sourceDirectory>
-                            <outputDirectory>${project.build.directory}/generated-test-sources
-                            </outputDirectory>
-                            <basePackageName>uk.gov.justice.api.subscription</basePackageName>
-                            <includes>
-                                <include>**/command-controller.yaml</include>
-                                <include>**/event-sources.yaml</include>
-                            </includes>
-                            <generatorProperties implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
-                                <serviceComponent>COMMAND_CONTROLLER</serviceComponent>
-                            </generatorProperties>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate-command-handler-subscription</id>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <phase>generate-test-sources</phase>
-                        <configuration>
-                            <generatorName>uk.gov.justice.subscription.jms.core.SubscriptionJmsEndpointGeneratorFactory</generatorName>
-                            <parserName>uk.gov.justice.subscription.jms.parser.SubscriptionWrapperFileParserFactory
-                            </parserName>
-                            <sourceDirectory>${basedir}/src/test/resources/yaml</sourceDirectory>
-                            <outputDirectory>${project.build.directory}/generated-test-sources
-                            </outputDirectory>
-                            <basePackageName>uk.gov.justice.api.subscription</basePackageName>
-                            <includes>
-                                <include>**/command-handler.yaml</include>
-                                <include>**/event-sources.yaml</include>
-                            </includes>
-                            <generatorProperties implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
-                                <serviceComponent>COMMAND_HANDLER</serviceComponent>
                             </generatorProperties>
                         </configuration>
                     </execution>
@@ -336,18 +308,22 @@
                         </goals>
                         <phase>generate-test-sources</phase>
                         <configuration>
-                            <generatorName>uk.gov.justice.subscription.jms.core.SubscriptionJmsEndpointGeneratorFactory</generatorName>
-                            <parserName>uk.gov.justice.subscription.jms.parser.SubscriptionWrapperFileParserFactory
+                            <generatorName>
+                                uk.gov.justice.subscription.jms.core.SubscriptionJmsEndpointGeneratorFactory
+                            </generatorName>
+                            <parserName>
+                                uk.gov.justice.subscription.jms.parser.SubscriptionWrapperFileParserFactory
                             </parserName>
                             <sourceDirectory>${basedir}/src/test/resources/yaml</sourceDirectory>
                             <outputDirectory>${project.build.directory}/generated-test-sources
                             </outputDirectory>
                             <basePackageName>uk.gov.justice.api.subscription</basePackageName>
                             <includes>
-                                <include>**/event-listener.yaml</include>
+                                <include>**/event-listener/subscription-descriptor.yaml</include>
                                 <include>**/event-sources.yaml</include>
                             </includes>
-                            <generatorProperties implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
+                            <generatorProperties
+                                    implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
                                 <serviceComponent>EVENT_LISTENER</serviceComponent>
                             </generatorProperties>
                         </configuration>
@@ -359,18 +335,23 @@
                         </goals>
                         <phase>generate-test-sources</phase>
                         <configuration>
-                            <generatorName>uk.gov.justice.subscription.jms.core.SubscriptionJmsEndpointGeneratorFactory</generatorName>
-                            <parserName>uk.gov.justice.subscription.jms.parser.SubscriptionWrapperFileParserFactory
+                            <generatorName>
+                                uk.gov.justice.subscription.jms.core.SubscriptionJmsEndpointGeneratorFactory
+                            </generatorName>
+                            <parserName>
+                                uk.gov.justice.subscription.jms.parser.SubscriptionWrapperFileParserFactory
                             </parserName>
                             <sourceDirectory>${basedir}/src/test/resources/yaml</sourceDirectory>
                             <outputDirectory>${project.build.directory}/generated-test-sources
                             </outputDirectory>
                             <basePackageName>uk.gov.justice.api.subscription</basePackageName>
                             <includes>
-                                <include>**/custom-event-listener.yaml</include>
+                                <include>**/custom-event-listener/subscription-descriptor.yaml
+                                </include>
                                 <include>**/event-sources.yaml</include>
                             </includes>
-                            <generatorProperties implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
+                            <generatorProperties
+                                    implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
                                 <serviceComponent>CUSTOM_EVENT_LISTENER</serviceComponent>
                             </generatorProperties>
                         </configuration>
@@ -382,17 +363,22 @@
                         </goals>
                         <phase>generate-test-sources</phase>
                         <configuration>
-                            <generatorName>uk.gov.justice.subscription.jms.core.SubscriptionJmsEndpointGeneratorFactory</generatorName>
-                            <parserName>uk.gov.justice.subscription.jms.parser.SubscriptionWrapperFileParserFactory</parserName>
+                            <generatorName>
+                                uk.gov.justice.subscription.jms.core.SubscriptionJmsEndpointGeneratorFactory
+                            </generatorName>
+                            <parserName>
+                                uk.gov.justice.subscription.jms.parser.SubscriptionWrapperFileParserFactory
+                            </parserName>
                             <sourceDirectory>${basedir}/src/test/resources/yaml</sourceDirectory>
                             <outputDirectory>${project.build.directory}/generated-test-sources
                             </outputDirectory>
                             <basePackageName>uk.gov.justice.api.subscription</basePackageName>
                             <includes>
-                                <include>**/event-processor.yaml</include>
+                                <include>**/event-processor/subscription-descriptor.yaml</include>
                                 <include>**/event-sources.yaml</include>
                             </includes>
-                            <generatorProperties implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
+                            <generatorProperties
+                                    implementation="uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties">
                                 <serviceComponent>EVENT_PROCESSOR</serviceComponent>
                             </generatorProperties>
                         </configuration>

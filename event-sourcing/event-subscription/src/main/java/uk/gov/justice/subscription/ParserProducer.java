@@ -1,9 +1,9 @@
 package uk.gov.justice.subscription;
 
-import uk.gov.justice.subscription.yaml.parser.YamlFileToJsonObjectConverter;
 import uk.gov.justice.subscription.yaml.parser.YamlFileValidator;
 import uk.gov.justice.subscription.yaml.parser.YamlParser;
 import uk.gov.justice.subscription.yaml.parser.YamlSchemaLoader;
+import uk.gov.justice.subscription.yaml.parser.YamlToJsonObjectConverter;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
@@ -36,9 +36,9 @@ public class ParserProducer {
     }
 
     private YamlFileValidator getYamlFileValidator() {
-        final YamlFileToJsonObjectConverter yamlFileToJsonObjectConverter = new YamlFileToJsonObjectConverter(yamlParser, objectMapper);
+        final YamlToJsonObjectConverter yamlToJsonObjectConverter = new YamlToJsonObjectConverter(yamlParser, objectMapper);
         if (yamlFileValidator == null) {
-            yamlFileValidator = new YamlFileValidator(yamlFileToJsonObjectConverter, yamlSchemaLoader);
+            yamlFileValidator = new YamlFileValidator(yamlToJsonObjectConverter, yamlSchemaLoader);
         }
         return yamlFileValidator;
     }

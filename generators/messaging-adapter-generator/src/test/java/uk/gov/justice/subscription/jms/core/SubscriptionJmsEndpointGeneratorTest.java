@@ -25,7 +25,6 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLL
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
-import static uk.gov.justice.services.core.interceptor.DefaultInterceptorContext.interceptorContextWithInput;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.methodsOf;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
@@ -39,13 +38,12 @@ import uk.gov.justice.maven.generator.io.files.parser.core.Generator;
 import uk.gov.justice.maven.generator.io.files.parser.core.GeneratorProperties;
 import uk.gov.justice.raml.jms.config.GeneratorPropertiesFactory;
 import uk.gov.justice.services.adapter.messaging.JmsLoggerMetadataInterceptor;
-import uk.gov.justice.services.adapter.messaging.JmsProcessor;
 import uk.gov.justice.services.adapter.messaging.JsonSchemaValidationInterceptor;
+import uk.gov.justice.services.adapter.messaging.SubscriptionJmsProcessor;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
-import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
-import uk.gov.justice.services.core.interceptor.InterceptorContext;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.subscription.SubscriptionManager;
 import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil;
 import uk.gov.justice.subscription.domain.eventsource.EventSource;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Event;
@@ -61,7 +59,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
@@ -88,9 +85,10 @@ import org.slf4j.Logger;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SubscriptionJmsEndpointGeneratorTest {
+
     private static final String BASE_PACKAGE = "uk.test";
     private static final String BASE_PACKAGE_FOLDER = "/uk/test";
-    private static final String INTERCEPTOR_CHAIN_PROCESSOR = "interceptorChainProcessor";
+    private static final String SUBSCRIPTION_MANAGER = "subscriptionManager";
 
     @Rule
     public TemporaryFolder outputFolder = new TemporaryFolder();
@@ -99,17 +97,16 @@ public class SubscriptionJmsEndpointGeneratorTest {
     public ExpectedException thrown = ExpectedException.none();
 
     @Mock
-    JmsProcessor jmsProcessor;
+    private SubscriptionJmsProcessor subscriptionJmsProcessor;
 
     @Mock
-    InterceptorChainProcessor interceptorChainProcessor;
+    private SubscriptionManager subscriptionManager;
 
     private GeneratorProperties generatorProperties;
     private JavaCompilerUtil compiler;
     private Generator<SubscriptionWrapper> generator;
     private final String serviceName = "context";
     private final String componentName = "EVENT_PROCESSOR";
-
 
     @Before
     public void setup() throws Exception {
@@ -144,8 +141,8 @@ public class SubscriptionJmsEndpointGeneratorTest {
     @Test
     public void shouldCreateMultipleJmsClasses() throws Exception {
 
-        String structureJmsUri = "jms:topic:structure.controller.command";
-        String peopleJmsUri = "jms:topic:people.controller.command";
+        final String structureJmsUri = "jms:topic:structure.controller.command";
+        final String peopleJmsUri = "jms:topic:people.controller.command";
 
         final Event event = event()
                 .withName("my-context.events.something-happened")
@@ -372,18 +369,18 @@ public class SubscriptionJmsEndpointGeneratorTest {
     }
 
     @Test
-    public void shouldCreateJmsEndpointWithAnnotatedInterceptorChainProcessorProperty() throws Exception {
+    public void shouldCreateJmsEndpointWithAnnotatedSubscriptionManagerProperty() throws Exception {
 
         final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:somecontext.controller.command", "somecontext.command1", serviceName, componentName);
 
         generator.run(subscriptionDescriptor, configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
         final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorSomecontextControllerCommandJmsListener");
-        final Field chainProcessField = clazz.getDeclaredField(INTERCEPTOR_CHAIN_PROCESSOR);
+        final Field chainProcessField = clazz.getDeclaredField(SUBSCRIPTION_MANAGER);
 
         assertThat(chainProcessField, not(nullValue()));
-        assertThat(chainProcessField.getType(), CoreMatchers.equalTo((InterceptorChainProcessor.class)));
-        assertThat(chainProcessField.getAnnotations(), arrayWithSize(1));
+        assertThat(chainProcessField.getType(), CoreMatchers.equalTo((SubscriptionManager.class)));
+        assertThat(chainProcessField.getAnnotations(), arrayWithSize(2));
         assertThat(chainProcessField.getAnnotation(Inject.class), not(nullValue()));
     }
 
@@ -395,10 +392,10 @@ public class SubscriptionJmsEndpointGeneratorTest {
         generator.run(subscriptionDescriptor, configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
         final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorSomecontextControllerCommandJmsListener");
-        final Field jmsProcessorField = clazz.getDeclaredField("jmsProcessor");
+        final Field jmsProcessorField = clazz.getDeclaredField("subscriptionJmsProcessor");
 
         assertThat(jmsProcessorField, not(nullValue()));
-        assertThat(jmsProcessorField.getType(), CoreMatchers.equalTo((JmsProcessor.class)));
+        assertThat(jmsProcessorField.getType(), CoreMatchers.equalTo((SubscriptionJmsProcessor.class)));
         assertThat(jmsProcessorField.getAnnotations(), arrayWithSize(1));
         assertThat(jmsProcessorField.getAnnotation(Inject.class), not(nullValue()));
     }
@@ -676,14 +673,11 @@ public class SubscriptionJmsEndpointGeneratorTest {
 
         jmsListener.onMessage(message);
 
-        final ArgumentCaptor<Consumer> consumerCaptor = ArgumentCaptor.forClass(Consumer.class);
-        verify(jmsProcessor).process(consumerCaptor.capture(), eq(message));
+        final ArgumentCaptor<SubscriptionManager> consumerCaptor = ArgumentCaptor.forClass(SubscriptionManager.class);
+        verify(subscriptionJmsProcessor).process(consumerCaptor.capture(), eq(message));
 
         final JsonEnvelope envelope = mock(JsonEnvelope.class);
-        final InterceptorContext interceptorContext = interceptorContextWithInput(envelope);
-        consumerCaptor.getValue().accept(interceptorContext);
-
-        verify(interceptorChainProcessor).process(interceptorContext);
+        consumerCaptor.getValue().process(envelope);
     }
 
     @Test
@@ -769,8 +763,8 @@ public class SubscriptionJmsEndpointGeneratorTest {
 
     private Object instantiate(final Class<?> resourceClass) throws InstantiationException, IllegalAccessException {
         final Object resourceObject = resourceClass.newInstance();
-        setField(resourceObject, "jmsProcessor", jmsProcessor);
-        setField(resourceObject, INTERCEPTOR_CHAIN_PROCESSOR, interceptorChainProcessor);
+        setField(resourceObject, "subscriptionJmsProcessor", subscriptionJmsProcessor);
+        setField(resourceObject, SUBSCRIPTION_MANAGER, subscriptionManager);
         return resourceObject;
     }
 

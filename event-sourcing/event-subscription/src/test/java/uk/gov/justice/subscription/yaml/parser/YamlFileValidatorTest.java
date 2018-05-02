@@ -10,7 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.nio.file.Path;
+import java.net.URL;
 
 import org.everit.json.schema.Schema;
 import org.json.JSONObject;
@@ -30,36 +30,35 @@ public class YamlFileValidatorTest {
     private YamlSchemaLoader yamlSchemaLoader;
 
     @Mock
-    private YamlFileToJsonObjectConverter yamlFileToJsonObjectConverter;
+    private YamlToJsonObjectConverter yamlToJsonObjectConverter;
 
     @InjectMocks
     private YamlFileValidator yamlFileValidator;
 
-
     @Test
     public void shouldValidateEventSourceYamlFile() throws IOException {
-        final Path path = mock(Path.class);
+        final URL yamlUrl = new URL("file:/test");
         final JSONObject jsonObject = mock(JSONObject.class);
         final Schema schema = mock(Schema.class);
 
-        when(yamlFileToJsonObjectConverter.convert(path)).thenReturn(jsonObject);
+        when(yamlToJsonObjectConverter.convert(yamlUrl)).thenReturn(jsonObject);
         when(yamlSchemaLoader.loadSchema(EVENT_SOURCES_SCHEMA_PATH)).thenReturn(schema);
 
-        yamlFileValidator.validateEventSource(path);
+        yamlFileValidator.validateEventSource(yamlUrl);
 
         verify(schema).validate(jsonObject);
     }
 
     @Test
     public void shouldValidateSubscriptionYamlFile() throws IOException {
-        final Path path = mock(Path.class);
+        final URL yamlUrl = new URL("file:/test");
         final JSONObject jsonObject = mock(JSONObject.class);
         final Schema schema = mock(Schema.class);
 
-        when(yamlFileToJsonObjectConverter.convert(path)).thenReturn(jsonObject);
+        when(yamlToJsonObjectConverter.convert(yamlUrl)).thenReturn(jsonObject);
         when(yamlSchemaLoader.loadSchema(SUBSCRIPTION_SCHEMA_PATH)).thenReturn(schema);
 
-        yamlFileValidator.validateSubscription(path);
+        yamlFileValidator.validateSubscription(yamlUrl);
 
         verify(schema).validate(jsonObject);
     }
@@ -67,13 +66,13 @@ public class YamlFileValidatorTest {
     @Test
     public void shouldThrowYamlParserException() throws IOException {
         try {
-            final Path path = mock(Path.class);
+            final URL yamlUrl = new URL("file:/test");
             final JSONObject jsonObject = mock(JSONObject.class);
 
-            when(yamlFileToJsonObjectConverter.convert(path)).thenReturn(jsonObject);
+            when(yamlToJsonObjectConverter.convert(yamlUrl)).thenReturn(jsonObject);
             when(yamlSchemaLoader.loadSchema(SUBSCRIPTION_SCHEMA_PATH)).thenThrow(new IOException());
 
-            yamlFileValidator.validateSubscription(path);
+            yamlFileValidator.validateSubscription(yamlUrl);
             fail();
         } catch (final Exception expected) {
             assertThat(expected, is(instanceOf(YamlParserException.class)));

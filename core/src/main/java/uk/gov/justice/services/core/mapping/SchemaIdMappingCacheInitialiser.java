@@ -7,21 +7,19 @@ import uk.gov.justice.services.core.extension.BeanInstantiater;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.spi.Bean;
 import javax.inject.Inject;
 
-@ApplicationScoped
-public class MappingCacheInitialiser {
+public class SchemaIdMappingCacheInitialiser {
 
     @Inject
-    ActionNameToMediaTypesMappingObserver actionNameToMediaTypesMappingObserver;
+    SchemaIdMappingObserver schemaIdMappingObserver;
 
     @Inject
     BeanInstantiater beanInstantiater;
 
-    public Map<String, MediaTypes> initialiseCache() {
-        return actionNameToMediaTypesMappingObserver.getNameMediaTypesMappers().stream()
+    public Map<MediaType, String> initialiseCache() {
+        return schemaIdMappingObserver.getMediaTypeToSchemaIdMappers().stream()
                 .flatMap(this::mapEntriesFrom)
                 .collect(toMap(
                         Map.Entry::getKey,
@@ -30,7 +28,7 @@ public class MappingCacheInitialiser {
                 ));
     }
 
-    private Stream<Map.Entry<String, MediaTypes>> mapEntriesFrom(final Bean<?> bean) {
-        return ((ActionNameToMediaTypesMapper) beanInstantiater.instantiate(bean)).getActionNameToMediaTypesMap().entrySet().stream();
+    private Stream<Map.Entry<MediaType, String>> mapEntriesFrom(final Bean<?> bean) {
+        return ((MediaTypeToSchemaIdMapper) beanInstantiater.instantiate(bean)).getMediaTypeToSchemaIdMap().entrySet().stream();
     }
 }

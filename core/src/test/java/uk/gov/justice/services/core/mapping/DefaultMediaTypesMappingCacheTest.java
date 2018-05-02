@@ -21,7 +21,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class DefaultMediaTypesMappingCacheTest {
 
     @Mock
-    private MappingCacheInitialiser mappingCacheInitialiser;
+    private MediaTypesMappingCacheInitialiser mediaTypesMappingCacheInitialiser;
 
 
     @InjectMocks
@@ -36,7 +36,7 @@ public class DefaultMediaTypesMappingCacheTest {
         final MediaType requestMediaType = new MediaType("application/vnd.example.add-recipe+json");
         final MediaType responseMediaType = new MediaType("application/vnd.example.recipe-added+json");
 
-        when(mappingCacheInitialiser.initialiseCache()).thenReturn(of(actionName, new MediaTypes(requestMediaType, responseMediaType)));
+        when(mediaTypesMappingCacheInitialiser.initialiseCache()).thenReturn(of(actionName, new MediaTypes(requestMediaType, responseMediaType)));
 
 
         final Optional<MediaTypes> mediaTypes = defaultMediaTypesMappingCache.mediaTypesFor(actionName);
@@ -53,7 +53,7 @@ public class DefaultMediaTypesMappingCacheTest {
         final MediaType requestMediaType = new MediaType("application/vnd.example.add-recipe+json");
         final MediaType responseMediaType = new MediaType("application/vnd.example.recipe-added+json");
 
-        when(mappingCacheInitialiser.initialiseCache()).thenReturn(of(actionName, new MediaTypes(requestMediaType, responseMediaType)));
+        when(mediaTypesMappingCacheInitialiser.initialiseCache()).thenReturn(of(actionName, new MediaTypes(requestMediaType, responseMediaType)));
 
 
         defaultMediaTypesMappingCache.mediaTypesFor(actionName);
@@ -62,14 +62,14 @@ public class DefaultMediaTypesMappingCacheTest {
         defaultMediaTypesMappingCache.mediaTypesFor(actionName);
         defaultMediaTypesMappingCache.mediaTypesFor(actionName);
 
-        verify(mappingCacheInitialiser, times(1)).initialiseCache();
+        verify(mediaTypesMappingCacheInitialiser, times(1)).initialiseCache();
 
     }
 
     @Test
     public void shouldReturnEmptyIfNoMappingFound() throws Exception {
 
-        when(mappingCacheInitialiser.initialiseCache()).thenReturn(new HashMap<>());
+        when(mediaTypesMappingCacheInitialiser.initialiseCache()).thenReturn(new HashMap<>());
 
         final Optional<MediaTypes> mediaTypes = defaultMediaTypesMappingCache.mediaTypesFor("some-unknown-action");
 

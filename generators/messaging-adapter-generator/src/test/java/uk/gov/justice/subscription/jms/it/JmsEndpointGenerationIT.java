@@ -33,8 +33,9 @@ import uk.gov.justice.services.core.mapping.ActionNameToMediaTypesMappingObserve
 import uk.gov.justice.services.core.mapping.DefaultMediaTypesMappingCache;
 import uk.gov.justice.services.core.mapping.DefaultNameToMediaTypeConverter;
 import uk.gov.justice.services.core.mapping.DefaultSchemaIdMappingCache;
-import uk.gov.justice.services.core.mapping.MappingCacheInitialiser;
+import uk.gov.justice.services.core.mapping.MediaTypesMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.MediaTypeToSchemaIdMapper;
+import uk.gov.justice.services.core.mapping.SchemaIdMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingObserver;
 import uk.gov.justice.services.event.buffer.api.AllowAllEventFilter;
 import uk.gov.justice.services.generators.test.utils.interceptor.RecordingInterceptorChainProcessor;
@@ -128,7 +129,8 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
 
             BackwardsCompatibleJsonSchemaValidator.class,
 
-            MappingCacheInitialiser.class
+            MediaTypesMappingCacheInitialiser.class,
+            SchemaIdMappingCacheInitialiser.class
     })
     public WebApp war() {
         return new WebApp()

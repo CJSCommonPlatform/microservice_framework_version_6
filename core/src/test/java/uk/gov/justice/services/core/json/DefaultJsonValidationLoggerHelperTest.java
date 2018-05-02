@@ -20,10 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.slf4j.Logger;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultJsonValidationLoggerHelperTest {

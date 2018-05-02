@@ -77,6 +77,8 @@ import uk.gov.justice.services.core.mapping.ActionNameToMediaTypesMappingObserve
 import uk.gov.justice.services.core.mapping.DefaultMediaTypesMappingCache;
 import uk.gov.justice.services.core.mapping.DefaultNameToMediaTypeConverter;
 import uk.gov.justice.services.core.mapping.DefaultSchemaIdMappingCache;
+import uk.gov.justice.services.core.mapping.MediaTypesMappingCacheInitialiser;
+import uk.gov.justice.services.core.mapping.SchemaIdMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingObserver;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.requester.RequesterProducer;
@@ -101,6 +103,7 @@ import org.apache.openejb.testing.Configuration;
 import org.apache.openejb.testing.Module;
 import org.apache.openejb.testng.PropertiesBuilder;
 import org.apache.openejb.util.NetworkUtil;
+import org.jgroups.protocols.SIZE;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -205,8 +208,10 @@ public class RemoteExampleEventProcessorIT {
             ActionNameToMediaTypesMappingObserver.class,
             MediaTypeProvider.class,
             BackwardsCompatibleJsonSchemaValidator.class,
-            EnvelopeInspector.class
+            EnvelopeInspector.class,
 
+            MediaTypesMappingCacheInitialiser.class,
+            SchemaIdMappingCacheInitialiser.class
     })
     public WebApp war() {
         return new WebApp()

@@ -56,7 +56,8 @@ import uk.gov.justice.services.core.mapping.ActionNameToMediaTypesMappingObserve
 import uk.gov.justice.services.core.mapping.DefaultMediaTypesMappingCache;
 import uk.gov.justice.services.core.mapping.DefaultNameToMediaTypeConverter;
 import uk.gov.justice.services.core.mapping.DefaultSchemaIdMappingCache;
-import uk.gov.justice.services.core.mapping.MappingCacheInitialiser;
+import uk.gov.justice.services.core.mapping.MediaTypesMappingCacheInitialiser;
+import uk.gov.justice.services.core.mapping.SchemaIdMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingObserver;
 import uk.gov.justice.services.core.requester.RequesterProducer;
 import uk.gov.justice.services.core.sender.SenderProducer;
@@ -159,7 +160,8 @@ public class CustomServiceComponentHandlerIT {
             RequesterProducer.class,
             BackwardsCompatibleJsonSchemaValidator.class,
 
-            MappingCacheInitialiser.class
+            MediaTypesMappingCacheInitialiser.class,
+            SchemaIdMappingCacheInitialiser.class
 
     })
     public WebApp war() {

@@ -45,8 +45,9 @@ import uk.gov.justice.services.core.mapping.ActionNameToMediaTypesMappingObserve
 import uk.gov.justice.services.core.mapping.DefaultMediaTypesMappingCache;
 import uk.gov.justice.services.core.mapping.DefaultNameToMediaTypeConverter;
 import uk.gov.justice.services.core.mapping.DefaultSchemaIdMappingCache;
-import uk.gov.justice.services.core.mapping.MappingCacheInitialiser;
+import uk.gov.justice.services.core.mapping.MediaTypesMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.MediaTypeToSchemaIdMapper;
+import uk.gov.justice.services.core.mapping.SchemaIdMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingObserver;
 import uk.gov.justice.services.generators.test.utils.interceptor.RecordingInterceptorChainProcessor;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
@@ -170,7 +171,8 @@ public class DefaultCustomUserIdResourceIT {
             EnvelopeInspector.class,
             DefaultJsonValidationLoggerHelper.class,
 
-            MappingCacheInitialiser.class
+            MediaTypesMappingCacheInitialiser.class,
+            SchemaIdMappingCacheInitialiser.class
 
     })
     public WebApp war() {

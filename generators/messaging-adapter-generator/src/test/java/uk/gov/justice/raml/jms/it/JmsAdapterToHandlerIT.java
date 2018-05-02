@@ -59,9 +59,10 @@ import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.core.mapping.ActionNameToMediaTypesMappingObserver;
 import uk.gov.justice.services.core.mapping.DefaultMediaTypesMappingCache;
 import uk.gov.justice.services.core.mapping.DefaultNameToMediaTypeConverter;
-import uk.gov.justice.services.core.mapping.MappingCacheInitialiser;
+import uk.gov.justice.services.core.mapping.MediaTypesMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.MediaType;
 import uk.gov.justice.services.core.mapping.NameToMediaTypeConverter;
+import uk.gov.justice.services.core.mapping.SchemaIdMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingObserver;
 import uk.gov.justice.services.core.requester.RequesterProducer;
 import uk.gov.justice.services.core.sender.SenderProducer;
@@ -190,7 +191,8 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
             EnvelopeInspector.class,
             RequesterProducer.class,
 
-            MappingCacheInitialiser.class
+            MediaTypesMappingCacheInitialiser.class,
+            SchemaIdMappingCacheInitialiser.class
 
     })
     public WebApp war() {

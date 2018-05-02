@@ -21,7 +21,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MappingCacheInitialiserTest {
+public class MediaTypesMappingCacheInitialiserTest {
 
     @Mock
     private ActionNameToMediaTypesMappingObserver actionNameToMediaTypesMappingObserver;
@@ -30,7 +30,7 @@ public class MappingCacheInitialiserTest {
     private BeanInstantiater beanInstantiater;
 
     @InjectMocks
-    private MappingCacheInitialiser mappingCacheInitialiser;
+    private MediaTypesMappingCacheInitialiser mediaTypesMappingCacheInitialiser;
 
     @SuppressWarnings("unchecked")
     @Test
@@ -49,7 +49,7 @@ public class MappingCacheInitialiserTest {
         when(beanInstantiater.instantiate(bean_1)).thenReturn(actionNameToMediaTypesMapper);
         when(actionNameToMediaTypesMapper.getActionNameToMediaTypesMap()).thenReturn(mediaTypeToSchemaIdMap);
 
-        final Map<String, MediaTypes> mappingCache = mappingCacheInitialiser.initialiseCache();
+        final Map<String, MediaTypes> mappingCache = mediaTypesMappingCacheInitialiser.initialiseCache();
 
         final MediaTypes mediaTypes = mappingCache.get(actionName);
 
@@ -87,7 +87,7 @@ public class MappingCacheInitialiserTest {
         when(actionNameToMediaTypesMapper_2.getActionNameToMediaTypesMap()).thenReturn(mediaTypeToSchemaIdMap_2);
 
 
-        final Map<String, MediaTypes> mappingCache = mappingCacheInitialiser.initialiseCache();
+        final Map<String, MediaTypes> mappingCache = mediaTypesMappingCacheInitialiser.initialiseCache();
 
         final MediaTypes mediaTypes_1 = mappingCache.get(actionName_1);
         final MediaTypes mediaTypes_2 = mappingCache.get(actionName_2);

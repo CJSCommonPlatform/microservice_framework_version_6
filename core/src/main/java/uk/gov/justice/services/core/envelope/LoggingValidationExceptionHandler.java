@@ -18,13 +18,15 @@ public class LoggingValidationExceptionHandler implements EnvelopeValidationExce
 
     @Override
     public void handle(final EnvelopeValidationException ex) {
-
-        String validationTrace = "";
-
-        if(ex.getCause() instanceof ValidationException) {
-            validationTrace = defaultJsonValidationLoggerHelper.toValidationTrace((ValidationException) ex.getCause());
+        if(ex.getCause() instanceof ValidationException && logger.isWarnEnabled()) {
+            logger.warn(traceValidation(ex), ex);
+        } else if(logger.isWarnEnabled()) {
+            logger.warn("Message validation failed ", ex);
         }
+    }
 
-        logger.warn(format("Message validation failed %s", validationTrace), ex);
+    private String traceValidation(EnvelopeValidationException ex) {
+        return format("Message validation failed %s",
+                defaultJsonValidationLoggerHelper.toValidationTrace((ValidationException) ex.getCause()));
     }
 }

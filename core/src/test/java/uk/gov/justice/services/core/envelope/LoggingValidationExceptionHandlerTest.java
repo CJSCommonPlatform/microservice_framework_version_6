@@ -29,6 +29,7 @@ public class LoggingValidationExceptionHandlerTest {
     @Test
     public void shouldLogException() throws Exception {
         final EnvelopeValidationException exception = new EnvelopeValidationException("");
+        when(logger.isWarnEnabled()).thenReturn(true);
         exceptionHandler.handle(exception);
         verify(logger).warn("Message validation failed ", exception);
     }
@@ -37,6 +38,7 @@ public class LoggingValidationExceptionHandlerTest {
     public void shouldLogValidationException() throws Exception {
         final ValidationException validationException = mock(ValidationException.class);
         final EnvelopeValidationException exception = new EnvelopeValidationException("Help me", validationException);
+        when(logger.isWarnEnabled()).thenReturn(true);
         when(defaultJsonValidationLoggerHelper.toValidationTrace(validationException)).thenReturn("string");
         exceptionHandler.handle(exception);
         verify(logger).warn("Message validation failed string", exception);

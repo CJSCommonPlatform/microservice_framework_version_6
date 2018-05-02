@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
+## [4.0.2] - 2018-05-02
+### Changed
+- Caches mapping between media types and action names for the schema catalog are now lazy loaded
+
 ## [4.0.1] - 2018-04-20
 ### Added
 - StreamId now persisted by enveloper for metadata

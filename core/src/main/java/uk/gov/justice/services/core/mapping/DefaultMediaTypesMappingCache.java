@@ -16,7 +16,7 @@ import javax.inject.Inject;
 public class DefaultMediaTypesMappingCache implements MediaTypesMappingCache {
 
     @Inject
-    MappingCacheInitialiser mappingCacheInitialiser;
+    MediaTypesMappingCacheInitialiser mediaTypesMappingCacheInitialiser;
 
     private Map<String, MediaTypes> actionNameToMediaTypesCache;
 
@@ -24,7 +24,7 @@ public class DefaultMediaTypesMappingCache implements MediaTypesMappingCache {
     public synchronized Optional<MediaTypes> mediaTypesFor(final String actionName) {
 
         if (actionNameToMediaTypesCache == null) {
-            actionNameToMediaTypesCache = mappingCacheInitialiser.initialiseCache();
+            actionNameToMediaTypesCache = mediaTypesMappingCacheInitialiser.initialiseCache();
         }
 
         return ofNullable(actionNameToMediaTypesCache.get(actionName));

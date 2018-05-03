@@ -1,5 +1,7 @@
 package uk.gov.justice.services.core.json;
 
+import static java.lang.String.format;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -28,6 +30,8 @@ public class FileBasedJsonSchemaValidator {
     @Inject
     PayloadExtractor payloadExtractor;
 
+    DefaultJsonValidationLoggerHelper defaultJsonValidationLoggerHelper = new DefaultJsonValidationLoggerHelper();
+
     /**
      * Validate a JSON payload against the correct schema for the given message type name. If the
      * JSON contains metadata, this is removed first. Schemas are cached for reuse.
@@ -42,7 +46,11 @@ public class FileBasedJsonSchemaValidator {
         try {
             schemaOf(actionName).validate(payload);
         } catch (final ValidationException ex) {
-            throw new JsonSchemaValidationException(ex.getMessage(), ex);
+
+            final String errorMessage = format("Message not valid against schema: %s",
+                    defaultJsonValidationLoggerHelper.toValidationTrace(ex));
+
+            throw new JsonSchemaValidationException(errorMessage, ex);
         }
 
     }

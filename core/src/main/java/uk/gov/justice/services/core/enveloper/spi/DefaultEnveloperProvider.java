@@ -2,9 +2,6 @@ package uk.gov.justice.services.core.enveloper.spi;
 
 import static javax.enterprise.inject.spi.CDI.current;
 
-import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.enveloper.DefaultEnveloper;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.Envelope;
@@ -34,8 +31,7 @@ public class DefaultEnveloperProvider implements EnveloperProvider {
             return current().select(DefaultEnveloper.class).get();
         }
 
-        //TODO: Remove when Test Enveloper Provider is implemented
-        return new DefaultEnveloper(new UtcClock(), new ObjectToJsonValueConverter(new ObjectMapperProducer().objectMapper()));
+        throw new IllegalStateException("No CDI container detected, DefaultEnvelopeProvider only works within a CDI container.");
     }
 
     private boolean isCdiAvailable() {

@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Added
+- test-utils-enveloper-provider module
+- EnveloperTestProvider that is used for testing usage of the Enveloper
+
 ### Changed
 - Added schema catalog generation plugin to example service
 - Updated to latest raml generator plugin

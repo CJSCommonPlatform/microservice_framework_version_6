@@ -15,6 +15,7 @@ import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.defaultGetResource;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
+import static uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtility.javaCompilerUtil;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.methodsOf;
 
@@ -24,7 +25,7 @@ import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil;
+import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtility;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -33,7 +34,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -42,21 +42,15 @@ import org.junit.rules.TemporaryFolder;
 public class DirectClientGeneratorCodeStructureTest {
 
     private static final String BASE_PACKAGE = "org.raml.test";
+    private static final JavaCompilerUtility COMPILER = javaCompilerUtil();
 
     private final DirectClientGenerator generator = new DirectClientGenerator();
-
-    private JavaCompilerUtil compiler;
 
     @Rule
     public TemporaryFolder outputFolder = new TemporaryFolder();
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
-
-    @Before
-    public void setUp() throws Exception {
-        compiler = new JavaCompilerUtil(outputFolder.getRoot(), outputFolder.getRoot());
-    }
 
     @Test
     public void shouldGenerateClassWithAnnotations() throws Exception {
@@ -67,7 +61,12 @@ public class DirectClientGeneratorCodeStructureTest {
                         .build(),
                 configurationWithBasePackage("uk.somepackage", outputFolder, generatorProperties().withServiceComponentOf("SOME_COMPONENT")));
 
-        final Class<?> generatedClass = compiler.compiledClassOf("uk.somepackage", "DirectSomeComponent2QueryApiServiceClient");
+        final Class<?> generatedClass = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                "uk.somepackage",
+                "DirectSomeComponent2QueryApiServiceClient");
+
         assertThat(generatedClass.getCanonicalName(), is("uk.somepackage.DirectSomeComponent2QueryApiServiceClient"));
         assertThat(generatedClass.getAnnotation(Direct.class), not(nullValue()));
         assertThat(generatedClass.getAnnotation(Direct.class).target(), is("QUERY_API"));
@@ -85,7 +84,12 @@ public class DirectClientGeneratorCodeStructureTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("SOME_COMPONENT")));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "DirectSomeComponent2QueryApiServiceClient");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "DirectSomeComponent2QueryApiServiceClient");
+
         final Field adapterField = clazz.getDeclaredField("adapterCache");
         assertThat(adapterField.getAnnotation(Inject.class), not(nullValue()));
         assertThat(adapterField.getGenericType(), equalTo(SynchronousDirectAdapterCache.class));
@@ -113,7 +117,12 @@ public class DirectClientGeneratorCodeStructureTest {
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("SOME_COMPONENT")));
 
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "DirectSomeComponent2QueryApiServiceClient");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "DirectSomeComponent2QueryApiServiceClient");
+
         final List<Method> methods = methodsOf(clazz);
         assertThat(methods, hasSize(2));
 
@@ -139,7 +148,12 @@ public class DirectClientGeneratorCodeStructureTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("SOME_COMPONENT")));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "DirectSomeComponent2QueryApiServiceClient");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "DirectSomeComponent2QueryApiServiceClient");
+
         final Method method = firstMethodOf(clazz).get();
         assertThat(method.getParameterCount(), is(1));
         assertThat(method.getParameters()[0].getType(), equalTo((JsonEnvelope.class)));
@@ -184,8 +198,8 @@ public class DirectClientGeneratorCodeStructureTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("SOME_COMPONENT")));
 
-
-        assertThat(methodsOf(compiler.compiledClassOf(BASE_PACKAGE, "DirectSomeComponent2QueryApiServiceClient")), hasSize(0));
+        final Class<?> compiledClass = COMPILER.compiledClassOf(outputFolder.getRoot(), outputFolder.getRoot(), BASE_PACKAGE, "DirectSomeComponent2QueryApiServiceClient");
+        assertThat(methodsOf(compiledClass), hasSize(0));
 
     }
 

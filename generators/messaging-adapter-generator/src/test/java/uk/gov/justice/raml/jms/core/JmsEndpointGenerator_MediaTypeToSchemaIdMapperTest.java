@@ -9,16 +9,15 @@ import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBu
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.messagingRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
+import static uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtility.javaCompilerUtil;
 
 import uk.gov.justice.maven.generator.io.files.parser.core.Generator;
 import uk.gov.justice.raml.jms.config.GeneratorPropertiesFactory;
 import uk.gov.justice.services.core.mapping.MediaType;
 import uk.gov.justice.services.core.mapping.MediaTypeToSchemaIdMapper;
-import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil;
 
 import java.util.Map;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -36,13 +35,7 @@ public class JmsEndpointGenerator_MediaTypeToSchemaIdMapperTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
-    private JavaCompilerUtil compiler;
     private Generator<Raml> generator = new JmsEndpointGenerator();
-
-    @Before
-    public void setup() {
-        compiler = new JavaCompilerUtil(outputFolder.getRoot(), outputFolder.getRoot());
-    }
 
     @Test
     public void shouldGenerateMediaTypeToSchemaIdMapper() throws Exception {
@@ -54,7 +47,13 @@ public class JmsEndpointGenerator_MediaTypeToSchemaIdMapperTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new GeneratorPropertiesFactory().withServiceComponentOf(COMMAND_CONTROLLER)));
 
-        final Class<?> schemaIdMapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "ProcessorMediaTypeToSchemaIdMapper");
+        final Class<?> schemaIdMapperClass = javaCompilerUtil().compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "mapper",
+                "ProcessorMediaTypeToSchemaIdMapper");
+
         final MediaTypeToSchemaIdMapper instance = (MediaTypeToSchemaIdMapper) schemaIdMapperClass.newInstance();
 
         final Map<MediaType, String> mediaTypeToSchemaIdMap = instance.getMediaTypeToSchemaIdMap();

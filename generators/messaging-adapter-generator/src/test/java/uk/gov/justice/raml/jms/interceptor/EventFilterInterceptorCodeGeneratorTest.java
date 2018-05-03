@@ -8,6 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.raml.jms.core.ClassNameFactory.EVENT_FILTER;
 import static uk.gov.justice.raml.jms.core.ClassNameFactory.EVENT_FILTER_INTERCEPTOR;
+import static uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtility.javaCompilerUtil;
 
 import uk.gov.justice.raml.jms.core.ClassNameFactory;
 import uk.gov.justice.services.core.interceptor.Interceptor;
@@ -15,7 +16,6 @@ import uk.gov.justice.services.core.interceptor.InterceptorChain;
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
-import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -56,8 +56,11 @@ public class EventFilterInterceptorCodeGeneratorTest {
                 .build()
                 .writeTo(outputDirectory);
 
-        final JavaCompilerUtil compiler = new JavaCompilerUtil(outputDirectory, COMPILATION_OUTPUT_DIRECTORY);
-        final Class<?> compiledClass = compiler.compiledClassOf(packageName, simpleName);
+        final Class<?> compiledClass = javaCompilerUtil().compiledClassOf(
+                outputDirectory,
+                COMPILATION_OUTPUT_DIRECTORY,
+                packageName,
+                simpleName);
 
         nowTestTheGeneratedClass(compiledClass);
         nowTestTheFailureCase(compiledClass);

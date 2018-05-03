@@ -56,7 +56,11 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
                         .with(defaultPostResource()).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
-        Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceApplication");
+        final Class<?> applicationClass = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "CommandApiRestServiceApplication");
 
         assertThat(applicationClass.isInterface(), is(false));
     }
@@ -69,7 +73,11 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
                         .with(defaultPostResource()).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
-        Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceWithHyphensApplication");
+        final Class<?> applicationClass = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "CommandApiRestServiceWithHyphensApplication");
 
         assertThat(applicationClass.isInterface(), is(false));
     }
@@ -82,7 +90,11 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
                         .with(defaultPostResource()).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
-        Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceApplication");
+        final Class<?> applicationClass = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "CommandApiRestServiceApplication");
 
         assertThat(Modifier.isFinal(applicationClass.getModifiers()), is(false));
         assertThat(Modifier.isPublic(applicationClass.getModifiers()), is(true));
@@ -97,7 +109,12 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
-        Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceApplication");
+        final Class<?> applicationClass = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "CommandApiRestServiceApplication");
+
         assertThat(applicationClass.getSuperclass(), equalTo(Application.class));
     }
 
@@ -110,7 +127,11 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
-        Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceApplication");
+        final Class<?> applicationClass = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "CommandApiRestServiceApplication");
 
         assertThat(applicationClass.getAnnotation(ApplicationPath.class), not(nullValue()));
         assertThat(applicationClass.getAnnotation(ApplicationPath.class).value(), is("/command/api/rest/service"));
@@ -125,9 +146,13 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
                         .with(defaultPostResource()).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
-        Class<?> applicationClass = compiler.compiledClassOf(BASE_PACKAGE, "CommandApiRestServiceApplication");
+        final Class<?> applicationClass = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "CommandApiRestServiceApplication");
 
-        Method method = applicationClass.getDeclaredMethod("getClasses");
+        final Method method = applicationClass.getDeclaredMethod("getClasses");
         assertThat(method, not(nullValue()));
         assertThat(method.getParameterCount(), equalTo(0));
         assertThat(isPublic(method.getModifiers()), is(true));
@@ -148,22 +173,30 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
-        Set<Class<?>> compiledClasses = compiler.compiledClassesOf(BASE_PACKAGE);
-        Class<?> applicationClass = compiler.classOf(compiledClasses, BASE_PACKAGE, "CommandApiRestServiceApplication");
-        Object application = applicationClass.newInstance();
+        final Set<Class<?>> compiledClasses = COMPILER.compiledClassesOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE);
 
-        CommonProviders commonProviders = mock(CommonProviders.class);
+        final Class<?> applicationClass = COMPILER.classOf(
+                compiledClasses,
+                BASE_PACKAGE,
+                "CommandApiRestServiceApplication");
+
+        final Object application = applicationClass.newInstance();
+
+        final CommonProviders commonProviders = mock(CommonProviders.class);
         when(commonProviders.providers()).thenReturn(newHashSet(JaxRsProviderA.class));
 
         setField(application, "commonProviders", commonProviders);
 
-        Method method = applicationClass.getDeclaredMethod("getClasses");
-        Object result = method.invoke(application);
+        final Method method = applicationClass.getDeclaredMethod("getClasses");
+        final Object result = method.invoke(application);
         assertThat(result, is(instanceOf(Set.class)));
-        Set<Class<?>> classes = (Set<Class<?>>) result;
+        final Set<Class<?>> classes = (Set<Class<?>>) result;
         assertThat(classes, hasItems(
-                compiler.classOf(compiledClasses, BASE_PACKAGE, "resource", "DefaultCommandApiPathAResource"),
-                compiler.classOf(compiledClasses, BASE_PACKAGE, "resource", "DefaultCommandApiPathBResource")));
+                COMPILER.classOf(compiledClasses, BASE_PACKAGE, "resource", "DefaultCommandApiPathAResource"),
+                COMPILER.classOf(compiledClasses, BASE_PACKAGE, "resource", "DefaultCommandApiPathBResource")));
     }
 
     @SuppressWarnings("unchecked")
@@ -176,26 +209,34 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
-        Set<Class<?>> compiledClasses = compiler.compiledClassesOf(BASE_PACKAGE);
-        Class<?> applicationClass = compiler.classOf(compiledClasses, BASE_PACKAGE, "CommandApiRestServiceApplication");
-        Object application = applicationClass.newInstance();
+        final Set<Class<?>> compiledClasses = COMPILER.compiledClassesOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE);
 
-        CommonProviders commonProviders = mock(CommonProviders.class);
+        final Class<?> applicationClass = COMPILER.classOf(
+                compiledClasses,
+                BASE_PACKAGE,
+                "CommandApiRestServiceApplication");
+
+        final Object application = applicationClass.newInstance();
+
+        final CommonProviders commonProviders = mock(CommonProviders.class);
         when(commonProviders.providers()).thenReturn(newHashSet(JaxRsProviderA.class, JaxRsProviderB.class));
 
         setField(application, "commonProviders", commonProviders);
 
-        Method method = applicationClass.getDeclaredMethod("getClasses");
-        Object result = method.invoke(application);
+        final Method method = applicationClass.getDeclaredMethod("getClasses");
+        final Object result = method.invoke(application);
         assertThat(result, is(instanceOf(Set.class)));
-        Set<Class<?>> classes = (Set<Class<?>>) result;
+        final Set<Class<?>> classes = (Set<Class<?>>) result;
         assertThat(classes, hasItems(JaxRsProviderA.class, JaxRsProviderB.class));
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void shouldNotGenerateExistingClasses() throws Exception {
-        Path sourcePath = existingFilePath();
+        final Path sourcePath = existingFilePath();
 
         generator.run(
                 restRamlWithQueryApiDefaults()
@@ -203,7 +244,7 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties(), singletonList(sourcePath)));
 
-        Path outputPath = Paths.get(outputFolder.newFile().getAbsolutePath(), EXISTING_FILE_PATH);
+        final Path outputPath = Paths.get(outputFolder.newFile().getAbsolutePath(), EXISTING_FILE_PATH);
 
         assertThat(outputPath.toFile().exists(), equalTo(FALSE));
     }
@@ -221,7 +262,7 @@ public class RestAdapterGenerator_ApplicationTest extends BaseRestAdapterGenerat
     }
 
     private Path existingFilePath() {
-        URL resource = getClass().getClassLoader().getResource(EXISTING_FILE_PATH);
+        final URL resource = getClass().getClassLoader().getResource(EXISTING_FILE_PATH);
         return Paths.get(new File(resource.getPath()).getPath()).getParent().getParent().getParent().getParent().getParent();
     }
 

@@ -2,6 +2,7 @@ package uk.gov.justice.services.adapters.rest.generator;
 
 
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtility.javaCompilerUtil;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
 import uk.gov.justice.services.adapter.rest.mapping.ActionMapper;
@@ -15,7 +16,7 @@ import uk.gov.justice.services.adapter.rest.processor.response.OkStatusEnvelopeP
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.messaging.logging.HttpTraceLoggerHelper;
 import uk.gov.justice.services.messaging.logging.TraceLogger;
-import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil;
+import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtility;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -27,6 +28,8 @@ import org.slf4j.Logger;
 
 @RunWith(MockitoJUnitRunner.class)
 public abstract class BaseRestAdapterGeneratorTest {
+
+    public static final JavaCompilerUtility COMPILER = javaCompilerUtil();
 
     private static final String INTERCEPTOR_CHAIN_PROCESSOR = "interceptorChainProcessor";
     private static final String REST_PROCESSOR = "restProcessor";
@@ -77,13 +80,9 @@ public abstract class BaseRestAdapterGeneratorTest {
 
     protected static final String BASE_PACKAGE = "org.raml.test";
 
-    protected JavaCompilerUtil compiler;
 
     @Before
     public void before() {
-
-        compiler = new JavaCompilerUtil(outputFolder.getRoot(), outputFolder.getRoot());
-
         try {
             setField(generator, LOGGER_FIELD, logger);
         } catch (IllegalAccessException e) {

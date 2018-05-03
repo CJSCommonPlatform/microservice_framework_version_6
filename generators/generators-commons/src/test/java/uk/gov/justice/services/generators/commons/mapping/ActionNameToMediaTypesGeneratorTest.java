@@ -10,17 +10,17 @@ import static uk.gov.justice.services.generators.test.utils.builder.MappingDescr
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithQueryApiDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
+import static uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtility.javaCompilerUtil;
 
 import uk.gov.justice.services.core.mapping.ActionNameToMediaTypesMapper;
 import uk.gov.justice.services.core.mapping.MediaType;
 import uk.gov.justice.services.core.mapping.MediaTypes;
 import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
-import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil;
+import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtility;
 
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -28,16 +28,10 @@ import org.junit.rules.TemporaryFolder;
 public class ActionNameToMediaTypesGeneratorTest {
 
     private static final String BASE_PACKAGE = "org.raml.test";
+    private static final JavaCompilerUtility COMPILER = javaCompilerUtil();
 
     @Rule
     public TemporaryFolder outputFolder = new TemporaryFolder();
-
-    private JavaCompilerUtil compiler;
-
-    @Before
-    public void before() {
-        compiler = new JavaCompilerUtil(outputFolder.getRoot(), outputFolder.getRoot());
-    }
 
     @Test
     public void shouldCreateMediaTypeToSchemaIdMapperForGivenRamlWithPost() throws Exception {
@@ -64,7 +58,13 @@ public class ActionNameToMediaTypesGeneratorTest {
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
-        final Class<?> mediaTypesMapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "WarnameActionNameToMediaTypesMapper");
+        final Class<?> mediaTypesMapperClass = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "mapper",
+                "WarnameActionNameToMediaTypesMapper");
+
         final ActionNameToMediaTypesMapper instance = (ActionNameToMediaTypesMapper) mediaTypesMapperClass.newInstance();
 
         final Map<String, MediaTypes> actionNameToMediaTypesMap = instance.getActionNameToMediaTypesMap();
@@ -99,7 +99,13 @@ public class ActionNameToMediaTypesGeneratorTest {
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
-        final Class<?> mediaTypesMapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "WarnameActionNameToMediaTypesMapper");
+        final Class<?> mediaTypesMapperClass = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "mapper",
+                "WarnameActionNameToMediaTypesMapper");
+
         final ActionNameToMediaTypesMapper instance = (ActionNameToMediaTypesMapper) mediaTypesMapperClass.newInstance();
 
         final Map<String, MediaTypes> actionNameToMediaTypesMap = instance.getActionNameToMediaTypesMap();

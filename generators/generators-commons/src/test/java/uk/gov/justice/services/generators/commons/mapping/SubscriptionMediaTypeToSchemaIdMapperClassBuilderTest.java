@@ -5,11 +5,11 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtility.javaCompilerUtil;
 
 import uk.gov.justice.services.core.annotation.SchemaIdMapper;
 import uk.gov.justice.services.core.mapping.MediaType;
 import uk.gov.justice.services.core.mapping.MediaTypeToSchemaIdMapper;
-import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Event;
 
 import java.io.File;
@@ -114,8 +114,8 @@ public class SubscriptionMediaTypeToSchemaIdMapperClassBuilderTest {
                 .writeTo(outputFolderRoot);
 
 
-        return new JavaCompilerUtil(outputFolderRoot, outputFolderRoot)
-                .compiledClassesOf(packageName)
+        return javaCompilerUtil()
+                .compiledClassesOf(outputFolderRoot, outputFolderRoot, packageName)
                 .stream()
                 .filter(clazz -> !clazz.getName().equals("java.lang.Object"))
                 .findFirst().orElseGet(null);

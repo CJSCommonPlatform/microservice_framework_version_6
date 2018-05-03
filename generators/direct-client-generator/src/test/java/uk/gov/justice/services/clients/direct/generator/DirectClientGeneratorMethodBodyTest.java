@@ -10,6 +10,7 @@ import static uk.gov.justice.config.GeneratorPropertiesFactory.generatorProperti
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.defaultGetResource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
+import static uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtility.javaCompilerUtil;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
@@ -18,12 +19,11 @@ import uk.gov.justice.services.adapter.direct.SynchronousDirectAdapter;
 import uk.gov.justice.services.adapter.direct.SynchronousDirectAdapterCache;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
-import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil;
+import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtility;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -35,8 +35,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class DirectClientGeneratorMethodBodyTest {
 
     private static final String BASE_PACKAGE = "org.raml.test";
-
-    private JavaCompilerUtil compiler;
+    private static final JavaCompilerUtility COMPILER = javaCompilerUtil();
 
     @Rule
     public TemporaryFolder outputFolder = new TemporaryFolder();
@@ -49,12 +48,6 @@ public class DirectClientGeneratorMethodBodyTest {
 
     private final DirectClientGenerator generator = new DirectClientGenerator();
 
-    @Before
-    public void setUp() throws Exception {
-        compiler = new JavaCompilerUtil(outputFolder.getRoot(), outputFolder.getRoot());
-    }
-
-
     @Test
     public void shouldPassEnvelopeToAdapter() throws Exception {
 
@@ -65,7 +58,12 @@ public class DirectClientGeneratorMethodBodyTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("QUERY_API")));
 
-        final Class<?> generatedClientClass = compiler.compiledClassOf(BASE_PACKAGE, "DirectQueryApi2QueryViewServiceClient");
+        final Class<?> generatedClientClass = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "DirectQueryApi2QueryViewServiceClient");
+
         final JsonEnvelope envelopePassedToClient = envelope().build();
 
         when(adapterCache.directAdapterForComponent("QUERY_VIEW")).thenReturn(adapter);
@@ -85,7 +83,12 @@ public class DirectClientGeneratorMethodBodyTest {
                         .with(defaultGetResource())
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("QUERY_API")));
-        final Class<?> generatedClientClass = compiler.compiledClassOf(BASE_PACKAGE, "DirectQueryApi2QueryViewServiceClient");
+
+        final Class<?> generatedClientClass = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "DirectQueryApi2QueryViewServiceClient");
 
         final JsonEnvelope envelopeReturnedByAdapter = envelope().build();
         when(adapterCache.directAdapterForComponent("QUERY_VIEW")).thenReturn(adapter);

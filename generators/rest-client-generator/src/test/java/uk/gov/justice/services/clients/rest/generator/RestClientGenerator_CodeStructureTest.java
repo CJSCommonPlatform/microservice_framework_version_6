@@ -23,6 +23,7 @@ import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.restRamlWithTitleVersion;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
+import static uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtility.javaCompilerUtil;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.methodsOf;
 
@@ -31,7 +32,7 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.Remote;
 import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil;
+import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtility;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -42,7 +43,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.hamcrest.Matchers;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -88,6 +88,7 @@ public class RestClientGenerator_CodeStructureTest {
     private static final String BASE_URI_WITH_LESS_THAN_EIGHT_PARTS = "http://localhost:8080/command/api/rest/service";
     private static final String BASE_URI_WITH_MORE_THAN_EIGHT_PARTS = "http://localhost:8080/warname/command/api/rest/service/extra";
     private static final String BASE_URI_WITH_HYPHENATED_SERVICE_NAME = "http://localhost:8080/warname/command/api/rest/service-with-hyphens";
+    private static final JavaCompilerUtility COMPILER = javaCompilerUtil();
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
@@ -96,13 +97,6 @@ public class RestClientGenerator_CodeStructureTest {
     public TemporaryFolder outputFolder = new TemporaryFolder();
 
     private final RestClientGenerator generator = new RestClientGenerator();
-
-    private JavaCompilerUtil compiler;
-
-    @Before
-    public void before() {
-        compiler = new JavaCompilerUtil(outputFolder.getRoot(), outputFolder.getRoot());
-    }
 
     @Test
     public void shouldGenerateClassWithAnnotations() throws Exception {
@@ -116,7 +110,11 @@ public class RestClientGenerator_CodeStructureTest {
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("CUSTOM_COMPONENT")));
 
 
-        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCustomComponent2ServiceQueryApi");
+        final Class<?> generatedClass = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "RemoteCustomComponent2ServiceQueryApi");
 
         assertThat(generatedClass.getCanonicalName(), is("org.raml.test.RemoteCustomComponent2ServiceQueryApi"));
         assertThat(generatedClass.getAnnotation(Remote.class), not(nullValue()));
@@ -137,7 +135,12 @@ public class RestClientGenerator_CodeStructureTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("QUERY_CONTROLLER")));
 
-        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteQueryController2ServiceQueryApi");
+        final Class<?> generatedClass = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "RemoteQueryController2ServiceQueryApi");
+
         assertThat(generatedClass.getAnnotation(FrameworkComponent.class).value(), is("QUERY_CONTROLLER"));
     }
 
@@ -150,7 +153,11 @@ public class RestClientGenerator_CodeStructureTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("CUSTOM_COMPONENT")));
 
-        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCustomComponent2ServiceQueryApi");
+        final Class<?> generatedClass = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "RemoteCustomComponent2ServiceQueryApi");
 
         final Field logger = generatedClass.getDeclaredField("LOGGER");
         assertThat(logger, not(nullValue()));
@@ -171,7 +178,12 @@ public class RestClientGenerator_CodeStructureTest {
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("CUSTOM_COMPONENT")));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCustomComponent2ServiceCommandApi");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "RemoteCustomComponent2ServiceCommandApi");
+
         final List<Method> methods = methodsOf(clazz);
         assertThat(methods, hasSize(1));
 
@@ -193,7 +205,12 @@ public class RestClientGenerator_CodeStructureTest {
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("CUSTOM_COMPONENT")));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCustomComponent2ServiceCommandApi");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "RemoteCustomComponent2ServiceCommandApi");
+
         final List<Method> methods = methodsOf(clazz);
         assertThat(methods, hasSize(1));
 
@@ -215,7 +232,12 @@ public class RestClientGenerator_CodeStructureTest {
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("CUSTOM_COMPONENT")));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCustomComponent2ServiceCommandApi");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "RemoteCustomComponent2ServiceCommandApi");
+
         final List<Method> methods = methodsOf(clazz);
         assertThat(methods, hasSize(1));
 
@@ -237,7 +259,12 @@ public class RestClientGenerator_CodeStructureTest {
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("CUSTOM_COMPONENT")));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCustomComponent2ServiceCommandApi");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "RemoteCustomComponent2ServiceCommandApi");
+
         final List<Method> methods = methodsOf(clazz);
         assertThat(methods, hasSize(1));
 
@@ -259,7 +286,11 @@ public class RestClientGenerator_CodeStructureTest {
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("CUSTOM_COMPONENT")));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCustomComponent2ServiceCommandApi");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE, "RemoteCustomComponent2ServiceCommandApi");
+
         final List<Method> methods = methodsOf(clazz);
         assertThat(methods, hasSize(1));
 
@@ -281,7 +312,12 @@ public class RestClientGenerator_CodeStructureTest {
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("CUSTOM_COMPONENT")));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCustomComponent2ServiceCommandApi");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "RemoteCustomComponent2ServiceCommandApi");
+
         final Method method = firstMethodOf(clazz).get();
         assertThat(method.getName(), equalTo("postSomePathRecipeIdCakeshopCommandCreateRecipe"));
         assertThat(method.getParameterCount(), is(1));
@@ -334,7 +370,11 @@ public class RestClientGenerator_CodeStructureTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("EVENT_PROCESSOR")));
 
-        compiler.compiledClassOf(BASE_PACKAGE, "RemoteEventProcessor2ServiceWithHyphensCommandApi");
+        COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "RemoteEventProcessor2ServiceWithHyphensCommandApi");
     }
 
     @Test
@@ -362,8 +402,11 @@ public class RestClientGenerator_CodeStructureTest {
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("SOME_COMPONENT")));
 
 
-        assertThat(methodsOf(compiler.compiledClassOf(BASE_PACKAGE, "RemoteSomeComponent2ServiceQueryApi")), hasSize(0));
-
+        assertThat(methodsOf(COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "RemoteSomeComponent2ServiceQueryApi")), hasSize(0));
     }
 
     private void assertBaseUriField(final Field field) {

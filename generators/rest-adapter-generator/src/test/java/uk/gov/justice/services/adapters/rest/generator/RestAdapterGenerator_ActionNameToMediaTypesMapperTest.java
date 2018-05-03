@@ -39,7 +39,13 @@ public class RestAdapterGenerator_ActionNameToMediaTypesMapperTest extends BaseR
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
-        final Class<?> mediaTypesMapperClass = compiler.compiledClassOf(BASE_PACKAGE, "mapper", "WarnameActionNameToMediaTypesMapper");
+        final Class<?> mediaTypesMapperClass = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "mapper",
+                "WarnameActionNameToMediaTypesMapper");
+
         final ActionNameToMediaTypesMapper instance = (ActionNameToMediaTypesMapper) mediaTypesMapperClass.newInstance();
 
         final Map<String, MediaTypes> actionNameToMediaTypesMap = instance.getActionNameToMediaTypesMap();

@@ -6,17 +6,16 @@ import static uk.gov.justice.config.GeneratorPropertiesFactory.generatorProperti
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.messagingRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
+import static uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtility.javaCompilerUtil;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
 import uk.gov.justice.services.messaging.logging.TraceLogger;
-import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil;
 
 import java.lang.reflect.Method;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -37,13 +36,6 @@ public class MessagingClientGenerator_MethodBodyTest {
 
     private final MessagingClientGenerator generator = new MessagingClientGenerator();
 
-    private JavaCompilerUtil compiler;
-
-    @Before
-    public void before() {
-        compiler = new JavaCompilerUtil(outputFolder.getRoot(), outputFolder.getRoot());
-    }
-
     @Test
     public void shouldSendEnvelopeToDestination() throws Exception {
         generator.run(
@@ -54,7 +46,12 @@ public class MessagingClientGenerator_MethodBodyTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_CONTROLLER")));
 
-        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteCommandController2EventProcessorMessageContextCakeshopControllerCommand");
+        final Class<?> generatedClass = javaCompilerUtil().compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "RemoteCommandController2EventProcessorMessageContextCakeshopControllerCommand");
+
         final Object instance = instanceOf(generatedClass);
         setField(instance, "traceLogger", mock(TraceLogger.class));
 

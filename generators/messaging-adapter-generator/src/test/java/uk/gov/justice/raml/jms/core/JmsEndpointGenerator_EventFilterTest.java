@@ -15,13 +15,14 @@ import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBu
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.raml;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
+import static uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtility.javaCompilerUtil;
 
 import uk.gov.justice.maven.generator.io.files.parser.core.Generator;
 import uk.gov.justice.maven.generator.io.files.parser.core.GeneratorProperties;
 import uk.gov.justice.raml.jms.config.GeneratorPropertiesFactory;
 import uk.gov.justice.services.adapter.messaging.JmsProcessor;
 import uk.gov.justice.services.event.buffer.api.AbstractEventFilter;
-import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil;
+import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtility;
 
 import java.io.File;
 
@@ -39,6 +40,7 @@ public class JmsEndpointGenerator_EventFilterTest {
 
     private static final String BASE_PACKAGE = "uk.test";
     private static final String BASE_PACKAGE_FOLDER = "/uk/test";
+    private static final JavaCompilerUtility COMPILER = javaCompilerUtil();
 
     @Rule
     public TemporaryFolder outputFolder = new TemporaryFolder();
@@ -50,12 +52,10 @@ public class JmsEndpointGenerator_EventFilterTest {
     private JmsProcessor jmsProcessor;
 
     private GeneratorProperties generatorProperties;
-    private JavaCompilerUtil compiler;
     private Generator<Raml> generator;
 
     @Before
     public void setup() throws Exception {
-        compiler = new JavaCompilerUtil(outputFolder.getRoot(), outputFolder.getRoot());
         generator = new JmsEndpointGenerator();
         generatorProperties = new GeneratorPropertiesFactory().withServiceComponentOf(EVENT_LISTENER);
     }
@@ -73,7 +73,11 @@ public class JmsEndpointGenerator_EventFilterTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "StructureEventListenerSomecontextControllerCommandEventFilter");
+        Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "StructureEventListenerSomecontextControllerCommandEventFilter");
 
         final AbstractEventFilter eventFilter = (AbstractEventFilter) clazz.newInstance();
 
@@ -125,7 +129,11 @@ public class JmsEndpointGenerator_EventFilterTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "StructureEventListenerSomecontextControllerCommandEventFilter");
+        Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "StructureEventListenerSomecontextControllerCommandEventFilter");
         assertThat(clazz.getAnnotation(ApplicationScoped.class), is(not(nullValue())));
     }
 
@@ -141,7 +149,11 @@ public class JmsEndpointGenerator_EventFilterTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "MyHyphenatedServiceEventListenerSomecontextControllerCommandEventFilter");
+        Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "MyHyphenatedServiceEventListenerSomecontextControllerCommandEventFilter");
 
         final AbstractEventFilter eventFilter = (AbstractEventFilter) clazz.newInstance();
 

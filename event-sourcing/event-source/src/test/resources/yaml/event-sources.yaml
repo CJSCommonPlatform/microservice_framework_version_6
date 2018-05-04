@@ -1,0 +1,15 @@
+event_sources:
+- name: correctdatasource
+  location:
+    jms_uri: jms:topic:defaultEventSource.event?timeToLive=1000
+    rest_uri: http://localhost:8080/defaultEventSource/event-source-api/rest
+    data_source: java:/app/test/DS.eventstore
+- name: nodatasource
+  location:
+    jms_uri: jms:topic:nodatasource.event?timeToLive=1000
+    rest_uri: http://localhost:8080/nodatasource/event-source-api/rest
+- name: incorrectdatasourcename
+  location:
+    jms_uri: jms:topic:incorrectdatasourcename.event?timeToLive=1000
+    rest_uri: http://localhost:8080/incorrectdatasourcename/event-source-api/rest
+    data_source: jdbc:h2:mem:test1;MV_STORE=FALSE;MVCC=FALSE

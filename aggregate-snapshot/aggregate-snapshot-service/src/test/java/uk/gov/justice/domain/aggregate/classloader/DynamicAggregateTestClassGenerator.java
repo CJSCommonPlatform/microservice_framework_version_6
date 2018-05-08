@@ -1,7 +1,8 @@
 package uk.gov.justice.domain.aggregate.classloader;
 
+import static uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtility.javaCompilerUtil;
+
 import uk.gov.justice.domain.aggregate.Aggregate;
-import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -77,8 +78,7 @@ public class DynamicAggregateTestClassGenerator {
         final File pathRoot = new File(path);
         javaFile.writeTo(pathRoot);
         javaFile.writeTo(System.out);
-        final JavaCompilerUtil compiler = new JavaCompilerUtil(pathRoot, pathRoot);
-        final Class<?> generatedClass = compiler.compiledClassOf(basePackage, fileNameToBeGenerated);
+        final Class<?> generatedClass = javaCompilerUtil().compiledClassOf(pathRoot, pathRoot, basePackage, fileNameToBeGenerated);
         return (Class<T>) generatedClass;
     }
 }

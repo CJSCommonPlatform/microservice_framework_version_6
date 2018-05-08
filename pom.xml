@@ -54,7 +54,7 @@
         <jboss-ejb3-ext-api.version>2.2.0.Final</jboss-ejb3-ext-api.version>
         <jboss-vfs.version>3.2.12.Final</jboss-vfs.version>
         <raml-maven-plugin.version>1.6.1</raml-maven-plugin.version>
-        <test-utils.version>1.16.2</test-utils.version>
+        <test-utils.version>1.16.3</test-utils.version>
         <utilities.version>1.13.0</utilities.version>
         <generator-maven-plugin.version>2.5.0-M2</generator-maven-plugin.version>
         <framework-api.version>3.0.0-M5</framework-api.version>

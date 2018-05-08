@@ -30,6 +30,7 @@ import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.defaultGetResource;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
+import static uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtility.javaCompilerUtil;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
@@ -40,14 +41,13 @@ import uk.gov.justice.services.clients.core.RestClientProcessor;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
-import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil;
+import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtility;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.function.Function;
 
 import com.google.common.collect.ImmutableSet;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -61,8 +61,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class RestClientGenerator_MethodBodyTest {
 
     private static final JsonEnvelope NOT_USED_ENVELOPE = mock(JsonEnvelope.class);
-
     private static final String BASE_PACKAGE = "org.raml.test";
+    private static final JavaCompilerUtility COMPILER = javaCompilerUtil();
 
     @Mock
     private RestClientProcessor restClientProcessor;
@@ -81,14 +81,6 @@ public class RestClientGenerator_MethodBodyTest {
 
     private final RestClientGenerator generator = new RestClientGenerator();
 
-    private JavaCompilerUtil compiler;
-
-
-    @Before
-    public void before() {
-        compiler = new JavaCompilerUtil(outputFolder.getRoot(), outputFolder.getRoot());
-    }
-
     @Test
     public void shouldCallRestClientWithEndpointDefinitionContainingBaseUri() throws Exception {
 
@@ -99,7 +91,12 @@ public class RestClientGenerator_MethodBodyTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("SOME_COMPONENT")));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteSomeComponent2Service1QueryApi");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "RemoteSomeComponent2Service1QueryApi");
+
         invokeFirstMethod(clazz);
 
         assertThat(capturedGetEndpointDefinition().getBaseUri(), is("http://localhost:8080/contextabc/query/api/rest/service1"));
@@ -114,7 +111,12 @@ public class RestClientGenerator_MethodBodyTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("SOME_COMPONENT")));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteSomeComponent2ServiceQueryApi");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "RemoteSomeComponent2ServiceQueryApi");
+
         invokeFirstMethod(clazz);
         assertThat(capturedGetEndpointDefinition().getPath(), is("/pathabc/{anId}"));
     }
@@ -129,7 +131,11 @@ public class RestClientGenerator_MethodBodyTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("SOME_COMPONENT")));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteSomeComponent2ServiceQueryApi");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "RemoteSomeComponent2ServiceQueryApi");
 
         final ImmutableSet<String> paramsSetReturnedByHelper = ImmutableSet.of("aaa");
         when(restClientHelper.extractPathParametersFromPath("/pathabc")).thenReturn(paramsSetReturnedByHelper);
@@ -155,7 +161,11 @@ public class RestClientGenerator_MethodBodyTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("SOME_COMPONENT")));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteSomeComponent2ServiceQueryApi");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "RemoteSomeComponent2ServiceQueryApi");
 
         invokeFirstMethod(clazz);
 
@@ -179,7 +189,12 @@ public class RestClientGenerator_MethodBodyTest {
                         .build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("SOME_COMPONENT")));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteSomeComponent2ServiceQueryApi");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "RemoteSomeComponent2ServiceQueryApi");
+
         final Object remoteClient = instanceOfRemoteClient(clazz);
         final Method method = firstMethodOf(clazz).get();
 
@@ -199,7 +214,12 @@ public class RestClientGenerator_MethodBodyTest {
         final JsonEnvelope outputEnvelope = mock(JsonEnvelope.class);
         final Function function = mock(Function.class);
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteSomeComponent2ServiceCommandApi");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "RemoteSomeComponent2ServiceCommandApi");
+
         final Object remoteClient = instanceOfRemoteClient(clazz);
         final Method method = firstMethodOf(clazz).get();
 
@@ -221,7 +241,12 @@ public class RestClientGenerator_MethodBodyTest {
         final JsonEnvelope outputEnvelope = mock(JsonEnvelope.class);
         final Function function = mock(Function.class);
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteSomeComponent2ServiceCommandApi");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "RemoteSomeComponent2ServiceCommandApi");
+
         final Object remoteClient = instanceOfRemoteClient(clazz);
         final Method method = firstMethodOf(clazz).get();
 
@@ -253,7 +278,12 @@ public class RestClientGenerator_MethodBodyTest {
         final JsonEnvelope outputEnvelope = mock(JsonEnvelope.class);
         final Function function = mock(Function.class);
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteSomeComponent2ServiceCommandApi");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "RemoteSomeComponent2ServiceCommandApi");
+
         final Object remoteClient = instanceOfRemoteClient(clazz);
         final Method method = firstMethodOf(clazz).get();
 
@@ -283,7 +313,12 @@ public class RestClientGenerator_MethodBodyTest {
         final JsonEnvelope outputEnvelope = mock(JsonEnvelope.class);
         final Function function = mock(Function.class);
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteSomeComponent2ServiceCommandApi");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "RemoteSomeComponent2ServiceCommandApi");
+
         final Object remoteClient = instanceOfRemoteClient(clazz);
         final Method method = firstMethodOf(clazz).get();
 
@@ -315,7 +350,12 @@ public class RestClientGenerator_MethodBodyTest {
         final JsonEnvelope outputEnvelope = mock(JsonEnvelope.class);
         final Function function = mock(Function.class);
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteSomeComponent2ServiceCommandApi");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "RemoteSomeComponent2ServiceCommandApi");
+
         final Object remoteClient = instanceOfRemoteClient(clazz);
         final Method method = firstMethodOf(clazz).get();
 
@@ -345,7 +385,12 @@ public class RestClientGenerator_MethodBodyTest {
         final JsonEnvelope outputEnvelope = mock(JsonEnvelope.class);
         final Function function = mock(Function.class);
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteSomeComponent2ServiceCommandApi");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "RemoteSomeComponent2ServiceCommandApi");
+
         final Object remoteClient = instanceOfRemoteClient(clazz);
         final Method method = firstMethodOf(clazz).get();
 
@@ -377,7 +422,12 @@ public class RestClientGenerator_MethodBodyTest {
         final JsonEnvelope outputEnvelope = mock(JsonEnvelope.class);
         final Function function = mock(Function.class);
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteSomeComponent2ServiceCommandApi");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "RemoteSomeComponent2ServiceCommandApi");
+
         final Object remoteClient = instanceOfRemoteClient(clazz);
 
         final Method method = firstMethodOf(clazz).get();
@@ -408,7 +458,12 @@ public class RestClientGenerator_MethodBodyTest {
         final JsonEnvelope outputEnvelope = mock(JsonEnvelope.class);
         final Function function = mock(Function.class);
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "RemoteSomeComponent2ServiceCommandApi");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "RemoteSomeComponent2ServiceCommandApi");
+
         final Object remoteClient = instanceOfRemoteClient(clazz);
         final Method method = firstMethodOf(clazz).get();
 

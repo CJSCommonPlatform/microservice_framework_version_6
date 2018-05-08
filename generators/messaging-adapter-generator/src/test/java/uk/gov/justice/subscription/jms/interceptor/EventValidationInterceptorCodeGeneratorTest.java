@@ -7,12 +7,12 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.jms.HeaderConstants.JMS_HEADER_CPPNAME;
+import static uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtility.javaCompilerUtil;
 import static uk.gov.justice.subscription.jms.core.ClassNameFactory.EVENT_FILTER;
 import static uk.gov.justice.subscription.jms.core.ClassNameFactory.EVENT_VALIDATION_INTERCEPTOR;
 
 import uk.gov.justice.services.adapter.messaging.JsonSchemaValidationInterceptor;
 import uk.gov.justice.services.messaging.jms.HeaderConstants;
-import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil;
 import uk.gov.justice.subscription.jms.core.ClassNameFactory;
 
 import java.io.File;
@@ -60,8 +60,11 @@ public class EventValidationInterceptorCodeGeneratorTest {
                 .build()
                 .writeTo(codeGenerationOutputDirectory);
 
-        final JavaCompilerUtil compiler = new JavaCompilerUtil(codeGenerationOutputDirectory, compilationOutputDirectory);
-        final Class<?> compiledClass = compiler.compiledClassOf(packageName, simpleName);
+        final Class<?> compiledClass = javaCompilerUtil().compiledClassOf(
+                codeGenerationOutputDirectory,
+                compilationOutputDirectory,
+                packageName,
+                simpleName);
 
         nowTestTheGeneratedClass(compiledClass);
         nowTestTheFailureCase(compiledClass);

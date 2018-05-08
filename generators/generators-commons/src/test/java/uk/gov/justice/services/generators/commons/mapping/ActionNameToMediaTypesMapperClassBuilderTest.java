@@ -6,12 +6,12 @@ import static java.util.Optional.of;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtility.javaCompilerUtil;
 
 import uk.gov.justice.services.core.annotation.MediaTypesMapper;
 import uk.gov.justice.services.core.mapping.ActionNameToMediaTypesMapper;
 import uk.gov.justice.services.core.mapping.MediaType;
 import uk.gov.justice.services.core.mapping.MediaTypes;
-import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -84,8 +84,8 @@ public class ActionNameToMediaTypesMapperClassBuilderTest {
                 .build()
                 .writeTo(outputFolderRoot);
 
-        return new JavaCompilerUtil(outputFolderRoot, outputFolderRoot)
-                .compiledClassesOf(packageName)
+        return javaCompilerUtil()
+                .compiledClassesOf(outputFolderRoot, outputFolderRoot, packageName)
                 .stream()
                 .filter(clazz -> !clazz.getName().equals("java.lang.Object"))
                 .findFirst().orElseGet(null);

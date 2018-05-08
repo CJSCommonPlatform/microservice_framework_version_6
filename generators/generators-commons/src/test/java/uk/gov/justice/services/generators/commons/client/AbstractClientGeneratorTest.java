@@ -26,6 +26,7 @@ import static uk.gov.justice.services.generators.test.utils.builder.HttpActionBu
 import static uk.gov.justice.services.generators.test.utils.builder.RamlBuilder.messagingRamlWithDefaults;
 import static uk.gov.justice.services.generators.test.utils.builder.ResourceBuilder.resource;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
+import static uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtility.javaCompilerUtil;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.firstMethodOf;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.methodsOf;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
@@ -38,7 +39,7 @@ import uk.gov.justice.services.core.annotation.Remote;
 import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
-import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil;
+import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtility;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -71,6 +72,7 @@ public class AbstractClientGeneratorTest {
     private static final String EXISTING_FILE_PATH = "org/raml/test/resource/RemoteBCDController.java";
     private static final String LOGGER_FIELD = "logger";
     private static final String BASE_PACKAGE = "org.raml.test";
+    private static final JavaCompilerUtility COMPILER = javaCompilerUtil();
 
     @Mock
     private Logger logger;
@@ -80,12 +82,9 @@ public class AbstractClientGeneratorTest {
 
     private final ABCClientGenerator generator = new ABCClientGenerator();
 
-    private JavaCompilerUtil compiler;
-
     @Before
     public void before() {
         overrideLogger(generator, logger);
-        compiler = new JavaCompilerUtil(outputFolder.getRoot(), outputFolder.getRoot());
     }
 
     @Test
@@ -99,7 +98,11 @@ public class AbstractClientGeneratorTest {
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_API")));
 
 
-        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteABCController");
+        final Class<?> generatedClass = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "RemoteABCController");
 
         assertThat(generatedClass.getCanonicalName(), is("org.raml.test.RemoteABCController"));
         assertThat(generatedClass.getAnnotation(Remote.class), not(nullValue()));
@@ -119,7 +122,11 @@ public class AbstractClientGeneratorTest {
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_API")));
 
 
-        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteABCController");
+        final Class<?> generatedClass = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "RemoteABCController");
 
         assertThat(generatedClass.getCanonicalName(), is("org.raml.test.RemoteABCController"));
         assertThat(generatedClass.getAnnotation(Remote.class), not(nullValue()));
@@ -139,7 +146,11 @@ public class AbstractClientGeneratorTest {
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_API")));
 
 
-        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteABCController");
+        final Class<?> generatedClass = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "RemoteABCController");
 
         assertThat(generatedClass.getCanonicalName(), is("org.raml.test.RemoteABCController"));
         assertThat(generatedClass.getAnnotation(Remote.class), not(nullValue()));
@@ -159,7 +170,11 @@ public class AbstractClientGeneratorTest {
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_API")));
 
 
-        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteABCController");
+        final Class<?> generatedClass = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "RemoteABCController");
 
         assertThat(generatedClass.getCanonicalName(), is("org.raml.test.RemoteABCController"));
         assertThat(generatedClass.getAnnotation(Remote.class), not(nullValue()));
@@ -181,7 +196,11 @@ public class AbstractClientGeneratorTest {
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties().withServiceComponentOf("COMMAND_CONTROLLER")));
 
 
-        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteABCController");
+        final Class<?> generatedClass = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "RemoteABCController");
 
         assertThat(generatedClass.getCanonicalName(), is("org.raml.test.RemoteABCController"));
         assertThat(generatedClass.getAnnotation(Remote.class), not(nullValue()));
@@ -197,7 +216,11 @@ public class AbstractClientGeneratorTest {
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder,
                         generatorProperties().withDefaultServiceComponent()));
 
-        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteABCController");
+        final Class<?> generatedClass = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "RemoteABCController");
 
         final Field logger = generatedClass.getDeclaredField("LOGGER");
         assertThat(logger, not(nullValue()));
@@ -214,7 +237,11 @@ public class AbstractClientGeneratorTest {
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder,
                         generatorProperties().withDefaultServiceComponent()));
 
-        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteABCController");
+        final Class<?> generatedClass = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "RemoteABCController");
 
         final Field logger = generatedClass.getDeclaredField("dummyVariable");
         assertThat(logger, not(nullValue()));
@@ -229,7 +256,11 @@ public class AbstractClientGeneratorTest {
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder,
                         generatorProperties().withDefaultServiceComponent()));
 
-        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteABCController");
+        final Class<?> generatedClass = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "RemoteABCController");
 
         final List<Method> methods = methodsOf(generatedClass);
         assertThat(methods, hasSize(1));
@@ -249,7 +280,11 @@ public class AbstractClientGeneratorTest {
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder,
                         generatorProperties().withDefaultServiceComponent()));
 
-        final Class<?> generatedClass = compiler.compiledClassOf(BASE_PACKAGE, "RemoteABCController");
+        final Class<?> generatedClass = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "RemoteABCController");
 
         final List<Method> methods = methodsOf(generatedClass);
         assertThat(methods, hasSize(1));
@@ -303,7 +338,7 @@ public class AbstractClientGeneratorTest {
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder,
                         generatorProperties().withServiceComponentOf("COMMAND_CONTROLLER"), singletonList(existingFilePath())));
 
-        Path outputPath = Paths.get(outputFolder.newFile().getAbsolutePath(), EXISTING_FILE_PATH);
+        final Path outputPath = Paths.get(outputFolder.newFile().getAbsolutePath(), EXISTING_FILE_PATH);
 
         assertThat(outputPath.toFile().exists(), equalTo(FALSE));
     }
@@ -365,7 +400,7 @@ public class AbstractClientGeneratorTest {
     }
 
     private Path existingFilePath() {
-        URL resource = getClass().getClassLoader().getResource(EXISTING_FILE_PATH);
+        final URL resource = getClass().getClassLoader().getResource(EXISTING_FILE_PATH);
         return Paths.get(new File(resource.getPath()).getPath()).getParent().getParent().getParent().getParent().getParent();
     }
 

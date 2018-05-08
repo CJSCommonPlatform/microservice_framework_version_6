@@ -26,6 +26,7 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.generators.test.utils.config.GeneratorConfigUtil.configurationWithBasePackage;
+import static uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtility.javaCompilerUtil;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.methodsOf;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.justice.subscription.domain.builders.EventBuilder.event;
@@ -44,7 +45,7 @@ import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.subscription.SubscriptionManager;
-import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil;
+import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtility;
 import uk.gov.justice.subscription.domain.eventsource.EventSource;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Event;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
@@ -89,6 +90,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
     private static final String BASE_PACKAGE = "uk.test";
     private static final String BASE_PACKAGE_FOLDER = "/uk/test";
     private static final String SUBSCRIPTION_MANAGER = "subscriptionManager";
+    private static final JavaCompilerUtility COMPILER = javaCompilerUtil();
 
     @Rule
     public TemporaryFolder outputFolder = new TemporaryFolder();
@@ -103,7 +105,6 @@ public class SubscriptionJmsEndpointGeneratorTest {
     private SubscriptionManager subscriptionManager;
 
     private GeneratorProperties generatorProperties;
-    private JavaCompilerUtil compiler;
     private Generator<SubscriptionWrapper> generator;
     private final String serviceName = "context";
     private final String componentName = "EVENT_PROCESSOR";
@@ -111,7 +112,6 @@ public class SubscriptionJmsEndpointGeneratorTest {
     @Before
     public void setup() throws Exception {
         generator = new JmsEndpointGenerationObjects().subscriptionJmsEndpointGenerator();
-        compiler = new JavaCompilerUtil(outputFolder.getRoot(), outputFolder.getRoot());
         generatorProperties = new GeneratorPropertiesFactory().withDefaultServiceComponent();
     }
 
@@ -133,7 +133,12 @@ public class SubscriptionJmsEndpointGeneratorTest {
         generator.run(subscriptionWrapper,
                 configurationWithBasePackage("uk.somepackage", outputFolder, generatorProperties));
 
-        final Class<?> compiledClass = compiler.compiledClassOf("uk.somepackage", "ContextWithHyphensEventProcessorStructureEventJmsListener");
+        final Class<?> compiledClass = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                "uk.somepackage",
+                "ContextWithHyphensEventProcessorStructureEventJmsListener");
+
         assertThat(compiledClass.getName(), is("uk.somepackage.ContextWithHyphensEventProcessorStructureEventJmsListener"));
     }
 
@@ -220,7 +225,12 @@ public class SubscriptionJmsEndpointGeneratorTest {
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage("uk.somepackage", outputFolder, generatorProperties));
 
-        final Class<?> clazz = compiler.compiledClassOf("uk.somepackage", "ContextEventProcessorStructureControllerCommandJmsListener");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                "uk.somepackage",
+                "ContextEventProcessorStructureControllerCommandJmsListener");
+
         assertThat(clazz.getName(), is("uk.somepackage.ContextEventProcessorStructureControllerCommandJmsListener"));
     }
 
@@ -231,7 +241,11 @@ public class SubscriptionJmsEndpointGeneratorTest {
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage("uk.somepackage", outputFolder, generatorProperties));
 
-        final Class<?> resourceClass = compiler.compiledClassOf("uk.somepackage", "ContextEventProcessorStructureControllerCommandJmsListener");
+        final Class<?> resourceClass = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                "uk.somepackage",
+                "ContextEventProcessorStructureControllerCommandJmsListener");
 
         final Field logger = resourceClass.getDeclaredField("LOGGER");
         assertThat(logger, CoreMatchers.not(nullValue()));
@@ -248,7 +262,12 @@ public class SubscriptionJmsEndpointGeneratorTest {
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage("uk.package2", outputFolder, generatorProperties));
 
-        final Class<?> clazz = compiler.compiledClassOf("uk.package2", "ContextEventProcessorStructureControllerCommandJmsListener");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                "uk.package2",
+                "ContextEventProcessorStructureControllerCommandJmsListener");
+
         assertThat(clazz.getName(), is("uk.package2.ContextEventProcessorStructureControllerCommandJmsListener"));
     }
 
@@ -260,7 +279,12 @@ public class SubscriptionJmsEndpointGeneratorTest {
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage("uk.somepackage", outputFolder, generatorProperties));
 
-        final Class<?> compiledClass = compiler.compiledClassOf("uk.somepackage", "ContextEventProcessorStructureEventJmsListener");
+        final Class<?> compiledClass = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                "uk.somepackage",
+                "ContextEventProcessorStructureEventJmsListener");
+
         assertThat(compiledClass.getName(), is("uk.somepackage.ContextEventProcessorStructureEventJmsListener"));
     }
 
@@ -270,7 +294,13 @@ public class SubscriptionJmsEndpointGeneratorTest {
 
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new GeneratorPropertiesFactory().withServiceComponentOf(COMMAND_HANDLER)));
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "AbcCommandHandlerPeopleSomeQueueJmsListener");
+
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "AbcCommandHandlerPeopleSomeQueueJmsListener");
+
         final Adapter adapterAnnotation = clazz.getAnnotation(Adapter.class);
         assertThat(adapterAnnotation, not(nullValue()));
         assertThat(adapterAnnotation.value(), is(COMMAND_HANDLER));
@@ -283,7 +313,12 @@ public class SubscriptionJmsEndpointGeneratorTest {
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new GeneratorPropertiesFactory().withServiceComponentOf(COMMAND_CONTROLLER)));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "AbcCommandControllerPeopleSomeQueryJmsListener");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "AbcCommandControllerPeopleSomeQueryJmsListener");
+
         final Adapter adapterAnnotation = clazz.getAnnotation(Adapter.class);
         assertThat(adapterAnnotation, not(nullValue()));
         assertThat(adapterAnnotation.value(), is(COMMAND_CONTROLLER));
@@ -297,7 +332,12 @@ public class SubscriptionJmsEndpointGeneratorTest {
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new GeneratorPropertiesFactory().withServiceComponentOf(EVENT_LISTENER)));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleEventListenerPeopleEventJmsListener");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "PeopleEventListenerPeopleEventJmsListener");
+
         final Adapter adapterAnnotation = clazz.getAnnotation(Adapter.class);
         assertThat(adapterAnnotation, not(nullValue()));
         assertThat(adapterAnnotation.value(), is(Component.EVENT_LISTENER));
@@ -312,13 +352,23 @@ public class SubscriptionJmsEndpointGeneratorTest {
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new GeneratorPropertiesFactory().withServiceComponentOf("CUSTOM_EVENT_LISTENER")));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "CustomCustomEventListenerPeopleEventJmsListener");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "CustomCustomEventListenerPeopleEventJmsListener");
+
         final Adapter adapterAnnotation = clazz.getAnnotation(Adapter.class);
 
         assertThat(adapterAnnotation, not(nullValue()));
         assertThat(adapterAnnotation.value(), is("CUSTOM_EVENT_LISTENER"));
 
-        final Class<?> customEventFilterInterceptor = compiler.compiledClassOf(BASE_PACKAGE, "CustomCustomEventListenerPeopleEventEventFilterInterceptor");
+        final Class<?> customEventFilterInterceptor = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "CustomCustomEventListenerPeopleEventEventFilterInterceptor");
+
         final Field eventFilter = customEventFilterInterceptor.getDeclaredField("eventFilter");
         final Class<?> customEventFilterClass = eventFilter.getType();
 
@@ -333,7 +383,12 @@ public class SubscriptionJmsEndpointGeneratorTest {
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new GeneratorPropertiesFactory().withServiceComponentOf(EVENT_PROCESSOR)));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleEventProcessorPeopleEventJmsListener");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "PeopleEventProcessorPeopleEventJmsListener");
+
         final Adapter adapterAnnotation = clazz.getAnnotation(Adapter.class);
 
         assertThat(adapterAnnotation, not(nullValue()));
@@ -348,7 +403,12 @@ public class SubscriptionJmsEndpointGeneratorTest {
 
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorPeopleHandlerCommandJmsListener");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "ContextEventProcessorPeopleHandlerCommandJmsListener");
+
         final Interceptors interceptorsAnnotation = clazz.getAnnotation(Interceptors.class);
 
         assertThat(interceptorsAnnotation, not(nullValue()));
@@ -362,7 +422,11 @@ public class SubscriptionJmsEndpointGeneratorTest {
 
         generator.run(subscriptionDescriptor, configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorSomecontextControllerCommandJmsListener");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "ContextEventProcessorSomecontextControllerCommandJmsListener");
 
         assertThat(clazz.getInterfaces().length, equalTo(1));
         assertThat(clazz.getInterfaces()[0], equalTo(MessageListener.class));
@@ -375,7 +439,12 @@ public class SubscriptionJmsEndpointGeneratorTest {
 
         generator.run(subscriptionDescriptor, configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorSomecontextControllerCommandJmsListener");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "ContextEventProcessorSomecontextControllerCommandJmsListener");
+
         final Field chainProcessField = clazz.getDeclaredField(SUBSCRIPTION_MANAGER);
 
         assertThat(chainProcessField, not(nullValue()));
@@ -391,7 +460,12 @@ public class SubscriptionJmsEndpointGeneratorTest {
 
         generator.run(subscriptionDescriptor, configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorSomecontextControllerCommandJmsListener");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "ContextEventProcessorSomecontextControllerCommandJmsListener");
+
         final Field jmsProcessorField = clazz.getDeclaredField("subscriptionJmsProcessor");
 
         assertThat(jmsProcessorField, not(nullValue()));
@@ -408,7 +482,11 @@ public class SubscriptionJmsEndpointGeneratorTest {
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorPeopleControllerCommandJmsListener");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "ContextEventProcessorPeopleControllerCommandJmsListener");
 
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
@@ -423,7 +501,11 @@ public class SubscriptionJmsEndpointGeneratorTest {
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorStructureControllerCommandJmsListener");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "ContextEventProcessorStructureControllerCommandJmsListener");
 
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
@@ -440,7 +522,11 @@ public class SubscriptionJmsEndpointGeneratorTest {
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorStructureHandlerCommandJmsListener");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "ContextEventProcessorStructureHandlerCommandJmsListener");
 
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
@@ -456,7 +542,11 @@ public class SubscriptionJmsEndpointGeneratorTest {
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorStructureEventJmsListener");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "ContextEventProcessorStructureEventJmsListener");
 
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
@@ -472,7 +562,11 @@ public class SubscriptionJmsEndpointGeneratorTest {
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleCommandControllerStructureSomethingJmsListener");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "PeopleCommandControllerStructureSomethingJmsListener");
 
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
@@ -488,7 +582,11 @@ public class SubscriptionJmsEndpointGeneratorTest {
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "AaaCommandHandlerLifecycleBlahJmsListener");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "AaaCommandHandlerLifecycleBlahJmsListener");
 
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
@@ -503,7 +601,11 @@ public class SubscriptionJmsEndpointGeneratorTest {
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new GeneratorPropertiesFactory().withServiceComponentOf(EVENT_LISTENER)));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorPeopleEventJmsListener");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "ContextEventProcessorPeopleEventJmsListener");
 
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
@@ -519,7 +621,11 @@ public class SubscriptionJmsEndpointGeneratorTest {
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorStructureControllerCommandJmsListener");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "ContextEventProcessorStructureControllerCommandJmsListener");
 
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
@@ -534,7 +640,11 @@ public class SubscriptionJmsEndpointGeneratorTest {
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorStructureControllerCommandJmsListener");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "ContextEventProcessorStructureControllerCommandJmsListener");
 
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
@@ -549,7 +659,11 @@ public class SubscriptionJmsEndpointGeneratorTest {
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventListenerStructureEventJmsListener");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "ContextEventListenerStructureEventJmsListener");
 
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
@@ -563,7 +677,11 @@ public class SubscriptionJmsEndpointGeneratorTest {
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorStructureEventJmsListener");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "ContextEventProcessorStructureEventJmsListener");
 
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
@@ -579,7 +697,11 @@ public class SubscriptionJmsEndpointGeneratorTest {
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorStructureControllerCommandJmsListener");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "ContextEventProcessorStructureControllerCommandJmsListener");
 
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
@@ -628,7 +750,11 @@ public class SubscriptionJmsEndpointGeneratorTest {
         generator.run(subscriptionWrapper,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorPeopleControllerCommandJmsListener");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "ContextEventProcessorPeopleControllerCommandJmsListener");
 
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
@@ -643,7 +769,11 @@ public class SubscriptionJmsEndpointGeneratorTest {
         final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:somecontext.controller.command", "somecontext.command1", serviceName, componentName);
         generator.run(subscriptionDescriptor, configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorSomecontextControllerCommandJmsListener");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "ContextEventProcessorSomecontextControllerCommandJmsListener");
 
         final List<Method> methods = methodsOf(clazz);
 
@@ -663,7 +793,12 @@ public class SubscriptionJmsEndpointGeneratorTest {
 
         generator.run(subscriptionDescriptor, configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorSomecontextControllerCommandJmsListener");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "ContextEventProcessorSomecontextControllerCommandJmsListener");
+
         final Object object = instantiate(clazz);
 
         assertThat(object, is(instanceOf(MessageListener.class)));
@@ -687,7 +822,12 @@ public class SubscriptionJmsEndpointGeneratorTest {
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new GeneratorPropertiesFactory().withServiceComponentOf(EVENT_LISTENER)));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleEventListenerPeopleEventJmsListener");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "PeopleEventListenerPeopleEventJmsListener");
+
         final ActivationConfigProperty[] activationConfig = clazz.getAnnotation(MessageDriven.class).activationConfig();
 
         assertThat(activationConfig, hasItemInArray(
@@ -708,7 +848,12 @@ public class SubscriptionJmsEndpointGeneratorTest {
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleCommandControllerPeopleControllerCommandJmsListener");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "PeopleCommandControllerPeopleControllerCommandJmsListener");
+
         final ActivationConfigProperty[] activationConfig = clazz.getAnnotation(MessageDriven.class).activationConfig();
 
         assertThat(activationConfig, hasItemInArray(allOf(
@@ -727,7 +872,11 @@ public class SubscriptionJmsEndpointGeneratorTest {
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "ContextEventProcessorStructureEventJmsListener");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "ContextEventProcessorStructureEventJmsListener");
 
         assertThat(clazz.getAnnotation(MessageDriven.class), is(notNullValue()));
         assertThat(clazz.getAnnotation(MessageDriven.class).activationConfig(),
@@ -742,7 +891,12 @@ public class SubscriptionJmsEndpointGeneratorTest {
 
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new GeneratorPropertiesFactory().withCustomMDBPool()));
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleEventListenerPeoplePersonAddedJmsListener");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "PeopleEventListenerPeoplePersonAddedJmsListener");
+
         final Pool poolAnnotation = clazz.getAnnotation(Pool.class);
 
         assertThat(poolAnnotation, not(nullValue()));
@@ -755,7 +909,12 @@ public class SubscriptionJmsEndpointGeneratorTest {
 
         generator.run(subscriptionDescriptor,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
-        final Class<?> clazz = compiler.compiledClassOf(BASE_PACKAGE, "PeopleEventListenerPeoplePersonAddedJmsListener");
+        final Class<?> clazz = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "PeopleEventListenerPeoplePersonAddedJmsListener");
+
         Pool poolAnnotation = clazz.getAnnotation(Pool.class);
 
         assertThat(poolAnnotation, nullValue());

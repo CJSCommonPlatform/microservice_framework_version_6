@@ -54,7 +54,10 @@ public class RestAdapterGenerator_MultipartCodeStructureTest extends BaseRestAda
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
-        final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
+        final Class<?> interfaceClass = COMPILER.compiledInterfaceOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                RESOURCE_PACKAGE);
 
         final List<Method> methods = methodsOf(interfaceClass);
         assertThat(methods, hasSize(1));
@@ -81,7 +84,10 @@ public class RestAdapterGenerator_MultipartCodeStructureTest extends BaseRestAda
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
-        final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
+        final Class<?> interfaceClass = COMPILER.compiledInterfaceOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                RESOURCE_PACKAGE);
 
         final List<Method> methods = methodsOf(interfaceClass);
         assertThat(methods, hasSize(1));
@@ -109,7 +115,10 @@ public class RestAdapterGenerator_MultipartCodeStructureTest extends BaseRestAda
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
-        final Class<?> interfaceClass = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
+        final Class<?> interfaceClass = COMPILER.compiledInterfaceOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                RESOURCE_PACKAGE);
 
         final List<Method> methods = methodsOf(interfaceClass);
         assertThat(methods, hasSize(1));
@@ -147,8 +156,17 @@ public class RestAdapterGenerator_MultipartCodeStructureTest extends BaseRestAda
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
-        final Class<?> resourceInterface = compiler.compiledInterfaceOf(RESOURCE_PACKAGE);
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
+        final Class<?> resourceInterface = COMPILER.compiledInterfaceOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                RESOURCE_PACKAGE);
+
+        final Class<?> resourceClass = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "resource",
+                "DefaultCommandApiSomePathResource");
 
         assertThat(resourceClass.isInterface(), is(false));
         assertThat(resourceClass.getGenericInterfaces(), arrayWithSize(1));
@@ -169,7 +187,12 @@ public class RestAdapterGenerator_MultipartCodeStructureTest extends BaseRestAda
                         ).build(),
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, new CommonGeneratorProperties()));
 
-        final Class<?> resourceClass = compiler.compiledClassOf(BASE_PACKAGE, "resource", "DefaultCommandApiSomePathResource");
+        final Class<?> resourceClass = COMPILER.compiledClassOf(
+                outputFolder.getRoot(),
+                outputFolder.getRoot(),
+                BASE_PACKAGE,
+                "resource",
+                "DefaultCommandApiSomePathResource");
 
         final Field chainProcess = resourceClass.getDeclaredField("fileInputDetailsFactory");
         assertThat(chainProcess, not(nullValue()));

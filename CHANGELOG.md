@@ -13,7 +13,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 - Added schema catalog generation plugin to example service
 - Updated to latest raml generator plugin
 - Updated utilities version to 1.13.0
-- Updated test-utils version to 1.16.2
+- Updated test-utils version to 1.16.3
 - Updated file.service version to 1.16.0
 - Updated common bom version to 1.24.0
 - Change message adapter generator to use SubscriptionManager instead of the interceptor chain

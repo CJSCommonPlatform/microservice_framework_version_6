@@ -6,13 +6,13 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtility.javaCompilerUtil;
 import static uk.gov.justice.subscription.jms.core.ClassNameFactory.EVENT_FILTER_INTERCEPTOR;
 import static uk.gov.justice.subscription.jms.core.ClassNameFactory.EVENT_LISTENER_INTERCEPTOR_CHAIN_PROVIDER;
 
 import uk.gov.justice.services.components.event.listener.interceptors.EventBufferInterceptor;
 import uk.gov.justice.services.core.interceptor.InterceptorChainEntry;
 import uk.gov.justice.services.core.interceptor.InterceptorChainEntryProvider;
-import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtil;
 import uk.gov.justice.subscription.jms.core.ClassNameFactory;
 
 import java.io.File;
@@ -60,8 +60,11 @@ public class EventListenerInterceptorChainProviderCodeGeneratorTest {
                 .build()
                 .writeTo(codeGenerationOutputDirectory);
 
-        final JavaCompilerUtil compiler = new JavaCompilerUtil(codeGenerationOutputDirectory, compilationOutputDirectory);
-        final Class<?> compiledClass = compiler.compiledClassOf(packageName, simpleName);
+        final Class<?> compiledClass = javaCompilerUtil().compiledClassOf(
+                codeGenerationOutputDirectory,
+                compilationOutputDirectory,
+                packageName,
+                simpleName);
 
         final InterceptorChainEntryProvider interceptorChainEntryProvider = (InterceptorChainEntryProvider) compiledClass.newInstance();
 

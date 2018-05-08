@@ -32,7 +32,6 @@ import com.google.common.annotations.VisibleForTesting;
  *     }
  *  }
  * </pre>
- *
  */
 public class DatabaseCleaner {
 
@@ -67,16 +66,17 @@ public class DatabaseCleaner {
         cleanViewStoreTables(contextName, "stream_status");
     }
 
-    /**
-     * Deletes all the data in the 'event_log' table
-     *
-     * @param contextName the name of the context who's tables you are cleaning
-     */
-    public void cleanEventLogTable(final String contextName) {
 
+    /**
+     * Deletes all the data in the Event-Store tables
+     *
+     * @param contextName the name of the context to clean the tables from
+     */
+    public void cleanEventStoreTables(final String contextName) {
         try (final Connection connection = testJdbcConnectionProvider.getEventStoreConnection(contextName)) {
 
             cleanTable("event_log", connection);
+            cleanTable("event_stream", connection);
 
         } catch (SQLException e) {
             throw new DataAccessException("Failed to commit or close database connection", e);
@@ -84,11 +84,24 @@ public class DatabaseCleaner {
     }
 
     /**
-     * Cleans all the tables in the specified list
+     * Deprecated from 3.2.0, please use {@link #cleanEventStoreTables(String)} to clean all tables
+     * belonging to the event-store.
+     *
+     * Deletes all the data in the 'event_log' table
      *
      * @param contextName the name of the context who's tables you are cleaning
-     * @param tableName the name of the first table to be cleaned
-     *                  (ensures that there is at least one table to be cleaned)
+     */
+    @Deprecated
+    public void cleanEventLogTable(final String contextName) {
+        cleanEventStoreTables(contextName);
+    }
+
+    /**
+     * Cleans all the tables in the specified list
+     *
+     * @param contextName          the name of the context who's tables you are cleaning
+     * @param tableName            the name of the first table to be cleaned (ensures that there is
+     *                             at least one table to be cleaned)
      * @param additionalTableNames the names of any other tables to be cleaned
      */
     public void cleanViewStoreTables(final String contextName, final String tableName, final String... additionalTableNames) {
@@ -106,9 +119,9 @@ public class DatabaseCleaner {
      * Cleans all the tables in the specified list
      *
      * @param contextName the name of the context who's tables you are cleaning
-     * @param tableNames a list of names of tables to be cleaned
-     *
-     * @deprecated use {@link #cleanViewStoreTables(String, String, String...)} instead. It's better.
+     * @param tableNames  a list of names of tables to be cleaned
+     * @deprecated use {@link #cleanViewStoreTables(String, String, String...)} instead. It's
+     * better.
      */
     @Deprecated
     public void cleanViewStoreTables(final String contextName, final List<String> tableNames) {
@@ -117,7 +130,6 @@ public class DatabaseCleaner {
             for (String tableName : tableNames) {
                 cleanTable(tableName, connection);
             }
-
         } catch (SQLException e) {
             throw new DataAccessException("Failed to commit or close database connection", e);
         }

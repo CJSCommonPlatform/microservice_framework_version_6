@@ -16,6 +16,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import javax.enterprise.inject.Vetoed;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
@@ -24,6 +25,7 @@ import org.slf4j.Logger;
 /**
  * Implementation of {@link EventRepository}
  */
+@Vetoed
 public class JdbcBasedEventRepository implements EventRepository {
 
     @Inject

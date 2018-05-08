@@ -1,6 +1,6 @@
 package uk.gov.justice.services.eventsourcing.source.core;
 
-import uk.gov.justice.services.eventsourcing.repository.jdbc.JdbcBasedEventRepository;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepository;
 import uk.gov.justice.services.eventsourcing.source.core.snapshot.SnapshotService;
 
 import java.util.UUID;
@@ -26,7 +26,7 @@ public class SnapshotAwareEventSource implements EventSource {
     SnapshotService snapshotService;
 
     @Inject
-    JdbcBasedEventRepository eventRepository;
+    EventRepository eventRepository;
 
     @Override
     public EventStream getStreamById(final UUID streamId) {

@@ -52,7 +52,7 @@ import uk.gov.justice.services.eventsourcing.source.api.util.LoggerProducer;
 import uk.gov.justice.services.eventsourcing.source.api.util.OpenEjbAwareEventRepository;
 import uk.gov.justice.services.eventsourcing.source.api.util.OpenEjbAwareEventStreamRepository;
 import uk.gov.justice.services.eventsourcing.source.api.util.TestSystemUserProvider;
-import uk.gov.justice.services.eventsourcing.source.core.DefaultEventSource;
+import uk.gov.justice.services.eventsourcing.source.core.JdbcBasedEventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventAppender;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventSourceNameExtractor;
@@ -185,7 +185,7 @@ public class EventsPageIT {
             JdbcDataSourceProvider.class,
             DefaultJsonValidationLoggerHelper.class,
             EventSource.class,
-            DefaultEventSource.class,
+            JdbcBasedEventSource.class,
             EventStreamManager.class,
             EventAppender.class,
             PublishingEventAppender.class,

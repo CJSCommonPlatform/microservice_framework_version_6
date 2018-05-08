@@ -26,12 +26,12 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DefaultEventSourceTest {
+public class JdbcBasedEventSourceTest {
 
     private static final UUID STREAM_ID = randomUUID();
 
     @InjectMocks
-    DefaultEventSource eventSource;
+    JdbcBasedEventSource eventSource;
 
     @Mock
     private EventStreamManager eventStreamManager;

@@ -15,7 +15,7 @@ import javax.inject.Inject;
  * Source of event streams.
  */
 @Vetoed
-public class DefaultEventSource implements EventSource {
+public class JdbcBasedEventSource implements EventSource {
 
     @Inject
     private EventStreamManager eventStreamManager;

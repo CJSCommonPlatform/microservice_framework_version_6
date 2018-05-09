@@ -1,5 +1,8 @@
 package uk.gov.justice.services.eventsourcing.source.core;
 
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
+
 import uk.gov.justice.services.eventsourcing.source.core.annotation.EventSourceName;
 import uk.gov.justice.subscription.domain.eventsource.Location;
 import uk.gov.justice.subscription.registry.EventSourceRegistry;
@@ -10,6 +13,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
+import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
@@ -17,7 +21,7 @@ import javax.sql.DataSource;
 public class DataSourceProducer {
 
     @Inject
-    InitialContextProducer initialContextProducer;
+    InitialContext initialContext;
 
     @Inject
     EventSourceNameExtractor eventSourceNameExtractor;
@@ -38,20 +42,19 @@ public class DataSourceProducer {
             final Location location = eventSource.get().getLocation();
 
             if (location.getDataSource().isPresent()) {
-                return createDataSource(eventSourceName, location.getDataSource().get());
+                return of(createDataSource(eventSourceName, location.getDataSource().get()));
             } else {
-                return Optional.empty();
+                return empty();
             }
         }
         throw new DataSourceProducerException("Expected Event Source of name: " + eventSourceName + " not found, please check event-sources.yaml");
     }
 
-    private Optional<DataSource> createDataSource(final String eventSourceName, final String dataSourceLocation) {
+    private DataSource createDataSource(final String eventSourceName, final String dataSourceLocation) {
         try {
-            final DataSource dataSource = (DataSource) initialContextProducer.getInitialContext().lookup(dataSourceLocation);
-            return Optional.of(dataSource);
+            return (DataSource) initialContext.lookup(dataSourceLocation);
         } catch (final NamingException e) {
-            throw new DataSourceProducerException("Data Source not found for the provided event source name: " + eventSourceName);
+            throw new DataSourceProducerException("Data Source not found for the provided event source name: " + eventSourceName, e);
 
         }
     }

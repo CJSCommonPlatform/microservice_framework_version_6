@@ -24,6 +24,7 @@ import uk.gov.justice.services.common.util.Clock;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.aggregate.event.EventA;
 import uk.gov.justice.services.core.aggregate.event.EventB;
+import uk.gov.justice.services.core.cdi.InitialContextProducer;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.enveloper.DefaultEnveloper;
 import uk.gov.justice.services.core.extension.EventFoundEvent;
@@ -48,7 +49,6 @@ import uk.gov.justice.services.eventsourcing.source.core.SystemEventService;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.jdbc.persistence.AbstractJdbcRepository;
 import uk.gov.justice.services.jdbc.persistence.DataSourceJndiNameProvider;
-import uk.gov.justice.services.jdbc.persistence.InitialContextProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcDataSourceProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
@@ -161,7 +161,7 @@ public class DefaultAggregateServiceIT {
             YamlSchemaLoader.class,
 
             DataSourceJndiNameProvider.class,
-            InitialContextProvider.class
+            InitialContextProducer.class
     })
     public WebApp war() {
         return new WebApp()

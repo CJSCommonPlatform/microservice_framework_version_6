@@ -22,7 +22,7 @@ import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderF
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUIDAndName;
 
 import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.DefaultEventRepository;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.JdbcBasedEventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.OptimisticLockingRetryException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.VersionMismatchException;
@@ -57,7 +57,7 @@ public class EventStreamManagerTest {
     @Mock
     private Logger logger;
     @Mock
-    private DefaultEventRepository eventRepository;
+    private JdbcBasedEventRepository eventRepository;
     @Mock
     private EventAppender eventAppender;
     @Mock

@@ -10,10 +10,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import uk.gov.justice.services.eventsourcing.repository.jdbc.DefaultEventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.DefaultEventStreamMetadata;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventStreamMetadata;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStream;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.JdbcBasedEventRepository;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 
 import java.util.List;
@@ -35,7 +34,7 @@ public class SnapshotAwareEventSourceTest {
     private EventStreamManager eventStreamManager;
 
     @Mock
-    private DefaultEventRepository eventRepository;
+    private JdbcBasedEventRepository eventRepository;
 
     @InjectMocks
     SnapshotAwareEventSource eventSource;
@@ -72,7 +71,7 @@ public class SnapshotAwareEventSourceTest {
         when(eventRepository.getEventStreamsFromPosition(position)).thenReturn(eventStreamMetadatas);
         when(eventStreamManager.getStreamPosition(streamId)).thenReturn(1l);
 
-        final Stream<uk.gov.justice.services.eventsourcing.source.core.EventStream> eventStreams= eventSource.getStreamsFrom(position);
+        final Stream<uk.gov.justice.services.eventsourcing.source.core.EventStream> eventStreams = eventSource.getStreamsFrom(position);
         List<uk.gov.justice.services.eventsourcing.source.core.EventStream> eventStreamList = eventStreams.collect(toList());
 
         assertThat(eventStreamList.size(), is(1));

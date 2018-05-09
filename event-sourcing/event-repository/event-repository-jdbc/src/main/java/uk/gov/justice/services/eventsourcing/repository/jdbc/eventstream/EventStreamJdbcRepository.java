@@ -6,6 +6,7 @@ import static uk.gov.justice.services.common.converter.ZonedDateTimes.toSqlTimes
 
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidStreamIdException;
+import uk.gov.justice.services.jdbc.persistence.DataSourceJndiNameProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcDataSourceProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
@@ -54,13 +55,17 @@ public class EventStreamJdbcRepository {
     JdbcDataSourceProvider jdbcDataSourceProvider;
 
     @Inject
+    DataSourceJndiNameProvider dataSourceJndiNameProvider;
+
+    @Inject
     UtcClock clock;
 
     DataSource dataSource;
 
     @PostConstruct
     private void initialiseDataSource() {
-        dataSource = jdbcDataSourceProvider.getDataSource();
+        final String jndiName = dataSourceJndiNameProvider.jndiName();
+        dataSource = jdbcDataSourceProvider.getDataSource(jndiName);
     }
 
     public void insert(final UUID streamId) {

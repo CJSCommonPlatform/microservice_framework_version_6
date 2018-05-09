@@ -56,6 +56,8 @@ import uk.gov.justice.services.eventsourcing.source.core.EventStreamManager;
 import uk.gov.justice.services.eventsourcing.source.core.JdbcBasedEventSource;
 import uk.gov.justice.services.eventsourcing.source.core.PublishingEventAppender;
 import uk.gov.justice.services.eventsourcing.source.core.SystemEventService;
+import uk.gov.justice.services.jdbc.persistence.DataSourceJndiNameProvider;
+import uk.gov.justice.services.jdbc.persistence.InitialContextProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcDataSourceProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
@@ -208,7 +210,10 @@ public class EventStreamPageIT {
             ParserProducer.class,
             YamlFileFinder.class,
             YamlParser.class,
-            YamlSchemaLoader.class
+            YamlSchemaLoader.class,
+
+            DataSourceJndiNameProvider.class,
+            InitialContextProvider.class
     })
 
     public WebApp war() {

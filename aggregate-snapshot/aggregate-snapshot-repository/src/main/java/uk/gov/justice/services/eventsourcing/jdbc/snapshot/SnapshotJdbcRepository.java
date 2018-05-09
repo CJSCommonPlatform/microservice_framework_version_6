@@ -4,6 +4,7 @@ import static java.lang.String.format;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.domain.snapshot.AggregateSnapshot;
+import uk.gov.justice.services.jdbc.persistence.DataSourceJndiNameProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcDataSourceProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 
@@ -43,6 +44,9 @@ public class SnapshotJdbcRepository implements SnapshotRepository {
 
     @Inject
     JdbcDataSourceProvider jdbcDataSourceProvider;
+
+    @Inject
+    DataSourceJndiNameProvider dataSourceJndiNameProvider;
 
     DataSource dataSource;
 
@@ -119,7 +123,8 @@ public class SnapshotJdbcRepository implements SnapshotRepository {
 
     @PostConstruct
     private void initialiseDataSource() {
-        dataSource = jdbcDataSourceProvider.getDataSource();
+        final String jndiName = dataSourceJndiNameProvider.jndiName();
+        dataSource = jdbcDataSourceProvider.getDataSource(jndiName);
     }
 
     private <T extends Aggregate> Optional<AggregateSnapshot<T>> extractResults(final PreparedStatement preparedStatement) throws SQLException {

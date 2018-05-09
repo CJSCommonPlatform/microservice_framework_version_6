@@ -349,16 +349,6 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
                 public Stream<EventStream> getStreamsFrom(final long position) {
                     throw new NotImplementedException();
                 }
-
-                @Override
-                public UUID cloneStream(final UUID streamId) {
-                    throw new NotImplementedException();
-                }
-
-                @Override
-                public void clearStream(final UUID streamId) {
-                    throw new NotImplementedException();
-                }
             };
         }
     }

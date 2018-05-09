@@ -6,6 +6,7 @@ import static uk.gov.justice.services.common.converter.ZonedDateTimes.fromSqlTim
 
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventInsertionStrategy;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidPositionException;
+import uk.gov.justice.services.jdbc.persistence.DataSourceJndiNameProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcDataSourceProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
@@ -76,11 +77,15 @@ public class EventJdbcRepository {
     @Inject
     JdbcDataSourceProvider jdbcDataSourceProvider;
 
+    @Inject
+    DataSourceJndiNameProvider dataSourceJndiNameProvider;
+
     DataSource dataSource;
 
     @PostConstruct
     private void initialiseDataSource() {
-        dataSource = jdbcDataSourceProvider.getDataSource();
+        final String jndiName = dataSourceJndiNameProvider.jndiName();
+        dataSource = jdbcDataSourceProvider.getDataSource(jndiName);
     }
 
     /**

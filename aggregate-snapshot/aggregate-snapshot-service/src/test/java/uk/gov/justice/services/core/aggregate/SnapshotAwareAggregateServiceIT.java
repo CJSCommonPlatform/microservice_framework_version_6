@@ -54,6 +54,8 @@ import uk.gov.justice.services.eventsourcing.source.core.SystemEventService;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.eventsourcing.source.core.snapshot.DefaultSnapshotService;
 import uk.gov.justice.services.eventsourcing.source.core.snapshot.DefaultSnapshotStrategy;
+import uk.gov.justice.services.jdbc.persistence.DataSourceJndiNameProvider;
+import uk.gov.justice.services.jdbc.persistence.InitialContextProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcDataSourceProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
@@ -182,7 +184,10 @@ public class SnapshotAwareAggregateServiceIT {
             UtcClock.class,
             TestServiceContextNameProvider.class,
             GlobalValueProducer.class,
-            ObjectToJsonObjectConverter.class
+            ObjectToJsonObjectConverter.class,
+
+            DataSourceJndiNameProvider.class,
+            InitialContextProvider.class
     })
 
     public WebApp war() {

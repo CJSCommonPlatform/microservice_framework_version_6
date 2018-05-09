@@ -5,6 +5,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -77,20 +78,20 @@ public class DatabaseCleanerTest {
     @Test
     public void shouldCleanTheEventTable() throws Exception {
 
-        final String tableName = "event_log";
         final String contextName = "my-context";
 
         final Connection connection = mock(Connection.class);
         final PreparedStatement preparedStatement = mock(PreparedStatement.class);
 
         when(testJdbcConnectionProvider.getEventStoreConnection(contextName)).thenReturn(connection);
-        when(connection.prepareStatement("DELETE FROM " + tableName)).thenReturn(preparedStatement);
+        when(connection.prepareStatement("DELETE FROM " + "event_log")).thenReturn(preparedStatement);
+        when(connection.prepareStatement("DELETE FROM " + "event_stream")).thenReturn(preparedStatement);
 
-        databaseCleaner.cleanEventLogTable(contextName);
+        databaseCleaner.cleanEventStoreTables(contextName);
 
-        verify(preparedStatement).executeUpdate();
+        verify(preparedStatement, times(2)).executeUpdate();
         verify(connection).close();
-        verify(preparedStatement).close();
+        verify(preparedStatement, times(2)).close();
     }
 
     @Test

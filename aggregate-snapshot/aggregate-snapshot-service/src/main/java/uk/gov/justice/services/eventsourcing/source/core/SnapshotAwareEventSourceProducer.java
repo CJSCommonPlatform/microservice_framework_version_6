@@ -9,22 +9,24 @@ import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepo
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepositoryFactory;
 import uk.gov.justice.services.eventsourcing.source.core.annotation.EventSourceName;
+import uk.gov.justice.services.eventsourcing.source.core.snapshot.SnapshotService;
 import uk.gov.justice.services.jdbc.persistence.DataSourceJndiNameProvider;
 import uk.gov.justice.subscription.registry.EventSourceRegistry;
 
 import java.util.Optional;
 
+import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.UnsatisfiedResolutionException;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 
-/**
- * Producer for EventSource, backwards compatible supports Named and Unnamed EventSource injection points
- */
 @ApplicationScoped
-public class EventSourceProducer {
+@Alternative
+@Priority(100)
+public class SnapshotAwareEventSourceProducer {
 
     @Inject
     EventSourceNameExtractor eventSourceNameExtractor;
@@ -47,11 +49,15 @@ public class EventSourceProducer {
     @Inject
     DataSourceJndiNameProvider dataSourceJndiNameProvider;
 
+    @Inject
+    SnapshotService snapshotService;
+
     /**
      * Backwards compatible support for Unnamed EventSource injection points
      *
      * @return {@link EventSource}
      */
+
     @Produces
     public EventSource eventSource() {
 
@@ -65,7 +71,7 @@ public class EventSourceProducer {
 
         final EventStreamManager eventStreamManager = eventStreamManagerFactory.eventStreamManager(eventRepository);
 
-        return new JdbcBasedEventSource(eventStreamManager, eventRepository);
+        return new SnapshotAwareEventSource(eventStreamManager, eventRepository, snapshotService);
     }
 
     /**
@@ -91,3 +97,4 @@ public class EventSourceProducer {
         }
     }
 }
+

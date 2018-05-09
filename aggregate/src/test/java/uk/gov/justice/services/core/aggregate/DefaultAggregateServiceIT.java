@@ -32,20 +32,20 @@ import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
 import uk.gov.justice.services.eventsourcing.publisher.jms.EventPublisher;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventInsertionStrategy;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepositoryProducer;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepositoryFactory;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventConverter;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepositoryProducer;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepositoryFactory;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepository;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepositoryProducer;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepositoryFactory;
 import uk.gov.justice.services.eventsourcing.source.core.EnvelopeEventStream;
 import uk.gov.justice.services.eventsourcing.source.core.EventAppender;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventSourceNameExtractor;
 import uk.gov.justice.services.eventsourcing.source.core.EventSourceProducer;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
-import uk.gov.justice.services.eventsourcing.source.core.EventStreamManagerProducer;
+import uk.gov.justice.services.eventsourcing.source.core.EventStreamManagerFactory;
 import uk.gov.justice.services.eventsourcing.source.core.JdbcBasedEventSource;
-import uk.gov.justice.services.eventsourcing.source.core.PublishingEventAppender;
+import uk.gov.justice.services.eventsourcing.source.core.PublishingEventAppenderFactory;
 import uk.gov.justice.services.eventsourcing.source.core.SystemEventService;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.jdbc.persistence.AbstractJdbcRepository;
@@ -55,7 +55,6 @@ import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.cdi.UnmanagedBeanCreator;
 import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
 import uk.gov.justice.subscription.ParserProducer;
@@ -119,15 +118,15 @@ public class DefaultAggregateServiceIT {
             LoggerProducer.class,
 
             AbstractJdbcRepository.class,
-            EventRepositoryProducer.class,
+            EventRepositoryFactory.class,
             TestEventInsertionStrategyProducer.class,
 
             DefaultAggregateService.class,
-            EventStreamJdbcRepositoryProducer.class,
-            EventJdbcRepositoryProducer.class,
+            EventStreamJdbcRepositoryFactory.class,
+            EventJdbcRepositoryFactory.class,
             JdbcRepositoryHelper.class,
             JdbcDataSourceProvider.class,
-            EventStreamManagerProducer.class,
+            EventStreamManagerFactory.class,
             EventStreamJdbcRepository.class,
             JdbcBasedEventSource.class,
             EnvelopeEventStream.class,
@@ -135,7 +134,7 @@ public class DefaultAggregateServiceIT {
             ObjectToJsonValueConverter.class,
             ObjectToJsonObjectConverter.class,
             EventAppender.class,
-            PublishingEventAppender.class,
+            PublishingEventAppenderFactory.class,
             SystemEventService.class,
             DefaultEnvelopeConverter.class,
             EventConverter.class,
@@ -164,7 +163,6 @@ public class DefaultAggregateServiceIT {
             DataSourceJndiNameProvider.class,
             InitialContextProducer.class,
 
-            UnmanagedBeanCreator.class
     })
     public WebApp war() {
         return new WebApp()

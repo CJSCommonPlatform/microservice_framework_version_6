@@ -6,7 +6,6 @@ import static uk.gov.justice.services.common.converter.ZonedDateTimes.fromSqlTim
 
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventInsertionStrategy;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidPositionException;
-import uk.gov.justice.services.jdbc.persistence.DataSourceJndiNameProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcDataSourceProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
@@ -18,8 +17,6 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import javax.enterprise.inject.Vetoed;
-import javax.inject.Inject;
 import javax.sql.DataSource;
 
 import org.slf4j.Logger;
@@ -27,7 +24,6 @@ import org.slf4j.Logger;
 /**
  * JDBC based repository for event log records.
  */
-@Vetoed
 public class EventJdbcRepository {
 
     /**
@@ -64,22 +60,25 @@ public class EventJdbcRepository {
 
     private static final long NO_EXISTING_VERSION = 0L;
 
-    @Inject
-    protected Logger logger;
+    private final String jndiDatasource;
+    private final Logger logger;
+    private final EventInsertionStrategy eventInsertionStrategy;
+    private final JdbcRepositoryHelper jdbcRepositoryHelper;
+    private final JdbcDataSourceProvider jdbcDataSourceProvider;
 
-    @Inject
-    EventInsertionStrategy eventInsertionStrategy;
+    private DataSource dataSource;
 
-    @Inject
-    JdbcRepositoryHelper jdbcRepositoryHelper;
-
-    @Inject
-    JdbcDataSourceProvider jdbcDataSourceProvider;
-
-    @Inject
-    DataSourceJndiNameProvider dataSourceJndiNameProvider;
-
-    DataSource dataSource;
+    public EventJdbcRepository(final EventInsertionStrategy eventInsertionStrategy,
+                               final JdbcRepositoryHelper jdbcRepositoryHelper,
+                               final JdbcDataSourceProvider jdbcDataSourceProvider,
+                               final String jndiDatasource,
+                               final Logger logger) {
+        this.eventInsertionStrategy = eventInsertionStrategy;
+        this.jdbcRepositoryHelper = jdbcRepositoryHelper;
+        this.jdbcDataSourceProvider = jdbcDataSourceProvider;
+        this.jndiDatasource = jndiDatasource;
+        this.logger = logger;
+    }
 
     /**
      * Insert the given event into the event log.
@@ -193,8 +192,7 @@ public class EventJdbcRepository {
 
     private DataSource getDataSource() {
         if (null == dataSource) {
-            final String jndiName = dataSourceJndiNameProvider.jndiName();
-            dataSource = jdbcDataSourceProvider.getDataSource(jndiName);
+            dataSource = jdbcDataSourceProvider.getDataSource(jndiDatasource);
         }
 
         return dataSource;

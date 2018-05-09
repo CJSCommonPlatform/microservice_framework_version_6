@@ -12,21 +12,17 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.UUID;
 
-import javax.annotation.Priority;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Alternative;
-import javax.inject.Inject;
 
-@ApplicationScoped
-@Alternative
-@Priority(1)
 public class PublishingEventAppender implements EventAppender {
 
-    @Inject
-    EventRepository eventRepository;
+    private final EventRepository eventRepository;
+    private final EventPublisher eventPublisher;
 
-    @Inject
-    EventPublisher eventPublisher;
+    public PublishingEventAppender(final EventRepository eventRepository, final EventPublisher eventPublisher) {
+        this.eventRepository = eventRepository;
+        this.eventPublisher = eventPublisher;
+    }
+
 
     /**
      * Stores the event in the event store and publishes it with the given streamId and version.

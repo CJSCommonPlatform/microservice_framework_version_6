@@ -16,8 +16,6 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import javax.enterprise.inject.Vetoed;
-import javax.inject.Inject;
 import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
@@ -25,20 +23,25 @@ import org.slf4j.Logger;
 /**
  * Implementation of {@link EventRepository}
  */
-@Vetoed
 public class JdbcBasedEventRepository implements EventRepository {
 
-    @Inject
-    Logger logger;
 
-    @Inject
-    EventConverter eventConverter;
+    private final Logger logger;
+    private final EventConverter eventConverter;
+    private final EventJdbcRepository eventJdbcRepository;
+    private final EventStreamJdbcRepository eventStreamJdbcRepository;
 
-    @Inject
-    EventJdbcRepository eventJdbcRepository;
+    public JdbcBasedEventRepository(
+            final EventConverter eventConverter,
+            final EventJdbcRepository eventJdbcRepository,
+            final EventStreamJdbcRepository eventStreamJdbcRepository,
+            final Logger logger) {
 
-    @Inject
-    EventStreamJdbcRepository eventStreamJdbcRepository;
+        this.logger = logger;
+        this.eventConverter = eventConverter;
+        this.eventJdbcRepository = eventJdbcRepository;
+        this.eventStreamJdbcRepository = eventStreamJdbcRepository;
+    }
 
     @Override
     public Stream<JsonEnvelope> getEvents() {

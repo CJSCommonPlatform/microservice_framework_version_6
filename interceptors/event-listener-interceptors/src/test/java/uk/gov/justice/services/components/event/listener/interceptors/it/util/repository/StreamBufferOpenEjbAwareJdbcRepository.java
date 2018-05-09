@@ -8,5 +8,5 @@ import uk.gov.justice.services.event.buffer.core.repository.streambuffer.StreamB
  */
 @Deprecated
 public class StreamBufferOpenEjbAwareJdbcRepository extends StreamBufferJdbcRepository {
-
+//TODO: check where is it used?
 }

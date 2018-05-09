@@ -36,9 +36,12 @@ import uk.gov.justice.services.eventsourcing.publisher.jms.EventPublisher;
 import uk.gov.justice.services.eventsourcing.publisher.jms.JmsEventPublisher;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventInsertionStrategy;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepositoryProducer;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepositoryFactory;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.Event;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventConverter;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepository;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepositoryFactory;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepositoryFactory;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidPositionException;
 import uk.gov.justice.services.eventsourcing.source.api.resource.EventPageResource;
 import uk.gov.justice.services.eventsourcing.source.api.resource.EventSourceApiApplication;
@@ -50,16 +53,14 @@ import uk.gov.justice.services.eventsourcing.source.api.service.core.EventsServi
 import uk.gov.justice.services.eventsourcing.source.api.service.core.PositionFactory;
 import uk.gov.justice.services.eventsourcing.source.api.service.core.PositionValueFactory;
 import uk.gov.justice.services.eventsourcing.source.api.util.LoggerProducer;
-import uk.gov.justice.services.eventsourcing.source.api.util.OpenEjbAwareEventRepository;
-import uk.gov.justice.services.eventsourcing.source.api.util.OpenEjbAwareEventStreamRepository;
 import uk.gov.justice.services.eventsourcing.source.api.util.TestSystemUserProvider;
 import uk.gov.justice.services.eventsourcing.source.core.EventAppender;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventSourceNameExtractor;
 import uk.gov.justice.services.eventsourcing.source.core.EventSourceProducer;
-import uk.gov.justice.services.eventsourcing.source.core.EventStreamManagerProducer;
+import uk.gov.justice.services.eventsourcing.source.core.EventStreamManagerFactory;
 import uk.gov.justice.services.eventsourcing.source.core.JdbcBasedEventSource;
-import uk.gov.justice.services.eventsourcing.source.core.PublishingEventAppender;
+import uk.gov.justice.services.eventsourcing.source.core.PublishingEventAppenderFactory;
 import uk.gov.justice.services.eventsourcing.source.core.SystemEventService;
 import uk.gov.justice.services.jdbc.persistence.DataSourceJndiNameProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcDataSourceProvider;
@@ -68,7 +69,6 @@ import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.Metadata;
-import uk.gov.justice.services.messaging.cdi.UnmanagedBeanCreator;
 import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.DefaultJmsEnvelopeSender;
 import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
@@ -133,7 +133,9 @@ public class EventsPageIT {
     private DataSource dataSource;
 
     @Inject
-    private OpenEjbAwareEventRepository eventsRepository;
+    private EventJdbcRepositoryFactory eventJdbcRepositoryFactory;
+
+    private EventJdbcRepository eventsRepository;
 
     @BeforeClass
     public static void beforeClass() throws NamingException {
@@ -146,6 +148,7 @@ public class EventsPageIT {
         InitialContext initialContext = new InitialContext();
         initialContext.bind("java:/app/EventsPageIT/DS.eventstore", dataSource);
         initEventDatabase();
+        eventsRepository = eventJdbcRepositoryFactory.eventJdbcRepository("java:openejb/Resource/eventStore");
     }
 
     @Configuration
@@ -171,13 +174,12 @@ public class EventsPageIT {
             ObjectMapperProducer.class,
             ObjectToJsonValueConverter.class,
             EventPageResource.class,
-            OpenEjbAwareEventRepository.class,
+            EventJdbcRepositoryFactory.class,
             EventsService.class,
             AccessController.class,
             TestSystemUserProvider.class,
             ForbiddenRequestExceptionMapper.class,
             TestEventInsertionStrategyProducer.class,
-            OpenEjbAwareEventStreamRepository.class,
             EventsPageService.class,
             LoggerProducer.class,
             PositionFactory.class,
@@ -191,8 +193,8 @@ public class EventsPageIT {
             EventSource.class,
             JdbcBasedEventSource.class,
             EventAppender.class,
-            PublishingEventAppender.class,
-            EventRepositoryProducer.class,
+            PublishingEventAppenderFactory.class,
+            EventRepositoryFactory.class,
             EventConverter.class,
             SystemEventService.class,
             StringToJsonObjectConverter.class,
@@ -222,10 +224,9 @@ public class EventsPageIT {
             DataSourceJndiNameProvider.class,
             InitialContextProducer.class,
 
-            EventStreamManagerProducer.class,
-            UnmanagedBeanCreator.class
+            EventStreamManagerFactory.class,
+            EventStreamJdbcRepositoryFactory.class
     })
-
     public WebApp war() {
         return new WebApp()
                 .contextRoot("event-source-api")

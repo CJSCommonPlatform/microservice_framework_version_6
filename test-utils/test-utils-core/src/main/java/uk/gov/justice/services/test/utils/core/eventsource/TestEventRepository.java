@@ -24,30 +24,40 @@ import org.slf4j.LoggerFactory;
 /**
  * Standalone repository class to access event streams. To be used in integration testing
  */
-public class TestEventRepository extends EventJdbcRepository {
+public class TestEventRepository {
 
+    private final EventJdbcRepository eventJdbcRepository;
     private final DataSource dbSource;
 
     public TestEventRepository(final DataSource dbSource) {
         this.dbSource = dbSource;
-        this.logger = LoggerFactory.getLogger(TestEventRepository.class);
-        setField(this, "eventInsertionStrategy", new AnsiSQLEventLogInsertionStrategy());
-        setField(this, "jdbcRepositoryHelper", new JdbcRepositoryHelper());
-        setField(this, "dataSource", dbSource);
+        eventJdbcRepository = new EventJdbcRepository(
+                new AnsiSQLEventLogInsertionStrategy(),
+                new JdbcRepositoryHelper(),
+                null,
+                "",
+                LoggerFactory.getLogger(EventJdbcRepository.class));
+
+        setField(eventJdbcRepository, "datasource", dbSource);
     }
 
     public TestEventRepository(final String url, final String username, final String password, final String driverClassName) {
-        setField(this, "eventInsertionStrategy", new AnsiSQLEventLogInsertionStrategy());
-        setField(this, "jdbcRepositoryHelper", new JdbcRepositoryHelper());
-
         final BasicDataSource dataSource = new BasicDataSource();
         dataSource.setDriverClassName(driverClassName);
         dataSource.setUrl(url);
         dataSource.setUsername(username);
         dataSource.setPassword(password);
+
         this.dbSource = dataSource;
-        setField(this, "dataSource", dbSource);
-        this.logger = LoggerFactory.getLogger(TestEventRepository.class);
+
+        eventJdbcRepository = new EventJdbcRepository(
+                new AnsiSQLEventLogInsertionStrategy(),
+                new JdbcRepositoryHelper(),
+                null,
+                "",
+                LoggerFactory.getLogger(EventJdbcRepository.class));
+
+        setField(eventJdbcRepository, "datasource", dbSource);
     }
 
     public TestEventRepository(final String contextName) throws SQLException {
@@ -67,13 +77,13 @@ public class TestEventRepository extends EventJdbcRepository {
     }
 
     public List<Event> eventsOfStreamId(final UUID streamId) {
-        try (final Stream<Event> events = this.findByStreamIdOrderByPositionAsc(streamId)) {
+        try (final Stream<Event> events = eventJdbcRepository.findByStreamIdOrderByPositionAsc(streamId)) {
             return events.collect(toList());
         }
     }
 
     public List<Event> allEvents() {
-        try (final Stream<Event> events = this.findAll()) {
+        try (final Stream<Event> events = eventJdbcRepository.findAll()) {
             return events.collect(toList());
         }
     }

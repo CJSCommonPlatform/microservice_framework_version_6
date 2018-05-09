@@ -6,27 +6,22 @@ import uk.gov.justice.services.eventsourcing.source.core.snapshot.SnapshotServic
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import javax.annotation.Priority;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Alternative;
-import javax.inject.Inject;
-
 /**
  * Source of event streams.
  */
-@ApplicationScoped
-@Alternative
-@Priority(100)
+
+
 public class SnapshotAwareEventSource implements EventSource {
 
-    @Inject
-    EventStreamManager eventStreamManager;
+    private final EventStreamManager eventStreamManager;
+    private final SnapshotService snapshotService;
+    private final EventRepository eventRepository;
 
-    @Inject
-    SnapshotService snapshotService;
-
-    @Inject
-    EventRepository eventRepository;
+    public SnapshotAwareEventSource(final EventStreamManager eventStreamManager,final EventRepository eventRepository,final SnapshotService snapshotService) {
+        this.eventStreamManager = eventStreamManager;
+        this.eventRepository = eventRepository;
+        this.snapshotService = snapshotService;
+    }
 
     @Override
     public EventStream getStreamById(final UUID streamId) {

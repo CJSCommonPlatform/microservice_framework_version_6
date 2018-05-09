@@ -21,15 +21,16 @@ import uk.gov.justice.services.eventsource.DefaultEventDestinationResolver;
 import uk.gov.justice.services.eventsourcing.publisher.jms.EventPublisher;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventInsertionStrategy;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepositoryProducer;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepository;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepositoryFactory;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.JdbcBasedEventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.PostgresSQLEventLogInsertionStrategy;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventConverter;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepositoryProducer;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepositoryProducer;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepositoryFactory;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepositoryFactory;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
-import uk.gov.justice.services.messaging.cdi.UnmanagedBeanCreator;
 import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.DefaultJmsEnvelopeSender;
 import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
@@ -52,6 +53,7 @@ import javax.inject.Inject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jglue.cdiunit.AdditionalClasses;
 import org.jglue.cdiunit.CdiRunner;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -70,7 +72,7 @@ import org.slf4j.Logger;
         PublishingEventAppender.class,
         ObjectMapper.class,
         ObjectMapperProducer.class,
-        EventRepositoryProducer.class,
+        EventRepositoryFactory.class,
         JsonObjectEnvelopeConverter.class,
         DefaultJsonObjectEnvelopeConverter.class,
         EventSourceProducerTest.DummyJmsEventPublisher.class,
@@ -92,12 +94,14 @@ import org.slf4j.Logger;
         YamlSchemaLoader.class,
         InitialContextProducer.class,
 
-        EventStreamManagerProducer.class,
+        EventStreamManagerFactory.class,
         EventSourceProducerTest.TestGlobalValueProducer.class,
         EventConverter.class,
-        EventJdbcRepositoryProducer.class,
-        EventStreamJdbcRepositoryProducer.class,
-        UnmanagedBeanCreator.class
+        EventJdbcRepositoryFactory.class,
+        EventStreamJdbcRepositoryFactory.class,
+
+        EventRepository.class,
+        JdbcBasedEventRepository.class
 })
 public class EventSourceProducerTest {
 

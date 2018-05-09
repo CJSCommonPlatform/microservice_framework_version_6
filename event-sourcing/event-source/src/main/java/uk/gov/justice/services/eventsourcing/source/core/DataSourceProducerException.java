@@ -10,4 +10,8 @@ public class DataSourceProducerException extends RuntimeException {
     public DataSourceProducerException(final String message) {
         super(message);
     }
+
+    public DataSourceProducerException(final String message, final Throwable cause) {
+        super(message, cause);
+    }
 }

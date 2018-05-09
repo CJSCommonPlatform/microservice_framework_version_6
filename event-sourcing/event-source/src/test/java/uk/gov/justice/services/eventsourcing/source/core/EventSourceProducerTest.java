@@ -13,6 +13,7 @@ import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.util.Clock;
 import uk.gov.justice.services.common.util.UtcClock;
+import uk.gov.justice.services.core.cdi.InitialContextProducer;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.enveloper.DefaultEnveloper;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -88,7 +89,8 @@ import org.slf4j.Logger;
         ParserProducer.class,
         YamlFileFinder.class,
         YamlParser.class,
-        YamlSchemaLoader.class
+        YamlSchemaLoader.class,
+        InitialContextProducer.class
 })
 public class EventSourceProducerTest {
 

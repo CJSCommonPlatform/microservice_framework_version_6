@@ -4,6 +4,7 @@ import static java.lang.String.format;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
@@ -11,7 +12,7 @@ import javax.sql.DataSource;
 public class JdbcDataSourceProvider {
 
     @Inject
-    private InitialContextProvider initialContextProvider;
+    private InitialContext initialContext;
 
     private DataSource datasource = null;
 
@@ -19,7 +20,7 @@ public class JdbcDataSourceProvider {
 
         if (datasource == null) {
             try {
-                datasource = (DataSource) initialContextProvider.getInitialContext().lookup(jndiName);
+                datasource = (DataSource) initialContext.lookup(jndiName);
             } catch (final NamingException e) {
                 throw new JdbcRepositoryException(format("Failed to lookup DataSource using jndi name '%s'", jndiName), e);
             }

@@ -29,7 +29,7 @@ import javax.sql.DataSource;
 public class JdbcDataSourceProviderTest {
 
     @Mock
-    private InitialContextProvider initialContextProvider;
+    private InitialContext initialContext;
 
     @InjectMocks
     private JdbcDataSourceProvider jdbcDataSourceProvider;
@@ -39,10 +39,8 @@ public class JdbcDataSourceProviderTest {
 
         final String jndiName = "the-jndi-name";
 
-        final InitialContext initialContext = mock(InitialContext.class);
         final DataSource dataSource = mock(DataSource.class);
 
-        when(initialContextProvider.getInitialContext()).thenReturn(initialContext);
         when(initialContext.lookup(jndiName)).thenReturn(dataSource);
 
         assertThat(jdbcDataSourceProvider.getDataSource(jndiName), is(dataSource));
@@ -53,7 +51,6 @@ public class JdbcDataSourceProviderTest {
         assertThat(jdbcDataSourceProvider.getDataSource(jndiName), is(dataSource));
         assertThat(jdbcDataSourceProvider.getDataSource(jndiName), is(dataSource));
 
-        verify(initialContextProvider, times(1)).getInitialContext();
         verify(initialContext, times(1)).lookup(jndiName);
     }
 
@@ -64,9 +61,6 @@ public class JdbcDataSourceProviderTest {
 
         final String jndiName = "the-jndi-name";
 
-        final InitialContext initialContext = mock(InitialContext.class);
-
-        when(initialContextProvider.getInitialContext()).thenReturn(initialContext);
         when(initialContext.lookup(jndiName)).thenThrow(namingException);
 
         try {

@@ -107,7 +107,7 @@ public class EventSourceProducerTest {
 
         when(eventSourceNameExtractor.getEventSourceNameFromQualifier(injectionPoint)).thenReturn(DEFAULT_EVENT_SOURCE_NAME);
 
-        assertThat(eventSourceProducer.eventSource(injectionPoint), is(instanceOf(DefaultEventSource.class)));
+        assertThat(eventSourceProducer.eventSource(injectionPoint), is(instanceOf(JdbcBasedEventSource.class)));
     }
 
     @Test

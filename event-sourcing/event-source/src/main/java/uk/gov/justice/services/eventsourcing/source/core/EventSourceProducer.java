@@ -35,7 +35,7 @@ public class EventSourceProducer {
      */
     @Produces
     public EventSource eventSource() {
-        return create(DefaultEventSource.class);
+        return create(JdbcBasedEventSource.class);
     }
 
     /**

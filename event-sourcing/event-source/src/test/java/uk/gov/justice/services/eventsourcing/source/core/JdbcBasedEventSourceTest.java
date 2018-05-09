@@ -7,13 +7,11 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.eventsourcing.repository.jdbc.DefaultEventStreamMetadata;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventStreamMetadata;
-import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 
 import java.util.List;
 import java.util.UUID;
@@ -44,22 +42,6 @@ public class JdbcBasedEventSourceTest {
         EnvelopeEventStream eventStream = (EnvelopeEventStream) eventSource.getStreamById(STREAM_ID);
 
         assertThat(eventStream.getId(), equalTo(STREAM_ID));
-    }
-
-    @Test
-    public void shouldCloneStream() throws EventStreamException {
-        final UUID clonedStreamId = randomUUID();
-        when(eventStreamManager.cloneAsAncestor(STREAM_ID)).thenReturn(clonedStreamId);
-        final UUID clonedId = eventSource.cloneStream(STREAM_ID);
-
-        assertThat(clonedId, is(clonedStreamId));
-    }
-
-    @Test
-    public void shouldDeleteStream() throws EventStreamException {
-        eventSource.clearStream(STREAM_ID);
-
-        verify(eventStreamManager).clear(STREAM_ID);
     }
 
     @Test

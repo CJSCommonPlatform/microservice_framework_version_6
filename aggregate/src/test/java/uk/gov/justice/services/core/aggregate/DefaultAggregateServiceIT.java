@@ -32,17 +32,18 @@ import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
 import uk.gov.justice.services.eventsourcing.publisher.jms.EventPublisher;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventInsertionStrategy;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.JdbcBasedEventRepository;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepositoryProducer;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventConverter;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepository;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepositoryProducer;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepository;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepositoryProducer;
 import uk.gov.justice.services.eventsourcing.source.core.EnvelopeEventStream;
 import uk.gov.justice.services.eventsourcing.source.core.EventAppender;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventSourceNameExtractor;
 import uk.gov.justice.services.eventsourcing.source.core.EventSourceProducer;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
-import uk.gov.justice.services.eventsourcing.source.core.EventStreamManager;
+import uk.gov.justice.services.eventsourcing.source.core.EventStreamManagerProducer;
 import uk.gov.justice.services.eventsourcing.source.core.JdbcBasedEventSource;
 import uk.gov.justice.services.eventsourcing.source.core.PublishingEventAppender;
 import uk.gov.justice.services.eventsourcing.source.core.SystemEventService;
@@ -54,6 +55,7 @@ import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.cdi.UnmanagedBeanCreator;
 import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
 import uk.gov.justice.subscription.ParserProducer;
@@ -117,19 +119,18 @@ public class DefaultAggregateServiceIT {
             LoggerProducer.class,
 
             AbstractJdbcRepository.class,
-            JdbcBasedEventRepository.class,
+            EventRepositoryProducer.class,
             TestEventInsertionStrategyProducer.class,
 
             DefaultAggregateService.class,
-            EventStreamJdbcRepository.class,
-            EventJdbcRepository.class,
+            EventStreamJdbcRepositoryProducer.class,
+            EventJdbcRepositoryProducer.class,
             JdbcRepositoryHelper.class,
             JdbcDataSourceProvider.class,
-            EventStreamManager.class,
+            EventStreamManagerProducer.class,
             EventStreamJdbcRepository.class,
             JdbcBasedEventSource.class,
             EnvelopeEventStream.class,
-            EventStreamManager.class,
             DefaultEnveloper.class,
             ObjectToJsonValueConverter.class,
             ObjectToJsonObjectConverter.class,
@@ -161,7 +162,9 @@ public class DefaultAggregateServiceIT {
             YamlSchemaLoader.class,
 
             DataSourceJndiNameProvider.class,
-            InitialContextProducer.class
+            InitialContextProducer.class,
+
+            UnmanagedBeanCreator.class
     })
     public WebApp war() {
         return new WebApp()

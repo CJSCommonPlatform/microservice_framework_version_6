@@ -20,7 +20,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Vetoed;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 /**
  * Manages operations on {@link EventStream}
  */
-@ApplicationScoped
+@Vetoed
 public class EventStreamManager {
 
     @Inject
@@ -43,7 +43,7 @@ public class EventStreamManager {
     long maxRetry;
 
     @Inject
-    private Logger logger;
+    Logger logger;
 
     @Inject
     SystemEventService systemEventService;
@@ -64,7 +64,7 @@ public class EventStreamManager {
     /**
      * Get the stream of events from the given version.
      *
-     * @param id      the UUID of the stream
+     * @param id       the UUID of the stream
      * @param position the version of the stream
      * @return the stream of events
      */
@@ -187,7 +187,8 @@ public class EventStreamManager {
 
     /**
      * Get the position of the stream within the streams
-     ** @return the latest position number for the provided steam.
+     *
+     * @return the latest position number for the provided steam.
      */
     public long getStreamPosition(final UUID streamId) {
         return eventRepository.getStreamPosition(streamId);

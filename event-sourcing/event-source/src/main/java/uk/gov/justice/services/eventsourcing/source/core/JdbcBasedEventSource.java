@@ -17,10 +17,10 @@ import javax.inject.Inject;
 public class JdbcBasedEventSource implements EventSource {
 
     @Inject
-    private EventStreamManager eventStreamManager;
+    EventStreamManager eventStreamManager;
 
     @Inject
-    private EventRepository eventRepository;
+    EventRepository eventRepository;
 
     @Override
     public EventStream getStreamById(final UUID streamId) {

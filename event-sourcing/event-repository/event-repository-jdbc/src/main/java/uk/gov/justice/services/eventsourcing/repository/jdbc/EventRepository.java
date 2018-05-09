@@ -6,8 +6,6 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import javax.transaction.Transactional;
-
 /**
  * Service to store and read event streams.
  */
@@ -44,7 +42,6 @@ public interface EventRepository {
      * @throws StoreEventRequestFailedException If there was a failure in storing the events, this
      *                                          will wrap the underlying cause.
      */
-    @Transactional
     void storeEvent(final JsonEnvelope envelope) throws StoreEventRequestFailedException;
 
     /**

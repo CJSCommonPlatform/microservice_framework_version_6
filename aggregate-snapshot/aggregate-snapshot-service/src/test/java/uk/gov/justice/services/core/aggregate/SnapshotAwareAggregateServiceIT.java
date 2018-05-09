@@ -41,13 +41,13 @@ import uk.gov.justice.services.eventsourcing.jdbc.snapshot.SnapshotRepository;
 import uk.gov.justice.services.eventsourcing.publisher.jms.JmsEventPublisher;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventInsertionStrategy;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.JdbcBasedEventRepository;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepositoryProducer;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventConverter;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepository;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepository;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepositoryProducer;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepositoryProducer;
 import uk.gov.justice.services.eventsourcing.source.core.EventAppender;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
-import uk.gov.justice.services.eventsourcing.source.core.EventStreamManager;
+import uk.gov.justice.services.eventsourcing.source.core.EventStreamManagerProducer;
 import uk.gov.justice.services.eventsourcing.source.core.PublishingEventAppender;
 import uk.gov.justice.services.eventsourcing.source.core.SnapshotAwareEnvelopeEventStream;
 import uk.gov.justice.services.eventsourcing.source.core.SnapshotAwareEventSource;
@@ -61,6 +61,7 @@ import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.cdi.UnmanagedBeanCreator;
 import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
 
@@ -149,10 +150,10 @@ public class SnapshotAwareAggregateServiceIT {
             SnapshotJdbcRepository.class,
             JdbcDataSourceProvider.class,
 
-            EventStreamJdbcRepository.class,
-            JdbcBasedEventRepository.class,
+            EventStreamJdbcRepositoryProducer.class,
+            EventRepositoryProducer.class,
             TestEventInsertionStrategyProducer.class,
-            EventJdbcRepository.class,
+            EventJdbcRepositoryProducer.class,
             JdbcRepositoryHelper.class,
             JdbcDataSourceProvider.class,
 
@@ -172,7 +173,7 @@ public class SnapshotAwareAggregateServiceIT {
             SnapshotAwareAggregateService.class,
             SnapshotAwareEventSource.class,
             SnapshotAwareEnvelopeEventStream.class,
-            EventStreamManager.class,
+            EventStreamManagerProducer.class,
             DefaultEnveloper.class,
             ObjectToJsonValueConverter.class,
             SystemEventService.class,
@@ -187,7 +188,9 @@ public class SnapshotAwareAggregateServiceIT {
             ObjectToJsonObjectConverter.class,
 
             DataSourceJndiNameProvider.class,
-            InitialContextProducer.class
+            InitialContextProducer.class,
+
+            UnmanagedBeanCreator.class
     })
 
     public WebApp war() {

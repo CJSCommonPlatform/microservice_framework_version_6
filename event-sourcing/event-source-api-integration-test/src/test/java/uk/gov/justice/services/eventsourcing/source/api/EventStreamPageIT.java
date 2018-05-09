@@ -32,8 +32,8 @@ import uk.gov.justice.services.eventsource.DefaultEventDestinationResolver;
 import uk.gov.justice.services.eventsourcing.publisher.jms.EventPublisher;
 import uk.gov.justice.services.eventsourcing.publisher.jms.JmsEventPublisher;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.DefaultEventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventInsertionStrategy;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.JdbcBasedEventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventConverter;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepository;
 import uk.gov.justice.services.eventsourcing.source.api.resource.EventSourceApiApplication;
@@ -48,12 +48,12 @@ import uk.gov.justice.services.eventsourcing.source.api.service.core.PositionVal
 import uk.gov.justice.services.eventsourcing.source.api.util.LoggerProducer;
 import uk.gov.justice.services.eventsourcing.source.api.util.OpenEjbAwareEventStreamRepository;
 import uk.gov.justice.services.eventsourcing.source.api.util.TestSystemUserProvider;
-import uk.gov.justice.services.eventsourcing.source.core.JdbcBasedEventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventAppender;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventSourceNameExtractor;
 import uk.gov.justice.services.eventsourcing.source.core.EventSourceProducer;
 import uk.gov.justice.services.eventsourcing.source.core.EventStreamManager;
+import uk.gov.justice.services.eventsourcing.source.core.JdbcBasedEventSource;
 import uk.gov.justice.services.eventsourcing.source.core.PublishingEventAppender;
 import uk.gov.justice.services.eventsourcing.source.core.SystemEventService;
 import uk.gov.justice.services.jdbc.persistence.JdbcDataSourceProvider;
@@ -183,7 +183,7 @@ public class EventStreamPageIT {
             EventStreamManager.class,
             EventAppender.class,
             PublishingEventAppender.class,
-            DefaultEventRepository.class,
+            JdbcBasedEventRepository.class,
             EventConverter.class,
             SystemEventService.class,
             StringToJsonObjectConverter.class,

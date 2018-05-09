@@ -42,7 +42,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DefaultEventRepositoryTest {
+public class JdbcBasedEventRepositoryTest {
 
     private static final UUID STREAM_ID = UUID.fromString("4b4e80a0-76f7-476c-b75b-527e38fb259e");
     private static final long POSITION = 1L;
@@ -75,7 +75,7 @@ public class DefaultEventRepositoryTest {
     private DefaultEventStreamMetadata eventStreamMetadata;
 
     @InjectMocks
-    private DefaultEventRepository defaultEventRepository;
+    private JdbcBasedEventRepository jdbcBasedEventRepository;
 
     private final static ZonedDateTime TIMESTAMP = new UtcClock().now();
 
@@ -84,7 +84,7 @@ public class DefaultEventRepositoryTest {
         when(eventJdbcRepository.findAll()).thenReturn(Stream.of(event));
         when(eventConverter.envelopeOf(event)).thenReturn(envelope);
 
-        Stream<JsonEnvelope> streamOfEnvelopes = defaultEventRepository.getEvents();
+        Stream<JsonEnvelope> streamOfEnvelopes = jdbcBasedEventRepository.getEvents();
 
         assertThat(streamOfEnvelopes, not(nullValue()));
         assertThat(streamOfEnvelopes.findFirst().get(), equalTo(envelope));
@@ -96,7 +96,7 @@ public class DefaultEventRepositoryTest {
         when(eventJdbcRepository.findByStreamIdOrderByPositionAsc(STREAM_ID)).thenReturn(Stream.of(event));
         when(eventConverter.envelopeOf(event)).thenReturn(envelope);
 
-        Stream<JsonEnvelope> streamOfEnvelopes = defaultEventRepository.getEventsByStreamId(STREAM_ID);
+        Stream<JsonEnvelope> streamOfEnvelopes = jdbcBasedEventRepository.getEventsByStreamId(STREAM_ID);
 
         assertThat(streamOfEnvelopes, not(nullValue()));
         assertThat(streamOfEnvelopes.findFirst().get(), equalTo(envelope));
@@ -105,7 +105,7 @@ public class DefaultEventRepositoryTest {
 
     @Test(expected = InvalidStreamIdException.class)
     public void shouldThrowExceptionOnNullStreamId() throws Exception {
-        defaultEventRepository.getEventsByStreamId(null);
+        jdbcBasedEventRepository.getEventsByStreamId(null);
     }
 
     @Test
@@ -113,7 +113,7 @@ public class DefaultEventRepositoryTest {
         when(eventJdbcRepository.findByStreamIdFromPositionOrderByPositionAsc(STREAM_ID, POSITION)).thenReturn(Stream.of(event));
         when(eventConverter.envelopeOf(event)).thenReturn(envelope);
 
-        Stream<JsonEnvelope> streamOfEnvelopes = defaultEventRepository.getEventsByStreamIdFromPosition(STREAM_ID, POSITION);
+        Stream<JsonEnvelope> streamOfEnvelopes = jdbcBasedEventRepository.getEventsByStreamIdFromPosition(STREAM_ID, POSITION);
 
         assertThat(streamOfEnvelopes, not(nullValue()));
         assertThat(streamOfEnvelopes.findFirst().get(), equalTo(envelope));
@@ -123,12 +123,12 @@ public class DefaultEventRepositoryTest {
 
     @Test(expected = InvalidStreamIdException.class)
     public void shouldThrowExceptionOnNullStreamIdWhenGettingStreamByStreamIdAndSequence() throws Exception {
-        defaultEventRepository.getEventsByStreamIdFromPosition(null, POSITION);
+        jdbcBasedEventRepository.getEventsByStreamIdFromPosition(null, POSITION);
     }
 
     @Test(expected = JdbcRepositoryException.class)
     public void shouldThrowExceptionOnNullSequenceIdWhenGettingStreamByStreamIdAndSequence() throws Exception {
-        defaultEventRepository.getEventsByStreamIdFromPosition(STREAM_ID, null);
+        jdbcBasedEventRepository.getEventsByStreamIdFromPosition(STREAM_ID, null);
     }
 
 
@@ -155,7 +155,7 @@ public class DefaultEventRepositoryTest {
         when(eventConverter.envelopeOf(event2)).thenReturn(envelope2);
         when(eventConverter.envelopeOf(event3)).thenReturn(envelope3);
 
-        final Stream<Stream<JsonEnvelope>> streamOfStreams = defaultEventRepository.getStreamOfAllEventStreams();
+        final Stream<Stream<JsonEnvelope>> streamOfStreams = jdbcBasedEventRepository.getStreamOfAllEventStreams();
 
         final List<Stream<JsonEnvelope>> listOfStreams = streamOfStreams.collect(toList());
         assertThat(listOfStreams, hasSize(3));
@@ -188,7 +188,7 @@ public class DefaultEventRepositoryTest {
         when(eventConverter.envelopeOf(event3)).thenReturn(envelope3);
 
 
-        final Stream<Stream<JsonEnvelope>> streamOfStreams = defaultEventRepository.getStreamOfAllActiveEventStreams();
+        final Stream<Stream<JsonEnvelope>> streamOfStreams = jdbcBasedEventRepository.getStreamOfAllActiveEventStreams();
 
         final List<Stream<JsonEnvelope>> listOfStreams = streamOfStreams.collect(toList());
         assertThat(listOfStreams, hasSize(3));
@@ -229,7 +229,7 @@ public class DefaultEventRepositoryTest {
         when(eventConverter.envelopeOf(event2)).thenReturn(envelope2);
         when(eventConverter.envelopeOf(event3)).thenReturn(envelope3);
 
-        final Stream<Stream<JsonEnvelope>> streamOfStreams = defaultEventRepository.getStreamOfAllEventStreams();
+        final Stream<Stream<JsonEnvelope>> streamOfStreams = jdbcBasedEventRepository.getStreamOfAllEventStreams();
         streamOfStreams.collect(toList());
 
         streamOfStreams.close();
@@ -246,7 +246,7 @@ public class DefaultEventRepositoryTest {
         final Event event = new Event(null, STREAM_ID, POSITION, name, null, null, now(), "source");
         when(eventConverter.eventOf(envelope)).thenReturn(event);
 
-        defaultEventRepository.storeEvent(envelope);
+        jdbcBasedEventRepository.storeEvent(envelope);
 
         verify(eventJdbcRepository).insert(event);
         verify(logger).trace("Storing event {} into stream {} at position {}", name, STREAM_ID, POSITION);
@@ -261,19 +261,19 @@ public class DefaultEventRepositoryTest {
 
         doThrow(InvalidPositionException.class).when(eventJdbcRepository).insert(event);
 
-        defaultEventRepository.storeEvent(envelope);
+        jdbcBasedEventRepository.storeEvent(envelope);
     }
 
     @Test
     public void shouldReturnCurrentEventPosition() {
         when(eventJdbcRepository.getStreamSize(STREAM_ID)).thenReturn(POSITION);
 
-        assertThat(defaultEventRepository.getStreamSize(STREAM_ID), equalTo(POSITION));
+        assertThat(jdbcBasedEventRepository.getStreamSize(STREAM_ID), equalTo(POSITION));
     }
 
     @Test
     public void shouldDeleteStream() {
-        defaultEventRepository.clearEventsForStream(STREAM_ID);
+        jdbcBasedEventRepository.clearEventsForStream(STREAM_ID);
 
         verify(eventJdbcRepository).clear(STREAM_ID);
     }
@@ -311,7 +311,7 @@ public class DefaultEventRepositoryTest {
 
         when(eventStreamJdbcRepository.findEventStreamWithPositionFrom(position)).thenReturn(eventStreams);
 
-        final Stream<EventStreamMetadata> streamOfEnvelopes = defaultEventRepository.getEventStreamsFromPosition(position);
+        final Stream<EventStreamMetadata> streamOfEnvelopes = jdbcBasedEventRepository.getEventStreamsFromPosition(position);
         final List<EventStreamMetadata> eventStreamMetadataList = streamOfEnvelopes.collect(toList());
 
         assertThat(eventStreamMetadataList.size(), is(1));
@@ -336,7 +336,7 @@ public class DefaultEventRepositoryTest {
 
         when(eventStreamJdbcRepository.findAll()).thenReturn(eventStreams);
 
-        final Stream<EventStreamMetadata> streamOfEnvelopes = defaultEventRepository.getStreams();
+        final Stream<EventStreamMetadata> streamOfEnvelopes = jdbcBasedEventRepository.getStreams();
         final List<EventStreamMetadata> eventStreamMetadataList = streamOfEnvelopes.collect(toList());
 
         assertThat(eventStreamMetadataList.size(), is(1));
@@ -352,19 +352,19 @@ public class DefaultEventRepositoryTest {
 
     @Test
     public void shouldMarkActive() {
-        defaultEventRepository.markEventStreamActive(STREAM_ID, true);
+        jdbcBasedEventRepository.markEventStreamActive(STREAM_ID, true);
         verify(eventStreamJdbcRepository).markActive(STREAM_ID, true);
     }
 
     @Test
     public void shouldReturnStreamPosition() {
-        defaultEventRepository.getStreamPosition(STREAM_ID);
+        jdbcBasedEventRepository.getStreamPosition(STREAM_ID);
         verify(eventStreamJdbcRepository).getPosition(STREAM_ID);
     }
 
     @Test
     public void shouldStoreEventStream() {
-        defaultEventRepository.createEventStream(STREAM_ID);
+        jdbcBasedEventRepository.createEventStream(STREAM_ID);
         verify(eventStreamJdbcRepository).insert(STREAM_ID);
     }
 

@@ -22,9 +22,9 @@ import javax.transaction.Transactional;
 import org.slf4j.Logger;
 
 /**
- *  Implementation of {@link EventRepository}
+ * Implementation of {@link EventRepository}
  */
-public class DefaultEventRepository implements EventRepository {
+public class JdbcBasedEventRepository implements EventRepository {
 
     @Inject
     Logger logger;

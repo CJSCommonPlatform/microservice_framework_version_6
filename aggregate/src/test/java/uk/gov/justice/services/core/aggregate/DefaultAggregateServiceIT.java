@@ -30,12 +30,11 @@ import uk.gov.justice.services.core.extension.EventFoundEvent;
 import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
 import uk.gov.justice.services.eventsourcing.publisher.jms.EventPublisher;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.DefaultEventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventInsertionStrategy;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.JdbcBasedEventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventConverter;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepository;
-import uk.gov.justice.services.eventsourcing.source.core.JdbcBasedEventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EnvelopeEventStream;
 import uk.gov.justice.services.eventsourcing.source.core.EventAppender;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
@@ -43,6 +42,7 @@ import uk.gov.justice.services.eventsourcing.source.core.EventSourceNameExtracto
 import uk.gov.justice.services.eventsourcing.source.core.EventSourceProducer;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.EventStreamManager;
+import uk.gov.justice.services.eventsourcing.source.core.JdbcBasedEventSource;
 import uk.gov.justice.services.eventsourcing.source.core.PublishingEventAppender;
 import uk.gov.justice.services.eventsourcing.source.core.SystemEventService;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
@@ -115,7 +115,7 @@ public class DefaultAggregateServiceIT {
             LoggerProducer.class,
 
             AbstractJdbcRepository.class,
-            DefaultEventRepository.class,
+            JdbcBasedEventRepository.class,
             TestEventInsertionStrategyProducer.class,
 
             DefaultAggregateService.class,

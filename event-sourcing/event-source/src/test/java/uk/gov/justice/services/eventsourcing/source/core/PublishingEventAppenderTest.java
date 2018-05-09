@@ -13,7 +13,7 @@ import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderF
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithDefaults;
 
 import uk.gov.justice.services.eventsourcing.publisher.jms.EventPublisher;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.DefaultEventRepository;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.JdbcBasedEventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.StoreEventRequestFailedException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -31,7 +31,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class PublishingEventAppenderTest {
 
     @Mock
-    private DefaultEventRepository eventRepository;
+    private JdbcBasedEventRepository eventRepository;
 
     @Mock
     private EventPublisher eventPublisher;
@@ -129,7 +129,7 @@ public class PublishingEventAppenderTest {
                 streamId,
                 secondStreamEvent);
 
-        verify(eventRepository,times(0)).
+        verify(eventRepository, times(0)).
                 createEventStream(streamId);
     }
 }

@@ -40,7 +40,7 @@ import uk.gov.justice.services.eventsourcing.jdbc.snapshot.SnapshotRepository;
 import uk.gov.justice.services.eventsourcing.publisher.jms.JmsEventPublisher;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventInsertionStrategy;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.DefaultEventRepository;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.JdbcBasedEventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventConverter;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepository;
@@ -148,7 +148,7 @@ public class SnapshotAwareAggregateServiceIT {
             JdbcDataSourceProvider.class,
 
             EventStreamJdbcRepository.class,
-            DefaultEventRepository.class,
+            JdbcBasedEventRepository.class,
             TestEventInsertionStrategyProducer.class,
             EventJdbcRepository.class,
             JdbcRepositoryHelper.class,

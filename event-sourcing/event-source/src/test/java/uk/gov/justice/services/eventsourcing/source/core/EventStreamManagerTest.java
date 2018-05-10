@@ -9,8 +9,10 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.rules.ExpectedException.none;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -22,6 +24,7 @@ import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderF
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUIDAndName;
 
 import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.JdbcBasedEventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.OptimisticLockingRetryException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
@@ -29,11 +32,11 @@ import uk.gov.justice.services.eventsourcing.source.core.exception.VersionMismat
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -42,33 +45,36 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EventStreamManagerTest {
 
-    private static final UUID STREAM_ID = UUID.randomUUID();
+    private static final UUID STREAM_ID = randomUUID();
     private static final Long INITIAL_VERSION = 0L;
     private static final Long CURRENT_VERSION = 5L;
     private static final Long INVALID_VERSION = 8L;
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-    @Mock
-    private Logger logger;
-    @Mock
-    private JdbcBasedEventRepository eventRepository;
-    @Mock
-    private EventAppender eventAppender;
-    @Mock
-    private Stream<JsonEnvelope> eventStream;
-    @Mock
-    private SystemEventService systemEventService;
 
-    private Enveloper enveloper = EnveloperFactory.createEnveloper();
+    private final Logger logger = mock(Logger.class);
+    private final JdbcBasedEventRepository eventRepository = mock(JdbcBasedEventRepository.class);
+    private final EventAppender eventAppender = mock(EventAppender.class);
+    private final Stream<JsonEnvelope> eventStream = mock(Stream.class);
+    private final SystemEventService systemEventService = mock(SystemEventService.class);
+    private final Enveloper enveloper = EnveloperFactory.createEnveloper();
 
-    @InjectMocks
-    private EventStreamManager eventStreamManager;
+
+    private static final long MAX_RETRY = 23L;
+
+    private final EventStreamManager eventStreamManager = new EventStreamManager(
+            eventAppender,
+            MAX_RETRY,
+            systemEventService,
+            enveloper,
+            eventRepository,
+            logger
+    );
 
     @Captor
     private ArgumentCaptor<JsonEnvelope> eventCaptor;
@@ -76,10 +82,9 @@ public class EventStreamManagerTest {
     @Captor
     private ArgumentCaptor<Long> versionCaptor;
 
-    @Before
-    public void setup() {
-        eventStreamManager.enveloper = enveloper;
-    }
+    @Rule
+    public ExpectedException expectedException = none();
+
 
     @Test
     public void shouldAppendToStream() throws Exception {
@@ -215,7 +220,7 @@ public class EventStreamManagerTest {
 
     @Test
     public void shouldRetryWithNextVersionIdInCaseOfOptimisticLockException() throws Exception {
-        eventStreamManager.maxRetry = 20L;
+        setMaxRetries(20L);
 
         final long currentVersion = 6L;
         final long currentVersionAfterException = 11L;
@@ -240,7 +245,8 @@ public class EventStreamManagerTest {
 
     @Test
     public void shouldTraceLogAnAttemptedRetry() throws Exception {
-        eventStreamManager.maxRetry = 20L;
+
+        setMaxRetries(20L);
 
         final long currentVersion = 6L;
         final long currentVersionAfterException = 11L;
@@ -262,7 +268,8 @@ public class EventStreamManagerTest {
 
     @Test
     public void shouldThrowExceptionAfterMaxNumberOfRetriesReached() throws Exception {
-        eventStreamManager.maxRetry = 2L;
+
+        setMaxRetries(2L);
 
         final long currentVersion = 6L;
         final long currentVersionAfterException1 = 11L;
@@ -287,7 +294,8 @@ public class EventStreamManagerTest {
 
     @Test
     public void shouldLogWarningAfterMaxNumberOfRetriesReached() throws Exception {
-        eventStreamManager.maxRetry = 2L;
+
+        setMaxRetries(2L);
 
         final long currentVersion = 6L;
         final long currentVersionAfterException1 = 11L;
@@ -306,7 +314,7 @@ public class EventStreamManagerTest {
 
         try {
             eventStreamManager.appendNonConsecutively(STREAM_ID, Stream.of(event));
-        } catch (OptimisticLockingRetryException e) {
+        } catch (final OptimisticLockingRetryException e) {
         }
 
         verify(logger).warn("Failed to append to stream {} due to concurrency issues, returning to handler.", STREAM_ID);
@@ -370,5 +378,13 @@ public class EventStreamManagerTest {
         return envelopeFrom(
                 metadataBuilder().withId(randomUUID()).withStreamId(STREAM_ID).withName(eventName),
                 createObjectBuilder().add("field", "value").build());
+    }
+
+    private void setMaxRetries(final long maxRetries) throws Exception {
+
+        final Field maxRetry = eventStreamManager.getClass().getDeclaredField("maxRetry");
+
+        maxRetry.setAccessible(true);
+        maxRetry.set(eventStreamManager, maxRetries);
     }
 }

@@ -7,20 +7,18 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import javax.enterprise.inject.Vetoed;
-import javax.inject.Inject;
-
 /**
  * Source of event streams.
  */
-@Vetoed
 public class JdbcBasedEventSource implements EventSource {
 
-    @Inject
-    EventStreamManager eventStreamManager;
+    private final EventStreamManager eventStreamManager;
+    private final EventRepository eventRepository;
 
-    @Inject
-    EventRepository eventRepository;
+    public JdbcBasedEventSource(final EventStreamManager eventStreamManager, final EventRepository eventRepository) {
+        this.eventStreamManager = eventStreamManager;
+        this.eventRepository = eventRepository;
+    }
 
     @Override
     public EventStream getStreamById(final UUID streamId) {

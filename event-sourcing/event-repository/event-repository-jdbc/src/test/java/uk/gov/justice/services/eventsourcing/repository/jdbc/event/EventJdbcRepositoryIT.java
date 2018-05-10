@@ -2,12 +2,12 @@ package uk.gov.justice.services.eventsourcing.repository.jdbc.event;
 
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
+import static junit.framework.TestCase.fail;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 import uk.gov.justice.services.common.util.UtcClock;
@@ -16,6 +16,7 @@ import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidPo
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
 import uk.gov.justice.services.test.utils.core.messaging.Poller;
+import uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil;
 import uk.gov.justice.services.test.utils.persistence.TestDataSourceFactory;
 
 import java.sql.SQLException;
@@ -25,6 +26,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import org.h2.jdbcx.JdbcDataSource;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,21 +44,21 @@ public class EventJdbcRepositoryIT {
     private final static String SOURCE = "source";
 
 
-    private final EventJdbcRepository jdbcRepository = new EventJdbcRepository();
+    private EventJdbcRepository jdbcRepository;
+    private JdbcDataSource dataSource;
 
     @Before
     public void initialize() {
         try {
-            jdbcRepository.dataSource = new TestDataSourceFactory(LIQUIBASE_EVENT_STORE_DB_CHANGELOG_XML).createDataSource();
-            jdbcRepository.logger = mock(Logger.class);
-            jdbcRepository.eventInsertionStrategy = new AnsiSQLEventLogInsertionStrategy();
-            jdbcRepository.jdbcRepositoryHelper = new JdbcRepositoryHelper();
+            jdbcRepository = new EventJdbcRepository(new AnsiSQLEventLogInsertionStrategy(), new JdbcRepositoryHelper(), null, "tests", mock(Logger.class));
+            dataSource = new TestDataSourceFactory(LIQUIBASE_EVENT_STORE_DB_CHANGELOG_XML).createDataSource();
+            ReflectionUtil.setField(jdbcRepository, "dataSource", dataSource);
 
             final Poller poller = new Poller();
 
             poller.pollUntilFound(() -> {
                 try {
-                    jdbcRepository.dataSource.getConnection().prepareStatement("SELECT COUNT (*) FROM event_log;").execute();
+                    dataSource.getConnection().prepareStatement("SELECT COUNT (*) FROM event_log;").execute();
                     return Optional.of("Success");
                 } catch (SQLException e) {
                     e.printStackTrace();
@@ -72,7 +74,7 @@ public class EventJdbcRepositoryIT {
 
     @After
     public void after() throws SQLException {
-        jdbcRepository.dataSource.getConnection().close();
+        dataSource.getConnection().close();
     }
 
     @Test

@@ -6,7 +6,6 @@ import static uk.gov.justice.services.common.converter.ZonedDateTimes.toSqlTimes
 
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidStreamIdException;
-import uk.gov.justice.services.jdbc.persistence.DataSourceJndiNameProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcDataSourceProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
@@ -18,13 +17,10 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import javax.enterprise.inject.Vetoed;
-import javax.inject.Inject;
 import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 
-@Vetoed
 public class EventStreamJdbcRepository {
 
     private static final String SQL_FIND_BY_POSITION = "SELECT * FROM event_stream WHERE sequence_number>=? ORDER BY sequence_number ASC";
@@ -44,22 +40,26 @@ public class EventStreamJdbcRepository {
     private static final String COL_DATE_CREATED = "date_created";
     private static final String EVENT_STREAM_EXCEPTION_MESSAGE = "Exception while deleting stream %s";
 
-    @Inject
-    protected Logger logger;
+    private final Logger logger;
+    private final JdbcRepositoryHelper eventStreamJdbcRepositoryHelper;
+    private final JdbcDataSourceProvider jdbcDataSourceProvider;
+    private final UtcClock clock;
+    private final String jndiDatasource;
 
-    @Inject
-    JdbcRepositoryHelper eventStreamJdbcRepositoryHelper;
+    private DataSource dataSource;
 
-    @Inject
-    JdbcDataSourceProvider jdbcDataSourceProvider;
+    public EventStreamJdbcRepository(final JdbcRepositoryHelper eventStreamJdbcRepositoryHelper,
+                                     final JdbcDataSourceProvider jdbcDataSourceProvider,
+                                     final UtcClock clock,
+                                     final String jndiDatasource,
+                                     final Logger logger) {
 
-    @Inject
-    DataSourceJndiNameProvider dataSourceJndiNameProvider;
-
-    @Inject
-    UtcClock clock;
-
-    DataSource dataSource;
+        this.eventStreamJdbcRepositoryHelper = eventStreamJdbcRepositoryHelper;
+        this.jdbcDataSourceProvider = jdbcDataSourceProvider;
+        this.jndiDatasource = jndiDatasource;
+        this.logger = logger;
+        this.clock = clock;
+    }
 
     public void insert(final UUID streamId) {
         insert(streamId, true);
@@ -132,8 +132,7 @@ public class EventStreamJdbcRepository {
 
     private DataSource getDataSource() {
         if (null == dataSource) {
-            final String jndiName = dataSourceJndiNameProvider.jndiName();
-            dataSource = jdbcDataSourceProvider.getDataSource(jndiName);
+            dataSource = jdbcDataSourceProvider.getDataSource(jndiDatasource);
         }
 
         return dataSource;

@@ -7,7 +7,6 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 
-import uk.gov.justice.services.common.configuration.GlobalValue;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.OptimisticLockingRetryException;
@@ -20,8 +19,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import javax.enterprise.inject.Vetoed;
-import javax.inject.Inject;
 import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
@@ -29,27 +26,30 @@ import org.slf4j.Logger;
 /**
  * Manages operations on {@link EventStream}
  */
-@Vetoed
 public class EventStreamManager {
 
-    @Inject
-    EventRepository eventRepository;
+    private final EventAppender eventAppender;
+    private final long maxRetry;
+    private final Logger logger;
+    private final SystemEventService systemEventService;
+    private final Enveloper enveloper;
+    private final EventRepository eventRepository;
 
-    @Inject
-    EventAppender eventAppender;
+    public EventStreamManager(
+            final EventAppender eventAppender,
+            final long maxRetry,
+            final SystemEventService systemEventService,
+            final Enveloper enveloper,
+            final EventRepository eventRepository,
+            final Logger logger) {
 
-    @Inject
-    @GlobalValue(key = "internal.max.retry", defaultValue = "20")
-    long maxRetry;
-
-    @Inject
-    Logger logger;
-
-    @Inject
-    SystemEventService systemEventService;
-
-    @Inject
-    Enveloper enveloper;
+        this.eventAppender = eventAppender;
+        this.maxRetry = maxRetry;
+        this.logger = logger;
+        this.systemEventService = systemEventService;
+        this.enveloper = enveloper;
+        this.eventRepository = eventRepository;
+    }
 
     /**
      * Get the stream of events.
@@ -88,8 +88,8 @@ public class EventStreamManager {
 
     /**
      * Store a stream of events without enforcing consecutive version ids. Reduces risk of throwing
-     * optimistic lock error. To be use instead of the append method, when it's acceptable to
-     * store events with non consecutive version ids
+     * optimistic lock error. To be use instead of the append method, when it's acceptable to store
+     * events with non consecutive version ids
      *
      * @param streamId - id of the stream to append to
      * @param events   the stream of events to store
@@ -110,7 +110,7 @@ public class EventStreamManager {
                 try {
                     eventAppender.append(event, streamId, ++currentVersion);
                     appendedSuccessfully = true;
-                } catch (OptimisticLockingRetryException e) {
+                } catch (final OptimisticLockingRetryException e) {
                     retryCount++;
                     if (retryCount > maxRetry) {
                         logger.warn("Failed to append to stream {} due to concurrency issues, returning to handler.", streamId);

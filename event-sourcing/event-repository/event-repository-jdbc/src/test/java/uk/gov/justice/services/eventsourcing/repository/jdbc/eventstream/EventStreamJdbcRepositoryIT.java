@@ -14,6 +14,7 @@ import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidPositionException;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
 import uk.gov.justice.services.test.utils.core.messaging.Poller;
+import uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil;
 import uk.gov.justice.services.test.utils.persistence.TestDataSourceFactory;
 
 import java.sql.SQLException;
@@ -21,6 +22,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import org.h2.jdbcx.JdbcDataSource;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -31,21 +33,23 @@ public class EventStreamJdbcRepositoryIT {
 
     private static final String LIQUIBASE_EVENT_STORE_DB_CHANGELOG_XML = "liquibase/event-store-db-changelog.xml";
 
-    private EventStreamJdbcRepository jdbcRepository = new EventStreamJdbcRepository();
+    private EventStreamJdbcRepository jdbcRepository;
+    private JdbcDataSource dataSource;
+
 
     @Before
     public void initialize() {
         try {
-            jdbcRepository.dataSource = new TestDataSourceFactory(LIQUIBASE_EVENT_STORE_DB_CHANGELOG_XML).createDataSource();
-            jdbcRepository.logger = mock(Logger.class);
-            jdbcRepository.eventStreamJdbcRepositoryHelper = new JdbcRepositoryHelper();
-            jdbcRepository.clock = new UtcClock();
+
+            jdbcRepository = new EventStreamJdbcRepository(new JdbcRepositoryHelper(), null, new UtcClock(), "tests", mock(Logger.class));
+            dataSource = new TestDataSourceFactory(LIQUIBASE_EVENT_STORE_DB_CHANGELOG_XML).createDataSource();
+            ReflectionUtil.setField(jdbcRepository, "dataSource", dataSource);
 
             final Poller poller = new Poller();
 
             poller.pollUntilFound(() -> {
                 try {
-                    jdbcRepository.dataSource.getConnection().prepareStatement("SELECT COUNT (*) FROM event_stream;").execute();
+                    dataSource.getConnection().prepareStatement("SELECT COUNT (*) FROM event_stream;").execute();
                     return Optional.of("Success");
                 } catch (SQLException e) {
                     e.printStackTrace();
@@ -60,7 +64,7 @@ public class EventStreamJdbcRepositoryIT {
 
     @After
     public void after() throws SQLException {
-        jdbcRepository.dataSource.getConnection().close();
+        dataSource.getConnection().close();
     }
 
     @Test

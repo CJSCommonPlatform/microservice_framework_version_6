@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
+## [4.0.3] - 2018-05-10
+### Changed
+- Makes TestDataSourceFactory lock rows in the same way as postgresql
+- Makes TestDataSourceFactory more extensible through overloaded createDataSource methods
+### Fixed
+- Tests for test-utils-pseristence were not in correct maven file structure so unused
+- Minor fixes to test-utils-pseristence tests where components have changed
+
 ## [4.0.2] - 2018-05-02
 ### Changed
 - Caches mapping between media types and action names for the schema catalog are now lazy loaded

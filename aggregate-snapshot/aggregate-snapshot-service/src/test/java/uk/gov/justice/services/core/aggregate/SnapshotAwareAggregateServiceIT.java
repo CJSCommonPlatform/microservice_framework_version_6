@@ -33,6 +33,7 @@ import uk.gov.justice.services.common.util.Clock;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.cdi.InitialContextProducer;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
+import uk.gov.justice.services.core.cdi.QualifierAnnotationExtractor;
 import uk.gov.justice.services.core.enveloper.DefaultEnveloper;
 import uk.gov.justice.services.core.extension.EventFoundEvent;
 import uk.gov.justice.services.eventsource.DefaultEventDestinationResolver;
@@ -47,18 +48,18 @@ import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepo
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepositoryFactory;
 import uk.gov.justice.services.eventsourcing.source.core.EventAppender;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
-import uk.gov.justice.services.eventsourcing.source.core.EventSourceNameExtractor;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.EventStreamManagerFactory;
 import uk.gov.justice.services.eventsourcing.source.core.PublishingEventAppenderFactory;
 import uk.gov.justice.services.eventsourcing.source.core.SnapshotAwareEnvelopeEventStream;
 import uk.gov.justice.services.eventsourcing.source.core.SnapshotAwareEventSource;
+import uk.gov.justice.services.eventsourcing.source.core.SnapshotAwareEventSourceFactory;
 import uk.gov.justice.services.eventsourcing.source.core.SnapshotAwareEventSourceProducer;
 import uk.gov.justice.services.eventsourcing.source.core.SystemEventService;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.eventsourcing.source.core.snapshot.DefaultSnapshotService;
 import uk.gov.justice.services.eventsourcing.source.core.snapshot.DefaultSnapshotStrategy;
-import uk.gov.justice.services.jdbc.persistence.DataSourceJndiNameProvider;
+import uk.gov.justice.services.jdbc.persistence.JndiDataSourceNameProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcDataSourceProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
@@ -194,15 +195,17 @@ public class SnapshotAwareAggregateServiceIT {
             GlobalValueProducer.class,
             ObjectToJsonObjectConverter.class,
 
-            DataSourceJndiNameProvider.class,
+            JndiDataSourceNameProvider.class,
             InitialContextProducer.class,
             SnapshotAwareEventSourceProducer.class,
-            EventSourceNameExtractor.class,
             EventSourceRegistryProducer.class,
             YamlFileFinder.class,
             ParserProducer.class,
             YamlParser.class,
-            YamlSchemaLoader.class
+            YamlSchemaLoader.class,
+
+            QualifierAnnotationExtractor.class,
+            SnapshotAwareEventSourceFactory.class
     })
 
     public WebApp war() {

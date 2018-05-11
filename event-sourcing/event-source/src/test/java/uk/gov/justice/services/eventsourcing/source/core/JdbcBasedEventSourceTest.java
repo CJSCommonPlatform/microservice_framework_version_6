@@ -62,7 +62,6 @@ public class JdbcBasedEventSourceTest {
         assertThat(eventStreamList.get(0).getPosition(), is(position));
     }
 
-
     @Test
     public void shouldReturnEmptyStream() {
         final long position = 9L;
@@ -73,5 +72,24 @@ public class JdbcBasedEventSourceTest {
         List<uk.gov.justice.services.eventsourcing.source.core.EventStream> eventStreamList = eventStreams.collect(toList());
 
         assertThat(eventStreamList.size(), is(0));
+    }
+
+    @Test
+    public void shouldGetStreamsWithoutUsingPosition() throws Exception {
+
+        final UUID streamId = randomUUID();
+        final long position = 1L;
+
+        final Stream<EventStreamMetadata> eventStreamObjectStream = Stream.of(new DefaultEventStreamMetadata(streamId, position, true, now()));
+        when(eventRepository.getStreams()).thenReturn(eventStreamObjectStream);
+
+        final Stream<uk.gov.justice.services.eventsourcing.source.core.EventStream> eventStreams = eventSource.getStreams();
+        List<uk.gov.justice.services.eventsourcing.source.core.EventStream> eventStreamList = eventStreams.collect(toList());
+
+        assertThat(eventStreamList.size(), is(1));
+        assertThat(eventStreamList.get(0), instanceOf(uk.gov.justice.services.eventsourcing.source.core.EventStream.class));
+        assertThat(eventStreamList.get(0), instanceOf(EnvelopeEventStream.class));
+        assertThat(eventStreamList.get(0).getId(), is(streamId));
+        assertThat(eventStreamList.get(0).getPosition(), is(position));
     }
 }

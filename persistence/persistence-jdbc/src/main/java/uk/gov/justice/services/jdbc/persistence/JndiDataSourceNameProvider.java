@@ -4,7 +4,7 @@ import static java.lang.String.format;
 
 import javax.annotation.Resource;
 
-public class DataSourceJndiNameProvider {
+public class JndiDataSourceNameProvider {
 
     private static final String JNDI_DS_EVENT_STORE_PATTERN = "java:/app/%s/DS.eventstore";
 

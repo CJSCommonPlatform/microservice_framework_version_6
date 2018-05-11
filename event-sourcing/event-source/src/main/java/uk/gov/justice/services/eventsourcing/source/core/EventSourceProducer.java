@@ -1,22 +1,18 @@
 package uk.gov.justice.services.eventsourcing.source.core;
 
-import static uk.gov.justice.services.eventsourcing.source.core.annotation.EventSourceName.DEFAULT_EVENT_SOURCE_NAME;
+import static java.lang.String.format;
 
-import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepository;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepositoryFactory;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepository;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepositoryFactory;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepository;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepositoryFactory;
+import uk.gov.justice.services.core.cdi.QualifierAnnotationExtractor;
 import uk.gov.justice.services.eventsourcing.source.core.annotation.EventSourceName;
-import uk.gov.justice.services.jdbc.persistence.DataSourceJndiNameProvider;
+import uk.gov.justice.services.jdbc.persistence.JndiDataSourceNameProvider;
+import uk.gov.justice.subscription.domain.eventsource.Location;
 import uk.gov.justice.subscription.registry.EventSourceRegistry;
 
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.CreationException;
 import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.UnsatisfiedResolutionException;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 
@@ -27,45 +23,26 @@ import javax.inject.Inject;
 public class EventSourceProducer {
 
     @Inject
-    EventSourceNameExtractor eventSourceNameExtractor;
-
-    @Inject
     EventSourceRegistry eventSourceRegistry;
 
     @Inject
-    EventStreamManagerFactory eventStreamManagerFactory;
+    JndiDataSourceNameProvider jndiDataSourceNameProvider;
 
     @Inject
-    EventRepositoryFactory eventRepositoryFactory;
+    JdbcEventSourceFactory jdbcEventSourceFactory;
 
     @Inject
-    EventJdbcRepositoryFactory eventJdbcRepositoryFactory;
-
-    @Inject
-    EventStreamJdbcRepositoryFactory eventStreamJdbcRepositoryFactory;
-
-    @Inject
-    DataSourceJndiNameProvider dataSourceJndiNameProvider;
+    QualifierAnnotationExtractor qualifierAnnotationExtractor;
 
     /**
-     * Backwards compatible support for Unnamed EventSource injection points
+     * Backwards compatible support for Unnamed EventSource injection points. Uses
+     * the injected container JNDI name to lookup the EventSource
      *
      * @return {@link EventSource}
      */
     @Produces
     public EventSource eventSource() {
-
-        final String jndiDatasource = dataSourceJndiNameProvider.jndiName();
-        final EventJdbcRepository eventJdbcRepository = eventJdbcRepositoryFactory.eventJdbcRepository(jndiDatasource);
-        final EventStreamJdbcRepository eventStreamJdbcRepository = eventStreamJdbcRepositoryFactory.eventStreamJdbcRepository(jndiDatasource);
-
-        final EventRepository eventRepository = eventRepositoryFactory.eventRepository(
-                eventJdbcRepository,
-                eventStreamJdbcRepository);
-
-        final EventStreamManager eventStreamManager = eventStreamManagerFactory.eventStreamManager(eventRepository);
-
-        return new JdbcBasedEventSource(eventStreamManager, eventRepository);
+        return jdbcEventSourceFactory.create(jndiDataSourceNameProvider.jndiName());
     }
 
     /**
@@ -79,15 +56,23 @@ public class EventSourceProducer {
     @EventSourceName
     public EventSource eventSource(final InjectionPoint injectionPoint) {
 
-        final String eventSourceName = eventSourceNameExtractor.getEventSourceNameFromQualifier(injectionPoint);
+        final String eventSourceName = qualifierAnnotationExtractor.getFrom(injectionPoint, EventSourceName.class).value();
 
-        if (DEFAULT_EVENT_SOURCE_NAME.equals(eventSourceName)) {
-            return eventSource();
-        } else {
-            final Optional<uk.gov.justice.subscription.domain.eventsource.EventSource> eventSourceFor = eventSourceRegistry.getEventSourceFor(eventSourceName);
-            return eventSourceFor
-                    .map(eventSource -> eventSource())
-                    .orElseThrow(() -> new UnsatisfiedResolutionException("Use of non default EventSources not yet implemented"));
-        }
+        final Optional<uk.gov.justice.subscription.domain.eventsource.EventSource> eventSourceDomainObject = eventSourceRegistry.getEventSourceFor(eventSourceName);
+        return eventSourceDomainObject
+                .map(this::createEventSourceFrom)
+                .orElseThrow(() -> new CreationException(format("Failed to find EventSource named '%s' in event-sources.yaml", eventSourceName)));
+    }
+
+    private EventSource createEventSourceFrom(final uk.gov.justice.subscription.domain.eventsource.EventSource eventSourceDomainObject) {
+
+        final Location location = eventSourceDomainObject.getLocation();
+        final Optional<String> dataSourceOptional = location.getDataSource();
+
+        return dataSourceOptional
+                .map(dataSource -> jdbcEventSourceFactory.create(dataSource))
+                .orElseThrow(() -> new CreationException(
+                        format("No DataSource specified for EventSource '%s' specified in event-sources.yaml", eventSourceDomainObject.getName())
+                ));
     }
 }

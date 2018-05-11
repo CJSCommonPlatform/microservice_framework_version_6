@@ -57,7 +57,6 @@ public class SnapshotAwareEventSourceProducer {
      *
      * @return {@link EventSource}
      */
-
     @Produces
     public EventSource eventSource() {
 
@@ -75,8 +74,8 @@ public class SnapshotAwareEventSourceProducer {
     }
 
     /**
-     * Support for Named EventSource injection points.  Annotate injection point with
-     * {@code @EventSourceName("name")}
+     * Support for Named EventSource injection points.  Annotate injection point with {@code
+     * @EventSourceName("name")}
      *
      * @param injectionPoint the injection point for the EventSource
      * @return {@link EventSource}
@@ -97,4 +96,3 @@ public class SnapshotAwareEventSourceProducer {
         }
     }
 }
-

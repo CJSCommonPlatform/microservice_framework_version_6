@@ -1,8 +1,6 @@
 package uk.gov.justice.services.event.sourcing.subscription;
 
-import static java.lang.String.format;
-
-import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
+import uk.gov.justice.services.core.cdi.QualifierAnnotationExtractor;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.subscription.SubscriptionManager;
@@ -22,7 +20,7 @@ public class SubscriptionManagerProducer {
 
     @Inject
     @Any
-    Instance<EventSource> eventsourceInstance;
+    Instance<EventSource> eventSourceInstance;
 
     @Inject
     SubscriptionDescriptorRegistry subscriptionDescriptorRegistry;
@@ -39,18 +37,11 @@ public class SubscriptionManagerProducer {
 
         final SubscriptionName subscriptionName = qualifierAnnotationExtractor.getFrom(injectionPoint, SubscriptionName.class);
         final Subscription subscription = subscriptionDescriptorRegistry.getSubscriptionFor(subscriptionName.value());
-
         final EventSourceNameQualifier eventSourceNameQualifier = new EventSourceNameQualifier(subscription.getEventSourceName());
 
-        final Instance<EventSource> eventSourceInstance = eventsourceInstance.select(eventSourceNameQualifier);
-
-        if (eventSourceInstance == null) {
-            throw new SubscriptionManagerProducerException(format("Failed to find instance of event source with Qualifier '%s'", subscription.getEventSourceName()));
-        }
-
-        final InterceptorChainProcessor interceptorChainProcessor = interceptorChainProcessorProducer.produceProcessor(injectionPoint);
-
-        final EventSource eventSource = eventSourceInstance.get();
-        return new DefaultSubscriptionManager(subscription, eventSource, interceptorChainProcessor);
+        return new DefaultSubscriptionManager(
+                subscription,
+                eventSourceInstance.select(eventSourceNameQualifier).get(),
+                interceptorChainProcessorProducer.produceProcessor(injectionPoint));
     }
 }

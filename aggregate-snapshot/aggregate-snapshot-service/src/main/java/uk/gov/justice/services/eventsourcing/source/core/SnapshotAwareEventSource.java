@@ -9,15 +9,15 @@ import java.util.stream.Stream;
 /**
  * Source of event streams.
  */
-
-
 public class SnapshotAwareEventSource implements EventSource {
 
     private final EventStreamManager eventStreamManager;
     private final SnapshotService snapshotService;
     private final EventRepository eventRepository;
 
-    public SnapshotAwareEventSource(final EventStreamManager eventStreamManager,final EventRepository eventRepository,final SnapshotService snapshotService) {
+    public SnapshotAwareEventSource(final EventStreamManager eventStreamManager,
+                                    final EventRepository eventRepository,
+                                    final SnapshotService snapshotService) {
         this.eventStreamManager = eventStreamManager;
         this.eventRepository = eventRepository;
         this.snapshotService = snapshotService;
@@ -42,5 +42,4 @@ public class SnapshotAwareEventSource implements EventSource {
                         eventStreamManager));
 
     }
-
 }

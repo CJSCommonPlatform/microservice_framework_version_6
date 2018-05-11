@@ -15,7 +15,7 @@ import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepo
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepositoryFactory;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepositoryFactory;
-import uk.gov.justice.services.jdbc.persistence.DataSourceJndiNameProvider;
+import uk.gov.justice.services.jdbc.persistence.JndiDataSourceNameProvider;
 
 import java.util.Optional;
 
@@ -41,7 +41,7 @@ public class EventSourceTransformationProducerTest {
     private EventStreamJdbcRepositoryFactory eventStreamJdbcRepositoryFactory;
 
     @Mock
-    private DataSourceJndiNameProvider dataSourceJndiNameProvider;
+    private JndiDataSourceNameProvider dataSourceJndiNameProvider;
 
     @InjectMocks
     private EventSourceTransformationProducer eventSourceTransformationProducer;

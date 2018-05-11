@@ -1,29 +1,21 @@
 package uk.gov.justice.services.eventsourcing.source.core;
 
+import static java.util.Optional.empty;
 import static java.util.Optional.of;
-import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.eventsourcing.source.core.annotation.EventSourceName.DEFAULT_EVENT_SOURCE_NAME;
-import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.fieldValue;
 
-import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepository;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepositoryFactory;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepository;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepositoryFactory;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepository;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepositoryFactory;
-import uk.gov.justice.services.eventsourcing.source.core.snapshot.SnapshotService;
-import uk.gov.justice.services.jdbc.persistence.DataSourceJndiNameProvider;
+import uk.gov.justice.services.core.cdi.QualifierAnnotationExtractor;
+import uk.gov.justice.services.eventsourcing.source.core.annotation.EventSourceName;
+import uk.gov.justice.services.jdbc.persistence.JndiDataSourceNameProvider;
+import uk.gov.justice.subscription.domain.eventsource.Location;
 import uk.gov.justice.subscription.registry.EventSourceRegistry;
 
-import java.util.Optional;
-
-import javax.enterprise.inject.UnsatisfiedResolutionException;
+import javax.enterprise.inject.CreationException;
 import javax.enterprise.inject.spi.InjectionPoint;
 
 import org.junit.Test;
@@ -32,76 +24,107 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+@SuppressWarnings("Duplicates")
 @RunWith(MockitoJUnitRunner.class)
 public class SnapshotAwareEventSourceProducerTest {
 
     @Mock
-    private EventSourceNameExtractor eventSourceNameExtractor;
+    private QualifierAnnotationExtractor qualifierAnnotationExtractor;
 
     @Mock
     private EventSourceRegistry eventSourceRegistry;
 
     @Mock
-    private EventStreamManagerFactory eventStreamManagerFactory;
+    private JndiDataSourceNameProvider jndiDataSourceNameProvider;
 
     @Mock
-    private EventRepositoryFactory eventRepositoryFactory;
-
-    @Mock
-    private EventJdbcRepositoryFactory eventJdbcRepositoryFactory;
-
-    @Mock
-    private EventStreamJdbcRepositoryFactory eventStreamJdbcRepositoryFactory;
-
-    @Mock
-    private DataSourceJndiNameProvider dataSourceJndiNameProvider;
-
-    @Mock
-    private SnapshotService snapshotService;
+    private SnapshotAwareEventSourceFactory snapshotAwareEventSourceFactory;
 
     @InjectMocks
     private SnapshotAwareEventSourceProducer snapshotAwareEventSourceProducer;
 
     @Test
-    public void shouldCreateTheCorrectEventSourceAccordingToTheEventSourceName() throws Exception {
+    public void shouldCreateEventSourceUsingTheJNDINameInjectedByTheContainer() throws Exception {
 
-        final InjectionPoint injectionPoint = mock(InjectionPoint.class);
-        final EventStreamManager eventStreamManager = mock(EventStreamManager.class);
-        final EventRepository eventRepository = mock(EventRepository.class);
+        final String jndiName = "java:/app/my-command-api/DS.eventstore";
 
-        when(eventSourceNameExtractor.getEventSourceNameFromQualifier(injectionPoint)).thenReturn(DEFAULT_EVENT_SOURCE_NAME);
-        when(eventRepositoryFactory.eventRepository(any(EventJdbcRepository.class), any(EventStreamJdbcRepository.class))).thenReturn(eventRepository);
-        when(eventStreamManagerFactory.eventStreamManager(eventRepository)).thenReturn(eventStreamManager);
+        final JdbcBasedEventSource jdbcBasedEventSource = mock(JdbcBasedEventSource.class);
 
-        final EventSource eventSource = snapshotAwareEventSourceProducer.eventSource(injectionPoint);
+        when(jndiDataSourceNameProvider.jndiName()).thenReturn(jndiName);
+        when(snapshotAwareEventSourceFactory.create(jndiName)).thenReturn(jdbcBasedEventSource);
 
-        assertThat(eventSource, is(instanceOf(SnapshotAwareEventSource.class)));
-
-        final SnapshotAwareEventSource snapshotAwareEventSource = (SnapshotAwareEventSource) eventSource;
-
-        final Optional<Object> eventStreamManagerField = fieldValue(snapshotAwareEventSource, "eventStreamManager");
-        assertThat(eventStreamManagerField, is(of(eventStreamManager)));
-
-        final Optional<Object> snapshotServiceField = fieldValue(snapshotAwareEventSource, "snapshotService");
-        assertThat(snapshotServiceField, is(of(snapshotService)));
-
-        final Optional<Object> eventRepositoryField = fieldValue(snapshotAwareEventSource, "eventRepository");
-        assertThat(eventRepositoryField, is(of(eventRepository)));
+        assertThat(snapshotAwareEventSourceProducer.eventSource(), is(jdbcBasedEventSource));
     }
 
     @Test
-    public void shouldThrowUnsatisfiedResolutionExceptionWhenDefaultEventSourceNameNotProvided() throws Exception {
+    public void shouldCreateAnEventSourceUsingTheEventSourceNameAnnotation() throws Exception {
+
+        final String eventSourceName = "eventSourceName";
+        final String dataSource = "my-data-source";
 
         final InjectionPoint injectionPoint = mock(InjectionPoint.class);
+        final EventSourceName eventSourceNameAnnotation = mock(EventSourceName.class);
+        final uk.gov.justice.subscription.domain.eventsource.EventSource eventSourceDomainObject = mock(uk.gov.justice.subscription.domain.eventsource.EventSource.class);
+        final Location location = mock(Location.class);
+        final JdbcBasedEventSource jdbcBasedEventSource = mock(JdbcBasedEventSource.class);
 
-        when(eventSourceNameExtractor.getEventSourceNameFromQualifier(injectionPoint)).thenReturn("not-known-name");
-        when(eventSourceRegistry.getEventSourceFor("not-known-name")).thenReturn(Optional.empty());
+        when(qualifierAnnotationExtractor.getFrom(injectionPoint, EventSourceName.class)).thenReturn(eventSourceNameAnnotation);
+        when(eventSourceNameAnnotation.value()).thenReturn(eventSourceName);
+        when(eventSourceRegistry.getEventSourceFor(eventSourceName)).thenReturn(of(eventSourceDomainObject));
+        when(eventSourceDomainObject.getLocation()).thenReturn(location);
+        when(location.getDataSource()).thenReturn(of(dataSource));
+        when(snapshotAwareEventSourceFactory.create(dataSource)).thenReturn(jdbcBasedEventSource);
+
+        assertThat(snapshotAwareEventSourceProducer.eventSource(injectionPoint), is(jdbcBasedEventSource));
+    }
+
+    @Test
+    public void shouldFailIfNoEventSourceFoundInTheEventSourceRegistry() throws Exception {
+
+        final String eventSourceName = "my-event-source";
+
+        final InjectionPoint injectionPoint = mock(InjectionPoint.class);
+        final EventSourceName eventSourceNameAnnotation = mock(EventSourceName.class);
+
+        when(qualifierAnnotationExtractor.getFrom(injectionPoint, EventSourceName.class)).thenReturn(eventSourceNameAnnotation);
+        when(eventSourceNameAnnotation.value()).thenReturn(eventSourceName);
+        when(eventSourceRegistry.getEventSourceFor(eventSourceName)).thenReturn(empty());
 
         try {
             snapshotAwareEventSourceProducer.eventSource(injectionPoint);
             fail();
-        } catch (final UnsatisfiedResolutionException expected) {
-            assertThat(expected.getMessage(), is("Use of non default EventSources not yet implemented"));
+        } catch (final CreationException expected) {
+            assertThat(expected.getMessage(), is("Failed to find EventSource named 'my-event-source' in event-sources.yaml"));
         }
+
+        verifyZeroInteractions(snapshotAwareEventSourceFactory);
+    }
+
+    @Test
+    public void shouldFailIfNoDataSourceNameFoundInEventSourcesYaml() throws Exception {
+
+        final String eventSourceName = "eventSourceName";
+        final String dataSourceName = "my-data-source";
+
+        final InjectionPoint injectionPoint = mock(InjectionPoint.class);
+        final EventSourceName eventSourceNameAnnotation = mock(EventSourceName.class);
+        final uk.gov.justice.subscription.domain.eventsource.EventSource eventSourceDomainObject = mock(uk.gov.justice.subscription.domain.eventsource.EventSource.class);
+        final Location location = mock(Location.class);
+
+        when(qualifierAnnotationExtractor.getFrom(injectionPoint, EventSourceName.class)).thenReturn(eventSourceNameAnnotation);
+        when(eventSourceNameAnnotation.value()).thenReturn(eventSourceName);
+        when(eventSourceRegistry.getEventSourceFor(eventSourceName)).thenReturn(of(eventSourceDomainObject));
+        when(eventSourceDomainObject.getLocation()).thenReturn(location);
+        when(location.getDataSource()).thenReturn(empty());
+        when(eventSourceDomainObject.getName()).thenReturn(dataSourceName);
+
+        try {
+            snapshotAwareEventSourceProducer.eventSource(injectionPoint);
+            fail();
+        } catch (final CreationException expected) {
+            assertThat(expected.getMessage(), is("No DataSource specified for EventSource 'my-data-source' specified in event-sources.yaml"));
+        }
+
+        verifyZeroInteractions(snapshotAwareEventSourceFactory);
     }
 }

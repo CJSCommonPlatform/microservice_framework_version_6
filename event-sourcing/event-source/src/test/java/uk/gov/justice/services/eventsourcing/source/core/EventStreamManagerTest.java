@@ -373,6 +373,16 @@ public class EventStreamManagerTest {
         verifyNoMoreInteractions(eventRepository, eventAppender);
     }
 
+    @Test
+    public void shouldGetTheStreamPositionFromTheEventStreamManager() throws Exception {
+
+        final UUID streamId = randomUUID();
+        final long streamPosition = 23L;
+
+        when(eventRepository.getStreamPosition(streamId)).thenReturn(streamPosition);
+
+        assertThat(eventStreamManager.getStreamPosition(streamId), is(streamPosition));
+    }
 
     private JsonEnvelope buildEnvelope(final String eventName) {
         return envelopeFrom(

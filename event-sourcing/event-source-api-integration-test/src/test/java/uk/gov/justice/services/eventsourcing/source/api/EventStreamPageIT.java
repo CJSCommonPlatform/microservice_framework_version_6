@@ -26,6 +26,7 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.rest.ForbiddenRequestExceptionMapper;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.cdi.InitialContextProducer;
+import uk.gov.justice.services.core.cdi.QualifierAnnotationExtractor;
 import uk.gov.justice.services.core.enveloper.DefaultEnveloper;
 import uk.gov.justice.services.core.json.DefaultJsonValidationLoggerHelper;
 import uk.gov.justice.services.core.json.JsonValidationLoggerHelper;
@@ -52,15 +53,15 @@ import uk.gov.justice.services.eventsourcing.source.api.util.LoggerProducer;
 import uk.gov.justice.services.eventsourcing.source.api.util.TestSystemUserProvider;
 import uk.gov.justice.services.eventsourcing.source.core.EventAppender;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
-import uk.gov.justice.services.eventsourcing.source.core.EventSourceNameExtractor;
 import uk.gov.justice.services.eventsourcing.source.core.EventSourceProducer;
 import uk.gov.justice.services.eventsourcing.source.core.EventStreamManagerFactory;
 import uk.gov.justice.services.eventsourcing.source.core.JdbcBasedEventSource;
+import uk.gov.justice.services.eventsourcing.source.core.JdbcEventSourceFactory;
 import uk.gov.justice.services.eventsourcing.source.core.PublishingEventAppenderFactory;
 import uk.gov.justice.services.eventsourcing.source.core.SystemEventService;
-import uk.gov.justice.services.jdbc.persistence.DataSourceJndiNameProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcDataSourceProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
+import uk.gov.justice.services.jdbc.persistence.JndiDataSourceNameProvider;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
@@ -207,18 +208,20 @@ public class EventStreamPageIT {
             DefaultEnvelopeConverter.class,
             JsonObjectToObjectConverter.class,
             EventSourceProducer.class,
-            EventSourceNameExtractor.class,
             EventSourceRegistryProducer.class,
             ParserProducer.class,
             YamlFileFinder.class,
             YamlParser.class,
             YamlSchemaLoader.class,
 
-            DataSourceJndiNameProvider.class,
+            JndiDataSourceNameProvider.class,
             InitialContextProducer.class,
 
             EventStreamManagerFactory.class,
-            EventJdbcRepositoryFactory.class
+            EventJdbcRepositoryFactory.class,
+
+            QualifierAnnotationExtractor.class,
+            JdbcEventSourceFactory.class
     })
 
     public WebApp war() {

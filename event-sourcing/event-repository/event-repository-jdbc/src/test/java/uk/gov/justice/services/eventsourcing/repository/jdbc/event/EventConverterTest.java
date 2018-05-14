@@ -39,7 +39,7 @@ public class EventConverterTest {
     private final static String PAYLOAD_JSON = "{\"" + PAYLOAD_FIELD_NAME + "\": \"" + PAYLOAD_FIELD_VALUE + "\"}";
     private final Clock clock = new StoppedClock(new UtcClock().now());
     private EventConverter eventConverter;
-    private final static String SOURCE = "SOURCE";
+
 
     @Before
     public void setup() {
@@ -81,7 +81,7 @@ public class EventConverterTest {
 
     @Test
     public void shouldCreateEnvelope() throws Exception {
-        JsonEnvelope actualEnvelope = eventConverter.envelopeOf(new Event(ID, STREAM_ID, SEQUENCE_ID, NAME, METADATA_JSON, PAYLOAD_JSON, new UtcClock().now(), SOURCE));
+        JsonEnvelope actualEnvelope = eventConverter.envelopeOf(new Event(ID, STREAM_ID, SEQUENCE_ID, NAME, METADATA_JSON, PAYLOAD_JSON, new UtcClock().now()));
 
         assertThat(actualEnvelope.metadata().id(), equalTo(ID));
         assertThat(actualEnvelope.metadata().name(), equalTo(NAME));

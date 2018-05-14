@@ -18,7 +18,7 @@ public class Event {
     private final String payload;
     private final String metadata;
     private final ZonedDateTime createdAt;
-    private final String source;
+
 
     public Event(final UUID id,
                  final UUID streamId,
@@ -26,8 +26,7 @@ public class Event {
                  final String name,
                  final String metadata,
                  final String payload,
-                 final ZonedDateTime createdAt,
-                 final String source) {
+                 final ZonedDateTime createdAt) {
         this.id = id;
         this.streamId = streamId;
         this.sequenceId = sequenceId;
@@ -35,7 +34,6 @@ public class Event {
         this.metadata = metadata;
         this.payload = payload;
         this.createdAt = createdAt;
-        this.source = source;
     }
 
     public UUID getId() {
@@ -66,9 +64,6 @@ public class Event {
         return createdAt;
     }
 
-    public String getSource() {
-        return source;
-    }
 
     @Override
     @SuppressWarnings({"squid:MethodCyclomaticComplexity", "squid:S1067", "squid:S00122"})
@@ -86,19 +81,18 @@ public class Event {
                 Objects.equals(payload, event.payload) &&
                 Objects.equals(metadata, event.metadata) &&
                 Objects.equals(name, event.name) &&
-                Objects.equals(createdAt, event.createdAt) &&
-                Objects.equals(source, event.source);
+                Objects.equals(createdAt, event.createdAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, streamId, sequenceId, payload, name, metadata, createdAt, source);
+        return Objects.hash(id, streamId, sequenceId, payload, name, metadata, createdAt);
     }
 
     @Override
     public String toString() {
         return String.format("Event [id=%s, streamId=%s, sequenceId=%s, name=%s, payload=%s, metadata=%s, createdAt=$s, source=$s]", id,
-                streamId, sequenceId, name, payload, metadata, ZonedDateTimes.toString(createdAt), source);
+                streamId, sequenceId, name, payload, metadata, ZonedDateTimes.toString(createdAt));
     }
 
 }

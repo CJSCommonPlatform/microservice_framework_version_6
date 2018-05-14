@@ -13,6 +13,7 @@ import static org.mockito.Mockito.mock;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidPositionException;
+import uk.gov.justice.services.jdbc.persistence.JdbcDataSourceProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
 import uk.gov.justice.services.test.utils.core.messaging.Poller;
@@ -49,7 +50,17 @@ public class EventJdbcRepositoryIT {
     @Before
     public void initialize() {
         try {
-            jdbcRepository = new EventJdbcRepository(new AnsiSQLEventLogInsertionStrategy(), new JdbcRepositoryHelper(), null, "tests", mock(Logger.class));
+
+            final JdbcDataSourceProvider jdbcDataSourceProvider = mock(JdbcDataSourceProvider.class);
+            final Logger logger = mock(Logger.class);
+
+            jdbcRepository = new EventJdbcRepository(
+                    new AnsiSQLEventLogInsertionStrategy(),
+                    new JdbcRepositoryHelper(),
+                    jdbcDataSourceProvider,
+                    "tests",
+                    logger);
+
             dataSource = new TestDataSourceFactory(LIQUIBASE_EVENT_STORE_DB_CHANGELOG_XML).createDataSource();
             ReflectionUtil.setField(jdbcRepository, "dataSource", dataSource);
 
@@ -133,7 +144,7 @@ public class EventJdbcRepositoryIT {
     }
 
     @Test
-    public void shouldReturnAllEventsOrderedBySequenceId() throws InvalidPositionException {
+    public void shouldReturnAllEventsOrderedByInsertionOrder() throws InvalidPositionException {
         jdbcRepository.insert(eventOf(1, randomUUID()));
         jdbcRepository.insert(eventOf(4, STREAM_ID));
         jdbcRepository.insert(eventOf(2, STREAM_ID));
@@ -143,8 +154,8 @@ public class EventJdbcRepositoryIT {
         final List<Event> eventList = events.collect(toList());
         assertThat(eventList, hasSize(3));
         assertThat(eventList.get(0).getSequenceId(), is(1L));
-        assertThat(eventList.get(1).getSequenceId(), is(2L));
-        assertThat(eventList.get(2).getSequenceId(), is(4L));
+        assertThat(eventList.get(1).getSequenceId(), is(4L));
+        assertThat(eventList.get(2).getSequenceId(), is(2L));
     }
 
     @Test
@@ -205,8 +216,15 @@ public class EventJdbcRepositoryIT {
         assertThat(deletedStreamLatestSequenceId, equalTo(0L));
     }
 
-    private Event eventOf(final UUID id, final String name, final UUID streamId, final long sequenceId, final String payloadJSON, final String metadataJSON,
-                          final ZonedDateTime timestamp) {
+    private Event eventOf(
+            final UUID id,
+            final String name,
+            final UUID streamId,
+            final long sequenceId,
+            final String payloadJSON,
+            final String metadataJSON,
+            final ZonedDateTime timestamp) {
+
         return new Event(id, streamId, sequenceId, name, metadataJSON, payloadJSON, timestamp);
     }
 

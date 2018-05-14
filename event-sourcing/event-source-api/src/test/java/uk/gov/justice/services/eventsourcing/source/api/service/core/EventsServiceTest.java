@@ -3,7 +3,6 @@ package uk.gov.justice.services.eventsourcing.source.api.service.core;
 import static java.time.ZonedDateTime.now;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
@@ -61,8 +60,20 @@ public class EventsServiceTest {
         final JsonObject payload1 = createObjectBuilder().add("field1", "value1").build();
         final JsonObject payload2 = createObjectBuilder().add("field2", "value2").build();
 
-        final JsonEnvelope event1 = envelope().withPayloadOf("value1","field1").with(metadataOf(firstEventId,"Test Name1").withVersion(1L).withStreamId(streamId).createdAt(event1CreatedAt)).build();
-        final JsonEnvelope event2 =  envelope().withPayloadOf("value2","field2").with(metadataOf(secondEventId,"Test Name2").withVersion(2L).withStreamId(streamId).createdAt(event2CreatedAt)).build();
+        final JsonEnvelope event1 = envelope()
+                .withPayloadOf("value1","field1")
+                .with(metadataOf(firstEventId,"Test Name1")
+                        .withVersion(1L)
+                        .withStreamId(streamId)
+                        .createdAt(event1CreatedAt)
+                ).build();
+        final JsonEnvelope event2 =  envelope()
+                .withPayloadOf("value2","field2")
+                .with(metadataOf(secondEventId,"Test Name2")
+                        .withVersion(2L)
+                        .withStreamId(streamId)
+                        .createdAt(event2CreatedAt)
+                ).build();
 
         final EventStream eventStream  = mock(EventStream.class);
 
@@ -75,27 +86,16 @@ public class EventsServiceTest {
         assertThat(entries, hasSize(2));
 
         assertThat(entries.get(0).getStreamId(), is(streamId.toString()));
-
-        assertThat(entries.get(0).getName(), is("Test Name2"));
-
-        assertThat(entries.get(0).getPosition(), is(2L));
-
-        assertThat(entries.get(0).getCreatedAt(), is(ZonedDateTimes.toString(event2CreatedAt)));
-
-        assertThat(entries.get(0).getPayload(), is(notNullValue()));
-
-        assertThat(entries.get(0).getPayload(), is(payload2));
+        assertThat(entries.get(0).getName(), is("Test Name1"));
+        assertThat(entries.get(0).getPosition(), is(1L));
+        assertThat(entries.get(0).getPayload(), is(payload1));
+        assertThat(entries.get(0).getCreatedAt(), is(ZonedDateTimes.toString(event1CreatedAt)));
 
         assertThat(entries.get(1).getStreamId(), is(streamId.toString()));
-
-        assertThat(entries.get(1).getName(), is("Test Name1"));
-
-        assertThat(entries.get(1).getPosition(), is(1L));
-
-        assertThat(entries.get(1).getPayload(), is(payload1));
-
-        assertThat(entries.get(1).getCreatedAt(), is(ZonedDateTimes.toString(event1CreatedAt)));
-
+        assertThat(entries.get(1).getName(), is("Test Name2"));
+        assertThat(entries.get(1).getPosition(), is(2L));
+        assertThat(entries.get(1).getCreatedAt(), is(ZonedDateTimes.toString(event2CreatedAt)));
+        assertThat(entries.get(1).getPayload(), is(payload2));
     }
 
     @Test
@@ -109,8 +109,20 @@ public class EventsServiceTest {
         final JsonObject payload1 = createObjectBuilder().add("field1", "value1").build();
         final JsonObject payload2 = createObjectBuilder().add("field2", "value2").build();
 
-        final JsonEnvelope event1 = envelope().withPayloadOf("value1","field1").with(metadataOf(streamId,"Test Name1").withVersion(1L).withStreamId(streamId).createdAt(event1CreatedAt)).build();
-        final JsonEnvelope event2 =  envelope().withPayloadOf("value2","field2").with(metadataOf(streamId,"Test Name2").withVersion(2L).withStreamId(streamId).createdAt(event2CreatedAt)).build();
+        final JsonEnvelope event1 = envelope()
+                .withPayloadOf("value1","field1")
+                .with(metadataOf(streamId,"Test Name1")
+                        .withVersion(1L)
+                        .withStreamId(streamId)
+                        .createdAt(event1CreatedAt)
+                ).build();
+        final JsonEnvelope event2 =  envelope()
+                .withPayloadOf("value2","field2")
+                .with(metadataOf(streamId,"Test Name2")
+                        .withVersion(2L)
+                        .withStreamId(streamId)
+                        .createdAt(event2CreatedAt)
+                ).build();
 
         final EventStream eventStream  = mock(EventStream.class);
 
@@ -123,26 +135,16 @@ public class EventsServiceTest {
         assertThat(eventEntries, hasSize(2));
 
         assertThat(eventEntries.get(0).getStreamId(), is(streamId.toString()));
-
-        assertThat(eventEntries.get(0).getName(), is("Test Name2"));
-
-        assertThat(eventEntries.get(0).getPosition(), is(2L));
-
-        assertThat(eventEntries.get(0).getCreatedAt(), is(ZonedDateTimes.toString(event2CreatedAt)));
-
-        assertThat(eventEntries.get(0).getPayload(), is(notNullValue()));
-
-        assertThat(eventEntries.get(0).getPayload(), is(payload2));
+        assertThat(eventEntries.get(0).getName(), is("Test Name1"));
+        assertThat(eventEntries.get(0).getPosition(), is(1L));
+        assertThat(eventEntries.get(0).getPayload(), is(payload1));
+        assertThat(eventEntries.get(0).getCreatedAt(), is(ZonedDateTimes.toString(event1CreatedAt)));
 
         assertThat(eventEntries.get(1).getStreamId(), is(streamId.toString()));
-
-        assertThat(eventEntries.get(1).getName(), is("Test Name1"));
-
-        assertThat(eventEntries.get(1).getPosition(), is(1L));
-
-        assertThat(eventEntries.get(1).getPayload(), is(payload1));
-
-        assertThat(eventEntries.get(1).getCreatedAt(), is(ZonedDateTimes.toString(event1CreatedAt)));
+        assertThat(eventEntries.get(1).getName(), is("Test Name2"));
+        assertThat(eventEntries.get(1).getPosition(), is(2L));
+        assertThat(eventEntries.get(1).getCreatedAt(), is(ZonedDateTimes.toString(event2CreatedAt)));
+        assertThat(eventEntries.get(1).getPayload(), is(payload2));
     }
 
     @Test
@@ -159,9 +161,27 @@ public class EventsServiceTest {
         final JsonObject payload3 = createObjectBuilder().add("field3", "value3").build();
         final JsonObject payload2 = createObjectBuilder().add("field2", "value2").build();
 
-        final JsonEnvelope event2 =  envelope().withPayloadOf("value2","field2").with(metadataOf(secondEventId,"Test Name2").withVersion(2L).withStreamId(streamId).createdAt(event2CreatedAt)).build();
-        final JsonEnvelope event3 = envelope().withPayloadOf("value3","field3").with(metadataOf(firstEventId,"Test Name3").withVersion(3L).withStreamId(streamId).createdAt(event3CreatedAt)).build();
-        final JsonEnvelope event4 =  envelope().withPayloadOf("value4","field4").with(metadataOf(secondEventId,"Test Name4").withVersion(4L).withStreamId(streamId).createdAt(event4CreatedAt)).build();
+        final JsonEnvelope event2 =  envelope()
+                .withPayloadOf("value2","field2")
+                .with(metadataOf(secondEventId,"Test Name2")
+                        .withVersion(2L)
+                        .withStreamId(streamId)
+                        .createdAt(event2CreatedAt)
+                ).build();
+        final JsonEnvelope event3 = envelope()
+                .withPayloadOf("value3","field3")
+                .with(metadataOf(firstEventId,"Test Name3")
+                        .withVersion(3L)
+                        .withStreamId(streamId)
+                        .createdAt(event3CreatedAt)
+                ).build();
+        final JsonEnvelope event4 =  envelope()
+                .withPayloadOf("value4","field4")
+                .with(metadataOf(secondEventId,"Test Name4")
+                        .withVersion(4L)
+                        .withStreamId(streamId)
+                        .createdAt(event4CreatedAt)
+                ).build();
 
         final EventStream eventStream  = mock(EventStream.class);
 
@@ -174,26 +194,16 @@ public class EventsServiceTest {
         assertThat(eventEntries, hasSize(2));
 
         assertThat(eventEntries.get(0).getStreamId(), is(streamId.toString()));
-
-        assertThat(eventEntries.get(0).getName(), is("Test Name3"));
-
-        assertThat(eventEntries.get(0).getPosition(), is(3L));
-
-        assertThat(eventEntries.get(0).getCreatedAt(), is(ZonedDateTimes.toString(event3CreatedAt)));
-
-        assertThat(eventEntries.get(0).getPayload(), is(notNullValue()));
-
-        assertThat(eventEntries.get(0).getPayload(), is(payload3));
+        assertThat(eventEntries.get(0).getName(), is("Test Name2"));
+        assertThat(eventEntries.get(0).getPosition(), is(2L));
+        assertThat(eventEntries.get(0).getPayload(), is(payload2));
+        assertThat(eventEntries.get(0).getCreatedAt(), is(ZonedDateTimes.toString(event2CreatedAt)));
 
         assertThat(eventEntries.get(1).getStreamId(), is(streamId.toString()));
-
-        assertThat(eventEntries.get(1).getName(), is("Test Name2"));
-
-        assertThat(eventEntries.get(1).getPosition(), is(2L));
-
-        assertThat(eventEntries.get(1).getPayload(), is(payload2));
-
-        assertThat(eventEntries.get(1).getCreatedAt(), is(ZonedDateTimes.toString(event2CreatedAt)));
+        assertThat(eventEntries.get(1).getName(), is("Test Name3"));
+        assertThat(eventEntries.get(1).getPosition(), is(3L));
+        assertThat(eventEntries.get(1).getCreatedAt(), is(ZonedDateTimes.toString(event3CreatedAt)));
+        assertThat(eventEntries.get(1).getPayload(), is(payload3));
     }
 
     @Test
@@ -220,8 +230,20 @@ public class EventsServiceTest {
         final JsonObject payload4 = createObjectBuilder().add("field4", "value4").build();
         final JsonObject payload3 = createObjectBuilder().add("field3", "value3").build();
 
-        final JsonEnvelope event4 =  envelope().withPayloadOf("value4","field4").with(metadataOf(secondEventId,"Test Name4").withVersion(4L).withStreamId(streamId).createdAt(event4CreatedAt)).build();
-        final JsonEnvelope event3 = envelope().withPayloadOf("value3","field3").with(metadataOf(firstEventId,"Test Name3").withVersion(3L).withStreamId(streamId).createdAt(event3CreatedAt)).build();
+        final JsonEnvelope event4 =  envelope()
+                .withPayloadOf("value4","field4")
+                .with(metadataOf(secondEventId,"Test Name4")
+                        .withVersion(4L)
+                        .withStreamId(streamId)
+                        .createdAt(event4CreatedAt)
+                ).build();
+        final JsonEnvelope event3 = envelope()
+                .withPayloadOf("value3","field3")
+                .with(metadataOf(firstEventId,"Test Name3")
+                        .withVersion(3L)
+                        .withStreamId(streamId)
+                        .createdAt(event3CreatedAt)
+                ).build();
 
         final EventStream eventStream  = mock(EventStream.class);
 
@@ -235,27 +257,16 @@ public class EventsServiceTest {
         assertThat(eventEntries, hasSize(2));
 
         assertThat(eventEntries.get(0).getStreamId(), is(streamId.toString()));
-
-        assertThat(eventEntries.get(0).getName(), is("Test Name4"));
-
-        assertThat(eventEntries.get(0).getPosition(), is(4L));
-
-        assertThat(eventEntries.get(0).getCreatedAt(), is(ZonedDateTimes.toString(event4CreatedAt)));
-
-        assertThat(eventEntries.get(0).getPayload(), is(notNullValue()));
-
-        assertThat(eventEntries.get(0).getPayload(), is(payload4));
+        assertThat(eventEntries.get(0).getName(), is("Test Name3"));
+        assertThat(eventEntries.get(0).getPosition(), is(3L));
+        assertThat(eventEntries.get(0).getPayload(), is(payload3));
+        assertThat(eventEntries.get(0).getCreatedAt(), is(ZonedDateTimes.toString(event3CreatedAt)));
 
         assertThat(eventEntries.get(1).getStreamId(), is(streamId.toString()));
-
-        assertThat(eventEntries.get(1).getName(), is("Test Name3"));
-
-        assertThat(eventEntries.get(1).getPosition(), is(3L));
-
-        assertThat(eventEntries.get(1).getPayload(), is(payload3));
-
-        assertThat(eventEntries.get(1).getCreatedAt(), is(ZonedDateTimes.toString
-                (event3CreatedAt)));
+        assertThat(eventEntries.get(1).getName(), is("Test Name4"));
+        assertThat(eventEntries.get(1).getPosition(), is(4L));
+        assertThat(eventEntries.get(1).getCreatedAt(), is(ZonedDateTimes.toString(event4CreatedAt)));
+        assertThat(eventEntries.get(1).getPayload(), is(payload4));
     }
 
     @Test
@@ -264,7 +275,13 @@ public class EventsServiceTest {
         final long position = 1L;
 
         final ZonedDateTime createdAt = now();
-        final JsonEnvelope event =  envelope().withPayloadOf("value1","field1").with(metadataOf(streamId,"Test Name1").withVersion(position).withStreamId(streamId).createdAt(createdAt)).build();
+        final JsonEnvelope event =  envelope()
+                .withPayloadOf("value1","field1")
+                .with(metadataOf(streamId,"Test Name1")
+                        .withVersion(position)
+                        .withStreamId(streamId)
+                        .createdAt(createdAt)
+                ).build();
         final EventStream eventStream = mock(EventStream.class);
 
         when(eventSource.getStreamById(streamId)).thenReturn(eventStream);

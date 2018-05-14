@@ -73,13 +73,11 @@ public class EventStreamServiceTest {
 
         assertThat(entries, hasSize(2));
 
-        assertThat(entries.get(0).getStreamId(), is(streamId4.toString()));
+        assertThat(entries.get(0).getStreamId(), is(streamId3.toString()));
+        assertThat(entries.get(0).getSequenceNumber(), is(3L));
 
-        assertThat(entries.get(0).getSequenceNumber(), is(4L));
-
-        assertThat(entries.get(1).getStreamId(), is(streamId3.toString()));
-
-        assertThat(entries.get(1).getSequenceNumber(), is(3L));
+        assertThat(entries.get(1).getStreamId(), is(streamId4.toString()));
+        assertThat(entries.get(1).getSequenceNumber(), is(4L));
     }
 
     @Test
@@ -109,13 +107,11 @@ public class EventStreamServiceTest {
 
         assertThat(eventStreamEntries, hasSize(2));
 
-        assertThat(eventStreamEntries.get(0).getStreamId(), is(streamId2.toString()));
+        assertThat(eventStreamEntries.get(0).getStreamId(), is(streamId1.toString()));
+        assertThat(eventStreamEntries.get(0).getSequenceNumber(), is(1L));
 
-        assertThat(eventStreamEntries.get(0).getSequenceNumber(), is(2L));
-
-        assertThat(eventStreamEntries.get(1).getStreamId(), is(streamId1.toString()));
-
-        assertThat(eventStreamEntries.get(1).getSequenceNumber(), is(1L));
+        assertThat(eventStreamEntries.get(1).getStreamId(), is(streamId2.toString()));
+        assertThat(eventStreamEntries.get(1).getSequenceNumber(), is(2L));
     }
 
     @Test
@@ -144,13 +140,11 @@ public class EventStreamServiceTest {
 
         assertThat(eventEntries, hasSize(2));
 
-        assertThat(eventEntries.get(0).getStreamId(), is(streamId3.toString()));
+        assertThat(eventEntries.get(0).getStreamId(), is(streamId2.toString()));
+        assertThat(eventEntries.get(0).getSequenceNumber(), is(2L));
 
-        assertThat(eventEntries.get(0).getSequenceNumber(), is(3L));
-
-        assertThat(eventEntries.get(1).getStreamId(), is(streamId2.toString()));
-
-        assertThat(eventEntries.get(1).getSequenceNumber(), is(2L));
+        assertThat(eventEntries.get(1).getStreamId(), is(streamId3.toString()));
+        assertThat(eventEntries.get(1).getSequenceNumber(), is(3L));
     }
 
     @Test
@@ -180,13 +174,11 @@ public class EventStreamServiceTest {
 
         assertThat(eventEntries, hasSize(2));
 
-        assertThat(eventEntries.get(0).getStreamId(), is(streamId5.toString()));
+        assertThat(eventEntries.get(0).getStreamId(), is(streamId4.toString()));
+        assertThat(eventEntries.get(0).getSequenceNumber(), is(4L));
 
-        assertThat(eventEntries.get(0).getSequenceNumber(), is(5L));
-
-        assertThat(eventEntries.get(1).getStreamId(), is(streamId4.toString()));
-
-        assertThat(eventEntries.get(1).getSequenceNumber(), is(4L));
+        assertThat(eventEntries.get(1).getStreamId(), is(streamId5.toString()));
+        assertThat(eventEntries.get(1).getSequenceNumber(), is(5L));
     }
 
     @Test

@@ -1,6 +1,5 @@
 package uk.gov.justice.services.eventsourcing.source.api.service.core;
 
-import static com.google.common.collect.Lists.reverse;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.justice.services.eventsourcing.source.api.service.core.Direction.BACKWARD;
@@ -36,26 +35,26 @@ public class EventsService {
         if (position.isHead()) {
             final long versionHead = eventStream.size() - pageSize + 1;
             final Stream<JsonEnvelope> events = eventStream.readFrom(versionHead).limit(pageSize);
-            return reverse(eventEntries(events));
+            return eventEntries(events);
         }
 
         if (position.isFirst()) {
             final int versionFirst = 1;
             final Stream<JsonEnvelope> events = eventStream.readFrom(versionFirst).limit(pageSize);
-            return reverse(eventEntries(events));
+            return eventEntries(events);
         }
 
         if (FORWARD.equals(direction)) {
             final long version = position.getPosition();
             final Stream<JsonEnvelope> events = eventStream.readFrom(version).limit(pageSize);
 
-            return reverse(eventEntries(events));
+            return eventEntries(events);
         }
 
         if (BACKWARD.equals(direction)) {
             final long version = position.getPosition() - pageSize + 1;
             final Stream<JsonEnvelope> events = eventStream.readFrom(version).limit(pageSize);
-            return reverse(eventEntries(events));
+            return eventEntries(events);
         }
         return emptyList();
     }

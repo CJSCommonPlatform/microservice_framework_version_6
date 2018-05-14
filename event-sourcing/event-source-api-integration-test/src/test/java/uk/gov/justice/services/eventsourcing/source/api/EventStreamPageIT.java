@@ -253,11 +253,11 @@ public class EventStreamPageIT {
         with(value)
                 .assertThat("$.data", hasSize(2))
 
-                .assertThat("$.data[0].self", containsString(selfLinkForStreamId3))
-                .assertThat("$.data[0].sequenceNumber", is(3))
+                .assertThat("$.data[0].self", containsString(selfLinkForStreamId2))
+                .assertThat("$.data[0].sequenceNumber", is(2))
 
-                .assertThat("$.data[1].self", containsString(selfLinkForStreamId2))
-                .assertThat("$.data[1].sequenceNumber", is(2));
+                .assertThat("$.data[1].self", containsString(selfLinkForStreamId3))
+                .assertThat("$.data[1].sequenceNumber", is(3));
     }
 
     @Test
@@ -282,11 +282,11 @@ public class EventStreamPageIT {
         with(page1)
                 .assertThat("$.data", hasSize(2))
 
-                .assertThat("$.data[0].self", containsString(expectedSelfLinkForStreamId5))
-                .assertThat("$.data[0].sequenceNumber", is(5))
+                .assertThat("$.data[0].self", containsString(expectedSelfLinkForStreamId4))
+                .assertThat("$.data[0].sequenceNumber", is(4))
 
-                .assertThat("$.data[1].self", containsString(expectedSelfLinkForStreamId4))
-                .assertThat("$.data[1].sequenceNumber", is(4));
+                .assertThat("$.data[1].self", containsString(expectedSelfLinkForStreamId5))
+                .assertThat("$.data[1].sequenceNumber", is(5));
 
         with(page1)
                 .assertNotDefined("$.pagingLinks.next");
@@ -329,11 +329,11 @@ public class EventStreamPageIT {
         with(page1)
                 .assertThat("$.data", hasSize(2))
 
-                .assertThat("$.data[0].self", containsString(selfLinkForStreamId5))
-                .assertThat("$.data[0].sequenceNumber", is(5))
+                .assertThat("$.data[0].self", containsString(selfLinkForStreamId4))
+                .assertThat("$.data[0].sequenceNumber", is(4))
 
-                .assertThat("$.data[1].self", containsString(selfLinkForStreamId4))
-                .assertThat("$.data[1].sequenceNumber", is(4));
+                .assertThat("$.data[1].self", containsString(selfLinkForStreamId5))
+                .assertThat("$.data[1].sequenceNumber", is(5));
 
         with(page1)
                 .assertNotDefined("$.pagingLinks.next");
@@ -369,11 +369,11 @@ public class EventStreamPageIT {
         with(page3)
                 .assertThat("$.data", hasSize(2))
 
-                .assertThat("$.data[0].self", containsString(selfLinkForStreamId2))
-                .assertThat("$.data[0].sequenceNumber", is(2))
+                .assertThat("$.data[0].self", containsString(selfLinkForStreamId1))
+                .assertThat("$.data[0].sequenceNumber", is(1))
 
-                .assertThat("$.data[1].self", containsString(selfLinkForStreamId1))
-                .assertThat("$.data[1].sequenceNumber", is(1));
+                .assertThat("$.data[1].self", containsString(selfLinkForStreamId2))
+                .assertThat("$.data[1].sequenceNumber", is(2));
 
         assertHeadAndLastLinks(page3);
 
@@ -416,11 +416,11 @@ public class EventStreamPageIT {
         with(page2)
                 .assertThat("$.data", hasSize(2))
 
-                .assertThat("$.data[0].self", containsString(selfLinkForStreamId3))
-                .assertThat("$.data[0].sequenceNumber", is(3))
+                .assertThat("$.data[0].self", containsString(selfLinkForStreamId2))
+                .assertThat("$.data[0].sequenceNumber", is(2))
 
-                .assertThat("$.data[1].self", containsString(selfLinkForStreamId2))
-                .assertThat("$.data[1].sequenceNumber", is(2));
+                .assertThat("$.data[1].self", containsString(selfLinkForStreamId3))
+                .assertThat("$.data[1].sequenceNumber", is(3));
 
         assertHeadAndLastLinks(page2);
 
@@ -458,11 +458,11 @@ public class EventStreamPageIT {
         with(page2)
                 .assertThat("$.data", hasSize(2))
 
-                .assertThat("$.data[0].self", containsString(selfLinkForStreamId4))
-                .assertThat("$.data[0].sequenceNumber", is(4))
+                .assertThat("$.data[0].self", containsString(selfLinkForStreamId3))
+                .assertThat("$.data[0].sequenceNumber", is(3))
 
-                .assertThat("$.data[1].self", containsString(selfLinkForStreamId3))
-                .assertThat("$.data[1].sequenceNumber", is(3));
+                .assertThat("$.data[1].self", containsString(selfLinkForStreamId4))
+                .assertThat("$.data[1].sequenceNumber", is(4));
 
         final String page1Url = JsonPath.read(page2, "$.pagingLinks.next");
 
@@ -554,10 +554,10 @@ public class EventStreamPageIT {
 
         with(page2)
                 .assertThat("$.data", hasSize(2))
-                .assertThat("$.data[0].self", containsString(selfLinkForStreamId3))
-                .assertThat("$.data[0].sequenceNumber", is(3))
-                .assertThat("$.data[1].self", containsString(selfLinkForStreamId2))
-                .assertThat("$.data[1].sequenceNumber", is(2));
+                .assertThat("$.data[0].self", containsString(selfLinkForStreamId2))
+                .assertThat("$.data[0].sequenceNumber", is(2))
+                .assertThat("$.data[1].self", containsString(selfLinkForStreamId3))
+                .assertThat("$.data[1].sequenceNumber", is(3));
 
         final String page3Url = JsonPath.read(page2, "$.pagingLinks.next");
         assertThat(page3Url, containsString(EVENT_STREAM_URL_PATH_PREFIX + "/4/FORWARD/" + PAGE_SIZE));
@@ -590,10 +590,10 @@ public class EventStreamPageIT {
 
         with(page2)
                 .assertThat("$.data", hasSize(2))
-                .assertThat("$.data[0].self", containsString(selfLinkForStreamId3))
-                .assertThat("$.data[0].sequenceNumber", is(3))
-                .assertThat("$.data[1].self", containsString(selfLinkForStreamId2))
-                .assertThat("$.data[1].sequenceNumber", is(2));
+                .assertThat("$.data[0].self", containsString(selfLinkForStreamId2))
+                .assertThat("$.data[0].sequenceNumber", is(2))
+                .assertThat("$.data[1].self", containsString(selfLinkForStreamId3))
+                .assertThat("$.data[1].sequenceNumber", is(3));
 
         final String page3Url = JsonPath.read(page2, "$.pagingLinks.previous");
 
@@ -605,10 +605,10 @@ public class EventStreamPageIT {
 
         with(page3)
                 .assertThat("$.data", hasSize(2))
-                .assertThat("$.data[0].self", containsString(selfLinkForStreamId2))
-                .assertThat("$.data[0].sequenceNumber", is(2))
-                .assertThat("$.data[1].self", containsString(selfLinkForStreamId1))
-                .assertThat("$.data[1].sequenceNumber", is(1));
+                .assertThat("$.data[0].self", containsString(selfLinkForStreamId1))
+                .assertThat("$.data[0].sequenceNumber", is(1))
+                .assertThat("$.data[1].self", containsString(selfLinkForStreamId2))
+                .assertThat("$.data[1].sequenceNumber", is(2));
 
         with(page3)
                 .assertNotDefined("$.pagingLinks.previous");
@@ -638,10 +638,10 @@ public class EventStreamPageIT {
 
         with(page2)
                 .assertThat("$.data", hasSize(2))
-                .assertThat("$.data[0].self", containsString(selfLinkForStreamId3))
-                .assertThat("$.data[0].sequenceNumber", is(3))
-                .assertThat("$.data[1].self", containsString(selfLinkForStreamId2))
-                .assertThat("$.data[1].sequenceNumber", is(2));
+                .assertThat("$.data[0].self", containsString(selfLinkForStreamId2))
+                .assertThat("$.data[0].sequenceNumber", is(2))
+                .assertThat("$.data[1].self", containsString(selfLinkForStreamId3))
+                .assertThat("$.data[1].sequenceNumber", is(3));
 
         final String page1Url = JsonPath.read(page2, "$.pagingLinks.next");
 
@@ -654,10 +654,10 @@ public class EventStreamPageIT {
 
         with(page1)
                 .assertThat("$.data", hasSize(2))
-                .assertThat("$.data[0].self", containsString(selfLinkForStreamId5))
-                .assertThat("$.data[0].sequenceNumber", is(5))
-                .assertThat("$.data[1].self", containsString(selfLinkForStreamId4))
-                .assertThat("$.data[1].sequenceNumber", is(4));
+                .assertThat("$.data[0].self", containsString(selfLinkForStreamId4))
+                .assertThat("$.data[0].sequenceNumber", is(4))
+                .assertThat("$.data[1].self", containsString(selfLinkForStreamId5))
+                .assertThat("$.data[1].sequenceNumber", is(5));
 
         assertHeadAndLastLinks(page1);
 

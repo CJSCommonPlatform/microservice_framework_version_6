@@ -63,9 +63,9 @@ import uk.gov.justice.services.eventsourcing.source.core.JdbcBasedEventSource;
 import uk.gov.justice.services.eventsourcing.source.core.JdbcEventSourceFactory;
 import uk.gov.justice.services.eventsourcing.source.core.PublishingEventAppenderFactory;
 import uk.gov.justice.services.eventsourcing.source.core.SystemEventService;
-import uk.gov.justice.services.jdbc.persistence.JndiDataSourceNameProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcDataSourceProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
+import uk.gov.justice.services.jdbc.persistence.JndiDataSourceNameProvider;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
@@ -251,13 +251,13 @@ public class EventsPageIT {
 
                 .assertThat("$.data[0].streamId", is(STREAM_ID.toString()))
                 .assertThat("$.data[0].name", containsString("name"))
-                .assertThat("$.data[0].position", is(3))
-                .assertThat("$.data[0].payload.field3", is("value3"))
+                .assertThat("$.data[0].position   ", is(2))
+                .assertThat("$.data[0].payload.field2", is("value2"))
 
                 .assertThat("$.data[1].streamId", is(STREAM_ID.toString()))
                 .assertThat("$.data[1].name", containsString("name"))
-                .assertThat("$.data[1].position   ", is(2))
-                .assertThat("$.data[1].payload.field2", is("value2"));
+                .assertThat("$.data[1].position", is(3))
+                .assertThat("$.data[1].payload.field3", is("value3"));
     }
 
     @Test
@@ -275,10 +275,10 @@ public class EventsPageIT {
                 .assertThat("$.data", hasSize(2))
 
                 .assertThat("$.data[0].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[0].position", is(5))
+                .assertThat("$.data[0].position", is(4))
 
                 .assertThat("$.data[1].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[1].position", is(4));
+                .assertThat("$.data[1].position", is(5));
 
         with(page1)
                 .assertNotDefined("$.pagingLinks.next");
@@ -313,10 +313,10 @@ public class EventsPageIT {
                 .assertThat("$.data", hasSize(2))
 
                 .assertThat("$.data[0].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[0].position", is(5))
+                .assertThat("$.data[0].position", is(4))
 
                 .assertThat("$.data[1].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[1].position", is(4));
+                .assertThat("$.data[1].position", is(5));
 
         with(page1)
                 .assertNotDefined("$.pagingLinks.next");
@@ -342,10 +342,10 @@ public class EventsPageIT {
                 .assertThat("$.data", hasSize(2))
 
                 .assertThat("$.data[0].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[0].position", is(2))
+                .assertThat("$.data[0].position", is(1))
 
                 .assertThat("$.data[1].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[1].position", is(1));
+                .assertThat("$.data[1].position", is(2));
 
         final String page2Url = JsonPath.read(page3, "$.pagingLinks.next");
 
@@ -379,10 +379,10 @@ public class EventsPageIT {
                 .assertThat("$.data", hasSize(2))
 
                 .assertThat("$.data[0].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[0].position", is(3))
+                .assertThat("$.data[0].position", is(2))
 
                 .assertThat("$.data[1].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[1].position", is(2));
+                .assertThat("$.data[1].position", is(3));
 
         final String page1Url = JsonPath.read(page2, "$.pagingLinks.next");
 
@@ -409,10 +409,10 @@ public class EventsPageIT {
                 .assertThat("$.data", hasSize(2))
 
                 .assertThat("$.data[0].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[0].position", is(4))
+                .assertThat("$.data[0].position", is(3))
 
                 .assertThat("$.data[1].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[1].position", is(3));
+                .assertThat("$.data[1].position", is(4));
 
         final String page1Url = JsonPath.read(page2, "$.pagingLinks.next");
 
@@ -489,9 +489,9 @@ public class EventsPageIT {
         with(page2)
                 .assertThat("$.data", hasSize(2))
                 .assertThat("$.data[0].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[0].position", is(3))
+                .assertThat("$.data[0].position", is(2))
                 .assertThat("$.data[1].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[1].position", is(2));
+                .assertThat("$.data[1].position", is(3));
 
         final String page3Url = JsonPath.read(page2, "$.pagingLinks.next");
         assertThat(page3Url, containsString(EVENT_STREAM_URL_PATH_PREFIX + "/4/FORWARD/" + PAGE_SIZE));
@@ -514,9 +514,9 @@ public class EventsPageIT {
         with(page2)
                 .assertThat("$.data", hasSize(2))
                 .assertThat("$.data[0].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[0].position", is(3))
+                .assertThat("$.data[0].position", is(2))
                 .assertThat("$.data[1].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[1].position", is(2));
+                .assertThat("$.data[1].position", is(3));
 
         final String page3Url = JsonPath.read(page2, "$.pagingLinks.previous");
 
@@ -527,9 +527,9 @@ public class EventsPageIT {
         with(page3)
                 .assertThat("$.data", hasSize(2))
                 .assertThat("$.data[0].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[0].position", is(2))
+                .assertThat("$.data[0].position", is(1))
                 .assertThat("$.data[1].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[1].position", is(1));
+                .assertThat("$.data[1].position", is(2));
 
         with(page3)
                 .assertNotDefined("$.pagingLinks.previous");
@@ -552,9 +552,9 @@ public class EventsPageIT {
         with(page2)
                 .assertThat("$.data", hasSize(PAGE_SIZE))
                 .assertThat("$.data[0].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[0].position", is(3))
+                .assertThat("$.data[0].position", is(2))
                 .assertThat("$.data[1].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[1].position", is(PAGE_SIZE));
+                .assertThat("$.data[1].position", is(3));
 
         final String page1Url = JsonPath.read(page2, "$.pagingLinks.next");
 
@@ -565,9 +565,9 @@ public class EventsPageIT {
         with(page1)
                 .assertThat("$.data", hasSize(PAGE_SIZE))
                 .assertThat("$.data[0].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[0].position", is(5))
+                .assertThat("$.data[0].position", is(4))
                 .assertThat("$.data[1].streamId", is(STREAM_ID.toString()))
-                .assertThat("$.data[1].position", is(4));
+                .assertThat("$.data[1].position", is(5));
 
         with(page1)
                 .assertNotDefined("$.pagingLinks.next");

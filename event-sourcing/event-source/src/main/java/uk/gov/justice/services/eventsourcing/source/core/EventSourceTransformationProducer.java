@@ -30,6 +30,8 @@ public class EventSourceTransformationProducer {
     @Inject
     JndiDataSourceNameProvider dataSourceJndiNameProvider;
 
+    private static final String DEFAULT_EVENT_SOURCE_NAME = "defaultEventSource";
+
     @Produces
     public EventSourceTransformation eventSourceTransformation() {
 
@@ -41,7 +43,7 @@ public class EventSourceTransformationProducer {
                 eventJdbcRepository,
                 eventStreamJdbcRepository);
 
-        final EventStreamManager eventStreamManager = eventStreamManagerFactory.eventStreamManager(eventRepository);
+        final EventStreamManager eventStreamManager = eventStreamManagerFactory.eventStreamManager(eventRepository, DEFAULT_EVENT_SOURCE_NAME);
 
         return new DefaultEventSourceTransformation(eventStreamManager);
     }

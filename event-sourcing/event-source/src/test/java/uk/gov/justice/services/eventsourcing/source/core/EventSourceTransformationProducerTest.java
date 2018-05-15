@@ -50,9 +50,10 @@ public class EventSourceTransformationProducerTest {
     public void shouldCreateEventSourceTransformation() throws Exception {
         final EventRepository eventRepository = mock(EventRepository.class);
         final EventStreamManager eventStreamManager = mock(EventStreamManager.class);
+        final String defaultEventSource = "defaultEventSource";
 
         when(eventRepositoryFactory.eventRepository(any(EventJdbcRepository.class), any(EventStreamJdbcRepository.class))).thenReturn(eventRepository);
-        when(eventStreamManagerFactory.eventStreamManager(eventRepository)).thenReturn(eventStreamManager);
+        when(eventStreamManagerFactory.eventStreamManager(eventRepository, defaultEventSource)).thenReturn(eventStreamManager);
 
         final EventSourceTransformation eventSourceTransformation = eventSourceTransformationProducer.eventSourceTransformation();
 

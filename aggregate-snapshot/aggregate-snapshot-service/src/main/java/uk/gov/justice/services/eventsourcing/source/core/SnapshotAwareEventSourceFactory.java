@@ -36,7 +36,7 @@ public class SnapshotAwareEventSourceFactory {
                 eventJdbcRepository,
                 eventStreamJdbcRepository);
 
-        final EventStreamManager eventStreamManager = eventStreamManagerFactory.eventStreamManager(eventRepository);
+        final EventStreamManager eventStreamManager = eventStreamManagerFactory.eventStreamManager(eventRepository, eventSourceName);
 
         return new SnapshotAwareEventSource(eventStreamManager, eventRepository, snapshotService, eventSourceName);
     }

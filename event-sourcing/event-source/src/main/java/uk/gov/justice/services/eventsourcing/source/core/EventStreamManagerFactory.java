@@ -28,7 +28,7 @@ public class EventStreamManagerFactory {
     @Inject
     PublishingEventAppenderFactory publishingEventAppenderFactory;
 
-    public EventStreamManager eventStreamManager(final EventRepository eventRepository) {
+    public EventStreamManager eventStreamManager(final EventRepository eventRepository, final String eventSourceName) {
 
         final EventAppender publishingEventAppender = publishingEventAppenderFactory.publishingEventAppender(eventRepository);
 
@@ -38,6 +38,7 @@ public class EventStreamManagerFactory {
                 systemEventService,
                 enveloper,
                 eventRepository,
+                eventSourceName,
                 logger
         );
 

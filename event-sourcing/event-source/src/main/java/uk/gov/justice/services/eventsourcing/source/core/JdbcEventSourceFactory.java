@@ -34,8 +34,8 @@ public class JdbcEventSourceFactory {
                 eventJdbcRepository,
                 eventStreamJdbcRepository);
 
-        final EventStreamManager eventStreamManager = eventStreamManagerFactory.eventStreamManager(eventRepository);
+        final EventStreamManager eventStreamManager = eventStreamManagerFactory.eventStreamManager(eventRepository, eventSourceName);
 
-        return new JdbcBasedEventSource(eventStreamManager, eventRepository , eventSourceName);
+        return new JdbcBasedEventSource(eventStreamManager, eventRepository, eventSourceName);
     }
 }

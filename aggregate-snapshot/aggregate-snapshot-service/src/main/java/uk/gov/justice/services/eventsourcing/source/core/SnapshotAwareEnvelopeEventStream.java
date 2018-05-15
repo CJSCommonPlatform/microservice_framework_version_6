@@ -18,8 +18,8 @@ public class SnapshotAwareEnvelopeEventStream<T extends Aggregate> extends Envel
 
     private final Map<Class<T>, T> aggregatesMap = new ConcurrentHashMap<>();
 
-    SnapshotAwareEnvelopeEventStream(final UUID id, final EventStreamManager eventStreamManager, final SnapshotService snapshotService) {
-        super(id, eventStreamManager);
+    SnapshotAwareEnvelopeEventStream(final UUID id, final EventStreamManager eventStreamManager, final SnapshotService snapshotService, final String eventSourceName) {
+        super(id, eventSourceName, eventStreamManager);
         this.snapshotService = snapshotService;
     }
 

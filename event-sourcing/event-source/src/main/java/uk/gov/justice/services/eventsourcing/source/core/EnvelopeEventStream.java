@@ -15,9 +15,11 @@ public class EnvelopeEventStream implements EventStream {
     private final UUID id;
     private volatile Optional<Long> lastReadPosition = Optional.empty();
     private long position;
+    private String eventSourceName;
 
-    public EnvelopeEventStream(final UUID id, final EventStreamManager eventStreamManager) {
+    public EnvelopeEventStream(final UUID id, final String eventSourceName, final EventStreamManager eventStreamManager) {
         this.id = id;
+        this.eventSourceName = eventSourceName;
         this.eventStreamManager = eventStreamManager;
     }
 
@@ -106,5 +108,10 @@ public class EnvelopeEventStream implements EventStream {
             throw new IllegalStateException("Event stream has already been read");
         }
         lastReadPosition = Optional.of(position);
+    }
+
+    @Override
+    public String getName() {
+        return eventSourceName;
     }
 }

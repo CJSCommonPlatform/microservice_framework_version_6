@@ -22,6 +22,8 @@ import javax.inject.Inject;
 @ApplicationScoped
 public class EventSourceProducer {
 
+    private final static String DEFAULT_EVENT_SOURCE_NAME = "defaultEventSource";
+
     @Inject
     EventSourceRegistry eventSourceRegistry;
 
@@ -42,7 +44,7 @@ public class EventSourceProducer {
      */
     @Produces
     public EventSource eventSource() {
-        return jdbcEventSourceFactory.create(jndiDataSourceNameProvider.jndiName());
+        return jdbcEventSourceFactory.create(jndiDataSourceNameProvider.jndiName(), DEFAULT_EVENT_SOURCE_NAME);
     }
 
     /**
@@ -70,7 +72,7 @@ public class EventSourceProducer {
         final Optional<String> dataSourceOptional = location.getDataSource();
 
         return dataSourceOptional
-                .map(dataSource -> jdbcEventSourceFactory.create(dataSource))
+                .map(dataSource -> jdbcEventSourceFactory.create(dataSource, eventSourceDomainObject.getName()))
                 .orElseThrow(() -> new CreationException(
                         format("No DataSource specified for EventSource '%s' specified in event-sources.yaml", eventSourceDomainObject.getName())
                 ));

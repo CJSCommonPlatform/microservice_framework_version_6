@@ -5,21 +5,15 @@ import static java.util.Optional.of;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.core.cdi.QualifierAnnotationExtractor;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepositoryFactory;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepositoryFactory;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepositoryFactory;
 import uk.gov.justice.services.eventsourcing.source.core.annotation.EventSourceName;
 import uk.gov.justice.services.jdbc.persistence.JndiDataSourceNameProvider;
 import uk.gov.justice.subscription.domain.eventsource.Location;
 import uk.gov.justice.subscription.registry.EventSourceRegistry;
-
-import java.util.Optional;
 
 import javax.enterprise.inject.CreationException;
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -53,11 +47,12 @@ public class EventSourceProducerTest {
     public void shouldCreateEventSourceUsingTheJNDINameInjectedByTheContainer() throws Exception {
 
         final String jndiName = "java:/app/my-command-api/DS.eventstore";
+        final String eventSourceName = "defaultEventSource";
 
         final JdbcBasedEventSource jdbcBasedEventSource = mock(JdbcBasedEventSource.class);
 
         when(jndiDataSourceNameProvider.jndiName()).thenReturn(jndiName);
-        when(jdbcEventSourceFactory.create(jndiName)).thenReturn(jdbcBasedEventSource);
+        when(jdbcEventSourceFactory.create(jndiName, eventSourceName)).thenReturn(jdbcBasedEventSource);
 
         assertThat(eventSourceProducer.eventSource(), is(jdbcBasedEventSource));
     }
@@ -79,7 +74,7 @@ public class EventSourceProducerTest {
         when(eventSourceRegistry.getEventSourceFor(eventSourceName)).thenReturn(of(eventSourceDomainObject));
         when(eventSourceDomainObject.getLocation()).thenReturn(location);
         when(location.getDataSource()).thenReturn(of(dataSource));
-        when(jdbcEventSourceFactory.create(dataSource)).thenReturn(jdbcBasedEventSource);
+        when(jdbcEventSourceFactory.create(dataSource, eventSourceDomainObject.getName())).thenReturn(jdbcBasedEventSource);
 
         assertThat(eventSourceProducer.eventSource(injectionPoint), is(jdbcBasedEventSource));
     }

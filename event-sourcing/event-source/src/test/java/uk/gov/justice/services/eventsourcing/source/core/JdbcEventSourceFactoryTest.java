@@ -1,16 +1,7 @@
 package uk.gov.justice.services.eventsourcing.source.core;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import static org.junit.Assert.assertThat;
-
-import org.mockito.InjectMocks;
-
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -23,6 +14,12 @@ import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventSt
 import uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil;
 
 import java.util.Optional;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -47,6 +44,7 @@ public class JdbcEventSourceFactoryTest {
     public void shouldCreateJdbcBasedEventSource() throws Exception {
 
         final String jndiDatasource = "jndiDatasource";
+        final String sourceName = "sourceName";
 
         final EventJdbcRepository eventJdbcRepository = mock(EventJdbcRepository.class);
         final EventStreamJdbcRepository eventStreamJdbcRepository = mock(EventStreamJdbcRepository.class);
@@ -62,11 +60,12 @@ public class JdbcEventSourceFactoryTest {
 
         when(eventStreamManagerFactory.eventStreamManager(eventRepository)).thenReturn(eventStreamManager);
 
-        final JdbcBasedEventSource jdbcBasedEventSource = jdbcEventSourceFactory.create(jndiDatasource);
+        final JdbcBasedEventSource jdbcBasedEventSource = jdbcEventSourceFactory.create(jndiDatasource, sourceName);
 
 
         assertThat(fieldValueAs(jdbcBasedEventSource, "eventStreamManager", EventStreamManager.class), is(eventStreamManager));
         assertThat(fieldValueAs(jdbcBasedEventSource, "eventRepository", EventRepository.class), is(eventRepository));
+        assertThat(fieldValueAs(jdbcBasedEventSource, "name", String.class), is(sourceName));
     }
 
     private <T> T fieldValueAs(final Object object, final String fieldName, final Class<T> type) throws Exception {

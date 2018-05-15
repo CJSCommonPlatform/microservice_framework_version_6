@@ -25,8 +25,8 @@ public class JdbcEventSourceFactory {
     @Inject
     EventStreamJdbcRepositoryFactory eventStreamJdbcRepositoryFactory;
 
-    public JdbcBasedEventSource create(final String jndiDatasource) {
-        
+    public JdbcBasedEventSource create(final String jndiDatasource, String eventSourceName) {
+
         final EventJdbcRepository eventJdbcRepository = eventJdbcRepositoryFactory.eventJdbcRepository(jndiDatasource);
         final EventStreamJdbcRepository eventStreamJdbcRepository = eventStreamJdbcRepositoryFactory.eventStreamJdbcRepository(jndiDatasource);
 
@@ -36,6 +36,6 @@ public class JdbcEventSourceFactory {
 
         final EventStreamManager eventStreamManager = eventStreamManagerFactory.eventStreamManager(eventRepository);
 
-        return new JdbcBasedEventSource(eventStreamManager, eventRepository);
+        return new JdbcBasedEventSource(eventStreamManager, eventRepository , eventSourceName);
     }
 }

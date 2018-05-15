@@ -35,6 +35,8 @@ public class SnapshotAwareEventSourceProducer {
     @Inject
     SnapshotAwareEventSourceFactory snapshotAwareEventSourceFactory;
 
+    private static final String DEFAULT_EVENT_SOURCE = "defaultEventSource";
+
     /**
      *
      * Backwards compatible support for Unnamed EventSource injection points
@@ -43,7 +45,7 @@ public class SnapshotAwareEventSourceProducer {
      */
     @Produces
     public EventSource eventSource() {
-        return snapshotAwareEventSourceFactory.create(jndiDataSourceNameProvider.jndiName());
+        return snapshotAwareEventSourceFactory.create(jndiDataSourceNameProvider.jndiName() , DEFAULT_EVENT_SOURCE);
     }
 
     /**
@@ -71,7 +73,7 @@ public class SnapshotAwareEventSourceProducer {
         final Optional<String> dataSourceOptional = location.getDataSource();
 
         return dataSourceOptional
-                .map(dataSource -> snapshotAwareEventSourceFactory.create(dataSource))
+                .map(dataSource -> snapshotAwareEventSourceFactory.create(dataSource, eventSourceDomainObject.getName()))
                 .orElseThrow(() -> new CreationException(
                         format("No DataSource specified for EventSource '%s' specified in event-sources.yaml", eventSourceDomainObject.getName())
                 ));

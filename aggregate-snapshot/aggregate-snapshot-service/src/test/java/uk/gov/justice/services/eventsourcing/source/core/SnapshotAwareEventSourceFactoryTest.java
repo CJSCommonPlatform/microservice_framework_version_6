@@ -49,6 +49,7 @@ public class SnapshotAwareEventSourceFactoryTest {
     public void shouldCreateSnapshotAwareEventSource() throws Exception {
 
         final String jndiDatasource = "jndiDatasource";
+        final String eventSourceName = "eventSourceName";
 
         final EventJdbcRepository eventJdbcRepository = mock(EventJdbcRepository.class);
         final EventStreamJdbcRepository eventStreamJdbcRepository = mock(EventStreamJdbcRepository.class);
@@ -64,7 +65,7 @@ public class SnapshotAwareEventSourceFactoryTest {
 
         when(eventStreamManagerFactory.eventStreamManager(eventRepository)).thenReturn(eventStreamManager);
 
-        final EventSource eventSource = snapshotAwareEventSourceFactory.create(jndiDatasource);
+        final EventSource eventSource = snapshotAwareEventSourceFactory.create(jndiDatasource, eventSourceName);
 
         assertThat(eventSource, is(instanceOf(SnapshotAwareEventSource.class)));
 
@@ -72,6 +73,7 @@ public class SnapshotAwareEventSourceFactoryTest {
         assertThat(fieldValueAs(eventSource, "eventStreamManager", EventStreamManager.class), is(eventStreamManager));
         assertThat(fieldValueAs(eventSource, "eventRepository", EventRepository.class), is(eventRepository));
         assertThat(fieldValueAs(eventSource, "snapshotService", SnapshotService.class), is(snapshotService));
+        assertThat(fieldValueAs(eventSource, "name", String.class), is(eventSourceName));
     }
 
     private <T> T fieldValueAs(final Object object, final String fieldName, final Class<T> type) throws Exception {

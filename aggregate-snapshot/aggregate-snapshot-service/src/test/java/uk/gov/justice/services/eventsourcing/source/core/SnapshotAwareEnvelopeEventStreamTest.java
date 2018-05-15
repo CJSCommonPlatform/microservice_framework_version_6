@@ -29,6 +29,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class SnapshotAwareEnvelopeEventStreamTest {
 
     private static final UUID STREAM_ID = UUID.randomUUID();
+    private static final String EVENT_SOURCE_NAME = "eventSourceName";
 
     @Mock
     private EventStreamManager eventStreamManager;
@@ -38,10 +39,9 @@ public class SnapshotAwareEnvelopeEventStreamTest {
 
     private SnapshotAwareEnvelopeEventStream eventStream;
 
-
     @Before
     public void setup() {
-        eventStream = new SnapshotAwareEnvelopeEventStream(STREAM_ID, eventStreamManager, snapshotService);
+        eventStream = new SnapshotAwareEnvelopeEventStream(STREAM_ID, eventStreamManager, snapshotService, EVENT_SOURCE_NAME);
     }
 
     @Test

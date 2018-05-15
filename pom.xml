@@ -57,7 +57,7 @@
         <test-utils.version>1.16.3</test-utils.version>
         <utilities.version>1.13.0</utilities.version>
         <generator-maven-plugin.version>2.5.0-M2</generator-maven-plugin.version>
-        <framework-api.version>3.0.0-M7</framework-api.version>
+        <framework-api.version>3.0.0-M8</framework-api.version>
     </properties>
 
     <dependencyManagement>

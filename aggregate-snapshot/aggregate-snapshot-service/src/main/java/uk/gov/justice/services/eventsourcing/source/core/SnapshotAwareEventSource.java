@@ -14,18 +14,21 @@ public class SnapshotAwareEventSource implements EventSource {
     private final EventStreamManager eventStreamManager;
     private final SnapshotService snapshotService;
     private final EventRepository eventRepository;
+    private  String name;
 
     public SnapshotAwareEventSource(final EventStreamManager eventStreamManager,
                                     final EventRepository eventRepository,
-                                    final SnapshotService snapshotService) {
+                                    final SnapshotService snapshotService,
+                                    final String name) {
         this.eventStreamManager = eventStreamManager;
         this.eventRepository = eventRepository;
         this.snapshotService = snapshotService;
+        this.name = name;
     }
 
     @Override
     public EventStream getStreamById(final UUID streamId) {
-        return new SnapshotAwareEnvelopeEventStream(streamId, eventStreamManager, snapshotService);
+        return new SnapshotAwareEnvelopeEventStream(streamId, eventStreamManager, snapshotService, name);
     }
 
     @Override

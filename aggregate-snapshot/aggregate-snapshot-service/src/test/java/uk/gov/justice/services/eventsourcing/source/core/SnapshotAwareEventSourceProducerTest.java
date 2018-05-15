@@ -47,11 +47,12 @@ public class SnapshotAwareEventSourceProducerTest {
     public void shouldCreateEventSourceUsingTheJNDINameInjectedByTheContainer() throws Exception {
 
         final String jndiName = "java:/app/my-command-api/DS.eventstore";
+        final String eventSourceName = "defaultEventSource";
 
         final JdbcBasedEventSource jdbcBasedEventSource = mock(JdbcBasedEventSource.class);
 
         when(jndiDataSourceNameProvider.jndiName()).thenReturn(jndiName);
-        when(snapshotAwareEventSourceFactory.create(jndiName)).thenReturn(jdbcBasedEventSource);
+        when(snapshotAwareEventSourceFactory.create(jndiName, eventSourceName)).thenReturn(jdbcBasedEventSource);
 
         assertThat(snapshotAwareEventSourceProducer.eventSource(), is(jdbcBasedEventSource));
     }
@@ -71,9 +72,10 @@ public class SnapshotAwareEventSourceProducerTest {
         when(qualifierAnnotationExtractor.getFrom(injectionPoint, EventSourceName.class)).thenReturn(eventSourceNameAnnotation);
         when(eventSourceNameAnnotation.value()).thenReturn(eventSourceName);
         when(eventSourceRegistry.getEventSourceFor(eventSourceName)).thenReturn(of(eventSourceDomainObject));
+        when(eventSourceDomainObject.getName()).thenReturn(eventSourceName);
         when(eventSourceDomainObject.getLocation()).thenReturn(location);
         when(location.getDataSource()).thenReturn(of(dataSource));
-        when(snapshotAwareEventSourceFactory.create(dataSource)).thenReturn(jdbcBasedEventSource);
+        when(snapshotAwareEventSourceFactory.create(dataSource, eventSourceName)).thenReturn(jdbcBasedEventSource);
 
         assertThat(snapshotAwareEventSourceProducer.eventSource(injectionPoint), is(jdbcBasedEventSource));
     }
@@ -114,6 +116,7 @@ public class SnapshotAwareEventSourceProducerTest {
         when(qualifierAnnotationExtractor.getFrom(injectionPoint, EventSourceName.class)).thenReturn(eventSourceNameAnnotation);
         when(eventSourceNameAnnotation.value()).thenReturn(eventSourceName);
         when(eventSourceRegistry.getEventSourceFor(eventSourceName)).thenReturn(of(eventSourceDomainObject));
+        when(eventSourceDomainObject.getName()).thenReturn(eventSourceName);
         when(eventSourceDomainObject.getLocation()).thenReturn(location);
         when(location.getDataSource()).thenReturn(empty());
         when(eventSourceDomainObject.getName()).thenReturn(dataSourceName);

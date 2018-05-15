@@ -27,7 +27,7 @@ public class SnapshotAwareEventSourceFactory {
     @Inject
     SnapshotService snapshotService;
 
-    public EventSource create(final String jndiDatasource) {
+    public EventSource create(final String jndiDatasource, final String eventSourceName) {
 
         final EventJdbcRepository eventJdbcRepository = eventJdbcRepositoryFactory.eventJdbcRepository(jndiDatasource);
         final EventStreamJdbcRepository eventStreamJdbcRepository = eventStreamJdbcRepositoryFactory.eventStreamJdbcRepository(jndiDatasource);
@@ -38,6 +38,6 @@ public class SnapshotAwareEventSourceFactory {
 
         final EventStreamManager eventStreamManager = eventStreamManagerFactory.eventStreamManager(eventRepository);
 
-        return new SnapshotAwareEventSource(eventStreamManager, eventRepository, snapshotService);
+        return new SnapshotAwareEventSource(eventStreamManager, eventRepository, snapshotService, eventSourceName);
     }
 }

@@ -19,10 +19,8 @@ import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderF
 
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -41,6 +39,8 @@ public class EnvelopeEventStreamTest {
     public static final Long CURRENT_POSITION = 4L;
     public static final Long CURRENT_STREAM_POSITION = 8L;
 
+
+    private static final String EVENT_SOURCE_NAME = "eventSourceName";
     private static final UUID STREAM_ID = randomUUID();
 
     @Mock
@@ -59,7 +59,7 @@ public class EnvelopeEventStreamTest {
 
     @Before
     public void setup() {
-        envelopeEventStream = new EnvelopeEventStream(STREAM_ID, eventStreamManager);
+        envelopeEventStream = new EnvelopeEventStream(STREAM_ID, EVENT_SOURCE_NAME, eventStreamManager);
         when(eventStreamManager.read(STREAM_ID)).thenReturn(Stream.of(
                 envelope().with(metadataWithDefaults().withVersion(1L)).build(),
                 envelope().with(metadataWithDefaults().withVersion(2L)).build(),
@@ -126,6 +126,13 @@ public class EnvelopeEventStreamTest {
         final UUID actualId = envelopeEventStream.getId();
 
         assertThat(actualId, equalTo(STREAM_ID));
+    }
+
+    @Test
+    public void shouldGetEventStreamName() throws Exception {
+        final String streamName = envelopeEventStream.getName();
+
+        assertThat(streamName, equalTo(EVENT_SOURCE_NAME));
     }
 
     @Test(expected = IllegalStateException.class)

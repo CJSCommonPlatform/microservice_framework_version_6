@@ -1,7 +1,7 @@
 package uk.gov.justice.subscription.jms.parser;
 
 import uk.gov.justice.maven.generator.io.files.parser.FileParser;
-import uk.gov.justice.subscription.domain.eventsource.EventSource;
+import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 
 import java.nio.file.Path;
 import java.util.Collection;
@@ -20,7 +20,7 @@ public class SubscriptionWrapperFileParser implements FileParser<SubscriptionWra
 
     @Override
     public Collection<SubscriptionWrapper> parse(final Path baseDir, final Collection<Path> paths) {
-        final List<EventSource> eventSourceDefinitions = eventSourcesFileParser.getEventSources(baseDir, paths);
+        final List<EventSourceDefinition> eventSourceDefinitions = eventSourcesFileParser.getEventSources(baseDir, paths);
         return subscriptionDescriptorFileParser.getSubscriptionWrappers(baseDir, paths, eventSourceDefinitions);
     }
 }

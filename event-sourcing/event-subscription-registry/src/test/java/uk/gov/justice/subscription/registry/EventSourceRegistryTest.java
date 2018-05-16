@@ -8,7 +8,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 import static uk.gov.justice.subscription.domain.builders.EventSourceBuilder.eventsource;
 
-import uk.gov.justice.subscription.domain.eventsource.EventSource;
+import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 import uk.gov.justice.subscription.domain.eventsource.Location;
 
 import java.util.stream.Stream;
@@ -23,15 +23,15 @@ public class EventSourceRegistryTest {
     @Test
     public void shouldRegisterStreamOfEventSources() throws Exception {
 
-        final EventSource eventSource1 = eventsource()
+        final EventSourceDefinition eventSource1 = eventsource()
                 .withLocation(mock(Location.class))
                 .withName("eventSource1").build();
 
-        final EventSource eventSource2 = eventsource()
+        final EventSourceDefinition eventSource2 = eventsource()
                 .withLocation(mock(Location.class))
                 .withName("eventSource2").build();
 
-        final Stream<EventSource> eventSourceList = Stream.of(eventSource1, eventSource2);
+        final Stream<EventSourceDefinition> eventSourceList = Stream.of(eventSource1, eventSource2);
 
         final EventSourceRegistry eventSourceRegistry = new EventSourceRegistry(eventSourceList);
 
@@ -44,16 +44,16 @@ public class EventSourceRegistryTest {
     @Test
     public void shouldIgnoreSecondEventSourceForTheSameName() throws Exception {
 
-        final EventSource eventSource1 = eventsource()
+        final EventSourceDefinition eventSource1 = eventsource()
                 .withLocation(mock(Location.class))
                 .withName("eventSource1").build();
 
-        final EventSource eventSource2 = eventsource()
+        final EventSourceDefinition eventSource2 = eventsource()
                 .withLocation(mock(Location.class))
                 .withName("eventSource1").build();
 
 
-        final Stream<EventSource> eventSourceList = Stream.of(eventSource1, eventSource2);
+        final Stream<EventSourceDefinition> eventSourceList = Stream.of(eventSource1, eventSource2);
 
         final EventSourceRegistry eventSourceRegistry = new EventSourceRegistry(eventSourceList);
 
@@ -66,11 +66,11 @@ public class EventSourceRegistryTest {
     @Test
     public void shouldReturnEmptyIfNoEventSourceIsFoundForASpecifiedServiceName() throws Exception {
 
-        final EventSource eventSource1 = eventsource()
+        final EventSourceDefinition eventSource1 = eventsource()
                 .withLocation(mock(Location.class))
                 .withName("eventSource").build();
 
-        final Stream<EventSource> eventSourceList = Stream.of(eventSource1);
+        final Stream<EventSourceDefinition> eventSourceList = Stream.of(eventSource1);
 
         final EventSourceRegistry eventSourceRegistry = new EventSourceRegistry(eventSourceList);
 

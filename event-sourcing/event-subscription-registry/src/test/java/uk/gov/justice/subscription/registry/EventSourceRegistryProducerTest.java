@@ -14,7 +14,7 @@ import static uk.gov.justice.subscription.domain.builders.EventSourceBuilder.eve
 
 import uk.gov.justice.subscription.EventSourcesParser;
 import uk.gov.justice.subscription.YamlFileFinder;
-import uk.gov.justice.subscription.domain.eventsource.EventSource;
+import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 import uk.gov.justice.subscription.domain.eventsource.Location;
 
 import java.io.IOException;
@@ -49,11 +49,11 @@ public class EventSourceRegistryProducerTest {
         final URL url_1 = new URL("file:/test");
         final URL url_2 = new URL("file:/test");
 
-        final EventSource eventSource1 = eventsource()
+        final EventSourceDefinition eventSource1 = eventsource()
                 .withLocation(mock(Location.class))
                 .withName(event_source_name_1).build();
 
-        final EventSource eventSource2 = eventsource()
+        final EventSourceDefinition eventSource2 = eventsource()
                 .withLocation(mock(Location.class))
                 .withName(event_source_name_2).build();
 
@@ -79,11 +79,11 @@ public class EventSourceRegistryProducerTest {
         final URL url_1 = new URL("file:/test");
         final URL url_2 = new URL("file:/test");
 
-        final EventSource eventSource1 = eventsource()
+        final EventSourceDefinition eventSource1 = eventsource()
                 .withLocation(mock(Location.class))
                 .withName(event_source_name_1).build();
 
-        final EventSource eventSource2 = eventsource()
+        final EventSourceDefinition eventSource2 = eventsource()
                 .withLocation(mock(Location.class))
                 .withName(event_source_name_2).build();
 

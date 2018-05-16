@@ -7,8 +7,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
 
-import uk.gov.justice.subscription.domain.eventsource.EventSource;
-import uk.gov.justice.subscription.domain.eventsource.EventSources;
+import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Event;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptor;
@@ -19,6 +18,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.junit.Test;
 
@@ -59,18 +59,17 @@ public class YamlParserTest {
 
         final YamlParser yamlParser = new YamlParser();
 
-        final EventSources eventSources = yamlParser.parseYamlFrom(url, EventSources.class);
+        final List<EventSourceDefinition> eventSourceList = yamlParser.parseYamlFrom(url, List.class);
 
-        final List<EventSource> eventSourceList = eventSources.getEventSources();
         assertThat(eventSourceList.size(), is(2));
 
-        final EventSource eventSource_1 = eventSourceList.get(0);
+        final EventSourceDefinition eventSource_1 = eventSourceList.get(0);
         assertThat(eventSource_1.getName(), is("people"));
         assertThat(eventSource_1.getLocation().getJmsUri(), is("jms:topic:people.event?timeToLive=1000"));
         assertThat(eventSource_1.getLocation().getRestUri(), is("http://localhost:8080/people/event-source-api/rest"));
         assertThat(eventSource_1.getLocation().getDataSource(), is(Optional.of("java:/app/peoplewarfilename/DS.eventstore")));
 
-        final EventSource eventSource_2 = eventSourceList.get(1);
+        final EventSourceDefinition eventSource_2 = eventSourceList.get(1);
         assertThat(eventSource_2.getName(), is("example"));
         assertThat(eventSource_2.getLocation().getJmsUri(), is("jms:topic:example.event?timeToLive=1000"));
         assertThat(eventSource_2.getLocation().getRestUri(), is("http://localhost:8080/example/event-source-api/rest"));

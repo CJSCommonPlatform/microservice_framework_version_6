@@ -6,8 +6,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static uk.gov.justice.subscription.domain.builders.EventSourcesBuilder.eventSources;
 
-import uk.gov.justice.subscription.domain.eventsource.EventSource;
-import uk.gov.justice.subscription.domain.eventsource.EventSources;
+import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 
 import org.junit.Test;
 
@@ -16,10 +15,10 @@ public class EventSourcesBuilderTest {
     @Test
     public void shouldBuildEventSources() throws Exception {
 
-        final EventSource event_source_1 = mock(EventSource.class);
-        final EventSource event_source_2 = mock(EventSource.class);
+        final EventSourceDefinition event_source_1 = mock(EventSourceDefinition.class);
+        final EventSourceDefinition event_source_2 = mock(EventSourceDefinition.class);
 
-        final EventSources eventSources = eventSources()
+        final EventSourcesDefinitionCollection eventSources = eventSources()
                 .withEventSources(asList(event_source_1, event_source_2))
                 .build();
 
@@ -30,10 +29,10 @@ public class EventSourcesBuilderTest {
     @Test
     public void shouldBeAbleToAddOneEventSourceAtATime() throws Exception {
 
-        final EventSource event_source_1 = mock(EventSource.class);
-        final EventSource event_source_2 = mock(EventSource.class);
+        final EventSourceDefinition event_source_1 = mock(EventSourceDefinition.class);
+        final EventSourceDefinition event_source_2 = mock(EventSourceDefinition.class);
 
-        final EventSources eventSources = eventSources()
+        final EventSourcesDefinitionCollection eventSources = eventSources()
                 .withEventSource(event_source_1)
                 .withEventSource(event_source_2)
                 .build();

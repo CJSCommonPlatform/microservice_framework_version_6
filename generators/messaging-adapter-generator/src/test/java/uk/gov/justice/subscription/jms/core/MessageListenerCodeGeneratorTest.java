@@ -12,7 +12,7 @@ import static uk.gov.justice.subscription.domain.builders.SubscriptionDescriptor
 import uk.gov.justice.maven.generator.io.files.parser.core.GeneratorProperties;
 import uk.gov.justice.raml.jms.config.GeneratorPropertiesFactory;
 import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
-import uk.gov.justice.subscription.domain.eventsource.EventSource;
+import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Event;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptor;
@@ -50,7 +50,7 @@ public class MessageListenerCodeGeneratorTest {
                 .build();
 
 
-        final EventSource eventSourceDefinition = eventsource()
+        final EventSourceDefinition eventSourceDefinition = eventsource()
                 .withName("eventsource")
                 .withLocation(location()
                         .withJmsUri(jmsUri)
@@ -58,7 +58,7 @@ public class MessageListenerCodeGeneratorTest {
                         .build())
                 .build();
 
-        final List<EventSource> eventSourceDefinitions = singletonList(eventSourceDefinition);
+        final List<EventSourceDefinition> eventSourceDefinitions = singletonList(eventSourceDefinition);
 
         final Subscription subscription = subscription()
                 .withName("subscription")
@@ -137,7 +137,7 @@ public class MessageListenerCodeGeneratorTest {
                 .withSchemaUri("http://justice.gov.uk/json/schemas/domains/example/my-context.events.something-else-happened.json")
                 .build();
 
-        final EventSource eventsource = eventsource()
+        final EventSourceDefinition eventsource = eventsource()
                 .withName("eventSource")
                 .withLocation(location()
                         .withJmsUri(jmsUri)
@@ -145,7 +145,7 @@ public class MessageListenerCodeGeneratorTest {
                         .build())
                 .build();
 
-        final List<EventSource> eventSourceDefinitions = singletonList(eventsource);
+        final List<EventSourceDefinition> eventSourceDefinitions = singletonList(eventsource);
 
         final Subscription subscription = subscription()
                 .withName("subscription")
@@ -221,7 +221,7 @@ public class MessageListenerCodeGeneratorTest {
                 .withSchemaUri("http://justice.gov.uk/json/schemas/domains/example/my-context.events.something-else-happened.json")
                 .build();
 
-        final EventSource eventSourceDefinition = eventsource()
+        final EventSourceDefinition eventSourceDefinition = eventsource()
                 .withName("eventsource")
                 .withLocation(location()
                         .withJmsUri(jmsUri)
@@ -229,7 +229,7 @@ public class MessageListenerCodeGeneratorTest {
                         .build())
                 .build();
 
-        final List<EventSource> eventSourceDefinitions = singletonList(eventSourceDefinition);
+        final List<EventSourceDefinition> eventSourceDefinitions = singletonList(eventSourceDefinition);
 
         final Subscription subscription = subscription()
                 .withName("subscription")

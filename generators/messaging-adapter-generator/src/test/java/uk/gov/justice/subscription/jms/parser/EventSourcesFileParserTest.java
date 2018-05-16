@@ -11,7 +11,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.subscription.EventSourcesParser;
-import uk.gov.justice.subscription.domain.eventsource.EventSource;
+import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 
 import java.net.URL;
 import java.nio.file.Path;
@@ -39,7 +39,7 @@ public class EventSourcesFileParserTest {
 
     @Test
     public void shouldReturnEventSources() throws Exception {
-        final EventSource eventSource = mock(EventSource.class);
+        final EventSourceDefinition eventSource = mock(EventSourceDefinition.class);
         final Path baseDir = Paths.get("/yaml");
 
         final Path eventSourcePath = Paths.get("event-sources.yaml");
@@ -52,7 +52,7 @@ public class EventSourcesFileParserTest {
         when(pathToUrlResolver.resolveToUrl(baseDir, eventSourcePath)).thenReturn(eventSourceUrl);
         when(eventSourcesParser.getEventSourcesFrom(urlList)).thenReturn(Stream.of(eventSource));
 
-        final List<EventSource> expectedEventSourceDefinitions = eventSourcesFileParser.getEventSources(baseDir, pathList);
+        final List<EventSourceDefinition> expectedEventSourceDefinitions = eventSourcesFileParser.getEventSources(baseDir, pathList);
 
         assertThat(expectedEventSourceDefinitions.size(), is(1));
         assertThat(expectedEventSourceDefinitions.get(0), is(eventSource));

@@ -2,7 +2,7 @@ package uk.gov.justice.subscription.registry;
 
 import uk.gov.justice.subscription.EventSourcesParser;
 import uk.gov.justice.subscription.YamlFileFinder;
-import uk.gov.justice.subscription.domain.eventsource.EventSource;
+import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 
 import java.io.IOException;
 import java.util.stream.Stream;
@@ -37,7 +37,7 @@ public class EventSourceRegistryProducer {
 
         if (null == eventSourceRegistry) {
             try {
-                final Stream<EventSource> eventSourcesFrom = eventSourcesParser.getEventSourcesFrom(yamlFileFinder.getEventSourcesPaths());
+                final Stream<EventSourceDefinition> eventSourcesFrom = eventSourcesParser.getEventSourcesFrom(yamlFileFinder.getEventSourcesPaths());
                 eventSourceRegistry = new EventSourceRegistry(eventSourcesFrom);
 
             } catch (final IOException e) {

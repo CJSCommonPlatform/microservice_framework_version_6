@@ -1,16 +1,16 @@
 package uk.gov.justice.subscription;
 
-import uk.gov.justice.subscription.domain.eventsource.EventSource;
-import uk.gov.justice.subscription.domain.eventsource.EventSources;
+import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 import uk.gov.justice.subscription.yaml.parser.YamlFileValidator;
 import uk.gov.justice.subscription.yaml.parser.YamlParser;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.stream.Stream;
+import java.util.List;
 
 /**
- * Parse YAML URLs into {@link EventSource}s
+ * Parse YAML URLs into {@link EventSourceDefinition}s
  */
 public class EventSourcesParser {
 
@@ -23,18 +23,22 @@ public class EventSourcesParser {
     }
 
     /**
-     * Return a Stream of {@link EventSource} from a Collection of YAML URLs
+     * Return a Stream of {@link EventSourceDefinition} from a Collection of YAML URLs
      *
      * @param urls the YAML URLs to parse
-     * @return Stream of {@link EventSource}
+     * @return Stream of {@link EventSourceDefinition}
      */
-    public Stream<EventSource> getEventSourcesFrom(final Collection<URL> urls) {
-        return urls.stream()
-                .flatMap(path -> parseEventSourcesFromYaml(path).getEventSources().stream());
+    public List<List<EventSourceDefinition>> getEventSourcesFrom(final Collection<URL> urls) {
+        final List<List<EventSourceDefinition>> eventSourceDefinitions = new ArrayList<>();
+        for (URL url : urls) {
+            eventSourceDefinitions.add(parseEventSourcesFromYaml(url));
+
+        }
+        return eventSourceDefinitions;
     }
 
-    private EventSources parseEventSourcesFromYaml(final URL url) {
+    private List<EventSourceDefinition> parseEventSourcesFromYaml(final URL url) {
         yamlFileValidator.validateEventSource(url);
-        return yamlParser.parseYamlFrom(url, EventSources.class);
+        return yamlParser.parseYamlFrom(url, List.class);
     }
 }

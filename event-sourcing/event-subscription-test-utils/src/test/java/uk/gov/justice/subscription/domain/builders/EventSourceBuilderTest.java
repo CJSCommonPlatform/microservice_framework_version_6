@@ -5,7 +5,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static uk.gov.justice.subscription.domain.builders.EventSourceBuilder.eventsource;
 
-import uk.gov.justice.subscription.domain.eventsource.EventSource;
+import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 import uk.gov.justice.subscription.domain.eventsource.Location;
 
 import org.junit.Test;
@@ -18,7 +18,7 @@ public class EventSourceBuilderTest {
         final String name = "name";
         final Location location = mock(Location.class);
 
-        final EventSource eventsource = eventsource()
+        final EventSourceDefinition eventsource = eventsource()
                 .withName(name)
                 .withLocation(location)
                 .build();

@@ -34,6 +34,7 @@ public class EventStreamManager {
     private final SystemEventService systemEventService;
     private final Enveloper enveloper;
     private final EventRepository eventRepository;
+    private final String eventSourceName;
 
     public EventStreamManager(
             final EventAppender eventAppender,
@@ -41,6 +42,7 @@ public class EventStreamManager {
             final SystemEventService systemEventService,
             final Enveloper enveloper,
             final EventRepository eventRepository,
+            final String eventSourceName,
             final Logger logger) {
 
         this.eventAppender = eventAppender;
@@ -49,6 +51,7 @@ public class EventStreamManager {
         this.systemEventService = systemEventService;
         this.enveloper = enveloper;
         this.eventRepository = eventRepository;
+        this.eventSourceName = eventSourceName;
     }
 
     /**
@@ -108,7 +111,7 @@ public class EventStreamManager {
             long retryCount = 0L;
             while (!appendedSuccessfully) {
                 try {
-                    eventAppender.append(event, streamId, ++currentVersion);
+                    eventAppender.append(event, streamId, ++currentVersion, eventSourceName);
                     appendedSuccessfully = true;
                 } catch (final OptimisticLockingRetryException e) {
                     retryCount++;
@@ -204,7 +207,7 @@ public class EventStreamManager {
         validateEvents(id, envelopeList);
 
         for (final JsonEnvelope event : envelopeList) {
-            eventAppender.append(event, id, ++currentPosition);
+            eventAppender.append(event, id, ++currentPosition, eventSourceName);
         }
         return currentPosition;
     }

@@ -42,13 +42,15 @@ public class EventStreamManagerFactoryTest {
     public void shouldProduceEventStreamManager() throws Exception {
 
         final long maxRetry = 23L;
+        final String eventSourceName = "evenSourceName";
+
         eventStreamManagerFactory.maxRetry = maxRetry;
 
         final EventRepository eventRepository = mock(EventRepository.class);
         when(publishingEventAppenderFactory.publishingEventAppender(eventRepository)).thenReturn(eventAppender);
 
         final EventStreamManager eventStreamManager = eventStreamManagerFactory.eventStreamManager(
-                eventRepository
+                eventRepository, eventSourceName
         );
 
         assertThat(getField(eventStreamManager, "eventAppender", EventAppender.class), is(eventAppender));

@@ -30,6 +30,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class PublishingEventAppenderTest {
 
+    private static final String DEFAULT_EVENT_SOURCE_NAME = "defaultEventSource";
+
     @Mock
     private JdbcBasedEventRepository eventRepository;
 
@@ -50,7 +52,7 @@ public class PublishingEventAppenderTest {
                         .withPayloadOf("payloadValue123", "somePayloadField")
                         .build(),
                 streamId,
-                3L);
+                3L, DEFAULT_EVENT_SOURCE_NAME);
 
         ArgumentCaptor<JsonEnvelope> envelopeCaptor = ArgumentCaptor.forClass(JsonEnvelope.class);
 
@@ -74,7 +76,7 @@ public class PublishingEventAppenderTest {
                         .withPayloadOf("payloadValue456", "someOtherPayloadField")
                         .build(),
                 streamId,
-                1L);
+                1L, DEFAULT_EVENT_SOURCE_NAME);
 
         ArgumentCaptor<JsonEnvelope> envelopeCaptor = ArgumentCaptor.forClass(JsonEnvelope.class);
 
@@ -90,7 +92,7 @@ public class PublishingEventAppenderTest {
     @Test(expected = EventStreamException.class)
     public void shouldThrowExceptionWhenStoreEventRequestFails() throws Exception {
         doThrow(StoreEventRequestFailedException.class).when(eventRepository).storeEvent(any());
-        eventAppender.append(envelope().with(metadataWithDefaults()).build(), randomUUID(), 1l);
+        eventAppender.append(envelope().with(metadataWithDefaults()).build(), randomUUID(), 1l, DEFAULT_EVENT_SOURCE_NAME);
     }
 
     @Test
@@ -105,7 +107,7 @@ public class PublishingEventAppenderTest {
                         .withPayloadOf("payloadValue456", "someOtherPayloadField")
                         .build(),
                 streamId,
-                firstStreamEvent);
+                firstStreamEvent, DEFAULT_EVENT_SOURCE_NAME);
 
         final ArgumentCaptor<UUID> streamIdCapture = ArgumentCaptor.forClass(UUID.class);
 
@@ -127,7 +129,7 @@ public class PublishingEventAppenderTest {
                         .withPayloadOf("payloadValue456", "someOtherPayloadField")
                         .build(),
                 streamId,
-                secondStreamEvent);
+                secondStreamEvent, DEFAULT_EVENT_SOURCE_NAME);
 
         verify(eventRepository, times(0)).
                 createEventStream(streamId);

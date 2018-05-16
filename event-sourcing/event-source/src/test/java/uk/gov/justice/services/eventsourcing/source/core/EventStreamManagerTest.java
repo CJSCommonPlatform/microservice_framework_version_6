@@ -24,7 +24,6 @@ import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderF
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUIDAndName;
 
 import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.JdbcBasedEventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.OptimisticLockingRetryException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
@@ -43,9 +42,6 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
 
@@ -56,6 +52,7 @@ public class EventStreamManagerTest {
     private static final Long INITIAL_VERSION = 0L;
     private static final Long CURRENT_VERSION = 5L;
     private static final Long INVALID_VERSION = 8L;
+    private static final String EVENT_SOURCE_NAME = "eventSourceName";
 
     private final Logger logger = mock(Logger.class);
     private final JdbcBasedEventRepository eventRepository = mock(JdbcBasedEventRepository.class);
@@ -73,8 +70,8 @@ public class EventStreamManagerTest {
             systemEventService,
             enveloper,
             eventRepository,
-            logger
-    );
+            EVENT_SOURCE_NAME,
+            logger);
 
     @Captor
     private ArgumentCaptor<JsonEnvelope> eventCaptor;
@@ -94,7 +91,7 @@ public class EventStreamManagerTest {
 
         eventStreamManager.append(STREAM_ID, Stream.of(event));
 
-        verify(eventAppender).append(event, STREAM_ID, INITIAL_VERSION + 1);
+        verify(eventAppender).append(event, STREAM_ID, INITIAL_VERSION + 1, EVENT_SOURCE_NAME);
 
     }
 
@@ -111,7 +108,7 @@ public class EventStreamManagerTest {
         final JsonEnvelope event = envelope().with(metadataWithRandomUUIDAndName()).build();
         eventStreamManager.appendAfter(STREAM_ID, Stream.of(event), CURRENT_VERSION);
 
-        verify(eventAppender).append(event, STREAM_ID, expectedVersion);
+        verify(eventAppender).append(event, STREAM_ID, expectedVersion, EVENT_SOURCE_NAME);
     }
 
     @Test
@@ -201,8 +198,8 @@ public class EventStreamManagerTest {
 
         eventStreamManager.appendNonConsecutively(STREAM_ID, Stream.of(event1, event2));
 
-        verify(eventAppender).append(event1, STREAM_ID, CURRENT_VERSION + 1);
-        verify(eventAppender).append(event2, STREAM_ID, CURRENT_VERSION + 2);
+        verify(eventAppender).append(event1, STREAM_ID, CURRENT_VERSION + 1, EVENT_SOURCE_NAME);
+        verify(eventAppender).append(event2, STREAM_ID, CURRENT_VERSION + 2, EVENT_SOURCE_NAME);
 
     }
 
@@ -233,14 +230,14 @@ public class EventStreamManagerTest {
         final JsonEnvelope event2 = envelope().with(metadataWithDefaults()).build();
         final JsonEnvelope event3 = envelope().with(metadataWithDefaults()).build();
 
-        doThrow(OptimisticLockingRetryException.class).when(eventAppender).append(event2, STREAM_ID, currentVersion + 2);
+        doThrow(OptimisticLockingRetryException.class).when(eventAppender).append(event2, STREAM_ID, currentVersion + 2, EVENT_SOURCE_NAME);
 
         eventStreamManager.appendNonConsecutively(STREAM_ID, Stream.of(event1, event2, event3));
 
-        verify(eventAppender).append(event1, STREAM_ID, currentVersion + 1);
-        verify(eventAppender).append(event2, STREAM_ID, currentVersion + 2);
-        verify(eventAppender).append(event2, STREAM_ID, currentVersionAfterException + 1);
-        verify(eventAppender).append(event3, STREAM_ID, currentVersionAfterException + 2);
+        verify(eventAppender).append(event1, STREAM_ID, currentVersion + 1, EVENT_SOURCE_NAME);
+        verify(eventAppender).append(event2, STREAM_ID, currentVersion + 2, EVENT_SOURCE_NAME);
+        verify(eventAppender).append(event2, STREAM_ID, currentVersionAfterException + 1, EVENT_SOURCE_NAME);
+        verify(eventAppender).append(event3, STREAM_ID, currentVersionAfterException + 2, EVENT_SOURCE_NAME);
     }
 
     @Test
@@ -259,7 +256,7 @@ public class EventStreamManagerTest {
         final JsonEnvelope event2 = envelope().with(metadataWithDefaults()).build();
         final JsonEnvelope event3 = envelope().with(metadataWithDefaults()).build();
 
-        doThrow(OptimisticLockingRetryException.class).when(eventAppender).append(event2, STREAM_ID, currentVersion + 2);
+        doThrow(OptimisticLockingRetryException.class).when(eventAppender).append(event2, STREAM_ID, currentVersion + 2, EVENT_SOURCE_NAME);
 
         eventStreamManager.appendNonConsecutively(STREAM_ID, Stream.of(event1, event2, event3));
 
@@ -282,9 +279,9 @@ public class EventStreamManagerTest {
 
         final JsonEnvelope event = envelope().with(metadataWithDefaults()).build();
 
-        doThrow(OptimisticLockingRetryException.class).when(eventAppender).append(event, STREAM_ID, currentVersion + 1);
-        doThrow(OptimisticLockingRetryException.class).when(eventAppender).append(event, STREAM_ID, currentVersionAfterException1 + 1);
-        doThrow(OptimisticLockingRetryException.class).when(eventAppender).append(event, STREAM_ID, currentVersionAfterException2 + 1);
+        doThrow(OptimisticLockingRetryException.class).when(eventAppender).append(event, STREAM_ID, currentVersion + 1, EVENT_SOURCE_NAME);
+        doThrow(OptimisticLockingRetryException.class).when(eventAppender).append(event, STREAM_ID, currentVersionAfterException1 + 1, EVENT_SOURCE_NAME);
+        doThrow(OptimisticLockingRetryException.class).when(eventAppender).append(event, STREAM_ID, currentVersionAfterException2 + 1, EVENT_SOURCE_NAME);
 
         expectedException.expect(OptimisticLockingRetryException.class);
 
@@ -308,9 +305,9 @@ public class EventStreamManagerTest {
 
         final JsonEnvelope event = envelope().with(metadataWithDefaults()).build();
 
-        doThrow(OptimisticLockingRetryException.class).when(eventAppender).append(event, STREAM_ID, currentVersion + 1);
-        doThrow(OptimisticLockingRetryException.class).when(eventAppender).append(event, STREAM_ID, currentVersionAfterException1 + 1);
-        doThrow(OptimisticLockingRetryException.class).when(eventAppender).append(event, STREAM_ID, currentVersionAfterException2 + 1);
+        doThrow(OptimisticLockingRetryException.class).when(eventAppender).append(event, STREAM_ID, currentVersion + 1, EVENT_SOURCE_NAME);
+        doThrow(OptimisticLockingRetryException.class).when(eventAppender).append(event, STREAM_ID, currentVersionAfterException1 + 1, EVENT_SOURCE_NAME);
+        doThrow(OptimisticLockingRetryException.class).when(eventAppender).append(event, STREAM_ID, currentVersionAfterException2 + 1, EVENT_SOURCE_NAME);
 
         try {
             eventStreamManager.appendNonConsecutively(STREAM_ID, Stream.of(event));
@@ -333,7 +330,7 @@ public class EventStreamManagerTest {
         assertThat(clonedId, is(notNullValue()));
         assertThat(clonedId, is(not(STREAM_ID)));
 
-        verify(eventAppender, times(2)).append(eventCaptor.capture(), eq(clonedId), versionCaptor.capture());
+        verify(eventAppender, times(2)).append(eventCaptor.capture(), eq(clonedId), versionCaptor.capture(), eq(EVENT_SOURCE_NAME));
         final List<JsonEnvelope> clonedEvents = eventCaptor.getAllValues();
 
         assertThat(versionCaptor.getAllValues(), hasItems(1L, 2L));
@@ -359,7 +356,7 @@ public class EventStreamManagerTest {
         assertThat(clonedId, is(notNullValue()));
         assertThat(clonedId, is(not(STREAM_ID)));
 
-        verify(eventAppender, times(3)).append(eventCaptor.capture(), eq(clonedId), versionCaptor.capture());
+        verify(eventAppender, times(3)).append(eventCaptor.capture(), eq(clonedId), versionCaptor.capture(), eq(EVENT_SOURCE_NAME));
         assertThat(versionCaptor.getAllValues(), hasItems(1L, 2L, 3L));
 
         verify(eventRepository).markEventStreamActive(clonedId, false);

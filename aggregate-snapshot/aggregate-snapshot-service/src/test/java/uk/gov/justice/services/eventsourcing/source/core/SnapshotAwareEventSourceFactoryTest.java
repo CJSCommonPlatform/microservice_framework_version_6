@@ -26,6 +26,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SnapshotAwareEventSourceFactoryTest {
+    private static final String EVENT_SOURCE_NAME = "eventSourceName";
 
     @Mock
     EventStreamManagerFactory eventStreamManagerFactory;
@@ -63,7 +64,7 @@ public class SnapshotAwareEventSourceFactoryTest {
                 eventJdbcRepository,
                 eventStreamJdbcRepository)).thenReturn(eventRepository);
 
-        when(eventStreamManagerFactory.eventStreamManager(eventRepository)).thenReturn(eventStreamManager);
+        when(eventStreamManagerFactory.eventStreamManager(eventRepository, EVENT_SOURCE_NAME)).thenReturn(eventStreamManager);
 
         final EventSource eventSource = snapshotAwareEventSourceFactory.create(jndiDatasource, eventSourceName);
 

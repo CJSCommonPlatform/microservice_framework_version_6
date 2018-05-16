@@ -44,7 +44,7 @@ public class JdbcEventSourceFactoryTest {
     public void shouldCreateJdbcBasedEventSource() throws Exception {
 
         final String jndiDatasource = "jndiDatasource";
-        final String sourceName = "sourceName";
+        final String eventSourceName = "eventSourceName";
 
         final EventJdbcRepository eventJdbcRepository = mock(EventJdbcRepository.class);
         final EventStreamJdbcRepository eventStreamJdbcRepository = mock(EventStreamJdbcRepository.class);
@@ -58,14 +58,14 @@ public class JdbcEventSourceFactoryTest {
                 eventJdbcRepository,
                 eventStreamJdbcRepository)).thenReturn(eventRepository);
 
-        when(eventStreamManagerFactory.eventStreamManager(eventRepository)).thenReturn(eventStreamManager);
+        when(eventStreamManagerFactory.eventStreamManager(eventRepository, eventSourceName)).thenReturn(eventStreamManager);
 
-        final JdbcBasedEventSource jdbcBasedEventSource = jdbcEventSourceFactory.create(jndiDatasource, sourceName);
+        final JdbcBasedEventSource jdbcBasedEventSource = jdbcEventSourceFactory.create(jndiDatasource, eventSourceName);
 
 
         assertThat(fieldValueAs(jdbcBasedEventSource, "eventStreamManager", EventStreamManager.class), is(eventStreamManager));
         assertThat(fieldValueAs(jdbcBasedEventSource, "eventRepository", EventRepository.class), is(eventRepository));
-        assertThat(fieldValueAs(jdbcBasedEventSource, "name", String.class), is(sourceName));
+        assertThat(fieldValueAs(jdbcBasedEventSource, "name", String.class), is(eventSourceName));
     }
 
     private <T> T fieldValueAs(final Object object, final String fieldName, final Class<T> type) throws Exception {

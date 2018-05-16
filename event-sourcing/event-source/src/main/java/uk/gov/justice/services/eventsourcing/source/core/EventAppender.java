@@ -17,9 +17,9 @@ public interface EventAppender {
      * @param streamId - id of the stream the event will be part of
      * @param version  - version id of the event in the stream
      */
-    void append(final JsonEnvelope event, final UUID streamId, final long version) throws EventStreamException;
+    void append(final JsonEnvelope event, final UUID streamId, final long version, final String eventSourceName) throws EventStreamException;
 
-    default JsonEnvelope eventFrom(final JsonEnvelope event, final UUID streamId, final long version) {
-        return envelopeFrom(metadataFrom(event.metadata()).withStreamId(streamId).withVersion(version), event.payloadAsJsonObject());
+    default JsonEnvelope eventFrom(final JsonEnvelope event, final UUID streamId, final long version, final String eventSourceName) {
+        return envelopeFrom(metadataFrom(event.metadata()).withStreamId(streamId).withVersion(version).withSource(eventSourceName), event.payloadAsJsonObject());
     }
 }

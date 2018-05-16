@@ -32,12 +32,12 @@ public class PublishingEventAppender implements EventAppender {
      * @param version  - version id of the event in the stream
      */
     @Override
-    public void append(final JsonEnvelope event, final UUID streamId, final long version) throws EventStreamException {
+    public void append(final JsonEnvelope event, final UUID streamId, final long version, final String eventSourceName) throws EventStreamException {
         try {
             if (version == INITIAL_EVENT_VERSION) {
                 eventRepository.createEventStream(streamId);
             }
-            final JsonEnvelope eventWithStreamIdAndVersion = eventFrom(event, streamId, version);
+            final JsonEnvelope eventWithStreamIdAndVersion = eventFrom(event, streamId, version, eventSourceName);
             eventRepository.storeEvent(eventWithStreamIdAndVersion);
             eventPublisher.publish(eventWithStreamIdAndVersion);
         } catch (StoreEventRequestFailedException e) {

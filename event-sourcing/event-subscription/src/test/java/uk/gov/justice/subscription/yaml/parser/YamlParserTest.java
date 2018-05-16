@@ -8,18 +8,18 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
 
 import uk.gov.justice.subscription.domain.eventsource.EventSource;
-import uk.gov.justice.subscription.domain.eventsource.EventSources;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Event;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptor;
-import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptorDef;
 
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.junit.Test;
 
 public class YamlParserTest {
@@ -31,8 +31,11 @@ public class YamlParserTest {
 
         final YamlParser yamlParser = new YamlParser();
 
-        final SubscriptionDescriptor subscriptionDescriptor = yamlParser.parseYamlFrom(url, SubscriptionDescriptorDef.class).getSubscriptionDescriptor();
-
+        final TypeReference<Map<String,SubscriptionDescriptor>> typeReference
+                = new TypeReference<Map<String,SubscriptionDescriptor>>() {
+        };
+        final Map<String,SubscriptionDescriptor> subscriptionDescriptorDef = yamlParser.parseYamlFrom(url, typeReference);
+        final SubscriptionDescriptor subscriptionDescriptor = subscriptionDescriptorDef.get("subscription_descriptor");
         assertThat(subscriptionDescriptor.getService(), is("examplecontext"));
         assertThat(subscriptionDescriptor.getServiceComponent(), is("EVENT_LISTENER"));
         assertThat(subscriptionDescriptor.getSpecVersion(), is("1.0.0"));
@@ -58,19 +61,20 @@ public class YamlParserTest {
         final URL url = getFromClasspath("yaml/event-sources.yaml");
 
         final YamlParser yamlParser = new YamlParser();
+        final TypeReference<Map<String, List<EventSource>>> typeReference
+                = new TypeReference<Map<String, List<EventSource>>>() {
+        };
+        final Map<String, List<EventSource>> stringListMap = yamlParser.parseYamlFrom(url, typeReference);
+        final List<EventSource> eventSources = stringListMap.get("event_sources");
+        assertThat(eventSources.size(), is(2));
 
-        final EventSources eventSources = yamlParser.parseYamlFrom(url, EventSources.class);
-
-        final List<EventSource> eventSourceList = eventSources.getEventSources();
-        assertThat(eventSourceList.size(), is(2));
-
-        final EventSource eventSource_1 = eventSourceList.get(0);
+        final EventSource eventSource_1 = eventSources.get(0);
         assertThat(eventSource_1.getName(), is("people"));
         assertThat(eventSource_1.getLocation().getJmsUri(), is("jms:topic:people.event?timeToLive=1000"));
         assertThat(eventSource_1.getLocation().getRestUri(), is("http://localhost:8080/people/event-source-api/rest"));
         assertThat(eventSource_1.getLocation().getDataSource(), is(Optional.of("java:/app/peoplewarfilename/DS.eventstore")));
 
-        final EventSource eventSource_2 = eventSourceList.get(1);
+        final EventSource eventSource_2 = eventSources.get(1);
         assertThat(eventSource_2.getName(), is("example"));
         assertThat(eventSource_2.getLocation().getJmsUri(), is("jms:topic:example.event?timeToLive=1000"));
         assertThat(eventSource_2.getLocation().getRestUri(), is("http://localhost:8080/example/event-source-api/rest"));
@@ -78,12 +82,30 @@ public class YamlParserTest {
     }
 
     @Test
-    public void shouldThrowFileNotFoundException() throws Exception {
+    public void shouldThrowFileNotFoundExceptionForTypeReference() throws Exception {
 
         final URL url = get("this-subscription-does-not-exist.yaml").toUri().toURL();
         try {
             final YamlParser yamlParser = new YamlParser();
-            yamlParser.parseYamlFrom(url, SubscriptionDescriptorDef.class);
+            final TypeReference<SubscriptionDescriptor> typeReference
+                    = new TypeReference<SubscriptionDescriptor>() {
+            };
+            yamlParser.parseYamlFrom(url, typeReference);
+            fail();
+        } catch (final YamlParserException e) {
+            assertThat(e.getCause(), is(instanceOf(FileNotFoundException.class)));
+            assertThat(e.getMessage(), containsString("Failed to read YAML file"));
+            assertThat(e.getMessage(), containsString("this-subscription-does-not-exist.yaml"));
+        }
+    }
+
+    @Test
+    public void shouldThrowFileNotFoundExceptionForClassType() throws Exception {
+
+        final URL url = get("this-subscription-does-not-exist.yaml").toUri().toURL();
+        try {
+            final YamlParser yamlParser = new YamlParser();
+            yamlParser.parseYamlFrom(url, EventSource.class);
             fail();
         } catch (final YamlParserException e) {
             assertThat(e.getCause(), is(instanceOf(FileNotFoundException.class)));

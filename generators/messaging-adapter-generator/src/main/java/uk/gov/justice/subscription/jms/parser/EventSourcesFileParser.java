@@ -32,7 +32,7 @@ public class EventSourcesFileParser {
             throw new FileParserException("No event-sources.yaml files found!");
         }
 
-        return eventSourcesParser.getEventSourcesFrom(eventSourcesPaths).collect(toList());
+        return eventSourcesParser.eventSourcesFrom(eventSourcesPaths).collect(toList());
     }
 
     private Predicate<Path> isEventSource = path -> path.endsWith("event-sources.yaml");

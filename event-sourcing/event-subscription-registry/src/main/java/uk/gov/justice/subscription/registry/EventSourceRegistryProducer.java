@@ -37,14 +37,13 @@ public class EventSourceRegistryProducer {
 
         if (null == eventSourceRegistry) {
             try {
-                final Stream<EventSource> eventSourcesFrom = eventSourcesParser.getEventSourcesFrom(yamlFileFinder.getEventSourcesPaths());
+                final Stream<EventSource> eventSourcesFrom = eventSourcesParser.eventSourcesFrom(yamlFileFinder.getEventSourcesPaths());
                 eventSourceRegistry = new EventSourceRegistry(eventSourcesFrom);
 
             } catch (final IOException e) {
                 throw new RegistryException("Failed to find yaml/event-sources.yaml resources on the classpath", e);
             }
         }
-
         return eventSourceRegistry;
     }
 

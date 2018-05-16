@@ -1,21 +1,29 @@
 package uk.gov.justice.subscription;
 
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptor;
-import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptorDef;
 import uk.gov.justice.subscription.yaml.parser.YamlFileValidator;
 import uk.gov.justice.subscription.yaml.parser.YamlParser;
 
 import java.net.URL;
 import java.util.Collection;
+import java.util.Map;
 import java.util.stream.Stream;
+
+import com.fasterxml.jackson.core.type.TypeReference;
 
 /**
  * Parse YAML URLs into {@link SubscriptionDescriptor}s
  */
 public class SubscriptionDescriptorsParser {
+    private static final TypeReference<Map<String, SubscriptionDescriptor>> SUBSCRIPTION_DESCRIPTOR_TYPE_REF
+            = new TypeReference<Map<String, SubscriptionDescriptor>>() {
+    };
+
+    private static final String SUBSCRIPTION_DESCRIPTOR = "subscription_descriptor";
 
     private YamlParser yamlParser;
     private YamlFileValidator yamlFileValidator;
+
 
     public SubscriptionDescriptorsParser(final YamlParser yamlParser, final YamlFileValidator yamlFileValidator) {
         this.yamlParser = yamlParser;
@@ -29,12 +37,12 @@ public class SubscriptionDescriptorsParser {
      * @return Stream of {@link SubscriptionDescriptor}
      */
     public Stream<SubscriptionDescriptor> getSubscriptionDescriptorsFrom(final Collection<URL> urls) {
-        return urls.stream()
-                .map(this::parseSubscriptionDescriptorFromYaml);
+        return urls.stream().map(this::parseSubscriptionDescriptorFromYaml);
     }
 
     private SubscriptionDescriptor parseSubscriptionDescriptorFromYaml(final URL url) {
         yamlFileValidator.validateSubscription(url);
-        return yamlParser.parseYamlFrom(url, SubscriptionDescriptorDef.class).getSubscriptionDescriptor();
+        final Map<String, SubscriptionDescriptor> stringSubscriptionDescriptorMap = yamlParser.parseYamlFrom(url, SUBSCRIPTION_DESCRIPTOR_TYPE_REF);
+        return stringSubscriptionDescriptorMap.get(SUBSCRIPTION_DESCRIPTOR);
     }
 }

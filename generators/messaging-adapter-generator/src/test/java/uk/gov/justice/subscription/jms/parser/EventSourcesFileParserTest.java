@@ -50,7 +50,7 @@ public class EventSourcesFileParserTest {
         final List<URL> urlList = singletonList(eventSourceUrl);
 
         when(pathToUrlResolver.resolveToUrl(baseDir, eventSourcePath)).thenReturn(eventSourceUrl);
-        when(eventSourcesParser.getEventSourcesFrom(urlList)).thenReturn(Stream.of(eventSource));
+        when(eventSourcesParser.eventSourcesFrom(urlList)).thenReturn(Stream.of(eventSource));
 
         final List<EventSource> expectedEventSourceDefinitions = eventSourcesFileParser.getEventSources(baseDir, pathList);
 

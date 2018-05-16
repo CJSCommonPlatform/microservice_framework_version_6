@@ -42,7 +42,7 @@ public class EventSourcesParserTest {
     public void shouldParseAllEventSources() throws Exception {
         final URL url = getFromClasspath("yaml/event-sources.yaml");
 
-        final List<EventSource> eventSourcesFrom = eventSourcesParser.getEventSourcesFrom(singletonList(url)).collect(toList());
+        final List<EventSource> eventSourcesFrom = eventSourcesParser.eventSourcesFrom(singletonList(url)).collect(toList());;
 
         assertThat(eventSourcesFrom.size(), is(2));
         assertThat(eventSourcesFrom.get(0).getName(), is("people"));

@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
+## [4.0.4] - 2018-05-17
+- Upgrade Jackson to 2.8.11 to fix Jackson security issues 
+
 ## [4.0.3] - 2018-05-10
 ### Changed
 - Makes TestDataSourceFactory lock rows in the same way as postgresql

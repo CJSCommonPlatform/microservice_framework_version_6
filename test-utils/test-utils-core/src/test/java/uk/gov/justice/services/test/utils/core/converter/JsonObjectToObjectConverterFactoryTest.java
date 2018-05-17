@@ -27,17 +27,16 @@ public class JsonObjectToObjectConverterFactoryTest {
         assertThat(convertedPojo.getTestAttribute(), is("testValue"));
     }
 
-    private class TestPojo {
+    private static class TestPojo {
 
-        private String testAttribute;
+        private final String testAttribute;
+
+        private TestPojo(final String testAttribute) {
+            this.testAttribute = testAttribute;
+        }
 
         public String getTestAttribute() {
             return testAttribute;
         }
-
-        public void setTestAttribute(String testAttribute) {
-            this.testAttribute = testAttribute;
-        }
-
     }
 }

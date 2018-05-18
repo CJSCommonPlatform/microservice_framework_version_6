@@ -40,7 +40,7 @@ public class FileBasedJsonSchemaValidator {
      * @param actionName   the message type name
      */
     public void validateWithoutSchemaCatalog(final String envelopeJson, final String actionName) {
-        logger.info("Falling back to file based schema lookup, no catalog schema found for: {}", actionName);
+        logger.debug("Falling back to file based schema lookup, no catalog schema found for: {}", actionName);
         final JSONObject payload = payloadExtractor.extractPayloadFrom(envelopeJson);
 
         try {

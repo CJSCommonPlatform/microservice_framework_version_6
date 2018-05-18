@@ -1,18 +1,26 @@
 package uk.gov.justice.subscription;
 
-import uk.gov.justice.subscription.domain.eventsource.EventSource;
-import uk.gov.justice.subscription.domain.eventsource.EventSources;
+import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 import uk.gov.justice.subscription.yaml.parser.YamlFileValidator;
 import uk.gov.justice.subscription.yaml.parser.YamlParser;
 
 import java.net.URL;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
 /**
- * Parse YAML URLs into {@link EventSource}s
+ * Parse YAML URLs into {@link EventSourceDefinition}s
  */
 public class EventSourcesParser {
+    private static final TypeReference<Map<String, List<EventSourceDefinition>>> EVENT_SOURCES_TYPE_REF
+            = new TypeReference<Map<String, List<EventSourceDefinition>>>() {
+    };
+
+    private static final String EVENT_SOURCES = "event_sources";
 
     private final YamlParser yamlParser;
     private final YamlFileValidator yamlFileValidator;
@@ -23,18 +31,18 @@ public class EventSourcesParser {
     }
 
     /**
-     * Return a Stream of {@link EventSource} from a Collection of YAML URLs
+     * Return a Stream of {@link EventSourceDefinition} from a Collection of YAML URLs
      *
      * @param urls the YAML URLs to parse
-     * @return Stream of {@link EventSource}
+     * @return Stream of {@link EventSourceDefinition}
      */
-    public Stream<EventSource> getEventSourcesFrom(final Collection<URL> urls) {
-        return urls.stream()
-                .flatMap(path -> parseEventSourcesFromYaml(path).getEventSources().stream());
+    public Stream<EventSourceDefinition> eventSourcesFrom(final Collection<URL> urls) {
+        return urls.stream().flatMap(this::parseEventSourcesFromYaml);
     }
 
-    private EventSources parseEventSourcesFromYaml(final URL url) {
+    private Stream<EventSourceDefinition> parseEventSourcesFromYaml(final URL url) {
         yamlFileValidator.validateEventSource(url);
-        return yamlParser.parseYamlFrom(url, EventSources.class);
+        final Map<String, List<EventSourceDefinition>> stringListMap = yamlParser.parseYamlFrom(url, EVENT_SOURCES_TYPE_REF);
+        return stringListMap.get(EVENT_SOURCES).stream();
     }
 }

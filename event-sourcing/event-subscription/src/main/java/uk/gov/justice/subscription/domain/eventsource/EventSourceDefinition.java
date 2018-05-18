@@ -1,11 +1,11 @@
 package uk.gov.justice.subscription.domain.eventsource;
 
-public class EventSource {
+public class EventSourceDefinition {
 
     private final String name;
     private final Location location;
 
-    public EventSource(final String name, final Location location) {
+    public EventSourceDefinition(final String name, final Location location) {
         this.name = name;
         this.location = location;
     }

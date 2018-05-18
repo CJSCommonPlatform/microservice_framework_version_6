@@ -71,7 +71,7 @@ import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
 import uk.gov.justice.services.messaging.logging.TraceLogger;
 import uk.gov.justice.subscription.ParserProducer;
 import uk.gov.justice.subscription.YamlFileFinder;
-import uk.gov.justice.subscription.registry.EventSourceRegistryProducer;
+import uk.gov.justice.subscription.registry.EventSourceDefinitionRegistryProducer;
 import uk.gov.justice.subscription.yaml.parser.YamlParser;
 import uk.gov.justice.subscription.yaml.parser.YamlSchemaLoader;
 
@@ -208,7 +208,7 @@ public class EventStreamPageIT {
             DefaultEnvelopeConverter.class,
             JsonObjectToObjectConverter.class,
             EventSourceProducer.class,
-            EventSourceRegistryProducer.class,
+            EventSourceDefinitionRegistryProducer.class,
             ParserProducer.class,
             YamlFileFinder.class,
             YamlParser.class,

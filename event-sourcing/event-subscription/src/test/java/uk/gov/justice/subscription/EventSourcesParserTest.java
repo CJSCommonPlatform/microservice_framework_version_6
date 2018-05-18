@@ -8,7 +8,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.justice.subscription.domain.eventsource.EventSource;
+import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 import uk.gov.justice.subscription.yaml.parser.YamlFileValidator;
 import uk.gov.justice.subscription.yaml.parser.YamlParser;
 import uk.gov.justice.subscription.yaml.parser.YamlSchemaLoader;
@@ -42,22 +42,22 @@ public class EventSourcesParserTest {
     public void shouldParseAllEventSources() throws Exception {
         final URL url = getFromClasspath("yaml/event-sources.yaml");
 
-        final List<EventSource> eventSourcesFrom = eventSourcesParser.eventSourcesFrom(singletonList(url)).collect(toList());;
+        final List<EventSourceDefinition> eventSourceDefinitionsFrom = eventSourcesParser.eventSourcesFrom(singletonList(url)).collect(toList());;
 
-        assertThat(eventSourcesFrom.size(), is(2));
-        assertThat(eventSourcesFrom.get(0).getName(), is("people"));
+        assertThat(eventSourceDefinitionsFrom.size(), is(2));
+        assertThat(eventSourceDefinitionsFrom.get(0).getName(), is("people"));
 
-        assertThat(eventSourcesFrom.get(0).getLocation(), is(notNullValue()));
-        assertThat(eventSourcesFrom.get(0).getLocation().getJmsUri(), is("jms:topic:people.event?timeToLive=1000"));
-        assertThat(eventSourcesFrom.get(0).getLocation().getRestUri(), is("http://localhost:8080/people/event-source-api/rest"));
-        assertThat(eventSourcesFrom.get(0).getLocation().getDataSource(), is(Optional.of("java:/app/peoplewarfilename/DS.eventstore")));
+        assertThat(eventSourceDefinitionsFrom.get(0).getLocation(), is(notNullValue()));
+        assertThat(eventSourceDefinitionsFrom.get(0).getLocation().getJmsUri(), is("jms:topic:people.event?timeToLive=1000"));
+        assertThat(eventSourceDefinitionsFrom.get(0).getLocation().getRestUri(), is("http://localhost:8080/people/event-source-api/rest"));
+        assertThat(eventSourceDefinitionsFrom.get(0).getLocation().getDataSource(), is(Optional.of("java:/app/peoplewarfilename/DS.eventstore")));
 
-        assertThat(eventSourcesFrom.get(1).getName(), is("example"));
+        assertThat(eventSourceDefinitionsFrom.get(1).getName(), is("example"));
 
-        assertThat(eventSourcesFrom.get(1).getLocation(), is(notNullValue()));
-        assertThat(eventSourcesFrom.get(1).getLocation().getJmsUri(), is("jms:topic:example.event?timeToLive=1000"));
-        assertThat(eventSourcesFrom.get(1).getLocation().getRestUri(), is("http://localhost:8080/example/event-source-api/rest"));
-        assertThat(eventSourcesFrom.get(1).getLocation().getDataSource(), is(Optional.empty()));
+        assertThat(eventSourceDefinitionsFrom.get(1).getLocation(), is(notNullValue()));
+        assertThat(eventSourceDefinitionsFrom.get(1).getLocation().getJmsUri(), is("jms:topic:example.event?timeToLive=1000"));
+        assertThat(eventSourceDefinitionsFrom.get(1).getLocation().getRestUri(), is("http://localhost:8080/example/event-source-api/rest"));
+        assertThat(eventSourceDefinitionsFrom.get(1).getLocation().getDataSource(), is(Optional.empty()));
     }
 
 

@@ -20,7 +20,7 @@ import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperti
 import uk.gov.justice.services.messaging.logging.LoggerUtils;
 import uk.gov.justice.services.subscription.SubscriptionManager;
 import uk.gov.justice.services.subscription.annotation.SubscriptionName;
-import uk.gov.justice.subscription.domain.eventsource.EventSource;
+import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Event;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptor;
@@ -109,7 +109,7 @@ public class MessageListenerCodeGenerator {
         if (componentDestinationType.isSupported(serviceComponent)) {
 
             final ClassName className = classNameFactory.classNameFor(JMS_LISTENER);
-            final EventSource eventSourceDefinition = subscriptionWrapper.getEventSourceByName(subscription.getEventSourceName());
+            final EventSourceDefinition eventSourceDefinition = subscriptionWrapper.getEventSourceByName(subscription.getEventSourceName());
             final String destination = destinationFromJmsUri(eventSourceDefinition.getLocation().getJmsUri());
 
             final TypeSpec.Builder typeSpecBuilder = classBuilder(className)

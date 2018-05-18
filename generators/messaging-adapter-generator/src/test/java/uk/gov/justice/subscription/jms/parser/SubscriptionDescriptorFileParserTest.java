@@ -8,7 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.subscription.SubscriptionDescriptorsParser;
-import uk.gov.justice.subscription.domain.eventsource.EventSource;
+import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptor;
 
 import java.net.URL;
@@ -39,7 +39,7 @@ public class SubscriptionDescriptorFileParserTest {
     @Test
     public void shouldCreateSubscriptionWrappers() throws Exception {
 
-        final EventSource eventSourceDefinition = mock(EventSource.class);
+        final EventSourceDefinition eventSourceDefinition = mock(EventSourceDefinition.class);
         final SubscriptionDescriptor subscriptionDescriptor = mock(SubscriptionDescriptor.class);
 
         final Path baseDir = Paths.get("/yaml");

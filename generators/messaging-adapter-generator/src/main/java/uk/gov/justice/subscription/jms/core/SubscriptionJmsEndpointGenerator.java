@@ -8,7 +8,7 @@ import uk.gov.justice.maven.generator.io.files.parser.core.Generator;
 import uk.gov.justice.maven.generator.io.files.parser.core.GeneratorConfig;
 import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperties;
 import uk.gov.justice.services.generators.commons.mapping.SubscriptionMediaTypeToSchemaIdGenerator;
-import uk.gov.justice.subscription.domain.eventsource.EventSource;
+import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Event;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptor;
@@ -102,7 +102,7 @@ public class SubscriptionJmsEndpointGenerator implements Generator<SubscriptionW
         final String componentName = subscriptionDescriptor.getServiceComponent();
 
 
-        final EventSource eventSourceDefinition = subscriptionWrapper.getEventSourceByName(subscription.getEventSourceName());
+        final EventSourceDefinition eventSourceDefinition = subscriptionWrapper.getEventSourceByName(subscription.getEventSourceName());
 
         final ClassNameFactory classNameFactory = new ClassNameFactory(
                 basePackageName,

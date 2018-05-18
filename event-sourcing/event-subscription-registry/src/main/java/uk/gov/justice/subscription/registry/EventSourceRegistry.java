@@ -3,7 +3,7 @@ package uk.gov.justice.subscription.registry;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toMap;
 
-import uk.gov.justice.subscription.domain.eventsource.EventSource;
+import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 
 import java.util.Map;
 import java.util.Optional;
@@ -11,29 +11,29 @@ import java.util.function.BinaryOperator;
 import java.util.stream.Stream;
 
 /**
- * Registry containing {@link EventSource}s mapped by the event source name
+ * Registry containing {@link EventSourceDefinition}s mapped by the event source name
  */
 public class EventSourceRegistry {
 
-    private final Map<String, EventSource> registry;
+    private final Map<String, EventSourceDefinition> registry;
 
-    private final BinaryOperator<EventSource> registerFirstEventSourceWhenDuplicate =
+    private final BinaryOperator<EventSourceDefinition> registerFirstEventSourceWhenDuplicate =
             (eventSource, eventSource2) -> eventSource;
 
-    public EventSourceRegistry(final Stream<EventSource> eventSources) {
+    public EventSourceRegistry(final Stream<EventSourceDefinition> eventSources) {
         registry = eventSources.collect(toMap(
-                EventSource::getName,
-                eventSource -> eventSource,
+                EventSourceDefinition::getName,
+                eventSourceDefinition -> eventSourceDefinition,
                 registerFirstEventSourceWhenDuplicate));
     }
 
     /**
-     * Return an {@link EventSource} mapped to an event source name or empty if not mapped.
+     * Return an {@link EventSourceDefinition} mapped to an event source name or empty if not mapped.
      *
      * @param eventSourceName the event source name to look up
-     * @return Optional of {@link EventSource} or empty
+     * @return Optional of {@link EventSourceDefinition} or empty
      */
-    public Optional<EventSource> getEventSourceFor(final String eventSourceName) {
+    public Optional<EventSourceDefinition> getEventSourceFor(final String eventSourceName) {
         return ofNullable(registry.get(eventSourceName));
     }
 }

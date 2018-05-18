@@ -46,7 +46,7 @@ import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.subscription.SubscriptionManager;
 import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtility;
-import uk.gov.justice.subscription.domain.eventsource.EventSource;
+import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Event;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptor;
@@ -154,7 +154,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
                 .withSchemaUri("http://justice.gov.uk/json/schemas/domains/example/my-context.events.something-happened.json")
                 .build();
 
-        final EventSource eventsource = eventsource()
+        final EventSourceDefinition eventsourceDefinition = eventsource()
                 .withName("eventSource")
                 .withLocation(location()
                         .withJmsUri(structureJmsUri)
@@ -162,7 +162,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
                         .build())
                 .build();
 
-        final EventSource eventsource2 = eventsource()
+        final EventSourceDefinition eventsourceDefinition2 = eventsource()
                 .withName("eventSource2")
                 .withLocation(location()
                         .withJmsUri(peopleJmsUri)
@@ -190,7 +190,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
                 .withSubscription(subscription2)
                 .build();
 
-        final SubscriptionWrapper subscriptionWrapper = new SubscriptionWrapper(subscriptionDescriptor, asList(eventsource, eventsource2));
+        final SubscriptionWrapper subscriptionWrapper = new SubscriptionWrapper(subscriptionDescriptor, asList(eventsourceDefinition, eventsourceDefinition2));
         generator.run(subscriptionWrapper,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
@@ -723,7 +723,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
                 .withSchemaUri("http://justice.gov.uk/json/schemas/domains/example/people.command2.json")
                 .build();
 
-        final EventSource eventsource = eventsource()
+        final EventSourceDefinition eventSourceDefinition = eventsource()
                 .withName("eventSource")
                 .withLocation(location()
                         .withJmsUri(jmsUri)
@@ -745,7 +745,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
                 .withSubscription(subscription)
                 .build();
 
-        final SubscriptionWrapper subscriptionWrapper = new SubscriptionWrapper(subscriptionDescriptor, asList(eventsource));
+        final SubscriptionWrapper subscriptionWrapper = new SubscriptionWrapper(subscriptionDescriptor, asList(eventSourceDefinition));
 
         generator.run(subscriptionWrapper,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
@@ -951,7 +951,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
                 .withSchemaUri("http://justice.gov.uk/json/schemas/domains/example/" + eventName + ".json")
                 .build();
 
-        final EventSource eventsource = eventsource()
+        final EventSourceDefinition eventSourceDefinition = eventsource()
                 .withName("eventSource")
                 .withLocation(location()
                         .withJmsUri(jmsUri)
@@ -972,6 +972,6 @@ public class SubscriptionJmsEndpointGeneratorTest {
                 .withSubscription(subscription)
                 .build();
 
-        return new SubscriptionWrapper(subscriptionDescriptor, asList(eventsource));
+        return new SubscriptionWrapper(subscriptionDescriptor, asList(eventSourceDefinition));
     }
 }

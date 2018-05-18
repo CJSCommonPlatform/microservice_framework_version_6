@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import uk.gov.justice.services.core.cdi.QualifierAnnotationExtractor;
 import uk.gov.justice.services.eventsourcing.source.core.annotation.EventSourceName;
 import uk.gov.justice.services.jdbc.persistence.JndiDataSourceNameProvider;
+import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 import uk.gov.justice.subscription.domain.eventsource.Location;
 import uk.gov.justice.subscription.registry.EventSourceRegistry;
 
@@ -65,15 +66,15 @@ public class SnapshotAwareEventSourceProducerTest {
 
         final InjectionPoint injectionPoint = mock(InjectionPoint.class);
         final EventSourceName eventSourceNameAnnotation = mock(EventSourceName.class);
-        final uk.gov.justice.subscription.domain.eventsource.EventSource eventSourceDomainObject = mock(uk.gov.justice.subscription.domain.eventsource.EventSource.class);
+        final EventSourceDefinition eventSourceDefinition = mock(EventSourceDefinition.class);
         final Location location = mock(Location.class);
         final JdbcBasedEventSource jdbcBasedEventSource = mock(JdbcBasedEventSource.class);
 
         when(qualifierAnnotationExtractor.getFrom(injectionPoint, EventSourceName.class)).thenReturn(eventSourceNameAnnotation);
         when(eventSourceNameAnnotation.value()).thenReturn(eventSourceName);
-        when(eventSourceRegistry.getEventSourceFor(eventSourceName)).thenReturn(of(eventSourceDomainObject));
-        when(eventSourceDomainObject.getName()).thenReturn(eventSourceName);
-        when(eventSourceDomainObject.getLocation()).thenReturn(location);
+        when(eventSourceRegistry.getEventSourceFor(eventSourceName)).thenReturn(of(eventSourceDefinition));
+        when(eventSourceDefinition.getName()).thenReturn(eventSourceName);
+        when(eventSourceDefinition.getLocation()).thenReturn(location);
         when(location.getDataSource()).thenReturn(of(dataSource));
         when(snapshotAwareEventSourceFactory.create(dataSource, eventSourceName)).thenReturn(jdbcBasedEventSource);
 
@@ -110,16 +111,16 @@ public class SnapshotAwareEventSourceProducerTest {
 
         final InjectionPoint injectionPoint = mock(InjectionPoint.class);
         final EventSourceName eventSourceNameAnnotation = mock(EventSourceName.class);
-        final uk.gov.justice.subscription.domain.eventsource.EventSource eventSourceDomainObject = mock(uk.gov.justice.subscription.domain.eventsource.EventSource.class);
+        final EventSourceDefinition eventSourceDefinition = mock(EventSourceDefinition.class);
         final Location location = mock(Location.class);
 
         when(qualifierAnnotationExtractor.getFrom(injectionPoint, EventSourceName.class)).thenReturn(eventSourceNameAnnotation);
         when(eventSourceNameAnnotation.value()).thenReturn(eventSourceName);
-        when(eventSourceRegistry.getEventSourceFor(eventSourceName)).thenReturn(of(eventSourceDomainObject));
-        when(eventSourceDomainObject.getName()).thenReturn(eventSourceName);
-        when(eventSourceDomainObject.getLocation()).thenReturn(location);
+        when(eventSourceRegistry.getEventSourceFor(eventSourceName)).thenReturn(of(eventSourceDefinition));
+        when(eventSourceDefinition.getName()).thenReturn(eventSourceName);
+        when(eventSourceDefinition.getLocation()).thenReturn(location);
         when(location.getDataSource()).thenReturn(empty());
-        when(eventSourceDomainObject.getName()).thenReturn(dataSourceName);
+        when(eventSourceDefinition.getName()).thenReturn(dataSourceName);
 
         try {
             snapshotAwareEventSourceProducer.eventSource(injectionPoint);

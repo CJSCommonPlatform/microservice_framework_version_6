@@ -1,6 +1,5 @@
 package uk.gov.justice.services.core.json;
 
-import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -11,7 +10,6 @@ import static org.mockito.Mockito.when;
 
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
-import org.hamcrest.Matchers;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,7 +56,7 @@ public class FileBasedJsonSchemaValidatorTest {
         fileBasedJsonSchemaValidator.validateWithoutSchemaCatalog(envelopeJson, actionName);
 
         verify(schema).validate(payload);
-        verify(logger).info("Falling back to file based schema lookup, no catalog schema found for: {}", actionName);
+        verify(logger).debug("Falling back to file based schema lookup, no catalog schema found for: {}", actionName);
     }
 
     @Test(expected = JsonSchemaValidationException.class)

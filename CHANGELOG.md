@@ -7,6 +7,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ### Fixed
 - Upgrade parent pom to fix upgrade of Jackson 2.8.11 
 
+### Changed
+- Reduce the logging level for not using schema catalog
+
 ## [4.0.4] - 2018-05-17
 ### Changed
 - Upgrade Jackson to 2.8.11 to fix Jackson security issues 

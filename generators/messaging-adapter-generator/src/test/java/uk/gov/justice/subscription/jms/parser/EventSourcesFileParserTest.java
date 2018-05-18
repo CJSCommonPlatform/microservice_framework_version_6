@@ -11,7 +11,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.subscription.EventSourcesParser;
-import uk.gov.justice.subscription.domain.eventsource.EventSource;
+import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 
 import java.net.URL;
 import java.nio.file.Path;
@@ -38,8 +38,8 @@ public class EventSourcesFileParserTest {
     private EventSourcesFileParser eventSourcesFileParser;
 
     @Test
-    public void shouldReturnEventSources() throws Exception {
-        final EventSource eventSource = mock(EventSource.class);
+    public void shouldReturnEventSourceDefinitions() throws Exception {
+        final EventSourceDefinition eventSourceDefinition = mock(EventSourceDefinition.class);
         final Path baseDir = Paths.get("/yaml");
 
         final Path eventSourcePath = Paths.get("event-sources.yaml");
@@ -50,20 +50,20 @@ public class EventSourcesFileParserTest {
         final List<URL> urlList = singletonList(eventSourceUrl);
 
         when(pathToUrlResolver.resolveToUrl(baseDir, eventSourcePath)).thenReturn(eventSourceUrl);
-        when(eventSourcesParser.eventSourcesFrom(urlList)).thenReturn(Stream.of(eventSource));
+        when(eventSourcesParser.eventSourcesFrom(urlList)).thenReturn(Stream.of(eventSourceDefinition));
 
-        final List<EventSource> expectedEventSourceDefinitions = eventSourcesFileParser.getEventSources(baseDir, pathList);
+        final List<EventSourceDefinition> expectedEventSourceDefinition = eventSourcesFileParser.getEventSourceDefinitions(baseDir, pathList);
 
-        assertThat(expectedEventSourceDefinitions.size(), is(1));
-        assertThat(expectedEventSourceDefinitions.get(0), is(eventSource));
+        assertThat(expectedEventSourceDefinition.size(), is(1));
+        assertThat(expectedEventSourceDefinition.get(0), is(eventSourceDefinition));
     }
 
     @Test
-    public void shouldThrowExceptionIfNoEventSourcesPresent() {
+    public void shouldThrowExceptionIfNoEventSourceDefinitionsPresent() {
         final Path baseDir = mock(Path.class);
 
         try {
-            eventSourcesFileParser.getEventSources(baseDir, emptyList());
+            eventSourcesFileParser.getEventSourceDefinitions(baseDir, emptyList());
             fail();
         } catch (final Exception e) {
             assertThat(e, is(instanceOf(FileParserException.class)));

@@ -32,7 +32,7 @@ public class SubscriptionWrapperFileParserTest {
 
         final SubscriptionWrapper subscriptionWrapper = subscriptionWrapperCollection.iterator().next();
 
-        assertThat(subscriptionWrapper.getSubscriptionDescriptor(), is(notNullValue()));
+        assertThat(subscriptionWrapper.getSubscriptionDescriptorDefinition(), is(notNullValue()));
         assertThat(subscriptionWrapper.getEventSourceByName("event.processor.service").getName(), is("event.processor.service"));
     }
 

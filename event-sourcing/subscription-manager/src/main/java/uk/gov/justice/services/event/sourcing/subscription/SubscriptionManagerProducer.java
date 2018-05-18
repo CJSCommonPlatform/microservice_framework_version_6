@@ -6,7 +6,7 @@ import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.subscription.SubscriptionManager;
 import uk.gov.justice.services.subscription.annotation.SubscriptionName;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
-import uk.gov.justice.subscription.registry.SubscriptionDescriptorRegistry;
+import uk.gov.justice.subscription.registry.SubscriptionDescriptorDefinitionRegistry;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
@@ -23,7 +23,7 @@ public class SubscriptionManagerProducer {
     Instance<EventSource> eventSourceInstance;
 
     @Inject
-    SubscriptionDescriptorRegistry subscriptionDescriptorRegistry;
+    SubscriptionDescriptorDefinitionRegistry subscriptionDescriptorRegistry;
 
     @Inject
     InterceptorChainProcessorProducer interceptorChainProcessorProducer;

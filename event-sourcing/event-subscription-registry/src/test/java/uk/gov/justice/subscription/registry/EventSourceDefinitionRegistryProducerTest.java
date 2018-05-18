@@ -14,7 +14,7 @@ import static uk.gov.justice.subscription.domain.builders.EventSourceBuilder.eve
 
 import uk.gov.justice.subscription.EventSourcesParser;
 import uk.gov.justice.subscription.YamlFileFinder;
-import uk.gov.justice.subscription.domain.eventsource.EventSource;
+import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 import uk.gov.justice.subscription.domain.eventsource.Location;
 
 import java.io.IOException;
@@ -29,7 +29,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class EventSourceRegistryProducerTest {
+public class EventSourceDefinitionRegistryProducerTest {
 
     @Mock
     private YamlFileFinder yamlFileFinder;
@@ -38,10 +38,10 @@ public class EventSourceRegistryProducerTest {
     private EventSourcesParser eventSourcesParser;
 
     @InjectMocks
-    private EventSourceRegistryProducer eventSourceRegistryProducer;
+    private EventSourceDefinitionRegistryProducer eventSourceDefinitionRegistryProducer;
 
     @Test
-    public void shouldCreateARegistryOfAllEventSourcesFromTheClasspath() throws Exception {
+    public void shouldCreateARegistryOfAllEventSourceDefinitionsFromTheClasspath() throws Exception {
 
         final String event_source_name_1 = "event_source_name_1";
         final String event_source_name_2 = "event_source_name_2";
@@ -49,25 +49,25 @@ public class EventSourceRegistryProducerTest {
         final URL url_1 = new URL("file:/test");
         final URL url_2 = new URL("file:/test");
 
-        final EventSource eventSource1 = eventsource()
+        final EventSourceDefinition eventSourceDefinition1 = eventsource()
                 .withLocation(mock(Location.class))
                 .withName(event_source_name_1).build();
 
-        final EventSource eventSource2 = eventsource()
+        final EventSourceDefinition eventSourceDefinition2 = eventsource()
                 .withLocation(mock(Location.class))
                 .withName(event_source_name_2).build();
 
         final List<URL> pathList = asList(url_1, url_2);
 
         when(yamlFileFinder.getEventSourcesPaths()).thenReturn(pathList);
-        when(eventSourcesParser.eventSourcesFrom(pathList)).thenReturn(Stream.of(eventSource1, eventSource2));
+        when(eventSourcesParser.eventSourcesFrom(pathList)).thenReturn(Stream.of(eventSourceDefinition1, eventSourceDefinition2));
 
-        final EventSourceRegistry eventSourceRegistry = eventSourceRegistryProducer.getEventSourceRegistry();
+        final EventSourceDefinitionRegistry eventSourceDefinitionRegistry = eventSourceDefinitionRegistryProducer.getEventSourceDefinitionRegistry();
 
-        assertThat(eventSourceRegistry, is(notNullValue()));
+        assertThat(eventSourceDefinitionRegistry, is(notNullValue()));
 
-        assertThat(eventSourceRegistry.getEventSourceFor(event_source_name_1), is(of(eventSource1)));
-        assertThat(eventSourceRegistry.getEventSourceFor(event_source_name_2), is(of(eventSource2)));
+        assertThat(eventSourceDefinitionRegistry.getEventSourceDefinitionFor(event_source_name_1), is(of(eventSourceDefinition1)));
+        assertThat(eventSourceDefinitionRegistry.getEventSourceDefinitionFor(event_source_name_2), is(of(eventSourceDefinition2)));
     }
 
     @Test
@@ -79,23 +79,23 @@ public class EventSourceRegistryProducerTest {
         final URL url_1 = new URL("file:/test");
         final URL url_2 = new URL("file:/test");
 
-        final EventSource eventSource1 = eventsource()
+        final EventSourceDefinition eventSourceDefinition1 = eventsource()
                 .withLocation(mock(Location.class))
                 .withName(event_source_name_1).build();
 
-        final EventSource eventSource2 = eventsource()
+        final EventSourceDefinition eventSourceDefinition2 = eventsource()
                 .withLocation(mock(Location.class))
                 .withName(event_source_name_2).build();
 
         final List<URL> pathList = asList(url_1, url_2);
 
         when(yamlFileFinder.getEventSourcesPaths()).thenReturn(pathList);
-        when(eventSourcesParser.eventSourcesFrom(pathList)).thenReturn(Stream.of(eventSource1, eventSource2));
+        when(eventSourcesParser.eventSourcesFrom(pathList)).thenReturn(Stream.of(eventSourceDefinition1, eventSourceDefinition2));
 
-        final EventSourceRegistry eventSourceRegistry_1 = eventSourceRegistryProducer.getEventSourceRegistry();
-        final EventSourceRegistry eventSourceRegistry_2 = eventSourceRegistryProducer.getEventSourceRegistry();
+        final EventSourceDefinitionRegistry eventSourceDefinitionRegistry_1 = eventSourceDefinitionRegistryProducer.getEventSourceDefinitionRegistry();
+        final EventSourceDefinitionRegistry eventSourceDefinitionRegistry_2 = eventSourceDefinitionRegistryProducer.getEventSourceDefinitionRegistry();
 
-        assertThat(eventSourceRegistry_1, is(sameInstance(eventSourceRegistry_2)));
+        assertThat(eventSourceDefinitionRegistry_1, is(sameInstance(eventSourceDefinitionRegistry_2)));
     }
 
     @Test
@@ -104,7 +104,7 @@ public class EventSourceRegistryProducerTest {
         when(yamlFileFinder.getEventSourcesPaths()).thenThrow(new IOException());
 
         try {
-            eventSourceRegistryProducer.getEventSourceRegistry();
+            eventSourceDefinitionRegistryProducer.getEventSourceDefinitionRegistry();
             fail();
         } catch (final Exception e) {
             assertThat(e, is(instanceOf(RegistryException.class)));

@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import uk.gov.justice.services.core.json.JsonSchemaValidationException;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.core.json.SchemaLoadingException;
 import uk.gov.justice.services.core.mapping.MediaType;
@@ -146,7 +147,7 @@ public class EnvelopeValidatorTest {
     @Test
     public void shouldHandleAValidationException() throws Exception {
 
-        final ValidationException validationException = new ValidationException("Ooops");
+        final JsonSchemaValidationException validationException = new JsonSchemaValidationException("Ooops", new ValidationException("Opps"));
 
         final String actionName = "exaple.action-name";
         final String payloadJson = "{\"some\": \"json\"}";
@@ -170,9 +171,8 @@ public class EnvelopeValidatorTest {
 
         final EnvelopeValidationException envelopeValidationException = exceptionArgumentCaptor.getValue();
 
-        final String exceptionMessage = "Message not valid against schema: " +
-                "\ndebug-json : validation error: {\"message\":\"#: Ooops\"," +
-                "\"violation\":\"#\",\"causingExceptions\":[]}";
+        final String exceptionMessage = "Message not valid against schema: \ndebug-json : validation error:" +
+                " {\"message\":\"#: Opps\",\"violation\":\"#\",\"causingExceptions\":[]}";
         assertThat(envelopeValidationException.getMessage(), is(exceptionMessage));
         assertThat(envelopeValidationException.getCause(), is(validationException));
     }

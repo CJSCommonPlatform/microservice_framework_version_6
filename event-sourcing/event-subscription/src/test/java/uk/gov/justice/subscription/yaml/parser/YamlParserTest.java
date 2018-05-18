@@ -7,10 +7,10 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
 
-import uk.gov.justice.subscription.domain.eventsource.EventSource;
+import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Event;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
-import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptor;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptorDefinition;
 
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
@@ -31,16 +31,16 @@ public class YamlParserTest {
 
         final YamlParser yamlParser = new YamlParser();
 
-        final TypeReference<Map<String, SubscriptionDescriptor>> typeReference
-                = new TypeReference<Map<String, SubscriptionDescriptor>>() {
+        final TypeReference<Map<String, SubscriptionDescriptorDefinition>> typeReference
+                = new TypeReference<Map<String, SubscriptionDescriptorDefinition>>() {
         };
-        final Map<String, SubscriptionDescriptor> subscriptionDescriptorDef = yamlParser.parseYamlFrom(url, typeReference);
-        final SubscriptionDescriptor subscriptionDescriptor = subscriptionDescriptorDef.get("subscription_descriptor");
-        assertThat(subscriptionDescriptor.getService(), is("examplecontext"));
-        assertThat(subscriptionDescriptor.getServiceComponent(), is("EVENT_LISTENER"));
-        assertThat(subscriptionDescriptor.getSpecVersion(), is("1.0.0"));
+        final Map<String, SubscriptionDescriptorDefinition> subscriptionDescriptorDefinitionMap = yamlParser.parseYamlFrom(url, typeReference);
+        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition = subscriptionDescriptorDefinitionMap.get("subscription_descriptor");
+        assertThat(subscriptionDescriptorDefinition.getService(), is("examplecontext"));
+        assertThat(subscriptionDescriptorDefinition.getServiceComponent(), is("EVENT_LISTENER"));
+        assertThat(subscriptionDescriptorDefinition.getSpecVersion(), is("1.0.0"));
 
-        final List<Subscription> subscriptions = subscriptionDescriptor.getSubscriptions();
+        final List<Subscription> subscriptions = subscriptionDescriptorDefinition.getSubscriptions();
         assertThat(subscriptions.size(), is(2));
 
         final Subscription subscription_1 = subscriptions.get(0);
@@ -61,31 +61,32 @@ public class YamlParserTest {
         final URL url = getFromClasspath("yaml/event-sources.yaml");
 
         final YamlParser yamlParser = new YamlParser();
-        final TypeReference<Map<String, List<EventSource>>> typeReference
-                = new TypeReference<Map<String, List<EventSource>>>() {
+        final TypeReference<Map<String, List<EventSourceDefinition>>> typeReference
+                = new TypeReference<Map<String, List<EventSourceDefinition>>>() {
         };
-        final Map<String, List<EventSource>> stringListMap = yamlParser.parseYamlFrom(url, typeReference);
-        final List<EventSource> eventSources = stringListMap.get("event_sources");
-        assertThat(eventSources.size(), is(2));
+        final Map<String, List<EventSourceDefinition>> stringListMap = yamlParser.parseYamlFrom(url, typeReference);
+        final List<EventSourceDefinition> eventSourceDefinitions = stringListMap.get("event_sources");
+        assertThat(eventSourceDefinitions.size(), is(2));
 
-        final EventSource eventSource_1 = eventSources.get(0);
-        assertThat(eventSource_1.getName(), is("people"));
-        assertThat(eventSource_1.getLocation().getJmsUri(), is("jms:topic:people.event?timeToLive=1000"));
-        assertThat(eventSource_1.getLocation().getRestUri(), is("http://localhost:8080/people/event-source-api/rest"));
-        assertThat(eventSource_1.getLocation().getDataSource(), is(Optional.of("java:/app/peoplewarfilename/DS.eventstore")));
+        final EventSourceDefinition eventSource_Definition_1 = eventSourceDefinitions.get(0);
+        assertThat(eventSource_Definition_1.getName(), is("people"));
+        assertThat(eventSource_Definition_1.getLocation().getJmsUri(), is("jms:topic:people.event?timeToLive=1000"));
+        assertThat(eventSource_Definition_1.getLocation().getRestUri(), is("http://localhost:8080/people/event-source-api/rest"));
+        assertThat(eventSource_Definition_1.getLocation().getDataSource(), is(Optional.of("java:/app/peoplewarfilename/DS.eventstore")));
 
-        final EventSource eventSource_2 = eventSources.get(1);
-        assertThat(eventSource_2.getName(), is("example"));
-        assertThat(eventSource_2.getLocation().getJmsUri(), is("jms:topic:example.event?timeToLive=1000"));
-        assertThat(eventSource_2.getLocation().getRestUri(), is("http://localhost:8080/example/event-source-api/rest"));
-        assertThat(eventSource_2.getLocation().getDataSource(), is(Optional.empty()));
+        final EventSourceDefinition eventSource_Definition_2 = eventSourceDefinitions.get(1);
+        assertThat(eventSource_Definition_2.getName(), is("example"));
+        assertThat(eventSource_Definition_2.getLocation().getJmsUri(), is("jms:topic:example.event?timeToLive=1000"));
+        assertThat(eventSource_Definition_2.getLocation().getRestUri(), is("http://localhost:8080/example/event-source-api/rest"));
+        assertThat(eventSource_Definition_2.getLocation().getDataSource(), is(Optional.empty()));
     }
 
     @Test
     public void shouldThrowFileNotFoundExceptionForTypeReference() throws Exception {
 
         final URL url = get("this-subscription-does-not-exist.yaml").toUri().toURL();
-        final TypeReference<SubscriptionDescriptor> typeReference = new TypeReference<SubscriptionDescriptor>() {
+        final TypeReference<SubscriptionDescriptorDefinition> typeReference
+                = new TypeReference<SubscriptionDescriptorDefinition>() {
         };
 
         try {
@@ -105,7 +106,7 @@ public class YamlParserTest {
         final URL url = get("this-subscription-does-not-exist.yaml").toUri().toURL();
         try {
             final YamlParser yamlParser = new YamlParser();
-            yamlParser.parseYamlFrom(url, SubscriptionDescriptor.class);
+            yamlParser.parseYamlFrom(url, SubscriptionDescriptorDefinition.class);
             fail();
         } catch (final YamlParserException e) {
             assertThat(e.getCause(), is(instanceOf(FileNotFoundException.class)));

@@ -5,8 +5,9 @@ import static java.lang.String.format;
 import uk.gov.justice.services.core.cdi.QualifierAnnotationExtractor;
 import uk.gov.justice.services.eventsourcing.source.core.annotation.EventSourceName;
 import uk.gov.justice.services.jdbc.persistence.JndiDataSourceNameProvider;
+import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 import uk.gov.justice.subscription.domain.eventsource.Location;
-import uk.gov.justice.subscription.registry.EventSourceRegistry;
+import uk.gov.justice.subscription.registry.EventSourceDefinitionRegistry;
 
 import java.util.Optional;
 
@@ -25,7 +26,7 @@ public class EventSourceProducer {
     private final static String DEFAULT_EVENT_SOURCE_NAME = "defaultEventSource";
 
     @Inject
-    EventSourceRegistry eventSourceRegistry;
+    EventSourceDefinitionRegistry eventSourceDefinitionRegistry;
 
     @Inject
     JndiDataSourceNameProvider jndiDataSourceNameProvider;
@@ -60,21 +61,21 @@ public class EventSourceProducer {
 
         final String eventSourceName = qualifierAnnotationExtractor.getFrom(injectionPoint, EventSourceName.class).value();
 
-        final Optional<uk.gov.justice.subscription.domain.eventsource.EventSource> eventSourceDomainObject = eventSourceRegistry.getEventSourceFor(eventSourceName);
-        return eventSourceDomainObject
+        final Optional<EventSourceDefinition> eventSourceDefinition = eventSourceDefinitionRegistry.getEventSourceDefinitionFor(eventSourceName);
+        return eventSourceDefinition
                 .map(this::createEventSourceFrom)
                 .orElseThrow(() -> new CreationException(format("Failed to find EventSource named '%s' in event-sources.yaml", eventSourceName)));
     }
 
-    private EventSource createEventSourceFrom(final uk.gov.justice.subscription.domain.eventsource.EventSource eventSourceDomainObject) {
+    private EventSource createEventSourceFrom(final EventSourceDefinition eventSourceDefinition) {
 
-        final Location location = eventSourceDomainObject.getLocation();
+        final Location location = eventSourceDefinition.getLocation();
         final Optional<String> dataSourceOptional = location.getDataSource();
 
         return dataSourceOptional
-                .map(dataSource -> jdbcEventSourceFactory.create(dataSource, eventSourceDomainObject.getName()))
+                .map(dataSource -> jdbcEventSourceFactory.create(dataSource, eventSourceDefinition.getName()))
                 .orElseThrow(() -> new CreationException(
-                        format("No DataSource specified for EventSource '%s' specified in event-sources.yaml", eventSourceDomainObject.getName())
+                        format("No DataSource specified for EventSource '%s' specified in event-sources.yaml", eventSourceDefinition.getName())
                 ));
     }
 }

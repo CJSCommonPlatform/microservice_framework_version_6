@@ -60,7 +60,7 @@ public class EventSourceRegistryProducerTest {
         final List<URL> pathList = asList(url_1, url_2);
 
         when(yamlFileFinder.getEventSourcesPaths()).thenReturn(pathList);
-        when(eventSourcesParser.getEventSourcesFrom(pathList)).thenReturn(Stream.of(eventSource1, eventSource2));
+        when(eventSourcesParser.eventSourcesFrom(pathList)).thenReturn(Stream.of(eventSource1, eventSource2));
 
         final EventSourceRegistry eventSourceRegistry = eventSourceRegistryProducer.getEventSourceRegistry();
 
@@ -90,7 +90,7 @@ public class EventSourceRegistryProducerTest {
         final List<URL> pathList = asList(url_1, url_2);
 
         when(yamlFileFinder.getEventSourcesPaths()).thenReturn(pathList);
-        when(eventSourcesParser.getEventSourcesFrom(pathList)).thenReturn(Stream.of(eventSource1, eventSource2));
+        when(eventSourcesParser.eventSourcesFrom(pathList)).thenReturn(Stream.of(eventSource1, eventSource2));
 
         final EventSourceRegistry eventSourceRegistry_1 = eventSourceRegistryProducer.getEventSourceRegistry();
         final EventSourceRegistry eventSourceRegistry_2 = eventSourceRegistryProducer.getEventSourceRegistry();

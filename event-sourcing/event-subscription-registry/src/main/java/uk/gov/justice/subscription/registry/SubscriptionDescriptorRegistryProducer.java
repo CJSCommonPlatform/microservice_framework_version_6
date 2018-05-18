@@ -62,7 +62,6 @@ public class SubscriptionDescriptorRegistryProducer {
                 throw new RegistryException("Failed to find yaml/subscription-descriptor.yaml resources on the classpath", e);
             }
         }
-
         return subscriptionDescriptorRegistry;
     }
 }

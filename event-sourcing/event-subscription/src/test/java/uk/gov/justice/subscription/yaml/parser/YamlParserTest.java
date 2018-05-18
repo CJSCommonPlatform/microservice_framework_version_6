@@ -10,7 +10,7 @@ import static org.junit.Assert.fail;
 import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Event;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
-import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptor;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptorDefinition;
 
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
@@ -31,16 +31,16 @@ public class YamlParserTest {
 
         final YamlParser yamlParser = new YamlParser();
 
-        final TypeReference<Map<String,SubscriptionDescriptor>> typeReference
-                = new TypeReference<Map<String,SubscriptionDescriptor>>() {
+        final TypeReference<Map<String,SubscriptionDescriptorDefinition>> typeReference
+                = new TypeReference<Map<String,SubscriptionDescriptorDefinition>>() {
         };
-        final Map<String,SubscriptionDescriptor> subscriptionDescriptorDef = yamlParser.parseYamlFrom(url, typeReference);
-        final SubscriptionDescriptor subscriptionDescriptor = subscriptionDescriptorDef.get("subscription_descriptor");
-        assertThat(subscriptionDescriptor.getService(), is("examplecontext"));
-        assertThat(subscriptionDescriptor.getServiceComponent(), is("EVENT_LISTENER"));
-        assertThat(subscriptionDescriptor.getSpecVersion(), is("1.0.0"));
+        final Map<String,SubscriptionDescriptorDefinition> subscriptionDescriptorDefinitionMap= yamlParser.parseYamlFrom(url, typeReference);
+        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition = subscriptionDescriptorDefinitionMap.get("subscription_descriptor");
+        assertThat(subscriptionDescriptorDefinition.getService(), is("examplecontext"));
+        assertThat(subscriptionDescriptorDefinition.getServiceComponent(), is("EVENT_LISTENER"));
+        assertThat(subscriptionDescriptorDefinition.getSpecVersion(), is("1.0.0"));
 
-        final List<Subscription> subscriptions = subscriptionDescriptor.getSubscriptions();
+        final List<Subscription> subscriptions = subscriptionDescriptorDefinition.getSubscriptions();
         assertThat(subscriptions.size(), is(2));
 
         final Subscription subscription_1 = subscriptions.get(0);
@@ -87,8 +87,8 @@ public class YamlParserTest {
         final URL url = get("this-subscription-does-not-exist.yaml").toUri().toURL();
         try {
             final YamlParser yamlParser = new YamlParser();
-            final TypeReference<SubscriptionDescriptor> typeReference
-                    = new TypeReference<SubscriptionDescriptor>() {
+            final TypeReference<SubscriptionDescriptorDefinition> typeReference
+                    = new TypeReference<SubscriptionDescriptorDefinition>() {
             };
             yamlParser.parseYamlFrom(url, typeReference);
             fail();

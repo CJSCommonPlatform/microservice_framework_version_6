@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 
 import uk.gov.justice.subscription.SubscriptionDescriptorsParser;
 import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
-import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptor;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptorDefinition;
 
 import java.net.URL;
 import java.nio.file.Path;
@@ -40,7 +40,7 @@ public class SubscriptionDescriptorFileParserTest {
     public void shouldCreateSubscriptionWrappers() throws Exception {
 
         final EventSourceDefinition eventSourceDefinition = mock(EventSourceDefinition.class);
-        final SubscriptionDescriptor subscriptionDescriptor = mock(SubscriptionDescriptor.class);
+        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition = mock(SubscriptionDescriptorDefinition.class);
 
         final Path baseDir = Paths.get("/yaml");
         final Path eventSourcePath = Paths.get("event-sources.yaml");
@@ -51,13 +51,13 @@ public class SubscriptionDescriptorFileParserTest {
         final List<URL> urlList = singletonList(subscriptionDescriptorUrl);
 
         when(pathToUrlResolver.resolveToUrl(baseDir, subscriptionDescriptorPath)).thenReturn(subscriptionDescriptorUrl);
-        when(subscriptionDescriptorsParser.getSubscriptionDescriptorsFrom(urlList)).thenReturn(Stream.of(subscriptionDescriptor));
+        when(subscriptionDescriptorsParser.getSubscriptionDescriptorsFrom(urlList)).thenReturn(Stream.of(subscriptionDescriptorDefinition));
         when(eventSourceDefinition.getName()).thenReturn("eventSourceName");
 
         final List<SubscriptionWrapper> subscriptionWrappers = subscriptionDescriptorFileParser.getSubscriptionWrappers(baseDir, paths, singletonList(eventSourceDefinition));
 
         assertThat(subscriptionWrappers.size(), is(1));
-        assertThat(subscriptionWrappers.get(0).getSubscriptionDescriptor(), is(subscriptionDescriptor));
+        assertThat(subscriptionWrappers.get(0).getSubscriptionDescriptorDefinition(), is(subscriptionDescriptorDefinition));
         assertThat(subscriptionWrappers.get(0).getEventSourceByName("eventSourceName"), is(eventSourceDefinition));
     }
 }

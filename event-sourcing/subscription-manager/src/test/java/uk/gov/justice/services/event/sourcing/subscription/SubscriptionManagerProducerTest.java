@@ -16,7 +16,7 @@ import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.subscription.SubscriptionManager;
 import uk.gov.justice.services.subscription.annotation.SubscriptionName;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
-import uk.gov.justice.subscription.registry.SubscriptionDescriptorRegistry;
+import uk.gov.justice.subscription.registry.SubscriptionDescriptorDefinitionRegistry;
 
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -34,7 +34,7 @@ public class SubscriptionManagerProducerTest {
     private Instance<EventSource> eventsourceInstance;
 
     @Mock
-    private SubscriptionDescriptorRegistry subscriptionDescriptorRegistry;
+    private SubscriptionDescriptorDefinitionRegistry subscriptionDescriptorRegistry;
 
     @Mock
     private QualifierAnnotationExtractor qualifierAnnotationExtractor;

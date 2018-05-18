@@ -5,7 +5,7 @@ import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toMap;
 
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
-import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptor;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptorDefinition;
 
 import java.util.Collection;
 import java.util.Map;
@@ -14,34 +14,34 @@ import java.util.function.BinaryOperator;
 import java.util.stream.Stream;
 
 /**
- * Registry containing {@link SubscriptionDescriptor}s mapped by the serviceComponentName
+ * Registry containing {@link SubscriptionDescriptorDefinition}s mapped by the serviceComponentName
  */
-public class SubscriptionDescriptorRegistry {
+public class SubscriptionDescriptorDefinitionRegistry {
 
-    private final Map<String, SubscriptionDescriptor> registry;
+    private final Map<String, SubscriptionDescriptorDefinition> registry;
 
-    private final BinaryOperator<SubscriptionDescriptor> throwRegistryExceptionWhenDuplicate =
+    private final BinaryOperator<SubscriptionDescriptorDefinition> throwRegistryExceptionWhenDuplicate =
             (subscriptionDescriptor, subscriptionDescriptor2) -> {
                 throw new RegistryException("Duplicate subscription descriptor for service component: " + subscriptionDescriptor.getServiceComponent());
             };
 
-    public SubscriptionDescriptorRegistry(final Stream<SubscriptionDescriptor> subscriptionDescriptors) {
-        this.registry = subscriptionDescriptors
+    public SubscriptionDescriptorDefinitionRegistry(final Stream<SubscriptionDescriptorDefinition> subscriptionDescriptorDefinitions) {
+        this.registry = subscriptionDescriptorDefinitions
                 .collect(toMap(
-                        SubscriptionDescriptor::getServiceComponent,
-                        subscriptionDescriptor -> subscriptionDescriptor,
+                        SubscriptionDescriptorDefinition::getServiceComponent,
+                        subscriptionDescriptorDefinition -> subscriptionDescriptorDefinition,
                         throwRegistryExceptionWhenDuplicate)
                 );
     }
 
     /**
-     * Return a {@link SubscriptionDescriptor} mapped to a subscription component name or
+     * Return a {@link SubscriptionDescriptorDefinition} mapped to a subscription component name or
      * empty if not mapped.
      *
      * @param serviceComponentName the subscription component name to look up
-     * @return Optional of {@link SubscriptionDescriptor} or empty
+     * @return Optional of {@link SubscriptionDescriptorDefinition} or empty
      */
-    public Optional<SubscriptionDescriptor> getSubscriptionDescriptorFor(final String serviceComponentName) {
+    public Optional<SubscriptionDescriptorDefinition> getSubscriptionDescriptorDescriptorFor(final String serviceComponentName) {
         return ofNullable(registry.get(serviceComponentName));
     }
 
@@ -53,7 +53,7 @@ public class SubscriptionDescriptorRegistry {
      */
     public Subscription getSubscriptionFor(final String subscriptionName) {
         return registry.values().stream()
-                .map(SubscriptionDescriptor::getSubscriptions)
+                .map(SubscriptionDescriptorDefinition::getSubscriptions)
                 .flatMap(Collection::stream)
                 .filter(subscription -> subscription.getName().equals(subscriptionName))
                 .findFirst()

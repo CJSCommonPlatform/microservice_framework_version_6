@@ -23,7 +23,7 @@ import uk.gov.justice.services.subscription.annotation.SubscriptionName;
 import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Event;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
-import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptor;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptorDefinition;
 import uk.gov.justice.subscription.jms.parser.SubscriptionWrapper;
 
 import java.util.List;
@@ -103,8 +103,8 @@ public class MessageListenerCodeGenerator {
                                            final Subscription subscription,
                                            final CommonGeneratorProperties commonGeneratorProperties,
                                            final ClassNameFactory classNameFactory) {
-        final SubscriptionDescriptor subscriptionDescriptor = subscriptionWrapper.getSubscriptionDescriptor();
-        final String serviceComponent = subscriptionDescriptor.getServiceComponent().toUpperCase();
+        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition = subscriptionWrapper.getSubscriptionDescriptorDefinition();
+        final String serviceComponent = subscriptionDescriptorDefinition.getServiceComponent().toUpperCase();
 
         if (componentDestinationType.isSupported(serviceComponent)) {
 
@@ -131,7 +131,7 @@ public class MessageListenerCodeGenerator {
                     .addAnnotation(AnnotationSpec.builder(Adapter.class)
                             .addMember(DEFAULT_ANNOTATION_PARAMETER, "$S", serviceComponent)
                             .build())
-                    .addAnnotation(messageDrivenAnnotation(serviceComponent, subscriptionDescriptor.getService(), subscription, destination));
+                    .addAnnotation(messageDrivenAnnotation(serviceComponent, subscriptionDescriptorDefinition.getService(), subscription, destination));
 
             if (!subscription.getEvents().isEmpty()) {
                 AnnotationSpec.Builder builder = AnnotationSpec.builder(Interceptors.class)

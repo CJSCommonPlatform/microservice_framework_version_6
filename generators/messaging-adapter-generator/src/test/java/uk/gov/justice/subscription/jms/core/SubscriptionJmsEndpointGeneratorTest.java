@@ -33,7 +33,7 @@ import static uk.gov.justice.subscription.domain.builders.EventBuilder.event;
 import static uk.gov.justice.subscription.domain.builders.EventSourceBuilder.eventsource;
 import static uk.gov.justice.subscription.domain.builders.LocationBuilder.location;
 import static uk.gov.justice.subscription.domain.builders.SubscriptionBuilder.subscription;
-import static uk.gov.justice.subscription.domain.builders.SubscriptionDescriptorBuilder.subscriptionDescriptor;
+import static uk.gov.justice.subscription.domain.builders.SubscriptionDescriptorDefinitionBuilder.subscriptionDescriptorDefinition;
 
 import uk.gov.justice.maven.generator.io.files.parser.core.Generator;
 import uk.gov.justice.maven.generator.io.files.parser.core.GeneratorProperties;
@@ -49,7 +49,7 @@ import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtility;
 import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Event;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
-import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptor;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptorDefinition;
 import uk.gov.justice.subscription.jms.parser.SubscriptionWrapper;
 
 import java.io.File;
@@ -182,7 +182,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
                 .withEventSourceName("eventSource2")
                 .build();
 
-        final SubscriptionDescriptor subscriptionDescriptor = subscriptionDescriptor()
+        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition = subscriptionDescriptorDefinition()
                 .withSpecVersion("1.0.0")
                 .withService(serviceName)
                 .withServiceComponent(componentName)
@@ -190,7 +190,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
                 .withSubscription(subscription2)
                 .build();
 
-        final SubscriptionWrapper subscriptionWrapper = new SubscriptionWrapper(subscriptionDescriptor, asList(eventsourceDefinition, eventsourceDefinition2));
+        final SubscriptionWrapper subscriptionWrapper = new SubscriptionWrapper(subscriptionDescriptorDefinition, asList(eventsourceDefinition, eventsourceDefinition2));
         generator.run(subscriptionWrapper,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
@@ -738,14 +738,14 @@ public class SubscriptionJmsEndpointGeneratorTest {
                 .withEventSourceName("eventSource")
                 .build();
 
-        final SubscriptionDescriptor subscriptionDescriptor = subscriptionDescriptor()
+        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition = subscriptionDescriptorDefinition()
                 .withSpecVersion("1.0.0")
                 .withService(serviceName)
                 .withServiceComponent(componentName)
                 .withSubscription(subscription)
                 .build();
 
-        final SubscriptionWrapper subscriptionWrapper = new SubscriptionWrapper(subscriptionDescriptor, asList(eventSourceDefinition));
+        final SubscriptionWrapper subscriptionWrapper = new SubscriptionWrapper(subscriptionDescriptorDefinition, asList(eventSourceDefinition));
 
         generator.run(subscriptionWrapper,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
@@ -965,13 +965,13 @@ public class SubscriptionJmsEndpointGeneratorTest {
                 .withEventSourceName("eventSource")
                 .build();
 
-        final SubscriptionDescriptor subscriptionDescriptor = subscriptionDescriptor()
+        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition = subscriptionDescriptorDefinition()
                 .withSpecVersion("1.0.0")
                 .withService(serviceName)
                 .withServiceComponent(componentName)
                 .withSubscription(subscription)
                 .build();
 
-        return new SubscriptionWrapper(subscriptionDescriptor, asList(eventSourceDefinition));
+        return new SubscriptionWrapper(subscriptionDescriptorDefinition, asList(eventSourceDefinition));
     }
 }

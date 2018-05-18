@@ -33,12 +33,12 @@ public class EventSourceDefinitionRegistryTest {
 
         final Stream<EventSourceDefinition> eventSourceList = Stream.of(eventSourceDefinition1, eventSourceDefinition2);
 
-        final EventSourceRegistry eventSourceRegistry = new EventSourceRegistry(eventSourceList);
+        final EventSourceDefinitionRegistry eventSourceDefinitionRegistry = new EventSourceDefinitionRegistry(eventSourceList);
 
-        assertThat(eventSourceRegistry, is(notNullValue()));
+        assertThat(eventSourceDefinitionRegistry, is(notNullValue()));
 
-        assertThat(eventSourceRegistry.getEventSourceFor("eventSourceDefinition1").get(), is(eventSourceDefinition1));
-        assertThat(eventSourceRegistry.getEventSourceFor("eventSourceDefinition2").get(), is(eventSourceDefinition2));
+        assertThat(eventSourceDefinitionRegistry.getEventSourceDefinitionFor("eventSourceDefinition1").get(), is(eventSourceDefinition1));
+        assertThat(eventSourceDefinitionRegistry.getEventSourceDefinitionFor("eventSourceDefinition2").get(), is(eventSourceDefinition2));
     }
 
     @Test
@@ -55,11 +55,11 @@ public class EventSourceDefinitionRegistryTest {
 
         final Stream<EventSourceDefinition> eventSourceList = Stream.of(eventSourceDefinition1, eventSourceDefinition2);
 
-        final EventSourceRegistry eventSourceRegistry = new EventSourceRegistry(eventSourceList);
+        final EventSourceDefinitionRegistry eventSourceDefinitionRegistry = new EventSourceDefinitionRegistry(eventSourceList);
 
-        assertThat(eventSourceRegistry, is(notNullValue()));
+        assertThat(eventSourceDefinitionRegistry, is(notNullValue()));
 
-        assertThat(eventSourceRegistry.getEventSourceFor("eventSourceDefinition1").get(), is(sameInstance(eventSourceDefinition1)));
+        assertThat(eventSourceDefinitionRegistry.getEventSourceDefinitionFor("eventSourceDefinition1").get(), is(sameInstance(eventSourceDefinition1)));
     }
 
 
@@ -72,8 +72,8 @@ public class EventSourceDefinitionRegistryTest {
 
         final Stream<EventSourceDefinition> eventSourceList = Stream.of(eventSourceDefinition);
 
-        final EventSourceRegistry eventSourceRegistry = new EventSourceRegistry(eventSourceList);
+        final EventSourceDefinitionRegistry eventSourceDefinitionRegistry = new EventSourceDefinitionRegistry(eventSourceList);
 
-        assertThat(eventSourceRegistry.getEventSourceFor("nonExistentEventSource"), is(empty()));
+        assertThat(eventSourceDefinitionRegistry.getEventSourceDefinitionFor("nonExistentEventSource"), is(empty()));
     }
 }

@@ -13,14 +13,14 @@ import java.util.stream.Stream;
 /**
  * Registry containing {@link EventSourceDefinition}s mapped by the event source name
  */
-public class EventSourceRegistry {
+public class EventSourceDefinitionRegistry {
 
     private final Map<String, EventSourceDefinition> registry;
 
     private final BinaryOperator<EventSourceDefinition> registerFirstEventSourceWhenDuplicate =
             (eventSource, eventSource2) -> eventSource;
 
-    public EventSourceRegistry(final Stream<EventSourceDefinition> eventSources) {
+    public EventSourceDefinitionRegistry(final Stream<EventSourceDefinition> eventSources) {
         registry = eventSources.collect(toMap(
                 EventSourceDefinition::getName,
                 eventSourceDefinition -> eventSourceDefinition,
@@ -33,7 +33,7 @@ public class EventSourceRegistry {
      * @param eventSourceName the event source name to look up
      * @return Optional of {@link EventSourceDefinition} or empty
      */
-    public Optional<EventSourceDefinition> getEventSourceFor(final String eventSourceName) {
+    public Optional<EventSourceDefinition> getEventSourceDefinitionFor(final String eventSourceName) {
         return ofNullable(registry.get(eventSourceName));
     }
 }

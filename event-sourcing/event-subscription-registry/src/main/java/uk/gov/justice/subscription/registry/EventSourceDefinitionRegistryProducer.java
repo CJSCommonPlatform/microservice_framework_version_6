@@ -12,11 +12,11 @@ import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 
 /**
- * Producer for the {@link EventSourceRegistry} creates a single instance and returns the same
+ * Producer for the {@link EventSourceDefinitionRegistry} creates a single instance and returns the same
  * instance.
  */
 @ApplicationScoped
-public class EventSourceRegistryProducer {
+public class EventSourceDefinitionRegistryProducer {
 
     @Inject
     EventSourcesParser eventSourcesParser;
@@ -24,27 +24,27 @@ public class EventSourceRegistryProducer {
     @Inject
     YamlFileFinder yamlFileFinder;
 
-    private EventSourceRegistry eventSourceRegistry;
+    private EventSourceDefinitionRegistry eventSourceDefinitionRegistry;
 
     /**
-     * Either creates the single instance of the {@link EventSourceRegistry} and returns it, or
+     * Either creates the single instance of the {@link EventSourceDefinitionRegistry} and returns it, or
      * returns the previously created instance.
      *
-     * @return the instance of the {@link EventSourceRegistry}
+     * @return the instance of the {@link EventSourceDefinitionRegistry}
      */
     @Produces
-    public EventSourceRegistry getEventSourceRegistry() {
+    public EventSourceDefinitionRegistry getEventSourceDefinitionRegistry() {
 
-        if (null == eventSourceRegistry) {
+        if (null == eventSourceDefinitionRegistry) {
             try {
                 final Stream<EventSourceDefinition> eventSourcesFrom = eventSourcesParser.eventSourcesFrom(yamlFileFinder.getEventSourcesPaths());
-                eventSourceRegistry = new EventSourceRegistry(eventSourcesFrom);
+                eventSourceDefinitionRegistry = new EventSourceDefinitionRegistry(eventSourcesFrom);
 
             } catch (final IOException e) {
                 throw new RegistryException("Failed to find yaml/event-sources.yaml resources on the classpath", e);
             }
         }
-        return eventSourceRegistry;
+        return eventSourceDefinitionRegistry;
     }
 
 }

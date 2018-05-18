@@ -38,7 +38,7 @@ public class EventSourceDefinitionRegistryProducerTest {
     private EventSourcesParser eventSourcesParser;
 
     @InjectMocks
-    private EventSourceRegistryProducer eventSourceRegistryProducer;
+    private EventSourceDefinitionRegistryProducer eventSourceDefinitionRegistryProducer;
 
     @Test
     public void shouldCreateARegistryOfAllEventSourceDefinitionsFromTheClasspath() throws Exception {
@@ -62,12 +62,12 @@ public class EventSourceDefinitionRegistryProducerTest {
         when(yamlFileFinder.getEventSourcesPaths()).thenReturn(pathList);
         when(eventSourcesParser.eventSourcesFrom(pathList)).thenReturn(Stream.of(eventSourceDefinition1, eventSourceDefinition2));
 
-        final EventSourceRegistry eventSourceRegistry = eventSourceRegistryProducer.getEventSourceRegistry();
+        final EventSourceDefinitionRegistry eventSourceDefinitionRegistry = eventSourceDefinitionRegistryProducer.getEventSourceDefinitionRegistry();
 
-        assertThat(eventSourceRegistry, is(notNullValue()));
+        assertThat(eventSourceDefinitionRegistry, is(notNullValue()));
 
-        assertThat(eventSourceRegistry.getEventSourceFor(event_source_name_1), is(of(eventSourceDefinition1)));
-        assertThat(eventSourceRegistry.getEventSourceFor(event_source_name_2), is(of(eventSourceDefinition2)));
+        assertThat(eventSourceDefinitionRegistry.getEventSourceDefinitionFor(event_source_name_1), is(of(eventSourceDefinition1)));
+        assertThat(eventSourceDefinitionRegistry.getEventSourceDefinitionFor(event_source_name_2), is(of(eventSourceDefinition2)));
     }
 
     @Test
@@ -92,10 +92,10 @@ public class EventSourceDefinitionRegistryProducerTest {
         when(yamlFileFinder.getEventSourcesPaths()).thenReturn(pathList);
         when(eventSourcesParser.eventSourcesFrom(pathList)).thenReturn(Stream.of(eventSourceDefinition1, eventSourceDefinition2));
 
-        final EventSourceRegistry eventSourceRegistry_1 = eventSourceRegistryProducer.getEventSourceRegistry();
-        final EventSourceRegistry eventSourceRegistry_2 = eventSourceRegistryProducer.getEventSourceRegistry();
+        final EventSourceDefinitionRegistry eventSourceDefinitionRegistry_1 = eventSourceDefinitionRegistryProducer.getEventSourceDefinitionRegistry();
+        final EventSourceDefinitionRegistry eventSourceDefinitionRegistry_2 = eventSourceDefinitionRegistryProducer.getEventSourceDefinitionRegistry();
 
-        assertThat(eventSourceRegistry_1, is(sameInstance(eventSourceRegistry_2)));
+        assertThat(eventSourceDefinitionRegistry_1, is(sameInstance(eventSourceDefinitionRegistry_2)));
     }
 
     @Test
@@ -104,7 +104,7 @@ public class EventSourceDefinitionRegistryProducerTest {
         when(yamlFileFinder.getEventSourcesPaths()).thenThrow(new IOException());
 
         try {
-            eventSourceRegistryProducer.getEventSourceRegistry();
+            eventSourceDefinitionRegistryProducer.getEventSourceDefinitionRegistry();
             fail();
         } catch (final Exception e) {
             assertThat(e, is(instanceOf(RegistryException.class)));

@@ -14,7 +14,7 @@ import uk.gov.justice.services.eventsourcing.source.core.annotation.EventSourceN
 import uk.gov.justice.services.jdbc.persistence.JndiDataSourceNameProvider;
 import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 import uk.gov.justice.subscription.domain.eventsource.Location;
-import uk.gov.justice.subscription.registry.EventSourceRegistry;
+import uk.gov.justice.subscription.registry.EventSourceDefinitionRegistry;
 
 import javax.enterprise.inject.CreationException;
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -33,7 +33,7 @@ public class SnapshotAwareEventSourceProducerTest {
     private QualifierAnnotationExtractor qualifierAnnotationExtractor;
 
     @Mock
-    private EventSourceRegistry eventSourceRegistry;
+    private EventSourceDefinitionRegistry eventSourceDefinitionRegistry;
 
     @Mock
     private JndiDataSourceNameProvider jndiDataSourceNameProvider;
@@ -72,7 +72,7 @@ public class SnapshotAwareEventSourceProducerTest {
 
         when(qualifierAnnotationExtractor.getFrom(injectionPoint, EventSourceName.class)).thenReturn(eventSourceNameAnnotation);
         when(eventSourceNameAnnotation.value()).thenReturn(eventSourceName);
-        when(eventSourceRegistry.getEventSourceFor(eventSourceName)).thenReturn(of(eventSourceDefinition));
+        when(eventSourceDefinitionRegistry.getEventSourceDefinitionFor(eventSourceName)).thenReturn(of(eventSourceDefinition));
         when(eventSourceDefinition.getName()).thenReturn(eventSourceName);
         when(eventSourceDefinition.getLocation()).thenReturn(location);
         when(location.getDataSource()).thenReturn(of(dataSource));
@@ -91,7 +91,7 @@ public class SnapshotAwareEventSourceProducerTest {
 
         when(qualifierAnnotationExtractor.getFrom(injectionPoint, EventSourceName.class)).thenReturn(eventSourceNameAnnotation);
         when(eventSourceNameAnnotation.value()).thenReturn(eventSourceName);
-        when(eventSourceRegistry.getEventSourceFor(eventSourceName)).thenReturn(empty());
+        when(eventSourceDefinitionRegistry.getEventSourceDefinitionFor(eventSourceName)).thenReturn(empty());
 
         try {
             snapshotAwareEventSourceProducer.eventSource(injectionPoint);
@@ -116,7 +116,7 @@ public class SnapshotAwareEventSourceProducerTest {
 
         when(qualifierAnnotationExtractor.getFrom(injectionPoint, EventSourceName.class)).thenReturn(eventSourceNameAnnotation);
         when(eventSourceNameAnnotation.value()).thenReturn(eventSourceName);
-        when(eventSourceRegistry.getEventSourceFor(eventSourceName)).thenReturn(of(eventSourceDefinition));
+        when(eventSourceDefinitionRegistry.getEventSourceDefinitionFor(eventSourceName)).thenReturn(of(eventSourceDefinition));
         when(eventSourceDefinition.getName()).thenReturn(eventSourceName);
         when(eventSourceDefinition.getLocation()).thenReturn(location);
         when(location.getDataSource()).thenReturn(empty());

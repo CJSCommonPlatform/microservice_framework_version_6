@@ -7,7 +7,7 @@ import uk.gov.justice.services.eventsourcing.source.core.annotation.EventSourceN
 import uk.gov.justice.services.jdbc.persistence.JndiDataSourceNameProvider;
 import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 import uk.gov.justice.subscription.domain.eventsource.Location;
-import uk.gov.justice.subscription.registry.EventSourceRegistry;
+import uk.gov.justice.subscription.registry.EventSourceDefinitionRegistry;
 
 import java.util.Optional;
 
@@ -26,7 +26,7 @@ public class EventSourceProducer {
     private final static String DEFAULT_EVENT_SOURCE_NAME = "defaultEventSource";
 
     @Inject
-    EventSourceRegistry eventSourceRegistry;
+    EventSourceDefinitionRegistry eventSourceDefinitionRegistry;
 
     @Inject
     JndiDataSourceNameProvider jndiDataSourceNameProvider;
@@ -61,8 +61,8 @@ public class EventSourceProducer {
 
         final String eventSourceName = qualifierAnnotationExtractor.getFrom(injectionPoint, EventSourceName.class).value();
 
-        final Optional<EventSourceDefinition> eventSourceDomainObject = eventSourceRegistry.getEventSourceFor(eventSourceName);
-        return eventSourceDomainObject
+        final Optional<EventSourceDefinition> eventSourceDefinition = eventSourceDefinitionRegistry.getEventSourceDefinitionFor(eventSourceName);
+        return eventSourceDefinition
                 .map(this::createEventSourceFrom)
                 .orElseThrow(() -> new CreationException(format("Failed to find EventSource named '%s' in event-sources.yaml", eventSourceName)));
     }

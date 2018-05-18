@@ -1,6 +1,6 @@
 package uk.gov.justice.subscription.domain.builders;
 
-import uk.gov.justice.subscription.domain.eventsource.EventSource;
+import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 import uk.gov.justice.subscription.domain.eventsource.Location;
 
 public final class EventSourceBuilder {
@@ -25,7 +25,7 @@ public final class EventSourceBuilder {
         return this;
     }
 
-    public EventSource build() {
-        return new EventSource(name, location);
+    public EventSourceDefinition build() {
+        return new EventSourceDefinition(name, location);
     }
 }

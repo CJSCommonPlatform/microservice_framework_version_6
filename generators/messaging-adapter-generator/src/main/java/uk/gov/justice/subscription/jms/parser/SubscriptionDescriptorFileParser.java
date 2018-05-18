@@ -3,7 +3,7 @@ package uk.gov.justice.subscription.jms.parser;
 import static java.util.stream.Collectors.toList;
 
 import uk.gov.justice.subscription.SubscriptionDescriptorsParser;
-import uk.gov.justice.subscription.domain.eventsource.EventSource;
+import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 
 import java.net.URL;
 import java.nio.file.Path;
@@ -24,14 +24,14 @@ public class SubscriptionDescriptorFileParser {
 
     public List<SubscriptionWrapper> getSubscriptionWrappers(final Path baseDir,
                                                              final Collection<Path> paths,
-                                                             final List<EventSource> eventSourceDefinitions) {
+                                                             final List<EventSourceDefinition> eventSourceDefinitionDefinitions) {
         final List<URL> subscriptionPaths = paths.stream()
                 .filter(isNotEventSource)
                 .map(path -> pathToUrlResolver.resolveToUrl(baseDir, path))
                 .collect(toList());
 
         return subscriptionDescriptorsParser.getSubscriptionDescriptorsFrom(subscriptionPaths)
-                .map(subscriptionDescriptor -> new SubscriptionWrapper(subscriptionDescriptor, eventSourceDefinitions))
+                .map(subscriptionDescriptor -> new SubscriptionWrapper(subscriptionDescriptor, eventSourceDefinitionDefinitions))
                 .collect(toList());
     }
 

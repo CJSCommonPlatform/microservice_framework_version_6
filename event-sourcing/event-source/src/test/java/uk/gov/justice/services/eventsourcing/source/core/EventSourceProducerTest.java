@@ -12,8 +12,9 @@ import static org.mockito.Mockito.when;
 import uk.gov.justice.services.core.cdi.QualifierAnnotationExtractor;
 import uk.gov.justice.services.eventsourcing.source.core.annotation.EventSourceName;
 import uk.gov.justice.services.jdbc.persistence.JndiDataSourceNameProvider;
+import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 import uk.gov.justice.subscription.domain.eventsource.Location;
-import uk.gov.justice.subscription.registry.EventSourceRegistry;
+import uk.gov.justice.subscription.registry.EventSourceDefinitionRegistry;
 
 import javax.enterprise.inject.CreationException;
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -28,7 +29,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class EventSourceProducerTest {
 
     @Mock
-    private EventSourceRegistry eventSourceRegistry;
+    private EventSourceDefinitionRegistry eventSourceDefinitionRegistry;
 
     @Mock
     private JndiDataSourceNameProvider jndiDataSourceNameProvider;
@@ -65,16 +66,16 @@ public class EventSourceProducerTest {
 
         final InjectionPoint injectionPoint = mock(InjectionPoint.class);
         final EventSourceName eventSourceNameAnnotation = mock(EventSourceName.class);
-        final uk.gov.justice.subscription.domain.eventsource.EventSource eventSourceDomainObject = mock(uk.gov.justice.subscription.domain.eventsource.EventSource.class);
+        final EventSourceDefinition eventSourceDefinition = mock(EventSourceDefinition.class);
         final Location location = mock(Location.class);
         final JdbcBasedEventSource jdbcBasedEventSource = mock(JdbcBasedEventSource.class);
 
         when(qualifierAnnotationExtractor.getFrom(injectionPoint, EventSourceName.class)).thenReturn(eventSourceNameAnnotation);
         when(eventSourceNameAnnotation.value()).thenReturn(eventSourceName);
-        when(eventSourceRegistry.getEventSourceFor(eventSourceName)).thenReturn(of(eventSourceDomainObject));
-        when(eventSourceDomainObject.getLocation()).thenReturn(location);
+        when(eventSourceDefinitionRegistry.getEventSourceDefinitionFor(eventSourceName)).thenReturn(of(eventSourceDefinition));
+        when(eventSourceDefinition.getLocation()).thenReturn(location);
         when(location.getDataSource()).thenReturn(of(dataSource));
-        when(jdbcEventSourceFactory.create(dataSource, eventSourceDomainObject.getName())).thenReturn(jdbcBasedEventSource);
+        when(jdbcEventSourceFactory.create(dataSource, eventSourceDefinition.getName())).thenReturn(jdbcBasedEventSource);
 
         assertThat(eventSourceProducer.eventSource(injectionPoint), is(jdbcBasedEventSource));
     }
@@ -89,7 +90,7 @@ public class EventSourceProducerTest {
 
         when(qualifierAnnotationExtractor.getFrom(injectionPoint, EventSourceName.class)).thenReturn(eventSourceNameAnnotation);
         when(eventSourceNameAnnotation.value()).thenReturn(eventSourceName);
-        when(eventSourceRegistry.getEventSourceFor(eventSourceName)).thenReturn(empty());
+        when(eventSourceDefinitionRegistry.getEventSourceDefinitionFor(eventSourceName)).thenReturn(empty());
 
         try {
             eventSourceProducer.eventSource(injectionPoint);
@@ -109,15 +110,15 @@ public class EventSourceProducerTest {
 
         final InjectionPoint injectionPoint = mock(InjectionPoint.class);
         final EventSourceName eventSourceNameAnnotation = mock(EventSourceName.class);
-        final uk.gov.justice.subscription.domain.eventsource.EventSource eventSourceDomainObject = mock(uk.gov.justice.subscription.domain.eventsource.EventSource.class);
+        final EventSourceDefinition eventSourceDefinition = mock(EventSourceDefinition.class);
         final Location location = mock(Location.class);
 
         when(qualifierAnnotationExtractor.getFrom(injectionPoint, EventSourceName.class)).thenReturn(eventSourceNameAnnotation);
         when(eventSourceNameAnnotation.value()).thenReturn(eventSourceName);
-        when(eventSourceRegistry.getEventSourceFor(eventSourceName)).thenReturn(of(eventSourceDomainObject));
-        when(eventSourceDomainObject.getLocation()).thenReturn(location);
+        when(eventSourceDefinitionRegistry.getEventSourceDefinitionFor(eventSourceName)).thenReturn(of(eventSourceDefinition));
+        when(eventSourceDefinition.getLocation()).thenReturn(location);
         when(location.getDataSource()).thenReturn(empty());
-        when(eventSourceDomainObject.getName()).thenReturn(dataSourceName);
+        when(eventSourceDefinition.getName()).thenReturn(dataSourceName);
 
         try {
             eventSourceProducer.eventSource(injectionPoint);

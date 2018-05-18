@@ -69,7 +69,7 @@ import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
 import uk.gov.justice.subscription.ParserProducer;
 import uk.gov.justice.subscription.YamlFileFinder;
-import uk.gov.justice.subscription.registry.EventSourceRegistryProducer;
+import uk.gov.justice.subscription.registry.EventSourceDefinitionRegistryProducer;
 import uk.gov.justice.subscription.yaml.parser.YamlParser;
 import uk.gov.justice.subscription.yaml.parser.YamlSchemaLoader;
 
@@ -198,7 +198,7 @@ public class SnapshotAwareAggregateServiceIT {
             JndiDataSourceNameProvider.class,
             InitialContextProducer.class,
             SnapshotAwareEventSourceProducer.class,
-            EventSourceRegistryProducer.class,
+            EventSourceDefinitionRegistryProducer.class,
             YamlFileFinder.class,
             ParserProducer.class,
             YamlParser.class,

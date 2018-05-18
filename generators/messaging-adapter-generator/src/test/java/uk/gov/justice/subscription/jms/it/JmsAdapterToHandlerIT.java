@@ -84,7 +84,7 @@ import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
 import uk.gov.justice.services.test.utils.common.envelope.TestEnvelopeRecorder;
 import uk.gov.justice.subscription.ParserProducer;
 import uk.gov.justice.subscription.YamlFileFinder;
-import uk.gov.justice.subscription.registry.SubscriptionDescriptorRegistryProducer;
+import uk.gov.justice.subscription.registry.SubscriptionDescriptorDefinitionRegistryProducer;
 import uk.gov.justice.subscription.yaml.parser.YamlParser;
 import uk.gov.justice.subscription.yaml.parser.YamlSchemaLoader;
 
@@ -208,7 +208,7 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
             DefaultSubscriptionJmsProcessor.class,
             SubscriptionManagerProducer.class,
             QualifierAnnotationExtractor.class,
-            SubscriptionDescriptorRegistryProducer.class,
+            SubscriptionDescriptorDefinitionRegistryProducer.class,
             YamlFileFinder.class,
             ParserProducer.class,
             YamlParser.class,

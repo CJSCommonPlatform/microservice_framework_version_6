@@ -11,12 +11,12 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.subscription.domain.builders.SubscriptionBuilder.subscription;
-import static uk.gov.justice.subscription.domain.builders.SubscriptionDescriptorBuilder.subscriptionDescriptor;
+import static uk.gov.justice.subscription.domain.builders.SubscriptionDescriptorDefinitionBuilder.subscriptionDescriptorDefinition;
 
 import uk.gov.justice.subscription.SubscriptionDescriptorsParser;
 import uk.gov.justice.subscription.YamlFileFinder;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
-import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptor;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptorDefinition;
 
 import java.io.IOException;
 import java.net.URL;
@@ -32,7 +32,7 @@ import org.slf4j.Logger;
 
 
 @RunWith(MockitoJUnitRunner.class)
-public class SubscriptionDescriptorRegistryProducerTest {
+public class SubscriptionDescriptorDefinitionRegistryProducerTest {
 
     @Mock
     private Logger logger;
@@ -44,10 +44,10 @@ public class SubscriptionDescriptorRegistryProducerTest {
     private SubscriptionDescriptorsParser subscriptionDescriptorsParser;
 
     @InjectMocks
-    private SubscriptionDescriptorRegistryProducer subscriptionRegistryProducer;
+    private SubscriptionDescriptorDefinitionRegistryProducer subscriptionDescriptorDefinitionRegistryProducer;
 
     @Test
-    public void shouldCreateRegistryOfAllSubscriptionsFromTheClasspath() throws Exception {
+    public void shouldCreateRegistryOfAllSubscriptionDescriptorDefinitionsFromTheClasspath() throws Exception {
 
         final String eventListener = "EVENT_LISTENER";
         final String eventProcessor = "EVENT_PROCESSOR";
@@ -55,24 +55,24 @@ public class SubscriptionDescriptorRegistryProducerTest {
         final URL url_1 = new URL("file:/test-1");
         final URL url_2 = new URL("file:/test-2");
 
-        final SubscriptionDescriptor subscriptionDescriptor_1 = subscriptionDescriptor()
+        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition_1 = subscriptionDescriptorDefinition()
                 .withServiceComponent(eventListener)
                 .build();
-        final SubscriptionDescriptor subscriptionDescriptor_2 = subscriptionDescriptor()
+        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition_2 = subscriptionDescriptorDefinition()
                 .withServiceComponent(eventProcessor)
                 .build();
 
         final List<URL> pathList = asList(url_1, url_2);
 
         when(yamlFileFinder.getSubscriptionDescriptorPaths()).thenReturn(pathList);
-        when(subscriptionDescriptorsParser.getSubscriptionDescriptorsFrom(pathList)).thenReturn(Stream.of(subscriptionDescriptor_1, subscriptionDescriptor_2));
+        when(subscriptionDescriptorsParser.getSubscriptionDescriptorsFrom(pathList)).thenReturn(Stream.of(subscriptionDescriptorDefinition_1, subscriptionDescriptorDefinition_2));
 
-        final SubscriptionDescriptorRegistry subscriptionDescriptorRegistry = subscriptionRegistryProducer.subscriptionDescriptorRegistry();
+        final SubscriptionDescriptorDefinitionRegistry subscriptionDescriptorRegistry = subscriptionDescriptorDefinitionRegistryProducer.subscriptionDescriptorRegistry();
 
         assertThat(subscriptionDescriptorRegistry, is(notNullValue()));
 
-        assertThat(subscriptionDescriptorRegistry.getSubscriptionDescriptorFor(eventListener), is(of(subscriptionDescriptor_1)));
-        assertThat(subscriptionDescriptorRegistry.getSubscriptionDescriptorFor(eventProcessor), is(of(subscriptionDescriptor_2)));
+        assertThat(subscriptionDescriptorRegistry.getSubscriptionDescriptorDescriptorFor(eventListener), is(of(subscriptionDescriptorDefinition_1)));
+        assertThat(subscriptionDescriptorRegistry.getSubscriptionDescriptorDescriptorFor(eventProcessor), is(of(subscriptionDescriptorDefinition_2)));
     }
 
     @Test
@@ -83,26 +83,26 @@ public class SubscriptionDescriptorRegistryProducerTest {
         final URL url_1 = new URL("file:/test-1");
         final URL url_2 = new URL("file:/test-2");
 
-        final SubscriptionDescriptor subscriptionDescriptor_1 = subscriptionDescriptor()
+        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition_1 = subscriptionDescriptorDefinition()
                 .withServiceComponent(eventListener)
                 .build();
-        final SubscriptionDescriptor subscriptionDescriptor_2 = subscriptionDescriptor()
+        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition_2 = subscriptionDescriptorDefinition()
                 .withServiceComponent(eventProcessor)
                 .build();
 
         final List<URL> pathList = asList(url_1, url_2);
 
         when(yamlFileFinder.getSubscriptionDescriptorPaths()).thenReturn(pathList);
-        when(subscriptionDescriptorsParser.getSubscriptionDescriptorsFrom(pathList)).thenReturn(Stream.of(subscriptionDescriptor_1, subscriptionDescriptor_2));
+        when(subscriptionDescriptorsParser.getSubscriptionDescriptorsFrom(pathList)).thenReturn(Stream.of(subscriptionDescriptorDefinition_1, subscriptionDescriptorDefinition_2));
 
-        final SubscriptionDescriptorRegistry subscriptionDescriptorRegistry_1 = subscriptionRegistryProducer.subscriptionDescriptorRegistry();
-        final SubscriptionDescriptorRegistry subscriptionDescriptorRegistry_2 = subscriptionRegistryProducer.subscriptionDescriptorRegistry();
+        final SubscriptionDescriptorDefinitionRegistry subscriptionDescriptorRegistry_1 = subscriptionDescriptorDefinitionRegistryProducer.subscriptionDescriptorRegistry();
+        final SubscriptionDescriptorDefinitionRegistry subscriptionDescriptorRegistry_2 = subscriptionDescriptorDefinitionRegistryProducer.subscriptionDescriptorRegistry();
 
         assertThat(subscriptionDescriptorRegistry_1, is(sameInstance(subscriptionDescriptorRegistry_2)));
     }
 
     @Test
-    public void shouldLogRegisteredSubscriptions() throws Exception {
+    public void shouldLogRegisteredSubscriptionDescriptorDefinitions() throws Exception {
 
         final String eventListener = "EVENT_LISTENER";
         final String eventProcessor = "EVENT_PROCESSOR";
@@ -118,12 +118,12 @@ public class SubscriptionDescriptorRegistryProducerTest {
                 .withName("Subscription_2")
                 .build();
 
-        final SubscriptionDescriptor subscriptionDescriptor_1 = subscriptionDescriptor()
+        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition_1 = subscriptionDescriptorDefinition()
                 .withServiceComponent(eventListener)
                 .withSubscription(subscription_1)
                 .build();
 
-        final SubscriptionDescriptor subscriptionDescriptor_2 = subscriptionDescriptor()
+        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition_2 = subscriptionDescriptorDefinition()
                 .withServiceComponent(eventProcessor)
                 .withSubscription(subscription_2)
                 .build();
@@ -131,21 +131,21 @@ public class SubscriptionDescriptorRegistryProducerTest {
         final List<URL> pathList = asList(url_1, url_2);
 
         when(yamlFileFinder.getSubscriptionDescriptorPaths()).thenReturn(pathList);
-        when(subscriptionDescriptorsParser.getSubscriptionDescriptorsFrom(pathList)).thenReturn(Stream.of(subscriptionDescriptor_1, subscriptionDescriptor_2));
+        when(subscriptionDescriptorsParser.getSubscriptionDescriptorsFrom(pathList)).thenReturn(Stream.of(subscriptionDescriptorDefinition_1, subscriptionDescriptorDefinition_2));
 
-        final SubscriptionDescriptorRegistry subscriptionDescriptorRegistry = subscriptionRegistryProducer.subscriptionDescriptorRegistry();
+        subscriptionDescriptorDefinitionRegistryProducer.subscriptionDescriptorRegistry();
 
         verify(logger).info("Subscription name in registry : Subscription_1");
         verify(logger).info("Subscription name in registry : Subscription_2");
     }
 
     @Test
-    public void shouldThrowExceptionIfIOExceptionOccursWhenFindingSubscriptionDescriptorResourcesOnTheClasspath() throws Exception {
+    public void shouldThrowExceptionIfIOExceptionOccursWhenFindingSubscriptionDescriptorDefinitionResourcesOnTheClasspath() throws Exception {
 
         when(yamlFileFinder.getSubscriptionDescriptorPaths()).thenThrow(new IOException());
 
         try {
-            subscriptionRegistryProducer.subscriptionDescriptorRegistry();
+            subscriptionDescriptorDefinitionRegistryProducer.subscriptionDescriptorRegistry();
             fail();
         } catch (final Exception e) {
             assertThat(e, is(instanceOf(RegistryException.class)));

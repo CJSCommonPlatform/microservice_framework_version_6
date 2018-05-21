@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
+
+## [4.0.6] - 2018-05-21
+### Fixed
+- Schema Validation Exception not caught error 
+
 ## [4.0.5] - 2018-05-18
 ### Fixed
 - Upgrade parent pom to fix upgrade of Jackson 2.8.11 

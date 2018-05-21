@@ -2,9 +2,9 @@ package uk.gov.justice.services.core.envelope;
 
 import static java.lang.String.format;
 import static javax.json.JsonValue.NULL;
-import static uk.gov.justice.services.core.json.JsonValidationLogger.toValidationTrace;
 
 import uk.gov.justice.services.core.json.DefaultJsonValidationLoggerHelper;
+import uk.gov.justice.services.core.json.JsonSchemaValidationException;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.core.json.SchemaLoadingException;
 import uk.gov.justice.services.core.mapping.MediaType;
@@ -16,7 +16,6 @@ import javax.json.JsonValue;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.everit.json.schema.ValidationException;
 
 public class EnvelopeValidator {
 
@@ -48,7 +47,7 @@ public class EnvelopeValidator {
         } catch (final SchemaLoadingException e) {
             envelopeValidationExceptionHandler.handle(new EnvelopeValidationException(
                     format("Could not load json schema that matches message type %s.", actionName), e));
-        } catch (final ValidationException e) {
+        } catch (final JsonSchemaValidationException e) {
             envelopeValidationExceptionHandler.handle(new EnvelopeValidationException(
                     format("Message not valid against schema: %n%s : validation error: %s",
                             jsonEnvelope.toObfuscatedDebugString(),

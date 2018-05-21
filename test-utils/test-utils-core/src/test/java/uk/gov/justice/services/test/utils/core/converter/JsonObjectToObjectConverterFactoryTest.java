@@ -27,7 +27,7 @@ public class JsonObjectToObjectConverterFactoryTest {
         assertThat(convertedPojo.getTestAttribute(), is("testValue"));
     }
 
-    private class TestPojo {
+    private static class TestPojo {
 
         private String testAttribute;
 

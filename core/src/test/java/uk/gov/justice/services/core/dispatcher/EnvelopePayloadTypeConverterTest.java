@@ -128,7 +128,7 @@ public class EnvelopePayloadTypeConverterTest {
     }
 
 
-    private class TestObject {
+    private static class TestObject {
 
         private String myString;
 
@@ -148,7 +148,7 @@ public class EnvelopePayloadTypeConverterTest {
         }
     }
 
-    private class DifferentTestObject {
+    private static class DifferentTestObject {
 
         private String myString;
 

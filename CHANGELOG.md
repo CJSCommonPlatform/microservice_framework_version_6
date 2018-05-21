@@ -11,12 +11,15 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ### Changed
 - Added schema catalog generation plugin to example service
-- Updated to latest raml generator plugin
-- Updated utilities version to 1.13.0
-- Updated test-utils version to 1.16.3
-- Updated file.service version to 1.16.0
-- Updated common bom version to 1.24.0
+- Updated to use latest raml generator plugin
+- Updated utilities version to 1.13.1
+- Updated test-utils version to 1.17.2
+- Updated file.service version to 1.16.1
+- Updated common-bom version to 1.26.0 for Jackson version 2.8.11
 - Change message adapter generator to use SubscriptionManager instead of the interceptor chain
+- Updated maven framework parent pom version to 1.12.2
+- Updated raml maven plugin version to 1.6.2
+- Updated generator maven plugin version to 2.5.0
 
 ## [4.0.0] - 2018-03-09
 

@@ -44,7 +44,6 @@ public class FileBasedJsonSchemaValidator {
         } catch (final ValidationException ex) {
             throw new JsonSchemaValidationException(ex.getMessage(), ex);
         }
-
     }
 
     private Schema schemaOf(final String actionName) {

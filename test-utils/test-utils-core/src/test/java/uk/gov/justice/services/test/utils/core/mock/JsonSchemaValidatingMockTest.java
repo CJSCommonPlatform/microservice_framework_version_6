@@ -48,7 +48,7 @@ public class JsonSchemaValidatingMockTest {
     public void shouldThrowExceptionWhenPayloadPassedToSenderDoesNotAdhereToSchema() {
 
         exception.expect(MockitoException.class);
-        exception.expectCause(allOf(instanceOf(JsonSchemaValidationException.class),
+        exception.expectCause(allOf(instanceOf(EnvelopeValidationException.class),
                 hasProperty("message", containsString("#: required key [name] not found"))));
         new SendingHandler(mock(Sender.class)).handle(
                 envelope()
@@ -89,7 +89,7 @@ public class JsonSchemaValidatingMockTest {
     public void shouldThrowExceptionWhenPayloadReturnedByRequesterDoesNotAdhereToSchema() {
 
         exception.expect(MockitoException.class);
-        exception.expectCause(allOf(instanceOf(JsonSchemaValidationException.class),
+        exception.expectCause(allOf(instanceOf(EnvelopeValidationException.class),
                 hasProperty("message", containsString("#: required key [glutenFree] not found"))));
 
         final Requester requester = mock(Requester.class);

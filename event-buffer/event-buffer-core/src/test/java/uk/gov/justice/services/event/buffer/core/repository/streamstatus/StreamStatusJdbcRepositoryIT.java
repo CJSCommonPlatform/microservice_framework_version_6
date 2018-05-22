@@ -76,9 +76,11 @@ public class StreamStatusJdbcRepositoryIT {
     }
 
     @Test
-    public void shouldUpdateVersion() throws Exception {
+    public void shouldUpdateVersionForSameStreamIdWithMultipleSources() throws Exception {
         final UUID id = randomUUID();
         jdbcRepository.insert(streamStatusOf(id, 4L, "source 4"));
+        jdbcRepository.update(streamStatusOf(id, 5L, "source 4"));
+        jdbcRepository.insert(streamStatusOf(id, 4L, "source 5"));
         jdbcRepository.update(streamStatusOf(id, 5L, "source 5"));
 
         final Optional<StreamStatus> result = jdbcRepository.findByStreamIdAndSource(id, "source 5");
@@ -86,6 +88,68 @@ public class StreamStatusJdbcRepositoryIT {
         assertThat(result.get().getVersion(), is(5L));
         assertThat(result.get().getSource(), is("source 5"));
 
+    }
+
+    @Test
+    public void shouldNotUpdateVersionForANewSourceField() throws Exception {
+        final UUID streamId = randomUUID();
+        jdbcRepository.insert(streamStatusOf(streamId, 1L, "source2"));
+
+        final String source3 = "source3";
+        final StreamStatus streamStatus = new StreamStatus(streamId, 1L, source3);
+
+        jdbcRepository.update(streamStatus);
+        final Optional<StreamStatus> result = jdbcRepository.findByStreamIdAndSource(streamId, source3);
+        assertThat(result,is(Optional.empty()));
+    }
+
+    @Test
+    public void shouldUpdateVersionForAnExistingSourceField() throws Exception {
+        final UUID streamId = randomUUID();
+        final String source3 = "source3";
+        jdbcRepository.insert(streamStatusOf(streamId, 4L, source3));
+        jdbcRepository.insert(streamStatusOf(streamId, 1L, "source4"));
+
+        final StreamStatus streamStatus = new StreamStatus(streamId, 5L, source3);
+
+        jdbcRepository.update(streamStatus);
+        final Optional<StreamStatus> result = jdbcRepository.findByStreamIdAndSource(streamId, source3);
+        assertTrue(result.isPresent());
+        assertThat(result.get().getVersion(), is(5L));
+        assertThat(result.get().getSource(), is(source3));
+    }
+
+
+    @Test
+    public void shouldUpdateNewVersionNumberForExistingSourceWhenMultipleSourceEventsExist() throws Exception {
+        final UUID streamId = randomUUID();
+        jdbcRepository.insert(streamStatusOf(streamId, 1L, "source1"));
+        jdbcRepository.insert(streamStatusOf(streamId, 1L, "source2"));
+        jdbcRepository.insert(streamStatusOf(streamId, 2L, "source3"));
+
+        final String existingSource = "source2";
+        final StreamStatus streamStatus = new StreamStatus(streamId, 2L, existingSource);
+
+        jdbcRepository.update(streamStatus);
+        final Optional<StreamStatus> result = jdbcRepository.findByStreamIdAndSource(streamId, existingSource);
+        assertTrue(result.isPresent());
+        assertThat(result.get().getVersion(), is(2L));
+        assertThat(result.get().getSource(), is(existingSource));
+    }
+
+    @Test
+    public void shouldNotUpdateNewVersionNumberForNewSourceWhenMultipleSourceEventsExist() throws Exception {
+        final UUID streamId = randomUUID();
+        jdbcRepository.insert(streamStatusOf(streamId, 1L, "source1"));
+        jdbcRepository.insert(streamStatusOf(streamId, 1L, "source2"));
+        jdbcRepository.insert(streamStatusOf(streamId, 2L, "source3"));
+
+        final String newSource = "source4";
+        final StreamStatus streamStatus = new StreamStatus(streamId, 1L, newSource);
+
+        jdbcRepository.update(streamStatus);
+        final Optional<StreamStatus> result = jdbcRepository.findByStreamIdAndSource(streamId, newSource);
+        assertThat(result,is(Optional.empty()));
     }
 
     private StreamStatus streamStatusOf(final UUID id, final Long version, final String source) {

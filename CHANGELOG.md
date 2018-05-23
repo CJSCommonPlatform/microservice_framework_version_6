@@ -20,6 +20,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 - Updated maven framework parent pom version to 1.12.2
 - Updated raml maven plugin version to 1.6.2
 - Updated generator maven plugin version to 2.5.0
+- Reduce the logging level for not using schema catalog
 
 ## [4.0.0] - 2018-03-09
 

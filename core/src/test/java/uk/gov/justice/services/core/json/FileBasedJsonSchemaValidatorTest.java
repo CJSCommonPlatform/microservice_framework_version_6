@@ -52,7 +52,7 @@ public class FileBasedJsonSchemaValidatorTest {
         fileBasedJsonSchemaValidator.validateWithoutSchemaCatalog(envelopeJson, actionName);
 
         verify(schema).validate(payload);
-        verify(logger).info("Falling back to file based schema lookup, no catalog schema found for: {}", actionName);
+        verify(logger).debug("Falling back to file based schema lookup, no catalog schema found for: {}", actionName);
     }
 
     @Test

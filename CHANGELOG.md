@@ -8,6 +8,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ### Added
 - test-utils-enveloper-provider module
 - EnveloperTestProvider that is used for testing usage of the Enveloper
+- Update JdbcEventRepository to return all active stream ids
 
 ### Changed
 - Added schema catalog generation plugin to example service

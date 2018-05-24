@@ -70,6 +70,13 @@ public interface EventRepository {
     Stream<Stream<JsonEnvelope>> getStreamOfAllActiveEventStreams();
 
     /**
+     * Returns Stream of all active streamIds
+     *
+     * @return the Stream of active streamIds
+     */
+    Stream<UUID> getAllActiveStreamIds();
+
+    /**
      * Clears all of the events from a stream.
      *
      * @param id - the id of the stream that is to be Cleared.

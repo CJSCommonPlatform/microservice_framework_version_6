@@ -163,7 +163,6 @@ public class JdbcEventRepositoryTest {
         when(eventConverter.envelopeOf(event2)).thenReturn(envelope2);
         when(eventConverter.envelopeOf(event3)).thenReturn(envelope3);
 
-
         final Stream<Stream<JsonEnvelope>> streamOfStreams = jdbcEventRepository.getStreamOfAllActiveEventStreams();
 
         final List<Stream<JsonEnvelope>> listOfStreams = streamOfStreams.collect(toList());
@@ -174,8 +173,22 @@ public class JdbcEventRepositoryTest {
         assertThat(listOfStreams.get(2).findFirst().get(), is(envelope3));
     }
 
-    private EventStream buildEventStreamFor(final UUID streamId, final Long sequence) {
-        return new EventStream(streamId, sequence, true, TIMESTAMP);
+    @Test
+    public void shouldGetActiveStreamOfStreamIds() throws Exception {
+        final UUID streamId1 = UUID.fromString("4b4e80a0-76f7-476c-b75b-527e38fb251e");
+        final UUID streamId2 = UUID.fromString("4b4e80a0-76f7-476c-b75b-527e38fb252e");
+        final UUID streamId3 = UUID.fromString("4b4e80a0-76f7-476c-b75b-527e38fb253e");
+
+        when(eventStreamJdbcRepository.findActive()).thenReturn(Stream.of(buildEventStreamFor(streamId1, 1L), buildEventStreamFor(streamId2, 2L), buildEventStreamFor(streamId3, 3L)));
+
+        final Stream<UUID> allActiveStreamIds = jdbcEventRepository.getAllActiveStreamIds();
+
+        final List<UUID> streamIds = allActiveStreamIds.collect(toList());
+        assertThat(streamIds, hasSize(3));
+
+        assertThat(streamIds.get(0), is(streamId1));
+        assertThat(streamIds.get(1), is(streamId2));
+        assertThat(streamIds.get(2), is(streamId3));
     }
 
     @Test
@@ -216,12 +229,10 @@ public class JdbcEventRepositoryTest {
         assertThat(streamCloseSpy3.streamClosed(), is(true));
     }
 
-
     @Test(expected = InvalidStreamIdException.class)
     public void shouldThrowExceptionOnNullStreamId() throws Exception {
         jdbcEventRepository.getByStreamId(null);
     }
-
 
     @Test(expected = InvalidStreamIdException.class)
     public void shouldThrowExceptionOnNullStreamIdWhenGettingStreamByStreamIdAndSequence() throws Exception {
@@ -269,6 +280,10 @@ public class JdbcEventRepositoryTest {
         jdbcEventRepository.clear(STREAM_ID);
 
         verify(eventJdbcRepository).clear(STREAM_ID);
+    }
+
+    private EventStream buildEventStreamFor(final UUID streamId, final Long sequence) {
+        return new EventStream(streamId, sequence, true, TIMESTAMP);
     }
 
     private Event eventOf(final UUID streamId) {

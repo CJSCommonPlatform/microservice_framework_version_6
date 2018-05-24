@@ -65,11 +65,19 @@ public interface EventRepository {
     Stream<Stream<JsonEnvelope>> getStreamOfAllEventStreams();
 
     /**
-     * Returns stream of all active envelope streams. Envelopes in the nested stream are ordered by sequenceId
+     * Returns stream of all active envelope streams. Envelopes in the nested stream are ordered by
+     * sequenceId
      *
      * @return the stream of active envelope streams
      */
     Stream<Stream<JsonEnvelope>> getStreamOfAllActiveEventStreams();
+
+    /**
+     * Returns Stream of all active streamIds
+     *
+     * @return the Stream of active streamIds
+     */
+    Stream<UUID> getAllActiveStreamIds();
 
     /**
      * Clears all of the events from a stream.

@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
+## [unreleased]
+
+## [4.1.0] -2018-05-24
+### Added
+- Update JdbcEventRepository to return all active stream ids
 
 ## [4.0.6] - 2018-05-21
 ### Fixed

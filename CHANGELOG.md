@@ -5,9 +5,13 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [unreleased]
 
-## [4.1.0] -2018-05-24
+## [4.1.0] - 2018-05-24
 ### Added
 - Update JdbcEventRepository to return all active stream ids
+
+## [4.0.7] - 2018-05-22
+### Fixed
+- Event Buffer stream status version update issue
 
 ## [4.0.6] - 2018-05-21
 ### Fixed

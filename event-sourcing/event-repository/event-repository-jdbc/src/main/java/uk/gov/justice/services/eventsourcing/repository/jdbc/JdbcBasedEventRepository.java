@@ -100,8 +100,13 @@ public class JdbcBasedEventRepository implements EventRepository {
 
     @Override
     public Stream<Stream<JsonEnvelope>> getStreamOfAllActiveEventStreams() {
-        final Stream<UUID> streamIds = eventStreamJdbcRepository.findActive().map(EventStream::getStreamId);
-        return getStreams(streamIds);
+        return getStreams(getAllActiveStreamIds());
+    }
+
+    @Override
+    public Stream<UUID> getAllActiveStreamIds() {
+        return eventStreamJdbcRepository.findActive()
+                .map(EventStream::getStreamId);
     }
 
     private Stream<Stream<JsonEnvelope>> getStreams(final Stream<UUID> streamIds) {

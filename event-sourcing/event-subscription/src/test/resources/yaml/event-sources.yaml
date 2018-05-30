@@ -1,5 +1,6 @@
 event_sources:
 - name: people
+  defaultEventSource: true
   location:
     jms_uri: jms:topic:people.event?timeToLive=1000
     rest_uri: http://localhost:8080/people/event-source-api/rest

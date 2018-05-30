@@ -36,7 +36,10 @@ public class EventSourcesParser {
      * @param urls the YAML URLs to parse
      * @return Stream of {@link EventSourceDefinition}
      */
-    public Stream<EventSourceDefinition> eventSourcesFrom(final Collection<URL> urls) {
+    public Stream<EventSourceDefinition> eventSourcesFrom(final List<URL> urls) {
+        if ( urls == null || urls.isEmpty()){
+            throw new YamlFileLoadingException("No event-sources.yaml defined on the classpath");
+        }
         return urls.stream().flatMap(this::parseEventSourcesFromYaml);
     }
 

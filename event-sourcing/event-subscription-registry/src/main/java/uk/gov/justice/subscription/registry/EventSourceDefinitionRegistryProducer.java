@@ -12,8 +12,8 @@ import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 
 /**
- * Producer for the {@link EventSourceDefinitionRegistry} creates a single instance and returns the same
- * instance.
+ * Producer for the {@link EventSourceDefinitionRegistry} creates a single instance and returns the
+ * same instance.
  */
 @ApplicationScoped
 public class EventSourceDefinitionRegistryProducer {
@@ -27,8 +27,8 @@ public class EventSourceDefinitionRegistryProducer {
     private EventSourceDefinitionRegistry eventSourceDefinitionRegistry;
 
     /**
-     * Either creates the single instance of the {@link EventSourceDefinitionRegistry} and returns it, or
-     * returns the previously created instance.
+     * Either creates the single instance of the {@link EventSourceDefinitionRegistry} and returns
+     * it, or returns the previously created instance.
      *
      * @return the instance of the {@link EventSourceDefinitionRegistry}
      */
@@ -38,7 +38,9 @@ public class EventSourceDefinitionRegistryProducer {
         if (null == eventSourceDefinitionRegistry) {
             try {
                 final Stream<EventSourceDefinition> eventSourcesFrom = eventSourcesParser.eventSourcesFrom(yamlFileFinder.getEventSourcesPaths());
-                eventSourceDefinitionRegistry = new EventSourceDefinitionRegistry(eventSourcesFrom);
+
+                eventSourceDefinitionRegistry = new EventSourceDefinitionRegistry();
+                eventSourcesFrom.forEach(eventSourceDefinition -> eventSourceDefinitionRegistry.register(eventSourceDefinition));
 
             } catch (final IOException e) {
                 throw new RegistryException("Failed to find yaml/event-sources.yaml resources on the classpath", e);
@@ -46,5 +48,4 @@ public class EventSourceDefinitionRegistryProducer {
         }
         return eventSourceDefinitionRegistry;
     }
-
 }

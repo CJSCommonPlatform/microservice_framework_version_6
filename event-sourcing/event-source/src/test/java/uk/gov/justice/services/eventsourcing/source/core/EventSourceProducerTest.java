@@ -8,13 +8,15 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.subscription.domain.builders.EventSourceDefinitionBuilder.eventSourceDefinition;
 
 import uk.gov.justice.services.core.cdi.QualifierAnnotationExtractor;
 import uk.gov.justice.services.eventsourcing.source.core.annotation.EventSourceName;
-import uk.gov.justice.services.jdbc.persistence.JndiDataSourceNameProvider;
 import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 import uk.gov.justice.subscription.domain.eventsource.Location;
 import uk.gov.justice.subscription.registry.EventSourceDefinitionRegistry;
+
+import java.util.Optional;
 
 import javax.enterprise.inject.CreationException;
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -32,9 +34,6 @@ public class EventSourceProducerTest {
     private EventSourceDefinitionRegistry eventSourceDefinitionRegistry;
 
     @Mock
-    private JndiDataSourceNameProvider jndiDataSourceNameProvider;
-
-    @Mock
     private JdbcEventSourceFactory jdbcEventSourceFactory;
 
     @Mock
@@ -45,15 +44,37 @@ public class EventSourceProducerTest {
 
 
     @Test
+    public void shouldCreateDefaultEventSourceDefinitionWhenEventSourceNameIsEmpty() throws Exception {
+        final EventSourceDefinition eventSourceDefinition = eventSourceDefinition()
+                .withName("defaultEventSource")
+                .withDefaultEventSource(true)
+                .withLocation(new Location("", "", Optional.of("dataSource")))
+                .build();
+        final InjectionPoint injectionPoint = mock(InjectionPoint.class);
+        final EventSourceName eventSourceNameAnnotation = mock(EventSourceName.class);
+
+        final JdbcBasedEventSource jdbcBasedEventSource = mock(JdbcBasedEventSource.class);
+        when(qualifierAnnotationExtractor.getFrom(injectionPoint, EventSourceName.class)).thenReturn(eventSourceNameAnnotation);
+        when(eventSourceNameAnnotation.value()).thenReturn("");
+        when(eventSourceDefinitionRegistry.getDefaultEventSourceDefinition()).thenReturn(eventSourceDefinition);
+        when(jdbcEventSourceFactory.create(eventSourceDefinition.getLocation().getDataSource().get(), eventSourceDefinition.getName())).thenReturn(jdbcBasedEventSource);
+
+        assertThat(eventSourceProducer.eventSource(), is(jdbcBasedEventSource));
+    }
+
+    @Test
     public void shouldCreateEventSourceUsingTheJNDINameInjectedByTheContainer() throws Exception {
 
-        final String jndiName = "java:/app/my-command-api/DS.eventstore";
-        final String eventSourceName = "defaultEventSource";
+        final EventSourceDefinition eventSourceDefinition = eventSourceDefinition()
+                .withName("defaultEventSource")
+                .withDefaultEventSource(true)
+                .withLocation(new Location("", "", Optional.of("dataSource")))
+                .build();
 
         final JdbcBasedEventSource jdbcBasedEventSource = mock(JdbcBasedEventSource.class);
 
-        when(jndiDataSourceNameProvider.jndiName()).thenReturn(jndiName);
-        when(jdbcEventSourceFactory.create(jndiName, eventSourceName)).thenReturn(jdbcBasedEventSource);
+        when(eventSourceDefinitionRegistry.getDefaultEventSourceDefinition()).thenReturn(eventSourceDefinition);
+        when(jdbcEventSourceFactory.create(eventSourceDefinition.getLocation().getDataSource().get(), eventSourceDefinition.getName())).thenReturn(jdbcBasedEventSource);
 
         assertThat(eventSourceProducer.eventSource(), is(jdbcBasedEventSource));
     }
@@ -72,7 +93,7 @@ public class EventSourceProducerTest {
 
         when(qualifierAnnotationExtractor.getFrom(injectionPoint, EventSourceName.class)).thenReturn(eventSourceNameAnnotation);
         when(eventSourceNameAnnotation.value()).thenReturn(eventSourceName);
-        when(eventSourceDefinitionRegistry.getEventSourceDefinitionFor(eventSourceName)).thenReturn(of(eventSourceDefinition));
+        when(eventSourceDefinitionRegistry.getEventSourceDefinitionFor(eventSourceName)).thenReturn(eventSourceDefinition);
         when(eventSourceDefinition.getLocation()).thenReturn(location);
         when(location.getDataSource()).thenReturn(of(dataSource));
         when(jdbcEventSourceFactory.create(dataSource, eventSourceDefinition.getName())).thenReturn(jdbcBasedEventSource);
@@ -90,7 +111,7 @@ public class EventSourceProducerTest {
 
         when(qualifierAnnotationExtractor.getFrom(injectionPoint, EventSourceName.class)).thenReturn(eventSourceNameAnnotation);
         when(eventSourceNameAnnotation.value()).thenReturn(eventSourceName);
-        when(eventSourceDefinitionRegistry.getEventSourceDefinitionFor(eventSourceName)).thenReturn(empty());
+        when(eventSourceDefinitionRegistry.getEventSourceDefinitionFor(eventSourceName)).thenReturn(null);
 
         try {
             eventSourceProducer.eventSource(injectionPoint);
@@ -115,7 +136,7 @@ public class EventSourceProducerTest {
 
         when(qualifierAnnotationExtractor.getFrom(injectionPoint, EventSourceName.class)).thenReturn(eventSourceNameAnnotation);
         when(eventSourceNameAnnotation.value()).thenReturn(eventSourceName);
-        when(eventSourceDefinitionRegistry.getEventSourceDefinitionFor(eventSourceName)).thenReturn(of(eventSourceDefinition));
+        when(eventSourceDefinitionRegistry.getEventSourceDefinitionFor(eventSourceName)).thenReturn(eventSourceDefinition);
         when(eventSourceDefinition.getLocation()).thenReturn(location);
         when(location.getDataSource()).thenReturn(empty());
         when(eventSourceDefinition.getName()).thenReturn(dataSourceName);

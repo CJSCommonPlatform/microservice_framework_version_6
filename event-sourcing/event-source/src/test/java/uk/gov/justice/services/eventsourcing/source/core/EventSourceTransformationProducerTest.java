@@ -8,6 +8,8 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.fieldValue;
+import static uk.gov.justice.subscription.domain.builders.EventSourceDefinitionBuilder.eventSourceDefinition;
+import static uk.gov.justice.subscription.domain.builders.LocationBuilder.location;
 
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepositoryFactory;
@@ -15,7 +17,8 @@ import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepo
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepositoryFactory;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepositoryFactory;
-import uk.gov.justice.services.jdbc.persistence.JndiDataSourceNameProvider;
+import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
+import uk.gov.justice.subscription.registry.EventSourceDefinitionRegistry;
 
 import java.util.Optional;
 
@@ -41,7 +44,7 @@ public class EventSourceTransformationProducerTest {
     private EventStreamJdbcRepositoryFactory eventStreamJdbcRepositoryFactory;
 
     @Mock
-    private JndiDataSourceNameProvider dataSourceJndiNameProvider;
+    private EventSourceDefinitionRegistry eventSourceDefinitionRegistry;
 
     @InjectMocks
     private EventSourceTransformationProducer eventSourceTransformationProducer;
@@ -50,11 +53,18 @@ public class EventSourceTransformationProducerTest {
     public void shouldCreateEventSourceTransformation() throws Exception {
         final EventRepository eventRepository = mock(EventRepository.class);
         final EventStreamManager eventStreamManager = mock(EventStreamManager.class);
-        final String defaultEventSource = "defaultEventSource";
 
+        final EventSourceDefinition eventSourceDefinition = eventSourceDefinition()
+                .withName("eventsource")
+                .withLocation(location()
+                        .withJmsUri("")
+                        .withRestUri("http://localhost:8080/example/event-source-api/rest")
+                        .withDataSource("jndi:datasource")
+                        .build())
+                .build();
         when(eventRepositoryFactory.eventRepository(any(EventJdbcRepository.class), any(EventStreamJdbcRepository.class))).thenReturn(eventRepository);
-        when(eventStreamManagerFactory.eventStreamManager(eventRepository, defaultEventSource)).thenReturn(eventStreamManager);
-
+        when(eventStreamManagerFactory.eventStreamManager(eventRepository, eventSourceDefinition.getName())).thenReturn(eventStreamManager);
+        when(eventSourceDefinitionRegistry.getDefaultEventSourceDefinition()).thenReturn(eventSourceDefinition);
         final EventSourceTransformation eventSourceTransformation = eventSourceTransformationProducer.eventSourceTransformation();
 
         assertThat(eventSourceTransformation, is(instanceOf(DefaultEventSourceTransformation.class)));

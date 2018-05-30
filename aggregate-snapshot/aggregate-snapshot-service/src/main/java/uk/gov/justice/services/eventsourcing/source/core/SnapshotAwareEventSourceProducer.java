@@ -4,7 +4,6 @@ import static java.lang.String.format;
 
 import uk.gov.justice.services.core.cdi.QualifierAnnotationExtractor;
 import uk.gov.justice.services.eventsourcing.source.core.annotation.EventSourceName;
-import uk.gov.justice.services.jdbc.persistence.JndiDataSourceNameProvider;
 import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 import uk.gov.justice.subscription.domain.eventsource.Location;
 import uk.gov.justice.subscription.registry.EventSourceDefinitionRegistry;
@@ -31,12 +30,8 @@ public class SnapshotAwareEventSourceProducer {
     EventSourceDefinitionRegistry eventSourceDefinitionRegistry;
 
     @Inject
-    JndiDataSourceNameProvider jndiDataSourceNameProvider;
-
-    @Inject
     SnapshotAwareEventSourceFactory snapshotAwareEventSourceFactory;
 
-    private static final String DEFAULT_EVENT_SOURCE = "defaultEventSource";
 
     /**
      *
@@ -46,7 +41,7 @@ public class SnapshotAwareEventSourceProducer {
      */
     @Produces
     public EventSource eventSource() {
-        return snapshotAwareEventSourceFactory.create(jndiDataSourceNameProvider.jndiName() , DEFAULT_EVENT_SOURCE);
+        return createEventSourceFrom(eventSourceDefinitionRegistry.getDefaultEventSourceDefinition());
     }
 
     /**
@@ -59,13 +54,18 @@ public class SnapshotAwareEventSourceProducer {
     @Produces
     @EventSourceName
     public EventSource eventSource(final InjectionPoint injectionPoint) {
-
         final String eventSourceName = qualifierAnnotationExtractor.getFrom(injectionPoint, EventSourceName.class).value();
+        final EventSourceDefinition eventSourceDefinition;
 
-        final Optional<EventSourceDefinition> eventSourceDefinition = eventSourceDefinitionRegistry.getEventSourceDefinitionFor(eventSourceName);
-        return eventSourceDefinition
-                .map(this::createEventSourceFrom)
-                .orElseThrow(() -> new CreationException(format("Failed to find EventSource named '%s' in event-sources.yaml", eventSourceName)));
+        if (eventSourceName.isEmpty()) {
+            eventSourceDefinition = eventSourceDefinitionRegistry.getDefaultEventSourceDefinition();
+        } else {
+            eventSourceDefinition = eventSourceDefinitionRegistry.getEventSourceDefinitionFor(eventSourceName);
+        }
+        if (null == eventSourceDefinition) {
+            throw new CreationException(format("Failed to find EventSource named '%s' in event-sources.yaml", eventSourceName));
+        }
+        return createEventSourceFrom(eventSourceDefinition);
     }
 
     private EventSource createEventSourceFrom(final EventSourceDefinition eventSourceDefinition) {

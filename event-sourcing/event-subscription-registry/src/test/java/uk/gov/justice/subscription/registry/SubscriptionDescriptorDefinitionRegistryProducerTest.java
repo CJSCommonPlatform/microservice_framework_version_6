@@ -20,6 +20,7 @@ import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDes
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -151,6 +152,19 @@ public class SubscriptionDescriptorDefinitionRegistryProducerTest {
             assertThat(e, is(instanceOf(RegistryException.class)));
             assertThat(e.getMessage(), is("Failed to find yaml/subscription-descriptor.yaml resources on the classpath"));
             assertThat(e.getCause(), is(instanceOf(IOException.class)));
+        }
+    }
+
+    @Test
+    public void shouldThrowExceptionIfIfNoSubscriptionDescriptorPathsUrlsFound() throws Exception {
+
+        when(yamlFileFinder.getEventSourcesPaths()).thenReturn(new ArrayList<>());
+
+        try {
+            subscriptionDescriptorDefinitionRegistryProducer.subscriptionDescriptorRegistry();
+            fail();
+        } catch (final RegistryException e) {
+            assertThat(e.getMessage(), is("No event-sources.yaml files found!"));
         }
     }
 }

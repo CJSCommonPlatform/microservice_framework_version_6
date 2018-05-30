@@ -8,13 +8,15 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.subscription.domain.builders.EventSourceDefinitionBuilder.eventSourceDefinition;
 
 import uk.gov.justice.services.core.cdi.QualifierAnnotationExtractor;
 import uk.gov.justice.services.eventsourcing.source.core.annotation.EventSourceName;
-import uk.gov.justice.services.jdbc.persistence.JndiDataSourceNameProvider;
 import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 import uk.gov.justice.subscription.domain.eventsource.Location;
 import uk.gov.justice.subscription.registry.EventSourceDefinitionRegistry;
+
+import java.util.Optional;
 
 import javax.enterprise.inject.CreationException;
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -29,14 +31,12 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class SnapshotAwareEventSourceProducerTest {
 
+
     @Mock
     private QualifierAnnotationExtractor qualifierAnnotationExtractor;
 
     @Mock
     private EventSourceDefinitionRegistry eventSourceDefinitionRegistry;
-
-    @Mock
-    private JndiDataSourceNameProvider jndiDataSourceNameProvider;
 
     @Mock
     private SnapshotAwareEventSourceFactory snapshotAwareEventSourceFactory;
@@ -45,17 +45,40 @@ public class SnapshotAwareEventSourceProducerTest {
     private SnapshotAwareEventSourceProducer snapshotAwareEventSourceProducer;
 
     @Test
-    public void shouldCreateEventSourceUsingTheJNDINameInjectedByTheContainer() throws Exception {
+    public void shouldCreateDefaultEventSourceDefinitionWhenEventSourceNameIsEmpty() throws Exception {
+        final EventSourceDefinition eventSourceDefinition = eventSourceDefinition()
+                .withName("defaultEventSource")
+                .withDefault(true)
+                .withLocation(new Location("", "", Optional.of("dataSource")))
+                .build();
+        final InjectionPoint injectionPoint = mock(InjectionPoint.class);
+        final EventSourceName eventSourceNameAnnotation = mock(EventSourceName.class);
 
-        final String jndiName = "java:/app/my-command-api/DS.eventstore";
-        final String eventSourceName = "defaultEventSource";
+        final JdbcBasedEventSource jdbcBasedEventSource = mock(JdbcBasedEventSource.class);
+        when(qualifierAnnotationExtractor.getFrom(injectionPoint, EventSourceName.class)).thenReturn(eventSourceNameAnnotation);
+        when(eventSourceNameAnnotation.value()).thenReturn("");
+        when(eventSourceDefinitionRegistry.getDefaultEventSourceDefinition()).thenReturn(eventSourceDefinition);
+        when(snapshotAwareEventSourceFactory.create(eventSourceDefinition.getLocation().getDataSource().get(), eventSourceDefinition.getName())).thenReturn(jdbcBasedEventSource);
+
+        assertThat(snapshotAwareEventSourceProducer.eventSource(), is(jdbcBasedEventSource));
+    }
+
+    @Test
+    public void shouldCreateDefaultEventSourceWhenNoEventSourceNameQualifierSet() throws Exception {
+        final EventSourceDefinition eventSourceDefinition = eventSourceDefinition()
+                .withName("defaultEventSource")
+                .withDefault(true)
+                .withLocation(new Location("", "", Optional.of("dataSource")))
+                .build();
 
         final JdbcBasedEventSource jdbcBasedEventSource = mock(JdbcBasedEventSource.class);
 
-        when(jndiDataSourceNameProvider.jndiName()).thenReturn(jndiName);
-        when(snapshotAwareEventSourceFactory.create(jndiName, eventSourceName)).thenReturn(jdbcBasedEventSource);
+        when(eventSourceDefinitionRegistry.getDefaultEventSourceDefinition()).thenReturn(eventSourceDefinition);
+        when(snapshotAwareEventSourceFactory.create(eventSourceDefinition.getLocation().getDataSource().get(), eventSourceDefinition.getName())).thenReturn(jdbcBasedEventSource);
 
         assertThat(snapshotAwareEventSourceProducer.eventSource(), is(jdbcBasedEventSource));
+
+
     }
 
     @Test
@@ -72,7 +95,7 @@ public class SnapshotAwareEventSourceProducerTest {
 
         when(qualifierAnnotationExtractor.getFrom(injectionPoint, EventSourceName.class)).thenReturn(eventSourceNameAnnotation);
         when(eventSourceNameAnnotation.value()).thenReturn(eventSourceName);
-        when(eventSourceDefinitionRegistry.getEventSourceDefinitionFor(eventSourceName)).thenReturn(of(eventSourceDefinition));
+        when(eventSourceDefinitionRegistry.getEventSourceDefinitionFor(eventSourceName)).thenReturn(Optional.of(eventSourceDefinition));
         when(eventSourceDefinition.getName()).thenReturn(eventSourceName);
         when(eventSourceDefinition.getLocation()).thenReturn(location);
         when(location.getDataSource()).thenReturn(of(dataSource));
@@ -116,7 +139,7 @@ public class SnapshotAwareEventSourceProducerTest {
 
         when(qualifierAnnotationExtractor.getFrom(injectionPoint, EventSourceName.class)).thenReturn(eventSourceNameAnnotation);
         when(eventSourceNameAnnotation.value()).thenReturn(eventSourceName);
-        when(eventSourceDefinitionRegistry.getEventSourceDefinitionFor(eventSourceName)).thenReturn(of(eventSourceDefinition));
+        when(eventSourceDefinitionRegistry.getEventSourceDefinitionFor(eventSourceName)).thenReturn(Optional.of(eventSourceDefinition));
         when(eventSourceDefinition.getName()).thenReturn(eventSourceName);
         when(eventSourceDefinition.getLocation()).thenReturn(location);
         when(location.getDataSource()).thenReturn(empty());

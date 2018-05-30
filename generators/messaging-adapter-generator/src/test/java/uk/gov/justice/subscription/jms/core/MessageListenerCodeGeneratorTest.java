@@ -4,7 +4,7 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.subscription.domain.builders.EventBuilder.event;
-import static uk.gov.justice.subscription.domain.builders.EventSourceBuilder.eventsource;
+import static uk.gov.justice.subscription.domain.builders.EventSourceDefinitionBuilder.eventSourceDefinition;
 import static uk.gov.justice.subscription.domain.builders.LocationBuilder.location;
 import static uk.gov.justice.subscription.domain.builders.SubscriptionBuilder.subscription;
 import static uk.gov.justice.subscription.domain.builders.SubscriptionDescriptorDefinitionBuilder.subscriptionDescriptorDefinition;
@@ -50,7 +50,7 @@ public class MessageListenerCodeGeneratorTest {
                 .build();
 
 
-        final EventSourceDefinition eventSourceDefinition = eventsource()
+        final EventSourceDefinition eventSourceDefinition = eventSourceDefinition()
                 .withName("eventsource")
                 .withLocation(location()
                         .withJmsUri(jmsUri)
@@ -137,7 +137,7 @@ public class MessageListenerCodeGeneratorTest {
                 .withSchemaUri("http://justice.gov.uk/json/schemas/domains/example/my-context.events.something-else-happened.json")
                 .build();
 
-        final EventSourceDefinition eventSourceDefinition = eventsource()
+        final EventSourceDefinition eventSourceDefinition = eventSourceDefinition()
                 .withName("eventSource")
                 .withLocation(location()
                         .withJmsUri(jmsUri)
@@ -221,7 +221,7 @@ public class MessageListenerCodeGeneratorTest {
                 .withSchemaUri("http://justice.gov.uk/json/schemas/domains/example/my-context.events.something-else-happened.json")
                 .build();
 
-        final EventSourceDefinition eventSourceDefinition = eventsource()
+        final EventSourceDefinition eventSourceDefinition = eventSourceDefinition()
                 .withName("eventsource")
                 .withLocation(location()
                         .withJmsUri(jmsUri)

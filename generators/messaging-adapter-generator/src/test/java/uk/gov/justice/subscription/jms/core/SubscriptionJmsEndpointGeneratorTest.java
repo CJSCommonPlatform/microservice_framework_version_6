@@ -30,7 +30,7 @@ import static uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtili
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.methodsOf;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.justice.subscription.domain.builders.EventBuilder.event;
-import static uk.gov.justice.subscription.domain.builders.EventSourceBuilder.eventsource;
+import static uk.gov.justice.subscription.domain.builders.EventSourceDefinitionBuilder.eventSourceDefinition;
 import static uk.gov.justice.subscription.domain.builders.LocationBuilder.location;
 import static uk.gov.justice.subscription.domain.builders.SubscriptionBuilder.subscription;
 import static uk.gov.justice.subscription.domain.builders.SubscriptionDescriptorDefinitionBuilder.subscriptionDescriptorDefinition;
@@ -154,7 +154,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
                 .withSchemaUri("http://justice.gov.uk/json/schemas/domains/example/my-context.events.something-happened.json")
                 .build();
 
-        final EventSourceDefinition eventsourceDefinition = eventsource()
+        final EventSourceDefinition eventsourceDefinition = eventSourceDefinition()
                 .withName("eventSource")
                 .withLocation(location()
                         .withJmsUri(structureJmsUri)
@@ -162,7 +162,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
                         .build())
                 .build();
 
-        final EventSourceDefinition eventsourceDefinition2 = eventsource()
+        final EventSourceDefinition eventsourceDefinition2 = eventSourceDefinition()
                 .withName("eventSource2")
                 .withLocation(location()
                         .withJmsUri(peopleJmsUri)
@@ -723,7 +723,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
                 .withSchemaUri("http://justice.gov.uk/json/schemas/domains/example/people.command2.json")
                 .build();
 
-        final EventSourceDefinition eventSourceDefinition = eventsource()
+        final EventSourceDefinition eventSourceDefinition = eventSourceDefinition()
                 .withName("eventSource")
                 .withLocation(location()
                         .withJmsUri(jmsUri)
@@ -951,7 +951,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
                 .withSchemaUri("http://justice.gov.uk/json/schemas/domains/example/" + eventName + ".json")
                 .build();
 
-        final EventSourceDefinition eventSourceDefinition = eventsource()
+        final EventSourceDefinition eventSourceDefinition = eventSourceDefinition()
                 .withName("eventSource")
                 .withLocation(location()
                         .withJmsUri(jmsUri)

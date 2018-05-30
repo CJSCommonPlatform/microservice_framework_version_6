@@ -59,7 +59,6 @@ import uk.gov.justice.services.eventsourcing.source.core.SystemEventService;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.eventsourcing.source.core.snapshot.DefaultSnapshotService;
 import uk.gov.justice.services.eventsourcing.source.core.snapshot.DefaultSnapshotStrategy;
-import uk.gov.justice.services.jdbc.persistence.JndiDataSourceNameProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcDataSourceProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
@@ -69,6 +68,8 @@ import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
 import uk.gov.justice.subscription.ParserProducer;
 import uk.gov.justice.subscription.YamlFileFinder;
+import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
+import uk.gov.justice.subscription.registry.EventSourceDefinitionRegistry;
 import uk.gov.justice.subscription.registry.EventSourceDefinitionRegistryProducer;
 import uk.gov.justice.subscription.yaml.parser.YamlParser;
 import uk.gov.justice.subscription.yaml.parser.YamlSchemaLoader;
@@ -149,6 +150,8 @@ public class SnapshotAwareAggregateServiceIT {
     @Inject
     private DefaultSnapshotService snapshotService;
 
+    @Inject
+    private EventSourceDefinitionRegistry eventSourceDefinitionRegistry;
 
     @Module
     @org.apache.openejb.testing.Classes(cdi = true, value = {
@@ -163,8 +166,6 @@ public class SnapshotAwareAggregateServiceIT {
             TestEventInsertionStrategyProducer.class,
             EventJdbcRepositoryFactory.class,
             JdbcRepositoryHelper.class,
-            JdbcDataSourceProvider.class,
-
             LoggerProducer.class,
 
             EventConverter.class,
@@ -194,8 +195,6 @@ public class SnapshotAwareAggregateServiceIT {
             TestServiceContextNameProvider.class,
             GlobalValueProducer.class,
             ObjectToJsonObjectConverter.class,
-
-            JndiDataSourceNameProvider.class,
             InitialContextProducer.class,
             SnapshotAwareEventSourceProducer.class,
             EventSourceDefinitionRegistryProducer.class,
@@ -225,8 +224,11 @@ public class SnapshotAwareAggregateServiceIT {
 
     @Before
     public void init() throws Exception {
+
+        final EventSourceDefinition defaultEventSourceDefinition = eventSourceDefinitionRegistry.getDefaultEventSourceDefinition();
+        final String jndiName = defaultEventSourceDefinition.getLocation().getDataSource().get();
         final InitialContext initialContext = new InitialContext();
-        initialContext.bind("java:/app/SnapshotAwareAggregateServiceIT/DS.eventstore", dataSource);
+        initialContext.bind(jndiName, dataSource);
         initEventDatabase();
         defaultAggregateService.register(new EventFoundEvent(EventA.class, "context.eventA"));
     }

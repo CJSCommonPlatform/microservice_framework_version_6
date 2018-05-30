@@ -4,4 +4,9 @@ event_sources:
     jms_uri:  jms:topic:other.event
     rest_uri: http://localhost:8080/example/event-source-api/rest
     data_source: java:/app/example/DS.eventstore
-
+- name: event.source
+  is_default: true
+  location:
+    jms_uri:  jms:topic:example.event
+    rest_uri: http://localhost:8080/example/event-source-api/rest
+    data_source: java:/app/example-single/DS.eventstore

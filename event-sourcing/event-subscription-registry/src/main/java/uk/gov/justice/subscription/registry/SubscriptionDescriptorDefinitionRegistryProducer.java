@@ -53,6 +53,10 @@ public class SubscriptionDescriptorDefinitionRegistryProducer {
             try {
                 final List<URL> subscriptionDescriptorPaths = yamlFileFinder.getSubscriptionDescriptorPaths();
 
+                if (subscriptionDescriptorPaths.isEmpty()){
+                    throw new RegistryException("No event-sources.yaml files found!");
+                }
+
                 final Stream<SubscriptionDescriptorDefinition> subscriptionDescriptorDefinitions = subscriptionDescriptorsParser
                         .getSubscriptionDescriptorsFrom(subscriptionDescriptorPaths)
                         .peek(logRegisteredSubscriptionNames);

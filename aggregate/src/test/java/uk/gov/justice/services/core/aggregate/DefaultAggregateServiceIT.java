@@ -53,7 +53,6 @@ import uk.gov.justice.services.jdbc.persistence.AbstractJdbcRepository;
 import uk.gov.justice.services.jdbc.persistence.JdbcDataSourceProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
-import uk.gov.justice.services.jdbc.persistence.JndiDataSourceNameProvider;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
@@ -159,8 +158,6 @@ public class DefaultAggregateServiceIT {
             YamlFileFinder.class,
             YamlParser.class,
             YamlSchemaLoader.class,
-
-            JndiDataSourceNameProvider.class,
             InitialContextProducer.class,
 
             QualifierAnnotationExtractor.class,

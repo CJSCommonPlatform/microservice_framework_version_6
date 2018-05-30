@@ -36,7 +36,7 @@ public class EventSourcesParser {
      * @param urls the YAML URLs to parse
      * @return Stream of {@link EventSourceDefinition}
      */
-    public Stream<EventSourceDefinition> eventSourcesFrom(final Collection<URL> urls) {
+    public Stream<EventSourceDefinition> eventSourcesFrom(final List<URL> urls) {
         return urls.stream().flatMap(this::parseEventSourcesFromYaml);
     }
 

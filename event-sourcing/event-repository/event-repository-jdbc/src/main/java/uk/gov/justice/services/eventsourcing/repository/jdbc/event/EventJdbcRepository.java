@@ -42,7 +42,7 @@ public class EventJdbcRepository {
     /**
      * Statements
      */
-    static final String SQL_FIND_ALL = "SELECT * FROM event_log ORDER BY sequence_id ASC";
+    static final String SQL_FIND_ALL = "SELECT * FROM event_log ORDER BY sequence_number ASC";
     static final String SQL_FIND_BY_STREAM_ID = "SELECT * FROM event_log WHERE stream_id=? ORDER BY sequence_id ASC";
     static final String SQL_FIND_BY_STREAM_ID_AND_POSITION = "SELECT * FROM event_log WHERE stream_id=? AND sequence_id>=? ORDER BY sequence_id ASC";
     static final String SQL_FIND_LATEST_POSITION = "SELECT MAX(sequence_id) FROM event_log WHERE stream_id=?";

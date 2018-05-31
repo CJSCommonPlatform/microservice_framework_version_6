@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="event-store-008" author="TechPod"
+               logicalFilePath="008-add-sequence-number-to-event-log.changelog.xml">
+
+        <createSequence incrementBy="1"
+                        cycle="false"
+                        sequenceName="event_log_seq"
+                        startValue="1"/>
+
+        <addColumn tableName="event_log">
+            <column 
+                    name="sequence_number"
+                    type="BIGINT"
+                    defaultValueSequenceNext="event_log_seq">
+                <constraints unique="true" nullable="false" />
+            </column>
+        </addColumn>
+
+        <rollback>
+            <dropColumn columnName="sequence_number"
+                        tableName="event_log"/>
+
+            <dropSequence sequenceName="event_log_seq"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

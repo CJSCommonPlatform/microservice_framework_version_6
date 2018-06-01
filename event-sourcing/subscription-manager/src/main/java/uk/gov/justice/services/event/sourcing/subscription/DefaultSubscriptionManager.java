@@ -1,6 +1,6 @@
 package uk.gov.justice.services.event.sourcing.subscription;
 
-import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
+import static uk.gov.justice.services.core.interceptor.DefaultInterceptorContext.interceptorContextWithInput;
 
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
@@ -24,6 +24,12 @@ public class DefaultSubscriptionManager implements SubscriptionManager {
 
     @Override
     public void process(final JsonEnvelope jsonEnvelope) {
+        //Start getting all events
         interceptorChainProcessor.process(interceptorContextWithInput(jsonEnvelope));
+    }
+
+    @Override
+    public void startSubscription() {
+        System.out.println("Subscription Process started");
     }
 }

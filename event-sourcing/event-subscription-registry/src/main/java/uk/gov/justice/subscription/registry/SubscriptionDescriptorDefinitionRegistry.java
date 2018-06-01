@@ -59,4 +59,8 @@ public class SubscriptionDescriptorDefinitionRegistry {
                 .findFirst()
                 .orElseThrow(() -> new RegistryException(format("Failed to find subscription '%s' in registry", subscriptionName)));
     }
+
+    public Stream<SubscriptionDescriptorDefinition> subscriptionDescriptorDefinitions() {
+        return registry.values().stream();
+    }
 }

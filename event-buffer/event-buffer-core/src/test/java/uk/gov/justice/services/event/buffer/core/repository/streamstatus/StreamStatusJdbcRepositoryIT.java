@@ -54,6 +54,37 @@ public class StreamStatusJdbcRepositoryIT {
     }
 
 
+
+    @Test
+    public void shouldUpdateSourceWhenUnknown() throws Exception {
+        final String source = "unknown";
+        final UUID streamId = randomUUID();
+
+        jdbcRepository.insert(streamStatusOf(streamId, 1L, source));
+
+        final StreamStatus streamStatus = new StreamStatus(streamId, 2L, source);
+
+        jdbcRepository.update(streamStatus);
+        final Optional<StreamStatus> result = jdbcRepository.findByStreamIdAndSource(streamId, source);
+        assertThat(result.get().getSource(), is(source));
+        assertThat(result.get().getVersion(), is(2L));
+    }
+
+    @Test
+    public void shouldUpdateSourceWhenNotUnknown() throws Exception {
+        final UUID streamId = randomUUID();
+
+        jdbcRepository.insert(streamStatusOf(streamId, 1L, "unknown"));
+
+        final String source = "sjp";
+        final StreamStatus streamStatus = new StreamStatus(streamId, 2L, source);
+
+        jdbcRepository.update(streamStatus);
+        final Optional<StreamStatus> result = jdbcRepository.findByStreamIdAndSource(streamId, source);
+        assertThat(result.get().getSource(), is(source));
+        assertThat(result.get().getVersion(), is(2L));
+    }
+
     @Test
     public void shouldInsertAndReturnStreamStatus() throws Exception {
         final UUID id = randomUUID();

@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [unreleased]
 
+## [4.1.1] - 2018-06-05
+### Fixed
+- Update of stream status table now handles a source column of 'unknown'
+
 ## [4.1.0] - 2018-05-24
 ### Added
 - Update JdbcEventRepository to return all active stream ids

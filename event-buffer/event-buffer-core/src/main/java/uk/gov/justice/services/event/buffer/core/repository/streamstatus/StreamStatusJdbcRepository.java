@@ -34,7 +34,7 @@ public class StreamStatusJdbcRepository {
     private static final String SELECT_BY_STREAM_ID_AND_SOURCE = "SELECT stream_id, version, source FROM stream_status WHERE stream_id=? AND source=? FOR UPDATE";
     private static final String INSERT = "INSERT INTO stream_status (version, stream_id, source) VALUES (?, ?, ?)";
     private static final String INSERT_ON_CONFLICT_DO_NOTHING = new StringBuilder().append(INSERT).append(" ON CONFLICT DO NOTHING").toString();
-    private static final String UPDATE = "UPDATE stream_status SET version=? WHERE stream_id=? and source=?";
+    private static final String UPDATE = "UPDATE stream_status SET version=?,source=? WHERE stream_id=? and source in (?,'unknown')";
 
 
     @Inject
@@ -100,8 +100,9 @@ public class StreamStatusJdbcRepository {
     public void update(final StreamStatus streamStatus) {
         try (final PreparedStatementWrapper ps = jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, UPDATE)) {
             ps.setLong(1, streamStatus.getVersion());
-            ps.setObject(2, streamStatus.getStreamId());
-            ps.setString(3, streamStatus.getSource());
+            ps.setString(2, streamStatus.getSource());
+            ps.setObject(3, streamStatus.getStreamId());
+            ps.setString(4, streamStatus.getSource());
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new JdbcRepositoryException(format("Exception while updating status of the stream: %s", streamStatus), e);

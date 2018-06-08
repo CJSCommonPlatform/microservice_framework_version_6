@@ -16,8 +16,12 @@
             "type": "string",
             "title": "The Name Schema ",
             "examples": [
-              "subscription1"
+              "Event Source Name"
             ]
+          },
+          "is_default": {
+            "$id": "/properties/event_sources/items/properties/is_default",
+            "type": "boolean"
           },
           "location": {
             "$id": "/properties/event_sources/items/properties/location",

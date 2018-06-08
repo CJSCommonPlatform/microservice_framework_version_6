@@ -1,6 +1,7 @@
 package uk.gov.justice.subscription;
 
 import static java.nio.file.Paths.get;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
@@ -16,6 +17,7 @@ import uk.gov.justice.subscription.yaml.parser.YamlToJsonObjectConverter;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,6 +38,17 @@ public class EventSourcesParserTest {
         final YamlFileValidator yamlFileValidator = new YamlFileValidator(new YamlToJsonObjectConverter(yamlParser, objectMapper), yamlSchemaLoader);
 
         eventSourcesParser = new EventSourcesParser(yamlParser, yamlFileValidator);
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenEventSourceYamlIsNotAvailable() throws Exception {
+        try {
+
+            final List<URL> urls = emptyList();
+            eventSourcesParser.eventSourcesFrom(urls);;
+        } catch (final YamlFileLoadingException exception) {
+            assertThat(exception.getMessage(), is("No event-sources.yaml defined on the classpath"));
+        }
     }
 
     @Test

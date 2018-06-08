@@ -4,9 +4,9 @@ import static java.lang.String.format;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.domain.snapshot.AggregateSnapshot;
-import uk.gov.justice.services.jdbc.persistence.JndiDataSourceNameProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcDataSourceProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
+import uk.gov.justice.subscription.registry.EventSourceDefinitionRegistry;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -46,7 +46,7 @@ public class SnapshotJdbcRepository implements SnapshotRepository {
     JdbcDataSourceProvider jdbcDataSourceProvider;
 
     @Inject
-    JndiDataSourceNameProvider jndiDataSourceNameProvider;
+    EventSourceDefinitionRegistry eventSourceDefinitionRegistry;
 
     DataSource dataSource;
 
@@ -123,7 +123,7 @@ public class SnapshotJdbcRepository implements SnapshotRepository {
 
     @PostConstruct
     private void initialiseDataSource() {
-        final String jndiName = jndiDataSourceNameProvider.jndiName();
+        final String jndiName = eventSourceDefinitionRegistry.getDefaultEventSourceDefinition().getLocation().getDataSource().get();
         dataSource = jdbcDataSourceProvider.getDataSource(jndiName);
     }
 

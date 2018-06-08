@@ -6,7 +6,8 @@ import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepo
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepositoryFactory;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepositoryFactory;
-import uk.gov.justice.services.jdbc.persistence.JndiDataSourceNameProvider;
+import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
+import uk.gov.justice.subscription.registry.EventSourceDefinitionRegistry;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
@@ -28,14 +29,14 @@ public class EventSourceTransformationProducer {
     EventStreamJdbcRepositoryFactory eventStreamJdbcRepositoryFactory;
 
     @Inject
-    JndiDataSourceNameProvider dataSourceJndiNameProvider;
-
-    private static final String DEFAULT_EVENT_SOURCE_NAME = "defaultEventSource";
+    EventSourceDefinitionRegistry eventSourceDefinitionRegistry;
 
     @Produces
     public EventSourceTransformation eventSourceTransformation() {
+        final EventSourceDefinition defaultEventSourceDefinition = eventSourceDefinitionRegistry.getDefaultEventSourceDefinition();
 
-        final String jndiDatasource = dataSourceJndiNameProvider.jndiName();
+        final String jndiDatasource = defaultEventSourceDefinition.getLocation().getDataSource().get();
+
         final EventJdbcRepository eventJdbcRepository = eventJdbcRepositoryFactory.eventJdbcRepository(jndiDatasource);
         final EventStreamJdbcRepository eventStreamJdbcRepository = eventStreamJdbcRepositoryFactory.eventStreamJdbcRepository(jndiDatasource);
 
@@ -43,7 +44,7 @@ public class EventSourceTransformationProducer {
                 eventJdbcRepository,
                 eventStreamJdbcRepository);
 
-        final EventStreamManager eventStreamManager = eventStreamManagerFactory.eventStreamManager(eventRepository, DEFAULT_EVENT_SOURCE_NAME);
+        final EventStreamManager eventStreamManager = eventStreamManagerFactory.eventStreamManager(eventRepository, defaultEventSourceDefinition.getName());
 
         return new DefaultEventSourceTransformation(eventStreamManager);
     }

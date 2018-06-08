@@ -100,6 +100,6 @@ public class PostgresSQLEventInsertionStrategyTest {
 
     @Test
     public void shouldReturnTheDefaultSqlInsertStatementWithPostgresDoNothingSuffix() throws Exception {
-        assertThat(strategy.insertStatement(), is(SQL_INSERT_EVENT + " ON CONFLICT DO NOTHING"));
+        assertThat(strategy.insertStatement(), is(strategy.SQL_INSERT_EVENT + " ON CONFLICT DO NOTHING"));
     }
 }

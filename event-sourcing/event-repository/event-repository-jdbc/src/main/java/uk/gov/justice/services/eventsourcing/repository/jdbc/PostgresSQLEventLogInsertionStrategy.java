@@ -14,10 +14,16 @@ import javax.enterprise.inject.Alternative;
 @Alternative
 public class PostgresSQLEventLogInsertionStrategy extends BaseEventInsertStrategy {
 
+    static final String SQL_INSERT_EVENT = "WITH seqWrapper AS (\n" +
+            "\tSELECT currval('event_log_seq') AS seqId\n" +
+            ")" +
+            "INSERT INTO event_log (id, stream_id, name, payload, metadata, date_created) " +
+            "VALUES(?, ?, ?, ?," +
+
+            "jsonb_set(TO_JSONB(?::JSON), '{stream, sequence_number}', TO_JSONB( (SELECT seqId FROM seqWrapper) ), true), " +
+            "?);";
     @Override
-    public String insertStatement() {
-        return SQL_INSERT_EVENT + " ON CONFLICT DO NOTHING";
-    }
+    public String insertStatement() {return SQL_INSERT_EVENT + " ON CONFLICT DO NOTHING";}
 
     /**
      * Tries to insert the given event into the event log. If database is PostgresSQL and

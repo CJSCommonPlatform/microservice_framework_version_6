@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [unreleased]
 
+## [4.1.2] - 2018-06-11
+### Fixed
+- Fix incorrect insertion of stream status table containing one record for unknown and correct source
+
 ## [4.1.1] - 2018-06-05
 ### Fixed
 - Update of stream status table now handles a source column of 'unknown'

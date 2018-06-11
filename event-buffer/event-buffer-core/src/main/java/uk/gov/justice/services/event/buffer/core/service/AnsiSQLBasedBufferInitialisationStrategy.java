@@ -17,7 +17,7 @@ public class AnsiSQLBasedBufferInitialisationStrategy implements BufferInitialis
 
     @Override
     public long initialiseBuffer(final UUID streamId, final String source) {
-
+        streamStatusRepository.updateSource(streamId,source);
         final Optional<StreamStatus> currentStatus = streamStatusRepository.findByStreamIdAndSource(streamId, source);
 
         if (!currentStatus.isPresent()) {

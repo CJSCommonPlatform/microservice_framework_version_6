@@ -25,6 +25,7 @@ public class StreamStatusJdbcRepositoryIT {
 
     private static final String LIQUIBASE_STREAM_STATUS_CHANGELOG_XML = "liquibase/event-buffer-changelog.xml";
 
+    private static final long INITIAL_VERSION = 0L;
 
     private StreamStatusJdbcRepository jdbcRepository;
 
@@ -53,9 +54,63 @@ public class StreamStatusJdbcRepositoryIT {
         }
     }
 
+    @Test
+    public void shouldNotCreateSeparateInitialStreamStatusForTheNewSourceWhenWeHaveExistingEventsForTheStream() throws Exception {
+        final String source = "unknown";
+        final UUID streamId = randomUUID();
 
+        initialiseBuffer(streamId, source);
+        final StreamStatus streamStatus = new StreamStatus(streamId, 2L, source);
+
+        jdbcRepository.update(streamStatus);
+
+        initialiseBuffer(streamId, "sjp");
+        final int count = jdbcRepository.countByStreamId(streamId);
+        assertThat(count, is(1));
+
+        final Optional<StreamStatus> result = jdbcRepository.findByStreamIdAndSource(streamId, "sjp");
+
+        assertThat(result.get().getSource(), is("sjp"));
+        assertThat(result.get().getVersion(), is(2L));
+    }
 
     @Test
+    public void shouldCreateSeparateInitialStreamStatusForTheNewSourceWhenWeHaveNoExistingEventsForTheStream() throws Exception {
+        final String source = "sjp";
+        final UUID streamId = randomUUID();
+
+        initialiseBuffer(streamId, source);
+        final int count = jdbcRepository.countByStreamId(streamId);
+        assertThat(count, is(1));
+
+        final Optional<StreamStatus> result = jdbcRepository.findByStreamIdAndSource(streamId, source);
+
+        assertThat(result.get().getSource(), is(source));
+        assertThat(result.get().getVersion(), is(0L));
+    }
+
+    @Test
+    public void shouldAppendToExistingStreamStatusForTheNewSourceWhenWeHaveExistingEventsForTheStream() throws Exception {
+        final String source = "sjp";
+        final UUID streamId = randomUUID();
+
+        initialiseBuffer(streamId, source);
+        final StreamStatus streamStatus = new StreamStatus(streamId, 2L, source);
+
+        jdbcRepository.update(streamStatus);
+
+        initialiseBuffer(streamId, source);
+        final int count = jdbcRepository.countByStreamId(streamId);
+        assertThat(count, is(1));
+
+        final Optional<StreamStatus> result = jdbcRepository.findByStreamIdAndSource(streamId, source);
+
+        assertThat(result.get().getSource(), is("sjp"));
+        assertThat(result.get().getVersion(), is(2L));
+    }
+
+
+        @Test
     public void shouldUpdateSourceWhenUnknown() throws Exception {
         final String source = "unknown";
         final UUID streamId = randomUUID();
@@ -185,6 +240,22 @@ public class StreamStatusJdbcRepositoryIT {
 
     private StreamStatus streamStatusOf(final UUID id, final Long version, final String source) {
         return new StreamStatus(id, version, source);
+    }
+
+    private long initialiseBuffer(final UUID streamId, final String source) {
+        jdbcRepository.updateSource(streamId,source);
+        final Optional<StreamStatus> currentStatus = jdbcRepository.findByStreamIdAndSource(streamId, source);
+
+        if (!currentStatus.isPresent()) {
+            //this is to address race condition
+            //in case of primary key violation the exception gets thrown, event goes back into topic and the transaction gets retried
+            jdbcRepository
+                    .insert(new StreamStatus(streamId, INITIAL_VERSION, source));
+            return INITIAL_VERSION;
+
+        } else {
+            return currentStatus.get().getVersion();
+        }
     }
 
 }

@@ -27,7 +27,7 @@ import org.slf4j.Logger;
 @Priority(2)
 public class ConsecutiveEventBufferService implements EventBufferService {
 
-    private static final long INITIAL_VERSION = 1l;
+    private static final long INITIAL_VERSION = 1L;
 
     @Inject
     private Logger logger;
@@ -44,7 +44,6 @@ public class ConsecutiveEventBufferService implements EventBufferService {
     @Inject
     private BufferInitialisationStrategy bufferInitialisationStrategy;
 
-
     /**
      * Takes an incoming event and returns a stream of json envelopes. If the event is not
      * consecutive according to the stream_status repository then an empty stream is returned and
@@ -58,10 +57,10 @@ public class ConsecutiveEventBufferService implements EventBufferService {
     @Override
     public Stream<JsonEnvelope> currentOrderedEventsWith(final JsonEnvelope incomingEvent) {
 
-        logger.trace("Message buffering for message: {}", incomingEvent);
+        final long incomingEventVersion = versionOf(incomingEvent);
+        logger.info("Message buffering for message: {} version {}", incomingEvent, incomingEventVersion);
 
         final UUID streamId = incomingEvent.metadata().streamId().orElseThrow(() -> new IllegalStateException("Event must have a a streamId "));
-        final long incomingEventVersion = versionOf(incomingEvent);
         final String source = getSource(incomingEvent);
 
         final long currentVersion = bufferInitialisationStrategy.initialiseBuffer(streamId, source);
@@ -71,12 +70,12 @@ public class ConsecutiveEventBufferService implements EventBufferService {
             return Stream.empty();
 
         } else if (incomingEventNotInOrder(incomingEventVersion, currentVersion)) {
-            logger.trace("Message : {} is not consecutive, adding to buffer", incomingEvent);
+            logger.info("Current Version : {} Message Version : {} Message : {} version is not consecutive, adding to buffer", currentVersion, incomingEventVersion, incomingEvent);
             addToBuffer(incomingEvent, streamId, incomingEventVersion);
             return Stream.empty();
 
         } else {
-            logger.trace("Message : {} version is valid sending stream to dispatcher", incomingEvent);
+            logger.info("Current Version : {} Message Version : {} Message : {} version {} is valid sending stream to dispatcher", currentVersion, incomingEventVersion, incomingEvent);
             streamStatusRepository.update(new StreamStatus(streamId, incomingEventVersion, source));
             return bufferedEvents(streamId, incomingEvent, incomingEventVersion);
         }

@@ -32,7 +32,6 @@ public class StreamStatusJdbcRepository {
      * Statements
      */
     private static final String SELECT_BY_STREAM_ID_AND_SOURCE = "SELECT stream_id, version, source FROM stream_status WHERE stream_id=? AND source in (?,'unknown') FOR UPDATE";
-    private static final String COUNT_BY_STREAM_ID = "SELECT count(*) FROM stream_status WHERE stream_id=?";
     private static final String INSERT = "INSERT INTO stream_status (version, stream_id, source) VALUES (?, ?, ?)";
     private static final String INSERT_ON_CONFLICT_DO_NOTHING = new StringBuilder().append(INSERT).append(" ON CONFLICT DO NOTHING").toString();
     private static final String UPDATE = "UPDATE stream_status SET version=?,source=? WHERE stream_id=? and source in (?,'unknown')";
@@ -125,25 +124,6 @@ public class StreamStatusJdbcRepository {
         } catch (SQLException e) {
             throw new JdbcRepositoryException(format("Exception while looking up status of the stream: %s", streamId), e);
         }
-    }
-
-    /**
-     * Returns a count of records for a given stream streamId.
-     *
-     * @param streamId streamId of the stream.
-     * @return a int.
-     */
-    public int countByStreamId(final UUID streamId) {
-        try (final PreparedStatementWrapper ps = jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, COUNT_BY_STREAM_ID)) {
-            ps.setObject(1, streamId);
-            final ResultSet resultSet = ps.executeQuery();
-            while (resultSet.next()) {
-                return resultSet.getInt(1);
-            }
-        } catch (SQLException e) {
-            throw new JdbcRepositoryException(format("Exception while looking up status of the stream: %s", streamId), e);
-        }
-        return 0;
     }
 
     private Optional<StreamStatus> streamStatusFrom(final PreparedStatementWrapper ps) throws SQLException {

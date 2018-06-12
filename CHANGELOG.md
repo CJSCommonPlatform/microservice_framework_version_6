@@ -22,6 +22,8 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 - Updated raml maven plugin version to 1.6.2
 - Updated generator maven plugin version to 2.5.0
 - Reduce the logging level for not using schema catalog
+- Travis setup now creates a postgres database as part of the build
+- Moved Integration tests in Event Buffer to use the new postgress database rather then H2 in memory database
 
 ## [4.0.0] - 2018-03-09
 

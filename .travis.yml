@@ -8,7 +8,14 @@ git:
 cache:
   directories:
   - "$HOME/.m2"
+services:
+  - postgresql
+before_script:
+  - psql -c 'create database frameworkeventstore;' -U postgres
+  - psql -c 'create database frameworkviewstore;' -U postgres
+  - psql -c "CREATE USER framework WITH PASSWORD 'framework';" -U postgres
 addons:
+  postgresql: "9.5"
   sonarcloud:
     organization: cjscommonplatform
     token:
@@ -30,3 +37,4 @@ env:
   global:
   - secure: zkTuIctILfKkWIbmvrKiKuYNfdnegUPpq5kll5Xek/sZ0JF7AI6nHzIiQk7QSKc4/UWPrFKkPbUPb2ByzRYCKAjhwyY+UoR1qFCQfiXV51lyX72Q9Xj1l/osNKEtgXzoQ5PR1lV+vKWOiXrvrZHXlbIrrBbT93+bwogTaLlqRywT3+7GyobaCn1B0h0uKA4HB1E2U/P1McjNI+CQ6fu1PgTCV+zd1KQAxTCI3WTmayVVApzcX5LReTg50Ely6rVR4reDgPs9a6LX75BuWpvf7ap74G7UeMpiW5qtJYxTxJYI3KFRiPLBPLP7Hv6lN/k6LFnyjEYF2xIYL9+Ojxgry36KsD9ig59iNO1qcyZAoWo+q0FIx1hIg7Ra5LQOIneaVylzZVQt0liK4ZvHP+ua+KsJGeZAZFxcWtJhczGlKgAlhUaIl3lEF7v65m1Ic1uNSkygYTxVqRh7oF8ihPWt180zREDU6Un9OMcVaTUCCyyBmao6XLYczA+5O9ywPPNZfyNvtI7AjJcwfEXtJnyg4TjWf+sQ2LBAOEIbbLWWwUg30DqYFKE732BYJdhj3lP5ClSmDlwDgLSTlgXqzpe/ZLk54qi1yuDk6DrbFE4ctpfsYOCzkkQY0kRAp8JjMmKUiEw0zfy8ZFlBraXMhiK4RQBOIUUovfflIcqWlASDxZ4=
   - secure: CG9snuBujVE3B0AgP92FokDaxwJjLN+tgwz3h9XN7eku87kzLA1mmj6yLjsNQ0/3AiMSneBxqMhK77KjLekuAkYy9bDaAxvwk7xxFQOIG+J+tCPeTg4SVfhsAbgscgRHb8FkkY7X7uVqJ+2tuPJt5dP1IUlZ3j/yEEswGwP9EyNDu8JCkqR3CIkroOoUyq4J+O32oy70jeYvsapKNhH4MmgmE/UwHb2Dqyd4v5EvxuY+TIu/NtHyx4egY3PxWhrO0e7MQf2fkYV8VkLP8cUSiEx+eik0fI7m/3ZeUTvXZTwXZQ1hCMBCziQY4Ce+XRPIPuRR7xzCF7itycHeuaM5hFznFw6NhLARkkl3y4YQulVO4cwkZb9F/aA/fUXBrWwe0lg/dksewZBMATRWb6goeYfDahJ2b0D+D7uyGwY+zx38x1wY4ljNwsgP9LFBHyUWwjufBCJKt7YUXiPY0da70UzdHY5Gn7muCMO4UOvLoMfKZyAoIYbZlO8nnDLfoMSDY812q/rM/e6YtzSxAihFSi5pHmmWAypsOGTxDVi6zT8SB/AlCfh9K39TkXLxex0fYXSxYiQcz0nx5XMLY8ro8ov3t4/uHxxtb+FH4TIWXeN0dpmwezyJdWghYYFZwgN9w1X2YfBZDurHYViAJtKTI+UdLowFulZVgbKsQ+yae8w=
+  - PGPORT=5432

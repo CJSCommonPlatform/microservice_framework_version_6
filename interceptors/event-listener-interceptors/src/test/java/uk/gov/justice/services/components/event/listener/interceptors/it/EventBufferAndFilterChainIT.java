@@ -20,7 +20,6 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.components.event.listener.interceptors.EventBufferInterceptor;
 import uk.gov.justice.services.components.event.listener.interceptors.EventFilterInterceptor;
-import uk.gov.justice.services.components.event.listener.interceptors.it.util.buffer.AnsiSQLBufferInitialisationStrategyProducer;
 import uk.gov.justice.services.components.event.listener.interceptors.it.util.repository.StreamBufferOpenEjbAwareJdbcRepository;
 import uk.gov.justice.services.components.event.listener.interceptors.it.util.repository.StreamStatusOpenEjbAwareJdbcRepository;
 import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
@@ -69,6 +68,7 @@ import uk.gov.justice.services.core.requester.RequesterProducer;
 import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.event.buffer.api.AbstractEventFilter;
 import uk.gov.justice.services.event.buffer.api.AllowAllEventFilter;
+import uk.gov.justice.services.event.buffer.core.service.BufferInitialisationStrategyProducer;
 import uk.gov.justice.services.event.buffer.core.service.ConsecutiveEventBufferService;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
 import uk.gov.justice.services.jdbc.persistence.ViewStoreJdbcDataSourceProvider;
@@ -114,7 +114,7 @@ public class EventBufferAndFilterChainIT {
     private static final String EVENT_SUPPORTED_ABC = "test.event-abc";
     private static final String EVENT_UNSUPPORTED_DEF = "test.event-def";
 
-    @Resource(name = "openejb/Resource/viewStore")
+    @Resource(name = "openejb/Resource/frameworkviewstore")
     private DataSource dataSource;
 
     @Inject
@@ -163,8 +163,8 @@ public class EventBufferAndFilterChainIT {
             PolicyEvaluator.class,
 
             ConsecutiveEventBufferService.class,
-            AnsiSQLBufferInitialisationStrategyProducer.class,
             EventBufferInterceptor.class,
+            BufferInitialisationStrategyProducer.class,
             LoggerProducer.class,
             EmptySystemUserProvider.class,
             SystemUserUtil.class,
@@ -220,26 +220,12 @@ public class EventBufferAndFilterChainIT {
     }
 
     @Configuration
-    public Properties configuration() {
-        return OpenEjbConfigurationBuilder.createOpenEjbConfigurationBuilder()
-                .addInitialContext()
-                .addh2ViewStore()
-                .build();
-    }
-
-
-    //Uncomment below to test when deplpoyed to the vagrant vm
-    /*
-
-    @Configuration
     public Properties postgresqlConfiguration() {
         return OpenEjbConfigurationBuilder.createOpenEjbConfigurationBuilder()
                 .addInitialContext()
                 .addPostgresqlViewStore()
                 .build();
     }
-
-    */
 
     @Test
     public void shouldAllowUnsupportedEventThroughBufferAndFilterOutAfterwards() {

@@ -20,7 +20,6 @@ import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.components.event.listener.interceptors.EventBufferInterceptor;
-import uk.gov.justice.services.components.event.listener.interceptors.it.util.buffer.AnsiSQLBufferInitialisationStrategyProducer;
 import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
 import uk.gov.justice.services.core.accesscontrol.AllowAllPolicyEvaluator;
 import uk.gov.justice.services.core.accesscontrol.DefaultAccessControlService;
@@ -69,6 +68,7 @@ import uk.gov.justice.services.event.buffer.core.repository.streambuffer.StreamB
 import uk.gov.justice.services.event.buffer.core.repository.streambuffer.StreamBufferJdbcRepository;
 import uk.gov.justice.services.event.buffer.core.repository.streamstatus.StreamStatus;
 import uk.gov.justice.services.event.buffer.core.repository.streamstatus.StreamStatusJdbcRepository;
+import uk.gov.justice.services.event.buffer.core.service.BufferInitialisationStrategyProducer;
 import uk.gov.justice.services.event.buffer.core.service.ConsecutiveEventBufferService;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
 import uk.gov.justice.services.jdbc.persistence.ViewStoreJdbcDataSourceProvider;
@@ -115,7 +115,7 @@ public class EventBufferIT {
     private static final String LIQUIBASE_STREAM_STATUS_CHANGELOG_XML = "liquibase/event-buffer-changelog.xml";
     private static final String CONTEXT_ROOT = "core-test";
 
-    @Resource(name = "openejb/Resource/viewStore")
+    @Resource(name = "openejb/Resource/frameworkviewstore")
     private DataSource dataSource;
 
     @Inject
@@ -138,12 +138,13 @@ public class EventBufferIT {
     }
 
     @Configuration
-    public Properties configuration() {
+    public Properties postgresqlConfiguration() {
         return OpenEjbConfigurationBuilder.createOpenEjbConfigurationBuilder()
                 .addInitialContext()
-                .addh2ViewStore()
+                .addPostgresqlViewStore()
                 .build();
     }
+
 
     @Module
     @Classes(cdi = true, value = {
@@ -178,7 +179,7 @@ public class EventBufferIT {
             PolicyEvaluator.class,
 
             ConsecutiveEventBufferService.class,
-            AnsiSQLBufferInitialisationStrategyProducer.class,
+            BufferInitialisationStrategyProducer.class,
             LoggerProducer.class,
             EmptySystemUserProvider.class,
             SystemUserUtil.class,
@@ -225,20 +226,6 @@ public class EventBufferIT {
                 .contextRoot(CONTEXT_ROOT)
                 .addServlet("TestApp", Application.class.getName());
     }
-
-
-    //Uncomment below to test when deplpoyed to the vagrant vm
-    /*
-
-    @Configuration
-    public Properties postgresqlConfiguration() {
-        return OpenEjbConfigurationBuilder.createOpenEjbConfigurationBuilder()
-                .addInitialContext()
-                .addPostgresqlViewStore()
-                .build();
-    }
-
-    */
 
     @Test
     public void shouldAddEventToBufferIfVersionNotOne() {

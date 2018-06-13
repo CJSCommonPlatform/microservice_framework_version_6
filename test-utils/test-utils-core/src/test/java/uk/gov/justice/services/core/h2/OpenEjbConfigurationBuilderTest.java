@@ -26,13 +26,14 @@ public class OpenEjbConfigurationBuilderTest {
                 .build();
 
         assertThat(properties, allOf(
-                hasEntry("eventStore", "new://Resource?type=DataSource"),
-                hasEntry("eventStore.JdbcDriver", "org.h2.Driver"),
-                hasEntry("eventStore.JdbcUrl", "jdbc:h2:mem:test;MV_STORE=FALSE;MVCC=FALSE"),
-                hasEntry("eventStore.JtaManaged", "true"),
-                hasEntry("eventStore.UserName", "sa"),
-                hasEntry("eventStore.Password", "sa"),
-                hasEntry("java.naming.factory.initial", "org.apache.openejb.client.LocalInitialContextFactory"))
+                hasEntry("frameworkeventstore", "new://Resource?type=DataSource"),
+                hasEntry("frameworkeventstore.JdbcDriver", "org.h2.Driver"),
+                hasEntry("frameworkeventstore.JdbcUrl", "jdbc:h2:mem:test;MV_STORE=FALSE;MVCC=FALSE"),
+                hasEntry("frameworkeventstore.JtaManaged", "true"),
+                hasEntry("frameworkeventstore.UserName", "sa"),
+                hasEntry("frameworkeventstore.Password", "sa"),
+                hasEntry("java.naming.factory.initial", "org.apache.openejb.client.LocalInitialContextFactory")
+                )
         );
     }
 
@@ -55,12 +56,12 @@ public class OpenEjbConfigurationBuilderTest {
                 .build();
 
         assertThat(properties, allOf(
-                hasEntry("viewStore", "new://Resource?type=DataSource"),
-                hasEntry("viewStore.JdbcDriver", "org.h2.Driver"),
-                hasEntry("viewStore.JdbcUrl", "jdbc:h2:mem:test;MV_STORE=FALSE;MVCC=FALSE"),
-                hasEntry("viewStore.JtaManaged", "true"),
-                hasEntry("viewStore.UserName", "sa"),
-                hasEntry("viewStore.Password", "sa"),
+                hasEntry("frameworkviewstore", "new://Resource?type=DataSource"),
+                hasEntry("frameworkviewstore.JdbcDriver", "org.h2.Driver"),
+                hasEntry("frameworkviewstore.JdbcUrl", "jdbc:h2:mem:test;MV_STORE=FALSE;MVCC=FALSE"),
+                hasEntry("frameworkviewstore.JtaManaged", "true"),
+                hasEntry("frameworkviewstore.UserName", "sa"),
+                hasEntry("frameworkviewstore.Password", "sa"),
                 hasEntry("java.naming.factory.initial", "org.apache.openejb.client.LocalInitialContextFactory"))
         );
     }
@@ -73,12 +74,12 @@ public class OpenEjbConfigurationBuilderTest {
                 .build();
 
         assertThat(properties, allOf(
-                hasEntry("viewStore", "new://Resource?type=DataSource"),
-                hasEntry("viewStore.JdbcDriver", "org.postgresql.Driver"),
-                hasEntry("viewStore.JdbcUrl", "jdbc:postgresql://localhost:5432/view-store"),
-                hasEntry("viewStore.JtaManaged", "false"),
-                hasEntry("viewStore.UserName", "postgres"),
-                hasEntry("viewStore.Password", "1"),
+                hasEntry("frameworkviewstore", "new://Resource?type=DataSource"),
+                hasEntry("frameworkviewstore.JdbcDriver", "org.postgresql.Driver"),
+                hasEntry("frameworkviewstore.JdbcUrl", "jdbc:postgresql://localhost:5432/frameworkviewstore"),
+                hasEntry("frameworkviewstore.JtaManaged", "false"),
+                hasEntry("frameworkviewstore.UserName", "framework"),
+                hasEntry("frameworkviewstore.Password", "framework"),
                 hasEntry("java.naming.factory.initial", "org.apache.openejb.client.LocalInitialContextFactory"))
         );
     }
@@ -91,12 +92,12 @@ public class OpenEjbConfigurationBuilderTest {
                 .build();
 
         assertThat(properties, allOf(
-                hasEntry("eventStore", "new://Resource?type=DataSource"),
-                hasEntry("eventStore.JdbcDriver", "org.postgresql.Driver"),
-                hasEntry("eventStore.JdbcUrl", "jdbc:postgresql://localhost:5432/view-store"),
-                hasEntry("eventStore.JtaManaged", "false"),
-                hasEntry("eventStore.UserName", "postgres"),
-                hasEntry("eventStore.Password", "1"),
+                hasEntry("frameworkeventstore", "new://Resource?type=DataSource"),
+                hasEntry("frameworkeventstore.JdbcDriver", "org.postgresql.Driver"),
+                hasEntry("frameworkeventstore.JdbcUrl", "jdbc:postgresql://localhost:5432/frameworkeventstore"),
+                hasEntry("frameworkeventstore.JtaManaged", "false"),
+                hasEntry("frameworkeventstore.UserName", "framework"),
+                hasEntry("frameworkeventstore.Password", "framework"),
                 hasEntry("java.naming.factory.initial", "org.apache.openejb.client.LocalInitialContextFactory"))
         );
     }

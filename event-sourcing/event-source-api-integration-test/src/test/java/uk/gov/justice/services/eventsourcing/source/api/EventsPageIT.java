@@ -129,7 +129,7 @@ public class EventsPageIT {
 
     private CloseableHttpClient httpClient;
 
-    @Resource(name = "openejb/Resource/eventStore")
+    @Resource(name = "openejb/Resource/frameworkeventstore")
     private DataSource dataSource;
 
     @Inject
@@ -146,9 +146,9 @@ public class EventsPageIT {
     public void setup() throws Exception {
         httpClient = HttpClients.createDefault();
         InitialContext initialContext = new InitialContext();
-        initialContext.bind("java:/app/EventsPageIT/DS.eventstore", dataSource);
+        initialContext.bind("java:/app/EventsPageIT/DS.frameworkeventstore", dataSource);
         initEventDatabase();
-        eventsRepository = eventJdbcRepositoryFactory.eventJdbcRepository("java:openejb/Resource/eventStore");
+        eventsRepository = eventJdbcRepositoryFactory.eventJdbcRepository("java:openejb/Resource/frameworkeventstore");
     }
 
     @Configuration

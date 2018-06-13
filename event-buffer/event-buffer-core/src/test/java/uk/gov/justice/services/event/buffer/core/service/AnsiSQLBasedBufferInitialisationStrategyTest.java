@@ -52,7 +52,6 @@ public class AnsiSQLBasedBufferInitialisationStrategyTest {
         final String source = "a source";
         when(streamStatusRepository.findByStreamIdAndSource(streamId, source)).thenReturn(Optional.empty());
         assertThat(bufferInitialisationStrategy.initialiseBuffer(streamId, source), is(0L));
-
     }
 
     @Test
@@ -63,6 +62,8 @@ public class AnsiSQLBasedBufferInitialisationStrategyTest {
         bufferInitialisationStrategy.initialiseBuffer(streamId, source);
 
         verify(streamStatusRepository).findByStreamIdAndSource(streamId, source);
+        verify(streamStatusRepository).updateSource(streamId, source);
+
         verifyNoMoreInteractions(streamStatusRepository);
     }
 

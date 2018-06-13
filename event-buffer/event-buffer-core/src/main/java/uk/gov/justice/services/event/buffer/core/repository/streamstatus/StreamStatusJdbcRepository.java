@@ -31,11 +31,11 @@ public class StreamStatusJdbcRepository {
     /**
      * Statements
      */
-    private static final String SELECT_BY_STREAM_ID_AND_SOURCE = "SELECT stream_id, version, source FROM stream_status WHERE stream_id=? AND source=? FOR UPDATE";
+    private static final String SELECT_BY_STREAM_ID_AND_SOURCE = "SELECT stream_id, version, source FROM stream_status WHERE stream_id=? AND source in (?,'unknown') FOR UPDATE";
     private static final String INSERT = "INSERT INTO stream_status (version, stream_id, source) VALUES (?, ?, ?)";
     private static final String INSERT_ON_CONFLICT_DO_NOTHING = new StringBuilder().append(INSERT).append(" ON CONFLICT DO NOTHING").toString();
     private static final String UPDATE = "UPDATE stream_status SET version=?,source=? WHERE stream_id=? and source in (?,'unknown')";
-
+    private static final String UPDATE_UNKNOWN_SOURCE = "UPDATE stream_status SET source=? WHERE stream_id=? and source = 'unknown'";
 
     @Inject
     JdbcRepositoryHelper jdbcRepositoryHelper;
@@ -136,5 +136,15 @@ public class StreamStatusJdbcRepository {
 
     protected StreamStatus entityFrom(final ResultSet rs) throws SQLException {
         return new StreamStatus((UUID) rs.getObject(PRIMARY_KEY_ID), rs.getLong(COL_VERSION), rs.getString(SOURCE));
+    }
+
+    public void updateSource(final UUID streamId, final String source) {
+        try (final PreparedStatementWrapper ps = jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, UPDATE_UNKNOWN_SOURCE)) {
+            ps.setString(1, source);
+            ps.setObject(2, streamId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new JdbcRepositoryException(format("Exception while updating unknown source of the stream: %s", streamId), e);
+        }
     }
 }

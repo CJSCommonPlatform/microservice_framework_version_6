@@ -3,8 +3,8 @@ package uk.gov.justice.services.event.sourcing.subscription;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.subscription.domain.builders.SubscriptionBuilder.subscription;
@@ -31,16 +31,22 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class SubscriptionManagerProducerTest {
 
     @Mock(answer = RETURNS_DEEP_STUBS)
-    private Instance<EventSource> eventsourceInstance;
+    private Instance<InterceptorChainProcessor> interceptorChainProcessors;
+
+    @Mock(answer = RETURNS_DEEP_STUBS)
+    private Instance<EventSource> eventSourceInstance;
+
+    @Mock
+    private InterceptorChainProcessorProducer interceptorChainProcessorProducer;
+
+    @Mock
+    private InterceptorChainProcessor interceptorChainProcessor;
 
     @Mock
     private SubscriptionDescriptorDefinitionRegistry subscriptionDescriptorRegistry;
 
     @Mock
     private QualifierAnnotationExtractor qualifierAnnotationExtractor;
-
-    @Mock
-    private InterceptorChainProcessorProducer interceptorChainProcessorProducer;
 
     @InjectMocks
     private SubscriptionManagerProducer subscriptionManagerProducer;
@@ -52,15 +58,21 @@ public class SubscriptionManagerProducerTest {
 
         final SubscriptionName subscriptionName = mock(SubscriptionName.class);
         final EventSource eventSource = mock(EventSource.class);
-        final EventSourceNameQualifier eventSourceNameQualifier = new EventSourceNameQualifier("eventSourceName");
+        final InterceptorChainProcessor interceptorChainProcessor = mock(InterceptorChainProcessor.class);
+
         final Subscription subscription = subscription()
                 .withEventSourceName("eventSourceName")
+                .withName("subscriptionName")
                 .build();
 
+        final String componentName = "eventListener";
+        when(subscriptionDescriptorRegistry.getSubscriptionFor(subscription.getName())).thenReturn(subscription);
         when(qualifierAnnotationExtractor.getFrom(injectionPoint, SubscriptionName.class)).thenReturn(subscriptionName);
-        when(eventsourceInstance.select(eventSourceNameQualifier).get()).thenReturn(eventSource);
+        when(interceptorChainProcessorProducer.produceProcessor(componentName)).thenReturn(interceptorChainProcessor);
+        when(subscriptionName.value()).thenReturn("subscriptionName");
         when(subscriptionDescriptorRegistry.getSubscriptionFor(subscriptionName.value())).thenReturn(subscription);
-        when(interceptorChainProcessorProducer.produceProcessor(injectionPoint)).thenReturn(mock(InterceptorChainProcessor.class));
+
+        when(eventSourceInstance.select(any(EventSourceNameQualifier.class)).get()).thenReturn(eventSource);
 
         final SubscriptionManager subscriptionManager = subscriptionManagerProducer.subscriptionManager(injectionPoint);
 

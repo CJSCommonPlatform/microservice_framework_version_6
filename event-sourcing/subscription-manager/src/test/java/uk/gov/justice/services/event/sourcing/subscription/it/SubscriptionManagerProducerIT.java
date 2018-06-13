@@ -8,15 +8,12 @@ import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.fieldValue;
 
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.justice.services.core.annotation.Adapter;
+import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.cdi.QualifierAnnotationExtractor;
-import uk.gov.justice.services.core.dispatcher.DispatcherCache;
 import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
 import uk.gov.justice.services.core.dispatcher.EnvelopePayloadTypeConverter;
 import uk.gov.justice.services.core.dispatcher.JsonEnvelopeRepacker;
-import uk.gov.justice.services.core.interceptor.InterceptorCache;
-import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
 import uk.gov.justice.services.event.sourcing.subscription.DefaultSubscriptionManager;
 import uk.gov.justice.services.event.sourcing.subscription.SubscriptionManagerProducer;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
@@ -49,15 +46,10 @@ import org.junit.runner.RunWith;
         ObjectMapperProducer.class,
         SubscriptionManagerProducer.class,
         SubscriptionDescriptorDefinitionRegistryProducer.class,
-        QualifierAnnotationExtractor.class,
-        InterceptorChainProcessorProducer.class,
-        DispatcherCache.class,
-        InterceptorCache.class,
         LoggerProducer.class,
         DispatcherFactory.class,
         JsonEnvelopeRepacker.class,
         EnvelopePayloadTypeConverter.class,
-
         SubscriptionManagerProducerIT.TestEventSourceProducer.class,
         SubscriptionManagerProducerIT.TestClass.class
 })
@@ -88,13 +80,10 @@ public class SubscriptionManagerProducerIT {
         assertThat(subscription.isPresent(), is(true));
         assertThat(((Subscription) subscription.get()).getName(), is(SUBSCRIPTION_NAME));
         assertThat(((Subscription) subscription.get()).getEventSourceName(), is(EVENT_SOURCE_NAME));
-
-        final Optional<Object> interceptorChainProcessor = fieldValue(defaultSubscriptionManager, "interceptorChainProcessor");
-        assertThat(interceptorChainProcessor.isPresent(), is(true));
     }
 
     @ApplicationScoped
-    @Adapter(EVENT_LISTENER)
+    @ServiceComponent(EVENT_LISTENER)
     public static class TestClass {
 
         @Inject
@@ -131,5 +120,4 @@ public class SubscriptionManagerProducerIT {
             return eventSource;
         }
     }
-
 }

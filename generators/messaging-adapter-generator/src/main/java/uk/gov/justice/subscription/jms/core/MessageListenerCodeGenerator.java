@@ -197,8 +197,8 @@ public class MessageListenerCodeGenerator {
                         .addStatement("$T.trace(LOGGER, () -> \"Received JMS message\")", LoggerUtils.class)
                         .addStatement("$L.process($L, $L)",
                                 JMS_PROCESSOR_FIELD,
-                                SUBSCRIPTION_MANAGER,
-                                messageFieldName)
+                                messageFieldName,
+                                SUBSCRIPTION_MANAGER)
                         .build())
                 .build();
     }

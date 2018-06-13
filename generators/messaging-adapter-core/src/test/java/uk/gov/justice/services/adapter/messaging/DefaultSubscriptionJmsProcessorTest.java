@@ -5,6 +5,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.EnvelopeConverter;
 import uk.gov.justice.services.messaging.logging.TraceLogger;
@@ -46,7 +47,7 @@ public class DefaultSubscriptionJmsProcessorTest {
         final SubscriptionManager subscriptionManager = mock(SubscriptionManager.class);
         when(envelopeConverter.fromMessage(textMessage)).thenReturn(expectedEnvelope);
 
-        subscriptionJmsProcessor.process(subscriptionManager, textMessage);
+        subscriptionJmsProcessor.process(textMessage, subscriptionManager);
 
         verify(subscriptionManager).process(expectedEnvelope);
     }
@@ -54,7 +55,7 @@ public class DefaultSubscriptionJmsProcessorTest {
     @Test(expected = InvalildJmsMessageTypeException.class)
     public void shouldThrowExceptionWithWrongMessageType() throws Exception {
         final SubscriptionManager subscriptionManager = mock(SubscriptionManager.class);
-        subscriptionJmsProcessor.process(subscriptionManager, objectMessage);
+        subscriptionJmsProcessor.process(objectMessage, subscriptionManager);
     }
 
     @Test(expected = InvalildJmsMessageTypeException.class)
@@ -63,6 +64,6 @@ public class DefaultSubscriptionJmsProcessorTest {
 
         doThrow(JMSException.class).when(objectMessage).getJMSMessageID();
 
-        subscriptionJmsProcessor.process(subscriptionManager, objectMessage);
+        subscriptionJmsProcessor.process(objectMessage, subscriptionManager);
     }
 }

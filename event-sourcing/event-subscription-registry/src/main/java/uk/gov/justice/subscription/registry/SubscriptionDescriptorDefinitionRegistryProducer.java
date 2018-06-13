@@ -1,6 +1,7 @@
 package uk.gov.justice.subscription.registry;
 
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toSet;
 
 import uk.gov.justice.subscription.SubscriptionDescriptorsParser;
 import uk.gov.justice.subscription.YamlFileFinder;
@@ -9,8 +10,8 @@ import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDes
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 import javax.enterprise.inject.Produces;
 import javax.faces.bean.ApplicationScoped;
@@ -57,9 +58,9 @@ public class SubscriptionDescriptorDefinitionRegistryProducer {
                     throw new RegistryException("No event-sources.yaml files found!");
                 }
 
-                final Stream<SubscriptionDescriptorDefinition> subscriptionDescriptorDefinitions = subscriptionDescriptorsParser
+                final Set<SubscriptionDescriptorDefinition> subscriptionDescriptorDefinitions = subscriptionDescriptorsParser
                         .getSubscriptionDescriptorsFrom(subscriptionDescriptorPaths)
-                        .peek(logRegisteredSubscriptionNames);
+                        .peek(logRegisteredSubscriptionNames).collect(toSet());
 
                 subscriptionDescriptorRegistry = new SubscriptionDescriptorDefinitionRegistry(subscriptionDescriptorDefinitions);
             } catch (final IOException e) {

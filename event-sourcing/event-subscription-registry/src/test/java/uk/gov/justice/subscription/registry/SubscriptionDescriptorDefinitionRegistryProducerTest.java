@@ -1,7 +1,6 @@
 package uk.gov.justice.subscription.registry;
 
 import static java.util.Arrays.asList;
-import static java.util.Optional.of;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -71,9 +70,7 @@ public class SubscriptionDescriptorDefinitionRegistryProducerTest {
         final SubscriptionDescriptorDefinitionRegistry subscriptionDescriptorRegistry = subscriptionDescriptorDefinitionRegistryProducer.subscriptionDescriptorRegistry();
 
         assertThat(subscriptionDescriptorRegistry, is(notNullValue()));
-
-        assertThat(subscriptionDescriptorRegistry.getSubscriptionDescriptorDescriptorFor(eventListener), is(of(subscriptionDescriptorDefinition_1)));
-        assertThat(subscriptionDescriptorRegistry.getSubscriptionDescriptorDescriptorFor(eventProcessor), is(of(subscriptionDescriptorDefinition_2)));
+        assertThat(subscriptionDescriptorRegistry.subscriptionDescriptorDefinitions().size(), is(2));
     }
 
     @Test

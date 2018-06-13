@@ -1,17 +1,12 @@
 package uk.gov.justice.services.core.interceptor;
 
-import static java.util.UUID.randomUUID;
-import static javax.json.Json.createObjectBuilder;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
-import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
-import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
-import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
-import static uk.gov.justice.services.test.utils.common.MemberInjectionPoint.injectionPointWith;
-
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.slf4j.Logger;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.DirectAdapter;
@@ -25,27 +20,30 @@ import uk.gov.justice.services.test.utils.common.MemberInjectionPoint;
 import uk.gov.justice.services.test.utils.common.envelope.EnvelopeRecordingInterceptor;
 import uk.gov.justice.services.test.utils.common.envelope.TestEnvelopeRecorder;
 
+import javax.inject.Inject;
 import java.util.LinkedList;
 
-import javax.inject.Inject;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.slf4j.Logger;
+import static java.util.UUID.randomUUID;
+import static javax.json.Json.createObjectBuilder;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
+import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
+import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
+import static uk.gov.justice.services.test.utils.common.MemberInjectionPoint.injectionPointWith;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InterceptorChainProcessorProducerTest {
 
     private static final String ACTION_NAME = "abc";
-    @Mock
-    private Logger logger;
 
     @Mock
     private InterceptorCache interceptorCache;
+    @Mock
+    private Logger logger;
 
     @InjectMocks
     private InterceptorChainProcessorProducer interceptorChainProcessorProducer;
@@ -83,6 +81,26 @@ public class InterceptorChainProcessorProducerTest {
         final MemberInjectionPoint injectionPoint = injectionPointWith(QueryApiDirectAdapter.class.getDeclaredField("processor"));
         interceptorChainProcessorProducer.dispatcherCache.dispatcherFor(injectionPoint).register(envelopeRecordingHandler);
         final InterceptorChainProcessor processor = interceptorChainProcessorProducer.produceProcessor(injectionPoint);
+
+        final JsonEnvelope dispatchedEnvelope = envelopeFrom(metadataBuilder().withId(randomUUID()).withName(ACTION_NAME), createObjectBuilder());
+
+        processor.process(interceptorContextWithInput(dispatchedEnvelope));
+
+        assertThat(envelopeRecordingInterceptor.firstRecordedEnvelope(), is(dispatchedEnvelope));
+        assertThat(envelopeRecordingHandler.firstRecordedEnvelope(), is(dispatchedEnvelope));
+    }
+
+    @Test
+    public void shouldProduceProcessorThatDispatchesEnvelope_UsingComponentNameAndLocation() throws Exception {
+        final String component = "EVENT_LISTENER";
+
+        when(interceptorCache.getInterceptors(component)).thenReturn(envelopeRecordingInterceptor());
+
+        final MemberInjectionPoint injectionPoint = injectionPointWith(EventListenerAdapter.class.getDeclaredField("processor"));
+        interceptorChainProcessorProducer.dispatcherCache.dispatcherFor(injectionPoint).register(envelopeRecordingHandler);
+
+
+        final InterceptorChainProcessor processor = interceptorChainProcessorProducer.produceLocalProcessor(component);
 
         final JsonEnvelope dispatchedEnvelope = envelopeFrom(metadataBuilder().withId(randomUUID()).withName(ACTION_NAME), createObjectBuilder());
 

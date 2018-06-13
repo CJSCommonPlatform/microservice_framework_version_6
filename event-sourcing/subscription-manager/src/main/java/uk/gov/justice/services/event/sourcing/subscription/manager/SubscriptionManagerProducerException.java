@@ -1,4 +1,4 @@
-package uk.gov.justice.services.event.sourcing.subscription;
+package uk.gov.justice.services.event.sourcing.subscription.manager;
 
 public class SubscriptionManagerProducerException extends RuntimeException {
 

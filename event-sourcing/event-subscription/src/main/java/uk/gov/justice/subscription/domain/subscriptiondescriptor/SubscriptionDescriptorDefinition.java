@@ -1,6 +1,7 @@
 package uk.gov.justice.subscription.domain.subscriptiondescriptor;
 
 import java.util.List;
+import java.util.Objects;
 
 public class SubscriptionDescriptorDefinition {
 
@@ -26,6 +27,21 @@ public class SubscriptionDescriptorDefinition {
 
     public String getServiceComponent() {
         return serviceComponent;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        SubscriptionDescriptorDefinition that = (SubscriptionDescriptorDefinition) object;
+        return Objects.equals(specVersion, that.specVersion) &&
+                Objects.equals(service, that.service) &&
+                Objects.equals(serviceComponent, that.serviceComponent);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(specVersion, service, serviceComponent);
     }
 
     public List<Subscription> getSubscriptions() {

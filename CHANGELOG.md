@@ -9,6 +9,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 - test-utils-enveloper-provider module
 - EnveloperTestProvider that is used for testing usage of the Enveloper
 - Update JdbcEventRepository to return all active stream ids
+- Flag to disable running of Integration Tests as part of the build
 
 ### Changed
 - Added schema catalog generation plugin to example service
@@ -24,6 +25,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 - Reduce the logging level for not using schema catalog
 - Travis setup now creates a postgres database as part of the build
 - Moved Integration tests in Event Buffer to use the new postgress database rather then H2 in memory database
+- Integration Tests now use a running local instance of Postgres, rather than using an in memory database
 
 ## [4.0.0] - 2018-03-09
 

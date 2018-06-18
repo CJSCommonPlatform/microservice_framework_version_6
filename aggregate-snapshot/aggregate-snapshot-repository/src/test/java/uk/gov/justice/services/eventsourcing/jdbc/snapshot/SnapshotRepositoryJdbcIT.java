@@ -9,7 +9,7 @@ import static org.mockito.Mockito.mock;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.domain.snapshot.AggregateSnapshot;
-import uk.gov.justice.services.test.utils.persistence.TestDataSourceFactory;
+import uk.gov.justice.services.test.utils.persistence.TestEventStoreDataSourceFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +39,7 @@ public class SnapshotRepositoryJdbcIT {
     @Before
     public void initialize() {
         try {
-            snapshotJdbcRepository.dataSource = new TestDataSourceFactory(LIQUIBASE_SNAPSHOT_STORE_DB_CHANGELOG_XML).createDataSource();
+            snapshotJdbcRepository.dataSource = new TestEventStoreDataSourceFactory(LIQUIBASE_SNAPSHOT_STORE_DB_CHANGELOG_XML).createDataSource();
             snapshotJdbcRepository.logger = mock(Logger.class);
         } catch (final Exception e) {
             e.printStackTrace();

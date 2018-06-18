@@ -12,20 +12,17 @@ import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
 import uk.gov.justice.services.jdbc.persistence.PreparedStatementWrapper;
 import uk.gov.justice.services.test.utils.core.messaging.Poller;
-import uk.gov.justice.services.test.utils.persistence.TestDataSourceFactory;
+import uk.gov.justice.services.test.utils.persistence.TestEventStoreDataSourceFactory;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.inject.Inject;
+import javax.sql.DataSource;
 
-import org.h2.jdbcx.JdbcDataSource;
 import org.junit.Before;
 import org.junit.Test;
-
-
 
 public class StreamStatusJdbcRepositoryIT {
 
@@ -37,14 +34,14 @@ public class StreamStatusJdbcRepositoryIT {
 
     private StreamStatusJdbcRepository jdbcRepository;
 
-    private JdbcDataSource dataSource;
+    private DataSource dataSource;
 
     private JdbcRepositoryHelper jdbcRepositoryHelper;
 
     @Before
     public void initDatabase() throws Exception {
-        final TestDataSourceFactory testDataSourceFactory = new TestDataSourceFactory(LIQUIBASE_STREAM_STATUS_CHANGELOG_XML);
-        dataSource = testDataSourceFactory.createDataSource();
+        final TestEventStoreDataSourceFactory testEventStoreDataSourceFactory = new TestEventStoreDataSourceFactory(LIQUIBASE_STREAM_STATUS_CHANGELOG_XML);
+        dataSource = testEventStoreDataSourceFactory.createDataSource();
         jdbcRepositoryHelper = new JdbcRepositoryHelper();
         jdbcRepository = new StreamStatusJdbcRepository(dataSource, jdbcRepositoryHelper);
 

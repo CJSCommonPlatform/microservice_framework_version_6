@@ -5,15 +5,15 @@ import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUti
 import uk.gov.justice.services.jdbc.persistence.AbstractJdbcRepository;
 
 import javax.naming.Context;
+import javax.sql.DataSource;
 
 import liquibase.Liquibase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.resource.ClassLoaderResourceAccessor;
-import org.h2.jdbcx.JdbcDataSource;
 
-
+@Deprecated
 public class AbstractJdbcRepositoryIT<T extends AbstractJdbcRepository> {
-    protected JdbcDataSource dataSource;
+    protected DataSource dataSource;
     protected T jdbcRepository;
     private final String liquibaseLocation;
 
@@ -28,10 +28,7 @@ public class AbstractJdbcRepositoryIT<T extends AbstractJdbcRepository> {
         System.setProperty(Context.URL_PKG_PREFIXES,
                 "org.apache.naming");
 
-        dataSource = new JdbcDataSource();
-        dataSource.setURL("jdbc:h2:mem:test;MV_STORE=FALSE;MVCC=FALSE");
-        dataSource.setUser("sa");
-        dataSource.setPassword("sa");
+        dataSource = new TestEventStoreDataSourceFactory(liquibaseLocation).createDataSource();
 
         setField(jdbcRepository, "datasource", dataSource);
         initDatabase();

@@ -44,7 +44,7 @@ import uk.gov.justice.services.core.envelope.MediaTypeProvider;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.extension.ServiceComponentScanner;
-import uk.gov.justice.services.core.h2.OpenEjbConfigurationBuilder;
+import uk.gov.justice.services.core.postgres.OpenEjbConfigurationBuilder;
 import uk.gov.justice.services.core.interceptor.InterceptorCache;
 import uk.gov.justice.services.core.interceptor.InterceptorChainEntry;
 import uk.gov.justice.services.core.interceptor.InterceptorChainEntryProvider;

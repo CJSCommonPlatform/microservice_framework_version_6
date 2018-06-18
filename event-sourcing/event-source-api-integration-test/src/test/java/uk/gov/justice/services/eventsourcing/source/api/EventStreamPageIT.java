@@ -11,7 +11,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
-import static uk.gov.justice.services.core.h2.OpenEjbConfigurationBuilder.createOpenEjbConfigurationBuilder;
+import static uk.gov.justice.services.core.postgres.OpenEjbConfigurationBuilder.createOpenEjbConfigurationBuilder;
 import static uk.gov.justice.services.eventsourcing.source.api.service.core.Direction.BACKWARD;
 import static uk.gov.justice.services.eventsourcing.source.api.service.core.Direction.FORWARD;
 import static uk.gov.justice.services.eventsourcing.source.api.util.TestSystemUserProvider.SYSTEM_USER_ID;
@@ -36,6 +36,7 @@ import uk.gov.justice.services.eventsourcing.publisher.jms.JmsEventPublisher;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventInsertionStrategy;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepositoryFactory;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.PostgresSQLEventLogInsertionStrategy;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventConverter;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepositoryFactory;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.eventstream.EventStreamJdbcRepository;
@@ -115,9 +116,8 @@ public class EventStreamPageIT {
     private static final String LIQUIBASE_EVENT_STORE_CHANGELOG_XML = "liquibase/event-store-db-changelog.xml";
     private static final String BASE_URI_PATTERN = "http://localhost:%d/event-source-api/rest";
     private static final String EVENT_STREAM_URL_PATH_PREFIX = "/event-source-api/rest/event-streams";
-    public static final int PAGE_SIZE = 2;
+    private static final int PAGE_SIZE = 2;
     private static int port = -1;
-
 
     private CloseableHttpClient httpClient;
     @Resource(name = "openejb/Resource/frameworkeventstore")
@@ -139,15 +139,15 @@ public class EventStreamPageIT {
         final InitialContext initialContext = new InitialContext();
         initialContext.bind("java:/app/EventStreamPageIT/DS.frameworkeventstore", dataSource);
         initEventDatabase();
-        eventsRepository = eventStreamJdbcRepositoryFactory.eventStreamJdbcRepository("java:openejb/Resource/frameworkeventstore");
+        eventsRepository = eventStreamJdbcRepositoryFactory.eventStreamJdbcRepository("java:/app/EventStreamPageIT/DS.frameworkeventstore");
     }
 
     @Configuration
-    public Properties configuration() {
+    public Properties postgresqlConfiguration() {
         return createOpenEjbConfigurationBuilder()
                 .addInitialContext()
                 .addHttpEjbPort(port)
-                .addH2EventStore()
+                .addPostgresqlViewStore()
                 .build();
     }
 
@@ -156,7 +156,7 @@ public class EventStreamPageIT {
 
         @Produces
         public EventInsertionStrategy eventLogInsertionStrategy() {
-            return new AnsiSQLEventLogInsertionStrategy();
+            return new PostgresSQLEventLogInsertionStrategy();
         }
     }
 

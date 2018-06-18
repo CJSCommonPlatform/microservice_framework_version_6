@@ -34,7 +34,7 @@ public class EventJdbcRepositoryFactoryTest {
 
     @Test
     public void shouldProduceEventJdbcRepository() throws Exception {
-        final String jndiDatasource = "java:/app/example/DS.eventstore";
+        final String jndiDatasource = "java:/app/example/DS.frameworkeventstore";
 
         final EventJdbcRepository eventJdbcRepository = eventJdbcRepositoryFactory.eventJdbcRepository(jndiDatasource);
 

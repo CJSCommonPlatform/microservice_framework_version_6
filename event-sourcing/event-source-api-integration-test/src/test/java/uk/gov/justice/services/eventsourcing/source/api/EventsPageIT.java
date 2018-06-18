@@ -14,7 +14,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
-import static uk.gov.justice.services.core.h2.OpenEjbConfigurationBuilder.createOpenEjbConfigurationBuilder;
+import static uk.gov.justice.services.core.postgres.OpenEjbConfigurationBuilder.createOpenEjbConfigurationBuilder;
 import static uk.gov.justice.services.eventsourcing.source.api.service.core.Direction.BACKWARD;
 import static uk.gov.justice.services.eventsourcing.source.api.service.core.Direction.FORWARD;
 import static uk.gov.justice.services.eventsourcing.source.api.util.TestSystemUserProvider.SYSTEM_USER_ID;
@@ -32,12 +32,13 @@ import uk.gov.justice.services.core.cdi.InitialContextProducer;
 import uk.gov.justice.services.core.cdi.QualifierAnnotationExtractor;
 import uk.gov.justice.services.core.enveloper.DefaultEnveloper;
 import uk.gov.justice.services.core.json.DefaultJsonValidationLoggerHelper;
+import uk.gov.justice.services.core.postgres.OpenEjbConfigurationBuilder;
 import uk.gov.justice.services.eventsource.DefaultEventDestinationResolver;
 import uk.gov.justice.services.eventsourcing.publisher.jms.EventPublisher;
 import uk.gov.justice.services.eventsourcing.publisher.jms.JmsEventPublisher;
-import uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventInsertionStrategy;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventRepositoryFactory;
+import uk.gov.justice.services.eventsourcing.repository.jdbc.PostgresSQLEventLogInsertionStrategy;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.Event;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventConverter;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepository;
@@ -119,7 +120,6 @@ import org.junit.runner.RunWith;
 @RunWith(ApplicationComposer.class)
 public class EventsPageIT {
 
-
     private static final String LIQUIBASE_EVENT_STORE_CHANGELOG_XML = "liquibase/event-store-db-changelog.xml";
     private static final String BASE_URI_PATTERN = "http://localhost:%d/event-source-api/rest";
     private static final UUID STREAM_ID = randomUUID();
@@ -148,15 +148,15 @@ public class EventsPageIT {
         InitialContext initialContext = new InitialContext();
         initialContext.bind("java:/app/EventsPageIT/DS.frameworkeventstore", dataSource);
         initEventDatabase();
-        eventsRepository = eventJdbcRepositoryFactory.eventJdbcRepository("java:openejb/Resource/frameworkeventstore");
+        eventsRepository = eventJdbcRepositoryFactory.eventJdbcRepository("java:/app/EventsPageIT/DS.frameworkeventstore");
     }
 
     @Configuration
-    public Properties configuration() {
+    public Properties postgresqlConfiguration() {
         return createOpenEjbConfigurationBuilder()
                 .addInitialContext()
                 .addHttpEjbPort(port)
-                .addH2EventStore()
+                .addPostgresqlViewStore()
                 .build();
     }
 
@@ -165,7 +165,7 @@ public class EventsPageIT {
 
         @Produces
         public EventInsertionStrategy eventLogInsertionStrategy() {
-            return new AnsiSQLEventLogInsertionStrategy();
+            return new PostgresSQLEventLogInsertionStrategy();
         }
     }
 

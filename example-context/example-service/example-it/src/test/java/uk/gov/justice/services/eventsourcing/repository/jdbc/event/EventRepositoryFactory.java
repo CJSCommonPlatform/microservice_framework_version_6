@@ -11,7 +11,7 @@ import javax.sql.DataSource;
 
 public class EventRepositoryFactory {
 
-    public static EventJdbcRepository getEventJdbcRepository(final DataSource dataSource) throws IllegalAccessException {
+    public EventJdbcRepository getEventJdbcRepository(final DataSource dataSource) throws IllegalAccessException {
         final EventJdbcRepository eventJdbcRepository = new EventJdbcRepository(
                 new AnsiSQLEventLogInsertionStrategy(),
                 new JdbcRepositoryHelper(),

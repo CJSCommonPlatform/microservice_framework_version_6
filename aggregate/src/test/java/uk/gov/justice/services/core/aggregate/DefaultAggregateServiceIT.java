@@ -8,7 +8,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.core.IsNull.notNullValue;
-import static uk.gov.justice.services.core.h2.OpenEjbConfigurationBuilder.createOpenEjbConfigurationBuilder;
+import static uk.gov.justice.services.core.postgres.OpenEjbConfigurationBuilder.createOpenEjbConfigurationBuilder;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 
@@ -101,7 +101,7 @@ public class DefaultAggregateServiceIT {
     private static final String SQL_EVENT_LOG_COUNT_BY_STREAM_ID = "SELECT count(*) FROM event_log WHERE stream_id=? ";
     private static final String SQL_EVENT_STREAM_COUNT_BY_STREAM_ID = "SELECT count(*) FROM event_stream WHERE stream_id=? ";
 
-    @Resource(name = "openejb/Resource/eventStore")
+    @Resource(name = "openejb/Resource/frameworkeventstore")
     private DataSource dataSource;
 
     @Inject
@@ -174,14 +174,14 @@ public class DefaultAggregateServiceIT {
     public Properties configuration() {
         return createOpenEjbConfigurationBuilder()
                 .addInitialContext()
-                .addH2EventStore()
+                .addPostgresqlEventStore()
                 .build();
     }
 
     @Before
     public void init() throws Exception {
         final InitialContext initialContext = new InitialContext();
-        initialContext.bind("java:/app/DefaultAggregateServiceIT/DS.eventstore", dataSource);
+        initialContext.bind("java:/app/DefaultAggregateServiceIT/DS.frameworkeventstore", dataSource);
         initDatabase();
     }
 

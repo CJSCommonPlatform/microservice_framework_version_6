@@ -8,7 +8,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.IsNot.not;
-import static uk.gov.justice.services.core.h2.OpenEjbConfigurationBuilder.createOpenEjbConfigurationBuilder;
+import static uk.gov.justice.services.core.postgres.OpenEjbConfigurationBuilder.createOpenEjbConfigurationBuilder;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 
@@ -129,7 +129,7 @@ public class SnapshotAwareAggregateServiceIT {
 
     private static final long SNAPSHOT_THRESHOLD = 25L;
 
-    @Resource(name = "openejb/Resource/eventStore")
+    @Resource(name = "openejb/Resource/frameworkeventstore")
     private DataSource dataSource;
 
     @Inject
@@ -217,7 +217,7 @@ public class SnapshotAwareAggregateServiceIT {
     public Properties configuration() {
         return createOpenEjbConfigurationBuilder()
                 .addInitialContext()
-                .addH2EventStore()
+                .addPostgresqlEventStore()
                 .build();
     }
 

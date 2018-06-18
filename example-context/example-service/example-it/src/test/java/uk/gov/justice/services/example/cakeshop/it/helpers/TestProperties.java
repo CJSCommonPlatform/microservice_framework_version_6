@@ -1,4 +1,4 @@
-package uk.gov.justice.services.example.cakeshop.it.util;
+package uk.gov.justice.services.example.cakeshop.it.helpers;
 
 import static org.junit.Assert.fail;
 

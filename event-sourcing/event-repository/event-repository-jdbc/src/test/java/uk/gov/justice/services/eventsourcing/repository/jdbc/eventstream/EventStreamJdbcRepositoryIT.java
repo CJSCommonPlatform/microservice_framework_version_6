@@ -15,14 +15,15 @@ import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidPo
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
 import uk.gov.justice.services.test.utils.core.messaging.Poller;
 import uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil;
-import uk.gov.justice.services.test.utils.persistence.TestDataSourceFactory;
+import uk.gov.justice.services.test.utils.persistence.TestEventStoreDataSourceFactory;
 
 import java.sql.SQLException;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import org.h2.jdbcx.JdbcDataSource;
+import javax.sql.DataSource;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -34,7 +35,7 @@ public class EventStreamJdbcRepositoryIT {
     private static final String LIQUIBASE_EVENT_STORE_DB_CHANGELOG_XML = "liquibase/event-store-db-changelog.xml";
 
     private EventStreamJdbcRepository jdbcRepository;
-    private JdbcDataSource dataSource;
+    private DataSource dataSource;
 
 
     @Before
@@ -42,7 +43,7 @@ public class EventStreamJdbcRepositoryIT {
         try {
 
             jdbcRepository = new EventStreamJdbcRepository(new JdbcRepositoryHelper(), null, new UtcClock(), "tests", mock(Logger.class));
-            dataSource = new TestDataSourceFactory(LIQUIBASE_EVENT_STORE_DB_CHANGELOG_XML).createDataSource();
+            dataSource = new TestEventStoreDataSourceFactory(LIQUIBASE_EVENT_STORE_DB_CHANGELOG_XML).createDataSource();
             ReflectionUtil.setField(jdbcRepository, "dataSource", dataSource);
 
             final Poller poller = new Poller();
@@ -51,7 +52,7 @@ public class EventStreamJdbcRepositoryIT {
                 try {
                     dataSource.getConnection().prepareStatement("SELECT COUNT (*) FROM event_stream;").execute();
                     return Optional.of("Success");
-                } catch (SQLException e) {
+                } catch (final SQLException e) {
                     e.printStackTrace();
                     return Optional.empty();
                 }

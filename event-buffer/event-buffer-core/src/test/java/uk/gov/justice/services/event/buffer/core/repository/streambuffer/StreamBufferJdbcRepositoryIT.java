@@ -11,14 +11,15 @@ import static org.junit.Assert.fail;
 
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
 import uk.gov.justice.services.test.utils.core.messaging.Poller;
-import uk.gov.justice.services.test.utils.persistence.TestDataSourceFactory;
+import uk.gov.justice.services.test.utils.persistence.TestEventStoreDataSourceFactory;
 
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.h2.jdbcx.JdbcDataSource;
+import javax.sql.DataSource;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -31,8 +32,8 @@ public class StreamBufferJdbcRepositoryIT {
 
     @Before
     public void initDatabase() throws Exception {
-        final TestDataSourceFactory testDataSourceFactory = new TestDataSourceFactory(LIQUIBASE_STREAM_STATUS_CHANGELOG_XML);
-        final JdbcDataSource dataSource = testDataSourceFactory.createDataSource();
+        final TestEventStoreDataSourceFactory testEventStoreDataSourceFactory = new TestEventStoreDataSourceFactory(LIQUIBASE_STREAM_STATUS_CHANGELOG_XML);
+        final DataSource dataSource = testEventStoreDataSourceFactory.createDataSource();
         jdbcRepository = new StreamBufferJdbcRepository(dataSource, new JdbcRepositoryHelper());
 
         try {

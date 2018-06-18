@@ -17,7 +17,7 @@ import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
 import uk.gov.justice.services.test.utils.core.messaging.Poller;
 import uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil;
-import uk.gov.justice.services.test.utils.persistence.TestDataSourceFactory;
+import uk.gov.justice.services.test.utils.persistence.TestEventStoreDataSourceFactory;
 
 import java.sql.SQLException;
 import java.time.ZonedDateTime;
@@ -26,7 +26,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import org.h2.jdbcx.JdbcDataSource;
+import javax.sql.DataSource;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,13 +45,13 @@ public class EventJdbcRepositoryIT {
 
 
     private EventJdbcRepository jdbcRepository;
-    private JdbcDataSource dataSource;
+    private DataSource dataSource;
 
     @Before
     public void initialize() {
         try {
             jdbcRepository = new EventJdbcRepository(new AnsiSQLEventLogInsertionStrategy(), new JdbcRepositoryHelper(), null, "tests", mock(Logger.class));
-            dataSource = new TestDataSourceFactory(LIQUIBASE_EVENT_STORE_DB_CHANGELOG_XML).createDataSource();
+            dataSource = new TestEventStoreDataSourceFactory(LIQUIBASE_EVENT_STORE_DB_CHANGELOG_XML).createDataSource();
             ReflectionUtil.setField(jdbcRepository, "dataSource", dataSource);
 
             final Poller poller = new Poller();

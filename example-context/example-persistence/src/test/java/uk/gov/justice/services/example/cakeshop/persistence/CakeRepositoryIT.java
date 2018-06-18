@@ -18,7 +18,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(CdiTestRunner.class)
-public class CakeRepositoryTest extends BaseTransactionalTest {
+public class CakeRepositoryIT extends BaseTransactionalTest {
 
     @Inject
     private CakeRepository cakeRepository;

@@ -382,7 +382,7 @@
                             pool-name="DS.example.eventstore" enabled="true"
                             use-java-context="true">
                     <connection-url>${db.eventstore.url}</connection-url>
-                    <driver>h2</driver>
+                    <driver>postgres</driver>
                     <pool>
                         <min-pool-size>3</min-pool-size>
                         <max-pool-size>3</max-pool-size>
@@ -396,7 +396,7 @@
                 <datasource jndi-name="java:/DS.example" pool-name="DS.example" enabled="true"
                             use-java-context="true">
                     <connection-url>${db.example.url}</connection-url>
-                    <driver>h2</driver>
+                    <driver>postgres</driver>
                     <pool>
                         <min-pool-size>3</min-pool-size>
                         <max-pool-size>3</max-pool-size>
@@ -413,7 +413,7 @@
                <datasource jndi-name="java:/DS.fileservice" pool-name="DS.fileservice" enabled="true"
                             use-java-context="true">
                     <connection-url>${db.fileservice.url}</connection-url>
-                    <driver>h2</driver>
+                    <driver>postgres</driver>
                     <pool>
                         <min-pool-size>3</min-pool-size>
                         <max-pool-size>3</max-pool-size>
@@ -428,8 +428,9 @@
                     </validation>
                 </datasource>
                 <drivers>
-                    <driver name="h2" module="com.h2database.h2">
-                        <xa-datasource-class>org.h2.jdbcx.JdbcDataSource</xa-datasource-class>
+                    <driver name="postgres" module="org.postgresql">
+                        <driver-class>org.postgresql.Driver</driver-class>
+                        <xa-datasource-class>org.postgresql.xa.PGXADataSource</xa-datasource-class>
                     </driver>
                 </drivers>
             </datasources>
@@ -438,10 +439,7 @@
             <bindings>
                 <simple name="java:/app/example-single/audit.blacklist" value="example.*" type="java.lang.String"/>
                 <simple name="java:/app/example-single/default.strategy.snapshot.threshold" value="3" type="java.lang.String"/>
-                <simple name="java:global/event.buffer.init.strategy" value="uk.gov.justice.services.event.buffer.core.service.AnsiSQLBasedBufferInitialisationStrategy" type="java.lang.String"/>
-                <simple name="java:global/eventlog.insertion.strategy" value="uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy" type="java.lang.String"/>
                 <simple name="java:global/envelope.validation.exception.handler" value="uk.gov.justice.services.core.envelope.RethrowingValidationExceptionHandler" type="java.lang.String"/>
-                <simple name="java:global/fileservice.metadata.sql.provider.strategy" value="uk.gov.justice.services.fileservice.repository.AnsiMetadataSqlProvider" type="java.lang.String"/>
             </bindings>
             <remote-naming/>
         </subsystem>

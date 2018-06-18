@@ -21,7 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(CdiTestRunner.class)
-public class IngredientRepositoryTest extends BaseTransactionalTest {
+public class IngredientRepositoryIT extends BaseTransactionalTest {
 
     private static final UUID INGREDIENT = UUID.randomUUID();
     private static final String INGREDIENT_NAME_A = "Flour";

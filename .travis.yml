@@ -13,6 +13,7 @@ services:
 before_script:
   - psql -c 'create database frameworkeventstore;' -U postgres
   - psql -c 'create database frameworkviewstore;' -U postgres
+  - psql -c 'create database frameworkfilestore;' -U postgres
   - psql -c "CREATE USER framework WITH PASSWORD 'framework';" -U postgres
 addons:
   postgresql: "9.5"

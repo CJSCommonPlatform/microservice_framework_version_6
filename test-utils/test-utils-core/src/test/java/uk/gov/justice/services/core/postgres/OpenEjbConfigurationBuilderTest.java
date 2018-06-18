@@ -1,4 +1,4 @@
-package uk.gov.justice.services.core.h2;
+package uk.gov.justice.services.core.postgres;
 
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasEntry;
@@ -19,25 +19,6 @@ public class OpenEjbConfigurationBuilderTest {
     }
 
     @Test
-    public void shouldReturnAnH2EventStoreWithInitialContext() {
-        final Properties properties = OpenEjbConfigurationBuilder.createOpenEjbConfigurationBuilder()
-                .addH2EventStore()
-                .addInitialContext()
-                .build();
-
-        assertThat(properties, allOf(
-                hasEntry("frameworkeventstore", "new://Resource?type=DataSource"),
-                hasEntry("frameworkeventstore.JdbcDriver", "org.h2.Driver"),
-                hasEntry("frameworkeventstore.JdbcUrl", "jdbc:h2:mem:test;MV_STORE=FALSE;MVCC=FALSE"),
-                hasEntry("frameworkeventstore.JtaManaged", "true"),
-                hasEntry("frameworkeventstore.UserName", "sa"),
-                hasEntry("frameworkeventstore.Password", "sa"),
-                hasEntry("java.naming.factory.initial", "org.apache.openejb.client.LocalInitialContextFactory")
-                )
-        );
-    }
-
-    @Test
     public void shouldAddAnHttpEjbPort() {
         final Properties properties = OpenEjbConfigurationBuilder.createOpenEjbConfigurationBuilder()
                 .addHttpEjbPort(-1)
@@ -45,24 +26,6 @@ public class OpenEjbConfigurationBuilderTest {
 
         assertThat(properties, allOf(
                 hasEntry("httpejbd.port", "-1"))
-        );
-    }
-
-    @Test
-    public void shouldReturnAnH2ViewStoreWithInitialContext() {
-        final Properties properties = OpenEjbConfigurationBuilder.createOpenEjbConfigurationBuilder()
-                .addh2ViewStore()
-                .addInitialContext()
-                .build();
-
-        assertThat(properties, allOf(
-                hasEntry("frameworkviewstore", "new://Resource?type=DataSource"),
-                hasEntry("frameworkviewstore.JdbcDriver", "org.h2.Driver"),
-                hasEntry("frameworkviewstore.JdbcUrl", "jdbc:h2:mem:test;MV_STORE=FALSE;MVCC=FALSE"),
-                hasEntry("frameworkviewstore.JtaManaged", "true"),
-                hasEntry("frameworkviewstore.UserName", "sa"),
-                hasEntry("frameworkviewstore.Password", "sa"),
-                hasEntry("java.naming.factory.initial", "org.apache.openejb.client.LocalInitialContextFactory"))
         );
     }
 

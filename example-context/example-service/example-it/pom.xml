@@ -11,12 +11,6 @@
     <properties>
         <wildfly.version>10.0.0.Final</wildfly.version>
         <jboss.home>${project.build.directory}/wildfly-${wildfly.version}</jboss.home>
-        <!-- To be used when running CakeShopIT-->
-        <server.config>standalone-test.xml</server.config>
-
-        <!-- To be used when running CakeShopPostgresIT-->
-        <!--<server.config>standalone-postgres-test.xml</server.config>-->
-
 
         <!-- Single war is used by default, to run example-it with multiple wars set the system example.use-multiple-war property to true: -->
         <!-- mvn clean install -Dexample.use-multiple-war=true -->
@@ -151,14 +145,11 @@
             <type>pom</type>
             <scope>test</scope>
         </dependency>
-
-        <!-- To be used when running CakeShopPostgresIT-->
-        <!--<dependency>-->
-        <!--<groupId>org.postgresql</groupId>-->
-        <!--<artifactId>postgresql</artifactId>-->
-        <!--<version>9.4-1201-jdbc41</version>-->
-        <!--<scope>test</scope>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 
@@ -222,66 +213,28 @@
                             </filters>
                         </configuration>
                     </execution>
-                </executions>
-            </plugin>
 
-            <!--To be used when running CakeShopPostgresIT-->
-            <!--<plugin>-->
-            <!--<artifactId>maven-resources-plugin</artifactId>-->
-            <!--<executions>-->
-            <!--<execution>-->
-            <!--<id>copy-jboss-module</id>-->
-            <!--<phase>pre-integration-test</phase>-->
-            <!--<goals>-->
-            <!--<goal>copy-resources</goal>-->
-            <!--</goals>-->
-            <!--<configuration>-->
-            <!--<outputDirectory>${jboss.home}/modules/system/layers/base/org-->
-            <!--</outputDirectory>-->
-            <!--<resources>-->
-            <!--<resource>-->
-            <!--<directory>src/test/resources/wildfly-modules</directory>-->
-            <!--<filtering>true</filtering>-->
-            <!--</resource>-->
-            <!--</resources>-->
-            <!--<filters>-->
-            <!--<filter>src/test/resources/test.properties</filter>-->
-            <!--</filters>-->
-            <!--</configuration>-->
-            <!--</execution>-->
-            <!--</executions>-->
-            <!--</plugin>-->
-
-            <!-- To be used when running CakeShopIT-->
-            <plugin>
-                <groupId>com.edugility</groupId>
-                <artifactId>h2-maven-plugin</artifactId>
-                <configuration>
-                    <port>8092</port>
-                </configuration>
-                <executions>
                     <execution>
-                        <id>Spawn a new H2 TCP server</id>
+                        <id>copy-jboss-module</id>
                         <phase>pre-integration-test</phase>
                         <goals>
-                            <goal>spawn</goal>
+                            <goal>copy-resources</goal>
                         </goals>
-                    </execution>
-                    <execution>
-                        <id>Stop a spawned H2 TCP server</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>stop</goal>
-                        </goals>
+                        <configuration>
+                            <outputDirectory>${jboss.home}/modules/system/layers/base/org
+                            </outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/test/resources/wildfly-modules</directory>
+                                    <filtering>true</filtering>
+                                </resource>
+                            </resources>
+                            <filters>
+                                <filter>src/test/resources/test.properties</filter>
+                            </filters>
+                        </configuration>
                     </execution>
                 </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.h2database</groupId>
-                        <artifactId>h2</artifactId>
-                        <version>${h2.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
 
             <plugin>
@@ -315,37 +268,6 @@
                         <goals>
                             <goal>shutdown</goal>
                         </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <configuration>
-                    <systemPropertyVariables>
-                        <random.jms.port>${random-jms-port}</random.jms.port>
-                        <random.http.port>${random-http-port}</random.http.port>
-                    </systemPropertyVariables>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>reserve-jms-port</id>
-                        <goals>
-                            <goal>reserve-network-port</goal>
-                        </goals>
-                        <phase>process-resources</phase>
-                        <configuration>
-                            <portNames>
-                                <portName>random-jms-port</portName>
-                                <portName>random-http-port</portName>
-                                <portName>random-management-port</portName>
-                            </portNames>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>

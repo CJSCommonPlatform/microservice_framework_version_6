@@ -6,12 +6,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import javax.sql.DataSource;
+
 import liquibase.exception.LiquibaseException;
-import org.h2.jdbcx.JdbcDataSource;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
-public class TestDataSourceFactoryTest {
+public class EventStoreDataSourceFactoryIT {
 
     private static final String LIQUIBASE_TEST_DB_CHANGELOG_XML = "liquibase/test-db-changelog.xml";
 
@@ -21,16 +22,14 @@ public class TestDataSourceFactoryTest {
     @Test
     public void shouldCreateJdbcDataSource() throws SQLException, LiquibaseException {
 
-        final TestDataSourceFactory testDataSourceFactory = new TestDataSourceFactory(LIQUIBASE_TEST_DB_CHANGELOG_XML);
-        final JdbcDataSource dataSource = testDataSourceFactory.createDataSource();
+        final TestEventStoreDataSourceFactory testEventStoreDataSourceFactory = new TestEventStoreDataSourceFactory(LIQUIBASE_TEST_DB_CHANGELOG_XML);
+        final DataSource dataSource = testEventStoreDataSourceFactory.createDataSource();
 
-        try(final Statement statement = dataSource.getConnection().createStatement();) {
+        try (final Statement statement = dataSource.getConnection().createStatement();) {
             statement.executeUpdate(sqlInsert);
             final ResultSet resultSet = statement.executeQuery(slqSelect);
             resultSet.next();
             assertThat(resultSet.getString("name"), Matchers.is("test"));
-        } catch (final SQLException e) {
-            throw e;
         }
     }
 }

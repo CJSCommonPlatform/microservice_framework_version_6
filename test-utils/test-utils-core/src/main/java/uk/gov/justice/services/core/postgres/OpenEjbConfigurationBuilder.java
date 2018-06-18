@@ -1,4 +1,4 @@
-package uk.gov.justice.services.core.h2;
+package uk.gov.justice.services.core.postgres;
 
 import static java.lang.String.format;
 
@@ -23,14 +23,6 @@ public class OpenEjbConfigurationBuilder {
         return this;
     }
 
-    public OpenEjbConfigurationBuilder addH2EventStore() {
-        return getH2Config(EVENT_STORE_NAME);
-    }
-
-    public OpenEjbConfigurationBuilder addh2ViewStore() {
-        return getH2Config(VIEW_STORE_NAME);
-    }
-
     public OpenEjbConfigurationBuilder addPostgresqlEventStore() {
         return getPostgresqlConfig(EVENT_STORE_NAME);
     }
@@ -46,16 +38,6 @@ public class OpenEjbConfigurationBuilder {
 
     public Properties build() {
         return configuration;
-    }
-
-    private OpenEjbConfigurationBuilder getH2Config(final String dbName) {
-        configuration.put(dbName, "new://Resource?type=DataSource");
-        configuration.put(format("%s.JdbcDriver", dbName), "org.h2.Driver");
-        configuration.put(format("%s.JdbcUrl", dbName), "jdbc:h2:mem:test;MV_STORE=FALSE;MVCC=FALSE");
-        configuration.put(format("%s.JtaManaged", dbName), "true");
-        configuration.put(format("%s.UserName", dbName), "sa");
-        configuration.put(format("%s.Password", dbName), "sa");
-        return this;
     }
 
     private OpenEjbConfigurationBuilder getPostgresqlConfig(final String dbName) {

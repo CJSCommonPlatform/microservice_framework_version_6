@@ -73,4 +73,24 @@ public class TestJdbcConnectionProviderTest {
             assertThat(expected.getMessage(), is(expectedErrorMessage));
         }
     }
+
+    @SuppressWarnings("Duplicates")
+    @Test
+    public void shouldThrowADataAccessExceptionIfTheConnectionToTheActivitiDBFails() throws Exception {
+
+        final String expectedErrorMessage =
+                "Failed to get JDBC connection " +
+                        "to my-non-existent-context Activiti Database. " +
+                        "url: 'jdbc:postgresql://localhost/my-non-existent-contextactiviti', " +
+                        "username 'my-non-existent-context', " +
+                        "password 'my-non-existent-context'";
+
+        try(final Connection connection = testJdbcConnectionProvider.getActivitiDBConnection("my-non-existent-context")) {
+            assertThat(connection, is(notNullValue()));
+            fail();
+        } catch(DataAccessException expected) {
+            assertThat(expected.getCause(), is(instanceOf(SQLException.class)));
+            assertThat(expected.getMessage(), is(expectedErrorMessage));
+        }
+    }
 }

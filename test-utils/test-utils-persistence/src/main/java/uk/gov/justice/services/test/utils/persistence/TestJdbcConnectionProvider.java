@@ -62,7 +62,7 @@ public class TestJdbcConnectionProvider {
         try {
             return DriverManager.getConnection(url, username, password);
         } catch (SQLException e) {
-            final String message = format("Failed to get JDBC connection to %s View Store. url: '%s', username '%s', password '%s'",
+            final String message = format("Failed to get JDBC connection to %s Activiti Database. url: '%s', username '%s', password '%s'",
                     contextName,
                     url,
                     username,

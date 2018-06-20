@@ -39,6 +39,17 @@ public interface EventRepository {
     Stream<JsonEnvelope> getByStreamIdAndSequenceId(final UUID streamId, final Long sequenceId);
 
     /**
+     * Get a stream of envelopes from a given version, ordered by sequence id. The stream is paged
+     * for efficiency
+     *
+     * @param streamId   the id of the stream to retrieve
+     * @param sequenceId the sequence id to read the stream from
+     * @param pageSize the size of the result set page.
+     * @return the stream of envelopes. Never returns null.
+     */
+    Stream<JsonEnvelope> getByStreamIdAndSequenceId(final UUID streamId, final Long sequenceId, final Integer pageSize);
+
+    /**
      * Stores the given envelope into the event stream.
      *
      * @param envelope the envelope containing the event and the metadata.

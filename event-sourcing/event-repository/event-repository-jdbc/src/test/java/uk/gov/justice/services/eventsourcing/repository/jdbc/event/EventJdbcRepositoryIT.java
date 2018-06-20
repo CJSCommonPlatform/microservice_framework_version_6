@@ -132,6 +132,22 @@ public class EventJdbcRepositoryIT {
     }
 
     @Test
+    public void shouldReturnEventsByStreamIdFromSequenceIdOrderBySequenceIdByPage() throws InvalidSequenceIdException {
+
+        final int pageSize = 2;
+
+        jdbcRepository.insert(eventOf(7, STREAM_ID));
+        jdbcRepository.insert(eventOf(4, STREAM_ID));
+        jdbcRepository.insert(eventOf(3, STREAM_ID));
+
+        final Stream<Event> events = jdbcRepository.findByStreamIdFromSequenceIdOrderBySequenceIdAsc(STREAM_ID, 3L, pageSize);
+        final List<Event> eventList = events.collect(toList());
+        assertThat(eventList, hasSize(2));
+        assertThat(eventList.get(0).getSequenceId(), is(3L));
+        assertThat(eventList.get(1).getSequenceId(), is(4L));
+    }
+
+    @Test
     public void shouldReturnAllEventsOrderedBySequenceId() throws InvalidSequenceIdException {
         jdbcRepository.insert(eventOf(1, randomUUID()));
         jdbcRepository.insert(eventOf(4, STREAM_ID));

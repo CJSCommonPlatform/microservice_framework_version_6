@@ -5,6 +5,12 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [unreleased]
 
+## [4.2.0] - 2018-06-20
+### Added
+- Added a page size when reading stream of events
+### Changed
+- Updated framework-api to 2.1.1
+
 ## [4.1.2] - 2018-06-11
 ### Fixed
 - Fix incorrect insertion of stream status table containing one record for unknown and correct source

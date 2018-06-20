@@ -118,6 +118,18 @@ public class PreparedStatementWrapperTest {
     }
 
     @Test
+    public void shouldDelegateSetIntMethodCall() throws SQLException {
+        final String query = "dummy";
+        when(connection.prepareStatement(query)).thenReturn(preparedStatement);
+        final PreparedStatementWrapper ps = PreparedStatementWrapper.valueOf(connection, query);
+        final int parameterIndex = 2;
+        final Integer value = 123;
+        ps.setInt(parameterIndex, value);
+
+        verify(preparedStatement).setInt(parameterIndex, value);
+    }
+
+    @Test
     public void shouldDelegateSetBooleanMethodCall() throws SQLException {
         final String query = "dummy";
         when(connection.prepareStatement(query)).thenReturn(preparedStatement);

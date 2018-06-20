@@ -84,3 +84,4 @@ conf/login.config
 conf/openejb.xml
 conf/users.properties
 conf/conf.d/
+/dependencies.xml

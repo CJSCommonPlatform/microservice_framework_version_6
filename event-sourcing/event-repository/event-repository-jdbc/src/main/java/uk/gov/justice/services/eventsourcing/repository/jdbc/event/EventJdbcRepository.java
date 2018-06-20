@@ -48,6 +48,7 @@ public class EventJdbcRepository {
     static final String SQL_FIND_ALL = "SELECT * FROM event_log ORDER BY sequence_id ASC";
     static final String SQL_FIND_BY_STREAM_ID = "SELECT * FROM event_log WHERE stream_id=? ORDER BY sequence_id ASC";
     static final String SQL_FIND_BY_STREAM_ID_AND_SEQUENCE_ID = "SELECT * FROM event_log WHERE stream_id=? AND sequence_id>=? ORDER BY sequence_id ASC";
+    static final String SQL_FIND_BY_STREAM_ID_AND_SEQUENCE_ID_BY_PAGE = "SELECT * FROM event_log WHERE stream_id=? AND sequence_id>=? ORDER BY sequence_id ASC LIMIT ?";
     static final String SQL_FIND_LATEST_SEQUENCE_ID = "SELECT MAX(sequence_id) FROM event_log WHERE stream_id=?";
     static final String SQL_DISTINCT_STREAM_ID = "SELECT DISTINCT stream_id FROM event_log";
     static final String SQL_DELETE_STREAM = "DELETE FROM event_log t WHERE t.stream_id=?";
@@ -139,6 +140,22 @@ public class EventJdbcRepository {
             final PreparedStatementWrapper ps = jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SQL_FIND_BY_STREAM_ID_AND_SEQUENCE_ID);
             ps.setObject(1, streamId);
             ps.setLong(2, versionFrom);
+
+            return jdbcRepositoryHelper.streamOf(ps, entityFromFunction());
+        } catch (final SQLException e) {
+            logger.warn(FAILED_TO_READ_STREAM, streamId, e);
+            throw new JdbcRepositoryException(format(READING_STREAM_EXCEPTION, streamId), e);
+        }
+    }
+
+    public Stream<Event> findByStreamIdFromSequenceIdOrderBySequenceIdAsc(final UUID streamId,
+                                                                          final Long versionFrom,
+                                                                          final Integer pageSize) {
+        try {
+            final PreparedStatementWrapper ps = jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SQL_FIND_BY_STREAM_ID_AND_SEQUENCE_ID_BY_PAGE);
+            ps.setObject(1, streamId);
+            ps.setLong(2, versionFrom);
+            ps.setInt(3, pageSize);
 
             return jdbcRepositoryHelper.streamOf(ps, entityFromFunction());
         } catch (final SQLException e) {

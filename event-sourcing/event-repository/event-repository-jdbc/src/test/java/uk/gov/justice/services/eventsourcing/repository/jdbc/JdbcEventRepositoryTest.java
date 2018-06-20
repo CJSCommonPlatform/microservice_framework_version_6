@@ -97,6 +97,21 @@ public class JdbcEventRepositoryTest {
     }
 
     @Test
+    public void shouldGetByStreamIdAndSequenceIdByPage() throws Exception {
+
+        final Integer pageSize = 1000;
+
+        when(eventJdbcRepository.findByStreamIdFromSequenceIdOrderBySequenceIdAsc(STREAM_ID, VERSION_1, pageSize)).thenReturn(Stream.of(event));
+        when(eventConverter.envelopeOf(event)).thenReturn(envelope);
+
+        Stream<JsonEnvelope> streamOfEnvelopes = jdbcEventRepository.getByStreamIdAndSequenceId(STREAM_ID, VERSION_1, pageSize);
+
+        assertThat(streamOfEnvelopes, not(nullValue()));
+        assertThat(streamOfEnvelopes.findFirst().get(), equalTo(envelope));
+        verify(logger).trace("Retrieving event stream for {} at sequence {}", STREAM_ID, VERSION_1);
+    }
+
+    @Test
     public void shouldGetAll() throws Exception {
         when(eventJdbcRepository.findAll()).thenReturn(Stream.of(event));
         when(eventConverter.envelopeOf(event)).thenReturn(envelope);

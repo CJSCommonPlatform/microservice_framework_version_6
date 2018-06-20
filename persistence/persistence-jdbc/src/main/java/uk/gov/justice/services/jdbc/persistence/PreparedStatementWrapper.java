@@ -47,6 +47,14 @@ public class PreparedStatementWrapper implements AutoCloseable {
         }
     }
 
+    public void setInt(final int parameterIndex, final Integer value) throws SQLException {
+        try {
+            this.preparedStatement.setInt(parameterIndex, value);
+        } catch (final SQLException e) {
+            handle(e, this);
+        }
+    }
+
     public void setTimestamp(final int parameterIndex, final Timestamp timestamp) throws SQLException {
         try {
             this.preparedStatement.setTimestamp(parameterIndex, timestamp);

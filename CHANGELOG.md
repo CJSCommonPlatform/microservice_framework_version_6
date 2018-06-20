@@ -10,6 +10,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 - EnveloperTestProvider that is used for testing usage of the Enveloper
 - Update JdbcEventRepository to return all active stream ids
 - Flag to disable running of Integration Tests as part of the build
+- Added a page size when reading stream of events
 
 ### Changed
 - Added schema catalog generation plugin to example service
@@ -26,6 +27,59 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 - Travis setup now creates a postgres database as part of the build
 - Moved Integration tests in Event Buffer to use the new postgress database rather then H2 in memory database
 - Integration Tests now use a running local instance of Postgres, rather than using an in memory database
+
+## [4.2.0] - 2018-06-20
+### Added
+- Added a page size when reading stream of events
+### Changed
+- Updated framework-api to 2.1.1
+
+## [4.1.2] - 2018-06-11
+### Fixed
+- Fix incorrect insertion of stream status table containing one record for unknown and correct source
+
+## [4.1.1] - 2018-06-05
+### Fixed
+- Update of stream status table now handles a source column of 'unknown'
+
+## [4.1.0] - 2018-05-24
+### Added
+- Update JdbcEventRepository to return all active stream ids
+
+## [4.0.7] - 2018-05-22
+### Fixed
+- Event Buffer stream status version update issue
+
+## [4.0.6] - 2018-05-21
+### Fixed
+- Schema Validation Exception not caught error 
+
+## [4.0.5] - 2018-05-18
+### Fixed
+- Upgrade parent pom to fix upgrade of Jackson 2.8.11 
+
+### Changed
+- Reduce the logging level for not using schema catalog
+
+## [4.0.4] - 2018-05-17
+### Changed
+- Upgrade Jackson to 2.8.11 to fix Jackson security issues 
+
+## [4.0.3] - 2018-05-10
+### Changed
+- Makes TestDataSourceFactory lock rows in the same way as postgresql
+- Makes TestDataSourceFactory more extensible through overloaded createDataSource methods
+### Fixed
+- Tests for test-utils-pseristence were not in correct maven file structure so unused
+- Minor fixes to test-utils-pseristence tests where components have changed
+
+## [4.0.2] - 2018-05-02
+### Changed
+- Caches mapping between media types and action names for the schema catalog are now lazy loaded
+
+## [4.0.1] - 2018-04-20
+### Added
+- StreamId now persisted by enveloper for metadata
 
 ## [4.0.0] - 2018-03-09
 

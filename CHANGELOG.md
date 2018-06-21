@@ -10,6 +10,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 - Added a page size when reading stream of events
 ### Changed
 - Updated framework-api to 2.1.1
+- Updated common-bom version to 1.27.0 to fix apache tika security issues
 
 ## [4.1.2] - 2018-06-11
 ### Fixed

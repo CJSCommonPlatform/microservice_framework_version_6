@@ -5,7 +5,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [unreleased]
 
-## [4.2.0] - 2018-06-20
+## [4.2.0] - 2018-06-21
 ### Added
 - Added a page size when reading stream of events
 ### Changed

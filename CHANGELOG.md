@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [unreleased]
 
+## [4.2.1] - 2018-06-21
+### Changed
+- Updated framework-api version to 2.1.2 to fix apache tika security issues
+
 ## [4.2.0] - 2018-06-21
 ### Added
 - Added a page size when reading stream of events

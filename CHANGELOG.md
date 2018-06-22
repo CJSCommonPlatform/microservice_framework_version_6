@@ -26,6 +26,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 - Travis setup now creates a postgres database as part of the build
 - Moved Integration tests in Event Buffer to use the new postgress database rather then H2 in memory database
 - Integration Tests now use a running local instance of Postgres, rather than using an in memory database
+- Updated common-bom version to 1.27.0 to fix apache tika security issues
 
 ## [4.0.0] - 2018-03-09
 

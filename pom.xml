@@ -7,7 +7,7 @@
     <parent>
         <groupId>uk.gov.justice</groupId>
         <artifactId>maven-framework-parent-pom</artifactId>
-        <version>1.12.2</version>
+        <version>1.12.3</version>
     </parent>
 
     <groupId>uk.gov.justice.services</groupId>
@@ -47,16 +47,16 @@
     <properties>
         <cpp.repo.name>microservice_framework</cpp.repo.name>
 
-        <common-bom.version>1.26.0</common-bom.version>
+        <common-bom.version>1.27.0</common-bom.version>
         <embedded-artemis.version>1.2.0</embedded-artemis.version>
-        <file.service.version>1.16.1</file.service.version>
+        <file.service.version>1.16.2</file.service.version>
         <jboss-ejb3-ext-api.version>2.2.0.Final</jboss-ejb3-ext-api.version>
         <jboss-vfs.version>3.2.12.Final</jboss-vfs.version>
-        <raml-maven-plugin.version>1.6.2</raml-maven-plugin.version>
-        <test-utils.version>1.17.2</test-utils.version>
-        <utilities.version>1.13.1</utilities.version>
-        <generator-maven-plugin.version>2.5.0</generator-maven-plugin.version>
-        <framework-api.version>3.0.0-M12</framework-api.version>
+        <raml-maven-plugin.version>1.6.3</raml-maven-plugin.version>
+        <test-utils.version>1.17.3</test-utils.version>
+        <utilities.version>1.13.2</utilities.version>
+        <generator-maven-plugin.version>2.5.1</generator-maven-plugin.version>
+        <framework-api.version>3.0.0-M13</framework-api.version>
     </properties>
 
     <dependencyManagement>

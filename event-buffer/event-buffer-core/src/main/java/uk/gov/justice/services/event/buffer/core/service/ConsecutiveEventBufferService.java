@@ -1,6 +1,7 @@
 package uk.gov.justice.services.event.buffer.core.service;
 
 import static java.util.stream.Stream.concat;
+import static java.util.stream.Stream.empty;
 import static java.util.stream.StreamSupport.stream;
 
 import uk.gov.justice.services.event.buffer.api.EventBufferService;
@@ -28,6 +29,7 @@ import org.slf4j.Logger;
 public class ConsecutiveEventBufferService implements EventBufferService {
 
     private static final long INITIAL_VERSION = 1L;
+    private static final Object MUT_EX = new Object();
 
     @Inject
     private Logger logger;
@@ -67,15 +69,15 @@ public class ConsecutiveEventBufferService implements EventBufferService {
 
         if (incomingEventObsolete(incomingEventVersion, currentVersion)) {
             logger.warn("Message : {} is an obsolete version", incomingEvent);
-            return Stream.empty();
+            return empty();
 
         } else if (incomingEventNotInOrder(incomingEventVersion, currentVersion)) {
-            logger.info("Current Version : {} Message Version : {} Message : {} version is not consecutive, adding to buffer", currentVersion, incomingEventVersion, incomingEvent);
+            logger.info("Current Version : {} Message Version : {} version is not consecutive, adding to buffer", currentVersion, incomingEventVersion);
             addToBuffer(incomingEvent, streamId, incomingEventVersion);
-            return Stream.empty();
+            return empty();
 
         } else {
-            logger.info("Current Version : {} Message Version : {} Message : {} version {} is valid sending stream to dispatcher", currentVersion, incomingEventVersion, incomingEvent);
+            logger.info("Current Version : {} Message Version : {} version is valid sending stream to dispatcher", currentVersion, incomingEventVersion);
             streamStatusRepository.update(new StreamStatus(streamId, incomingEventVersion, source));
             return bufferedEvents(streamId, incomingEvent, incomingEventVersion);
         }

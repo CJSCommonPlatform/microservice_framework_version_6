@@ -2,13 +2,10 @@ package uk.gov.justice.services.components.event.listener.interceptors.it;
 
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
-import static javax.ejb.TransactionAttributeType.NOT_SUPPORTED;
-import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
-import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
 
@@ -26,7 +23,6 @@ import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGen
 import uk.gov.justice.services.core.accesscontrol.AllowAllPolicyEvaluator;
 import uk.gov.justice.services.core.accesscontrol.DefaultAccessControlService;
 import uk.gov.justice.services.core.accesscontrol.PolicyEvaluator;
-import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
@@ -48,7 +44,6 @@ import uk.gov.justice.services.core.interceptor.InterceptorCache;
 import uk.gov.justice.services.core.interceptor.InterceptorChainEntry;
 import uk.gov.justice.services.core.interceptor.InterceptorChainEntryProvider;
 import uk.gov.justice.services.core.interceptor.InterceptorChainObserver;
-import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
 import uk.gov.justice.services.core.json.BackwardsCompatibleJsonSchemaValidator;
 import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
@@ -84,19 +79,14 @@ import uk.gov.justice.services.test.utils.core.messaging.Poller;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.UUID;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.stream.Stream;
 
 import javax.annotation.Resource;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
 import javax.enterprise.concurrent.ManagedExecutorService;
-import javax.enterprise.concurrent.ManagedTask;
 import javax.enterprise.concurrent.ManagedTaskListener;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -307,6 +297,7 @@ public class MultiThreadedEventBufferIT implements ManagedTaskListener {
     @Override
     public void taskDone(final Future<?> future, final ManagedExecutorService executor, final Object task, final Throwable exception) {
         System.out.println("Done");
+        exception.printStackTrace();
     }
 
     @Override
@@ -323,37 +314,6 @@ public class MultiThreadedEventBufferIT implements ManagedTaskListener {
             record(envelope);
         }
 
-    }
-
-    @Stateless
-    @Adapter(EVENT_LISTENER)
-    public static class AsynchronousDispatchBean {
-
-        @Resource(name = "openejb/Resource/frameworkviewstore")
-        private DataSource dataSource;
-
-        @Inject
-        private InterceptorChainProcessor interceptorChainProcessor;
-
-        public void init() throws Exception {
-            InitialContext initialContext = new InitialContext();
-            initialContext.bind("java:/DS.MultiThreadedEventBufferIT", dataSource);
-        }
-
-        @TransactionAttribute(NOT_SUPPORTED)
-        public Optional<JsonEnvelope> process(final JsonEnvelope jsonEnvelope) {
-            try {
-                return processWithChain(jsonEnvelope);
-            } catch (final Throwable t) {
-                t.printStackTrace();
-                throw t;
-            }
-        }
-
-        @TransactionAttribute(REQUIRES_NEW)
-        private Optional<JsonEnvelope> processWithChain(final JsonEnvelope jsonEnvelope) {
-            return interceptorChainProcessor.process(interceptorContextWithInput(jsonEnvelope));
-        }
     }
 
     private void initDatabase() throws Exception {
@@ -378,38 +338,4 @@ public class MultiThreadedEventBufferIT implements ManagedTaskListener {
         }
     }
 
-    public static class JsonEnvelopeDispatchTask implements Callable<Optional<JsonEnvelope>>, ManagedTask {
-
-        private final JsonEnvelope jsonEnvelope;
-        private final AsynchronousDispatchBean asynchronousDispatchBean;
-        private final ManagedTaskListener managedTaskListener;
-
-        public JsonEnvelopeDispatchTask(final JsonEnvelope jsonEnvelope,
-                                        final AsynchronousDispatchBean asynchronousDispatchBean,
-                                        final ManagedTaskListener managedTaskListener) {
-            this.jsonEnvelope = jsonEnvelope;
-            this.asynchronousDispatchBean = asynchronousDispatchBean;
-            this.managedTaskListener = managedTaskListener;
-        }
-
-        @Override
-        public Optional<JsonEnvelope> call() throws Exception {
-            try {
-                return asynchronousDispatchBean.process(jsonEnvelope);
-            } catch (final Throwable t) {
-                t.printStackTrace();
-                throw t;
-            }
-        }
-
-        @Override
-        public ManagedTaskListener getManagedTaskListener() {
-            return managedTaskListener;
-        }
-
-        @Override
-        public Map<String, String> getExecutionProperties() {
-            return null;
-        }
-    }
 }

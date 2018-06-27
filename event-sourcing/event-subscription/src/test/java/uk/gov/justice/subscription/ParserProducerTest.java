@@ -17,8 +17,8 @@ public class ParserProducerTest {
 
     @Test
     public void shouldProduceSubscriptionDescriptorsParser() {
-        final SubscriptionDescriptorsParser subscriptionDescriptorsParser = new ParserProducer().subscriptionDescriptorsParser();
+        final SubscriptionsDescriptorParser subscriptionsDescriptorParser = new ParserProducer().subscriptionDescriptorsParser();
 
-        assertThat(subscriptionDescriptorsParser, is(instanceOf(SubscriptionDescriptorsParser.class)));
+        assertThat(subscriptionsDescriptorParser, is(instanceOf(SubscriptionsDescriptorParser.class)));
     }
 }

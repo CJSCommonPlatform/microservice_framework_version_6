@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-public class SubscriptionDescriptorDefinitionTest {
+public class SubscriptionsDescriptorTest {
     @Test
     public void shouldReturnFalseForDifferentSubscriptionNameQualifiers() {
         final String specVersion1 = "1.0";
@@ -22,9 +22,9 @@ public class SubscriptionDescriptorDefinitionTest {
         final List<Subscription> subscriptions2 = new ArrayList<>();
 
 
-        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition1 = new SubscriptionDescriptorDefinition(specVersion1, service1, serviceComponent1, subscriptions1);
-        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition2 = new SubscriptionDescriptorDefinition(specVersion2, service2, serviceComponent2, subscriptions2);
-        assertFalse(subscriptionDescriptorDefinition1.equals(subscriptionDescriptorDefinition2));
+        final SubscriptionsDescriptor subscriptionsDescriptor1 = new SubscriptionsDescriptor(specVersion1, service1, serviceComponent1, subscriptions1);
+        final SubscriptionsDescriptor subscriptionsDescriptor2 = new SubscriptionsDescriptor(specVersion2, service2, serviceComponent2, subscriptions2);
+        assertFalse(subscriptionsDescriptor1.equals(subscriptionsDescriptor2));
     }
 
     @Test
@@ -35,8 +35,8 @@ public class SubscriptionDescriptorDefinitionTest {
         final String serviceComponent = "EVENT_LISTENER";
         final List<Subscription> subscriptions = new ArrayList<>();
 
-        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition1 = new SubscriptionDescriptorDefinition(specVersion, service, serviceComponent, subscriptions);
-        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition2 = new SubscriptionDescriptorDefinition(specVersion, service, serviceComponent, subscriptions);
-        assertTrue(subscriptionDescriptorDefinition1.equals(subscriptionDescriptorDefinition2));
+        final SubscriptionsDescriptor subscriptionsDescriptor1 = new SubscriptionsDescriptor(specVersion, service, serviceComponent, subscriptions);
+        final SubscriptionsDescriptor subscriptionsDescriptor2 = new SubscriptionsDescriptor(specVersion, service, serviceComponent, subscriptions);
+        assertTrue(subscriptionsDescriptor1.equals(subscriptionsDescriptor2));
     }
 }

@@ -3,14 +3,14 @@ package uk.gov.justice.subscription.domain.subscriptiondescriptor;
 import java.util.List;
 import java.util.Objects;
 
-public class SubscriptionDescriptorDefinition {
+public class SubscriptionsDescriptor {
 
     private final String specVersion;
     private final String service;
     private final String serviceComponent;
     private final List<Subscription> subscriptions;
 
-    public SubscriptionDescriptorDefinition(final String specVersion, final String service, final String serviceComponent, final List<Subscription> subscriptions) {
+    public SubscriptionsDescriptor(final String specVersion, final String service, final String serviceComponent, final List<Subscription> subscriptions) {
         this.specVersion = specVersion;
         this.service = service;
         this.serviceComponent = serviceComponent;
@@ -33,7 +33,7 @@ public class SubscriptionDescriptorDefinition {
     public boolean equals(Object object) {
         if (this == object) return true;
         if (object == null || getClass() != object.getClass()) return false;
-        SubscriptionDescriptorDefinition that = (SubscriptionDescriptorDefinition) object;
+        SubscriptionsDescriptor that = (SubscriptionsDescriptor) object;
         return Objects.equals(specVersion, that.specVersion) &&
                 Objects.equals(service, that.service) &&
                 Objects.equals(serviceComponent, that.serviceComponent);

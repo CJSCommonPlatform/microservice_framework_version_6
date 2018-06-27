@@ -11,7 +11,7 @@ import uk.gov.justice.services.generators.commons.mapping.SubscriptionMediaTypeT
 import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Event;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
-import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptorDefinition;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionsDescriptor;
 import uk.gov.justice.subscription.jms.interceptor.EventFilterInterceptorCodeGenerator;
 import uk.gov.justice.subscription.jms.interceptor.EventListenerInterceptorChainProviderCodeGenerator;
 import uk.gov.justice.subscription.jms.interceptor.EventValidationInterceptorCodeGenerator;
@@ -68,8 +68,8 @@ public class SubscriptionJmsEndpointGenerator implements Generator<SubscriptionW
         final CommonGeneratorProperties commonGeneratorProperties = (CommonGeneratorProperties) configuration.getGeneratorProperties();
         final String basePackageName = configuration.getBasePackageName();
 
-        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition = subscriptionWrapper.getSubscriptionDescriptorDefinition();
-        final List<Subscription> subscriptions = subscriptionDescriptorDefinition.getSubscriptions();
+        final SubscriptionsDescriptor subscriptionsDescriptor = subscriptionWrapper.getSubscriptionsDescriptor();
+        final List<Subscription> subscriptions = subscriptionsDescriptor.getSubscriptions();
         subscriptions.stream()
                 .flatMap(subscription -> generatedClassesFrom(subscriptionWrapper, subscription, commonGeneratorProperties, basePackageName))
                 .forEach(generatedClass ->
@@ -81,8 +81,8 @@ public class SubscriptionJmsEndpointGenerator implements Generator<SubscriptionW
                 .flatMap(Collection::stream)
                 .collect(toList());
 
-        final String contextName = subscriptionDescriptorDefinition.getService();
-        final String componentName = subscriptionDescriptorDefinition.getServiceComponent();
+        final String contextName = subscriptionsDescriptor.getService();
+        final String componentName = subscriptionsDescriptor.getServiceComponent();
 
         subscriptionMediaTypeToSchemaIdGenerator.generateMediaTypeToSchemaIdMapper(
                 contextName,
@@ -97,9 +97,9 @@ public class SubscriptionJmsEndpointGenerator implements Generator<SubscriptionW
                                                   final String basePackageName) {
 
         final Stream.Builder<TypeSpec> streamBuilder = Stream.builder();
-        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition = subscriptionWrapper.getSubscriptionDescriptorDefinition();
-        final String contextName = subscriptionDescriptorDefinition.getService();
-        final String componentName = subscriptionDescriptorDefinition.getServiceComponent();
+        final SubscriptionsDescriptor subscriptionsDescriptor = subscriptionWrapper.getSubscriptionsDescriptor();
+        final String contextName = subscriptionsDescriptor.getService();
+        final String componentName = subscriptionsDescriptor.getServiceComponent();
 
 
         final EventSourceDefinition eventSourceDefinition = subscriptionWrapper.getEventSourceByName(subscription.getEventSourceName());

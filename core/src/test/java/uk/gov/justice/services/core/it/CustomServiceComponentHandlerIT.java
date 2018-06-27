@@ -166,7 +166,7 @@ public class CustomServiceComponentHandlerIT {
     })
     public WebApp war() {
         return new WebApp()
-                .contextRoot("custom-component-test")
+                .contextRoot("CustomServiceComponentHandlerIT")
                 .addServlet("TestApp", Application.class.getName());
     }
 

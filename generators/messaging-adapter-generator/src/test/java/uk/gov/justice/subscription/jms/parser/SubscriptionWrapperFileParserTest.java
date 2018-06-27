@@ -19,32 +19,32 @@ public class SubscriptionWrapperFileParserTest {
     private SubscriptionWrapperFileParser subscriptionWrapperFileParser = new SubscriptionWrapperFileParserFactory().create();
 
     @Test
-    public void shouldParseEventSourceAndSubscriptionYaml() throws Exception {
+    public void shouldParseEventSourceAndSubscriptionYaml() {
 
         final Path path = getFromClasspath("");
 
         final List<Path> yamlPaths = asList(
                 getFromClasspath("yaml/event-sources.yaml"),
-                getFromClasspath("yaml/event-processor/subscription-descriptor.yaml"));
+                getFromClasspath("yaml/event-processor/subscriptions-descriptor.yaml"));
         final Collection<SubscriptionWrapper> subscriptionWrapperCollection = subscriptionWrapperFileParser.parse(path, yamlPaths);
 
         assertThat(subscriptionWrapperCollection.size(), is(1));
 
         final SubscriptionWrapper subscriptionWrapper = subscriptionWrapperCollection.iterator().next();
 
-        assertThat(subscriptionWrapper.getSubscriptionDescriptorDefinition(), is(notNullValue()));
+        assertThat(subscriptionWrapper.getSubscriptionsDescriptor(), is(notNullValue()));
         assertThat(subscriptionWrapper.getEventSourceByName("event.processor.service").getName(), is("event.processor.service"));
     }
 
     @Test
-    public void shouldThrowExceptionIfMoreThanOneEventSourcesPresent() throws Exception {
+    public void shouldThrowExceptionIfMoreThanOneEventSourcesPresent() {
         try {
             final Path path = getFromClasspath("");
 
             final List<Path> yamlPaths = asList(
                     getFromClasspath("yaml/event-sources.yaml"),
                     getFromClasspath("yaml/event-sources.yaml"),
-                    getFromClasspath("yaml/event-processor/subscription-descriptor.yaml"));
+                    getFromClasspath("yaml/event-processor/subscriptions-descriptor.yaml"));
             subscriptionWrapperFileParser.parse(path, yamlPaths);
             fail();
         } catch (final Exception expected) {

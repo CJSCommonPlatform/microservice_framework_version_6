@@ -38,12 +38,12 @@ public class ResponseStrategyCacheIT {
     })
     public WebApp war() {
         return new WebApp()
-                .contextRoot("test")
+                .contextRoot("ResponseStrategyCacheIT")
                 .addServlet("TestApp", Application.class.getName());
     }
 
     @Test
-    public void shouldReturnStrategyByName() throws Exception {
+    public void shouldReturnStrategyByName() {
 
         assertThat(responseStrategyCache.responseStrategyOf("ABC")
                 .responseFor("", empty()).getEntity(), is("Response from Strategy ABC"));
@@ -56,7 +56,7 @@ public class ResponseStrategyCacheIT {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void shouldThrowExceptionIfBeanNotFound() throws Exception {
+    public void shouldThrowExceptionIfBeanNotFound() {
         responseStrategyCache.responseStrategyOf("unknown");
 
     }

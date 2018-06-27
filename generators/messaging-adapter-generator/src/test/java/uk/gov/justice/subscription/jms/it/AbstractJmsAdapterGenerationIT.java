@@ -12,6 +12,7 @@ import java.util.Properties;
 import javax.jms.Connection;
 import javax.jms.Destination;
 import javax.jms.JMSException;
+import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
@@ -75,6 +76,18 @@ public abstract class AbstractJmsAdapterGenerationIT {
             message.setStringProperty("CPPNAME", commandName);
             try (final MessageProducer producer = session.createProducer(queue)) {
                 producer.send(message);
+            }
+        }
+    }
+
+    protected void cleanQueue(final Destination queue) throws JMSException {
+        try (final Connection connection = getConnection();
+             final Session session = connection.createSession()) {
+
+            final MessageConsumer consumer = session.createConsumer(queue);
+
+            while (consumer.receiveNoWait() != null) {
+                //Do nothing
             }
         }
     }

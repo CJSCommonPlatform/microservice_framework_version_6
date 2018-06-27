@@ -25,7 +25,7 @@ import uk.gov.justice.services.subscription.SubscriptionManager;
 import uk.gov.justice.services.subscription.annotation.SubscriptionName;
 import uk.gov.justice.subscription.ParserProducer;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
-import uk.gov.justice.subscription.registry.SubscriptionDescriptorDefinitionRegistryProducer;
+import uk.gov.justice.subscription.registry.SubscriptionsDescriptorsRegistryProducer;
 import uk.gov.justice.subscription.yaml.parser.YamlParser;
 import uk.gov.justice.subscription.yaml.parser.YamlSchemaLoader;
 
@@ -49,7 +49,7 @@ import org.junit.runner.RunWith;
         YamlSchemaLoader.class,
         ObjectMapperProducer.class,
         SubscriptionManagerProducer.class,
-        SubscriptionDescriptorDefinitionRegistryProducer.class,
+        SubscriptionsDescriptorsRegistryProducer.class,
         LoggerProducer.class,
         DispatcherFactory.class,
         JsonEnvelopeRepacker.class,

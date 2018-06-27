@@ -43,7 +43,7 @@ public class EventSourcesFileParserTest {
         final Path baseDir = Paths.get("/yaml");
 
         final Path eventSourcePath = Paths.get("event-sources.yaml");
-        final Path subscriptionDescriptorPath = Paths.get("subscription-descriptor.yaml");
+        final Path subscriptionDescriptorPath = Paths.get("subscriptions-descriptor.yaml");
         final List<Path> pathList = asList(eventSourcePath, subscriptionDescriptorPath);
 
         final URL eventSourceUrl = baseDir.resolve(eventSourcePath).toUri().toURL();

@@ -319,7 +319,7 @@
                             </outputDirectory>
                             <basePackageName>uk.gov.justice.api.subscription</basePackageName>
                             <includes>
-                                <include>**/event-listener/subscription-descriptor.yaml</include>
+                                <include>**/event-listener/subscriptions-descriptor.yaml</include>
                                 <include>**/event-sources.yaml</include>
                             </includes>
                             <generatorProperties
@@ -346,7 +346,7 @@
                             </outputDirectory>
                             <basePackageName>uk.gov.justice.api.subscription</basePackageName>
                             <includes>
-                                <include>**/custom-event-listener/subscription-descriptor.yaml
+                                <include>**/custom-event-listener/subscriptions-descriptor.yaml
                                 </include>
                                 <include>**/event-sources.yaml</include>
                             </includes>
@@ -374,7 +374,7 @@
                             </outputDirectory>
                             <basePackageName>uk.gov.justice.api.subscription</basePackageName>
                             <includes>
-                                <include>**/event-processor/subscription-descriptor.yaml</include>
+                                <include>**/event-processor/subscriptions-descriptor.yaml</include>
                                 <include>**/event-sources.yaml</include>
                             </includes>
                             <generatorProperties

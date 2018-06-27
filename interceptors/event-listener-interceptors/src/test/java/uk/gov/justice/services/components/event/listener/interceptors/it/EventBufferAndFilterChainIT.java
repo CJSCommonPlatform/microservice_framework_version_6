@@ -44,7 +44,6 @@ import uk.gov.justice.services.core.envelope.MediaTypeProvider;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.extension.ServiceComponentScanner;
-import uk.gov.justice.services.core.postgres.OpenEjbConfigurationBuilder;
 import uk.gov.justice.services.core.interceptor.InterceptorCache;
 import uk.gov.justice.services.core.interceptor.InterceptorChainEntry;
 import uk.gov.justice.services.core.interceptor.InterceptorChainEntryProvider;
@@ -64,6 +63,7 @@ import uk.gov.justice.services.core.mapping.DefaultSchemaIdMappingCache;
 import uk.gov.justice.services.core.mapping.MediaTypesMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingObserver;
+import uk.gov.justice.services.core.postgres.OpenEjbConfigurationBuilder;
 import uk.gov.justice.services.core.requester.RequesterProducer;
 import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.event.buffer.api.AbstractEventFilter;
@@ -208,7 +208,7 @@ public class EventBufferAndFilterChainIT {
     })
     public WebApp war() {
         return new WebApp()
-                .contextRoot("core-test")
+                .contextRoot("EventBufferAndFilterChainIT")
                 .addServlet("TestApp", Application.class.getName());
     }
 

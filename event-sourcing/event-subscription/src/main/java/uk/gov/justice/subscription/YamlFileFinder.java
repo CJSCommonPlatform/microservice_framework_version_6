@@ -12,24 +12,24 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 
 /**
- * Find yaml/subscription-descriptor.yaml and yaml/event-sources.yaml resources on the classpath.
+ * Find yaml/subscriptions-descriptor.yaml and yaml/event-sources.yaml resources on the classpath.
  */
 public class YamlFileFinder {
 
-    private static final String SUBSCRIPTION_FILE_NAME = "yaml/subscription-descriptor.yaml";
+    private static final String SUBSCRIPTIONS_FILE_NAME = "yaml/subscriptions-descriptor.yaml";
     private static final String EVENT_SOURCE_FILE_NAME = "yaml/event-sources.yaml";
 
     @Inject
     Logger logger;
 
     /**
-     * Find all yaml/subscription-descriptor.yaml resources on the classpath
+     * Find all yaml/subscriptions-descriptor.yaml resources on the classpath
      *
-     * @return List of subscription-descriptor.yaml URLs
+     * @return List of subscriptions-descriptor.yaml URLs
      * @throws IOException if getting the resources fails
      */
-    public List<URL> getSubscriptionDescriptorPaths() throws IOException {
-        return findOnClasspath(SUBSCRIPTION_FILE_NAME);
+    public List<URL> getSubscriptionsDescriptorsPaths() throws IOException {
+        return findOnClasspath(SUBSCRIPTIONS_FILE_NAME);
     }
 
     /**

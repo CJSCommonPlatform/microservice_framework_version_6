@@ -7,6 +7,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 import static uk.gov.justice.subscription.domain.builders.SubscriptionBuilder.subscription;
@@ -19,7 +20,7 @@ import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.subscription.SubscriptionManager;
 import uk.gov.justice.services.subscription.annotation.SubscriptionName;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
-import uk.gov.justice.subscription.registry.SubscriptionDescriptorDefinitionRegistry;
+import uk.gov.justice.subscription.registry.SubscriptionsDescriptorsRegistry;
 
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -35,19 +36,13 @@ import org.slf4j.Logger;
 public class SubscriptionManagerProducerTest {
 
     @Mock(answer = RETURNS_DEEP_STUBS)
-    private Instance<InterceptorChainProcessor> interceptorChainProcessors;
-
-    @Mock(answer = RETURNS_DEEP_STUBS)
     private Instance<EventSource> eventSourceInstance;
 
     @Mock
     private InterceptorChainProcessorProducer interceptorChainProcessorProducer;
 
     @Mock
-    private InterceptorChainProcessor interceptorChainProcessor;
-
-    @Mock
-    private SubscriptionDescriptorDefinitionRegistry subscriptionDescriptorRegistry;
+    private SubscriptionsDescriptorsRegistry subscriptionDescriptorRegistry;
 
     @Mock
     private QualifierAnnotationExtractor qualifierAnnotationExtractor;
@@ -62,7 +57,7 @@ public class SubscriptionManagerProducerTest {
     private SubscriptionManagerProducer subscriptionManagerProducer;
 
     @Test
-    public void shouldCreateSubscriptionManagerOnStartUp() throws Exception {
+    public void shouldCreateSubscriptionManagersOnStartUp() {
 
         final InjectionPoint injectionPoint = mock(InjectionPoint.class);
 
@@ -89,5 +84,6 @@ public class SubscriptionManagerProducerTest {
         final SubscriptionManager subscriptionManager = subscriptionManagerProducer.subscriptionManager(injectionPoint);
 
         assertThat(subscriptionManager, is(instanceOf(DefaultSubscriptionManager.class)));
+        verify(logger).debug("Creating subscription manager for subscription name: " + subscriptionName.value());
     }
 }

@@ -172,7 +172,7 @@ public class EventHandlerIT {
     })
     public WebApp war() {
         return new WebApp()
-                .contextRoot("core-test")
+                .contextRoot("EventHandlerIT")
                 .addServlet("TestApp", Application.class.getName());
     }
 

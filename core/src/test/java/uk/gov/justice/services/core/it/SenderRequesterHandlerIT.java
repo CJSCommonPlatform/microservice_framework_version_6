@@ -174,12 +174,12 @@ public class SenderRequesterHandlerIT {
     })
     public WebApp war() {
         return new WebApp()
-                .contextRoot("core-test")
+                .contextRoot("SenderRequesterHandlerIT")
                 .addServlet("TestApp", Application.class.getName());
     }
 
     @Test
-    public void shouldSendToCorrectSenderWithFieldLevelServiceComponentAnnotation() throws Exception {
+    public void shouldSendToCorrectSenderWithFieldLevelServiceComponentAnnotation() {
         UUID metadataId = randomUUID();
         commandControllerSender.send(envelopeFrom(
                 metadataBuilder().withId(metadataId).withName("contexta.command.aaa"),
@@ -193,7 +193,7 @@ public class SenderRequesterHandlerIT {
     }
 
     @Test
-    public void shouldSendToCorrectRequesterWithFieldLevelServiceComponentAnnotation() throws Exception {
+    public void shouldSendToCorrectRequesterWithFieldLevelServiceComponentAnnotation() {
         UUID metadataId = randomUUID();
         final JsonEnvelope response = queryControllerRequester.request(envelopeFrom(
                 metadataBuilder().withId(metadataId).withName("contexta.query.aaa"),

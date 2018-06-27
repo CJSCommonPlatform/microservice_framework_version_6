@@ -1,14 +1,14 @@
 package uk.gov.justice.subscription.jms.it;
 
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import uk.gov.justice.api.subscription.Service2EventListenerPeopleEventEventFilter;
-import uk.gov.justice.api.subscription.Service2EventListenerPeopleEventEventValidationInterceptor;
-import uk.gov.justice.api.subscription.Service2EventListenerPeopleEventJmsListener;
+import uk.gov.justice.api.subscription.Service2EventListenerAnotherPeopleEventEventFilter;
+import uk.gov.justice.api.subscription.Service2EventListenerAnotherPeopleEventEventValidationInterceptor;
+import uk.gov.justice.api.subscription.Service2EventListenerAnotherPeopleEventJmsListener;
 import uk.gov.justice.api.subscription.Service2EventProcessorStructureEventJmsListener;
-import uk.gov.justice.raml.jms.it.AbstractJmsAdapterGenerationIT;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsParameterChecker;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsProcessor;
 import uk.gov.justice.services.adapter.messaging.DefaultSubscriptionJmsProcessor;
@@ -80,6 +80,7 @@ import org.apache.openejb.jee.WebApp;
 import org.apache.openejb.junit.ApplicationComposer;
 import org.apache.openejb.testing.Classes;
 import org.apache.openejb.testing.Module;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -95,16 +96,16 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
     @Resource(name = "structure.event")
     private Topic structureEventsDestination;
 
-    @Resource(name = "people.event")
+    @Resource(name = "another.people.event")
     private Topic peopleEventsDestination;
 
     @Module
     @Classes(cdi = true, value = {
             DefaultJmsProcessor.class,
             Service2EventProcessorStructureEventJmsListener.class,
-            Service2EventListenerPeopleEventJmsListener.class,
-            Service2EventListenerPeopleEventEventFilter.class,
-            Service2EventListenerPeopleEventEventValidationInterceptor.class,
+            Service2EventListenerAnotherPeopleEventJmsListener.class,
+            Service2EventListenerAnotherPeopleEventEventFilter.class,
+            Service2EventListenerAnotherPeopleEventEventValidationInterceptor.class,
 
             RecordingJsonSchemaValidator.class,
 
@@ -173,7 +174,13 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
     })
     public WebApp war() {
         return new WebApp()
-                .contextRoot("jms-endpoint-test");
+                .contextRoot("subscription.JmsEndpointGenerationIT");
+    }
+
+    @Before
+    public void setup() throws Exception {
+        cleanQueue(peopleEventsDestination);
+        cleanQueue(structureEventsDestination);
     }
 
     @Test
@@ -184,7 +191,7 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
         //which means the message sent to the topic is lost, which in turn causes this test to fail occasionally.
         //Delaying test execution (Thread.sleep) mitigates the issue.
         //TODO: check OpenEJB code and investigate if we can't fix the issue.
-        final String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d30";
+        final String metadataId = randomUUID().toString();
         final String eventName = "structure.eventbb";
 
         sendEnvelope(metadataId, eventName, structureEventsDestination);
@@ -198,7 +205,7 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
     @Test
     public void eventListenerDispatcherShouldNotReceiveAnEventUnspecifiedInMessageSelector() throws JMSException {
 
-        final String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d21";
+        final String metadataId = randomUUID().toString();
         final String commandName = "structure.eventcc";
 
         sendEnvelope(metadataId, commandName, structureEventsDestination);
@@ -208,7 +215,7 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
     @Test
     public void eventListenerDispatcherShouldReceiveAnEventSpecifiedInMessageSelector() throws JMSException {
 
-        final String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d21";
+        final String metadataId = randomUUID().toString();
         final String eventName = "people.eventaa";
 
         sendEnvelope(metadataId, eventName, peopleEventsDestination);

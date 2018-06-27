@@ -45,8 +45,8 @@ import uk.gov.justice.services.core.mapping.ActionNameToMediaTypesMappingObserve
 import uk.gov.justice.services.core.mapping.DefaultMediaTypesMappingCache;
 import uk.gov.justice.services.core.mapping.DefaultNameToMediaTypeConverter;
 import uk.gov.justice.services.core.mapping.DefaultSchemaIdMappingCache;
-import uk.gov.justice.services.core.mapping.MediaTypesMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.MediaTypeToSchemaIdMapper;
+import uk.gov.justice.services.core.mapping.MediaTypesMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingObserver;
 import uk.gov.justice.services.generators.test.utils.interceptor.RecordingInterceptorChainProcessor;
@@ -178,8 +178,8 @@ public class DefaultCustomUserIdResourceIT {
     public WebApp war() {
         return new WebApp()
                 .contextRoot("rest-adapter-generator")
-                .addServlet("TestApp", Application.class.getName())
-                .addInitParam("TestApp", "javax.ws.rs.Application", CustomApiRestExampleApplication.class.getName());
+                .addServlet("DefaultCustomUserIdResourceIT", Application.class.getName())
+                .addInitParam("DefaultCustomUserIdResourceIT", "javax.ws.rs.Application", CustomApiRestExampleApplication.class.getName());
     }
 
     @Test

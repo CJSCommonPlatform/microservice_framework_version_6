@@ -52,8 +52,8 @@ import uk.gov.justice.services.core.mapping.ActionNameToMediaTypesMappingObserve
 import uk.gov.justice.services.core.mapping.DefaultMediaTypesMappingCache;
 import uk.gov.justice.services.core.mapping.DefaultNameToMediaTypeConverter;
 import uk.gov.justice.services.core.mapping.DefaultSchemaIdMappingCache;
-import uk.gov.justice.services.core.mapping.MediaTypesMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.MediaTypeToSchemaIdMapper;
+import uk.gov.justice.services.core.mapping.MediaTypesMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingObserver;
 import uk.gov.justice.services.generators.test.utils.interceptor.RecordingInterceptorChainProcessor;
@@ -199,8 +199,8 @@ public class DefaultUsersUserIdResourceIT {
     public WebApp war() {
         return new WebApp()
                 .contextRoot("rest-adapter-generator")
-                .addServlet("TestApp", Application.class.getName())
-                .addInitParam("TestApp", "javax.ws.rs.Application", QueryApiRestExampleApplication.class.getName());
+                .addServlet("DefaultUsersUserIdResourceIT", Application.class.getName())
+                .addInitParam("DefaultUsersUserIdResourceIT", "javax.ws.rs.Application", QueryApiRestExampleApplication.class.getName());
     }
 
     @Test
@@ -454,7 +454,7 @@ public class DefaultUsersUserIdResourceIT {
         assertThat(commonProviders.getClass() == DummyCommonProviders.class, is(true));
     }
 
-    private HttpGet getRequestFor(final String uri, final String accept) throws UnsupportedEncodingException {
+    private HttpGet getRequestFor(final String uri, final String accept) {
         final HttpGet request = new HttpGet(BASE_URI + uri);
         request.setHeader("Accept", accept);
         return request;
@@ -499,7 +499,7 @@ public class DefaultUsersUserIdResourceIT {
         return request;
     }
 
-    private HttpDelete deleteRequestFor(final String uri, final String contentType) throws UnsupportedEncodingException {
+    private HttpDelete deleteRequestFor(final String uri, final String contentType) {
         final HttpDelete request = new HttpDelete(BASE_URI + uri);
         request.setHeader("Content-Type", contentType);
         return request;

@@ -3,18 +3,18 @@ package uk.gov.justice.subscription.registry;
 import static java.lang.String.format;
 
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
-import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptorDefinition;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionsDescriptor;
 
 import java.util.Collection;
 import java.util.Set;
 /**
- * Registry containing {@link SubscriptionDescriptorDefinition}s set
+ * Registry containing {@link SubscriptionsDescriptor}s set
  */
-public class SubscriptionDescriptorDefinitionRegistry {
-    private final Set<SubscriptionDescriptorDefinition> registry;
+public class SubscriptionsDescriptorsRegistry {
+    private final Set<SubscriptionsDescriptor> registry;
 
-    public SubscriptionDescriptorDefinitionRegistry(final Set<SubscriptionDescriptorDefinition> subscriptionDescriptorDefinitions) {
-        this.registry = subscriptionDescriptorDefinitions;
+    public SubscriptionsDescriptorsRegistry(final Set<SubscriptionsDescriptor> subscriptionsDescriptors) {
+        this.registry = subscriptionsDescriptors;
     }
     /**
      * Return a {@link Subscription} mapped to a subscription name
@@ -24,7 +24,7 @@ public class SubscriptionDescriptorDefinitionRegistry {
      */
     public Subscription getSubscriptionFor(final String subscriptionName) {
         return registry.stream()
-                .map(SubscriptionDescriptorDefinition::getSubscriptions)
+                .map(SubscriptionsDescriptor::getSubscriptions)
                 .flatMap(Collection::stream)
                 .filter(subscription -> subscription.getName().equals(subscriptionName))
                 .findFirst()
@@ -38,7 +38,7 @@ public class SubscriptionDescriptorDefinitionRegistry {
      * @return subscription component name
      */
     public String findComponentNameBy(final String subscriptionName) {
-        final SubscriptionDescriptorDefinition first = registry
+        final SubscriptionsDescriptor first = registry
                 .stream()
                 .filter(subscriptionDescriptorDefinition -> isSubscriptionNameExist(subscriptionName, subscriptionDescriptorDefinition))
                 .findFirst()
@@ -46,14 +46,14 @@ public class SubscriptionDescriptorDefinitionRegistry {
         return first.getServiceComponent();
     }
 
-    private boolean isSubscriptionNameExist(final String subscriptionName, final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition) {
-        return subscriptionDescriptorDefinition
+    private boolean isSubscriptionNameExist(final String subscriptionName, final SubscriptionsDescriptor subscriptionsDescriptor) {
+        return subscriptionsDescriptor
                 .getSubscriptions()
                 .stream()
-                .anyMatch(subscription1 -> subscription1.getName().equals(subscriptionName));
+                .anyMatch(subscription -> subscription.getName().equals(subscriptionName));
     }
 
-    public Set<SubscriptionDescriptorDefinition> subscriptionDescriptorDefinitions() {
+    public Set<SubscriptionsDescriptor> subscriptionsDescriptors() {
         return registry;
     }
 }

@@ -32,7 +32,6 @@ import uk.gov.justice.services.core.cdi.InitialContextProducer;
 import uk.gov.justice.services.core.cdi.QualifierAnnotationExtractor;
 import uk.gov.justice.services.core.enveloper.DefaultEnveloper;
 import uk.gov.justice.services.core.json.DefaultJsonValidationLoggerHelper;
-import uk.gov.justice.services.core.postgres.OpenEjbConfigurationBuilder;
 import uk.gov.justice.services.eventsource.DefaultEventDestinationResolver;
 import uk.gov.justice.services.eventsourcing.publisher.jms.EventPublisher;
 import uk.gov.justice.services.eventsourcing.publisher.jms.JmsEventPublisher;
@@ -90,7 +89,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 import com.jayway.jsonpath.JsonPath;
@@ -138,7 +136,7 @@ public class EventsPageIT {
     private EventJdbcRepository eventsRepository;
 
     @BeforeClass
-    public static void beforeClass() throws NamingException {
+    public static void beforeClass() {
         port = NetworkUtil.getNextAvailablePort();
     }
 
@@ -231,8 +229,8 @@ public class EventsPageIT {
     public WebApp war() {
         return new WebApp()
                 .contextRoot("event-source-api")
-                .addServlet("TestApp", Application.class.getName())
-                .addInitParam("TestApp", "javax.ws.rs.Application", EventSourceApiApplication.class.getName());
+                .addServlet("EventsPageIT", Application.class.getName())
+                .addInitParam("EventsPageIT", "javax.ws.rs.Application", EventSourceApiApplication.class.getName());
     }
 
     @Test

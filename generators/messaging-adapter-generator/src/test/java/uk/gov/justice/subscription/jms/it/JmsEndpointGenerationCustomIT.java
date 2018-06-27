@@ -1,5 +1,6 @@
 package uk.gov.justice.subscription.jms.it;
 
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -13,7 +14,6 @@ import uk.gov.justice.api.subscription.CustomEventListenerPeopleEventEventFilter
 import uk.gov.justice.api.subscription.CustomEventListenerPeopleEventEventListenerInterceptorChainProvider;
 import uk.gov.justice.api.subscription.CustomEventListenerPeopleEventEventValidationInterceptor;
 import uk.gov.justice.api.subscription.CustomEventListenerPeopleEventJmsListener;
-import uk.gov.justice.raml.jms.it.AbstractJmsAdapterGenerationIT;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsParameterChecker;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsProcessor;
 import uk.gov.justice.services.adapter.messaging.DefaultSubscriptionJmsProcessor;
@@ -84,6 +84,7 @@ import org.apache.openejb.jee.WebApp;
 import org.apache.openejb.junit.ApplicationComposer;
 import org.apache.openejb.testing.Classes;
 import org.apache.openejb.testing.Module;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -175,7 +176,7 @@ public class JmsEndpointGenerationCustomIT extends AbstractJmsAdapterGenerationI
     })
     public WebApp war() {
         return new WebApp()
-                .contextRoot("jms-endpoint-test");
+                .contextRoot("subscription.JmsEndpointGenerationCustomIT");
     }
 
     @Inject
@@ -187,10 +188,16 @@ public class JmsEndpointGenerationCustomIT extends AbstractJmsAdapterGenerationI
     @Resource(name = "example.event")
     private Topic exampleEventDestination;
 
+    @Before
+    public void setup() throws Exception {
+        cleanQueue(peopleEventsDestination);
+        cleanQueue(exampleEventDestination);
+    }
+
     @Test
     public void eventListenerDispatcherShouldReceiveCustomEventSpecifiedInMessageSelector() throws Exception {
 
-        final String metadataId = "861c9430-7bc6-4bf0-b549-6534b3457c56";
+        final String metadataId = randomUUID().toString();
         final String eventName = "people.eventbb";
 
         sendEnvelope(metadataId, eventName, peopleEventsDestination);
@@ -203,7 +210,7 @@ public class JmsEndpointGenerationCustomIT extends AbstractJmsAdapterGenerationI
     @Test
     public void eventListenerDispatcherShouldReceiveCustomExampleEventSpecifiedInMessageSelector() throws Exception {
 
-        final String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d61";
+        final String metadataId = randomUUID().toString();
         final String eventName = "example.eventaa";
 
         sendEnvelope(metadataId, eventName, exampleEventDestination);

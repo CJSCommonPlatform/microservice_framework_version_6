@@ -14,10 +14,10 @@ public class PathToUrlResolverTest {
     @Test
     public void shouldResolvePathToUrl() {
         final Path baseDir = Paths.get("/yaml");
-        final Path path = Paths.get("subscription-descriptor.yaml");
+        final Path path = Paths.get("subscriptions-descriptor.yaml");
 
         final URL url = new PathToUrlResolver().resolveToUrl(baseDir, path);
 
-        assertThat(url.toString(), is("file:/yaml/subscription-descriptor.yaml"));
+        assertThat(url.toString(), is("file:/yaml/subscriptions-descriptor.yaml"));
     }
 }

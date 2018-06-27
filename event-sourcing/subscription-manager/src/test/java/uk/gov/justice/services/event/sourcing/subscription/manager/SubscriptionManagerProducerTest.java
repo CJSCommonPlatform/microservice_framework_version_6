@@ -19,7 +19,7 @@ import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.subscription.SubscriptionManager;
 import uk.gov.justice.services.subscription.annotation.SubscriptionName;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
-import uk.gov.justice.subscription.registry.SubscriptionDescriptorDefinitionRegistry;
+import uk.gov.justice.subscription.registry.SubscriptionsDescriptorsRegistry;
 
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -35,19 +35,13 @@ import org.slf4j.Logger;
 public class SubscriptionManagerProducerTest {
 
     @Mock(answer = RETURNS_DEEP_STUBS)
-    private Instance<InterceptorChainProcessor> interceptorChainProcessors;
-
-    @Mock(answer = RETURNS_DEEP_STUBS)
     private Instance<EventSource> eventSourceInstance;
 
     @Mock
     private InterceptorChainProcessorProducer interceptorChainProcessorProducer;
 
     @Mock
-    private InterceptorChainProcessor interceptorChainProcessor;
-
-    @Mock
-    private SubscriptionDescriptorDefinitionRegistry subscriptionDescriptorRegistry;
+    private SubscriptionsDescriptorsRegistry subscriptionDescriptorRegistry;
 
     @Mock
     private QualifierAnnotationExtractor qualifierAnnotationExtractor;
@@ -62,7 +56,7 @@ public class SubscriptionManagerProducerTest {
     private SubscriptionManagerProducer subscriptionManagerProducer;
 
     @Test
-    public void shouldCreateSubscriptionManagerOnStartUp() throws Exception {
+    public void shouldCreateSubscriptionManagersOnStartUp() {
 
         final InjectionPoint injectionPoint = mock(InjectionPoint.class);
 

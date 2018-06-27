@@ -21,7 +21,7 @@ event_sources:
 
 - name: event.listener.service
   location:
-    jms_uri:  jms:topic:people.event
+    jms_uri:  jms:topic:another.people.event
     rest_uri: http://localhost:8080/example/event-source-api/rest
 
 - name: event.processor.service

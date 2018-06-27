@@ -12,8 +12,8 @@ import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.subscription.SubscriptionManager;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
-import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptorDefinition;
-import uk.gov.justice.subscription.registry.SubscriptionDescriptorDefinitionRegistry;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionsDescriptor;
+import uk.gov.justice.subscription.registry.SubscriptionsDescriptorsRegistry;
 
 import java.util.List;
 
@@ -33,9 +33,9 @@ public class SubscriptionManagerStartUpTest {
     private Instance<SubscriptionManager> subscriptionManagerBeans;
 
     @Mock
-    private SubscriptionDescriptorDefinitionRegistry descriptorRegistry;
+    private SubscriptionsDescriptorsRegistry descriptorRegistry;
     @Mock
-    private SubscriptionDescriptorDefinition descriptor;
+    private SubscriptionsDescriptor descriptor;
 
     @InjectMocks
     private SubscriptionManagerStartUp subscriptionManagerStartUp;
@@ -45,7 +45,7 @@ public class SubscriptionManagerStartUpTest {
 
         final SubscriptionManager subscriptionManager = mock(SubscriptionManager.class);
 
-        when(descriptorRegistry.subscriptionDescriptorDefinitions()).thenReturn(Sets.newHashSet(descriptor));
+        when(descriptorRegistry.subscriptionsDescriptors()).thenReturn(Sets.newHashSet(descriptor));
         when(descriptor.getSubscriptions()).thenReturn(asList(mock(Subscription.class)));
         when(subscriptionManagerBeans.select(any(SubscriptionNameQualifier.class)).get()).thenReturn(subscriptionManager);
 
@@ -59,7 +59,7 @@ public class SubscriptionManagerStartUpTest {
 
         List<SubscriptionManager> subscriptionManagers = asList(mock(SubscriptionManager.class), mock(SubscriptionManager.class));
 
-        when(descriptorRegistry.subscriptionDescriptorDefinitions()).thenReturn(Sets.newHashSet(descriptor));
+        when(descriptorRegistry.subscriptionsDescriptors()).thenReturn(Sets.newHashSet(descriptor));
         when(descriptor.getSubscriptions()).thenReturn(asList(mock(Subscription.class), mock(Subscription.class)));
 
         when(subscriptionManagerBeans.select(any(SubscriptionNameQualifier.class)).get())
@@ -75,7 +75,7 @@ public class SubscriptionManagerStartUpTest {
     @Test
     public void shouldDoNothingWhenNoSubscriptionsExist() {
 
-        when(descriptorRegistry.subscriptionDescriptorDefinitions()).thenReturn(Sets.newHashSet(descriptor));
+        when(descriptorRegistry.subscriptionsDescriptors()).thenReturn(Sets.newHashSet(descriptor));
         when(descriptor.getSubscriptions()).thenReturn(EMPTY_LIST);
 
         subscriptionManagerStartUp.start();

@@ -165,7 +165,7 @@ public class AllEventsHandlerIT {
     })
     public WebApp war() {
         return new WebApp()
-                .contextRoot("core-test")
+                .contextRoot("AllEventsHandlerIT")
                 .addServlet("TestApp", Application.class.getName());
     }
 

@@ -7,7 +7,7 @@ import static uk.gov.justice.subscription.domain.builders.EventBuilder.event;
 import static uk.gov.justice.subscription.domain.builders.EventSourceDefinitionBuilder.eventSourceDefinition;
 import static uk.gov.justice.subscription.domain.builders.LocationBuilder.location;
 import static uk.gov.justice.subscription.domain.builders.SubscriptionBuilder.subscription;
-import static uk.gov.justice.subscription.domain.builders.SubscriptionDescriptorDefinitionBuilder.subscriptionDescriptorDefinition;
+import static uk.gov.justice.subscription.domain.builders.SubscriptionsDescriptorBuilder.subscriptionsDescriptor;
 
 import uk.gov.justice.maven.generator.io.files.parser.core.GeneratorProperties;
 import uk.gov.justice.raml.jms.config.GeneratorPropertiesFactory;
@@ -15,7 +15,7 @@ import uk.gov.justice.services.generators.commons.config.CommonGeneratorProperti
 import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Event;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
-import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptorDefinition;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionsDescriptor;
 import uk.gov.justice.subscription.jms.parser.SubscriptionWrapper;
 
 import java.util.List;
@@ -33,7 +33,7 @@ public class MessageListenerCodeGeneratorTest {
     private MessageListenerCodeGenerator messageListenerCodeGenerator;
 
     @Test
-    public void shouldGenerateMDBForTopic() throws Exception {
+    public void shouldGenerateMDBForTopic() {
         final String basePackageName = "uk.gov.moj.base.package.name";
         final String serviceName = "my-context";
         final String componentName = "EVENT_LISTENER";
@@ -67,14 +67,14 @@ public class MessageListenerCodeGeneratorTest {
                 .withEventSourceName("eventsource")
                 .build();
 
-        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition = subscriptionDescriptorDefinition()
+        final SubscriptionsDescriptor subscriptionsDescriptor = subscriptionsDescriptor()
                 .withSpecVersion("1.0.0")
                 .withService(serviceName)
                 .withServiceComponent(componentName)
                 .withSubscription(subscription)
                 .build();
 
-        final SubscriptionWrapper subscriptionWrapper = new SubscriptionWrapper(subscriptionDescriptorDefinition, eventSourceDefinitions);
+        final SubscriptionWrapper subscriptionWrapper = new SubscriptionWrapper(subscriptionsDescriptor, eventSourceDefinitions);
 
         final ClassNameFactory classNameFactory = new ClassNameFactory(
                 basePackageName,
@@ -121,7 +121,7 @@ public class MessageListenerCodeGeneratorTest {
     }
 
     @Test
-    public void shouldGenerateMDBForCommandHandlerQueue() throws Exception {
+    public void shouldGenerateMDBForCommandHandlerQueue() {
         final String basePackageName = "uk.gov.moj.base.package.name";
         final String serviceName = "my-context";
         final String componentName = "COMMAND_HANDLER";
@@ -154,7 +154,7 @@ public class MessageListenerCodeGeneratorTest {
                 .withEventSourceName("eventSource")
                 .build();
 
-        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition = subscriptionDescriptorDefinition()
+        final SubscriptionsDescriptor subscriptionsDescriptor = subscriptionsDescriptor()
                 .withSpecVersion("1.0.0")
                 .withService(serviceName)
                 .withServiceComponent(componentName)
@@ -169,7 +169,7 @@ public class MessageListenerCodeGeneratorTest {
 
         final GeneratorProperties generatorProperties = new GeneratorPropertiesFactory().withServiceComponentOf(componentName);
 
-        final SubscriptionWrapper subscriptionWrapper = new SubscriptionWrapper(subscriptionDescriptorDefinition, eventSourceDefinitions);
+        final SubscriptionWrapper subscriptionWrapper = new SubscriptionWrapper(subscriptionsDescriptor, eventSourceDefinitions);
 
         final TypeSpec typeSpec = messageListenerCodeGenerator.generate(subscriptionWrapper, subscription, (CommonGeneratorProperties) generatorProperties, classNameFactory);
 
@@ -205,7 +205,7 @@ public class MessageListenerCodeGeneratorTest {
     }
 
     @Test
-    public void shouldGenerateMDBForQueue() throws Exception {
+    public void shouldGenerateMDBForQueue() {
         final String basePackageName = "uk.gov.moj.base.package.name";
         final String serviceName = "my-context";
         final String componentName = "COMMAND_API";
@@ -238,7 +238,7 @@ public class MessageListenerCodeGeneratorTest {
                 .withEventSourceName("eventsource")
                 .build();
 
-        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition = subscriptionDescriptorDefinition()
+        final SubscriptionsDescriptor subscriptionsDescriptor = subscriptionsDescriptor()
                 .withSpecVersion("1.0.0")
                 .withService(serviceName)
                 .withServiceComponent(componentName)
@@ -253,7 +253,7 @@ public class MessageListenerCodeGeneratorTest {
 
         final GeneratorProperties generatorProperties = new GeneratorPropertiesFactory().withServiceComponentOf("COMMAND_API");
 
-        final SubscriptionWrapper subscriptionWrapper = new SubscriptionWrapper(subscriptionDescriptorDefinition, eventSourceDefinitions);
+        final SubscriptionWrapper subscriptionWrapper = new SubscriptionWrapper(subscriptionsDescriptor, eventSourceDefinitions);
 
         final TypeSpec typeSpec = messageListenerCodeGenerator.generate(subscriptionWrapper, subscription, (CommonGeneratorProperties) generatorProperties, classNameFactory);
 

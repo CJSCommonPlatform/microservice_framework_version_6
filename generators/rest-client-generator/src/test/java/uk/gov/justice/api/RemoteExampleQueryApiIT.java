@@ -204,12 +204,12 @@ public class RemoteExampleQueryApiIT {
     })
     public WebApp war() {
         return new WebApp()
-                .contextRoot("rest-client-generator")
+                .contextRoot("RemoteExampleQueryApiIT")
                 .addServlet("TestApp", Application.class.getName());
     }
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
 
         stubFor(get(urlEqualTo(BASE_PATH + format("/users/%s", USER_ID)))
                 .withHeader("Accept", equalTo(MIME_TYPE))

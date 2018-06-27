@@ -31,19 +31,19 @@ public class SynchronousDirectAdapterCacheIT {
     })
     public WebApp war() {
         return new WebApp()
-                .contextRoot("test")
+                .contextRoot("SynchronousDirectAdapterCacheIT")
                 .addServlet("TestApp", Application.class.getName());
     }
 
     @Test
-    public void shouldProduceAdapterBasingOnServiceComponentAnnotation() throws Exception {
+    public void shouldProduceAdapterBasingOnServiceComponentAnnotation() {
         assertThat(adapterCache.directAdapterForComponent("COMPONENT_ABC"), instanceOf(DirectAdapterAbc.class));
         assertThat(adapterCache.directAdapterForComponent("COMPONENT_BCD"), instanceOf(DirectAdapterBcd.class));
 
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void shouldThrowExceptionIfBeanNotFound() throws Exception {
+    public void shouldThrowExceptionIfBeanNotFound() {
         adapterCache.directAdapterForComponent("UNKNOWN");
     }
 

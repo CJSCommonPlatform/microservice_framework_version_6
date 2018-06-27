@@ -1,5 +1,5 @@
 ---
-subscription_descriptor:
+subscriptions_descriptor:
   service: examplecontext
   service_component: EVENT_LISTENER
   subscriptions:

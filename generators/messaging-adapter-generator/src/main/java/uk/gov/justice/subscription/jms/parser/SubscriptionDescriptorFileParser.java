@@ -2,7 +2,7 @@ package uk.gov.justice.subscription.jms.parser;
 
 import static java.util.stream.Collectors.toList;
 
-import uk.gov.justice.subscription.SubscriptionDescriptorsParser;
+import uk.gov.justice.subscription.SubscriptionsDescriptorParser;
 import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 
 import java.net.URL;
@@ -13,12 +13,12 @@ import java.util.function.Predicate;
 
 public class SubscriptionDescriptorFileParser {
 
-    private final SubscriptionDescriptorsParser subscriptionDescriptorsParser;
+    private final SubscriptionsDescriptorParser subscriptionsDescriptorParser;
     private final PathToUrlResolver pathToUrlResolver;
 
-    public SubscriptionDescriptorFileParser(final SubscriptionDescriptorsParser subscriptionDescriptorsParser,
+    public SubscriptionDescriptorFileParser(final SubscriptionsDescriptorParser subscriptionsDescriptorParser,
                                             final PathToUrlResolver pathToUrlResolver) {
-        this.subscriptionDescriptorsParser = subscriptionDescriptorsParser;
+        this.subscriptionsDescriptorParser = subscriptionsDescriptorParser;
         this.pathToUrlResolver = pathToUrlResolver;
     }
 
@@ -30,7 +30,7 @@ public class SubscriptionDescriptorFileParser {
                 .map(path -> pathToUrlResolver.resolveToUrl(baseDir, path))
                 .collect(toList());
 
-        return subscriptionDescriptorsParser.getSubscriptionDescriptorsFrom(subscriptionPaths)
+        return subscriptionsDescriptorParser.getSubscriptionDescriptorsFrom(subscriptionPaths)
                 .map(subscriptionDescriptor -> new SubscriptionWrapper(subscriptionDescriptor, eventSourceDefinitionDefinitions))
                 .collect(toList());
     }

@@ -225,8 +225,8 @@ public class EventStreamPageIT {
     public WebApp war() {
         return new WebApp()
                 .contextRoot("event-source-api")
-                .addServlet("TestApp", Application.class.getName())
-                .addInitParam("TestApp", "javax.ws.rs.Application", EventSourceApiApplication.class.getName());
+                .addServlet("EventStreamPageITApp", Application.class.getName())
+                .addInitParam("EventStreamPageITApp", "javax.ws.rs.Application", EventSourceApiApplication.class.getName());
     }
 
     @Test

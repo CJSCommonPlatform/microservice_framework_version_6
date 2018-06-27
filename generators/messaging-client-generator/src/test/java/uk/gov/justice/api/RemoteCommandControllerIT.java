@@ -139,7 +139,7 @@ public class RemoteCommandControllerIT {
     })
     public WebApp war() {
         return new WebApp()
-                .contextRoot("jms-endpoint-test");
+                .contextRoot("RemoteCommandControllerIT");
     }
 
     @Configuration
@@ -151,12 +151,12 @@ public class RemoteCommandControllerIT {
     }
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         envelopeSender.init();
     }
 
     @Test
-    public void shouldPassEnvelopeToEnvelopeSender() throws Exception {
+    public void shouldPassEnvelopeToEnvelopeSender() {
         final UUID id = randomUUID();
         final String userId = "userId1234";
         sender.send(envelope()
@@ -172,7 +172,7 @@ public class RemoteCommandControllerIT {
     }
 
     @Test
-    public void shouldPassEnvelopeWithSystemUserIdToEnvelopeSender() throws Exception {
+    public void shouldPassEnvelopeWithSystemUserIdToEnvelopeSender() {
         final UUID id = randomUUID();
         final String userId = "userId1235";
         sender.sendAsAdmin(envelope()

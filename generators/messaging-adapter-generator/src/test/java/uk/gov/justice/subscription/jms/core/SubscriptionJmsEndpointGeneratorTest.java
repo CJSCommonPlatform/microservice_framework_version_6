@@ -18,7 +18,6 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.StringStartsWith.startsWith;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -34,7 +33,7 @@ import static uk.gov.justice.subscription.domain.builders.EventBuilder.event;
 import static uk.gov.justice.subscription.domain.builders.EventSourceDefinitionBuilder.eventSourceDefinition;
 import static uk.gov.justice.subscription.domain.builders.LocationBuilder.location;
 import static uk.gov.justice.subscription.domain.builders.SubscriptionBuilder.subscription;
-import static uk.gov.justice.subscription.domain.builders.SubscriptionDescriptorDefinitionBuilder.subscriptionDescriptorDefinition;
+import static uk.gov.justice.subscription.domain.builders.SubscriptionsDescriptorBuilder.subscriptionsDescriptor;
 
 import uk.gov.justice.maven.generator.io.files.parser.core.Generator;
 import uk.gov.justice.maven.generator.io.files.parser.core.GeneratorProperties;
@@ -51,7 +50,7 @@ import uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtility;
 import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Event;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
-import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptorDefinition;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionsDescriptor;
 import uk.gov.justice.subscription.jms.parser.SubscriptionWrapper;
 
 import java.io.File;
@@ -112,13 +111,13 @@ public class SubscriptionJmsEndpointGeneratorTest {
     private final String componentName = "EVENT_PROCESSOR";
 
     @Before
-    public void setup() throws Exception {
+    public void setup() {
         generator = new JmsEndpointGenerationObjects().subscriptionJmsEndpointGenerator();
         generatorProperties = new GeneratorPropertiesFactory().withDefaultServiceComponent();
     }
 
     @Test
-    public void shouldCreateJmsClass() throws Exception {
+    public void shouldCreateJmsClass() {
         final SubscriptionWrapper subscriptionWrapper = setUpMessageSubscription("jms:topic:structure.controller.command", "my-context.events.something-happened", serviceName, componentName);
         generator.run(subscriptionWrapper,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
@@ -129,7 +128,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
     }
 
     @Test
-    public void shouldCreateClassContainsHyphens() throws Exception {
+    public void shouldCreateClassContainsHyphens() {
         final SubscriptionWrapper subscriptionWrapper = setUpMessageSubscription("jms:topic:structure.event", "some event", "context-with-hyphens", componentName);
 
         generator.run(subscriptionWrapper,
@@ -146,7 +145,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void shouldCreateMultipleJmsClasses() throws Exception {
+    public void shouldCreateMultipleJmsClasses() {
 
         final String structureJmsUri = "jms:topic:structure.controller.command";
         final String peopleJmsUri = "jms:topic:people.controller.command";
@@ -184,7 +183,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
                 .withEventSourceName("eventSource2")
                 .build();
 
-        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition = subscriptionDescriptorDefinition()
+        final SubscriptionsDescriptor subscriptionsDescriptor = subscriptionsDescriptor()
                 .withSpecVersion("1.0.0")
                 .withService(serviceName)
                 .withServiceComponent(componentName)
@@ -192,7 +191,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
                 .withSubscription(subscription2)
                 .build();
 
-        final SubscriptionWrapper subscriptionWrapper = new SubscriptionWrapper(subscriptionDescriptorDefinition, asList(eventsourceDefinition, eventsourceDefinition2));
+        final SubscriptionWrapper subscriptionWrapper = new SubscriptionWrapper(subscriptionsDescriptor, asList(eventsourceDefinition, eventsourceDefinition2));
         generator.run(subscriptionWrapper,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
@@ -221,7 +220,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
     }
 
     @Test
-    public void shouldCreateJmsEndpointNamedAfterTopic() throws Exception {
+    public void shouldCreateJmsEndpointNamedAfterTopic() {
         final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.controller.command", "my-context.events.something-happened", serviceName, componentName);
 
         generator.run(subscriptionDescriptor,
@@ -258,7 +257,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
     }
 
     @Test
-    public void shouldCreateJmsEndpointInADifferentPackage() throws Exception {
+    public void shouldCreateJmsEndpointInADifferentPackage() {
         final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.controller.command", "my-context.events.something-happened", serviceName, componentName);
 
         generator.run(subscriptionDescriptor,
@@ -274,7 +273,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
     }
 
     @Test
-    public void shouldCreateJmsEventProcessorNamedAfterDestinationNameAndContextName() throws Exception {
+    public void shouldCreateJmsEventProcessorNamedAfterDestinationNameAndContextName() {
         final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.event", "some event", "context", componentName);
 
 
@@ -291,7 +290,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
     }
 
     @Test
-    public void shouldCreateJmsEndpointAnnotatedWithCommandHandlerAdapter() throws Exception {
+    public void shouldCreateJmsEndpointAnnotatedWithCommandHandlerAdapter() {
         final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.some.queue", "people.abc", "abc", "COMMAND_HANDLER");
 
         generator.run(subscriptionDescriptor,
@@ -309,7 +308,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
     }
 
     @Test
-    public void shouldCreateJmsEndpointAnnotatedWithControllerCommandAdapter() throws Exception {
+    public void shouldCreateJmsEndpointAnnotatedWithControllerCommandAdapter() {
         final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.some.query", "people.abc", "abc", "COMMAND_CONTROLLER");
 
         generator.run(subscriptionDescriptor,
@@ -328,7 +327,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
     }
 
     @Test
-    public void shouldCreateJmsEndpointAnnotatedWithEventListenerAdapter() throws Exception {
+    public void shouldCreateJmsEndpointAnnotatedWithEventListenerAdapter() {
         final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.event", "people.abc", "people", "EVENT_LISTENER");
 
         generator.run(subscriptionDescriptor,
@@ -378,7 +377,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
     }
 
     @Test
-    public void shouldCreateJmsEndpointAnnotatedWithEventProcessorAdapter() throws Exception {
+    public void shouldCreateJmsEndpointAnnotatedWithEventProcessorAdapter() {
 
         final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.event", "people.abc", "people", componentName);
 
@@ -399,7 +398,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
     }
 
     @Test
-    public void shouldCreateJmsEndpointAnnotatedWithInterceptors() throws Exception {
+    public void shouldCreateJmsEndpointAnnotatedWithInterceptors() {
 
         final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.handler.command", "people.abc", serviceName, componentName);
 
@@ -419,7 +418,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
     }
 
     @Test
-    public void shouldCreateJmsEndpointImplementingMessageListener() throws Exception {
+    public void shouldCreateJmsEndpointImplementingMessageListener() {
         final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:somecontext.controller.command", "somecontext.command1", serviceName, componentName);
 
         generator.run(subscriptionDescriptor, configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
@@ -477,7 +476,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
     }
 
     @Test
-    public void shouldCreateAnnotatedCommandControllerEndpointWithDestinationLookupProperty() throws Exception {
+    public void shouldCreateAnnotatedCommandControllerEndpointWithDestinationLookupProperty() {
 
         final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.controller.command", "people.abc", serviceName, "EVENT_PROCESSOR");
 
@@ -497,7 +496,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
     }
 
     @Test
-    public void shouldCreateAnnotatedCommandControllerEndpointWithDestinationLookupProperty2() throws Exception {
+    public void shouldCreateAnnotatedCommandControllerEndpointWithDestinationLookupProperty2() {
         final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.controller.command", "my-context.events.something-happened", serviceName, componentName);
 
         generator.run(subscriptionDescriptor,
@@ -516,7 +515,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
     }
 
     @Test
-    public void shouldCreateAnnotatedCommandHandlerEndpointWithDestinationLookupProperty3() throws Exception {
+    public void shouldCreateAnnotatedCommandHandlerEndpointWithDestinationLookupProperty3() {
 
         final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.handler.command", "people.abc", serviceName, componentName);
 
@@ -537,7 +536,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
     }
 
     @Test
-    public void shouldCreateAnnotatedEventListenerEndpointWithDestinationLookupProperty3() throws Exception {
+    public void shouldCreateAnnotatedEventListenerEndpointWithDestinationLookupProperty3() {
 
         final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.event", "structure.abc", serviceName, componentName);
 
@@ -557,7 +556,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
     }
 
     @Test
-    public void shouldCreateAnnotatedControllerCommandEndpointWithQueueAsDestinationType() throws Exception {
+    public void shouldCreateAnnotatedControllerCommandEndpointWithQueueAsDestinationType() {
 
         final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:queue:structure.something", "structure.abc", "people", "COMMAND_CONTROLLER");
 
@@ -577,7 +576,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
     }
 
     @Test
-    public void shouldCreateAnnotatedCommandHandlerEndpointWithQueueAsDestinationType() throws Exception {
+    public void shouldCreateAnnotatedCommandHandlerEndpointWithQueueAsDestinationType() {
 
         final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:lifecycle.blah", "lifecycle.abc", "aaa", "COMMAND_HANDLER");
 
@@ -597,7 +596,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
     }
 
     @Test
-    public void shouldCreateAnnotatedEventListenerEndpointWithQueueAsDestinationType() throws Exception {
+    public void shouldCreateAnnotatedEventListenerEndpointWithQueueAsDestinationType() {
         final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.event", "people.abc", serviceName, "EVENT_PROCESSOR");
 
         generator.run(subscriptionDescriptor,
@@ -616,7 +615,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
     }
 
     @Test
-    public void shouldCreateAnnotatedJmsEndpointWithMessageSelectorContainingOneCommandWithAPost() throws Exception {
+    public void shouldCreateAnnotatedJmsEndpointWithMessageSelectorContainingOneCommandWithAPost() {
 
         final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.controller.command", "structure.test-cmd", serviceName, "EVENT_PROCESSOR");
 
@@ -636,7 +635,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
     }
 
     @Test
-    public void shouldCreateAnnotatedJmsEndpointFromMediaTypeWithoutPillar() throws Exception {
+    public void shouldCreateAnnotatedJmsEndpointFromMediaTypeWithoutPillar() {
         final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.controller.command", "structure.test-cmd", serviceName, "EVENT_PROCESSOR");
 
         generator.run(subscriptionDescriptor,
@@ -655,7 +654,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
     }
 
     @Test
-    public void shouldNotAddMessageSelectorForEventListener() throws Exception {
+    public void shouldNotAddMessageSelectorForEventListener() {
         final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.event", "structure.test-event", serviceName, "EVENT_LISTENER");
 
         generator.run(subscriptionDescriptor,
@@ -673,7 +672,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
     }
 
     @Test
-    public void shouldCreateAnnotatedJmsEndpointWithMessageSelectorContainingOneEvent_PluralPillarName() throws Exception {
+    public void shouldCreateAnnotatedJmsEndpointWithMessageSelectorContainingOneEvent_PluralPillarName() {
         final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.event", "structure.events.test-event", serviceName, componentName);
 
         generator.run(subscriptionDescriptor,
@@ -692,7 +691,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
     }
 
     @Test
-    public void shouldOnlyCreateMessageSelectorForPostActionAndIgnoreAllOtherActions() throws Exception {
+    public void shouldOnlyCreateMessageSelectorForPostActionAndIgnoreAllOtherActions() {
 
         final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.controller.command", "structure.test-cmd1", serviceName, componentName);
 
@@ -712,7 +711,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
     }
 
     @Test
-    public void shouldCreateAnnotatedJmsEndpointWithMessageSelectorContainingTwoCommand() throws Exception {
+    public void shouldCreateAnnotatedJmsEndpointWithMessageSelectorContainingTwoCommand() {
         final String jmsUri = "jms:topic:people.controller.command";
 
         final Event event = event()
@@ -740,14 +739,14 @@ public class SubscriptionJmsEndpointGeneratorTest {
                 .withEventSourceName("eventSource")
                 .build();
 
-        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition = subscriptionDescriptorDefinition()
+        final SubscriptionsDescriptor subscriptionsDescriptor = subscriptionsDescriptor()
                 .withSpecVersion("1.0.0")
                 .withService(serviceName)
                 .withServiceComponent(componentName)
                 .withSubscription(subscription)
                 .build();
 
-        final SubscriptionWrapper subscriptionWrapper = new SubscriptionWrapper(subscriptionDescriptorDefinition, asList(eventSourceDefinition));
+        final SubscriptionWrapper subscriptionWrapper = new SubscriptionWrapper(subscriptionsDescriptor, asList(eventSourceDefinition));
 
         generator.run(subscriptionWrapper,
                 configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
@@ -767,7 +766,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
     }
 
     @Test
-    public void shouldCreateJmsEndpointWithOnMessage() throws Exception {
+    public void shouldCreateJmsEndpointWithOnMessage() {
         final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:somecontext.controller.command", "somecontext.command1", serviceName, componentName);
         generator.run(subscriptionDescriptor, configurationWithBasePackage(BASE_PACKAGE, outputFolder, generatorProperties));
 
@@ -819,7 +818,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
     }
 
     @Test
-    public void shouldCreateDurableTopicSubscriber() throws Exception {
+    public void shouldCreateDurableTopicSubscriber() {
         final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.event", "context1.event.abc", "people", "EVENT_LISTENER");
 
         generator.run(subscriptionDescriptor,
@@ -845,7 +844,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
     }
 
     @Test
-    public void shouldNotContainDurableSubscriberPropertiesIfItsNotTopic() throws Exception {
+    public void shouldNotContainDurableSubscriberPropertiesIfItsNotTopic() {
         final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.controller.command", "people.event.abc", "people", "COMMAND_CONTROLLER");
 
         generator.run(subscriptionDescriptor,
@@ -869,7 +868,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
     }
 
     @Test
-    public void shouldCreateAnnotatedEventListenerEndpointWithSharedSubscriptionsPropertySetToTrue() throws Exception {
+    public void shouldCreateAnnotatedEventListenerEndpointWithSharedSubscriptionsPropertySetToTrue() {
         final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:structure.event", "structure.abc", serviceName, componentName);
 
         generator.run(subscriptionDescriptor,
@@ -889,7 +888,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
 
 
     @Test
-    public void shouldCreateJmsEndpointAnnotatedWithPoolConfiguration() throws Exception {
+    public void shouldCreateJmsEndpointAnnotatedWithPoolConfiguration() {
         final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.person-added", "people.abc", "people", "EVENT_LISTENER");
 
         generator.run(subscriptionDescriptor,
@@ -907,7 +906,7 @@ public class SubscriptionJmsEndpointGeneratorTest {
     }
 
     @Test
-    public void shouldCreateJmsEndpointAnnotatedWithoutPoolConfiguration() throws Exception {
+    public void shouldCreateJmsEndpointAnnotatedWithoutPoolConfiguration() {
         final SubscriptionWrapper subscriptionDescriptor = setUpMessageSubscription("jms:topic:people.person-added", "people.abc", "people", "EVENT_LISTENER");
 
         generator.run(subscriptionDescriptor,
@@ -968,13 +967,13 @@ public class SubscriptionJmsEndpointGeneratorTest {
                 .withEventSourceName("eventSource")
                 .build();
 
-        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition = subscriptionDescriptorDefinition()
+        final SubscriptionsDescriptor subscriptionsDescriptor = subscriptionsDescriptor()
                 .withSpecVersion("1.0.0")
                 .withService(serviceName)
                 .withServiceComponent(componentName)
                 .withSubscription(subscription)
                 .build();
 
-        return new SubscriptionWrapper(subscriptionDescriptorDefinition, asList(eventSourceDefinition));
+        return new SubscriptionWrapper(subscriptionsDescriptor, asList(eventSourceDefinition));
     }
 }

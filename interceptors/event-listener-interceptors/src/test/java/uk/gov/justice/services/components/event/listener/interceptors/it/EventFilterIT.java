@@ -182,7 +182,7 @@ public class EventFilterIT {
     })
     public WebApp war() {
         return new WebApp()
-                .contextRoot("core-test")
+                .contextRoot("EventFilterIT")
                 .addServlet("TestApp", Application.class.getName());
     }
 

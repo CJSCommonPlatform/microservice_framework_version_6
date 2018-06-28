@@ -14,6 +14,10 @@
 
         <!-- Single war is used by default, to run example-it with multiple wars set the system example.use-multiple-war property to true: -->
         <!-- mvn clean install -Dexample.use-multiple-war=true -->
+        <eventstore-jdbc.url>jdbc:postgresql://localhost:5432/frameworkeventstore
+        </eventstore-jdbc.url>
+        <viewstore-jdbc.url>jdbc:postgresql://localhost:5432/frameworkviewstore</viewstore-jdbc.url>
+        <filestore-jdbc.url>jdbc:postgresql://localhost:5432/frameworkfilestore</filestore-jdbc.url>
     </properties>
 
     <dependencies>
@@ -155,6 +159,103 @@
 
     <build>
         <plugins>
+            <!-- Drops and updates frameworkevent framworkviewstore and frameworkfilestore -->
+            <plugin>
+                <groupId>org.liquibase</groupId>
+                <artifactId>liquibase-maven-plugin</artifactId>
+                <configuration>
+                    <driver>org.postgresql.Driver</driver>
+                    <username>framework</username>
+                    <password>framework</password>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>drop-event-store</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>dropAll</goal>
+                        </goals>
+                        <configuration>
+                            <url>${eventstore-jdbc.url}</url>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>update-event-store</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>update</goal>
+                        </goals>
+                        <configuration>
+                            <changeLogFile>liquibase/event-store-db-changelog.xml</changeLogFile>
+                            <url>${eventstore-jdbc.url}</url>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>update-snapshot</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>update</goal>
+                        </goals>
+                        <configuration>
+                            <changeLogFile>liquibase/snapshot-store-db-changelog.xml</changeLogFile>
+                            <url>${eventstore-jdbc.url}</url>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>drop-view-store</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>dropAll</goal>
+                        </goals>
+                        <configuration>
+                            <url>${viewstore-jdbc.url}</url>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>update-view-store</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>update</goal>
+                        </goals>
+                        <configuration>
+                            <changeLogFile>liquibase/view-store-db-changelog.xml</changeLogFile>
+                            <url>${viewstore-jdbc.url}</url>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>update-event-buffer</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>update</goal>
+                        </goals>
+                        <configuration>
+                            <changeLogFile>liquibase/event-buffer-changelog.xml</changeLogFile>
+                            <url>${viewstore-jdbc.url}</url>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>drop-file-store</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>dropAll</goal>
+                        </goals>
+                        <configuration>
+                            <url>${filestore-jdbc.url}</url>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>update-file-store</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>update</goal>
+                        </goals>
+                        <configuration>
+                            <changeLogFile>liquibase/file-service-liquibase-db-changelog.xml</changeLogFile>
+                            <url>${filestore-jdbc.url}</url>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -271,105 +372,6 @@
                     </execution>
                 </executions>
             </plugin>
-
-            <!-- Drops and updates frameworkevent framworkviewstore and frameworkfilestore -->
-            <plugin>
-                <groupId>org.liquibase</groupId>
-                <artifactId>liquibase-maven-plugin</artifactId>
-                <configuration>
-                    <driver>org.postgresql.Driver</driver>
-                    <username>framework</username>
-                    <password>framework</password>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>drop-event-store</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>dropAll</goal>
-                        </goals>
-                        <configuration>
-                            <url>jdbc:postgresql://localhost:5432/frameworkeventstore</url>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>update-event-store</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>update</goal>
-                        </goals>
-                        <configuration>
-                            <changeLogFile>liquibase/event-store-db-changelog.xml</changeLogFile>
-                            <url>jdbc:postgresql://localhost:5432/frameworkeventstore</url>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>update-snapshot</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>update</goal>
-                        </goals>
-                        <configuration>
-                            <changeLogFile>liquibase/snapshot-store-db-changelog.xml</changeLogFile>
-                            <url>jdbc:postgresql://localhost:5432/frameworkeventstore</url>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>drop-view-store</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>dropAll</goal>
-                        </goals>
-                        <configuration>
-                            <url>jdbc:postgresql://localhost:5432/frameworkviewstore</url>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>update-view-store</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>update</goal>
-                        </goals>
-                        <configuration>
-                            <changeLogFile>liquibase/view-store-db-changelog.xml</changeLogFile>
-                            <url>jdbc:postgresql://localhost:5432/frameworkviewstore</url>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>update-event-buffer</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>update</goal>
-                        </goals>
-                        <configuration>
-                            <changeLogFile>liquibase/event-buffer-changelog.xml</changeLogFile>
-                            <url>jdbc:postgresql://localhost:5432/frameworkviewstore</url>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>drop-file-store</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>dropAll</goal>
-                        </goals>
-                        <configuration>
-                            <url>jdbc:postgresql://localhost:5432/frameworkfilestore</url>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>update-file-store</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>update</goal>
-                        </goals>
-                        <configuration>
-                            <changeLogFile>liquibase/file-service-liquibase-db-changelog.xml</changeLogFile>
-                            <url>jdbc:postgresql://localhost:5432/frameworkfilestore</url>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
         </plugins>
     </build>
 

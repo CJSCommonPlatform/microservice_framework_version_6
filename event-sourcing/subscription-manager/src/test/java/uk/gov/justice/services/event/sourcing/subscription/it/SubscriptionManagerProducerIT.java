@@ -35,6 +35,7 @@ import javax.inject.Inject;
 
 import org.jglue.cdiunit.AdditionalClasses;
 import org.jglue.cdiunit.CdiRunner;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -65,6 +66,7 @@ public class SubscriptionManagerProducerIT {
     TestClass testClass;
 
     @Test
+    @Ignore
     public void shouldInjectSubscriptionManagerWithNamedSubscription() throws Exception {
 
         final SubscriptionManager subscriptionManager = testClass.getSubscriptionManager();

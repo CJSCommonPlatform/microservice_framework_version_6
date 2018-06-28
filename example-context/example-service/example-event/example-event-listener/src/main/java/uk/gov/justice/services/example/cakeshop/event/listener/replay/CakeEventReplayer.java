@@ -7,6 +7,9 @@ import uk.gov.justice.services.event.sourcing.subscription.EventReplayer;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -24,8 +27,8 @@ public class CakeEventReplayer implements EventReplayer {
     @Override
     public void replay(final InterceptorChainProcessor interceptorChainProcessor) {
 
-        final int numberOfStreams = 1;
-        final int numberOfEventsToCreate = 1000;
+        final int numberOfStreams = 100;
+        final int numberOfEventsToCreate = 1_000;
 
         final List<JsonEnvelope> jsonEnvelopes = new CakeFactory(numberOfStreams).generateEvents(numberOfEventsToCreate);
 
@@ -35,10 +38,9 @@ public class CakeEventReplayer implements EventReplayer {
 
         stopWatch.start();
 
-        jsonEnvelopes.forEach(jsonEnvelope ->
-                        asyncCakeEventReplayer.replay(jsonEnvelope, interceptorChainProcessor)
-//                interceptorChainProcessor.process(InterceptorContext.interceptorContextWithInput(jsonEnvelope))
-        );
+        final List<Future<Optional<JsonEnvelope>>> futures = jsonEnvelopes.stream().map(jsonEnvelope ->
+                asyncCakeEventReplayer.replay(jsonEnvelope, interceptorChainProcessor)
+        ).collect(Collectors.toList());
 
         stopWatch.stop();
 

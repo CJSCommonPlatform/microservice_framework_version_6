@@ -5,6 +5,10 @@ import static uk.gov.justice.services.core.interceptor.InterceptorContext.interc
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
+import java.util.Optional;
+import java.util.concurrent.Future;
+
+import javax.ejb.AsyncResult;
 import javax.ejb.Asynchronous;
 import javax.ejb.Stateless;
 
@@ -12,8 +16,10 @@ import javax.ejb.Stateless;
 public class AsyncCakeEventReplayer {
 
     @Asynchronous
-    public void replay(final JsonEnvelope jsonEnvelope,
-                       final InterceptorChainProcessor interceptorChainProcessor) {
-        interceptorChainProcessor.process(interceptorContextWithInput(jsonEnvelope));
+    public Future<Optional<JsonEnvelope>> replay(final JsonEnvelope jsonEnvelope,
+                         final InterceptorChainProcessor interceptorChainProcessor) {
+        final Optional<JsonEnvelope> process = interceptorChainProcessor.process(interceptorContextWithInput(jsonEnvelope));
+
+        return new AsyncResult(process);
     }
 }

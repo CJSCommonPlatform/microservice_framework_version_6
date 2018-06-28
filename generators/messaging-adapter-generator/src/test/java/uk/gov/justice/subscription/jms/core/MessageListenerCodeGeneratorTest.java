@@ -115,7 +115,7 @@ public class MessageListenerCodeGeneratorTest {
                 "  @java.lang.Override\n" +
                 "  public void onMessage(javax.jms.Message message) {\n" +
                 "    uk.gov.justice.services.messaging.logging.LoggerUtils.trace(LOGGER, () -> \"Received JMS message\");\n" +
-                "    subscriptionJmsProcessor.process(subscriptionManager, message);\n" +
+                "    subscriptionJmsProcessor.process(message, subscriptionManager);\n" +
                 "  }\n" +
                 "}\n"));
     }
@@ -199,7 +199,7 @@ public class MessageListenerCodeGeneratorTest {
                 "  @java.lang.Override\n" +
                 "  public void onMessage(javax.jms.Message message) {\n" +
                 "    uk.gov.justice.services.messaging.logging.LoggerUtils.trace(LOGGER, () -> \"Received JMS message\");\n" +
-                "    subscriptionJmsProcessor.process(subscriptionManager, message);\n" +
+                "    subscriptionJmsProcessor.process(message, subscriptionManager);\n" +
                 "  }\n" +
                 "}\n"));
     }
@@ -283,7 +283,7 @@ public class MessageListenerCodeGeneratorTest {
                 "  @java.lang.Override\n" +
                 "  public void onMessage(javax.jms.Message message) {\n" +
                 "    uk.gov.justice.services.messaging.logging.LoggerUtils.trace(LOGGER, () -> \"Received JMS message\");\n" +
-                "    subscriptionJmsProcessor.process(subscriptionManager, message);\n" +
+                "    subscriptionJmsProcessor.process(message, subscriptionManager);\n" +
                 "  }\n" +
                 "}\n"));
     }

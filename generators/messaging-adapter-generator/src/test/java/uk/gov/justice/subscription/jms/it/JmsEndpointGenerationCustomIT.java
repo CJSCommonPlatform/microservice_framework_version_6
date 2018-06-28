@@ -43,6 +43,10 @@ import uk.gov.justice.services.core.envelope.MediaTypeProvider;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.extension.ServiceComponentScanner;
+import uk.gov.justice.services.core.interceptor.DefaultInterceptorChainProcessor;
+import uk.gov.justice.services.core.interceptor.InterceptorCache;
+import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
+import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
 import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
 import uk.gov.justice.services.core.json.DefaultJsonValidationLoggerHelper;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
@@ -158,6 +162,13 @@ public class JmsEndpointGenerationCustomIT extends AbstractJmsAdapterGenerationI
             EnvelopeInspector.class,
             RequesterProducer.class,
 
+            RecordingSubscriptionManager.class,
+            InterceptorChainProcessor.class,
+            DefaultInterceptorChainProcessor.class,
+            InterceptorChainProcessorProducer.class,
+            InterceptorCache.class,
+            DispatcherCache.class,
+
             DefaultSubscriptionJmsProcessor.class,
             TestSubscriptionManagerProducer.class,
             RecordingSubscriptionManager.class
@@ -221,6 +232,11 @@ public class JmsEndpointGenerationCustomIT extends AbstractJmsAdapterGenerationI
         @Override
         public void process(final JsonEnvelope jsonEnvelope) {
             record(jsonEnvelope);
+        }
+
+        @Override
+        public void startSubscription() {
+
         }
     }
 

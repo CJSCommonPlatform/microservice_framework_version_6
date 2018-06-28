@@ -3,6 +3,7 @@ package uk.gov.justice.services.example.cakeshop.event.listener.replay;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
+import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
@@ -20,37 +21,28 @@ import java.util.stream.IntStream;
 public class CakeFactory {
 
     private final int numberOfStreams;
-    private final int numberOfUniqueEventNames;
 
     private final Random random = new Random();
     private final Map<UUID, List<JsonEnvelope>> eventsByStream = new HashMap<>();
 
-    public CakeFactory(final int numberOfStreams, final int numberOfUniqueEventNames) {
+    public CakeFactory(final int numberOfStreams) {
         this.numberOfStreams = numberOfStreams;
-        this.numberOfUniqueEventNames = numberOfUniqueEventNames;
     }
 
     public List<JsonEnvelope> generateEvents(final int numberOfEventsToCreate) {
 
         final List<UUID> streamIds = generateStreamIds();
-        final List<String> eventNames = generateEventNames();
 
         streamIds.forEach(streamId -> eventsByStream.put(streamId, new ArrayList<>()));
 
         return IntStream.range(0, numberOfEventsToCreate)
-                .mapToObj(index -> generateEnvelope(streamIds, eventNames))
+                .mapToObj(index -> generateEnvelope(streamIds))
                 .collect(toList());
     }
 
     private List<UUID> generateStreamIds() {
         return range(0, numberOfStreams)
                 .mapToObj(index -> randomUUID())
-                .collect(toList());
-    }
-
-    private List<String> generateEventNames() {
-        return range(0, numberOfUniqueEventNames)
-                .mapToObj(index -> "context.event_" + (index + 1))
                 .collect(toList());
     }
 
@@ -61,39 +53,54 @@ public class CakeFactory {
         return streamIds.get(index);
     }
 
-    private String getARandomEventName(final List<String> eventNames) {
 
-        final int index = random.nextInt(eventNames.size());
-
-        return eventNames.get(index);
-    }
-
-    private JsonEnvelope generateEnvelope(final List<UUID> streamIds, final List<String> eventNames) {
+    private JsonEnvelope generateEnvelope(final List<UUID> streamIds) {
 
         final UUID streamId = getARandomStreamId(streamIds);
-        final String eventName = getARandomEventName(eventNames);
 
         final List<JsonEnvelope> jsonEnvelopesByStream = eventsByStream.get(streamId);
         final int version = jsonEnvelopesByStream.size() + 1;
 
-        final JsonEnvelope jsonEnvelope = generateJsonEnvelope(streamId, eventName, version);
+        final JsonEnvelope jsonEnvelope = generateJsonEnvelope(streamId, version);
 
         jsonEnvelopesByStream.add(jsonEnvelope);
 
         return jsonEnvelope;
     }
 
-    private JsonEnvelope generateJsonEnvelope(final UUID streamId, final String eventName, final int version) {
+    private JsonEnvelope generateJsonEnvelope(final UUID streamId, final long version) {
+
+        if (version == 1L) {
+            return envelopeFrom(
+                    metadataBuilder()
+                            .withId(randomUUID())
+                            .withName("example.recipe-added")
+                            .withStreamId(streamId)
+                            .withVersion(version)
+                            .withSource("example"),
+                    createObjectBuilder()
+                            .add("recipeId", streamId.toString())
+                            .add("name", "Carrot Cake")
+                            .add("glutenFree", false)
+                            .add("ingredients", createArrayBuilder()
+                                    .add(createObjectBuilder()
+                                            .add("name", "carrot")
+                                            .add("quantity", 1)
+                                    ).build())
+                            .build()
+            );
+        }
+
         return envelopeFrom(
                 metadataBuilder()
                         .withId(randomUUID())
-                        .withName("add-recipe")
+                        .withName("example.recipe-renamed")
                         .withStreamId(streamId)
                         .withVersion(version)
-                        .withSource("test"),
+                        .withSource("example"),
                 createObjectBuilder()
-                        .add("name", "Carrot Cake")
-                        .add("glutenFree", false)
+                        .add("recipeId", streamId.toString())
+                        .add("name", "Not Carrot Cake")
                         .build()
         );
     }

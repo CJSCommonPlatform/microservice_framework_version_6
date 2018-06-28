@@ -1,6 +1,8 @@
 package uk.gov.justice.services.event.buffer.core.service;
 
+import static java.lang.String.format;
 import static java.util.stream.Stream.concat;
+import static java.util.stream.Stream.empty;
 import static java.util.stream.StreamSupport.stream;
 
 import uk.gov.justice.services.event.buffer.api.EventBufferService;
@@ -18,6 +20,7 @@ import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -27,7 +30,7 @@ import org.slf4j.Logger;
 @Priority(2)
 public class ConsecutiveEventBufferService implements EventBufferService {
 
-    private static final long INITIAL_VERSION = 1l;
+    private static final long INITIAL_VERSION = 1L;
 
     @Inject
     private Logger logger;
@@ -44,7 +47,6 @@ public class ConsecutiveEventBufferService implements EventBufferService {
     @Inject
     private BufferInitialisationStrategy bufferInitialisationStrategy;
 
-
     /**
      * Takes an incoming event and returns a stream of json envelopes. If the event is not
      * consecutive according to the stream_status repository then an empty stream is returned and
@@ -56,27 +58,30 @@ public class ConsecutiveEventBufferService implements EventBufferService {
      * @return stream of consecutive events
      */
     @Override
+    @Transactional(Transactional.TxType.MANDATORY)
     public Stream<JsonEnvelope> currentOrderedEventsWith(final JsonEnvelope incomingEvent) {
 
-        logger.trace("Message buffering for message: {}", incomingEvent);
+        System.out.println("processing incoming event version: " + incomingEvent.metadata().version() + " streamId: " + incomingEvent.metadata().streamId());
+
+        final long incomingEventVersion = versionOf(incomingEvent);
+//        logger.info("Message buffering for message: {} version {}", incomingEvent, incomingEventVersion);
 
         final UUID streamId = incomingEvent.metadata().streamId().orElseThrow(() -> new IllegalStateException("Event must have a a streamId "));
-        final long incomingEventVersion = versionOf(incomingEvent);
         final String source = getSource(incomingEvent);
 
         final long currentVersion = bufferInitialisationStrategy.initialiseBuffer(streamId, source);
 
         if (incomingEventObsolete(incomingEventVersion, currentVersion)) {
-            logger.warn("Message : {} is an obsolete version", incomingEvent);
-            return Stream.empty();
+//            logger.warn("Message : {} is an obsolete version", incomingEvent);
+            return empty();
 
         } else if (incomingEventNotInOrder(incomingEventVersion, currentVersion)) {
-            logger.trace("Message : {} is not consecutive, adding to buffer", incomingEvent);
+//            System.out.println(format("Current Version : %d Message Version : %d version is not consecutive, adding to buffer", currentVersion, incomingEventVersion));
             addToBuffer(incomingEvent, streamId, incomingEventVersion);
-            return Stream.empty();
+            return empty();
 
         } else {
-            logger.trace("Message : {} version is valid sending stream to dispatcher", incomingEvent);
+//            System.out.println(format("Current Version : %d Message Version : %d version is valid sending stream to dispatcher", currentVersion, incomingEventVersion));
             streamStatusRepository.update(new StreamStatus(streamId, incomingEventVersion, source));
             return bufferedEvents(streamId, incomingEvent, incomingEventVersion);
         }

@@ -7,6 +7,7 @@ import java.util.UUID;
 
 public class PostgreSQLBasedBufferInitialisationStrategy implements BufferInitialisationStrategy {
     private static final long INITIAL_VERSION = 0L;
+    private static final Object MUT_EX = new Object();
 
     private final StreamStatusJdbcRepository streamStatusRepository;
 
@@ -16,10 +17,14 @@ public class PostgreSQLBasedBufferInitialisationStrategy implements BufferInitia
 
     @Override
     public long initialiseBuffer(final UUID streamId, final String source) {
-        streamStatusRepository.updateSource(streamId,source);
+
+        streamStatusRepository.updateSource(streamId, source);
         streamStatusRepository.insertOrDoNothing(new StreamStatus(streamId, INITIAL_VERSION, source));
-        return streamStatusRepository.findByStreamIdAndSource(streamId, source)
-                .orElseThrow(() -> new IllegalStateException("stream status cannot be empty"))
-                .getVersion();
+        final StreamStatus streamStatus = streamStatusRepository.findByStreamIdAndSource(streamId, source)
+                .orElseThrow(() -> new IllegalStateException("stream status cannot be empty"));
+        System.out.println(streamStatus);
+
+        return streamStatus.getVersion();
+
     }
 }

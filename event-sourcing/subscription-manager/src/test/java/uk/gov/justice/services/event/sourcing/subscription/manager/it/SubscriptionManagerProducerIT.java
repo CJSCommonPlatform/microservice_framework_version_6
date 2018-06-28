@@ -14,10 +14,13 @@ import uk.gov.justice.services.core.cdi.QualifierAnnotationExtractor;
 import uk.gov.justice.services.core.dispatcher.DispatcherFactory;
 import uk.gov.justice.services.core.dispatcher.EnvelopePayloadTypeConverter;
 import uk.gov.justice.services.core.dispatcher.JsonEnvelopeRepacker;
+import uk.gov.justice.services.event.buffer.api.EventBufferService;
 import uk.gov.justice.services.event.sourcing.subscription.manager.DefaultSubscriptionManager;
+import uk.gov.justice.services.event.sourcing.subscription.manager.EventBufferSelector;
 import uk.gov.justice.services.event.sourcing.subscription.manager.SubscriptionManagerProducer;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.annotation.EventSourceName;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.subscription.SubscriptionManager;
 import uk.gov.justice.services.subscription.annotation.SubscriptionName;
 import uk.gov.justice.subscription.ParserProducer;
@@ -27,6 +30,7 @@ import uk.gov.justice.subscription.yaml.parser.YamlParser;
 import uk.gov.justice.subscription.yaml.parser.YamlSchemaLoader;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
@@ -51,7 +55,10 @@ import org.junit.runner.RunWith;
         JsonEnvelopeRepacker.class,
         EnvelopePayloadTypeConverter.class,
         SubscriptionManagerProducerIT.TestEventSourceProducer.class,
-        SubscriptionManagerProducerIT.TestClass.class
+        SubscriptionManagerProducerIT.TestClass.class,
+        SubscriptionManagerProducerIT.DummyEventBufferService.class,
+        EventBufferSelector.class
+
 })
 public class SubscriptionManagerProducerIT {
 
@@ -118,6 +125,15 @@ public class SubscriptionManagerProducerIT {
 
         public EventSource getEventSource() {
             return eventSource;
+        }
+    }
+
+    @ApplicationScoped
+    public static class DummyEventBufferService implements EventBufferService {
+
+        @Override
+        public Stream<JsonEnvelope> currentOrderedEventsWith(final JsonEnvelope envelope) {
+            return Stream.of(envelope);
         }
     }
 }

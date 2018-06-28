@@ -27,7 +27,6 @@ import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.util.UtcClock;
-import uk.gov.justice.services.components.event.listener.interceptors.EventBufferInterceptor;
 import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
 import uk.gov.justice.services.core.accesscontrol.AllowAllPolicyEvaluator;
 import uk.gov.justice.services.core.accesscontrol.DefaultAccessControlService;
@@ -70,6 +69,7 @@ import uk.gov.justice.services.core.requester.RequesterProducer;
 import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.event.buffer.api.AllowAllEventFilter;
 import uk.gov.justice.services.event.buffer.api.EventBufferService;
+import uk.gov.justice.services.event.sourcing.subscription.manager.EventBufferSelector;
 import uk.gov.justice.services.event.sourcing.subscription.manager.SubscriptionManagerProducer;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
@@ -150,7 +150,6 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
             InterceptorChainProcessor.class,
             InterceptorCache.class,
             InterceptorChainObserver.class,
-            EventBufferInterceptor.class,
 
             ServiceComponentScanner.class,
             RequesterProducer.class,
@@ -214,7 +213,9 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
             YamlParser.class,
             YamlSchemaLoader.class,
 
-            TestEventSourceProducer.class
+            TestEventSourceProducer.class,
+
+            EventBufferSelector.class,
     })
     public WebApp war() {
         return new WebApp()

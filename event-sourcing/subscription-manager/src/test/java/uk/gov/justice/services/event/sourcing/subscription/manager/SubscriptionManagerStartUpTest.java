@@ -1,25 +1,30 @@
 package uk.gov.justice.services.event.sourcing.subscription.manager;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.EMPTY_LIST;
+import static org.codehaus.groovy.runtime.InvokerHelper.asList;
+import static org.mockito.Answers.RETURNS_DEEP_STUBS;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+
+import uk.gov.justice.services.subscription.SubscriptionManager;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptorDefinition;
+import uk.gov.justice.subscription.registry.SubscriptionDescriptorDefinitionRegistry;
+
+import java.util.List;
+
+import javax.enterprise.inject.Instance;
+
 import com.google.common.collect.Sets;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.justice.services.subscription.SubscriptionManager;
-import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
-import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptorDefinition;
-import uk.gov.justice.subscription.registry.SubscriptionDescriptorDefinitionRegistry;
-
-import javax.enterprise.inject.Instance;
-import java.util.List;
-
-import static java.util.Arrays.asList;
-import static java.util.Collections.EMPTY_LIST;
-import static org.codehaus.groovy.runtime.InvokerHelper.asList;
-import static org.mockito.Answers.RETURNS_DEEP_STUBS;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SubscriptionManagerStartUpTest {

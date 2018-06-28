@@ -10,7 +10,6 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static uk.gov.justice.subscription.jms.core.ClassNameFactory.EVENT_FILTER_INTERCEPTOR;
 import static uk.gov.justice.subscription.jms.core.ClassNameFactory.EVENT_LISTENER_INTERCEPTOR_CHAIN_PROVIDER;
 
-import uk.gov.justice.services.components.event.listener.interceptors.EventBufferInterceptor;
 import uk.gov.justice.services.core.interceptor.InterceptorChainEntry;
 import uk.gov.justice.services.core.interceptor.InterceptorChainEntryProvider;
 import uk.gov.justice.subscription.jms.core.ClassNameFactory;
@@ -38,7 +37,6 @@ import com.squareup.javapoet.TypeSpec;
  *          private final List<InterceptorChainEntry> interceptorChainEntries = new ArrayList<>();
  *
  *          public ExampleEventListenerInterceptorChainProvider() {
- *              interceptorChainEntries.add(new InterceptorChainEntry(1000, EventBufferInterceptor.class));
  *              interceptorChainEntries.add(new InterceptorChainEntry(2000, MyCustomEventFilterInterceptor.class));
  *          }
  *
@@ -91,11 +89,9 @@ public class EventListenerInterceptorChainProviderCodeGenerator {
     private MethodSpec createConstructor(final ClassName eventFilterInterceptorClassName) {
 
         final ClassName interceptorChainEntryClassName = get(InterceptorChainEntry.class);
-        final ClassName eventBufferInterceptorClassName = get(EventBufferInterceptor.class);
 
         return constructorBuilder()
                 .addModifiers(PUBLIC)
-                .addStatement("interceptorChainEntries.add(new $T(1000, $T.class))", interceptorChainEntryClassName, eventBufferInterceptorClassName)
                 .addStatement("interceptorChainEntries.add(new $T(2000, $T.class))", interceptorChainEntryClassName, eventFilterInterceptorClassName)
                 .build();
     }

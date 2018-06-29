@@ -36,7 +36,8 @@ public class DefaultSubscriptionJmsProcessor implements SubscriptionJmsProcessor
     JmsMessageLoggerHelper jmsMessageLoggerHelper;
 
     @Override
-    public void process(final SubscriptionManager subscriptionManager, final Message message) {
+    public void process(final Message message,
+                        final SubscriptionManager subscriptionManager) {
 
         traceLogger.trace(LOGGER, () -> format("Processing JMS message: %s", jmsMessageLoggerHelper.toJmsTraceString(message)));
 

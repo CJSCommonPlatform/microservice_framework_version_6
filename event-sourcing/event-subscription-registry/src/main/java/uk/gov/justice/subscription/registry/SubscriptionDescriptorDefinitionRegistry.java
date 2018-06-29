@@ -1,50 +1,21 @@
 package uk.gov.justice.subscription.registry;
 
 import static java.lang.String.format;
-import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.toMap;
 
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptorDefinition;
 
 import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.BinaryOperator;
-import java.util.stream.Stream;
-
+import java.util.Set;
 /**
- * Registry containing {@link SubscriptionDescriptorDefinition}s mapped by the serviceComponentName
+ * Registry containing {@link SubscriptionDescriptorDefinition}s set
  */
 public class SubscriptionDescriptorDefinitionRegistry {
+    private final Set<SubscriptionDescriptorDefinition> registry;
 
-    private final Map<String, SubscriptionDescriptorDefinition> registry;
-
-    private final BinaryOperator<SubscriptionDescriptorDefinition> throwRegistryExceptionWhenDuplicate =
-            (subscriptionDescriptor, subscriptionDescriptor2) -> {
-                throw new RegistryException("Duplicate subscription descriptor for service component: " + subscriptionDescriptor.getServiceComponent());
-            };
-
-    public SubscriptionDescriptorDefinitionRegistry(final Stream<SubscriptionDescriptorDefinition> subscriptionDescriptorDefinitions) {
-        this.registry = subscriptionDescriptorDefinitions
-                .collect(toMap(
-                        SubscriptionDescriptorDefinition::getServiceComponent,
-                        subscriptionDescriptorDefinition -> subscriptionDescriptorDefinition,
-                        throwRegistryExceptionWhenDuplicate)
-                );
+    public SubscriptionDescriptorDefinitionRegistry(final Set<SubscriptionDescriptorDefinition> subscriptionDescriptorDefinitions) {
+        this.registry = subscriptionDescriptorDefinitions;
     }
-
-    /**
-     * Return a {@link SubscriptionDescriptorDefinition} mapped to a subscription component name or
-     * empty if not mapped.
-     *
-     * @param serviceComponentName the subscription component name to look up
-     * @return Optional of {@link SubscriptionDescriptorDefinition} or empty
-     */
-    public Optional<SubscriptionDescriptorDefinition> getSubscriptionDescriptorDescriptorFor(final String serviceComponentName) {
-        return ofNullable(registry.get(serviceComponentName));
-    }
-
     /**
      * Return a {@link Subscription} mapped to a subscription name
      *
@@ -52,11 +23,37 @@ public class SubscriptionDescriptorDefinitionRegistry {
      * @return {@link Subscription}
      */
     public Subscription getSubscriptionFor(final String subscriptionName) {
-        return registry.values().stream()
+        return registry.stream()
                 .map(SubscriptionDescriptorDefinition::getSubscriptions)
                 .flatMap(Collection::stream)
                 .filter(subscription -> subscription.getName().equals(subscriptionName))
                 .findFirst()
                 .orElseThrow(() -> new RegistryException(format("Failed to find subscription '%s' in registry", subscriptionName)));
+    }
+
+    /**
+     * Return a subscription component name
+     *
+     * @param subscriptionName the subscription name to look up
+     * @return subscription component name
+     */
+    public String findComponentNameBy(final String subscriptionName) {
+        final SubscriptionDescriptorDefinition first = registry
+                .stream()
+                .filter(subscriptionDescriptorDefinition -> isSubscriptionNameExist(subscriptionName, subscriptionDescriptorDefinition))
+                .findFirst()
+                .orElseThrow(() -> new RegistryException(format("Failed to find service component name in registry for subscription '%s' ", subscriptionName)));
+        return first.getServiceComponent();
+    }
+
+    private boolean isSubscriptionNameExist(final String subscriptionName, final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition) {
+        return subscriptionDescriptorDefinition
+                .getSubscriptions()
+                .stream()
+                .anyMatch(subscription1 -> subscription1.getName().equals(subscriptionName));
+    }
+
+    public Set<SubscriptionDescriptorDefinition> subscriptionDescriptorDefinitions() {
+        return registry;
     }
 }

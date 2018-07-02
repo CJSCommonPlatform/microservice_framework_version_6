@@ -12,9 +12,10 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 
 /**
- * Interceptor to apply the Event Buffer service and stream returned events to the interceptor
- * chain.
+ * @deprecated This class should no longer be used, the SubscriptionManager now handles event
+ * buffering
  */
+@Deprecated
 public class EventBufferInterceptor implements Interceptor {
 
     private static final int FIRST_CONTEXT = 0;

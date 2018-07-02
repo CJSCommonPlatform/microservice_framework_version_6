@@ -45,8 +45,9 @@
             <artifactId>framework-api-messaging-adapter</artifactId>
         </dependency>
         <dependency>
-            <groupId>uk.gov.justice.framework-api</groupId>
-            <artifactId>framework-api-subscription</artifactId>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>event-buffer-api</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <!--Test Dependencies-->

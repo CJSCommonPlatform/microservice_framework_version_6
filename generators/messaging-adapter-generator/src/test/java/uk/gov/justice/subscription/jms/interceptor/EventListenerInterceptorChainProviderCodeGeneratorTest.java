@@ -10,7 +10,6 @@ import static uk.gov.justice.services.test.utils.core.compiler.JavaCompilerUtili
 import static uk.gov.justice.subscription.jms.core.ClassNameFactory.EVENT_FILTER_INTERCEPTOR;
 import static uk.gov.justice.subscription.jms.core.ClassNameFactory.EVENT_LISTENER_INTERCEPTOR_CHAIN_PROVIDER;
 
-import uk.gov.justice.services.components.event.listener.interceptors.EventBufferInterceptor;
 import uk.gov.justice.services.core.interceptor.InterceptorChainEntry;
 import uk.gov.justice.services.core.interceptor.InterceptorChainEntryProvider;
 import uk.gov.justice.subscription.jms.core.ClassNameFactory;
@@ -71,7 +70,6 @@ public class EventListenerInterceptorChainProviderCodeGeneratorTest {
         assertThat(interceptorChainEntryProvider.component(), is(componentName));
 
         final List<InterceptorChainEntry> interceptorChainEntries = interceptorChainEntryProvider.interceptorChainTypes();
-        assertThat(interceptorChainEntries, hasItem(new InterceptorChainEntry(1000, EventBufferInterceptor.class)));
         assertThat(interceptorChainEntries, hasItem(new InterceptorChainEntry(2000, StubEventFilterInterceptor.class)));
     }
 

@@ -2,19 +2,13 @@ package uk.gov.justice.services.test.utils.core.matchers;
 
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.not;
-
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.Description;
-
-import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-
-import org.junit.Test;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.isStatus;
+
+import org.hamcrest.Description;
+import org.junit.Test;
 
 public class ResponseStatusMatcherTest {
 

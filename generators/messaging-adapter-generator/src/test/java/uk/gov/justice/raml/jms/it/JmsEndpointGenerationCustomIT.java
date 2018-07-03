@@ -15,7 +15,8 @@ import uk.gov.justice.api.CustomEventListenerPeopleEventEventListenerInterceptor
 import uk.gov.justice.api.CustomEventListenerPeopleEventEventValidationInterceptor;
 import uk.gov.justice.api.CustomEventListenerPeopleEventJmsListener;
 import uk.gov.justice.api.mapper.ListenerMediaTypeToSchemaIdMapper;
-import uk.gov.justice.schema.catalog.CatalogProducer;
+import uk.gov.justice.schema.service.CatalogProducer;
+import uk.gov.justice.schema.service.SchemaCatalogResolverProducer;
 import uk.gov.justice.schema.service.SchemaCatalogService;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsParameterChecker;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsProcessor;
@@ -25,7 +26,6 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.json.BackwardsCompatibleJsonSchemaValidator;
-import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
 import uk.gov.justice.services.core.json.DefaultJsonValidationLoggerHelper;
 import uk.gov.justice.services.core.json.FileBasedJsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
@@ -91,6 +91,7 @@ public class JmsEndpointGenerationCustomIT extends AbstractJmsAdapterGenerationI
             DefaultJsonObjectEnvelopeConverter.class,
             FileBasedJsonSchemaValidator.class,
             JsonSchemaLoader.class,
+            SchemaCatalogResolverProducer.class,
             LoggerProducer.class,
             AllowAllEventFilter.class,
             DefaultJmsParameterChecker.class,
@@ -98,7 +99,6 @@ public class JmsEndpointGenerationCustomIT extends AbstractJmsAdapterGenerationI
             DefaultJmsMessageLoggerHelper.class,
             DefaultTraceLogger.class,
             DefaultJsonValidationLoggerHelper.class,
-            DefaultFileSystemUrlResolverStrategy.class,
 
             ListenerMediaTypeToSchemaIdMapper.class,
             SchemaCatalogAwareJsonSchemaValidator.class,
@@ -113,6 +113,7 @@ public class JmsEndpointGenerationCustomIT extends AbstractJmsAdapterGenerationI
 
             CatalogProducer.class,
             SchemaCatalogService.class,
+            SchemaCatalogResolverProducer.class,
 
             DefaultMediaTypesMappingCache.class,
             ActionNameToMediaTypesMappingObserver.class,

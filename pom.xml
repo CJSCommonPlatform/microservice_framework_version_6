@@ -7,7 +7,7 @@
     <parent>
         <groupId>uk.gov.justice</groupId>
         <artifactId>maven-framework-parent-pom</artifactId>
-        <version>1.12.3</version>
+        <version>1.13.0</version>
     </parent>
 
     <groupId>uk.gov.justice.services</groupId>
@@ -55,8 +55,9 @@
         <raml-maven-plugin.version>1.6.3</raml-maven-plugin.version>
         <test-utils.version>1.17.3</test-utils.version>
         <utilities.version>1.13.2</utilities.version>
-        <generator-maven-plugin.version>2.5.1</generator-maven-plugin.version>
-        <framework-api.version>3.0.0-M13</framework-api.version>
+        <generator-maven-plugin.version>2.6.0</generator-maven-plugin.version>
+        <json-schema-catalog.version>1.3.2</json-schema-catalog.version>
+        <framework-api.version>3.0.0-M14</framework-api.version>
     </properties>
 
     <dependencyManagement>

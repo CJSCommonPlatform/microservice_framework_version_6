@@ -9,6 +9,7 @@ import uk.gov.justice.api.subscription.Service2EventListenerAnotherPeopleEventEv
 import uk.gov.justice.api.subscription.Service2EventListenerAnotherPeopleEventEventValidationInterceptor;
 import uk.gov.justice.api.subscription.Service2EventListenerAnotherPeopleEventJmsListener;
 import uk.gov.justice.api.subscription.Service2EventProcessorStructureEventJmsListener;
+import uk.gov.justice.schema.service.SchemaCatalogResolverProducer;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsParameterChecker;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsProcessor;
 import uk.gov.justice.services.adapter.messaging.DefaultSubscriptionJmsProcessor;
@@ -42,7 +43,6 @@ import uk.gov.justice.services.core.interceptor.DefaultInterceptorChainProcessor
 import uk.gov.justice.services.core.interceptor.InterceptorCache;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
-import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
 import uk.gov.justice.services.core.json.DefaultJsonValidationLoggerHelper;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
@@ -121,6 +121,7 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
             DefaultJmsParameterChecker.class,
             JmsAdapterToHandlerIT.TestServiceContextNameProvider.class,
             JsonSchemaLoader.class,
+            SchemaCatalogResolverProducer.class,
             StringToJsonObjectConverter.class,
             DefaultJsonObjectEnvelopeConverter.class,
             ObjectToJsonValueConverter.class,
@@ -145,7 +146,6 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
             DefaultJmsMessageLoggerHelper.class,
             DefaultTraceLogger.class,
 
-            DefaultFileSystemUrlResolverStrategy.class,
             DefaultJsonValidationLoggerHelper.class,
 
             DefaultNameToMediaTypeConverter.class,

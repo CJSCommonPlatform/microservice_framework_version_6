@@ -15,7 +15,8 @@ import uk.gov.justice.api.QueryApiRestExampleApplication;
 import uk.gov.justice.api.mapper.DefaultQueryApiUsersResourceActionMapper;
 import uk.gov.justice.api.mapper.DefaultQueryApiUsersUserIdResourceActionMapper;
 import uk.gov.justice.api.mapper.RestAdapterGeneratorMediaTypeToSchemaIdMapper;
-import uk.gov.justice.schema.catalog.CatalogProducer;
+import uk.gov.justice.schema.service.CatalogProducer;
+import uk.gov.justice.schema.service.SchemaCatalogResolverProducer;
 import uk.gov.justice.schema.service.SchemaCatalogService;
 import uk.gov.justice.services.adapter.rest.application.CommonProviders;
 import uk.gov.justice.services.adapter.rest.application.DefaultCommonProviders;
@@ -42,7 +43,6 @@ import uk.gov.justice.services.core.envelope.EnvelopeInspector;
 import uk.gov.justice.services.core.envelope.MediaTypeProvider;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.json.BackwardsCompatibleJsonSchemaValidator;
-import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
 import uk.gov.justice.services.core.json.DefaultJsonValidationLoggerHelper;
 import uk.gov.justice.services.core.json.FileBasedJsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
@@ -170,7 +170,6 @@ public class DefaultUsersUserIdResourceIT {
             ValidParameterCollectionBuilderFactory.class,
             DefaultTraceLogger.class,
             DefaultHttpTraceLoggerHelper.class,
-            DefaultFileSystemUrlResolverStrategy.class,
             RestAdapterGeneratorMediaTypeToSchemaIdMapper.class,
             SchemaCatalogAwareJsonSchemaValidator.class,
             PayloadExtractor.class,
@@ -184,6 +183,7 @@ public class DefaultUsersUserIdResourceIT {
 
             CatalogProducer.class,
             SchemaCatalogService.class,
+            SchemaCatalogResolverProducer.class,
 
             DefaultMediaTypesMappingCache.class,
             ActionNameToMediaTypesMappingObserver.class,

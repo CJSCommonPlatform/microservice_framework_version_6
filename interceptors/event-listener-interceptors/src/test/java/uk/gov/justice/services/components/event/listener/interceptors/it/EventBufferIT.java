@@ -12,7 +12,8 @@ import static uk.gov.justice.services.core.interceptor.InterceptorContext.interc
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
 
-import uk.gov.justice.schema.catalog.CatalogProducer;
+import uk.gov.justice.schema.service.CatalogProducer;
+import uk.gov.justice.schema.service.SchemaCatalogResolverProducer;
 import uk.gov.justice.schema.service.SchemaCatalogService;
 import uk.gov.justice.services.common.configuration.GlobalValueProducer;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
@@ -49,7 +50,6 @@ import uk.gov.justice.services.core.interceptor.InterceptorChainObserver;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
 import uk.gov.justice.services.core.json.BackwardsCompatibleJsonSchemaValidator;
-import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
 import uk.gov.justice.services.core.json.FileBasedJsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.json.PayloadExtractor;
@@ -66,8 +66,8 @@ import uk.gov.justice.services.core.requester.RequesterProducer;
 import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.event.buffer.core.repository.streambuffer.EventBufferEvent;
 import uk.gov.justice.services.event.buffer.core.repository.streambuffer.EventBufferJdbcRepository;
-import uk.gov.justice.services.event.buffer.core.repository.subscription.SubscriptionJdbcRepository;
 import uk.gov.justice.services.event.buffer.core.repository.subscription.Subscription;
+import uk.gov.justice.services.event.buffer.core.repository.subscription.SubscriptionJdbcRepository;
 import uk.gov.justice.services.event.buffer.core.service.BufferInitialisationStrategyProducer;
 import uk.gov.justice.services.event.buffer.core.service.ConsecutiveEventBufferService;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
@@ -186,8 +186,6 @@ public class EventBufferIT {
             BeanInstantiater.class,
             UtcClock.class,
 
-            DefaultFileSystemUrlResolverStrategy.class,
-
             GlobalValueProducer.class,
             EnvelopeValidationExceptionHandlerProducer.class,
             FileBasedJsonSchemaValidator.class,
@@ -206,6 +204,7 @@ public class EventBufferIT {
 
             CatalogProducer.class,
             SchemaCatalogService.class,
+            SchemaCatalogResolverProducer.class,
 
             DefaultMediaTypesMappingCache.class,
             ActionNameToMediaTypesMappingObserver.class,
@@ -363,8 +362,8 @@ public class EventBufferIT {
                         streamId,
                         4L,
                         envelope().with(metadataOf(metadataId4, EVENT_ABC)
-                                        .withStreamId(streamId)
-                                        .withVersion(4L))
+                                .withStreamId(streamId)
+                                .withVersion(4L))
                                 .toJsonString(),
                         SOURCE
 
@@ -376,15 +375,14 @@ public class EventBufferIT {
                         streamId,
                         5L,
                         envelope().with(
-                                        metadataOf(metadataId5, EVENT_ABC)
-                                                .withStreamId(streamId).withVersion(5L))
+                                metadataOf(metadataId5, EVENT_ABC)
+                                        .withStreamId(streamId).withVersion(5L))
                                 .toJsonString(),
                         SOURCE
                 )
         );
 
         interceptorChainProcessor.process(interceptorContextWithInput(jsonEnvelope));
-
 
 
         final List<EventBufferEvent> eventBufferEvents = jdbcStreamBufferRepository.findStreamByIdAndSource(streamId, SOURCE).collect(toList());

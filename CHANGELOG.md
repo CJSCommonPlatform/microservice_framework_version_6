@@ -28,6 +28,69 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 - Integration Tests now use a running local instance of Postgres, rather than using an in memory database
 - Updated common-bom version to 1.27.0 to fix apache tika security issues
 - Moved EventBuffer into DefaultSubscriptionManager
+- Add SchemaCatalogResolver to JsonSchemaLoader for resolving file base schemas with the schema catalog
+
+## [4.2.2] - 2018-07-05
+### Changed
+- Add SchemaCatalogResolver to JsonSchemaLoader for resolving file base schemas with the schema catalog
+
+## [4.2.1] - 2018-06-21
+### Changed
+- Updated framework-api version to 2.1.2 to fix apache tika security issues
+
+## [4.2.0] - 2018-06-21
+### Added
+- Added a page size when reading stream of events
+### Changed
+- Updated framework-api to 2.1.1
+- Updated common-bom version to 1.27.0 to fix apache tika security issues
+
+## [4.1.2] - 2018-06-11
+### Fixed
+- Fix incorrect insertion of stream status table containing one record for unknown and correct source
+
+## [4.1.1] - 2018-06-05
+### Fixed
+- Update of stream status table now handles a source column of 'unknown'
+
+## [4.1.0] - 2018-05-24
+### Added
+- Update JdbcEventRepository to return all active stream ids
+
+## [4.0.7] - 2018-05-22
+### Fixed
+- Event Buffer stream status version update issue
+
+## [4.0.6] - 2018-05-21
+### Fixed
+- Schema Validation Exception not caught error 
+
+## [4.0.5] - 2018-05-18
+### Fixed
+- Upgrade parent pom to fix upgrade of Jackson 2.8.11 
+
+### Changed
+- Reduce the logging level for not using schema catalog
+
+## [4.0.4] - 2018-05-17
+### Changed
+- Upgrade Jackson to 2.8.11 to fix Jackson security issues 
+
+## [4.0.3] - 2018-05-10
+### Changed
+- Makes TestDataSourceFactory lock rows in the same way as postgresql
+- Makes TestDataSourceFactory more extensible through overloaded createDataSource methods
+### Fixed
+- Tests for test-utils-pseristence were not in correct maven file structure so unused
+- Minor fixes to test-utils-pseristence tests where components have changed
+
+## [4.0.2] - 2018-05-02
+### Changed
+- Caches mapping between media types and action names for the schema catalog are now lazy loaded
+
+## [4.0.1] - 2018-04-20
+### Added
+- StreamId now persisted by enveloper for metadata
 
 ## [4.0.0] - 2018-03-09
 

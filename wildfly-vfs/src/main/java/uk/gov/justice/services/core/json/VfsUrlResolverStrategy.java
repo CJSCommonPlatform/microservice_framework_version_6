@@ -11,6 +11,10 @@ import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;
 
+/**
+ * @deprecated No longer required by Schema file validation
+ */
+@Deprecated
 @ApplicationScoped
 @Alternative
 @Priority(200)

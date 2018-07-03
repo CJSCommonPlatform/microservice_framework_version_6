@@ -12,7 +12,8 @@ import static uk.gov.justice.services.core.annotation.Component.QUERY_CONTROLLER
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
 
-import uk.gov.justice.schema.catalog.CatalogProducer;
+import uk.gov.justice.schema.service.CatalogProducer;
+import uk.gov.justice.schema.service.SchemaCatalogResolverProducer;
 import uk.gov.justice.schema.service.SchemaCatalogService;
 import uk.gov.justice.services.common.configuration.GlobalValueProducer;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
@@ -42,7 +43,6 @@ import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.extension.ServiceComponentScanner;
 import uk.gov.justice.services.core.it.util.producer.TestEnvelopeValidationExceptionHandlerProducer;
 import uk.gov.justice.services.core.json.BackwardsCompatibleJsonSchemaValidator;
-import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
 import uk.gov.justice.services.core.json.FileBasedJsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.json.PayloadExtractor;
@@ -136,7 +136,6 @@ public class SenderRequesterHandlerIT {
             SystemUserUtil.class,
             EmptySystemUserProvider.class,
             UtcClock.class,
-            DefaultFileSystemUrlResolverStrategy.class,
             DispatcherFactory.class,
             EnvelopePayloadTypeConverter.class,
             JsonEnvelopeRepacker.class,
@@ -157,8 +156,9 @@ public class SenderRequesterHandlerIT {
             DefaultSchemaIdMappingCache.class,
             SchemaIdMappingObserver.class,
 
-            CatalogProducer.class,
             SchemaCatalogService.class,
+            CatalogProducer.class,
+            SchemaCatalogResolverProducer.class,
 
             DefaultMediaTypesMappingCache.class,
             ActionNameToMediaTypesMappingObserver.class,

@@ -13,7 +13,8 @@ import uk.gov.justice.api.Service2EventListenerPeopleEventEventValidationInterce
 import uk.gov.justice.api.Service2EventListenerPeopleEventJmsListener;
 import uk.gov.justice.api.Service2EventProcessorStructureEventJmsListener;
 import uk.gov.justice.api.mapper.ListenerMediaTypeToSchemaIdMapper;
-import uk.gov.justice.schema.catalog.CatalogProducer;
+import uk.gov.justice.schema.service.CatalogProducer;
+import uk.gov.justice.schema.service.SchemaCatalogResolverProducer;
 import uk.gov.justice.schema.service.SchemaCatalogService;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsParameterChecker;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsProcessor;
@@ -23,7 +24,6 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.json.BackwardsCompatibleJsonSchemaValidator;
-import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
 import uk.gov.justice.services.core.json.DefaultJsonValidationLoggerHelper;
 import uk.gov.justice.services.core.json.FileBasedJsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
@@ -33,8 +33,8 @@ import uk.gov.justice.services.core.mapping.ActionNameToMediaTypesMappingObserve
 import uk.gov.justice.services.core.mapping.DefaultMediaTypesMappingCache;
 import uk.gov.justice.services.core.mapping.DefaultNameToMediaTypeConverter;
 import uk.gov.justice.services.core.mapping.DefaultSchemaIdMappingCache;
-import uk.gov.justice.services.core.mapping.MediaTypesMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.MediaTypeToSchemaIdMapper;
+import uk.gov.justice.services.core.mapping.MediaTypesMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingObserver;
 import uk.gov.justice.services.event.buffer.api.AllowAllEventFilter;
@@ -101,6 +101,7 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
             DefaultJsonObjectEnvelopeConverter.class,
             FileBasedJsonSchemaValidator.class,
             JsonSchemaLoader.class,
+            SchemaCatalogResolverProducer.class,
             LoggerProducer.class,
             AllowAllEventFilter.class,
             Service2EventListenerPeopleEventEventValidationInterceptor.class,
@@ -109,7 +110,6 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
             DefaultJmsMessageLoggerHelper.class,
             DefaultTraceLogger.class,
             DefaultJsonValidationLoggerHelper.class,
-            DefaultFileSystemUrlResolverStrategy.class,
 
             ListenerMediaTypeToSchemaIdMapper.class,
             SchemaCatalogAwareJsonSchemaValidator.class,
@@ -124,6 +124,7 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
 
             CatalogProducer.class,
             SchemaCatalogService.class,
+            SchemaCatalogResolverProducer.class,
 
             DefaultMediaTypesMappingCache.class,
             ActionNameToMediaTypesMappingObserver.class,

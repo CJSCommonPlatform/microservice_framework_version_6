@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [unreleased]
 
+## [4.2.2] - 2018-07-05
+### Changed
+- Add SchemaCatalogResolver to JsonSchemaLoader for resolving file base schemas with the schema catalog
+
 ## [4.2.1] - 2018-06-21
 ### Changed
 - Updated framework-api version to 2.1.2 to fix apache tika security issues

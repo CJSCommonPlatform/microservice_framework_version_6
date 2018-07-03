@@ -8,7 +8,8 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
 
-import uk.gov.justice.schema.catalog.CatalogProducer;
+import uk.gov.justice.schema.service.CatalogProducer;
+import uk.gov.justice.schema.service.SchemaCatalogResolverProducer;
 import uk.gov.justice.schema.service.SchemaCatalogService;
 import uk.gov.justice.services.common.configuration.GlobalValueProducer;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -31,7 +32,6 @@ import uk.gov.justice.services.core.envelope.MediaTypeProvider;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.json.BackwardsCompatibleJsonSchemaValidator;
-import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
 import uk.gov.justice.services.core.json.FileBasedJsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.json.PayloadExtractor;
@@ -117,8 +117,6 @@ public class RemoteCommandControllerIT {
             ObjectMapperProducer.class,
             DefaultTraceLogger.class,
 
-            DefaultFileSystemUrlResolverStrategy.class,
-
             SchemaCatalogAwareJsonSchemaValidator.class,
             PayloadExtractor.class,
             DefaultNameToMediaTypeConverter.class,
@@ -127,6 +125,7 @@ public class RemoteCommandControllerIT {
 
             CatalogProducer.class,
             SchemaCatalogService.class,
+            SchemaCatalogResolverProducer.class,
 
             DefaultMediaTypesMappingCache.class,
             ActionNameToMediaTypesMappingObserver.class,

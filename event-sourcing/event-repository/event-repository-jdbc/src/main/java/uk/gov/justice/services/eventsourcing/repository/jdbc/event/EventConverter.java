@@ -38,7 +38,7 @@ public class EventConverter {
 
         return new Event(eventMetadata.id(),
                 eventMetadata.streamId().orElseThrow(() -> new InvalidStreamIdException("StreamId missing in envelope.")),
-                eventMetadata.version().orElse(null),
+                eventMetadata.position().orElse(null),
                 eventMetadata.name(),
                 envelope.metadata().asJsonObject().toString(),
                 extractPayloadAsString(envelope),

@@ -14,10 +14,10 @@ import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuil
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithDefaults;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUIDAndName;
 
-import uk.gov.justice.services.event.buffer.core.repository.streambuffer.StreamBufferEvent;
-import uk.gov.justice.services.event.buffer.core.repository.streambuffer.StreamBufferJdbcRepository;
-import uk.gov.justice.services.event.buffer.core.repository.streamstatus.StreamStatus;
-import uk.gov.justice.services.event.buffer.core.repository.streamstatus.StreamStatusJdbcRepository;
+import uk.gov.justice.services.event.buffer.core.repository.streambuffer.EventBufferEvent;
+import uk.gov.justice.services.event.buffer.core.repository.streambuffer.EventBufferJdbcRepository;
+import uk.gov.justice.services.event.buffer.core.repository.subscription.SubscriptionJdbcRepository;
+import uk.gov.justice.services.event.buffer.core.repository.subscription.Subscription;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.test.utils.common.stream.StreamCloseSpy;
@@ -41,10 +41,10 @@ public class ConsecutiveEventBufferServiceTest {
     private Logger logger;
 
     @Mock
-    private StreamStatusJdbcRepository streamStatusRepository;
+    private SubscriptionJdbcRepository subscriptionJdbcRepository;
 
     @Mock
-    private StreamBufferJdbcRepository streamBufferRepository;
+    private EventBufferJdbcRepository streamBufferRepository;
 
     @Mock
     private JsonObjectEnvelopeConverter jsonObjectEnvelopeConverter;
@@ -151,7 +151,7 @@ public class ConsecutiveEventBufferServiceTest {
         when(streamBufferRepository.findStreamByIdAndSource(streamId, source)).thenReturn(Stream.empty());
 
         bufferService.currentOrderedEventsWith(incomingEvent);
-        verify(streamStatusRepository).update(new StreamStatus(streamId, 5L, source));
+        verify(subscriptionJdbcRepository).update(new Subscription(streamId, 5L, source));
 
     }
 
@@ -170,13 +170,13 @@ public class ConsecutiveEventBufferServiceTest {
                         .build();
 
         when(bufferInitialisationStrategy.initialiseBuffer(streamId, source)).thenReturn(4L);
-        when(streamStatusRepository.findByStreamIdAndSource(streamId, source)).thenReturn(Optional.of(new StreamStatus(streamId, 4L, source)));
+        when(subscriptionJdbcRepository.findByStreamIdAndSource(streamId, source)).thenReturn(Optional.of(new Subscription(streamId, 4L, source)));
 
         when(jsonObjectEnvelopeConverter.asJsonString(incomingEvent)).thenReturn("someStringRepresentation");
 
         final Stream<JsonEnvelope> returnedEvents = bufferService.currentOrderedEventsWith(incomingEvent);
 
-        verify(streamBufferRepository).insert(new StreamBufferEvent(streamId, 6L, "someStringRepresentation", source));
+        verify(streamBufferRepository).insert(new EventBufferEvent(streamId, 6L, "someStringRepresentation", source));
         assertThat(returnedEvents, empty());
 
     }
@@ -191,13 +191,13 @@ public class ConsecutiveEventBufferServiceTest {
         when(bufferInitialisationStrategy.initialiseBuffer(eq(streamId), eq(source))).thenReturn(2L);
 
         when(streamBufferRepository.findStreamByIdAndSource(streamId, source)).thenReturn(
-                Stream.of(new StreamBufferEvent(streamId, 4L, "someEventContent4", "source_4"),
-                        new StreamBufferEvent(streamId, 5L, "someEventContent5", "source_5"),
-                        new StreamBufferEvent(streamId, 6L, "someEventContent6", "source_6"),
-                        new StreamBufferEvent(streamId, 8L, "someEventContent8", "source_8"),
-                        new StreamBufferEvent(streamId, 9L, "someEventContent9", "source_9"),
-                        new StreamBufferEvent(streamId, 10L, "someEventContent10", "source_10"),
-                        new StreamBufferEvent(streamId, 11L, "someEventContent11", "source_11")));
+                Stream.of(new EventBufferEvent(streamId, 4L, "someEventContent4", "source_4"),
+                        new EventBufferEvent(streamId, 5L, "someEventContent5", "source_5"),
+                        new EventBufferEvent(streamId, 6L, "someEventContent6", "source_6"),
+                        new EventBufferEvent(streamId, 8L, "someEventContent8", "source_8"),
+                        new EventBufferEvent(streamId, 9L, "someEventContent9", "source_9"),
+                        new EventBufferEvent(streamId, 10L, "someEventContent10", "source_10"),
+                        new EventBufferEvent(streamId, 11L, "someEventContent11", "source_11")));
 
         final JsonEnvelope bufferedEvent4 = envelope().build();
         final JsonEnvelope bufferedEvent5 = envelope().build();
@@ -232,8 +232,8 @@ public class ConsecutiveEventBufferServiceTest {
         final StreamCloseSpy sourceStreamSpy = new StreamCloseSpy();
 
         when(streamBufferRepository.findStreamByIdAndSource(streamId, source)).thenReturn(
-                Stream.of(new StreamBufferEvent(streamId, 4L, "someEventContent4", source),
-                        new StreamBufferEvent(streamId, 8L, "someEventContent8", source)).onClose(sourceStreamSpy)
+                Stream.of(new EventBufferEvent(streamId, 4L, "someEventContent4", source),
+                        new EventBufferEvent(streamId, 8L, "someEventContent8", source)).onClose(sourceStreamSpy)
         );
 
         final JsonEnvelope bufferedEvent4 = mock(JsonEnvelope.class);
@@ -262,9 +262,9 @@ public class ConsecutiveEventBufferServiceTest {
         when(bufferInitialisationStrategy.initialiseBuffer(eq(streamId), eq(source))).thenReturn(2L);
 
 
-        final StreamBufferEvent event4 = new StreamBufferEvent(streamId, 4L, "someEventContent4", "source_1");
-        final StreamBufferEvent event5 = new StreamBufferEvent(streamId, 5L, "someEventContent5", "source_2");
-        final StreamBufferEvent event6 = new StreamBufferEvent(streamId, 6L, "someEventContent6", "source_3");
+        final EventBufferEvent event4 = new EventBufferEvent(streamId, 4L, "someEventContent4", "source_1");
+        final EventBufferEvent event5 = new EventBufferEvent(streamId, 5L, "someEventContent5", "source_2");
+        final EventBufferEvent event6 = new EventBufferEvent(streamId, 6L, "someEventContent6", "source_3");
 
         when(streamBufferRepository.findStreamByIdAndSource(streamId, source)).thenReturn(
                 Stream.of(event4, event5, event6));

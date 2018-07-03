@@ -19,14 +19,14 @@ import javax.inject.Inject;
 import javax.sql.DataSource;
 
 @ApplicationScoped
-public class StreamBufferJdbcRepository {
+public class EventBufferJdbcRepository {
 
-    private static final String INSERT = "INSERT INTO stream_buffer (stream_id, version, event, source) VALUES (?, ?, ?, ?)";
-    private static final String SELECT_STREAM_BUFFER_BY_STREAM_ID_AND_SOURCE = "SELECT stream_id, version, event, source FROM stream_buffer WHERE stream_id=? AND source=? ORDER BY version";
-    private static final String DELETE_BY_STREAM_ID_VERSION = "DELETE FROM stream_buffer WHERE stream_id=? AND version=? AND source=?";
+    private static final String INSERT = "INSERT INTO event_buffer (stream_id, position, event, source) VALUES (?, ?, ?, ?)";
+    private static final String SELECT_STREAM_BUFFER_BY_STREAM_ID_AND_SOURCE = "SELECT stream_id, position, event, source FROM event_buffer WHERE stream_id=? AND source=? ORDER BY position";
+    private static final String DELETE_BY_STREAM_ID_POSITION = "DELETE FROM event_buffer WHERE stream_id=? AND position=? AND source=?";
 
     private static final String STREAM_ID = "stream_id";
-    private static final String VERSION = "version";
+    private static final String POSITION = "position";
     private static final String EVENT = "event";
     private static final String SOURCE = "source";
 
@@ -38,9 +38,9 @@ public class StreamBufferJdbcRepository {
 
     private DataSource dataSource;
 
-    public StreamBufferJdbcRepository() {}
+    public EventBufferJdbcRepository() {}
 
-    public StreamBufferJdbcRepository(final DataSource dataSource, final JdbcRepositoryHelper jdbcRepositoryHelper) {
+    public EventBufferJdbcRepository(final DataSource dataSource, final JdbcRepositoryHelper jdbcRepositoryHelper) {
         this.dataSource = dataSource;
         this.jdbcRepositoryHelper = jdbcRepositoryHelper;
     }
@@ -52,10 +52,10 @@ public class StreamBufferJdbcRepository {
     }
 
 
-    public void insert(final StreamBufferEvent bufferedEvent) {
+    public void insert(final EventBufferEvent bufferedEvent) {
         try (final PreparedStatementWrapper ps = jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, INSERT)) {
             ps.setObject(1, bufferedEvent.getStreamId());
-            ps.setLong(2, bufferedEvent.getVersion());
+            ps.setLong(2, bufferedEvent.getPosition());
             ps.setString(3, bufferedEvent.getEvent());
             ps.setString(4, bufferedEvent.getSource());
             ps.executeUpdate();
@@ -64,7 +64,7 @@ public class StreamBufferJdbcRepository {
         }
     }
 
-    public Stream<StreamBufferEvent> findStreamByIdAndSource(final UUID id, final String source) {
+    public Stream<EventBufferEvent> findStreamByIdAndSource(final UUID id, final String source) {
         try {
             final PreparedStatementWrapper ps = jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, SELECT_STREAM_BUFFER_BY_STREAM_ID_AND_SOURCE);
             ps.setObject(1, id);
@@ -77,24 +77,24 @@ public class StreamBufferJdbcRepository {
         }
     }
 
-    public void remove(final StreamBufferEvent streamBufferEvent) {
+    public void remove(final EventBufferEvent eventBufferEvent) {
 
-        try (final PreparedStatementWrapper ps = jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, DELETE_BY_STREAM_ID_VERSION)) {
-            ps.setObject(1, streamBufferEvent.getStreamId());
-            ps.setLong(2, streamBufferEvent.getVersion());
-            ps.setString(3, streamBufferEvent.getSource());
+        try (final PreparedStatementWrapper ps = jdbcRepositoryHelper.preparedStatementWrapperOf(dataSource, DELETE_BY_STREAM_ID_POSITION)) {
+            ps.setObject(1, eventBufferEvent.getStreamId());
+            ps.setLong(2, eventBufferEvent.getPosition());
+            ps.setString(3, eventBufferEvent.getSource());
             ps.executeUpdate();
         } catch (SQLException e) {
-            throw new JdbcRepositoryException(format("Exception while removing event from the buffer: %s", streamBufferEvent), e);
+            throw new JdbcRepositoryException(format("Exception while removing event from the buffer: %s", eventBufferEvent), e);
         }
 
     }
 
-    private Function<ResultSet, StreamBufferEvent> entityFromFunction() {
+    private Function<ResultSet, EventBufferEvent> entityFromFunction() {
         return resultSet -> {
             try {
-                return new StreamBufferEvent((UUID) resultSet.getObject(STREAM_ID),
-                                                    resultSet.getLong(VERSION),
+                return new EventBufferEvent((UUID) resultSet.getObject(STREAM_ID),
+                                                    resultSet.getLong(POSITION),
                                                     resultSet.getString(EVENT),
                                                     resultSet.getString(SOURCE)
                         );

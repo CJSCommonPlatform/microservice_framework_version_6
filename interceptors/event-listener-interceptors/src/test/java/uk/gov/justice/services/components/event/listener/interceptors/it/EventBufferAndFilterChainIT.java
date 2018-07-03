@@ -20,8 +20,8 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.components.event.listener.interceptors.EventBufferInterceptor;
 import uk.gov.justice.services.components.event.listener.interceptors.EventFilterInterceptor;
-import uk.gov.justice.services.components.event.listener.interceptors.it.util.repository.StreamBufferOpenEjbAwareJdbcRepository;
-import uk.gov.justice.services.components.event.listener.interceptors.it.util.repository.StreamStatusOpenEjbAwareJdbcRepository;
+import uk.gov.justice.services.components.event.listener.interceptors.it.util.repository.EventBufferOpenEjbAwareJdbcRepository;
+import uk.gov.justice.services.components.event.listener.interceptors.it.util.repository.SubscriptionOpenEjbAwareJdbcRepository;
 import uk.gov.justice.services.core.accesscontrol.AccessControlFailureMessageGenerator;
 import uk.gov.justice.services.core.accesscontrol.AllowAllPolicyEvaluator;
 import uk.gov.justice.services.core.accesscontrol.DefaultAccessControlService;
@@ -181,8 +181,8 @@ public class EventBufferAndFilterChainIT {
             DefaultTraceLogger.class,
             JdbcRepositoryHelper.class,
             ViewStoreJdbcDataSourceProvider.class,
-            StreamBufferOpenEjbAwareJdbcRepository.class,
-            StreamStatusOpenEjbAwareJdbcRepository.class,
+            EventBufferOpenEjbAwareJdbcRepository.class,
+            SubscriptionOpenEjbAwareJdbcRepository.class,
 
             SchemaCatalogAwareJsonSchemaValidator.class,
             PayloadExtractor.class,
@@ -257,9 +257,9 @@ public class EventBufferAndFilterChainIT {
 
         assertThat(abcEventHandler.recordedEnvelopes(), not(empty()));
         assertThat(abcEventHandler.recordedEnvelopes().get(0).metadata().id(), equalTo(metadataId1));
-        assertThat(abcEventHandler.recordedEnvelopes().get(0).metadata().version(), contains(1L));
+        assertThat(abcEventHandler.recordedEnvelopes().get(0).metadata().position(), contains(1L));
         assertThat(abcEventHandler.recordedEnvelopes().get(1).metadata().id(), equalTo(metadataId3));
-        assertThat(abcEventHandler.recordedEnvelopes().get(1).metadata().version(), contains(3L));
+        assertThat(abcEventHandler.recordedEnvelopes().get(1).metadata().position(), contains(3L));
 
         assertThat(defEventHandler.recordedEnvelopes(), empty());
     }

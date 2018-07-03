@@ -30,7 +30,7 @@ public class JsonEnvelopeMetadataMatcher extends TypeSafeDiagnosingMatcher<Metad
     private Optional<String> userId = Optional.empty();
     private Optional<String> sessionId = Optional.empty();
     private Optional<UUID> streamId = Optional.empty();
-    private Optional<Long> version = Optional.empty();
+    private Optional<Long> position = Optional.empty();
     private Optional<String> clientCorrelationId = Optional.empty();
     private Optional<IsJson<Object>> jsonMatcher = Optional.empty();
 
@@ -63,7 +63,7 @@ public class JsonEnvelopeMetadataMatcher extends TypeSafeDiagnosingMatcher<Metad
         userId.ifPresent(value -> description.appendText(format("userId = %s, ", value)));
         sessionId.ifPresent(value -> description.appendText(format("sessionId = %s, ", value)));
         streamId.ifPresent(value -> description.appendText(format("streamId = %s, ", value)));
-        version.ifPresent(value -> description.appendText(format("version = %s ", value)));
+        position.ifPresent(value -> description.appendText(format("position = %s ", value)));
         clientCorrelationId.ifPresent(value -> description.appendText(format("clientCorrelationId = %s ", value)));
         jsonMatcher.ifPresent(description::appendDescriptionOf);
     }
@@ -98,8 +98,21 @@ public class JsonEnvelopeMetadataMatcher extends TypeSafeDiagnosingMatcher<Metad
         return this;
     }
 
+    public JsonEnvelopeMetadataMatcher withPosition(final Long position) {
+        this.position = Optional.of(position);
+        return this;
+    }
+
+    /**
+     * deprecated.
+     * version renamed to position. Please use <code>withPosition(...)</code> instead.
+     *
+     * @param version The position of this event
+     * @return this
+     */
+    @Deprecated // renamed to position. Please use instead
     public JsonEnvelopeMetadataMatcher withVersion(final Long version) {
-        this.version = Optional.of(version);
+        this.position = Optional.of(version);
         return this;
     }
 
@@ -125,7 +138,7 @@ public class JsonEnvelopeMetadataMatcher extends TypeSafeDiagnosingMatcher<Metad
         userId = metadata.userId();
         sessionId = metadata.sessionId();
         streamId = metadata.streamId();
-        version = metadata.version();
+        position = metadata.position();
 
         final List<UUID> causation = metadata.causation();
         causationIds = Optional.of(causation.toArray(new UUID[causation.size()]));
@@ -146,7 +159,7 @@ public class JsonEnvelopeMetadataMatcher extends TypeSafeDiagnosingMatcher<Metad
         userId = metadata.userId();
         sessionId = metadata.sessionId();
         streamId = metadata.streamId();
-        version = metadata.version();
+        position = metadata.position();
 
         final List<UUID> causation = metadata.causation();
         final UUID[] uuids = causation.toArray(new UUID[causation.size() + 1]);
@@ -188,8 +201,8 @@ public class JsonEnvelopeMetadataMatcher extends TypeSafeDiagnosingMatcher<Metad
             return false;
         }
 
-        if (versionIsSetAndDoesNotMatchWith(metadata)) {
-            description.appendText("Metadata with version = " + metadata.version().map(String::valueOf).orElse(NOT_SET));
+        if (positionIsSetAndDoesNotMatchWith(metadata)) {
+            description.appendText("Metadata with position = " + metadata.position().map(String::valueOf).orElse(NOT_SET));
             return false;
         }
 
@@ -231,8 +244,8 @@ public class JsonEnvelopeMetadataMatcher extends TypeSafeDiagnosingMatcher<Metad
         return streamId.isPresent() && !streamId.equals(metadata.streamId());
     }
 
-    private boolean versionIsSetAndDoesNotMatchWith(final Metadata metadata) {
-        return version.isPresent() && !version.equals(metadata.version());
+    private boolean positionIsSetAndDoesNotMatchWith(final Metadata metadata) {
+        return position.isPresent() && !position.equals(metadata.position());
     }
 
     private boolean clientCorrelationIdIsSetAndDoesNotMatchWith(final Metadata metadata) {

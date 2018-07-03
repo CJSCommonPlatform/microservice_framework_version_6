@@ -24,7 +24,7 @@ public class JsonEnvelopeMetadataMatcherTest {
     private static final String USER_ID = "user id";
     private static final String SESSION_ID = "session id";
     private static final UUID STREAM_ID = randomUUID();
-    private static final Long VERSION = 1L;
+    private static final Long POSITION = 1L;
     private static final String CLIENT_CORRELATION_ID = "client correlation id";
     private static final String EVENT_NAME = "event.action";
     private static final String COMMAND_ACTION = "command.action";
@@ -40,7 +40,7 @@ public class JsonEnvelopeMetadataMatcherTest {
                 .withUserId(USER_ID)
                 .withSessionId(SESSION_ID)
                 .withStreamId(STREAM_ID)
-                .withVersion(VERSION)
+                .withPosition(POSITION)
                 .withClientCorrelationId(CLIENT_CORRELATION_ID));
     }
 
@@ -135,11 +135,11 @@ public class JsonEnvelopeMetadataMatcherTest {
     @Test
     public void shouldMatchMetadataByVersion() throws Exception {
         final Metadata metadata = metadataWithRandomUUID(EVENT_NAME)
-                .withVersion(VERSION)
+                .withVersion(POSITION)
                 .build();
 
         assertThat(metadata, JsonEnvelopeMetadataMatcher.metadata()
-                .withVersion(VERSION));
+                .withVersion(POSITION));
     }
 
     @Test
@@ -271,7 +271,7 @@ public class JsonEnvelopeMetadataMatcherTest {
                 .withUserId(USER_ID)
                 .withSessionId(SESSION_ID)
                 .withStreamId(STREAM_ID)
-                .withVersion(VERSION)
+                .withVersion(POSITION)
                 .withClientCorrelationId(CLIENT_CORRELATION_ID);
     }
 }

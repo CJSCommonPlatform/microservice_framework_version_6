@@ -1,4 +1,4 @@
-package uk.gov.justice.services.event.buffer.core.repository.streamstatus;
+package uk.gov.justice.services.event.buffer.core.repository.subscription;
 
 import java.util.UUID;
 
@@ -6,17 +6,17 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
- * Entity to represent event stream status
+ * Entity to represent event subscription
  */
-public class StreamStatus {
+public class Subscription {
 
     private final UUID streamId;
-    private final long version;
+    private final long position;
     private final String source;
 
-    public StreamStatus(final UUID streamId, final long version, final String source) {
+    public Subscription(final UUID streamId, final long position, final String source) {
         this.streamId = streamId;
-        this.version = version;
+        this.position = position;
         this.source = source;
     }
 
@@ -24,8 +24,8 @@ public class StreamStatus {
         return streamId;
     }
 
-    public long getVersion() {
-        return version;
+    public long getPosition() {
+        return position;
     }
 
     public String getSource() {
@@ -34,9 +34,9 @@ public class StreamStatus {
 
     @Override
     public String toString() {
-        return "StreamStatus{" +
+        return "Subscription{" +
                 "streamId=" + streamId +
-                ", version=" + version +
+                ", position=" + position +
                 ", source='" + source + '\'' +
                 '}';
     }
@@ -47,11 +47,11 @@ public class StreamStatus {
 
         if (o == null || getClass() != o.getClass()) return false;
 
-        StreamStatus that = (StreamStatus) o;
+        Subscription that = (Subscription) o;
 
         return new EqualsBuilder()
                 .append(streamId, that.streamId)
-                .append(version, that.version)
+                .append(position, that.position)
                 .append(source, that.source)
                 .isEquals();
     }
@@ -60,7 +60,7 @@ public class StreamStatus {
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
                 .append(streamId)
-                .append(version)
+                .append(position)
                 .append(source)
                 .toHashCode();
     }

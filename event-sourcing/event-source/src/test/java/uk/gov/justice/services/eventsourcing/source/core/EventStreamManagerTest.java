@@ -337,7 +337,7 @@ public class EventStreamManagerTest {
         assertThat(clonedEvents, hasItems(systemEvent));
         final JsonEnvelope clonedEvent = clonedEvents.get(0);
         assertThat(clonedEvent.metadata().name(), is("test.events.event1"));
-        assertThat(clonedEvent.metadata().version(), is(empty()));
+        assertThat(clonedEvent.metadata().position(), is(empty()));
 
         verify(eventRepository).markEventStreamActive(clonedId, false);
     }

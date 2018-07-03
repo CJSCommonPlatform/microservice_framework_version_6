@@ -1,6 +1,6 @@
 package uk.gov.justice.services.example.cakeshop.it.helpers;
 
-import uk.gov.justice.services.event.buffer.core.repository.streamstatus.StreamStatusJdbcRepository;
+import uk.gov.justice.services.event.buffer.core.repository.subscription.SubscriptionJdbcRepository;
 import uk.gov.justice.services.eventsourcing.jdbc.snapshot.SnapshotJdbcRepository;
 import uk.gov.justice.services.eventsourcing.jdbc.snapshot.StandaloneSnapshotJdbcRepositoryFactory;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventJdbcRepository;
@@ -12,12 +12,12 @@ public class CakeShopRepositoryManager {
 
     private final DatabaseManager databaseManager = new DatabaseManager();
     private final EventRepositoryFactory eventRepositoryFactory = new EventRepositoryFactory();
-    private final StandaloneStreamStatusJdbcRepositoryFactory standaloneStreamStatusJdbcRepositoryFactory = new StandaloneStreamStatusJdbcRepositoryFactory();
+    private final StandaloneSubscriptionJdbcRepositoryFactory standaloneSubscriptionJdbcRepositoryFactory = new StandaloneSubscriptionJdbcRepositoryFactory();
     private final StandaloneSnapshotJdbcRepositoryFactory standaloneSnapshotJdbcRepositoryFactory = new StandaloneSnapshotJdbcRepositoryFactory();
 
 
     private EventJdbcRepository eventJdbcRepository;
-    private StreamStatusJdbcRepository streamStatusJdbcRepository;
+    private SubscriptionJdbcRepository subscriptionJdbcRepository;
     private SnapshotJdbcRepository snapshotJdbcRepository;
 
 
@@ -27,7 +27,7 @@ public class CakeShopRepositoryManager {
         final DataSource viewStoreDatasource = databaseManager.initViewStoreDb();
 
         eventJdbcRepository = eventRepositoryFactory.getEventJdbcRepository(eventStoreDataSource);
-        streamStatusJdbcRepository = standaloneStreamStatusJdbcRepositoryFactory.getSnapshotStreamStatusJdbcRepository(viewStoreDatasource);
+        subscriptionJdbcRepository = standaloneSubscriptionJdbcRepositoryFactory.getSnapshotSubscriptionJdbcRepository(viewStoreDatasource);
         snapshotJdbcRepository = standaloneSnapshotJdbcRepositoryFactory.getSnapshotJdbcRepository(eventStoreDataSource);
 
         databaseManager.initFileServiceDb();
@@ -37,8 +37,8 @@ public class CakeShopRepositoryManager {
         return eventJdbcRepository;
     }
 
-    public StreamStatusJdbcRepository getStreamStatusJdbcRepository() {
-        return streamStatusJdbcRepository;
+    public SubscriptionJdbcRepository getSubscriptionJdbcRepository() {
+        return subscriptionJdbcRepository;
     }
 
     public SnapshotJdbcRepository getSnapshotJdbcRepository() {

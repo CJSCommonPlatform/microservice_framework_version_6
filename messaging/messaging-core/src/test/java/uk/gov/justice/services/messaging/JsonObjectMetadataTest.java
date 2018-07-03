@@ -47,7 +47,7 @@ public class JsonObjectMetadataTest {
     private static final String UUID_SESSION_ID = "f0132298-7b79-4397-bab6-f2f5e27915f0";
     private static final String UUID_STREAM_ID = "f29e0415-3a3b-48d8-b301-d34faa58662a";
     private static final String MESSAGE_NAME = "logical.message.name";
-    private static final Long STREAM_VERSION = 99L;
+    private static final Long STREAM_POSITION = 99L;
 
     private JsonObject jsonObject;
     private Metadata metadata;
@@ -69,7 +69,7 @@ public class JsonObjectMetadataTest {
                 )
                 .add(STREAM, Json.createObjectBuilder()
                         .add(STREAM_ID, UUID_STREAM_ID)
-                        .add(VERSION, STREAM_VERSION)
+                        .add(VERSION, STREAM_POSITION)
                 )
                 .build();
         metadata = metadataFrom(jsonObject);
@@ -127,9 +127,9 @@ public class JsonObjectMetadataTest {
     }
 
     @Test
-    public void shouldReturnStreamVersion() throws Exception {
-        assertThat(metadata.version().isPresent(), is(true));
-        assertThat(metadata.version().get(), equalTo(STREAM_VERSION));
+    public void shouldReturnStreamPosition() throws Exception {
+        assertThat(metadata.position().isPresent(), is(true));
+        assertThat(metadata.position().get(), equalTo(STREAM_POSITION));
     }
 
     @Test
@@ -190,15 +190,15 @@ public class JsonObjectMetadataTest {
     @Test
     public void shouldTestEqualsAndHashCode() {
 
-        final Metadata item1 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, STREAM_VERSION);
-        final Metadata item2 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, STREAM_VERSION);
-        final Metadata item3 = metadata(UUID.randomUUID().toString(), UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, STREAM_VERSION);
-        final Metadata item4 = metadata(UUID_ID, UUID.randomUUID().toString(), UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, STREAM_VERSION);
-        final Metadata item5 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID.randomUUID().toString(), UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, STREAM_VERSION);
-        final Metadata item6 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID.randomUUID().toString(), UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, STREAM_VERSION);
-        final Metadata item7 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID.randomUUID().toString(), UUID_STREAM_ID, MESSAGE_NAME, STREAM_VERSION);
-        final Metadata item8 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID.randomUUID().toString(), MESSAGE_NAME, STREAM_VERSION);
-        final Metadata item9 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, "dummy name", STREAM_VERSION);
+        final Metadata item1 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, STREAM_POSITION);
+        final Metadata item2 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, STREAM_POSITION);
+        final Metadata item3 = metadata(UUID.randomUUID().toString(), UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, STREAM_POSITION);
+        final Metadata item4 = metadata(UUID_ID, UUID.randomUUID().toString(), UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, STREAM_POSITION);
+        final Metadata item5 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID.randomUUID().toString(), UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, STREAM_POSITION);
+        final Metadata item6 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID.randomUUID().toString(), UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, STREAM_POSITION);
+        final Metadata item7 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID.randomUUID().toString(), UUID_STREAM_ID, MESSAGE_NAME, STREAM_POSITION);
+        final Metadata item8 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID.randomUUID().toString(), MESSAGE_NAME, STREAM_POSITION);
+        final Metadata item9 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, "dummy name", STREAM_POSITION);
         final Metadata item10 = metadata(UUID_ID, UUID_CLIENT_CORRELATION, UUID_CAUSATION, UUID_USER_ID, UUID_SESSION_ID, UUID_STREAM_ID, MESSAGE_NAME, 0L);
 
         new EqualsTester()

@@ -1,6 +1,6 @@
 package uk.gov.justice.services.event.buffer.core.service;
 
-import uk.gov.justice.services.event.buffer.core.repository.streambuffer.StreamBufferEvent;
+import uk.gov.justice.services.event.buffer.core.repository.streambuffer.EventBufferEvent;
 
 import java.util.Iterator;
 import java.util.Spliterators.AbstractSpliterator;
@@ -11,12 +11,12 @@ import java.util.stream.Stream;
  * Spliterator enables to transform stream of events into a consecutive stream of events.
  * If a version gap in the eventStream is spotted then then the processing of the stream terminates.
  */
-public class ConsecutiveEventsSpliterator extends AbstractSpliterator<StreamBufferEvent> {
+public class ConsecutiveEventsSpliterator extends AbstractSpliterator<EventBufferEvent> {
     private long currentVersion;
-    private final Stream<StreamBufferEvent> eventStream;
-    private final Iterator<StreamBufferEvent> eventStreamIterator;
+    private final Stream<EventBufferEvent> eventStream;
+    private final Iterator<EventBufferEvent> eventStreamIterator;
 
-    public ConsecutiveEventsSpliterator(final Stream<StreamBufferEvent> eventStream, final long currentVersion) {
+    public ConsecutiveEventsSpliterator(final Stream<EventBufferEvent> eventStream, final long currentVersion) {
         super(Long.MAX_VALUE, ORDERED);
         this.eventStream = eventStream;
         this.currentVersion = currentVersion;
@@ -24,12 +24,12 @@ public class ConsecutiveEventsSpliterator extends AbstractSpliterator<StreamBuff
     }
 
     @Override
-    public boolean tryAdvance(final Consumer<? super StreamBufferEvent> consumer) {
+    public boolean tryAdvance(final Consumer<? super EventBufferEvent> consumer) {
         if (!eventStreamIterator.hasNext()) {
             return false;
         } else {
-            final StreamBufferEvent next = eventStreamIterator.next();
-            final long version = next.getVersion();
+            final EventBufferEvent next = eventStreamIterator.next();
+            final long version = next.getPosition();
             if (versionGapFound(version)) {
                 return false;
             } else {

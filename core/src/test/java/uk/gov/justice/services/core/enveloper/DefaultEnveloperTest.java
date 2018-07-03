@@ -162,7 +162,7 @@ public class DefaultEnveloperTest {
                         createObjectBuilder()))
                 .apply(new TestEvent());
 
-        assertThat(event.metadata().version(), is(empty()));
+        assertThat(event.metadata().position(), is(empty()));
     }
 
     @Test
@@ -179,7 +179,7 @@ public class DefaultEnveloperTest {
                         createObjectBuilder()), "new.name")
                 .apply(new TestEvent());
 
-        assertThat(event.metadata().version(), is(empty()));
+        assertThat(event.metadata().position(), is(empty()));
     }
 
     @Event("Test-Event")

@@ -25,7 +25,7 @@ import com.google.common.annotations.VisibleForTesting;
  *     {@literal @}Before
  *     public void cleanTheDatabase() {
  *
- *          databaseCleaner.cleanStreamStatusTable(CONTEXT_NAME);
+ *          databaseCleaner.cleanSubscriptionTable(CONTEXT_NAME);
  *          databaseCleaner.cleanStreamBufferTable(CONTEXT_NAME);
  *          databaseCleaner.cleanEventLogTable(CONTEXT_NAME);
  *          databaseCleaner.cleanViewStoreTables(CONTEXT_NAME, "table_1", "table_2");
@@ -62,8 +62,8 @@ public class DatabaseCleaner {
      *
      * @param contextName the name of the context who's tables you are cleaning
      */
-    public void cleanStreamStatusTable(final String contextName) {
-        cleanViewStoreTables(contextName, "stream_status");
+    public void cleanSubscriptionTable(final String contextName) {
+        cleanViewStoreTables(contextName, "subscription");
     }
 
 

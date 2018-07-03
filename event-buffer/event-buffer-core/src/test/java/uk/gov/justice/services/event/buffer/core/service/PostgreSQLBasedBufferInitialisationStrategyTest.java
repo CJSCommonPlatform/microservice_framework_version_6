@@ -8,10 +8,9 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import uk.gov.justice.services.event.buffer.core.repository.streamstatus.StreamStatus;
-import uk.gov.justice.services.event.buffer.core.repository.streamstatus.StreamStatusJdbcRepository;
+import uk.gov.justice.services.event.buffer.core.repository.subscription.SubscriptionJdbcRepository;
+import uk.gov.justice.services.event.buffer.core.repository.subscription.Subscription;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -24,30 +23,30 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class PostgreSQLBasedBufferInitialisationStrategyTest {
 
     @Mock
-    private StreamStatusJdbcRepository streamStatusRepository;
+    private SubscriptionJdbcRepository subscriptionJdbcRepository;
 
     private BufferInitialisationStrategy bufferInitialisationStrategy;
 
     @Before
     public void setUp() throws Exception {
-        bufferInitialisationStrategy = new PostgreSQLBasedBufferInitialisationStrategy(streamStatusRepository);
+        bufferInitialisationStrategy = new PostgreSQLBasedBufferInitialisationStrategy(subscriptionJdbcRepository);
     }
 
     @Test
     public void shouldTryInsertingZeroBufferStatus() throws Exception {
         final UUID streamId = randomUUID();
         final String source = "a source";
-        when(streamStatusRepository.findByStreamIdAndSource(streamId, source)).thenReturn(of(new StreamStatus(streamId, 3, source)));
+        when(subscriptionJdbcRepository.findByStreamIdAndSource(streamId, source)).thenReturn(of(new Subscription(streamId, 3, source)));
         bufferInitialisationStrategy.initialiseBuffer(streamId, source);
 
-        verify(streamStatusRepository).insertOrDoNothing(new StreamStatus(streamId, 0, source));
+        verify(subscriptionJdbcRepository).insertOrDoNothing(new Subscription(streamId, 0, source));
     }
 
     @Test
     public void shouldReturnCurrentVersion() {
         final UUID streamId = randomUUID();
         final String source = "a source";
-        when(streamStatusRepository.findByStreamIdAndSource(streamId, source)).thenReturn(of(new StreamStatus(streamId, 3, source)));
+        when(subscriptionJdbcRepository.findByStreamIdAndSource(streamId, source)).thenReturn(of(new Subscription(streamId, 3, source)));
 
         final long currentVersion = bufferInitialisationStrategy.initialiseBuffer(streamId, source);
         assertThat(currentVersion, is(3L));
@@ -57,7 +56,7 @@ public class PostgreSQLBasedBufferInitialisationStrategyTest {
     public void shouldThrowExceptionIfStatusNotFound() throws Exception {
         final UUID streamId = randomUUID();
         final String source = "a source";
-        when(streamStatusRepository.findByStreamIdAndSource(streamId, source)).thenReturn(empty());
+        when(subscriptionJdbcRepository.findByStreamIdAndSource(streamId, source)).thenReturn(empty());
 
         bufferInitialisationStrategy.initialiseBuffer(streamId, source);
 

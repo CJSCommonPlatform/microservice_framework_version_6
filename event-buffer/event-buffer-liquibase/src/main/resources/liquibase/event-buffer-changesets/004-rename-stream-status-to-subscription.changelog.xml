@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet
+            id="event-buffer-004"
+            author="TechPod"
+            logicalFilePath="004-rename-stream-status-to-subscription.changelog.xml">
+
+
+        <renameTable newTableName="subscription"
+                     oldTableName="stream_status"/>
+
+        <renameColumn newColumnName="latest_position"
+                      oldColumnName="version"
+                      tableName="subscription"/>
+
+        <rollback>
+            <renameColumn newColumnName="version"
+                          oldColumnName="latest_position"
+                          tableName="subscription"/>
+            <renameTable newTableName="stream_status"
+                         oldTableName="subscription"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

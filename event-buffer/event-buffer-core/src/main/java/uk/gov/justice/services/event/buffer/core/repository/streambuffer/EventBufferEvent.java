@@ -8,16 +8,16 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 
-public class StreamBufferEvent implements Comparable<StreamBufferEvent> {
+public class EventBufferEvent implements Comparable<EventBufferEvent> {
     private final UUID streamId;
-    private final long version;
+    private final long position;
     private final String event;
     private final String source;
 
-    public StreamBufferEvent(final UUID streamId, final long version, final String event,
-                             final String source) {
+    public EventBufferEvent(final UUID streamId, final long position, final String event,
+                            final String source) {
         this.streamId = streamId;
-        this.version = version;
+        this.position = position;
         this.event = event;
         this.source = source;
     }
@@ -26,8 +26,8 @@ public class StreamBufferEvent implements Comparable<StreamBufferEvent> {
         return streamId;
     }
 
-    public long getVersion() {
-        return version;
+    public long getPosition() {
+        return position;
     }
 
     public String getEvent() {
@@ -40,9 +40,9 @@ public class StreamBufferEvent implements Comparable<StreamBufferEvent> {
 
     @Override
     public String toString() {
-        return "StreamBufferEvent{" +
+        return "EventBufferEvent{" +
                 "streamId=" + streamId +
-                ", version=" + version +
+                ", position=" + position +
                 ", event='" + event + '\'' +
                 ", source='" + source + '\'' +
                 '}';
@@ -58,10 +58,10 @@ public class StreamBufferEvent implements Comparable<StreamBufferEvent> {
             return false;
         }
 
-        final StreamBufferEvent that = (StreamBufferEvent) o;
+        final EventBufferEvent that = (EventBufferEvent) o;
 
         return new EqualsBuilder()
-                .append(getVersion(), that.getVersion())
+                .append(getPosition(), that.getPosition())
                 .append(getStreamId(), that.getStreamId())
                 .append(getEvent(), that.getEvent())
                 .append(getSource(), that.getSource())
@@ -72,14 +72,14 @@ public class StreamBufferEvent implements Comparable<StreamBufferEvent> {
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
                 .append(getStreamId())
-                .append(getVersion())
+                .append(getPosition())
                 .append(getEvent())
                 .append(getSource())
                 .toHashCode();
     }
 
     @Override
-    public int compareTo(final StreamBufferEvent streamBufferEvent) {
-        return toIntExact(this.getVersion() - streamBufferEvent.getVersion());
+    public int compareTo(final EventBufferEvent eventBufferEvent) {
+        return toIntExact(this.getPosition() - eventBufferEvent.getPosition());
     }
 }

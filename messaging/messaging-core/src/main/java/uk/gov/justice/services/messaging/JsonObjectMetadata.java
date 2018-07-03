@@ -200,7 +200,7 @@ public class JsonObjectMetadata implements Metadata {
 
     @Override
     public Optional<Long> version() {
-        return metadata.version();
+        return metadata.position();
     }
 
     @Override

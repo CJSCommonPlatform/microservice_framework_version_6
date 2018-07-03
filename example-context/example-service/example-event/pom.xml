@@ -128,7 +128,7 @@
                                         </serviceComponent>
                                     </generatorProperties>
                                     <includes>
-                                        <include>**/subscription-descriptor.yaml</include>
+                                        <include>**/subscriptions-descriptor.yaml</include>
                                         <include>**/event-sources.yaml</include>
                                     </includes>
                                 </configuration>

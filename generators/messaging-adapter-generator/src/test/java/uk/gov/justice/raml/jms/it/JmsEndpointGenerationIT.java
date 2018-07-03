@@ -1,5 +1,6 @@
 package uk.gov.justice.raml.jms.it;
 
+import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -33,8 +34,8 @@ import uk.gov.justice.services.core.mapping.ActionNameToMediaTypesMappingObserve
 import uk.gov.justice.services.core.mapping.DefaultMediaTypesMappingCache;
 import uk.gov.justice.services.core.mapping.DefaultNameToMediaTypeConverter;
 import uk.gov.justice.services.core.mapping.DefaultSchemaIdMappingCache;
-import uk.gov.justice.services.core.mapping.MediaTypesMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.MediaTypeToSchemaIdMapper;
+import uk.gov.justice.services.core.mapping.MediaTypesMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingObserver;
 import uk.gov.justice.services.event.buffer.api.AllowAllEventFilter;
@@ -58,6 +59,7 @@ import org.apache.openejb.jee.WebApp;
 import org.apache.openejb.junit.ApplicationComposer;
 import org.apache.openejb.testing.Classes;
 import org.apache.openejb.testing.Module;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -135,13 +137,22 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
     })
     public WebApp war() {
         return new WebApp()
-                .contextRoot("jms-endpoint-test");
+                .contextRoot("raml.JmsEndpointGenerationIT");
+    }
+
+    @Before
+    public void setup() throws Exception {
+        cleanQueue(commandHandlerDestination);
+        cleanQueue(commandControllerDestination);
+        cleanQueue(structureEventsDestination);
+        cleanQueue(peopleEventsDestination);
+        cleanQueue(publicEventsDestination);
     }
 
     @Test
     public void commandControllerDispatcherShouldReceiveCommandA() throws JMSException {
 
-        final String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d65";
+        final String metadataId = randomUUID().toString();
         final String commandName = "structure.commanda";
 
         sendEnvelope(metadataId, commandName, commandControllerDestination);
@@ -154,7 +165,7 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
     @Test
     public void commandControllerDispatcherShouldReceiveCommandB() throws JMSException {
 
-        final String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d11";
+        final String metadataId = randomUUID().toString();
         final String commandName = "structure.commandb";
 
         sendEnvelope(metadataId, commandName, commandControllerDestination);
@@ -166,9 +177,9 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
 
     @Test
     public void commandControllerDispatcherShouldNotReceiveACommandUnspecifiedInMessageSelector()
-            throws JMSException, InterruptedException {
+            throws JMSException {
 
-        final String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d12";
+        final String metadataId = randomUUID().toString();
         final String commandName = "structure.commandc";
 
         sendEnvelope(metadataId, commandName, commandControllerDestination);
@@ -178,7 +189,7 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
     @Test
     public void commandHandlerDispatcherShouldReceiveCommandA() throws JMSException {
 
-        final String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d61";
+        final String metadataId = randomUUID().toString();
         final String commandName = "structure.cmdaa";
 
         sendEnvelope(metadataId, commandName, commandHandlerDestination);
@@ -191,7 +202,7 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
     @Test
     public void commandHandlerDispatcherShouldNotReceiveACommandUnspecifiedInMessageSelector() throws JMSException {
 
-        final String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d13";
+        final String metadataId = randomUUID().toString();
         final String commandName = "structure.cmdcc";
 
         sendEnvelope(metadataId, commandName, commandHandlerDestination);
@@ -201,7 +212,7 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
     @Test
     public void dispatcherShouldNotReceiveAMessageNotAdheringToSchema() throws JMSException {
 
-        final String metadataId = "961c9430-7bc6-4bf0-b549-6534394b8d13";
+        final String metadataId = randomUUID().toString();
         final String commandName = "people.create-user";
 
         sendEnvelope(metadataId, commandName, commandHandlerDestination, createObjectBuilder().add("non_existent_field", "value").build());
@@ -217,7 +228,7 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
         //Delaying test execution (Thread.sleep) mitigates the issue.
         //TODO: check OpenEJB code and investigate if we can't fix the issue.
         Thread.sleep(300);
-        final String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d30";
+        final String metadataId = randomUUID().toString();
         final String eventName = "structure.eventbb";
 
         sendEnvelope(metadataId, eventName, structureEventsDestination);
@@ -230,9 +241,9 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
 
     @Test
     public void eventListenerDispatcherShouldNotReceiveAnEventUnspecifiedInMessageSelector()
-            throws JMSException, InterruptedException {
+            throws JMSException {
 
-        final String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d21";
+        final String metadataId = randomUUID().toString();
         final String commandName = "structure.eventcc";
 
         sendEnvelope(metadataId, commandName, structureEventsDestination);
@@ -241,9 +252,9 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
 
     @Test
     public void eventListenerDispatcherShouldReceiveAnEventSpecifiedInMessageSelector()
-            throws JMSException, InterruptedException {
+            throws JMSException {
 
-        final String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d21";
+        final String metadataId = randomUUID().toString();
         final String eventName = "people.eventaa";
 
         sendEnvelope(metadataId, eventName, peopleEventsDestination);
@@ -257,15 +268,15 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
     public void allEventsProcessorDispatcherShouldReceiveAllEvents() throws InterruptedException, JMSException {
         Thread.sleep(300);
 
-        final String metadataId1 = "861c9430-7bc6-4bf0-b549-6534394b8d31";
+        final String metadataId1 = randomUUID().toString();
         final String eventName1 = "some.eventa";
         sendEnvelope(metadataId1, eventName1, publicEventsDestination);
 
-        final String metadataId2 = "861c9430-7bc6-4bf0-b549-6534394b8d32";
+        final String metadataId2 = randomUUID().toString();
         final String eventName2 = "other.eventb";
         sendEnvelope(metadataId2, eventName2, publicEventsDestination);
 
-        final String metadataId3 = "861c9430-7bc6-4bf0-b549-6534394b8d33";
+        final String metadataId3 = randomUUID().toString();
         final String eventName3 = "another.eventc";
         sendEnvelope(metadataId3, eventName3, publicEventsDestination);
 

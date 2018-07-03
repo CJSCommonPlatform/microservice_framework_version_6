@@ -1,6 +1,7 @@
 package uk.gov.justice.subscription.jms.it;
 
 import static com.jayway.awaitility.Awaitility.await;
+import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
@@ -11,11 +12,11 @@ import static org.junit.Assert.assertTrue;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 import static uk.gov.justice.services.messaging.jms.HeaderConstants.JMS_HEADER_CPPNAME;
 
-import uk.gov.justice.api.subscription.Service2EventListenerPeopleEventEventFilter;
-import uk.gov.justice.api.subscription.Service2EventListenerPeopleEventEventFilterInterceptor;
-import uk.gov.justice.api.subscription.Service2EventListenerPeopleEventEventListenerInterceptorChainProvider;
-import uk.gov.justice.api.subscription.Service2EventListenerPeopleEventEventValidationInterceptor;
-import uk.gov.justice.api.subscription.Service2EventListenerPeopleEventJmsListener;
+import uk.gov.justice.api.subscription.Service2EventListenerAnotherPeopleEventEventFilter;
+import uk.gov.justice.api.subscription.Service2EventListenerAnotherPeopleEventEventFilterInterceptor;
+import uk.gov.justice.api.subscription.Service2EventListenerAnotherPeopleEventEventListenerInterceptorChainProvider;
+import uk.gov.justice.api.subscription.Service2EventListenerAnotherPeopleEventEventValidationInterceptor;
+import uk.gov.justice.api.subscription.Service2EventListenerAnotherPeopleEventJmsListener;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsParameterChecker;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsProcessor;
 import uk.gov.justice.services.adapter.messaging.DefaultSubscriptionJmsProcessor;
@@ -84,7 +85,7 @@ import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
 import uk.gov.justice.services.test.utils.common.envelope.TestEnvelopeRecorder;
 import uk.gov.justice.subscription.ParserProducer;
 import uk.gov.justice.subscription.YamlFileFinder;
-import uk.gov.justice.subscription.registry.SubscriptionDescriptorDefinitionRegistryProducer;
+import uk.gov.justice.subscription.registry.SubscriptionsDescriptorsRegistryProducer;
 import uk.gov.justice.subscription.yaml.parser.YamlParser;
 import uk.gov.justice.subscription.yaml.parser.YamlSchemaLoader;
 
@@ -106,6 +107,7 @@ import org.apache.openejb.jee.WebApp;
 import org.apache.openejb.junit.ApplicationComposer;
 import org.apache.openejb.testing.Classes;
 import org.apache.openejb.testing.Module;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -115,14 +117,14 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
 
     private static final String PEOPLE_EVENT_AA = "people.eventaa";
 
-    @Resource(name = "people.event")
+    @Resource(name = "another.people.event")
     private Topic peopleEventsDestination;
 
     @Inject
-    private Service2EventListenerPeopleEventEventFilter recordingEventListenerEventFilter;
+    private Service2EventListenerAnotherPeopleEventEventFilter recordingEventListenerEventFilter;
 
     @Inject
-    private Service2EventListenerPeopleEventEventValidationInterceptor eventListenerValidationInterceptor;
+    private Service2EventListenerAnotherPeopleEventEventValidationInterceptor eventListenerValidationInterceptor;
 
     @Inject
     private RecordingEventAAHandler aaEventHandler;
@@ -136,11 +138,11 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
     @Module
     @Classes(cdi = true, value = {
             TestService2EventListenerPeopleEventJmsListener.class,
-            Service2EventListenerPeopleEventEventFilter.class,
-            Service2EventListenerPeopleEventEventFilterInterceptor.class,
-            Service2EventListenerPeopleEventEventListenerInterceptorChainProvider.class,
-            Service2EventListenerPeopleEventEventValidationInterceptor.class,
-            Service2EventListenerPeopleEventJmsListener.class,
+            Service2EventListenerAnotherPeopleEventEventFilter.class,
+            Service2EventListenerAnotherPeopleEventEventFilterInterceptor.class,
+            Service2EventListenerAnotherPeopleEventEventListenerInterceptorChainProvider.class,
+            Service2EventListenerAnotherPeopleEventEventValidationInterceptor.class,
+            Service2EventListenerAnotherPeopleEventJmsListener.class,
 
             RecordingEventAAHandler.class,
             RecordingJsonSchemaValidator.class,
@@ -207,7 +209,7 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
             DefaultSubscriptionJmsProcessor.class,
             SubscriptionManagerProducer.class,
             QualifierAnnotationExtractor.class,
-            SubscriptionDescriptorDefinitionRegistryProducer.class,
+            SubscriptionsDescriptorsRegistryProducer.class,
             YamlFileFinder.class,
             ParserProducer.class,
             YamlParser.class,
@@ -219,7 +221,12 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
     })
     public WebApp war() {
         return new WebApp()
-                .contextRoot("jms-adapter-to-aaEventHandler-test");
+                .contextRoot("subscription.JmsAdapterToHandlerIT");
+    }
+
+    @Before
+    public void setup() throws Exception {
+        cleanQueue(peopleEventsDestination);
     }
 
     public TextMessage textMessage(final String message, final Session session, final String eventName) {
@@ -234,7 +241,7 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
 
     @Test
     public void shouldProcessSupportedEventThroughJsonValidator_EventBufferAndHandler() throws Exception {
-        final String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d01";
+        final String metadataId = randomUUID().toString();
 
         final String messageStr = "textMessage";
 
@@ -258,7 +265,7 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
 
     @Test
     public void shouldProcessUnSupportedEventThroughEventBufferOnly() throws Exception {
-        final String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d02";
+        final String metadataId = randomUUID().toString();
 
         sendEnvelope(metadataId, "people.unsuported-event", peopleEventsDestination);
         await().until(() -> bufferService.recordedEnvelopes().size() > 0);
@@ -325,7 +332,7 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
     }
 
     @ApplicationScoped
-    public static class TestService2EventListenerPeopleEventJmsListener extends Service2EventListenerPeopleEventJmsListener {
+    public static class TestService2EventListenerPeopleEventJmsListener extends Service2EventListenerAnotherPeopleEventJmsListener {
 
     }
 

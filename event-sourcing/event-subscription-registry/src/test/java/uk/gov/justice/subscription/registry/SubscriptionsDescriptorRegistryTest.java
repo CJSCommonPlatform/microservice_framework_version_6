@@ -5,21 +5,21 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static uk.gov.justice.subscription.domain.builders.SubscriptionBuilder.subscription;
-import static uk.gov.justice.subscription.domain.builders.SubscriptionDescriptorDefinitionBuilder.subscriptionDescriptorDefinition;
+import static uk.gov.justice.subscription.domain.builders.SubscriptionsDescriptorBuilder.subscriptionsDescriptor;
 
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
-import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptorDefinition;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionsDescriptor;
 
 import java.util.Set;
 
 import com.google.common.collect.Sets;
 import org.junit.Test;
 
-public class SubscriptionDescriptorDefinitionRegistryTest {
+public class SubscriptionsDescriptorRegistryTest {
 
 
     @Test
-    public void shouldGetASubscriptionByNameBySearchingAllASubscriptionDescriptorDefinitions() throws Exception {
+    public void shouldGetASubscriptionByNameBySearchingAllASubscriptionDescriptorDefinitions() {
 
         final Subscription subscription_1_1 = subscription().withName("subscription_1_1").build();
         final Subscription subscription_1_2 = subscription().withName("subscription_1_2").build();
@@ -30,7 +30,7 @@ public class SubscriptionDescriptorDefinitionRegistryTest {
         final String event_listener = "EVENT_LISTENER";
         final String event_processor = "EVENT_PROCESSOR";
 
-        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition_1 = subscriptionDescriptorDefinition()
+        final SubscriptionsDescriptor subscriptionsDescriptor_1 = subscriptionsDescriptor()
                 .withServiceComponent(event_listener)
                 .withSubscriptions(asList(
                         subscription_1_1,
@@ -38,7 +38,7 @@ public class SubscriptionDescriptorDefinitionRegistryTest {
                 ))
                 .build();
 
-        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition_2 = subscriptionDescriptorDefinition()
+        final SubscriptionsDescriptor subscriptionsDescriptor_2 = subscriptionsDescriptor()
                 .withServiceComponent(event_processor)
                 .withSubscriptions(asList(
                         subscription_2_1,
@@ -46,18 +46,18 @@ public class SubscriptionDescriptorDefinitionRegistryTest {
                 ))
                 .build();
 
-        final Set<SubscriptionDescriptorDefinition> subscriptionDescriptors = Sets.newHashSet(
-                subscriptionDescriptorDefinition_1,
-                subscriptionDescriptorDefinition_2
+        final Set<SubscriptionsDescriptor> subscriptionDescriptors = Sets.newHashSet(
+                subscriptionsDescriptor_1,
+                subscriptionsDescriptor_2
         );
 
-        final SubscriptionDescriptorDefinitionRegistry subscriptionDescriptorRegistry = new SubscriptionDescriptorDefinitionRegistry(subscriptionDescriptors);
+        final SubscriptionsDescriptorsRegistry subscriptionDescriptorRegistry = new SubscriptionsDescriptorsRegistry(subscriptionDescriptors);
 
         assertThat(subscriptionDescriptorRegistry.getSubscriptionFor("subscription_2_1"), is(subscription_2_1));
     }
 
     @Test
-    public void shouldThrowARegistryExceptionIfNoSubscriptionCanBeFoundWithTheSpecifiedSubscriptionName() throws Exception {
+    public void shouldThrowARegistryExceptionIfNoSubscriptionCanBeFoundWithTheSpecifiedSubscriptionName() {
 
         final String thisSubscriptionDoesNotExist = "thisSubscriptionDoesNotExist";
 
@@ -66,7 +66,7 @@ public class SubscriptionDescriptorDefinitionRegistryTest {
         final Subscription subscription_2_1 = subscription().withName("subscription_2_1").build();
         final Subscription subscription_2_2 = subscription().withName("subscription_2_2").build();
 
-        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition_1 = subscriptionDescriptorDefinition()
+        final SubscriptionsDescriptor subscriptionsDescriptor_1 = subscriptionsDescriptor()
                 .withServiceComponent("EVENT_LISTENER")
                 .withSubscriptions(asList(
                         subscription_1_1,
@@ -74,7 +74,7 @@ public class SubscriptionDescriptorDefinitionRegistryTest {
                 ))
                 .build();
 
-        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition_2 = subscriptionDescriptorDefinition()
+        final SubscriptionsDescriptor subscriptionsDescriptor_2 = subscriptionsDescriptor()
                 .withServiceComponent("EVENT_PROCESSOR")
                 .withSubscriptions(asList(
                         subscription_2_1,
@@ -82,12 +82,12 @@ public class SubscriptionDescriptorDefinitionRegistryTest {
                 ))
                 .build();
 
-        final Set<SubscriptionDescriptorDefinition> subscriptionDescriptorDefinitions = Sets.newHashSet(
-                subscriptionDescriptorDefinition_1,
-                subscriptionDescriptorDefinition_2
+        final Set<SubscriptionsDescriptor> subscriptionsDescriptors = Sets.newHashSet(
+                subscriptionsDescriptor_1,
+                subscriptionsDescriptor_2
         );
 
-        final SubscriptionDescriptorDefinitionRegistry subscriptionDescriptorRegistry = new SubscriptionDescriptorDefinitionRegistry(subscriptionDescriptorDefinitions);
+        final SubscriptionsDescriptorsRegistry subscriptionDescriptorRegistry = new SubscriptionsDescriptorsRegistry(subscriptionsDescriptors);
 
         try {
             subscriptionDescriptorRegistry.getSubscriptionFor(thisSubscriptionDoesNotExist);
@@ -98,29 +98,29 @@ public class SubscriptionDescriptorDefinitionRegistryTest {
     }
 
     @Test
-    public void shouldNotAllowDuplicateSubscriptionDescriptorDefinition() throws Exception {
+    public void shouldNotAllowDuplicateSubscriptionDescriptorDefinition() {
 
-        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition_1 = subscriptionDescriptorDefinition()
+        final SubscriptionsDescriptor subscriptionsDescriptor_1 = subscriptionsDescriptor()
                 .withServiceComponent("EVENT_LISTENER")
                 .build();
 
-        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition_2 = subscriptionDescriptorDefinition()
+        final SubscriptionsDescriptor subscriptionsDescriptor_2 = subscriptionsDescriptor()
                 .withServiceComponent("EVENT_LISTENER")
                 .build();
 
-        final Set<SubscriptionDescriptorDefinition> subscriptionDescriptorDefinitions = Sets.newHashSet(
-                subscriptionDescriptorDefinition_1,
-                subscriptionDescriptorDefinition_2
+        final Set<SubscriptionsDescriptor> subscriptionsDescriptors = Sets.newHashSet(
+                subscriptionsDescriptor_1,
+                subscriptionsDescriptor_2
         );
 
-        final SubscriptionDescriptorDefinitionRegistry subscriptionDescriptorDefinitionRegistry = new SubscriptionDescriptorDefinitionRegistry(subscriptionDescriptorDefinitions);
+        final SubscriptionsDescriptorsRegistry subscriptionsDescriptorsRegistry = new SubscriptionsDescriptorsRegistry(subscriptionsDescriptors);
 
-        assertThat(subscriptionDescriptorDefinitionRegistry.subscriptionDescriptorDefinitions().size(), is(1));
+        assertThat(subscriptionsDescriptorsRegistry.subscriptionsDescriptors().size(), is(1));
 
     }
 
     @Test
-    public void shouldThrowARegistryExceptionIfNoServiceComponentNameFoundWithTheSpecifiedSubscriptionName() throws Exception {
+    public void shouldThrowARegistryExceptionIfNoServiceComponentNameFoundWithTheSpecifiedSubscriptionName() {
 
         final String thisSubscriptionDoesNotExist = "thisSubscriptionDoesNotExist";
 
@@ -129,7 +129,7 @@ public class SubscriptionDescriptorDefinitionRegistryTest {
         final Subscription subscription_2_1 = subscription().withName("subscription_2_1").build();
         final Subscription subscription_2_2 = subscription().withName("subscription_2_2").build();
 
-        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition_1 = subscriptionDescriptorDefinition()
+        final SubscriptionsDescriptor subscriptionsDescriptor_1 = subscriptionsDescriptor()
                 .withServiceComponent("EVENT_LISTENER")
                 .withSubscriptions(asList(
                         subscription_1_1,
@@ -137,7 +137,7 @@ public class SubscriptionDescriptorDefinitionRegistryTest {
                 ))
                 .build();
 
-        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition_2 = subscriptionDescriptorDefinition()
+        final SubscriptionsDescriptor subscriptionsDescriptor_2 = subscriptionsDescriptor()
                 .withServiceComponent("EVENT_PROCESSOR")
                 .withSubscriptions(asList(
                         subscription_2_1,
@@ -145,12 +145,12 @@ public class SubscriptionDescriptorDefinitionRegistryTest {
                 ))
                 .build();
 
-        final Set<SubscriptionDescriptorDefinition> subscriptionDescriptorDefinitions = Sets.newHashSet(
-                subscriptionDescriptorDefinition_1,
-                subscriptionDescriptorDefinition_2
+        final Set<SubscriptionsDescriptor> subscriptionsDescriptors = Sets.newHashSet(
+                subscriptionsDescriptor_1,
+                subscriptionsDescriptor_2
         );
 
-        final SubscriptionDescriptorDefinitionRegistry subscriptionDescriptorRegistry = new SubscriptionDescriptorDefinitionRegistry(subscriptionDescriptorDefinitions);
+        final SubscriptionsDescriptorsRegistry subscriptionDescriptorRegistry = new SubscriptionsDescriptorsRegistry(subscriptionsDescriptors);
 
         try {
             subscriptionDescriptorRegistry.findComponentNameBy(thisSubscriptionDoesNotExist);
@@ -161,7 +161,7 @@ public class SubscriptionDescriptorDefinitionRegistryTest {
     }
 
     @Test
-    public void shouldFindServiceComponentNameWithTheSpecifiedSubscriptionName() throws Exception {
+    public void shouldFindServiceComponentNameWithTheSpecifiedSubscriptionName() {
         final String event_listener = "EVENT_LISTENER";
 
         final String subscriptionName = "subscription_1_1";
@@ -171,7 +171,7 @@ public class SubscriptionDescriptorDefinitionRegistryTest {
         final Subscription subscription_2_2 = subscription().withName("subscription_2_2").build();
 
 
-        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition_1 = subscriptionDescriptorDefinition()
+        final SubscriptionsDescriptor subscriptionsDescriptor_1 = subscriptionsDescriptor()
                 .withServiceComponent(event_listener)
                 .withSubscriptions(asList(
                         subscription_1_1,
@@ -179,7 +179,7 @@ public class SubscriptionDescriptorDefinitionRegistryTest {
                 ))
                 .build();
 
-        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition_2 = subscriptionDescriptorDefinition()
+        final SubscriptionsDescriptor subscriptionsDescriptor_2 = subscriptionsDescriptor()
                 .withServiceComponent("EVENT_PROCESSOR")
                 .withSubscriptions(asList(
                         subscription_2_1,
@@ -187,12 +187,12 @@ public class SubscriptionDescriptorDefinitionRegistryTest {
                 ))
                 .build();
 
-        final Set<SubscriptionDescriptorDefinition> subscriptionDescriptorDefinitions = Sets.newHashSet(
-                subscriptionDescriptorDefinition_1,
-                subscriptionDescriptorDefinition_2
+        final Set<SubscriptionsDescriptor> subscriptionsDescriptors = Sets.newHashSet(
+                subscriptionsDescriptor_1,
+                subscriptionsDescriptor_2
         );
 
-        final SubscriptionDescriptorDefinitionRegistry subscriptionDescriptorRegistry = new SubscriptionDescriptorDefinitionRegistry(subscriptionDescriptorDefinitions);
+        final SubscriptionsDescriptorsRegistry subscriptionDescriptorRegistry = new SubscriptionsDescriptorsRegistry(subscriptionsDescriptors);
         final String componentName = subscriptionDescriptorRegistry.findComponentNameBy(subscriptionName);
 
         assertThat(componentName , is(event_listener));

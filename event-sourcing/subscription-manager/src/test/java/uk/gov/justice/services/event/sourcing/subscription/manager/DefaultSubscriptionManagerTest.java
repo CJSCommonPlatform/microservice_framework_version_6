@@ -10,7 +10,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
 
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
@@ -19,7 +18,6 @@ import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -28,7 +26,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
@@ -55,7 +52,7 @@ public class DefaultSubscriptionManagerTest {
     private ArgumentCaptor<InterceptorContext> interceptorContextArgumentCaptor;
 
     @Test
-    public void shouldProcessWithEventBuffer() throws Exception {
+    public void shouldProcessWithEventBuffer() {
 
         final Optional<EventBufferService> eventBufferServiceOptional = of(eventBufferService);
         final DefaultSubscriptionManager defaultSubscriptionManager = new DefaultSubscriptionManager(
@@ -86,7 +83,7 @@ public class DefaultSubscriptionManagerTest {
     }
 
     @Test
-    public void shouldProcessWithoutEventBuffer() throws Exception {
+    public void shouldProcessWithoutEventBuffer() {
 
         final Optional<EventBufferService> eventBufferServiceOptional = empty();
         final DefaultSubscriptionManager defaultSubscriptionManager = new DefaultSubscriptionManager(

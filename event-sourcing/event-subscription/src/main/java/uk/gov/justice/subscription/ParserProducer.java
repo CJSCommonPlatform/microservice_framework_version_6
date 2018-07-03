@@ -31,8 +31,8 @@ public class ParserProducer {
     }
 
     @Produces
-    public uk.gov.justice.subscription.SubscriptionDescriptorsParser subscriptionDescriptorsParser() {
-        return new uk.gov.justice.subscription.SubscriptionDescriptorsParser(yamlParser, getYamlFileValidator());
+    public SubscriptionsDescriptorParser subscriptionDescriptorsParser() {
+        return new SubscriptionsDescriptorParser(yamlParser, getYamlFileValidator());
     }
 
     private YamlFileValidator getYamlFileValidator() {

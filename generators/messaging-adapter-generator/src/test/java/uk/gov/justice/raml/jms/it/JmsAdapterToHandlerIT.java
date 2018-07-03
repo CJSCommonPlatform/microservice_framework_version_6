@@ -1,6 +1,7 @@
 package uk.gov.justice.raml.jms.it;
 
 import static com.jayway.awaitility.Awaitility.await;
+import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
 import static junit.framework.TestCase.assertTrue;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -59,8 +60,8 @@ import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.core.mapping.ActionNameToMediaTypesMappingObserver;
 import uk.gov.justice.services.core.mapping.DefaultMediaTypesMappingCache;
 import uk.gov.justice.services.core.mapping.DefaultNameToMediaTypeConverter;
-import uk.gov.justice.services.core.mapping.MediaTypesMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.MediaType;
+import uk.gov.justice.services.core.mapping.MediaTypesMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.NameToMediaTypeConverter;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingObserver;
@@ -68,7 +69,6 @@ import uk.gov.justice.services.core.requester.RequesterProducer;
 import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.event.buffer.api.AllowAllEventFilter;
 import uk.gov.justice.services.event.buffer.api.EventBufferService;
-import uk.gov.justice.services.event.sourcing.subscription.manager.EventBufferSelector;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
@@ -94,6 +94,7 @@ import org.apache.openejb.jee.WebApp;
 import org.apache.openejb.junit.ApplicationComposer;
 import org.apache.openejb.testing.Classes;
 import org.apache.openejb.testing.Module;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -101,6 +102,7 @@ import org.junit.runner.RunWith;
 public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
 
     private static final String PEOPLE_EVENT_AA = "people.eventaa";
+
     @Resource(name = "people.event")
     private Topic peopleEventsDestination;
 
@@ -198,7 +200,12 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
     })
     public WebApp war() {
         return new WebApp()
-                .contextRoot("jms-adapter-to-aaEventHandler-test");
+                .contextRoot("raml.JmsAdapterToHandlerIT");
+    }
+
+    @Before
+    public void setup() throws Exception {
+        cleanQueue(peopleEventsDestination);
     }
 
     public TextMessage textMessage(final String message, final Session session, final String eventName) {
@@ -213,7 +220,7 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
 
     @Test
     public void shouldProcessSupportedEventThroughJsonValidator_EventBufferAndHandler() throws Exception {
-        final String metadataId = "861c9430-7bc6-4bf0-b549-6534b3457c56";
+        final String metadataId = randomUUID().toString();
         Thread.sleep(300);
 
         final String messageStr = "textMessage";
@@ -240,7 +247,7 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
 
     @Test
     public void shouldProcessUnSupportedEventThroughEventBufferOnly() throws Exception {
-        final String metadataId = "861c9430-7bc6-4bf0-b549-6534394b8d02";
+        final String metadataId = randomUUID().toString();
         Thread.sleep(300);
 
         sendEnvelope(metadataId, "people.unsuported-event", peopleEventsDestination);

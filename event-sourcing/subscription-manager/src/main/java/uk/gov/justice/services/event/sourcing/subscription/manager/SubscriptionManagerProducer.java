@@ -9,7 +9,7 @@ import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.subscription.SubscriptionManager;
 import uk.gov.justice.services.subscription.annotation.SubscriptionName;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
-import uk.gov.justice.subscription.registry.SubscriptionDescriptorDefinitionRegistry;
+import uk.gov.justice.subscription.registry.SubscriptionsDescriptorsRegistry;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,12 +22,15 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ApplicationScoped
 public class SubscriptionManagerProducer {
 
-
     private final Map<String, SubscriptionManager> subscriptionManagerMap = new ConcurrentHashMap<>();
+
+    @Inject
+    Logger logger;
 
     @Inject
     @Any
@@ -37,16 +40,13 @@ public class SubscriptionManagerProducer {
     InterceptorChainProcessorProducer interceptorChainProcessorProducer;
 
     @Inject
-    SubscriptionDescriptorDefinitionRegistry subscriptionDescriptorRegistry;
+    SubscriptionsDescriptorsRegistry subscriptionDescriptorRegistry;
 
     @Inject
     QualifierAnnotationExtractor qualifierAnnotationExtractor;
 
     @Inject
     EventBufferSelector eventBufferSelector;
-
-    @Inject
-    Logger logger;
 
     @Produces
     @SubscriptionName
@@ -61,7 +61,6 @@ public class SubscriptionManagerProducer {
 
     private SubscriptionManager create(final Subscription subscription) {
         logger.debug(format("Retrieving from subscription manager map : %s", subscription.getName()));
-
         final String componentName = subscriptionDescriptorRegistry.findComponentNameBy(subscription.getName());
         final InterceptorChainProcessor interceptorChainProcessor = interceptorChainProcessorProducer.produceLocalProcessor(componentName);
         final EventSource eventSource = getEventSource(subscription.getEventSourceName());
@@ -71,14 +70,14 @@ public class SubscriptionManagerProducer {
                 eventSource,
                 interceptorChainProcessor,
                 eventBufferSelector.selectFor(componentName),
-                logger);
+                LoggerFactory.getLogger(DefaultSubscriptionManager.class)
+        );
     }
 
     private EventSource getEventSource(final String eventSourceName) {
         final EventSourceNameQualifier eventSourceNameQualifier = new EventSourceNameQualifier(eventSourceName);
         return eventSourceInstance.select(eventSourceNameQualifier).get();
     }
-
 }
 
 

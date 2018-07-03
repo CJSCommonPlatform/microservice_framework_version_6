@@ -2,8 +2,8 @@ package uk.gov.justice.services.event.sourcing.subscription.manager;
 
 import uk.gov.justice.services.subscription.SubscriptionManager;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
-import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptorDefinition;
-import uk.gov.justice.subscription.registry.SubscriptionDescriptorDefinitionRegistry;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionsDescriptor;
+import uk.gov.justice.subscription.registry.SubscriptionsDescriptorsRegistry;
 
 import java.util.List;
 import java.util.Set;
@@ -29,15 +29,15 @@ public class SubscriptionManagerStartUp {
     Instance<SubscriptionManager> subscriptionManagers;
 
     @Inject
-    SubscriptionDescriptorDefinitionRegistry subscriptionDescriptorDefinitionRegistry;
+    SubscriptionsDescriptorsRegistry subscriptionsDescriptorsRegistry;
 
     @PostConstruct
     public void start() {
         LOGGER.info("SubscriptionManagerStartUp started");
-        final Set<SubscriptionDescriptorDefinition> subscriptionDescriptorDefinitions =
-                subscriptionDescriptorDefinitionRegistry.subscriptionDescriptorDefinitions();
+        final Set<SubscriptionsDescriptor> subscriptionsDescriptors =
+                subscriptionsDescriptorsRegistry.subscriptionsDescriptors();
 
-        subscriptionDescriptorDefinitions.forEach(
+        subscriptionsDescriptors.forEach(
                 subscriptionDescriptorDefinition ->
                 {
                     final List<Subscription> subscriptions = subscriptionDescriptorDefinition.getSubscriptions();

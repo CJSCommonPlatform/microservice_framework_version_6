@@ -103,7 +103,6 @@ import org.apache.openejb.testing.Configuration;
 import org.apache.openejb.testing.Module;
 import org.apache.openejb.testng.PropertiesBuilder;
 import org.apache.openejb.util.NetworkUtil;
-import org.jgroups.protocols.SIZE;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -215,7 +214,7 @@ public class RemoteExampleEventProcessorIT {
     })
     public WebApp war() {
         return new WebApp()
-                .contextRoot("rest-client-generator")
+                .contextRoot("RemoteExampleEventProcessorIT")
                 .addServlet("TestApp", Application.class.getName());
     }
 

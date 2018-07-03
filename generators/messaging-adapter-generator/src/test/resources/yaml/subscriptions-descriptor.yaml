@@ -1,5 +1,5 @@
-subscription_descriptor:
-  # This file is required so that there is a subscription-descriptor.yaml file on the classpath when
+subscriptions_descriptor:
+  # This file is required so that there is a subscriptions-descriptor.yaml file on the classpath when
   # running the integration tests.
   spec_version: 1.0.0
   service: service2

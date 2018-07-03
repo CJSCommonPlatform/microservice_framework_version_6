@@ -10,7 +10,7 @@ import static org.junit.Assert.fail;
 import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Event;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.Subscription;
-import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionDescriptorDefinition;
+import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionsDescriptor;
 
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
@@ -27,20 +27,20 @@ public class YamlParserTest {
     @Test
     public void shouldParseSubscriptionPathAsSubscriptionDescriptorDef() throws Exception {
 
-        final URL url = getFromClasspath("yaml/subscription-descriptor.yaml");
+        final URL url = getFromClasspath("yaml/subscriptions-descriptor.yaml");
 
         final YamlParser yamlParser = new YamlParser();
 
-        final TypeReference<Map<String, SubscriptionDescriptorDefinition>> typeReference
-                = new TypeReference<Map<String, SubscriptionDescriptorDefinition>>() {
+        final TypeReference<Map<String, SubscriptionsDescriptor>> typeReference
+                = new TypeReference<Map<String, SubscriptionsDescriptor>>() {
         };
-        final Map<String, SubscriptionDescriptorDefinition> subscriptionDescriptorDefinitionMap = yamlParser.parseYamlFrom(url, typeReference);
-        final SubscriptionDescriptorDefinition subscriptionDescriptorDefinition = subscriptionDescriptorDefinitionMap.get("subscription_descriptor");
-        assertThat(subscriptionDescriptorDefinition.getService(), is("examplecontext"));
-        assertThat(subscriptionDescriptorDefinition.getServiceComponent(), is("EVENT_LISTENER"));
-        assertThat(subscriptionDescriptorDefinition.getSpecVersion(), is("1.0.0"));
+        final Map<String, SubscriptionsDescriptor> subscriptionDescriptorDefinitionMap = yamlParser.parseYamlFrom(url, typeReference);
+        final SubscriptionsDescriptor subscriptionsDescriptor = subscriptionDescriptorDefinitionMap.get("subscriptions_descriptor");
+        assertThat(subscriptionsDescriptor.getService(), is("examplecontext"));
+        assertThat(subscriptionsDescriptor.getServiceComponent(), is("EVENT_LISTENER"));
+        assertThat(subscriptionsDescriptor.getSpecVersion(), is("1.0.0"));
 
-        final List<Subscription> subscriptions = subscriptionDescriptorDefinition.getSubscriptions();
+        final List<Subscription> subscriptions = subscriptionsDescriptor.getSubscriptions();
         assertThat(subscriptions.size(), is(2));
 
         final Subscription subscription_1 = subscriptions.get(0);
@@ -85,8 +85,8 @@ public class YamlParserTest {
     public void shouldThrowFileNotFoundExceptionForTypeReference() throws Exception {
 
         final URL url = get("this-subscription-does-not-exist.yaml").toUri().toURL();
-        final TypeReference<SubscriptionDescriptorDefinition> typeReference
-                = new TypeReference<SubscriptionDescriptorDefinition>() {
+        final TypeReference<SubscriptionsDescriptor> typeReference
+                = new TypeReference<SubscriptionsDescriptor>() {
         };
 
         try {
@@ -106,7 +106,7 @@ public class YamlParserTest {
         final URL url = get("this-subscription-does-not-exist.yaml").toUri().toURL();
         try {
             final YamlParser yamlParser = new YamlParser();
-            yamlParser.parseYamlFrom(url, SubscriptionDescriptorDefinition.class);
+            yamlParser.parseYamlFrom(url, SubscriptionsDescriptor.class);
             fail();
         } catch (final YamlParserException e) {
             assertThat(e.getCause(), is(instanceOf(FileNotFoundException.class)));

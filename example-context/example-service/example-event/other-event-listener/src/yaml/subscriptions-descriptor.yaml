@@ -1,4 +1,4 @@
-subscription_descriptor:
+subscriptions_descriptor:
   spec_version: 1.0.0
   service: example
   service_component: OTHER_EVENT_LISTENER

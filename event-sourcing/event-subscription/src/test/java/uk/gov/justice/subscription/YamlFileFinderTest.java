@@ -27,11 +27,11 @@ public class YamlFileFinderTest {
     @Test
     public void shouldFindAllSubscriptionDescriptorsOnTheClasspathWhichHaveTheCorrectName() throws Exception {
 
-        final List<URL> urls = yamlFileFinder.getSubscriptionDescriptorPaths();
+        final List<URL> urls = yamlFileFinder.getSubscriptionsDescriptorsPaths();
 
         assertThat(urls.size(), is(1));
 
-        assertThat(urls.get(0).toString(), endsWith("/yaml/subscription-descriptor.yaml"));
+        assertThat(urls.get(0).toString(), endsWith("/yaml/subscriptions-descriptor.yaml"));
     }
 
     @Test
@@ -46,8 +46,8 @@ public class YamlFileFinderTest {
 
     @Test
     public void shouldLogFoundResources() throws Exception {
-        yamlFileFinder.getSubscriptionDescriptorPaths();
+        yamlFileFinder.getSubscriptionsDescriptorsPaths();
 
-        verify(logger).info("Found 1 resources on the classpath for yaml/subscription-descriptor.yaml");
+        verify(logger).info("Found 1 resources on the classpath for yaml/subscriptions-descriptor.yaml");
     }
 }

@@ -4,12 +4,12 @@
   "definitions": {},
   "$schema": "http://json-schema.org/draft-04/schema#",
   "properties": {
-    "subscription_descriptor": {
-      "$id": "/properties/subscription_descriptor",
+    "subscriptions_descriptor": {
+      "$id": "/properties/subscriptions_descriptor",
       "type": "object",
       "properties": {
         "spec_version": {
-          "$id": "/properties/subscription_descriptor/properties/spec_version",
+          "$id": "/properties/subscriptions_descriptor/properties/spec_version",
           "type": "string",
           "title": "The Spec_version Schema ",
           "examples": [
@@ -17,7 +17,7 @@
           ]
         },
         "service": {
-          "$id": "/properties/subscription_descriptor/properties/service",
+          "$id": "/properties/subscriptions_descriptor/properties/service",
           "type": "string",
           "title": "The Service Schema ",
           "examples": [
@@ -25,7 +25,7 @@
           ]
         },
         "service_component": {
-          "$id": "/properties/subscription_descriptor/properties/service_component",
+          "$id": "/properties/subscriptions_descriptor/properties/service_component",
           "type": "string",
           "title": "The Service_component Schema ",
           "examples": [
@@ -33,14 +33,14 @@
           ]
         },
         "subscriptions": {
-          "$id": "/properties/subscription_descriptor/properties/subscriptions",
+          "$id": "/properties/subscriptions_descriptor/properties/subscriptions",
           "type": "array",
           "items": {
-            "$id": "/properties/subscription_descriptor/properties/subscriptions/items",
+            "$id": "/properties/subscriptions_descriptor/properties/subscriptions/items",
             "type": "object",
             "properties": {
               "name": {
-                "$id": "/properties/subscription_descriptor/properties/subscriptions/items/properties/name",
+                "$id": "/properties/subscriptions_descriptor/properties/subscriptions/items/properties/name",
                 "type": "string",
                 "title": "The Name Schema ",
                 "examples": [
@@ -48,14 +48,14 @@
                 ]
               },
               "events": {
-                "$id": "/properties/subscription_descriptor/properties/subscriptions/items/properties/events",
+                "$id": "/properties/subscriptions_descriptor/properties/subscriptions/items/properties/events",
                 "type": "array",
                 "items": {
-                  "$id": "/properties/subscription_descriptor/properties/subscriptions/items/properties/events/items",
+                  "$id": "/properties/subscriptions_descriptor/properties/subscriptions/items/properties/events/items",
                   "type": "object",
                   "properties": {
                     "name": {
-                      "$id": "/properties/subscription_descriptor/properties/subscriptions/items/properties/events/items/properties/name",
+                      "$id": "/properties/subscriptions_descriptor/properties/subscriptions/items/properties/events/items/properties/name",
                       "type": "string",
                       "title": "The Name Schema ",
                       "examples": [
@@ -63,7 +63,7 @@
                       ]
                     },
                     "schema_uri": {
-                      "$id": "/properties/subscription_descriptor/properties/subscriptions/items/properties/events/items/properties/schema_uri",
+                      "$id": "/properties/subscriptions_descriptor/properties/subscriptions/items/properties/events/items/properties/schema_uri",
                       "type": "string",
                       "title": "The Schema_uri Schema ",
                       "pattern": "^http|https:(\\/?\\/?)[^\\s]+$",
@@ -79,7 +79,7 @@
                 }
               },
               "event_source_name": {
-                "$id": "/properties/subscription_descriptor/properties/subscriptions/items/properties/event_source_name",
+                "$id": "/properties/subscriptions_descriptor/properties/subscriptions/items/properties/event_source_name",
                 "title": "The Service Schema ",
                 "examples": [
                   "people"
@@ -103,7 +103,7 @@
     }
   },
   "required": [
-    "subscription_descriptor"
+    "subscriptions_descriptor"
   ]
 }
 

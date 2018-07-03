@@ -1,4 +1,4 @@
-subscription_descriptor:
+subscriptions_descriptor:
   spec_version: 1.0.0
   service: custom
   service_component: EVENT_LISTENER

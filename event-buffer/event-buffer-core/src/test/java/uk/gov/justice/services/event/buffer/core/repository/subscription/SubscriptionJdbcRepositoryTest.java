@@ -1,4 +1,4 @@
-package uk.gov.justice.services.event.buffer.core.repository.streamstatus;
+package uk.gov.justice.services.event.buffer.core.repository.subscription;
 
 import static java.util.UUID.randomUUID;
 import static org.mockito.Mockito.verify;
@@ -21,10 +21,10 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class StreamStatusJdbcRepositoryTest {
+public class SubscriptionJdbcRepositoryTest {
 
     @InjectMocks
-    private StreamStatusJdbcRepository repository;
+    private SubscriptionJdbcRepository repository;
 
     @Mock
     DataSource dataSource;
@@ -51,12 +51,12 @@ public class StreamStatusJdbcRepositoryTest {
 
         final String source = "a source";
 
-        when(connection.prepareStatement("INSERT INTO stream_status (version, stream_id, source) VALUES (?, ?, ?) ON CONFLICT DO NOTHING"))
+        when(connection.prepareStatement("INSERT INTO subscription (latest_position, stream_id, source) VALUES (?, ?, ?) ON CONFLICT DO NOTHING"))
                 .thenReturn(statement);
 
         final UUID streamId = randomUUID();
         final long version = 1l;
-        repository.insertOrDoNothing(new StreamStatus(streamId, version, source));
+        repository.insertOrDoNothing(new Subscription(streamId, version, source));
 
         verify(statement).setLong(1, version);
         verify(statement).setObject(2, streamId);

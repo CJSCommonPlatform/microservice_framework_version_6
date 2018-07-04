@@ -135,6 +135,7 @@ public class DefaultJsonMetadataTest {
         assertThat(metadata.streamId().get(), equalTo(UUID.fromString(UUID_STREAM_ID)));
     }
 
+    @Deprecated // renamed to position.
     @Test
     public void shouldReturnStreamVersion() throws Exception {
         assertThat(metadata.version().isPresent(), is(true));

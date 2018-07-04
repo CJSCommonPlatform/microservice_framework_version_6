@@ -74,13 +74,13 @@ public class JsonObjectMetadataBuilderTest {
     }
 
     @Test
-    public void shouldBuildMetadataWithStreamIdAndVersion() {
+    public void shouldBuildMetadataWithStreamIdAndPosition() {
         final UUID streamId = randomUUID();
-        final Long version = 1234567l;
-        final Metadata metadata = metadataWithDefaults().withStreamId(streamId).withVersion(version).build();
+        final Long position = 1234567l;
+        final Metadata metadata = metadataWithDefaults().withStreamId(streamId).withVersion(position).build();
 
         assertThat(metadata.streamId().get(), is(streamId));
-        assertThat(metadata.version().get(), is(version));
+        assertThat(metadata.position().get(), is(position));
 
     }
 
@@ -94,7 +94,7 @@ public class JsonObjectMetadataBuilderTest {
         final Metadata originalMetadata = metadataOf(id, name).withUserId("usrIdAAAA").withStreamId(streamId).withCausation(causationId1, causationId2).build();
 
         final Metadata metadata = metadataFrom(originalMetadata).withUserId("usrIdBBBB").withVersion(4L).build();
-        assertThat(metadata.version(), contains(4L));
+        assertThat(metadata.position(), contains(4L));
         assertThat(metadata.userId(), contains("usrIdBBBB"));
         assertThat(metadata.id(), is(id));
         assertThat(metadata.name(), is(name));

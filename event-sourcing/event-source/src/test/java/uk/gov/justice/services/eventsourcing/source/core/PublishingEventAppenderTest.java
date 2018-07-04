@@ -60,7 +60,7 @@ public class PublishingEventAppenderTest {
 
         final JsonEnvelope storedEnvelope = envelopeCaptor.getValue();
         assertThat(storedEnvelope.metadata().streamId(), contains(streamId));
-        assertThat(storedEnvelope.metadata().version(), contains(3L));
+        assertThat(storedEnvelope.metadata().position(), contains(3L));
         assertThat(storedEnvelope.metadata().name(), is("name123"));
         assertThat(storedEnvelope.payloadAsJsonObject().getString("somePayloadField"), is("payloadValue123"));
     }
@@ -84,7 +84,7 @@ public class PublishingEventAppenderTest {
 
         final JsonEnvelope publishedEnvelope = envelopeCaptor.getValue();
         assertThat(publishedEnvelope.metadata().streamId(), contains(streamId));
-        assertThat(publishedEnvelope.metadata().version(), contains(1L));
+        assertThat(publishedEnvelope.metadata().position(), contains(1L));
         assertThat(publishedEnvelope.metadata().name(), is("name456"));
         assertThat(publishedEnvelope.payloadAsJsonObject().getString("someOtherPayloadField"), is("payloadValue456"));
     }

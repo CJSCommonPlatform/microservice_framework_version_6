@@ -82,7 +82,7 @@ public class DefaultJsonMetadataBuilderTest {
         final Metadata metadata = metadataWithDefaults().withStreamId(streamId).withVersion(version).build();
 
         assertThat(metadata.streamId().get(), is(streamId));
-        assertThat(metadata.version().get(), is(version));
+        assertThat(metadata.position().get(), is(version));
 
     }
 
@@ -102,7 +102,7 @@ public class DefaultJsonMetadataBuilderTest {
                 .build();
 
         final Metadata metadata = metadataBuilderFrom(originalMetadata).withUserId("usrIdBBBB").withVersion(4L).build();
-        assertThat(metadata.version(), contains(4L));
+        assertThat(metadata.position(), contains(4L));
         assertThat(metadata.userId(), contains("usrIdBBBB"));
         assertThat(metadata.id(), is(id));
         assertThat(metadata.name(), is(name));

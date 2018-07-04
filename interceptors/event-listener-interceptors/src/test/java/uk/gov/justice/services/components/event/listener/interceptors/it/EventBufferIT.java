@@ -42,7 +42,6 @@ import uk.gov.justice.services.core.envelope.MediaTypeProvider;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.extension.ServiceComponentScanner;
-import uk.gov.justice.services.core.postgres.OpenEjbConfigurationBuilder;
 import uk.gov.justice.services.core.interceptor.InterceptorCache;
 import uk.gov.justice.services.core.interceptor.InterceptorChainEntry;
 import uk.gov.justice.services.core.interceptor.InterceptorChainEntryProvider;
@@ -62,12 +61,13 @@ import uk.gov.justice.services.core.mapping.DefaultSchemaIdMappingCache;
 import uk.gov.justice.services.core.mapping.MediaTypesMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingObserver;
+import uk.gov.justice.services.core.postgres.OpenEjbConfigurationBuilder;
 import uk.gov.justice.services.core.requester.RequesterProducer;
 import uk.gov.justice.services.core.sender.SenderProducer;
-import uk.gov.justice.services.event.buffer.core.repository.streambuffer.StreamBufferEvent;
-import uk.gov.justice.services.event.buffer.core.repository.streambuffer.StreamBufferJdbcRepository;
-import uk.gov.justice.services.event.buffer.core.repository.streamstatus.StreamStatus;
-import uk.gov.justice.services.event.buffer.core.repository.streamstatus.StreamStatusJdbcRepository;
+import uk.gov.justice.services.event.buffer.core.repository.streambuffer.EventBufferEvent;
+import uk.gov.justice.services.event.buffer.core.repository.streambuffer.EventBufferJdbcRepository;
+import uk.gov.justice.services.event.buffer.core.repository.subscription.SubscriptionJdbcRepository;
+import uk.gov.justice.services.event.buffer.core.repository.subscription.Subscription;
 import uk.gov.justice.services.event.buffer.core.service.BufferInitialisationStrategyProducer;
 import uk.gov.justice.services.event.buffer.core.service.ConsecutiveEventBufferService;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
@@ -125,10 +125,10 @@ public class EventBufferIT {
     private AbcEventHandler abcEventHandler;
 
     @Inject
-    private StreamBufferJdbcRepository jdbcStreamBufferRepository;
+    private EventBufferJdbcRepository jdbcStreamBufferRepository;
 
     @Inject
-    private StreamStatusJdbcRepository statusRepository;
+    private SubscriptionJdbcRepository statusRepository;
 
     @Before
     public void setup() throws Exception {
@@ -195,8 +195,8 @@ public class EventBufferIT {
             DefaultTraceLogger.class,
             JdbcRepositoryHelper.class,
             ViewStoreJdbcDataSourceProvider.class,
-            StreamBufferJdbcRepository.class,
-            StreamStatusJdbcRepository.class,
+            EventBufferJdbcRepository.class,
+            SubscriptionJdbcRepository.class,
 
             SchemaCatalogAwareJsonSchemaValidator.class,
             PayloadExtractor.class,
@@ -239,12 +239,12 @@ public class EventBufferIT {
 
         interceptorChainProcessor.process(interceptorContextWithInput(envelope));
 
-        final List<StreamBufferEvent> streamBufferEvents = jdbcStreamBufferRepository.findStreamByIdAndSource(streamId, SOURCE).collect(toList());
+        final List<EventBufferEvent> eventBufferEvents = jdbcStreamBufferRepository.findStreamByIdAndSource(streamId, SOURCE).collect(toList());
 
-        assertThat(streamBufferEvents, hasSize(1));
-        assertThat(streamBufferEvents.get(0).getStreamId(), is(streamId));
-        assertThat(streamBufferEvents.get(0).getVersion(), is(2L));
-        assertThat(streamBufferEvents.get(0).getSource(), is(SOURCE));
+        assertThat(eventBufferEvents, hasSize(1));
+        assertThat(eventBufferEvents.get(0).getStreamId(), is(streamId));
+        assertThat(eventBufferEvents.get(0).getPosition(), is(2L));
+        assertThat(eventBufferEvents.get(0).getSource(), is(SOURCE));
 
         final List<JsonEnvelope> handledEnvelopes = abcEventHandler.recordedEnvelopes();
         assertThat(handledEnvelopes, empty());
@@ -262,18 +262,18 @@ public class EventBufferIT {
                 .build();
         interceptorChainProcessor.process(interceptorContextWithInput(jsonEnvelope));
 
-        final List<StreamBufferEvent> streamBufferEvents = jdbcStreamBufferRepository.findStreamByIdAndSource(streamId, SOURCE).collect(toList());
-        final Optional<StreamStatus> streamStatus = statusRepository.findByStreamIdAndSource(streamId, SOURCE);
+        final List<EventBufferEvent> eventBufferEvents = jdbcStreamBufferRepository.findStreamByIdAndSource(streamId, SOURCE).collect(toList());
+        final Optional<Subscription> subscription = statusRepository.findByStreamIdAndSource(streamId, SOURCE);
 
-        assertThat(streamBufferEvents, empty());
-        assertThat(streamStatus.isPresent(), is(true));
-        assertThat(streamStatus.get().getVersion(), is(1L));
+        assertThat(eventBufferEvents, empty());
+        assertThat(subscription.isPresent(), is(true));
+        assertThat(subscription.get().getPosition(), is(1L));
 
         final List<JsonEnvelope> handledEnvelopes = abcEventHandler.recordedEnvelopes();
         assertThat(handledEnvelopes, hasSize(1));
 
         assertThat(handledEnvelopes.get(0).metadata().id(), is(metadataId));
-        assertThat(handledEnvelopes.get(0).metadata().version(), contains(1L));
+        assertThat(handledEnvelopes.get(0).metadata().position(), contains(1L));
     }
 
     @Test
@@ -282,7 +282,7 @@ public class EventBufferIT {
         final UUID metadataId = randomUUID();
         final UUID streamId = randomUUID();
 
-        statusRepository.insert(new StreamStatus(streamId, 1L, SOURCE));
+        statusRepository.insert(new Subscription(streamId, 1L, SOURCE));
 
 
         final JsonEnvelope envelope = envelope()
@@ -293,12 +293,12 @@ public class EventBufferIT {
 
         interceptorChainProcessor.process(interceptorContextWithInput(envelope));
 
-        final List<StreamBufferEvent> streamBufferEvents = jdbcStreamBufferRepository.findStreamByIdAndSource(streamId, SOURCE).collect(toList());
-        final Optional<StreamStatus> streamStatus = statusRepository.findByStreamIdAndSource(streamId, SOURCE);
+        final List<EventBufferEvent> eventBufferEvents = jdbcStreamBufferRepository.findStreamByIdAndSource(streamId, SOURCE).collect(toList());
+        final Optional<Subscription> subscription = statusRepository.findByStreamIdAndSource(streamId, SOURCE);
 
-        assertThat(streamBufferEvents, empty());
-        assertThat(streamStatus.isPresent(), is(true));
-        assertThat(streamStatus.get().getVersion(), is(2L));
+        assertThat(eventBufferEvents, empty());
+        assertThat(subscription.isPresent(), is(true));
+        assertThat(subscription.get().getPosition(), is(2L));
 
     }
 
@@ -308,7 +308,7 @@ public class EventBufferIT {
         final UUID metadataId = randomUUID();
         final UUID streamId = randomUUID();
 
-        statusRepository.insert(new StreamStatus(streamId, 2L, SOURCE));
+        statusRepository.insert(new Subscription(streamId, 2L, SOURCE));
 
         final JsonEnvelope jsonEnvelope = envelope()
                 .with(metadataOf(metadataId, EVENT_ABC)
@@ -316,14 +316,14 @@ public class EventBufferIT {
                 .build();
         interceptorChainProcessor.process(interceptorContextWithInput(jsonEnvelope));
 
-        final List<StreamBufferEvent> streamBufferEvents = jdbcStreamBufferRepository.findStreamByIdAndSource(streamId, SOURCE).collect(toList());
-        final Optional<StreamStatus> streamStatus = statusRepository.findByStreamIdAndSource(streamId, SOURCE);
+        final List<EventBufferEvent> eventBufferEvents = jdbcStreamBufferRepository.findStreamByIdAndSource(streamId, SOURCE).collect(toList());
+        final Optional<Subscription> subscription = statusRepository.findByStreamIdAndSource(streamId, SOURCE);
 
-        assertThat(streamBufferEvents, hasSize(1));
-        assertThat(streamBufferEvents.get(0).getStreamId(), is(streamId));
-        assertThat(streamBufferEvents.get(0).getVersion(), is(4L));
-        assertThat(streamStatus.isPresent(), is(true));
-        assertThat(streamStatus.get().getVersion(), is(2L));
+        assertThat(eventBufferEvents, hasSize(1));
+        assertThat(eventBufferEvents.get(0).getStreamId(), is(streamId));
+        assertThat(eventBufferEvents.get(0).getPosition(), is(4L));
+        assertThat(subscription.isPresent(), is(true));
+        assertThat(subscription.get().getPosition(), is(2L));
 
     }
 
@@ -339,14 +339,14 @@ public class EventBufferIT {
                 .build();
 
 
-        statusRepository.insert(new StreamStatus(streamId, 1L, SOURCE));
+        statusRepository.insert(new Subscription(streamId, 1L, SOURCE));
 
         final UUID metadataId3 = randomUUID();
         final UUID metadataId4 = randomUUID();
         final UUID metadataId5 = randomUUID();
 
         jdbcStreamBufferRepository.insert(
-                new StreamBufferEvent(
+                new EventBufferEvent(
                         streamId,
                         3L,
                         envelope()
@@ -359,7 +359,7 @@ public class EventBufferIT {
         );
 
         jdbcStreamBufferRepository.insert(
-                new StreamBufferEvent(
+                new EventBufferEvent(
                         streamId,
                         4L,
                         envelope().with(metadataOf(metadataId4, EVENT_ABC)
@@ -372,7 +372,7 @@ public class EventBufferIT {
         );
 
         jdbcStreamBufferRepository.insert(
-                new StreamBufferEvent(
+                new EventBufferEvent(
                         streamId,
                         5L,
                         envelope().with(
@@ -387,29 +387,29 @@ public class EventBufferIT {
 
 
 
-        final List<StreamBufferEvent> streamBufferEvents = jdbcStreamBufferRepository.findStreamByIdAndSource(streamId, SOURCE).collect(toList());
-        final Optional<StreamStatus> streamStatus = statusRepository.findByStreamIdAndSource(streamId, SOURCE);
+        final List<EventBufferEvent> eventBufferEvents = jdbcStreamBufferRepository.findStreamByIdAndSource(streamId, SOURCE).collect(toList());
+        final Optional<Subscription> subscription = statusRepository.findByStreamIdAndSource(streamId, SOURCE);
 
-        assertThat(streamStatus.isPresent(), is(true));
-        assertThat(streamStatus.get().getVersion(), is(5L));
+        assertThat(subscription.isPresent(), is(true));
+        assertThat(subscription.get().getPosition(), is(5L));
 
         final List<JsonEnvelope> handledEnvelopes = abcEventHandler.recordedEnvelopes();
         assertThat(handledEnvelopes, hasSize(4));
 
         assertThat(handledEnvelopes.get(0).metadata().id(), is(metadataId2));
-        assertThat(handledEnvelopes.get(0).metadata().version(), contains(2L));
+        assertThat(handledEnvelopes.get(0).metadata().position(), contains(2L));
 
         assertThat(handledEnvelopes.get(1).metadata().id(), is(metadataId3));
-        assertThat(handledEnvelopes.get(1).metadata().version(), contains(3L));
+        assertThat(handledEnvelopes.get(1).metadata().position(), contains(3L));
 
         assertThat(handledEnvelopes.get(2).metadata().id(), is(metadataId4));
-        assertThat(handledEnvelopes.get(2).metadata().version(), contains(4L));
+        assertThat(handledEnvelopes.get(2).metadata().position(), contains(4L));
 
         assertThat(handledEnvelopes.get(3).metadata().id(), is(metadataId5));
-        assertThat(handledEnvelopes.get(3).metadata().version(), contains(5L));
+        assertThat(handledEnvelopes.get(3).metadata().position(), contains(5L));
 
 
-        assertThat(streamBufferEvents, hasSize(0));
+        assertThat(eventBufferEvents, hasSize(0));
     }
 
     @Test
@@ -423,24 +423,24 @@ public class EventBufferIT {
                         .withStreamId(streamId).withVersion(1L))
                 .build();
 
-        final StreamBufferEvent streamBufferEvent2 = new StreamBufferEvent(streamId, 4L, "payload", SOURCE);
-        final StreamBufferEvent streamBufferEvent3 = new StreamBufferEvent(streamId, 5L, "payload", SOURCE);
+        final EventBufferEvent eventBufferEvent2 = new EventBufferEvent(streamId, 4L, "payload", SOURCE);
+        final EventBufferEvent eventBufferEvent3 = new EventBufferEvent(streamId, 5L, "payload", SOURCE);
 
 
-        statusRepository.insert(new StreamStatus(streamId, 2L, SOURCE));
-        jdbcStreamBufferRepository.insert(streamBufferEvent2);
-        jdbcStreamBufferRepository.insert(streamBufferEvent3);
+        statusRepository.insert(new Subscription(streamId, 2L, SOURCE));
+        jdbcStreamBufferRepository.insert(eventBufferEvent2);
+        jdbcStreamBufferRepository.insert(eventBufferEvent3);
 
         interceptorChainProcessor.process(interceptorContextWithInput(jsonEnvelope));
 
-        final List<StreamBufferEvent> streamBufferEvents = jdbcStreamBufferRepository
+        final List<EventBufferEvent> eventBufferEvents = jdbcStreamBufferRepository
                 .findStreamByIdAndSource(streamId, SOURCE)
                 .collect(toList());
-        final Optional<StreamStatus> streamStatus = statusRepository.findByStreamIdAndSource(streamId, SOURCE);
+        final Optional<Subscription> subscription = statusRepository.findByStreamIdAndSource(streamId, SOURCE);
 
-        assertThat(streamBufferEvents, hasSize(2));
-        assertThat(streamStatus.isPresent(), is(true));
-        assertThat(streamStatus.get().getVersion(), is(2L));
+        assertThat(eventBufferEvents, hasSize(2));
+        assertThat(subscription.isPresent(), is(true));
+        assertThat(subscription.get().getPosition(), is(2L));
         assertThat(abcEventHandler.recordedEnvelopes(), empty());
     }
 

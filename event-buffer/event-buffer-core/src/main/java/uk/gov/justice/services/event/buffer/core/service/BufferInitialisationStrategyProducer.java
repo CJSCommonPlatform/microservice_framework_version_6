@@ -2,7 +2,7 @@ package uk.gov.justice.services.event.buffer.core.service;
 
 
 import uk.gov.justice.services.common.configuration.GlobalValue;
-import uk.gov.justice.services.event.buffer.core.repository.streamstatus.StreamStatusJdbcRepository;
+import uk.gov.justice.services.event.buffer.core.repository.subscription.SubscriptionJdbcRepository;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -26,15 +26,15 @@ public class BufferInitialisationStrategyProducer {
     Logger logger;
 
     @Inject
-    StreamStatusJdbcRepository streamStatusRepository;
+    SubscriptionJdbcRepository subscriptionJdbcRepository;
 
     @Produces
     public BufferInitialisationStrategy bufferInitialisationStrategy() {
         logger.info("Instantiating {}", strategyClass);
         try {
             Class<?> clazz = Class.forName(strategyClass);
-            Constructor<?> constructor = clazz.getConstructor(StreamStatusJdbcRepository.class);
-            return (BufferInitialisationStrategy) constructor.newInstance(streamStatusRepository);
+            Constructor<?> constructor = clazz.getConstructor(SubscriptionJdbcRepository.class);
+            return (BufferInitialisationStrategy) constructor.newInstance(subscriptionJdbcRepository);
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
             throw new IllegalArgumentException(INSTANTIATION_ERROR_MSG, e);
         }

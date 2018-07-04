@@ -66,7 +66,7 @@ public class RestEnvelopeBuilderTest {
     private static final String PAYLOAD_NAME = "action.name";
     private static final UUID PAYLOAD_METADATA_ID = randomUUID();
     private static final UUID UUID_STREAM_ID = randomUUID();
-    private static final Long VERSION_VALUE = 1L;
+    private static final Long POSITION_VALUE = 1L;
     private static final UUID SINGLE_CAUSATION_ID = randomUUID();
 
     private static final String EXPECTED_MESSAGE_TEMPLATE = "The metadata of payload and the headers both have %s set and the values are not equal: payload = %s, headers = %s";
@@ -207,7 +207,7 @@ public class RestEnvelopeBuilderTest {
                                 .add(CLIENT_ID, UUID_CLIENT_CORRELATION_ID.toString()))
                         .add(STREAM, createObjectBuilder()
                                 .add(STREAM_ID, UUID_STREAM_ID.toString())
-                                .add(VERSION, VERSION_VALUE))
+                                .add(VERSION, POSITION_VALUE))
                 )
                 .add("test", "value")
                 .build());
@@ -225,7 +225,7 @@ public class RestEnvelopeBuilderTest {
         assertThat(metadata.userId(), is(Optional.of(UUID_USER_ID.toString())));
         assertThat(metadata.clientCorrelationId(), is(Optional.of(UUID_CLIENT_CORRELATION_ID.toString())));
         assertThat(metadata.streamId(), is(Optional.of(UUID_STREAM_ID)));
-        assertThat(metadata.version(), is(Optional.of(VERSION_VALUE)));
+        assertThat(metadata.position(), is(Optional.of(POSITION_VALUE)));
         assertThat(metadata.causation().get(0).toString(), is(payloadCausationId));
 
         assertThat(getString(payload, METADATA, ID), is(Optional.empty()));
@@ -246,7 +246,7 @@ public class RestEnvelopeBuilderTest {
                         .add(NAME, PAYLOAD_NAME)
                         .add(STREAM, createObjectBuilder()
                                 .add(STREAM_ID, UUID_STREAM_ID.toString())
-                                .add(VERSION, VERSION_VALUE))
+                                .add(VERSION, POSITION_VALUE))
                 )
                 .add("test", "value")
                 .build());
@@ -269,7 +269,7 @@ public class RestEnvelopeBuilderTest {
         assertThat(metadata.userId(), is(Optional.of(UUID_USER_ID.toString())));
         assertThat(metadata.clientCorrelationId(), is(Optional.of(UUID_CLIENT_CORRELATION_ID.toString())));
         assertThat(metadata.streamId(), is(Optional.of(UUID_STREAM_ID)));
-        assertThat(metadata.version(), is(Optional.of(VERSION_VALUE)));
+        assertThat(metadata.position(), is(Optional.of(POSITION_VALUE)));
         assertThat(metadata.causation().get(0), is(SINGLE_CAUSATION_ID));
     }
 
@@ -285,7 +285,7 @@ public class RestEnvelopeBuilderTest {
                         .add(NAME, PAYLOAD_NAME)
                         .add(STREAM, createObjectBuilder()
                                 .add(STREAM_ID, UUID_STREAM_ID.toString())
-                                .add(VERSION, VERSION_VALUE))
+                                .add(VERSION, POSITION_VALUE))
                 )
                 .add("test", "value")
                 .build());
@@ -308,7 +308,7 @@ public class RestEnvelopeBuilderTest {
         assertThat(metadata.userId(), is(Optional.of(UUID_USER_ID.toString())));
         assertThat(metadata.clientCorrelationId(), is(Optional.of(UUID_CLIENT_CORRELATION_ID.toString())));
         assertThat(metadata.streamId(), is(Optional.of(UUID_STREAM_ID)));
-        assertThat(metadata.version(), is(Optional.of(VERSION_VALUE)));
+        assertThat(metadata.position(), is(Optional.of(POSITION_VALUE)));
         assertThat(metadata.causation(), is(uuids));
     }
 

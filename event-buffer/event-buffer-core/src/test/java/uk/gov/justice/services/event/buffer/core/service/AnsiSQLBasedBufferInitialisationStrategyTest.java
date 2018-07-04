@@ -8,8 +8,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import uk.gov.justice.services.event.buffer.core.repository.streamstatus.StreamStatus;
-import uk.gov.justice.services.event.buffer.core.repository.streamstatus.StreamStatusJdbcRepository;
+import uk.gov.justice.services.event.buffer.core.repository.subscription.SubscriptionJdbcRepository;
+import uk.gov.justice.services.event.buffer.core.repository.subscription.Subscription;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -24,14 +24,14 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class AnsiSQLBasedBufferInitialisationStrategyTest {
 
     @Mock
-    private StreamStatusJdbcRepository streamStatusRepository;
+    private SubscriptionJdbcRepository subscriptionJdbcRepository;
 
 
     private BufferInitialisationStrategy bufferInitialisationStrategy;
 
     @Before
     public void setUp() throws Exception {
-        bufferInitialisationStrategy = new AnsiSQLBasedBufferInitialisationStrategy(streamStatusRepository);
+        bufferInitialisationStrategy = new AnsiSQLBasedBufferInitialisationStrategy(subscriptionJdbcRepository);
     }
 
     @Test
@@ -39,10 +39,10 @@ public class AnsiSQLBasedBufferInitialisationStrategyTest {
 
         final UUID streamId = randomUUID();
         final String source = "a source";
-        when(streamStatusRepository.findByStreamIdAndSource(streamId, source)).thenReturn(Optional.empty());
+        when(subscriptionJdbcRepository.findByStreamIdAndSource(streamId, source)).thenReturn(Optional.empty());
         bufferInitialisationStrategy.initialiseBuffer(streamId, source);
 
-        verify(streamStatusRepository).insert(new StreamStatus(streamId, 0L, source));
+        verify(subscriptionJdbcRepository).insert(new Subscription(streamId, 0L, source));
     }
 
     @Test
@@ -50,7 +50,7 @@ public class AnsiSQLBasedBufferInitialisationStrategyTest {
 
         final UUID streamId = randomUUID();
         final String source = "a source";
-        when(streamStatusRepository.findByStreamIdAndSource(streamId, source)).thenReturn(Optional.empty());
+        when(subscriptionJdbcRepository.findByStreamIdAndSource(streamId, source)).thenReturn(Optional.empty());
         assertThat(bufferInitialisationStrategy.initialiseBuffer(streamId, source), is(0L));
     }
 
@@ -58,13 +58,13 @@ public class AnsiSQLBasedBufferInitialisationStrategyTest {
     public void shouldNotAddStatusIfItExists() throws Exception {
         final UUID streamId = randomUUID();
         final String source = "a source";
-        when(streamStatusRepository.findByStreamIdAndSource(streamId, source)).thenReturn(of(new StreamStatus(streamId, 3L, source)));
+        when(subscriptionJdbcRepository.findByStreamIdAndSource(streamId, source)).thenReturn(of(new Subscription(streamId, 3L, source)));
         bufferInitialisationStrategy.initialiseBuffer(streamId, source);
 
-        verify(streamStatusRepository).findByStreamIdAndSource(streamId, source);
-        verify(streamStatusRepository).updateSource(streamId, source);
+        verify(subscriptionJdbcRepository).findByStreamIdAndSource(streamId, source);
+        verify(subscriptionJdbcRepository).updateSource(streamId, source);
 
-        verifyNoMoreInteractions(streamStatusRepository);
+        verifyNoMoreInteractions(subscriptionJdbcRepository);
     }
 
     @Test
@@ -72,7 +72,7 @@ public class AnsiSQLBasedBufferInitialisationStrategyTest {
         final UUID streamId = randomUUID();
         final String source = "a source";
         final long currentVersion = 3L;
-        when(streamStatusRepository.findByStreamIdAndSource(streamId, source)).thenReturn(of(new StreamStatus(streamId, currentVersion, source)));
+        when(subscriptionJdbcRepository.findByStreamIdAndSource(streamId, source)).thenReturn(of(new Subscription(streamId, currentVersion, source)));
         bufferInitialisationStrategy.initialiseBuffer(streamId, source);
 
         assertThat(bufferInitialisationStrategy.initialiseBuffer(streamId, source), is(currentVersion));

@@ -114,9 +114,9 @@ public class DatabaseCleanerTest {
     }
 
     @Test
-    public void shouldCleanTheStreamStatusTable() throws Exception {
+    public void shouldCleanTheSubscriptionTable() throws Exception {
 
-        final String tableName = "stream_status";
+        final String tableName = "subscription";
         final String contextName = "my-context";
 
         final Connection connection = mock(Connection.class);
@@ -125,7 +125,7 @@ public class DatabaseCleanerTest {
         when(testJdbcConnectionProvider.getViewStoreConnection(contextName)).thenReturn(connection);
         when(connection.prepareStatement("DELETE FROM " + tableName)).thenReturn(preparedStatement);
 
-        databaseCleaner.cleanStreamStatusTable(contextName);
+        databaseCleaner.cleanSubscriptionTable(contextName);
 
         verify(preparedStatement).executeUpdate();
         verify(connection).close();

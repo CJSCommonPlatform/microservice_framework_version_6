@@ -9,7 +9,7 @@ import static uk.gov.justice.services.example.cakeshop.it.params.CakeShopMediaTy
 import static uk.gov.justice.services.example.cakeshop.it.params.CakeShopMediaTypes.CONTEXT_NAME;
 import static uk.gov.justice.services.example.cakeshop.it.params.CakeShopUris.RECIPES_RESOURCE_URI;
 
-import uk.gov.justice.services.event.buffer.core.repository.streamstatus.StreamStatus;
+import uk.gov.justice.services.event.buffer.core.repository.subscription.Subscription;
 import uk.gov.justice.services.example.cakeshop.it.helpers.CakeShopRepositoryManager;
 import uk.gov.justice.services.example.cakeshop.it.helpers.CommandFactory;
 import uk.gov.justice.services.example.cakeshop.it.helpers.RestEasyClientFactory;
@@ -54,12 +54,12 @@ public class CakeShopEventBufferingIT {
                 .request()
                 .post(entity(commandFactory.addRecipeCommand(), ADD_RECIPE_MEDIA_TYPE));
 
-        await().until(() -> streamStatus(recipeId).isPresent());
-        assertThat(streamStatus(recipeId).get().getVersion(), is(1L));
+        await().until(() -> subscription(recipeId).isPresent());
+        assertThat(subscription(recipeId).get().getPosition(), is(1L));
     }
 
     @SuppressWarnings("SameParameterValue")
-    private Optional<StreamStatus> streamStatus(final String recipeId) {
-        return CAKE_SHOP_REPOSITORY_MANAGER.getStreamStatusJdbcRepository().findByStreamIdAndSource(fromString(recipeId), CONTEXT_NAME);
+    private Optional<Subscription> subscription(final String recipeId) {
+        return CAKE_SHOP_REPOSITORY_MANAGER.getSubscriptionJdbcRepository().findByStreamIdAndSource(fromString(recipeId), CONTEXT_NAME);
     }
 }

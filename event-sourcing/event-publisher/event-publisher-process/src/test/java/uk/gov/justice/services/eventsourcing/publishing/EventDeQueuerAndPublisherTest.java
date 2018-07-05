@@ -65,8 +65,6 @@ public class EventDeQueuerAndPublisherTest {
 
         assertThat(eventDeQueuerAndPublisher.deQueueAndPublish(), is(false));
 
-        //verify(logger).debug("No event found to publish");
-
         verifyZeroInteractions(eventConverter);
         verifyZeroInteractions(eventPublisher);
     }

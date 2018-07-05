@@ -10,6 +10,9 @@ import java.util.Properties;
 import javax.sql.DataSource;
 
 import org.hamcrest.MatcherAssert;
+
+import javax.sql.DataSource;
+
 import org.junit.Test;
 
 

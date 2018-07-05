@@ -65,7 +65,7 @@ public class HandlerRegistry {
                             "already been registered for %s ", newHandlerMethod, handlerMethods.get(name), name));
         }
 
-        logger.info("Registering handler {}, {}", name, newHandlerMethod.toString());
+        logger.debug("Registering handler {}, {}", name, newHandlerMethod.toString());
 
         if (newHandlerMethod.isDirect()) {
             handlerMethods.put(name, newHandlerMethod);

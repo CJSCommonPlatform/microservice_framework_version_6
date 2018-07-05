@@ -169,7 +169,7 @@ public class HandlerRegistryTest {
     }
 
     private void assertLogStatement(final String name) {
-        verify(logger).info(eq("Registering handler {}, {}"), eq(name), anyString());
+        verify(logger).debug(eq("Registering handler {}, {}"), eq(name), anyString());
     }
 
     @ServiceComponent(COMMAND_HANDLER)

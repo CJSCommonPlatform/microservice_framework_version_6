@@ -4,6 +4,8 @@ import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
 
@@ -13,8 +15,11 @@ import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidStreamIdException;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.Metadata;
+import uk.gov.justice.services.messaging.spi.DefaultJsonEnvelope;
 import uk.gov.justice.services.test.utils.common.helper.StoppedClock;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -36,7 +41,7 @@ public class EventConverterTest {
     private final static String METADATA_JSON = "{\"id\": \"" + ID.toString() + "\", " +
             "\"name\": \"" + NAME + "\"" +
             "}";
-    private final static String PAYLOAD_JSON = "{\"" + PAYLOAD_FIELD_NAME + "\": \"" + PAYLOAD_FIELD_VALUE + "\"}";
+    private final static String PAYLOAD_JSON = "{\"" + PAYLOAD_FIELD_NAME + "\":\"" + PAYLOAD_FIELD_VALUE + "\"}";
     private final Clock clock = new StoppedClock(new UtcClock().now());
     private EventConverter eventConverter;
 
@@ -65,8 +70,8 @@ public class EventConverterTest {
         assertThat(event.getStreamId(), equalTo(STREAM_ID));
         assertThat(event.getSequenceId(), equalTo(SEQUENCE_ID));
         assertThat(event.getCreatedAt(), is(clock.now()));
-        JSONAssert.assertEquals(METADATA_JSON, event.getMetadata(), false);
-        JSONAssert.assertEquals(envelope.payloadAsJsonObject().toString(), event.getPayload(), false);
+        assertEquals(METADATA_JSON, event.getMetadata(), false);
+        assertEquals(envelope.payloadAsJsonObject().toString(), event.getPayload(), false);
     }
 
     @Test(expected = InvalidStreamIdException.class)
@@ -81,13 +86,35 @@ public class EventConverterTest {
 
     @Test
     public void shouldCreateEnvelope() throws Exception {
-        JsonEnvelope actualEnvelope = eventConverter.envelopeOf(new Event(ID, STREAM_ID, SEQUENCE_ID, NAME, METADATA_JSON, PAYLOAD_JSON, new UtcClock().now()));
+        final JsonEnvelope actualEnvelope = eventConverter.envelopeOf(new Event(ID, STREAM_ID, SEQUENCE_ID, NAME, METADATA_JSON, PAYLOAD_JSON, new UtcClock().now()));
 
         assertThat(actualEnvelope.metadata().id(), equalTo(ID));
         assertThat(actualEnvelope.metadata().name(), equalTo(NAME));
         String actualPayload = actualEnvelope.payloadAsJsonObject().toString();
-        JSONAssert.assertEquals(PAYLOAD_JSON, actualPayload, false);
+        assertEquals(PAYLOAD_JSON, actualPayload, false);
     }
 
+    @Test
+    public void shouldConvertToAndFromJsonEnvelope() throws Exception {
 
+        final ZonedDateTime createdAt = new UtcClock().now();
+
+        final Metadata metadata = metadataBuilder()
+                .createdAt(createdAt)
+                .withStreamId(STREAM_ID)
+                .withId(ID)
+                .withName(NAME)
+                .withVersion(SEQUENCE_ID)
+                .build();
+
+        final String metadataJson = metadata.asJsonObject().toString();
+
+        final Event event = new Event(ID, STREAM_ID, SEQUENCE_ID, NAME, metadataJson, PAYLOAD_JSON, createdAt);
+
+        final JsonEnvelope jsonEnvelope = eventConverter.envelopeOf(event);
+
+        final Event convertedEvent = eventConverter.eventOf(jsonEnvelope);
+
+        assertThat(convertedEvent, is(event));
+    }
 }

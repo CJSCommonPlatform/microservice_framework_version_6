@@ -60,6 +60,7 @@ import uk.gov.justice.services.eventsourcing.source.core.JdbcBasedEventSource;
 import uk.gov.justice.services.eventsourcing.source.core.JdbcEventSourceFactory;
 import uk.gov.justice.services.eventsourcing.source.core.PublishingEventAppenderFactory;
 import uk.gov.justice.services.eventsourcing.source.core.SystemEventService;
+import uk.gov.justice.services.jdbc.persistence.DefaultJdbcDataSourceProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcDataSourceProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
@@ -181,6 +182,7 @@ public class EventStreamPageIT {
             JdbcRepositoryHelper.class,
             UtcClock.class,
             JdbcDataSourceProvider.class,
+            DefaultJdbcDataSourceProvider.class,
             JsonValidationLoggerHelper.class,
             BadRequestExceptionMapper.class,
             DefaultJsonValidationLoggerHelper.class,

@@ -20,9 +20,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class PublishingEventAppenderFactoryTest {
 
-    @Mock
-    private EventPublisher eventPublisher;
-
     @InjectMocks
     private PublishingEventAppenderFactory publishingEventAppenderFactory;
 
@@ -33,9 +30,6 @@ public class PublishingEventAppenderFactoryTest {
         final PublishingEventAppender publishingEventAppender = publishingEventAppenderFactory.publishingEventAppender(eventRepository);
 
         assertThat(publishingEventAppender, is(notNullValue()));
-
-        final Optional<Object> eventPublisherField = fieldValue(publishingEventAppender, "eventPublisher");
-        assertThat(eventPublisherField, is(Optional.of(eventPublisher)));
 
         final Optional<Object> eventRepositoryField = fieldValue(publishingEventAppender, "eventRepository");
         assertThat(eventRepositoryField, is(Optional.of(eventRepository)));

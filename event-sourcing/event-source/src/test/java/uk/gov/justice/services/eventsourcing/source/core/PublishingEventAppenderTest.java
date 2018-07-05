@@ -35,9 +35,6 @@ public class PublishingEventAppenderTest {
     @Mock
     private JdbcBasedEventRepository eventRepository;
 
-    @Mock
-    private EventPublisher eventPublisher;
-
     @InjectMocks
     private PublishingEventAppender eventAppender;
 
@@ -63,30 +60,6 @@ public class PublishingEventAppenderTest {
         assertThat(storedEnvelope.metadata().position(), contains(3L));
         assertThat(storedEnvelope.metadata().name(), is("name123"));
         assertThat(storedEnvelope.payloadAsJsonObject().getString("somePayloadField"), is("payloadValue123"));
-    }
-
-    @Test
-    public void shouldPublishEvent() throws Exception {
-        final UUID eventId = randomUUID();
-        final UUID streamId = randomUUID();
-
-        eventAppender.append(
-                envelope()
-                        .with(metadataOf(eventId, "name456"))
-                        .withPayloadOf("payloadValue456", "someOtherPayloadField")
-                        .build(),
-                streamId,
-                1L, DEFAULT_EVENT_SOURCE_NAME);
-
-        ArgumentCaptor<JsonEnvelope> envelopeCaptor = ArgumentCaptor.forClass(JsonEnvelope.class);
-
-        verify(eventPublisher).publish(envelopeCaptor.capture());
-
-        final JsonEnvelope publishedEnvelope = envelopeCaptor.getValue();
-        assertThat(publishedEnvelope.metadata().streamId(), contains(streamId));
-        assertThat(publishedEnvelope.metadata().position(), contains(1L));
-        assertThat(publishedEnvelope.metadata().name(), is("name456"));
-        assertThat(publishedEnvelope.payloadAsJsonObject().getString("someOtherPayloadField"), is("payloadValue456"));
     }
 
     @Test(expected = EventStreamException.class)

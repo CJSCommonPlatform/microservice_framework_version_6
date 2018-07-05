@@ -2,12 +2,12 @@ package uk.gov.justice.raml.jms.it;
 
 import static com.jayway.awaitility.Awaitility.await;
 import static javax.json.Json.createObjectBuilder;
-import static junit.framework.TestCase.assertTrue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 import static uk.gov.justice.services.messaging.jms.HeaderConstants.JMS_HEADER_CPPNAME;
 
@@ -16,6 +16,7 @@ import uk.gov.justice.api.Service2EventListenerPeopleEventEventFilterInterceptor
 import uk.gov.justice.api.Service2EventListenerPeopleEventEventListenerInterceptorChainProvider;
 import uk.gov.justice.api.Service2EventListenerPeopleEventEventValidationInterceptor;
 import uk.gov.justice.api.Service2EventListenerPeopleEventJmsListener;
+import uk.gov.justice.schema.service.SchemaCatalogResolverProducer;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsParameterChecker;
 import uk.gov.justice.services.adapter.messaging.DefaultJmsProcessor;
 import uk.gov.justice.services.adapter.messaging.JmsLoggerMetadataInterceptor;
@@ -52,15 +53,14 @@ import uk.gov.justice.services.core.interceptor.InterceptorCache;
 import uk.gov.justice.services.core.interceptor.InterceptorChainObserver;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
-import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
 import uk.gov.justice.services.core.json.DefaultJsonValidationLoggerHelper;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.core.mapping.ActionNameToMediaTypesMappingObserver;
 import uk.gov.justice.services.core.mapping.DefaultMediaTypesMappingCache;
 import uk.gov.justice.services.core.mapping.DefaultNameToMediaTypeConverter;
-import uk.gov.justice.services.core.mapping.MediaTypesMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.MediaType;
+import uk.gov.justice.services.core.mapping.MediaTypesMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.NameToMediaTypeConverter;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingObserver;
@@ -153,6 +153,7 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
             DefaultJmsParameterChecker.class,
             TestServiceContextNameProvider.class,
             JsonSchemaLoader.class,
+            SchemaCatalogResolverProducer.class,
             StringToJsonObjectConverter.class,
             DefaultJsonObjectEnvelopeConverter.class,
             ObjectToJsonValueConverter.class,
@@ -177,7 +178,6 @@ public class JmsAdapterToHandlerIT extends AbstractJmsAdapterGenerationIT {
             DefaultJmsMessageLoggerHelper.class,
             DefaultTraceLogger.class,
 
-            DefaultFileSystemUrlResolverStrategy.class,
             DefaultJsonValidationLoggerHelper.class,
 
             DefaultNameToMediaTypeConverter.class,

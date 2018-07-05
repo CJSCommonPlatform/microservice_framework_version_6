@@ -15,7 +15,6 @@ import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderF
 
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.envelope.EnvelopeValidationException;
-import uk.gov.justice.services.core.json.JsonSchemaValidationException;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -28,7 +27,7 @@ import org.mockito.exceptions.base.MockitoException;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class JsonSchemaValidatingMockTest {
+public class JsonSchemaValidatingMockMakerTest {
 
     @Test
     public void shouldPassWhenPayloadPassedToSenderAdheresToSchema() throws Exception {

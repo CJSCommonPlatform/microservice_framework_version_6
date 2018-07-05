@@ -7,7 +7,8 @@ import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuil
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithDefaults;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 
-import uk.gov.justice.schema.catalog.CatalogProducer;
+import uk.gov.justice.schema.service.CatalogProducer;
+import uk.gov.justice.schema.service.SchemaCatalogResolverProducer;
 import uk.gov.justice.schema.service.SchemaCatalogService;
 import uk.gov.justice.services.adapter.direct.SynchronousDirectAdapter;
 import uk.gov.justice.services.adapter.direct.SynchronousDirectAdapterCache;
@@ -34,7 +35,6 @@ import uk.gov.justice.services.core.interceptor.InterceptorCache;
 import uk.gov.justice.services.core.interceptor.InterceptorChainObserver;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
 import uk.gov.justice.services.core.json.BackwardsCompatibleJsonSchemaValidator;
-import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
 import uk.gov.justice.services.core.json.FileBasedJsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.json.PayloadExtractor;
@@ -115,7 +115,6 @@ public class QueryApiDirectClientIT {
             ValueProducer.class,
             GlobalValueProducer.class,
 
-            DefaultFileSystemUrlResolverStrategy.class,
             JsonSchemaLoader.class,
 
             DirectQueryApi2QueryViewRestExampleClient.class,
@@ -123,6 +122,7 @@ public class QueryApiDirectClientIT {
             TestDirectAdapter.class,
 
             SchemaCatalogService.class,
+            SchemaCatalogResolverProducer.class,
             SchemaCatalogAwareJsonSchemaValidator.class,
             PayloadExtractor.class,
             DefaultNameToMediaTypeConverter.class,

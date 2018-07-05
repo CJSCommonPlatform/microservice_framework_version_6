@@ -5,6 +5,7 @@ import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.
 
 import uk.gov.justice.schema.catalog.Catalog;
 import uk.gov.justice.schema.catalog.CatalogObjectFactory;
+import uk.gov.justice.schema.service.SchemaCatalogResolverProducer;
 import uk.gov.justice.schema.service.SchemaCatalogService;
 
 public class DefaultJsonSchemaValidatorFactory {
@@ -12,7 +13,8 @@ public class DefaultJsonSchemaValidatorFactory {
     public JsonSchemaValidator getDefaultJsonSchemaValidator() {
 
         final JsonSchemaLoader loader = new JsonSchemaLoader();
-        loader.fileSystemUrlResolverStrategy = new DefaultFileSystemUrlResolverStrategy();
+        final SchemaCatalogResolverProducer schemaCatalogResolverProducer = new SchemaCatalogResolverProducer();
+        loader.schemaCatalogResolver = schemaCatalogResolverProducer.schemaCatalogResolver();
 
         final PayloadExtractor payloadExtractor = new PayloadExtractor();
 

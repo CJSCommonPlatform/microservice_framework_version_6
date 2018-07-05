@@ -8,7 +8,8 @@ import static org.junit.Assert.assertThat;
 import uk.gov.justice.api.CustomApiRestExampleApplication;
 import uk.gov.justice.api.mapper.DefaultCustomApiRestExampleCustomUserIdResourceActionMapper;
 import uk.gov.justice.api.mapper.RestAdapterGeneratorMediaTypeToSchemaIdMapper;
-import uk.gov.justice.schema.catalog.CatalogProducer;
+import uk.gov.justice.schema.service.CatalogProducer;
+import uk.gov.justice.schema.service.SchemaCatalogResolverProducer;
 import uk.gov.justice.schema.service.SchemaCatalogService;
 import uk.gov.justice.services.adapter.rest.application.CommonProviders;
 import uk.gov.justice.services.adapter.rest.application.DefaultCommonProviders;
@@ -35,7 +36,6 @@ import uk.gov.justice.services.core.envelope.EnvelopeInspector;
 import uk.gov.justice.services.core.envelope.MediaTypeProvider;
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.json.BackwardsCompatibleJsonSchemaValidator;
-import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
 import uk.gov.justice.services.core.json.DefaultJsonValidationLoggerHelper;
 import uk.gov.justice.services.core.json.FileBasedJsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
@@ -45,8 +45,8 @@ import uk.gov.justice.services.core.mapping.ActionNameToMediaTypesMappingObserve
 import uk.gov.justice.services.core.mapping.DefaultMediaTypesMappingCache;
 import uk.gov.justice.services.core.mapping.DefaultNameToMediaTypeConverter;
 import uk.gov.justice.services.core.mapping.DefaultSchemaIdMappingCache;
-import uk.gov.justice.services.core.mapping.MediaTypesMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.MediaTypeToSchemaIdMapper;
+import uk.gov.justice.services.core.mapping.MediaTypesMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingCacheInitialiser;
 import uk.gov.justice.services.core.mapping.SchemaIdMappingObserver;
 import uk.gov.justice.services.generators.test.utils.interceptor.RecordingInterceptorChainProcessor;
@@ -149,7 +149,6 @@ public class DefaultCustomUserIdResourceIT {
             JsonSchemaLoader.class,
             DefaultTraceLogger.class,
             DefaultHttpTraceLoggerHelper.class,
-            DefaultFileSystemUrlResolverStrategy.class,
 
             RestAdapterGeneratorMediaTypeToSchemaIdMapper.class,
             SchemaCatalogAwareJsonSchemaValidator.class,
@@ -163,6 +162,7 @@ public class DefaultCustomUserIdResourceIT {
 
             CatalogProducer.class,
             SchemaCatalogService.class,
+            SchemaCatalogResolverProducer.class,
 
             DefaultMediaTypesMappingCache.class,
             ActionNameToMediaTypesMappingObserver.class,

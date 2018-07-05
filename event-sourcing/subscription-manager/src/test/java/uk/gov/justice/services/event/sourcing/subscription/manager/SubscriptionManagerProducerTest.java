@@ -7,6 +7,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 import static uk.gov.justice.subscription.domain.builders.SubscriptionBuilder.subscription;
@@ -83,5 +84,6 @@ public class SubscriptionManagerProducerTest {
         final SubscriptionManager subscriptionManager = subscriptionManagerProducer.subscriptionManager(injectionPoint);
 
         assertThat(subscriptionManager, is(instanceOf(DefaultSubscriptionManager.class)));
+        verify(logger).debug("Creating subscription manager for subscription name: " + subscriptionName.value());
     }
 }

@@ -54,8 +54,12 @@ protocols: [ HTTP, HTTPS ]
         application/vnd.example.make-cake+json:
             schema: !include json/schema/example.make-cake.json
             example: !include json/make-cake.json
-
-
+    responses:
+      202:
+        body:
+          application/vnd.example.make-cake-status+json:
+            schema: !include json/schema/example.make-cake-status.json
+            example: !include json/make-cake-status.json
 
 /orders/{orderId}:
   description: |

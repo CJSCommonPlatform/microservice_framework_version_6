@@ -10,6 +10,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 - EnveloperTestProvider that is used for testing usage of the Enveloper
 - Update JdbcEventRepository to return all active stream ids
 - Flag to disable running of Integration Tests as part of the build
+- Ability to return an Accepted code and payload from a post to a Command API component
 
 ### Changed
 - Added schema catalog generation plugin to example service
@@ -29,6 +30,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 - Updated common-bom version to 1.27.0 to fix apache tika security issues
 - Moved EventBuffer into DefaultSubscriptionManager
 - Add SchemaCatalogResolver to JsonSchemaLoader for resolving file base schemas with the schema catalog
+
+## [4.3.0] - 2018-07-10
+### Added
+- Ability to return an Accepted code and payload from a post to a Command API component
 
 ## [4.2.2] - 2018-07-05
 ### Changed

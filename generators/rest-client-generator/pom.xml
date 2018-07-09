@@ -7,7 +7,7 @@
     <parent>
         <groupId>uk.gov.justice.services</groupId>
         <artifactId>generators</artifactId>
-        <version>4.2.3-SNAPSHOT</version>
+        <version>4.3.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>rest-client-generator</artifactId>

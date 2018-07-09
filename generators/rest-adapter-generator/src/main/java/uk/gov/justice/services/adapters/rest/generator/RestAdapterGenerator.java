@@ -57,7 +57,8 @@ public class RestAdapterGenerator implements Generator {
         validator.validate(raml);
 
         final JaxRsInterfaceGenerator interfaceGenerator = new JaxRsInterfaceGenerator();
-        final JaxRsImplementationGenerator implementationGenerator = new JaxRsImplementationGenerator(configuration);
+        final ResponseStrategyFactory responseStrategyFactory = new ResponseStrategyFactory();
+        final JaxRsImplementationGenerator implementationGenerator = new JaxRsImplementationGenerator(configuration, responseStrategyFactory);
         final JaxRsApplicationCodeGenerator applicationGenerator = new JaxRsApplicationCodeGenerator(configuration);
         final ActionMappingGenerator actionMappingGenerator = new ActionMappingGenerator();
         final MediaTypeToSchemaIdGenerator mediaTypeToSchemaIdGenerator = new MediaTypeToSchemaIdGenerator();

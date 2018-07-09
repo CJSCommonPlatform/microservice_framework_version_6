@@ -8,21 +8,13 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
-import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
-import static uk.gov.justice.services.adapter.rest.processor.response.ResponseStrategies.ACCEPTED_STATUS_NO_ENTITY_RESPONSE_STRATEGY;
-import static uk.gov.justice.services.adapter.rest.processor.response.ResponseStrategies.FILE_STREAM_RETURNING_RESPONSE_STRATEGY;
-import static uk.gov.justice.services.adapter.rest.processor.response.ResponseStrategies.OK_STATUS_ENVELOPE_ENTITY_RESPONSE_STRATEGY;
-import static uk.gov.justice.services.adapter.rest.processor.response.ResponseStrategies.OK_STATUS_ENVELOPE_PAYLOAD_ENTITY_RESPONSE_STRATEGY;
 import static uk.gov.justice.services.adapters.rest.generator.Generators.byMimeTypeOrder;
 import static uk.gov.justice.services.adapters.rest.generator.Generators.resourceImplementationNameOf;
 import static uk.gov.justice.services.adapters.rest.generator.Generators.resourceInterfaceNameOf;
 import static uk.gov.justice.services.adapters.rest.helper.Multiparts.isMultipartResource;
-import static uk.gov.justice.services.core.annotation.Component.QUERY_CONTROLLER;
-import static uk.gov.justice.services.core.annotation.Component.QUERY_VIEW;
 import static uk.gov.justice.services.generators.commons.config.GeneratorProperties.serviceComponentOf;
 import static uk.gov.justice.services.generators.commons.helper.Actions.isSupportedActionType;
 import static uk.gov.justice.services.generators.commons.helper.Actions.isSupportedActionTypeWithResponseTypeOnly;
-import static uk.gov.justice.services.generators.commons.helper.Actions.isSynchronousAction;
 import static uk.gov.justice.services.generators.commons.helper.Names.DEFAULT_ANNOTATION_PARAMETER;
 import static uk.gov.justice.services.generators.commons.helper.Names.GENERIC_PAYLOAD_ARGUMENT_NAME;
 import static uk.gov.justice.services.generators.commons.helper.Names.RESOURCE_PACKAGE_NAME;
@@ -108,14 +100,17 @@ class JaxRsImplementationGenerator {
     private static final String HTTP_TRACE_LOGGER_HELPER_FIELD = "httpTraceLoggerHelper";
 
     private final GeneratorConfig configuration;
+    private final ResponseStrategyFactory responseStrategyFactory;
 
     /**
      * Constructor.
      *
      * @param configuration the generator configuration
      */
-    JaxRsImplementationGenerator(final GeneratorConfig configuration) {
+    JaxRsImplementationGenerator(final GeneratorConfig configuration,
+                                 final ResponseStrategyFactory responseStrategyFactory) {
         this.configuration = configuration;
+        this.responseStrategyFactory = responseStrategyFactory;
     }
 
     /**
@@ -134,8 +129,8 @@ class JaxRsImplementationGenerator {
     /**
      * Create an implementation class for the specified {@link Resource}
      *
-     * @param resource  the resource to generate as an implementation class
-     * @param baseUri base uri of the raml
+     * @param resource the resource to generate as an implementation class
+     * @param baseUri  base uri of the raml
      * @return a {@link TypeSpec} that represents the implementation class
      */
     private TypeSpec generateFor(final Resource resource, final RestResourceBaseUri baseUri) {
@@ -151,8 +146,8 @@ class JaxRsImplementationGenerator {
     /**
      * Creates a {@link TypeSpec.Builder} from an initial template of an implementation class
      *
-     * @param resource  the resource to generate as an implementation class
-     * @param baseUri the optional component for this class
+     * @param resource the resource to generate as an implementation class
+     * @param baseUri  the optional component for this class
      * @return a {@link TypeSpec.Builder} that represents the implementation class
      */
     private TypeSpec.Builder classSpecFor(final Resource resource, final RestResourceBaseUri baseUri) {
@@ -192,35 +187,6 @@ class JaxRsImplementationGenerator {
                         .build());
     }
 
-    private boolean containsOctetStreamResponse(final Action action) {
-        for (org.raml.model.Response response : action.getResponses().values()) {
-            if (response.getBody() != null) {
-                for (MimeType mimeType : response.getBody().values()) {
-                    if (mimeType.getType().equals(APPLICATION_OCTET_STREAM)) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    private String nameOfResponseStrategyFor(final Action action, final Optional<String> component) {
-        if (containsOctetStreamResponse(action)) {
-            return FILE_STREAM_RETURNING_RESPONSE_STRATEGY;
-        }
-
-        if (!isSynchronousAction(action)) {
-            return ACCEPTED_STATUS_NO_ENTITY_RESPONSE_STRATEGY;
-        }
-
-        if (isPresentAndRequiresEnvelopeEntityResponse(component)) {
-            return OK_STATUS_ENVELOPE_ENTITY_RESPONSE_STRATEGY;
-        }
-
-        return OK_STATUS_ENVELOPE_PAYLOAD_ENTITY_RESPONSE_STRATEGY;
-    }
-
     /**
      * Generate an {@link Adapter} annotation from the Component or a {@link CustomAdapter}
      * annotation from the service component configuration parameter.
@@ -244,12 +210,12 @@ class JaxRsImplementationGenerator {
      * Process the body or bodies for each httpAction.
      *
      * @param action the httpAction to process
-     * @param component
      * @return the list of {@link MethodSpec} that represents each method for the httpAction
      */
     private List<MethodSpec> methodsFor(final Action action, final Optional<String> component) {
         final ActionType actionType = action.getType();
-        final String responseStrategyName = nameOfResponseStrategyFor(action, component);
+        final String responseStrategyName = responseStrategyFactory.nameOfResponseStrategyFor(action, component);
+
         if (isSupportedActionType(actionType)) {
             if (isSupportedActionTypeWithResponseTypeOnly(actionType)) {
                 return singletonList(processNoActionBody(action, responseStrategyName));
@@ -300,7 +266,6 @@ class JaxRsImplementationGenerator {
      * Generate the interface class name for implementation class
      *
      * @param resource generate for resource
-     * @param baseUri
      * @return the {@link ClassName} of the interface
      */
     private ClassName interfaceClassNameFor(final Resource resource, final RestResourceBaseUri baseUri) {
@@ -411,10 +376,6 @@ class JaxRsImplementationGenerator {
         return generateGenericResourceMethod(resourceMethodName, queryParams, pathParams)
                 .addCode(methodBody(pathParams, methodBodyForGet(queryParams, resourceMethodName, responseStrategyName)))
                 .build();
-    }
-
-    private boolean isPresentAndRequiresEnvelopeEntityResponse(final Optional<String> component) {
-        return component.isPresent() && (QUERY_CONTROLLER.equals(component.get()) || QUERY_VIEW.equals(component.get()));
     }
 
     /**

@@ -39,7 +39,11 @@ public class ResponseBuilder {
     public Response build() {
         final Response response = new Response();
         response.setDescription(description);
-        response.setBody(responseBody);
+
+        if (!responseBody.isEmpty()) {
+            response.setBody(responseBody);
+        }
+
         return response;
     }
 }

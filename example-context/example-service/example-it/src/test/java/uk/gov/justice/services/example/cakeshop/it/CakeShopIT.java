@@ -124,6 +124,7 @@ public class CakeShopIT {
     private static final String RENAME_RECIPE_MEDIA_TYPE = "application/vnd." + SOURCE + ".rename-recipe+json";
     private static final String REMOVE_RECIPE_MEDIA_TYPE = "application/vnd." + SOURCE + ".remove-recipe+json";
     private static final String MAKE_CAKE_MEDIA_TYPE = "application/vnd." + SOURCE + ".make-cake+json";
+    private static final String MAKE_CAKE_STATUS_MEDIA_TYPE = "application/vnd." + SOURCE + ".make-cake-status+json";
     private static final String ORDER_CAKE_MEDIA_TYPE = "application/vnd." + SOURCE + ".order-cake+json";
     private static final String QUERY_RECIPE_MEDIA_TYPE = "application/vnd." + SOURCE + ".recipe+json";
     private static final String QUERY_RECIPES_MEDIA_TYPE = "application/vnd." + SOURCE + ".recipes+json";
@@ -515,6 +516,21 @@ public class CakeShopIT {
         assertThat(response.httpCode(), is(BAD_REQUEST));
     }
 
+    @Test
+    public void shouldReturnStatusFromMakeCakeAction() throws Exception {
+        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526e51";
+        final String cakeId = "163af847-effb-46a9-96bc-32a0f7526f01";
+        final String cakeName = "Super cake";
+
+        addRecipe(recipeId, cakeName);
+        addRecipe("163af847-effb-46a9-96bc-32a0f7526f02", "cake");
+        await().until(() -> recipesQueryResult().body().contains(recipeId));
+
+        final ApiResponse apiResponse = makeCake(recipeId, cakeId);
+
+        with(apiResponse.body())
+                .assertThat("$.status", equalTo("Making Cake"));
+    }
 
     @Test
     public void shouldReturnCakesWithNamesInheritedFromRecipe() throws Exception {
@@ -829,10 +845,14 @@ public class CakeShopIT {
     }
 
 
-    private void makeCake(final String recipeId, final String cakeId) {
-        final Response response = sendTo(format(CAKES_RESOURCE_URI, recipeId, cakeId)).request()
+    private ApiResponse makeCake(final String recipeId, final String cakeId) {
+        final Response response = sendTo(format(CAKES_RESOURCE_URI, recipeId, cakeId))
+                .request()
+                .accept(MAKE_CAKE_STATUS_MEDIA_TYPE)
                 .post(entity("{}", MAKE_CAKE_MEDIA_TYPE));
         assertThat(response.getStatus(), is(ACCEPTED));
+
+        return ApiResponse.from(response);
     }
 
     private void addRecipe(final String recipeId, final String cakeName) {

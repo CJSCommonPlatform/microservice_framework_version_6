@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [unreleased]
 
+## [4.3.0] - 2018-07-10
+### Added
+- Ability to return an Accepted code and payload from an post to a Command API component
+
 ## [4.2.2] - 2018-07-05
 ### Changed
 - Add SchemaCatalogResolver to JsonSchemaLoader for resolving file base schemas with the schema catalog

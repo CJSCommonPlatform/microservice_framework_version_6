@@ -195,6 +195,21 @@
                             </generatorProperties>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>generate-for-accepted-with-body-example</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>generate-test-sources</phase>
+                        <configuration>
+                            <includes>
+                                <include>**/accepted-with-response-body-example.raml</include>
+                            </includes>
+                            <generatorProperties>
+                                <serviceComponent>COMMAND_API</serviceComponent>
+                            </generatorProperties>
+                        </configuration>
+                    </execution>
                 </executions>
                 <dependencies>
                     <dependency>

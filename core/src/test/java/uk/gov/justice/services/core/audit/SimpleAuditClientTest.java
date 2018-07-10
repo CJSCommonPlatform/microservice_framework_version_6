@@ -42,7 +42,7 @@ public class SimpleAuditClientTest {
                 .put("propertyName", propertyValue)
                 .toString();
 
-        final JsonEnvelope envelope =  mock(JsonEnvelope.class);
+        final JsonEnvelope envelope = mock(JsonEnvelope.class);
 
         when(envelope.toString()).thenReturn(envelopeJson);
         when(serviceContextNameProvider.getServiceContextName()).thenReturn(serviceContextName);
@@ -51,7 +51,7 @@ public class SimpleAuditClientTest {
 
         final ArgumentCaptor<String> argumentCaptor = forClass(String.class);
 
-        verify(logger).info(argumentCaptor.capture());
+        verify(logger).debug(argumentCaptor.capture());
 
         final String json = argumentCaptor.getValue();
 

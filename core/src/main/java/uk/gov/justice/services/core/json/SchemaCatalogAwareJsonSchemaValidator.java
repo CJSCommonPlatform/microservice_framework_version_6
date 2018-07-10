@@ -55,7 +55,6 @@ public class SchemaCatalogAwareJsonSchemaValidator {
         final Optional<Schema> schema = schemaIdMappingCache.schemaIdFor(mediaType).flatMap(schemaCatalogService::findSchema);
 
         if (schema.isPresent()) {
-            logger.info(format("Performing schema validation with catalog schema for action '%s' and mediaType '%s", actionName, mediaType));
             final JSONObject payload = payloadExtractor.extractPayloadFrom(envelopeJson);
             try {
                 schema.get().validate(payload);

@@ -1,6 +1,5 @@
 package uk.gov.justice.services.example.cakeshop.query.view;
 
-import static org.slf4j.LoggerFactory.getLogger;
 import static uk.gov.justice.services.messaging.JsonObjects.getBoolean;
 import static uk.gov.justice.services.messaging.JsonObjects.getString;
 
@@ -17,15 +16,12 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import javax.inject.Inject;
 import javax.json.JsonObject;
 
-import org.slf4j.Logger;
-
 @ServiceComponent(Component.QUERY_VIEW)
 public class RecipesQueryView {
 
     static final String NAME_RESPONSE_RECIPE = "example.get-recipe";
     static final String NAME_RESPONSE_RECIPE_PHOTO = "example.get-recipe-photograph";
     static final String NAME_RESPONSE_RECIPE_LIST = "example.search-recipes";
-    private static final Logger LOGGER = getLogger(RecipesQueryView.class);
     private static final String FIELD_RECIPE_ID = "recipeId";
     private static final String FIELD_NAME = "name";
     private static final String PAGESIZE = "pagesize";
@@ -42,8 +38,6 @@ public class RecipesQueryView {
 
     @Handles("example.get-recipe")
     public JsonEnvelope findRecipe(final JsonEnvelope query) {
-        LOGGER.info("=============> Inside findRecipe Query View. RecipeId: " + query.payloadAsJsonObject().getString(FIELD_RECIPE_ID));
-
         final RecipeView recipe = recipeService.findRecipe(query.payloadAsJsonObject().getString(FIELD_RECIPE_ID));
         return enveloper.withMetadataFrom(query, NAME_RESPONSE_RECIPE).apply(
                 recipe);
@@ -51,17 +45,14 @@ public class RecipesQueryView {
 
     @Handles("example.search-recipes")
     public JsonEnvelope listRecipes(final JsonEnvelope query) {
-        LOGGER.info("=============> Inside listRecipes Query View ");
-
         return enveloper.withMetadataFrom(query, NAME_RESPONSE_RECIPE_LIST).apply(fetchRecipes(query));
     }
 
     @Handles("example.query-recipes")
     public JsonEnvelope queryRecipes(final JsonEnvelope query) {
-        LOGGER.info("=============> Inside queryRecipes Query View ");
-
         return enveloper.withMetadataFrom(query, NAME_RESPONSE_RECIPE_LIST).apply(fetchRecipes(query));
     }
+
     @Handles("example.get-recipe-photograph")
     public JsonEnvelope findRecipePhoto(final JsonEnvelope query) {
         final PhotoView photo = recipeService.findRecipePhoto(query.payloadAsJsonObject().getString(FIELD_RECIPE_ID));

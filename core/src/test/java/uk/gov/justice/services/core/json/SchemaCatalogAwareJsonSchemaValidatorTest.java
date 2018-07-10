@@ -68,7 +68,6 @@ public class SchemaCatalogAwareJsonSchemaValidatorTest {
 
         schemaCatalogAwareJsonSchemaValidator.validate(envelopeJson, actionName, of(mediaType));
 
-        verify(logger).info("Performing schema validation with catalog schema for action 'command.api.initiate-warp-speed' and mediaType 'application/vnd.mind.command.initiate-warp-speed+json");
         verify(schema).validate(payload);
         verifyZeroInteractions(fileBasedJsonSchemaValidator);
     }

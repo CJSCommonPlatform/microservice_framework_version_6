@@ -16,7 +16,7 @@ addons:
     github_token:
       secure: "OsKkSFwBiUEWS1HkRz397R9uMtSy7KT9YpTyiWWDqRTY6Cq7RpG92dGPPJDp5ul1cT7Z/8SZrmIYZ8PnFYKcyrBLSALTU4L0iWMVv6MsjzJYz1KNwFPth/mTAqW1u6OnQm10qGTGiRHvtj547tWYnMcK+Qes5j308af0SRMOGy5icxdolPKiqhVz15QmrHiVoCRzeH2JISwfGZFoYTrDyahlT4duA0HymaYiZee8WJ/n3i0v2ZI5D/2EOCurSBHG+NF0zFCVVEz/RtxRlUUIIgYwojbNdMYHTL2GNb6pBHJ3Z3fLazWitUgI2xN5J49zRxVSuujeA8i7GncBi30suC2gIQXH0CKlIR4Oc0iUswD0qyDWTOGLuj/1UWC82PudgSTJzDfBCJh5So1CrmqA0PSQIPi/KgA0oqQnDBOZ7ZeHLXfb+p3VD6+uNJo04Tf8TqUEW3WsIroSeyYjWkTsUl6v2+Q/2eMfn0Ai0Eek/vWcV+TWxmRXQOwhXRmZZb3lmyVmb5EiFI75VosM5W9TjWnoKFtpfX0ByfYf3Uq+ygwhvBEX1myaVDWkpZj3ZQL+PqDMhD2N7XpNIKl+33wg/rdIN81dIcylBOygI0eFsS+2pcJBKgore/vZzFj2HMugdfYgIqg+7i6FnPpDV+Z9fP3FmDFMW/KBbhsNnUEwzSU="
 before_install:
-- git clone https://github.com/CJSCommonPlatform/travis-settings.git target/travis-settings
+- git clone https://github.com/CJSCommonPlatform/travis-settings.git target/travis-settings --unshallow
 - ln -sfT ${PWD}/target/travis-settings/settings.xml ${HOME}/.m2/settings.xml
 - ln -sfT ${PWD}/target/travis-settings/mvnw mvnw
 - ln -sft ${PWD} ${PWD}/target/travis-settings/.mvn

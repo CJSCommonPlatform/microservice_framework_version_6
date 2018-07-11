@@ -5,6 +5,11 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [unreleased]
 
+## [4.3.2] - 2018-07-11
+### Changed
+- Upgraded generator maven plugin to version 2.6.0
+- Upgraded json schema catalog to version 1.3.2
+
 ## [4.3.1] - 2018-07-11
 ### Added
 - Ability to return an Accepted code and payload from an post to a Command API component

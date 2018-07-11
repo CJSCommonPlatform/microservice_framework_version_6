@@ -25,7 +25,7 @@ public class SimpleAuditClient implements AuditClient {
 
     @Override
     public void auditEntry(final JsonEnvelope envelope, final String component) {
-        logger.info(createAuditMessageFrom(envelope, component));
+        logger.debug(createAuditMessageFrom(envelope, component));
     }
 
     private String createAuditMessageFrom(final JsonEnvelope envelope, final String component) {

@@ -9,22 +9,14 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 @ServiceComponent(EVENT_PROCESSOR)
 public class CakeMadeEventProcessor {
-
-    private static final Logger logger = LoggerFactory.getLogger(CakeMadeEventProcessor.class);
 
     @Inject
     Sender sender;
 
     @Handles("example.cake-made")
     public void handle(final JsonEnvelope event) {
-
-        logger.info("=============> Inside cake-made Event Processor");
         sender.send(event);
-
     }
 }

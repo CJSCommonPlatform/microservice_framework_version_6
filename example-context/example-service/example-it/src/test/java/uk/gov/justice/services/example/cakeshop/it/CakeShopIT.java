@@ -182,7 +182,7 @@ public class CakeShopIT {
 
     @Test
     public void shouldReturn202ResponseWhenAddingRecipe() throws Exception {
-        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526f88";
+        final String recipeId = randomUUID().toString();
         final Response response = sendTo(RECIPES_RESOURCE_URI + recipeId).request()
                 .post(entity(addRecipeCommand(), ADD_RECIPE_MEDIA_TYPE));
         assertThat(response.getStatus(), is(ACCEPTED));
@@ -190,7 +190,7 @@ public class CakeShopIT {
 
     @Test
     public void shouldReturn202ResponseWhenRemovingRecipe() throws Exception {
-        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526f25";
+        final String recipeId = randomUUID().toString();
         Response response = sendTo(RECIPES_RESOURCE_URI + recipeId).request()
                 .post(entity(addRecipeCommand(), ADD_RECIPE_MEDIA_TYPE));
         assertThat(response.getStatus(), is(ACCEPTED));
@@ -204,7 +204,7 @@ public class CakeShopIT {
 
     @Test
     public void shouldReturn400ResponseWhenJsonNotAdheringToSchemaIsSent() throws Exception {
-        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526f25";
+        final String recipeId = randomUUID().toString();
         final Response response = sendTo(RECIPES_RESOURCE_URI + recipeId).request()
                 .post(entity("{}", ADD_RECIPE_MEDIA_TYPE));
         assertThat(response.getStatus(), is(BAD_REQUEST));
@@ -212,7 +212,7 @@ public class CakeShopIT {
 
     @Test
     public void shouldRegisterRecipeAddedEvent() {
-        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526f99";
+        final String recipeId = randomUUID().toString();
         sendTo(RECIPES_RESOURCE_URI + recipeId).request()
                 .post(entity(
                         jsonObject()
@@ -332,13 +332,13 @@ public class CakeShopIT {
 
     @Test
     public void shouldReturn404IfRecipeDoesNotExist() {
-        final ApiResponse response = queryForRecipe("163af847-effb-46a9-96bc-32a0f7526f00");
+        final ApiResponse response = queryForRecipe(randomUUID().toString());
         assertThat(response.httpCode(), is(NOT_FOUND));
     }
 
     @Test
     public void shouldReturnRecipeOfGivenId() {
-        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526f22";
+        final String recipeId = randomUUID().toString();
         final String recipeName = "Cheesy cheese cake";
         addRecipe(recipeId, recipeName);
 
@@ -361,7 +361,7 @@ public class CakeShopIT {
                 //closing db to cause transaction error
                 closeCakeShopDb();
 
-                final String recipeId = "363af847-effb-46a9-96bc-32a0f7526f12";
+                final String recipeId = randomUUID().toString();
                 addRecipe(recipeId, "Cheesy cheese cake");
 
                 final TextMessage messageFromDLQ = (TextMessage) dlqConsumer.receive();
@@ -378,10 +378,10 @@ public class CakeShopIT {
     @Test
     public void shouldReturnRecipes() {
         //adding 2 recipes
-        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526e14";
+        final String recipeId = randomUUID().toString();
         addRecipe(recipeId, "Cheesy cheese cake");
 
-        final String recipeId2 = "163af847-effb-46a9-96bc-32a0f7526e15";
+        final String recipeId2 = randomUUID().toString();
         addRecipe(recipeId2, "Chocolate muffin");
 
 
@@ -459,10 +459,10 @@ public class CakeShopIT {
     @Test
     public void shouldFilterRecipesUsingPageSize() {
         //adding 2 recipes
-        final String recipeId = "263af847-effb-46a9-96bc-32a0f7526e44";
+        final String recipeId = randomUUID().toString();
         addRecipe(recipeId, "Absolutely cheesy cheese cake");
 
-        final String recipeId2 = "263af847-effb-46a9-96bc-32a0f7526e55";
+        final String recipeId2 = randomUUID().toString();
         addRecipe(recipeId2, "Chocolate muffin");
 
         await().until(() -> recipesQueryResult().body().contains(recipeId));
@@ -478,11 +478,11 @@ public class CakeShopIT {
     @Test
     public void shouldFilterGlutenFreeRecipes() {
         //adding 2 recipes
-        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526e66";
+        final String recipeId = randomUUID().toString();
         sendTo(RECIPES_RESOURCE_URI + recipeId).request()
                 .post(recipeEntity("Muffin", false));
 
-        final String recipeId2 = "163af847-effb-46a9-96bc-32a0f7526e77";
+        final String recipeId2 = randomUUID().toString();
         sendTo(RECIPES_RESOURCE_URI + recipeId2).request()
                 .post(recipeEntity("Oat cake", true));
 
@@ -518,12 +518,12 @@ public class CakeShopIT {
 
     @Test
     public void shouldReturnStatusFromMakeCakeAction() throws Exception {
-        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526e51";
-        final String cakeId = "163af847-effb-46a9-96bc-32a0f7526f01";
+        final String recipeId = randomUUID().toString();
+        final String cakeId = randomUUID().toString();
         final String cakeName = "Super cake";
 
         addRecipe(recipeId, cakeName);
-        addRecipe("163af847-effb-46a9-96bc-32a0f7526f02", "cake");
+        addRecipe(randomUUID().toString(), "cake");
         await().until(() -> recipesQueryResult().body().contains(recipeId));
 
         final ApiResponse apiResponse = makeCake(recipeId, cakeId);
@@ -534,12 +534,12 @@ public class CakeShopIT {
 
     @Test
     public void shouldReturnCakesWithNamesInheritedFromRecipe() throws Exception {
-        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526e51";
-        final String cakeId = "163af847-effb-46a9-96bc-32a0f7526f01";
+        final String recipeId = randomUUID().toString();
+        final String cakeId = randomUUID().toString();
         final String cakeName = "Super cake";
 
         addRecipe(recipeId, cakeName);
-        addRecipe("163af847-effb-46a9-96bc-32a0f7526f02", "cake");
+        addRecipe(randomUUID().toString(), "cake");
         await().until(() -> recipesQueryResult().body().contains(recipeId));
 
         makeCake(recipeId, cakeId);
@@ -555,7 +555,7 @@ public class CakeShopIT {
     @Test
     public void shouldUseSnapshotWhenMakingCakes() throws AggregateChangeDetectedException {
 
-        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526e52";
+        final String recipeId = randomUUID().toString();
         final String cakeName = "Delicious cake";
 
         addRecipe(recipeId, cakeName);
@@ -563,8 +563,8 @@ public class CakeShopIT {
 
         //cake made events belong to the recipe aggregate.
         //snapshot threshold is set to 3 in settings-test.xml so this should cause snapshot to be created
-        final String cakeId1 = "b8b138a2-aee8-46ac-bc8d-a4e0b32de424";
-        final String cakeId2 = "a7df425e-ba49-4b53-aaad-7b4b3f796dee";
+        final String cakeId1 = randomUUID().toString();
+        final String cakeId2 = randomUUID().toString();
 
         makeCake(recipeId, cakeId1);
         makeCake(recipeId, cakeId2);
@@ -575,7 +575,7 @@ public class CakeShopIT {
         final String newCakeName = "Tweaked cake";
         tweakRecipeSnapshotName(recipeId, newCakeName);
 
-        final String lastCakeId = "7eba6ce5-70e7-452a-b9a9-84acc6011fdf";
+        final String lastCakeId = randomUUID().toString();
         makeCake(recipeId, lastCakeId);
 
         await().until(() -> cakesQueryResult().body().contains(lastCakeId));
@@ -611,7 +611,7 @@ public class CakeShopIT {
         try (final Session jmsSession = jmsSession()) {
             try (final MessageConsumer publicTopicConsumer = topicConsumerOf(jmsSession, "public.event")) {
 
-                final String recipeId = "163af847-effb-46a9-96bc-32a0f7526e13";
+                final String recipeId = randomUUID().toString();
                 sendTo(RECIPES_RESOURCE_URI + recipeId).request()
                         .post(recipeEntity("Apple pie", false));
 
@@ -707,7 +707,7 @@ public class CakeShopIT {
 
     @Test
     public void shouldUpdateEventBufferStatus() throws Exception {
-        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526f89";
+        final String recipeId = randomUUID().toString();
         sendTo(RECIPES_RESOURCE_URI + recipeId).request()
                 .post(entity(addRecipeCommand(), ADD_RECIPE_MEDIA_TYPE));
 
@@ -724,7 +724,7 @@ public class CakeShopIT {
             sendTo(RECIPES_RESOURCE_URI + randomUUID()).request()
                     .post(recipeEntity("Exceptional cake"));
         }
-        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526f78";
+        final String recipeId = randomUUID().toString();
         final String recipeName = "Non exceptional cake";
         addRecipe(recipeId, recipeName);
 
@@ -754,7 +754,7 @@ public class CakeShopIT {
     @Test
     public void shouldReturnAcceptedStatusAndCreatEventWhenPostingPhotographToMultipartEndpoint() throws Exception {
 
-        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526f22";
+        final String recipeId = randomUUID().toString();
         final String fieldName = "photoId";
         final String filename = "croydon.jpg";
         final File file = new File(getResource(filename).getFile());
@@ -790,7 +790,7 @@ public class CakeShopIT {
 
     @Test
     public void shouldRetrieveRecipePhotograph() throws Exception {
-        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526f24";
+        final String recipeId = randomUUID().toString();
         addRecipe(recipeId, "Easy Muffin");
         await().until(() -> queryForRecipe(recipeId).httpCode() == OK);
 

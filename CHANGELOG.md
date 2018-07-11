@@ -5,9 +5,12 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [unreleased]
 
-## [4.3.0] - 2018-07-10
+## [4.3.1] - 2018-07-11
 ### Added
 - Ability to return an Accepted code and payload from an post to a Command API component
+
+### Changed
+- Remove logging to keep within Travis 4MB log limit
 
 ## [4.2.2] - 2018-07-05
 ### Changed

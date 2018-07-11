@@ -72,7 +72,7 @@ public class CakeShopIT {
 
     @Test
     public void shouldAcceptAddRecipeCommand() throws Exception {
-        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526f88";
+        final String recipeId = randomUUID().toString();
 
         final Response response = client
                 .target(RECIPES_RESOURCE_URI + recipeId)
@@ -84,7 +84,7 @@ public class CakeShopIT {
 
     @Test
     public void shouldAcceptRemoveRecipeCommand() throws Exception {
-        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526f25";
+        final String recipeId = randomUUID().toString();
         final Response response_1 = client
                 .target(RECIPES_RESOURCE_URI + recipeId)
                 .request()
@@ -104,7 +104,7 @@ public class CakeShopIT {
 
     @Test
     public void shouldProcessRecipeAddedEvent() {
-        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526f99";
+        final String recipeId = randomUUID().toString();
         final String eventJson = createObjectBuilder()
                 .add("name", "Vanilla cake")
                 .add("glutenFree", false)
@@ -158,7 +158,7 @@ public class CakeShopIT {
 
     @Test
     public void shouldQueryRecipesById() {
-        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526f22";
+        final String recipeId = randomUUID().toString();
         final String recipeName = "Cheesy cheese cake";
         commandSender.addRecipe(recipeId, recipeName);
 
@@ -175,10 +175,10 @@ public class CakeShopIT {
     @Test
     public void shouldQueryForRecipes() {
         //adding 2 recipes
-        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526e14";
+        final String recipeId = randomUUID().toString();
         commandSender.addRecipe(recipeId, "Cheesy cheese cake");
 
-        final String recipeId2 = "163af847-effb-46a9-96bc-32a0f7526e15";
+        final String recipeId2 = randomUUID().toString();
         commandSender.addRecipe(recipeId2, "Chocolate muffin");
 
 
@@ -213,15 +213,17 @@ public class CakeShopIT {
 
     @Test
     public void shouldQueryForCakesWithNamesInheritedFromRecipe() throws Exception {
-        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526e51";
-        final String cakeId = "163af847-effb-46a9-96bc-32a0f7526f01";
+        final String recipeId_1 = randomUUID().toString();
+        final String recipeId_2 = randomUUID().toString();
+
+        final String cakeId = randomUUID().toString();
         final String cakeName = "Super cake";
 
-        commandSender.addRecipe(recipeId, cakeName);
-        commandSender.addRecipe("163af847-effb-46a9-96bc-32a0f7526f02", "cake");
-        await().until(() -> querier.recipesQueryResult().body().contains(recipeId));
+        commandSender.addRecipe(recipeId_1, cakeName);
+        commandSender.addRecipe(recipeId_2, "cake");
+        await().until(() -> querier.recipesQueryResult().body().contains(recipeId_1));
 
-        commandSender.makeCake(recipeId, cakeId);
+        commandSender.makeCake(recipeId_1, cakeId);
 
         await().until(() -> querier.cakesQueryResult().body().contains(cakeId));
 

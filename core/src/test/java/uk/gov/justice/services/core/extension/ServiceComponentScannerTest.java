@@ -104,6 +104,7 @@ public class ServiceComponentScannerTest {
         verifyIfEventFoundEventFiredWith(processAnnotatedType);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldNotFireAnyEventWithNoHandler() throws Exception {
 
@@ -144,10 +145,9 @@ public class ServiceComponentScannerTest {
         verify(beanManager, never()).fireEvent(any());
     }
 
-
     @SuppressWarnings("serial")
-    private void mockBeanManagerGetBeansWith(Bean<Object>... handlers) {
-        doReturn(new HashSet<Bean<Object>>(asList(handlers))).when(beanManager).getBeans(any(), any());
+    private void mockBeanManagerGetBeansWith(final Bean<Object>... handlers) {
+        doReturn(new HashSet<>(asList(handlers))).when(beanManager).getBeans(any(), any());
     }
 
     private void mockProcessAnnotatedType() {
@@ -157,6 +157,7 @@ public class ServiceComponentScannerTest {
         doReturn(TestEvent.class.getAnnotation(Event.class)).when(annotatedType).getAnnotation(Event.class);
     }
 
+    @SuppressWarnings("unchecked")
     private void verifyIfServiceComponentFoundEventFiredWith(final Bean<Object> handler) {
         final ArgumentCaptor<ServiceComponentFoundEvent> captor = ArgumentCaptor.forClass(ServiceComponentFoundEvent.class);
         mockBeanManagerGetBeansWith(handler);
@@ -168,6 +169,7 @@ public class ServiceComponentScannerTest {
         assertThat(captor.getValue().getLocation(), equalTo(ServiceComponentLocation.LOCAL));
     }
 
+    @SuppressWarnings("unchecked")
     private void verifyIfRemoteServiceComponentFoundEventFiredWith(final Bean<Object> handler) {
         final ArgumentCaptor<ServiceComponentFoundEvent> captor = ArgumentCaptor.forClass(ServiceComponentFoundEvent.class);
         mockBeanManagerGetBeansWith(handler);

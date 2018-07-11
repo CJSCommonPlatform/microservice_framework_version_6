@@ -42,16 +42,17 @@ public class HttpMessageLoggerHelperTest {
     private static final String ACCEPT_VALUE = "media.type.response";
 
     @Mock
-    HttpHeaders httpHeaders;
+    private HttpHeaders httpHeaders;
 
     @Mock
-    MediaType mediaType;
+    private MediaType mediaType;
 
     @Test
     public void shouldBeWellDefinedUtilityClass() {
         assertUtilityClassWellDefined(HttpMessageLoggerHelper.class);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldContainAllHttpHeaderConstants() {
         when(httpHeaders.getMediaType()).thenReturn(mediaType);

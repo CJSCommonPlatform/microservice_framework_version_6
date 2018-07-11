@@ -289,6 +289,7 @@ public class LoggerRequestDataFilterTest {
         verify(context).setEntityStream(Mockito.any(ByteArrayInputStream.class));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldIgnoreNonFrameworkMediaTypesAndNotUploadStream() throws Exception {
         final MultivaluedMap<String, String> headers = new MultivaluedHashMap();

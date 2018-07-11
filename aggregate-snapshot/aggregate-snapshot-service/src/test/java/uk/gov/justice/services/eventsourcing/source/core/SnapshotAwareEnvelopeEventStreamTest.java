@@ -80,6 +80,7 @@ public class SnapshotAwareEnvelopeEventStreamTest {
         verify(eventStreamManager).append(STREAM_ID, stream);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldAppendStreamAfterAfterPosition() throws Exception {
         final Stream<JsonEnvelope> stream = Stream.of(envelope().build());
@@ -104,6 +105,7 @@ public class SnapshotAwareEnvelopeEventStreamTest {
         assertThat(actualId, equalTo(STREAM_ID));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldAttemptSnapshotCreationOnAppendingEvents() throws Exception {
         final TestAggregate aggregate = new TestAggregate();
@@ -119,6 +121,7 @@ public class SnapshotAwareEnvelopeEventStreamTest {
 
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldNotCreateSnapshotWhenAppendingWithNonConsecutiveTolerance() throws Exception {
         eventStream.registerAggregates(TestAggregate.class, new TestAggregate());
@@ -129,6 +132,7 @@ public class SnapshotAwareEnvelopeEventStreamTest {
 
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldAttemptSnapshotCreationWhenAppendingWithConsecutiveTolerance() throws Exception {
         final TestAggregate aggregate = new TestAggregate();
@@ -144,6 +148,7 @@ public class SnapshotAwareEnvelopeEventStreamTest {
 
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldAttemptSnapshotCreationOnAppendingEventsFrom() throws Exception {
         final TestAggregate aggregate = new TestAggregate();

@@ -26,12 +26,12 @@ public class CakeOrderedEventListenerTest {
     private CakeOrderRepository repository;
 
     @Mock
-    JsonObjectToObjectConverter converter;
+    private JsonObjectToObjectConverter converter;
 
     @InjectMocks
-    CakeOrderedEventListener listener;
+    private CakeOrderedEventListener listener;
 
-
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldSaveEvent() throws Exception {
 

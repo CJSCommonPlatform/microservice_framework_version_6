@@ -90,6 +90,7 @@ public class HandlerMethodTest {
         assertThat(result, nullValue());
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldHandlePojoSynchronously() {
         final TestPojo testPojo = new TestPojo();

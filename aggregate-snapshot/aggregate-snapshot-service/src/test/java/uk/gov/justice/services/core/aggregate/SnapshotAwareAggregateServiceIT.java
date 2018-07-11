@@ -269,6 +269,7 @@ public class SnapshotAwareAggregateServiceIT {
         assertThat(rowCount(SQL_EVENT_STREAM_COUNT_BY_STREAM_ID, streamId), is(1));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldNotCreateNewSnapshotOnAggregateChangeWhenWeJustOneExistingSnapshots() throws Exception {
 
@@ -298,6 +299,7 @@ public class SnapshotAwareAggregateServiceIT {
         assertThat(rowCount(SQL_EVENT_STREAM_COUNT_BY_STREAM_ID, streamId), is(1));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldCreateNewSnapshotOnAggregateChangeWhenWeHaveMultipleExistingSnapshots() throws Exception {
 
@@ -392,6 +394,7 @@ public class SnapshotAwareAggregateServiceIT {
         assertThat(rowCount(SQL_EVENT_STREAM_COUNT_BY_STREAM_ID, streamId), is(1));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldRebuildSnapshotOnAggregateModelChange() throws Exception {
 

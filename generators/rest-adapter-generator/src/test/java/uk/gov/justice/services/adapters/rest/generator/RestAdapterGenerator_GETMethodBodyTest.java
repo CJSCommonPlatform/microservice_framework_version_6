@@ -126,6 +126,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldPassEntityResponseStrategyToProcessor() throws Exception {
 
@@ -151,6 +152,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldPassEnvelopePayloadEntityResponseStrategyNameToProcessor() throws Exception {
 
@@ -174,6 +176,7 @@ public class RestAdapterGenerator_GETMethodBodyTest extends BaseRestAdapterGener
 
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldPassFileStreamReturningResponseStrategyNameToProcessor() throws Exception {
 

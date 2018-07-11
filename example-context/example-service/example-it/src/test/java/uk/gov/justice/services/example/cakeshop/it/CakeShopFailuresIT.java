@@ -26,6 +26,8 @@ import uk.gov.justice.services.example.cakeshop.it.helpers.EventFactory;
 import uk.gov.justice.services.example.cakeshop.it.helpers.Querier;
 import uk.gov.justice.services.example.cakeshop.it.helpers.RestEasyClientFactory;
 
+import java.util.UUID;
+
 import javax.ws.rs.client.Client;
 import javax.ws.rs.core.Response;
 
@@ -65,7 +67,7 @@ public class CakeShopFailuresIT {
 
     @Test
     public void shouldReturnBadRequestIfJsonFailsValidation() throws Exception {
-        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526f25";
+        final String recipeId = randomUUID().toString();
         final Response response = client.target(RECIPES_RESOURCE_URI + recipeId).request()
                 .post(entity("{}", ADD_RECIPE_MEDIA_TYPE));
         assertThat(response.getStatus(), isStatus(BAD_REQUEST));
@@ -85,7 +87,8 @@ public class CakeShopFailuresIT {
 
     @Test
     public void shouldReturnNotFoundIfRecipeDoesNotExist() {
-        final ApiResponse response = querier.queryForRecipe("163af847-effb-46a9-96bc-32a0f7526f00");
+        final UUID recipeId = randomUUID();
+        final ApiResponse response = querier.queryForRecipe(recipeId.toString());
         assertThat(response.httpCode(), isStatus(NOT_FOUND));
     }
 
@@ -137,7 +140,7 @@ public class CakeShopFailuresIT {
                     .request()
                     .post(eventFactory.recipeEntity("Exceptional cake"));
         }
-        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526f78";
+        final String recipeId = randomUUID().toString();
         final String recipeName = "Non exceptional cake";
         commandSender.addRecipe(recipeId, recipeName);
 

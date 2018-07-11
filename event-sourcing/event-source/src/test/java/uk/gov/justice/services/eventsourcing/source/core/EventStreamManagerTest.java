@@ -57,7 +57,10 @@ public class EventStreamManagerTest {
     private final Logger logger = mock(Logger.class);
     private final JdbcBasedEventRepository eventRepository = mock(JdbcBasedEventRepository.class);
     private final EventAppender eventAppender = mock(EventAppender.class);
+
+    @SuppressWarnings("unchecked")
     private final Stream<JsonEnvelope> eventStream = mock(Stream.class);
+
     private final SystemEventService systemEventService = mock(SystemEventService.class);
     private final Enveloper enveloper = EnveloperFactory.createEnveloper();
 

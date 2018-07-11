@@ -57,6 +57,7 @@ public class DispatcherDelegateTest {
         verify(dispatcher).dispatch(envelope);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldDispatchEnvelopeWithPojoPayload() {
 

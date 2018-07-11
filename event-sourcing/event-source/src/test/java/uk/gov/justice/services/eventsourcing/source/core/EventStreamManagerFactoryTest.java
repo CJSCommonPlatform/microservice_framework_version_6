@@ -60,6 +60,7 @@ public class EventStreamManagerFactoryTest {
         assertThat(getField(eventStreamManager, "enveloper", Enveloper.class), is(enveloper));
     }
 
+    @SuppressWarnings("unchecked")
     private <T> T getField(
             final EventStreamManager eventStreamManager,
             final String fieldName,

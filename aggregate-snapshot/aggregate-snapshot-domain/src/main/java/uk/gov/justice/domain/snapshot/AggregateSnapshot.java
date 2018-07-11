@@ -54,6 +54,7 @@ public class AggregateSnapshot<T extends Aggregate> implements Serializable {
         return aggregateByteRepresentation;
     }
 
+    @SuppressWarnings("unchecked")
     public T getAggregate(final ObjectInputStreamStrategy streamStrategy) throws AggregateChangeDetectedException {
         try (final ObjectInputStream objectInputStream = streamStrategy.objectInputStreamOf(new ByteArrayInputStream(aggregateByteRepresentation))) {
             return (T) Class.forName(getType()).cast(objectInputStream.readObject());

@@ -196,6 +196,7 @@ public class DefaultRestProcessorTest {
         assertThat(resultInterceptorContext, equalTo(interceptorContext));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldReturnResponseFromResponseStrategyForCallWithInputPart() throws Exception {
         final List<FileInputDetails> fileInputDetails = mock(List.class);

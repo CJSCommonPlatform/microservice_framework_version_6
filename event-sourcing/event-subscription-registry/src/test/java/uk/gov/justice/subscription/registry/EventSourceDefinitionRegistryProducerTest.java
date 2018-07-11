@@ -20,9 +20,7 @@ import uk.gov.justice.subscription.domain.eventsource.Location;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -96,10 +94,6 @@ public class EventSourceDefinitionRegistryProducerTest {
                 .withName(event_source_name_2).build();
 
         final List<URL> pathList = asList(url_1, url_2);
-
-        final Map<String, EventSourceDefinition> sourceDefinitionMap = new HashMap();
-        sourceDefinitionMap.put(eventSourceDefinition1.getName(), eventSourceDefinition1);
-        sourceDefinitionMap.put(eventSourceDefinition2.getName(), eventSourceDefinition2);
 
         when(yamlFileFinder.getEventSourcesPaths()).thenReturn(pathList);
         when(eventSourcesParser.eventSourcesFrom(pathList)).thenReturn(Stream.of(eventSourceDefinition1, eventSourceDefinition2));

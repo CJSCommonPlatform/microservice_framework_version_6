@@ -18,6 +18,7 @@ public class OpenEjbConfigurationBuilderTest {
         Assert.assertNotNull(properties);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldAddAnHttpEjbPort() {
         final Properties properties = OpenEjbConfigurationBuilder.createOpenEjbConfigurationBuilder()
@@ -29,6 +30,7 @@ public class OpenEjbConfigurationBuilderTest {
         );
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldReturnAnPostgresqlViewStoreWithInitialContext() {
         final Properties properties = OpenEjbConfigurationBuilder.createOpenEjbConfigurationBuilder()
@@ -47,6 +49,7 @@ public class OpenEjbConfigurationBuilderTest {
         );
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldReturnAnPostgresqlEventStoreWithInitialContext() {
         final Properties properties = OpenEjbConfigurationBuilder.createOpenEjbConfigurationBuilder()

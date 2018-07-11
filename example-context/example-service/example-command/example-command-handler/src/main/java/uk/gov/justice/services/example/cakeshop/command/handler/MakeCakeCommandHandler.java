@@ -1,6 +1,5 @@
 package uk.gov.justice.services.example.cakeshop.command.handler;
 
-import static org.slf4j.LoggerFactory.getLogger;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 import static uk.gov.justice.services.core.enveloper.Enveloper.toEnvelopeWithMetadataFrom;
 import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
@@ -19,12 +18,8 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-
 @ServiceComponent(COMMAND_HANDLER)
 public class MakeCakeCommandHandler {
-
-    private static final Logger LOGGER = getLogger(MakeCakeCommandHandler.class);
 
     private static final String FIELD_RECIPE_ID = "recipeId";
     private static final String FIELD_CAKE_ID = "cakeId";
@@ -37,7 +32,6 @@ public class MakeCakeCommandHandler {
 
     @Handles("example.command.make-cake")
     public void makeCake(final JsonEnvelope command) throws EventStreamException {
-        LOGGER.info("=============> Inside make-cake Command Handler");
 
         final UUID recipeId = getUUID(command.payloadAsJsonObject(), FIELD_RECIPE_ID).get();
         final UUID cakeId = getUUID(command.payloadAsJsonObject(), FIELD_CAKE_ID).get();

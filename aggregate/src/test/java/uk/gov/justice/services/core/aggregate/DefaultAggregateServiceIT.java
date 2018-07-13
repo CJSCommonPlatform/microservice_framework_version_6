@@ -29,7 +29,6 @@ import uk.gov.justice.services.core.cdi.LoggerProducer;
 import uk.gov.justice.services.core.cdi.QualifierAnnotationExtractor;
 import uk.gov.justice.services.core.enveloper.DefaultEnveloper;
 import uk.gov.justice.services.core.extension.EventFoundEvent;
-import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
 import uk.gov.justice.services.eventsourcing.publisher.jms.EventPublisher;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInsertionStrategy;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.EventInsertionStrategy;
@@ -148,8 +147,6 @@ public class DefaultAggregateServiceIT {
             UtcClock.class,
 
             GlobalValueProducer.class,
-
-            DefaultFileSystemUrlResolverStrategy.class,
 
             EventSourceProducer.class,
 

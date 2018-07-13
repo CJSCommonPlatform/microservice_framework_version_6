@@ -3,15 +3,13 @@ package uk.gov.justice.services.core.json;
 import static java.lang.String.format;
 import static org.slf4j.LoggerFactory.getLogger;
 
-import java.io.IOException;
+import uk.gov.justice.schema.catalog.SchemaCatalogResolver;
+
 import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.net.URL;
 
 import javax.inject.Inject;
 
 import org.everit.json.schema.Schema;
-import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.slf4j.Logger;
@@ -26,7 +24,7 @@ public class JsonSchemaLoader {
     private final static String SCHEMA_LOCATION_PATTERN = "/json/schema/%s.json";
 
     @Inject
-    FileSystemUrlResolverStrategy fileSystemUrlResolverStrategy;
+    SchemaCatalogResolver schemaCatalogResolver;
 
     /**
      * Locate a JSON schema file on the classpath and load it.
@@ -41,19 +39,12 @@ public class JsonSchemaLoader {
 
     private Schema load(final String schemaFile) {
         logger.trace("Loading schema {}", schemaFile);
+
         try (final InputStream schemaFileStream = this.getClass().getResourceAsStream(schemaFile)) {
-            final URL schemaUrl = getClass().getResource(schemaFile);
-            return SchemaLoader.builder()
-                    .resolutionScope(resolveUrl(schemaUrl))
-                    .schemaJson(
-                            new JSONObject(new JSONTokener(schemaFileStream)))
-                    .build().load().build();
+            final JSONObject schemaJsonObject = new JSONObject(new JSONTokener(schemaFileStream));
+            return schemaCatalogResolver.loadSchema(schemaJsonObject);
         } catch (final Exception ex) {
             throw new SchemaLoadingException(format("Unable to load JSON schema %s from classpath", schemaFile), ex);
         }
-    }
-
-    private String resolveUrl(final URL schemaUrl) throws URISyntaxException, IOException {
-        return fileSystemUrlResolverStrategy.getPhysicalFrom(schemaUrl).toString();
     }
 }

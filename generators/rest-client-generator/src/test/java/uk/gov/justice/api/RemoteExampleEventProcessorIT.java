@@ -31,7 +31,8 @@ import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuil
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 
-import uk.gov.justice.schema.catalog.CatalogProducer;
+import uk.gov.justice.schema.service.CatalogProducer;
+import uk.gov.justice.schema.service.SchemaCatalogResolverProducer;
 import uk.gov.justice.schema.service.SchemaCatalogService;
 import uk.gov.justice.services.clients.core.DefaultRestClientHelper;
 import uk.gov.justice.services.clients.core.DefaultRestClientProcessor;
@@ -68,7 +69,6 @@ import uk.gov.justice.services.core.interceptor.InterceptorCache;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
 import uk.gov.justice.services.core.json.BackwardsCompatibleJsonSchemaValidator;
-import uk.gov.justice.services.core.json.DefaultFileSystemUrlResolverStrategy;
 import uk.gov.justice.services.core.json.FileBasedJsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.json.PayloadExtractor;
@@ -191,7 +191,6 @@ public class RemoteExampleEventProcessorIT {
             EnvelopeValidationExceptionHandlerProducer.class,
             DefaultTraceLogger.class,
 
-            DefaultFileSystemUrlResolverStrategy.class,
             JsonSchemaLoader.class,
 
             SchemaCatalogAwareJsonSchemaValidator.class,
@@ -202,6 +201,7 @@ public class RemoteExampleEventProcessorIT {
 
             CatalogProducer.class,
             SchemaCatalogService.class,
+            SchemaCatalogResolverProducer.class,
 
             DefaultMediaTypesMappingCache.class,
             ActionNameToMediaTypesMappingObserver.class,

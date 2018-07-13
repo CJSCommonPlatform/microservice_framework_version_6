@@ -38,11 +38,6 @@
         </dependency>
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
-            <artifactId>wildfly-vfs</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>uk.gov.justice.services</groupId>
             <artifactId>rest-adapter-file-service</artifactId>
             <version>${project.version}</version>
         </dependency>

@@ -1,6 +1,7 @@
 package uk.gov.justice.services.example.cakeshop.command.api;
 
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
@@ -52,7 +53,9 @@ public class MakeCakeCommandApiTest {
                 .with(metadataWithDefaults().withName("example.make-cake"))
                 .withPayloadOf("Field", "Value").build();
 
-        commandApi.handle(envelope);
+        final JsonEnvelope response = commandApi.handle(envelope);
+
+        assertThat(response.payloadAsJsonObject().getString("status"), equalTo("Making Cake"));
 
         verify(sender).send(envelopeCaptor.capture());
         assertThat(envelopeCaptor.getValue().metadata().name(), is("example.command.make-cake"));

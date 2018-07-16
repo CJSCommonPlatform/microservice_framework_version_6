@@ -28,8 +28,10 @@ public class MakeCakeCommandApi {
                 .withMetadataFrom(envelope, "example.command.make-cake")
                 .apply(envelope.payloadAsJsonObject()));
 
-        return envelopeFrom(
-                metadataFrom(envelope.metadata()),
-                createObjectBuilder().add("status", "Making Cake"));
+        return enveloper
+                .withMetadataFrom(envelope, "example.command.make-cake-status")
+                .apply(createObjectBuilder()
+                        .add("status", "Making Cake")
+                        .build());
     }
 }

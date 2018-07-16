@@ -6,6 +6,7 @@ import static javax.ws.rs.core.Response.Status.ACCEPTED;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static uk.gov.justice.services.example.cakeshop.it.params.CakeShopMediaTypes.MAKE_CAKE_MEDIA_TYPE;
+import static uk.gov.justice.services.example.cakeshop.it.params.CakeShopMediaTypes.MAKE_CAKE_STATUS_MEDIA_TYPE;
 import static uk.gov.justice.services.example.cakeshop.it.params.CakeShopUris.CAKES_RESOURCE_URI_FORMAT;
 import static uk.gov.justice.services.example.cakeshop.it.params.CakeShopUris.RECIPES_RESOURCE_URI;
 
@@ -22,10 +23,14 @@ public class CommandSender {
         this.eventFactory = eventFactory;
     }
 
-    public void makeCake(final String recipeId, final String cakeId) {
-        final Response response = client.target(format(CAKES_RESOURCE_URI_FORMAT, recipeId, cakeId)).request()
+    public ApiResponse makeCake(final String recipeId, final String cakeId) {
+        final Response jaxrRsResponse = client.target(format(CAKES_RESOURCE_URI_FORMAT, recipeId, cakeId))
+                .request()
+                .accept(MAKE_CAKE_STATUS_MEDIA_TYPE)
                 .post(entity("{}", MAKE_CAKE_MEDIA_TYPE));
-        assertThat(response.getStatus(), is(ACCEPTED.getStatusCode()));
+        assertThat(jaxrRsResponse.getStatus(), is(ACCEPTED.getStatusCode()));
+
+        return ApiResponse.from(jaxrRsResponse);
     }
 
     public void addRecipe(final String recipeId, final String cakeName) {

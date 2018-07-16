@@ -196,6 +196,22 @@ public class CakeShopIT {
     }
 
     @Test
+    public void shouldReturnStatusFromMakeCakeAction() throws Exception {
+        final String recipeId = randomUUID().toString();
+        final String cakeId = randomUUID().toString();
+        final String cakeName = "Super cake";
+
+        commandSender.addRecipe(recipeId, cakeName);
+        commandSender.addRecipe(randomUUID().toString(), "cake");
+        await().until(() -> querier.recipesQueryResult().body().contains(recipeId));
+
+        final ApiResponse apiResponse = commandSender.makeCake(recipeId, cakeId);
+
+        with(apiResponse.body())
+                .assertThat("$.status", equalTo("Making Cake"));
+    }
+
+    @Test
     public void shouldQueryForCakesWithNamesInheritedFromRecipe() throws Exception {
         final String recipeId = "163af847-effb-46a9-96bc-32a0f7526e51";
         final String cakeId = "163af847-effb-46a9-96bc-32a0f7526f01";

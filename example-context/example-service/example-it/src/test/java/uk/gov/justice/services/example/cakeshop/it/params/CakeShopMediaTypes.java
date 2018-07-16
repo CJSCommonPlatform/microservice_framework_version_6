@@ -12,6 +12,7 @@ public class CakeShopMediaTypes {
     public static final String RENAME_RECIPE_MEDIA_TYPE = PREFIX + "rename-recipe+json";
     public static final String REMOVE_RECIPE_MEDIA_TYPE = PREFIX + "remove-recipe+json";
     public static final String MAKE_CAKE_MEDIA_TYPE = PREFIX + "make-cake+json";
+    public static final String MAKE_CAKE_STATUS_MEDIA_TYPE = PREFIX + "make-cake-status+json";
     public static final String ORDER_CAKE_MEDIA_TYPE = PREFIX + "order-cake+json";
 
     public static final String QUERY_RECIPE_MEDIA_TYPE = PREFIX + "recipe+json";

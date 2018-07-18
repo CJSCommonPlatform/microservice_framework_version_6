@@ -31,9 +31,17 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 - Moved EventBuffer into DefaultSubscriptionManager
 - Add SchemaCatalogResolver to JsonSchemaLoader for resolving file base schemas with the schema catalog
 
-## [4.3.0] - 2018-07-10
+## [4.3.2] - 2018-07-11
+### Changed
+- Upgraded generator maven plugin to version 2.6.0
+- Upgraded json schema catalog to version 1.3.2
+
+## [4.3.1] - 2018-07-11
 ### Added
-- Ability to return an Accepted code and payload from a post to a Command API component
+- Ability to return an Accepted code and payload from an post to a Command API component
+
+### Changed
+- Remove logging to keep within Travis 4MB log limit
 
 ## [4.2.2] - 2018-07-05
 ### Changed

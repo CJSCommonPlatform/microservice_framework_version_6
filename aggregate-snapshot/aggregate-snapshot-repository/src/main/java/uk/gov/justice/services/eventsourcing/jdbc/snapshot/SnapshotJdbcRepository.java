@@ -127,6 +127,7 @@ public class SnapshotJdbcRepository implements SnapshotRepository {
         dataSource = jdbcDataSourceProvider.getDataSource(jndiName);
     }
 
+    @SuppressWarnings("unchecked")
     private <T extends Aggregate> Optional<AggregateSnapshot<T>> extractResults(final PreparedStatement preparedStatement) throws SQLException {
 
         try (final ResultSet resultSet = preparedStatement.executeQuery()) {

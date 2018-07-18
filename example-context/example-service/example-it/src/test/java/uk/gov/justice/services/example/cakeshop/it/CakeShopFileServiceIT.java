@@ -4,6 +4,7 @@ import static com.google.common.io.Resources.getResource;
 import static com.jayway.awaitility.Awaitility.await;
 import static com.jayway.jsonassert.JsonAssert.with;
 import static java.lang.String.format;
+import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM_TYPE;
 import static javax.ws.rs.core.Response.Status.ACCEPTED;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
@@ -74,7 +75,7 @@ public class CakeShopFileServiceIT {
     @Test
     public void shouldReturnAcceptedStatusAndCreatEventWhenPostingPhotographToMultipartEndpoint() throws Exception {
 
-        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526f22";
+        final String recipeId = randomUUID().toString();
         final String fieldName = "photoId";
         final String filename = "croydon.jpg";
         final File file = new File(getResource(filename).getFile());
@@ -109,7 +110,7 @@ public class CakeShopFileServiceIT {
 
     @Test
     public void shouldRetrieveRecipePhotograph() throws Exception {
-        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526f24";
+        final String recipeId = randomUUID().toString();
         commandSender.addRecipe(recipeId, "Easy Muffin");
         await().until(() -> querier.queryForRecipe(recipeId).httpCode() == OK.getStatusCode());
 

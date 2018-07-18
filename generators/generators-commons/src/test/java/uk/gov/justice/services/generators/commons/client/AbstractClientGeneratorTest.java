@@ -343,6 +343,7 @@ public class AbstractClientGeneratorTest {
         assertThat(outputPath.toFile().exists(), equalTo(FALSE));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldLogWarningIfClassExists() throws Exception {
 

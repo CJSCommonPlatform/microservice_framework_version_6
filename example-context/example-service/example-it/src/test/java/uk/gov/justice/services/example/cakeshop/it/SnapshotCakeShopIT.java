@@ -2,6 +2,7 @@ package uk.gov.justice.services.example.cakeshop.it;
 
 import static com.jayway.awaitility.Awaitility.await;
 import static com.jayway.jsonassert.JsonAssert.with;
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.core.IsCollectionContaining.hasItem;
 import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
 
@@ -56,7 +57,7 @@ public class SnapshotCakeShopIT {
     @Test
     public void shouldUseSnapshotWhenMakingCakes() throws AggregateChangeDetectedException {
 
-        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526e52";
+        final String recipeId = randomUUID().toString();
         final String cakeName = "Delicious cake";
 
         commandSender.addRecipe(recipeId, cakeName);
@@ -64,8 +65,8 @@ public class SnapshotCakeShopIT {
 
         //cake made events belong to the recipe aggregate.
         //snapshot threshold is set to 3 in settings-test.xml so this should cause snapshot to be created
-        final String cakeId1 = "b8b138a2-aee8-46ac-bc8d-a4e0b32de424";
-        final String cakeId2 = "a7df425e-ba49-4b53-aaad-7b4b3f796dee";
+        final String cakeId1 = randomUUID().toString();
+        final String cakeId2 = randomUUID().toString();
 
         commandSender.makeCake(recipeId, cakeId1);
         commandSender.makeCake(recipeId, cakeId2);
@@ -75,7 +76,7 @@ public class SnapshotCakeShopIT {
         final String newCakeName = "Tweaked cake";
         changeRecipeSnapshotName(recipeId, newCakeName);
 
-        final String lastCakeId = "7eba6ce5-70e7-452a-b9a9-84acc6011fdf";
+        final String lastCakeId = randomUUID().toString();
         commandSender.makeCake(recipeId, lastCakeId);
 
         await().until(() -> querier.cakesQueryResult().body().contains(lastCakeId));
@@ -85,6 +86,7 @@ public class SnapshotCakeShopIT {
 
     }
 
+    @SuppressWarnings("unchecked")
     private void changeRecipeSnapshotName(final String recipeId, final String newRecipeName) throws AggregateChangeDetectedException {
         final AggregateSnapshot<Recipe> recipeAggregateSnapshot = recipeAggregateSnapshotOf(recipeId).get();
         final Recipe recipe = recipeAggregateSnapshot.getAggregate(new DefaultObjectInputStreamStrategy());

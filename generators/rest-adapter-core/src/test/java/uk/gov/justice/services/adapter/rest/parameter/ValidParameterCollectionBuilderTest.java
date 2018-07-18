@@ -62,6 +62,7 @@ public class ValidParameterCollectionBuilderTest {
         assertThat(validParameters.iterator().next().getStringValue(), is("OptionalValue1"));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldReturnMapWithMultipleRequiredAndOptionalParameters() throws Exception {
         validParameterCollectionBuilder

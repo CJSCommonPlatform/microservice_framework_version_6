@@ -8,6 +8,7 @@ import javax.json.JsonObject;
 
 public class DefaultEnvelopeProvider implements EnvelopeProvider {
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T> Envelope<T> envelopeFrom(final Metadata metadata, final T payload) {
         return new DefaultEnvelope(metadata, payload);

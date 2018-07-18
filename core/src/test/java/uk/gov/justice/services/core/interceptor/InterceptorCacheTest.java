@@ -180,6 +180,7 @@ public class InterceptorCacheTest {
         interceptorCache.getInterceptors("Unknown Component");
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldThrowExceptionIfInterceptorBeanNotInstantiated() throws Exception {
         expectedException.expect(InterceptorCacheException.class);

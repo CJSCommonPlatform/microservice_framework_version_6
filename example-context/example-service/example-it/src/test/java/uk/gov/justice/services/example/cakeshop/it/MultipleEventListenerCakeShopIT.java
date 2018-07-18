@@ -3,6 +3,7 @@ package uk.gov.justice.services.example.cakeshop.it;
 import static com.jayway.awaitility.Awaitility.await;
 import static com.jayway.jsonassert.JsonAssert.with;
 import static java.util.Collections.singletonList;
+import static java.util.UUID.randomUUID;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.core.Response.Status.OK;
@@ -70,11 +71,11 @@ public class MultipleEventListenerCakeShopIT {
     @Test
     public void shouldReturnRecipeFromOtherEventListener() throws Exception {
         //adding 1 recipe as normal
-        final UUID recipeId = UUID.randomUUID();
+        final UUID recipeId = randomUUID();
         commandSender.addRecipe(recipeId.toString(), "Cheesy cheese cake");
 
         //adding 1 recipe as other event
-        final UUID recipeId2 = UUID.randomUUID();
+        final UUID recipeId2 = randomUUID();
 
         try (final Session jmsSession = jmsBootstrapper.jmsSession()) {
             final Topic topic = jmsSession.createTopic("other.event");
@@ -94,7 +95,7 @@ public class MultipleEventListenerCakeShopIT {
 
                 final JsonEnvelope jsonEnvelope = envelopeFrom(
                         metadataBuilder()
-                                .withId(UUID.randomUUID())
+                                .withId(randomUUID())
                                 .withName("other.recipe-added")
                                 .withStreamId(recipeId2)
                                 .withVersion(1L)

@@ -9,8 +9,8 @@ import javax.inject.Inject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- *   Converts Envelope with payload of T to Envelope with payload of R where
- *   T can be converted to R using a jackson object mapper
+ * Converts Envelope with payload of T to Envelope with payload of R where T can be converted to R
+ * using a jackson object mapper
  */
 public class EnvelopePayloadTypeConverter {
 
@@ -25,24 +25,25 @@ public class EnvelopePayloadTypeConverter {
     }
 
     /**
-     * Converts Envelope with payload of T to Envelope with payload of R where
-     * T can be converted to R using a jackson object mapper
+     * Converts Envelope with payload of T to Envelope with payload of R where T can be converted to
+     * R using a jackson object mapper
      *
      * @param envelope to be converted
-     * @param clazz of the new payload type
+     * @param clazz    of the new payload type
      * @return an envelope of type clazz
      */
+    @SuppressWarnings("unchecked")
     public <R> Envelope<R> convert(final Envelope<?> envelope, final Class<R> clazz) {
 
-        if(envelope == null) { //Asynchronous methods return nulls / voids...
+        if (envelope == null) { //Asynchronous methods return nulls / voids...
             return null;
         }
 
-        if(envelope.payload() == null){
+        if (envelope.payload() == null) {
             return envelopeFrom(envelope.metadata(), null);
         }
 
-        if(clazz.isAssignableFrom(envelope.payload().getClass())) {
+        if (clazz.isAssignableFrom(envelope.payload().getClass())) {
             return (Envelope<R>) envelope;
         }
 

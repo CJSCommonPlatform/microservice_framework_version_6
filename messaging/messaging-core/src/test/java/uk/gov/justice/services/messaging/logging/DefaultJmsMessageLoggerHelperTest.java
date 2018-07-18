@@ -39,7 +39,7 @@ public class DefaultJmsMessageLoggerHelperTest {
     private List<UUID> causation;
 
     @InjectMocks
-    DefaultJmsMessageLoggerHelper jmsMessageLoggerHelper;
+    private DefaultJmsMessageLoggerHelper jmsMessageLoggerHelper;
 
     @Test
     public void shouldReturnValidMetadataJson() throws JMSException {
@@ -53,6 +53,7 @@ public class DefaultJmsMessageLoggerHelperTest {
         assertThat(result.getJsonObject("context").getString("session"), is(A_SESSION_ID));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldReturnErrorMessageOnError() throws JMSException {
         when(message.getText()).thenThrow(JMSException.class);

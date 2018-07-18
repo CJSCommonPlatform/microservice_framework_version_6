@@ -30,6 +30,7 @@ public class CakeMadeEventListenerTest {
     @InjectMocks
     private CakeMadeEventListener cakeMadeEventListener = new CakeMadeEventListener();
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldSaveCake() {
         final Envelope<Cake> envelope = mock(Envelope.class);

@@ -5,6 +5,7 @@ import static com.jayway.jsonassert.JsonAssert.emptyCollection;
 import static com.jayway.jsonassert.JsonAssert.with;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -56,10 +57,10 @@ public class CakeShopFilteringIT {
     @Test
     public void shouldFilterRecipesUsingPageSize() {
         //adding 2 recipes
-        final String recipeId = "263af847-effb-46a9-96bc-32a0f7526e44";
+        final String recipeId = randomUUID().toString();
         commandSender.addRecipe(recipeId, "Absolutely cheesy cheese cake");
 
-        final String recipeId2 = "263af847-effb-46a9-96bc-32a0f7526e55";
+        final String recipeId2 = randomUUID().toString();
         commandSender.addRecipe(recipeId2, "Chocolate muffin");
 
         await().until(() -> querier.recipesQueryResult().body().contains(recipeId));
@@ -75,11 +76,11 @@ public class CakeShopFilteringIT {
     @Test
     public void shouldFilterGlutenFreeRecipes() {
         //adding 2 recipes
-        final String recipeId = "163af847-effb-46a9-96bc-32a0f7526e66";
+        final String recipeId = randomUUID().toString();
         client.target(RECIPES_RESOURCE_URI + recipeId).request()
                 .post(eventFactory.recipeEntity("Muffin", false));
 
-        final String recipeId2 = "163af847-effb-46a9-96bc-32a0f7526e77";
+        final String recipeId2 = randomUUID().toString();
         client.target(RECIPES_RESOURCE_URI + recipeId2).request()
                 .post(eventFactory.recipeEntity("Oat cake", true));
 

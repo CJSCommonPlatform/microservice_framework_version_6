@@ -40,6 +40,7 @@ public class SubscriptionManagerStartUpTest {
     @InjectMocks
     private SubscriptionManagerStartUp subscriptionManagerStartUp;
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldStartSubscription() {
 
@@ -72,6 +73,7 @@ public class SubscriptionManagerStartUpTest {
         verify(subscriptionManagers.get(1)).startSubscription();
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldDoNothingWhenNoSubscriptionsExist() {
 

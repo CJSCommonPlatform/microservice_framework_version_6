@@ -20,6 +20,7 @@ import com.squareup.javapoet.TypeSpec;
 
 public class DynamicAggregateTestClassGenerator {
 
+    @SuppressWarnings("unchecked")
     public <T extends Aggregate> Class<T> generatedTestAggregateClassOf(long serialVersionUid, String basePackage, String fileNameToBeGenerated) throws IOException, ClassNotFoundException {
 
         final MethodSpec constructor = MethodSpec.constructorBuilder()

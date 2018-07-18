@@ -26,6 +26,7 @@ public class ResponseStrategyCache {
         return strategies.computeIfAbsent(responseStrategyName, s -> strategyFromContext(responseStrategyName));
     }
 
+    @SuppressWarnings("unchecked")
     private ResponseStrategy strategyFromContext(final String responseStrategyName) {
         final Bean bean = beanManager.getBeans(responseStrategyName).stream().findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(format("Response response not found: %s", responseStrategyName)));

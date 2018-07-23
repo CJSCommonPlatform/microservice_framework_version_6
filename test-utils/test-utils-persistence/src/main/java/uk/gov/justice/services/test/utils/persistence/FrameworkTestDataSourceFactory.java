@@ -1,5 +1,9 @@
 package uk.gov.justice.services.test.utils.persistence;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
 import javax.sql.DataSource;
 
 import org.postgresql.ds.PGSimpleDataSource;
@@ -12,10 +16,7 @@ public class FrameworkTestDataSourceFactory {
     private static final String EVENT_STORE_DATABASE_NAME = "frameworkeventstore";
     private static final String VIEW_STORE_DATABASE_NAME = "frameworkviewstore";
     private static final String FILE_STORE_DATABASE_NAME = "frameworkfilestore";
-
-    private static final int PORT_NUMBER = 5432;
-    private static final String USERNAME = "framework";
-    private static final String PASSWORD = "framework";
+    private static final String DATA_SOURCE_CONFIG_PROPERTIES = "test-data-source.properties";
 
     /**
      * Gets a DataSource to the Event Store
@@ -45,12 +46,28 @@ public class FrameworkTestDataSourceFactory {
     }
 
     private DataSource createDataSource(final String databaseName) {
+
+        final Properties prop = getTestDatSourceProperties();
         final PGSimpleDataSource dataSource = new PGSimpleDataSource();
-        dataSource.setPortNumber(PORT_NUMBER);
+        dataSource.setPortNumber(Integer.parseInt(prop.getProperty("PORT_NUMBER")));
         dataSource.setDatabaseName(databaseName);
-        dataSource.setUser(USERNAME);
-        dataSource.setPassword(PASSWORD);
+        dataSource.setUser(prop.getProperty("USERNAME"));
+        dataSource.setPassword(prop.getProperty("PASSWORD"));
 
         return dataSource;
+    }
+
+    public Properties getTestDatSourceProperties(){
+        Properties prop = new Properties();
+
+        try(InputStream input = this.getClass().getClassLoader().getResourceAsStream(DATA_SOURCE_CONFIG_PROPERTIES)){
+            if(input != null){
+                prop.load(input);
+            }
+        }
+        catch(IOException ex){
+            ex.getMessage();
+        }
+        return prop;
     }
 }

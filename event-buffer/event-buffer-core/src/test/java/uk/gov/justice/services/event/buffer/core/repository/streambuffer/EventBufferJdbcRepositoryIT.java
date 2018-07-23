@@ -7,15 +7,12 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
-import uk.gov.justice.services.test.utils.core.messaging.Poller;
+import uk.gov.justice.services.test.utils.persistence.DatabaseCleaner;
 import uk.gov.justice.services.test.utils.persistence.TestEventStoreDataSourceFactory;
 
-import java.sql.SQLException;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import javax.sql.DataSource;
@@ -26,33 +23,15 @@ import org.junit.Test;
 
 public class EventBufferJdbcRepositoryIT {
 
-    private static final String LIQUIBASE_STREAM_STATUS_CHANGELOG_XML = "liquibase/event-buffer-changelog.xml";
-
     private EventBufferJdbcRepository jdbcRepository;
 
     @Before
     public void initDatabase() throws Exception {
-        final TestEventStoreDataSourceFactory testEventStoreDataSourceFactory = new TestEventStoreDataSourceFactory(LIQUIBASE_STREAM_STATUS_CHANGELOG_XML);
-        final DataSource dataSource = testEventStoreDataSourceFactory.createDataSource();
+        final DataSource dataSource = new TestEventStoreDataSourceFactory()
+                .createDataSource("frameworkviewstore");
         jdbcRepository = new EventBufferJdbcRepository(dataSource, new JdbcRepositoryHelper());
 
-        try {
-            final Poller poller = new Poller();
-
-            poller.pollUntilFound(() -> {
-                try {
-                    dataSource.getConnection().prepareStatement("SELECT COUNT (*) FROM event_buffer;").execute();
-                    return Optional.of("Success");
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    fail("EventJdbcRepository construction failed");
-                    return Optional.empty();
-                }
-            });
-        } catch (final Exception e) {
-            e.printStackTrace();
-            fail("EventJdbcRepository construction failed");
-        }
+        new DatabaseCleaner().cleanViewStoreTables("framework", "event_buffer", "subscription");
     }
 
     @Test

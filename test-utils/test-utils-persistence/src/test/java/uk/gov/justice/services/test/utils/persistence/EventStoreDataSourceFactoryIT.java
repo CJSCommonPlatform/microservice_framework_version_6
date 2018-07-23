@@ -23,7 +23,7 @@ public class EventStoreDataSourceFactoryIT {
     public void shouldCreateJdbcDataSource() throws SQLException, LiquibaseException {
 
         final TestEventStoreDataSourceFactory testEventStoreDataSourceFactory = new TestEventStoreDataSourceFactory(LIQUIBASE_TEST_DB_CHANGELOG_XML);
-        final DataSource dataSource = testEventStoreDataSourceFactory.createDataSource();
+        final DataSource dataSource = testEventStoreDataSourceFactory.createDataSource("frameworkviewstore");
 
         try (final Statement statement = dataSource.getConnection().createStatement();) {
             statement.executeUpdate(sqlInsert);

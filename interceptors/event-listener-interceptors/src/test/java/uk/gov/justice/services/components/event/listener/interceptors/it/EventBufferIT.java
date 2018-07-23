@@ -78,6 +78,7 @@ import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.DefaultJmsEnvelopeSender;
 import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
 import uk.gov.justice.services.test.utils.common.envelope.TestEnvelopeRecorder;
+import uk.gov.justice.services.test.utils.persistence.DatabaseCleaner;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -112,7 +113,6 @@ public class EventBufferIT {
 
     private static final String SOURCE = "my-context";
     private static final String EVENT_ABC = SOURCE + ".event-abc";
-    private static final String LIQUIBASE_STREAM_STATUS_CHANGELOG_XML = "liquibase/event-buffer-changelog.xml";
     private static final String CONTEXT_ROOT = "core-test";
 
     @Resource(name = "openejb/Resource/frameworkviewstore")
@@ -134,7 +134,7 @@ public class EventBufferIT {
     public void setup() throws Exception {
         final InitialContext initialContext = new InitialContext();
         initialContext.bind("java:/DS.EventBufferIT", dataSource);
-        initDatabase();
+        new DatabaseCleaner().cleanStreamBufferTable("framework");
     }
 
     @Configuration
@@ -440,13 +440,6 @@ public class EventBufferIT {
         assertThat(subscription.isPresent(), is(true));
         assertThat(subscription.get().getPosition(), is(2L));
         assertThat(abcEventHandler.recordedEnvelopes(), empty());
-    }
-
-    private void initDatabase() throws Exception {
-        Liquibase liquibase = new Liquibase(LIQUIBASE_STREAM_STATUS_CHANGELOG_XML,
-                new ClassLoaderResourceAccessor(), new JdbcConnection(dataSource.getConnection()));
-        liquibase.dropAll();
-        liquibase.update("");
     }
 
     @ServiceComponent(EVENT_LISTENER)

@@ -97,7 +97,7 @@ public class DatabaseCleanerTest {
     @Test
     public void shouldCleanTheStreamBufferTable() throws Exception {
 
-        final String tableName = "stream_buffer";
+        final String tableName = "event_buffer";
         final String contextName = "my-context";
 
         final Connection connection = mock(Connection.class);
@@ -135,7 +135,7 @@ public class DatabaseCleanerTest {
     @Test
     public void shouldThrowADataAccessExceptionIfCleaningAViewStoreTableFails() throws Exception {
 
-        final String tableName = "stream_buffer";
+        final String tableName = "event_buffer";
         final String contextName = "my-context";
 
         final SQLException sqlException = new SQLException("Oops");
@@ -183,7 +183,7 @@ public class DatabaseCleanerTest {
     @Test
     public void shouldThrowADatAccessExceptionIfClosingTheViewStoreConnectionFails() throws Exception {
 
-        final String tableName = "stream_buffer";
+        final String tableName = "event_buffer";
         final String contextName = "my-context";
 
         final SQLException sqlException = new SQLException("Oops");

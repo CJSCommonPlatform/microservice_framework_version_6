@@ -32,14 +32,15 @@ public class SnapshotRepositoryJdbcIT {
     private static final Class<RecordingAggregate> TYPE = RecordingAggregate.class;
     private static final Class<DifferentAggregate> OTHER_TYPE = DifferentAggregate.class;
     private static final byte[] AGGREGATE = "Any String you want".getBytes();
-    private static final String LIQUIBASE_SNAPSHOT_STORE_DB_CHANGELOG_XML = "liquibase/snapshot-store-db-changelog.xml";
 
     private final SnapshotJdbcRepository snapshotJdbcRepository = new SnapshotJdbcRepository();
 
     @Before
     public void initialize() {
         try {
-            snapshotJdbcRepository.dataSource = new TestEventStoreDataSourceFactory(LIQUIBASE_SNAPSHOT_STORE_DB_CHANGELOG_XML).createDataSource();
+            snapshotJdbcRepository.dataSource = new TestEventStoreDataSourceFactory()
+                    .createDataSource("frameworkeventstore");
+
             snapshotJdbcRepository.logger = mock(Logger.class);
         } catch (final Exception e) {
             e.printStackTrace();
@@ -100,7 +101,7 @@ public class SnapshotRepositoryJdbcIT {
         snapshotJdbcRepository.storeSnapshot(aggregateSnapshot2);
         snapshotJdbcRepository.storeSnapshot(aggregateSnapshot3);
 
-        final Optional<AggregateSnapshot<RecordingAggregate>> snapshot  = snapshotJdbcRepository.getLatestSnapshot(streamId, TYPE);
+        final Optional<AggregateSnapshot<RecordingAggregate>> snapshot = snapshotJdbcRepository.getLatestSnapshot(streamId, TYPE);
 
         assertThat(snapshot, notNullValue());
         assertThat(snapshot, is(Optional.of(aggregateSnapshot2)));
@@ -136,7 +137,7 @@ public class SnapshotRepositoryJdbcIT {
     public void shouldReturnOptionalNullIfNoSnapshotAvailable() {
 
         final UUID streamId = randomUUID();
-        final Optional<AggregateSnapshot<RecordingAggregate>> snapshot  = snapshotJdbcRepository.getLatestSnapshot(streamId, TYPE);
+        final Optional<AggregateSnapshot<RecordingAggregate>> snapshot = snapshotJdbcRepository.getLatestSnapshot(streamId, TYPE);
 
         assertThat(snapshot.isPresent(), is(false));
     }
@@ -147,7 +148,7 @@ public class SnapshotRepositoryJdbcIT {
         final AggregateSnapshot aggregateSnapshot1 = createSnapshot(streamId, VERSION_ID, OTHER_TYPE, AGGREGATE);
         snapshotJdbcRepository.storeSnapshot(aggregateSnapshot1);
 
-        final Optional<AggregateSnapshot<RecordingAggregate>> snapshot  = snapshotJdbcRepository.getLatestSnapshot(streamId, TYPE);
+        final Optional<AggregateSnapshot<RecordingAggregate>> snapshot = snapshotJdbcRepository.getLatestSnapshot(streamId, TYPE);
 
         assertThat(snapshot.isPresent(), is(false));
 

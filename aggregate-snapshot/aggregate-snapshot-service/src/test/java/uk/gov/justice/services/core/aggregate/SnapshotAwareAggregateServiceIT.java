@@ -66,6 +66,7 @@ import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
+import uk.gov.justice.services.test.utils.persistence.DatabaseCleaner;
 import uk.gov.justice.subscription.ParserProducer;
 import uk.gov.justice.subscription.YamlFileFinder;
 import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
@@ -93,9 +94,6 @@ import javax.jms.Destination;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
-import liquibase.Liquibase;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.resource.ClassLoaderResourceAccessor;
 import org.apache.openejb.jee.WebApp;
 import org.apache.openejb.junit.ApplicationComposer;
 import org.apache.openejb.testing.Application;
@@ -107,10 +105,6 @@ import org.junit.runner.RunWith;
 
 @RunWith(ApplicationComposer.class)
 public class SnapshotAwareAggregateServiceIT {
-
-    private static final String LIQUIBASE_EVENT_STORE_CHANGELOG_XML = "liquibase/event-store-db-changelog.xml";
-
-    private static final String LIQUIBASE_SNAPSHOT_STORE_CHANGELOG_XML = "liquibase/snapshot-store-db-changelog.xml";
 
     private static final String AGGREGATE_INTERFACE_FULL_NAME = "uk.gov.justice.domain.aggregate.Aggregate";
 
@@ -128,6 +122,7 @@ public class SnapshotAwareAggregateServiceIT {
     private static final String SQL_EVENT_STREAM_COUNT_BY_STREAM_ID = "SELECT count(*) FROM event_stream WHERE stream_id=? ";
 
     private static final long SNAPSHOT_THRESHOLD = 25L;
+    private static final String FRAMEWORK_CONTEXT_NAME = "framework";
 
     @Resource(name = "openejb/Resource/frameworkeventstore")
     private DataSource dataSource;
@@ -229,7 +224,7 @@ public class SnapshotAwareAggregateServiceIT {
         final String jndiName = defaultEventSourceDefinition.getLocation().getDataSource().get();
         final InitialContext initialContext = new InitialContext();
         initialContext.bind(jndiName, dataSource);
-        initEventDatabase();
+        new DatabaseCleaner().cleanEventStoreTables(FRAMEWORK_CONTEXT_NAME);
         defaultAggregateService.register(new EventFoundEvent(EventA.class, "context.eventA"));
     }
 
@@ -431,18 +426,6 @@ public class SnapshotAwareAggregateServiceIT {
         assertThat(newSnapshot.get().getVersionId(), equalTo(123L));
         assertThat(rowCount(SQL_EVENT_LOG_COUNT_BY_STREAM_ID, streamId), is(123));
         assertThat(rowCount(SQL_EVENT_STREAM_COUNT_BY_STREAM_ID, streamId), is(1));
-    }
-
-    private void initEventDatabase() throws Exception {
-
-        final Liquibase eventStoreLiquibase = new Liquibase(LIQUIBASE_EVENT_STORE_CHANGELOG_XML,
-                new ClassLoaderResourceAccessor(), new JdbcConnection(dataSource.getConnection()));
-        eventStoreLiquibase.dropAll();
-        eventStoreLiquibase.update("");
-        final Liquibase snapshotLiquidBase = new Liquibase(LIQUIBASE_SNAPSHOT_STORE_CHANGELOG_XML,
-                new ClassLoaderResourceAccessor(), new JdbcConnection(dataSource.getConnection()));
-        snapshotLiquidBase.update("");
-
     }
 
     private DynamicallyLoadingClassLoader classLoaderWithGeneratedAggregateLoaded() throws ClassNotFoundException {

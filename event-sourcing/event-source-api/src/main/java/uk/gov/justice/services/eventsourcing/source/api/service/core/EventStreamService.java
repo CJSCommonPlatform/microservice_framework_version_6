@@ -36,7 +36,7 @@ public class EventStreamService {
 
         if (position.isHead()) {
             final Stream<EventStream> eventStreamsFromFirst = eventSource.getStreamsFrom(1);
-            final long fromPosition = eventStreamsFromFirst.count() - pageSize + 1;
+            final long fromPosition = eventStreamsFromFirst.count() - pageSize + 1L;
             return eventSource.getStreamsFrom(fromPosition);
         }
 
@@ -49,7 +49,7 @@ public class EventStreamService {
         }
 
         if (BACKWARD.equals(direction)) {
-            final long sequenceNumber = position.getPosition() - pageSize + 1;
+            final long sequenceNumber = position.getPosition() - pageSize + 1L;
             return eventSource.getStreamsFrom(sequenceNumber);
         }
 

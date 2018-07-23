@@ -56,6 +56,7 @@ import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
+import uk.gov.justice.services.test.utils.persistence.DatabaseCleaner;
 import uk.gov.justice.subscription.ParserProducer;
 import uk.gov.justice.subscription.YamlFileFinder;
 import uk.gov.justice.subscription.registry.EventSourceDefinitionRegistryProducer;
@@ -78,9 +79,6 @@ import javax.jms.Destination;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
-import liquibase.Liquibase;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.resource.ClassLoaderResourceAccessor;
 import org.apache.openejb.jee.WebApp;
 import org.apache.openejb.junit.ApplicationComposer;
 import org.apache.openejb.testing.Application;
@@ -94,11 +92,9 @@ import org.junit.runner.RunWith;
 @RunWith(ApplicationComposer.class)
 public class DefaultAggregateServiceIT {
 
-    private static final UUID STREAM_ID = randomUUID();
-
-    private static final String LIQUIBASE_EVENT_STORE_CHANGELOG_XML = "liquibase/event-store-db-changelog.xml";
     private static final String SQL_EVENT_LOG_COUNT_BY_STREAM_ID = "SELECT count(*) FROM event_log WHERE stream_id=? ";
     private static final String SQL_EVENT_STREAM_COUNT_BY_STREAM_ID = "SELECT count(*) FROM event_stream WHERE stream_id=? ";
+    private static final String FRAMEWORK_CONTEXT_NAME = "framework";
 
     @Resource(name = "openejb/Resource/frameworkeventstore")
     private DataSource dataSource;
@@ -179,97 +175,98 @@ public class DefaultAggregateServiceIT {
     public void init() throws Exception {
         final InitialContext initialContext = new InitialContext();
         initialContext.bind("java:/app/DefaultAggregateServiceIT/DS.frameworkeventstore", dataSource);
-        initDatabase();
+        new DatabaseCleaner().cleanEventStoreTables(FRAMEWORK_CONTEXT_NAME);
     }
 
     @Test
     public void shouldCreateAggregateFromEmptyStream() {
-        final EventStream eventStream = eventSource.getStreamById(STREAM_ID);
+        final UUID streamId = randomUUID();
+
+        final EventStream eventStream = eventSource.getStreamById(streamId);
 
         final TestAggregate aggregate = aggregateService.get(eventStream, TestAggregate.class);
 
         assertThat(aggregate, notNullValue());
         assertThat(aggregate.recordedEvents(), empty());
-        assertThat(rowCount(SQL_EVENT_STREAM_COUNT_BY_STREAM_ID, STREAM_ID), is(0));
+        assertThat(rowCount(SQL_EVENT_STREAM_COUNT_BY_STREAM_ID, streamId), is(0));
     }
 
     @Test
     public void shouldCreateAggregateFromSingletonStream() throws EventStreamException {
 
-        final EventStream eventStream = eventSource.getStreamById(STREAM_ID);
+        final UUID streamId = randomUUID();
+
+        final EventStream eventStream = eventSource.getStreamById(streamId);
         aggregateService.register(new EventFoundEvent(EventA.class, "context.eventA"));
 
         aggregateService.get(eventStream, TestAggregate.class);
 
-        eventStream.append(Stream.of(envelopeFrom("context.eventA")));
+        eventStream.append(Stream.of(envelopeFrom(streamId, "context.eventA")));
 
-        final TestAggregate aggregate = aggregateService.get(eventSource.getStreamById(STREAM_ID), TestAggregate.class);
+        final TestAggregate aggregate = aggregateService.get(eventSource.getStreamById(streamId), TestAggregate.class);
 
         assertThat(aggregate, notNullValue());
         assertThat(aggregate.recordedEvents(), hasSize(1));
         assertThat(aggregate.recordedEvents().get(0).getClass(), equalTo(EventA.class));
-        assertThat(rowCount(SQL_EVENT_LOG_COUNT_BY_STREAM_ID, STREAM_ID), is(1));
-        assertThat(rowCount(SQL_EVENT_STREAM_COUNT_BY_STREAM_ID, STREAM_ID), is(1));
+        assertThat(rowCount(SQL_EVENT_LOG_COUNT_BY_STREAM_ID, streamId), is(1));
+        assertThat(rowCount(SQL_EVENT_STREAM_COUNT_BY_STREAM_ID, streamId), is(1));
     }
 
     @Test
     public void shouldCreateAggregateFromStreamOfTwo() throws EventStreamException {
 
-        final EventStream eventStream = eventSource.getStreamById(STREAM_ID);
+        final UUID streamId = randomUUID();
+
+        final EventStream eventStream = eventSource.getStreamById(streamId);
 
         aggregateService.register(new EventFoundEvent(EventA.class, "context.eventA"));
         aggregateService.register(new EventFoundEvent(EventB.class, "context.eventB"));
 
         aggregateService.get(eventStream, TestAggregate.class);
 
-        eventStream.append(Stream.of(envelopeFrom("context.eventA"), envelopeFrom("context.eventB")));
+        eventStream.append(Stream.of(envelopeFrom(streamId, "context.eventA"), envelopeFrom(streamId, "context.eventB")));
 
-        final TestAggregate aggregate = aggregateService.get(eventSource.getStreamById(STREAM_ID), TestAggregate.class);
+        final TestAggregate aggregate = aggregateService.get(eventSource.getStreamById(streamId), TestAggregate.class);
 
         assertThat(aggregate, notNullValue());
         assertThat(aggregate.recordedEvents(), hasSize(2));
         assertThat(aggregate.recordedEvents().get(0).getClass(), equalTo(EventA.class));
         assertThat(aggregate.recordedEvents().get(1).getClass(), equalTo(EventB.class));
-        assertThat(rowCount(SQL_EVENT_LOG_COUNT_BY_STREAM_ID, STREAM_ID), is(2));
-        assertThat(rowCount(SQL_EVENT_STREAM_COUNT_BY_STREAM_ID, STREAM_ID), is(1));
+        assertThat(rowCount(SQL_EVENT_LOG_COUNT_BY_STREAM_ID, streamId), is(2));
+        assertThat(rowCount(SQL_EVENT_STREAM_COUNT_BY_STREAM_ID, streamId), is(1));
 
     }
 
     @Test(expected = IllegalStateException.class)
-    public void shouldThrowExceptionForUnregisteredEvent() throws EventStreamException {
+    public void shouldThrowExceptionForUnregisteredEvent() throws Exception {
 
-        final EventStream eventStream = eventSource.getStreamById(STREAM_ID);
+        final UUID streamId = randomUUID();
 
-        eventStream.append(Stream.of(envelopeFrom("context.eventA")));
+        final EventStream eventStream = eventSource.getStreamById(streamId);
+
+        eventStream.append(Stream.of(envelopeFrom(streamId, "context.eventA")));
 
         aggregateService.get(eventStream, TestAggregate.class);
 
     }
 
     @Test(expected = RuntimeException.class)
-    public void shouldThrowExceptionForNonInstantiatableEvent() throws EventStreamException {
+    public void shouldThrowExceptionForNonInstantiatableEvent() throws Exception {
 
-        final EventStream eventStream = eventSource.getStreamById(STREAM_ID);
+        final UUID streamId = randomUUID();
+
+        final EventStream eventStream = eventSource.getStreamById(streamId);
 
         aggregateService.register(new EventFoundEvent(EventA.class, "eventA"));
 
         aggregateService.get(eventStream, PrivateAggregate.class);
     }
 
-    private void initDatabase() throws Exception {
-
-        final Liquibase snapshotLiquidBase = new Liquibase(LIQUIBASE_EVENT_STORE_CHANGELOG_XML,
-                new ClassLoaderResourceAccessor(), new JdbcConnection(dataSource.getConnection()));
-        snapshotLiquidBase.dropAll();
-        snapshotLiquidBase.update("");
-
-    }
-
-    private JsonEnvelope envelopeFrom(final String eventName) {
+    private JsonEnvelope envelopeFrom(final UUID streamId, final String eventName) {
         return envelope()
                 .with(metadataWithRandomUUID(eventName)
                         .createdAt(clock.now())
-                        .withStreamId(STREAM_ID))
+                        .withStreamId(streamId))
                 .withPayloadOf("value", "name")
                 .build();
     }

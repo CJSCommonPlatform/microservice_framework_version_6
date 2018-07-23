@@ -1,7 +1,7 @@
 package uk.gov.justice.services.core.cdi;
 
-import javax.enterprise.inject.CreationException;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.CreationException;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.InjectionException;
 import javax.enterprise.inject.Produces;

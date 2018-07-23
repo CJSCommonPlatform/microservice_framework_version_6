@@ -16,7 +16,6 @@ import uk.gov.justice.services.example.cakeshop.it.helpers.CommandFactory;
 import uk.gov.justice.services.example.cakeshop.it.helpers.RestEasyClientFactory;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import javax.ws.rs.client.Client;
 

@@ -70,12 +70,4 @@ public class FrameworkTestDataSourceFactory {
         }
         return prop;
     }
-        final PGSimpleDataSource dataSource = new PGSimpleDataSource();
-        dataSource.setPortNumber(PORT_NUMBER);
-        dataSource.setDatabaseName(databaseName);
-        dataSource.setUser(USERNAME);
-        dataSource.setPassword(PASSWORD);
-
-        return dataSource;
-    }
 }

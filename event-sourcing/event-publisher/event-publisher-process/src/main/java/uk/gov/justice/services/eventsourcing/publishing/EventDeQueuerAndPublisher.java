@@ -1,6 +1,5 @@
 package uk.gov.justice.services.eventsourcing.publishing;
 
-import static java.lang.String.format;
 import static javax.transaction.Transactional.TxType.REQUIRES_NEW;
 
 import uk.gov.justice.services.eventsourcing.publisher.jms.EventPublisher;

@@ -58,7 +58,7 @@ public class FrameworkTestDataSourceFactoryTest {
 
     @Test
     public void shouldLoadPropertiesSuccessfully(){
-        Properties prop = frameworkTestDataSourceFactory.getTestDatSourceProperties();
+        final Properties prop = frameworkTestDataSourceFactory.getTestDatSourceProperties();
 
         MatcherAssert.assertThat(prop.getProperty("PORT_NUMBER"), is("5432"));
         MatcherAssert.assertThat(prop.getProperty("USERNAME"), is("framework"));

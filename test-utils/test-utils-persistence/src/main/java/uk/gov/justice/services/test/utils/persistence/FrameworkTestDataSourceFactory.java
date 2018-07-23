@@ -58,9 +58,9 @@ public class FrameworkTestDataSourceFactory {
     }
 
     public Properties getTestDatSourceProperties(){
-        Properties prop = new Properties();
+        final Properties prop = new Properties();
 
-        try(InputStream input = this.getClass().getClassLoader().getResourceAsStream(DATA_SOURCE_CONFIG_PROPERTIES)){
+        try(final InputStream input = this.getClass().getClassLoader().getResourceAsStream(DATA_SOURCE_CONFIG_PROPERTIES)){
             if(input != null){
                 prop.load(input);
             }

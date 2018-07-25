@@ -1,6 +1,9 @@
 package uk.gov.justice.services.test.utils.persistence;
 
+import static java.lang.String.format;
+
 import java.sql.SQLException;
+import java.util.Optional;
 
 import javax.naming.Context;
 import javax.sql.DataSource;
@@ -15,21 +18,24 @@ import org.postgresql.Driver;
 
 public class TestEventStoreDataSourceFactory {
 
-    private static final String EVENT_STORE_URL = "jdbc:postgresql://localhost:5432/frameworkeventstore";
+    private static final String EVENT_STORE_URL_FORMAT = "jdbc:postgresql://localhost:5432/%s";
     private static final String EVENT_STORE_USER_NAME = "framework";
     private static final String EVENT_STORE_PASSWORD = "framework";
-    private final String liquibaseLocation;
+    private final Optional<String> liquibaseLocation;
 
-
-    public TestEventStoreDataSourceFactory(final String liquibaseLocation) {
-        this.liquibaseLocation = liquibaseLocation;
+    public TestEventStoreDataSourceFactory() {
+        this.liquibaseLocation = Optional.empty();
     }
 
-    public DataSource createDataSource() throws LiquibaseException, SQLException {
+    public TestEventStoreDataSourceFactory(final String liquibaseLocation) {
+        this.liquibaseLocation = Optional.of(liquibaseLocation);
+    }
+
+    public DataSource createDataSource(final String databaseName) throws LiquibaseException, SQLException {
 
         final BasicDataSource basicDataSource = new BasicDataSource();
         basicDataSource.setJdbcDriver(Driver.class.getName());
-        basicDataSource.setJdbcUrl(EVENT_STORE_URL);
+        basicDataSource.setJdbcUrl(format(EVENT_STORE_URL_FORMAT, databaseName));
         basicDataSource.setUserName(EVENT_STORE_USER_NAME);
         basicDataSource.setPassword(EVENT_STORE_PASSWORD);
 
@@ -38,14 +44,16 @@ public class TestEventStoreDataSourceFactory {
         System.setProperty(Context.URL_PKG_PREFIXES,
                 "org.apache.naming");
 
-        initDatabase(basicDataSource);
+        if (liquibaseLocation.isPresent()) {
+            initDatabase(basicDataSource);
+        }
 
         return basicDataSource;
     }
 
     private void initDatabase(final DataSource dataSource) throws LiquibaseException, SQLException {
         final Liquibase liquibase = new Liquibase(
-                liquibaseLocation,
+                liquibaseLocation.get(),
                 new ClassLoaderResourceAccessor(),
                 new JdbcConnection(dataSource.getConnection()));
         liquibase.dropAll();

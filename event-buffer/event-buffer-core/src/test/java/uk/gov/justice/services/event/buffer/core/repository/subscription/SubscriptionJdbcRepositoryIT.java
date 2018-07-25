@@ -6,12 +6,11 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
 import uk.gov.justice.services.jdbc.persistence.PreparedStatementWrapper;
-import uk.gov.justice.services.test.utils.core.messaging.Poller;
+import uk.gov.justice.services.test.utils.persistence.DatabaseCleaner;
 import uk.gov.justice.services.test.utils.persistence.TestEventStoreDataSourceFactory;
 
 import java.sql.ResultSet;
@@ -28,8 +27,6 @@ public class SubscriptionJdbcRepositoryIT {
 
     private static final String COUNT_BY_STREAM_ID = "SELECT count(*) FROM subscription WHERE stream_id=?";
 
-    private static final String LIQUIBASE_STREAM_STATUS_CHANGELOG_XML = "liquibase/event-buffer-changelog.xml";
-
     private static final long INITIAL_POSITION = 0L;
 
     private SubscriptionJdbcRepository jdbcRepository;
@@ -40,28 +37,13 @@ public class SubscriptionJdbcRepositoryIT {
 
     @Before
     public void initDatabase() throws Exception {
-        final TestEventStoreDataSourceFactory testEventStoreDataSourceFactory = new TestEventStoreDataSourceFactory(LIQUIBASE_STREAM_STATUS_CHANGELOG_XML);
-        dataSource = testEventStoreDataSourceFactory.createDataSource();
+        dataSource = new TestEventStoreDataSourceFactory()
+                .createDataSource("frameworkviewstore");
+
         jdbcRepositoryHelper = new JdbcRepositoryHelper();
         jdbcRepository = new SubscriptionJdbcRepository(dataSource, jdbcRepositoryHelper);
 
-        try {
-            final Poller poller = new Poller();
-
-            poller.pollUntilFound(() -> {
-                try {
-                    dataSource.getConnection().prepareStatement("SELECT COUNT (*) FROM event_buffer;").execute();
-                    return Optional.of("Success");
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    fail("EventJdbcRepository construction failed");
-                    return Optional.empty();
-                }
-            });
-        } catch (final Exception e) {
-            e.printStackTrace();
-            fail("EventJdbcRepository construction failed");
-        }
+        new DatabaseCleaner().cleanViewStoreTables("framework", "subscription", "event_buffer");
     }
 
     @Test
@@ -120,7 +102,7 @@ public class SubscriptionJdbcRepositoryIT {
     }
 
 
-        @Test
+    @Test
     public void shouldUpdateSourceWhenUnknown() throws Exception {
         final String source = "unknown";
         final UUID streamId = randomUUID();
@@ -196,7 +178,7 @@ public class SubscriptionJdbcRepositoryIT {
 
         jdbcRepository.update(subscription);
         final Optional<Subscription> result = jdbcRepository.findByStreamIdAndSource(streamId, source3);
-        assertThat(result,is(Optional.empty()));
+        assertThat(result, is(Optional.empty()));
     }
 
     @Test
@@ -245,7 +227,7 @@ public class SubscriptionJdbcRepositoryIT {
 
         jdbcRepository.update(subscription);
         final Optional<Subscription> result = jdbcRepository.findByStreamIdAndSource(streamId, newSource);
-        assertThat(result,is(Optional.empty()));
+        assertThat(result, is(Optional.empty()));
     }
 
     private Subscription subscriptionOf(final UUID id, final Long version, final String source) {
@@ -253,7 +235,7 @@ public class SubscriptionJdbcRepositoryIT {
     }
 
     private long initialiseBuffer(final UUID streamId, final String source) {
-        jdbcRepository.updateSource(streamId,source);
+        jdbcRepository.updateSource(streamId, source);
         final Optional<Subscription> currentStatus = jdbcRepository.findByStreamIdAndSource(streamId, source);
 
         if (!currentStatus.isPresent()) {

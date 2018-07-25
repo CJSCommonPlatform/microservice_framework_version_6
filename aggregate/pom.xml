@@ -59,12 +59,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>uk.gov.justice.services</groupId>
-            <artifactId>event-repository-liquibase</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>uk.gov.justice.utils</groupId>
             <artifactId>test-utils-logging-simple</artifactId>
             <type>pom</type>
@@ -73,6 +67,12 @@
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
             <artifactId>test-utils-core</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>test-utils-persistence</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
@@ -107,4 +107,43 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.liquibase</groupId>
+                <artifactId>liquibase-maven-plugin</artifactId>
+                <version>${liquibase.version}</version>
+                <configuration>
+                    <changeLogFile>liquibase/event-store-db-changelog.xml</changeLogFile>
+                    <driver>org.postgresql.Driver</driver>
+                    <url>jdbc:postgresql://localhost:5432/frameworkeventstore</url>
+                    <username>framework</username>
+                    <password>framework</password>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>dropAll</goal>
+                            <goal>update</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>uk.gov.justice.services</groupId>
+                        <artifactId>event-repository-liquibase</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.postgresql</groupId>
+                        <artifactId>postgresql</artifactId>
+                        <version>${postgresql.driver.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>

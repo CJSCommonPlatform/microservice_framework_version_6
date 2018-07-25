@@ -78,6 +78,7 @@ import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.DefaultJmsEnvelopeSender;
 import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
 import uk.gov.justice.services.test.utils.common.envelope.TestEnvelopeRecorder;
+import uk.gov.justice.services.test.utils.persistence.DatabaseCleaner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -92,9 +93,6 @@ import javax.inject.Inject;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
-import liquibase.Liquibase;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.resource.ClassLoaderResourceAccessor;
 import org.apache.openejb.jee.Application;
 import org.apache.openejb.jee.WebApp;
 import org.apache.openejb.junit.ApplicationComposer;
@@ -108,8 +106,6 @@ import org.junit.runner.RunWith;
 @RunWith(ApplicationComposer.class)
 @Adapter(EVENT_LISTENER)
 public class EventBufferAndFilterChainIT {
-
-    private static final String LIQUIBASE_STREAM_STATUS_CHANGELOG_XML = "liquibase/event-buffer-changelog.xml";
 
     private static final String EVENT_SUPPORTED_ABC = "test.event-abc";
     private static final String EVENT_UNSUPPORTED_DEF = "test.event-def";
@@ -215,7 +211,7 @@ public class EventBufferAndFilterChainIT {
     public void init() throws Exception {
         InitialContext initialContext = new InitialContext();
         initialContext.bind("java:/DS.EventBufferAndFilterChainIT", dataSource);
-        initDatabase();
+        new DatabaseCleaner().cleanStreamBufferTable("framework");
     }
 
     @Configuration
@@ -292,13 +288,6 @@ public class EventBufferAndFilterChainIT {
         public SupportedEventAllowingEventFilter() {
             super(EVENT_SUPPORTED_ABC);
         }
-    }
-
-    private void initDatabase() throws Exception {
-        Liquibase liquibase = new Liquibase(LIQUIBASE_STREAM_STATUS_CHANGELOG_XML,
-                new ClassLoaderResourceAccessor(), new JdbcConnection(dataSource.getConnection()));
-        liquibase.dropAll();
-        liquibase.update("");
     }
 
     public static class EventListenerInterceptorChainProvider implements InterceptorChainEntryProvider {

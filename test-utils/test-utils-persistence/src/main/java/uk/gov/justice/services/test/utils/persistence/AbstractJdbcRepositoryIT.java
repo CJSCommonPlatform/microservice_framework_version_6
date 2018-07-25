@@ -11,6 +11,7 @@ import liquibase.Liquibase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.resource.ClassLoaderResourceAccessor;
 
+//TODO: Delete this
 @Deprecated
 public class AbstractJdbcRepositoryIT<T extends AbstractJdbcRepository> {
     protected DataSource dataSource;
@@ -28,7 +29,7 @@ public class AbstractJdbcRepositoryIT<T extends AbstractJdbcRepository> {
         System.setProperty(Context.URL_PKG_PREFIXES,
                 "org.apache.naming");
 
-        dataSource = new TestEventStoreDataSourceFactory(liquibaseLocation).createDataSource();
+        dataSource = new TestEventStoreDataSourceFactory(liquibaseLocation).createDataSource("frameworkeventstore");
 
         setField(jdbcRepository, "datasource", dataSource);
         initDatabase();

@@ -2,7 +2,6 @@ package uk.gov.justice.services.eventsourcing.repository.jdbc.event;
 
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
-import static junit.framework.TestCase.fail;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
@@ -15,14 +14,13 @@ import uk.gov.justice.services.eventsourcing.repository.jdbc.AnsiSQLEventLogInse
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.InvalidPositionException;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
-import uk.gov.justice.services.test.utils.core.messaging.Poller;
 import uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil;
+import uk.gov.justice.services.test.utils.persistence.DatabaseCleaner;
 import uk.gov.justice.services.test.utils.persistence.TestEventStoreDataSourceFactory;
 
 import java.sql.SQLException;
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -40,36 +38,27 @@ public class EventJdbcRepositoryIT {
     private static final String NAME = "Test Name";
     private static final String PAYLOAD_JSON = "{\"field\": \"Value\"}";
     private static final String METADATA_JSON = "{\"field\": \"Value\"}";
-    private static final String LIQUIBASE_EVENT_STORE_DB_CHANGELOG_XML = "liquibase/event-store-db-changelog.xml";
-    private final static ZonedDateTime TIMESTAMP = new UtcClock().now();
 
+    private static final ZonedDateTime TIMESTAMP = new UtcClock().now();
+    private static final String FRAMEWORK_CONTEXT_NAME = "framework";
 
     private EventJdbcRepository jdbcRepository;
     private DataSource dataSource;
 
     @Before
-    public void initialize() {
-        try {
-            jdbcRepository = new EventJdbcRepository(new AnsiSQLEventLogInsertionStrategy(), new JdbcRepositoryHelper(), null, "tests", mock(Logger.class));
-            dataSource = new TestEventStoreDataSourceFactory(LIQUIBASE_EVENT_STORE_DB_CHANGELOG_XML).createDataSource();
-            ReflectionUtil.setField(jdbcRepository, "dataSource", dataSource);
+    public void initialize() throws Exception {
+        jdbcRepository = new EventJdbcRepository(
+                new AnsiSQLEventLogInsertionStrategy(),
+                new JdbcRepositoryHelper(),
+                null,
+                "tests",
+                mock(Logger.class));
 
-            final Poller poller = new Poller();
+        dataSource = new TestEventStoreDataSourceFactory()
+                .createDataSource("frameworkeventstore");
+        ReflectionUtil.setField(jdbcRepository, "dataSource", dataSource);
 
-            poller.pollUntilFound(() -> {
-                try {
-                    dataSource.getConnection().prepareStatement("SELECT COUNT (*) FROM event_log;").execute();
-                    return Optional.of("Success");
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    fail("EventJdbcRepository construction failed");
-                    return Optional.empty();
-                }
-            });
-        } catch (final Exception e) {
-            e.printStackTrace();
-            fail("EventJdbcRepository construction failed");
-        }
+        new DatabaseCleaner().cleanEventStoreTables(FRAMEWORK_CONTEXT_NAME);
     }
 
     @After

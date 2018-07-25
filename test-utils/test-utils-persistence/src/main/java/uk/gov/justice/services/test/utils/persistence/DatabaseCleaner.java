@@ -49,12 +49,12 @@ public class DatabaseCleaner {
     }
 
     /**
-     * Deletes all the data in the 'stream_buffer' table
+     * Deletes all the data in the 'event_buffer' table
      *
      * @param contextName the name of the context who's tables you are cleaning
      */
     public void cleanStreamBufferTable(final String contextName) {
-        cleanViewStoreTables(contextName, "stream_buffer");
+        cleanViewStoreTables(contextName, "event_buffer");
     }
 
     /**

@@ -31,6 +31,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 - Moved EventBuffer into DefaultSubscriptionManager
 - Add SchemaCatalogResolver to JsonSchemaLoader for resolving file base schemas with the schema catalog
 
+### Removed
+- AbstractJdbcRepositoryIT from test utils, deprecated in previous version
+
 ## [4.3.2] - 2018-07-11
 ### Changed
 - Upgraded generator maven plugin to version 2.6.0

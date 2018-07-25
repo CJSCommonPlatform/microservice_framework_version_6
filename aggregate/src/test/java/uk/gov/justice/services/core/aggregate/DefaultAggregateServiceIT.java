@@ -49,6 +49,7 @@ import uk.gov.justice.services.eventsourcing.source.core.PublishingEventAppender
 import uk.gov.justice.services.eventsourcing.source.core.SystemEventService;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.jdbc.persistence.AbstractJdbcRepository;
+import uk.gov.justice.services.jdbc.persistence.DefaultJdbcDataSourceProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcDataSourceProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
@@ -121,8 +122,10 @@ public class DefaultAggregateServiceIT {
             EventJdbcRepositoryFactory.class,
             JdbcRepositoryHelper.class,
             JdbcDataSourceProvider.class,
+            DefaultJdbcDataSourceProvider.class,
             EventStreamManagerFactory.class,
             EventStreamJdbcRepository.class,
+            JdbcBasedEventSource.class,
             JdbcBasedEventSource.class,
             EnvelopeEventStream.class,
             DefaultEnveloper.class,

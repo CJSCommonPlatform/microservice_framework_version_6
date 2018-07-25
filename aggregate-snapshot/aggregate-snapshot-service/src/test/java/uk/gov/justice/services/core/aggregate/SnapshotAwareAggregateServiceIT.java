@@ -59,6 +59,7 @@ import uk.gov.justice.services.eventsourcing.source.core.SystemEventService;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.eventsourcing.source.core.snapshot.DefaultSnapshotService;
 import uk.gov.justice.services.eventsourcing.source.core.snapshot.DefaultSnapshotStrategy;
+import uk.gov.justice.services.jdbc.persistence.DefaultJdbcDataSourceProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcDataSourceProvider;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryException;
 import uk.gov.justice.services.jdbc.persistence.JdbcRepositoryHelper;
@@ -155,6 +156,7 @@ public class SnapshotAwareAggregateServiceIT {
             DefaultObjectInputStreamStrategy.class,
             SnapshotJdbcRepository.class,
             JdbcDataSourceProvider.class,
+            DefaultJdbcDataSourceProvider.class,
 
             EventStreamJdbcRepositoryFactory.class,
             EventRepositoryFactory.class,

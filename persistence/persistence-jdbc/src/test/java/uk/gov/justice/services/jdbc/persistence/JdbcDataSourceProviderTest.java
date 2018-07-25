@@ -25,7 +25,7 @@ public class JdbcDataSourceProviderTest {
     private InitialContext initialContext;
 
     @InjectMocks
-    private JdbcDataSourceProvider jdbcDataSourceProvider;
+    private DefaultJdbcDataSourceProvider defaultJdbcDataSourceProvider;
 
     @Test
     public void shouldLookupTheDataSourceInTheInitialContextAndCache() throws Exception {
@@ -36,13 +36,13 @@ public class JdbcDataSourceProviderTest {
 
         when(initialContext.lookup(jndiName)).thenReturn(dataSource);
 
-        assertThat(jdbcDataSourceProvider.getDataSource(jndiName), is(dataSource));
-        assertThat(jdbcDataSourceProvider.getDataSource(jndiName), is(dataSource));
-        assertThat(jdbcDataSourceProvider.getDataSource(jndiName), is(dataSource));
-        assertThat(jdbcDataSourceProvider.getDataSource(jndiName), is(dataSource));
-        assertThat(jdbcDataSourceProvider.getDataSource(jndiName), is(dataSource));
-        assertThat(jdbcDataSourceProvider.getDataSource(jndiName), is(dataSource));
-        assertThat(jdbcDataSourceProvider.getDataSource(jndiName), is(dataSource));
+        assertThat(defaultJdbcDataSourceProvider.getDataSource(jndiName), is(dataSource));
+        assertThat(defaultJdbcDataSourceProvider.getDataSource(jndiName), is(dataSource));
+        assertThat(defaultJdbcDataSourceProvider.getDataSource(jndiName), is(dataSource));
+        assertThat(defaultJdbcDataSourceProvider.getDataSource(jndiName), is(dataSource));
+        assertThat(defaultJdbcDataSourceProvider.getDataSource(jndiName), is(dataSource));
+        assertThat(defaultJdbcDataSourceProvider.getDataSource(jndiName), is(dataSource));
+        assertThat(defaultJdbcDataSourceProvider.getDataSource(jndiName), is(dataSource));
 
         verify(initialContext, times(1)).lookup(jndiName);
     }
@@ -57,7 +57,7 @@ public class JdbcDataSourceProviderTest {
         when(initialContext.lookup(jndiName)).thenThrow(namingException);
 
         try {
-            jdbcDataSourceProvider.getDataSource(jndiName);
+            defaultJdbcDataSourceProvider.getDataSource(jndiName);
             fail();
         } catch (final JdbcRepositoryException expected) {
             assertThat(expected.getCause(), is(namingException));

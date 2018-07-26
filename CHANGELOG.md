@@ -5,6 +5,14 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [unreleased]
 
+## [4.3.3] - 2018-07-26
+### Changed
+- Updated maven-common-bom to version 1.28.0
+- Updated file-service to version 1.16.3
+- Updated utilities to version 1.15.0
+- Updated generator-maven-plugin to version 2.6.1
+- Updated json-schema-catalog to version 1.4.0
+
 ## [4.3.2] - 2018-07-11
 ### Changed
 - Upgraded generator maven plugin to version 2.6.0

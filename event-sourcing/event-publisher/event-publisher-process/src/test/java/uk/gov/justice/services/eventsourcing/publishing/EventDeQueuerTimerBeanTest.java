@@ -21,6 +21,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class EventDeQueuerTimerBeanTest {
 
+    private static final String TIMER_START_VALUE = "7000";
+    private static final String TIMER_INTERVAL_VALUE = "2000";
+
     @Mock
     private TimerService timerService;
 
@@ -52,9 +55,13 @@ public class EventDeQueuerTimerBeanTest {
         final Timer timer = mock(Timer.class);
         final TimerConfig timerConfig = mock(TimerConfig.class);
 
+        eventDeQueuerTimerBean.timerStartWaitMilliseconds = TIMER_START_VALUE;
+        eventDeQueuerTimerBean.timerIntervalMilliseconds = TIMER_INTERVAL_VALUE;
+
         when(timerService.getAllTimers()).thenReturn(singletonList(timer));
         when(timer.getInfo()).thenReturn(timerJobName);
         when(timerConfigFactory.createNew()).thenReturn(timerConfig);
+
 
         eventDeQueuerTimerBean.startTimerService();
 
@@ -63,7 +70,7 @@ public class EventDeQueuerTimerBeanTest {
         inOrder.verify(timer).cancel();
         inOrder.verify(timerConfig).setPersistent(false);
         inOrder.verify(timerConfig).setInfo(timerJobName);
-        inOrder.verify(timerService).createIntervalTimer(7_000, 1_000, timerConfig);
+        inOrder.verify(timerService).createIntervalTimer(7_000, 2_000, timerConfig);
 
     }
 }

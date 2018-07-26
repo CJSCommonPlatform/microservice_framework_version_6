@@ -1,5 +1,9 @@
 package uk.gov.justice.services.eventsourcing.publishing;
 
+import static java.lang.Long.parseLong;
+
+import uk.gov.justice.services.common.configuration.GlobalValue;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ejb.Singleton;
@@ -16,8 +20,13 @@ public class EventDeQueuerTimerBean {
 
     private static final String TIMER_JOB = "framework.de-queue-events-and-publish.job";
 
-    private static final long TIMER_START_WAIT_MILLISECONDS = 7 * 1_000L;
-    private static final long TIMER_INTERVAL_MILLISECONDS = 1 * 1_000L;
+    @Inject
+    @GlobalValue(key = "timer.start.wait.milliseconds", defaultValue = "7000")
+    String timerStartWaitMilliseconds;
+
+    @Inject
+    @GlobalValue(key = "timer.interval.milliseconds", defaultValue = "2000")
+    String timerIntervalMilliseconds;
 
     @Resource
     TimerService timerService;
@@ -49,7 +58,7 @@ public class EventDeQueuerTimerBean {
         timerConfig.setPersistent(false);
         timerConfig.setInfo(TIMER_JOB);
 
-        timerService.createIntervalTimer(TIMER_START_WAIT_MILLISECONDS, TIMER_INTERVAL_MILLISECONDS, timerConfig);
+        timerService.createIntervalTimer(parseLong(timerStartWaitMilliseconds), parseLong(timerIntervalMilliseconds), timerConfig);
     }
 
     private void cancelExistingTimer() {

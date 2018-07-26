@@ -17,6 +17,7 @@ import uk.gov.justice.services.eventsourcing.publishing.helpers.DummyEventPublis
 import uk.gov.justice.services.eventsourcing.publishing.helpers.EventFactory;
 import uk.gov.justice.services.eventsourcing.publishing.helpers.EventStoreInitializer;
 import uk.gov.justice.services.eventsourcing.publishing.helpers.TestEventInserter;
+import uk.gov.justice.services.eventsourcing.publishing.helpers.TestGlobalValueProducer;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.Event;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.event.EventConverter;
 import uk.gov.justice.services.jdbc.persistence.JdbcDataSourceProvider;
@@ -73,7 +74,7 @@ public class EventDeQueuerTimerBeanIT {
 
     private final EventFactory eventFactory = new EventFactory();
     private final TestEventInserter testEventInserter = new TestEventInserter();
-    private final Poller poller = new Poller(10, 1_000L);
+    private final Poller poller = new Poller(10, 3_000L);
     private final EventStoreInitializer eventStoreInitializer = new EventStoreInitializer();
 
     @Before
@@ -117,7 +118,8 @@ public class EventDeQueuerTimerBeanIT {
             YamlSchemaLoader.class,
             YamlParser.class,
             SubscriptionDataSourceProvider.class,
-            TimerConfigFactory.class
+            TimerConfigFactory.class,
+            TestGlobalValueProducer.class
     })
     public WebApp war() {
         return new WebApp()

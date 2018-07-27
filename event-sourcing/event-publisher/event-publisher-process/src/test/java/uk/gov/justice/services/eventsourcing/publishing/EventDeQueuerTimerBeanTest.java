@@ -1,11 +1,15 @@
 package uk.gov.justice.services.eventsourcing.publishing;
 
 import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.ejb.Timer;
 import javax.ejb.TimerConfig;
@@ -72,5 +76,39 @@ public class EventDeQueuerTimerBeanTest {
         inOrder.verify(timerConfig).setInfo(timerJobName);
         inOrder.verify(timerService).createIntervalTimer(7_000, 2_000, timerConfig);
 
+    }
+
+    @Test
+    public void shouldCancelAnyScheduledTaskIfOverlappingLimitIsReached(){
+        final String timerJobName = "framework.de-queue-events-and-publish.job";
+
+        final Timer timer = mock(Timer.class);
+        final TimerConfig timerConfig = mock(TimerConfig.class);
+        final List<Timer> mockList = new ArrayList<>();
+        mockList.add(timer);
+        mockList.add(timer);
+        mockList.add(timer);
+        mockList.add(timer);
+        mockList.add(timer);
+        mockList.add(timer);
+        mockList.add(timer);
+        mockList.add(timer);
+        mockList.add(timer);
+        mockList.add(timer);
+        mockList.add(timer);
+
+        eventDeQueuerTimerBean.timerStartWaitMilliseconds = TIMER_START_VALUE;
+        eventDeQueuerTimerBean.timerIntervalMilliseconds = TIMER_INTERVAL_VALUE;
+
+        when(timerService.getAllTimers()).thenReturn(mockList);
+
+        when(timer.getInfo()).thenReturn(timerJobName);
+        when(timerConfigFactory.createNew()).thenReturn(timerConfig);
+
+        when(eventDeQueuerAndPublisher.deQueueAndPublish()).thenReturn(true, false);
+
+        eventDeQueuerTimerBean.doDeQueueAndPublish();
+
+        verify(timer, atLeast(11)).cancel();
     }
 }

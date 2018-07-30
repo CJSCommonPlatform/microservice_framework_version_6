@@ -18,6 +18,7 @@ import javax.inject.Inject;
 @Startup
 public class EventDeQueuerTimerBean {
 
+    private static final int THRESHOLD = 10;
     private static final String TIMER_JOB = "framework.de-queue-events-and-publish.job";
 
     @Inject
@@ -48,8 +49,7 @@ public class EventDeQueuerTimerBean {
     public void doDeQueueAndPublish() {
 
         while (eventDeQueuerAndPublisher.deQueueAndPublish()) {
-            // nothing to do. The work happens in deQueueAndPublish()
-            // but it needs to be transactional.
+            isOverlappingLimitReached();
         }
     }
 
@@ -63,5 +63,11 @@ public class EventDeQueuerTimerBean {
 
     private void cancelExistingTimer() {
         timerService.getAllTimers().stream().filter(t -> TIMER_JOB.equals(t.getInfo())).forEach(Timer::cancel);
+    }
+
+    private void isOverlappingLimitReached(){
+        if(!timerService.getAllTimers().isEmpty() && timerService.getAllTimers().size() > THRESHOLD){
+            cancelExistingTimer();
+        }
     }
 }

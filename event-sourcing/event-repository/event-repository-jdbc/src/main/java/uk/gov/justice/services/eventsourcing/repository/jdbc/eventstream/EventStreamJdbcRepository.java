@@ -73,7 +73,7 @@ public class EventStreamJdbcRepository {
                 ps.setBoolean(3, active);
 
                 ps.executeUpdate();
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 throw new JdbcRepositoryException(format("Exception while storing stream %s", streamId), e);
             }
         }

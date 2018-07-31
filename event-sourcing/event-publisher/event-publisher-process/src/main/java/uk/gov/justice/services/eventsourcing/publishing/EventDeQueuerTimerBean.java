@@ -22,11 +22,11 @@ public class EventDeQueuerTimerBean {
     private static final String TIMER_JOB = "framework.de-queue-events-and-publish.job";
 
     @Inject
-    @GlobalValue(key = "timer.start.wait.milliseconds", defaultValue = "7000")
+    @GlobalValue(key = "event.dequer.start.wait.milliseconds", defaultValue = "7000")
     String timerStartWaitMilliseconds;
 
     @Inject
-    @GlobalValue(key = "timer.interval.milliseconds", defaultValue = "2000")
+    @GlobalValue(key = "event.dequer.timer.interval.milliseconds", defaultValue = "500")
     String timerIntervalMilliseconds;
 
     @Resource

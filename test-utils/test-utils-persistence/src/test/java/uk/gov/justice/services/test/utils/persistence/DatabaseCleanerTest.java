@@ -86,12 +86,13 @@ public class DatabaseCleanerTest {
         when(testJdbcConnectionProvider.getEventStoreConnection(contextName)).thenReturn(connection);
         when(connection.prepareStatement("DELETE FROM " + "event_log")).thenReturn(preparedStatement);
         when(connection.prepareStatement("DELETE FROM " + "event_stream")).thenReturn(preparedStatement);
+        when(connection.prepareStatement("DELETE FROM " + "publish_queue")).thenReturn(preparedStatement);
 
         databaseCleaner.cleanEventStoreTables(contextName);
 
-        verify(preparedStatement, times(2)).executeUpdate();
+        verify(preparedStatement, times(3)).executeUpdate();
         verify(connection).close();
-        verify(preparedStatement, times(2)).close();
+        verify(preparedStatement, times(3)).close();
     }
 
     @Test

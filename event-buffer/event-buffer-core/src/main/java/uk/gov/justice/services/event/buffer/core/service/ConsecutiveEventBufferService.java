@@ -6,8 +6,8 @@ import static java.util.stream.StreamSupport.stream;
 import uk.gov.justice.services.event.buffer.api.EventBufferService;
 import uk.gov.justice.services.event.buffer.core.repository.streambuffer.EventBufferEvent;
 import uk.gov.justice.services.event.buffer.core.repository.streambuffer.EventBufferJdbcRepository;
-import uk.gov.justice.services.event.buffer.core.repository.subscription.SubscriptionJdbcRepository;
 import uk.gov.justice.services.event.buffer.core.repository.subscription.Subscription;
+import uk.gov.justice.services.event.buffer.core.repository.subscription.SubscriptionJdbcRepository;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 

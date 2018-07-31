@@ -24,6 +24,7 @@ import uk.gov.justice.services.clients.core.exception.InvalidResponseException;
 import uk.gov.justice.services.clients.core.webclient.WebTargetFactory;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.core.accesscontrol.AccessControlViolationException;
+import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.Metadata;
@@ -40,7 +41,6 @@ import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
-import uk.gov.justice.services.core.enveloper.Enveloper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

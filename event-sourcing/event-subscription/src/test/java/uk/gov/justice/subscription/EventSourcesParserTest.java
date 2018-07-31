@@ -17,7 +17,6 @@ import uk.gov.justice.subscription.yaml.parser.YamlToJsonObjectConverter;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 

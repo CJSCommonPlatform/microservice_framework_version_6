@@ -16,8 +16,8 @@ import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderF
 
 import uk.gov.justice.services.event.buffer.core.repository.streambuffer.EventBufferEvent;
 import uk.gov.justice.services.event.buffer.core.repository.streambuffer.EventBufferJdbcRepository;
-import uk.gov.justice.services.event.buffer.core.repository.subscription.SubscriptionJdbcRepository;
 import uk.gov.justice.services.event.buffer.core.repository.subscription.Subscription;
+import uk.gov.justice.services.event.buffer.core.repository.subscription.SubscriptionJdbcRepository;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.test.utils.common.stream.StreamCloseSpy;

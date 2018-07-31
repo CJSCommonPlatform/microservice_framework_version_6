@@ -12,4 +12,8 @@ public class OptimisticLockingRetryException extends RuntimeException {
     public OptimisticLockingRetryException(final String message) {
         super(message);
     }
+
+    public OptimisticLockingRetryException(final String message, final Throwable cause) {
+        super(message, cause);
+    }
 }

@@ -12,7 +12,6 @@ import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuil
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithDefaults;
 
-import uk.gov.justice.services.eventsourcing.publisher.jms.EventPublisher;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.JdbcBasedEventRepository;
 import uk.gov.justice.services.eventsourcing.repository.jdbc.exception.StoreEventRequestFailedException;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;

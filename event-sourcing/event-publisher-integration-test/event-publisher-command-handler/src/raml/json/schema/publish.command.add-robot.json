@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/publishing/command/publish.command.add-robot.json",
+  "type": "object",
+  "properties": {
+    "robotId": {
+      "$ref": "#/definitions/uuid"
+    },
+    "robotType": {
+      "type": "string"
+    },
+    "isEvil": {
+      "type": "boolean"
+    },
+    "brainTheSizeOfAPlanet": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "robotId",
+    "robotType",
+    "isEvil",
+    "brainTheSizeOfAPlanet"
+  ],
+  "definitions": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    }
+  }
+}

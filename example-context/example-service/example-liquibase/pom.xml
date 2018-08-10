@@ -5,7 +5,7 @@
     <parent>
         <groupId>uk.gov.justice.services.example</groupId>
         <artifactId>example-service</artifactId>
-        <version>4.3.3-SNAPSHOT</version>
+        <version>4.3.5</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 

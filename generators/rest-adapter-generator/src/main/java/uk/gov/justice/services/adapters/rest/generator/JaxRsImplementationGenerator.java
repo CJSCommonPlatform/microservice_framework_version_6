@@ -464,6 +464,7 @@ class JaxRsImplementationGenerator {
 
         return () -> CodeBlock.builder()
                 .addStatement("final $T $L = new $T<>()", listType, PART_DEFINITIONS_VARIABLE, arrayClassType)
+                .addStatement("uk.gov.justice.services.adapter.rest.multipart.AdditionalPropertiesExtractor.addAdditionalProperties(multipartFormDataInput, validParameterCollectionBuilder, LOGGER);")
                 .add(putAllFileFormPartsInPartDefinitionsBuilder(bodyMimeType))
                 .addStatement(REST_PROCESSOR_MULTIPART_METHOD_STATEMENT,
                         responseStrategy,

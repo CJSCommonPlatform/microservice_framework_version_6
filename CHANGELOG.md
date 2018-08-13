@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [unreleased]
 
+## [4.4.0] - 2018-08-13
+### Added
+- Include additional properties in multipart
+
 ## [4.3.4] - 2018-08-10
 ### Changed
 - Updated file-service to version 1.16.4

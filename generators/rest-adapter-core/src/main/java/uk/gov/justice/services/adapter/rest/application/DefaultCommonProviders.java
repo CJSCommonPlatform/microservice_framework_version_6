@@ -1,6 +1,7 @@
 package uk.gov.justice.services.adapter.rest.application;
 
 import uk.gov.justice.services.adapter.rest.cors.CorsFeature;
+import uk.gov.justice.services.adapter.rest.filter.JsonValidatorRequestFilter;
 import uk.gov.justice.services.adapter.rest.filter.LoggerRequestDataFilter;
 import uk.gov.justice.services.adapter.rest.interceptor.JsonSchemaValidationInterceptor;
 import uk.gov.justice.services.adapter.rest.mapper.BadRequestExceptionMapper;
@@ -25,6 +26,7 @@ public class DefaultCommonProviders implements CommonProviders {
         classes.add(BadRequestExceptionMapper.class);
         classes.add(ConflictedResourceExceptionMapper.class);
         classes.add(ForbiddenRequestExceptionMapper.class);
+        classes.add(JsonValidatorRequestFilter.class);
         classes.add(LoggerRequestDataFilter.class);
         classes.add(JsonSchemaValidationInterceptor.class);
         classes.add(CorsFeature.class);

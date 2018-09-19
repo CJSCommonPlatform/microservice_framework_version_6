@@ -1,11 +1,16 @@
 package uk.gov.justice.services.core.accesscontrol;
 
+import static java.util.UUID.fromString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.Metadata;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,20 +24,23 @@ public class AccessControlFailureMessageGeneratorTest {
     private AccessControlFailureMessageGenerator accessControlFailureMessageGenerator;
 
     @Test
-    public void shouldGenerateAnErrorMessageWithUserIdEnvelopeNameAndFailureReason()
-                    throws Exception {
+    public void shouldGenerateAnErrorMessageWithEnvelopeIdAndEnvelopeNameAndFailureReasonAndNoUserId()
+            throws Exception {
 
-        final String jsonEnvelopeString = "the: jsonEnvelope";
         final String reason = "reason";
-
         final AccessControlViolation accessControlViolation = new AccessControlViolation(reason);
+        final Metadata metadata = mock(Metadata.class);
         final JsonEnvelope jsonEnvelope = mock(JsonEnvelope.class);
 
-        when(jsonEnvelope.toString()).thenReturn(jsonEnvelopeString);
+        when(jsonEnvelope.metadata()).thenReturn(metadata);
+        when(metadata.id()).thenReturn(fromString("9132d439-c797-4483-a961-5eb640c55fe7"));
+        when(metadata.name()).thenReturn("sjp.query.cases-referred-to-court");
 
         final String errorMessage = accessControlFailureMessageGenerator
-                        .errorMessageFrom(jsonEnvelope, accessControlViolation);
+                .errorMessageFrom(jsonEnvelope, accessControlViolation);
 
-        assertThat(errorMessage, is("Access Control failed for json envelope 'the: jsonEnvelope'. Reason: reason"));
+        assertThat(errorMessage, is("Access Control failed for json envelope '9132d439-c797-4483-a961-5eb640c55fe7' of type 'sjp.query.cases-referred-to-court'. Reason: reason"));
+
+        verify(metadata, times(0)).userId();
     }
 }

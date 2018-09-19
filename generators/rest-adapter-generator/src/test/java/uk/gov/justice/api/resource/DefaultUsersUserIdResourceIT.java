@@ -21,6 +21,7 @@ import uk.gov.justice.schema.service.SchemaCatalogService;
 import uk.gov.justice.services.adapter.rest.application.CommonProviders;
 import uk.gov.justice.services.adapter.rest.application.DefaultCommonProviders;
 import uk.gov.justice.services.adapter.rest.envelope.RestEnvelopeBuilderFactory;
+import uk.gov.justice.services.adapter.rest.filter.JsonValidatorRequestFilter;
 import uk.gov.justice.services.adapter.rest.filter.LoggerRequestDataFilter;
 import uk.gov.justice.services.adapter.rest.interceptor.JsonSchemaValidationInterceptor;
 import uk.gov.justice.services.adapter.rest.mapper.BadRequestExceptionMapper;
@@ -153,6 +154,7 @@ public class DefaultUsersUserIdResourceIT {
             DefaultCommonProviders.class,
             DummyCommonProviders.class,
             BadRequestExceptionMapper.class,
+            JsonValidatorRequestFilter.class,
             JsonSchemaValidationInterceptor.class,
             LoggerRequestDataFilter.class,
             TestServiceContextNameProvider.class,

@@ -10,8 +10,9 @@ public class AccessControlFailureMessageGenerator {
                     final JsonEnvelope jsonEnvelope,
                     final AccessControlViolation accessControlViolation) {
 
-        return format("Access Control failed for json envelope '%s'. Reason: %s",
-                        jsonEnvelope,
-                        accessControlViolation.getReason());
+        return format("Access Control failed for json envelope '%s' of type '%s'. Reason: %s",
+                jsonEnvelope.metadata().id(),
+                jsonEnvelope.metadata().name(),
+                accessControlViolation.getReason());
     }
 }

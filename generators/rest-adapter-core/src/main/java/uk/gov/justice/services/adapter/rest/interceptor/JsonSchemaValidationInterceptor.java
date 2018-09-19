@@ -2,8 +2,10 @@ package uk.gov.justice.services.adapter.rest.interceptor;
 
 import static java.lang.String.format;
 import static java.util.Optional.of;
+import static java.util.stream.Collectors.toMap;
 import static uk.gov.justice.services.adapter.rest.envelope.MediaTypes.JSON_MEDIA_TYPE_SUFFIX;
 import static uk.gov.justice.services.adapter.rest.envelope.MediaTypes.charsetFrom;
+import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 
 import uk.gov.justice.services.adapter.rest.exception.BadRequestException;
 import uk.gov.justice.services.core.json.JsonSchemaValidationException;
@@ -19,6 +21,8 @@ import java.io.IOException;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
 import javax.ws.rs.ext.ReaderInterceptor;
 import javax.ws.rs.ext.ReaderInterceptorContext;
@@ -61,7 +65,7 @@ public class JsonSchemaValidationInterceptor implements ReaderInterceptor {
                 restJsonSchemaValidator.validate(payload, nameToMediaTypeConverter.convert(mediaType), of(mediaType));
             } catch (final JsonSchemaValidationException jsonSchemaValidationException) {
                 final String message = format("JSON schema validation has failed on %s due to %s ",
-                        httpTraceLoggerHelper.toHttpHeaderTrace(context.getHeaders()),
+                        httpTraceLoggerHelper.toHttpHeaderTrace(stripUserId(context.getHeaders())),
                         jsonValidationLoggerHelper.toValidationTrace(jsonSchemaValidationException));
                 logger.debug(message);
                 throw new BadRequestException(message, jsonSchemaValidationException);
@@ -74,5 +78,12 @@ public class JsonSchemaValidationInterceptor implements ReaderInterceptor {
         }
 
         return context.proceed();
+    }
+
+    private MultivaluedMap<String, String> stripUserId(final MultivaluedMap<String, String> headers) {
+        return new MultivaluedHashMap<>(headers.entrySet()
+                .stream()
+                .filter(e -> !USER_ID.equals(e.getKey()))
+                .collect(toMap(e -> e.getKey(), e -> e.getValue().get(0))));
     }
 }

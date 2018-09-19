@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 
 import uk.gov.justice.services.adapter.rest.cors.CorsFeature;
+import uk.gov.justice.services.adapter.rest.filter.JsonValidatorRequestFilter;
 import uk.gov.justice.services.adapter.rest.filter.LoggerRequestDataFilter;
 import uk.gov.justice.services.adapter.rest.interceptor.JsonSchemaValidationInterceptor;
 import uk.gov.justice.services.adapter.rest.mapper.BadRequestExceptionMapper;
@@ -24,6 +25,7 @@ public class DefaultCommonProvidersTest {
                 ConflictedResourceExceptionMapper.class,
                 ForbiddenRequestExceptionMapper.class,
                 JsonSchemaValidationInterceptor.class,
+                JsonValidatorRequestFilter.class,
                 LoggerRequestDataFilter.class,
                 CorsFeature.class));
     }

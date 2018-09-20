@@ -5,6 +5,11 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [unreleased]
 
+## [4.4.1] - 2018-09-20
+### Added
+- Added filter to validate JSON payload format
+- Updates to ensure user_id is not returned to client in HTTP error messages
+
 ## [4.4.0] - 2018-08-13
 ### Added
 - Include additional properties in multipart

@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [unreleased]
 
+## [4.4.2] - 2018-09-25
+### Added
+- Fixed minor bug in JsonValidationRequestFilter
+
 ## [4.4.1] - 2018-09-20
 ### Added
 - Added filter to validate JSON payload format

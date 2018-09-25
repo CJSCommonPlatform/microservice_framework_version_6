@@ -27,9 +27,9 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 
 /**
@@ -50,8 +50,11 @@ public class JsonValidatorRequestFilter implements ContainerRequestFilter {
     @Inject
     HttpTraceLoggerHelper httpTraceLoggerHelper;
 
+    @Inject
+    ObjectMapper objectMapper;
+
     @Override
-    public void filter(ContainerRequestContext requestContext) throws IOException {
+    public void filter(final ContainerRequestContext requestContext) throws IOException {
         trace(logger, () -> "Validating JSON");
         validateJsonPayloadIfPresent(requestContext);
     }
@@ -66,10 +69,10 @@ public class JsonValidatorRequestFilter implements ContainerRequestFilter {
 
             try {
                 if (isNotBlank(payload)) {
-                    new JSONObject(payload);
+                    objectMapper.readTree(payload);
                 }
             }
-            catch (final JSONException jsonEx) {
+            catch (final JsonProcessingException jsonEx) {
                 final String message = format("Invalid JSON provided to [%s] JSON: [%s] ",
                         httpTraceLoggerHelper.toHttpHeaderTrace(stripUserId(requestContext.getHeaders())),
                         payload);

@@ -1,14 +1,19 @@
 package uk.gov.justice.services.adapter.rest.interceptor;
 
 import static java.util.Optional.of;
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.common.http.HeaderConstants.ID;
+import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 
 import uk.gov.justice.services.adapter.rest.exception.BadRequestException;
 import uk.gov.justice.services.core.json.JsonSchemaValidationException;
@@ -35,6 +40,7 @@ import org.hamcrest.TypeSafeMatcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -136,6 +142,32 @@ public class JsonSchemaValidationInterceptorTest {
 
     @Test(expected = BadRequestException.class)
     @SuppressWarnings("unchecked")
+    public void shouldRemoveUserIdHeaderParamFromBadRequestExceptionIfValidatorFailsWithValidationException() throws Exception {
+        final MultivaluedMap<String, String> headers = new MultivaluedHashMap();
+        headers.add(USER_ID, randomUUID().toString());
+        headers.add(ID, randomUUID().toString());
+        final String actionName = "example.action-name";
+
+        when(nameToMediaTypeConverter.convert(CONVERTED_MEDIA_TYPE)).thenReturn(actionName);
+
+        doThrow(new JsonSchemaValidationException("")).when(jsonSchemaValidator).validate(PAYLOAD, actionName, of(CONVERTED_MEDIA_TYPE));
+        when(context.getHeaders()).thenReturn(headers);
+
+        final ArgumentCaptor<MultivaluedHashMap> captor = ArgumentCaptor.forClass(MultivaluedHashMap.class);
+
+        jsonSchemaValidationInterceptor.aroundReadFrom(context);
+
+        verify(httpTraceLoggerHelper).toHttpHeaderTrace(captor.capture());
+
+        final MultivaluedHashMap<String, String> headerMap = captor.getValue();
+
+        assertThat(headerMap, hasKey(ID));
+        assertThat(headerMap, not(hasKey(USER_ID)));
+    }
+
+
+    @Test(expected = BadRequestException.class)
+    @SuppressWarnings("unchecked")
     public void shouldThrowBadRequestExceptionIfValidatorFailsWithInvalidMediaTypeException() throws Exception {
         final MultivaluedMap<String, String> headers = new MultivaluedHashMap();
         final String actionName = "example.action-name";
@@ -147,6 +179,8 @@ public class JsonSchemaValidationInterceptorTest {
 
         jsonSchemaValidationInterceptor.aroundReadFrom(context);
     }
+
+
 
     private InputStream inputStream(final String input) throws IOException {
         return new ByteArrayInputStream(input.getBytes("UTF-8"));

@@ -16,13 +16,13 @@ import static uk.gov.justice.services.eventsourcing.source.api.service.core.Dire
 import static uk.gov.justice.services.eventsourcing.source.api.service.core.Direction.FORWARD;
 import static uk.gov.justice.services.eventsourcing.source.api.util.TestSystemUserProvider.SYSTEM_USER_ID;
 
-import uk.gov.justice.services.adapter.rest.mapper.BadRequestExceptionMapper;
 import uk.gov.justice.services.common.configuration.GlobalValueProducer;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.common.rest.BadRequestExceptionMapper;
 import uk.gov.justice.services.common.rest.ForbiddenRequestExceptionMapper;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.cdi.InitialContextProducer;
@@ -184,7 +184,6 @@ public class EventStreamPageIT {
             JdbcDataSourceProvider.class,
             DefaultJdbcDataSourceProvider.class,
             JsonValidationLoggerHelper.class,
-            BadRequestExceptionMapper.class,
             DefaultJsonValidationLoggerHelper.class,
             EventSource.class,
             JdbcBasedEventSource.class,

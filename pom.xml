@@ -31,7 +31,6 @@
         <module>event-sourcing</module>
         <module>common</module>
         <module>persistence</module>
-        <module>generators</module>
         <module>test-utils</module>
         <module>framework-bom</module>
         <module>event-buffer</module>

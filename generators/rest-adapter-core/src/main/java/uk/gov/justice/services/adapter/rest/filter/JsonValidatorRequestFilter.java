@@ -27,16 +27,17 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 
 /**
- * Filter that validates any JSON payload data in the request. Throws a BadRequestException if the payload
- * has a JSON media type but fails to parse into valid JSON. Note validation does not involve JSON Schema,
- * it is purely to check that the data is of a valid JSON format. This filter needs to run before
- * LoggerRequestDataFilter as LoggerRequestDataFilter results in a HTTP 500 error code if it attempts to process invalid JSON
+ * Filter that validates any JSON payload data in the request. Throws a BadRequestException if the
+ * payload has a JSON media type but fails to parse into valid JSON. Note validation does not
+ * involve JSON Schema, it is purely to check that the data is of a valid JSON format. This filter
+ * needs to run before LoggerRequestDataFilter as LoggerRequestDataFilter results in a HTTP 500
+ * error code if it attempts to process invalid JSON
  */
 @Priority(FILTER_PRIORITY)
 @Provider
@@ -50,8 +51,11 @@ public class JsonValidatorRequestFilter implements ContainerRequestFilter {
     @Inject
     HttpTraceLoggerHelper httpTraceLoggerHelper;
 
+    @Inject
+    ObjectMapper objectMapper;
+
     @Override
-    public void filter(ContainerRequestContext requestContext) throws IOException {
+    public void filter(final ContainerRequestContext requestContext) throws IOException {
         trace(logger, () -> "Validating JSON");
         validateJsonPayloadIfPresent(requestContext);
     }
@@ -66,10 +70,9 @@ public class JsonValidatorRequestFilter implements ContainerRequestFilter {
 
             try {
                 if (isNotBlank(payload)) {
-                    new JSONObject(payload);
+                    objectMapper.readTree(payload);
                 }
-            }
-            catch (final JSONException jsonEx) {
+            } catch (final JsonProcessingException jsonEx) {
                 final String message = format("Invalid JSON provided to [%s] JSON: [%s] ",
                         httpTraceLoggerHelper.toHttpHeaderTrace(stripUserId(requestContext.getHeaders())),
                         payload);
@@ -90,9 +93,9 @@ public class JsonValidatorRequestFilter implements ContainerRequestFilter {
 
     private MultivaluedMap<String, String> stripUserId(final MultivaluedMap<String, String> headers) {
         return new MultivaluedHashMap<>(headers.entrySet()
-                   .stream()
-                   .filter(e -> !USER_ID.equals(e.getKey()))
-                   .collect(toMap(e -> e.getKey(), e -> e.getValue().get(0))));
+                .stream()
+                .filter(e -> !USER_ID.equals(e.getKey()))
+                .collect(toMap(e -> e.getKey(), e -> e.getValue().get(0))));
 
     }
 }

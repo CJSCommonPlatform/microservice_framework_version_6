@@ -26,12 +26,11 @@ public class JsonEnvelopeWriter {
     }
 
     public static String writeJsonObject(final JsonObject json) {
-        try (final StringWriter swriter = new StringWriter();
-             final JsonWriter jsonWriter = writerFactory.createWriter(swriter)) {
+        final StringWriter stringWriter = new StringWriter();
+
+        try (final JsonWriter jsonWriter = writerFactory.createWriter(stringWriter)) {
             jsonWriter.writeObject(json);
-            return swriter.toString();
-        } catch (IOException e) {
-            return "Failed to write Json: " + e.getMessage();
+            return stringWriter.toString();
         }
     }
 

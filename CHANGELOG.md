@@ -5,35 +5,41 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
-### Added
-- test-utils-enveloper-provider module
-- EnveloperTestProvider that is used for testing usage of the Enveloper
-- Update JdbcEventRepository to return all active stream ids
-- Flag to disable running of Integration Tests as part of the build
-- Ability to return an Accepted code and payload from a post to a Command API component
+## [5.0.0-M1] - 2018-10-25
+
+### Removed
+- Aggregate to its own repository: https://github.com/CJSCommonPlatform/framework-domain 
+- Event Store to its own repository: https://github.com/CJSCommonPlatform/event-store
+- Generators to their own repository: https://github.com/CJSCommonPlatform/framework-generators
+- Cake Shop example app to its own repository: https://github.com/CJSCommonPlatform/cake-shop   
+- AbstractJdbcRepositoryIT from test utils, deprecated in previous version
 
 ### Changed
-- Added schema catalog generation plugin to example service
+- Message adapter generator to use SubscriptionManager instead of the interceptor chain
+- Travis setup now creates a postgres database as part of the build
+- Moved EventBuffer into DefaultSubscriptionManager
 - Updated to use latest raml generator plugin
 - Updated utilities version to 1.15.1
 - Updated test-utils version to 1.17.2
 - Updated file.service version to 1.16.4
 - Updated json-schema-catalog version to 1.4.1
 - Updated common-bom version to 1.26.0 for Jackson version 2.8.11
-- Change message adapter generator to use SubscriptionManager instead of the interceptor chain
 - Updated maven framework parent pom version to 1.12.2
 - Updated raml maven plugin version to 1.6.2
 - Updated generator maven plugin version to 2.5.0
 - Reduce the logging level for not using schema catalog
-- Travis setup now creates a postgres database as part of the build
 - Moved Integration tests in Event Buffer to use the new postgress database rather then H2 in memory database
 - Integration Tests now use a running local instance of Postgres, rather than using an in memory database
 - Updated common-bom version to 1.27.0 to fix apache tika security issues
-- Moved EventBuffer into DefaultSubscriptionManager
-- Add SchemaCatalogResolver to JsonSchemaLoader for resolving file base schemas with the schema catalog
+- Update JdbcEventRepository to return all active stream ids
 
-### Removed
-- AbstractJdbcRepositoryIT from test utils, deprecated in previous version
+### Added
+- Schema catalog generation plugin to example service
+- SchemaCatalogResolver to JsonSchemaLoader for resolving file base schemas with the schema catalog
+- test-utils-enveloper-provider module
+- EnveloperTestProvider that is used for testing usage of the Enveloper
+- Flag to disable running of Integration Tests as part of the build
+- Ability to return an Accepted code and payload from a post to a Command API component
 
 ## [4.3.2] - 2018-07-11
 ### Changed

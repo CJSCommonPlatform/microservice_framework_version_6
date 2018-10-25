@@ -6,11 +6,11 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
-public class ResponseStatusMatcher extends TypeSafeMatcher<Integer> {
+public class HttpStatusCodeMatcher extends TypeSafeMatcher<Integer> {
 
     private final Response.Status status;
 
-    public ResponseStatusMatcher(final Response.Status status) {
+    public HttpStatusCodeMatcher(final Response.Status status) {
         this.status = status;
     }
 
@@ -25,6 +25,6 @@ public class ResponseStatusMatcher extends TypeSafeMatcher<Integer> {
     }
 
     public static Matcher<Integer> isStatus(final Response.Status status) {
-        return new ResponseStatusMatcher(status);
+        return new HttpStatusCodeMatcher(status);
     }
 }

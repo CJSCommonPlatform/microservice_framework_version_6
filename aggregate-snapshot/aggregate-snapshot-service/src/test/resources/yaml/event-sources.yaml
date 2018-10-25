@@ -1,7 +1,0 @@
-event_sources:
-- name: event.source
-  is_default: true
-  location:
-    jms_uri:  jms:topic:example.event
-    rest_uri: http://localhost:8080/example/event-source-api/rest
-    data_source: java:/app/DefaultAggregateServiceIT/DS.eventstore

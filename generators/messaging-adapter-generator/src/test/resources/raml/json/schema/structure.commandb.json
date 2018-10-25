@@ -1,6 +1,0 @@
-{
-  "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/example/command/controller/structure.commandb.json",
-  "type": "object"
-}
-

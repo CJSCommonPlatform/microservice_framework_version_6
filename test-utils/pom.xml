@@ -15,7 +15,6 @@
     </description>
     <modules>
         <module>test-utils-core</module>
-        <module>test-utils-persistence</module>
         <module>test-utils-common</module>
         <module>test-utils-enveloper-provider</module>
     </modules>

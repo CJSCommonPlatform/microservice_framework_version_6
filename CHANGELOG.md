@@ -5,6 +5,11 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [5.0.0-M2] - 2018-10-30
+
+### Changed
+- Moved persistence-test-utils to event-store
+
 ## [5.0.0-M1] - 2018-10-25
 
 ### Removed

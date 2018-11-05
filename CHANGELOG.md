@@ -9,6 +9,11 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ### Removed
 - Moved CDI producers to [Utilities](https://github.com/CJSCommonPlatform/utilities)
 
+## [5.0.0-M3] - 2018-11-05
+
+### Changed
+- Moved CDI producers to [Utilities](https://github.com/CJSCommonPlatform/utilities)
+
 ## [5.0.0-M2] - 2018-10-30
 
 ### Changed

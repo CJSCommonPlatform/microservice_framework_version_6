@@ -4,6 +4,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+## [5.0.0-M3] - 2018-11-05
+
+### Removed
+- Moved CDI producers to [Utilities](https://github.com/CJSCommonPlatform/utilities)
 
 ## [5.0.0-M2] - 2018-10-30
 

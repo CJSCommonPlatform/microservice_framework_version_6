@@ -46,7 +46,7 @@
         <jboss-vfs.version>3.2.12.Final</jboss-vfs.version>
         <raml-maven-plugin.version>1.6.3</raml-maven-plugin.version>
         <test-utils.version>1.18.0</test-utils.version>
-        <utilities.version>1.15.1</utilities.version>
+        <utilities.version>1.16.0</utilities.version>
         <generator-maven-plugin.version>2.6.1</generator-maven-plugin.version>
         <json-schema-catalog.version>1.4.1</json-schema-catalog.version>
         <framework-api.version>3.0.0-M14</framework-api.version>

@@ -5,6 +5,11 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [5.0.1] - 2018-11-07
+
+### Changed
+- Update framework-api to version 3.0.0
+
 ## [5.0.0] - 2018-11-07
 - First release of Framework 5.0.0
 

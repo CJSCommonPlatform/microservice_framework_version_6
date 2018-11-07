@@ -4,6 +4,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [5.0.0] - 2018-11-07
+- First release of Framework 5.0.0
+
 ## [5.0.0-M3] - 2018-11-05
 
 ### Removed

@@ -5,6 +5,13 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [5.0.3] - 2018-11-09
+### Changed
+- Update test-utils to 1.18.1
+- Update utilities to 1.16.1
+- Update json-schema-catalog to 1.4.2
+- Update framework-api to 3.0.0
+
 ## [5.0.2] - 2018-11-07
 
 ### Changed

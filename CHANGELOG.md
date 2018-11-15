@@ -5,6 +5,14 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [5.0.4] - 2018-11-15
+### Added
+- setInt method to PreparedStatementWrapper
+
+### Changed
+- Update framework-api to 3.0.1
+- Set high priority to the EnveloperTestProvider
+
 ## [5.0.3] - 2018-11-09
 ### Changed
 - Update test-utils to 1.18.1

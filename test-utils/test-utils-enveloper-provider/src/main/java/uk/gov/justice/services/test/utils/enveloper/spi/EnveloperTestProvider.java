@@ -1,5 +1,7 @@
 package uk.gov.justice.services.test.utils.enveloper.spi;
 
+import static java.lang.Integer.MIN_VALUE;
+
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.util.UtcClock;
@@ -21,6 +23,11 @@ public class EnveloperTestProvider implements EnveloperProvider {
     @Override
     public Function<Object, JsonEnvelope> toEnvelopeWithMetadataFrom(final Envelope<?> envelope) {
         return getDefaultEnveloper().toEnvelopeWithMetadataFrom(envelope);
+    }
+
+    @Override
+    public int priority() {
+        return MIN_VALUE;
     }
 
     private DefaultEnveloper getDefaultEnveloper() {

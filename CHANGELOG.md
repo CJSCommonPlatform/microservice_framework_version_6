@@ -5,7 +5,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
-## [5.1.0] - 2018-11-23
+## [5.1.0-M1] - 2018-11-23
 ### Added
 - Implementation of Metadata interface adding eventNumber and previousEventNumber
 

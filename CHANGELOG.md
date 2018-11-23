@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [5.1.0] - 2018-11-23
+### Added
+- Implementation of Metadata interface adding eventNumber and previousEventNumber
+
 ## [5.0.4] - 2018-11-15
 ### Added
 - setInt method to PreparedStatementWrapper

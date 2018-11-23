@@ -144,6 +144,16 @@ public class DefaultJsonMetadata extends JsonMetadata {
     }
 
     @Override
+    public Optional<Long> eventNumber() {
+        return getLong(metadata, EVENT_NUMBER_PATH);
+    }
+
+    @Override
+    public Optional<Long> previousEventNumber() {
+        return getLong(metadata, PREVIOUS_EVENT_NUMBER_PATH);
+    }
+
+    @Override
     @SuppressWarnings({"squid:MethodCyclomaticComplexity", "squid:S1067", "squid:S00122"})
     public boolean equals(final Object o) {
         if (this == o) return true;
@@ -233,8 +243,26 @@ public class DefaultJsonMetadata extends JsonMetadata {
         }
 
         @Override
+        public MetadataBuilder withPosition(final long version) {
+            json.add(BigDecimal.valueOf(version), VERSION_PATH);
+            return this;
+        }
+
+        @Override
         public MetadataBuilder withSource(final String source) {
             json.add(source, SOURCE);
+            return this;
+        }
+
+        @Override
+        public MetadataBuilder withEventNumber(final long eventNumber) {
+            json.add(BigDecimal.valueOf(eventNumber), EVENT_NUMBER_PATH);
+            return this;
+        }
+
+        @Override
+        public MetadataBuilder withPreviousEventNumber(final long previousEventNumber) {
+            json.add(BigDecimal.valueOf(previousEventNumber), PREVIOUS_EVENT_NUMBER_PATH);
             return this;
         }
 

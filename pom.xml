@@ -45,7 +45,7 @@
         <test-utils.version>1.18.1</test-utils.version>
         <utilities.version>1.16.1</utilities.version>
         <json-schema-catalog.version>1.4.2</json-schema-catalog.version>
-        <framework-api.version>3.0.1</framework-api.version>
+        <framework-api.version>3.1.0-M1</framework-api.version>
     </properties>
 
     <dependencyManagement>

@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [5.1.0-M2] - 2018-12-03
+### Changed
+- Updated to framework-api 3.1.0-M2
+
 ## [5.1.0-M1] - 2018-11-23
 ### Added
 - Implementation of Metadata interface adding eventNumber and previousEventNumber

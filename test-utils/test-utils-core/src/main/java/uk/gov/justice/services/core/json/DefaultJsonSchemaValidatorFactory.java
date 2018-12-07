@@ -43,11 +43,7 @@ public class DefaultJsonSchemaValidatorFactory {
         final Catalog catalog = new CatalogObjectFactory().catalog();
         final SchemaCatalogService schemaCatalogService = new SchemaCatalogService();
 
-        try {
-            setField(schemaCatalogService, "catalog", catalog);
-        } catch (final IllegalAccessException e) {
-            throw new InstantiationFailedException("Failed to set catalog on " + SchemaCatalogService.class.getSimpleName(), e);
-        }
+        setField(schemaCatalogService, "catalog", catalog);
 
         return schemaCatalogService;
     }

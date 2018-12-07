@@ -5,6 +5,12 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+
+## [5.1.0-M3] - 2018-12-07
+### Changed
+- Updated to test-utils to 1.19.0
+- Removed ReflectionUtils: use ReflectionUtil in test-utils instead
+
 ## [5.1.0-M2] - 2018-12-03
 ### Changed
 - Updated to framework-api 3.1.0-M2

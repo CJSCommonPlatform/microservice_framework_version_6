@@ -2,7 +2,7 @@ package uk.gov.justice.services.test.utils.core.matchers;
 
 import static uk.gov.justice.services.test.utils.core.matchers.JsonSchemaValidationMatcher.isValidJsonEnvelopeForSchema;
 
-import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.Metadata;
 
 import java.util.Optional;
@@ -72,7 +72,7 @@ import org.hamcrest.TypeSafeDiagnosingMatcher;
  *
  * This makes use of {@link IsJson} to achieve Json matching in the payload.
  */
-public class JsonEnvelopeMatcher extends TypeSafeDiagnosingMatcher<JsonEnvelope> {
+public class JsonEnvelopeMatcher extends TypeSafeDiagnosingMatcher<Envelope<JsonValue>> {
 
     private Optional<JsonEnvelopeMetadataMatcher> metadataMatcher = Optional.empty();
     private Optional<JsonEnvelopePayloadMatcher> payloadMatcher = Optional.empty();
@@ -131,8 +131,8 @@ public class JsonEnvelopeMatcher extends TypeSafeDiagnosingMatcher<JsonEnvelope>
     }
 
     @Override
-    protected boolean matchesSafely(final JsonEnvelope jsonEnvelope, final Description description) {
-        final Metadata metadata = jsonEnvelope.metadata();
+    protected boolean matchesSafely(final Envelope<JsonValue> envelope, final Description description) {
+        final Metadata metadata = envelope.metadata();
 
         if (metadataMatcher.isPresent() && !metadataMatcher.get().matches(metadata)) {
             metadataMatcher.get().describeMismatch(metadata, description);
@@ -140,7 +140,7 @@ public class JsonEnvelopeMatcher extends TypeSafeDiagnosingMatcher<JsonEnvelope>
         }
 
         if (payloadMatcher.isPresent()) {
-            final JsonValue payload = jsonEnvelope.payload();
+            final JsonValue payload = envelope.payload();
 
             if (!payloadMatcher.get().matches(payload)) {
                 payloadMatcher.get().describeMismatch(payload, description);
@@ -148,8 +148,8 @@ public class JsonEnvelopeMatcher extends TypeSafeDiagnosingMatcher<JsonEnvelope>
             }
         }
 
-        if (schemaMatcher.isPresent() && !schemaMatcher.get().matches(jsonEnvelope)) {
-            schemaMatcher.get().describeMismatch(jsonEnvelope, description);
+        if (schemaMatcher.isPresent() && !schemaMatcher.get().matches(envelope)) {
+            schemaMatcher.get().describeMismatch(envelope, description);
             return false;
         }
 

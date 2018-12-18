@@ -4,7 +4,8 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
-
+### Fixed
+- JsonEnvelopeMatcher now works with the new Enveloper
 
 ## [5.1.0-M3] - 2018-12-07
 ### Changed

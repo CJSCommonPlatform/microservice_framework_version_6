@@ -5,7 +5,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
-## [5.0.5] - 2018-12-18
+## [5.0.5] - 2018-12-19
 ### Fixed
 - JsonEnvelopeMatcher now works with the new Enveloper
 

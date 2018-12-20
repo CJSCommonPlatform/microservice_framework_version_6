@@ -5,6 +5,8 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Added
+- JsonValueEnvelopeMatcher for matching Envelope<JsonValue> types
 
 ## [5.1.0-M3] - 2018-12-07
 ### Changed

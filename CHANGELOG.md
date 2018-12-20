@@ -5,6 +5,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [5.0.6] - 2018-12-20
 ### Changed
 - Reverted JsonEnvelopeMatcher
 

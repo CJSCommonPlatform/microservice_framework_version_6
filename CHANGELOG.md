@@ -5,6 +5,12 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Changed
+- Reverted JsonEnvelopeMatcher
+
+### Added
+- JsonValueEnvelopeMatcher for matching Envelope<JsonValue> types
+
 ## [5.0.5] - 2018-12-19
 ### Fixed
 - JsonEnvelopeMatcher now works with the new Enveloper

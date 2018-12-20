@@ -2,7 +2,7 @@ package uk.gov.justice.services.test.utils.core.matchers;
 
 import static uk.gov.justice.services.test.utils.core.matchers.JsonSchemaValidationMatcher.isValidJsonEnvelopeForSchema;
 
-import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.Metadata;
 
 import java.util.Optional;
@@ -15,13 +15,13 @@ import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 
 /**
- * Matches a JsonEnvelope Metadata and Payload.  This can be used independently or with {@link
- * JsonEnvelopeStreamMatcher} and {@link JsonEnvelopeListMatcher}.
+ * Matches an {@code Envelope<JsonValue>} Metadata and Payload.  This can be used independently or
+ * with {@link JsonEnvelopeStreamMatcher} and {@link JsonEnvelopeListMatcher}.
  *
  * Where the test should specify the metadata use the 'metadata' method. For example:
  * <pre>
  *  {@code
- *         assertThat(jsonEnvelope(), JsonEnvelopeMatcher.jsonEnvelope(
+ *         assertThat(jsonValueEnvelope(), JsonValueEnvelopeMatcher.jsonValueEnvelope(
  *                              metadata()
  *                                  .withUserId(userId)
  *                                  .withName("event.action"),
@@ -36,7 +36,7 @@ import org.hamcrest.TypeSafeDiagnosingMatcher;
  * 'withMetadataEnvelopedFrom' and provide the input JsonEnvelope to match. For example:
  * <pre>
  *  {@code
- *         assertThat(jsonEnvelope(), JsonEnvelopeMatcher.jsonEnvelope(
+ *         assertThat(jsonValueEnvelope(), JsonValueEnvelopeMatcher.jsonValueEnvelope(
  *                              withMetadataEnvelopedFrom(commandJsonEnvelope)
  *                                  .withName("event.action"),
  *                              payloadIsJson(allOf(
@@ -50,7 +50,7 @@ import org.hamcrest.TypeSafeDiagnosingMatcher;
  * at 'raml/json/schema/event.action.json' The JsonEnvelope can be validated as follows:
  * <pre>
  *  {@code
- *         assertThat(jsonEnvelope(), JsonEnvelopeMatcher.jsonEnvelope(
+ *         assertThat(jsonValueEnvelope(), JsonValueEnvelopeMatcher.jsonValueEnvelope(
  *                              withMetadataEnvelopedFrom(commandJsonEnvelope)
  *                                  .withName("event.action"),
  *                              payloadIsJson(allOf(
@@ -63,7 +63,7 @@ import org.hamcrest.TypeSafeDiagnosingMatcher;
  * Where expected envelope payload is a JsonValue.NULL:
  * <pre>
  *  {@code
- *         assertThat(jsonEnvelope(), JsonEnvelopeMatcher.jsonEnvelope(
+ *         assertThat(jsonValueEnvelope(), JsonValueEnvelopeMatcher.jsonValueEnvelope(
  *                              withMetadataEnvelopedFrom(commandJsonEnvelope)
  *                                  .withName("event.action"),
  *                              .withPayloadOf(payloadIsJsonValueNull()));
@@ -72,52 +72,53 @@ import org.hamcrest.TypeSafeDiagnosingMatcher;
  *
  * This makes use of {@link IsJson} to achieve Json matching in the payload.
  */
-public class JsonEnvelopeMatcher extends TypeSafeDiagnosingMatcher<JsonEnvelope> {
+public class JsonValueEnvelopeMatcher extends TypeSafeDiagnosingMatcher<Envelope<JsonValue>> {
 
-    private Optional<JsonEnvelopeMetadataMatcher> metadataMatcher = Optional.empty();
-    private Optional<JsonEnvelopePayloadMatcher> payloadMatcher = Optional.empty();
+    private Optional<JsonEnvelopeMetadataMatcher> jsonEnvelopeMetadataMatcher = Optional.empty();
+    private Optional<JsonEnvelopePayloadMatcher> jsonEnvelopePayloadMatcher = Optional.empty();
     private Optional<Matcher> schemaMatcher = Optional.empty();
 
-    public static JsonEnvelopeMatcher jsonEnvelope() {
-        return new JsonEnvelopeMatcher();
+    public static JsonValueEnvelopeMatcher jsonValueEnvelope() {
+        return new JsonValueEnvelopeMatcher();
     }
 
-    public static JsonEnvelopeMatcher jsonEnvelope(final JsonEnvelopeMetadataMatcher metadataMatcher, final JsonEnvelopePayloadMatcher payloadMatcher) {
-        return new JsonEnvelopeMatcher()
-                .withMetadataOf(metadataMatcher)
-                .withPayloadOf(payloadMatcher);
+    public static JsonValueEnvelopeMatcher jsonValueEnvelope(final JsonEnvelopeMetadataMatcher jsonEnvelopeMetadataMatcher,
+                                                             final JsonEnvelopePayloadMatcher jsonEnvelopePayloadMatcher) {
+        return new JsonValueEnvelopeMatcher()
+                .withMetadataOf(jsonEnvelopeMetadataMatcher)
+                .withPayloadOf(jsonEnvelopePayloadMatcher);
     }
 
     /**
-     * Validate the JsonEnvelope metadata using {@link JsonEnvelopeMetadataMatcher}
+     * Validate the {@code Envelope<JsonValue>} metadata using {@link JsonEnvelopeMetadataMatcher}
      *
-     * @param metadataMatcher the JsonEnvelopeMetadataMatcher to use
+     * @param jsonEnvelopeMetadataMatcher the JsonEnvelopeMetadataMatcher to use
      * @return the matcher instance
      */
-    public JsonEnvelopeMatcher withMetadataOf(final JsonEnvelopeMetadataMatcher metadataMatcher) {
-        this.metadataMatcher = Optional.of(metadataMatcher);
+    public JsonValueEnvelopeMatcher withMetadataOf(final JsonEnvelopeMetadataMatcher jsonEnvelopeMetadataMatcher) {
+        this.jsonEnvelopeMetadataMatcher = Optional.of(jsonEnvelopeMetadataMatcher);
         return this;
     }
 
     /**
-     * Validate the JsonEnvelope payload using {@link JsonEnvelopePayloadMatcher}
+     * Validate the {@code Envelope<JsonValue>} payload using {@link JsonEnvelopePayloadMatcher}
      *
-     * @param payloadMatcher the JsonEnvelopePayloadMatcher to use
+     * @param jsonEnvelopePayloadMatcher the JsonEnvelopePayloadMatcher to use
      * @return the matcher instance
      */
-    public JsonEnvelopeMatcher withPayloadOf(final JsonEnvelopePayloadMatcher payloadMatcher) {
-        this.payloadMatcher = Optional.of(payloadMatcher);
+    public JsonValueEnvelopeMatcher withPayloadOf(final JsonEnvelopePayloadMatcher jsonEnvelopePayloadMatcher) {
+        this.jsonEnvelopePayloadMatcher = Optional.of(jsonEnvelopePayloadMatcher);
         return this;
     }
 
     /**
-     * Validates a JsonEnvelope against the correct schema for the action name provided in the
-     * metadata. Expects to find the schema on the class path in package
+     * Validates an {@code Envelope<JsonValue>} against the correct schema for the action name
+     * provided in the metadata. Expects to find the schema on the class path in package
      * 'raml/json/schema/{action.name}.json'.
      *
      * @return the matcher instance
      */
-    public JsonEnvelopeMatcher thatMatchesSchema() {
+    public JsonValueEnvelopeMatcher thatMatchesSchema() {
         this.schemaMatcher = Optional.of(isValidJsonEnvelopeForSchema());
         return this;
     }
@@ -125,31 +126,31 @@ public class JsonEnvelopeMatcher extends TypeSafeDiagnosingMatcher<JsonEnvelope>
     @Override
     public void describeTo(final Description description) {
         description.appendText("JsonEnvelope that contains (");
-        metadataMatcher.ifPresent(description::appendDescriptionOf);
-        payloadMatcher.ifPresent(description::appendDescriptionOf);
+        jsonEnvelopeMetadataMatcher.ifPresent(description::appendDescriptionOf);
+        jsonEnvelopePayloadMatcher.ifPresent(description::appendDescriptionOf);
         description.appendText(") ");
     }
 
     @Override
-    protected boolean matchesSafely(final JsonEnvelope jsonEnvelope, final Description description) {
-        final Metadata metadata = jsonEnvelope.metadata();
+    protected boolean matchesSafely(final Envelope<JsonValue> envelope, final Description description) {
+        final Metadata metadata = envelope.metadata();
 
-        if (metadataMatcher.isPresent() && !metadataMatcher.get().matches(metadata)) {
-            metadataMatcher.get().describeMismatch(metadata, description);
+        if (jsonEnvelopeMetadataMatcher.isPresent() && !jsonEnvelopeMetadataMatcher.get().matches(metadata)) {
+            jsonEnvelopeMetadataMatcher.get().describeMismatch(metadata, description);
             return false;
         }
 
-        if (payloadMatcher.isPresent()) {
-            final JsonValue payload = jsonEnvelope.payload();
+        if (jsonEnvelopePayloadMatcher.isPresent()) {
+            final JsonValue payload = envelope.payload();
 
-            if (!payloadMatcher.get().matches(payload)) {
-                payloadMatcher.get().describeMismatch(payload, description);
+            if (!jsonEnvelopePayloadMatcher.get().matches(payload)) {
+                jsonEnvelopePayloadMatcher.get().describeMismatch(payload, description);
                 return false;
             }
         }
 
-        if (schemaMatcher.isPresent() && !schemaMatcher.get().matches(jsonEnvelope)) {
-            schemaMatcher.get().describeMismatch(jsonEnvelope, description);
+        if (schemaMatcher.isPresent() && !schemaMatcher.get().matches(envelope)) {
+            schemaMatcher.get().describeMismatch(envelope, description);
             return false;
         }
 

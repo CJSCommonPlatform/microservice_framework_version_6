@@ -5,7 +5,14 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [5.1.0] - 2019-01-08
+### Changed
+- Updated to test-utils to 1.19.1
+- Updated to utilities to 1.16.2
+- Updated to framework-api 3.1.0
+- Removed ReflectionUtils: use ReflectionUtil in test-utils instead
 ### Added
+- Implementation of Metadata interface adding eventNumber and previousEventNumber
 - JsonValueEnvelopeMatcher for matching Envelope<JsonValue> types
 
 ## [5.1.0-M3] - 2018-12-07

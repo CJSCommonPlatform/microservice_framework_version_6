@@ -32,7 +32,6 @@
         <module>persistence</module>
         <module>test-utils</module>
         <module>framework-bom</module>
-        <module>wildfly-vfs</module>
         <module>common-rest</module>
     </modules>
 

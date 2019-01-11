@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Removed
+- wildfly-vfs module - VfsResolverStrategy class
+- FileSystemUrlResolverStrategy interface
+
 ## [5.1.0] - 2019-01-08
 ### Changed
 - Updated to test-utils to 1.19.1

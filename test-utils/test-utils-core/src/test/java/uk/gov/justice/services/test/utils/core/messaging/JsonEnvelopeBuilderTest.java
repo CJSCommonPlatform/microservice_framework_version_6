@@ -5,11 +5,14 @@ import static com.jayway.jsonassert.JsonAssert.with;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.math.BigDecimal.ONE;
 import static java.util.UUID.randomUUID;
+import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItems;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -17,6 +20,7 @@ import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
+import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -26,6 +30,8 @@ import uk.gov.justice.services.messaging.MetadataBuilder;
 
 import java.util.UUID;
 
+import javax.json.JsonArray;
+import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 
@@ -34,7 +40,7 @@ import org.junit.Test;
 public class JsonEnvelopeBuilderTest {
 
     @Test
-    public void shouldBuildJsonEnvelopeFromMetadataAndJsonValue() throws Exception {
+    public void shouldBuildJsonEnvelopeFromMetadataAndJsonValue() {
         final Metadata metadata = mock(Metadata.class);
         final JsonValue payload = mock(JsonValue.class);
 
@@ -45,7 +51,7 @@ public class JsonEnvelopeBuilderTest {
     }
 
     @Test
-    public void shouldBuildJsonEnvelopeContainingMetadataAndPayloadFromJsonEnvelope() throws Exception {
+    public void shouldBuildJsonEnvelopeContainingMetadataAndPayloadFromJsonEnvelope() {
         final UUID id = randomUUID();
         final String name = "name";
 
@@ -62,14 +68,14 @@ public class JsonEnvelopeBuilderTest {
     }
 
     @Test
-    public void shouldBuildJsonEnvelopeContainingPayloadFromJsonEnvelope() throws Exception {
+    public void shouldBuildJsonEnvelopeContainingPayloadFromJsonEnvelope() {
         final UUID id = randomUUID();
         final String name = "name";
 
         final MetadataBuilder metadata = metadataBuilder().withId(id).withName(name);
         final JsonObjectBuilder payload = createObjectBuilder().add("test", "value");
 
-        final JsonEnvelope envelope = JsonEnvelopeBuilder.envelope()
+        final JsonEnvelope envelope = envelope()
                 .withPayloadFrom(JsonEnvelope.envelopeFrom(metadata, payload)).build();
 
         assertThat(envelope.metadata(), nullValue());
@@ -85,7 +91,7 @@ public class JsonEnvelopeBuilderTest {
         final MetadataBuilder metadata = metadataOf(metadataId, metadataName);
         final UUID testId = randomUUID();
 
-        final JsonEnvelope jsonEnvelope = JsonEnvelopeBuilder.envelope()
+        final JsonEnvelope jsonEnvelope = envelope()
                 .with(metadata)
                 .withPayloadOf(1, "int")
                 .withPayloadOf(Boolean.FALSE, "bool")
@@ -110,8 +116,8 @@ public class JsonEnvelopeBuilderTest {
     }
 
     @Test
-    public void shouldBuildJsonEnvelopeWithJsonValueNull() throws Exception {
-        final JsonEnvelope jsonEnvelope = JsonEnvelopeBuilder.envelope().withNullPayload().build();
+    public void shouldBuildJsonEnvelopeWithJsonValueNull() {
+        final JsonEnvelope jsonEnvelope = envelope().withNullPayload().build();
         assertThat(jsonEnvelope.payload(), is(JsonValue.NULL));
     }
 
@@ -122,7 +128,7 @@ public class JsonEnvelopeBuilderTest {
         final MetadataBuilder metadata = metadataOf(metadataId, metadataName);
         final UUID testId = randomUUID();
 
-        final String jsonEnvelope = JsonEnvelopeBuilder.envelope()
+        final String jsonEnvelope = envelope()
                 .with(metadata)
                 .withPayloadOf(1, "int")
                 .withPayloadOf(Boolean.FALSE, "bool")
@@ -146,7 +152,7 @@ public class JsonEnvelopeBuilderTest {
     }
 
     @Test
-    public void shouldBuildJsonEnvelopeFromDeprecatedMetadataBuilderAndJsonValue() throws Exception {
+    public void shouldBuildJsonEnvelopeFromDeprecatedMetadataBuilderAndJsonValue() {
         final UUID id = randomUUID();
         final String name = "name";
 
@@ -160,7 +166,7 @@ public class JsonEnvelopeBuilderTest {
     }
 
     @Test
-    public void shouldBuildJsonEnvelopeFromDeprecatedMetadataBuilderAndJsonObjectBuilder() throws Exception {
+    public void shouldBuildJsonEnvelopeFromDeprecatedMetadataBuilderAndJsonObjectBuilder() {
         final UUID id = randomUUID();
         final String name = "name";
 
@@ -182,7 +188,7 @@ public class JsonEnvelopeBuilderTest {
         final JsonObjectMetadata.Builder metadata = JsonObjectMetadata.metadataOf(metadataId, metadataName);
         final UUID testId = randomUUID();
 
-        final JsonEnvelope jsonEnvelope = JsonEnvelopeBuilder.envelope()
+        final JsonEnvelope jsonEnvelope = envelope()
                 .with(metadata)
                 .withPayloadOf(1, "int")
                 .build();
@@ -192,5 +198,43 @@ public class JsonEnvelopeBuilderTest {
                 payloadIsJson(
                         withJsonPath("$.int", equalTo(1))
                 )));
+    }
+
+    @Test
+    public void shouldBuildJsonEnvelopeWithFullyConstructedRootObjectPayload() {
+        final String attributeName = "key";
+        final String attributeValue = "attributeValue";
+        final JsonObject rootObject = createObjectBuilder().add(attributeName, attributeValue).build();
+        final JsonEnvelope jsonEnvelope = envelope().withPayloadFrom(rootObject).build();
+        assertThat(jsonEnvelope.payload(), notNullValue());
+        assertThat(jsonEnvelope.payloadAsJsonObject().getString(attributeName), is(attributeValue));
+    }
+
+    @Test
+    public void shouldDiscardExistingStateAndRebuildUsingFullyConstructedRootObjectPayload() {
+        final JsonEnvelopeBuilder jsonEnvelopeBuilder = envelope();
+
+        final String attributeName = "key";
+        final String initialAttributeValue = "finalAttributeValue";
+        final String finalAttributeValue = "finalAttributeValue";
+        // add a top level attribute
+        jsonEnvelopeBuilder.withPayloadOf(initialAttributeValue, attributeName);
+
+        final JsonObject rootObject = createObjectBuilder().add(attributeName, finalAttributeValue).build();
+        // overwrite with full payload
+        final JsonEnvelope jsonEnvelope = jsonEnvelopeBuilder.withPayloadFrom(rootObject).build();
+
+        final JsonObject actualPayload = jsonEnvelope.payloadAsJsonObject();
+        assertThat(actualPayload, notNullValue());
+        assertThat(actualPayload.getString(attributeName), is(finalAttributeValue));
+    }
+
+    @Test
+    public void shouldBuildJsonEnvelopeWithJsonArrayAttribute() {
+        final JsonArray numberJsonArray = createArrayBuilder().add(1).add(2).build();
+        final String arrayAttributeName = "numbers";
+        final JsonEnvelope jsonEnvelope = envelope().withPayloadOf(numberJsonArray, arrayAttributeName).build();
+        assertThat(jsonEnvelope.payload(), notNullValue());
+        assertThat(jsonEnvelope.payloadAsJsonObject().getJsonArray(arrayAttributeName), hasSize(2));
     }
 }

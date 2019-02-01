@@ -8,11 +8,13 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectMetadata;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.justice.services.messaging.MetadataBuilder;
+import uk.gov.justice.services.test.utils.core.messaging.JsonObjectBuilderWrapper;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
 import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -123,6 +125,23 @@ public class JsonEnvelopeBuilder {
 
     public JsonEnvelopeBuilder withPayloadOf(final JsonObject value, final String... name) {
         payload.add(value, name);
+        return this;
+    }
+
+    public JsonEnvelopeBuilder withPayloadOf(final JsonArray value, final String... name) {
+        payload.add(value, name);
+        return this;
+    }
+
+    /**
+     * Convenience method to create the envelope payload from the given {@link JsonObject} as root
+     * element.  This is a destructive operations and will undo all earlier builder operations.  It
+     * will continue to support additional builder operations
+     *
+     * @param rootObject the complete constructed payload to use
+     */
+    public JsonEnvelopeBuilder withPayloadFrom(final JsonObject rootObject) {
+        payload = new JsonObjectBuilderWrapper(rootObject);
         return this;
     }
 

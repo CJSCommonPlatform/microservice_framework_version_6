@@ -1,7 +1,9 @@
 package uk.gov.justice.services.test.utils.core.matchers;
 
+import static java.lang.Class.forName;
 import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Answers.RETURNS_DEFAULTS;
 import static org.mockito.Mockito.mock;
@@ -22,6 +24,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.test.utils.core.mock.SkipJsonValidationListener;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
@@ -147,7 +150,7 @@ public class HandlerMethodMatcher extends TypeSafeDiagnosingMatcher<Class<?>> {
         senderField.set(handlerInstance, sender);
 
         method.invoke(handlerInstance, command);
-        verify(sender, times(ONCE)).send(command);
+        verify(sender).send(command);
 
         return true;
     }
@@ -158,20 +161,17 @@ public class HandlerMethodMatcher extends TypeSafeDiagnosingMatcher<Class<?>> {
                         .name(format("%s.requester.request", method.getName()))
                         .invocationListeners(SKIP_JSON_VALIDATION_LISTENER)
                         .defaultAnswer(RETURNS_DEFAULTS.get()));
-        final JsonEnvelope query = envelope().with(metadataWithDefaults()).build();
-        final JsonEnvelope response = envelope().with(metadataWithDefaults()).build();
+        final Envelope query = envelope().with(metadataWithDefaults()).build();
+
         final Object handlerInstance = handlerClass.newInstance();
 
         final Field requesterField = findField(handlerClass, Requester.class);
         requesterField.setAccessible(true);
         requesterField.set(handlerInstance, requester);
 
-        when(requester.request(query)).thenReturn(response);
-
-        assertThat(method.invoke(handlerInstance, query), is(response));
-        verify(requester, times(ONCE)).request(query);
-
-        return true;
+        return method.getParameters()[0].getParameterizedType().getTypeName().contains("JsonEnvelope")?
+                verifyRequesterMethodJsonEnvelopeCall(method, requester, query, handlerInstance):
+                verifyRequesterMethodPojoEnvelopeCall(method, requester, query, handlerInstance, method.getParameters()[0].getParameterizedType().getTypeName());
     }
 
     @Override
@@ -183,6 +183,35 @@ public class HandlerMethodMatcher extends TypeSafeDiagnosingMatcher<Class<?>> {
                         .appendText(type.toString())
                         .appendText(" pass-through method"));
     }
+
+
+    private boolean verifyRequesterMethodJsonEnvelopeCall(final Method method,
+                                                          final Requester requester,
+                                                          final Envelope query,
+                                                          final Object handlerInstance) throws IllegalAccessException, InvocationTargetException {
+       final JsonEnvelope jsonEnvelopeResponse = envelope().with(metadataWithDefaults()).build();
+       when(requester.request(query)).thenReturn(jsonEnvelopeResponse);
+
+       assertThat(method.invoke(handlerInstance, query), is(jsonEnvelopeResponse));
+       verify(requester).request(query);
+       return true;
+    }
+
+    private boolean verifyRequesterMethodPojoEnvelopeCall(final Method method,
+                                                          final Requester requester,
+                                                          final Envelope query,
+                                                          final Object handlerInstance,
+                                                          final String fullClassName) throws IllegalAccessException, InvocationTargetException, ClassNotFoundException {
+       final Envelope response = envelope().with(metadataWithDefaults()).build();
+       String className = fullClassName.substring(fullClassName.indexOf('<')+1, fullClassName.indexOf('>'));
+       when(requester.request(query, forName(className))).thenReturn(response);
+
+       assertThat(method.invoke(handlerInstance, query), is(response));
+       verify(requester).request(query, forName(className));
+       return true;
+    }
+
+
 
     private Field findField(final Class<?> handlerClass, final Class<?> fieldClass) {
         return Stream.of(handlerClass.getDeclaredFields())

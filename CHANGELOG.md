@@ -5,6 +5,14 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [5.1.1] - 2019-02-04
+### Changed
+- Updated to common-bom to 1.29.0
+- Updated to test-utils to 1.22.0
+- Updated to utilities to 1.16.4
+- Updated to json-schema-catalog to 1.4.5
+- Updated to framework-api 3.2.0
+
 ### Removed
 - wildfly-vfs module - VfsResolverStrategy class
 - FileSystemUrlResolverStrategy interface

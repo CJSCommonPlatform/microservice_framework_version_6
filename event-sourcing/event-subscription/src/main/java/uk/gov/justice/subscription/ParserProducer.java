@@ -25,6 +25,9 @@ public class ParserProducer {
     @Inject
     YamlSchemaLoader yamlSchemaLoader;
 
+    @Inject
+    SubscriptionHelper subscriptionHelper;
+
     @Produces
     public uk.gov.justice.subscription.EventSourcesParser eventSourcesParser() {
         return new uk.gov.justice.subscription.EventSourcesParser(yamlParser, getYamlFileValidator());
@@ -32,7 +35,7 @@ public class ParserProducer {
 
     @Produces
     public SubscriptionsDescriptorParser subscriptionDescriptorsParser() {
-        return new SubscriptionsDescriptorParser(yamlParser, getYamlFileValidator());
+        return new SubscriptionsDescriptorParser(yamlParser, getYamlFileValidator(), subscriptionHelper);
     }
 
     private YamlFileValidator getYamlFileValidator() {

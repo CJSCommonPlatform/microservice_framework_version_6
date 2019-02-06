@@ -23,11 +23,13 @@ public class SubscriptionsDescriptorParser {
 
     private YamlParser yamlParser;
     private YamlFileValidator yamlFileValidator;
+    private SubscriptionHelper subscriptionHelper;
 
 
-    public SubscriptionsDescriptorParser(final YamlParser yamlParser, final YamlFileValidator yamlFileValidator) {
+    public SubscriptionsDescriptorParser(final YamlParser yamlParser, final YamlFileValidator yamlFileValidator, final SubscriptionHelper subscriptionHelper) {
         this.yamlParser = yamlParser;
         this.yamlFileValidator = yamlFileValidator;
+        this.subscriptionHelper = subscriptionHelper;
     }
 
     /**
@@ -42,7 +44,11 @@ public class SubscriptionsDescriptorParser {
 
     private SubscriptionsDescriptor parseSubscriptionDescriptorFromYaml(final URL url) {
         yamlFileValidator.validateSubscription(url);
+
         final Map<String, SubscriptionsDescriptor> stringSubscriptionDescriptorMap = yamlParser.parseYamlFrom(url, SUBSCRIPTIONS_DESCRIPTOR_TYPE_REF);
-        return stringSubscriptionDescriptorMap.get(SUBSCRIPTIONS_DESCRIPTOR);
+        final SubscriptionsDescriptor subscriptionsDescriptor = stringSubscriptionDescriptorMap.get(SUBSCRIPTIONS_DESCRIPTOR);
+
+        subscriptionHelper.sortSubscriptionsByPrioritisation(subscriptionsDescriptor);
+        return subscriptionsDescriptor;
     }
 }

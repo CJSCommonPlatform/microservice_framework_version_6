@@ -4,6 +4,7 @@ subscriptions_descriptor:
   service_component: EVENT_LISTENER
   subscriptions:
     - name: subscription1
+      prioritisation: 1
       events:
         - name: example.recipe-added
           schema_uri: http://justice.gov.uk/json/schemas/domains/example/example.recipe-added.json

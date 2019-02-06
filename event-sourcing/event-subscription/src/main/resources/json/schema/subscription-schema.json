@@ -47,6 +47,14 @@
                   "subscription1"
                 ]
               },
+              "prioritisation": {
+                "$id": "/properties/subscriptions_descriptor/properties/subscriptions/items/properties/prioritisation",
+                "type": "integer",
+                "title": "Subscription prioritisation",
+                "examples": [
+                  "1"
+                ]
+              },
               "events": {
                 "$id": "/properties/subscriptions_descriptor/properties/subscriptions/items/properties/events",
                 "type": "array",

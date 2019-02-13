@@ -44,7 +44,7 @@ public class DispatcherDelegateTest {
     }
 
     @Test
-    public void requestMethodShouldDelegateToDispatcher() throws Exception {
+    public void shouldDelegateToDispatcherWithRequestMethod() throws Exception {
         final JsonEnvelope envelope = mock(JsonEnvelope.class);
 
         when(envelopePayloadTypeConverter.convert(any(Envelope.class), eq(JsonValue.class)))
@@ -74,8 +74,25 @@ public class DispatcherDelegateTest {
         verify(dispatcher).dispatch(any(JsonEnvelope.class));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
-    public void requestMethodShouldValidateEnvelope() throws Exception {
+    public void shouldDispatchAdminEnvelopeWithPojoPayload() {
+
+        final Envelope<JsonValue> jsonValueEnvelope = mock(Envelope.class);
+
+        when(envelopePayloadTypeConverter.convert(any(Envelope.class), eq(JsonValue.class)))
+                .thenReturn(jsonValueEnvelope);
+        when(jsonEnvelopeRepacker.repack(jsonValueEnvelope)).thenReturn(mock(JsonEnvelope.class));
+
+        final Envelope<Object> envelope = mock(Envelope.class);
+
+        dispatcherDelegate.sendAsAdmin(envelope);
+
+        verify(dispatcher).dispatch(any(JsonEnvelope.class));
+    }
+
+    @Test
+    public void shouldValidateJsonEnvelopeWithRequestMethod() throws Exception {
         final JsonEnvelope envelope = mock(JsonEnvelope.class);
         final JsonEnvelope response = mock(JsonEnvelope.class);
 
@@ -91,16 +108,17 @@ public class DispatcherDelegateTest {
     }
 
     @Test
-    public void requestMethodShouldSpecifyResponsePayloadType() throws Exception {
+    public void shouldValidatePojoEnvelopeWithRequestMethod() throws Exception {
 
-        final JsonEnvelope envelope = mock(JsonEnvelope.class);
+        final JsonEnvelope jsonEnvelope = mock(JsonEnvelope.class);
         final JsonEnvelope response = mock(JsonEnvelope.class);
+        final Envelope envelope = mock(Envelope.class);
 
         when(envelopePayloadTypeConverter.convert(any(Envelope.class), eq(JsonValue.class)))
-                .thenReturn(envelope);
-        when(jsonEnvelopeRepacker.repack(envelope)).thenReturn(envelope);
+                .thenReturn(jsonEnvelope);
+        when(jsonEnvelopeRepacker.repack(jsonEnvelope)).thenReturn(jsonEnvelope);
 
-        when(dispatcher.dispatch(envelope)).thenReturn(response);
+        when(dispatcher.dispatch(jsonEnvelope)).thenReturn(response);
 
         dispatcherDelegate.request(envelope, Object.class);
 
@@ -108,7 +126,7 @@ public class DispatcherDelegateTest {
     }
 
     @Test
-    public void sendMethodShouldDelegateToDispatcher() throws Exception {
+    public void shouldDelegateToDispatcherWithSendMethod() throws Exception {
 
         final JsonEnvelope envelope = mock(JsonEnvelope.class);
 
@@ -122,7 +140,7 @@ public class DispatcherDelegateTest {
     }
 
     @Test
-    public void sendMethodShouldValidateEnvelope() throws Exception {
+    public void shouldValidateEnvelopeWithSendMethod() throws Exception {
 
         final JsonEnvelope envelope = mock(JsonEnvelope.class);
 
@@ -136,7 +154,7 @@ public class DispatcherDelegateTest {
     }
 
     @Test
-    public void requestAsAdminMethodShouldDelegateEnvelopeReturnedBySystemUserUtil() {
+    public void shouldDelegateEnvelopeReturnedBySystemUserUtilWithRequestAsAdminMethod() {
         final JsonEnvelope envelope = mock(JsonEnvelope.class);
         final JsonEnvelope envelopeWithSysUserId = mock(JsonEnvelope.class);
         when(systemUserUtil.asEnvelopeWithSystemUserId(envelope)).thenReturn(envelopeWithSysUserId);
@@ -147,7 +165,7 @@ public class DispatcherDelegateTest {
     }
 
     @Test
-    public void requestAsAdminMethodShouldValidateResponse() {
+    public void shouldValidateResponseWithRequestAsAdminMethod() {
         final JsonEnvelope response = mock(JsonEnvelope.class);
         when(dispatcher.dispatch(any(JsonEnvelope.class))).thenReturn(response);
 
@@ -157,7 +175,7 @@ public class DispatcherDelegateTest {
     }
 
     @Test
-    public void sendAsAdminMethodShouldDelegateEnvelopeReturnedBySystemUserUtil() {
+    public void shouldDelegateEnvelopeReturnedBySystemUserUtilWithSendAsAdminMethod() {
         final JsonEnvelope envelope = mock(JsonEnvelope.class);
         final JsonEnvelope envelopeWithSysUserId = mock(JsonEnvelope.class);
         when(systemUserUtil.asEnvelopeWithSystemUserId(envelope)).thenReturn(envelopeWithSysUserId);
@@ -168,11 +186,29 @@ public class DispatcherDelegateTest {
     }
 
     @Test
-    public void sendAsAdminMethodShouldValidateEnvelope() {
+    public void shouldValidateEnvelopeWithSendAsAdminMethod() {
         final JsonEnvelope envelope = mock(JsonEnvelope.class);
 
         dispatcherDelegate.sendAsAdmin(envelope);
 
         verify(requestResponseEnvelopeValidator).validateRequest(envelope);
+    }
+
+    @Test
+    public void shouldValidateResponseWithPojoRequestAsAdminMethod() {
+        final Envelope<JsonValue> jsonValueEnvelope = mock(Envelope.class);
+        final JsonEnvelope response = mock(JsonEnvelope.class);
+
+        when(envelopePayloadTypeConverter.convert(any(Envelope.class), eq(JsonValue.class)))
+                .thenReturn(jsonValueEnvelope);
+        when(jsonEnvelopeRepacker.repack(jsonValueEnvelope)).thenReturn(mock(JsonEnvelope.class));
+
+        when(dispatcher.dispatch(any(JsonEnvelope.class))).thenReturn(response);
+
+        final Envelope<Object> envelope = mock(Envelope.class);
+
+        dispatcherDelegate.requestAsAdmin(envelope, Object.class);
+
+        verify(requestResponseEnvelopeValidator).validateResponse(response);
     }
 }

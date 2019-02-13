@@ -4,6 +4,8 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+- Add pojo implementation for Sender, Requester to DispatcherDelegate class
+- Updated HandlerMethodMatcher class to support pojo envelope 
 
 ## [5.1.1] - 2019-02-04
 ### Changed

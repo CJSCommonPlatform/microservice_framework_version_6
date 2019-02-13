@@ -9,7 +9,11 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.sender.Sender;
+import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+
+import java.time.ZonedDateTime;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -70,6 +74,11 @@ public class HandlerMethodMatcherTest {
     @Test
     public void shouldMatchAPassThroughRequesterMethod() throws Exception {
         assertThat(TestServiceComponent.class, method("testF").thatHandles("testF").withRequesterPassThrough());
+    }
+
+    @Test
+    public void shouldMatchAPassThroughRequesterMethodforPojo() throws Exception {
+        assertThat(TestServiceComponent.class, method("testK").thatHandles("testK").withRequesterPassThrough());
     }
 
     @Test(expected = AssertionError.class)
@@ -148,6 +157,38 @@ public class HandlerMethodMatcherTest {
         @Handles("testJ")
         public JsonEnvelope testJ(final JsonEnvelope command) {
             return requester.request(command);
+        }
+
+        @Handles("testK")
+        public Envelope<TestOrderView> testK(final Envelope<TestOrderView> query) {
+            return requester.request(query, TestOrderView.class);
+        }
+    }
+
+    private class TestOrderView {
+        private UUID orderId;
+
+        private UUID recipeId;
+
+        private ZonedDateTime deliveryDate;
+
+
+        public TestOrderView(final UUID orderId, final UUID recipeId, final ZonedDateTime deliveryDate) {
+            this.orderId = orderId;
+            this.recipeId = recipeId;
+            this.deliveryDate = deliveryDate;
+        }
+
+        public UUID getOrderId() {
+            return orderId;
+        }
+
+        public UUID getRecipeId() {
+            return recipeId;
+        }
+
+        public ZonedDateTime getDeliveryDate() {
+            return deliveryDate;
         }
     }
 }

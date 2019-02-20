@@ -169,9 +169,9 @@ public class HandlerMethodMatcher extends TypeSafeDiagnosingMatcher<Class<?>> {
         requesterField.setAccessible(true);
         requesterField.set(handlerInstance, requester);
 
-        return method.getParameters()[0].getParameterizedType().getTypeName().contains("JsonEnvelope")?
+        return method.getReturnType().getName().contains("JsonEnvelope")?
                 verifyRequesterMethodJsonEnvelopeCall(method, requester, query, handlerInstance):
-                verifyRequesterMethodPojoEnvelopeCall(method, requester, query, handlerInstance, method.getParameters()[0].getParameterizedType().getTypeName());
+                verifyRequesterMethodPojoEnvelopeCall(method, requester, query, handlerInstance, method.getGenericReturnType().getTypeName());
     }
 
     @Override

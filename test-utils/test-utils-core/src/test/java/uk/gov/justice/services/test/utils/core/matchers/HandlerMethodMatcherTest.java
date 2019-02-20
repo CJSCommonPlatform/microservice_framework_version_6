@@ -160,7 +160,7 @@ public class HandlerMethodMatcherTest {
         }
 
         @Handles("testK")
-        public Envelope<TestOrderView> testK(final Envelope<TestOrderView> query) {
+        public Envelope<TestOrderView> testK(final Envelope<?> query) {
             return requester.request(query, TestOrderView.class);
         }
     }

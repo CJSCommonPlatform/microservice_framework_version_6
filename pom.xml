@@ -33,6 +33,7 @@
         <module>test-utils</module>
         <module>framework-bom</module>
         <module>common-rest</module>
+        <module>jmx</module>
     </modules>
 
     <properties>
@@ -44,7 +45,7 @@
         <test-utils.version>1.22.0</test-utils.version>
         <utilities.version>1.16.4</utilities.version>
         <json-schema-catalog.version>1.4.5</json-schema-catalog.version>
-        <framework-api.version>3.3.0</framework-api.version>
+        <framework-api.version>3.4.0-M1</framework-api.version>
     </properties>
 
     <dependencyManagement>

@@ -47,7 +47,7 @@ import uk.gov.justice.services.core.interceptor.InterceptorChainObserver;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessorProducer;
 import uk.gov.justice.services.core.interceptor.InterceptorContext;
-import uk.gov.justice.services.core.json.BackwardsCompatibleJsonSchemaValidator;
+import uk.gov.justice.services.core.json.DummyJsonSchemaValidator;
 import uk.gov.justice.services.core.json.FileBasedJsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.json.PayloadExtractor;
@@ -157,7 +157,7 @@ public class CustomServiceComponentHandlerIT {
             MediaTypeProvider.class,
             EnvelopeInspector.class,
             RequesterProducer.class,
-            BackwardsCompatibleJsonSchemaValidator.class,
+            DummyJsonSchemaValidator.class,
 
             MediaTypesMappingCacheInitialiser.class,
             SchemaIdMappingCacheInitialiser.class

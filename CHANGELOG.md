@@ -5,6 +5,13 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [5.3.0-M1] - 2019-02-21
+### Added
+- JMX service
+- Command api validation of outgoing messages
+### Changed
+- Updated pojo implementation to not use typed parameter 
+
 ## [5.2.0] - 2019-02-13
 ### Added
 - Add pojo implementation for Sender, Requester to DispatcherDelegate class

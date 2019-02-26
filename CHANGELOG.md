@@ -5,6 +5,12 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [5.3.0-M2] - 2019-02-26
+### Added
+- JMX dependency to common bom
+### Changed
+- Added DummyJsonValidationSchema to testUtils common
+
 ## [5.3.0-M1] - 2019-02-21
 ### Added
 - JMX service

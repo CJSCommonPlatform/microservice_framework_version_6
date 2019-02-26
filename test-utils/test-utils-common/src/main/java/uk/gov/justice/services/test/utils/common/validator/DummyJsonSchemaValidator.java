@@ -1,5 +1,6 @@
-package uk.gov.justice.services.core.json;
+package uk.gov.justice.services.test.utils.common.validator;
 
+import uk.gov.justice.services.core.json.JsonSchemaValidator;
 import uk.gov.justice.services.core.mapping.MediaType;
 
 import java.util.Optional;

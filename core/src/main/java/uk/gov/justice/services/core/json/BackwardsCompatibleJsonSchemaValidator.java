@@ -1,6 +1,7 @@
 package uk.gov.justice.services.core.json;
 
 import static java.util.Arrays.asList;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import uk.gov.justice.services.common.configuration.Value;
 import uk.gov.justice.services.core.mapping.MediaType;
@@ -26,15 +27,17 @@ public class BackwardsCompatibleJsonSchemaValidator implements JsonSchemaValidat
     FileBasedJsonSchemaValidator fileBasedJsonSchemaValidator;
 
     @Inject
-    @Value(key = "schema.validation.action.whitelist")
+    @Value(key = "schema.validation.action.whitelist", defaultValue = "audit.events.audit-recorded")
     String whitelistActionName;
 
     private final List<String> actionNames = new ArrayList<>();
 
     @PostConstruct
     public void postConstruct() {
-        final String[] actions = whitelistActionName.split(",");
-        actionNames.addAll(asList(actions));
+        if (isNotBlank(whitelistActionName)) {
+            final String[] actions = whitelistActionName.split(",");
+            actionNames.addAll(asList(actions));
+        }
     }
 
     /**

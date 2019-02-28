@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 public class MessagingAdapterBaseUri {
 
     private static final Pattern MESSAGING_BASE_URI_PATTERN
-            = Pattern.compile("message://(event|command|query)/(api|controller|handler|listener|processor)/\\S+/(\\S+)");
+            = Pattern.compile("message://(event|command|query)/(api|controller|handler|listener|processor|indexer)/\\S+/(\\S+)");
     private final String tier;
     private final String pillar;
     private final String service;

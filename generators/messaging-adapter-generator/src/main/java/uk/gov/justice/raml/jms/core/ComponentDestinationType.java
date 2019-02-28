@@ -4,6 +4,7 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLLER;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_INDEXER;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 
 import uk.gov.justice.services.core.annotation.Component;
@@ -28,6 +29,7 @@ public class ComponentDestinationType {
         components.put(COMMAND_HANDLER, Queue.class);
         components.put(EVENT_PROCESSOR, Topic.class);
         components.put(EVENT_LISTENER, Topic.class);
+        components.put(EVENT_INDEXER, Topic.class);
     }
 
     /**
@@ -60,6 +62,10 @@ public class ComponentDestinationType {
             return components.get(EVENT_LISTENER);
         }
 
+        if (component.contains(EVENT_INDEXER)) {
+            return components.get(EVENT_INDEXER);
+        }
+
         if (components.containsKey(component)) {
             return components.get(component);
         }
@@ -73,6 +79,7 @@ public class ComponentDestinationType {
                 || component.contains(COMMAND_HANDLER)
                 || component.contains(EVENT_PROCESSOR)
                 || component.contains(EVENT_LISTENER)
+                || component.contains(EVENT_INDEXER)
                 || components.containsKey(component);
     }
 }

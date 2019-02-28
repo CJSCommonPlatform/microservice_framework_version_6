@@ -5,7 +5,7 @@
     <parent>
         <groupId>uk.gov.justice.services</groupId>
         <artifactId>generators</artifactId>
-        <version>4.3.2</version>
+        <version>4.3.2-elasticsearch-spike</version>
     </parent>
     <artifactId>messaging-adapter-generator</artifactId>
     <dependencies>

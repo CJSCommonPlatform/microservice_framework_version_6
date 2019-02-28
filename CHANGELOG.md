@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [5.3.0-M3] - 2019-02-28
+### Changed
+- Update schema whitelist to add default value
+
 ## [5.3.0-M2] - 2019-02-26
 ### Added
 - JMX dependency to common bom

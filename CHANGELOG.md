@@ -5,6 +5,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Changed
+- reverted the aggregate module. It is now no longer its own repository.
+
 ## [5.3.0-M3] - 2019-02-28
 ### Changed
 - Update schema whitelist to add default value

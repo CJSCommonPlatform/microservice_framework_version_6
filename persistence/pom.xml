@@ -5,7 +5,7 @@
     <parent>
         <artifactId>microservice-framework</artifactId>
         <groupId>uk.gov.justice.services</groupId>
-        <version>5.3.0-M5</version>
+        <version>5.3.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 

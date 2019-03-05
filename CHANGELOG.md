@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [5.3.0-M5] - 2019-03-05
+### Changed
+- Update framework-api version
+
 ## [5.3.0-M4] - 2019-03-04
 ### Changed
 - Revert the aggregate module. It is now no longer its own repository.

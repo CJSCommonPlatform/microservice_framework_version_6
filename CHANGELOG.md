@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.0.0-M1] - 2019-03-07
+### Changed
+- Merged in Subscription domain, yaml parsing classes and builders from event-store
+
 ## [5.3.0-M5] - 2019-03-05
 ### Changed
 - Update framework-api version

@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.0.0-M2] - 2019-03-11
+### Changed
+- Update json-schema-catalog version to 1.6.0
+
 ## [6.0.0-M1] - 2019-03-07
 ### Changed
 - Merged in Subscription domain, yaml parsing classes and builders from event-store

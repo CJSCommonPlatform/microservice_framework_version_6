@@ -5,12 +5,14 @@ import uk.gov.justice.services.core.mapping.MediaType;
 
 import java.util.Optional;
 
+import javax.enterprise.inject.Default;
 import javax.faces.bean.ApplicationScoped;
 
 /**
  * Service for validating JSON payloads against a schema contained in a catalog.
  */
 @ApplicationScoped
+@Default
 public class DummyJsonSchemaValidator implements JsonSchemaValidator {
 
 

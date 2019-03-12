@@ -5,6 +5,14 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.0.0-M3] - 2019-03-12
+### Changed
+-  Added priority to JsonSchemaValidator to fix CDI problems
+
+## [6.0.0-M2] - 2019-03-11
+### Changed
+- Update json-schema-catalog version to 1.6.0
+
 ## [6.0.0-M2] - 2019-03-11
 ### Changed
 - Update json-schema-catalog version to 1.6.0

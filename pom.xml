@@ -33,7 +33,6 @@
         <module>test-utils</module>
         <module>framework-bom</module>
         <module>common-rest</module>
-        <module>jmx</module>
         <module>aggregate</module>
         <module>event-subscription</module>
         <module>event-subscription-test-utils</module>

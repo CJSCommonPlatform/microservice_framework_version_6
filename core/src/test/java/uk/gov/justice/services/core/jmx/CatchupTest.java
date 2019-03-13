@@ -1,4 +1,4 @@
-package uk.gov.justice.services.jmx;
+package uk.gov.justice.services.core.jmx;
 
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertThat;
@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.lifecycle.ApplicationStateController;
 import uk.gov.justice.services.core.lifecycle.catchup.events.CatchupRequestedEvent;
+import uk.gov.justice.services.jmx.CatchupMBean;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,7 +18,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 
 @RunWith(MockitoJUnitRunner.class)
-public class DefaultCatchupMBeanTest {
+public class CatchupTest {
 
     @Mock
     private ApplicationStateController applicationStateController;
@@ -26,17 +27,17 @@ public class DefaultCatchupMBeanTest {
     private UtcClock clock;
 
     @InjectMocks
-    private DefaultCatchupMBean defaultCatchupMBean;
+    private Catchup catchup;
 
     @Test
     public void shouldCreteInstanceOfCatchupMBean() {
-        final DefaultCatchupMBean defaultCatchupMBean = new DefaultCatchupMBean();
-        assertThat(defaultCatchupMBean, instanceOf(CatchupMBean.class));
+        final Catchup catchup = new Catchup();
+        assertThat(catchup, instanceOf(CatchupMBean.class));
     }
 
     @Test
     public void shouldFireCatchupRequestedEvent() {
-        defaultCatchupMBean.doCatchupRequested();
+        catchup.doCatchupRequested();
         verify(applicationStateController).fireCatchupRequested(any(CatchupRequestedEvent.class));
     }
 }

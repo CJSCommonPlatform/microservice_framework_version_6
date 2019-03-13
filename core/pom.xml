@@ -77,6 +77,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>uk.gov.justice.utils</groupId>
+            <artifactId>test-utils-core</artifactId>
+            <scope>test</scope>
+            <version>${test-utils.version}</version>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
@@ -136,6 +142,10 @@
             <groupId>co.unruly</groupId>
             <artifactId>java-8-matchers</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.framework-api</groupId>
+            <artifactId>framework-api-jmx</artifactId>
         </dependency>
     </dependencies>
 </project>

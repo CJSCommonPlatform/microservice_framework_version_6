@@ -5,6 +5,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Added
+- Upgrade to latest framework-api version 4.0.0-M2
+
 ## [6.0.0-M3] - 2019-03-12
 ### Changed
 -  Added priority to JsonSchemaValidator to fix CDI problems

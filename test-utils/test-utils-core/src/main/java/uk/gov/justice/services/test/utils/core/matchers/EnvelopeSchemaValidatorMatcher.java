@@ -3,7 +3,6 @@ package uk.gov.justice.services.test.utils.core.matchers;
 import static uk.gov.justice.schema.catalog.test.utils.SchemaCatalogResolver.schemaCatalogResolver;
 
 import uk.gov.justice.services.messaging.Envelope;
-import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,8 +26,7 @@ import org.hamcrest.TypeSafeMatcher;
 import org.hamcrest.core.IsNot;
 import org.json.JSONObject;
 
-
-public class JsonSchemaValidationMatcher<T> {
+public class EnvelopeSchemaValidatorMatcher {
 
     private static final Random random = new Random();
     private static final String JSON_SCHEMA_TEMPLATE = "json/schema/%s.json";
@@ -72,20 +70,20 @@ public class JsonSchemaValidationMatcher<T> {
         };
     }
 
-    public static Matcher<JsonEnvelope> isValidJsonEnvelopeForSchema() {
-        return new TypeSafeDiagnosingMatcher<JsonEnvelope>() {
+    public static Matcher<Envelope<?>> isValidEnvelopeForSchema() {
+        return new TypeSafeDiagnosingMatcher<Envelope<?>>() {
             private ValidationException validationException = null;
 
             @Override
-            protected boolean matchesSafely(final JsonEnvelope jsonEnvelope, final Description description) {
+            protected boolean matchesSafely(final Envelope<?> envelope, final Description description) {
                 if (null == this.validationException) {
                     try {
-                        String e = String.format(JSON_SCHEMA_TEMPLATE, jsonEnvelope.metadata().name());
-                        getJsonSchemaFor(e).validate(new JSONObject(jsonEnvelope.payloadAsJsonObject().toString()));
+                        String e = String.format(JSON_SCHEMA_TEMPLATE, envelope.metadata().name());
+                        getJsonSchemaFor(e).validate(new JSONObject(envelope.payload().toString()));
                     } catch (IOException | IllegalArgumentException var6) {
                         try {
-                            String ioe = String.format(RAML_JSON_SCHEMA_TEMPLATE, jsonEnvelope.metadata().name());
-                            getJsonSchemaFor(ioe).validate(new JSONObject(jsonEnvelope.payloadAsJsonObject().toString()));
+                            String ioe = String.format(RAML_JSON_SCHEMA_TEMPLATE, envelope.metadata().name());
+                            getJsonSchemaFor(ioe).validate(new JSONObject(envelope.payload().toString()));
                         } catch (IOException var5) {
                             throw new IllegalArgumentException(var5);
                         }

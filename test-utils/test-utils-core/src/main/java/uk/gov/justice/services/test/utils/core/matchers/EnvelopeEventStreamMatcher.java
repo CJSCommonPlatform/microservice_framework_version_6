@@ -24,9 +24,9 @@ public class EnvelopeEventStreamMatcher<T> extends TypeSafeDiagnosingMatcher<Eve
     private Optional<Long> version = Optional.empty();
     private Optional<Tolerance> tolerance = Optional.empty();
 
-
-    public static EnvelopeEventStreamMatcher eventStreamAppendedWith(final EnvelopeStreamMatcher envelopeStreamMatcher) {
-        return new EnvelopeEventStreamMatcher().with(envelopeStreamMatcher);
+    @SuppressWarnings("unchecked")
+    public static <T> EnvelopeEventStreamMatcher<T> eventStreamAppendedWith(final EnvelopeStreamMatcher envelopeStreamMatcher, final Class<T> classType) {
+        return new EnvelopeEventStreamMatcher<T>().with(envelopeStreamMatcher);
     }
 
     public static EnvelopeEventStreamMatcher eventStreamAppendedAfter(final Long version) {

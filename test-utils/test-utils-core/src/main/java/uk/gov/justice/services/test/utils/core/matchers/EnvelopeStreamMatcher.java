@@ -22,8 +22,8 @@ public class EnvelopeStreamMatcher<T> extends TypeSafeDiagnosingMatcher<Stream<E
         this.matchers = matchers;
     }
 
-    public static EnvelopeStreamMatcher streamContaining(final Matcher... matchers) {
-        return new EnvelopeStreamMatcher(matchers);
+    public static <T> EnvelopeStreamMatcher<T> streamContaining(final Class<T> classType, final Matcher... matchers) {
+        return new EnvelopeStreamMatcher<T>(matchers);
     }
 
     @Override
@@ -39,7 +39,7 @@ public class EnvelopeStreamMatcher<T> extends TypeSafeDiagnosingMatcher<Stream<E
             envelopes = envelopeStream.collect(toList());
         }
 
-        return listContaining(matchers).matchesSafely(envelopes, description);
+        return new EnvelopeListMatcher<T>(matchers).matchesSafely(envelopes, description);
     }
 
 }

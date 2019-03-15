@@ -20,10 +20,6 @@ public class EnvelopeListMatcher<T> extends TypeSafeDiagnosingMatcher<List<Envel
         this.matchers = matchers;
     }
 
-    public static EnvelopeListMatcher listContaining(final Matcher... matchers) {
-        return new EnvelopeListMatcher(matchers);
-    }
-
     @Override
     public void describeTo(final Description description) {
         description.appendText("JsonEnvelope List that contains: ");

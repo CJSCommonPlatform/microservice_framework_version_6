@@ -1,4 +1,4 @@
-package uk.gov.justice.services.jmx;
+package uk.gov.justice.services.core.jmx;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -41,8 +41,8 @@ public class MBeanInstantiatorTest {
         final MBeanServer mbeanServer = (MBeanServer) privateField("mbeanServer", mBeanInstantiator, MBeanInstantiator.class);
 
         final Set<ObjectInstance> instances = mbeanServer.queryMBeans(null, null);
-        final boolean containsInstanceOfDefaultCatchupMBean = instances.stream().anyMatch(e -> e.getClassName().equals(DefaultCatchupMBean.class.getCanonicalName()));
-        final boolean containsInstanceOfDefaultShutteringMBean = instances.stream().anyMatch(e -> e.getClassName().equals(DefaultShutteringMBean.class.getCanonicalName()));
+        final boolean containsInstanceOfDefaultCatchupMBean = instances.stream().anyMatch(e -> e.getClassName().equals(Catchup.class.getCanonicalName()));
+        final boolean containsInstanceOfDefaultShutteringMBean = instances.stream().anyMatch(e -> e.getClassName().equals(Shuttering.class.getCanonicalName()));
 
         assertThat(containsInstanceOfDefaultCatchupMBean, is(true));
         assertThat(containsInstanceOfDefaultShutteringMBean, is(true));
@@ -60,8 +60,8 @@ public class MBeanInstantiatorTest {
 
         final Set<ObjectInstance> instances1 = mbeanServerWithUnregisteredMBeans.queryMBeans(null, null);
 
-        final boolean containsInstanceOfDefaultCatchupMBean1 = instances1.stream().anyMatch(e -> e.getClassName().equals(DefaultCatchupMBean.class.getCanonicalName()));
-        final boolean containsInstanceOfDefaultShutteringMBean1 = instances1.stream().anyMatch(e -> e.getClassName().equals(DefaultShutteringMBean.class.getCanonicalName()));
+        final boolean containsInstanceOfDefaultCatchupMBean1 = instances1.stream().anyMatch(e -> e.getClassName().equals(Catchup.class.getCanonicalName()));
+        final boolean containsInstanceOfDefaultShutteringMBean1 = instances1.stream().anyMatch(e -> e.getClassName().equals(Shuttering.class.getCanonicalName()));
 
         assertThat(containsInstanceOfDefaultCatchupMBean1, is(false));
         assertThat(containsInstanceOfDefaultShutteringMBean1, is(false));

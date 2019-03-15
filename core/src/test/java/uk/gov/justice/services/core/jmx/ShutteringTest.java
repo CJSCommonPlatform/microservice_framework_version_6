@@ -1,4 +1,4 @@
-package uk.gov.justice.services.jmx;
+package uk.gov.justice.services.core.jmx;
 
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertThat;
@@ -9,6 +9,7 @@ import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.lifecycle.ApplicationStateController;
 import uk.gov.justice.services.core.lifecycle.shuttering.events.ShutteringRequestedEvent;
 import uk.gov.justice.services.core.lifecycle.shuttering.events.UnshutteringRequestedEvent;
+import uk.gov.justice.services.jmx.ShutteringMBean;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,32 +18,32 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DefaultShutteringMBeanTest {
+public class ShutteringTest {
 
     @Mock
     private ApplicationStateController applicationStateController;
 
     @Mock
-    private UtcClock clock;
+    private UtcClock utcClock;
 
     @InjectMocks
-    private DefaultShutteringMBean defaultShutteringMBean;
+    private Shuttering shuttering;
 
     @Test
     public void shouldCreateInstanceOfShutteringMBean() {
-        final DefaultShutteringMBean defaultShutteringMBean = new DefaultShutteringMBean();
-        assertThat(defaultShutteringMBean, instanceOf(ShutteringMBean.class));
+        final Shuttering shuttering = new Shuttering();
+        assertThat(shuttering, instanceOf(ShutteringMBean.class));
     }
 
     @Test
     public void shouldFireShutteringRequestedEvent() {
-        defaultShutteringMBean.doShutteringRequested();
+        shuttering.doShutteringRequested();
         verify(applicationStateController).fireShutteringRequested(any(ShutteringRequestedEvent.class));
     }
 
     @Test
     public void shouldFireUnshutteringRequestedEvent() {
-        defaultShutteringMBean.doUnshutteringRequested();
+        shuttering.doUnshutteringRequested();
         verify(applicationStateController).fireUnshutteringRequested(any(UnshutteringRequestedEvent.class));
     }
 

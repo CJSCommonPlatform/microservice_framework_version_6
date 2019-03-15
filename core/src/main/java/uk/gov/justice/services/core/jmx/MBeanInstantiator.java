@@ -1,4 +1,4 @@
-package uk.gov.justice.services.jmx;
+package uk.gov.justice.services.core.jmx;
 
 
 import static java.lang.management.ManagementFactory.getPlatformMBeanServer;
@@ -14,8 +14,8 @@ import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
 import javax.management.NotCompliantMBeanException;
 
-@Singleton
 @Startup
+@Singleton
 public class MBeanInstantiator {
 
     @Inject

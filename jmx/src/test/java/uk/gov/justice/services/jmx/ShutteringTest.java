@@ -1,21 +1,19 @@
-package uk.gov.justice.services.core.jmx;
-
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.verify;
-
-import uk.gov.justice.services.common.util.UtcClock;
-import uk.gov.justice.services.core.lifecycle.ApplicationStateController;
-import uk.gov.justice.services.core.lifecycle.shuttering.events.ShutteringRequestedEvent;
-import uk.gov.justice.services.core.lifecycle.shuttering.events.UnshutteringRequestedEvent;
-import uk.gov.justice.services.jmx.ShutteringMBean;
+package uk.gov.justice.services.jmx;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.justice.services.common.util.UtcClock;
+import uk.gov.justice.services.core.lifecycle.ApplicationStateController;
+import uk.gov.justice.services.core.lifecycle.shuttering.events.ShutteringRequestedEvent;
+import uk.gov.justice.services.core.lifecycle.shuttering.events.UnshutteringRequestedEvent;
+
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ShutteringTest {

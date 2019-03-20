@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>microservice-framework</artifactId>
         <groupId>uk.gov.justice.services</groupId>
         <version>6.0.0-SNAPSHOT</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
 
+    <modelVersion>4.0.0</modelVersion>
     <artifactId>jmx</artifactId>
 
     <dependencies>
@@ -44,7 +44,7 @@
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
             <artifactId>core</artifactId>
-            <version>6.0.0-SNAPSHOT</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -53,14 +53,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.tomee</groupId>
-            <artifactId>openejb-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>uk.gov.justice.utils</groupId>
             <artifactId>test-utils-core</artifactId>
-            <version>1.17.3</version>
+            <version>${test-utils.version}</version>
             <scope>test</scope>
         </dependency>
 

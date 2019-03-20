@@ -1,6 +1,5 @@
 package uk.gov.justice.services.jmx;
 
-
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.ejb.Singleton;
@@ -15,7 +14,7 @@ import static java.lang.management.ManagementFactory.getPlatformMBeanServer;
 public class MBeanInstantiator {
 
     @Inject
-     MBeanRegistry mBeanRegistry;
+    MBeanRegistry mBeanRegistry;
 
     private MBeanServer mbeanServer = getPlatformMBeanServer();
 
@@ -43,3 +42,4 @@ public class MBeanInstantiator {
                 });
     }
 }
+

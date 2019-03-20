@@ -29,7 +29,6 @@ public class MBeanInstantiatorTest {
     @InjectMocks
     private MBeanInstantiator mBeanInstantiator;
 
-
     @Test
     public void shouldRegisterMBeans() throws Exception {
 

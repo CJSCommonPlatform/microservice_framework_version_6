@@ -1,6 +1,5 @@
 package uk.gov.justice.services.jmx;
 
-
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.lifecycle.ApplicationStateController;
 import uk.gov.justice.services.core.lifecycle.catchup.events.CatchupRequestedEvent;

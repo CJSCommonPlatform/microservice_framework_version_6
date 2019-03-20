@@ -44,6 +44,4 @@ public class ShutteringTest {
         shuttering.doUnshutteringRequested();
         verify(applicationStateController).fireUnshutteringRequested(any(UnshutteringRequestedEvent.class));
     }
-
-
 }

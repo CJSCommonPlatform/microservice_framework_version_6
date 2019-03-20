@@ -24,7 +24,5 @@ public class MBeanRegistryTest {
 
         assertThat(mBeanMap.values().stream().filter(objectName -> objectName.getDomain().equals("shuttering")).count(), is(1l));
         assertThat(mBeanMap.values().stream().filter(objectName -> objectName.getDomain().equals("catchup")).count(), is(1l));
-
     }
-
 }

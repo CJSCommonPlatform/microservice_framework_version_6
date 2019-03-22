@@ -1,13 +1,12 @@
-package uk.gov.justice.services.core.jmx;
-
-import static java.lang.String.format;
-
-import java.util.HashMap;
-import java.util.Map;
+package uk.gov.justice.services.jmx;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+import java.util.HashMap;
+import java.util.Map;
+
+import static java.lang.String.format;
 
 
 @ApplicationScoped

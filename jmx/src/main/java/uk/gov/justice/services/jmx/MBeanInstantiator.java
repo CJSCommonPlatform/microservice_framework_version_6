@@ -1,25 +1,20 @@
-package uk.gov.justice.services.core.jmx;
-
-
-import static java.lang.management.ManagementFactory.getPlatformMBeanServer;
+package uk.gov.justice.services.jmx;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanRegistrationException;
-import javax.management.MBeanServer;
-import javax.management.NotCompliantMBeanException;
+import javax.management.*;
+
+import static java.lang.management.ManagementFactory.getPlatformMBeanServer;
 
 @Startup
 @Singleton
 public class MBeanInstantiator {
 
     @Inject
-     MBeanRegistry mBeanRegistry;
+    MBeanRegistry mBeanRegistry;
 
     private MBeanServer mbeanServer = getPlatformMBeanServer();
 
@@ -47,3 +42,4 @@ public class MBeanInstantiator {
                 });
     }
 }
+

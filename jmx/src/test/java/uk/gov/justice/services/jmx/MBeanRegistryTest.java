@@ -1,13 +1,12 @@
-package uk.gov.justice.services.core.jmx;
+package uk.gov.justice.services.jmx;
+
+import org.junit.Test;
+
+import javax.management.ObjectName;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-
-import java.util.Map;
-
-import javax.management.ObjectName;
-
-import org.junit.Test;
 
 public class MBeanRegistryTest {
 
@@ -25,7 +24,5 @@ public class MBeanRegistryTest {
 
         assertThat(mBeanMap.values().stream().filter(objectName -> objectName.getDomain().equals("shuttering")).count(), is(1l));
         assertThat(mBeanMap.values().stream().filter(objectName -> objectName.getDomain().equals("catchup")).count(), is(1l));
-
     }
-
 }

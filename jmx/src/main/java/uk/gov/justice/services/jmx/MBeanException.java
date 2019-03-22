@@ -1,4 +1,4 @@
-package uk.gov.justice.services.core.jmx;
+package uk.gov.justice.services.jmx;
 
 public class MBeanException extends RuntimeException {
     public MBeanException(final String message) {

@@ -1,10 +1,9 @@
-package uk.gov.justice.services.core.jmx;
+package uk.gov.justice.services.jmx;
 
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.lifecycle.ApplicationStateController;
 import uk.gov.justice.services.core.lifecycle.shuttering.events.ShutteringRequestedEvent;
 import uk.gov.justice.services.core.lifecycle.shuttering.events.UnshutteringRequestedEvent;
-import uk.gov.justice.services.jmx.ShutteringMBean;
 
 public class Shuttering implements ShutteringMBean {
 

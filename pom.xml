@@ -36,6 +36,7 @@
         <module>aggregate</module>
         <module>event-subscription</module>
         <module>event-subscription-test-utils</module>
+        <module>jmx</module>
     </modules>
 
     <properties>

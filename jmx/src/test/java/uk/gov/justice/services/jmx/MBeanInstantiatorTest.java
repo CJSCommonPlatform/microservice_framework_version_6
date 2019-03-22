@@ -1,27 +1,24 @@
-package uk.gov.justice.services.core.jmx;
-
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
-
-import java.lang.reflect.Field;
-import java.util.Set;
-
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanServer;
-import javax.management.ObjectInstance;
+package uk.gov.justice.services.jmx;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanServer;
+import javax.management.ObjectInstance;
+import java.lang.reflect.Field;
+import java.util.Set;
+
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MBeanInstantiatorTest {
@@ -31,7 +28,6 @@ public class MBeanInstantiatorTest {
 
     @InjectMocks
     private MBeanInstantiator mBeanInstantiator;
-
 
     @Test
     public void shouldRegisterMBeans() throws Exception {

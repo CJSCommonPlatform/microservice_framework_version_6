@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.0.0-M5] - 2019-03-22
+### Added
+- Added JMX standalone module
+
 ## [6.0.0-M4]
 ### Added
 - Upgrade to latest framework-api version 4.0.0-M2

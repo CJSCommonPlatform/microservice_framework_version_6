@@ -93,23 +93,11 @@ public class ApplicationStateControllerTest {
     @Test
     public void shouldCallCatchupCompletedOnAllCatchupListeners() throws Exception {
 
-        final long currentEventNumber_1 = 23498L;
-        final int totalNumberOfEvents_1 = 23;
-
-        final long currentEventNumber_2 = 98273L;
-        final int totalNumberOfEvents_2 = 83;
-
         final ZonedDateTime catchupCompletedTime_1 = new UtcClock().now();
         final ZonedDateTime catchupCompletedTime_2 = catchupCompletedTime_1.plusMinutes(23);
 
-        final CatchupCompletedEvent catchupCompletedEvent_1 = new CatchupCompletedEvent(
-                currentEventNumber_1,
-                totalNumberOfEvents_1,
-                catchupCompletedTime_1);
-        final CatchupCompletedEvent catchupCompletedEvent_2 = new CatchupCompletedEvent(
-                currentEventNumber_2,
-                totalNumberOfEvents_2,
-                catchupCompletedTime_2);
+        final CatchupCompletedEvent catchupCompletedEvent_1 = new CatchupCompletedEvent(catchupCompletedTime_1);
+        final CatchupCompletedEvent catchupCompletedEvent_2 = new CatchupCompletedEvent(catchupCompletedTime_2);
 
         final CatchupListener catchupListener_1 = mock(CatchupListener.class);
         final CatchupListener catchupListener_2 = mock(CatchupListener.class);

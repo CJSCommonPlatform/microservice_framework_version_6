@@ -4,6 +4,8 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+## [6.0.0-M7] - 2019-03-28
+- Moved Shuttering to using JEE Observable
 
 ## [6.0.0-M6] - 2019-03-26
 ### Added

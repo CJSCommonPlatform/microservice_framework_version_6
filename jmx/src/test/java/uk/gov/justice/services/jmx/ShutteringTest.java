@@ -18,7 +18,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DefaultShutteringMBeanTest {
+public class ShutteringTest {
 
     @Mock
     private UtcClock clock;
@@ -30,7 +30,7 @@ public class DefaultShutteringMBeanTest {
     private Event<UnshutteringRequestedEvent> unshutteringRequestedEventFirer;
 
     @InjectMocks
-    private DefaultShutteringMBean defaultShutteringMBean;
+    private Shuttering shuttering;
 
     @Test
     public void shouldFireShutteringRequestedEvent() {
@@ -39,9 +39,9 @@ public class DefaultShutteringMBeanTest {
 
         when(clock.now()).thenReturn(requestedAt);
 
-        defaultShutteringMBean.doShutteringRequested();
+        shuttering.doShutteringRequested();
 
-        verify(shutteringRequestedEventFirer).fire(new ShutteringRequestedEvent(defaultShutteringMBean, requestedAt));
+        verify(shutteringRequestedEventFirer).fire(new ShutteringRequestedEvent(shuttering, requestedAt));
     }
 
     @Test
@@ -51,8 +51,8 @@ public class DefaultShutteringMBeanTest {
 
         when(clock.now()).thenReturn(requestedAt);
 
-        defaultShutteringMBean.doUnshutteringRequested();
+        shuttering.doUnshutteringRequested();
         
-        verify(unshutteringRequestedEventFirer).fire(new UnshutteringRequestedEvent(defaultShutteringMBean, requestedAt));
+        verify(unshutteringRequestedEventFirer).fire(new UnshutteringRequestedEvent(shuttering, requestedAt));
     }
 }

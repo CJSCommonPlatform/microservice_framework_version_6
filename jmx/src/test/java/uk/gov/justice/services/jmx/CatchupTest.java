@@ -17,7 +17,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DefaultCatchupMBeanTest {
+public class CatchupTest {
 
     @Mock
     private Event<CatchupRequestedEvent> catchupRequestedEventFirer;
@@ -26,7 +26,7 @@ public class DefaultCatchupMBeanTest {
     private UtcClock clock;
 
     @InjectMocks
-    private DefaultCatchupMBean defaultCatchupMBean;
+    private Catchup catchup;
 
     @Test
     public void shouldFireCatchupRequestedEvent() {
@@ -35,7 +35,7 @@ public class DefaultCatchupMBeanTest {
 
         when(clock.now()).thenReturn(requestedAt);
 
-        defaultCatchupMBean.doCatchupRequested();
-        verify(catchupRequestedEventFirer).fire(new CatchupRequestedEvent(defaultCatchupMBean, requestedAt));
+        catchup.doCatchupRequested();
+        verify(catchupRequestedEventFirer).fire(new CatchupRequestedEvent(catchup, requestedAt));
     }
 }

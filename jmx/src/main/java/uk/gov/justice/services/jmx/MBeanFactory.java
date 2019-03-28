@@ -1,7 +1,5 @@
 package uk.gov.justice.services.jmx;
 
-import static java.lang.String.format;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,10 +16,10 @@ public class MBeanFactory {
     private static final String OBJECT_NAME_KEY = "type";
 
     @Inject
-    private DefaultShutteringMBean defaultShutteringMBean;
+    private Shuttering shuttering;
 
     @Inject
-    private DefaultCatchupMBean defaultCatchupMBean;
+    private Catchup catchup;
 
     @Inject
     private ObjectNameFactory objectNameFactory;
@@ -30,8 +28,8 @@ public class MBeanFactory {
 
         final Map<Object, ObjectName> mbeanMap = new HashMap<>();
 
-        mbeanMap.put(defaultShutteringMBean, objectNameFactory.create(SHUTTERING_DOMAIN_NAME, OBJECT_NAME_KEY, SHUTTERING_BEAN));
-        mbeanMap.put(defaultCatchupMBean, objectNameFactory.create(CATCHUP_DOMAIN_NAME, OBJECT_NAME_KEY, CATCHUP_BEAN));
+        mbeanMap.put(shuttering, objectNameFactory.create(SHUTTERING_DOMAIN_NAME, OBJECT_NAME_KEY, SHUTTERING_BEAN));
+        mbeanMap.put(catchup, objectNameFactory.create(CATCHUP_DOMAIN_NAME, OBJECT_NAME_KEY, CATCHUP_BEAN));
 
         return mbeanMap;
     }

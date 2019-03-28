@@ -9,7 +9,7 @@ import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
 @ApplicationScoped
-public class DefaultShutteringMBean implements ShutteringMBean {
+public class Shuttering implements ShutteringMBean {
 
     @Inject
     private UtcClock clock;

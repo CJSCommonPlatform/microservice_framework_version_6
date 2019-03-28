@@ -1,30 +1,34 @@
 package uk.gov.justice.services.jmx;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanServer;
-import javax.management.ObjectInstance;
-import java.lang.reflect.Field;
-import java.util.Set;
-
+import static com.google.common.collect.ImmutableMap.of;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
-import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Map;
+
+import javax.management.MBeanRegistrationException;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MBeanInstantiatorTest {
 
-    @Spy
+    @Mock
     private MBeanRegistry mBeanRegistry;
+
+    @Mock
+    private MBeanServer mbeanServer;
 
     @InjectMocks
     private MBeanInstantiator mBeanInstantiator;
@@ -32,68 +36,87 @@ public class MBeanInstantiatorTest {
     @Test
     public void shouldRegisterMBeans() throws Exception {
 
+        final Object mBean_1 = new Object();
+        final Object mBean_2 = new Object();
+
+        final ObjectName objectName_1 = mock(ObjectName.class);
+        final ObjectName objectName_2 = mock(ObjectName.class);
+
+        final Map<Object, ObjectName> mBeanMap = of(mBean_1, objectName_1, mBean_2, objectName_2);
+
+        when(mBeanRegistry.getMBeanMap()).thenReturn(mBeanMap);
+
         mBeanInstantiator.registerMBeans();
 
-        final MBeanServer mbeanServer = (MBeanServer) privateField("mbeanServer", mBeanInstantiator, MBeanInstantiator.class);
-
-        final Set<ObjectInstance> instances = mbeanServer.queryMBeans(null, null);
-        final boolean containsInstanceOfDefaultCatchupMBean = instances.stream().anyMatch(e -> e.getClassName().equals(Catchup.class.getCanonicalName()));
-        final boolean containsInstanceOfDefaultShutteringMBean = instances.stream().anyMatch(e -> e.getClassName().equals(Shuttering.class.getCanonicalName()));
-
-        assertThat(containsInstanceOfDefaultCatchupMBean, is(true));
-        assertThat(containsInstanceOfDefaultShutteringMBean, is(true));
-
-        mBeanInstantiator.unregisterMBeans();
+        verify(mbeanServer).registerMBean(mBean_1, objectName_1);
+        verify(mbeanServer).registerMBean(mBean_2, objectName_2);
     }
 
     @Test
     public void shouldUnregisterMBeans() throws Exception {
 
-        mBeanInstantiator.registerMBeans();
+        final Object mBean_1 = new Object();
+        final Object mBean_2 = new Object();
+
+        final ObjectName objectName_1 = mock(ObjectName.class);
+        final ObjectName objectName_2 = mock(ObjectName.class);
+
+        final Map<Object, ObjectName> mBeanMap = of(mBean_1, objectName_1, mBean_2, objectName_2);
+
+        when(mBeanRegistry.getMBeanMap()).thenReturn(mBeanMap);
+
         mBeanInstantiator.unregisterMBeans();
 
-        final MBeanServer mbeanServerWithUnregisteredMBeans = (MBeanServer) privateField("mbeanServer", mBeanInstantiator, MBeanInstantiator.class);
-
-        final Set<ObjectInstance> instances1 = mbeanServerWithUnregisteredMBeans.queryMBeans(null, null);
-
-        final boolean containsInstanceOfDefaultCatchupMBean1 = instances1.stream().anyMatch(e -> e.getClassName().equals(Catchup.class.getCanonicalName()));
-        final boolean containsInstanceOfDefaultShutteringMBean1 = instances1.stream().anyMatch(e -> e.getClassName().equals(Shuttering.class.getCanonicalName()));
-
-        assertThat(containsInstanceOfDefaultCatchupMBean1, is(false));
-        assertThat(containsInstanceOfDefaultShutteringMBean1, is(false));
+        verify(mbeanServer).unregisterMBean(objectName_1);
+        verify(mbeanServer).unregisterMBean(objectName_2);
     }
 
     @Test
     public void shouldThrowExceptionWhenMBeanRegisteringIncorrect() throws Exception {
-        try {
-            final MBeanServer mbeanServer = mock(MBeanServer.class);
-            setField(mBeanInstantiator, "mbeanServer", mbeanServer);
 
-            when(mbeanServer.registerMBean(any(), any())).thenThrow(new InstanceAlreadyExistsException("Not found"));
+        final MBeanRegistrationException mBeanRegistrationException = new MBeanRegistrationException(new NullPointerException("Ooops"));
+
+        final Object mBean_1 = "mBean_1";
+        final Object mBean_2 = "mBean_2";
+
+        final ObjectName objectName_1 = mock(ObjectName.class, "objectName_1");
+        final ObjectName objectName_2 = mock(ObjectName.class, "objectName_2");
+
+        final Map<Object, ObjectName> mBeanMap = of(mBean_1, objectName_1, mBean_2, objectName_2);
+
+        when(mBeanRegistry.getMBeanMap()).thenReturn(mBeanMap);
+        doThrow(mBeanRegistrationException).when(mbeanServer).registerMBean(mBean_2, objectName_2);
+
+        try {
             mBeanInstantiator.registerMBeans();
             fail();
         } catch (final MBeanException expected) {
-            assertThat(expected.getMessage(), is("Error during registration MXBean registration: Not found"));
+            assertThat(expected.getCause(), is(mBeanRegistrationException));
+            assertThat(expected.getMessage(), is("MXBean registration failed for key 'mBean_2', value 'objectName_2'"));
         }
     }
 
     @Test
     public void shouldThrowExceptionWhenMBeanUnregisteringIncorrect() throws Exception {
+        final MBeanRegistrationException mBeanRegistrationException = new MBeanRegistrationException(new NullPointerException("Ooops"));
+
+        final Object mBean_1 = "mBean_1";
+        final Object mBean_2 = "mBean_2";
+
+        final ObjectName objectName_1 = mock(ObjectName.class, "objectName_1");
+        final ObjectName objectName_2 = mock(ObjectName.class, "objectName_2");
+
+        final Map<Object, ObjectName> mBeanMap = of(mBean_1, objectName_1, mBean_2, objectName_2);
+
+        when(mBeanRegistry.getMBeanMap()).thenReturn(mBeanMap);
+        doThrow(mBeanRegistrationException).when(mbeanServer).unregisterMBean(objectName_2);
+
         try {
-            final MBeanServer mbeanServer = mock(MBeanServer.class);
-            setField(mBeanInstantiator, "mbeanServer", mbeanServer);
-            doThrow(new InstanceNotFoundException("Not found")).when(mbeanServer).unregisterMBean(any());
             mBeanInstantiator.unregisterMBeans();
             fail();
         } catch (final MBeanException expected) {
-            assertThat(expected.getMessage(), is("Error during MXBean unregistration: Not found"));
+            assertThat(expected.getCause(), is(mBeanRegistrationException));
+            assertThat(expected.getMessage(), is("MXBean unregistration failed for key 'mBean_2', value 'objectName_2'"));
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T> T privateField(final String fieldName, final Object object, @SuppressWarnings("unused") final Class<T> clazz) throws Exception {
-        final Field field = object.getClass().getDeclaredField(fieldName);
-        field.setAccessible(true);
-        return (T) field.get(object);
     }
 }

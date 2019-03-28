@@ -1,34 +1,26 @@
 package uk.gov.justice.services.jmx;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
 import java.util.HashMap;
 import java.util.Map;
 
-import static java.lang.String.format;
-
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.management.ObjectName;
 
 @ApplicationScoped
 public class MBeanRegistry {
 
-    private static final String SHUTTERING_DOMAIN_NAME = "shuttering";
-    private static final String CATCHUP_DOMAIN_NAME = "catchup";
-
-    private static final String SHUTTERING_BEAN = "Shuttering";
-    private static final String CATCHUP_BEAN = "Catchup";
+    @Inject
+    private MBeanFactory mBeanFactory;
 
     private Map<Object, ObjectName> mbeanMap = new HashMap<>();
 
     public Map<Object, ObjectName> getMBeanMap() {
-        try {
-            if (mbeanMap.isEmpty()) {
-                mbeanMap.put(new Shuttering(), new ObjectName(SHUTTERING_DOMAIN_NAME, "type", SHUTTERING_BEAN));
-                mbeanMap.put(new Catchup(), new ObjectName(CATCHUP_DOMAIN_NAME, "type", CATCHUP_BEAN));
-            }
-            return mbeanMap;
-        } catch (final MalformedObjectNameException exception) {
-            throw new MBeanException(format("Unable to create MBean map: %s", exception.getMessage()));
+
+        if (mbeanMap.isEmpty()) {
+            mbeanMap = mBeanFactory.createMBeans();
         }
+
+        return mbeanMap;
     }
 }

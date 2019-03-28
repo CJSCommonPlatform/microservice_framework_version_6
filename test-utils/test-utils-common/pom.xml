@@ -10,6 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>test-utils-common</artifactId>
+
     <dependencies>
         <!-- Leave glassfish at top as the preferred Json provider (even though its for test) -->
         <dependency>

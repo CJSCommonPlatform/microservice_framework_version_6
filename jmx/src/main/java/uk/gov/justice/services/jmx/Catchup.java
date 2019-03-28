@@ -6,7 +6,7 @@ import uk.gov.justice.services.core.lifecycle.events.catchup.CatchupRequestedEve
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
-public class DefaultCatchupMBean implements CatchupMBean {
+public class Catchup implements CatchupMBean {
 
     @Inject
     private UtcClock utcClock;

@@ -2,13 +2,11 @@ package uk.gov.justice.services.jmx;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.junit.Test;
@@ -21,10 +19,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class MBeanFactoryTest {
 
     @Mock
-    private DefaultShutteringMBean defaultShutteringMBean;
+    private Shuttering shuttering;
 
     @Mock
-    private DefaultCatchupMBean defaultCatchupMBean;
+    private Catchup catchup;
 
     @Mock
     private ObjectNameFactory objectNameFactory;
@@ -43,7 +41,7 @@ public class MBeanFactoryTest {
 
         final Map<Object, ObjectName> mBeans = mBeanFactory.createMBeans();
 
-        assertThat(mBeans.get(defaultShutteringMBean), is(shutteringObjectName));
-        assertThat(mBeans.get(defaultCatchupMBean), is(catchupObjectName));
+        assertThat(mBeans.get(shuttering), is(shutteringObjectName));
+        assertThat(mBeans.get(catchup), is(catchupObjectName));
     }
 }

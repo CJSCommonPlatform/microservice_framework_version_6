@@ -1,63 +1,55 @@
 package uk.gov.justice.services.test.utils.helper;
 
-import uk.gov.justice.services.jmx.ShutteringMBean;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
-import javax.management.InstanceNotFoundException;
-import javax.management.IntrospectionException;
-import javax.management.JMX;
-import javax.management.MBeanInfo;
-import javax.management.MBeanOperationInfo;
-import javax.management.MBeanServerConnection;
-import javax.management.ObjectName;
-import javax.management.ReflectionException;
+import javax.management.*;
 import javax.management.remote.JMXConnector;
-import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
+import java.io.IOException;
+import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.lang.System.getProperty;
+import static java.util.Arrays.asList;
+import static javax.management.JMX.newMBeanProxy;
+import static javax.management.remote.JMXConnectorFactory.connect;
 
 public class MBeanHelper {
 
     @Inject
-    Logger LOGGER = LoggerFactory.getLogger(MBeanHelper.class.getName());
+    private Logger logger;
 
     private static final String HOST = "localhost";
     private static final String RANDOM_MANAGEMENT_PORT = "random.management.port";
 
-    public ShutteringMBean getMbeanProxy(ObjectName objectName, final MBeanServerConnection connection) {
-        return JMX.newMBeanProxy(connection, objectName, ShutteringMBean.class, true);
+    public <T> T getMbeanProxy(final ObjectName objectName, final MBeanServerConnection connection, final Class<T> interfaceClass) {
+        return newMBeanProxy(connection, objectName, interfaceClass, true);
     }
 
     public void getMbeanDomains(final MBeanServerConnection connection) throws IOException {
         final String [] domains = connection.getDomains();
-        final List<String> mbeanDomains = Arrays.asList(domains);
+        final List<String> mbeanDomains = asList(domains);
 
-        LOGGER.info("MBean Domains: ");
-        mbeanDomains.forEach(mbeanDomain -> LOGGER.info(mbeanDomain));
+        logger.debug("MBean Domains: ");
+        mbeanDomains.forEach(mbeanDomain -> logger.debug(mbeanDomain));
     }
 
-    public void getMbeanOperations(ObjectName objectName, final MBeanServerConnection connection) throws IOException, IntrospectionException, InstanceNotFoundException, ReflectionException {
+    public void getMbeanOperations(final ObjectName objectName, final MBeanServerConnection connection) throws IOException, IntrospectionException, InstanceNotFoundException, ReflectionException {
         final MBeanInfo mBeanInfo = connection.getMBeanInfo(objectName);
         final MBeanOperationInfo[] operations = mBeanInfo.getOperations();
-        final List<MBeanOperationInfo> mbeanOperations = Arrays.asList(operations);
+        final List<MBeanOperationInfo> mbeanOperations = asList(operations);
 
-        LOGGER.info("MBean Operations: ");
-        mbeanOperations.forEach(mBeanOperationInfo -> LOGGER.info(mBeanOperationInfo.getName()));
+        logger.debug("MBean Operations: ");
+        mbeanOperations.forEach(mBeanOperationInfo -> logger.debug(mBeanOperationInfo.getName()));
     }
 
     public JMXConnector getJMXConnector() throws IOException {
-        final int managementPort = Integer.valueOf(System.getProperty(RANDOM_MANAGEMENT_PORT));
+        final int managementPort = Integer.valueOf(getProperty(RANDOM_MANAGEMENT_PORT));
 
         final String urlString =
-                System.getProperty("jmx.service.url","service:jmx:remote+http://" + HOST + ":" + managementPort);
+                getProperty("jmx.service.url","service:jmx:remote+http://" + HOST + ":" + managementPort);
         final JMXServiceURL serviceURL = new JMXServiceURL(urlString);
 
-        return JMXConnectorFactory.connect(serviceURL, null);
+        return connect(serviceURL, null);
     }
 }

@@ -21,10 +21,10 @@ public class Shuttering implements ShutteringMBean {
     private Event<UnshutteringRequestedEvent> unshutteringRequestedEventFirer;
 
     public void doShutteringRequested() {
-        shutteringRequestedEventFirer.fire(new ShutteringRequestedEvent(this, clock.now()));
+        shutteringRequestedEventFirer.fire(new ShutteringRequestedEvent(getClass().getSimpleName(), clock.now()));
     }
 
     public void doUnshutteringRequested() {
-        unshutteringRequestedEventFirer.fire(new UnshutteringRequestedEvent(this, clock.now()));
+        unshutteringRequestedEventFirer.fire(new UnshutteringRequestedEvent(getClass().getSimpleName(), clock.now()));
     }
 }

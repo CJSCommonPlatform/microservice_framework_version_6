@@ -41,7 +41,7 @@ public class ShutteringTest {
 
         shuttering.doShutteringRequested();
 
-        verify(shutteringRequestedEventFirer).fire(new ShutteringRequestedEvent(shuttering, requestedAt));
+        verify(shutteringRequestedEventFirer).fire(new ShutteringRequestedEvent(Shuttering.class.getSimpleName(), requestedAt));
     }
 
     @Test
@@ -53,6 +53,6 @@ public class ShutteringTest {
 
         shuttering.doUnshutteringRequested();
         
-        verify(unshutteringRequestedEventFirer).fire(new UnshutteringRequestedEvent(shuttering, requestedAt));
+        verify(unshutteringRequestedEventFirer).fire(new UnshutteringRequestedEvent(Shuttering.class.getSimpleName(), requestedAt));
     }
 }

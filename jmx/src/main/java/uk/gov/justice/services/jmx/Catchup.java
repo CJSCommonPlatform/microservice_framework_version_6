@@ -16,6 +16,6 @@ public class Catchup implements CatchupMBean {
 
     @Override
     public void doCatchupRequested() {
-        catchupRequestedEventFirer.fire(new CatchupRequestedEvent(this, utcClock.now()));
+        catchupRequestedEventFirer.fire(new CatchupRequestedEvent(getClass().getSimpleName(), utcClock.now()));
     }
 }

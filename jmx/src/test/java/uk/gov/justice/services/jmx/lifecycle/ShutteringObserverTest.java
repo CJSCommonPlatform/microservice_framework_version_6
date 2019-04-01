@@ -21,13 +21,7 @@ import org.slf4j.Logger;
 public class ShutteringObserverTest {
 
     @Mock
-    private UtcClock clock;
-
-    @Mock
     private Logger logger;
-
-    @Mock
-    private Object caller;
 
     @Mock
     private ShutteringFlagProducerBean shutteringFlagProducerBean;
@@ -40,7 +34,7 @@ public class ShutteringObserverTest {
 
         final ZonedDateTime shutteringStartedAt = of(2019, 2, 23, 17, 12, 23, 0, UTC);
 
-        shutteringObserver.onShutterringRequested(new ShutteringRequestedEvent(caller, shutteringStartedAt));
+        shutteringObserver.onShutterringRequested(new ShutteringRequestedEvent(ShutteringObserver.class.getSimpleName(), shutteringStartedAt));
 
         verify(logger).info("Shuttering requested started at: 2019-02-23T17:12:23Z");
         verify(shutteringFlagProducerBean).setDoShuttering(true);

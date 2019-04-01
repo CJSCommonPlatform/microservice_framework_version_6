@@ -4,6 +4,11 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [6.0.0-M8] - 2019-04-01
+### Changed
+- Change caller/shutterable to a simple String in the event classes
+
 ## [6.0.0-M7] - 2019-03-28
 - Moved Shuttering to using JEE Observable
 

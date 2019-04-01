@@ -36,6 +36,7 @@ public class CatchupTest {
         when(clock.now()).thenReturn(requestedAt);
 
         catchup.doCatchupRequested();
-        verify(catchupRequestedEventFirer).fire(new CatchupRequestedEvent(catchup, requestedAt));
+
+        verify(catchupRequestedEventFirer).fire(new CatchupRequestedEvent(Catchup.class.getSimpleName(), requestedAt));
     }
 }

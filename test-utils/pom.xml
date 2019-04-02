@@ -17,7 +17,6 @@
         <module>test-utils-core</module>
         <module>test-utils-common</module>
         <module>test-utils-enveloper-provider</module>
-        <module>test-utils-wildfly</module>
     </modules>
     <packaging>pom</packaging>
 

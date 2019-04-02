@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.0.0-M9] - 2019-04-02
+### Removed
+- Remove test-utils-wildfly module
+
 ## [6.0.0-M8] - 2019-04-01
 ### Changed
 - Change caller/shutterable to a simple String in the event classes

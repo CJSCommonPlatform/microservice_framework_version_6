@@ -1,7 +1,9 @@
 package uk.gov.justice.services.jmx.lifecycle;
 
-import uk.gov.justice.services.core.lifecycle.events.shuttering.ShutteringCompleteEvent;
+import static java.lang.String.format;
+
 import uk.gov.justice.services.core.lifecycle.events.shuttering.ShutteringRequestedEvent;
+import uk.gov.justice.services.core.lifecycle.events.shuttering.UnshutteringRequestedEvent;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -20,12 +22,12 @@ public class ShutteringObserver {
 
 
     public void onShutterringRequested(@Observes final ShutteringRequestedEvent shutteringRequestedEvent){
-        logger.info("Shuttering requested started at: " + shutteringRequestedEvent.getShutteringRequestedAt());
+        logger.info(format("Shuttering requested started at: %s", shutteringRequestedEvent.getShutteringRequestedAt()));
         shutteringFlagProducerBean.setDoShuttering(true);
     }
 
-    public void onUnShutterringRequested(@Observes final ShutteringCompleteEvent shutteringCompleteEvent){
-        logger.info("Unshuttering requested started at: " + shutteringCompleteEvent.getShutteringCompleteAt());
+    public void onUnShutterringRequested(@Observes final UnshutteringRequestedEvent unshutteringRequestedEvent){
+        logger.info(format("Unshuttering requested started at: %s", unshutteringRequestedEvent.getUnshutteringRequestedAt()));
         shutteringFlagProducerBean.setDoShuttering(false);
     }
 

@@ -24,7 +24,6 @@ public class DefaultJsonSchemaValidatorFactory {
         fileBasedJsonSchemaValidator.payloadExtractor = payloadExtractor;
 
         final SchemaCatalogAwareJsonSchemaValidator schemaCatalogAwareJsonSchemaValidator = new SchemaCatalogAwareJsonSchemaValidator();
-        schemaCatalogAwareJsonSchemaValidator.logger = getLogger(SchemaCatalogAwareJsonSchemaValidator.class);
         schemaCatalogAwareJsonSchemaValidator.fileBasedJsonSchemaValidator = fileBasedJsonSchemaValidator;
         schemaCatalogAwareJsonSchemaValidator.payloadExtractor = payloadExtractor;
         schemaCatalogAwareJsonSchemaValidator.schemaCatalogService = aSchemaCatalogService();

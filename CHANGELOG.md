@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.0.0-M11] - 2019-04-05
+### Changed
+- Upgrade to latest framework-api version 4.0.0-M7
+
 ## [6.0.0-M10] - 2019-04-05
 ### Changed
 - Update ShutteringObserver to use UnshutteringRequestedEvent

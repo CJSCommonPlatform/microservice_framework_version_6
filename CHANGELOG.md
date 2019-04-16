@@ -4,6 +4,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+## [6.0.0-M13] - 2019-04-16
+### Changed
+- Upgrade to latest framework-api version 4.0.0-M8
 
 ## [6.0.0-M12] - 2019-04-15
 ### Removed

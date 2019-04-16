@@ -6,6 +6,11 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ## [Unreleased]
 ## [6.0.0-M13] - 2019-04-16
 ### Changed
+- Renamed JdbcRepositoryHelper to JdbcResultSetStreamer
+- Extracted preparedStatementWrapperOf() in JdbcRepositoryHelper to a new class 'PreparedStatementWrapperFactory'
+
+## [6.0.0-M13] - 2019-04-16
+### Changed
 - Upgrade to latest framework-api version 4.0.0-M8
 
 ## [6.0.0-M12] - 2019-04-15

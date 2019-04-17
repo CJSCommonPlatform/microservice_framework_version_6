@@ -4,6 +4,14 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [6.0.0-M15] - 2019-04-17
+### Changed
+- Update test-utils to 1.22.0-M1
+- Update utilities to 1.17.0-M2
+- Update json-schema-catalog to 1.6.1-M2
+- Update framework to 4.0.0-M9
+
 ## [6.0.0-M14] - 2019-04-16
 ### Changed
 - Renamed JdbcRepositoryHelper to JdbcResultSetStreamer

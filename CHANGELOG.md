@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.0.0-M18] - 2019-04-23
+### Changed
+- Update test utils core version to the latest
+
 ## [6.0.0-M17] - 2019-04-23
 ### Changed
 - Update framework-api version to include indexer component

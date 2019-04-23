@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.0.0-M16] - 2019-04-23
+### Changed
+- Update framework-api version
+
 ## [6.0.0-M15] - 2019-04-17
 ### Changed
 - Update test-utils to 1.22.0-M1

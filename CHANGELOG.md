@@ -24,6 +24,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 - Update json-schema-catalog to 1.6.1-M2
 - Update framework to 4.0.0-M9
 
+## [6.0.0-M15] - 2019-04-24
+### Changed
+- Upgrade to latest framework-api version 4.0.0-M12
+
 ## [6.0.0-M14] - 2019-04-16
 ### Changed
 - Renamed JdbcRepositoryHelper to JdbcResultSetStreamer

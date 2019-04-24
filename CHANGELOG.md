@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.0.0-M20] - 2019-04-24
+### Deleted
+- Removed deprecated classes and methods
+
 ## [6.0.0-M19] - 2019-04-24
 ### Changed
 - Upgrade to latest framework-api version 4.0.0-M12

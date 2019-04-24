@@ -28,6 +28,7 @@ public class DefaultInterceptorChainProcessorTest {
 
     @Test
     public void shouldProcessInterceptorContext() throws Exception {
+
         final JsonEnvelope inputEnvelope = mock(JsonEnvelope.class);
         final JsonEnvelope outputEnvelope = mock(JsonEnvelope.class);
         final InterceptorContext interceptorContext = interceptorContextWithInput(inputEnvelope);
@@ -45,32 +46,18 @@ public class DefaultInterceptorChainProcessorTest {
     }
 
     @Test
-    public void shouldProcessJsonEnvelope() throws Exception {
+    public void shouldProcessesDispatcherThatReturnsNull() throws Exception {
+
         final JsonEnvelope inputEnvelope = mock(JsonEnvelope.class);
         final JsonEnvelope outputEnvelope = mock(JsonEnvelope.class);
-        final String component = "component";
-
-        when(interceptorCache.getInterceptors(component)).thenReturn(interceptors());
-        when(dispatch.apply(inputEnvelope)).thenReturn(outputEnvelope);
-
-        final DefaultInterceptorChainProcessor interceptorChainProcessor = new DefaultInterceptorChainProcessor(interceptorCache, dispatch, component);
-
-        final Optional<JsonEnvelope> result = interceptorChainProcessor.process(inputEnvelope);
-
-        assertThat(result.isPresent(), is(true));
-        assertThat(result.get(), is(outputEnvelope));
-    }
-
-    @Test
-    public void shouldProcessesDispatcherThatReturnsNull() throws Exception {
-        final JsonEnvelope inputEnvelope = mock(JsonEnvelope.class);
+        final InterceptorContext interceptorContext = interceptorContextWithInput(inputEnvelope);
         final String component = "component";
 
         when(interceptorCache.getInterceptors(component)).thenReturn(interceptors());
         when(dispatch.apply(inputEnvelope)).thenReturn(null);
 
         final DefaultInterceptorChainProcessor interceptorChainProcessor = new DefaultInterceptorChainProcessor(interceptorCache, dispatch, component);
-        final Optional<JsonEnvelope> result = interceptorChainProcessor.process(inputEnvelope);
+        final Optional<JsonEnvelope> result = interceptorChainProcessor.process(interceptorContext);
 
         assertThat(result, is(Optional.empty()));
     }

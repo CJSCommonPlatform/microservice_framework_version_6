@@ -17,8 +17,7 @@ import org.slf4j.Logger;
 
 /**
  * Observes for {@link AfterDeploymentValidation} and adds all {@link InterceptorChainEntryProvider}
- * and all deprecated {@link InterceptorChainProvider} implementations to the
- * {@link InterceptorCache}
+ * implementations to the {@link InterceptorCache}
  */
 public class InterceptorChainObserver implements Extension {
 
@@ -27,13 +26,9 @@ public class InterceptorChainObserver implements Extension {
     private final List<Bean<?>> interceptorChainProviderBeans = new ArrayList<>();
     private final List<Bean<?>> interceptorBeans = new ArrayList<>();
 
-    @SuppressWarnings({"unused"})
     void afterDeploymentValidation(@Observes final AfterDeploymentValidation event, final BeanManager beanManager) {
-        beanManager.getBeans(InterceptorChainEntryProvider.class, AnyLiteral.create()).stream()
-                .peek(this::logInterceptorChainProvider)
-                .forEach(interceptorChainProviderBeans::add);
 
-        beanManager.getBeans(InterceptorChainProvider.class, AnyLiteral.create()).stream()
+        beanManager.getBeans(InterceptorChainEntryProvider.class, AnyLiteral.create()).stream()
                 .peek(this::logInterceptorChainProvider)
                 .forEach(interceptorChainProviderBeans::add);
 

@@ -3,7 +3,6 @@ package uk.gov.justice.services.core.interceptor;
 import static java.lang.String.format;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toCollection;
-import static java.util.stream.Collectors.toList;
 
 import uk.gov.justice.services.core.extension.BeanInstantiater;
 import uk.gov.justice.services.core.interceptor.exception.InterceptorCacheException;
@@ -39,6 +38,7 @@ public class InterceptorCache {
 
     @PostConstruct
     public void initialise() {
+
         final HashMap<String, Set<InterceptorChainEntryInstance>> orderedComponentInterceptors = new HashMap<>();
         final Map<Class<?>, Interceptor> interceptorInstancesByType = interceptorInstancesByType();
 
@@ -55,6 +55,7 @@ public class InterceptorCache {
      * @return a deque of interceptors in priority order
      */
     Deque<Interceptor> getInterceptors(final String component) {
+
         if (componentInterceptors.containsKey(component)) {
             return new LinkedList<>(componentInterceptors.get(component));
         }
@@ -63,6 +64,7 @@ public class InterceptorCache {
     }
 
     private Map<Class<?>, Interceptor> interceptorInstancesByType() {
+
         final List<Bean<?>> interceptorBeans = interceptorChainObserver.getInterceptorBeans();
         final Map<Class<?>, Interceptor> interceptorInstancesByType = new HashMap<>();
 
@@ -79,6 +81,7 @@ public class InterceptorCache {
     private void createInterceptorChainsByComponent(final Map<Class<?>, Interceptor> interceptorInstancesByType,
                                                     final HashMap<String, Set<InterceptorChainEntryInstance>> orderedComponentInterceptors,
                                                     final Bean<?> providerBean) {
+
         final InterceptorChainEntryProvider interceptorChainEntryProvider = getInterceptorChainEntryProvider(providerBean);
 
         final Set<InterceptorChainEntryInstance> interceptors = newOrCachedInterceptorChain(interceptorChainEntryProvider, orderedComponentInterceptors);
@@ -93,13 +96,8 @@ public class InterceptorCache {
     }
 
     private InterceptorChainEntryProvider getInterceptorChainEntryProvider(final Bean<?> providerBean) {
-        final Object provider = beanInstantiater.instantiate(providerBean);
 
-        if (provider instanceof InterceptorChainProvider) {
-            return new ConvertedInterceptorChainEntryProvider((InterceptorChainProvider) provider);
-        }
-
-        return (InterceptorChainEntryProvider) provider;
+        return (InterceptorChainEntryProvider) beanInstantiater.instantiate(providerBean);
     }
 
     private Interceptor interceptorInstanceFrom(final Map<Class<?>, Interceptor> interceptorInstancesByType, final Class<? extends Interceptor> interceptorChainType) {
@@ -111,6 +109,7 @@ public class InterceptorCache {
     }
 
     private void createComponentInterceptorsFrom(final HashMap<String, Set<InterceptorChainEntryInstance>> orderedComponentInterceptors) {
+
         orderedComponentInterceptors.forEach((key, value) -> {
             final Deque<Interceptor> interceptors = value.stream()
                     .map(InterceptorChainEntryInstance::getInterceptor)
@@ -122,6 +121,7 @@ public class InterceptorCache {
 
     private Set<InterceptorChainEntryInstance> newOrCachedInterceptorChain(final InterceptorChainEntryProvider interceptorChainEntryProvider,
                                                                            final HashMap<String, Set<InterceptorChainEntryInstance>> orderedComponentInterceptors) {
+
         if (orderedComponentInterceptors.containsKey(interceptorChainEntryProvider.component())) {
             return orderedComponentInterceptors.get(interceptorChainEntryProvider.component());
         }
@@ -145,30 +145,6 @@ public class InterceptorCache {
 
         public Interceptor getInterceptor() {
             return interceptor;
-        }
-    }
-
-    private class ConvertedInterceptorChainEntryProvider implements InterceptorChainEntryProvider {
-
-        private final String component;
-        private final List<InterceptorChainEntry> interceptorChainTypes;
-
-        public ConvertedInterceptorChainEntryProvider(final InterceptorChainProvider interceptorChainProvider) {
-            this.component = interceptorChainProvider.component();
-
-            this.interceptorChainTypes = interceptorChainProvider.interceptorChainTypes().stream()
-                    .map(integerClassPair -> new InterceptorChainEntry(integerClassPair.getKey(), integerClassPair.getValue()))
-                    .collect(toList());
-        }
-
-        @Override
-        public String component() {
-            return component;
-        }
-
-        @Override
-        public List<InterceptorChainEntry> interceptorChainTypes() {
-            return interceptorChainTypes;
         }
     }
 }

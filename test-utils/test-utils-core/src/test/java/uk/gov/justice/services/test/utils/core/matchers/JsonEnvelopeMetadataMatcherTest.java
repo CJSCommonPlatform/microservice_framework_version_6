@@ -133,16 +133,6 @@ public class JsonEnvelopeMetadataMatcherTest {
     }
 
     @Test
-    public void shouldMatchMetadataByVersion() throws Exception {
-        final Metadata metadata = metadataWithRandomUUID(EVENT_NAME)
-                .withVersion(POSITION)
-                .build();
-
-        assertThat(metadata, JsonEnvelopeMetadataMatcher.metadata()
-                .withVersion(POSITION));
-    }
-
-    @Test
     public void shouldMatchMetadataByClientCorrelationId() throws Exception {
         final Metadata metadata = metadataWithRandomUUID(EVENT_NAME)
                 .withClientCorrelationId(CLIENT_CORRELATION_ID)
@@ -225,16 +215,6 @@ public class JsonEnvelopeMetadataMatcherTest {
 
         assertThat(metadata, JsonEnvelopeMetadataMatcher.metadata()
                 .withStreamId(randomUUID()));
-    }
-
-    @Test(expected = AssertionError.class)
-    public void shouldFailIfVersionDoesNotMatch() throws Exception {
-        final Metadata metadata = metadataWithRandomUUID(EVENT_NAME)
-                .withVersion(1L)
-                .build();
-
-        assertThat(metadata, JsonEnvelopeMetadataMatcher.metadata()
-                .withVersion(2L));
     }
 
     @Test(expected = AssertionError.class)

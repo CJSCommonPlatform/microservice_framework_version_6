@@ -59,7 +59,7 @@ public class JsonEnvelopeMetadataMatcher extends TypeSafeDiagnosingMatcher<Metad
         description.appendText("Metadata with ");
         id.ifPresent(value -> description.appendText(format("id = %s, ", value)));
         name.ifPresent(value -> description.appendText(format("name = %s, ", value)));
-        causationIds.ifPresent(value -> format("causationIds = %s", Arrays.toString(value)));
+        causationIds.ifPresent(value -> description.appendText(format("causationIds = %s", Arrays.toString(value))));
         userId.ifPresent(value -> description.appendText(format("userId = %s, ", value)));
         sessionId.ifPresent(value -> description.appendText(format("sessionId = %s, ", value)));
         streamId.ifPresent(value -> description.appendText(format("streamId = %s, ", value)));
@@ -103,19 +103,6 @@ public class JsonEnvelopeMetadataMatcher extends TypeSafeDiagnosingMatcher<Metad
         return this;
     }
 
-    /**
-     * deprecated.
-     * version renamed to position. Please use <code>withPosition(...)</code> instead.
-     *
-     * @param version The position of this event
-     * @return this
-     */
-    @Deprecated // renamed to position. Please use instead
-    public JsonEnvelopeMetadataMatcher withVersion(final Long version) {
-        this.position = Optional.of(version);
-        return this;
-    }
-
     public JsonEnvelopeMetadataMatcher withClientCorrelationId(final String clientCorrelationId) {
         this.clientCorrelationId = Optional.of(clientCorrelationId);
         return this;
@@ -141,7 +128,7 @@ public class JsonEnvelopeMetadataMatcher extends TypeSafeDiagnosingMatcher<Metad
         position = metadata.position();
 
         final List<UUID> causation = metadata.causation();
-        causationIds = Optional.of(causation.toArray(new UUID[causation.size()]));
+        causationIds = Optional.of(causation.toArray(new UUID[0]));
 
         return this;
     }

@@ -18,8 +18,6 @@ import java.util.List;
 
 import javax.enterprise.inject.spi.Bean;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -85,24 +83,6 @@ public class InterceptorCacheTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void shouldSupportDeprecatedInterceptorChainProviders() throws Exception {
-        givenThreeInterceptorBeans();
-
-        final InterceptorChainProvider interceptorChainProvider = new DeprecatedInterceptorChainProvider();
-        final Bean<InterceptorChainProvider> interceptorChainProviderBean = mock(Bean.class);
-
-        when(observer.getInterceptorChainProviderBeans()).thenReturn(singletonList(interceptorChainProviderBean));
-        when(beanInstantiater.instantiate(interceptorChainProviderBean)).thenReturn(interceptorChainProvider);
-
-        interceptorCache.initialise();
-
-        final Deque<Interceptor> interceptors = interceptorCache.getInterceptors("Component_1");
-
-        assertThat(interceptors, contains(INTERCEPTOR_1, INTERCEPTOR_2));
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
     public void shouldReturnCorrectInterceptorsForEachComponent() throws Exception {
         givenThreeInterceptorBeans();
 
@@ -140,29 +120,6 @@ public class InterceptorCacheTest {
         when(observer.getInterceptorChainProviderBeans()).thenReturn(asList(interceptorChainProviderBean_1, interceptorChainProviderBean_2));
 
         when(beanInstantiater.instantiate(interceptorChainProviderBean_1)).thenReturn(interceptorChainEntryProvider);
-        when(beanInstantiater.instantiate(interceptorChainProviderBean_2)).thenReturn(interceptorChainEntryProviderExtra);
-
-        interceptorCache.initialise();
-
-        final Deque<Interceptor> interceptors = interceptorCache.getInterceptors("Component_1");
-
-        assertThat(interceptors, contains(INTERCEPTOR_1, INTERCEPTOR_3, INTERCEPTOR_2));
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
-    public void shouldCombineInterceptorsFromMultipleProviderTypes() throws Exception {
-        givenThreeInterceptorBeans();
-
-        final InterceptorChainProvider interceptorChainProvider = new DeprecatedInterceptorChainProvider();
-        final InterceptorChainEntryProvider interceptorChainEntryProviderExtra = new ComponentOneExtraInterceptorChainProvider();
-
-        final Bean<InterceptorChainProvider> interceptorChainProviderBean_1 = mock(Bean.class);
-        final Bean<InterceptorChainEntryProvider> interceptorChainProviderBean_2 = mock(Bean.class);
-
-        when(observer.getInterceptorChainProviderBeans()).thenReturn(asList(interceptorChainProviderBean_1, interceptorChainProviderBean_2));
-
-        when(beanInstantiater.instantiate(interceptorChainProviderBean_1)).thenReturn(interceptorChainProvider);
         when(beanInstantiater.instantiate(interceptorChainProviderBean_2)).thenReturn(interceptorChainEntryProviderExtra);
 
         interceptorCache.initialise();
@@ -318,22 +275,6 @@ public class InterceptorCacheTest {
         @Override
         public InterceptorContext process(final InterceptorContext interceptorContext, final InterceptorChain interceptorChain) {
             return interceptorChain.processNext(interceptorContext);
-        }
-    }
-
-    public class DeprecatedInterceptorChainProvider implements InterceptorChainProvider {
-
-        @Override
-        public String component() {
-            return "Component_1";
-        }
-
-        @Override
-        public List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes() {
-            final List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes = new ArrayList<>();
-            interceptorChainTypes.add(new ImmutablePair<>(1, InterceptorOne.class));
-            interceptorChainTypes.add(new ImmutablePair<>(3, InterceptorTwo.class));
-            return interceptorChainTypes;
         }
     }
 }

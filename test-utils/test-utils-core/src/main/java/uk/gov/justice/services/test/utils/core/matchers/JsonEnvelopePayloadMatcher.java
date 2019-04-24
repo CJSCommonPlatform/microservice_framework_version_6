@@ -15,16 +15,6 @@ public class JsonEnvelopePayloadMatcher extends TypeSafeDiagnosingMatcher<JsonVa
 
     private TypeSafeDiagnosingMatcher<JsonValue> jsonValueMatcher;
 
-    /**
-     * Use {@link JsonEnvelopePayloadMatcher#payload} or {@link JsonEnvelopePayloadMatcher#payloadIsJson}
-     *
-     * @return the payload matcher
-     */
-    @Deprecated
-    public static JsonEnvelopePayloadMatcher payLoad() {
-        return new JsonEnvelopePayloadMatcher();
-    }
-
     public static JsonEnvelopePayloadMatcher payload() {
         return new JsonEnvelopePayloadMatcher();
     }

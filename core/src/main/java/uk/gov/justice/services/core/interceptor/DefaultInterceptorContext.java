@@ -25,19 +25,6 @@ public class DefaultInterceptorContext implements InterceptorContext {
         this.output = output;
     }
 
-    /**
-     * Create an interceptor context with an input {@link ContextPayload} that wraps the input
-     * envelope, an output {@link ContextPayload} with no envelope and an injection point.
-     *
-     * @param inputEnvelope the input JsonEnvelope
-     * @return the new InterceptorContext
-     * @deprecated Use InterceptorContext.interceptorContextWithInput() provided by DefaultInterceptorContextProvider
-     */
-    @Deprecated
-    public static InterceptorContext interceptorContextWithInput(final JsonEnvelope inputEnvelope) {
-        return InterceptorContext.interceptorContextWithInput(inputEnvelope);
-    }
-
     public InterceptorContext copyWithInput(final JsonEnvelope inputEnvelope) {
         return new DefaultInterceptorContext(
                 copyWithEnvelope(this.inputContext(), inputEnvelope),

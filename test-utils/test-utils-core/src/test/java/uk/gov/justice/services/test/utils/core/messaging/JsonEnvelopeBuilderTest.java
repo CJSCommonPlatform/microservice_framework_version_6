@@ -15,7 +15,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
@@ -24,8 +24,6 @@ import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuil
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjectMetadata;
-import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.justice.services.messaging.MetadataBuilder;
 
 import java.util.UUID;
@@ -40,17 +38,6 @@ import org.junit.Test;
 public class JsonEnvelopeBuilderTest {
 
     @Test
-    public void shouldBuildJsonEnvelopeFromMetadataAndJsonValue() {
-        final Metadata metadata = mock(Metadata.class);
-        final JsonValue payload = mock(JsonValue.class);
-
-        final JsonEnvelope envelope = JsonEnvelopeBuilder.envelopeFrom(metadata, payload);
-
-        assertThat(envelope.metadata(), is(metadata));
-        assertThat(envelope.payload(), is(payload));
-    }
-
-    @Test
     public void shouldBuildJsonEnvelopeContainingMetadataAndPayloadFromJsonEnvelope() {
         final UUID id = randomUUID();
         final String name = "name";
@@ -59,7 +46,7 @@ public class JsonEnvelopeBuilderTest {
         final JsonObjectBuilder payload = createObjectBuilder().add("test", "value");
 
         final JsonEnvelope envelope = new JsonEnvelopeBuilder(
-                JsonEnvelope.envelopeFrom(metadata, payload))
+                envelopeFrom(metadata, payload))
                 .build();
 
         assertThat(envelope, jsonEnvelope(
@@ -76,7 +63,7 @@ public class JsonEnvelopeBuilderTest {
         final JsonObjectBuilder payload = createObjectBuilder().add("test", "value");
 
         final JsonEnvelope envelope = envelope()
-                .withPayloadFrom(JsonEnvelope.envelopeFrom(metadata, payload)).build();
+                .withPayloadFrom(envelopeFrom(metadata, payload)).build();
 
         assertThat(envelope.metadata(), nullValue());
         assertThat(envelope, jsonEnvelope()
@@ -152,46 +139,13 @@ public class JsonEnvelopeBuilderTest {
     }
 
     @Test
-    public void shouldBuildJsonEnvelopeFromDeprecatedMetadataBuilderAndJsonValue() {
-        final UUID id = randomUUID();
-        final String name = "name";
-
-        final JsonObjectMetadata.Builder metadataBuilder = JsonObjectMetadata.metadataOf(id, name);
-        final JsonValue payload = mock(JsonValue.class);
-
-        final JsonEnvelope envelope = JsonEnvelopeBuilder.envelopeFrom(metadataBuilder, payload);
-
-        assertThat(envelope, jsonEnvelope().withMetadataOf(metadata().withId(id).withName(name)));
-        assertThat(envelope.payload(), is(payload));
-    }
-
-    @Test
-    public void shouldBuildJsonEnvelopeFromDeprecatedMetadataBuilderAndJsonObjectBuilder() {
-        final UUID id = randomUUID();
-        final String name = "name";
-
-        final JsonObjectMetadata.Builder metadataBuilder = JsonObjectMetadata.metadataOf(id, name);
-        final JsonObjectBuilder jsonObjectBuilder = createObjectBuilder().add("test", "value");
-
-        final JsonEnvelope envelope = JsonEnvelopeBuilder.envelopeFrom(metadataBuilder, jsonObjectBuilder);
-
-        assertThat(envelope, jsonEnvelope(
-                metadata().withId(id).withName(name),
-                payloadIsJson(withJsonPath("$.test", equalTo("value")))));
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
     public void shouldBuildWithDeprecatedMetadataBuilder() {
         final String metadataName = "metadata name";
         final UUID metadataId = randomUUID();
-        final JsonObjectMetadata.Builder metadata = JsonObjectMetadata.metadataOf(metadataId, metadataName);
-        final UUID testId = randomUUID();
 
-        final JsonEnvelope jsonEnvelope = envelope()
-                .with(metadata)
-                .withPayloadOf(1, "int")
-                .build();
+        final JsonEnvelope jsonEnvelope = envelopeFrom(
+                metadataBuilder().withId(metadataId).withName(metadataName),
+                createObjectBuilder().add("int", 1));
 
         assertThat(jsonEnvelope, jsonEnvelope(
                 metadata().withId(metadataId).withName(metadataName),

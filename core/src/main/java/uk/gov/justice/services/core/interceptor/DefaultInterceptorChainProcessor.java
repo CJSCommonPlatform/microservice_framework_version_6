@@ -1,7 +1,5 @@
 package uk.gov.justice.services.core.interceptor;
 
-import static uk.gov.justice.services.core.interceptor.InterceptorContext.interceptorContextWithInput;
-
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.Optional;
@@ -26,14 +24,6 @@ public class DefaultInterceptorChainProcessor implements InterceptorChainProcess
         return new DefaultInterceptorChain(interceptorCache.getInterceptors(component), targetOf(dispatch))
                 .processNext(interceptorContext)
                 .outputEnvelope();
-    }
-
-    @Override
-    @Deprecated
-    public Optional<JsonEnvelope> process(final JsonEnvelope jsonEnvelope) {
-        final InterceptorContext context = interceptorContextWithInput(jsonEnvelope);
-        context.setInputParameter("component", component);
-        return process(context);
     }
 
     private Target targetOf(final Function<JsonEnvelope, JsonEnvelope> dispatch) {

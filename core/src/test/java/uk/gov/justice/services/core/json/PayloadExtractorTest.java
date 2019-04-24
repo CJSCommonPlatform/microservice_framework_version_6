@@ -2,10 +2,11 @@ package uk.gov.justice.services.core.json;
 
 import static com.jayway.jsonassert.JsonAssert.with;
 import static java.util.UUID.randomUUID;
+import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.is;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonEnvelope.METADATA;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
@@ -30,11 +31,12 @@ public class PayloadExtractorTest {
         final UUID streamId = randomUUID();
         final String commandName = "time-travel-initiated";
 
-        final JsonEnvelope jsonEnvelope = envelope()
-                .with(metadataWithRandomUUID(commandName)
-                        .withStreamId(streamId))
-                .withPayloadOf("Jurassic Era", "destination")
-                .build();
+        final JsonEnvelope jsonEnvelope = envelopeFrom(metadataBuilder()
+                        .withId(randomUUID())
+                        .withStreamId(streamId)
+                        .withName(commandName),
+                createObjectBuilder()
+                        .add("destination", "Jurassic Era"));
 
         final String envelopeJson = jsonEnvelope.toDebugStringPrettyPrint();
 

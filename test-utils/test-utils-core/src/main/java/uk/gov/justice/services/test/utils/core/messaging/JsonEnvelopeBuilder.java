@@ -5,10 +5,7 @@ import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
 
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjectMetadata;
-import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.justice.services.messaging.MetadataBuilder;
-import uk.gov.justice.services.test.utils.core.messaging.JsonObjectBuilderWrapper;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -17,8 +14,6 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonValue;
 
 /**
  * Implementation of the {@link JsonEnvelope} specifically for testing purposes that include useful
@@ -28,39 +23,6 @@ public class JsonEnvelopeBuilder {
 
     private JsonObjectBuilderWrapper payload;
     private MetadataBuilder metadata;
-
-    /**
-     * @param metadata the metadata
-     * @param payload  the payload
-     * @return a JsonEnvelope
-     * @deprecated Use {@link JsonEnvelope#envelopeFrom(Metadata, JsonValue)}
-     */
-    @Deprecated
-    public static JsonEnvelope envelopeFrom(final Metadata metadata, final JsonValue payload) {
-        return JsonEnvelope.envelopeFrom(metadata, payload);
-    }
-
-    /**
-     * @param metadataBuilder the metadataBuilder
-     * @param payload         the payload
-     * @return a JsonEnvelope
-     * @deprecated Use {@link JsonEnvelope#envelopeFrom(MetadataBuilder, JsonValue)}
-     */
-    @Deprecated
-    public static JsonEnvelope envelopeFrom(final JsonObjectMetadata.Builder metadataBuilder, final JsonValue payload) {
-        return JsonEnvelope.envelopeFrom(metadataBuilder.build(), payload);
-    }
-
-    /**
-     * @param metadataBuilder the metadataBuilder
-     * @param payloadBuilder  the payloadBuilder
-     * @return a JsonEnvelope
-     * @deprecated Use {@link JsonEnvelope#envelopeFrom(MetadataBuilder, JsonObjectBuilder)}
-     */
-    @Deprecated
-    public static JsonEnvelope envelopeFrom(final JsonObjectMetadata.Builder metadataBuilder, final JsonObjectBuilder payloadBuilder) {
-        return JsonEnvelope.envelopeFrom(metadataBuilder.build(), payloadBuilder.build());
-    }
 
     public static JsonEnvelopeBuilder envelope() {
         return new JsonEnvelopeBuilder();
@@ -77,15 +39,6 @@ public class JsonEnvelopeBuilder {
 
     public JsonEnvelopeBuilder with(final MetadataBuilder metadata) {
         this.metadata = metadata;
-        return this;
-    }
-
-    /**
-     * @deprecated Use {@link JsonEnvelopeBuilder#with(MetadataBuilder)}
-     */
-    @Deprecated
-    public JsonEnvelopeBuilder with(final JsonObjectMetadata.Builder metadata) {
-        this.metadata = metadataFrom(metadata.build());
         return this;
     }
 

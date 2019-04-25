@@ -184,7 +184,7 @@ public class EventHandlerIT {
                         .withId(metadataId)
                         .withName(EVENT_ABC)
                         .withStreamId(randomUUID())
-                        .withVersion(1L),
+                        .withPosition(1L),
                 createObjectBuilder());
 
         interceptorChainProcessor.process(interceptorContextWithInput(jsonEnvelope));
@@ -202,7 +202,7 @@ public class EventHandlerIT {
                         .withId(metadataId)
                         .withName("some.unregistered.event")
                         .withStreamId(randomUUID())
-                        .withVersion(1L),
+                        .withPosition(1L),
                 createObjectBuilder());
 
         interceptorChainProcessor.process(interceptorContextWithInput(jsonEnvelope));
@@ -220,7 +220,7 @@ public class EventHandlerIT {
                         .withId(metadataId)
                         .withName(EVENT_ABC)
                         .withStreamId(randomUUID())
-                        .withVersion(1L),
+                        .withPosition(1L),
                 createObjectBuilder());
 
         interceptorChainProcessor.process(interceptorContextWithInput(jsonEnvelope));

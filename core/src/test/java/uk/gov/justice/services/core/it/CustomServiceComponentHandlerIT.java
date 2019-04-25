@@ -177,7 +177,7 @@ public class CustomServiceComponentHandlerIT {
                         .withId(metadataId)
                         .withName(CUSTOM_XYZ)
                         .withStreamId(randomUUID())
-                        .withVersion(1L),
+                        .withPosition(1L),
                 createObjectBuilder());
 
         interceptorChainProcessor.process(interceptorContextWithInput(jsonEnvelope));

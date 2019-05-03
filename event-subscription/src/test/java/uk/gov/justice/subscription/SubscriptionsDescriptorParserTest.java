@@ -7,11 +7,11 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.yaml.YamlFileValidator;
+import uk.gov.justice.services.yaml.YamlParser;
+import uk.gov.justice.services.yaml.YamlSchemaLoader;
+import uk.gov.justice.services.yaml.YamlToJsonObjectConverter;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionsDescriptor;
-import uk.gov.justice.subscription.yaml.parser.YamlFileValidator;
-import uk.gov.justice.subscription.yaml.parser.YamlParser;
-import uk.gov.justice.subscription.yaml.parser.YamlSchemaLoader;
-import uk.gov.justice.subscription.yaml.parser.YamlToJsonObjectConverter;
 
 import java.net.MalformedURLException;
 import java.net.URL;

@@ -1,8 +1,8 @@
 package uk.gov.justice.subscription;
 
+import uk.gov.justice.services.yaml.YamlFileValidator;
+import uk.gov.justice.services.yaml.YamlParser;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionsDescriptor;
-import uk.gov.justice.subscription.yaml.parser.YamlFileValidator;
-import uk.gov.justice.subscription.yaml.parser.YamlParser;
 
 import java.net.URL;
 import java.util.Collection;
@@ -15,6 +15,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
  * Parse YAML URLs into {@link SubscriptionsDescriptor}s
  */
 public class SubscriptionsDescriptorParser {
+    private static final String SCHEMA_LOCATION = "/json/schema/";
+
+    private static final String SUBSCRIPTION_SCHEMA_PATH = SCHEMA_LOCATION + "subscription-schema.json";
+
     private static final TypeReference<Map<String, SubscriptionsDescriptor>> SUBSCRIPTIONS_DESCRIPTOR_TYPE_REF
             = new TypeReference<Map<String, SubscriptionsDescriptor>>() {
     };
@@ -43,7 +47,7 @@ public class SubscriptionsDescriptorParser {
     }
 
     private SubscriptionsDescriptor parseSubscriptionDescriptorFromYaml(final URL url) {
-        yamlFileValidator.validateSubscription(url);
+        yamlFileValidator.validate(SUBSCRIPTION_SCHEMA_PATH, url);
 
         final Map<String, SubscriptionsDescriptor> stringSubscriptionDescriptorMap = yamlParser.parseYamlFrom(url, SUBSCRIPTIONS_DESCRIPTOR_TYPE_REF);
         final SubscriptionsDescriptor subscriptionsDescriptor = stringSubscriptionDescriptorMap.get(SUBSCRIPTIONS_DESCRIPTOR);

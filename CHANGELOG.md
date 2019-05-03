@@ -4,6 +4,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+## [6.0.0-M21] - 2019-05-03
+### - Removed
+- Event subscription now depends on utilites for YAML parser
 
 ## [6.0.0-M20] - 2019-04-24
 ### Deleted

@@ -46,7 +46,7 @@
         <embedded-artemis.version>1.2.0</embedded-artemis.version>
         <jboss-ejb3-ext-api.version>2.2.0.Final</jboss-ejb3-ext-api.version>
         <test-utils.version>1.22.0-M1</test-utils.version>
-        <utilities.version>1.16.4</utilities.version>
+        <utilities.version>1.17.0-M3</utilities.version>
         <json-schema-catalog.version>1.6.0</json-schema-catalog.version>
         <framework-api.version>4.0.0-M13</framework-api.version>
     </properties>

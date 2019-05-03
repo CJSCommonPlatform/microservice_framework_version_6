@@ -1,8 +1,8 @@
 package uk.gov.justice.subscription;
 
+import uk.gov.justice.services.yaml.YamlFileValidator;
+import uk.gov.justice.services.yaml.YamlParser;
 import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
-import uk.gov.justice.subscription.yaml.parser.YamlFileValidator;
-import uk.gov.justice.subscription.yaml.parser.YamlParser;
 
 import java.net.URL;
 import java.util.List;
@@ -15,6 +15,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
  * Parse YAML URLs into {@link EventSourceDefinition}s
  */
 public class EventSourcesParser {
+    private static final String SCHEMA_LOCATION  = "/json/schema/";
+    private static final String EVENT_SOURCES_SCHEMA_PATH = SCHEMA_LOCATION + "event-source-schema.json";
+
     private static final TypeReference<Map<String, List<EventSourceDefinition>>> EVENT_SOURCES_TYPE_REF
             = new TypeReference<Map<String, List<EventSourceDefinition>>>() {
     };
@@ -40,7 +43,7 @@ public class EventSourcesParser {
     }
 
     private Stream<EventSourceDefinition> parseEventSourcesFromYaml(final URL url) {
-        yamlFileValidator.validateEventSource(url);
+        yamlFileValidator.validate(EVENT_SOURCES_SCHEMA_PATH, url);
         final Map<String, List<EventSourceDefinition>> stringListMap = yamlParser.parseYamlFrom(url, EVENT_SOURCES_TYPE_REF);
         return stringListMap.get(EVENT_SOURCES).stream();
     }

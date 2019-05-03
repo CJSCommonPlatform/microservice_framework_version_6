@@ -1,9 +1,9 @@
 package uk.gov.justice.subscription;
 
-import uk.gov.justice.subscription.yaml.parser.YamlFileValidator;
-import uk.gov.justice.subscription.yaml.parser.YamlParser;
-import uk.gov.justice.subscription.yaml.parser.YamlSchemaLoader;
-import uk.gov.justice.subscription.yaml.parser.YamlToJsonObjectConverter;
+import uk.gov.justice.services.yaml.YamlFileValidator;
+import uk.gov.justice.services.yaml.YamlParser;
+import uk.gov.justice.services.yaml.YamlSchemaLoader;
+import uk.gov.justice.services.yaml.YamlToJsonObjectConverter;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;

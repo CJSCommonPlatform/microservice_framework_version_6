@@ -5,8 +5,8 @@ import static java.lang.String.format;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.naturalOrder;
 
+import uk.gov.justice.services.yaml.YamlParserException;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionsDescriptor;
-import uk.gov.justice.subscription.yaml.parser.YamlParserException;
 
 public class SubscriptionHelper {
 
@@ -25,7 +25,7 @@ public class SubscriptionHelper {
             }
             return HIGHEST_PRIORITY;
         } catch (final NumberFormatException nfe) {
-            throw new YamlParserException(format("Incorrect prioritisation number: %s in subscription-descriptor.yaml", prioritisation));
+            throw new YamlParserException(format("Incorrect prioritisation number: %s in subscription-descriptor.yaml", prioritisation), nfe);
         }
     }
 }

@@ -4,6 +4,15 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [6.0.0-M22] - 2019-05-07
+### Changed
+- Update common-bom to 2.0.2
+- Update test-utils to 1.23.0
+- Update utilities to 1.18.0
+- Update json-schema-catalog to 1.7.0
+- Update framework to 4.0.0-M18
+
 ## [6.0.0-M21] - 2019-05-03
 ### - Removed
 - Event subscription now depends on utilites for YAML parser

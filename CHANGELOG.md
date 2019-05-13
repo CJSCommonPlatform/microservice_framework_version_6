@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.0.0-M23] - 2019-05-13
+### Changed
+- Update framework-api to 4.0.0-M19
+
 ## [6.0.0-M22] - 2019-05-07
 ### Changed
 - Update common-bom to 2.0.2

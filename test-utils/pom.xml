@@ -17,6 +17,8 @@
         <module>test-utils-core</module>
         <module>test-utils-common</module>
         <module>test-utils-enveloper-provider</module>
+        <module>test-utils-framework-persistence</module>
+        <module>test-utils-messaging</module>
     </modules>
     <packaging>pom</packaging>
 

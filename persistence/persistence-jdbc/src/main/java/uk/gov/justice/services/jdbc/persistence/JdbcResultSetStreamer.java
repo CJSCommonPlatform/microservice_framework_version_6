@@ -3,18 +3,13 @@ package uk.gov.justice.services.jdbc.persistence;
 import static java.lang.Long.MAX_VALUE;
 import static java.util.Spliterator.ORDERED;
 import static java.util.stream.StreamSupport.stream;
-import static uk.gov.justice.services.jdbc.persistence.PreparedStatementWrapper.valueOf;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
-import javax.sql.DataSource;
 
 /**
  * Provides methods for returning result sets as streams

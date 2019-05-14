@@ -36,9 +36,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>uk.gov.justice.services</groupId>
+            <groupId>uk.gov.justice.utils</groupId>
             <artifactId>test-utils-core</artifactId>
-            <version>${project.version}</version>
+            <version>${test-utils.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

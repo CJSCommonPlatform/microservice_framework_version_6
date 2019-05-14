@@ -62,11 +62,10 @@ import uk.gov.justice.services.core.requester.RequesterProducer;
 import uk.gov.justice.services.core.sender.SenderProducer;
 import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
-import uk.gov.justice.services.messaging.jms.DefaultJmsEnvelopeSender;
 import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
 import uk.gov.justice.services.test.utils.common.envelope.TestEnvelopeRecorder;
 import uk.gov.justice.services.test.utils.common.validator.DummyJsonSchemaValidator;
+import uk.gov.justice.services.test.utils.messaging.jms.DummyJmsEnvelopeSender;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -111,8 +110,10 @@ public class CustomServiceComponentHandlerIT {
             CustomInterceptorChainProvider.class,
 
             SenderProducer.class,
-            DefaultJmsEnvelopeSender.class,
-            DefaultEnvelopeConverter.class,
+            DummyJmsEnvelopeSender.class,
+            DispatcherFactory.class,
+            EnvelopePayloadTypeConverter.class,
+            JsonEnvelopeRepacker.class,
 
             StringToJsonObjectConverter.class,
             DefaultJsonObjectEnvelopeConverter.class,

@@ -3,7 +3,6 @@ package uk.gov.justice.services.messaging;
 import static javax.json.Json.createWriterFactory;
 import static javax.json.stream.JsonGenerator.PRETTY_PRINTING;
 
-import java.io.IOException;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;

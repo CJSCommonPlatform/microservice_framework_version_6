@@ -1,6 +1,5 @@
 package uk.gov.justice.services.core.enveloper.spi;
 
-import static javax.ejb.embeddable.EJBContainer.createEJBContainer;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -56,27 +55,19 @@ import uk.gov.justice.services.messaging.DefaultJsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
-import uk.gov.justice.services.messaging.jms.DefaultEnvelopeConverter;
-import uk.gov.justice.services.messaging.jms.DefaultJmsEnvelopeSender;
 import uk.gov.justice.services.messaging.logging.DefaultTraceLogger;
 import uk.gov.justice.services.messaging.spi.DefaultEnvelope;
 import uk.gov.justice.services.test.utils.common.validator.DummyJsonSchemaValidator;
+import uk.gov.justice.services.test.utils.messaging.jms.DummyJmsEnvelopeSender;
 
 import java.util.UUID;
 import java.util.function.Function;
 
-import javax.ejb.embeddable.EJBContainer;
-
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.apache.openejb.jee.Application;
 import org.apache.openejb.jee.WebApp;
 import org.apache.openejb.junit.ApplicationComposer;
 import org.apache.openejb.testing.Classes;
 import org.apache.openejb.testing.Module;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -102,8 +93,10 @@ public class DefaultEnveloperProviderTest {
             AllEventsHandlerIT.EventListenerInterceptorChainProvider.class,
 
             SenderProducer.class,
-            DefaultJmsEnvelopeSender.class,
-            DefaultEnvelopeConverter.class,
+            DummyJmsEnvelopeSender.class,
+            DispatcherFactory.class,
+            EnvelopePayloadTypeConverter.class,
+            JsonEnvelopeRepacker.class,
 
             StringToJsonObjectConverter.class,
             DefaultJsonObjectEnvelopeConverter.class,

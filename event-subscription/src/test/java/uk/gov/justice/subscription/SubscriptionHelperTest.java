@@ -1,9 +1,9 @@
 package uk.gov.justice.subscription;
 
 
-import static org.hamcrest.Matchers.is;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 

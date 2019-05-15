@@ -4,9 +4,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
-import uk.gov.justice.subscription.domain.eventsource.Location;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;

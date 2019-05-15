@@ -3,9 +3,6 @@ package uk.gov.justice.subscription.domain.eventsource;
 import static java.lang.String.format;
 import static java.util.Optional.of;
 
-import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
-import uk.gov.justice.subscription.domain.eventsource.Location;
-
 import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
 

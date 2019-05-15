@@ -2,7 +2,9 @@ package uk.gov.justice.services.jmx.lifecycle;
 
 import static java.lang.String.format;
 
+import uk.gov.justice.services.core.lifecycle.events.shuttering.ShutteringCompleteEvent;
 import uk.gov.justice.services.core.lifecycle.events.shuttering.ShutteringRequestedEvent;
+import uk.gov.justice.services.core.lifecycle.events.shuttering.UnshutteringCompleteEvent;
 import uk.gov.justice.services.core.lifecycle.events.shuttering.UnshutteringRequestedEvent;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -18,17 +20,24 @@ public class ShutteringObserver {
     private Logger logger;
 
     @Inject
-    private ShutteringFlagProducerBean shutteringFlagProducerBean;
+    private ShutteringBean shutteringBean;
 
 
-    public void onShutterringRequested(@Observes final ShutteringRequestedEvent shutteringRequestedEvent){
+    public void onShutteringRequested(@Observes final ShutteringRequestedEvent shutteringRequestedEvent){
         logger.info(format("Shuttering requested started at: %s", shutteringRequestedEvent.getShutteringRequestedAt()));
-        shutteringFlagProducerBean.setDoShuttering(true);
+        shutteringBean.shutter();
     }
 
-    public void onUnShutterringRequested(@Observes final UnshutteringRequestedEvent unshutteringRequestedEvent){
+    public void onShutteringComplete(@Observes final ShutteringCompleteEvent shutteringCompleteEvent) {
+        logger.info(format("Shuttering completed at: %s", shutteringCompleteEvent.getShutteringCompleteAt()));
+    }
+
+    public void onUnShutteringRequested(@Observes final UnshutteringRequestedEvent unshutteringRequestedEvent){
         logger.info(format("Unshuttering requested started at: %s", unshutteringRequestedEvent.getUnshutteringRequestedAt()));
-        shutteringFlagProducerBean.setDoShuttering(false);
+        shutteringBean.unshutter();
     }
 
+    public void onUnshutteringComplete(@Observes final UnshutteringCompleteEvent unshutteringCompleteEvent) {
+        logger.info(format("Unshuttering completed at: %s", unshutteringCompleteEvent.getUnshutteringCompletedAt()));
+    }
 }

@@ -5,6 +5,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### [6.0.0-M25] - 2019-05-17
 ### Added
 - JMX Rebuild service bean
 

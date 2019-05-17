@@ -4,13 +4,16 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+### Added
+- JMX Rebuild service bean
+
 ## [6.0.0-M24] - 2019-05-15
 ### Changed
 - Shuttering now shutters in command api
 - All commands received whilst the application is shuttered are stored in a new table 
 'shuttered_command_store' in the viewstore
 - Stored commands are send to JMS once the application is un-shuttered
-
 
 ## [6.0.0-M23] - 2019-05-13
 ### Changed

@@ -25,6 +25,9 @@ public class MBeanFactoryTest {
     private Catchup catchup;
 
     @Mock
+    private Rebuild rebuild;
+
+    @Mock
     private ObjectNameFactory objectNameFactory;
 
     @InjectMocks
@@ -35,13 +38,16 @@ public class MBeanFactoryTest {
 
         final ObjectName shutteringObjectName = mock(ObjectName.class);
         final ObjectName catchupObjectName = mock(ObjectName.class);
+        final ObjectName rebuildObjectName = mock(ObjectName.class);
 
         when(objectNameFactory.create("shuttering", "type", "Shuttering")).thenReturn(shutteringObjectName);
         when(objectNameFactory.create("catchup", "type", "Catchup")).thenReturn(catchupObjectName);
+        when(objectNameFactory.create("rebuild", "type", "Rebuild")).thenReturn(rebuildObjectName);
 
         final Map<Object, ObjectName> mBeans = mBeanFactory.createMBeans();
 
         assertThat(mBeans.get(shuttering), is(shutteringObjectName));
         assertThat(mBeans.get(catchup), is(catchupObjectName));
+        assertThat(mBeans.get(rebuild), is(rebuildObjectName));
     }
 }

@@ -49,7 +49,7 @@
         <test-utils.version>1.23.0</test-utils.version>
         <utilities.version>1.18.0</utilities.version>
         <json-schema-catalog.version>1.7.0</json-schema-catalog.version>
-        <framework-api.version>4.0.0-M20</framework-api.version>
+        <framework-api.version>4.0.0-M21</framework-api.version>
     </properties>
 
     <dependencyManagement>

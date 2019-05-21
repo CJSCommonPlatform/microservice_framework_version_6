@@ -2,16 +2,12 @@ package uk.gov.justice.services.messaging.jms;
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
-/**
- * An envelope producer that sends or publishes an envelope to a queue or topic respectively
- * depending on the destination type.
- */
-public class DefaultJmsEnvelopeSender implements JmsEnvelopeSender {
+public class ShutteringJmsEnvelopeSender implements JmsEnvelopeSender {
 
-    private final JmsSender jmsSender;
+    private final EnvelopeSenderSelector envelopeSenderSelector;
 
-    public DefaultJmsEnvelopeSender(final JmsSender jmsSender) {
-        this.jmsSender = jmsSender;
+    public ShutteringJmsEnvelopeSender(final EnvelopeSenderSelector envelopeSenderSelector) {
+        this.envelopeSenderSelector = envelopeSenderSelector;
     }
 
     /**
@@ -22,6 +18,6 @@ public class DefaultJmsEnvelopeSender implements JmsEnvelopeSender {
      */
     @Override
     public void send(final JsonEnvelope envelope, final String destinationName) {
-        jmsSender.send(envelope, destinationName);
+        envelopeSenderSelector.getEnvelopeSender().send(envelope, destinationName);
     }
 }

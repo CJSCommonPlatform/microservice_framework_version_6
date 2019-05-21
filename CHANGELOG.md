@@ -5,6 +5,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Added
+- Producer for JmsEnvelopeSender, COMMAND-API component will return shuttering version, otherwise default
+
 ### [6.0.0-M25] - 2019-05-17
 ### Added
 - JMX Rebuild service bean

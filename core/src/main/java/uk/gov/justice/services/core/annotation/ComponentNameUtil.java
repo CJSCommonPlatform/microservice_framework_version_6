@@ -17,24 +17,24 @@ public final class ComponentNameUtil {
     /**
      * Retrieves name of the component of the provided {@link ServiceComponent} or {@link Adapter}.
      *
-     * @param clazz The service component to be analysed
+     * @param aClass The service component to be analysed
      * @return the component from the provided {@link ServiceComponent} or {@link Adapter}
      */
-    public static String componentFrom(final Class<?> clazz) {
-        if (clazz.isAnnotationPresent(ServiceComponent.class)) {
-            return clazz.getAnnotation(ServiceComponent.class).value();
-        } else if (clazz.isAnnotationPresent(Adapter.class)) {
-            return clazz.getAnnotation(Adapter.class).value();
-        } else if (clazz.isAnnotationPresent(FrameworkComponent.class)) {
-            return clazz.getAnnotation(FrameworkComponent.class).value();
-        } else if (clazz.isAnnotationPresent(CustomServiceComponent.class)) {
-            return clazz.getAnnotation(CustomServiceComponent.class).value();
-        } else if (clazz.isAnnotationPresent(CustomAdapter.class)) {
-            return clazz.getAnnotation(CustomAdapter.class).value();
-        } else if (clazz.isAnnotationPresent(DirectAdapter.class)) {
-            return clazz.getAnnotation(DirectAdapter.class).value();
+    public static String componentFrom(final Class<?> aClass) {
+        if (aClass.isAnnotationPresent(ServiceComponent.class)) {
+            return aClass.getAnnotation(ServiceComponent.class).value();
+        } else if (aClass.isAnnotationPresent(Adapter.class)) {
+            return aClass.getAnnotation(Adapter.class).value();
+        } else if (aClass.isAnnotationPresent(FrameworkComponent.class)) {
+            return aClass.getAnnotation(FrameworkComponent.class).value();
+        } else if (aClass.isAnnotationPresent(CustomServiceComponent.class)) {
+            return aClass.getAnnotation(CustomServiceComponent.class).value();
+        } else if (aClass.isAnnotationPresent(CustomAdapter.class)) {
+            return aClass.getAnnotation(CustomAdapter.class).value();
+        } else if (aClass.isAnnotationPresent(DirectAdapter.class)) {
+            return aClass.getAnnotation(DirectAdapter.class).value();
         } else {
-            throw new IllegalStateException(format("No annotation found to define component for class %s", clazz));
+            throw new IllegalStateException(format("No annotation found to define component for class %s", aClass));
         }
     }
 
@@ -47,6 +47,16 @@ public final class ComponentNameUtil {
     public static String componentFrom(final InjectionPoint injectionPoint) {
         return fieldLevelComponent(injectionPoint)
                 .orElseGet(() -> componentFrom(injectionPoint.getMember().getDeclaringClass()));
+    }
+
+    /**
+     * Checks if the injection point class has a component annotation.
+     *
+     * @param injectionPoint the injection point to be analysed
+     * @return true if the injection point has a component annotation
+     */
+    public static boolean hasComponentAnnotation(final InjectionPoint injectionPoint) {
+        return hasComponentAnnotation(injectionPoint.getMember().getDeclaringClass());
     }
 
     private static Optional<String> fieldLevelComponent(final InjectionPoint injectionPoint) {
@@ -62,6 +72,15 @@ public final class ComponentNameUtil {
         }
 
         return empty();
+    }
+
+    private static boolean hasComponentAnnotation(final Class<?> aClass) {
+        return aClass.isAnnotationPresent(ServiceComponent.class) ||
+                aClass.isAnnotationPresent(Adapter.class) ||
+                aClass.isAnnotationPresent(FrameworkComponent.class) ||
+                aClass.isAnnotationPresent(CustomServiceComponent.class) ||
+                aClass.isAnnotationPresent(CustomAdapter.class) ||
+                aClass.isAnnotationPresent(DirectAdapter.class);
     }
 
 }

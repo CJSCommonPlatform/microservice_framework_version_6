@@ -3,12 +3,14 @@ package uk.gov.justice.services.core.annotation;
 
 import static net.trajano.commons.testing.UtilityClassTestUtil.assertUtilityClassWellDefined;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLLER;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 import static uk.gov.justice.services.core.annotation.ComponentNameUtil.componentFrom;
+import static uk.gov.justice.services.core.annotation.ComponentNameUtil.hasComponentAnnotation;
 import static uk.gov.justice.services.test.utils.common.MemberInjectionPoint.injectionPointWith;
 
 import javax.inject.Inject;
@@ -74,11 +76,26 @@ public class ComponentNameUtilTest {
         assertThat(componentFrom(injectionPointWith(CustomServiceFieldLevelAnnotation.class.getDeclaredField(FIELD_NAME))), equalTo("CUSTOM_SERVICE_NAME"));
     }
 
-
-
     @Test(expected = IllegalStateException.class)
     public void shouldThrowExceptionOnMissingComponentAnnotation() throws NoSuchFieldException {
         componentFrom(injectionPointWith(NoAnnotation.class.getDeclaredField(FIELD_NAME)));
+    }
+
+    @Test
+    public void shouldReturnTrueForClassWithComponentAnnotation() throws Exception {
+
+        assertThat(hasComponentAnnotation(injectionPointWith(ServiceComponentClassLevelAnnotation.class.getDeclaredField(FIELD_NAME))), is(true));
+        assertThat(hasComponentAnnotation(injectionPointWith(ServiceComponentClassLevelAnnotationMethod.class.getDeclaredMethods()[0])), is(true));
+        assertThat(hasComponentAnnotation(injectionPointWith(AdapterAnnotation.class.getDeclaredField(FIELD_NAME))), is(true));
+        assertThat(hasComponentAnnotation(injectionPointWith(DirectAdapterAnnotation.class.getDeclaredField(FIELD_NAME))), is(true));
+        assertThat(hasComponentAnnotation(injectionPointWith(CustomAdapterAnnotation.class.getDeclaredField(FIELD_NAME))), is(true));
+        assertThat(hasComponentAnnotation(injectionPointWith(FrameworkComponentClassLevelAnnotation.class.getDeclaredField(FIELD_NAME))), is(true));
+        assertThat(hasComponentAnnotation(injectionPointWith(CustomServiceClassLevelAnnotation.class.getDeclaredMethods()[0])), is(true));
+    }
+
+    @Test
+    public void shouldReturnFalseForClassWithNoComponentAnnotation() throws Exception {
+        assertThat(hasComponentAnnotation(injectionPointWith(NoAnnotation.class.getDeclaredField(FIELD_NAME))), is(false));
     }
 
     public static class ServiceComponentFieldLevelAnnotation {

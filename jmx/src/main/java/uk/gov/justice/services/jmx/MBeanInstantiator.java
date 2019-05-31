@@ -2,6 +2,8 @@ package uk.gov.justice.services.jmx;
 
 import static java.lang.String.format;
 
+import uk.gov.justice.services.jmx.command.SystemCommander;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.ejb.Singleton;
@@ -12,39 +14,48 @@ import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
 import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
 
 @Startup
 @Singleton
 public class MBeanInstantiator {
 
-    @Inject
-    private MBeanRegistry mBeanRegistry;
+    private static final String SYSTEM_COMMANDER_DOMAIN_NAME = "systemCommander";
+
+    private static final String SYSTEM_COMMANDER_BEAN = "SystemCommander";
+    private static final String OBJECT_NAME_KEY = "type";
 
     @Inject
     private MBeanServer mbeanServer;
 
+    @Inject
+    private SystemCommander systemCommander;
+
+    @Inject
+    private ObjectNameFactory objectNameFactory;
+
     @PostConstruct
-    public void registerMBeans() {
-        mBeanRegistry.getMBeanMap()
-                .forEach((key, value) -> {
-                    try {
-                        mbeanServer.registerMBean(key, value);
-                    } catch (final InstanceAlreadyExistsException | MBeanRegistrationException | NotCompliantMBeanException e) {
-                        throw new MBeanException(format("MXBean registration failed for key '%s', value '%s'", key, value), e);
-                    }
-                });
+    public void registerSystemCommanderMBean() {
+
+        final ObjectName objectName = objectNameFactory.create(SYSTEM_COMMANDER_DOMAIN_NAME, OBJECT_NAME_KEY, SYSTEM_COMMANDER_BEAN);
+
+        try {
+            mbeanServer.registerMBean(systemCommander, objectName);
+        } catch (InstanceAlreadyExistsException | MBeanRegistrationException | NotCompliantMBeanException e) {
+            throw new MBeanException(format("Failed to register SystemCommander MBean using object name '%s'", objectName), e);
+        }
     }
 
     @PreDestroy
     public void unregisterMBeans() {
-        mBeanRegistry.getMBeanMap()
-                .forEach((key, value) -> {
-                    try {
-                        mbeanServer.unregisterMBean(value);
-                    } catch (final InstanceNotFoundException | MBeanRegistrationException e) {
-                        throw new MBeanException(format("MXBean unregistration failed for key '%s', value '%s'", key, value), e);
-                    }
-                });
+
+        final ObjectName objectName = objectNameFactory.create(SYSTEM_COMMANDER_DOMAIN_NAME, OBJECT_NAME_KEY, SYSTEM_COMMANDER_BEAN);
+
+        try {
+            mbeanServer.unregisterMBean(objectName);
+        } catch (final InstanceNotFoundException | MBeanRegistrationException e) {
+            throw new MBeanException(format("Failed to unregister MBean with object name '%s'", objectName), e);
+        }
     }
 }
 

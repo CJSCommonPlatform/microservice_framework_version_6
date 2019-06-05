@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### [6.0.0-M28] - 2019-06-05
+## Added
+- beans.xml to framework-management module
+
 ### [6.0.0-M27] - 2019-06-05
 ## Added
 - JMX bean command handlers for system commands

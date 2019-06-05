@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### [6.0.0-M27] - 2019-06-05
+## Added
+- JMX bean command handlers for system commands
+
 ### [6.0.0-M26] - 2019-05-22
 ### Added
 - Producer for JmsEnvelopeSender, COMMAND-API component will return shuttering version, otherwise default

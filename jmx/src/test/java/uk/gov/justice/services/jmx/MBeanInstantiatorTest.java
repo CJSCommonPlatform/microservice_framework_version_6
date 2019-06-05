@@ -9,8 +9,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import uk.gov.justice.services.jmx.command.SystemCommander;
+
 import java.util.Map;
 
+import javax.inject.Inject;
 import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
@@ -25,74 +28,56 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class MBeanInstantiatorTest {
 
     @Mock
-    private MBeanRegistry mBeanRegistry;
+    private ObjectNameFactory objectNameFactory;
 
     @Mock
     private MBeanServer mbeanServer;
+
+    @Mock
+    private SystemCommander systemCommander;
 
     @InjectMocks
     private MBeanInstantiator mBeanInstantiator;
 
     @Test
-    public void shouldRegisterMBeans() throws Exception {
+    public void shouldRegisterSystemCommanderMBean() throws Exception {
 
-        final Object mBean_1 = new Object();
-        final Object mBean_2 = new Object();
+        final ObjectName objectName = mock(ObjectName.class);
 
-        final ObjectName objectName_1 = mock(ObjectName.class);
-        final ObjectName objectName_2 = mock(ObjectName.class);
+        when(objectNameFactory.create("systemCommander", "type", "SystemCommander")).thenReturn(objectName);
 
-        final Map<Object, ObjectName> mBeanMap = of(mBean_1, objectName_1, mBean_2, objectName_2);
+        mBeanInstantiator.registerSystemCommanderMBean();
 
-        when(mBeanRegistry.getMBeanMap()).thenReturn(mBeanMap);
-
-        mBeanInstantiator.registerMBeans();
-
-        verify(mbeanServer).registerMBean(mBean_1, objectName_1);
-        verify(mbeanServer).registerMBean(mBean_2, objectName_2);
+        verify(mbeanServer).registerMBean(systemCommander, objectName);
     }
 
     @Test
     public void shouldUnregisterMBeans() throws Exception {
 
-        final Object mBean_1 = new Object();
-        final Object mBean_2 = new Object();
+        final ObjectName objectName = mock(ObjectName.class);
 
-        final ObjectName objectName_1 = mock(ObjectName.class);
-        final ObjectName objectName_2 = mock(ObjectName.class);
-
-        final Map<Object, ObjectName> mBeanMap = of(mBean_1, objectName_1, mBean_2, objectName_2);
-
-        when(mBeanRegistry.getMBeanMap()).thenReturn(mBeanMap);
+        when(objectNameFactory.create("systemCommander", "type", "SystemCommander")).thenReturn(objectName);
 
         mBeanInstantiator.unregisterMBeans();
 
-        verify(mbeanServer).unregisterMBean(objectName_1);
-        verify(mbeanServer).unregisterMBean(objectName_2);
+        verify(mbeanServer).unregisterMBean(objectName);
     }
 
     @Test
     public void shouldThrowExceptionWhenMBeanRegisteringIncorrect() throws Exception {
 
         final MBeanRegistrationException mBeanRegistrationException = new MBeanRegistrationException(new NullPointerException("Ooops"));
+        final ObjectName objectName = mock(ObjectName.class, "AnObjectName");
 
-        final Object mBean_1 = "mBean_1";
-        final Object mBean_2 = "mBean_2";
-
-        final ObjectName objectName_1 = mock(ObjectName.class, "objectName_1");
-        final ObjectName objectName_2 = mock(ObjectName.class, "objectName_2");
-
-        final Map<Object, ObjectName> mBeanMap = of(mBean_1, objectName_1, mBean_2, objectName_2);
-
-        when(mBeanRegistry.getMBeanMap()).thenReturn(mBeanMap);
-        doThrow(mBeanRegistrationException).when(mbeanServer).registerMBean(mBean_2, objectName_2);
+        when(objectNameFactory.create("systemCommander", "type", "SystemCommander")).thenReturn(objectName);
+        doThrow(mBeanRegistrationException).when(mbeanServer).registerMBean(systemCommander, objectName);
 
         try {
-            mBeanInstantiator.registerMBeans();
+            mBeanInstantiator.registerSystemCommanderMBean();
             fail();
         } catch (final MBeanException expected) {
             assertThat(expected.getCause(), is(mBeanRegistrationException));
-            assertThat(expected.getMessage(), is("MXBean registration failed for key 'mBean_2', value 'objectName_2'"));
+            assertThat(expected.getMessage(), is("Failed to register SystemCommander MBean using object name 'AnObjectName'"));
         }
     }
 
@@ -100,23 +85,16 @@ public class MBeanInstantiatorTest {
     public void shouldThrowExceptionWhenMBeanUnregisteringIncorrect() throws Exception {
         final MBeanRegistrationException mBeanRegistrationException = new MBeanRegistrationException(new NullPointerException("Ooops"));
 
-        final Object mBean_1 = "mBean_1";
-        final Object mBean_2 = "mBean_2";
-
-        final ObjectName objectName_1 = mock(ObjectName.class, "objectName_1");
-        final ObjectName objectName_2 = mock(ObjectName.class, "objectName_2");
-
-        final Map<Object, ObjectName> mBeanMap = of(mBean_1, objectName_1, mBean_2, objectName_2);
-
-        when(mBeanRegistry.getMBeanMap()).thenReturn(mBeanMap);
-        doThrow(mBeanRegistrationException).when(mbeanServer).unregisterMBean(objectName_2);
+        final ObjectName objectName = mock(ObjectName.class, "AnObjectName");
+        when(objectNameFactory.create("systemCommander", "type", "SystemCommander")).thenReturn(objectName);
+        doThrow(mBeanRegistrationException).when(mbeanServer).unregisterMBean(objectName);
 
         try {
             mBeanInstantiator.unregisterMBeans();
             fail();
         } catch (final MBeanException expected) {
             assertThat(expected.getCause(), is(mBeanRegistrationException));
-            assertThat(expected.getMessage(), is("MXBean unregistration failed for key 'mBean_2', value 'objectName_2'"));
+            assertThat(expected.getMessage(), is("Failed to unregister MBean with object name 'AnObjectName'"));
         }
     }
 }

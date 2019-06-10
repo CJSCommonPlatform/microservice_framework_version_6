@@ -3,13 +3,13 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>shuttering</artifactId>
+        <artifactId>framework-system</artifactId>
         <groupId>uk.gov.justice.services</groupId>
         <version>6.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>shuttering-core</artifactId>
+    <artifactId>shuttering-persistence</artifactId>
 
     <dependencies>
         <dependency>
@@ -54,7 +54,7 @@
                 <artifactId>liquibase-maven-plugin</artifactId>
                 <version>${liquibase.version}</version>
                 <configuration>
-                    <changeLogFile>liquibase/shuttering-changelog.xml</changeLogFile>
+                    <changeLogFile>liquibase/framework-system-changelog.xml</changeLogFile>
                     <driver>org.postgresql.Driver</driver>
                     <url>jdbc:postgresql://localhost:5432/frameworkviewstore</url>
                     <username>framework</username>
@@ -72,7 +72,7 @@
                 <dependencies>
                     <dependency>
                         <groupId>uk.gov.justice.services</groupId>
-                        <artifactId>shuttering-liquibase</artifactId>
+                        <artifactId>framework-system-liquibase</artifactId>
                         <version>${project.version}</version>
                     </dependency>
                     <dependency>

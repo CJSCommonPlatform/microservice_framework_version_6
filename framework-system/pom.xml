@@ -9,13 +9,12 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>shuttering</artifactId>
+    <artifactId>framework-system</artifactId>
     <packaging>pom</packaging>
 
     <modules>
-        <module>shuttering-liquibase</module>
-        <module>shuttering-core</module>
+        <module>framework-management</module>
+        <module>shuttering-persistence</module>
+        <module>framework-system-liquibase</module>
     </modules>
-
-
 </project>

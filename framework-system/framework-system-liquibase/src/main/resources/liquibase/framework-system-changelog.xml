@@ -4,6 +4,6 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
 
-    <includeAll relativeToChangelogFile="true" path="shuttering-changesets"/>
+    <includeAll relativeToChangelogFile="true" path="framework-system-changesets"/>
 
 </databaseChangeLog>

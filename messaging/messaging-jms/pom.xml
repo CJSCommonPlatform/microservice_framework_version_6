@@ -27,7 +27,7 @@
         </dependency>
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
-            <artifactId>shuttering-core</artifactId>
+            <artifactId>shuttering-persistence</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -54,6 +54,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-
 </project>

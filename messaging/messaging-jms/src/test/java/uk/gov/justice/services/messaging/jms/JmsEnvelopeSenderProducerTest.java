@@ -1,4 +1,4 @@
-package uk.gov.justice.services.core.messaging.jms;
+package uk.gov.justice.services.messaging.jms;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.sameInstance;
@@ -9,13 +9,9 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 import static uk.gov.justice.services.test.utils.common.MemberInjectionPoint.injectionPointWithMemberAsFirstMethodOf;
 
+import uk.gov.justice.services.common.annotation.ComponentNameExtractor;
 import uk.gov.justice.services.core.annotation.FrameworkComponent;
 import uk.gov.justice.services.core.interceptor.InterceptorChainProcessor;
-import uk.gov.justice.services.messaging.jms.DefaultJmsEnvelopeSender;
-import uk.gov.justice.services.messaging.jms.EnvelopeSenderSelector;
-import uk.gov.justice.services.messaging.jms.JmsEnvelopeSender;
-import uk.gov.justice.services.messaging.jms.JmsSender;
-import uk.gov.justice.services.messaging.jms.ShutteringJmsEnvelopeSender;
 
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
@@ -24,6 +20,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -39,6 +36,9 @@ public class JmsEnvelopeSenderProducerTest {
 
     @Mock
     private EnvelopeSenderSelector envelopeSenderSelector;
+
+    @Spy
+    private ComponentNameExtractor componentNameExtractor = new ComponentNameExtractor();
 
     @InjectMocks
     private JmsEnvelopeSenderProducer jmsEnvelopeSenderProducer;

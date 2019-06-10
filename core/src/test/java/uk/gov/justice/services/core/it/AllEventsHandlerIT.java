@@ -16,6 +16,7 @@ import uk.gov.justice.schema.service.CatalogProducer;
 import uk.gov.justice.schema.service.SchemaCatalogResolverProducer;
 import uk.gov.justice.schema.service.SchemaCatalogService;
 import uk.gov.justice.services.cdi.LoggerProducer;
+import uk.gov.justice.services.common.annotation.ComponentNameExtractor;
 import uk.gov.justice.services.common.configuration.GlobalValueProducer;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
@@ -113,9 +114,6 @@ public class AllEventsHandlerIT {
 
             SenderProducer.class,
             DummyJmsEnvelopeSender.class,
-            DispatcherFactory.class,
-            EnvelopePayloadTypeConverter.class,
-            JsonEnvelopeRepacker.class,
 
             StringToJsonObjectConverter.class,
             DefaultJsonObjectEnvelopeConverter.class,
@@ -127,6 +125,7 @@ public class AllEventsHandlerIT {
             AllowAllPolicyEvaluator.class,
             DefaultAccessControlService.class,
             DispatcherCache.class,
+            ComponentNameExtractor.class,
             PolicyEvaluator.class,
 
             EnvelopeValidationExceptionHandlerProducer.class,
@@ -154,10 +153,8 @@ public class AllEventsHandlerIT {
             DefaultMediaTypesMappingCache.class,
             ActionNameToMediaTypesMappingObserver.class,
 
-            SenderProducer.class,
             MediaTypeProvider.class,
             EnvelopeInspector.class,
-            RequesterProducer.class,
             DummyJsonSchemaValidator.class,
             MediaTypesMappingCacheInitialiser.class,
             SchemaIdMappingCacheInitialiser.class

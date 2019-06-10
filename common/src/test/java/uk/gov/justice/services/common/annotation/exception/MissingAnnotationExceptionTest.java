@@ -1,8 +1,10 @@
-package uk.gov.justice.services.core.annotation.exception;
+package uk.gov.justice.services.common.annotation.exception;
 
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+
+import uk.gov.justice.services.core.annotation.exception.MissingAnnotationException;
 
 import org.junit.Test;
 

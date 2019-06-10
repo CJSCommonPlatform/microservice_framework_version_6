@@ -14,6 +14,7 @@ import uk.gov.justice.schema.service.CatalogProducer;
 import uk.gov.justice.schema.service.SchemaCatalogResolverProducer;
 import uk.gov.justice.schema.service.SchemaCatalogService;
 import uk.gov.justice.services.cdi.LoggerProducer;
+import uk.gov.justice.services.common.annotation.ComponentNameExtractor;
 import uk.gov.justice.services.common.configuration.GlobalValueProducer;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
@@ -120,9 +121,6 @@ public class CustomServiceComponentHandlerIT {
             ObjectToJsonValueConverter.class,
             ObjectMapper.class,
             Enveloper.class,
-            DispatcherFactory.class,
-            EnvelopePayloadTypeConverter.class,
-            JsonEnvelopeRepacker.class,
 
             EnvelopeValidationExceptionHandlerProducer.class,
             GlobalValueProducer.class,
@@ -133,6 +131,7 @@ public class CustomServiceComponentHandlerIT {
             AllowAllPolicyEvaluator.class,
             AccessControlService.class,
             DispatcherCache.class,
+            ComponentNameExtractor.class,
             PolicyEvaluator.class,
             LoggerProducer.class,
             EmptySystemUserProvider.class,
@@ -154,10 +153,8 @@ public class CustomServiceComponentHandlerIT {
             DefaultMediaTypesMappingCache.class,
             ActionNameToMediaTypesMappingObserver.class,
 
-            SenderProducer.class,
             MediaTypeProvider.class,
             EnvelopeInspector.class,
-            RequesterProducer.class,
             DummyJsonSchemaValidator.class,
 
             MediaTypesMappingCacheInitialiser.class,

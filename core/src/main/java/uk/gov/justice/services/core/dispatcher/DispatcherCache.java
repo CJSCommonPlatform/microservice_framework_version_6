@@ -1,8 +1,8 @@
 package uk.gov.justice.services.core.dispatcher;
 
-import static uk.gov.justice.services.core.annotation.ComponentNameUtil.componentFrom;
 import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.componentLocationFrom;
 
+import uk.gov.justice.services.common.annotation.ComponentNameExtractor;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.ServiceComponentLocation;
 import uk.gov.justice.services.core.extension.ServiceComponentFoundEvent;
@@ -25,10 +25,13 @@ public class DispatcherCache {
     private final Map<DispatcherKey, Dispatcher> dispatcherMap = new ConcurrentHashMap<>();
 
     private DispatcherFactory dispatcherFactory;
+    private ComponentNameExtractor componentNameExtractor;
 
     @Inject
-    public DispatcherCache(final DispatcherFactory dispatcherFactory) {
+    public DispatcherCache(final DispatcherFactory dispatcherFactory,
+                           final ComponentNameExtractor componentNameExtractor) {
         this.dispatcherFactory = dispatcherFactory;
+        this.componentNameExtractor = componentNameExtractor;
     }
 
     public DispatcherCache() {
@@ -43,7 +46,7 @@ public class DispatcherCache {
      */
     public Dispatcher dispatcherFor(final InjectionPoint injectionPoint) {
         return createDispatcherIfAbsent(new DispatcherKey(
-                componentFrom(injectionPoint), componentLocationFrom(injectionPoint)));
+                componentNameExtractor.componentFrom(injectionPoint), componentLocationFrom(injectionPoint)));
     }
 
     /**

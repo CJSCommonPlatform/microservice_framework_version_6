@@ -12,6 +12,7 @@ import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
 import static uk.gov.justice.services.test.utils.common.MemberInjectionPoint.injectionPointWith;
 
+import uk.gov.justice.services.common.annotation.ComponentNameExtractor;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.annotation.DirectAdapter;
@@ -34,6 +35,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
 
@@ -44,6 +46,10 @@ public class InterceptorChainProcessorProducerTest {
 
     @Mock
     private InterceptorCache interceptorCache;
+
+    @Spy
+    private ComponentNameExtractor componentNameExtractor = new ComponentNameExtractor();
+
     @Mock
     private Logger logger;
 
@@ -56,7 +62,8 @@ public class InterceptorChainProcessorProducerTest {
     @Before
     public void setUp() throws Exception {
         interceptorChainProcessorProducer.dispatcherCache =
-                new DispatcherCache(new DispatcherFactory(new EnvelopePayloadTypeConverter(new ObjectMapperProducer().objectMapper()), new JsonEnvelopeRepacker()));
+                new DispatcherCache(new DispatcherFactory(new EnvelopePayloadTypeConverter(new ObjectMapperProducer().objectMapper()), new JsonEnvelopeRepacker()),
+                        componentNameExtractor);
         envelopeRecordingInterceptor.reset();
     }
 

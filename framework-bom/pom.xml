@@ -105,7 +105,7 @@
             </dependency>
             <dependency>
                 <groupId>uk.gov.justice.services</groupId>
-                <artifactId>jmx</artifactId>
+                <artifactId>jmx-command-handling</artifactId>
                 <version>${cpp.framework.version}</version>
             </dependency>
             <dependency>

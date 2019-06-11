@@ -7,6 +7,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## Added
 - JmsQueueBrowser service to return the size of a queue
+- Brought in jmx command client code from cake-shop
+
+## Changed
+- Moved system command modules into their own area
 
 ### [6.0.0-M28] - 2019-06-05
 ## Added

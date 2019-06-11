@@ -11,6 +11,7 @@ import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.L
 import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.REMOTE;
 import static uk.gov.justice.services.test.utils.common.MemberInjectionPoint.injectionPointWithMemberAsFirstMethodOf;
 
+import uk.gov.justice.services.common.annotation.ComponentNameExtractor;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.annotation.Adapter;
 import uk.gov.justice.services.core.extension.ServiceComponentFoundEvent;
@@ -37,6 +38,9 @@ public class DispatcherCacheTest {
     @Spy
     private DispatcherFactory dispatcherFactory =
             new DispatcherFactory(new EnvelopePayloadTypeConverter(new ObjectMapperProducer().objectMapper()), new JsonEnvelopeRepacker());
+
+    @Spy
+    private ComponentNameExtractor componentNameExtractor = new ComponentNameExtractor();
 
     @InjectMocks
     private DispatcherCache dispatcherCache;

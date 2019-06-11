@@ -2,11 +2,11 @@ package uk.gov.justice.services.core.extension;
 
 import static java.util.Collections.synchronizedList;
 import static org.slf4j.LoggerFactory.getLogger;
-import static uk.gov.justice.services.core.annotation.ComponentNameUtil.componentFrom;
 import static uk.gov.justice.services.core.annotation.ServiceComponentLocation.componentLocationFrom;
 
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.adapter.direct.SynchronousDirectAdapter;
+import uk.gov.justice.services.common.annotation.ComponentNameExtractor;
 import uk.gov.justice.services.core.annotation.AnyLiteral;
 import uk.gov.justice.services.core.annotation.CustomServiceComponent;
 import uk.gov.justice.services.core.annotation.Direct;
@@ -79,23 +79,27 @@ public class ServiceComponentScanner implements Extension {
      * @param bean a bean that has an annotation and could be of interest to the framework wiring.
      */
     private void processServiceComponentsForEvents(final Bean<?> bean) {
-        final Class<?> clazz = bean.getBeanClass();
-        LOGGER.info("Found class {} as part of component {}", clazz.getSimpleName(), componentFrom(clazz));
 
-        events.add(new ServiceComponentFoundEvent(componentFrom(clazz), bean, componentLocationFrom(clazz)));
+        final ComponentNameExtractor componentNameExtractor = new ComponentNameExtractor();
+        final Class<?> beanClass = bean.getBeanClass();
+
+        LOGGER.info("Found class {} as part of component {}", beanClass.getSimpleName(), componentNameExtractor.componentFrom(beanClass));
+
+        events.add(new ServiceComponentFoundEvent(componentNameExtractor.componentFrom(beanClass), bean, componentLocationFrom(beanClass)));
     }
 
     private boolean isNotDirectComponentWithoutAdapter(final Bean<?> bean, final Set<Bean<?>> directAdapters) {
+
         final Class<?> beanClass = bean.getBeanClass();
+
         if (beanClass.isAnnotationPresent(Direct.class)) {
             final String targetComponentName = beanClass.getAnnotation(Direct.class).target();
             final Optional<Bean<?>> matchingAdapter = directAdapters.stream()
                     .filter(directAdapter -> directAdapter.getBeanClass().getAnnotation(DirectAdapter.class).value().equals(targetComponentName))
                     .findAny();
-            if (!matchingAdapter.isPresent()) {
-                return false;
-            }
+            return matchingAdapter.isPresent();
         }
+
         return true;
     }
 

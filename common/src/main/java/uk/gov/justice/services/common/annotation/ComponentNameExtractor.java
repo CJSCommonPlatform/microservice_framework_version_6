@@ -1,18 +1,22 @@
-package uk.gov.justice.services.core.annotation;
+package uk.gov.justice.services.common.annotation;
 
 
 import static java.lang.String.format;
 import static java.util.Optional.empty;
+
+import uk.gov.justice.services.core.annotation.Adapter;
+import uk.gov.justice.services.core.annotation.CustomAdapter;
+import uk.gov.justice.services.core.annotation.CustomServiceComponent;
+import uk.gov.justice.services.core.annotation.DirectAdapter;
+import uk.gov.justice.services.core.annotation.FrameworkComponent;
+import uk.gov.justice.services.core.annotation.ServiceComponent;
 
 import java.lang.reflect.Field;
 import java.util.Optional;
 
 import javax.enterprise.inject.spi.InjectionPoint;
 
-public final class ComponentNameUtil {
-
-    private ComponentNameUtil() {
-    }
+public class ComponentNameExtractor {
 
     /**
      * Retrieves name of the component of the provided {@link ServiceComponent} or {@link Adapter}.
@@ -20,7 +24,7 @@ public final class ComponentNameUtil {
      * @param aClass The service component to be analysed
      * @return the component from the provided {@link ServiceComponent} or {@link Adapter}
      */
-    public static String componentFrom(final Class<?> aClass) {
+    public String componentFrom(final Class<?> aClass) {
         if (aClass.isAnnotationPresent(ServiceComponent.class)) {
             return aClass.getAnnotation(ServiceComponent.class).value();
         } else if (aClass.isAnnotationPresent(Adapter.class)) {
@@ -44,7 +48,7 @@ public final class ComponentNameUtil {
      * @param injectionPoint the injection point to be analysed
      * @return the component from the provided injection point
      */
-    public static String componentFrom(final InjectionPoint injectionPoint) {
+    public String componentFrom(final InjectionPoint injectionPoint) {
         return fieldLevelComponent(injectionPoint)
                 .orElseGet(() -> componentFrom(injectionPoint.getMember().getDeclaringClass()));
     }
@@ -55,11 +59,11 @@ public final class ComponentNameUtil {
      * @param injectionPoint the injection point to be analysed
      * @return true if the injection point has a component annotation
      */
-    public static boolean hasComponentAnnotation(final InjectionPoint injectionPoint) {
+    public boolean hasComponentAnnotation(final InjectionPoint injectionPoint) {
         return hasComponentAnnotation(injectionPoint.getMember().getDeclaringClass());
     }
 
-    private static Optional<String> fieldLevelComponent(final InjectionPoint injectionPoint) {
+    private Optional<String> fieldLevelComponent(final InjectionPoint injectionPoint) {
         if (injectionPoint.getMember() instanceof Field) {
             final Field field = (Field) injectionPoint.getMember();
             if (field.isAnnotationPresent(ServiceComponent.class)) {
@@ -74,7 +78,7 @@ public final class ComponentNameUtil {
         return empty();
     }
 
-    private static boolean hasComponentAnnotation(final Class<?> aClass) {
+    private boolean hasComponentAnnotation(final Class<?> aClass) {
         return aClass.isAnnotationPresent(ServiceComponent.class) ||
                 aClass.isAnnotationPresent(Adapter.class) ||
                 aClass.isAnnotationPresent(FrameworkComponent.class) ||
@@ -82,5 +86,4 @@ public final class ComponentNameUtil {
                 aClass.isAnnotationPresent(CustomAdapter.class) ||
                 aClass.isAnnotationPresent(DirectAdapter.class);
     }
-
 }

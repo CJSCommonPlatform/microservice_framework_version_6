@@ -15,6 +15,4 @@ public class ConnectorWrapper {
         final Map<String, Object> environment = emptyMap();
         return JMXConnectorFactory.connect(serviceURL, environment);
     }
-
-
 }

@@ -3,14 +3,23 @@ package uk.gov.justice.subscription.domain.eventsource;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.when;
+
+import uk.gov.justice.services.jdbc.persistence.JndiAppNameProvider;
+
+import javax.inject.Inject;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultEventSourceDefinitionFactoryTest {
+
+    @Mock
+    private JndiAppNameProvider jndiAppNameProvider;
 
     @InjectMocks
     private DefaultEventSourceDefinitionFactory defaultEventSourceDefinitionFactory;
@@ -18,7 +27,7 @@ public class DefaultEventSourceDefinitionFactoryTest {
     @Test
     public void shouldCreateADefaultDataSource() throws Exception {
 
-        defaultEventSourceDefinitionFactory.warFileName = "my-context-service";
+        when(jndiAppNameProvider.getAppName()).thenReturn("my-context-service");
 
         final EventSourceDefinition eventSourceDefinition = defaultEventSourceDefinitionFactory.createDefaultEventSource();
 

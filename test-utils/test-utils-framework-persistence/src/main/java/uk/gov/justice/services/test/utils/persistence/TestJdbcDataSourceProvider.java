@@ -26,6 +26,13 @@ public class TestJdbcDataSourceProvider {
                 format("%sviewstore", contextName));
 
     }
+    public DataSource getSystemDataSource(final String contextName) {
+
+        return getDataSource(
+                contextName,
+                format("%ssystem", contextName));
+
+    }
 
     private DataSource getDataSource(final String contextName, final String databaseName) {
 

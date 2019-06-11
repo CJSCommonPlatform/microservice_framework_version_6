@@ -3,18 +3,17 @@ package uk.gov.justice.services.jdbc.persistence;
 import static java.lang.String.format;
 
 import javax.inject.Inject;
-import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
-public class ViewStoreJdbcDataSourceProvider {
+public class SystemJdbcDataSourceProvider {
 
     @Inject
     private InitialContext initialContext;
 
     @Inject
-    private ViewStoreDataSourceNameProvider viewStoreDataSourceNameProvider;
+    private SystemDataSourceNameProvider systemDataSourceNameProvider;
 
     private DataSource datasource = null;
 
@@ -28,11 +27,11 @@ public class ViewStoreJdbcDataSourceProvider {
     }
 
     private DataSource lookupDataSource() {
-        final String dataSourceName = viewStoreDataSourceNameProvider.getDataSourceName();
+        final String dataSourceName = systemDataSourceNameProvider.getDataSourceName();
         try {
             return (DataSource) initialContext.lookup(dataSourceName);
         } catch (final NamingException e) {
-            throw new JdbcRepositoryException(format("Failed to lookup ViewStore DataSource using JNDI name '%s'", dataSourceName), e);
+            throw new JdbcRepositoryException(format("Failed to lookup System DataSource using JNDI name '%s'", dataSourceName), e);
         }
     }
 }

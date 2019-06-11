@@ -56,7 +56,7 @@
                 <configuration>
                     <changeLogFile>liquibase/framework-system-changelog.xml</changeLogFile>
                     <driver>org.postgresql.Driver</driver>
-                    <url>jdbc:postgresql://localhost:5432/frameworkviewstore</url>
+                    <url>jdbc:postgresql://localhost:5432/frameworksystem</url>
                     <username>framework</username>
                     <password>framework</password>
                 </configuration>

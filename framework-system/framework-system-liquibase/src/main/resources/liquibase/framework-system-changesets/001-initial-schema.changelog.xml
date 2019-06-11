@@ -21,6 +21,8 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
+
         <addPrimaryKey tableName="shuttered_command_store" columnNames="envelope_id"/>
+ 
     </changeSet>
 </databaseChangeLog>

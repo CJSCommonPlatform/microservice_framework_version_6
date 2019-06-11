@@ -6,6 +6,7 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 import static uk.gov.justice.services.test.utils.common.MemberInjectionPoint.injectionPointWithMemberAsFirstMethodOf;
 
@@ -28,6 +29,7 @@ public class JmsEnvelopeSenderProducerTest {
 
     private InjectionPoint adaptorCommandApiInjectionPointA = injectionPointWithMemberAsFirstMethodOf(TestCommandApiAdaptorA.class);
     private InjectionPoint adaptorCommandApiInjectionPointB = injectionPointWithMemberAsFirstMethodOf(TestCommandApiAdaptorB.class);
+    private InjectionPoint adaptorEventProcessorInjectionPoint = injectionPointWithMemberAsFirstMethodOf(TestEventProcessorAdaptor.class);
     private InjectionPoint adaptorQueryApiInjectionPoint = injectionPointWithMemberAsFirstMethodOf(TestQueryApiAdaptor.class);
     private InjectionPoint noAnnotationInjectionPoint = injectionPointWithMemberAsFirstMethodOf(TestNoAnnotation.class);
 
@@ -51,10 +53,17 @@ public class JmsEnvelopeSenderProducerTest {
         assertThat(jmsEnvelopeSender, is(instanceOf(DefaultJmsEnvelopeSender.class)));
     }
 
-    @Test
-    public void shouldProduceShutteringJmsEnvelopeSender() {
+    public void shouldProduceShutteringJmsEnvelopeSenderForCommandApiComponent() {
 
         final JmsEnvelopeSender jmsEnvelopeSender = jmsEnvelopeSenderProducer.createJmsEnvelopeSender(adaptorCommandApiInjectionPointA);
+
+        assertThat(jmsEnvelopeSender, is(instanceOf(ShutteringJmsEnvelopeSender.class)));
+    }
+
+    @Test
+    public void shouldProduceShutteringJmsEnvelopeSenderForEventProcessorComponent() {
+
+        final JmsEnvelopeSender jmsEnvelopeSender = jmsEnvelopeSenderProducer.createJmsEnvelopeSender(adaptorEventProcessorInjectionPoint);
 
         assertThat(jmsEnvelopeSender, is(instanceOf(ShutteringJmsEnvelopeSender.class)));
     }
@@ -97,6 +106,16 @@ public class JmsEnvelopeSenderProducerTest {
 
     @FrameworkComponent(COMMAND_API)
     public static class TestCommandApiAdaptorB {
+
+        @Inject
+        InterceptorChainProcessor interceptorChainProcessor;
+
+        public void dummyMethod() {
+        }
+    }
+
+    @FrameworkComponent(EVENT_PROCESSOR)
+    public static class TestEventProcessorAdaptor {
 
         @Inject
         InterceptorChainProcessor interceptorChainProcessor;

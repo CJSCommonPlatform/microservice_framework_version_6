@@ -8,6 +8,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ## Added
 - JmsQueueBrowser service to return the size of a queue
 - Brought in jmx command client code from cake-shop
+- Event Processor shuttering
 
 ## Changed
 - Moved system command modules into their own area

@@ -1,6 +1,7 @@
 package uk.gov.justice.services.messaging.jms;
 
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 
 import uk.gov.justice.services.common.annotation.ComponentNameExtractor;
 
@@ -26,7 +27,7 @@ public class JmsEnvelopeSenderProducer {
 
             final String componentName = componentNameExtractor.componentFrom(injectionPoint);
 
-            if (COMMAND_API.contains(componentName)) {
+            if (COMMAND_API.contains(componentName) || EVENT_PROCESSOR.contains(componentName)) {
                 return new ShutteringJmsEnvelopeSender(envelopeSenderSelector);
             }
         }

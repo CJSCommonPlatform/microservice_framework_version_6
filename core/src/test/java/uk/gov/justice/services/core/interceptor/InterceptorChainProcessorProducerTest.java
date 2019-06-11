@@ -11,6 +11,7 @@ import static uk.gov.justice.services.core.interceptor.InterceptorContext.interc
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
 import static uk.gov.justice.services.test.utils.common.MemberInjectionPoint.injectionPointWith;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
 import uk.gov.justice.services.common.annotation.ComponentNameExtractor;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -59,11 +60,19 @@ public class InterceptorChainProcessorProducerTest {
     private EnvelopeRecordingInterceptor envelopeRecordingInterceptor = new EnvelopeRecordingInterceptor();
     private EnvelopeRecordingHandler envelopeRecordingHandler = new EnvelopeRecordingHandler();
 
+    private DispatcherCache dispatcherCache;
+
     @Before
     public void setUp() throws Exception {
-        interceptorChainProcessorProducer.dispatcherCache =
-                new DispatcherCache(new DispatcherFactory(new EnvelopePayloadTypeConverter(new ObjectMapperProducer().objectMapper()), new JsonEnvelopeRepacker()),
-                        componentNameExtractor);
+
+        dispatcherCache = new DispatcherCache(
+                new DispatcherFactory(
+                        new EnvelopePayloadTypeConverter(new ObjectMapperProducer().objectMapper()),
+                        new JsonEnvelopeRepacker()),
+                componentNameExtractor);
+
+        setField(interceptorChainProcessorProducer, "dispatcherCache", dispatcherCache);
+
         envelopeRecordingInterceptor.reset();
     }
 
@@ -72,7 +81,7 @@ public class InterceptorChainProcessorProducerTest {
         when(interceptorCache.getInterceptors("EVENT_LISTENER")).thenReturn(envelopeRecordingInterceptor());
 
         final MemberInjectionPoint injectionPoint = injectionPointWith(EventListenerAdapter.class.getDeclaredField("processor"));
-        interceptorChainProcessorProducer.dispatcherCache.dispatcherFor(injectionPoint).register(envelopeRecordingHandler);
+        dispatcherCache.dispatcherFor(injectionPoint).register(envelopeRecordingHandler);
         final InterceptorChainProcessor processor = interceptorChainProcessorProducer.produceProcessor(injectionPoint);
 
         final JsonEnvelope dispatchedEnvelope = envelopeFrom(metadataBuilder().withId(randomUUID()).withName(ACTION_NAME), createObjectBuilder());
@@ -88,7 +97,7 @@ public class InterceptorChainProcessorProducerTest {
         when(interceptorCache.getInterceptors("QUERY_API")).thenReturn(envelopeRecordingInterceptor());
 
         final MemberInjectionPoint injectionPoint = injectionPointWith(QueryApiDirectAdapter.class.getDeclaredField("processor"));
-        interceptorChainProcessorProducer.dispatcherCache.dispatcherFor(injectionPoint).register(envelopeRecordingHandler);
+        dispatcherCache.dispatcherFor(injectionPoint).register(envelopeRecordingHandler);
         final InterceptorChainProcessor processor = interceptorChainProcessorProducer.produceProcessor(injectionPoint);
 
         final JsonEnvelope dispatchedEnvelope = envelopeFrom(metadataBuilder().withId(randomUUID()).withName(ACTION_NAME), createObjectBuilder());
@@ -106,7 +115,7 @@ public class InterceptorChainProcessorProducerTest {
         when(interceptorCache.getInterceptors(component)).thenReturn(envelopeRecordingInterceptor());
 
         final MemberInjectionPoint injectionPoint = injectionPointWith(EventListenerAdapter.class.getDeclaredField("processor"));
-        interceptorChainProcessorProducer.dispatcherCache.dispatcherFor(injectionPoint).register(envelopeRecordingHandler);
+        dispatcherCache.dispatcherFor(injectionPoint).register(envelopeRecordingHandler);
 
 
         final InterceptorChainProcessor processor = interceptorChainProcessorProducer.produceLocalProcessor(component);

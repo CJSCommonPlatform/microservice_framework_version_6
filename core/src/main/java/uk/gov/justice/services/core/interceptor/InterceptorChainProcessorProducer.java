@@ -22,9 +22,8 @@ public class InterceptorChainProcessorProducer {
     @Inject
     private Logger logger;
 
-    //TODO: Add private after redoing tests
     @Inject
-    DispatcherCache dispatcherCache;
+    private DispatcherCache dispatcherCache;
 
     @Inject
     private InterceptorCache interceptorCache;

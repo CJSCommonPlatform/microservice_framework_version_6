@@ -46,11 +46,11 @@ public class JmsEnvelopeSenderProducerTest {
     private JmsEnvelopeSenderProducer jmsEnvelopeSenderProducer;
 
     @Test
-    public void shouldProduceDefaultJmsEnvelopeSender() {
+    public void shouldProduceShutteringJmsEnvelopeSenderForQueryApiComponent() {
 
         final JmsEnvelopeSender jmsEnvelopeSender = jmsEnvelopeSenderProducer.createJmsEnvelopeSender(adaptorQueryApiInjectionPoint);
 
-        assertThat(jmsEnvelopeSender, is(instanceOf(DefaultJmsEnvelopeSender.class)));
+        assertThat(jmsEnvelopeSender, is(instanceOf(ShutteringJmsEnvelopeSender.class)));
     }
 
     public void shouldProduceShutteringJmsEnvelopeSenderForCommandApiComponent() {

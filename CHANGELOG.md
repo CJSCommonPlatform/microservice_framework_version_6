@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.0.0-M31] - 2019-06-12
+## Changed
+- JmsEnvelopeSenderProducer provides shuttering JmsEnvelopeSender by default to components, non component injection point will be provided with a non shuttering JmsEnvelopeSender
+
 ## [6.0.0-M30] - 2019-06-11
 ## Added
 - JmsQueueBrowser service to return the size of a queue

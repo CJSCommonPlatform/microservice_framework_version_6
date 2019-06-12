@@ -3,7 +3,7 @@ package uk.gov.justice.services.messaging.jms;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 /**
- * An envelope producer that sends or publishes an envelope to a queue or topic respectively
+ * An JmsEnvelopeSender that sends or publishes an envelope to a queue or topic respectively
  * depending on the destination type.
  */
 public class DefaultJmsEnvelopeSender implements JmsEnvelopeSender {

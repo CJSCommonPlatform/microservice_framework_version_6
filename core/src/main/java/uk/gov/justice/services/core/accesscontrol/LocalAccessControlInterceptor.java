@@ -15,22 +15,22 @@ import javax.inject.Inject;
 public class LocalAccessControlInterceptor implements Interceptor {
 
     @Inject
-    AccessControlService accessControlService;
+    private AccessControlService accessControlService;
 
     @Inject
-    AccessControlFailureMessageGenerator accessControlFailureMessageGenerator;
+    private AccessControlFailureMessageGenerator accessControlFailureMessageGenerator;
 
     @Override
     public InterceptorContext process(final InterceptorContext interceptorContext, final InterceptorChain interceptorChain) {
 
-        final String component = interceptorContext.getInputParameter("component").get().toString();
-        checkAccessControl(component, interceptorContext.inputEnvelope());
+        checkAccessControl(interceptorContext.getComponentName(), interceptorContext.inputEnvelope());
 
         return interceptorChain.processNext(interceptorContext);
     }
 
     private void checkAccessControl(final String component, final JsonEnvelope jsonEnvelope) {
-        final Optional<AccessControlViolation> accessControlViolation = accessControlService.checkAccessControl(component,jsonEnvelope);
+
+        final Optional<AccessControlViolation> accessControlViolation = accessControlService.checkAccessControl(component, jsonEnvelope);
 
         if (accessControlViolation.isPresent()) {
             final String errorMessage = accessControlFailureMessageGenerator.errorMessageFrom(

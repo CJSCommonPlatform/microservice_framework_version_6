@@ -4,6 +4,11 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+## [6.0.0-M32] - 2019-06-13
+## Added
+- New System database
+### Changed
+- shuttered_event_store table moved to the new system database 
 
 ## [6.0.0-M31] - 2019-06-12
 ## Changed

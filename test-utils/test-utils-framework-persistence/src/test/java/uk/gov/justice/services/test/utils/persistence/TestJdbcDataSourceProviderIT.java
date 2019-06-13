@@ -37,4 +37,13 @@ public class TestJdbcDataSourceProviderIT {
             assertThat(connection.isClosed(), is(false));
         }
     }
+    @Test
+    public void shouldGetADataSourceToSystem() throws Exception {
+
+        final DataSource dataSource = testJdbcDataSourceProvider.getSystemDataSource("framework");
+
+        try(final Connection connection = dataSource.getConnection()) {
+            assertThat(connection.isClosed(), is(false));
+        }
+    }
 }

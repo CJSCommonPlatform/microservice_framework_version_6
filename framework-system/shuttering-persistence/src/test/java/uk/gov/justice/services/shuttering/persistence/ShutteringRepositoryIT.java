@@ -10,7 +10,7 @@ import static org.mockito.Mockito.when;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.jdbc.persistence.JdbcResultSetStreamer;
 import uk.gov.justice.services.jdbc.persistence.PreparedStatementWrapperFactory;
-import uk.gov.justice.services.jdbc.persistence.ViewStoreJdbcDataSourceProvider;
+import uk.gov.justice.services.jdbc.persistence.SystemJdbcDataSourceProvider;
 import uk.gov.justice.services.shuttering.domain.ShutteredCommand;
 import uk.gov.justice.services.test.utils.persistence.TestJdbcDataSourceProvider;
 
@@ -31,7 +31,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class ShutteringRepositoryIT {
 
     @Mock
-    private ViewStoreJdbcDataSourceProvider viewStoreJdbcDataSourceProvider;
+    private SystemJdbcDataSourceProvider systemJdbcDataSourceProvider;
 
     @Spy
     private PreparedStatementWrapperFactory preparedStatementWrapperFactory = new PreparedStatementWrapperFactory();
@@ -46,9 +46,9 @@ public class ShutteringRepositoryIT {
     @Test
     public void shouldInsertAndGetShutteredCommands() throws Exception {
 
-        final DataSource viewStoreDataSource = new TestJdbcDataSourceProvider().getViewStoreDataSource("framework");
+        final DataSource systemDataSource = new TestJdbcDataSourceProvider().getSystemDataSource("framework");
 
-        when(viewStoreJdbcDataSourceProvider.getDataSource()).thenReturn(viewStoreDataSource);
+        when(systemJdbcDataSourceProvider.getDataSource()).thenReturn(systemDataSource);
 
         shutteringRepository.deleteAll();
 
@@ -78,9 +78,9 @@ public class ShutteringRepositoryIT {
     @Test
     public void shouldDeleteShutteredCommand() throws Exception {
 
-        final DataSource viewStoreDataSource = new TestJdbcDataSourceProvider().getViewStoreDataSource("framework");
+        final DataSource systemDataSource = new TestJdbcDataSourceProvider().getSystemDataSource("framework");
 
-        when(viewStoreJdbcDataSourceProvider.getDataSource()).thenReturn(viewStoreDataSource);
+        when(systemJdbcDataSourceProvider.getDataSource()).thenReturn(systemDataSource);
 
         shutteringRepository.deleteAll();
 

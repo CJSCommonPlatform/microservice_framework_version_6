@@ -7,7 +7,7 @@ import static uk.gov.justice.services.common.converter.ZonedDateTimes.toSqlTimes
 import uk.gov.justice.services.jdbc.persistence.JdbcResultSetStreamer;
 import uk.gov.justice.services.jdbc.persistence.PreparedStatementWrapper;
 import uk.gov.justice.services.jdbc.persistence.PreparedStatementWrapperFactory;
-import uk.gov.justice.services.jdbc.persistence.ViewStoreJdbcDataSourceProvider;
+import uk.gov.justice.services.jdbc.persistence.SystemJdbcDataSourceProvider;
 import uk.gov.justice.services.shuttering.domain.ShutteredCommand;
 
 import java.sql.Connection;
@@ -27,7 +27,7 @@ public class ShutteringRepository {
     private static final String DELETE_SHUTTERED_COMMAND_SQL = "DELETE FROM shuttered_command_store WHERE envelope_id = ?";
 
     @Inject
-    private ViewStoreJdbcDataSourceProvider viewStoreJdbcDataSourceProvider;
+    private SystemJdbcDataSourceProvider systemJdbcDataSourceProvider;
 
     @Inject
     private PreparedStatementWrapperFactory preparedStatementWrapperFactory;
@@ -37,7 +37,7 @@ public class ShutteringRepository {
 
     public Stream<ShutteredCommand> streamShutteredCommands() {
 
-        final DataSource dataSource = viewStoreJdbcDataSourceProvider.getDataSource();
+        final DataSource dataSource = systemJdbcDataSourceProvider.getDataSource();
 
         try {
             final PreparedStatementWrapper preparedStatementWrapper = preparedStatementWrapperFactory.preparedStatementWrapperOf(
@@ -67,7 +67,7 @@ public class ShutteringRepository {
 
     public void save(final ShutteredCommand shutteredCommand) {
 
-        final DataSource dataSource = viewStoreJdbcDataSourceProvider.getDataSource();
+        final DataSource dataSource = systemJdbcDataSourceProvider.getDataSource();
 
         try (final Connection connection = dataSource.getConnection();
              final PreparedStatement preparedStatement = connection.prepareStatement(INSERT_SHUTTERED_COMMAND_SQL)) {
@@ -85,7 +85,7 @@ public class ShutteringRepository {
 
     public void delete(final UUID envelopeId) {
 
-        final DataSource dataSource = viewStoreJdbcDataSourceProvider.getDataSource();
+        final DataSource dataSource = systemJdbcDataSourceProvider.getDataSource();
 
         try (final Connection connection = dataSource.getConnection();
              final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_SHUTTERED_COMMAND_SQL)) {
@@ -99,7 +99,7 @@ public class ShutteringRepository {
     }
 
     public void deleteAll() {
-        final DataSource dataSource = viewStoreJdbcDataSourceProvider.getDataSource();
+        final DataSource dataSource = systemJdbcDataSourceProvider.getDataSource();
 
         try (final Connection connection = dataSource.getConnection();
              final PreparedStatement preparedStatement = connection.prepareStatement(TRUNCATE_SHUTTERED_COMMAND_SQL)) {

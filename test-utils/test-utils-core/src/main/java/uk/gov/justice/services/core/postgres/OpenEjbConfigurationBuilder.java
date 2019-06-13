@@ -9,6 +9,7 @@ public class OpenEjbConfigurationBuilder {
     private final Properties configuration;
     private static final String EVENT_STORE_NAME = "frameworkeventstore";
     private static final String VIEW_STORE_NAME = "frameworkviewstore";
+    private static final String SYSTEM_NAME = "frameworksystem";
 
     private OpenEjbConfigurationBuilder() {
         configuration = new Properties();
@@ -29,6 +30,10 @@ public class OpenEjbConfigurationBuilder {
 
     public OpenEjbConfigurationBuilder addPostgresqlViewStore() {
         return getPostgresqlConfig(VIEW_STORE_NAME);
+    }
+
+    public OpenEjbConfigurationBuilder addPostgresqlSystem() {
+        return getPostgresqlConfig(SYSTEM_NAME);
     }
 
     public OpenEjbConfigurationBuilder addHttpEjbPort(final int port) {

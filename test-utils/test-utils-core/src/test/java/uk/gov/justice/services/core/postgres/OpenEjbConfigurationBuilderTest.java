@@ -68,5 +68,22 @@ public class OpenEjbConfigurationBuilderTest {
         );
     }
 
+    @SuppressWarnings("unchecked")
+    @Test
+    public void shouldReturnAnPostgresqlSystemDatabaseWithInitialContext() {
+        final Properties properties = OpenEjbConfigurationBuilder.createOpenEjbConfigurationBuilder()
+                .addPostgresqlSystem()
+                .addInitialContext()
+                .build();
 
+        assertThat(properties, allOf(
+                hasEntry("frameworksystem", "new://Resource?type=DataSource"),
+                hasEntry("frameworksystem.JdbcDriver", "org.postgresql.Driver"),
+                hasEntry("frameworksystem.JdbcUrl", "jdbc:postgresql://localhost:5432/frameworksystem"),
+                hasEntry("frameworksystem.JtaManaged", "false"),
+                hasEntry("frameworksystem.UserName", "framework"),
+                hasEntry("frameworksystem.Password", "framework"),
+                hasEntry("java.naming.factory.initial", "org.apache.openejb.client.LocalInitialContextFactory"))
+        );
+    }
 }

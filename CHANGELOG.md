@@ -4,6 +4,12 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [6.0.0-M33] - 2019-06-17
+### Changed
+- Update framework-api to 4.0.0-M25
+- Update utilities to 1.19.0
+
 ## [6.0.0-M32] - 2019-06-13
 ## Added
 - New System database

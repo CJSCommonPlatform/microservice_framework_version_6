@@ -1,5 +1,6 @@
 package uk.gov.justice.services.jmx.bootstrap;
 
+import uk.gov.justice.services.jmx.command.HandlerMethodValidator;
 import uk.gov.justice.services.jmx.command.HandlesSystemCommand;
 import uk.gov.justice.services.jmx.command.SystemCommandHandlerProxy;
 
@@ -14,12 +15,15 @@ public class SystemCommandProxyResolver {
 
     private final CdiInstanceResolver cdiInstanceResolver;
     private final SystemCommandHandlerProxyFactory systemCommandHandlerProxyFactory;
+    private final HandlerMethodValidator handlerMethodValidator;
 
     public SystemCommandProxyResolver(
             final CdiInstanceResolver cdiInstanceResolver,
-            final SystemCommandHandlerProxyFactory systemCommandHandlerProxyFactory) {
+            final SystemCommandHandlerProxyFactory systemCommandHandlerProxyFactory,
+            final HandlerMethodValidator handlerMethodValidator) {
         this.cdiInstanceResolver = cdiInstanceResolver;
         this.systemCommandHandlerProxyFactory = systemCommandHandlerProxyFactory;
+        this.handlerMethodValidator = handlerMethodValidator;
     }
 
     public List<SystemCommandHandlerProxy> allCommandProxiesFor(final Bean<?> bean, final BeanManager beanManager) {
@@ -37,7 +41,8 @@ public class SystemCommandProxyResolver {
                 final SystemCommandHandlerProxy systemCommandHandlerProxy = systemCommandHandlerProxyFactory.create(
                         handlesSystemCommand.value(),
                         method,
-                        systemCommandHandler
+                        systemCommandHandler,
+                        handlerMethodValidator
                 );
 
                 systemCommandHandlerProxies.add(systemCommandHandlerProxy);

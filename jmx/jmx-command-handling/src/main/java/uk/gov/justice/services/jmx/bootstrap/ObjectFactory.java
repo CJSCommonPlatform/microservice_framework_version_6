@@ -1,5 +1,7 @@
 package uk.gov.justice.services.jmx.bootstrap;
 
+import uk.gov.justice.services.jmx.command.HandlerMethodValidator;
+
 public class ObjectFactory {
 
     public CdiInstanceResolver cdiInstanceResolver() {
@@ -10,10 +12,15 @@ public class ObjectFactory {
         return new SystemCommandHandlerProxyFactory();
     }
 
+    public HandlerMethodValidator handlerMethodValidator() {
+        return new HandlerMethodValidator();
+    }
+
     public SystemCommandProxyResolver systemCommandProxyResolver() {
         return new SystemCommandProxyResolver(
                 cdiInstanceResolver(),
-                systemCommandHandlerProxyFactory());
+                systemCommandHandlerProxyFactory(),
+                handlerMethodValidator());
     }
 
     public SystemCommandScanner systemCommandScanner() {

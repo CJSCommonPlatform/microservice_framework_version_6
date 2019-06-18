@@ -10,11 +10,13 @@ public class SystemCommandHandlerProxy {
     private final String commandName;
     private final Method method;
     private final Object instance;
+    private final HandlerMethodValidator handlerMethodValidator;
 
-    public SystemCommandHandlerProxy(final String commandName, final Method method, final Object instance) {
+    public SystemCommandHandlerProxy(final String commandName, final Method method, final Object instance, final HandlerMethodValidator handlerMethodValidator) {
         this.commandName = commandName;
         this.method = method;
         this.instance = instance;
+        this.handlerMethodValidator = handlerMethodValidator;
     }
 
     public String getCommandName() {
@@ -26,6 +28,8 @@ public class SystemCommandHandlerProxy {
     }
 
     public void invokeCommand() {
+
+        handlerMethodValidator.checkHandlerMethodIsValid(method, instance);
 
         try {
             method.invoke(instance);

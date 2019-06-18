@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.common.util.UtcClock;
+import uk.gov.justice.services.jmx.command.SystemCommand;
 import uk.gov.justice.services.management.shuttering.events.ShutteringCompleteEvent;
 import uk.gov.justice.services.management.shuttering.events.UnshutteringCompleteEvent;
 import uk.gov.justice.services.messaging.jms.EnvelopeSenderSelector;
@@ -68,15 +69,17 @@ public class ShutteringBeanTest {
 
         final ZonedDateTime now = new UtcClock().now();
 
+        final SystemCommand target = mock(SystemCommand.class);
         when(clock.now()).thenReturn(now);
 
-        shutteringBean.shutter();
+        shutteringBean.shutter(target);
 
         verify(envelopeSenderSelector).setShuttered(true);
         verify(shutteringCompleteEventFirer).fire(shutteringCompleteEventCaptor.capture());
 
         final ShutteringCompleteEvent shutteringCompleteEvent = shutteringCompleteEventCaptor.getValue();
 
+        assertThat(shutteringCompleteEvent.getTarget(), is(target));
         assertThat(shutteringCompleteEvent.getShutteringCompleteAt(), is(now));
     }
 
@@ -86,12 +89,14 @@ public class ShutteringBeanTest {
         final ShutteredCommand shutteredCommand_1 = mock(ShutteredCommand.class);
         final ShutteredCommand shutteredCommand_2 = mock(ShutteredCommand.class);
 
+        final SystemCommand target = mock(SystemCommand.class);
+
         final ZonedDateTime now = new UtcClock().now();
 
         when(shutteringRepository.streamShutteredCommands()).thenReturn(of(shutteredCommand_1, shutteredCommand_2));
         when(clock.now()).thenReturn(now);
 
-        shutteringBean.unshutter();
+        shutteringBean.unshutter(target);
 
         final InOrder inOrder = inOrder(shutteredCommandSender, envelopeSenderSelector, unshutteringCompleteEventFirer);
 
@@ -103,6 +108,7 @@ public class ShutteringBeanTest {
         final UnshutteringCompleteEvent unshutteringCompleteEvent = unshutteringCompleteEventCaptor.getValue();
 
         assertThat(unshutteringCompleteEvent.getUnshutteringCompletedAt(), is(now));
+        assertThat(unshutteringCompleteEvent.getTarget(), is(target));
     }
 
     @Test
@@ -113,11 +119,13 @@ public class ShutteringBeanTest {
         final ShutteredCommand shutteredCommand_1 = mock(ShutteredCommand.class);
         final ShutteredCommand shutteredCommand_2 = mock(ShutteredCommand.class);
 
+        final SystemCommand systemCommand = mock(SystemCommand.class);
+
         when(shutteringRepository.streamShutteredCommands()).thenReturn(of(shutteredCommand_1, shutteredCommand_2));
         Mockito.doThrow(shutteringPersistenceException).when(shutteredCommandSender).sendAndDelete(shutteredCommand_2);
 
         try {
-            shutteringBean.unshutter();
+            shutteringBean.unshutter(systemCommand);
             fail();
         } catch (final ShutteringPersistenceException expected) {
             assertThat(expected, CoreMatchers.is(shutteringPersistenceException));
@@ -125,7 +133,7 @@ public class ShutteringBeanTest {
 
         verify(shutteredCommandSender).sendAndDelete(shutteredCommand_1);
 
-        Mockito.verifyZeroInteractions(envelopeSenderSelector);
+        verifyZeroInteractions(envelopeSenderSelector);
         verifyZeroInteractions(unshutteringCompleteEventFirer);
     }
 }

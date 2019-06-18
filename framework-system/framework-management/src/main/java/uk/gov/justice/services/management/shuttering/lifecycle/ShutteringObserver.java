@@ -24,7 +24,7 @@ public class ShutteringObserver {
 
     public void onShutteringRequested(@Observes final ShutteringRequestedEvent shutteringRequestedEvent) {
         logger.info(format("Shuttering requested started at: %s", shutteringRequestedEvent.getShutteringRequestedAt()));
-        shutteringBean.shutter();
+        shutteringBean.shutter(shutteringRequestedEvent.getTarget());
     }
 
     public void onShutteringComplete(@Observes final ShutteringCompleteEvent shutteringCompleteEvent) {
@@ -33,7 +33,7 @@ public class ShutteringObserver {
 
     public void onUnShutteringRequested(@Observes final UnshutteringRequestedEvent unshutteringRequestedEvent) {
         logger.info(format("Unshuttering requested started at: %s", unshutteringRequestedEvent.getUnshutteringRequestedAt()));
-        shutteringBean.unshutter();
+        shutteringBean.unshutter(unshutteringRequestedEvent.getTarget());
     }
 
     public void onUnshutteringComplete(@Observes final UnshutteringCompleteEvent unshutteringCompleteEvent) {

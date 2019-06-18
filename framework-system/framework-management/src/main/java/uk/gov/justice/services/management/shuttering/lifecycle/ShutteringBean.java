@@ -1,6 +1,9 @@
 package uk.gov.justice.services.management.shuttering.lifecycle;
 
+import static javax.transaction.Transactional.TxType.REQUIRED;
+
 import uk.gov.justice.services.common.util.UtcClock;
+import uk.gov.justice.services.jmx.command.SystemCommand;
 import uk.gov.justice.services.management.shuttering.events.ShutteringCompleteEvent;
 import uk.gov.justice.services.management.shuttering.events.UnshutteringCompleteEvent;
 import uk.gov.justice.services.messaging.jms.EnvelopeSenderSelector;
@@ -35,14 +38,14 @@ public class ShutteringBean {
     @Inject
     private UtcClock clock;
 
-    public void shutter() {
+    public void shutter(final SystemCommand target) {
         envelopeSenderSelector.setShuttered(true);
 
-        shutteringCompleteEventFirer.fire(new ShutteringCompleteEvent(clock.now()));
+        shutteringCompleteEventFirer.fire(new ShutteringCompleteEvent(target, clock.now()));
     }
 
-    @Transactional(Transactional.TxType.REQUIRED)
-    public void unshutter() {
+    @Transactional(REQUIRED)
+    public void unshutter(final SystemCommand target) {
 
         try (final Stream<ShutteredCommand> shutteredCommandStream = shutteringRepository.streamShutteredCommands()) {
             shutteredCommandStream.forEach(shutteredCommandSender::sendAndDelete);
@@ -50,6 +53,6 @@ public class ShutteringBean {
 
         envelopeSenderSelector.setShuttered(false);
 
-        unshutteringCompleteEventFirer.fire(new UnshutteringCompleteEvent(clock.now()));
+        unshutteringCompleteEventFirer.fire(new UnshutteringCompleteEvent(target, clock.now()));
     }
 }

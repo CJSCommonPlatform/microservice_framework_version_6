@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.0.0-M34] - 2019-06-18
+### Changed
+- Feed SystemCommand from JMX Command MBean into the command handlers
+
 ## [6.0.0-M33] - 2019-06-17
 ### Changed
 - Update framework-api to 4.0.0-M25

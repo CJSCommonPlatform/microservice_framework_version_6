@@ -8,6 +8,8 @@ import static uk.gov.justice.services.management.shuttering.command.ShutterSyste
 import static uk.gov.justice.services.management.shuttering.command.UnshutterSystemCommand.UNSHUTTER_APPLICATION;
 
 import uk.gov.justice.services.common.util.UtcClock;
+import uk.gov.justice.services.management.shuttering.command.ShutterSystemCommand;
+import uk.gov.justice.services.management.shuttering.command.UnshutterSystemCommand;
 import uk.gov.justice.services.management.shuttering.events.ShutteringRequestedEvent;
 import uk.gov.justice.services.management.shuttering.events.UnshutteringRequestedEvent;
 
@@ -48,16 +50,17 @@ public class ShutteringSystemCommandHandlerTest {
     public void shouldFireEventOnShutteringRequested() throws Exception {
 
         final ZonedDateTime now = new UtcClock().now();
+        final ShutterSystemCommand shutterSystemCommand = new ShutterSystemCommand();
 
         when(clock.now()).thenReturn(now);
 
-        shutteringSystemCommandHandler.onShutterRequested();
+        shutteringSystemCommandHandler.onShutterRequested(shutterSystemCommand);
 
         verify(shutteringRequestedEventFirer).fire(shutteringEventCaptor.capture());
 
         final ShutteringRequestedEvent shutteringRequestedEvent = shutteringEventCaptor.getValue();
 
-        assertThat(shutteringRequestedEvent.getSystemCommand().getName(), is(SHUTTER_APPLICATION));
+        assertThat(shutteringRequestedEvent.getTarget(), is(shutterSystemCommand));
         assertThat(shutteringRequestedEvent.getShutteringRequestedAt(), is(now));
     }
 
@@ -65,16 +68,17 @@ public class ShutteringSystemCommandHandlerTest {
     public void shouldFireEventOnUnshutteringRequested() throws Exception {
 
         final ZonedDateTime now = new UtcClock().now();
+        final UnshutterSystemCommand unshutterSystemCommand = new UnshutterSystemCommand();
 
         when(clock.now()).thenReturn(now);
 
-        shutteringSystemCommandHandler.onUnshutterRequested();
+        shutteringSystemCommandHandler.onUnshutterRequested(unshutterSystemCommand);
 
         verify(unshutteringRequestedEventFirer).fire(unshutteringEventCaptor.capture());
 
         final UnshutteringRequestedEvent unshutteringRequestedEvent = unshutteringEventCaptor.getValue();
 
-        assertThat(unshutteringRequestedEvent.getSystemCommand().getName(), is(UNSHUTTER_APPLICATION));
+        assertThat(unshutteringRequestedEvent.getTarget(), is(unshutterSystemCommand));
         assertThat(unshutteringRequestedEvent.getUnshutteringRequestedAt(), is(now));
     }
 }

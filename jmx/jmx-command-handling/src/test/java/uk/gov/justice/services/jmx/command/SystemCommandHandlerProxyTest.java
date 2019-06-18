@@ -4,6 +4,8 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -12,6 +14,7 @@ import org.junit.Test;
 
 public class SystemCommandHandlerProxyTest {
 
+
     @Test
     public void shouldInvokeTheCommandHandlerMethod() throws Exception {
 
@@ -19,7 +22,13 @@ public class SystemCommandHandlerProxyTest {
         final DummyHandler dummyHandler = new DummyHandler();
         final Method method = dummyHandler.getClass().getDeclaredMethod("someHandlerMethod");
 
-        final SystemCommandHandlerProxy systemCommandHandlerProxy = new SystemCommandHandlerProxy(commandName, method, dummyHandler);
+        final HandlerMethodValidator handlerMethodValidator = mock(HandlerMethodValidator.class);
+
+        final SystemCommandHandlerProxy systemCommandHandlerProxy = new SystemCommandHandlerProxy(
+                commandName,
+                method,
+                dummyHandler,
+                handlerMethodValidator);
 
         assertThat(systemCommandHandlerProxy.getCommandName(), is(commandName));
         assertThat(systemCommandHandlerProxy.getInstance(), is(dummyHandler));
@@ -29,6 +38,8 @@ public class SystemCommandHandlerProxyTest {
         systemCommandHandlerProxy.invokeCommand();
 
         assertThat(dummyHandler.someHandlerMethodWasCalled(), is(true));
+
+        verify(handlerMethodValidator).checkHandlerMethodIsValid(method, dummyHandler);
     }
 
     @Test
@@ -38,7 +49,13 @@ public class SystemCommandHandlerProxyTest {
         final DummyHandler dummyHandler = new DummyHandler();
         final Method method = dummyHandler.getClass().getDeclaredMethod("aPrivateMethod");
 
-        final SystemCommandHandlerProxy systemCommandHandlerProxy = new SystemCommandHandlerProxy(commandName, method, dummyHandler);
+        final HandlerMethodValidator handlerMethodValidator = mock(HandlerMethodValidator.class);
+
+        final SystemCommandHandlerProxy systemCommandHandlerProxy = new SystemCommandHandlerProxy(
+                commandName,
+                method,
+                dummyHandler,
+                handlerMethodValidator);
 
         try {
             systemCommandHandlerProxy.invokeCommand();
@@ -47,6 +64,8 @@ public class SystemCommandHandlerProxyTest {
             assertThat(expected.getMessage(), is("Failed to call method 'aPrivateMethod()' on " + dummyHandler.getClass().getName() + ". Is the method public?"));
             assertThat(expected.getCause(), is(instanceOf(IllegalAccessException.class)));
         }
+
+        verify(handlerMethodValidator).checkHandlerMethodIsValid(method, dummyHandler);
     }
 
     @Test
@@ -56,7 +75,13 @@ public class SystemCommandHandlerProxyTest {
         final DummyHandler dummyHandler = new DummyHandler();
         final Method method = dummyHandler.getClass().getDeclaredMethod("anExceptionThrowingMethod");
 
-        final SystemCommandHandlerProxy systemCommandHandlerProxy = new SystemCommandHandlerProxy(commandName, method, dummyHandler);
+        final HandlerMethodValidator handlerMethodValidator = mock(HandlerMethodValidator.class);
+
+        final SystemCommandHandlerProxy systemCommandHandlerProxy = new SystemCommandHandlerProxy(
+                commandName,
+                method,
+                dummyHandler,
+                handlerMethodValidator);
 
         try {
             systemCommandHandlerProxy.invokeCommand();
@@ -65,6 +90,8 @@ public class SystemCommandHandlerProxyTest {
             assertThat(expected.getMessage(), is("IOException thrown when calling method 'anExceptionThrowingMethod()' on " + dummyHandler.getClass().getName()));
             assertThat(expected.getCause(), is(instanceOf(IOException.class)));
         }
+
+        verify(handlerMethodValidator).checkHandlerMethodIsValid(method, dummyHandler);
     }
 
     private class DummyHandler {

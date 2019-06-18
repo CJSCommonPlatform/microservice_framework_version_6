@@ -29,4 +29,9 @@ public class ObjectFactoryTest {
     public void shouldCreateSystemCommandScanner() throws Exception {
         assertThat(objectFactory.systemCommandScanner(), is(notNullValue()));
     }
+
+    @Test
+    public void shouldCreateHandlerMethodValidator() throws Exception {
+        assertThat(objectFactory.handlerMethodValidator(), is(notNullValue()));
+    }
 }

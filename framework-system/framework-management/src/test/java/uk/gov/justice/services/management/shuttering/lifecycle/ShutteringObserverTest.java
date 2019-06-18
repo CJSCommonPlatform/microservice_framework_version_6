@@ -36,32 +36,33 @@ public class ShutteringObserverTest {
     public void shouldRequestShutter() {
 
         final ZonedDateTime shutteringStartedAt = of(2019, 2, 23, 17, 12, 23, 0, UTC);
-        final SystemCommand systemCommand = mock(SystemCommand.class);
+        final SystemCommand target = mock(SystemCommand.class);
 
-        shutteringObserver.onShutteringRequested(new ShutteringRequestedEvent(systemCommand, shutteringStartedAt));
+        shutteringObserver.onShutteringRequested(new ShutteringRequestedEvent(target, shutteringStartedAt));
 
         verify(logger).info("Shuttering requested started at: 2019-02-23T17:12:23Z");
-        verify(shutteringBean).shutter();
+        verify(shutteringBean).shutter(target);
     }
 
     @Test
     public void shouldRequestUnshutter() {
 
         final ZonedDateTime unShutteringStartedAt = of(2019, 2, 23, 17, 12, 23, 0, UTC);
-        final SystemCommand systemCommand = mock(SystemCommand.class);
+        final SystemCommand target = mock(SystemCommand.class);
 
-        shutteringObserver.onUnShutteringRequested(new UnshutteringRequestedEvent(systemCommand, unShutteringStartedAt));
+        shutteringObserver.onUnShutteringRequested(new UnshutteringRequestedEvent(target, unShutteringStartedAt));
 
         verify(logger).info("Unshuttering requested started at: 2019-02-23T17:12:23Z");
-        verify(shutteringBean).unshutter();
+        verify(shutteringBean).unshutter(target);
     }
 
     @Test
     public void shouldInformShutteringCompleted() {
 
         final ZonedDateTime shutteringStartedAt = of(2019, 2, 23, 17, 12, 23, 0, UTC);
+        final SystemCommand target = mock(SystemCommand.class);
 
-        shutteringObserver.onShutteringComplete(new ShutteringCompleteEvent(shutteringStartedAt));
+        shutteringObserver.onShutteringComplete(new ShutteringCompleteEvent(target, shutteringStartedAt));
 
         verify(logger).info("Shuttering completed at: 2019-02-23T17:12:23Z");
     }
@@ -70,8 +71,9 @@ public class ShutteringObserverTest {
     public void shouldInformUnshutteringCompleted() {
 
         final ZonedDateTime unshutteringStartedAt = of(2019, 2, 23, 17, 12, 23, 0, UTC);
+        final SystemCommand target = mock(SystemCommand.class);
 
-        shutteringObserver.onUnshutteringComplete(new UnshutteringCompleteEvent(unshutteringStartedAt));
+        shutteringObserver.onUnshutteringComplete(new UnshutteringCompleteEvent(target, unshutteringStartedAt));
 
         verify(logger).info("Unshuttering completed at: 2019-02-23T17:12:23Z");
     }

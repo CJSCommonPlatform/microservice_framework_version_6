@@ -1,6 +1,5 @@
 package uk.gov.justice.services.management.shuttering.handler;
 
-
 import static uk.gov.justice.services.management.shuttering.command.ShutterSystemCommand.SHUTTER_APPLICATION;
 import static uk.gov.justice.services.management.shuttering.command.UnshutterSystemCommand.UNSHUTTER_APPLICATION;
 
@@ -26,12 +25,12 @@ public class ShutteringSystemCommandHandler {
     private Event<UnshutteringRequestedEvent> unshutteringRequestedEventFirer;
 
     @HandlesSystemCommand(SHUTTER_APPLICATION)
-    public void onShutterRequested() {
-        shutteringRequestedEventFirer.fire(new ShutteringRequestedEvent(new ShutterSystemCommand(), clock.now()));
+    public void onShutterRequested(final ShutterSystemCommand shutterSystemCommand) {
+        shutteringRequestedEventFirer.fire(new ShutteringRequestedEvent(shutterSystemCommand, clock.now()));
     }
 
     @HandlesSystemCommand(UNSHUTTER_APPLICATION)
-    public void onUnshutterRequested() {
-        unshutteringRequestedEventFirer.fire(new UnshutteringRequestedEvent(new UnshutterSystemCommand(), clock.now()));
+    public void onUnshutterRequested(final UnshutterSystemCommand unshutterSystemCommand) {
+        unshutteringRequestedEventFirer.fire(new UnshutteringRequestedEvent(unshutterSystemCommand, clock.now()));
     }
 }

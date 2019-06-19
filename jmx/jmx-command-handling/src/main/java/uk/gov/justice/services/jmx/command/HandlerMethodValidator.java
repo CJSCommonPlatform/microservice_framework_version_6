@@ -31,7 +31,7 @@ public class HandlerMethodValidator {
                    SystemCommand.class.getName()));
         }
 
-        if (! parameterTypes[0].isAssignableFrom(SystemCommand.class)) {
+        if (! SystemCommand.class.isAssignableFrom(parameterTypes[0])) {
             throw new InvalidHandlerMethodException(format("Invalid handler method '%s' on class '%s'. Method should have one parameter of type '%s'.",
                     handlerMethod.getName(),
                     instance.getClass().getName(),

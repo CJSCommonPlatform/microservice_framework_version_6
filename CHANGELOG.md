@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.0.0-M35] - 2019-06-19
+### Fixed
+- Handler method validator now works with subclasses of SystemCommand
+
 ## [6.0.0-M34] - 2019-06-18
 ### Changed
 - Feed SystemCommand from JMX Command MBean into the command handlers

@@ -19,6 +19,6 @@ public class SystemCommander implements SystemCommanderMBean {
 
         logger.info(format("Received System Command '%s'", systemCommand.getName()));
 
-        systemCommandStore.findCommandProxy(systemCommand).invokeCommand();
+        systemCommandStore.findCommandProxy(systemCommand).invokeCommand(systemCommand);
     }
 }

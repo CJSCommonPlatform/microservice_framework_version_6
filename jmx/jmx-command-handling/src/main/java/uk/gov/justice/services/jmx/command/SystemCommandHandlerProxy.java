@@ -27,12 +27,12 @@ public class SystemCommandHandlerProxy {
         return instance;
     }
 
-    public void invokeCommand() {
+    public void invokeCommand(final SystemCommand systemCommand) {
 
         handlerMethodValidator.checkHandlerMethodIsValid(method, instance);
 
         try {
-            method.invoke(instance);
+            method.invoke(instance, systemCommand);
         } catch (final IllegalAccessException e) {
 
             final String message = format("Failed to call method '%s()' on %s. Is the method public?",

@@ -28,19 +28,17 @@ public class SystemCommanderTest {
     @Test
     public void shouldFindTheCorrectProxyForTheCommandAndInvoke() throws Exception {
 
-        final String command = "some command";
+        final TestCommand testCommand = new TestCommand();
 
-        final SystemCommand systemCommand = mock(SystemCommand.class);
         final SystemCommandHandlerProxy systemCommandHandlerProxy = mock(SystemCommandHandlerProxy.class);
 
-        when(systemCommand.getName()).thenReturn(command);
-        when(systemCommandStore.findCommandProxy(systemCommand)).thenReturn(systemCommandHandlerProxy);
+        when(systemCommandStore.findCommandProxy(testCommand)).thenReturn(systemCommandHandlerProxy);
 
-        systemCommander.call(systemCommand);
+        systemCommander.call(testCommand);
 
         final InOrder inOrder = inOrder(logger, systemCommandHandlerProxy);
 
-        inOrder.verify(logger).info("Received System Command 'some command'");
-        inOrder.verify(systemCommandHandlerProxy).invokeCommand();
+        inOrder.verify(logger).info("Received System Command 'TEST_COMMAND'");
+        inOrder.verify(systemCommandHandlerProxy).invokeCommand(testCommand);
     }
 }

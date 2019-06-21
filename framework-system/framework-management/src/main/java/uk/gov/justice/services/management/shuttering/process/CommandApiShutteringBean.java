@@ -1,4 +1,4 @@
-package uk.gov.justice.services.management.shuttering.lifecycle;
+package uk.gov.justice.services.management.shuttering.process;
 
 import static javax.transaction.Transactional.TxType.REQUIRED;
 
@@ -18,7 +18,7 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 
 @Stateless
-public class ShutteringBean {
+public class CommandApiShutteringBean {
 
     @Inject
     private EnvelopeSenderSelector envelopeSenderSelector;

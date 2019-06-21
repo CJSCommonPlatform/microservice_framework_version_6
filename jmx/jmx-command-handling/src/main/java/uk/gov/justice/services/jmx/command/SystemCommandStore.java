@@ -33,7 +33,7 @@ public class SystemCommandStore {
                 "Failed to find SystemCommandHandler for command '%s'",
                 systemCommand.getName());
 
-        throw new SystemCommandInvocationException(message);
+        throw new SystemCommandException(message);
     }
 
     public void store(final List<SystemCommandHandlerProxy> systemCommandProxies) {

@@ -16,7 +16,7 @@ import javax.jms.Session;
 
 public class JmsQueueBrowser {
 
-    @Resource(mappedName = "java:comp/DefaultJMSConnectionFactory")
+    @Resource(mappedName = "java:jboss/DefaultJMSConnectionFactory")
     private ConnectionFactory connectionFactory;
 
     @Inject

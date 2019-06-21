@@ -1,6 +1,5 @@
 package uk.gov.justice.services.jmx;
 
-import static com.google.common.collect.ImmutableMap.of;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -11,9 +10,6 @@ import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.jmx.command.SystemCommander;
 
-import java.util.Map;
-
-import javax.inject.Inject;
 import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;

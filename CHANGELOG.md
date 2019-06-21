@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.0.0-M36] - 2019-06-21
+### Added
+- Observers for the shutter then catchup process
+
 ## [6.0.0-M35] - 2019-06-19
 ### Fixed
 - Handler method validator now works with subclasses of SystemCommand

@@ -1,4 +1,4 @@
-package uk.gov.justice.services.management.shuttering.lifecycle;
+package uk.gov.justice.services.management.shuttering.process;
 
 import static java.util.stream.Stream.of;
 import static org.hamcrest.CoreMatchers.is;
@@ -35,7 +35,7 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ShutteringBeanTest {
+public class CommandApiShutteringBeanTest {
 
     @Mock
     private EnvelopeSenderSelector envelopeSenderSelector;
@@ -56,7 +56,7 @@ public class ShutteringBeanTest {
     private UtcClock clock;
 
     @InjectMocks
-    private ShutteringBean shutteringBean;
+    private CommandApiShutteringBean commandApiShutteringBean;
 
     @Captor
     private ArgumentCaptor<ShutteringCompleteEvent> shutteringCompleteEventCaptor;
@@ -72,7 +72,7 @@ public class ShutteringBeanTest {
         final SystemCommand target = mock(SystemCommand.class);
         when(clock.now()).thenReturn(now);
 
-        shutteringBean.shutter(target);
+        commandApiShutteringBean.shutter(target);
 
         verify(envelopeSenderSelector).setShuttered(true);
         verify(shutteringCompleteEventFirer).fire(shutteringCompleteEventCaptor.capture());
@@ -96,7 +96,7 @@ public class ShutteringBeanTest {
         when(shutteringRepository.streamShutteredCommands()).thenReturn(of(shutteredCommand_1, shutteredCommand_2));
         when(clock.now()).thenReturn(now);
 
-        shutteringBean.unshutter(target);
+        commandApiShutteringBean.unshutter(target);
 
         final InOrder inOrder = inOrder(shutteredCommandSender, envelopeSenderSelector, unshutteringCompleteEventFirer);
 
@@ -125,7 +125,7 @@ public class ShutteringBeanTest {
         Mockito.doThrow(shutteringPersistenceException).when(shutteredCommandSender).sendAndDelete(shutteredCommand_2);
 
         try {
-            shutteringBean.unshutter(systemCommand);
+            commandApiShutteringBean.unshutter(systemCommand);
             fail();
         } catch (final ShutteringPersistenceException expected) {
             assertThat(expected, CoreMatchers.is(shutteringPersistenceException));

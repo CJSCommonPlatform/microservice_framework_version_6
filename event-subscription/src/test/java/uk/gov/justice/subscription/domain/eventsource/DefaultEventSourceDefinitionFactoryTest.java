@@ -7,8 +7,6 @@ import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.jdbc.persistence.JndiAppNameProvider;
 
-import javax.inject.Inject;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;

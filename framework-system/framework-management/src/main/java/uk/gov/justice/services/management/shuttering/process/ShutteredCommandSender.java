@@ -1,4 +1,4 @@
-package uk.gov.justice.services.management.shuttering.lifecycle;
+package uk.gov.justice.services.management.shuttering.process;
 
 import static javax.transaction.Transactional.TxType.REQUIRES_NEW;
 

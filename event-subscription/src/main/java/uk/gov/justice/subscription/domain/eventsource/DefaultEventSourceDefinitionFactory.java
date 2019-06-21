@@ -5,7 +5,6 @@ import static java.util.Optional.of;
 
 import uk.gov.justice.services.jdbc.persistence.JndiAppNameProvider;
 
-import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 

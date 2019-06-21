@@ -1,4 +1,4 @@
-package uk.gov.justice.services.management.shuttering.lifecycle;
+package uk.gov.justice.services.management.shuttering.process;
 
 import static java.util.UUID.randomUUID;
 import static org.mockito.Mockito.inOrder;

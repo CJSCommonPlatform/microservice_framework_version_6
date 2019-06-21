@@ -17,8 +17,15 @@ public class SystemCommander implements SystemCommanderMBean {
     @Override
     public void call(final SystemCommand systemCommand) {
 
-        logger.info(format("Received System Command '%s'", systemCommand.getName()));
+        final String commandName = systemCommand.getName();
+        logger.info(format("Received System Command '%s'", commandName));
 
-        systemCommandStore.findCommandProxy(systemCommand).invokeCommand(systemCommand);
+        try {
+            systemCommandStore.findCommandProxy(systemCommand).invokeCommand(systemCommand);
+        } catch (final SystemCommandInvocationException e) {
+            final String message = format("Failed to run System Command '%s'", commandName);
+            logger.error(message, e);
+            throw new SystemCommandException(message, e);
+        }
     }
 }

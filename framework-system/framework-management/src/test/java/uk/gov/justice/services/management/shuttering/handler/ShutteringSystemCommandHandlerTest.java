@@ -4,8 +4,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.management.shuttering.command.ShutterSystemCommand.SHUTTER_APPLICATION;
-import static uk.gov.justice.services.management.shuttering.command.UnshutterSystemCommand.UNSHUTTER_APPLICATION;
 
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.management.shuttering.command.ShutterSystemCommand;

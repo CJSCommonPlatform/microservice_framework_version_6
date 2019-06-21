@@ -69,7 +69,7 @@ public class SystemCommandStoreTest {
         try {
             systemCommandStore.findCommandProxy(systemCommand);
             fail();
-        } catch (final SystemCommandInvocationException expected) {
+        } catch (final SystemCommandException expected) {
             assertThat(expected.getMessage(), is("Failed to find SystemCommandHandler for command 'This command does not exist'"));
         }
     }

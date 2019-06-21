@@ -27,7 +27,7 @@ public class SystemCommandHandlerProxy {
         return instance;
     }
 
-    public void invokeCommand(final SystemCommand systemCommand) {
+    public void invokeCommand(final SystemCommand systemCommand) throws SystemCommandInvocationException {
 
         handlerMethodValidator.checkHandlerMethodIsValid(method, instance);
 

@@ -2,6 +2,7 @@ package uk.gov.justice.services.management.shuttering.observers.shuttering;
 
 
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
 import static uk.gov.justice.services.management.shuttering.observers.shuttering.ShutteringRegistry.ShutteringState.SHUTTERING_COMPLETE;
 import static uk.gov.justice.services.management.shuttering.observers.shuttering.ShutteringRegistry.ShutteringState.SHUTTERING_REQUESTED;
 
@@ -53,12 +54,16 @@ public class ShutteringRegistry {
 
     public void markShutteringCompleteFor(final Class<?> shutterable, final SystemCommand target) {
 
+
+        logger.info("Marking shuttering complete for " + shutterable.getSimpleName());
         shutteringStateMap.put(shutterable, SHUTTERING_COMPLETE);
 
         if (allShutteringComplete()) {
+
+            logger.info("All shuttering complete: " + allShutterables.stream().map(Class::getSimpleName).collect(toList()));
             shutteringStateMap.clear();
             shutteringCompleteEventFirer.fire(new ShutteringCompleteEvent(target, clock.now()));
-        }
+        } 
     }
 
     public void clear() {

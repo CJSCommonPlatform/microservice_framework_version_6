@@ -58,9 +58,13 @@ public class ShutteringRegistryTest {
         shutteringRegistry.shutteringStarted();
 
         shutteringRegistry.markShutteringCompleteFor(Shutterable_2.class, systemCommand);
+        verify(logger).info("Marking shuttering complete for Shutterable_2");
         shutteringRegistry.markShutteringCompleteFor(Shutterable_1.class, systemCommand);
+        verify(logger).info("Marking shuttering complete for Shutterable_1");
         shutteringRegistry.markShutteringCompleteFor(Shutterable_3.class, systemCommand);
+        verify(logger).info("Marking shuttering complete for Shutterable_3");
 
+        verify(logger).info("All shuttering complete: [Shutterable_1, Shutterable_2, Shutterable_3]");
         verify(shutteringCompleteEventFirer, times(1)).fire(new ShutteringCompleteEvent(systemCommand, now));
     }
 

@@ -1,5 +1,6 @@
 package uk.gov.justice.services.jmx.bootstrap;
 
+import uk.gov.justice.services.framework.utilities.cdi.CdiInstanceResolver;
 import uk.gov.justice.services.jmx.command.HandlerMethodValidator;
 import uk.gov.justice.services.jmx.command.HandlesSystemCommand;
 import uk.gov.justice.services.jmx.command.SystemCommandHandlerProxy;

@@ -2,7 +2,6 @@ package uk.gov.justice.services.management.shuttering.observers.shuttering;
 
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.jmx.command.SystemCommand;
@@ -33,14 +32,6 @@ public class ShutterCommandApiObserverTest {
     private ShutterCommandApiObserver shutterCommandApiObserver;
 
     @Test
-    public void shouldRegisterAsShutterable() throws Exception {
-
-        shutterCommandApiObserver.registerAsShutterable();
-
-        verify(shutteringRegistry).registerAsShutterable(ShutterCommandApiObserver.class);
-    }
-
-    @Test
     public void shouldShutterTheCommandApiAndFireTheShutteringCompleteEvent() throws Exception {
 
         final SystemCommand systemCommand = mock(SystemCommand.class);
@@ -55,7 +46,7 @@ public class ShutterCommandApiObserverTest {
         final InOrder inOrder = inOrder(logger, commandApiShutteringBean, shutteringRegistry);
 
         inOrder.verify(logger).info("Shuttering Command API");
-        inOrder.verify(commandApiShutteringBean).shutter(systemCommand);
+        inOrder.verify(commandApiShutteringBean).shutter();
         inOrder.verify(logger).info("Shuttering of Command API complete");
         inOrder.verify(shutteringRegistry).markShutteringCompleteFor(ShutterCommandApiObserver.class, systemCommand);
     }

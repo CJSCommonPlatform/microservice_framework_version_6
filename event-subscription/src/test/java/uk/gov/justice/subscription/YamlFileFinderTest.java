@@ -48,6 +48,6 @@ public class YamlFileFinderTest {
     public void shouldLogFoundResources() throws Exception {
         yamlFileFinder.getSubscriptionsDescriptorsPaths();
 
-        verify(logger).info("Found 1 resources on the classpath for yaml/subscriptions-descriptor.yaml");
+        verify(logger).debug("Found 1 resources on the classpath for yaml/subscriptions-descriptor.yaml");
     }
 }

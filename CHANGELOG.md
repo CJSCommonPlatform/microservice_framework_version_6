@@ -5,6 +5,12 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.0.0-M37] - 2019-06-25
+### Changed
+- Shuttering executors no longer register themselves but are discovered at system startup and registered
+### Fixed
+- Shuttering is no longer called twice when shuttering for catchup
+
 ## [6.0.0-M36] - 2019-06-21
 ### Added
 - Observers for the shutter then catchup process

@@ -2,37 +2,33 @@ package uk.gov.justice.services.management.shuttering.observers.unshuttering;
 
 import uk.gov.justice.services.management.shuttering.events.UnshutteringProcessStartedEvent;
 import uk.gov.justice.services.management.shuttering.process.CommandApiShutteringBean;
+import uk.gov.justice.services.management.shuttering.startup.UnshutteringExecutor;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 
+@UnshutteringExecutor
 public class UnshutterCommandApiObserver {
 
     @Inject
     private CommandApiShutteringBean commandApiShutteringBean;
 
     @Inject
-    private UnshutteringRegistry shutteringRegistry;
+    private UnshutteringRegistry unshutteringRegistry;
 
     @Inject
     private Logger logger;
-
-    @PostConstruct
-    public void registerAsUnshutterable() {
-        shutteringRegistry.registerAsUnshutterable(getClass());
-    }
 
     public void onUnshutteringProcessStarted(@Observes final UnshutteringProcessStartedEvent unshutteringProcessStartedEvent) {
 
         logger.info("Unshuttering Command API");
 
-        commandApiShutteringBean.unshutter(unshutteringProcessStartedEvent.getTarget());
+        commandApiShutteringBean.unshutter();
 
         logger.info("Unshuttering of Command API complete");
 
-        shutteringRegistry.markUnshutteringCompleteFor(getClass(), unshutteringProcessStartedEvent.getTarget());
+        unshutteringRegistry.markUnshutteringCompleteFor(getClass(), unshutteringProcessStartedEvent.getTarget());
     }
 }

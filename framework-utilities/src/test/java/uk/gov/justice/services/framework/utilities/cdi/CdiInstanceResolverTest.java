@@ -1,4 +1,4 @@
-package uk.gov.justice.services.jmx.bootstrap;
+package uk.gov.justice.services.framework.utilities.cdi;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static org.hamcrest.CoreMatchers.is;
@@ -25,15 +25,15 @@ public class CdiInstanceResolverTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void shouldResolvedTheInstanceOfTheBean() throws Exception {
+    public void shouldResolveTheInstanceOfACdiBean() throws Exception {
 
         final BeanManager beanManager = mock(BeanManager.class);
         final Bean bean = mock(Bean.class);
         final Set<Bean<?>> beans = newHashSet(bean);
         final CreationalContext<?> context = mock(CreationalContext.class);
-        final SystemCommandScanner systemCommandScanner = mock(SystemCommandScanner.class);
+        final DummyCdiBean systemCommandScanner = new DummyCdiBean();
 
-        final Class<SystemCommandScanner> beanClass = SystemCommandScanner.class;
+        final Class<DummyCdiBean> beanClass = DummyCdiBean.class;
         when(beanManager.getBeans(beanClass)).thenReturn(beans);
         when(beanManager.resolve(beans)).thenReturn(bean);
         when(beanManager.createCreationalContext(bean)).thenReturn(context);

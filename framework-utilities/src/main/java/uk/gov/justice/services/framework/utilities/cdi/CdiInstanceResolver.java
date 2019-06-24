@@ -1,4 +1,4 @@
-package uk.gov.justice.services.jmx.bootstrap;
+package uk.gov.justice.services.framework.utilities.cdi;
 
 import static java.lang.String.format;
 

@@ -6,6 +6,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import uk.gov.justice.services.framework.utilities.cdi.CdiInstanceResolver;
 import uk.gov.justice.services.jmx.command.HandlerMethodValidator;
 import uk.gov.justice.services.jmx.command.HandlesSystemCommand;
 import uk.gov.justice.services.jmx.command.SystemCommand;

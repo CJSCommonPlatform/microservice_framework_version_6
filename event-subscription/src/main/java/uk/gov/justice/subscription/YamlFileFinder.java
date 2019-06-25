@@ -20,7 +20,7 @@ public class YamlFileFinder {
     private static final String EVENT_SOURCE_FILE_NAME = "yaml/event-sources.yaml";
 
     @Inject
-    Logger logger;
+    private Logger logger;
 
     /**
      * Find all yaml/subscriptions-descriptor.yaml resources on the classpath
@@ -47,7 +47,7 @@ public class YamlFileFinder {
                 .getClassLoader()
                 .getResources(name));
 
-        logger.info(format("Found %s resources on the classpath for %s", urls.size(), name));
+        logger.debug(format("Found %s resources on the classpath for %s", urls.size(), name));
 
         return urls;
     }

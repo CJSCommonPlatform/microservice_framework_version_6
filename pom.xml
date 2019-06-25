@@ -38,6 +38,7 @@
         <module>event-subscription-test-utils</module>
         <module>jmx</module>
         <module>framework-system</module>
+        <module>framework-utilities</module>
     </modules>
 
     <properties>

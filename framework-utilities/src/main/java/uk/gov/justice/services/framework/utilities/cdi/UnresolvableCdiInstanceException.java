@@ -1,4 +1,4 @@
-package uk.gov.justice.services.jmx.bootstrap;
+package uk.gov.justice.services.framework.utilities.cdi;
 
 public class UnresolvableCdiInstanceException extends RuntimeException {
 

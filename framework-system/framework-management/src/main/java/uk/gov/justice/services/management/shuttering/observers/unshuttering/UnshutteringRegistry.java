@@ -1,6 +1,7 @@
 package uk.gov.justice.services.management.shuttering.observers.unshuttering;
 
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
 import static uk.gov.justice.services.management.shuttering.observers.unshuttering.UnshutteringRegistry.UnshutteringState.UNSHUTTERING_COMPLETE;
 import static uk.gov.justice.services.management.shuttering.observers.unshuttering.UnshutteringRegistry.UnshutteringState.UNSHUTTERING_REQUESTED;
 
@@ -37,24 +38,26 @@ public class UnshutteringRegistry {
     @Inject
     private Logger logger;
 
-    private final List<Class<?>> allUnshutterables = new ArrayList<>();
+    private final List<Class<?>> allUnshutteringExecutors = new ArrayList<>();
     private final ConcurrentMap<Class<?>, UnshutteringState> unshutteringStateMap = new ConcurrentHashMap<>();
 
-    public void registerAsUnshutterable(final Class<?> unshutterable) {
+    public void registerAsUnshutterable(final Class<?> unshutteringExecutorClass) {
 
-        logger.info(format("Registering %s as unshutterable", unshutterable.getSimpleName()));
-        allUnshutterables.add(unshutterable);
+        logger.info(format("Registering %s as unshuttering executor", unshutteringExecutorClass.getSimpleName()));
+        allUnshutteringExecutors.add(unshutteringExecutorClass);
     }
 
     public void unshutteringStarted() {
-        allUnshutterables.forEach(unshutterableClass -> unshutteringStateMap.put(unshutterableClass, UNSHUTTERING_REQUESTED));
+        allUnshutteringExecutors.forEach(unshutterableClass -> unshutteringStateMap.put(unshutterableClass, UNSHUTTERING_REQUESTED));
     }
 
     public void markUnshutteringCompleteFor(final Class<?> unshutterable, final SystemCommand target) {
 
+        logger.info("Marking unshuttering complete for " + unshutterable.getSimpleName());
         unshutteringStateMap.put(unshutterable, UNSHUTTERING_COMPLETE);
 
         if (allUnshutteringComplete()) {
+            logger.info("All unshuttering complete: " + allUnshutteringExecutors.stream().map(Class::getSimpleName).collect(toList()));
             unshutteringStateMap.clear();
             unshutteringCompleteEventFirer.fire(new UnshutteringCompleteEvent(target, clock.now()));
         }

@@ -2,6 +2,7 @@ package uk.gov.justice.services.jmx.bootstrap;
 
 import static java.util.stream.Collectors.toList;
 
+import uk.gov.justice.services.framework.utilities.cdi.CdiInstanceResolver;
 import uk.gov.justice.services.jmx.command.SystemCommandHandlerProxy;
 import uk.gov.justice.services.jmx.command.SystemCommandStore;
 

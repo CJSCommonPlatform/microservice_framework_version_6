@@ -49,20 +49,26 @@ public class UnshutteringRegistryTest {
         unshutteringRegistry.clear();
 
         unshutteringRegistry.registerAsUnshutterable(Unshutterable_1.class);
-        verify(logger).info("Registering Unshutterable_1 as unshutterable");
+        verify(logger).info("Registering Unshutterable_1 as unshuttering executor");
 
         unshutteringRegistry.registerAsUnshutterable(Unshutterable_2.class);
-        verify(logger).info("Registering Unshutterable_2 as unshutterable");
+        verify(logger).info("Registering Unshutterable_2 as unshuttering executor");
 
         unshutteringRegistry.registerAsUnshutterable(Unshutterable_3.class);
-        verify(logger).info("Registering Unshutterable_3 as unshutterable");
+        verify(logger).info("Registering Unshutterable_3 as unshuttering executor");
 
         unshutteringRegistry.unshutteringStarted();
 
         unshutteringRegistry.markUnshutteringCompleteFor(Unshutterable_2.class, systemCommand);
-        unshutteringRegistry.markUnshutteringCompleteFor(Unshutterable_1.class, systemCommand);
-        unshutteringRegistry.markUnshutteringCompleteFor(Unshutterable_3.class, systemCommand);
+        verify(logger).info("Marking unshuttering complete for Unshutterable_2");
 
+        unshutteringRegistry.markUnshutteringCompleteFor(Unshutterable_1.class, systemCommand);
+        verify(logger).info("Marking unshuttering complete for Unshutterable_1");
+
+        unshutteringRegistry.markUnshutteringCompleteFor(Unshutterable_3.class, systemCommand);
+        verify(logger).info("Marking unshuttering complete for Unshutterable_3");
+
+        verify(logger).info("All unshuttering complete: [Unshutterable_1, Unshutterable_2, Unshutterable_3]");
         verify(unshutteringCompleteEventFirer, times(1)).fire(new UnshutteringCompleteEvent(systemCommand, now));
     }
 

@@ -5,204 +5,35 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
-## [6.0.0-M37] - 2019-06-25
-### Changed
-- Shuttering executors no longer register themselves but are discovered at system startup and registered
-### Fixed
-- Shuttering is no longer called twice when shuttering for catchup
-
-## [6.0.0-M36] - 2019-06-21
+## [6.0.0-RC1] - 2019-06-26
 ### Added
-- Observers for the shutter then catchup process
-
-## [6.0.0-M35] - 2019-06-19
-### Fixed
-- Handler method validator now works with subclasses of SystemCommand
-
-## [6.0.0-M34] - 2019-06-18
-### Changed
-- Feed SystemCommand from JMX Command MBean into the command handlers
-
-## [6.0.0-M33] - 2019-06-17
-### Changed
-- Update framework-api to 4.0.0-M25
-- Update utilities to 1.19.0
-
-## [6.0.0-M32] - 2019-06-13
-## Added
+- SystemCommand mechanism to allow us to call management commands on the framework via JMX
+- New System Command to Shutter application
 - New System database
-### Changed
-- shuttered_event_store table moved to the new system database 
-
-## [6.0.0-M31] - 2019-06-12
-## Changed
-- JmsEnvelopeSenderProducer provides shuttering JmsEnvelopeSender by default to components, non component injection point will be provided with a non shuttering JmsEnvelopeSender
-
-## [6.0.0-M30] - 2019-06-11
-## Added
+- JMX bean command handlers for system commands
+- Observers for the shutter then catchup process
 - JmsQueueBrowser service to return the size of a queue
 - Brought in jmx command client code from cake-shop
-- Event Processor shuttering
 
-## Changed
-- Moved system command modules into their own area
-- Rename ComponentNameUtil to ComponentNameExtractor and moved to common
-
-### [6.0.0-M28] - 2019-06-05
-## Added
-- beans.xml to framework-management module
-
-### [6.0.0-M27] - 2019-06-05
-## Added
-- JMX bean command handlers for system commands
-
-### [6.0.0-M26] - 2019-05-22
-### Added
-- Producer for JmsEnvelopeSender, COMMAND-API component will return shuttering version, otherwise default
-
-### [6.0.0-M25] - 2019-05-17
-### Added
-- JMX Rebuild service bean
-
-## [6.0.0-M24] - 2019-05-15
 ### Changed
-- Shuttering now shutters in command api
-- All commands received whilst the application is shuttered are stored in a new table 
-'shuttered_command_store' in the viewstore
+- All commands received whilst the application is shuttered are stored in a new table 'shuttered_command_store' in the viewstore
 - Stored commands are send to JMS once the application is un-shuttered
-
-## [6.0.0-M23] - 2019-05-13
-### Changed
-- Update framework-api to 4.0.0-M19
-
-## [6.0.0-M23] - 2019-05-13
-### Changed
-- Update framework-api to 4.0.0-M19
-
-## [6.0.0-M22] - 2019-05-07
-### Changed
-- Update common-bom to 2.0.2
-- Update test-utils to 1.23.0
-- Update utilities to 1.18.0
-- Update json-schema-catalog to 1.7.0
-- Update framework to 4.0.0-M18
-
-## [6.0.0-M21] - 2019-05-03
-### - Removed
-- Event subscription now depends on utilites for YAML parser
-
-## [6.0.0-M20] - 2019-04-24
-### Deleted
-- Removed deprecated classes and methods
-
-## [6.0.0-M19] - 2019-04-24
-### Changed
-- Upgrade to latest framework-api version 4.0.0-M12
-
-## [6.0.0-M18] - 2019-04-23
-### Changed
-- Update test utils core version to the latest
-
-## [6.0.0-M17] - 2019-04-23
-### Changed
-- Update framework-api version to include indexer component
-
-## [6.0.0-M16] - 2019-04-23
-### Changed
-- Update framework-api version
-
-## [6.0.0-M15] - 2019-04-17
-### Changed
-- Update test-utils to 1.22.0-M1
-- Update utilities to 1.17.0-M2
-- Update json-schema-catalog to 1.6.1-M2
-- Update framework to 4.0.0-M9
-
-## [6.0.0-M14] - 2019-04-16
-### Changed
+- Rename ComponentNameUtil to ComponentNameExtractor and moved to common
 - Renamed JdbcRepositoryHelper to JdbcResultSetStreamer
 - Extracted preparedStatementWrapperOf() in JdbcRepositoryHelper to a new class 'PreparedStatementWrapperFactory'
-
-## [6.0.0-M13] - 2019-04-16
-### Changed
-- Upgrade to latest framework-api version 4.0.0-M8
-
-## [6.0.0-M12] - 2019-04-15
-### Removed
-- Remove deprecated github_token from travis.yml
-
-## [6.0.0-M11] - 2019-04-12
-### Changed
-- Upgrade to latest framework-api version 4.0.0-M7
-
-## [6.0.0-M10] - 2019-04-05
-### Changed
-- Update ShutteringObserver to use UnshutteringRequestedEvent
 - Remove validation info logging
-
-## [6.0.0-M9] - 2019-04-02
-### Removed
-- Remove test-utils-wildfly module
-
-## [6.0.0-M8] - 2019-04-01
-### Changed
-- Change caller/shutterable to a simple String in the event classes
-
-## [6.0.0-M7] - 2019-03-28
-- Moved Shuttering to using JEE Observable
-
-## [6.0.0-M6] - 2019-03-26
-### Added
-- Upgrade to latest framework-api version 4.0.0-M3
-
-## [6.0.0-M5] - 2019-03-22
-### Added
-- Added JMX standalone module
-
-## [6.0.0-M4]
-### Added
-- Upgrade to latest framework-api version 4.0.0-M2
-
-## [6.0.0-M3] - 2019-03-12
-### Changed
--  Added priority to JsonSchemaValidator to fix CDI problems
-
-## [6.0.0-M2] - 2019-03-11
-### Changed
-- Update json-schema-catalog version to 1.6.0
-
-## [6.0.0-M2] - 2019-03-11
-### Changed
-- Update json-schema-catalog version to 1.6.0
-
-## [6.0.0-M1] - 2019-03-07
-### Changed
 - Merged in Subscription domain, yaml parsing classes and builders from event-store
+- JmsEnvelopeSenderProducer provides shuttering JmsEnvelopeSender by default to components, non component injection point will be provided with a non shuttering JmsEnvelopeSender
+- Updated to framework-api 4.0.0
+- Updated to common-bom to 2.3.0
+- Updated to utilities to 1.20.0
+- Updated to json-schema-catalog to 1.7.2
+- Updated to test-utils to 1.24.2
 
-## [5.3.0-M5] - 2019-03-05
-### Changed
-- Update framework-api version
-
-## [5.3.0-M4] - 2019-03-04
-### Changed
-- Revert the aggregate module. It is now no longer its own repository.
-
-## [5.3.0-M3] - 2019-02-28
-### Changed
-- Update schema whitelist to add default value
-
-## [5.3.0-M2] - 2019-02-26
-### Added
-- JMX dependency to common bom
-### Changed
-- Added DummyJsonValidationSchema to testUtils common
-
-## [5.3.0-M1] - 2019-02-21
-### Added
-- JMX service
-- Command api validation of outgoing messages
-### Changed
-- Updated pojo implementation to not use typed parameter 
+### Removed
+- Removed all deprecated classes and methods
+- Remove test-utils-wildfly module
+- Event subscription now depends on utilities for YAML parser
 
 ## [5.2.0] - 2019-02-13
 ### Added
@@ -227,23 +58,11 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 - Updated to test-utils to 1.19.1
 - Updated to utilities to 1.16.2
 - Updated to framework-api 3.1.0
-- Removed ReflectionUtils: use ReflectionUtil in test-utils instead
 ### Added
 - Implementation of Metadata interface adding eventNumber and previousEventNumber
 - JsonValueEnvelopeMatcher for matching Envelope<JsonValue> types
-
-## [5.1.0-M3] - 2018-12-07
-### Changed
-- Updated to test-utils to 1.19.0
+### Removed
 - Removed ReflectionUtils: use ReflectionUtil in test-utils instead
-
-## [5.1.0-M2] - 2018-12-03
-### Changed
-- Updated to framework-api 3.1.0-M2
-
-## [5.1.0-M1] - 2018-11-23
-### Added
-- Implementation of Metadata interface adding eventNumber and previousEventNumber
 
 ## [5.0.4] - 2018-11-15
 ### Added
@@ -266,41 +85,23 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 - Fix base pom dependencies
 
 ## [5.0.1] - 2018-11-07
-
 ### Changed
 - Update framework-api to version 3.0.0
 
 ## [5.0.0] - 2018-11-07
-- First release of Framework 5.0.0
-
-## [5.0.0-M3] - 2018-11-05
-
-### Removed
-- Moved CDI producers to [Utilities](https://github.com/CJSCommonPlatform/utilities)
-
-## [5.0.0-M3] - 2018-11-05
-
-### Changed
-- Moved CDI producers to [Utilities](https://github.com/CJSCommonPlatform/utilities)
-
-## [5.0.0-M2] - 2018-10-30
-
-### Changed
-- Moved persistence-test-utils to event-store
-
-## [5.0.0-M1] - 2018-10-25
-
 ### Removed
 - Aggregate to its own repository: https://github.com/CJSCommonPlatform/framework-domain 
 - Event Store to its own repository: https://github.com/CJSCommonPlatform/event-store
 - Generators to their own repository: https://github.com/CJSCommonPlatform/framework-generators
 - Cake Shop example app to its own repository: https://github.com/CJSCommonPlatform/cake-shop   
 - AbstractJdbcRepositoryIT from test utils, deprecated in previous version
+- Moved CDI producers to [Utilities](https://github.com/CJSCommonPlatform/utilities)
 
 ### Changed
 - Message adapter generator to use SubscriptionManager instead of the interceptor chain
 - Travis setup now creates a postgres database as part of the build
 - Moved EventBuffer into DefaultSubscriptionManager
+- Moved persistence-test-utils to event-store
 - Updated to use latest raml generator plugin
 - Updated utilities version to 1.15.1
 - Updated test-utils version to 1.17.2

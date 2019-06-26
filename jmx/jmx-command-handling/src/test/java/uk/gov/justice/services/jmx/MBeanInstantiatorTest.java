@@ -5,7 +5,10 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.jmx.command.SystemCommander;
@@ -40,6 +43,7 @@ public class MBeanInstantiatorTest {
 
         final ObjectName objectName = mock(ObjectName.class);
 
+        when(mbeanServer.isRegistered(objectName)).thenReturn(false);
         when(objectNameFactory.create("systemCommander", "type", "SystemCommander")).thenReturn(objectName);
 
         mBeanInstantiator.registerSystemCommanderMBean();
@@ -48,15 +52,16 @@ public class MBeanInstantiatorTest {
     }
 
     @Test
-    public void shouldUnregisterMBeans() throws Exception {
+    public void shouldNotRegisterSystemCommanderMBeanIfAlreadyRegistered() throws Exception {
 
         final ObjectName objectName = mock(ObjectName.class);
 
         when(objectNameFactory.create("systemCommander", "type", "SystemCommander")).thenReturn(objectName);
+        when(mbeanServer.isRegistered(objectName)).thenReturn(true);
 
-        mBeanInstantiator.unregisterMBeans();
+        mBeanInstantiator.registerSystemCommanderMBean();
 
-        verify(mbeanServer).unregisterMBean(objectName);
+        verify(mbeanServer, never()).registerMBean(systemCommander, objectName);
     }
 
     @Test
@@ -65,6 +70,7 @@ public class MBeanInstantiatorTest {
         final MBeanRegistrationException mBeanRegistrationException = new MBeanRegistrationException(new NullPointerException("Ooops"));
         final ObjectName objectName = mock(ObjectName.class, "AnObjectName");
 
+        when(mbeanServer.isRegistered(objectName)).thenReturn(false);
         when(objectNameFactory.create("systemCommander", "type", "SystemCommander")).thenReturn(objectName);
         doThrow(mBeanRegistrationException).when(mbeanServer).registerMBean(systemCommander, objectName);
 
@@ -78,10 +84,38 @@ public class MBeanInstantiatorTest {
     }
 
     @Test
+    public void shouldUnregisterMBeans() throws Exception {
+
+        final ObjectName objectName = mock(ObjectName.class);
+
+        when(mbeanServer.isRegistered(objectName)).thenReturn(true);
+        when(objectNameFactory.create("systemCommander", "type", "SystemCommander")).thenReturn(objectName);
+
+        mBeanInstantiator.unregisterMBeans();
+
+        verify(mbeanServer).unregisterMBean(objectName);
+    }
+
+    @Test
+    public void shouldNotUnregisterMBeansIfNotAlreadyRegistered() throws Exception {
+
+        final ObjectName objectName = mock(ObjectName.class);
+
+        when(mbeanServer.isRegistered(objectName)).thenReturn(false);
+        when(objectNameFactory.create("systemCommander", "type", "SystemCommander")).thenReturn(objectName);
+
+        mBeanInstantiator.unregisterMBeans();
+
+        verify(mbeanServer, never()).unregisterMBean(objectName);
+    }
+
+    @Test
     public void shouldThrowExceptionWhenMBeanUnregisteringIncorrect() throws Exception {
         final MBeanRegistrationException mBeanRegistrationException = new MBeanRegistrationException(new NullPointerException("Ooops"));
 
         final ObjectName objectName = mock(ObjectName.class, "AnObjectName");
+
+        when(mbeanServer.isRegistered(objectName)).thenReturn(true);
         when(objectNameFactory.create("systemCommander", "type", "SystemCommander")).thenReturn(objectName);
         doThrow(mBeanRegistrationException).when(mbeanServer).unregisterMBean(objectName);
 

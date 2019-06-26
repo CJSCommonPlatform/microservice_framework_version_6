@@ -44,13 +44,13 @@
     <properties>
         <cpp.repo.name>microservice_framework</cpp.repo.name>
 
-        <common-bom.version>2.2.0</common-bom.version>
+        <common-bom.version>2.3.0</common-bom.version>
+        <framework-api.version>4.0.0</framework-api.version>
+        <utilities.version>1.20.0</utilities.version>
+        <json-schema-catalog.version>1.7.2</json-schema-catalog.version>
+        <test-utils.version>1.24.2</test-utils.version>
         <embedded-artemis.version>1.2.0</embedded-artemis.version>
         <jboss-ejb3-ext-api.version>2.2.0.Final</jboss-ejb3-ext-api.version>
-        <test-utils.version>1.23.0</test-utils.version>
-        <utilities.version>1.19.0</utilities.version>
-        <json-schema-catalog.version>1.7.0</json-schema-catalog.version>
-        <framework-api.version>4.0.0-M25</framework-api.version>
     </properties>
 
     <dependencyManagement>

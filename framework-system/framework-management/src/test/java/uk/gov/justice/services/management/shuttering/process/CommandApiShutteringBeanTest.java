@@ -1,26 +1,24 @@
 package uk.gov.justice.services.management.shuttering.process;
 
 import static java.util.stream.Stream.of;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import uk.gov.justice.services.common.polling.MultiIteratingPollerFactory;
 import uk.gov.justice.services.messaging.jms.EnvelopeSenderSelector;
-import uk.gov.justice.services.shuttering.domain.ShutteredCommand;
-import uk.gov.justice.services.shuttering.persistence.ShutteringPersistenceException;
-import uk.gov.justice.services.shuttering.persistence.ShutteringRepository;
+import uk.gov.justice.services.shuttering.domain.StoredCommand;
+import uk.gov.justice.services.shuttering.persistence.StoredCommandRepository;
+import uk.gov.justice.services.test.utils.common.polling.DummyMultiIteratingPoller;
 
-import org.hamcrest.CoreMatchers;
+import java.util.stream.Stream;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -30,10 +28,13 @@ public class CommandApiShutteringBeanTest {
     private EnvelopeSenderSelector envelopeSenderSelector;
 
     @Mock
-    private ShutteringRepository shutteringRepository;
+    private StoredCommandRepository storedCommandRepository;
 
     @Mock
-    private ShutteredCommandSender shutteredCommandSender;
+    private StoredCommandSender storedCommandSender;
+
+    @Mock
+    private MultiIteratingPollerFactory multiIteratingPollerFactory;
 
     @InjectMocks
     private CommandApiShutteringBean commandApiShutteringBean;
@@ -46,43 +47,31 @@ public class CommandApiShutteringBeanTest {
         verify(envelopeSenderSelector).setShuttered(true);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldDrainTheShutteringCommandQueueAndSetShutteredToFalse() throws Exception {
 
-        final ShutteredCommand shutteredCommand_1 = mock(ShutteredCommand.class);
-        final ShutteredCommand shutteredCommand_2 = mock(ShutteredCommand.class);
+        final StoredCommand storedCommand_1 = mock(StoredCommand.class);
+        final StoredCommand storedCommand_2 = mock(StoredCommand.class);
+        final StoredCommand storedCommand_3 = mock(StoredCommand.class);
+        final StoredCommand storedCommand_4 = mock(StoredCommand.class);
 
-        when(shutteringRepository.streamShutteredCommands()).thenReturn(of(shutteredCommand_1, shutteredCommand_2));
+        final Stream<StoredCommand> shutteredCommands_1 = of(storedCommand_1, storedCommand_2);
+        final Stream<StoredCommand> shutteredCommands_2 = of(storedCommand_3, storedCommand_4);
+
+        when(storedCommandRepository.streamStoredCommands()).thenReturn(shutteredCommands_1, shutteredCommands_2);
+        when(multiIteratingPollerFactory.create(2, 100L, 2, 100L)).thenReturn(new DummyMultiIteratingPoller());
 
         commandApiShutteringBean.unshutter();
 
-        final InOrder inOrder = inOrder(shutteredCommandSender, envelopeSenderSelector);
+        final InOrder inOrder = inOrder(storedCommandSender, envelopeSenderSelector);
 
-        inOrder.verify(shutteredCommandSender).sendAndDelete(shutteredCommand_1);
-        inOrder.verify(shutteredCommandSender).sendAndDelete(shutteredCommand_2);
+        inOrder.verify(storedCommandSender).sendAndDelete(storedCommand_1);
+        inOrder.verify(storedCommandSender).sendAndDelete(storedCommand_2);
         inOrder.verify(envelopeSenderSelector).setShuttered(false);
+        inOrder.verify(storedCommandSender).sendAndDelete(storedCommand_3);
+        inOrder.verify(storedCommandSender).sendAndDelete(storedCommand_4);
     }
 
-    @Test
-    public void shouldNotUnshutterIfDrainingTheCommandQueueFails() throws Exception {
 
-        final ShutteringPersistenceException shutteringPersistenceException = new ShutteringPersistenceException("Ooops");
-
-        final ShutteredCommand shutteredCommand_1 = mock(ShutteredCommand.class);
-        final ShutteredCommand shutteredCommand_2 = mock(ShutteredCommand.class);
-
-        when(shutteringRepository.streamShutteredCommands()).thenReturn(of(shutteredCommand_1, shutteredCommand_2));
-        Mockito.doThrow(shutteringPersistenceException).when(shutteredCommandSender).sendAndDelete(shutteredCommand_2);
-
-        try {
-            commandApiShutteringBean.unshutter();
-            fail();
-        } catch (final ShutteringPersistenceException expected) {
-            assertThat(expected, CoreMatchers.is(shutteringPersistenceException));
-        }
-
-        verify(shutteredCommandSender).sendAndDelete(shutteredCommand_1);
-
-        verifyZeroInteractions(envelopeSenderSelector);
-    }
 }

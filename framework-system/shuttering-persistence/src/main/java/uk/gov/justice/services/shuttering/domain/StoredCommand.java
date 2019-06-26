@@ -4,14 +4,14 @@ import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
-public class ShutteredCommand {
+public class StoredCommand {
 
     private final UUID envelopeId;
     private final String commandJsonEnvelope;
     private final String destination;
     private final ZonedDateTime dateReceived;
 
-    public ShutteredCommand(
+    public StoredCommand(
             final UUID envelopeId,
             final String commandJsonEnvelope,
             final String destination,
@@ -41,8 +41,8 @@ public class ShutteredCommand {
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
-        if (!(o instanceof ShutteredCommand)) return false;
-        final ShutteredCommand that = (ShutteredCommand) o;
+        if (!(o instanceof StoredCommand)) return false;
+        final StoredCommand that = (StoredCommand) o;
         return Objects.equals(envelopeId, that.envelopeId) &&
                 Objects.equals(commandJsonEnvelope, that.commandJsonEnvelope) &&
                 Objects.equals(destination, that.destination) &&

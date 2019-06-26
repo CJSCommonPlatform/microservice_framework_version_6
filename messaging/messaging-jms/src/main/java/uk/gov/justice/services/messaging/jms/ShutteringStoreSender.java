@@ -3,8 +3,8 @@ package uk.gov.justice.services.messaging.jms;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
-import uk.gov.justice.services.shuttering.domain.ShutteredCommand;
-import uk.gov.justice.services.shuttering.persistence.ShutteringRepository;
+import uk.gov.justice.services.shuttering.domain.StoredCommand;
+import uk.gov.justice.services.shuttering.persistence.StoredCommandRepository;
 
 import java.util.UUID;
 
@@ -13,7 +13,7 @@ import javax.inject.Inject;
 public class ShutteringStoreSender implements EnvelopeSender {
 
     @Inject
-    private ShutteringRepository shutteringRepository;
+    private StoredCommandRepository storedCommandRepository;
 
     @Inject
     private JsonObjectEnvelopeConverter jsonObjectEnvelopeConverter;
@@ -27,12 +27,12 @@ public class ShutteringStoreSender implements EnvelopeSender {
 
         final String commandJson = jsonObjectEnvelopeConverter.asJsonString(command);
 
-        final ShutteredCommand shutteredCommand = new ShutteredCommand(
+        final StoredCommand storedCommand = new StoredCommand(
                 envelopeId,
                 commandJson,
                 destinationName,
                 clock.now());
 
-        shutteringRepository.save(shutteredCommand);
+        storedCommandRepository.save(storedCommand);
     }
 }

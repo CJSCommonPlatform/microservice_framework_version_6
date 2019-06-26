@@ -39,18 +39,34 @@ public class MBeanInstantiator {
 
         final ObjectName objectName = objectNameFactory.create(SYSTEM_COMMANDER_DOMAIN_NAME, OBJECT_NAME_KEY, SYSTEM_COMMANDER_BEAN);
 
-        try {
-            mbeanServer.registerMBean(systemCommander, objectName);
-        } catch (InstanceAlreadyExistsException | MBeanRegistrationException | NotCompliantMBeanException e) {
-            throw new MBeanException(format("Failed to register SystemCommander MBean using object name '%s'", objectName), e);
+        if (!mbeanServer.isRegistered(objectName)) {
+            register(objectName);
         }
     }
+
 
     @PreDestroy
     public void unregisterMBeans() {
 
         final ObjectName objectName = objectNameFactory.create(SYSTEM_COMMANDER_DOMAIN_NAME, OBJECT_NAME_KEY, SYSTEM_COMMANDER_BEAN);
 
+        if (mbeanServer.isRegistered(objectName)) {
+            unregister(objectName);
+
+        }
+    }
+
+    private void register(final ObjectName objectName) {
+        try {
+            mbeanServer.registerMBean(systemCommander, objectName);
+
+        } catch (InstanceAlreadyExistsException | MBeanRegistrationException | NotCompliantMBeanException e) {
+            throw new MBeanException(format("Failed to register SystemCommander MBean using object name '%s'", objectName), e);
+        }
+    }
+
+
+    private void unregister(final ObjectName objectName) {
         try {
             mbeanServer.unregisterMBean(objectName);
         } catch (final InstanceNotFoundException | MBeanRegistrationException e) {

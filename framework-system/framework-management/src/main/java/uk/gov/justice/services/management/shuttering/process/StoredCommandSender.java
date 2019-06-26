@@ -5,16 +5,16 @@ import static javax.transaction.Transactional.TxType.REQUIRES_NEW;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.JmsSender;
-import uk.gov.justice.services.shuttering.domain.ShutteredCommand;
-import uk.gov.justice.services.shuttering.persistence.ShutteringRepository;
+import uk.gov.justice.services.shuttering.domain.StoredCommand;
+import uk.gov.justice.services.shuttering.persistence.StoredCommandRepository;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
-public class ShutteredCommandSender {
+public class StoredCommandSender {
 
     @Inject
-    private ShutteringRepository shutteringRepository;
+    private StoredCommandRepository storedCommandRepository;
 
     @Inject
     private JsonObjectEnvelopeConverter jsonObjectEnvelopeConverter;
@@ -23,14 +23,14 @@ public class ShutteredCommandSender {
     private JmsSender jmsSender;
 
     @Transactional(REQUIRES_NEW)
-    public void sendAndDelete(final ShutteredCommand shutteredCommand) {
+    public void sendAndDelete(final StoredCommand storedCommand) {
 
-        final String commandJsonEnvelope = shutteredCommand.getCommandJsonEnvelope();
+        final String commandJsonEnvelope = storedCommand.getCommandJsonEnvelope();
         final JsonEnvelope jsonEnvelope = jsonObjectEnvelopeConverter.asEnvelope(commandJsonEnvelope);
-        final String destination = shutteredCommand.getDestination();
+        final String destination = storedCommand.getDestination();
 
         jmsSender.send(jsonEnvelope, destination);
 
-        shutteringRepository.delete(shutteredCommand.getEnvelopeId());
+        storedCommandRepository.delete(storedCommand.getEnvelopeId());
     }
 }

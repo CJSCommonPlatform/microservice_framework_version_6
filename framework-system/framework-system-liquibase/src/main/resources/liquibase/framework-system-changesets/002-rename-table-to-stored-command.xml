@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="framework-system-002" author="TechPod"
+               logicalFilePath="002-rename-table-to-stored-command.xml">
+
+        <renameTable
+                oldTableName="shuttered_command_store"
+                newTableName="stored_command" />
+
+        <rollback>
+            <renameTable
+                    oldTableName="stored_command"
+                    newTableName="shuttered_command_store"/>
+        </rollback>
+
+    </changeSet>
+</databaseChangeLog>

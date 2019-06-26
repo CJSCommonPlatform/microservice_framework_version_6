@@ -8,7 +8,7 @@ import uk.gov.justice.services.jdbc.persistence.JdbcResultSetStreamer;
 import uk.gov.justice.services.jdbc.persistence.PreparedStatementWrapper;
 import uk.gov.justice.services.jdbc.persistence.PreparedStatementWrapperFactory;
 import uk.gov.justice.services.jdbc.persistence.SystemJdbcDataSourceProvider;
-import uk.gov.justice.services.shuttering.domain.ShutteredCommand;
+import uk.gov.justice.services.shuttering.domain.StoredCommand;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -19,12 +19,12 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.sql.DataSource;
 
-public class ShutteringRepository {
+public class StoredCommandRepository {
 
-    private static final String SELECT_SHUTTERED_COMMAND_SQL = "SELECT envelope_id, command_json_envelope, destination, date_received FROM shuttered_command_store";
-    private static final String INSERT_SHUTTERED_COMMAND_SQL = "INSERT into shuttered_command_store (envelope_id, command_json_envelope, destination, date_received) VALUES (?, ?, ?, ?)";
-    private static final String TRUNCATE_SHUTTERED_COMMAND_SQL = "TRUNCATE shuttered_command_store";
-    private static final String DELETE_SHUTTERED_COMMAND_SQL = "DELETE FROM shuttered_command_store WHERE envelope_id = ?";
+    private static final String SELECT_STORED_COMMAND_SQL = "SELECT envelope_id, command_json_envelope, destination, date_received FROM stored_command";
+    private static final String INSERT_STORED_COMMAND_SQL = "INSERT into stored_command (envelope_id, command_json_envelope, destination, date_received) VALUES (?, ?, ?, ?)";
+    private static final String TRUNCATE_STORED_COMMAND_SQL = "TRUNCATE stored_command";
+    private static final String DELETE_STORED_COMMAND_SQL = "DELETE FROM stored_command WHERE envelope_id = ?";
 
     @Inject
     private SystemJdbcDataSourceProvider systemJdbcDataSourceProvider;
@@ -35,19 +35,19 @@ public class ShutteringRepository {
     @Inject
     private JdbcResultSetStreamer jdbcResultSetStreamer;
 
-    public Stream<ShutteredCommand> streamShutteredCommands() {
+    public Stream<StoredCommand> streamStoredCommands() {
 
         final DataSource dataSource = systemJdbcDataSourceProvider.getDataSource();
 
         try {
             final PreparedStatementWrapper preparedStatementWrapper = preparedStatementWrapperFactory.preparedStatementWrapperOf(
                     dataSource,
-                    SELECT_SHUTTERED_COMMAND_SQL);
+                    SELECT_STORED_COMMAND_SQL);
 
             return jdbcResultSetStreamer.streamOf(preparedStatementWrapper, resultSet -> {
 
                 try {
-                    return new ShutteredCommand(
+                    return new StoredCommand(
                             (UUID) resultSet.getObject("envelope_id"),
                             resultSet.getString("command_json_envelope"),
                             resultSet.getString("destination"),
@@ -55,31 +55,31 @@ public class ShutteringRepository {
                     );
 
                 } catch (final SQLException e) {
-                    throw new ShutteringPersistenceException("Failed to get shuttered command stream", e);
+                    throw new StoredCommandPersistenceException("Failed to get stored command stream", e);
                 }
             });
 
         } catch (final SQLException e) {
-            throw new ShutteringPersistenceException("Failed to get shuttered command", e);
+            throw new StoredCommandPersistenceException("Failed to get stored command", e);
 
         }
     }
 
-    public void save(final ShutteredCommand shutteredCommand) {
+    public void save(final StoredCommand storedCommand) {
 
         final DataSource dataSource = systemJdbcDataSourceProvider.getDataSource();
 
         try (final Connection connection = dataSource.getConnection();
-             final PreparedStatement preparedStatement = connection.prepareStatement(INSERT_SHUTTERED_COMMAND_SQL)) {
+             final PreparedStatement preparedStatement = connection.prepareStatement(INSERT_STORED_COMMAND_SQL)) {
 
-            preparedStatement.setObject(1, shutteredCommand.getEnvelopeId());
-            preparedStatement.setString(2, shutteredCommand.getCommandJsonEnvelope());
-            preparedStatement.setString(3, shutteredCommand.getDestination());
-            preparedStatement.setTimestamp(4, toSqlTimestamp(shutteredCommand.getDateReceived()));
+            preparedStatement.setObject(1, storedCommand.getEnvelopeId());
+            preparedStatement.setString(2, storedCommand.getCommandJsonEnvelope());
+            preparedStatement.setString(3, storedCommand.getDestination());
+            preparedStatement.setTimestamp(4, toSqlTimestamp(storedCommand.getDateReceived()));
             preparedStatement.executeUpdate();
 
         } catch (final SQLException e) {
-            throw new ShutteringPersistenceException("Failed to insert shuttered command", e);
+            throw new StoredCommandPersistenceException("Failed to insert stored command", e);
         }
     }
 
@@ -88,13 +88,13 @@ public class ShutteringRepository {
         final DataSource dataSource = systemJdbcDataSourceProvider.getDataSource();
 
         try (final Connection connection = dataSource.getConnection();
-             final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_SHUTTERED_COMMAND_SQL)) {
+             final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_STORED_COMMAND_SQL)) {
 
             preparedStatement.setObject(1, envelopeId);
             preparedStatement.executeUpdate();
 
         } catch (final SQLException e) {
-            throw new ShutteringPersistenceException(format("Failed to delete shuttered command with envelope id '%s'", envelopeId), e);
+            throw new StoredCommandPersistenceException(format("Failed to delete stored command with envelope id '%s'", envelopeId), e);
         }
     }
 
@@ -102,11 +102,11 @@ public class ShutteringRepository {
         final DataSource dataSource = systemJdbcDataSourceProvider.getDataSource();
 
         try (final Connection connection = dataSource.getConnection();
-             final PreparedStatement preparedStatement = connection.prepareStatement(TRUNCATE_SHUTTERED_COMMAND_SQL)) {
+             final PreparedStatement preparedStatement = connection.prepareStatement(TRUNCATE_STORED_COMMAND_SQL)) {
             preparedStatement.executeUpdate();
 
         } catch (final SQLException e) {
-            throw new ShutteringPersistenceException("Failed to truncate shuttered_command table", e);
+            throw new StoredCommandPersistenceException("Failed to truncate stored_command table", e);
         }
     }
 }

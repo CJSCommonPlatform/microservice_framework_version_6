@@ -9,8 +9,8 @@ import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.JmsSender;
-import uk.gov.justice.services.shuttering.domain.ShutteredCommand;
-import uk.gov.justice.services.shuttering.persistence.ShutteringRepository;
+import uk.gov.justice.services.shuttering.domain.StoredCommand;
+import uk.gov.justice.services.shuttering.persistence.StoredCommandRepository;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -23,10 +23,10 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ShutteredCommandSenderTest {
+public class StoredCommandSenderTest {
 
     @Mock
-    private ShutteringRepository shutteringRepository;
+    private StoredCommandRepository storedCommandRepository;
 
     @Mock
     private JsonObjectEnvelopeConverter jsonObjectEnvelopeConverter;
@@ -35,7 +35,7 @@ public class ShutteredCommandSenderTest {
     private JmsSender jmsSender;
 
     @InjectMocks
-    private ShutteredCommandSender shutteredCommandSender;
+    private StoredCommandSender storedCommandSender;
 
     @Test
     public void shouldSendAndDeleteShutteredCommand() throws Exception {
@@ -48,7 +48,7 @@ public class ShutteredCommandSenderTest {
 
         final ZonedDateTime now = new UtcClock().now();
 
-        final ShutteredCommand shutteredCommand = new ShutteredCommand(
+        final StoredCommand storedCommand = new StoredCommand(
                 envelopeId,
                 commandJsonEnvelope,
                 destination,
@@ -56,11 +56,11 @@ public class ShutteredCommandSenderTest {
 
         when(jsonObjectEnvelopeConverter.asEnvelope(commandJsonEnvelope)).thenReturn(jsonEnvelope);
 
-        shutteredCommandSender.sendAndDelete(shutteredCommand);
+        storedCommandSender.sendAndDelete(storedCommand);
 
-        final InOrder inOrder = inOrder(jmsSender, shutteringRepository);
+        final InOrder inOrder = inOrder(jmsSender, storedCommandRepository);
 
         inOrder.verify(jmsSender).send(jsonEnvelope, destination);
-        inOrder.verify(shutteringRepository).delete(envelopeId);
+        inOrder.verify(storedCommandRepository).delete(envelopeId);
     }
 }

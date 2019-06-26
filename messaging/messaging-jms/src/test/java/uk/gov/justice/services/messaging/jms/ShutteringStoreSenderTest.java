@@ -11,8 +11,8 @@ import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.Metadata;
-import uk.gov.justice.services.shuttering.domain.ShutteredCommand;
-import uk.gov.justice.services.shuttering.persistence.ShutteringRepository;
+import uk.gov.justice.services.shuttering.domain.StoredCommand;
+import uk.gov.justice.services.shuttering.persistence.StoredCommandRepository;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -30,7 +30,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class ShutteringStoreSenderTest {
 
     @Mock
-    private ShutteringRepository shutteringRepository;
+    private StoredCommandRepository storedCommandRepository;
 
     @Mock
     private JsonObjectEnvelopeConverter jsonObjectEnvelopeConverter;
@@ -42,7 +42,7 @@ public class ShutteringStoreSenderTest {
     private ShutteringStoreSender shutteringStoreSender;
 
     @Captor
-    private ArgumentCaptor<ShutteredCommand> shutteredCommandCaptor;
+    private ArgumentCaptor<StoredCommand> shutteredCommandCaptor;
 
     @Test
     public void shouldConvertToShutteredCommandAndSave() throws Exception {
@@ -63,13 +63,13 @@ public class ShutteringStoreSenderTest {
 
         shutteringStoreSender.send(command, destinationName);
 
-        verify(shutteringRepository).save(shutteredCommandCaptor.capture());
+        verify(storedCommandRepository).save(shutteredCommandCaptor.capture());
 
-        final ShutteredCommand shutteredCommand = shutteredCommandCaptor.getValue();
+        final StoredCommand storedCommand = shutteredCommandCaptor.getValue();
 
-        assertThat(shutteredCommand.getEnvelopeId(), is(envelopeId));
-        assertThat(shutteredCommand.getCommandJsonEnvelope(), is(envelopeJson));
-        assertThat(shutteredCommand.getDestination(), is(destinationName));
-        assertThat(shutteredCommand.getDateReceived(), is(now));
+        assertThat(storedCommand.getEnvelopeId(), is(envelopeId));
+        assertThat(storedCommand.getCommandJsonEnvelope(), is(envelopeJson));
+        assertThat(storedCommand.getDestination(), is(destinationName));
+        assertThat(storedCommand.getDateReceived(), is(now));
     }
 }

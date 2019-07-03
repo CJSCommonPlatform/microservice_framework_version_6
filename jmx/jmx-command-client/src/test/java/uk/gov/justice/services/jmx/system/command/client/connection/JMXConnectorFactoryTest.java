@@ -1,5 +1,6 @@
 package uk.gov.justice.services.jmx.system.command.client.connection;
 
+import static com.google.common.collect.ImmutableMap.of;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -9,6 +10,7 @@ import static org.mockito.Mockito.when;
 import uk.gov.justice.services.jmx.system.command.client.MBeanClientException;
 
 import java.io.IOException;
+import java.util.Map;
 
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXServiceURL;
@@ -36,14 +38,15 @@ public class JMXConnectorFactoryTest {
 
         final String host = "localhost";
         final int port = 2384;
+        final Map<String, Object> environment = of("name", "value");
 
         final JMXServiceURL serviceURL = mock(JMXServiceURL.class);
         final JMXConnector jmxConnector = mock(JMXConnector.class);
 
         when(jmxUrlFactory.createUrl(host, port)).thenReturn(serviceURL);
-        when(connectorWrapper.connect(serviceURL)).thenReturn(jmxConnector);
+        when(connectorWrapper.connect(serviceURL, environment)).thenReturn(jmxConnector);
 
-        assertThat(jmxConnectorFactory.createJMXConnector(host, port), is(jmxConnector));
+        assertThat(jmxConnectorFactory.createJmxConnector(host, port, environment), is(jmxConnector));
     }
 
     @Test
@@ -54,14 +57,15 @@ public class JMXConnectorFactoryTest {
         final String host = "localhost";
         final int port = 2384;
         final String urlString = "service:jmx:remote+http://" + host + ":" + port;
+        final Map<String, Object> environment = of("name", "value");
 
         final JMXServiceURL serviceURL = new JMXServiceURL(urlString);
 
         when(jmxUrlFactory.createUrl(host, port)).thenReturn(serviceURL);
-        when(connectorWrapper.connect(serviceURL)).thenThrow(ioException);
+        when(connectorWrapper.connect(serviceURL, environment)).thenThrow(ioException);
 
         try {
-            jmxConnectorFactory.createJMXConnector(host, port);
+            jmxConnectorFactory.createJmxConnector(host, port, environment);
             fail();
         } catch (final MBeanClientException expected) {
             assertThat(expected.getCause(), is(ioException));

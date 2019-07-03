@@ -58,4 +58,9 @@ public class ObjectFactoryTest {
 
         assertThat(objectFactory.systemCommanderClient(mBeanConnector, jmxConnector), is(notNullValue()));
     }
+
+    @Test
+    public void shouldCreateCredentialsFactory() throws Exception {
+        assertThat(objectFactory.credentialsFactory(), is(notNullValue()));
+    }
 }

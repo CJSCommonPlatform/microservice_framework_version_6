@@ -3,6 +3,7 @@ package uk.gov.justice.services.jmx.system.command.client.build;
 import uk.gov.justice.services.jmx.ObjectNameFactory;
 import uk.gov.justice.services.jmx.system.command.client.SystemCommanderClient;
 import uk.gov.justice.services.jmx.system.command.client.connection.ConnectorWrapper;
+import uk.gov.justice.services.jmx.system.command.client.connection.CredentialsFactory;
 import uk.gov.justice.services.jmx.system.command.client.connection.JMXConnectorFactory;
 import uk.gov.justice.services.jmx.system.command.client.connection.JmxUrlFactory;
 import uk.gov.justice.services.jmx.system.command.client.connection.MBeanConnector;
@@ -28,6 +29,10 @@ public class ObjectFactory {
         return new MBeanConnector(
                 objectNameFactory(),
                 remoteMBeanFactory());
+    }
+
+    public CredentialsFactory credentialsFactory() {
+        return new CredentialsFactory();
     }
 
     public RemoteMBeanFactory remoteMBeanFactory() {

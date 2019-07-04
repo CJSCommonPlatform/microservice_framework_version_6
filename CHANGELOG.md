@@ -4,6 +4,8 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [6.0.0-RC2] - 2019-07-04
 ### Added
 - Jmx command client now takes an optional username and password
 - Added a builder for the JMX parameters

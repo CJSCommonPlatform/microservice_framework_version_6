@@ -60,7 +60,7 @@ public class ObjectFactoryTest {
     }
 
     @Test
-    public void shouldCreateCredentialsFactory() throws Exception {
-        assertThat(objectFactory.credentialsFactory(), is(notNullValue()));
+    public void shouldCreateEnvironmentFactory() throws Exception {
+        assertThat(objectFactory.environmentFactory(), is(notNullValue()));
     }
 }

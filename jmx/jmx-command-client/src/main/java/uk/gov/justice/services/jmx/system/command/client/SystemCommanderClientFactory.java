@@ -1,16 +1,12 @@
 package uk.gov.justice.services.jmx.system.command.client;
 
 import uk.gov.justice.services.jmx.system.command.client.build.ObjectFactory;
+import uk.gov.justice.services.jmx.system.command.client.connection.JmxParametersBuilder;
 import uk.gov.justice.services.jmx.system.command.client.connection.MBeanConnector;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.management.remote.JMXConnector;
 
 public class SystemCommanderClientFactory {
-
-    private static final Map<String, Object> EMPTY_MAP = new HashMap<>();
 
     private final ObjectFactory objectFactory;
 
@@ -22,23 +18,10 @@ public class SystemCommanderClientFactory {
         this.objectFactory = objectFactory;
     }
 
-    public SystemCommanderClient create(final String hostName, final int port) {
-        return create(hostName, port, EMPTY_MAP);
-    }
-
-    public SystemCommanderClient create(final String hostName, final int port, final String username, final String password) {
-
-        final Map<String, Object> environmentWithCredentials = objectFactory
-                .credentialsFactory()
-                .create(username, password);
-
-        return create(hostName, port, environmentWithCredentials);
-    }
-
-    private SystemCommanderClient create(final String hostName, final int port, final Map<String, Object> environment) {
+    public SystemCommanderClient create(final JmxParametersBuilder jmxParametersBuilder) {
 
         final MBeanConnector mBeanConnector = objectFactory.mBeanConnector();
-        final JMXConnector jmxConnector = objectFactory.jmxConnectorFactory().createJmxConnector(hostName, port, environment);
+        final JMXConnector jmxConnector = objectFactory.jmxConnectorFactory().createJmxConnector(jmxParametersBuilder);
 
         return objectFactory.systemCommanderClient(mBeanConnector, jmxConnector);
     }

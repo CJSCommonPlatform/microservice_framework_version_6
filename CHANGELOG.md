@@ -6,6 +6,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ## [Unreleased]
 ### Added
 - Jmx command client now takes an optional username and password
+- Added a builder for the JMX parameters
 
 ## [6.0.0-RC1] - 2019-06-26
 ### Added

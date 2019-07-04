@@ -6,6 +6,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.jmx.system.command.client.connection.JmxParametersBuilder.jmxParameters;
 
 import uk.gov.justice.services.jmx.system.command.client.MBeanClientException;
 
@@ -30,6 +31,9 @@ public class JMXConnectorFactoryTest {
     @Mock
     private ConnectorWrapper connectorWrapper;
 
+    @Mock
+    private EnvironmentFactory environmentFactory;
+
     @InjectMocks
     private JMXConnectorFactory jmxConnectorFactory;
 
@@ -40,13 +44,18 @@ public class JMXConnectorFactoryTest {
         final int port = 2384;
         final Map<String, Object> environment = of("name", "value");
 
+        final JmxParametersBuilder jmxParametersBuilder = jmxParameters()
+                .withHost(host)
+                .withPort(port);
+
         final JMXServiceURL serviceURL = mock(JMXServiceURL.class);
         final JMXConnector jmxConnector = mock(JMXConnector.class);
 
         when(jmxUrlFactory.createUrl(host, port)).thenReturn(serviceURL);
         when(connectorWrapper.connect(serviceURL, environment)).thenReturn(jmxConnector);
+        when(environmentFactory.create(jmxParametersBuilder.build())).thenReturn(environment);
 
-        assertThat(jmxConnectorFactory.createJmxConnector(host, port, environment), is(jmxConnector));
+        assertThat(jmxConnectorFactory.createJmxConnector(jmxParametersBuilder), is(jmxConnector));
     }
 
     @Test
@@ -59,13 +68,18 @@ public class JMXConnectorFactoryTest {
         final String urlString = "service:jmx:remote+http://" + host + ":" + port;
         final Map<String, Object> environment = of("name", "value");
 
+        final JmxParametersBuilder jmxParametersBuilder = jmxParameters()
+                .withHost(host)
+                .withPort(port);
+
         final JMXServiceURL serviceURL = new JMXServiceURL(urlString);
 
         when(jmxUrlFactory.createUrl(host, port)).thenReturn(serviceURL);
         when(connectorWrapper.connect(serviceURL, environment)).thenThrow(ioException);
-
+        when(environmentFactory.create(jmxParametersBuilder.build())).thenReturn(environment);
+        
         try {
-            jmxConnectorFactory.createJmxConnector(host, port, environment);
+            jmxConnectorFactory.createJmxConnector(jmxParametersBuilder);
             fail();
         } catch (final MBeanClientException expected) {
             assertThat(expected.getCause(), is(ioException));

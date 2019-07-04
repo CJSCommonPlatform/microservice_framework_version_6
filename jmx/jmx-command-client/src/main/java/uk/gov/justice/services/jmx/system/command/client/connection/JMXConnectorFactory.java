@@ -14,16 +14,26 @@ public class JMXConnectorFactory {
 
     private final JmxUrlFactory jmxUrlFactory;
     private final ConnectorWrapper connectorWrapper;
+    private final EnvironmentFactory environmentFactory;
 
     public JMXConnectorFactory(
             final JmxUrlFactory jmxUrlFactory,
-            final ConnectorWrapper connectorWrapper) {
+            final ConnectorWrapper connectorWrapper,
+            final EnvironmentFactory environmentFactory) {
         this.jmxUrlFactory = jmxUrlFactory;
         this.connectorWrapper = connectorWrapper;
+        this.environmentFactory = environmentFactory;
     }
 
-    public JMXConnector createJmxConnector(final String host, final int port, final Map<String, Object> environment) {
+    public JMXConnector createJmxConnector(final JmxParametersBuilder jmxParametersBuilder) {
+
+        final JmxParameters jmxParameters = jmxParametersBuilder.build();
+        final Map<String, Object> environment = environmentFactory.create(jmxParameters);
+        final String host = jmxParameters.getHost();
+        final int port = jmxParameters.getPort();
+
         final JMXServiceURL serviceURL = jmxUrlFactory.createUrl(host, port);
+
         try {
             return connectorWrapper.connect(serviceURL, environment);
         } catch (final IOException e) {

@@ -15,14 +15,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
  * Parse YAML URLs into {@link EventSourceDefinition}s
  */
 public class EventSourcesParser {
-    private static final String SCHEMA_LOCATION  = "/json/schema/";
-    private static final String EVENT_SOURCES_SCHEMA_PATH = SCHEMA_LOCATION + "event-source-schema.json";
 
+    private static final String EVENT_SOURCES_SCHEMA_PATH = "/json/schema/event-source-schema.json";
+    private static final String EVENT_SOURCES = "event_sources";
     private static final TypeReference<Map<String, List<EventSourceDefinition>>> EVENT_SOURCES_TYPE_REF
             = new TypeReference<Map<String, List<EventSourceDefinition>>>() {
     };
-
-    private static final String EVENT_SOURCES = "event_sources";
 
     private final YamlParser yamlParser;
     private final YamlFileValidator yamlFileValidator;

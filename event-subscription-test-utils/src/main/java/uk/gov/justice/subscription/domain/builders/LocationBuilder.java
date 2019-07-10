@@ -1,11 +1,11 @@
 package uk.gov.justice.subscription.domain.builders;
 
+import static java.util.Optional.ofNullable;
+
 import uk.gov.justice.subscription.domain.eventsource.Location;
 
-import java.util.Optional;
-
 public final class LocationBuilder {
-    
+
     private String jmsUri;
     private String restUri;
     private String dataSource;
@@ -32,8 +32,7 @@ public final class LocationBuilder {
         return this;
     }
 
-
     public Location build() {
-        return new Location(jmsUri, restUri, Optional.ofNullable(dataSource));
+        return new Location(jmsUri, ofNullable(restUri), ofNullable(dataSource));
     }
 }

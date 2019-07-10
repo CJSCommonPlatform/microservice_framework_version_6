@@ -31,9 +31,9 @@ public class SubscriptionsDescriptorParserTest {
         final YamlSchemaLoader yamlSchemaLoader = new YamlSchemaLoader();
         final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
         final YamlFileValidator yamlFileValidator = new YamlFileValidator(new YamlToJsonObjectConverter(yamlParser, objectMapper), yamlSchemaLoader);
-        final SubscriptionHelper subscriptionHelper = new SubscriptionHelper();
+        final SubscriptionSorter subscriptionSorter = new SubscriptionSorter();
 
-        subscriptionsDescriptorParser = new SubscriptionsDescriptorParser(yamlParser, yamlFileValidator, subscriptionHelper);
+        subscriptionsDescriptorParser = new SubscriptionsDescriptorParser(yamlParser, yamlFileValidator, subscriptionSorter);
     }
 
     @Test

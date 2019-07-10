@@ -8,8 +8,7 @@ public class EventSourceDefinition {
 
     public EventSourceDefinition(final String name,
                                  final boolean is_default,
-                                 final Location location
-    ) {
+                                 final Location location) {
         this.name = name;
         this.is_default = is_default;
         this.location = location;

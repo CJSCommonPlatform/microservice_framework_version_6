@@ -1,6 +1,7 @@
 package uk.gov.justice.subscription.domain.eventsource;
 
 import static java.lang.String.format;
+import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
 import uk.gov.justice.services.jdbc.persistence.JndiAppNameProvider;
@@ -28,7 +29,7 @@ public class DefaultEventSourceDefinitionFactory {
                 isDefault,
                 new Location(
                         "JMS URI not used",
-                        "Rest URI not used",
+                        empty(),
                         of(dataSourceName)
                 )
         );

@@ -15,25 +15,23 @@ import com.fasterxml.jackson.core.type.TypeReference;
  * Parse YAML URLs into {@link SubscriptionsDescriptor}s
  */
 public class SubscriptionsDescriptorParser {
-    private static final String SCHEMA_LOCATION = "/json/schema/";
 
-    private static final String SUBSCRIPTION_SCHEMA_PATH = SCHEMA_LOCATION + "subscription-schema.json";
-
+    private static final String SUBSCRIPTION_SCHEMA_PATH = "/json/schema/subscription-schema.json";
+    private static final String SUBSCRIPTIONS_DESCRIPTOR = "subscriptions_descriptor";
     private static final TypeReference<Map<String, SubscriptionsDescriptor>> SUBSCRIPTIONS_DESCRIPTOR_TYPE_REF
             = new TypeReference<Map<String, SubscriptionsDescriptor>>() {
     };
 
-    private static final String SUBSCRIPTIONS_DESCRIPTOR = "subscriptions_descriptor";
-
     private YamlParser yamlParser;
     private YamlFileValidator yamlFileValidator;
-    private SubscriptionHelper subscriptionHelper;
+    private SubscriptionSorter subscriptionSorter;
 
-
-    public SubscriptionsDescriptorParser(final YamlParser yamlParser, final YamlFileValidator yamlFileValidator, final SubscriptionHelper subscriptionHelper) {
+    public SubscriptionsDescriptorParser(final YamlParser yamlParser,
+                                         final YamlFileValidator yamlFileValidator,
+                                         final SubscriptionSorter subscriptionSorter) {
         this.yamlParser = yamlParser;
         this.yamlFileValidator = yamlFileValidator;
-        this.subscriptionHelper = subscriptionHelper;
+        this.subscriptionSorter = subscriptionSorter;
     }
 
     /**
@@ -52,7 +50,7 @@ public class SubscriptionsDescriptorParser {
         final Map<String, SubscriptionsDescriptor> stringSubscriptionDescriptorMap = yamlParser.parseYamlFrom(url, SUBSCRIPTIONS_DESCRIPTOR_TYPE_REF);
         final SubscriptionsDescriptor subscriptionsDescriptor = stringSubscriptionDescriptorMap.get(SUBSCRIPTIONS_DESCRIPTOR);
 
-        subscriptionHelper.sortSubscriptionsByPrioritisation(subscriptionsDescriptor);
+        subscriptionSorter.sortSubscriptionsByPrioritisation(subscriptionsDescriptor);
         return subscriptionsDescriptor;
     }
 }

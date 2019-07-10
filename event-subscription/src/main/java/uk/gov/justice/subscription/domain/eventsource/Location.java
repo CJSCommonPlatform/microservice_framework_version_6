@@ -3,12 +3,13 @@ package uk.gov.justice.subscription.domain.eventsource;
 import java.util.Optional;
 
 public class Location {
+
     private final String jmsUri;
-    private final String restUri;
+    private final Optional<String> restUri;
     private final Optional<String> dataSource;
 
     public Location(final String jmsUri,
-                    final String restUri,
+                    final Optional<String> restUri,
                     final Optional<String> dataSource) {
         this.jmsUri = jmsUri;
         this.restUri = restUri;
@@ -19,7 +20,7 @@ public class Location {
         return jmsUri;
     }
 
-    public String getRestUri() {
+    public Optional<String> getRestUri() {
         return restUri;
     }
 

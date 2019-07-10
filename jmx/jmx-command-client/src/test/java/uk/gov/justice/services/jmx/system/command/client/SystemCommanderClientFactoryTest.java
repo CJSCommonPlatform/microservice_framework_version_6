@@ -8,6 +8,7 @@ import static uk.gov.justice.services.jmx.system.command.client.connection.JmxPa
 
 import uk.gov.justice.services.jmx.system.command.client.build.ObjectFactory;
 import uk.gov.justice.services.jmx.system.command.client.connection.JMXConnectorFactory;
+import uk.gov.justice.services.jmx.system.command.client.connection.JmxParameters;
 import uk.gov.justice.services.jmx.system.command.client.connection.JmxParametersBuilder;
 import uk.gov.justice.services.jmx.system.command.client.connection.MBeanConnector;
 
@@ -35,6 +36,7 @@ public class SystemCommanderClientFactoryTest {
         final int port = 9340;
 
         final JmxParametersBuilder jmxParametersBuilder = jmxParameters().withHost(hostName).withPort(port);
+        final JmxParameters jmxParameters = jmxParametersBuilder.build();
 
         final MBeanConnector mBeanConnector = mock(MBeanConnector.class);
         final JMXConnectorFactory jmxConnectorFactory = mock(JMXConnectorFactory.class);
@@ -43,7 +45,7 @@ public class SystemCommanderClientFactoryTest {
 
         when(objectFactory.mBeanConnector()).thenReturn(mBeanConnector);
         when(objectFactory.jmxConnectorFactory()).thenReturn(jmxConnectorFactory);
-        when(jmxConnectorFactory.createJmxConnector(jmxParametersBuilder)).thenReturn(jmxConnector);
+        when(jmxConnectorFactory.createJmxConnector(jmxParameters)).thenReturn(jmxConnector);
         when(objectFactory.systemCommanderClient(mBeanConnector, jmxConnector)).thenReturn(systemCommanderClient);
 
         assertThat(systemCommanderClientFactory.create(jmxParametersBuilder), is(systemCommanderClient));

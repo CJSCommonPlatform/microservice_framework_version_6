@@ -13,12 +13,12 @@ import java.util.Set;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 
-public class SystemCommandScanner {
+public class SystemCommandHandlerScanner {
 
     private final SystemCommandProxyResolver systemCommandProxyResolver;
     private final CdiInstanceResolver cdiInstanceResolver;
 
-    public SystemCommandScanner(final SystemCommandProxyResolver systemCommandProxyResolver, final CdiInstanceResolver cdiInstanceResolver) {
+    public SystemCommandHandlerScanner(final SystemCommandProxyResolver systemCommandProxyResolver, final CdiInstanceResolver cdiInstanceResolver) {
         this.systemCommandProxyResolver = systemCommandProxyResolver;
         this.cdiInstanceResolver = cdiInstanceResolver;
     }

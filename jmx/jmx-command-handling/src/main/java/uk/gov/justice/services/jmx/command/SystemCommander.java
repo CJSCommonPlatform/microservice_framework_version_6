@@ -2,6 +2,8 @@ package uk.gov.justice.services.jmx.command;
 
 import static java.lang.String.format;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -13,6 +15,9 @@ public class SystemCommander implements SystemCommanderMBean {
 
     @Inject
     private SystemCommandStore systemCommandStore;
+
+    @Inject
+    private SystemCommandScanner systemCommandScanner;
 
     @Override
     public void call(final SystemCommand systemCommand) {
@@ -27,5 +32,10 @@ public class SystemCommander implements SystemCommanderMBean {
             logger.error(message, e);
             throw new SystemCommandException(message, e);
         }
+    }
+
+    @Override
+    public List<SystemCommand> listCommands() {
+       return systemCommandScanner.findCommands();
     }
 }

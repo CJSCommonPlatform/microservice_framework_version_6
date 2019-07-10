@@ -9,6 +9,7 @@ import java.util.Map;
 
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXServiceURL;
+import javax.security.sasl.SaslException;
 
 public class JMXConnectorFactory {
 
@@ -25,9 +26,8 @@ public class JMXConnectorFactory {
         this.environmentFactory = environmentFactory;
     }
 
-    public JMXConnector createJmxConnector(final JmxParametersBuilder jmxParametersBuilder) {
+    public JMXConnector createJmxConnector(final JmxParameters jmxParameters) {
 
-        final JmxParameters jmxParameters = jmxParametersBuilder.build();
         final Map<String, Object> environment = environmentFactory.create(jmxParameters);
         final String host = jmxParameters.getHost();
         final int port = jmxParameters.getPort();
@@ -36,6 +36,8 @@ public class JMXConnectorFactory {
 
         try {
             return connectorWrapper.connect(serviceURL, environment);
+        } catch (final SaslException e) {
+           throw new JmxAuthenticationException("Jmx authentication failed", e);
         } catch (final IOException e) {
             throw new MBeanClientException(format("Failed to connect to JMX using url '%s'", serviceURL), e);
         }

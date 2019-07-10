@@ -120,6 +120,11 @@ public class HandlesSystemCommandProxyResolverTest {
         public String getName() {
             return SYSTEM_COMMAND_NAME_1;
         }
+
+        @Override
+        public String getDescription() {
+            return "description 1";
+        }
     }
 
     private static class HandlesSystemSystemCommand_2 implements SystemCommand {
@@ -129,6 +134,11 @@ public class HandlesSystemCommandProxyResolverTest {
         @Override
         public String getName() {
             return SYSTEM_COMMAND_NAME_2;
+        }
+
+        @Override
+        public String getDescription() {
+            return "description 2";
         }
     }
 
@@ -140,6 +150,10 @@ public class HandlesSystemCommandProxyResolverTest {
         public String getName() {
             return SYSTEM_COMMAND_NAME_3;
         }
-    }
 
+        @Override
+        public String getDescription() {
+            return "description 3";
+        }
+    }
 }

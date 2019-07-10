@@ -4,8 +4,16 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [6.0.0-RC3] - 2019-07-11
+
+### Added
+- New method to list all SystemCommands added to SystemCommander JmxBean
+- New method 'getDescription()' added to SystemCommands
 ### Changed
 - rest_uri in event-sources.yaml is now optional to support JMS only sources
+- If authentication fails when connecting to JMX then a specific exception 
+'JmxAuthenticationException' is thrown
 
 ## [6.0.0-RC2] - 2019-07-04
 ### Added

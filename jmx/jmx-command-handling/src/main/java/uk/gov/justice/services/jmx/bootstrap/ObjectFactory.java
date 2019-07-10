@@ -24,8 +24,8 @@ public class ObjectFactory {
                 handlerMethodValidator());
     }
 
-    public SystemCommandScanner systemCommandScanner() {
-        return new SystemCommandScanner(
+    public SystemCommandHandlerScanner systemCommandScanner() {
+        return new SystemCommandHandlerScanner(
                 systemCommandProxyResolver(),
                 cdiInstanceResolver());
     }

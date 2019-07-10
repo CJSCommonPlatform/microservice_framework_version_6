@@ -15,6 +15,7 @@ import java.util.Map;
 
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXServiceURL;
+import javax.security.sasl.SaslException;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,18 +45,48 @@ public class JMXConnectorFactoryTest {
         final int port = 2384;
         final Map<String, Object> environment = of("name", "value");
 
-        final JmxParametersBuilder jmxParametersBuilder = jmxParameters()
+        final JmxParameters jmxParameters = jmxParameters()
                 .withHost(host)
-                .withPort(port);
+                .withPort(port)
+                .build();
 
         final JMXServiceURL serviceURL = mock(JMXServiceURL.class);
         final JMXConnector jmxConnector = mock(JMXConnector.class);
 
         when(jmxUrlFactory.createUrl(host, port)).thenReturn(serviceURL);
         when(connectorWrapper.connect(serviceURL, environment)).thenReturn(jmxConnector);
-        when(environmentFactory.create(jmxParametersBuilder.build())).thenReturn(environment);
+        when(environmentFactory.create(jmxParameters)).thenReturn(environment);
 
-        assertThat(jmxConnectorFactory.createJmxConnector(jmxParametersBuilder), is(jmxConnector));
+        assertThat(jmxConnectorFactory.createJmxConnector(jmxParameters), is(jmxConnector));
+    }
+
+    @Test
+    public void shouldThrowAuthenticationExceptionIfAuthenticationFails() throws Exception {
+        final SaslException saslException = new SaslException("Ooops");
+
+        final String host = "localhost";
+        final int port = 2384;
+        final String urlString = "service:jmx:remote+http://" + host + ":" + port;
+        final Map<String, Object> environment = of("name", "value");
+
+        final JmxParameters jmxParameters = jmxParameters()
+                .withHost(host)
+                .withPort(port)
+                .build();
+
+        final JMXServiceURL serviceURL = new JMXServiceURL(urlString);
+
+        when(jmxUrlFactory.createUrl(host, port)).thenReturn(serviceURL);
+        when(environmentFactory.create(jmxParameters)).thenReturn(environment);
+        when(connectorWrapper.connect(serviceURL, environment)).thenThrow(saslException);
+
+        try {
+            jmxConnectorFactory.createJmxConnector(jmxParameters);
+            fail();
+        } catch (final JmxAuthenticationException expected) {
+            assertThat(expected.getCause(), is(saslException));
+            assertThat(expected.getMessage(), is("Jmx authentication failed"));
+        }
     }
 
     @Test
@@ -68,18 +99,19 @@ public class JMXConnectorFactoryTest {
         final String urlString = "service:jmx:remote+http://" + host + ":" + port;
         final Map<String, Object> environment = of("name", "value");
 
-        final JmxParametersBuilder jmxParametersBuilder = jmxParameters()
+        final JmxParameters jmxParameters = jmxParameters()
                 .withHost(host)
-                .withPort(port);
+                .withPort(port)
+                .build();
 
         final JMXServiceURL serviceURL = new JMXServiceURL(urlString);
 
         when(jmxUrlFactory.createUrl(host, port)).thenReturn(serviceURL);
         when(connectorWrapper.connect(serviceURL, environment)).thenThrow(ioException);
-        when(environmentFactory.create(jmxParametersBuilder.build())).thenReturn(environment);
+        when(environmentFactory.create(jmxParameters)).thenReturn(environment);
         
         try {
-            jmxConnectorFactory.createJmxConnector(jmxParametersBuilder);
+            jmxConnectorFactory.createJmxConnector(jmxParameters);
             fail();
         } catch (final MBeanClientException expected) {
             assertThat(expected.getCause(), is(ioException));

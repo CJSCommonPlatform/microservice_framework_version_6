@@ -30,14 +30,14 @@ public class JmxHandlesSystemCommandBootstrapperTest {
     @Test
     public void shouldBootstrapTheJmxCommandBeanAndHandlers() throws Exception {
 
-        final SystemCommandScanner systemCommandScanner = mock(SystemCommandScanner.class);
+        final SystemCommandHandlerScanner systemCommandHandlerScanner = mock(SystemCommandHandlerScanner.class);
         final BeanManager beanManager = mock(BeanManager.class);
 
-        when(objectFactory.systemCommandScanner()).thenReturn(systemCommandScanner);
+        when(objectFactory.systemCommandScanner()).thenReturn(systemCommandHandlerScanner);
 
         jmxSystemCommandBootstrapper.afterDeploymentValidation(mock(AfterDeploymentValidation.class), beanManager);
 
-        verify(systemCommandScanner).registerSystemCommands(beanManager);
+        verify(systemCommandHandlerScanner).registerSystemCommands(beanManager);
     }
 
     @Test

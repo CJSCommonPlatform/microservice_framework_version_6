@@ -5,14 +5,21 @@ import java.util.Objects;
 public abstract class BaseSystemCommand implements SystemCommand {
 
     private final String name;
+    private final String description;
 
-    protected BaseSystemCommand(final String name) {
+    protected BaseSystemCommand(final String name, final String description) {
         this.name = name;
+        this.description = description;
     }
 
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public String getDescription() {
+        return description;
     }
 
     @Override

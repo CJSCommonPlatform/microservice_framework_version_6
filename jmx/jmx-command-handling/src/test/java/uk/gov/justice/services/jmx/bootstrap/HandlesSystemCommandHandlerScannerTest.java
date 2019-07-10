@@ -29,7 +29,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 
 @RunWith(MockitoJUnitRunner.class)
-public class HandlesSystemCommandScannerTest {
+public class HandlesSystemCommandHandlerScannerTest {
 
     @Mock
     private SystemCommandProxyResolver systemCommandProxyResolver;
@@ -38,7 +38,7 @@ public class HandlesSystemCommandScannerTest {
     private CdiInstanceResolver cdiInstanceResolver;
 
     @InjectMocks
-    private SystemCommandScanner systemCommandScanner;
+    private SystemCommandHandlerScanner systemCommandHandlerScanner;
 
     @SuppressWarnings("unchecked")
     @Test
@@ -67,7 +67,7 @@ public class HandlesSystemCommandScannerTest {
         when(systemCommandProxyResolver.allCommandProxiesFor(bean_2, beanManager)).thenReturn(beanProxies_2);
         when(cdiInstanceResolver.getInstanceOf(SystemCommandStore.class, beanManager)).thenReturn(systemCommandStore);
 
-        systemCommandScanner.registerSystemCommands(beanManager);
+        systemCommandHandlerScanner.registerSystemCommands(beanManager);
 
         final ArgumentCaptor<List> captor = forClass(List.class);
 

@@ -17,16 +17,16 @@ public class ParserProducer {
     private YamlFileValidator yamlFileValidator;
 
     @Inject
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
     @Inject
-    YamlParser yamlParser;
+    private YamlParser yamlParser;
 
     @Inject
-    YamlSchemaLoader yamlSchemaLoader;
+    private YamlSchemaLoader yamlSchemaLoader;
 
     @Inject
-    SubscriptionHelper subscriptionHelper;
+    private SubscriptionSorter subscriptionSorter;
 
     @Produces
     public uk.gov.justice.subscription.EventSourcesParser eventSourcesParser() {
@@ -35,7 +35,7 @@ public class ParserProducer {
 
     @Produces
     public SubscriptionsDescriptorParser subscriptionDescriptorsParser() {
-        return new SubscriptionsDescriptorParser(yamlParser, getYamlFileValidator(), subscriptionHelper);
+        return new SubscriptionsDescriptorParser(yamlParser, getYamlFileValidator(), subscriptionSorter);
     }
 
     private YamlFileValidator getYamlFileValidator() {

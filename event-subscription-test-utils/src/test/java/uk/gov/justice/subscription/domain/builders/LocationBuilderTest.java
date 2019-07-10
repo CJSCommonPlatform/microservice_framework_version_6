@@ -1,12 +1,11 @@
 package uk.gov.justice.subscription.domain.builders;
 
+import static java.util.Optional.of;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.subscription.domain.builders.LocationBuilder.location;
 
 import uk.gov.justice.subscription.domain.eventsource.Location;
-
-import java.util.Optional;
 
 import org.junit.Test;
 
@@ -26,7 +25,7 @@ public class LocationBuilderTest {
                 .build();
 
         assertThat(location.getJmsUri(), is(jmsUri));
-        assertThat(location.getRestUri(), is(restUri));
-        assertThat(location.getDataSource(), is(Optional.of(dataSource)));
+        assertThat(location.getRestUri(), is(of(restUri)));
+        assertThat(location.getDataSource(), is(of(dataSource)));
     }
 }

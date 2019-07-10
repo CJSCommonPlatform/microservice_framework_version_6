@@ -8,7 +8,7 @@ import static java.util.Comparator.naturalOrder;
 import uk.gov.justice.services.yaml.YamlParserException;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionsDescriptor;
 
-public class SubscriptionHelper {
+public class SubscriptionSorter {
 
     private final static int HIGHEST_PRIORITY = 0;
 

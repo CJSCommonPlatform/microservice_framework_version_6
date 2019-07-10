@@ -10,7 +10,10 @@ public class SubscriptionsDescriptor {
     private final String serviceComponent;
     private final List<Subscription> subscriptions;
 
-    public SubscriptionsDescriptor(final String specVersion, final String service, final String serviceComponent, final List<Subscription> subscriptions) {
+    public SubscriptionsDescriptor(final String specVersion,
+                                   final String service,
+                                   final String serviceComponent,
+                                   final List<Subscription> subscriptions) {
         this.specVersion = specVersion;
         this.service = service;
         this.serviceComponent = serviceComponent;

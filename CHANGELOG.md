@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.0.0-RC4] - 2019-07-12
+### Changed
+- Update common-bom to 2.4.0 to allow for correct exclusions in wildfly client
+
 ## [6.0.0-RC3] - 2019-07-11
 
 ### Added

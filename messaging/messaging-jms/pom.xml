@@ -44,6 +44,12 @@
             <type>pom</type>
         </dependency>
         <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>test-utils-common</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>net.trajano.commons</groupId>
             <artifactId>commons-testing</artifactId>
             <scope>test</scope>

@@ -7,10 +7,9 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import uk.gov.justice.services.jmx.api.name.ObjectNameException;
 import uk.gov.justice.services.jmx.command.SystemCommander;
 
 import javax.management.MBeanRegistrationException;
@@ -77,7 +76,7 @@ public class MBeanInstantiatorTest {
         try {
             mBeanInstantiator.registerSystemCommanderMBean();
             fail();
-        } catch (final MBeanException expected) {
+        } catch (final ObjectNameException expected) {
             assertThat(expected.getCause(), is(mBeanRegistrationException));
             assertThat(expected.getMessage(), is("Failed to register SystemCommander MBean using object name 'AnObjectName'"));
         }
@@ -122,7 +121,7 @@ public class MBeanInstantiatorTest {
         try {
             mBeanInstantiator.unregisterMBeans();
             fail();
-        } catch (final MBeanException expected) {
+        } catch (final ObjectNameException expected) {
             assertThat(expected.getCause(), is(mBeanRegistrationException));
             assertThat(expected.getMessage(), is("Failed to unregister MBean with object name 'AnObjectName'"));
         }

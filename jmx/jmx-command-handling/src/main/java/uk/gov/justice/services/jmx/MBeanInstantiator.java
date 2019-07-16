@@ -2,6 +2,7 @@ package uk.gov.justice.services.jmx;
 
 import static java.lang.String.format;
 
+import uk.gov.justice.services.jmx.api.name.ObjectNameException;
 import uk.gov.justice.services.jmx.command.SystemCommander;
 
 import javax.annotation.PostConstruct;
@@ -61,7 +62,7 @@ public class MBeanInstantiator {
             mbeanServer.registerMBean(systemCommander, objectName);
 
         } catch (InstanceAlreadyExistsException | MBeanRegistrationException | NotCompliantMBeanException e) {
-            throw new MBeanException(format("Failed to register SystemCommander MBean using object name '%s'", objectName), e);
+            throw new ObjectNameException(format("Failed to register SystemCommander MBean using object name '%s'", objectName), e);
         }
     }
 
@@ -70,7 +71,7 @@ public class MBeanInstantiator {
         try {
             mbeanServer.unregisterMBean(objectName);
         } catch (final InstanceNotFoundException | MBeanRegistrationException e) {
-            throw new MBeanException(format("Failed to unregister MBean with object name '%s'", objectName), e);
+            throw new ObjectNameException(format("Failed to unregister MBean with object name '%s'", objectName), e);
         }
     }
 }

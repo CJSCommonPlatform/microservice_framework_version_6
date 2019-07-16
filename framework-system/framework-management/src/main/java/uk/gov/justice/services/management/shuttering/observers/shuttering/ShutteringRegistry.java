@@ -7,7 +7,7 @@ import static uk.gov.justice.services.management.shuttering.observers.shuttering
 import static uk.gov.justice.services.management.shuttering.observers.shuttering.ShutteringRegistry.ShutteringState.SHUTTERING_REQUESTED;
 
 import uk.gov.justice.services.common.util.UtcClock;
-import uk.gov.justice.services.jmx.command.SystemCommand;
+import uk.gov.justice.services.jmx.api.command.SystemCommand;
 import uk.gov.justice.services.management.shuttering.events.ShutteringCompleteEvent;
 
 import java.util.ArrayList;

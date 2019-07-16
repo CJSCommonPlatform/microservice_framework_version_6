@@ -6,8 +6,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.common.util.UtcClock;
-import uk.gov.justice.services.management.shuttering.command.ShutterSystemCommand;
-import uk.gov.justice.services.management.shuttering.command.UnshutterSystemCommand;
+import uk.gov.justice.services.jmx.api.command.ShutterSystemCommand;
+import uk.gov.justice.services.jmx.api.command.UnshutterSystemCommand;
 import uk.gov.justice.services.management.shuttering.events.ShutteringRequestedEvent;
 import uk.gov.justice.services.management.shuttering.events.UnshutteringRequestedEvent;
 

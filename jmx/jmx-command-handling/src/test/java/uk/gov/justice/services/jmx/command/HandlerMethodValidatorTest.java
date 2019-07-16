@@ -53,7 +53,7 @@ public class HandlerMethodValidatorTest {
             handlerMethodValidator.checkHandlerMethodIsValid(invalidMissingParameterHandlerMethod, testCommandHandler);
             fail();
         } catch (final InvalidHandlerMethodException expected) {
-            assertThat(expected.getMessage(), is("Invalid handler method 'invalidMissingParameterHandlerMethod' on class 'uk.gov.justice.services.jmx.command.TestCommandHandler'. Method should have one parameter of type 'uk.gov.justice.services.jmx.command.SystemCommand'."));
+            assertThat(expected.getMessage(), is("Invalid handler method 'invalidMissingParameterHandlerMethod' on class 'uk.gov.justice.services.jmx.command.TestCommandHandler'. Method should have one parameter of type 'uk.gov.justice.services.jmx.api.command.SystemCommand'."));
         }
     }
 
@@ -68,7 +68,7 @@ public class HandlerMethodValidatorTest {
             handlerMethodValidator.checkHandlerMethodIsValid(invalidTooManyParametersHandlerMethod, testCommandHandler);
             fail();
         } catch (final InvalidHandlerMethodException expected) {
-            assertThat(expected.getMessage(), is("Invalid handler method 'invalidTooManyParametersHandlerMethod' on class 'uk.gov.justice.services.jmx.command.TestCommandHandler'. Method should have one parameter of type 'uk.gov.justice.services.jmx.command.SystemCommand'."));
+            assertThat(expected.getMessage(), is("Invalid handler method 'invalidTooManyParametersHandlerMethod' on class 'uk.gov.justice.services.jmx.command.TestCommandHandler'. Method should have one parameter of type 'uk.gov.justice.services.jmx.api.command.SystemCommand'."));
         }
     }
 
@@ -83,7 +83,7 @@ public class HandlerMethodValidatorTest {
             handlerMethodValidator.checkHandlerMethodIsValid(invalidNoSystemCommandHandlerMethod, testCommandHandler);
             fail();
         } catch (final InvalidHandlerMethodException expected) {
-            assertThat(expected.getMessage(), is("Invalid handler method 'invalidNoSystemCommandHandlerMethod' on class 'uk.gov.justice.services.jmx.command.TestCommandHandler'. Method should have one parameter of type 'uk.gov.justice.services.jmx.command.SystemCommand'."));
+            assertThat(expected.getMessage(), is("Invalid handler method 'invalidNoSystemCommandHandlerMethod' on class 'uk.gov.justice.services.jmx.command.TestCommandHandler'. Method should have one parameter of type 'uk.gov.justice.services.jmx.api.command.SystemCommand'."));
         }
     }
 

@@ -1,12 +1,12 @@
 package uk.gov.justice.services.management.shuttering.handler;
 
-import static uk.gov.justice.services.management.shuttering.command.ShutterSystemCommand.SHUTTER_APPLICATION;
-import static uk.gov.justice.services.management.shuttering.command.UnshutterSystemCommand.UNSHUTTER_APPLICATION;
+import static uk.gov.justice.services.jmx.api.command.ShutterSystemCommand.SHUTTER_APPLICATION;
+import static uk.gov.justice.services.jmx.api.command.UnshutterSystemCommand.UNSHUTTER_APPLICATION;
 
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.jmx.command.HandlesSystemCommand;
-import uk.gov.justice.services.management.shuttering.command.ShutterSystemCommand;
-import uk.gov.justice.services.management.shuttering.command.UnshutterSystemCommand;
+import uk.gov.justice.services.jmx.api.command.ShutterSystemCommand;
+import uk.gov.justice.services.jmx.api.command.UnshutterSystemCommand;
 import uk.gov.justice.services.management.shuttering.events.ShutteringRequestedEvent;
 import uk.gov.justice.services.management.shuttering.events.UnshutteringRequestedEvent;
 

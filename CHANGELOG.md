@@ -4,6 +4,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+## [6.0.0-RC6] - 2019-07-16
+### Changed
+- Extracted SystemCommands into their own module jmx-api
 
 ## [6.0.0-RC5] - 2019-07-15
 ### Changed

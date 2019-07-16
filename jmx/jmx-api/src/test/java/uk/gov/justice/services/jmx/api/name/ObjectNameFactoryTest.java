@@ -1,6 +1,5 @@
-package uk.gov.justice.services.jmx;
+package uk.gov.justice.services.jmx.api.name;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -8,6 +7,7 @@ import static org.junit.Assert.fail;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -39,9 +39,9 @@ public class ObjectNameFactoryTest {
         try {
             objectNameFactory.create("fred:fred", "type", "value");
             fail();
-        } catch (final MBeanException expected) {
+        } catch (final ObjectNameException expected) {
             assertThat(expected.getMessage(), is("Unable to create ObjectName: domain='fred:fred', key='type', value='value'"));
-            assertThat(expected.getCause(), is(instanceOf(MalformedObjectNameException.class)));
+            assertThat(expected.getCause(), is(CoreMatchers.instanceOf(MalformedObjectNameException.class)));
         }
     }
 }

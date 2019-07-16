@@ -15,6 +15,7 @@
     <modules>
         <module>jmx-command-handling</module>
         <module>jmx-command-client</module>
+        <module>jmx-api</module>
     </modules>
 
 

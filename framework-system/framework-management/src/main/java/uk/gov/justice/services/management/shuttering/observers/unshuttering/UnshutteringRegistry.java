@@ -6,7 +6,7 @@ import static uk.gov.justice.services.management.shuttering.observers.unshutteri
 import static uk.gov.justice.services.management.shuttering.observers.unshuttering.UnshutteringRegistry.UnshutteringState.UNSHUTTERING_REQUESTED;
 
 import uk.gov.justice.services.common.util.UtcClock;
-import uk.gov.justice.services.jmx.command.SystemCommand;
+import uk.gov.justice.services.jmx.api.command.SystemCommand;
 import uk.gov.justice.services.management.shuttering.events.UnshutteringCompleteEvent;
 
 import java.util.ArrayList;

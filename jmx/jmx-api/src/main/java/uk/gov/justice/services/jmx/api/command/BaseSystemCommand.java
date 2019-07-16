@@ -1,4 +1,4 @@
-package uk.gov.justice.services.jmx.command;
+package uk.gov.justice.services.jmx.api.command;
 
 import java.util.Objects;
 

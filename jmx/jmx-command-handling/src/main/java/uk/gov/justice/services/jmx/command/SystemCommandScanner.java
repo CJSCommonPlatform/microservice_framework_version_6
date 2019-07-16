@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toList;
 
 import uk.gov.justice.services.framework.utilities.cdi.CdiInstanceResolver;
 import uk.gov.justice.services.framework.utilities.cdi.CdiProvider;
+import uk.gov.justice.services.jmx.api.command.SystemCommand;
 
 import java.util.List;
 import java.util.Set;

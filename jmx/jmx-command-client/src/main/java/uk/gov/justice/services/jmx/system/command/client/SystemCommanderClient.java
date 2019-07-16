@@ -1,6 +1,6 @@
 package uk.gov.justice.services.jmx.system.command.client;
 
-import uk.gov.justice.services.jmx.command.SystemCommanderMBean;
+import uk.gov.justice.services.jmx.api.mbean.SystemCommanderMBean;
 import uk.gov.justice.services.jmx.system.command.client.connection.MBeanConnector;
 
 import java.io.Closeable;

@@ -9,8 +9,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import uk.gov.justice.services.jmx.api.mbean.SystemCommander;
 import uk.gov.justice.services.jmx.api.name.ObjectNameException;
-import uk.gov.justice.services.jmx.command.SystemCommander;
+import uk.gov.justice.services.jmx.api.name.ObjectNameFactory;
 
 import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;

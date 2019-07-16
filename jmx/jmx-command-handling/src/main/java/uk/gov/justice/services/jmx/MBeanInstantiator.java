@@ -2,8 +2,9 @@ package uk.gov.justice.services.jmx;
 
 import static java.lang.String.format;
 
+import uk.gov.justice.services.jmx.api.mbean.SystemCommander;
 import uk.gov.justice.services.jmx.api.name.ObjectNameException;
-import uk.gov.justice.services.jmx.command.SystemCommander;
+import uk.gov.justice.services.jmx.api.name.ObjectNameFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;

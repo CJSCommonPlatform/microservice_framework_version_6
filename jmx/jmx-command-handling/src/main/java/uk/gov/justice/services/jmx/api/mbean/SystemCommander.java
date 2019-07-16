@@ -1,9 +1,12 @@
-package uk.gov.justice.services.jmx.command;
+package uk.gov.justice.services.jmx.api.mbean;
 
 import static java.lang.String.format;
 
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
-import uk.gov.justice.services.jmx.api.mbean.SystemCommanderMBean;
+import uk.gov.justice.services.jmx.command.SystemCommandException;
+import uk.gov.justice.services.jmx.command.SystemCommandInvocationException;
+import uk.gov.justice.services.jmx.command.SystemCommandScanner;
+import uk.gov.justice.services.jmx.command.SystemCommandStore;
 
 import java.util.List;
 

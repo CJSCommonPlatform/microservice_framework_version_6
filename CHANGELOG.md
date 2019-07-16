@@ -4,6 +4,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+## [6.0.0-RC7] - 2019-07-16
+### Changed
+- Make package of SystemCommander MBean match that of its interface
+
 ## [6.0.0-RC6] - 2019-07-16
 ### Changed
 - Extracted SystemCommands into their own module jmx-api

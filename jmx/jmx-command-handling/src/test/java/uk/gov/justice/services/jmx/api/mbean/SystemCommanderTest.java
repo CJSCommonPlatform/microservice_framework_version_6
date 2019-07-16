@@ -1,4 +1,4 @@
-package uk.gov.justice.services.jmx.command;
+package uk.gov.justice.services.jmx.api.mbean;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.hasItem;
@@ -12,6 +12,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
+import uk.gov.justice.services.jmx.command.SystemCommandException;
+import uk.gov.justice.services.jmx.command.SystemCommandHandlerProxy;
+import uk.gov.justice.services.jmx.command.SystemCommandInvocationException;
+import uk.gov.justice.services.jmx.command.SystemCommandScanner;
+import uk.gov.justice.services.jmx.command.SystemCommandStore;
+import uk.gov.justice.services.jmx.command.TestCommand;
 
 import java.util.List;
 

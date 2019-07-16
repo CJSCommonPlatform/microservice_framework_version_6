@@ -1,6 +1,4 @@
-package uk.gov.justice.services.management.ping.command;
-
-import uk.gov.justice.services.jmx.command.BaseSystemCommand;
+package uk.gov.justice.services.jmx.api.command;
 
 public class PingSystemCommand extends BaseSystemCommand {
 

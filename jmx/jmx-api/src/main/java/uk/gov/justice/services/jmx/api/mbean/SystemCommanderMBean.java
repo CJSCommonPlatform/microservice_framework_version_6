@@ -1,4 +1,6 @@
-package uk.gov.justice.services.jmx.command;
+package uk.gov.justice.services.jmx.api.mbean;
+
+import uk.gov.justice.services.jmx.api.command.SystemCommand;
 
 import java.util.List;
 

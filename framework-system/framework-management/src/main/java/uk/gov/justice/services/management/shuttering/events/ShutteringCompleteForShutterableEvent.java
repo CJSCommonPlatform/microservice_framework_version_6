@@ -1,6 +1,6 @@
 package uk.gov.justice.services.management.shuttering.events;
 
-import uk.gov.justice.services.jmx.command.SystemCommand;
+import uk.gov.justice.services.jmx.api.command.SystemCommand;
 
 import java.time.ZonedDateTime;
 import java.util.Objects;

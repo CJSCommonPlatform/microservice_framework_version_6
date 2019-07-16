@@ -3,6 +3,8 @@ package uk.gov.justice.services.jmx.command;
 import static java.lang.String.format;
 import static java.lang.reflect.Modifier.isPublic;
 
+import uk.gov.justice.services.jmx.api.command.SystemCommand;
+
 import java.lang.reflect.Method;
 
 public class HandlerMethodValidator {

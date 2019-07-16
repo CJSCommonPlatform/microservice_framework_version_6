@@ -2,6 +2,9 @@ package uk.gov.justice.services.jmx.command;
 
 import static java.lang.String.format;
 
+import uk.gov.justice.services.jmx.api.command.SystemCommand;
+import uk.gov.justice.services.jmx.api.mbean.SystemCommanderMBean;
+
 import java.util.List;
 
 import javax.inject.Inject;

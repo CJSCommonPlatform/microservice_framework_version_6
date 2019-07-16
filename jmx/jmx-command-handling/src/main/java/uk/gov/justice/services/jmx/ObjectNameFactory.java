@@ -2,6 +2,8 @@ package uk.gov.justice.services.jmx;
 
 import static java.lang.String.format;
 
+import uk.gov.justice.services.jmx.api.name.ObjectNameException;
+
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
@@ -11,7 +13,7 @@ public class ObjectNameFactory {
         try {
             return new ObjectName(domain, key, value);
         } catch (final MalformedObjectNameException exception) {
-            throw new MBeanException(format(
+            throw new ObjectNameException(format(
                     "Unable to create ObjectName: domain='%s', key='%s', value='%s'",
                     domain,
                     key,

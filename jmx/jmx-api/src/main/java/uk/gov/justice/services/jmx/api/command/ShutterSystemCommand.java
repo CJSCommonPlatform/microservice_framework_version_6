@@ -1,6 +1,4 @@
-package uk.gov.justice.services.management.shuttering.command;
-
-import uk.gov.justice.services.jmx.command.BaseSystemCommand;
+package uk.gov.justice.services.jmx.api.command;
 
 public class ShutterSystemCommand extends BaseSystemCommand {
 

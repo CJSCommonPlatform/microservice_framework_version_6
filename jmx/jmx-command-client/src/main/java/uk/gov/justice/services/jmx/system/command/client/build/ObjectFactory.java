@@ -1,6 +1,6 @@
 package uk.gov.justice.services.jmx.system.command.client.build;
 
-import uk.gov.justice.services.jmx.ObjectNameFactory;
+import uk.gov.justice.services.jmx.api.name.ObjectNameFactory;
 import uk.gov.justice.services.jmx.system.command.client.SystemCommanderClient;
 import uk.gov.justice.services.jmx.system.command.client.connection.ConnectorWrapper;
 import uk.gov.justice.services.jmx.system.command.client.connection.EnvironmentFactory;

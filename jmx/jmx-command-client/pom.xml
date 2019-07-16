@@ -12,9 +12,10 @@
     <artifactId>jmx-command-client</artifactId>
 
     <dependencies>
+
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
-            <artifactId>jmx-command-handling</artifactId>
+            <artifactId>jmx-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

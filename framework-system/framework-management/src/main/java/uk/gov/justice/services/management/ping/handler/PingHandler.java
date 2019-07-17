@@ -3,6 +3,7 @@ package uk.gov.justice.services.management.ping.handler;
 import static uk.gov.justice.services.jmx.api.command.PingSystemCommand.PING;
 
 import uk.gov.justice.services.common.util.UtcClock;
+import uk.gov.justice.services.jmx.api.command.PingSystemCommand;
 import uk.gov.justice.services.jmx.command.HandlesSystemCommand;
 
 import javax.inject.Inject;
@@ -18,7 +19,7 @@ public class PingHandler {
     private UtcClock clock;
 
     @HandlesSystemCommand(PING)
-    public void ping() {
+    public void ping(@SuppressWarnings("unused") final PingSystemCommand pingSystemCommand) {
         logger.info("********** Received system command '" + PING + "' at " + clock.now() + " **********");
     }
 }

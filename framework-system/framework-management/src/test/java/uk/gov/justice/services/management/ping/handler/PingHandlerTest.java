@@ -25,6 +25,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
 import uk.gov.justice.services.common.util.UtcClock;
+import uk.gov.justice.services.jmx.api.command.PingSystemCommand;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -51,7 +52,7 @@ public class PingHandlerTest {
 
         when(clock.now()).thenReturn(now);
 
-        pingHandler.ping();
+        pingHandler.ping(new PingSystemCommand());
 
         verify(logger).info("********** Received system command 'PING' at 2019-11-07T15:22:25Z **********");
     }

@@ -4,6 +4,12 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Fixed
+- Fixed PING system command
+### Changed
+- Moved InvalidHandlerMethodException to jmx-api to allow it to be caught 
+in the command line jmx client
+
 ## [6.0.0-RC7] - 2019-07-16
 ### Changed
 - Make package of SystemCommander MBean match that of its interface

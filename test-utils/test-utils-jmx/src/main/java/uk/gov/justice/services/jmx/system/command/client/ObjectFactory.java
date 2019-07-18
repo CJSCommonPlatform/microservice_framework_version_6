@@ -1,7 +1,8 @@
-package uk.gov.justice.services.jmx.system.command.client.build;
+package uk.gov.justice.services.jmx.system.command.client;
+
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
 import uk.gov.justice.services.jmx.api.name.ObjectNameFactory;
-import uk.gov.justice.services.jmx.system.command.client.SystemCommanderClient;
 import uk.gov.justice.services.jmx.system.command.client.connection.ConnectorWrapper;
 import uk.gov.justice.services.jmx.system.command.client.connection.EnvironmentFactory;
 import uk.gov.justice.services.jmx.system.command.client.connection.JMXConnectorFactory;
@@ -22,13 +23,24 @@ public class ObjectFactory {
     }
 
     public JMXConnectorFactory jmxConnectorFactory() {
-        return new JMXConnectorFactory(jmxUrlFactory(), connectorWrapper(), environmentFactory());
+
+        final JMXConnectorFactory jmxConnectorFactory = new JMXConnectorFactory();
+
+        setField(jmxConnectorFactory, "jmxUrlFactory", jmxUrlFactory());
+        setField(jmxConnectorFactory, "connectorWrapper", connectorWrapper());
+        setField(jmxConnectorFactory, "environmentFactory", environmentFactory());
+
+        return jmxConnectorFactory;
     }
 
     public MBeanConnector mBeanConnector() {
-        return new MBeanConnector(
-                objectNameFactory(),
-                remoteMBeanFactory());
+
+        final MBeanConnector mBeanConnector = new MBeanConnector();
+
+        setField(mBeanConnector, "objectNameFactory", objectNameFactory());
+        setField(mBeanConnector, "remoteMBeanFactory", remoteMBeanFactory());
+
+        return mBeanConnector;
     }
 
     public EnvironmentFactory environmentFactory() {
@@ -44,10 +56,6 @@ public class ObjectFactory {
     }
 
     public SystemCommanderClient systemCommanderClient(final MBeanConnector mBeanConnector, final JMXConnector jmxConnector) {
-
-        return new SystemCommanderClient(
-                jmxConnector,
-                mBeanConnector
-        );
+        return new SystemCommanderClient(jmxConnector, mBeanConnector);
     }
 }

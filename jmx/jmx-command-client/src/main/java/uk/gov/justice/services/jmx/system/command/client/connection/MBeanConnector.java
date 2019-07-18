@@ -7,19 +7,18 @@ import uk.gov.justice.services.jmx.system.command.client.MBeanClientException;
 
 import java.io.IOException;
 
+import javax.inject.Inject;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 
 public class MBeanConnector {
 
-    private final ObjectNameFactory objectNameFactory;
-    private final RemoteMBeanFactory remoteMBeanFactory;
+    @Inject
+    private ObjectNameFactory objectNameFactory;
 
-    public MBeanConnector(final ObjectNameFactory objectNameFactory, final RemoteMBeanFactory remoteMBeanFactory) {
-        this.objectNameFactory = objectNameFactory;
-        this.remoteMBeanFactory = remoteMBeanFactory;
-    }
+    @Inject
+    private RemoteMBeanFactory remoteMBeanFactory;
 
     public <T> T connect(final String domain, final String typeName, final Class<T> mBeanInterface, final JMXConnector jmxConnector) {
         try {

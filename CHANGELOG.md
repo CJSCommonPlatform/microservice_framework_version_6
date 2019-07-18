@@ -6,7 +6,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ## [Unreleased]
 ### Fixed
 - Fixed PING system command
+### Added
+- New jmx test-utils modulue with factory for running the jmx client classes in tests
 ### Changed
+- Jmx client classes now use proper dependency injection
 - Moved InvalidHandlerMethodException to jmx-api to allow it to be caught 
 in the command line jmx client
 

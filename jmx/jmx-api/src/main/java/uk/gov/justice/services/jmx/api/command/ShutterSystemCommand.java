@@ -2,10 +2,10 @@ package uk.gov.justice.services.jmx.api.command;
 
 public class ShutterSystemCommand extends BaseSystemCommand {
 
-    public static final String SHUTTER_APPLICATION = "SHUTTER_APPLICATION";
+    public static final String SHUTTER = "SHUTTER";
     private static final String DESCRIPTION = "Shutters the application to allow for maintenance.";
 
     public ShutterSystemCommand() {
-        super(SHUTTER_APPLICATION, DESCRIPTION);
+        super(SHUTTER, DESCRIPTION);
     }
 }

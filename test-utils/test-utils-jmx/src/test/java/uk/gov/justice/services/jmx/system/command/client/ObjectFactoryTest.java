@@ -1,4 +1,4 @@
-package uk.gov.justice.services.jmx.system.command.client.build;
+package uk.gov.justice.services.jmx.system.command.client;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;

@@ -7,24 +7,21 @@ import uk.gov.justice.services.jmx.system.command.client.MBeanClientException;
 import java.io.IOException;
 import java.util.Map;
 
+import javax.inject.Inject;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXServiceURL;
 import javax.security.sasl.SaslException;
 
 public class JMXConnectorFactory {
 
-    private final JmxUrlFactory jmxUrlFactory;
-    private final ConnectorWrapper connectorWrapper;
-    private final EnvironmentFactory environmentFactory;
+    @Inject
+    private JmxUrlFactory jmxUrlFactory;
 
-    public JMXConnectorFactory(
-            final JmxUrlFactory jmxUrlFactory,
-            final ConnectorWrapper connectorWrapper,
-            final EnvironmentFactory environmentFactory) {
-        this.jmxUrlFactory = jmxUrlFactory;
-        this.connectorWrapper = connectorWrapper;
-        this.environmentFactory = environmentFactory;
-    }
+    @Inject
+    private ConnectorWrapper connectorWrapper;
+
+    @Inject
+    private EnvironmentFactory environmentFactory;
 
     public JMXConnector createJmxConnector(final JmxParameters jmxParameters) {
 

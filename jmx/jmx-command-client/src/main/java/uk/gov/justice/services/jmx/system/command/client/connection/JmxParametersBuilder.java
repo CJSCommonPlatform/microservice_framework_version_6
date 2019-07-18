@@ -7,6 +7,7 @@ import java.util.Optional;
 
 public class JmxParametersBuilder {
 
+    private String contextName;
     private String host;
     private Integer port;
     private String username;
@@ -16,6 +17,11 @@ public class JmxParametersBuilder {
 
     public static JmxParametersBuilder jmxParameters() {
         return new JmxParametersBuilder();
+    }
+
+    public JmxParametersBuilder withContextName(final String contextName) {
+        this.contextName = contextName;
+        return this;
     }
 
     public JmxParametersBuilder withHost(final String host) {
@@ -39,7 +45,7 @@ public class JmxParametersBuilder {
     }
 
     public JmxParameters build() {
-        return new JmxParameters(host, port, credentials());
+        return new JmxParameters(contextName, host, port, credentials());
     }
 
     private Optional<Credentials> credentials() {

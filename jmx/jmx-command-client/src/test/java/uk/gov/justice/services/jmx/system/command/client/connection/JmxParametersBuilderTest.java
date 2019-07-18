@@ -14,14 +14,17 @@ public class JmxParametersBuilderTest {
     @Test
     public void shouldJmxParametersWithoutCredentials() throws Exception {
 
+        final String contextName = "my-context";
         final String host = "host";
         final int port = 8080;
 
         final JmxParameters jmxParameters = jmxParameters()
+                .withContextName(contextName)
                 .withHost(host)
                 .withPort(port)
                 .build();
 
+        assertThat(jmxParameters.getContextName(), is(contextName));
         assertThat(jmxParameters.getHost(), is(host));
         assertThat(jmxParameters.getPort(), is(port));
         assertThat(jmxParameters.getCredentials().isPresent(), is(false));
@@ -30,18 +33,21 @@ public class JmxParametersBuilderTest {
     @Test
     public void shouldJmxParametersWithCredentials() throws Exception {
 
+        final String contextName = "my-context";
         final String host = "host";
         final int port = 8080;
         final String username = "Fred";
         final String password = "Password123";
 
         final JmxParameters jmxParameters = jmxParameters()
+                .withContextName(contextName)
                 .withHost(host)
                 .withPort(port)
                 .withUsername(username)
                 .withPassword(password)
                 .build();
 
+        assertThat(jmxParameters.getContextName(), is(contextName));
         assertThat(jmxParameters.getHost(), is(host));
         assertThat(jmxParameters.getPort(), is(port));
 

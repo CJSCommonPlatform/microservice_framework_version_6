@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.0.0-RC9] - 2019-07-18
+### Added
+- Added the context name to JmxParameters
+
 ## [6.0.0-RC8] - 2019-07-18
 ### Changed
 - Jmx client classes now use proper dependency injection

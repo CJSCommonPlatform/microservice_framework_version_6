@@ -12,9 +12,6 @@ import javax.management.remote.JMXConnector;
 
 public class SystemCommanderClient implements Closeable {
 
-    private static final String SYSTEM_COMMANDER_DOMAIN = "systemCommander";
-    private static final String SYSTEM_COMMANDER = "SystemCommander";
-
     private final JMXConnector jmxConnector;
     private final MBeanConnector mBeanConnector;
 
@@ -23,11 +20,10 @@ public class SystemCommanderClient implements Closeable {
         this.mBeanConnector = mBeanConnector;
     }
 
-    public SystemCommanderMBean getRemote() {
+    public SystemCommanderMBean getRemote(final String contextName) {
 
         return mBeanConnector.connect(
-                SYSTEM_COMMANDER_DOMAIN,
-                SYSTEM_COMMANDER,
+                contextName,
                 SystemCommanderMBean.class,
                 jmxConnector
         );

@@ -33,15 +33,15 @@ public class SystemCommanderClientTest {
     @Test
     public void shouldGetTheRemoteSystemCommanderMBean() throws Exception {
 
+        final String contextName = "my-context";
         final SystemCommanderMBean systemCommanderMBean = mock(SystemCommanderMBean.class);
 
         when(mBeanConnector.connect(
-                "systemCommander",
-                "SystemCommander",
+                contextName,
                 SystemCommanderMBean.class,
                 jmxConnector)).thenReturn(systemCommanderMBean);
 
-        assertThat(systemCommanderClient.getRemote(), is(systemCommanderMBean));
+        assertThat(systemCommanderClient.getRemote(contextName), is(systemCommanderMBean));
     }
 
     @Test

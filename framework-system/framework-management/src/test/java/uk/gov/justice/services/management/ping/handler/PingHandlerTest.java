@@ -2,15 +2,13 @@ package uk.gov.justice.services.management.ping.handler;
 
 import static java.time.ZoneOffset.UTC;
 import static java.time.ZonedDateTime.of;
-import static org.junit.Assert.*;
-
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.sameInstance;
-import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import uk.gov.justice.services.common.util.UtcClock;
+import uk.gov.justice.services.jmx.api.command.PingSystemCommand;
+
+import java.time.ZonedDateTime;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,19 +16,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.*;
-
-import uk.gov.justice.services.common.util.UtcClock;
-import uk.gov.justice.services.jmx.api.command.PingSystemCommand;
-
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-
-import javax.inject.Inject;
 
 
 @RunWith(MockitoJUnitRunner.class)

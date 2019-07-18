@@ -2,6 +2,7 @@ package uk.gov.justice.services.jmx.system.command.client;
 
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
+import uk.gov.justice.services.jmx.api.name.CommandMBeanNameProvider;
 import uk.gov.justice.services.jmx.api.name.ObjectNameFactory;
 import uk.gov.justice.services.jmx.system.command.client.connection.ConnectorWrapper;
 import uk.gov.justice.services.jmx.system.command.client.connection.EnvironmentFactory;
@@ -33,11 +34,20 @@ public class ObjectFactory {
         return jmxConnectorFactory;
     }
 
+    public CommandMBeanNameProvider commandMBeanNameProvider() {
+
+        final CommandMBeanNameProvider commandMBeanNameProvider = new CommandMBeanNameProvider();
+
+        setField(commandMBeanNameProvider, "objectNameFactory", objectNameFactory());
+
+        return commandMBeanNameProvider;
+    }
+
     public MBeanConnector mBeanConnector() {
 
         final MBeanConnector mBeanConnector = new MBeanConnector();
 
-        setField(mBeanConnector, "objectNameFactory", objectNameFactory());
+        setField(mBeanConnector, "commandMBeanNameProvider", commandMBeanNameProvider());
         setField(mBeanConnector, "remoteMBeanFactory", remoteMBeanFactory());
 
         return mBeanConnector;

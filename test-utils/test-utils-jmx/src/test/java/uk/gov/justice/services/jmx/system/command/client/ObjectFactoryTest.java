@@ -36,6 +36,11 @@ public class ObjectFactoryTest {
     }
 
     @Test
+    public void shouldCreateCommandMBeanNameProvider() throws Exception {
+        assertThat(objectFactory.commandMBeanNameProvider(), is(notNullValue()));
+    }
+
+    @Test
     public void shouldCreateMBeanConnector() throws Exception {
         assertThat(objectFactory.mBeanConnector(), is(notNullValue()));
     }

@@ -4,14 +4,17 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [6.0.0-RC8] - 2019-07-18
+### Changed
+- Jmx client classes now use proper dependency injection
+- The context name is now used in the registration name of the SystemCommander MBeans
+- Moved InvalidHandlerMethodException to jmx-api to allow it to be caught 
+in the command line jmx client
 ### Fixed
 - Fixed PING system command
 ### Added
 - New jmx test-utils modulue with factory for running the jmx client classes in tests
-### Changed
-- Jmx client classes now use proper dependency injection
-- Moved InvalidHandlerMethodException to jmx-api to allow it to be caught 
-in the command line jmx client
 
 ## [6.0.0-RC7] - 2019-07-16
 ### Changed

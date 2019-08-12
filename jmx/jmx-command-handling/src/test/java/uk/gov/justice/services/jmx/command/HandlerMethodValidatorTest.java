@@ -4,7 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-import uk.gov.justice.services.jmx.api.mbean.InvalidHandlerMethodException;
+import uk.gov.justice.services.jmx.api.InvalidHandlerMethodException;
 
 import java.lang.reflect.Method;
 

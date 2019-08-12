@@ -6,12 +6,12 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Added
+- New Utility test class for calling SystemCommands
 ### Changed
 - Name SystemCommand classes have consistent name. i.e. from ShutterSystemCommand to ShutterCommand
 - The the context name in JmxParameters is now parsed so that everything after the first dash is excluded
 i.e. a war with name 'customer-service' would now become just 'customer'
-### Added
-- New Utility test class for calling SystemCommands
 ### Fixed
 - All server side Exceptions thrown by the JMX bean are now included in the api classes to fix 
 ClassNotFoundExceptions in the JMX client
@@ -32,7 +32,10 @@ ClassNotFoundExceptions in the JMX client
 ### Added
 - subscriptions_descriptor.yaml location pattern for jms_uri and rest_uri
 ### Fixed
-- ShutteringRegistry is now correctly a singleton 
+- Fixed PING system command
+- ShutteringRegistry is now correctly a singleton
+### Added
+- New jmx test-utils modulue with factory for running the jmx client classes in tests
 
 ## [6.0.2] - 2019-08-15
 ### Changed

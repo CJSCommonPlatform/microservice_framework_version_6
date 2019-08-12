@@ -14,6 +14,7 @@ import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
 import uk.gov.justice.services.jmx.api.mbean.SystemCommander;
 import uk.gov.justice.services.jmx.api.name.CommandMBeanNameProvider;
 import uk.gov.justice.services.jmx.api.name.ObjectNameException;
+import uk.gov.justice.services.jmx.util.ContextNameProvider;
 
 import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
@@ -36,7 +37,7 @@ public class MBeanInstantiatorTest {
     private SystemCommander systemCommander;
 
     @Mock
-    private ServiceContextNameProvider serviceContextNameProvider;
+    private ContextNameProvider contextNameProvider;
 
     @Mock
     private CommandMBeanNameProvider commandMBeanNameProvider;
@@ -54,7 +55,7 @@ public class MBeanInstantiatorTest {
         final ObjectName objectName = mock(ObjectName.class, "mBeanName");
 
         when(mbeanServer.isRegistered(objectName)).thenReturn(false);
-        when(serviceContextNameProvider.getServiceContextName()).thenReturn(contextName);
+        when(contextNameProvider.getContextName()).thenReturn(contextName);
         when(commandMBeanNameProvider.create(contextName)).thenReturn(objectName);
 
         mBeanInstantiator.registerSystemCommanderMBean();
@@ -69,7 +70,7 @@ public class MBeanInstantiatorTest {
         final String contextName = "my-context";
         final ObjectName objectName = mock(ObjectName.class, "mBeanName");
 
-        when(serviceContextNameProvider.getServiceContextName()).thenReturn(contextName);
+        when(contextNameProvider.getContextName()).thenReturn(contextName);
         when(commandMBeanNameProvider.create(contextName)).thenReturn(objectName);
         when(mbeanServer.isRegistered(objectName)).thenReturn(true);
 
@@ -87,7 +88,7 @@ public class MBeanInstantiatorTest {
         final ObjectName objectName = mock(ObjectName.class, "AnObjectName");
 
         when(mbeanServer.isRegistered(objectName)).thenReturn(false);
-        when(serviceContextNameProvider.getServiceContextName()).thenReturn(contextName);
+        when(contextNameProvider.getContextName()).thenReturn(contextName);
         when(commandMBeanNameProvider.create(contextName)).thenReturn(objectName);
         doThrow(mBeanRegistrationException).when(mbeanServer).registerMBean(systemCommander, objectName);
 
@@ -107,7 +108,7 @@ public class MBeanInstantiatorTest {
         final ObjectName objectName = mock(ObjectName.class, "mBeanName");
 
         when(mbeanServer.isRegistered(objectName)).thenReturn(true);
-        when(serviceContextNameProvider.getServiceContextName()).thenReturn(contextName);
+        when(contextNameProvider.getContextName()).thenReturn(contextName);
         when(commandMBeanNameProvider.create(contextName)).thenReturn(objectName);
 
         mBeanInstantiator.unregisterMBeans();
@@ -123,7 +124,7 @@ public class MBeanInstantiatorTest {
         final ObjectName objectName = mock(ObjectName.class, "mBeanName");
 
         when(mbeanServer.isRegistered(objectName)).thenReturn(false);
-        when(serviceContextNameProvider.getServiceContextName()).thenReturn(contextName);
+        when(contextNameProvider.getContextName()).thenReturn(contextName);
         when(commandMBeanNameProvider.create(contextName)).thenReturn(objectName);
 
         mBeanInstantiator.unregisterMBeans();
@@ -140,7 +141,7 @@ public class MBeanInstantiatorTest {
         final ObjectName objectName = mock(ObjectName.class, "AnObjectName");
 
         when(mbeanServer.isRegistered(objectName)).thenReturn(true);
-        when(serviceContextNameProvider.getServiceContextName()).thenReturn(contextName);
+        when(contextNameProvider.getContextName()).thenReturn(contextName);
         when(commandMBeanNameProvider.create(contextName)).thenReturn(objectName);
         doThrow(mBeanRegistrationException).when(mbeanServer).unregisterMBean(objectName);
 

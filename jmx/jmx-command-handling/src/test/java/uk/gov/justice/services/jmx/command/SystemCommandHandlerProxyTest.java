@@ -8,6 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.jmx.command.TestCommand.TEST_COMMAND;
 
+import uk.gov.justice.services.jmx.api.SystemCommandInvocationException;
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
 
 import java.io.IOException;

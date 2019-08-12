@@ -2,10 +2,10 @@ package uk.gov.justice.services.jmx;
 
 import static java.lang.String.format;
 
-import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
 import uk.gov.justice.services.jmx.api.mbean.SystemCommander;
 import uk.gov.justice.services.jmx.api.name.CommandMBeanNameProvider;
 import uk.gov.justice.services.jmx.api.name.ObjectNameException;
+import uk.gov.justice.services.jmx.util.ContextNameProvider;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -32,7 +32,7 @@ public class MBeanInstantiator {
     private SystemCommander systemCommander;
 
     @Inject
-    private ServiceContextNameProvider serviceContextNameProvider;
+    private ContextNameProvider contextNameProvider;
 
     @Inject
     private CommandMBeanNameProvider commandMBeanNameProvider;
@@ -43,7 +43,8 @@ public class MBeanInstantiator {
     @PostConstruct
     public void registerSystemCommanderMBean() {
 
-        final String contextName = serviceContextNameProvider.getServiceContextName();
+        final String contextName = contextNameProvider.getContextName();
+
         final ObjectName objectName = commandMBeanNameProvider.create(contextName);
 
         if (!mbeanServer.isRegistered(objectName)) {
@@ -54,7 +55,7 @@ public class MBeanInstantiator {
     @PreDestroy
     public void unregisterMBeans() {
 
-        final String contextName = serviceContextNameProvider.getServiceContextName();
+        final String contextName = contextNameProvider.getContextName();
         final ObjectName objectName = commandMBeanNameProvider.create(contextName);
 
         if (mbeanServer.isRegistered(objectName)) {

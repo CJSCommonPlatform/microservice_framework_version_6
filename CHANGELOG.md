@@ -4,6 +4,8 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Changed
+- Shuttering of a context is now idempotent
 
 ## [6.0.0-RC9] - 2019-07-18
 ### Added

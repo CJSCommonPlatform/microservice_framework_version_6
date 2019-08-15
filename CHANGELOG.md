@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.0.1] - 2019-08-15
+### Changed
+- Update utilities to 1.20.2
+
 ## [6.0.0] - 2019-08-15
 ### Changed
 - Catchup and Rebuild fully implemented using JMX
@@ -37,13 +41,13 @@ in the command line jmx client
 - rest_uri in event-sources.yaml is now optional to support JMS only sources
 - If authentication fails when connecting to JMX then a specific exception 'JmxAuthenticationException' is thrown
 - Update common-bom to 2.4.0 
-- Updated to framework-api 4.0.0
-- Updated to utilities to 1.20.2
-- Updated to json-schema-catalog to 1.7.4
-- Updated to json-pojo-generator to 1.7.2
-- Updated to file-service to 1.17.11
-- Updated to test-utils to 1.24.2
-- Updated to json-transformer to 1.0.7
+- Update framework-api 4.0.0
+- Update utilities to 1.20.1
+- Update json-schema-catalog to 1.7.4
+- Update json-pojo-generator to 1.7.2
+- Update file-service to 1.17.11
+- Update test-utils to 1.24.2
+- Update json-transformer to 1.0.7
 
 ### Removed
 - Removed all deprecated classes and methods

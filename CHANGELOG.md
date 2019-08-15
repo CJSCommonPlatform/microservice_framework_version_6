@@ -4,66 +4,22 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [6.0.0] - 2019-08-15
 ### Changed
-- Shuttering of a context is now idempotent
-
-## [6.0.0-RC9] - 2019-07-18
-### Added
-- Added the context name to JmxParameters
-
-## [6.0.0-RC8] - 2019-07-18
-### Changed
-- Jmx client classes now use proper dependency injection
-- The context name is now used in the registration name of the SystemCommander MBeans
-- Moved InvalidHandlerMethodException to jmx-api to allow it to be caught 
-in the command line jmx client
-### Fixed
-- Fixed PING system command
-### Added
-- New jmx test-utils modulue with factory for running the jmx client classes in tests
-
-## [6.0.0-RC7] - 2019-07-16
-### Changed
-- Make package of SystemCommander MBean match that of its interface
-
-## [6.0.0-RC6] - 2019-07-16
-### Changed
-- Extracted SystemCommands into their own module jmx-api
-
-## [6.0.0-RC5] - 2019-07-15
-### Changed
-- Fix test dependency scope 
-
-## [6.0.0-RC4] - 2019-07-12
-### Changed
-- Update common-bom to 2.4.0 to allow for correct exclusions in wildfly client
-
-## [6.0.0-RC3] - 2019-07-11
-
-### Added
-- New method to list all SystemCommands added to SystemCommander JmxBean
-- New method 'getDescription()' added to SystemCommands
-### Changed
-- rest_uri in event-sources.yaml is now optional to support JMS only sources
-- If authentication fails when connecting to JMX then a specific exception 
-'JmxAuthenticationException' is thrown
-
-## [6.0.0-RC2] - 2019-07-04
-### Added
-- Jmx command client now takes an optional username and password
-- Added a builder for the JMX parameters
-
-## [6.0.0-RC1] - 2019-06-26
-### Added
+- Catchup and Rebuild fully implemented using JMX
 - SystemCommand mechanism to allow us to call management commands on the framework via JMX
 - New System Command to Shutter application
+- New System Command to run Catchup
+- New System Command to run Rebuild
+- New System Command to run Indexes Catchup
 - New System database
+- New method to list all SystemCommands added to SystemCommander JmxBean
+- Brought in jmx command client code from cake-shop
 - JMX bean command handlers for system commands
 - Observers for the shutter then catchup process
 - JmsQueueBrowser service to return the size of a queue
-- Brought in jmx command client code from cake-shop
-
-### Changed
+- New jmx test-utils modulue with factory for running the jmx client classes in tests
 - All commands received whilst the application is shuttered are stored in a new table 'shuttered_command_store' in the viewstore
 - Stored commands are send to JMS once the application is un-shuttered
 - Rename ComponentNameUtil to ComponentNameExtractor and moved to common
@@ -72,11 +28,22 @@ in the command line jmx client
 - Remove validation info logging
 - Merged in Subscription domain, yaml parsing classes and builders from event-store
 - JmsEnvelopeSenderProducer provides shuttering JmsEnvelopeSender by default to components, non component injection point will be provided with a non shuttering JmsEnvelopeSender
+- Jmx client classes now use proper dependency injection
+- The context name is now used in the registration name of the SystemCommander MBeans
+- Moved InvalidHandlerMethodException to jmx-api to allow it to be caught 
+in the command line jmx client
+- Shuttering of a context is idempotent
+- Extracted SystemCommands into their own module jmx-api
+- rest_uri in event-sources.yaml is now optional to support JMS only sources
+- If authentication fails when connecting to JMX then a specific exception 'JmxAuthenticationException' is thrown
+- Update common-bom to 2.4.0 
 - Updated to framework-api 4.0.0
-- Updated to common-bom to 2.3.0
-- Updated to utilities to 1.20.0
-- Updated to json-schema-catalog to 1.7.2
+- Updated to utilities to 1.20.2
+- Updated to json-schema-catalog to 1.7.4
+- Updated to json-pojo-generator to 1.7.2
+- Updated to file-service to 1.17.11
 - Updated to test-utils to 1.24.2
+- Updated to json-transformer to 1.0.7
 
 ### Removed
 - Removed all deprecated classes and methods

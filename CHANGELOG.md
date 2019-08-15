@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.0.2] - 2019-08-15
+### Changed
+- Update json-schema-catalog to 1.7.4
+
 ## [6.0.1] - 2019-08-15
 ### Changed
 - Update utilities to 1.20.2

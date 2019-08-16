@@ -2,8 +2,8 @@ package uk.gov.justice.services.management.shuttering.observers.shuttering;
 
 public enum ContextShutteredState {
 
-    SHUTTERING_STARTED,
-    CONTEXT_SHUTTERED,
-    UNSHUTTERING_STARTED,
-    CONTEXT_UNSHUTTERED
+    SHUTTERING_IN_PROGRESS,
+    SHUTTERED,
+    UNSHUTTERING_IN_PROGRESS,
+    UNSHUTTERED
 }

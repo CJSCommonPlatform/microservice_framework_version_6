@@ -5,17 +5,17 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.management.shuttering.observers.shuttering.ContextShutteredState.CONTEXT_SHUTTERED;
-import static uk.gov.justice.services.management.shuttering.observers.shuttering.ContextShutteredState.CONTEXT_UNSHUTTERED;
-import static uk.gov.justice.services.management.shuttering.observers.shuttering.ContextShutteredState.SHUTTERING_STARTED;
-import static uk.gov.justice.services.management.shuttering.observers.shuttering.ContextShutteredState.UNSHUTTERING_STARTED;
+import static uk.gov.justice.services.management.shuttering.observers.shuttering.ContextShutteredState.SHUTTERED;
+import static uk.gov.justice.services.management.shuttering.observers.shuttering.ContextShutteredState.UNSHUTTERED;
+import static uk.gov.justice.services.management.shuttering.observers.shuttering.ContextShutteredState.SHUTTERING_IN_PROGRESS;
+import static uk.gov.justice.services.management.shuttering.observers.shuttering.ContextShutteredState.UNSHUTTERING_IN_PROGRESS;
 
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.jmx.api.command.ShutterSystemCommand;
 import uk.gov.justice.services.jmx.api.command.UnshutterSystemCommand;
 import uk.gov.justice.services.management.shuttering.events.ShutteringRequestedEvent;
 import uk.gov.justice.services.management.shuttering.events.UnshutteringRequestedEvent;
-import uk.gov.justice.services.management.shuttering.observers.ContextShutteredStateObserver;
+import uk.gov.justice.services.management.shuttering.observers.ShutteringStateRegistry;
 
 import java.time.ZonedDateTime;
 
@@ -43,7 +43,7 @@ public class ShutteringSystemCommandHandlerTest {
     private Event<UnshutteringRequestedEvent> unshutteringRequestedEventFirer;
 
     @Mock
-    private ContextShutteredStateObserver contextShutteredStateObserver;
+    private ShutteringStateRegistry shutteringStateRegistry;
 
     @Mock
     private Logger logger;
@@ -63,7 +63,7 @@ public class ShutteringSystemCommandHandlerTest {
         final ZonedDateTime now = new UtcClock().now();
         final ShutterSystemCommand shutterSystemCommand = new ShutterSystemCommand();
 
-        when(contextShutteredStateObserver.getShutteredState()).thenReturn(CONTEXT_UNSHUTTERED);
+        when(shutteringStateRegistry.getShutteredState()).thenReturn(UNSHUTTERED);
         when(clock.now()).thenReturn(now);
 
         shutteringSystemCommandHandler.onShutterRequested(shutterSystemCommand);
@@ -82,7 +82,7 @@ public class ShutteringSystemCommandHandlerTest {
         final ZonedDateTime now = new UtcClock().now();
         final UnshutterSystemCommand unshutterSystemCommand = new UnshutterSystemCommand();
 
-        when(contextShutteredStateObserver.getShutteredState()).thenReturn(CONTEXT_SHUTTERED);
+        when(shutteringStateRegistry.getShutteredState()).thenReturn(SHUTTERED);
         when(clock.now()).thenReturn(now);
 
         shutteringSystemCommandHandler.onUnshutterRequested(unshutterSystemCommand);
@@ -98,66 +98,66 @@ public class ShutteringSystemCommandHandlerTest {
     @Test
     public void shouldIgnoreShutteringRequestIfTheShutteredStateIsContextShuttered() throws Exception {
 
-        when(contextShutteredStateObserver.getShutteredState()).thenReturn(CONTEXT_SHUTTERED);
+        when(shutteringStateRegistry.getShutteredState()).thenReturn(SHUTTERED);
 
         shutteringSystemCommandHandler.onShutterRequested(new ShutterSystemCommand());
 
         verifyZeroInteractions(shutteringRequestedEventFirer);
-        verify(logger).info("Ignoring command 'SHUTTER'. Context shuttered state is 'CONTEXT_SHUTTERED'");
+        verify(logger).info("Ignoring command 'SHUTTER'. Context shuttered state is 'SHUTTERED'");
     }
 
     @Test
     public void shouldIgnoreShutteringRequestIfTheShutteredStateIsShutteringStarted() throws Exception {
 
-        when(contextShutteredStateObserver.getShutteredState()).thenReturn(SHUTTERING_STARTED);
+        when(shutteringStateRegistry.getShutteredState()).thenReturn(SHUTTERING_IN_PROGRESS);
 
         shutteringSystemCommandHandler.onShutterRequested(new ShutterSystemCommand());
 
         verifyZeroInteractions(shutteringRequestedEventFirer);
-        verify(logger).info("Ignoring command 'SHUTTER'. Context shuttered state is 'SHUTTERING_STARTED'");
+        verify(logger).info("Ignoring command 'SHUTTER'. Context shuttered state is 'SHUTTERING_IN_PROGRESS'");
     }
 
     @Test
     public void shouldIgnoreShutteringRequestIfTheShutteredStateIsUnshutteringStarted() throws Exception {
 
-        when(contextShutteredStateObserver.getShutteredState()).thenReturn(UNSHUTTERING_STARTED);
+        when(shutteringStateRegistry.getShutteredState()).thenReturn(UNSHUTTERING_IN_PROGRESS);
 
         shutteringSystemCommandHandler.onShutterRequested(new ShutterSystemCommand());
 
         verifyZeroInteractions(shutteringRequestedEventFirer);
-        verify(logger).info("Ignoring command 'SHUTTER'. Context shuttered state is 'UNSHUTTERING_STARTED'");
+        verify(logger).info("Ignoring command 'SHUTTER'. Context shuttered state is 'UNSHUTTERING_IN_PROGRESS'");
     }
 
     @Test
     public void shouldIgnoreUnshutteringRequestIfTheShutteredStateIsContextUnshuttered() throws Exception {
 
-        when(contextShutteredStateObserver.getShutteredState()).thenReturn(CONTEXT_UNSHUTTERED);
+        when(shutteringStateRegistry.getShutteredState()).thenReturn(UNSHUTTERED);
 
         shutteringSystemCommandHandler.onUnshutterRequested(new UnshutterSystemCommand());
 
         verifyZeroInteractions(shutteringRequestedEventFirer);
-        verify(logger).info("Ignoring command 'UNSHUTTER'. Context shuttered state is 'CONTEXT_UNSHUTTERED'");
+        verify(logger).info("Ignoring command 'UNSHUTTER'. Context shuttered state is 'UNSHUTTERED'");
     }
 
     @Test
     public void shouldIgnoreUnshutteringRequestIfTheShutteredStateIsShutteringStarted() throws Exception {
 
-        when(contextShutteredStateObserver.getShutteredState()).thenReturn(SHUTTERING_STARTED);
+        when(shutteringStateRegistry.getShutteredState()).thenReturn(SHUTTERING_IN_PROGRESS);
 
         shutteringSystemCommandHandler.onUnshutterRequested(new UnshutterSystemCommand());
 
         verifyZeroInteractions(shutteringRequestedEventFirer);
-        verify(logger).info("Ignoring command 'UNSHUTTER'. Context shuttered state is 'SHUTTERING_STARTED'");
+        verify(logger).info("Ignoring command 'UNSHUTTER'. Context shuttered state is 'SHUTTERING_IN_PROGRESS'");
     }
 
     @Test
     public void shouldIgnoreUnshutteringRequestIfTheShutteredStateIsUnshutteringStarted() throws Exception {
 
-        when(contextShutteredStateObserver.getShutteredState()).thenReturn(UNSHUTTERING_STARTED);
+        when(shutteringStateRegistry.getShutteredState()).thenReturn(UNSHUTTERING_IN_PROGRESS);
 
         shutteringSystemCommandHandler.onUnshutterRequested(new UnshutterSystemCommand());
 
         verifyZeroInteractions(shutteringRequestedEventFirer);
-        verify(logger).info("Ignoring command 'UNSHUTTER'. Context shuttered state is 'UNSHUTTERING_STARTED'");
+        verify(logger).info("Ignoring command 'UNSHUTTER'. Context shuttered state is 'UNSHUTTERING_IN_PROGRESS'");
     }
 }

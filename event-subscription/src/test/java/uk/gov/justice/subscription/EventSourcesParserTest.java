@@ -6,15 +6,19 @@ import static java.util.Collections.singletonList;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.fail;
 
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.yaml.YamlFileValidator;
 import uk.gov.justice.services.yaml.YamlParser;
 import uk.gov.justice.services.yaml.YamlSchemaLoader;
 import uk.gov.justice.services.yaml.YamlToJsonObjectConverter;
+import uk.gov.justice.services.yaml.YamlValidationException;
 import uk.gov.justice.subscription.domain.eventsource.EventSourceDefinition;
 
 import java.net.MalformedURLException;
@@ -22,6 +26,7 @@ import java.net.URL;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.everit.json.schema.ValidationException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -76,7 +81,7 @@ public class EventSourcesParserTest {
         assertThat(eventSourceDefinition_2.getName(), is("no-data-source"));
         assertThat(eventSourceDefinition_2.isDefault(), is(false));
         assertThat(eventSourceDefinition_2.getLocation(), is(notNullValue()));
-        assertThat(eventSourceDefinition_2.getLocation().getJmsUri(), is("jms:topic:no-data-source"));
+        assertThat(eventSourceDefinition_2.getLocation().getJmsUri(), is("jms:topic:no.data.source"));
         assertThat(eventSourceDefinition_2.getLocation().getRestUri(), is(of("http://localhost:8080/no-data-source/event-source-api/rest")));
         assertThat(eventSourceDefinition_2.getLocation().getDataSource(), is(empty()));
 
@@ -84,9 +89,25 @@ public class EventSourcesParserTest {
         assertThat(eventSourceDefinition_3.getName(), is("no-data-source-or-rest-uri"));
         assertThat(eventSourceDefinition_3.isDefault(), is(false));
         assertThat(eventSourceDefinition_3.getLocation(), is(notNullValue()));
-        assertThat(eventSourceDefinition_3.getLocation().getJmsUri(), is("jms:topic:no-data-source-or-rest-uri"));
+        assertThat(eventSourceDefinition_3.getLocation().getJmsUri(), is("jms:topic:no.data.source.or.rest.uri"));
         assertThat(eventSourceDefinition_3.getLocation().getRestUri(), is(empty()));
         assertThat(eventSourceDefinition_3.getLocation().getDataSource(), is(empty()));
+    }
+
+    @Test
+    public void shouldThrowExceptionIfIncorrectJmsUri() throws Exception {
+
+        final URL url = getFromClasspath("yaml/incorrect-event-sources.yaml");
+
+        try {
+            eventSourcesParser
+                    .eventSourcesFrom(singletonList(url))
+                    .collect(toList());
+            fail();
+        } catch (final YamlValidationException e) {
+            assertThat(e.getCause(), instanceOf(ValidationException.class));
+            assertThat(e.getMessage(), containsString("Errors: [#/event_sources/1/location/jms_uri: string [jms:topic:example.event?timeToLive=1000] does not match pattern ^jms:(queue|topic):([a-z|A-Z|-|\\\\.])+$, #/event_sources/0/location/jms_uri: string [jms:topic] does not match pattern ^jms:(queue|topic):([a-z|A-Z|-|\\\\.])+$, #/event_sources/0: required key [name] not found]"));
+        }
     }
 
     @SuppressWarnings("ConstantConditions")

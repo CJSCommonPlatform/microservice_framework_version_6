@@ -2,7 +2,7 @@
 event_sources:
 - name1: people
   location:
-    jms_uri: jms:topic:people.event?timeToLive=1000
+    jms_uri: jms:topic
     rest_uri: http://localhost:8080/people/event-source-api/rest
     data_source: java:/app/peoplewarfilename/DS.eventstore
 - name: example

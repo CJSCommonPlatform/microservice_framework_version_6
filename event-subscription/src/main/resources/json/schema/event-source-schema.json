@@ -29,11 +29,13 @@
             "properties": {
               "jms_uri": {
                 "$id": "/properties/event_sources/items/properties/location/jms_uri",
-                "type": "string"
+                "type": "string",
+                "pattern": "^jms:(queue|topic):([a-z|A-Z|-|\\\\.])+$"
               },
               "rest_uri": {
                 "$id": "/properties/event_sources/items/properties/location/rest_uri",
-                "type": "string"
+                "type": "string",
+                "pattern": "^http|https:(\\/?\\/?)[^\\s]+$"
               },
               "data_source": {
                 "$id": "/properties/event_sources/items/properties/location/data_source",

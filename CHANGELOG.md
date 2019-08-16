@@ -5,6 +5,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Added
+- subscriptions_descriptor.yaml location pattern for jms_uri and rest_uri
+
 ## [6.0.2] - 2019-08-15
 ### Changed
 - Update json-schema-catalog to 1.7.4

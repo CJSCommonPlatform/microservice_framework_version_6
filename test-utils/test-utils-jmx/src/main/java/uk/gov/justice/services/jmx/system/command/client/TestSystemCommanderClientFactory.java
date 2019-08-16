@@ -1,7 +1,6 @@
 package uk.gov.justice.services.jmx.system.command.client;
 
 import uk.gov.justice.services.jmx.system.command.client.connection.JmxParameters;
-import uk.gov.justice.services.jmx.system.command.client.connection.JmxParametersBuilder;
 import uk.gov.justice.services.jmx.system.command.client.connection.MBeanConnector;
 
 import javax.management.remote.JMXConnector;

@@ -3,17 +3,17 @@ package uk.gov.justice.services.management.shuttering.handler;
 import static java.lang.String.format;
 import static uk.gov.justice.services.jmx.api.command.ShutterSystemCommand.SHUTTER;
 import static uk.gov.justice.services.jmx.api.command.UnshutterSystemCommand.UNSHUTTER;
-import static uk.gov.justice.services.management.shuttering.observers.shuttering.ContextShutteredState.SHUTTERED;
-import static uk.gov.justice.services.management.shuttering.observers.shuttering.ContextShutteredState.UNSHUTTERED;
+import static uk.gov.justice.services.jmx.api.state.ApplicationManagementState.SHUTTERED;
+import static uk.gov.justice.services.jmx.api.state.ApplicationManagementState.UNSHUTTERED;
 
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.jmx.api.command.ShutterSystemCommand;
 import uk.gov.justice.services.jmx.api.command.UnshutterSystemCommand;
+import uk.gov.justice.services.jmx.api.state.ApplicationManagementState;
+import uk.gov.justice.services.jmx.command.ApplicationManagementStateRegistry;
 import uk.gov.justice.services.jmx.command.HandlesSystemCommand;
 import uk.gov.justice.services.management.shuttering.events.ShutteringRequestedEvent;
 import uk.gov.justice.services.management.shuttering.events.UnshutteringRequestedEvent;
-import uk.gov.justice.services.management.shuttering.observers.ShutteringStateRegistry;
-import uk.gov.justice.services.management.shuttering.observers.shuttering.ContextShutteredState;
 
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
@@ -32,14 +32,14 @@ public class ShutteringSystemCommandHandler {
     private Event<UnshutteringRequestedEvent> unshutteringRequestedEventFirer;
 
     @Inject
-    private ShutteringStateRegistry shutteringStateRegistry;
+    private ApplicationManagementStateRegistry applicationManagementStateRegistry;
 
     @Inject
     private Logger logger;
 
     @HandlesSystemCommand(SHUTTER)
     public void onShutterRequested(final ShutterSystemCommand shutterSystemCommand) {
-        final ContextShutteredState shutteredState = shutteringStateRegistry.getShutteredState();
+        final ApplicationManagementState shutteredState = applicationManagementStateRegistry.getApplicationManagementState();
         if(shutteredState == UNSHUTTERED) {
             shutteringRequestedEventFirer.fire(new ShutteringRequestedEvent(shutterSystemCommand, clock.now()));
         } else {
@@ -49,7 +49,7 @@ public class ShutteringSystemCommandHandler {
 
     @HandlesSystemCommand(UNSHUTTER)
     public void onUnshutterRequested(final UnshutterSystemCommand unshutterSystemCommand) {
-        final ContextShutteredState shutteredState = shutteringStateRegistry.getShutteredState();
+        final ApplicationManagementState shutteredState = applicationManagementStateRegistry.getApplicationManagementState();
         if(shutteredState == SHUTTERED) {
             unshutteringRequestedEventFirer.fire(new UnshutteringRequestedEvent(unshutterSystemCommand, clock.now()));
         } else {

@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.0.4] - 2019-08-16
+### Added
+- New call to get application state from JMX bean
+
 ## [6.0.3] - 2019-08-16
 ### Added
 - subscriptions_descriptor.yaml location pattern for jms_uri and rest_uri

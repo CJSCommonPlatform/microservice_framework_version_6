@@ -3,7 +3,8 @@ package uk.gov.justice.services.jmx.api.mbean;
 import static java.lang.String.format;
 
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
-import uk.gov.justice.services.jmx.command.SystemCommandException;
+import uk.gov.justice.services.jmx.api.state.ApplicationManagementState;
+import uk.gov.justice.services.jmx.command.ApplicationManagementStateRegistry;
 import uk.gov.justice.services.jmx.command.SystemCommandInvocationException;
 import uk.gov.justice.services.jmx.command.SystemCommandScanner;
 import uk.gov.justice.services.jmx.command.SystemCommandStore;
@@ -25,6 +26,9 @@ public class SystemCommander implements SystemCommanderMBean {
     @Inject
     private SystemCommandScanner systemCommandScanner;
 
+    @Inject
+    private ApplicationManagementStateRegistry applicationManagementStateRegistry;
+
     @Override
     public void call(final SystemCommand systemCommand) {
 
@@ -43,5 +47,10 @@ public class SystemCommander implements SystemCommanderMBean {
     @Override
     public List<SystemCommand> listCommands() {
        return systemCommandScanner.findCommands();
+    }
+
+    @Override
+    public ApplicationManagementState getApplicationState() {
+        return applicationManagementStateRegistry.getApplicationManagementState();
     }
 }

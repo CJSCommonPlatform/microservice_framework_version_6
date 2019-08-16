@@ -6,9 +6,8 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import uk.gov.justice.services.jmx.api.name.CommandMBeanNameProvider;
-import uk.gov.justice.services.jmx.api.name.ObjectNameFactory;
 import uk.gov.justice.services.jmx.api.mbean.SystemCommanderMBean;
+import uk.gov.justice.services.jmx.api.name.CommandMBeanNameProvider;
 import uk.gov.justice.services.jmx.system.command.client.MBeanClientException;
 
 import java.io.IOException;

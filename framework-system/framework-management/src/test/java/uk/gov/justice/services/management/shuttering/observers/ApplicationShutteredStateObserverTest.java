@@ -2,11 +2,12 @@ package uk.gov.justice.services.management.shuttering.observers;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static uk.gov.justice.services.management.shuttering.observers.shuttering.ContextShutteredState.SHUTTERED;
-import static uk.gov.justice.services.management.shuttering.observers.shuttering.ContextShutteredState.SHUTTERING_IN_PROGRESS;
-import static uk.gov.justice.services.management.shuttering.observers.shuttering.ContextShutteredState.UNSHUTTERED;
-import static uk.gov.justice.services.management.shuttering.observers.shuttering.ContextShutteredState.UNSHUTTERING_IN_PROGRESS;
+import static uk.gov.justice.services.jmx.api.state.ApplicationManagementState.SHUTTERED;
+import static uk.gov.justice.services.jmx.api.state.ApplicationManagementState.SHUTTERING_IN_PROGRESS;
+import static uk.gov.justice.services.jmx.api.state.ApplicationManagementState.UNSHUTTERED;
+import static uk.gov.justice.services.jmx.api.state.ApplicationManagementState.UNSHUTTERING_IN_PROGRESS;
 
+import uk.gov.justice.services.jmx.command.ApplicationManagementStateRegistry;
 import uk.gov.justice.services.management.shuttering.events.ShutteringCompleteEvent;
 import uk.gov.justice.services.management.shuttering.events.ShutteringRequestedEvent;
 import uk.gov.justice.services.management.shuttering.events.UnshutteringCompleteEvent;
@@ -22,7 +23,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class ApplicationShutteredStateObserverTest {
 
     @Mock
-    private ShutteringStateRegistry shutteringStateRegistry;
+    private ApplicationManagementStateRegistry applicationManagementStateRegistry;
 
     @InjectMocks
     private ApplicationShutteredStateObserver contextShutteredStateObserver;
@@ -34,7 +35,7 @@ public class ApplicationShutteredStateObserverTest {
 
         contextShutteredStateObserver.onShutteringRequested(shutteringRequestedEvent);
 
-        verify(shutteringStateRegistry).setShutteredState(SHUTTERING_IN_PROGRESS);
+        verify(applicationManagementStateRegistry).setApplicationManagementState(SHUTTERING_IN_PROGRESS);
     }
 
     @Test
@@ -44,7 +45,7 @@ public class ApplicationShutteredStateObserverTest {
 
         contextShutteredStateObserver.onShutteringComplete(shutteringCompleteEvent);
 
-        verify(shutteringStateRegistry).setShutteredState(SHUTTERED);
+        verify(applicationManagementStateRegistry).setApplicationManagementState(SHUTTERED);
     }
 
     @Test
@@ -54,7 +55,7 @@ public class ApplicationShutteredStateObserverTest {
 
         contextShutteredStateObserver.onUnshutteringRequested(unshutteringRequestedEvent);
 
-        verify(shutteringStateRegistry).setShutteredState(UNSHUTTERING_IN_PROGRESS);
+        verify(applicationManagementStateRegistry).setApplicationManagementState(UNSHUTTERING_IN_PROGRESS);
     }
 
     @Test
@@ -64,6 +65,6 @@ public class ApplicationShutteredStateObserverTest {
 
         contextShutteredStateObserver.onUnshutteringComplete(unshutteringCompleteEvent);
 
-        verify(shutteringStateRegistry).setShutteredState(UNSHUTTERED);
+        verify(applicationManagementStateRegistry).setApplicationManagementState(UNSHUTTERED);
     }
 }

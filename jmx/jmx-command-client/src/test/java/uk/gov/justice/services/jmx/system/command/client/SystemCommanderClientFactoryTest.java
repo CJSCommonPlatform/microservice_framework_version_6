@@ -9,7 +9,6 @@ import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.
 import uk.gov.justice.services.jmx.system.command.client.connection.JMXConnectorFactory;
 import uk.gov.justice.services.jmx.system.command.client.connection.JmxParameters;
 import uk.gov.justice.services.jmx.system.command.client.connection.MBeanConnector;
-import uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil;
 
 import javax.management.remote.JMXConnector;
 

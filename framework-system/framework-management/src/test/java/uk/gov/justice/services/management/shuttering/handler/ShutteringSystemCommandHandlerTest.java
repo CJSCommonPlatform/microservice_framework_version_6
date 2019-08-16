@@ -5,17 +5,17 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.management.shuttering.observers.shuttering.ContextShutteredState.SHUTTERED;
-import static uk.gov.justice.services.management.shuttering.observers.shuttering.ContextShutteredState.UNSHUTTERED;
-import static uk.gov.justice.services.management.shuttering.observers.shuttering.ContextShutteredState.SHUTTERING_IN_PROGRESS;
-import static uk.gov.justice.services.management.shuttering.observers.shuttering.ContextShutteredState.UNSHUTTERING_IN_PROGRESS;
+import static uk.gov.justice.services.jmx.api.state.ApplicationManagementState.SHUTTERED;
+import static uk.gov.justice.services.jmx.api.state.ApplicationManagementState.SHUTTERING_IN_PROGRESS;
+import static uk.gov.justice.services.jmx.api.state.ApplicationManagementState.UNSHUTTERED;
+import static uk.gov.justice.services.jmx.api.state.ApplicationManagementState.UNSHUTTERING_IN_PROGRESS;
 
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.jmx.api.command.ShutterSystemCommand;
 import uk.gov.justice.services.jmx.api.command.UnshutterSystemCommand;
+import uk.gov.justice.services.jmx.command.ApplicationManagementStateRegistry;
 import uk.gov.justice.services.management.shuttering.events.ShutteringRequestedEvent;
 import uk.gov.justice.services.management.shuttering.events.UnshutteringRequestedEvent;
-import uk.gov.justice.services.management.shuttering.observers.ShutteringStateRegistry;
 
 import java.time.ZonedDateTime;
 
@@ -43,7 +43,7 @@ public class ShutteringSystemCommandHandlerTest {
     private Event<UnshutteringRequestedEvent> unshutteringRequestedEventFirer;
 
     @Mock
-    private ShutteringStateRegistry shutteringStateRegistry;
+    private ApplicationManagementStateRegistry applicationManagementStateRegistry;
 
     @Mock
     private Logger logger;
@@ -63,7 +63,7 @@ public class ShutteringSystemCommandHandlerTest {
         final ZonedDateTime now = new UtcClock().now();
         final ShutterSystemCommand shutterSystemCommand = new ShutterSystemCommand();
 
-        when(shutteringStateRegistry.getShutteredState()).thenReturn(UNSHUTTERED);
+        when(applicationManagementStateRegistry.getApplicationManagementState()).thenReturn(UNSHUTTERED);
         when(clock.now()).thenReturn(now);
 
         shutteringSystemCommandHandler.onShutterRequested(shutterSystemCommand);
@@ -82,7 +82,7 @@ public class ShutteringSystemCommandHandlerTest {
         final ZonedDateTime now = new UtcClock().now();
         final UnshutterSystemCommand unshutterSystemCommand = new UnshutterSystemCommand();
 
-        when(shutteringStateRegistry.getShutteredState()).thenReturn(SHUTTERED);
+        when(applicationManagementStateRegistry.getApplicationManagementState()).thenReturn(SHUTTERED);
         when(clock.now()).thenReturn(now);
 
         shutteringSystemCommandHandler.onUnshutterRequested(unshutterSystemCommand);
@@ -98,7 +98,7 @@ public class ShutteringSystemCommandHandlerTest {
     @Test
     public void shouldIgnoreShutteringRequestIfTheShutteredStateIsContextShuttered() throws Exception {
 
-        when(shutteringStateRegistry.getShutteredState()).thenReturn(SHUTTERED);
+        when(applicationManagementStateRegistry.getApplicationManagementState()).thenReturn(SHUTTERED);
 
         shutteringSystemCommandHandler.onShutterRequested(new ShutterSystemCommand());
 
@@ -109,7 +109,7 @@ public class ShutteringSystemCommandHandlerTest {
     @Test
     public void shouldIgnoreShutteringRequestIfTheShutteredStateIsShutteringStarted() throws Exception {
 
-        when(shutteringStateRegistry.getShutteredState()).thenReturn(SHUTTERING_IN_PROGRESS);
+        when(applicationManagementStateRegistry.getApplicationManagementState()).thenReturn(SHUTTERING_IN_PROGRESS);
 
         shutteringSystemCommandHandler.onShutterRequested(new ShutterSystemCommand());
 
@@ -120,7 +120,7 @@ public class ShutteringSystemCommandHandlerTest {
     @Test
     public void shouldIgnoreShutteringRequestIfTheShutteredStateIsUnshutteringStarted() throws Exception {
 
-        when(shutteringStateRegistry.getShutteredState()).thenReturn(UNSHUTTERING_IN_PROGRESS);
+        when(applicationManagementStateRegistry.getApplicationManagementState()).thenReturn(UNSHUTTERING_IN_PROGRESS);
 
         shutteringSystemCommandHandler.onShutterRequested(new ShutterSystemCommand());
 
@@ -131,7 +131,7 @@ public class ShutteringSystemCommandHandlerTest {
     @Test
     public void shouldIgnoreUnshutteringRequestIfTheShutteredStateIsContextUnshuttered() throws Exception {
 
-        when(shutteringStateRegistry.getShutteredState()).thenReturn(UNSHUTTERED);
+        when(applicationManagementStateRegistry.getApplicationManagementState()).thenReturn(UNSHUTTERED);
 
         shutteringSystemCommandHandler.onUnshutterRequested(new UnshutterSystemCommand());
 
@@ -142,7 +142,7 @@ public class ShutteringSystemCommandHandlerTest {
     @Test
     public void shouldIgnoreUnshutteringRequestIfTheShutteredStateIsShutteringStarted() throws Exception {
 
-        when(shutteringStateRegistry.getShutteredState()).thenReturn(SHUTTERING_IN_PROGRESS);
+        when(applicationManagementStateRegistry.getApplicationManagementState()).thenReturn(SHUTTERING_IN_PROGRESS);
 
         shutteringSystemCommandHandler.onUnshutterRequested(new UnshutterSystemCommand());
 
@@ -153,7 +153,7 @@ public class ShutteringSystemCommandHandlerTest {
     @Test
     public void shouldIgnoreUnshutteringRequestIfTheShutteredStateIsUnshutteringStarted() throws Exception {
 
-        when(shutteringStateRegistry.getShutteredState()).thenReturn(UNSHUTTERING_IN_PROGRESS);
+        when(applicationManagementStateRegistry.getApplicationManagementState()).thenReturn(UNSHUTTERING_IN_PROGRESS);
 
         shutteringSystemCommandHandler.onUnshutterRequested(new UnshutterSystemCommand());
 

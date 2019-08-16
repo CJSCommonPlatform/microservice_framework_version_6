@@ -10,9 +10,11 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.jmx.api.state.ApplicationManagementState.SHUTTERED;
 
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
-import uk.gov.justice.services.jmx.command.SystemCommandException;
+import uk.gov.justice.services.jmx.api.state.ApplicationManagementState;
+import uk.gov.justice.services.jmx.command.ApplicationManagementStateRegistry;
 import uk.gov.justice.services.jmx.command.SystemCommandHandlerProxy;
 import uk.gov.justice.services.jmx.command.SystemCommandInvocationException;
 import uk.gov.justice.services.jmx.command.SystemCommandScanner;
@@ -41,6 +43,9 @@ public class SystemCommanderTest {
 
     @Mock
     private SystemCommandScanner systemCommandScanner;
+
+    @Mock
+    private ApplicationManagementStateRegistry applicationManagementStateRegistry;
 
     @InjectMocks
     private SystemCommander systemCommander;
@@ -105,5 +110,15 @@ public class SystemCommanderTest {
         assertThat(systemCommands, hasItem(systemCommand_1));
         assertThat(systemCommands, hasItem(systemCommand_2));
         assertThat(systemCommands, hasItem(systemCommand_3));
+    }
+
+    @Test
+    public void shouldGetTheApplicationState() throws Exception {
+
+        final ApplicationManagementState applicationManagementState = SHUTTERED;
+
+        when(applicationManagementStateRegistry.getApplicationManagementState()).thenReturn(applicationManagementState);
+
+        assertThat(systemCommander.getApplicationState(), is(applicationManagementState));
     }
 }

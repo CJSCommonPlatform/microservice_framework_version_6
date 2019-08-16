@@ -1,10 +1,11 @@
 package uk.gov.justice.services.management.shuttering.observers;
 
-import static uk.gov.justice.services.management.shuttering.observers.shuttering.ContextShutteredState.SHUTTERED;
-import static uk.gov.justice.services.management.shuttering.observers.shuttering.ContextShutteredState.SHUTTERING_IN_PROGRESS;
-import static uk.gov.justice.services.management.shuttering.observers.shuttering.ContextShutteredState.UNSHUTTERED;
-import static uk.gov.justice.services.management.shuttering.observers.shuttering.ContextShutteredState.UNSHUTTERING_IN_PROGRESS;
+import static uk.gov.justice.services.jmx.api.state.ApplicationManagementState.SHUTTERED;
+import static uk.gov.justice.services.jmx.api.state.ApplicationManagementState.SHUTTERING_IN_PROGRESS;
+import static uk.gov.justice.services.jmx.api.state.ApplicationManagementState.UNSHUTTERED;
+import static uk.gov.justice.services.jmx.api.state.ApplicationManagementState.UNSHUTTERING_IN_PROGRESS;
 
+import uk.gov.justice.services.jmx.command.ApplicationManagementStateRegistry;
 import uk.gov.justice.services.management.shuttering.events.ShutteringCompleteEvent;
 import uk.gov.justice.services.management.shuttering.events.ShutteringRequestedEvent;
 import uk.gov.justice.services.management.shuttering.events.UnshutteringCompleteEvent;
@@ -16,21 +17,21 @@ import javax.inject.Inject;
 public class ApplicationShutteredStateObserver {
 
     @Inject
-    private ShutteringStateRegistry shutteringStateRegistry;
+    private ApplicationManagementStateRegistry applicationManagementStateRegistry;
 
     public void onShutteringRequested(@SuppressWarnings("unused") @Observes final ShutteringRequestedEvent shutteringRequestedEvent) {
-        shutteringStateRegistry.setShutteredState(SHUTTERING_IN_PROGRESS);
+        applicationManagementStateRegistry.setApplicationManagementState(SHUTTERING_IN_PROGRESS);
     }
 
     public void onShutteringComplete(@SuppressWarnings("unused") @Observes final ShutteringCompleteEvent shutteringCompleteEvent) {
-        shutteringStateRegistry.setShutteredState(SHUTTERED);
+        applicationManagementStateRegistry.setApplicationManagementState(SHUTTERED);
     }
 
     public void onUnshutteringRequested(@SuppressWarnings("unused") @Observes final UnshutteringRequestedEvent unshutteringRequestedEvent) {
-        shutteringStateRegistry.setShutteredState(UNSHUTTERING_IN_PROGRESS);
+        applicationManagementStateRegistry.setApplicationManagementState(UNSHUTTERING_IN_PROGRESS);
     }
 
     public void onUnshutteringComplete(@SuppressWarnings("unused") @Observes final UnshutteringCompleteEvent unshutteringCompleteEvent) {
-        shutteringStateRegistry.setShutteredState(UNSHUTTERED);
+        applicationManagementStateRegistry.setApplicationManagementState(UNSHUTTERED);
     }
 }

@@ -11,12 +11,10 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
-import uk.gov.justice.services.jmx.api.command.SystemCommand;
 import uk.gov.justice.services.jmx.api.mbean.SystemCommander;
 import uk.gov.justice.services.jmx.api.name.CommandMBeanNameProvider;
 import uk.gov.justice.services.jmx.api.name.ObjectNameException;
 
-import javax.inject.Inject;
 import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;

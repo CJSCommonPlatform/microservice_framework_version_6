@@ -3,7 +3,12 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
+
 ## [Unreleased]
+
+## [6.0.5] - 2019-08-19
+### Changed
+- Shuttering state is now set directly rather than relying on Events as they may arrive out of order
 
 ## [6.0.4] - 2019-08-16
 ### Added

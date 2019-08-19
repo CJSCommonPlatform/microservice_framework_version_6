@@ -2,11 +2,13 @@ package uk.gov.justice.services.management.shuttering.observers.unshuttering;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.justice.services.jmx.api.state.ApplicationManagementState.UNSHUTTERED;
 import static uk.gov.justice.services.management.shuttering.observers.unshuttering.UnshutteringRegistry.UnshutteringState.UNSHUTTERING_COMPLETE;
 import static uk.gov.justice.services.management.shuttering.observers.unshuttering.UnshutteringRegistry.UnshutteringState.UNSHUTTERING_REQUESTED;
 
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
+import uk.gov.justice.services.jmx.command.ApplicationManagementStateRegistry;
 import uk.gov.justice.services.management.shuttering.events.UnshutteringCompleteEvent;
 
 import java.util.ArrayList;
@@ -31,6 +33,9 @@ public class UnshutteringRegistry {
 
     @Inject
     private Event<UnshutteringCompleteEvent> unshutteringCompleteEventFirer;
+
+    @Inject
+    private ApplicationManagementStateRegistry applicationManagementStateRegistry;
 
     @Inject
     private UtcClock clock;
@@ -59,12 +64,9 @@ public class UnshutteringRegistry {
         if (allUnshutteringComplete()) {
             logger.info("All unshuttering complete: " + allUnshutteringExecutors.stream().map(Class::getSimpleName).collect(toList()));
             unshutteringStateMap.clear();
+            applicationManagementStateRegistry.setApplicationManagementState(UNSHUTTERED);
             unshutteringCompleteEventFirer.fire(new UnshutteringCompleteEvent(target, clock.now()));
         }
-    }
-
-    public void clear() {
-        unshutteringStateMap.clear();
     }
 
     private boolean allUnshutteringComplete() {

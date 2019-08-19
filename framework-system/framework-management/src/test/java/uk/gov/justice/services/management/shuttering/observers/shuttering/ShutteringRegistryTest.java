@@ -5,12 +5,16 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.jmx.api.state.ApplicationManagementState.SHUTTERED;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.getValueOfField;
 
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
+import uk.gov.justice.services.jmx.command.ApplicationManagementStateRegistry;
 import uk.gov.justice.services.management.shuttering.events.ShutteringCompleteEvent;
 
 import java.time.ZonedDateTime;
+import java.util.Map;
 
 import javax.enterprise.event.Event;
 
@@ -26,6 +30,9 @@ public class ShutteringRegistryTest {
 
     @Mock
     private Event<ShutteringCompleteEvent> shutteringCompleteEventFirer;
+
+    @Mock
+    private ApplicationManagementStateRegistry applicationManagementStateRegistry;
 
     @Mock
     private UtcClock clock;
@@ -44,7 +51,7 @@ public class ShutteringRegistryTest {
 
         when(clock.now()).thenReturn(now);
 
-        shutteringRegistry.clear();
+        clearShutteringRegistry();
 
         shutteringRegistry.registerAsShutterable(Shutterable_1.class);
         verify(logger).info("Registering Shutterable_1 as shutterable");
@@ -65,6 +72,7 @@ public class ShutteringRegistryTest {
         verify(logger).info("Marking shuttering complete for Shutterable_3");
 
         verify(logger).info("All shuttering complete: [Shutterable_1, Shutterable_2, Shutterable_3]");
+        verify(applicationManagementStateRegistry).setApplicationManagementState(SHUTTERED);
         verify(shutteringCompleteEventFirer, times(1)).fire(new ShutteringCompleteEvent(systemCommand, now));
     }
 
@@ -73,7 +81,7 @@ public class ShutteringRegistryTest {
 
         final SystemCommand systemCommand = mock(SystemCommand.class);
 
-        shutteringRegistry.clear();
+        clearShutteringRegistry();
 
         shutteringRegistry.registerAsShutterable(Shutterable_1.class);
         shutteringRegistry.registerAsShutterable(Shutterable_2.class);
@@ -85,6 +93,10 @@ public class ShutteringRegistryTest {
         shutteringRegistry.markShutteringCompleteFor(Shutterable_3.class, systemCommand);
 
         verifyZeroInteractions(shutteringCompleteEventFirer);
+    }
+
+    private void clearShutteringRegistry() throws Exception {
+        getValueOfField(shutteringRegistry, "shutteringStateMap", Map.class).clear();
     }
 }
 

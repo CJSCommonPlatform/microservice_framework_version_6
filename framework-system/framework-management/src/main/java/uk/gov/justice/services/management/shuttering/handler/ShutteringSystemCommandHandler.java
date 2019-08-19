@@ -4,7 +4,9 @@ import static java.lang.String.format;
 import static uk.gov.justice.services.jmx.api.command.ShutterSystemCommand.SHUTTER;
 import static uk.gov.justice.services.jmx.api.command.UnshutterSystemCommand.UNSHUTTER;
 import static uk.gov.justice.services.jmx.api.state.ApplicationManagementState.SHUTTERED;
+import static uk.gov.justice.services.jmx.api.state.ApplicationManagementState.SHUTTERING_IN_PROGRESS;
 import static uk.gov.justice.services.jmx.api.state.ApplicationManagementState.UNSHUTTERED;
+import static uk.gov.justice.services.jmx.api.state.ApplicationManagementState.UNSHUTTERING_IN_PROGRESS;
 
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.jmx.api.command.ShutterSystemCommand;
@@ -41,6 +43,7 @@ public class ShutteringSystemCommandHandler {
     public void onShutterRequested(final ShutterSystemCommand shutterSystemCommand) {
         final ApplicationManagementState shutteredState = applicationManagementStateRegistry.getApplicationManagementState();
         if(shutteredState == UNSHUTTERED) {
+            applicationManagementStateRegistry.setApplicationManagementState(SHUTTERING_IN_PROGRESS);
             shutteringRequestedEventFirer.fire(new ShutteringRequestedEvent(shutterSystemCommand, clock.now()));
         } else {
             logger.info(format("Ignoring command '%s'. Context shuttered state is '%s'", shutterSystemCommand, shutteredState));
@@ -51,6 +54,7 @@ public class ShutteringSystemCommandHandler {
     public void onUnshutterRequested(final UnshutterSystemCommand unshutterSystemCommand) {
         final ApplicationManagementState shutteredState = applicationManagementStateRegistry.getApplicationManagementState();
         if(shutteredState == SHUTTERED) {
+            applicationManagementStateRegistry.setApplicationManagementState(UNSHUTTERING_IN_PROGRESS);
             unshutteringRequestedEventFirer.fire(new UnshutteringRequestedEvent(unshutterSystemCommand, clock.now()));
         } else {
             logger.info(format("Ignoring command '%s'. Context shuttered state is '%s'", unshutterSystemCommand, shutteredState));

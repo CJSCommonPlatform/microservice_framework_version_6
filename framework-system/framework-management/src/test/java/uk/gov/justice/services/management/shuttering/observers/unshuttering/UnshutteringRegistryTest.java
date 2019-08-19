@@ -5,12 +5,16 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.jmx.api.state.ApplicationManagementState.UNSHUTTERED;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.getValueOfField;
 
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
+import uk.gov.justice.services.jmx.command.ApplicationManagementStateRegistry;
 import uk.gov.justice.services.management.shuttering.events.UnshutteringCompleteEvent;
 
 import java.time.ZonedDateTime;
+import java.util.Map;
 
 import javax.enterprise.event.Event;
 
@@ -26,6 +30,9 @@ public class UnshutteringRegistryTest {
 
     @Mock
     private Event<UnshutteringCompleteEvent> unshutteringCompleteEventFirer;
+
+    @Mock
+    private ApplicationManagementStateRegistry applicationManagementStateRegistry;
 
     @Mock
     private UtcClock clock;
@@ -46,7 +53,7 @@ public class UnshutteringRegistryTest {
         when(clock.now()).thenReturn(now);
         when(systemCommand.getName()).thenReturn(commandName);
 
-        unshutteringRegistry.clear();
+        clearShutteringRegistry();
 
         unshutteringRegistry.registerAsUnshutterable(Unshutterable_1.class);
         verify(logger).info("Registering Unshutterable_1 as unshuttering executor");
@@ -69,6 +76,7 @@ public class UnshutteringRegistryTest {
         verify(logger).info("Marking unshuttering complete for Unshutterable_3");
 
         verify(logger).info("All unshuttering complete: [Unshutterable_1, Unshutterable_2, Unshutterable_3]");
+        verify(applicationManagementStateRegistry).setApplicationManagementState(UNSHUTTERED);
         verify(unshutteringCompleteEventFirer, times(1)).fire(new UnshutteringCompleteEvent(systemCommand, now));
     }
 
@@ -77,7 +85,7 @@ public class UnshutteringRegistryTest {
 
         final SystemCommand systemCommand = mock(SystemCommand.class);
 
-        unshutteringRegistry.clear();
+        clearShutteringRegistry();
 
         unshutteringRegistry.registerAsUnshutterable(Unshutterable_1.class);
         unshutteringRegistry.registerAsUnshutterable(Unshutterable_2.class);
@@ -89,6 +97,10 @@ public class UnshutteringRegistryTest {
         unshutteringRegistry.markUnshutteringCompleteFor(Unshutterable_3.class, systemCommand);
 
         verifyZeroInteractions(unshutteringCompleteEventFirer);
+    }
+
+    private void clearShutteringRegistry() throws Exception {
+        getValueOfField(unshutteringRegistry, "unshutteringStateMap", Map.class).clear();
     }
 }
 

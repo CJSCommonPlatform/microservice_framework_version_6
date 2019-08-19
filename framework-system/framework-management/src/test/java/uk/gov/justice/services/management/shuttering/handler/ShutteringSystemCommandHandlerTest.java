@@ -68,6 +68,7 @@ public class ShutteringSystemCommandHandlerTest {
 
         shutteringSystemCommandHandler.onShutterRequested(shutterSystemCommand);
 
+        verify(applicationManagementStateRegistry).setApplicationManagementState(SHUTTERING_IN_PROGRESS);
         verify(shutteringRequestedEventFirer).fire(shutteringEventCaptor.capture());
 
         final ShutteringRequestedEvent shutteringRequestedEvent = shutteringEventCaptor.getValue();
@@ -87,6 +88,7 @@ public class ShutteringSystemCommandHandlerTest {
 
         shutteringSystemCommandHandler.onUnshutterRequested(unshutterSystemCommand);
 
+        verify(applicationManagementStateRegistry).setApplicationManagementState(UNSHUTTERING_IN_PROGRESS);
         verify(unshutteringRequestedEventFirer).fire(unshutteringEventCaptor.capture());
 
         final UnshutteringRequestedEvent unshutteringRequestedEvent = unshutteringEventCaptor.getValue();

@@ -3,11 +3,13 @@ package uk.gov.justice.services.management.shuttering.observers.shuttering;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.justice.services.jmx.api.state.ApplicationManagementState.SHUTTERED;
 import static uk.gov.justice.services.management.shuttering.observers.shuttering.ShutteringRegistry.ShutteringState.SHUTTERING_COMPLETE;
 import static uk.gov.justice.services.management.shuttering.observers.shuttering.ShutteringRegistry.ShutteringState.SHUTTERING_REQUESTED;
 
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
+import uk.gov.justice.services.jmx.command.ApplicationManagementStateRegistry;
 import uk.gov.justice.services.management.shuttering.events.ShutteringCompleteEvent;
 
 import java.util.ArrayList;
@@ -32,6 +34,9 @@ public class ShutteringRegistry {
 
     @Inject
     private Event<ShutteringCompleteEvent> shutteringCompleteEventFirer;
+
+    @Inject
+    private ApplicationManagementStateRegistry applicationManagementStateRegistry;
 
     @Inject
     private UtcClock clock;
@@ -61,15 +66,11 @@ public class ShutteringRegistry {
         if (allShutteringComplete()) {
 
             logger.info("All shuttering complete: " + allShutterables.stream().map(Class::getSimpleName).collect(toList()));
+            applicationManagementStateRegistry.setApplicationManagementState(SHUTTERED);
             shutteringStateMap.clear();
             shutteringCompleteEventFirer.fire(new ShutteringCompleteEvent(target, clock.now()));
         } 
     }
-
-    public void clear() {
-        shutteringStateMap.clear();
-    }
-
 
     private boolean allShutteringComplete() {
         final Set<Class<?>> shutterables = shutteringStateMap.keySet();

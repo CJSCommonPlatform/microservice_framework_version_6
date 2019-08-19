@@ -6,6 +6,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.0.6] - 2019-08-19
+### Removed
+- ApplicationShutteredStateObserver so that state is not changed by observed events
+
 ## [6.0.5] - 2019-08-19
 ### Changed
 - Shuttering state is now set directly rather than relying on Events as they may arrive out of order

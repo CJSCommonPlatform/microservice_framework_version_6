@@ -1,11 +1,11 @@
 package uk.gov.justice.services.jmx.api.command;
 
-public class UnshutterSystemCommand extends BaseSystemCommand {
+public class UnshutterCommand extends BaseSystemCommand {
 
     public static final String UNSHUTTER = "UNSHUTTER";
     private static final String DESCRIPTION = "Unshutters the application.";
 
-    public UnshutterSystemCommand() {
+    public UnshutterCommand() {
         super(UNSHUTTER, DESCRIPTION);
     }
 }

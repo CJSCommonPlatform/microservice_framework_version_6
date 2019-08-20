@@ -6,6 +6,16 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+### Changed
+- Name SystemCommand classes have consistent name. i.e. from ShutterSystemCommand to ShutterCommand
+- The the context name in JmxParameters is now parsed so that everything after the first dash is excluded
+i.e. a war with name 'customer-service' would now become just 'customer'
+### Added
+- New Utility test class for calling SystemCommands
+### Fixed
+- All server side Exceptions thrown by the JMX bean are now included in the api classes to fix 
+ClassNotFoundExceptions in the JMX client
+
 ## [6.0.6] - 2019-08-19
 ### Removed
 - ApplicationShutteredStateObserver so that state is not changed by observed events

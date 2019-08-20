@@ -38,7 +38,6 @@ public class HandlerMethodValidator {
             throw new InvalidHandlerMethodException(format("Invalid handler method '%s' on class '%s'. Method should have one parameter of type '%s'.",
                     handlerMethod.getName(),
                     instance.getClass().getName(),
-                    SystemCommand.class.getName(),
                     SystemCommand.class.getName()));
         }
     }

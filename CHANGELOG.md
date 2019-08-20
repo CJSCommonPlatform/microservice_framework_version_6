@@ -6,6 +6,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.0.7] - 2019-08-20
 ### Added
 - New Utility test class for calling SystemCommands
 ### Changed

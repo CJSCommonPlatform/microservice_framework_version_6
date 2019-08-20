@@ -1,4 +1,4 @@
-package uk.gov.justice.services.jmx.api.mbean;
+package uk.gov.justice.services.jmx.api;
 
 public class SystemCommandException extends RuntimeException {
 

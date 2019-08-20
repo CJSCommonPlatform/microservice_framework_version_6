@@ -12,11 +12,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.jmx.api.state.ApplicationManagementState.SHUTTERED;
 
+import uk.gov.justice.services.jmx.api.SystemCommandException;
+import uk.gov.justice.services.jmx.api.SystemCommandInvocationException;
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
 import uk.gov.justice.services.jmx.api.state.ApplicationManagementState;
 import uk.gov.justice.services.jmx.command.ApplicationManagementStateRegistry;
 import uk.gov.justice.services.jmx.command.SystemCommandHandlerProxy;
-import uk.gov.justice.services.jmx.command.SystemCommandInvocationException;
 import uk.gov.justice.services.jmx.command.SystemCommandScanner;
 import uk.gov.justice.services.jmx.command.SystemCommandStore;
 import uk.gov.justice.services.jmx.command.TestCommand;

@@ -2,6 +2,7 @@ package uk.gov.justice.services.jmx.command;
 
 import static java.lang.String.format;
 
+import uk.gov.justice.services.jmx.api.SystemCommandInvocationException;
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
 
 import java.lang.reflect.InvocationTargetException;

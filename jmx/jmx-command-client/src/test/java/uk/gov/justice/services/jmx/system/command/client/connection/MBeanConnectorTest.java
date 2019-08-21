@@ -5,10 +5,13 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
 import uk.gov.justice.services.jmx.api.mbean.SystemCommanderMBean;
 import uk.gov.justice.services.jmx.api.name.CommandMBeanNameProvider;
+import uk.gov.justice.services.jmx.api.name.ObjectNameFactory;
 import uk.gov.justice.services.jmx.system.command.client.MBeanClientException;
+import uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil;
 
 import java.io.IOException;
 
@@ -47,6 +50,7 @@ public class MBeanConnectorTest {
 
         when(commandMBeanNameProvider.create(contextName)).thenReturn(objectName);
         when(jmxConnector.getMBeanServerConnection()).thenReturn(connection);
+        when(connection.isRegistered(objectName)).thenReturn(true);
         when(remoteMBeanFactory.createRemote(connection, objectName, mBeanInterface)).thenReturn(systemCommanderMBean);
 
         assertThat(mBeanConnector.connect(contextName, mBeanInterface, jmxConnector), is(systemCommanderMBean));
@@ -73,5 +77,35 @@ public class MBeanConnectorTest {
             assertThat(expected.getCause(), is(ioException));
             assertThat(expected.getMessage(), is("Failed to get remote connection to MBean 'SystemCommanderMBean'"));
         }
+    }
+
+    @Test
+    public void shouldThrowExceptionIfMBeanNameNotCorrect() throws Exception {
+
+        final String contextName = "people";
+        final ObjectName realObjectName = createARealObjectName(contextName);
+
+        final Class<SystemCommanderMBean> mBeanInterface = SystemCommanderMBean.class;
+        final JMXConnector jmxConnector =  mock(JMXConnector.class);
+        final MBeanServerConnection connection = mock(MBeanServerConnection.class);
+
+        when(commandMBeanNameProvider.create(contextName)).thenReturn(realObjectName);
+        when(jmxConnector.getMBeanServerConnection()).thenReturn(connection);
+        when(connection.isRegistered(realObjectName)).thenReturn(false);
+
+
+        try {
+            mBeanConnector.connect(contextName, mBeanInterface, jmxConnector);
+            fail();
+        } catch (final MBeanClientException expected) {
+            assertThat(expected.getMessage(), is("No JMX bean found with name 'people-system-command-handler-mbean'. Is your context name of 'people' correct?"));
+        }
+    }
+
+    private ObjectName createARealObjectName(final String contextName) {
+        final CommandMBeanNameProvider commandMBeanNameProvider = new CommandMBeanNameProvider();
+        setField(commandMBeanNameProvider, "objectNameFactory", new ObjectNameFactory());
+
+        return commandMBeanNameProvider.create(contextName);
     }
 }

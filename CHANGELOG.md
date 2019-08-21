@@ -5,6 +5,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 
 ## [Unreleased]
+## [6.0.8] - 2019-08-21
+### Fixed
+- Better error message if the name of the JMX bean is incorrect when called by the client
 
 ## [6.0.7] - 2019-08-20
 ### Added

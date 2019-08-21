@@ -25,7 +25,12 @@ public class MBeanConnector {
             final ObjectName objectName = commandMBeanNameProvider.create(contextName);
             final MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
 
-            return remoteMBeanFactory.createRemote(connection, objectName, mBeanInterface);
+            if(connection.isRegistered(objectName)) {
+                return remoteMBeanFactory.createRemote(connection, objectName, mBeanInterface);
+            }
+
+            throw new MBeanClientException(format("No JMX bean found with name '%s'. Is your context name of '%s' correct?", objectName.getKeyProperty("type"), contextName));
+
         } catch (final IOException e) {
             throw new MBeanClientException(format("Failed to get remote connection to MBean '%s'", mBeanInterface.getSimpleName()), e);
         }

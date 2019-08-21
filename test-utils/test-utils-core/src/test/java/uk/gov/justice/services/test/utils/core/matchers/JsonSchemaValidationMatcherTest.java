@@ -1,6 +1,8 @@
 package uk.gov.justice.services.test.utils.core.matchers;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.fail;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonSchemaValidationMatcher.failsValidationForAnyMissingField;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonSchemaValidationMatcher.failsValidationWithMessage;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonSchemaValidationMatcher.isNotValidForSchema;
@@ -81,14 +83,19 @@ public class JsonSchemaValidationMatcherTest {
         assertThat(jsonEnvelope, JsonSchemaValidationMatcher.isValidJsonEnvelopeForSchema());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void shouldFailToValidateJsonEnvelopeIfSchemaDoesNotExist() throws Exception {
         final JsonEnvelope jsonEnvelope = envelope()
                 .with(metadataWithRandomUUID("no.match.action"))
                 .withPayloadOf("id", "someId")
                 .build();
 
-        assertThat(jsonEnvelope, JsonSchemaValidationMatcher.isValidJsonEnvelopeForSchema());
+        try {
+            assertThat(jsonEnvelope, JsonSchemaValidationMatcher.isValidJsonEnvelopeForSchema());
+            fail();
+        } catch (final IllegalArgumentException e) {
+            assertThat(e.getMessage(), is("Failed to find schema at any of the following locations : json/schema/no.match.action.json, raml/json/schema/no.match.action.json, yaml/json/schema/no.match.action.json"));
+        }
     }
 
     @Test
@@ -96,6 +103,16 @@ public class JsonSchemaValidationMatcherTest {
         final JsonEnvelope jsonEnvelope = envelope()
                 .with(metadataWithRandomUUID("fallback.action"))
                 .withPayloadOf("id", "fallback")
+                .build();
+
+        assertThat(jsonEnvelope, JsonSchemaValidationMatcher.isValidJsonEnvelopeForSchema());
+    }
+
+    @Test
+    public void shouldFallbackToYamlPathIfNotFoundInJsonPathOrRamlPath() throws Exception {
+        final JsonEnvelope jsonEnvelope = envelope()
+                .with(metadataWithRandomUUID("yaml.fallback.action"))
+                .withPayloadOf("id", "yamlfallback")
                 .build();
 
         assertThat(jsonEnvelope, JsonSchemaValidationMatcher.isValidJsonEnvelopeForSchema());

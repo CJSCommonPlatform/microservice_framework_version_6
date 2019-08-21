@@ -5,6 +5,11 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 
 ## [Unreleased]
+
+## [6.0.9] - 2018-08-21
+### Fixed
+- JsonSchemaValidationMatcher now supports yaml/json/schema location
+
 ## [6.0.8] - 2019-08-21
 ### Fixed
 - Better error message if the name of the JMX bean is incorrect when called by the client

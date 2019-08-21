@@ -1,5 +1,7 @@
 package uk.gov.justice.services.test.utils.core.matchers;
 
+import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static uk.gov.justice.schema.catalog.test.utils.SchemaCatalogResolver.schemaCatalogResolver;
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -9,7 +11,9 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
@@ -32,10 +36,12 @@ public class JsonSchemaValidationMatcher {
     private static final Random random = new Random();
     private static final String JSON_SCHEMA_TEMPLATE = "json/schema/%s.json";
     private static final String RAML_JSON_SCHEMA_TEMPLATE = "raml/json/schema/%s.json";
+    private static final String YAML_JSON_SCHEMA_TEMPLATE = "yaml/json/schema/%s.json";
     private static final String VALIDATION_ERROR = " to fail validation against schema ";
     private static final String VALIDTAE_SCHEMA = " to validate against schema ";
     private static final String JSON_FILE = "json file ";
     private static final String VALIDATION_SUCCESS = "validation passed";
+    private static final List<String> LOCATION_TEMPLATES = asList(JSON_SCHEMA_TEMPLATE, RAML_JSON_SCHEMA_TEMPLATE, YAML_JSON_SCHEMA_TEMPLATE);
 
 
     public static Matcher<String> isValidForSchema(final String pathToJsonSchema) {
@@ -78,19 +84,32 @@ public class JsonSchemaValidationMatcher {
             @Override
             protected boolean matchesSafely(final JsonEnvelope jsonEnvelope, final Description description) {
                 if (null == this.validationException) {
-                    try {
-                        String e = String.format(JSON_SCHEMA_TEMPLATE, jsonEnvelope.metadata().name());
-                        getJsonSchemaFor(e).validate(new JSONObject(jsonEnvelope.payloadAsJsonObject().toString()));
-                    } catch (IOException | IllegalArgumentException var6) {
+
+                    final String name = jsonEnvelope.metadata().name();
+                    final String payload = jsonEnvelope.payloadAsJsonObject().toString();
+
+                    for (int index = 0; index < LOCATION_TEMPLATES.size(); index++) {
                         try {
-                            String ioe = String.format(RAML_JSON_SCHEMA_TEMPLATE, jsonEnvelope.metadata().name());
-                            getJsonSchemaFor(ioe).validate(new JSONObject(jsonEnvelope.payloadAsJsonObject().toString()));
-                        } catch (IOException var5) {
-                            throw new IllegalArgumentException(var5);
+
+                            if (validateSchemaAt(format(LOCATION_TEMPLATES.get(index), name), payload)) {
+                                return true;
+                            } else {
+                                final boolean isLastTemplate = index == LOCATION_TEMPLATES.size() - 1;
+
+                                if (isLastTemplate) {
+
+                                    final String locations = LOCATION_TEMPLATES.stream()
+                                            .map(locationTemplate -> format(locationTemplate, name))
+                                            .collect(Collectors.joining(", "));
+
+                                    throw new IllegalArgumentException("Failed to find schema at any of the following locations : " + locations);
+                                }
+                            }
+
+                        } catch (final ValidationException validationException) {
+                            this.validationException = validationException;
+                            return false;
                         }
-                    } catch (ValidationException var7) {
-                        this.validationException = var7;
-                        return false;
                     }
 
                     return true;
@@ -186,6 +205,18 @@ public class JsonSchemaValidationMatcher {
                 mismatchDescription.appendText(VALIDATION_SUCCESS);
             }
         };
+    }
+
+    private static boolean validateSchemaAt(final String location, final String payload) {
+
+        try {
+            getJsonSchemaFor(location).validate(new JSONObject(payload));
+        } catch (final IOException | IllegalArgumentException e) {
+            return false;
+        }
+
+        //Validation completed
+        return true;
     }
 
     private static JSONObject getJsonObjectFor(final String pathToJsonFile) throws IOException {

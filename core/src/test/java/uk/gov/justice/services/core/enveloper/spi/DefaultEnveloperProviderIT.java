@@ -43,6 +43,7 @@ import uk.gov.justice.services.core.json.FileBasedJsonSchemaValidator;
 import uk.gov.justice.services.core.json.JsonSchemaLoader;
 import uk.gov.justice.services.core.json.PayloadExtractor;
 import uk.gov.justice.services.core.json.SchemaCatalogAwareJsonSchemaValidator;
+import uk.gov.justice.services.core.json.SchemaValidationErrorMessageGenerator;
 import uk.gov.justice.services.core.mapping.ActionNameToMediaTypesMappingObserver;
 import uk.gov.justice.services.core.mapping.DefaultMediaTypesMappingCache;
 import uk.gov.justice.services.core.mapping.DefaultNameToMediaTypeConverter;
@@ -73,7 +74,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(ApplicationComposer.class)
-public class DefaultEnveloperProviderTest {
+public class DefaultEnveloperProviderIT {
 
     private static final String TEST_EVENT_NAME = "test.event.something-happened";
 
@@ -143,7 +144,9 @@ public class DefaultEnveloperProviderTest {
             MediaTypesMappingCacheInitialiser.class,
             SchemaIdMappingCacheInitialiser.class,
             DefaultEnveloper.class,
-            ObjectMapperProducer.class
+            ObjectMapperProducer.class,
+
+            SchemaValidationErrorMessageGenerator.class
     })
     public WebApp war() {
         return new WebApp()
@@ -173,7 +176,7 @@ public class DefaultEnveloperProviderTest {
                 new UtcClock(),
                 new ObjectToJsonValueConverter(new ObjectMapperProducer().objectMapper()));
 
-        enveloper.register(new EventFoundEvent(DefaultEnveloperProviderTest.TestEvent.class, TEST_EVENT_NAME));
+        enveloper.register(new EventFoundEvent(DefaultEnveloperProviderIT.TestEvent.class, TEST_EVENT_NAME));
 
         final Metadata metadata = createMetadata();
         final TestPojo payload = new TestPojo(TEST_EVENT_NAME);

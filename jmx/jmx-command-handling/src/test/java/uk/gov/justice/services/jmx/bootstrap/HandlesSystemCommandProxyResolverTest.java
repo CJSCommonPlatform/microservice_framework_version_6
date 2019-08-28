@@ -1,5 +1,6 @@
 package uk.gov.justice.services.jmx.bootstrap;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -8,12 +9,14 @@ import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.framework.utilities.cdi.CdiInstanceResolver;
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
+import uk.gov.justice.services.jmx.bootstrap.blacklist.BlacklistedCommandsFilter;
 import uk.gov.justice.services.jmx.command.HandlerMethodValidator;
 import uk.gov.justice.services.jmx.command.HandlesSystemCommand;
 import uk.gov.justice.services.jmx.command.SystemCommandHandlerProxy;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Set;
 
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
@@ -37,6 +40,9 @@ public class HandlesSystemCommandProxyResolverTest {
     @Mock
     private HandlerMethodValidator handlerMethodValidator;
 
+    @Mock
+    private BlacklistedCommandsFilter blacklistedCommandsFilter;
+
     @InjectMocks
     private SystemCommandProxyResolver systemCommandProxyResolver;
 
@@ -58,9 +64,12 @@ public class HandlesSystemCommandProxyResolverTest {
         final SystemCommandHandlerProxy systemCommandHandlerProxy_2 = mock(SystemCommandHandlerProxy.class);
         final SystemCommandHandlerProxy systemCommandHandlerProxy_3 = mock(SystemCommandHandlerProxy.class);
 
+        final Set<SystemCommand> blacklistedCommands = newHashSet(mock(SystemCommand.class));
+
         when(bean.getBeanClass()).thenReturn(beanClass);
         when(cdiInstanceResolver.getInstanceOf(beanClass, beanManager)).thenReturn(systemCommandHandler);
 
+        when(blacklistedCommandsFilter.isSystemCommandAllowed(HandlesSystemSystemCommand_1.SYSTEM_COMMAND_NAME_1, blacklistedCommands)).thenReturn(true);
         when(systemCommandHandlerProxyFactory.create(
                 HandlesSystemSystemCommand_1.SYSTEM_COMMAND_NAME_1,
                 handlerMethod_1,
@@ -68,6 +77,7 @@ public class HandlesSystemCommandProxyResolverTest {
                 handlerMethodValidator
         )).thenReturn(systemCommandHandlerProxy_1);
 
+        when(blacklistedCommandsFilter.isSystemCommandAllowed(HandlesSystemSystemCommand_2.SYSTEM_COMMAND_NAME_2, blacklistedCommands)).thenReturn(true);
         when(systemCommandHandlerProxyFactory.create(
                 HandlesSystemSystemCommand_2.SYSTEM_COMMAND_NAME_2,
                 handlerMethod_2,
@@ -75,6 +85,7 @@ public class HandlesSystemCommandProxyResolverTest {
                 handlerMethodValidator
         )).thenReturn(systemCommandHandlerProxy_2);
 
+        when(blacklistedCommandsFilter.isSystemCommandAllowed(HandlesSystemSystemCommand_3.SYSTEM_COMMAND_NAME_3, blacklistedCommands)).thenReturn(true);
         when(systemCommandHandlerProxyFactory.create(
                 HandlesSystemSystemCommand_3.SYSTEM_COMMAND_NAME_3,
                 handlerMethod_3,
@@ -82,12 +93,61 @@ public class HandlesSystemCommandProxyResolverTest {
                 handlerMethodValidator
         )).thenReturn(systemCommandHandlerProxy_3);
 
-        final List<SystemCommandHandlerProxy> systemCommandHandlerProxies = systemCommandProxyResolver.allCommandProxiesFor(bean, beanManager);
+        final List<SystemCommandHandlerProxy> systemCommandHandlerProxies = systemCommandProxyResolver.allCommandProxiesFor(bean, beanManager, blacklistedCommands);
 
         assertThat(systemCommandHandlerProxies.size(), is(3));
 
         assertThat(systemCommandHandlerProxies, hasItem(systemCommandHandlerProxy_1));
         assertThat(systemCommandHandlerProxies, hasItem(systemCommandHandlerProxy_2));
+        assertThat(systemCommandHandlerProxies, hasItem(systemCommandHandlerProxy_3));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void shouldNotCreateProxyIfTheCommandNameIsBlacklisted() throws Exception {
+        final Bean<?> bean = mock(Bean.class);
+        final BeanManager beanManager = mock(BeanManager.class);
+
+        final Object systemCommandHandler = new HandlesSystemCommandHandler();
+
+        final Class beanClass = systemCommandHandler.getClass();
+
+        final Method handlerMethod_1 = beanClass.getDeclaredMethod("runSystemCommand_1");
+        final Method handlerMethod_2 = beanClass.getDeclaredMethod("runSystemCommand_2");
+        final Method handlerMethod_3 = beanClass.getDeclaredMethod("runSystemCommand_3");
+
+        final SystemCommandHandlerProxy systemCommandHandlerProxy_1 = mock(SystemCommandHandlerProxy.class);
+        final SystemCommandHandlerProxy systemCommandHandlerProxy_2 = mock(SystemCommandHandlerProxy.class);
+        final SystemCommandHandlerProxy systemCommandHandlerProxy_3 = mock(SystemCommandHandlerProxy.class);
+
+        final Set<SystemCommand> blacklistedCommands = newHashSet(mock(SystemCommand.class));
+
+        when(bean.getBeanClass()).thenReturn(beanClass);
+        when(cdiInstanceResolver.getInstanceOf(beanClass, beanManager)).thenReturn(systemCommandHandler);
+
+        when(blacklistedCommandsFilter.isSystemCommandAllowed(HandlesSystemSystemCommand_1.SYSTEM_COMMAND_NAME_1, blacklistedCommands)).thenReturn(true);
+        when(systemCommandHandlerProxyFactory.create(
+                HandlesSystemSystemCommand_1.SYSTEM_COMMAND_NAME_1,
+                handlerMethod_1,
+                systemCommandHandler,
+                handlerMethodValidator
+        )).thenReturn(systemCommandHandlerProxy_1);
+
+        when(blacklistedCommandsFilter.isSystemCommandAllowed(HandlesSystemSystemCommand_2.SYSTEM_COMMAND_NAME_2, blacklistedCommands)).thenReturn(false);
+
+        when(blacklistedCommandsFilter.isSystemCommandAllowed(HandlesSystemSystemCommand_3.SYSTEM_COMMAND_NAME_3, blacklistedCommands)).thenReturn(true);
+        when(systemCommandHandlerProxyFactory.create(
+                HandlesSystemSystemCommand_3.SYSTEM_COMMAND_NAME_3,
+                handlerMethod_3,
+                systemCommandHandler,
+                handlerMethodValidator
+        )).thenReturn(systemCommandHandlerProxy_3);
+
+        final List<SystemCommandHandlerProxy> systemCommandHandlerProxies = systemCommandProxyResolver.allCommandProxiesFor(bean, beanManager, blacklistedCommands);
+
+        assertThat(systemCommandHandlerProxies.size(), is(2));
+
+        assertThat(systemCommandHandlerProxies, hasItem(systemCommandHandlerProxy_1));
         assertThat(systemCommandHandlerProxies, hasItem(systemCommandHandlerProxy_3));
     }
 

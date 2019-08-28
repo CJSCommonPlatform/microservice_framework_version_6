@@ -10,7 +10,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
-import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
 import uk.gov.justice.services.jmx.api.mbean.SystemCommander;
 import uk.gov.justice.services.jmx.api.name.CommandMBeanNameProvider;
 import uk.gov.justice.services.jmx.api.name.ObjectNameException;

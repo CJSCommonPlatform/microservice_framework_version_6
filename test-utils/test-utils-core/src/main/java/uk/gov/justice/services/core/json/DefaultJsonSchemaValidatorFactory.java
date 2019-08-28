@@ -1,6 +1,5 @@
 package uk.gov.justice.services.core.json;
 
-import static org.slf4j.LoggerFactory.getLogger;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
 import uk.gov.justice.schema.catalog.Catalog;
@@ -19,9 +18,10 @@ public class DefaultJsonSchemaValidatorFactory {
         final PayloadExtractor payloadExtractor = new PayloadExtractor();
 
         final FileBasedJsonSchemaValidator fileBasedJsonSchemaValidator = new FileBasedJsonSchemaValidator();
-        fileBasedJsonSchemaValidator.jsonSchemaLoader = loader;
-        fileBasedJsonSchemaValidator.logger = getLogger(FileBasedJsonSchemaValidator.class);
-        fileBasedJsonSchemaValidator.payloadExtractor = payloadExtractor;
+
+        setField(fileBasedJsonSchemaValidator, "jsonSchemaLoader", loader);
+        setField(fileBasedJsonSchemaValidator, "payloadExtractor", payloadExtractor);
+        setField(fileBasedJsonSchemaValidator, "schemaValidationErrorMessageGenerator", new SchemaValidationErrorMessageGenerator());
 
         final SchemaCatalogAwareJsonSchemaValidator schemaCatalogAwareJsonSchemaValidator = new SchemaCatalogAwareJsonSchemaValidator();
         schemaCatalogAwareJsonSchemaValidator.fileBasedJsonSchemaValidator = fileBasedJsonSchemaValidator;

@@ -9,7 +9,6 @@ import javax.inject.Inject;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
 import org.json.JSONObject;
-import org.slf4j.Logger;
 
 /**
  * Service for validating JSON payloads against a schema.
@@ -20,13 +19,13 @@ public class FileBasedJsonSchemaValidator {
     private final Map<String, Schema> schemas = new ConcurrentHashMap<>();
 
     @Inject
-    Logger logger;
+    private JsonSchemaLoader jsonSchemaLoader;
 
     @Inject
-    JsonSchemaLoader jsonSchemaLoader;
+    private PayloadExtractor payloadExtractor;
 
     @Inject
-    PayloadExtractor payloadExtractor;
+    private SchemaValidationErrorMessageGenerator schemaValidationErrorMessageGenerator;
 
     /**
      * Validate a JSON payload against the correct schema for the given message type name. If the
@@ -36,13 +35,14 @@ public class FileBasedJsonSchemaValidator {
      * @param actionName   the message type name
      */
     public void validateWithoutSchemaCatalog(final String envelopeJson, final String actionName) {
-        logger.debug("Falling back to file based schema lookup, no catalog schema found for: {}", actionName);
         final JSONObject payload = payloadExtractor.extractPayloadFrom(envelopeJson);
 
         try {
             schemaOf(actionName).validate(payload);
-        } catch (final ValidationException ex) {
-            throw new JsonSchemaValidationException(ex.getMessage(), ex);
+        } catch (final ValidationException e) {
+            throw new JsonSchemaValidationException(
+                    schemaValidationErrorMessageGenerator.generateErrorMessage(e),
+                    e);
         }
     }
 

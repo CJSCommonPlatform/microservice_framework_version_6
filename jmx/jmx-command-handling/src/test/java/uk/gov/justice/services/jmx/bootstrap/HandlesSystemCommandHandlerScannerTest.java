@@ -11,6 +11,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.framework.utilities.cdi.CdiInstanceResolver;
+import uk.gov.justice.services.jmx.api.command.SystemCommand;
+import uk.gov.justice.services.jmx.bootstrap.blacklist.BlacklistedCommandsScanner;
 import uk.gov.justice.services.jmx.command.SystemCommandHandlerProxy;
 import uk.gov.justice.services.jmx.command.SystemCommandStore;
 
@@ -37,6 +39,9 @@ public class HandlesSystemCommandHandlerScannerTest {
     @Mock
     private CdiInstanceResolver cdiInstanceResolver;
 
+    @Mock
+    private BlacklistedCommandsScanner blacklistedCommandsScanner;
+
     @InjectMocks
     private SystemCommandHandlerScanner systemCommandHandlerScanner;
 
@@ -58,13 +63,17 @@ public class HandlesSystemCommandHandlerScannerTest {
         final List<SystemCommandHandlerProxy> beanProxies_2 = asList(systemCommandHandlerProxy_2_1, systemCommandHandlerProxy_2_2);
 
         final Set<Bean<?>> cdiBeans = newHashSet(bean_1, bean_2);
+        final Set<SystemCommand> blacklistedCommands = newHashSet(mock(SystemCommand.class));
 
         final SystemCommandStore systemCommandStore = mock(SystemCommandStore.class);
 
         when(beanManager.getBeans(Object.class)).thenReturn(cdiBeans);
+        when(blacklistedCommandsScanner.scanForBlacklistedCommands(
+                cdiBeans,
+                beanManager)).thenReturn(blacklistedCommands);
 
-        when(systemCommandProxyResolver.allCommandProxiesFor(bean_1, beanManager)).thenReturn(beanProxies_1);
-        when(systemCommandProxyResolver.allCommandProxiesFor(bean_2, beanManager)).thenReturn(beanProxies_2);
+        when(systemCommandProxyResolver.allCommandProxiesFor(bean_1, beanManager, blacklistedCommands)).thenReturn(beanProxies_1);
+        when(systemCommandProxyResolver.allCommandProxiesFor(bean_2, beanManager, blacklistedCommands)).thenReturn(beanProxies_2);
         when(cdiInstanceResolver.getInstanceOf(SystemCommandStore.class, beanManager)).thenReturn(systemCommandStore);
 
         systemCommandHandlerScanner.registerSystemCommands(beanManager);

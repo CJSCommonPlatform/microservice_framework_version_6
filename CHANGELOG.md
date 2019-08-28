@@ -3,8 +3,11 @@ All notable changes to this project will be documented in this file, which follo
 on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
-
 ## [Unreleased]
+
+## [6.0.10] - 2018-08-28
+### Added
+- JMX SystemCommands can now be disabled for a context
 
 ## [6.0.9] - 2018-08-21
 ### Fixed

@@ -26,13 +26,13 @@ import org.slf4j.Logger;
 public class FileBasedJsonSchemaValidatorTest {
 
     @Mock
-    private Logger logger;
-
-    @Mock
     private JsonSchemaLoader jsonSchemaLoader;
 
     @Mock
     private PayloadExtractor payloadExtractor;
+
+    @Mock
+    private SchemaValidationErrorMessageGenerator schemaValidationErrorMessageGenerator;
 
     @InjectMocks
     private FileBasedJsonSchemaValidator fileBasedJsonSchemaValidator;
@@ -52,7 +52,6 @@ public class FileBasedJsonSchemaValidatorTest {
         fileBasedJsonSchemaValidator.validateWithoutSchemaCatalog(envelopeJson, actionName);
 
         verify(schema).validate(payload);
-        verify(logger).debug("Falling back to file based schema lookup, no catalog schema found for: {}", actionName);
     }
 
     @Test
@@ -60,19 +59,23 @@ public class FileBasedJsonSchemaValidatorTest {
 
         final String actionName = "example.action-name";
         final String envelopeJson = "{\"envelope\": \"json\"}";
+        final String errorMessage = "error message";
 
         final JSONObject payload = mock(JSONObject.class);
         final Schema schema = mock(Schema.class);
+        final ValidationException validationException = mock(ValidationException.class);
 
         when(payloadExtractor.extractPayloadFrom(envelopeJson)).thenReturn(payload);
         when(jsonSchemaLoader.loadSchema(actionName)).thenReturn(schema);
-        doThrow(new ValidationException(schema, "", "", "")).when(schema).validate(payload);
+        when(schemaValidationErrorMessageGenerator.generateErrorMessage(validationException)).thenReturn(errorMessage);
+        doThrow(validationException).when(schema).validate(payload);
 
         try {
             fileBasedJsonSchemaValidator.validateWithoutSchemaCatalog(envelopeJson, actionName);
             fail();
         } catch (final JsonSchemaValidationException e) {
-            assertThat(e.getCause(), is(instanceOf(ValidationException.class)));
+            assertThat(e.getMessage(), is(errorMessage));
+            assertThat(e.getCause(), is(validationException));
         }
     }
 }

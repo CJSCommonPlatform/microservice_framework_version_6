@@ -34,4 +34,14 @@ public class ObjectFactoryTest {
     public void shouldCreateHandlerMethodValidator() throws Exception {
         assertThat(objectFactory.handlerMethodValidator(), is(notNullValue()));
     }
+
+    @Test
+    public void shouldCreateBlacklistedCommandsScanner() throws Exception {
+        assertThat(objectFactory.blacklistedCommandsScanner(), is(notNullValue()));
+    }
+
+    @Test
+    public void shouldCreateBlacklistedCommandsFilter() throws Exception {
+        assertThat(objectFactory.blacklistedCommandsFilter(), is(notNullValue()));
+    }
 }

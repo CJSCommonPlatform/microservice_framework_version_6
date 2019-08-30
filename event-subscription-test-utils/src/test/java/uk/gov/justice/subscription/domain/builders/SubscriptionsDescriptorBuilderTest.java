@@ -20,6 +20,7 @@ public class SubscriptionsDescriptorBuilderTest {
         final String specVersion = "specVersion";
         final String service = "service";
         final String serviceComponent = "serviceComponent";
+        final int prioritisation = 1;
         final Subscription subscription_1 = mock(Subscription.class);
         final Subscription subscription_2 = mock(Subscription.class);
 
@@ -27,12 +28,14 @@ public class SubscriptionsDescriptorBuilderTest {
                 .withSpecVersion(specVersion)
                 .withService(service)
                 .withServiceComponent(serviceComponent)
+                .withPrioritisation(prioritisation)
                 .withSubscriptions(asList(subscription_1, subscription_2))
                 .build();
 
         assertThat(subscriptionsDescriptor.getSpecVersion(), is(specVersion));
         assertThat(subscriptionsDescriptor.getService(), is(service));
         assertThat(subscriptionsDescriptor.getServiceComponent(), is(serviceComponent));
+        assertThat(subscriptionsDescriptor.getPrioritisation(), is(prioritisation));
         assertThat(subscriptionsDescriptor.getSubscriptions(), hasItem(subscription_1));
         assertThat(subscriptionsDescriptor.getSubscriptions(), hasItem(subscription_2));
     }
@@ -43,6 +46,7 @@ public class SubscriptionsDescriptorBuilderTest {
         final String specVersion = "specVersion";
         final String service = "service";
         final String serviceComponent = "serviceComponent";
+        final int prioritisation = 1;
         final Subscription subscription_1 = mock(Subscription.class);
         final Subscription subscription_2 = mock(Subscription.class);
 
@@ -50,6 +54,7 @@ public class SubscriptionsDescriptorBuilderTest {
                 .withSpecVersion(specVersion)
                 .withService(service)
                 .withServiceComponent(serviceComponent)
+                .withPrioritisation(prioritisation)
                 .withSubscription(subscription_1)
                 .withSubscription(subscription_2)
                 .build();
@@ -57,6 +62,7 @@ public class SubscriptionsDescriptorBuilderTest {
         assertThat(subscriptionsDescriptor.getSpecVersion(), is(specVersion));
         assertThat(subscriptionsDescriptor.getService(), is(service));
         assertThat(subscriptionsDescriptor.getServiceComponent(), is(serviceComponent));
+        assertThat(subscriptionsDescriptor.getPrioritisation(), is(prioritisation));
         assertThat(subscriptionsDescriptor.getSubscriptions(), hasItem(subscription_1));
         assertThat(subscriptionsDescriptor.getSubscriptions(), hasItem(subscription_2));
     }

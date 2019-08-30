@@ -26,12 +26,12 @@ public class SubscriptionSorterTest {
 
         final List<Event> eventList = asList(mock(Event.class), mock(Event.class));
 
-        final Subscription subscription1 = new Subscription("name1", eventList, "eventSourceName1", "1");
-        final Subscription subscription2 = new Subscription("name2", eventList, "eventSourceName3", "2");
-        final Subscription subscription3 = new Subscription("name3", eventList, "eventSourceName1", "3");
+        final Subscription subscription1 = new Subscription("name1", eventList, "eventSourceName1", 1);
+        final Subscription subscription2 = new Subscription("name2", eventList, "eventSourceName3", 2);
+        final Subscription subscription3 = new Subscription("name3", eventList, "eventSourceName1", 3);
 
         final List<Subscription> subscriptions = asList(subscription2, subscription3, subscription1);
-        final SubscriptionsDescriptor subscriptionsDescriptor = new SubscriptionsDescriptor("specVersion", "service", "serviceComponent", subscriptions);
+        final SubscriptionsDescriptor subscriptionsDescriptor = new SubscriptionsDescriptor("specVersion", "service", "serviceComponent", 1, subscriptions);
 
         final SubscriptionSorter subscriptionSorter = new SubscriptionSorter();
 
@@ -48,13 +48,13 @@ public class SubscriptionSorterTest {
 
         final List<Event> eventList = asList(mock(Event.class), mock(Event.class));
 
-        final Subscription subscription1 = new Subscription("name1", eventList, "eventSourceName1", "1");
-        final Subscription subscription2 = new Subscription("name2", eventList, "eventSourceName3", null);
-        final Subscription subscription3 = new Subscription("name3", eventList, "eventSourceName1", "3");
+        final Subscription subscription1 = new Subscription("name1", eventList, "eventSourceName1", 1);
+        final Subscription subscription2 = new Subscription("name2", eventList, "eventSourceName3", 0);
+        final Subscription subscription3 = new Subscription("name3", eventList, "eventSourceName1", 3);
 
         final List<Subscription> subscriptions = asList(subscription2, subscription3, subscription1);
 
-        final SubscriptionsDescriptor subscriptionsDescriptor = new SubscriptionsDescriptor("specVersion", "service", "serviceComponent", subscriptions);
+        final SubscriptionsDescriptor subscriptionsDescriptor = new SubscriptionsDescriptor("specVersion", "service", "serviceComponent", 1, subscriptions);
 
         final SubscriptionSorter subscriptionSorter = new SubscriptionSorter();
 
@@ -64,28 +64,5 @@ public class SubscriptionSorterTest {
         assertThat(subscriptionsDescriptor.getSubscriptions().get(1), is(subscription1));
         assertThat(subscriptionsDescriptor.getSubscriptions().get(2), is(subscription3));
 
-    }
-
-    @Test
-    public void shouldThrowExceptionIfPrioritisationNotNumber() {
-
-        final List<Event> eventList = asList(mock(Event.class), mock(Event.class));
-
-        final Subscription subscription1 = new Subscription("name1", eventList, "eventSourceName1", "1");
-        final Subscription subscription2 = new Subscription("name2", eventList, "eventSourceName3", "wrongPrioritisation");
-        final Subscription subscription3 = new Subscription("name3", eventList, "eventSourceName1", "3");
-
-        final List<Subscription> subscriptions = asList(subscription2, subscription3, subscription1);
-
-        final SubscriptionsDescriptor subscriptionsDescriptor = new SubscriptionsDescriptor("specVersion", "service", "serviceComponent", subscriptions);
-
-        final SubscriptionSorter subscriptionSorter = new SubscriptionSorter();
-
-        try {
-            subscriptionSorter.sortSubscriptionsByPrioritisation(subscriptionsDescriptor);
-            fail();
-        } catch (final YamlParserException expected) {
-            assertThat(expected.getMessage(), is("Incorrect prioritisation number: wrongPrioritisation in subscription-descriptor.yaml"));
-        }
     }
 }

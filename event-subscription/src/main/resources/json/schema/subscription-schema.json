@@ -32,6 +32,14 @@
             "EVENT_LISTENER"
           ]
         },
+        "prioritisation": {
+          "$id": "/properties/subscriptions_descriptor/properties/prioritisation",
+          "type": "integer",
+          "title": "Subscription descriptor prioritisation",
+          "examples": [
+            "1"
+          ]
+        },
         "subscriptions": {
           "$id": "/properties/subscriptions_descriptor/properties/subscriptions",
           "type": "array",

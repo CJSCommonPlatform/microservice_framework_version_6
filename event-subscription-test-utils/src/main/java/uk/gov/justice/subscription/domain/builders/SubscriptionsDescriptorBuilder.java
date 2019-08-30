@@ -11,6 +11,7 @@ public final class SubscriptionsDescriptorBuilder {
     private String specVersion;
     private String service;
     private String serviceComponent;
+    private int prioritisation = 0;
     private final List<Subscription> subscriptions = new ArrayList<>();
 
     private SubscriptionsDescriptorBuilder() {
@@ -45,7 +46,12 @@ public final class SubscriptionsDescriptorBuilder {
         return this;
     }
 
+    public SubscriptionsDescriptorBuilder withPrioritisation(final int prioritisation) {
+        this.prioritisation = prioritisation;
+        return this;
+    }
+
     public SubscriptionsDescriptor build() {
-        return new SubscriptionsDescriptor(specVersion, service, serviceComponent, subscriptions);
+        return new SubscriptionsDescriptor(specVersion, service, serviceComponent, prioritisation, subscriptions);
     }
 }

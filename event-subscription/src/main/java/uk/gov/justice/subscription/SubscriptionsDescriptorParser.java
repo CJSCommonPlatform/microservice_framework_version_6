@@ -1,5 +1,7 @@
 package uk.gov.justice.subscription;
 
+import static java.util.Comparator.comparingInt;
+
 import uk.gov.justice.services.yaml.YamlFileValidator;
 import uk.gov.justice.services.yaml.YamlParser;
 import uk.gov.justice.subscription.domain.subscriptiondescriptor.SubscriptionsDescriptor;
@@ -41,7 +43,9 @@ public class SubscriptionsDescriptorParser {
      * @return Stream of {@link SubscriptionsDescriptor}
      */
     public Stream<SubscriptionsDescriptor> getSubscriptionDescriptorsFrom(final Collection<URL> urls) {
-        return urls.stream().map(this::parseSubscriptionDescriptorFromYaml);
+        return urls.stream()
+                .map(this::parseSubscriptionDescriptorFromYaml)
+                .sorted(comparingInt(SubscriptionsDescriptor::getPrioritisation));
     }
 
     private SubscriptionsDescriptor parseSubscriptionDescriptorFromYaml(final URL url) {

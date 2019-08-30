@@ -22,7 +22,7 @@ public class SubscriptionBuilderTest {
         final Event event_1 = mock(Event.class);
         final Event event_2 = mock(Event.class);
         final String eventSourceName = "eventSoureName";
-        final String prioritisation = "1";
+        final int prioritisation = 1;
 
         final Subscription subscription = subscription()
                 .withName(name)
@@ -45,7 +45,7 @@ public class SubscriptionBuilderTest {
         final Event event_1 = mock(Event.class);
         final Event event_2 = mock(Event.class);
         final String eventSourceName = "eventSourceName";
-        final String prioritisation = "1";
+        final int prioritisation = 1;
 
         final Subscription subscription = subscription()
                 .withName(name)

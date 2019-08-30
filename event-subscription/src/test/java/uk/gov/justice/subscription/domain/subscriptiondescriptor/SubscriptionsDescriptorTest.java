@@ -22,8 +22,8 @@ public class SubscriptionsDescriptorTest {
         final List<Subscription> subscriptions2 = new ArrayList<>();
 
 
-        final SubscriptionsDescriptor subscriptionsDescriptor1 = new SubscriptionsDescriptor(specVersion1, service1, serviceComponent1, subscriptions1);
-        final SubscriptionsDescriptor subscriptionsDescriptor2 = new SubscriptionsDescriptor(specVersion2, service2, serviceComponent2, subscriptions2);
+        final SubscriptionsDescriptor subscriptionsDescriptor1 = new SubscriptionsDescriptor(specVersion1, service1, serviceComponent1, 1, subscriptions1);
+        final SubscriptionsDescriptor subscriptionsDescriptor2 = new SubscriptionsDescriptor(specVersion2, service2, serviceComponent2, 1, subscriptions2);
         assertFalse(subscriptionsDescriptor1.equals(subscriptionsDescriptor2));
     }
 
@@ -33,10 +33,11 @@ public class SubscriptionsDescriptorTest {
         final String specVersion = "1.0";
         final String service = "service";
         final String serviceComponent = "EVENT_LISTENER";
+        final int prioritisation = 1;
         final List<Subscription> subscriptions = new ArrayList<>();
 
-        final SubscriptionsDescriptor subscriptionsDescriptor1 = new SubscriptionsDescriptor(specVersion, service, serviceComponent, subscriptions);
-        final SubscriptionsDescriptor subscriptionsDescriptor2 = new SubscriptionsDescriptor(specVersion, service, serviceComponent, subscriptions);
+        final SubscriptionsDescriptor subscriptionsDescriptor1 = new SubscriptionsDescriptor(specVersion, service, serviceComponent, prioritisation, subscriptions);
+        final SubscriptionsDescriptor subscriptionsDescriptor2 = new SubscriptionsDescriptor(specVersion, service, serviceComponent, prioritisation, subscriptions);
         assertTrue(subscriptionsDescriptor1.equals(subscriptionsDescriptor2));
     }
 }

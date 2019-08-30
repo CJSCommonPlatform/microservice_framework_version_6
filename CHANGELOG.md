@@ -6,6 +6,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ## [Unreleased]
 
 ## [6.0.11] - 2018-08-30
+### Added
+- ordering to subscriptions descriptor yamls
+
 ### Fixed
 - JdbcDataSourceProvider can now handle multiple DataSources
 

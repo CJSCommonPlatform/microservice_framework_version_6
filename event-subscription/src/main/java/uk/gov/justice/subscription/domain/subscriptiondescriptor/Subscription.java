@@ -8,12 +8,12 @@ public class Subscription {
     private final String name;
     private final List<Event> events;
     private final String eventSourceName;
-    private final String prioritisation;
+    private final int prioritisation;
 
     public Subscription(final String name,
                         final List<Event> events,
                         final String eventSourceName,
-                        final String prioritisation) {
+                        final int prioritisation) {
         this.name = name;
         this.events = events;
         this.eventSourceName = eventSourceName;
@@ -32,7 +32,7 @@ public class Subscription {
         return eventSourceName;
     }
 
-    public String getPrioritisation() {
+    public int getPrioritisation() {
         return prioritisation;
     }
 
@@ -50,5 +50,15 @@ public class Subscription {
     @Override
     public int hashCode() {
         return Objects.hash(name, events,prioritisation, eventSourceName);
+    }
+
+    @Override
+    public String toString() {
+        return "Subscription{" +
+                "name='" + name + '\'' +
+                ", events=" + events +
+                ", eventSourceName='" + eventSourceName + '\'' +
+                ", prioritisation=" + prioritisation +
+                '}';
     }
 }

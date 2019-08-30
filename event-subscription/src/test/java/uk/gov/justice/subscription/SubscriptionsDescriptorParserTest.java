@@ -1,7 +1,7 @@
 package uk.gov.justice.subscription;
 
 import static java.nio.file.Paths.get;
-import static java.util.Collections.singletonList;
+import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -37,18 +37,36 @@ public class SubscriptionsDescriptorParserTest {
     }
 
     @Test
-    public void shouldParseSubscriptionDescriptorYamlUrl() throws Exception {
-        final URL url = getFromClasspath("yaml/subscriptions-descriptor.yaml");
+    public void shouldParseSubscriptionDescriptorYamlUrlAndReturnInPriorityOrder() throws Exception {
+        final URL url_1 = getFromClasspath("yaml/subscriptions-descriptor.yaml");
+        final URL url_2 = getFromClasspath("yaml/no-priority-subscriptions-descriptor.yaml");
+        final URL url_3 = getFromClasspath("yaml/priority-one-subscriptions-descriptor.yaml");
 
         final List<SubscriptionsDescriptor> subscriptionsDescriptors = subscriptionsDescriptorParser
-                .getSubscriptionDescriptorsFrom(singletonList(url))
+                .getSubscriptionDescriptorsFrom(asList(url_1, url_2, url_3))
                 .collect(toList());
 
-        assertThat(subscriptionsDescriptors.size(), is(1));
-        assertThat(subscriptionsDescriptors.get(0).getSubscriptions().size(), is(2));
-        assertThat(subscriptionsDescriptors.get(0).getService(), is("examplecontext"));
-        assertThat(subscriptionsDescriptors.get(0).getServiceComponent(), is("EVENT_LISTENER"));
-        assertThat(subscriptionsDescriptors.get(0).getSpecVersion(), is("1.0.0"));
+        assertThat(subscriptionsDescriptors.size(), is(3));
+        final SubscriptionsDescriptor subscriptionsDescriptor_1 = subscriptionsDescriptors.get(0);
+        assertThat(subscriptionsDescriptor_1.getSubscriptions().size(), is(1));
+        assertThat(subscriptionsDescriptor_1.getService(), is("examplecontext"));
+        assertThat(subscriptionsDescriptor_1.getServiceComponent(), is("NO_PRIORITY_EVENT_LISTENER"));
+        assertThat(subscriptionsDescriptor_1.getSpecVersion(), is("1.0.0"));
+        assertThat(subscriptionsDescriptor_1.getPrioritisation(), is(0));
+
+        final SubscriptionsDescriptor subscriptionsDescriptor_2 = subscriptionsDescriptors.get(1);
+        assertThat(subscriptionsDescriptor_2.getSubscriptions().size(), is(1));
+        assertThat(subscriptionsDescriptor_2.getService(), is("examplecontext"));
+        assertThat(subscriptionsDescriptor_2.getServiceComponent(), is("EVENT_PROCESSOR"));
+        assertThat(subscriptionsDescriptor_2.getSpecVersion(), is("1.0.0"));
+        assertThat(subscriptionsDescriptor_2.getPrioritisation(), is(1));
+
+        final SubscriptionsDescriptor subscriptionsDescriptor_3 = subscriptionsDescriptors.get(2);
+        assertThat(subscriptionsDescriptor_3.getSubscriptions().size(), is(2));
+        assertThat(subscriptionsDescriptor_3.getService(), is("examplecontext"));
+        assertThat(subscriptionsDescriptor_3.getServiceComponent(), is("EVENT_LISTENER"));
+        assertThat(subscriptionsDescriptor_3.getSpecVersion(), is("1.0.0"));
+        assertThat(subscriptionsDescriptor_3.getPrioritisation(), is(2));
     }
 
     @SuppressWarnings("ConstantConditions")

@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.0.11] - 2018-08-30
+### Fixed
+- JdbcDataSourceProvider can now handle multiple DataSources
+
 ## [6.0.10] - 2018-08-28
 ### Added
 - JMX SystemCommands can now be disabled for a context

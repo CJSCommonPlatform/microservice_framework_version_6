@@ -5,21 +5,16 @@ import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.jmx.api.state.ApplicationManagementState.SHUTTERED;
 
-import uk.gov.justice.services.jmx.api.SystemCommandException;
-import uk.gov.justice.services.jmx.api.SystemCommandInvocationException;
+import uk.gov.justice.services.jmx.api.UnsupportedSystemCommandException;
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
 import uk.gov.justice.services.jmx.api.state.ApplicationManagementState;
 import uk.gov.justice.services.jmx.command.ApplicationManagementStateRegistry;
-import uk.gov.justice.services.jmx.command.SystemCommandHandlerProxy;
 import uk.gov.justice.services.jmx.command.SystemCommandScanner;
-import uk.gov.justice.services.jmx.command.SystemCommandStore;
 import uk.gov.justice.services.jmx.command.TestCommand;
 
 import java.util.List;
@@ -40,7 +35,7 @@ public class SystemCommanderTest {
     private Logger logger;
 
     @Mock
-    private SystemCommandStore systemCommandStore;
+    private AsynchronousCommandRunnerBean asynchronousCommandRunnerBean;
 
     @Mock
     private SystemCommandScanner systemCommandScanner;
@@ -52,44 +47,32 @@ public class SystemCommanderTest {
     private SystemCommander systemCommander;
 
     @Test
-    public void shouldFindTheCorrectProxyForTheCommandAndInvoke() throws Exception {
+    public void shouldRunTheSystemCommandIfSuppoorted() throws Exception {
 
         final TestCommand testCommand = new TestCommand();
 
-        final SystemCommandHandlerProxy systemCommandHandlerProxy = mock(SystemCommandHandlerProxy.class);
-
-        when(systemCommandStore.findCommandProxy(testCommand)).thenReturn(systemCommandHandlerProxy);
+        when(asynchronousCommandRunnerBean.isSupported(testCommand)).thenReturn(true);
 
         systemCommander.call(testCommand);
 
-        final InOrder inOrder = inOrder(logger, systemCommandHandlerProxy);
+        final InOrder inOrder = inOrder(logger, asynchronousCommandRunnerBean);
 
         inOrder.verify(logger).info("Received System Command 'TEST_COMMAND'");
-        inOrder.verify(systemCommandHandlerProxy).invokeCommand(testCommand);
+        inOrder.verify(asynchronousCommandRunnerBean).run(testCommand);
     }
 
     @Test
-    public void shouldHandleExceptionsThrownBySystemCommandHandlerProxy() throws Exception {
-
-        final SystemCommandInvocationException systemCommandInvocationException = new SystemCommandInvocationException(
-                "Ooops",
-                new Exception());
+    public void shouldFailIfSystemCommandNotSupported() throws Exception {
 
         final TestCommand testCommand = new TestCommand();
 
-        final SystemCommandHandlerProxy systemCommandHandlerProxy = mock(SystemCommandHandlerProxy.class);
-
-        when(systemCommandStore.findCommandProxy(testCommand)).thenReturn(systemCommandHandlerProxy);
-        doThrow(systemCommandInvocationException).when(systemCommandHandlerProxy).invokeCommand(testCommand);
+        when(asynchronousCommandRunnerBean.isSupported(testCommand)).thenReturn(false);
 
         try {
             systemCommander.call(testCommand);
             fail();
-        } catch (final SystemCommandException expected) {
-           assertThat(expected.getCause(), is(systemCommandInvocationException));
-           assertThat(expected.getMessage(), is("Failed to run System Command 'TEST_COMMAND'"));
-
-           verify(logger).error("Failed to run System Command 'TEST_COMMAND'", systemCommandInvocationException);
+        } catch (final UnsupportedSystemCommandException expected) {
+            assertThat(expected.getMessage(), is("The system command 'TEST_COMMAND' is not supported on this context."));
         }
     }
 

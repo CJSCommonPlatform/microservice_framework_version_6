@@ -5,6 +5,13 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.0.12] - 2018-09-08
+### Changed
+- All JMX SystemCommands are now run asynchronously. i.e the call to the JMX bean will return immediately
+- The JMX SystemCommandBean now only throws 2 Exceptions
+    1. UnsupportedSystemCommandException. If the command is unrecognised by the context. 
+    2. SystemCommandFailedException. On any other failure. NB. this Exception also contains the stacktrace of the server side exception
+
 ## [6.0.11] - 2018-08-30
 ### Added
 - ordering to subscriptions descriptor yamls

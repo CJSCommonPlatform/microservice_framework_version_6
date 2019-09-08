@@ -9,6 +9,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.jmx.api.SystemCommandException;
+import uk.gov.justice.services.jmx.api.command.CatchupCommand;
+import uk.gov.justice.services.jmx.api.command.PingCommand;
+import uk.gov.justice.services.jmx.api.command.RebuildCommand;
+import uk.gov.justice.services.jmx.api.command.ShutterCommand;
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
 
 import org.junit.Test;
@@ -26,6 +30,36 @@ public class SystemCommandStoreTest {
  
     @InjectMocks
     private SystemCommandStore systemCommandStore;
+
+    @Test
+    public void shouldKnowWhichCommandsAreSupported() throws Exception {
+
+        final String commandName = "COMMAND";
+
+        final SystemCommandHandlerProxy systemCommandHandlerProxy_1 = mock(SystemCommandHandlerProxy.class);
+        final SystemCommandHandlerProxy systemCommandHandlerProxy_2 = mock(SystemCommandHandlerProxy.class);
+        final SystemCommandHandlerProxy systemCommandHandlerProxy_3 = mock(SystemCommandHandlerProxy.class);
+
+        final SystemCommand rebuildCommand = new RebuildCommand();
+        final SystemCommand pingCommand = new PingCommand();
+        final SystemCommand catchupCommand = new CatchupCommand();
+
+        when(systemCommandHandlerProxy_1.getCommandName()).thenReturn(rebuildCommand.getName());
+        when(systemCommandHandlerProxy_2.getCommandName()).thenReturn(pingCommand.getName());
+        when(systemCommandHandlerProxy_3.getCommandName()).thenReturn(catchupCommand.getName());
+
+        when(systemCommandHandlerProxy_1.getInstance()).thenReturn(new DummyHandler_1());
+        when(systemCommandHandlerProxy_2.getInstance()).thenReturn(new DummyHandler_2());
+        when(systemCommandHandlerProxy_3.getInstance()).thenReturn(new DummyHandler_3());
+
+        systemCommandStore.store(asList(systemCommandHandlerProxy_1, systemCommandHandlerProxy_2, systemCommandHandlerProxy_3));
+
+        assertThat(systemCommandStore.isSupported(rebuildCommand), is(true));
+        assertThat(systemCommandStore.isSupported(pingCommand), is(true));
+        assertThat(systemCommandStore.isSupported(catchupCommand), is(true));
+
+        assertThat(systemCommandStore.isSupported(new ShutterCommand()), is(false));
+    }
 
     @Test
     public void shouldFindTheCorrectHandlerForTheCommandName() throws Exception {

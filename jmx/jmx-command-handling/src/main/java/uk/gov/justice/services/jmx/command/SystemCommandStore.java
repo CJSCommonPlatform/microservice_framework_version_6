@@ -9,18 +9,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 
-@ApplicationScoped
+@Singleton
 public class SystemCommandStore {
 
     private Map<String, SystemCommandHandlerProxy> handlers = new HashMap<>();
 
     @Inject
     private Logger logger;
+
+    public boolean isSupported(final SystemCommand systemCommand) {
+        return handlers.containsKey(systemCommand.getName());
+    }
 
     public SystemCommandHandlerProxy findCommandProxy(final SystemCommand systemCommand) {
 

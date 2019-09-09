@@ -23,13 +23,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SystemCommandStoreTest {
+public class DefaultSystemCommandStoreTest {
 
     @Mock
     private Logger logger;
  
     @InjectMocks
-    private SystemCommandStore systemCommandStore;
+    private DefaultSystemCommandStore defaultSystemCommandStore;
 
     @Test
     public void shouldKnowWhichCommandsAreSupported() throws Exception {
@@ -52,13 +52,13 @@ public class SystemCommandStoreTest {
         when(systemCommandHandlerProxy_2.getInstance()).thenReturn(new DummyHandler_2());
         when(systemCommandHandlerProxy_3.getInstance()).thenReturn(new DummyHandler_3());
 
-        systemCommandStore.store(asList(systemCommandHandlerProxy_1, systemCommandHandlerProxy_2, systemCommandHandlerProxy_3));
+        defaultSystemCommandStore.store(asList(systemCommandHandlerProxy_1, systemCommandHandlerProxy_2, systemCommandHandlerProxy_3));
 
-        assertThat(systemCommandStore.isSupported(rebuildCommand), is(true));
-        assertThat(systemCommandStore.isSupported(pingCommand), is(true));
-        assertThat(systemCommandStore.isSupported(catchupCommand), is(true));
+        assertThat(defaultSystemCommandStore.isSupported(rebuildCommand), is(true));
+        assertThat(defaultSystemCommandStore.isSupported(pingCommand), is(true));
+        assertThat(defaultSystemCommandStore.isSupported(catchupCommand), is(true));
 
-        assertThat(systemCommandStore.isSupported(new ShutterCommand()), is(false));
+        assertThat(defaultSystemCommandStore.isSupported(new ShutterCommand()), is(false));
     }
 
     @Test
@@ -84,13 +84,13 @@ public class SystemCommandStoreTest {
 
         when(systemCommand.getName()).thenReturn(commandName_2);
 
-        systemCommandStore.store(asList(systemCommandHandlerProxy_1, systemCommandHandlerProxy_2, systemCommandHandlerProxy_3));
+        defaultSystemCommandStore.store(asList(systemCommandHandlerProxy_1, systemCommandHandlerProxy_2, systemCommandHandlerProxy_3));
 
         verify(logger).info("Registering class DummyHandler_1 as system command handler for 'COMMAND_1'");
         verify(logger).info("Registering class DummyHandler_2 as system command handler for 'COMMAND_2'");
         verify(logger).info("Registering class DummyHandler_3 as system command handler for 'COMMAND_3'");
 
-        final SystemCommandHandlerProxy systemCommandHandlerProxy = systemCommandStore.findCommandProxy(systemCommand);
+        final SystemCommandHandlerProxy systemCommandHandlerProxy = defaultSystemCommandStore.findCommandProxy(systemCommand);
 
         assertThat(systemCommandHandlerProxy, is(systemCommandHandlerProxy_2));
     }
@@ -104,7 +104,7 @@ public class SystemCommandStoreTest {
 
         when(systemCommand.getName()).thenReturn(missinCommandName);
         try {
-            systemCommandStore.findCommandProxy(systemCommand);
+            defaultSystemCommandStore.findCommandProxy(systemCommand);
             fail();
         } catch (final SystemCommandException expected) {
             assertThat(expected.getMessage(), is("Failed to find SystemCommandHandler for command 'This command does not exist'"));

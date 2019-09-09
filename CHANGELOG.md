@@ -4,6 +4,8 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Changed
+- SystemCommandStore moved to an interface implemented by DefaultSystemCommandStore. This is to allow stubbing in integration tests
 
 ## [6.0.12] - 2018-09-08
 ### Changed

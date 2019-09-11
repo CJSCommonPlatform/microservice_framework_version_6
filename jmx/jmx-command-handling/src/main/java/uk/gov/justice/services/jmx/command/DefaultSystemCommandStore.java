@@ -11,7 +11,6 @@ import java.util.Map;
 
 import javax.annotation.Priority;
 import javax.enterprise.inject.Alternative;
-import javax.faces.bean.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 

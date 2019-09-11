@@ -1,4 +1,4 @@
-package uk.gov.justice.services.jmx.api.mbean;
+package uk.gov.justice.services.jmx.runner;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -23,9 +23,8 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
 
-
 @RunWith(MockitoJUnitRunner.class)
-public class AsynchronousCommandRunnerBeanTest {
+public class SystemCommandRunnerTest {
 
     @Mock
     private SystemCommandStore systemCommandStore;
@@ -37,7 +36,7 @@ public class AsynchronousCommandRunnerBeanTest {
     private Logger logger;
 
     @InjectMocks
-    private AsynchronousCommandRunnerBean asynchronousCommandRunnerBean;
+    private SystemCommandRunner systemCommandRunner;
 
     @Test
     public void shouldReturnFalseIfCommandUnsupported() throws Exception {
@@ -47,7 +46,7 @@ public class AsynchronousCommandRunnerBeanTest {
 
         when(systemCommandStore.isSupported(testCommand)).thenReturn(supported);
 
-        assertThat(asynchronousCommandRunnerBean.isSupported(testCommand), is(supported));
+        assertThat(systemCommandRunner.isSupported(testCommand), is(supported));
     }
 
     @Test
@@ -59,7 +58,7 @@ public class AsynchronousCommandRunnerBeanTest {
 
         when(systemCommandStore.findCommandProxy(testCommand)).thenReturn(systemCommandHandlerProxy);
 
-        asynchronousCommandRunnerBean.run(testCommand);
+        systemCommandRunner.run(testCommand);
 
         verify(systemCommandHandlerProxy).invokeCommand(testCommand);
     }
@@ -78,14 +77,12 @@ public class AsynchronousCommandRunnerBeanTest {
         when(stackTraceProvider.getStackTrace(systemCommandException)).thenReturn(stackTrace);
 
         try {
-            asynchronousCommandRunnerBean.run(testCommand);
+            systemCommandRunner.run(testCommand);
             fail();
         } catch (final SystemCommandFailedException expected) {
             assertThat(expected.getMessage(), is("Failed to run System Command 'TEST_COMMAND'. Caused by uk.gov.justice.services.jmx.api.SystemCommandException: Ooops"));
             assertThat(expected.getServerStackTrace(), is(stackTrace));
             assertThat(expected.getCause(), is(nullValue()));
         }
-
-
     }
 }

@@ -7,6 +7,7 @@ import uk.gov.justice.services.jmx.api.command.SystemCommand;
 import uk.gov.justice.services.jmx.api.state.ApplicationManagementState;
 import uk.gov.justice.services.jmx.command.ApplicationManagementStateRegistry;
 import uk.gov.justice.services.jmx.command.SystemCommandScanner;
+import uk.gov.justice.services.jmx.runner.AsynchronousCommandRunner;
 
 import java.util.List;
 
@@ -20,7 +21,7 @@ public class SystemCommander implements SystemCommanderMBean {
     private Logger logger;
 
     @Inject
-    private AsynchronousCommandRunnerBean asynchronousCommandRunnerBean;
+    private AsynchronousCommandRunner asynchronousCommandRunnerBean;
 
     @Inject
     private SystemCommandScanner systemCommandScanner;

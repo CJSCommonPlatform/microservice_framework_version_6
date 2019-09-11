@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.0.14] - 2018-09-11
+### Changed
+- System commands now run using a ManagedExecutor rather than an asynchronous EJB
+
 ## [6.0.13] - 2018-09-10
 ### Changed
 - SystemCommandStore moved to an interface implemented by DefaultSystemCommandStore. This is to allow stubbing in integration tests

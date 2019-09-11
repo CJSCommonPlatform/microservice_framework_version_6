@@ -16,6 +16,7 @@ import uk.gov.justice.services.jmx.api.state.ApplicationManagementState;
 import uk.gov.justice.services.jmx.command.ApplicationManagementStateRegistry;
 import uk.gov.justice.services.jmx.command.SystemCommandScanner;
 import uk.gov.justice.services.jmx.command.TestCommand;
+import uk.gov.justice.services.jmx.runner.AsynchronousCommandRunner;
 
 import java.util.List;
 
@@ -35,7 +36,7 @@ public class SystemCommanderTest {
     private Logger logger;
 
     @Mock
-    private AsynchronousCommandRunnerBean asynchronousCommandRunnerBean;
+    private AsynchronousCommandRunner asynchronousCommandRunner;
 
     @Mock
     private SystemCommandScanner systemCommandScanner;
@@ -51,14 +52,14 @@ public class SystemCommanderTest {
 
         final TestCommand testCommand = new TestCommand();
 
-        when(asynchronousCommandRunnerBean.isSupported(testCommand)).thenReturn(true);
+        when(asynchronousCommandRunner.isSupported(testCommand)).thenReturn(true);
 
         systemCommander.call(testCommand);
 
-        final InOrder inOrder = inOrder(logger, asynchronousCommandRunnerBean);
+        final InOrder inOrder = inOrder(logger, asynchronousCommandRunner);
 
         inOrder.verify(logger).info("Received System Command 'TEST_COMMAND'");
-        inOrder.verify(asynchronousCommandRunnerBean).run(testCommand);
+        inOrder.verify(asynchronousCommandRunner).run(testCommand);
     }
 
     @Test
@@ -66,7 +67,7 @@ public class SystemCommanderTest {
 
         final TestCommand testCommand = new TestCommand();
 
-        when(asynchronousCommandRunnerBean.isSupported(testCommand)).thenReturn(false);
+        when(asynchronousCommandRunner.isSupported(testCommand)).thenReturn(false);
 
         try {
             systemCommander.call(testCommand);

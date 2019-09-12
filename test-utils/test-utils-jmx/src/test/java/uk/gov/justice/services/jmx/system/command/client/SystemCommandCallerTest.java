@@ -1,30 +1,29 @@
 package uk.gov.justice.services.jmx.system.command.client;
 
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
-
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import org.junit.Test;
-import org.mockito.Mock;
-
-import static org.mockito.Mockito.*;
 import static uk.gov.justice.services.test.utils.common.host.TestHostProvider.getHost;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.getValueOfField;
 
 import uk.gov.justice.services.jmx.api.command.CatchupCommand;
+import uk.gov.justice.services.jmx.api.command.IndexerCatchupCommand;
 import uk.gov.justice.services.jmx.api.command.RebuildCommand;
 import uk.gov.justice.services.jmx.api.command.ShutterCommand;
 import uk.gov.justice.services.jmx.api.command.UnshutterCommand;
 import uk.gov.justice.services.jmx.api.mbean.SystemCommanderMBean;
 import uk.gov.justice.services.jmx.system.command.client.connection.Credentials;
 import uk.gov.justice.services.jmx.system.command.client.connection.JmxParameters;
-import uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil;
 
 import java.util.Optional;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SystemCommandCallerTest {
@@ -71,6 +70,27 @@ public class SystemCommandCallerTest {
         systemCommandCaller.callCatchup();
 
         verify(systemCommanderMBean).call(new CatchupCommand());
+        verify(systemCommanderClient).close();
+    }
+
+    @Test
+    public void shouldCallIndexerCatchup() throws Exception {
+
+        final String contextName = "contextName";
+
+        final JmxParameters jmxParameters = mock(JmxParameters.class);
+        final SystemCommanderClient systemCommanderClient = mock(SystemCommanderClient.class);
+        final SystemCommanderMBean systemCommanderMBean = mock(SystemCommanderMBean.class);
+
+        final SystemCommandCaller systemCommandCaller = new SystemCommandCaller(jmxParameters, testSystemCommanderClientFactory);
+
+        when(jmxParameters.getContextName()).thenReturn(contextName);
+        when(testSystemCommanderClientFactory.create(jmxParameters)).thenReturn(systemCommanderClient);
+        when(systemCommanderClient.getRemote(contextName)).thenReturn(systemCommanderMBean);
+
+        systemCommandCaller.callIndexerCatchup();
+
+        verify(systemCommanderMBean).call(new IndexerCatchupCommand());
         verify(systemCommanderClient).close();
     }
 

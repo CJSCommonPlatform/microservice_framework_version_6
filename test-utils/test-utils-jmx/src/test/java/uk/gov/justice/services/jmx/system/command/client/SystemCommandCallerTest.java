@@ -9,11 +9,14 @@ import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.common.host.TestHostProvider.getHost;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.getValueOfField;
 
+import uk.gov.justice.services.jmx.api.command.AddTriggerCommand;
 import uk.gov.justice.services.jmx.api.command.CatchupCommand;
 import uk.gov.justice.services.jmx.api.command.IndexerCatchupCommand;
 import uk.gov.justice.services.jmx.api.command.RebuildCommand;
+import uk.gov.justice.services.jmx.api.command.RemoveTriggerCommand;
 import uk.gov.justice.services.jmx.api.command.ShutterCommand;
 import uk.gov.justice.services.jmx.api.command.UnshutterCommand;
+import uk.gov.justice.services.jmx.api.command.ValidateCatchupCommand;
 import uk.gov.justice.services.jmx.api.mbean.SystemCommanderMBean;
 import uk.gov.justice.services.jmx.system.command.client.connection.Credentials;
 import uk.gov.justice.services.jmx.system.command.client.connection.JmxParameters;
@@ -133,6 +136,69 @@ public class SystemCommandCallerTest {
         systemCommandCaller.callUnshutter();
 
         verify(systemCommanderMBean).call(new UnshutterCommand());
+        verify(systemCommanderClient).close();
+    }
+
+    @Test
+    public void shouldCallAddTrigger() throws Exception {
+
+        final String contextName = "contextName";
+
+        final JmxParameters jmxParameters = mock(JmxParameters.class);
+        final SystemCommanderClient systemCommanderClient = mock(SystemCommanderClient.class);
+        final SystemCommanderMBean systemCommanderMBean = mock(SystemCommanderMBean.class);
+
+        final SystemCommandCaller systemCommandCaller = new SystemCommandCaller(jmxParameters, testSystemCommanderClientFactory);
+
+        when(jmxParameters.getContextName()).thenReturn(contextName);
+        when(testSystemCommanderClientFactory.create(jmxParameters)).thenReturn(systemCommanderClient);
+        when(systemCommanderClient.getRemote(contextName)).thenReturn(systemCommanderMBean);
+
+        systemCommandCaller.callAddTrigger();
+
+        verify(systemCommanderMBean).call(new AddTriggerCommand());
+        verify(systemCommanderClient).close();
+    }
+
+    @Test
+    public void shouldCallRemoveTrigger() throws Exception {
+
+        final String contextName = "contextName";
+
+        final JmxParameters jmxParameters = mock(JmxParameters.class);
+        final SystemCommanderClient systemCommanderClient = mock(SystemCommanderClient.class);
+        final SystemCommanderMBean systemCommanderMBean = mock(SystemCommanderMBean.class);
+
+        final SystemCommandCaller systemCommandCaller = new SystemCommandCaller(jmxParameters, testSystemCommanderClientFactory);
+
+        when(jmxParameters.getContextName()).thenReturn(contextName);
+        when(testSystemCommanderClientFactory.create(jmxParameters)).thenReturn(systemCommanderClient);
+        when(systemCommanderClient.getRemote(contextName)).thenReturn(systemCommanderMBean);
+
+        systemCommandCaller.callRemoveTrigger();
+
+        verify(systemCommanderMBean).call(new RemoveTriggerCommand());
+        verify(systemCommanderClient).close();
+    }
+
+    @Test
+    public void shouldCallValidateCatchup() throws Exception {
+
+        final String contextName = "contextName";
+
+        final JmxParameters jmxParameters = mock(JmxParameters.class);
+        final SystemCommanderClient systemCommanderClient = mock(SystemCommanderClient.class);
+        final SystemCommanderMBean systemCommanderMBean = mock(SystemCommanderMBean.class);
+
+        final SystemCommandCaller systemCommandCaller = new SystemCommandCaller(jmxParameters, testSystemCommanderClientFactory);
+
+        when(jmxParameters.getContextName()).thenReturn(contextName);
+        when(testSystemCommanderClientFactory.create(jmxParameters)).thenReturn(systemCommanderClient);
+        when(systemCommanderClient.getRemote(contextName)).thenReturn(systemCommanderMBean);
+
+        systemCommandCaller.callValidateCatchup();
+
+        verify(systemCommanderMBean).call(new ValidateCatchupCommand());
         verify(systemCommanderClient).close();
     }
 

@@ -5,6 +5,12 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.0.15] - 2018-09-19
+### Added
+- New SystemCommands: AddTriggerCommand, RemoveTriggerCommand and ValidateCatchupCommand
+### Changed
+- Updated framework-api to 4.1.0
+
 ## [6.0.14] - 2018-09-11
 ### Changed
 - System commands now run using a ManagedExecutor rather than an asynchronous EJB

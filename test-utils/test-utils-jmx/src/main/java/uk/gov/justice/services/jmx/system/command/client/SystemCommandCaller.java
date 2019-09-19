@@ -3,12 +3,15 @@ package uk.gov.justice.services.jmx.system.command.client;
 import static uk.gov.justice.services.jmx.system.command.client.connection.JmxParametersBuilder.jmxParameters;
 import static uk.gov.justice.services.test.utils.common.host.TestHostProvider.getHost;
 
+import uk.gov.justice.services.jmx.api.command.AddTriggerCommand;
 import uk.gov.justice.services.jmx.api.command.CatchupCommand;
 import uk.gov.justice.services.jmx.api.command.IndexerCatchupCommand;
 import uk.gov.justice.services.jmx.api.command.RebuildCommand;
+import uk.gov.justice.services.jmx.api.command.RemoveTriggerCommand;
 import uk.gov.justice.services.jmx.api.command.ShutterCommand;
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
 import uk.gov.justice.services.jmx.api.command.UnshutterCommand;
+import uk.gov.justice.services.jmx.api.command.ValidateCatchupCommand;
 import uk.gov.justice.services.jmx.system.command.client.connection.JmxParameters;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -64,6 +67,18 @@ public class SystemCommandCaller {
 
     public void callUnshutter() {
         callSystemCommand(new UnshutterCommand());
+    }
+
+    public void callAddTrigger() {
+        callSystemCommand(new AddTriggerCommand());
+    }
+
+    public void callRemoveTrigger() {
+        callSystemCommand(new RemoveTriggerCommand());
+    }
+
+    public void callValidateCatchup() {
+        callSystemCommand(new ValidateCatchupCommand());
     }
 
     private void callSystemCommand(final SystemCommand systemCommand) {

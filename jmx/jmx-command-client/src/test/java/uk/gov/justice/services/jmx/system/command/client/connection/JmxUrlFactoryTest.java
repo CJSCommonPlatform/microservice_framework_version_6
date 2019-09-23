@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import uk.gov.justice.services.jmx.system.command.client.MBeanClientConnectionException;
 import uk.gov.justice.services.jmx.system.command.client.MBeanClientException;
 
 import java.net.MalformedURLException;
@@ -42,7 +43,7 @@ public class JmxUrlFactoryTest {
         try {
             jmxUrlFactory.createUrl(dodglyHostName, port);
             fail();
-        } catch (final MBeanClientException expected) {
+        } catch (final MBeanClientConnectionException expected) {
             assertThat(expected.getMessage(), is("Failed to create JMX service url using host '{}\\' and port 9009"));
             assertThat(expected.getCause(), is(instanceOf(MalformedURLException.class)));
         }

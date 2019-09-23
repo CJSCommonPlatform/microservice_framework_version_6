@@ -8,6 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.jmx.system.command.client.connection.JmxParametersBuilder.jmxParameters;
 
+import uk.gov.justice.services.jmx.system.command.client.MBeanClientConnectionException;
 import uk.gov.justice.services.jmx.system.command.client.MBeanClientException;
 
 import java.io.IOException;
@@ -113,7 +114,7 @@ public class JMXConnectorFactoryTest {
         try {
             jmxConnectorFactory.createJmxConnector(jmxParameters);
             fail();
-        } catch (final MBeanClientException expected) {
+        } catch (final MBeanClientConnectionException expected) {
             assertThat(expected.getCause(), is(ioException));
             assertThat(expected.getMessage(), is("Failed to connect to JMX using url 'service:jmx:remote+http://localhost:2384'"));
         }

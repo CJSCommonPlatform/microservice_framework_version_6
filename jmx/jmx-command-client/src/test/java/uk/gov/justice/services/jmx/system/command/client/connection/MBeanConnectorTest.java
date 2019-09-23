@@ -10,6 +10,7 @@ import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.
 import uk.gov.justice.services.jmx.api.mbean.SystemCommanderMBean;
 import uk.gov.justice.services.jmx.api.name.CommandMBeanNameProvider;
 import uk.gov.justice.services.jmx.api.name.ObjectNameFactory;
+import uk.gov.justice.services.jmx.system.command.client.MBeanClientConnectionException;
 import uk.gov.justice.services.jmx.system.command.client.MBeanClientException;
 import uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil;
 
@@ -73,7 +74,7 @@ public class MBeanConnectorTest {
         try {
             mBeanConnector.connect(contextName, mBeanInterface, jmxConnector);
             fail();
-        } catch (final MBeanClientException expected) {
+        } catch (final MBeanClientConnectionException expected) {
             assertThat(expected.getCause(), is(ioException));
             assertThat(expected.getMessage(), is("Failed to get remote connection to MBean 'SystemCommanderMBean'"));
         }

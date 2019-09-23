@@ -5,6 +5,11 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.0.16] - 2018-09-23
+### Changed
+- Renamed ValidateCatchupCommand to VerifyCatchupCommand
+- Added MBeanClientConnectionException to the JMX client classes to show that a connection error occurred
+
 ## [6.0.15] - 2018-09-19
 ### Added
 - New SystemCommands: AddTriggerCommand, RemoveTriggerCommand and ValidateCatchupCommand

@@ -2,7 +2,7 @@ package uk.gov.justice.services.jmx.system.command.client.connection;
 
 import static java.lang.String.format;
 
-import uk.gov.justice.services.jmx.system.command.client.MBeanClientException;
+import uk.gov.justice.services.jmx.system.command.client.MBeanClientConnectionException;
 
 import java.io.IOException;
 import java.util.Map;
@@ -36,7 +36,7 @@ public class JMXConnectorFactory {
         } catch (final SaslException e) {
            throw new JmxAuthenticationException("Jmx authentication failed", e);
         } catch (final IOException e) {
-            throw new MBeanClientException(format("Failed to connect to JMX using url '%s'", serviceURL), e);
+            throw new MBeanClientConnectionException(format("Failed to connect to JMX using url '%s'", serviceURL), e);
         }
     }
 }

@@ -16,7 +16,7 @@ import uk.gov.justice.services.jmx.api.command.RebuildCommand;
 import uk.gov.justice.services.jmx.api.command.RemoveTriggerCommand;
 import uk.gov.justice.services.jmx.api.command.ShutterCommand;
 import uk.gov.justice.services.jmx.api.command.UnshutterCommand;
-import uk.gov.justice.services.jmx.api.command.ValidateCatchupCommand;
+import uk.gov.justice.services.jmx.api.command.VerifyCatchupCommand;
 import uk.gov.justice.services.jmx.api.mbean.SystemCommanderMBean;
 import uk.gov.justice.services.jmx.system.command.client.connection.Credentials;
 import uk.gov.justice.services.jmx.system.command.client.connection.JmxParameters;
@@ -198,7 +198,7 @@ public class SystemCommandCallerTest {
 
         systemCommandCaller.callValidateCatchup();
 
-        verify(systemCommanderMBean).call(new ValidateCatchupCommand());
+        verify(systemCommanderMBean).call(new VerifyCatchupCommand());
         verify(systemCommanderClient).close();
     }
 

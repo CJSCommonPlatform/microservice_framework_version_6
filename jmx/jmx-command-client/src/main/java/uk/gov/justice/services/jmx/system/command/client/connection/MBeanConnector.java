@@ -3,6 +3,7 @@ package uk.gov.justice.services.jmx.system.command.client.connection;
 import static java.lang.String.format;
 
 import uk.gov.justice.services.jmx.api.name.CommandMBeanNameProvider;
+import uk.gov.justice.services.jmx.system.command.client.MBeanClientConnectionException;
 import uk.gov.justice.services.jmx.system.command.client.MBeanClientException;
 
 import java.io.IOException;
@@ -32,7 +33,7 @@ public class MBeanConnector {
             throw new MBeanClientException(format("No JMX bean found with name '%s'. Is your context name of '%s' correct?", objectName.getKeyProperty("type"), contextName));
 
         } catch (final IOException e) {
-            throw new MBeanClientException(format("Failed to get remote connection to MBean '%s'", mBeanInterface.getSimpleName()), e);
+            throw new MBeanClientConnectionException(format("Failed to get remote connection to MBean '%s'", mBeanInterface.getSimpleName()), e);
         }
     }
 }

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="framework-system-003" author="TechPod"
+               logicalFilePath="003-add-command-status-table.xml">
+
+
+        <createTable tableName="system_command_status">
+            <column name="command_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="command_name" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="command_state" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status_changed_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="message" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="system_command_status" columnNames="command_id, command_state"/>
+
+        <rollback>
+            <dropTable tableName="system_command_status"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

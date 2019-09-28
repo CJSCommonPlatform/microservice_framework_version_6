@@ -35,6 +35,11 @@
             <groupId>uk.gov.justice.utils</groupId>
             <artifactId>utilities-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>persistence-jdbc</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- Test Dependencies -->
         <dependency>
@@ -56,6 +61,12 @@
             <groupId>uk.gov.justice.utils</groupId>
             <artifactId>test-utils-core</artifactId>
             <version>${test-utils.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>test-utils-framework-persistence</artifactId>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

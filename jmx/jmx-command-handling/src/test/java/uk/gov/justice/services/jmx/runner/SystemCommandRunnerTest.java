@@ -16,6 +16,8 @@ import uk.gov.justice.services.jmx.command.SystemCommandHandlerProxy;
 import uk.gov.justice.services.jmx.command.SystemCommandStore;
 import uk.gov.justice.services.jmx.command.TestCommand;
 
+import java.util.UUID;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -52,20 +54,22 @@ public class SystemCommandRunnerTest {
     @Test
     public void shouldFindTheCorrectProxyForTheCommandAndInvoke() throws Exception {
 
+        final UUID commandId = UUID.randomUUID();
         final TestCommand testCommand = new TestCommand();
 
         final SystemCommandHandlerProxy systemCommandHandlerProxy = mock(SystemCommandHandlerProxy.class);
 
         when(systemCommandStore.findCommandProxy(testCommand)).thenReturn(systemCommandHandlerProxy);
 
-        systemCommandRunner.run(testCommand);
+        systemCommandRunner.run(testCommand, commandId);
 
-        verify(systemCommandHandlerProxy).invokeCommand(testCommand);
+        verify(systemCommandHandlerProxy).invokeCommand(testCommand, commandId);
     }
 
     @Test
     public void shouldThrowSystemCommandFailedExceptionIfCommandFails() throws Exception {
 
+        final UUID commandId = UUID.randomUUID();
         final TestCommand testCommand = new TestCommand();
         final SystemCommandException systemCommandException = new SystemCommandException("Ooops");
         final String stackTrace = "stack trace";
@@ -73,11 +77,11 @@ public class SystemCommandRunnerTest {
         final SystemCommandHandlerProxy systemCommandHandlerProxy = mock(SystemCommandHandlerProxy.class);
 
         when(systemCommandStore.findCommandProxy(testCommand)).thenReturn(systemCommandHandlerProxy);
-        doThrow(systemCommandException).when(systemCommandHandlerProxy).invokeCommand(testCommand);
+        doThrow(systemCommandException).when(systemCommandHandlerProxy).invokeCommand(testCommand, commandId);
         when(stackTraceProvider.getStackTrace(systemCommandException)).thenReturn(stackTrace);
 
         try {
-            systemCommandRunner.run(testCommand);
+            systemCommandRunner.run(testCommand, commandId);
             fail();
         } catch (final SystemCommandFailedException expected) {
             assertThat(expected.getMessage(), is("Failed to run System Command 'TEST_COMMAND'. Caused by uk.gov.justice.services.jmx.api.SystemCommandException: Ooops"));

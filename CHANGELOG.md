@@ -4,6 +4,9 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Changed
+- All SystemCommandHandler methods now also take a mandatory commandId as a parameter
+- SystemCommander JMX bean now returns a unique command id for each command that it runs
 
 ## [6.0.16] - 2018-09-23
 ### Changed

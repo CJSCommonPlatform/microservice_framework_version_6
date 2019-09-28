@@ -7,6 +7,7 @@ import uk.gov.justice.services.jmx.api.command.SystemCommand;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.UUID;
 
 public class SystemCommandHandlerProxy {
 
@@ -30,12 +31,12 @@ public class SystemCommandHandlerProxy {
         return instance;
     }
 
-    public void invokeCommand(final SystemCommand systemCommand) throws SystemCommandInvocationException {
+    public void invokeCommand(final SystemCommand systemCommand, final UUID commandId) throws SystemCommandInvocationException {
 
         handlerMethodValidator.checkHandlerMethodIsValid(method, instance);
 
         try {
-            method.invoke(instance, systemCommand);
+            method.invoke(instance, systemCommand, commandId);
         } catch (final IllegalAccessException e) {
 
             final String message = format("Failed to call method '%s()' on %s. Is the method public?",

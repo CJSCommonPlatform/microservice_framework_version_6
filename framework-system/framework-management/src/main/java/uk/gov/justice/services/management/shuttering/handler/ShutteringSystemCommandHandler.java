@@ -17,6 +17,8 @@ import uk.gov.justice.services.jmx.command.HandlesSystemCommand;
 import uk.gov.justice.services.management.shuttering.events.ShutteringRequestedEvent;
 import uk.gov.justice.services.management.shuttering.events.UnshutteringRequestedEvent;
 
+import java.util.UUID;
+
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
@@ -40,7 +42,7 @@ public class ShutteringSystemCommandHandler {
     private Logger logger;
 
     @HandlesSystemCommand(SHUTTER)
-    public void onShutterRequested(final ShutterCommand shutterCommand) {
+    public void onShutterRequested(final ShutterCommand shutterCommand, final UUID commandId) {
         final ApplicationManagementState shutteredState = applicationManagementStateRegistry.getApplicationManagementState();
         if(shutteredState == UNSHUTTERED) {
             applicationManagementStateRegistry.setApplicationManagementState(SHUTTERING_IN_PROGRESS);
@@ -51,7 +53,7 @@ public class ShutteringSystemCommandHandler {
     }
 
     @HandlesSystemCommand(UNSHUTTER)
-    public void onUnshutterRequested(final UnshutterCommand unshutterCommand) {
+    public void onUnshutterRequested(final UnshutterCommand unshutterCommand, final UUID commandId) {
         final ApplicationManagementState shutteredState = applicationManagementStateRegistry.getApplicationManagementState();
         if(shutteredState == SHUTTERED) {
             applicationManagementStateRegistry.setApplicationManagementState(UNSHUTTERING_IN_PROGRESS);

@@ -10,6 +10,7 @@ import uk.gov.justice.services.jmx.command.SystemCommandScanner;
 import uk.gov.justice.services.jmx.runner.AsynchronousCommandRunner;
 
 import java.util.List;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -30,12 +31,12 @@ public class SystemCommander implements SystemCommanderMBean {
     private ApplicationManagementStateRegistry applicationManagementStateRegistry;
 
     @Override
-    public void call(final SystemCommand systemCommand) {
+    public UUID call(final SystemCommand systemCommand) {
 
         logger.info(format("Received System Command '%s'", systemCommand.getName()));
 
         if(asynchronousCommandRunnerBean.isSupported(systemCommand)) {
-            asynchronousCommandRunnerBean.run(systemCommand);
+            return asynchronousCommandRunnerBean.run(systemCommand);
         } else {
            throw new UnsupportedSystemCommandException(format("The system command '%s' is not supported on this context.", systemCommand.getName()));
         }

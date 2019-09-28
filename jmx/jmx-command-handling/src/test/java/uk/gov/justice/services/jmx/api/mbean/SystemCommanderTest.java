@@ -1,6 +1,7 @@
 package uk.gov.justice.services.jmx.api.mbean;
 
 import static java.util.Arrays.asList;
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -19,6 +20,7 @@ import uk.gov.justice.services.jmx.command.TestCommand;
 import uk.gov.justice.services.jmx.runner.AsynchronousCommandRunner;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,11 +52,13 @@ public class SystemCommanderTest {
     @Test
     public void shouldRunTheSystemCommandIfSuppoorted() throws Exception {
 
+        final UUID commandId = randomUUID();
         final TestCommand testCommand = new TestCommand();
 
         when(asynchronousCommandRunner.isSupported(testCommand)).thenReturn(true);
+        when(asynchronousCommandRunner.run(testCommand)).thenReturn(commandId);
 
-        systemCommander.call(testCommand);
+        assertThat(systemCommander.call(testCommand), is(commandId));
 
         final InOrder inOrder = inOrder(logger, asynchronousCommandRunner);
 

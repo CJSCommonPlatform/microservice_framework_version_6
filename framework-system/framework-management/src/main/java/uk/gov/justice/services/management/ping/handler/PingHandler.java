@@ -6,6 +6,8 @@ import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.jmx.api.command.PingCommand;
 import uk.gov.justice.services.jmx.command.HandlesSystemCommand;
 
+import java.util.UUID;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -19,7 +21,7 @@ public class PingHandler {
     private UtcClock clock;
 
     @HandlesSystemCommand(PING)
-    public void ping(@SuppressWarnings("unused") final PingCommand pingCommand) {
+    public void ping(@SuppressWarnings("unused") final PingCommand pingCommand, @SuppressWarnings("unused") final UUID commandId) {
         logger.info("********** Received system command '" + PING + "' at " + clock.now() + " **********");
     }
 }

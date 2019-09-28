@@ -7,6 +7,7 @@ import uk.gov.justice.services.jmx.api.InvalidHandlerMethodException;
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
 
 import java.lang.reflect.Method;
+import java.util.UUID;
 
 public class HandlerMethodValidator {
 
@@ -19,22 +20,23 @@ public class HandlerMethodValidator {
 
     private void checkMethodPublic(final Method handlerMethod, final Object instance) {
 
-        if(! isPublic(handlerMethod.getModifiers())) {
-           throw new InvalidHandlerMethodException(format("Handler method '%s' on class '%s' is not public.", handlerMethod.getName(), instance.getClass().getName()));
+        if (!isPublic(handlerMethod.getModifiers())) {
+            throw new InvalidHandlerMethodException(format("Handler method '%s' on class '%s' is not public.", handlerMethod.getName(), instance.getClass().getName()));
         }
     }
 
     private void checkMethodParameter(final Method handlerMethod, final Object instance) {
         final Class<?>[] parameterTypes = handlerMethod.getParameterTypes();
 
-        if (parameterTypes.length != 1) {
-            throw new InvalidHandlerMethodException(format("Invalid handler method '%s' on class '%s'. Method should have one parameter of type '%s'.",
-                   handlerMethod.getName(),
-                   instance.getClass().getName(),
-                   SystemCommand.class.getName()));
+        if (parameterTypes.length != 2) {
+            throw new InvalidHandlerMethodException(format("Invalid handler method '%s' on class '%s'. Method should have 2 parameters. First of type '%s' and second of type '%s'.",
+                    handlerMethod.getName(),
+                    instance.getClass().getName(),
+                    SystemCommand.class.getName(),
+                    UUID.class.getName()));
         }
 
-        if (! SystemCommand.class.isAssignableFrom(parameterTypes[0])) {
+        if (!SystemCommand.class.isAssignableFrom(parameterTypes[0])) {
             throw new InvalidHandlerMethodException(format("Invalid handler method '%s' on class '%s'. Method should have one parameter of type '%s'.",
                     handlerMethod.getName(),
                     instance.getClass().getName(),

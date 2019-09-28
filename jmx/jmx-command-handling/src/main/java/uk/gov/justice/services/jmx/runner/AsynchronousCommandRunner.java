@@ -1,6 +1,10 @@
 package uk.gov.justice.services.jmx.runner;
 
+import static java.util.UUID.randomUUID;
+
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
+
+import java.util.UUID;
 
 import javax.annotation.Resource;
 import javax.enterprise.concurrent.ManagedExecutorService;
@@ -15,14 +19,18 @@ public class AsynchronousCommandRunner {
     private SystemCommandRunner systemCommandRunner;
 
 
-    public void run(final SystemCommand systemCommand) {
+    public UUID run(final SystemCommand systemCommand) {
 
+        final UUID commandId = randomUUID();
         final RunSystemCommandTask runSystemCommandTask = new RunSystemCommandTask(
                 systemCommandRunner,
-                systemCommand
+                systemCommand,
+                commandId
         );
 
         managedExecutorService.submit(runSystemCommandTask);
+
+        return commandId;
     }
 
     public boolean isSupported(final SystemCommand systemCommand) {

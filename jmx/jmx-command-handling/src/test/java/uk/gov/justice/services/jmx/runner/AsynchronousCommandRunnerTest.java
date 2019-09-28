@@ -9,6 +9,8 @@ import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
 import uk.gov.justice.services.jmx.command.TestCommand;
 
+import java.util.UUID;
+
 import javax.enterprise.concurrent.ManagedExecutorService;
 
 import org.junit.Test;
@@ -18,7 +20,6 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-
 
 @RunWith(MockitoJUnitRunner.class)
 public class AsynchronousCommandRunnerTest {
@@ -40,7 +41,7 @@ public class AsynchronousCommandRunnerTest {
 
         final SystemCommand systemCommand = new TestCommand();
 
-        asynchronousCommandRunner.run(systemCommand);
+        final UUID commandId = asynchronousCommandRunner.run(systemCommand);
 
         verify(managedExecutorService).submit(runSystemCommandTaskCaptor.capture());
 
@@ -48,6 +49,7 @@ public class AsynchronousCommandRunnerTest {
 
         assertThat(getValueOfField(runSystemCommandTask, "systemCommandRunner", SystemCommandRunner.class), is(systemCommandRunner));
         assertThat(getValueOfField(runSystemCommandTask, "systemCommand", SystemCommand.class), is(systemCommand));
+        assertThat(getValueOfField(runSystemCommandTask, "commandId", UUID.class), is(commandId));
     }
 
     @Test

@@ -29,6 +29,9 @@ public class ShutterCommandApiObserver {
 
         logger.info("Shuttering of Command API complete");
 
-        shutteringRegistry.markShutteringCompleteFor(getClass(), shutteringProcessStartedEvent.getTarget());
+        shutteringRegistry.markShutteringCompleteFor(
+                shutteringProcessStartedEvent.getCommandId(),
+                getClass(),
+                shutteringProcessStartedEvent.getTarget());
     }
 }

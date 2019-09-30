@@ -15,6 +15,7 @@ import uk.gov.justice.services.management.shuttering.events.ShutteringCompleteEv
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -57,18 +58,17 @@ public class ShutteringRegistry {
         allShutterables.forEach(shutterableClass -> shutteringStateMap.put(shutterableClass, SHUTTERING_REQUESTED));
     }
 
-    public void markShutteringCompleteFor(final Class<?> shutterable, final SystemCommand target) {
+    public void markShutteringCompleteFor(final UUID commandId, final Class<?> shutterable, final SystemCommand target) {
 
 
         logger.info("Marking shuttering complete for " + shutterable.getSimpleName());
         shutteringStateMap.put(shutterable, SHUTTERING_COMPLETE);
 
         if (allShutteringComplete()) {
-
             logger.info("All shuttering complete: " + allShutterables.stream().map(Class::getSimpleName).collect(toList()));
             applicationManagementStateRegistry.setApplicationManagementState(SHUTTERED);
             shutteringStateMap.clear();
-            shutteringCompleteEventFirer.fire(new ShutteringCompleteEvent(target, clock.now()));
+            shutteringCompleteEventFirer.fire(new ShutteringCompleteEvent(commandId, target, clock.now()));
         } 
     }
 

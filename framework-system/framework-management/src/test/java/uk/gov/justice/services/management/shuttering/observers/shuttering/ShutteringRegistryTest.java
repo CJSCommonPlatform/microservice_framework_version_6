@@ -1,5 +1,6 @@
 package uk.gov.justice.services.management.shuttering.observers.shuttering;
 
+import static java.util.UUID.randomUUID;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -15,6 +16,7 @@ import uk.gov.justice.services.management.shuttering.events.ShutteringCompleteEv
 
 import java.time.ZonedDateTime;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.enterprise.event.Event;
 
@@ -46,6 +48,7 @@ public class ShutteringRegistryTest {
     @Test
     public void shouldFireShutteringCompleteOnceAllShutterablesAreMarkedAsComplete() throws Exception {
 
+        final UUID commandId = randomUUID();
         final SystemCommand systemCommand = mock(SystemCommand.class);
         final ZonedDateTime now = new UtcClock().now();
 
@@ -64,21 +67,22 @@ public class ShutteringRegistryTest {
 
         shutteringRegistry.shutteringStarted();
 
-        shutteringRegistry.markShutteringCompleteFor(Shutterable_2.class, systemCommand);
+        shutteringRegistry.markShutteringCompleteFor(commandId, Shutterable_2.class, systemCommand);
         verify(logger).info("Marking shuttering complete for Shutterable_2");
-        shutteringRegistry.markShutteringCompleteFor(Shutterable_1.class, systemCommand);
+        shutteringRegistry.markShutteringCompleteFor(commandId, Shutterable_1.class, systemCommand);
         verify(logger).info("Marking shuttering complete for Shutterable_1");
-        shutteringRegistry.markShutteringCompleteFor(Shutterable_3.class, systemCommand);
+        shutteringRegistry.markShutteringCompleteFor(commandId, Shutterable_3.class, systemCommand);
         verify(logger).info("Marking shuttering complete for Shutterable_3");
 
         verify(logger).info("All shuttering complete: [Shutterable_1, Shutterable_2, Shutterable_3]");
         verify(applicationManagementStateRegistry).setApplicationManagementState(SHUTTERED);
-        verify(shutteringCompleteEventFirer, times(1)).fire(new ShutteringCompleteEvent(systemCommand, now));
+        verify(shutteringCompleteEventFirer, times(1)).fire(new ShutteringCompleteEvent(commandId, systemCommand, now));
     }
 
     @Test
     public void shouldNotFireShutteringCompleteIfNotAllShutterablesAreMarkedAsComplete() throws Exception {
 
+        final UUID commandId = randomUUID();
         final SystemCommand systemCommand = mock(SystemCommand.class);
 
         clearShutteringRegistry();
@@ -89,8 +93,8 @@ public class ShutteringRegistryTest {
 
         shutteringRegistry.shutteringStarted();
 
-        shutteringRegistry.markShutteringCompleteFor(Shutterable_2.class, systemCommand);
-        shutteringRegistry.markShutteringCompleteFor(Shutterable_3.class, systemCommand);
+        shutteringRegistry.markShutteringCompleteFor(commandId, Shutterable_2.class, systemCommand);
+        shutteringRegistry.markShutteringCompleteFor(commandId, Shutterable_3.class, systemCommand);
 
         verifyZeroInteractions(shutteringCompleteEventFirer);
     }

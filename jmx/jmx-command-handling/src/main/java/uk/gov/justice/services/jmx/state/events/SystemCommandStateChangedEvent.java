@@ -1,26 +1,23 @@
-package uk.gov.justice.services.jmx.state.domain;
+package uk.gov.justice.services.jmx.state.events;
+
+import uk.gov.justice.services.jmx.api.command.SystemCommand;
+import uk.gov.justice.services.jmx.state.domain.SystemCommandStatus.CommandState;
 
 import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
-public class SystemCommandStatus {
+public class SystemCommandStateChangedEvent {
 
     private final UUID commandId;
-    private final String systemCommand;
+    private final SystemCommand systemCommand;
     private final CommandState commandState;
     private final ZonedDateTime statusChangedAt;
     private final String message;
 
-    public enum CommandState {
-        IN_PROGRESS,
-        COMPLETE,
-        FAILED
-    }
-
-    public SystemCommandStatus(
+    public SystemCommandStateChangedEvent(
             final UUID commandId,
-            final String systemCommand,
+            final SystemCommand systemCommand,
             final CommandState commandState,
             final ZonedDateTime statusChangedAt,
             final String message) {
@@ -35,7 +32,7 @@ public class SystemCommandStatus {
         return commandId;
     }
 
-    public String getSystemCommandName() {
+    public SystemCommand getSystemCommand() {
         return systemCommand;
     }
 
@@ -54,8 +51,8 @@ public class SystemCommandStatus {
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
-        if (!(o instanceof SystemCommandStatus)) return false;
-        final SystemCommandStatus that = (SystemCommandStatus) o;
+        if (!(o instanceof SystemCommandStateChangedEvent)) return false;
+        final SystemCommandStateChangedEvent that = (SystemCommandStateChangedEvent) o;
         return Objects.equals(commandId, that.commandId) &&
                 Objects.equals(systemCommand, that.systemCommand) &&
                 commandState == that.commandState &&
@@ -70,12 +67,12 @@ public class SystemCommandStatus {
 
     @Override
     public String toString() {
-        return "CommandStatus{" +
+        return "SystemCommandStateEvent{" +
                 "commandId=" + commandId +
                 ", systemCommand=" + systemCommand +
                 ", commandState=" + commandState +
                 ", statusChangedAt=" + statusChangedAt +
-                ", message=" + message +
+                ", message='" + message + '\'' +
                 '}';
     }
 }

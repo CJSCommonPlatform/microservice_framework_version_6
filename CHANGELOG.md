@@ -5,6 +5,11 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.2.0-M1] - 2018-10-02
+### Added
+- Observer for SystemCommand lifecycle to allow for querying the current state of a SystemCommand
+- New table in the system database 'system_command_status'
+
 ## [6.1.1] - 2018-10-01
 ### Added
 - Injectable debug logger that logs only if debug logging is set. 

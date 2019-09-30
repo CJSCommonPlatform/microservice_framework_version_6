@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.jmx.system.command.client.connection.JmxParametersBuilder.jmxParameters;
 
 import uk.gov.justice.services.jmx.system.command.client.MBeanClientConnectionException;
-import uk.gov.justice.services.jmx.system.command.client.MBeanClientException;
 
 import java.io.IOException;
 import java.util.Map;

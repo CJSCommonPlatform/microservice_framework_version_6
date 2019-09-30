@@ -59,7 +59,7 @@ public class SystemCommandStatusRepository {
              final PreparedStatement preparedStatement = connection.prepareStatement(INSERT_COMMAND_STATUS)) {
 
             preparedStatement.setObject(1, systemCommandStatus.getCommandId());
-            preparedStatement.setString(2, systemCommandStatus.getSystemCommand());
+            preparedStatement.setString(2, systemCommandStatus.getSystemCommandName());
             preparedStatement.setString(3, systemCommandStatus.getCommandState().name());
             preparedStatement.setTimestamp(4, toSqlTimestamp(systemCommandStatus.getStatusChangedAt()));
             preparedStatement.setString(5, systemCommandStatus.getMessage());

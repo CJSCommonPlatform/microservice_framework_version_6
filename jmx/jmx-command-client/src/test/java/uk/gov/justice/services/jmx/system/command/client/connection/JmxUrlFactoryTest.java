@@ -6,7 +6,6 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import uk.gov.justice.services.jmx.system.command.client.MBeanClientConnectionException;
-import uk.gov.justice.services.jmx.system.command.client.MBeanClientException;
 
 import java.net.MalformedURLException;
 

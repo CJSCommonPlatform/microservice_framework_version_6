@@ -4,6 +4,8 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [6.1.1] - 2018-10-01
 ### Added
 - Injectable debug logger that logs only if debug logging is set. 
 

@@ -2,11 +2,9 @@ package uk.gov.justice.services.jmx.state.persistence;
 
 import static java.util.Optional.empty;
 import static java.util.UUID.randomUUID;
-import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.isNotNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.jmx.api.command.CatchupCommand.CATCHUP;
 import static uk.gov.justice.services.jmx.api.command.IndexerCatchupCommand.INDEXER_CATCHUP;

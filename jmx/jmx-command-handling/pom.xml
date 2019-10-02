@@ -22,6 +22,11 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>uk.gov.justice.framework-api</groupId>
+            <artifactId>framework-api-common</artifactId>
+            <version>${framework-api.version}</version>
+        </dependency>
+        <dependency>
             <groupId>uk.gov.justice.services</groupId>
             <artifactId>framework-utilities</artifactId>
             <version>${project.version}</version>
@@ -67,6 +72,11 @@
             <groupId>uk.gov.justice.services</groupId>
             <artifactId>test-utils-framework-persistence</artifactId>
             <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

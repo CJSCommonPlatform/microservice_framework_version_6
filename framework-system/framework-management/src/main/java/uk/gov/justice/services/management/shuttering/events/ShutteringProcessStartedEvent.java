@@ -4,15 +4,25 @@ import uk.gov.justice.services.jmx.api.command.SystemCommand;
 
 import java.time.ZonedDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
 public class ShutteringProcessStartedEvent {
 
+    private final UUID commandId;
     private final SystemCommand target;
     private final ZonedDateTime shutteringStartedAt;
 
-    public ShutteringProcessStartedEvent(final SystemCommand target, final ZonedDateTime shutteringStartedAt) {
+    public ShutteringProcessStartedEvent(
+            final UUID commandId,
+            final SystemCommand target,
+            final ZonedDateTime shutteringStartedAt) {
+        this.commandId = commandId;
         this.target = target;
         this.shutteringStartedAt = shutteringStartedAt;
+    }
+
+    public UUID getCommandId() {
+        return commandId;
     }
 
     public SystemCommand getTarget() {
@@ -28,19 +38,21 @@ public class ShutteringProcessStartedEvent {
         if (this == o) return true;
         if (!(o instanceof ShutteringProcessStartedEvent)) return false;
         final ShutteringProcessStartedEvent that = (ShutteringProcessStartedEvent) o;
-        return Objects.equals(target, that.target) &&
+        return Objects.equals(commandId, that.commandId) &&
+                Objects.equals(target, that.target) &&
                 Objects.equals(shutteringStartedAt, that.shutteringStartedAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(target, shutteringStartedAt);
+        return Objects.hash(commandId, target, shutteringStartedAt);
     }
 
     @Override
     public String toString() {
-        return "ShutteringProcessStarted{" +
-                "target=" + target +
+        return "ShutteringProcessStartedEvent{" +
+                "commandId=" + commandId +
+                ", target=" + target +
                 ", shutteringStartedAt=" + shutteringStartedAt +
                 '}';
     }

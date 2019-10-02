@@ -12,7 +12,6 @@ import uk.gov.justice.services.jmx.api.name.CommandMBeanNameProvider;
 import uk.gov.justice.services.jmx.api.name.ObjectNameFactory;
 import uk.gov.justice.services.jmx.system.command.client.MBeanClientConnectionException;
 import uk.gov.justice.services.jmx.system.command.client.MBeanClientException;
-import uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil;
 
 import java.io.IOException;
 

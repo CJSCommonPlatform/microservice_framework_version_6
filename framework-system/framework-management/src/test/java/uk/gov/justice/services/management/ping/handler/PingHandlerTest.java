@@ -10,7 +10,6 @@ import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.jmx.api.command.PingCommand;
 
 import java.time.ZonedDateTime;
-import java.util.UUID;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

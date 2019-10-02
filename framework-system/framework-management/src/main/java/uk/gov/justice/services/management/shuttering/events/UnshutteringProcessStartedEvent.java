@@ -4,15 +4,25 @@ import uk.gov.justice.services.jmx.api.command.SystemCommand;
 
 import java.time.ZonedDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
 public class UnshutteringProcessStartedEvent {
 
+    private final UUID commandId;
     private final SystemCommand target;
     private final ZonedDateTime unshutteringStartedAt;
 
-    public UnshutteringProcessStartedEvent(final SystemCommand target, final ZonedDateTime unshutteringStartedAt) {
+    public UnshutteringProcessStartedEvent(
+            final UUID commandId,
+            final SystemCommand target,
+            final ZonedDateTime unshutteringStartedAt) {
+        this.commandId = commandId;
         this.target = target;
         this.unshutteringStartedAt = unshutteringStartedAt;
+    }
+
+    public UUID getCommandId() {
+        return commandId;
     }
 
     public SystemCommand getTarget() {
@@ -28,19 +38,21 @@ public class UnshutteringProcessStartedEvent {
         if (this == o) return true;
         if (!(o instanceof UnshutteringProcessStartedEvent)) return false;
         final UnshutteringProcessStartedEvent that = (UnshutteringProcessStartedEvent) o;
-        return Objects.equals(target, that.target) &&
+        return Objects.equals(commandId, that.commandId) &&
+                Objects.equals(target, that.target) &&
                 Objects.equals(unshutteringStartedAt, that.unshutteringStartedAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(target, unshutteringStartedAt);
+        return Objects.hash(commandId, target, unshutteringStartedAt);
     }
 
     @Override
     public String toString() {
-        return "UnshutteringProcessStarted{" +
-                "target=" + target +
+        return "UnshutteringProcessStartedEvent{" +
+                "commandId=" + commandId +
+                ", target=" + target +
                 ", unshutteringStartedAt=" + unshutteringStartedAt +
                 '}';
     }

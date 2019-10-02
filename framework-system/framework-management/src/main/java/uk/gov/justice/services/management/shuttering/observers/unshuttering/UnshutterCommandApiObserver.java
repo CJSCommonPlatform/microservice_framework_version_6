@@ -29,6 +29,9 @@ public class UnshutterCommandApiObserver {
 
         logger.info("Unshuttering of Command API complete");
 
-        unshutteringRegistry.markUnshutteringCompleteFor(getClass(), unshutteringProcessStartedEvent.getTarget());
+        unshutteringRegistry.markUnshutteringCompleteFor(
+                unshutteringProcessStartedEvent.getCommandId(),
+                getClass(),
+                unshutteringProcessStartedEvent.getTarget());
     }
 }

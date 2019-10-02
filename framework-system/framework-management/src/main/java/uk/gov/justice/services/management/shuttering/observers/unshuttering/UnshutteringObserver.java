@@ -41,7 +41,10 @@ public class UnshutteringObserver {
 
         shutteringRegistry.unshutteringStarted();
 
-        shutteringProcessStartedEventFirer.fire(new UnshutteringProcessStartedEvent(target, clock.now()));
+        shutteringProcessStartedEventFirer.fire(new UnshutteringProcessStartedEvent(
+                unshutteringRequestedEvent.getCommandId(),
+                target,
+                clock.now()));
     }
 
     public void onUnshutteringComplete(@Observes final UnshutteringCompleteEvent unshutteringCompleteEvent) {

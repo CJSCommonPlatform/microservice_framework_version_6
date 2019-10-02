@@ -14,6 +14,7 @@ import uk.gov.justice.services.management.shuttering.events.UnshutteringComplete
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -56,7 +57,10 @@ public class UnshutteringRegistry {
         allUnshutteringExecutors.forEach(unshutterableClass -> unshutteringStateMap.put(unshutterableClass, UNSHUTTERING_REQUESTED));
     }
 
-    public void markUnshutteringCompleteFor(final Class<?> unshutterable, final SystemCommand target) {
+    public void markUnshutteringCompleteFor(
+            final UUID commandId,
+            final Class<?> unshutterable,
+            final SystemCommand target) {
 
         logger.info("Marking unshuttering complete for " + unshutterable.getSimpleName());
         unshutteringStateMap.put(unshutterable, UNSHUTTERING_COMPLETE);
@@ -65,7 +69,7 @@ public class UnshutteringRegistry {
             logger.info("All unshuttering complete: " + allUnshutteringExecutors.stream().map(Class::getSimpleName).collect(toList()));
             unshutteringStateMap.clear();
             applicationManagementStateRegistry.setApplicationManagementState(UNSHUTTERED);
-            unshutteringCompleteEventFirer.fire(new UnshutteringCompleteEvent(target, clock.now()));
+            unshutteringCompleteEventFirer.fire(new UnshutteringCompleteEvent(commandId, target, clock.now()));
         }
     }
 

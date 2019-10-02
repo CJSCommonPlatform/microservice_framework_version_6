@@ -4,15 +4,25 @@ import uk.gov.justice.services.jmx.api.command.SystemCommand;
 
 import java.time.ZonedDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
 public class UnshutteringRequestedEvent {
 
     private final ZonedDateTime unshutteringRequestedAt;
+    private final UUID commandId;
     private final SystemCommand target;
 
-    public UnshutteringRequestedEvent(final SystemCommand target, final ZonedDateTime unshutteringRequestedAt) {
+    public UnshutteringRequestedEvent(
+            final UUID commandId,
+            final SystemCommand target,
+            final ZonedDateTime unshutteringRequestedAt) {
+        this.commandId = commandId;
         this.target = target;
         this.unshutteringRequestedAt = unshutteringRequestedAt;
+    }
+
+    public UUID getCommandId() {
+        return commandId;
     }
 
     public SystemCommand getTarget() {

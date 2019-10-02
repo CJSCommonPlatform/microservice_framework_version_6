@@ -5,7 +5,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
-## [6.2.0-M1] - 2018-10-02
+## [6.2.0-M2] - 2018-10-02
 ### Added
 - Added commandId to all SystemEvents
 

@@ -7,6 +7,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [6.2.0-M1] - 2018-10-02
 ### Added
+- Added commandId to all SystemEvents
+
+## [6.2.0-M1] - 2018-10-02
+### Added
 - Observer for SystemCommand lifecycle to allow for querying the current state of a SystemCommand
 - New table in the system database 'system_command_status'
 

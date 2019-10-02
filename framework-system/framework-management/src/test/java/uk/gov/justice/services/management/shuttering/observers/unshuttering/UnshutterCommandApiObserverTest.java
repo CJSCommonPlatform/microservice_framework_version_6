@@ -1,5 +1,6 @@
 package uk.gov.justice.services.management.shuttering.observers.unshuttering;
 
+import static java.util.UUID.randomUUID;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 
@@ -7,6 +8,8 @@ import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
 import uk.gov.justice.services.management.shuttering.events.UnshutteringProcessStartedEvent;
 import uk.gov.justice.services.management.shuttering.process.CommandApiShutteringBean;
+
+import java.util.UUID;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,9 +37,11 @@ public class UnshutterCommandApiObserverTest {
     @Test
     public void shouldUnshutterTheCommandApiAndFireTheUnshutteringCompleteEvent() throws Exception {
 
+        final UUID commandId = randomUUID();
         final SystemCommand systemCommand = mock(SystemCommand.class);
 
         final UnshutteringProcessStartedEvent unshutteringProcessStartedEvent = new UnshutteringProcessStartedEvent(
+                commandId,
                 systemCommand,
                 new UtcClock().now()
         );
@@ -48,6 +53,6 @@ public class UnshutterCommandApiObserverTest {
         inOrder.verify(logger).info("Unshuttering Command API");
         inOrder.verify(commandApiShutteringBean).unshutter();
         inOrder.verify(logger).info("Unshuttering of Command API complete");
-        inOrder.verify(unshutteringRegistry).markUnshutteringCompleteFor(UnshutterCommandApiObserver.class, systemCommand);
+        inOrder.verify(unshutteringRegistry).markUnshutteringCompleteFor(commandId, UnshutterCommandApiObserver.class, systemCommand);
     }
 }

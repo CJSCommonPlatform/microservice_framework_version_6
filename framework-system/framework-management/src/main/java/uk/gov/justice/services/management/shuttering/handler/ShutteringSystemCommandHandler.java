@@ -60,7 +60,7 @@ public class ShutteringSystemCommandHandler {
         final ApplicationManagementState shutteredState = applicationManagementStateRegistry.getApplicationManagementState();
         if(shutteredState == SHUTTERED) {
             applicationManagementStateRegistry.setApplicationManagementState(UNSHUTTERING_IN_PROGRESS);
-            unshutteringRequestedEventFirer.fire(new UnshutteringRequestedEvent(unshutterCommand, clock.now()));
+            unshutteringRequestedEventFirer.fire(new UnshutteringRequestedEvent(commandId, unshutterCommand, clock.now()));
         } else {
             logger.info(format("Ignoring command '%s'. Context shuttered state is '%s'", unshutterCommand, shutteredState));
         }

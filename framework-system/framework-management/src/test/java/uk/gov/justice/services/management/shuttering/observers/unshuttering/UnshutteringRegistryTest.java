@@ -1,5 +1,6 @@
 package uk.gov.justice.services.management.shuttering.observers.unshuttering;
 
+import static java.util.UUID.randomUUID;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -15,6 +16,7 @@ import uk.gov.justice.services.management.shuttering.events.UnshutteringComplete
 
 import java.time.ZonedDateTime;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.enterprise.event.Event;
 
@@ -46,6 +48,7 @@ public class UnshutteringRegistryTest {
     @Test
     public void shouldFireUnshutteringCompleteOnceAllUnshutterablesAreMarkedAsComplete() throws Exception {
 
+        final UUID commandId = randomUUID();
         final String commandName = "CATCHUP";
         final SystemCommand systemCommand = mock(SystemCommand.class);
         final ZonedDateTime now = new UtcClock().now();
@@ -66,23 +69,24 @@ public class UnshutteringRegistryTest {
 
         unshutteringRegistry.unshutteringStarted();
 
-        unshutteringRegistry.markUnshutteringCompleteFor(Unshutterable_2.class, systemCommand);
+        unshutteringRegistry.markUnshutteringCompleteFor(commandId, Unshutterable_2.class, systemCommand);
         verify(logger).info("Marking unshuttering complete for Unshutterable_2");
 
-        unshutteringRegistry.markUnshutteringCompleteFor(Unshutterable_1.class, systemCommand);
+        unshutteringRegistry.markUnshutteringCompleteFor(commandId, Unshutterable_1.class, systemCommand);
         verify(logger).info("Marking unshuttering complete for Unshutterable_1");
 
-        unshutteringRegistry.markUnshutteringCompleteFor(Unshutterable_3.class, systemCommand);
+        unshutteringRegistry.markUnshutteringCompleteFor(commandId, Unshutterable_3.class, systemCommand);
         verify(logger).info("Marking unshuttering complete for Unshutterable_3");
 
         verify(logger).info("All unshuttering complete: [Unshutterable_1, Unshutterable_2, Unshutterable_3]");
         verify(applicationManagementStateRegistry).setApplicationManagementState(UNSHUTTERED);
-        verify(unshutteringCompleteEventFirer, times(1)).fire(new UnshutteringCompleteEvent(systemCommand, now));
+        verify(unshutteringCompleteEventFirer, times(1)).fire(new UnshutteringCompleteEvent(commandId, systemCommand, now));
     }
 
     @Test
     public void shouldNotFireUnshutteringCompleteIfNotAllUnshutterablesAreMarkedAsComplete() throws Exception {
 
+        final UUID commandId = randomUUID();
         final SystemCommand systemCommand = mock(SystemCommand.class);
 
         clearShutteringRegistry();
@@ -93,8 +97,8 @@ public class UnshutteringRegistryTest {
 
         unshutteringRegistry.unshutteringStarted();
 
-        unshutteringRegistry.markUnshutteringCompleteFor(Unshutterable_2.class, systemCommand);
-        unshutteringRegistry.markUnshutteringCompleteFor(Unshutterable_3.class, systemCommand);
+        unshutteringRegistry.markUnshutteringCompleteFor(commandId, Unshutterable_2.class, systemCommand);
+        unshutteringRegistry.markUnshutteringCompleteFor(commandId, Unshutterable_3.class, systemCommand);
 
         verifyZeroInteractions(unshutteringCompleteEventFirer);
     }

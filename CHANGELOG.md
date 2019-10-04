@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.0.17] - 2019-10-04
+### Changed
+- Storing of Commands whilst shuttered is now idempotent 
+
 ## [6.0.16] - 2018-09-23
 ### Changed
 - Renamed ValidateCatchupCommand to VerifyCatchupCommand

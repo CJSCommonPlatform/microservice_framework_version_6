@@ -19,10 +19,15 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+
 public class StoredCommandRepository {
 
     private static final String SELECT_STORED_COMMAND_SQL = "SELECT envelope_id, command_json_envelope, destination, date_received FROM stored_command";
-    private static final String INSERT_STORED_COMMAND_SQL = "INSERT into stored_command (envelope_id, command_json_envelope, destination, date_received) VALUES (?, ?, ?, ?)";
+    private static final String INSERT_STORED_COMMAND_SQL = "INSERT into stored_command " +
+            "(envelope_id, command_json_envelope, destination, date_received) " +
+            "VALUES (?, ?, ?, ?) " +
+            "ON CONFLICT DO NOTHING";
     private static final String TRUNCATE_STORED_COMMAND_SQL = "TRUNCATE stored_command";
     private static final String DELETE_STORED_COMMAND_SQL = "DELETE FROM stored_command WHERE envelope_id = ?";
 
@@ -34,6 +39,9 @@ public class StoredCommandRepository {
 
     @Inject
     private JdbcResultSetStreamer jdbcResultSetStreamer;
+
+    @Inject
+    private Logger logger;
 
     public Stream<StoredCommand> streamStoredCommands() {
 
@@ -76,7 +84,11 @@ public class StoredCommandRepository {
             preparedStatement.setString(2, storedCommand.getCommandJsonEnvelope());
             preparedStatement.setString(3, storedCommand.getDestination());
             preparedStatement.setTimestamp(4, toSqlTimestamp(storedCommand.getDateReceived()));
-            preparedStatement.executeUpdate();
+            final int rowsChanged = preparedStatement.executeUpdate();
+
+            if (rowsChanged == 0) {
+               logger.warn(format("Command with id '%s' not inserted into stored_command table. Command with that id already exists", storedCommand.getEnvelopeId()));
+            }
 
         } catch (final SQLException e) {
             throw new StoredCommandPersistenceException("Failed to insert stored command", e);

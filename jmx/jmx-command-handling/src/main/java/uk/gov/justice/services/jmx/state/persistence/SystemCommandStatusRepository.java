@@ -5,7 +5,7 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static uk.gov.justice.services.common.converter.ZonedDateTimes.fromSqlTimestamp;
 import static uk.gov.justice.services.common.converter.ZonedDateTimes.toSqlTimestamp;
-import static uk.gov.justice.services.jmx.state.domain.SystemCommandStatus.CommandState.valueOf;
+import static uk.gov.justice.services.jmx.state.domain.CommandState.valueOf;
 
 import uk.gov.justice.services.jdbc.persistence.SystemJdbcDataSourceProvider;
 import uk.gov.justice.services.jmx.state.domain.SystemCommandStatus;

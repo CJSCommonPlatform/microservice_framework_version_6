@@ -12,12 +12,6 @@ public class SystemCommandStatus {
     private final ZonedDateTime statusChangedAt;
     private final String message;
 
-    public enum CommandState {
-        IN_PROGRESS,
-        COMPLETE,
-        FAILED
-    }
-
     public SystemCommandStatus(
             final UUID commandId,
             final String systemCommand,

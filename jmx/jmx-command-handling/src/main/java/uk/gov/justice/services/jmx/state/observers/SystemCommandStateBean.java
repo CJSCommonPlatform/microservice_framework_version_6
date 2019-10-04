@@ -1,6 +1,6 @@
 package uk.gov.justice.services.jmx.state.observers;
 
-import static javax.transaction.Transactional.TxType.REQUIRED;
+import static javax.transaction.Transactional.TxType.REQUIRES_NEW;
 
 import uk.gov.justice.services.jmx.state.domain.SystemCommandStatus;
 import uk.gov.justice.services.jmx.state.persistence.SystemCommandStatusRepository;
@@ -15,7 +15,7 @@ public class SystemCommandStateBean {
     @Inject
     private SystemCommandStatusRepository systemCommandStatusRepository;
 
-    @Transactional(REQUIRED)
+    @Transactional(REQUIRES_NEW)
     public void addSystemCommandState(final SystemCommandStatus systemCommandStatus) {
         systemCommandStatusRepository.add(systemCommandStatus);
     }

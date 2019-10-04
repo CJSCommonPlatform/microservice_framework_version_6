@@ -1,7 +1,7 @@
 package uk.gov.justice.services.jmx.state.events;
 
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
-import uk.gov.justice.services.jmx.state.domain.SystemCommandStatus.CommandState;
+import uk.gov.justice.services.jmx.state.domain.CommandState;
 
 import java.time.ZonedDateTime;
 import java.util.Objects;

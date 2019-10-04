@@ -2,7 +2,7 @@ package uk.gov.justice.services.jmx.state.observers;
 
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
 import uk.gov.justice.services.jmx.state.domain.SystemCommandStatus;
-import uk.gov.justice.services.jmx.state.domain.SystemCommandStatus.CommandState;
+import uk.gov.justice.services.jmx.state.domain.CommandState;
 import uk.gov.justice.services.jmx.state.events.SystemCommandStateChangedEvent;
 
 import java.time.ZonedDateTime;

@@ -8,8 +8,8 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.jmx.api.command.CatchupCommand.CATCHUP;
 import static uk.gov.justice.services.jmx.api.command.IndexerCatchupCommand.INDEXER_CATCHUP;
-import static uk.gov.justice.services.jmx.state.domain.SystemCommandStatus.CommandState.COMPLETE;
-import static uk.gov.justice.services.jmx.state.domain.SystemCommandStatus.CommandState.IN_PROGRESS;
+import static uk.gov.justice.services.jmx.state.domain.CommandState.COMPLETE;
+import static uk.gov.justice.services.jmx.state.domain.CommandState.IN_PROGRESS;
 
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.jdbc.persistence.SystemJdbcDataSourceProvider;

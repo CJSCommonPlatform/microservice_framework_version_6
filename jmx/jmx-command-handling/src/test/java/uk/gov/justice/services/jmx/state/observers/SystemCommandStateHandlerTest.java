@@ -4,12 +4,12 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
-import static uk.gov.justice.services.jmx.state.domain.SystemCommandStatus.CommandState.IN_PROGRESS;
+import static uk.gov.justice.services.jmx.state.domain.CommandState.IN_PROGRESS;
 
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.jmx.api.command.CatchupCommand;
 import uk.gov.justice.services.jmx.state.domain.SystemCommandStatus;
-import uk.gov.justice.services.jmx.state.domain.SystemCommandStatus.CommandState;
+import uk.gov.justice.services.jmx.state.domain.CommandState;
 import uk.gov.justice.services.jmx.state.events.SystemCommandStateChangedEvent;
 
 import java.time.ZonedDateTime;

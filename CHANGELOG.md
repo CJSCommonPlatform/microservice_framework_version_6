@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.1.2] - 2018-10-04
+### Changed
+- Storing of Commands whilst shuttered is now idempotent 
+
 ## [6.1.1] - 2018-10-01
 ### Added
 - Injectable debug logger that logs only if debug logging is set. 

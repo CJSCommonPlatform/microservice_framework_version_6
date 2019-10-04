@@ -6,6 +6,7 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
+import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLLER;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 import static uk.gov.justice.services.test.utils.common.MemberInjectionPoint.injectionPointWithMemberAsFirstMethodOf;
@@ -32,6 +33,7 @@ public class JmsEnvelopeSenderProducerTest {
     private InjectionPoint adaptorEventProcessorInjectionPoint = injectionPointWithMemberAsFirstMethodOf(TestEventProcessorAdaptor.class);
     private InjectionPoint adaptorQueryApiInjectionPoint = injectionPointWithMemberAsFirstMethodOf(TestQueryApiAdaptor.class);
     private InjectionPoint noAnnotationInjectionPoint = injectionPointWithMemberAsFirstMethodOf(TestNoAnnotation.class);
+    private InjectionPoint adaptorCommandControllerInjectionPoint = injectionPointWithMemberAsFirstMethodOf(TestCommandControllerAdaptor.class);
 
     @Mock
     private JmsSender jmsSender;
@@ -66,6 +68,14 @@ public class JmsEnvelopeSenderProducerTest {
         final JmsEnvelopeSender jmsEnvelopeSender = jmsEnvelopeSenderProducer.createJmsEnvelopeSender(adaptorEventProcessorInjectionPoint);
 
         assertThat(jmsEnvelopeSender, is(instanceOf(ShutteringJmsEnvelopeSender.class)));
+    }
+
+    @Test
+    public void shouldProduceDefaultJmsEnvelopeSenderWhenCommandControllerAnnotation() {
+
+        final JmsEnvelopeSender jmsEnvelopeSender = jmsEnvelopeSenderProducer.createJmsEnvelopeSender(adaptorCommandControllerInjectionPoint);
+
+        assertThat(jmsEnvelopeSender, is(instanceOf(DefaultJmsEnvelopeSender.class)));
     }
 
     @Test
@@ -138,6 +148,16 @@ public class JmsEnvelopeSenderProducerTest {
 
         @Inject
         JmsEnvelopeSender jmsEnvelopeSender;
+
+        public void dummyMethod() {
+        }
+    }
+
+    @FrameworkComponent(COMMAND_CONTROLLER)
+    public static class TestCommandControllerAdaptor {
+
+        @Inject
+        InterceptorChainProcessor interceptorChainProcessor;
 
         public void dummyMethod() {
         }

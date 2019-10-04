@@ -8,6 +8,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ## [6.0.17] - 2019-10-04
 ### Changed
 - Storing of Commands whilst shuttered is now idempotent 
+- Do not shutter the JmsEnvelopeSender when called from the Command-Controller component
 
 ## [6.0.16] - 2018-09-23
 ### Changed

@@ -2,12 +2,13 @@ package uk.gov.justice.services.jmx.api.mbean;
 
 import static java.lang.String.format;
 
+import uk.gov.justice.services.jmx.api.CommandNotFoundException;
 import uk.gov.justice.services.jmx.api.UnsupportedSystemCommandException;
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
-import uk.gov.justice.services.jmx.api.state.ApplicationManagementState;
-import uk.gov.justice.services.jmx.command.ApplicationManagementStateRegistry;
+import uk.gov.justice.services.jmx.api.domain.SystemCommandStatus;
 import uk.gov.justice.services.jmx.command.SystemCommandScanner;
 import uk.gov.justice.services.jmx.runner.AsynchronousCommandRunner;
+import uk.gov.justice.services.jmx.state.observers.SystemCommandStateBean;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,7 +29,7 @@ public class SystemCommander implements SystemCommanderMBean {
     private SystemCommandScanner systemCommandScanner;
 
     @Inject
-    private ApplicationManagementStateRegistry applicationManagementStateRegistry;
+    private SystemCommandStateBean systemCommandStateBean;
 
     @Override
     public UUID call(final SystemCommand systemCommand) {
@@ -48,7 +49,10 @@ public class SystemCommander implements SystemCommanderMBean {
     }
 
     @Override
-    public ApplicationManagementState getApplicationState() {
-        return applicationManagementStateRegistry.getApplicationManagementState();
+    public SystemCommandStatus getCommandStatus(final UUID commandId) {
+
+        return systemCommandStateBean
+                .getCommandStatus(commandId)
+                .orElseThrow(() -> new CommandNotFoundException(format("No SystemCommand found with id %s", commandId)));
     }
 }

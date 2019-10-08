@@ -1,7 +1,7 @@
 package uk.gov.justice.services.management.shuttering.process;
 
 import static java.lang.String.format;
-import static uk.gov.justice.services.jmx.state.domain.CommandState.IN_PROGRESS;
+import static uk.gov.justice.services.jmx.api.domain.CommandState.COMMAND_IN_PROGRESS;
 
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
@@ -45,7 +45,7 @@ public class ShutteringProcessRunner {
         systemCommandStateChangedEventFirer.fire(new SystemCommandStateChangedEvent(
                 commandId,
                 systemCommand,
-                IN_PROGRESS,
+                COMMAND_IN_PROGRESS,
                 clock.now(),
                 format("%s started", systemCommandName)
         ));

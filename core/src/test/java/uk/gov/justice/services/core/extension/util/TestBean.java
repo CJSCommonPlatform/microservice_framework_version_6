@@ -1,5 +1,7 @@
 package uk.gov.justice.services.core.extension.util;
 
+import static com.google.common.collect.Sets.newHashSet;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Set;
@@ -7,6 +9,8 @@ import java.util.Set;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
+
+import com.google.common.collect.Sets;
 
 
 public class TestBean implements Bean<Object> {
@@ -28,7 +32,7 @@ public class TestBean implements Bean<Object> {
 
     @Override
     public Set<InjectionPoint> getInjectionPoints() {
-        return null;
+        return newHashSet();
     }
 
     @Override
@@ -48,12 +52,12 @@ public class TestBean implements Bean<Object> {
 
     @Override
     public Set<Type> getTypes() {
-        return null;
+        return newHashSet();
     }
 
     @Override
     public Set<Annotation> getQualifiers() {
-        return null;
+        return newHashSet();
     }
 
     @Override
@@ -68,7 +72,7 @@ public class TestBean implements Bean<Object> {
 
     @Override
     public Set<Class<? extends Annotation>> getStereotypes() {
-        return null;
+        return newHashSet();
     }
 
     @Override

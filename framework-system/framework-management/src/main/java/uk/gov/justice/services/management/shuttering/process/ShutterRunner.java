@@ -20,6 +20,9 @@ public class ShutterRunner {
     private ShutteringExecutorProvider shutteringExecutorProvider;
 
     @Inject
+    private ShutteringFailedHandler shutteringFailedHandler;
+
+    @Inject
     private Logger logger;
 
     public List<ShutteringResult> runShuttering(final UUID commandId, final SystemCommand systemCommand) {
@@ -33,6 +36,10 @@ public class ShutterRunner {
 
         logger.info(format("Shuttering %s", shutteringExecutor.getName()));
 
-        return shutteringExecutor.shutter(commandId, systemCommand);
+        try {
+            return shutteringExecutor.shutter(commandId, systemCommand);
+        } catch (final Throwable e) {
+            return shutteringFailedHandler.onShutteringFailed(commandId, systemCommand, shutteringExecutor, e);
+        }
     }
 }

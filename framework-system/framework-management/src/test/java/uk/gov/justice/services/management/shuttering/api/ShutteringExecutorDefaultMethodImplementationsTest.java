@@ -1,38 +1,25 @@
 package uk.gov.justice.services.management.shuttering.api;
 
 import static java.util.UUID.randomUUID;
-import static org.junit.Assert.*;
-
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.sameInstance;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.when;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
 
-import uk.gov.justice.services.jmx.api.command.ShutterCommand;
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
 import uk.gov.justice.services.management.shuttering.process.ShutteringExecutorWithNoImplementations;
 
 import java.util.UUID;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
+
 @RunWith(MockitoJUnitRunner.class)
 public class ShutteringExecutorDefaultMethodImplementationsTest {
 
     @Test
-    public void getNameShouldReturnTheClassSimpleNameByDefault() throws Exception {
+    public void shouldReturnClassSimpleNameForTheNameByDefault() throws Exception {
         assertThat(new ShutteringExecutorWithNoImplementations().getName(), is(ShutteringExecutorWithNoImplementations.class.getSimpleName()));
     }
 
@@ -47,7 +34,7 @@ public class ShutteringExecutorDefaultMethodImplementationsTest {
     }
 
     @Test
-    public void shutterMethodShouldBeUnsupportedByDefault() throws Exception {
+    public void shouldThrowUnsupportedOperationExceptionBuDefaultForShutter() throws Exception {
 
         final UUID commandId = randomUUID();
         final SystemCommand systemCommand = mock(SystemCommand.class);
@@ -61,7 +48,7 @@ public class ShutteringExecutorDefaultMethodImplementationsTest {
     }
 
     @Test
-    public void unshutterMethodShouldBeUnsupportedByDefault() throws Exception {
+    public void shouldThrowUnsupportedOperationExceptionBuDefaultForUnshutter() throws Exception {
 
         final UUID commandId = randomUUID();
         final SystemCommand systemCommand = mock(SystemCommand.class);

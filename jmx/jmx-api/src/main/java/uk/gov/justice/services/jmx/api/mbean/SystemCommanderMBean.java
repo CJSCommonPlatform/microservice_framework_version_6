@@ -1,7 +1,7 @@
 package uk.gov.justice.services.jmx.api.mbean;
 
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
-import uk.gov.justice.services.jmx.api.state.ApplicationManagementState;
+import uk.gov.justice.services.jmx.api.domain.SystemCommandStatus;
 
 import java.util.List;
 import java.util.UUID;
@@ -13,5 +13,5 @@ public interface SystemCommanderMBean {
 
     UUID call(final SystemCommand systemCommand);
     List<SystemCommand> listCommands();
-    ApplicationManagementState getApplicationState();
+    SystemCommandStatus getCommandStatus(UUID commandId);
 }

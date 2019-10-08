@@ -2,11 +2,11 @@ package uk.gov.justice.services.management.shuttering.api;
 
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
-import static uk.gov.justice.services.jmx.state.domain.CommandState.COMPLETE;
-import static uk.gov.justice.services.jmx.state.domain.CommandState.FAILED;
+import static uk.gov.justice.services.jmx.api.domain.CommandState.COMMAND_COMPLETE;
+import static uk.gov.justice.services.jmx.api.domain.CommandState.COMMAND_FAILED;
 
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
-import uk.gov.justice.services.jmx.state.domain.CommandState;
+import uk.gov.justice.services.jmx.api.domain.CommandState;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -45,7 +45,7 @@ public class ShutteringResult {
         return new ShutteringResult(
                 shutteringExecutorName,
                 message,
-                COMPLETE,
+                COMMAND_COMPLETE,
                 commandId,
                 systemCommand,
                 empty()
@@ -61,7 +61,7 @@ public class ShutteringResult {
         return new ShutteringResult(
                 shutteringExecutorName,
                 message,
-                FAILED,
+                COMMAND_FAILED,
                 commandId,
                 systemCommand,
                 empty()
@@ -78,7 +78,7 @@ public class ShutteringResult {
         return new ShutteringResult(
                 shutteringExecutorName,
                 message,
-                FAILED,
+                COMMAND_FAILED,
                 commandId,
                 systemCommand,
                 of(exception)

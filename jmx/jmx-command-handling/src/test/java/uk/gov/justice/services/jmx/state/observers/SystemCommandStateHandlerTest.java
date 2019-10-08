@@ -4,12 +4,12 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
-import static uk.gov.justice.services.jmx.state.domain.CommandState.IN_PROGRESS;
+import static uk.gov.justice.services.jmx.api.domain.CommandState.COMMAND_IN_PROGRESS;
 
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.jmx.api.command.CatchupCommand;
-import uk.gov.justice.services.jmx.state.domain.SystemCommandStatus;
-import uk.gov.justice.services.jmx.state.domain.CommandState;
+import uk.gov.justice.services.jmx.api.domain.CommandState;
+import uk.gov.justice.services.jmx.api.domain.SystemCommandStatus;
 import uk.gov.justice.services.jmx.state.events.SystemCommandStateChangedEvent;
 
 import java.time.ZonedDateTime;
@@ -40,7 +40,7 @@ public class SystemCommandStateHandlerTest {
 
         final UUID commandId = randomUUID();
         final CatchupCommand systemCommand = new CatchupCommand();
-        final CommandState commandState = IN_PROGRESS;
+        final CommandState commandState = COMMAND_IN_PROGRESS;
         final ZonedDateTime statusChangedAt = new UtcClock().now();
         final String message = "message";
 

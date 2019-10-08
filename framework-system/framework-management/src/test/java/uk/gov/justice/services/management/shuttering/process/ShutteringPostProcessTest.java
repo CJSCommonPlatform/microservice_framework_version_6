@@ -8,14 +8,13 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.jmx.state.domain.CommandState.COMPLETE;
-import static uk.gov.justice.services.jmx.state.domain.CommandState.FAILED;
+import static uk.gov.justice.services.jmx.api.domain.CommandState.COMMAND_COMPLETE;
+import static uk.gov.justice.services.jmx.api.domain.CommandState.COMMAND_FAILED;
 
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.jmx.api.command.ShutterCommand;
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
 import uk.gov.justice.services.jmx.api.command.UnshutterCommand;
-import uk.gov.justice.services.jmx.state.domain.CommandState;
 import uk.gov.justice.services.jmx.state.events.SystemCommandStateChangedEvent;
 import uk.gov.justice.services.management.shuttering.api.ShutteringResult;
 
@@ -24,7 +23,6 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.enterprise.event.Event;
-import javax.inject.Inject;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -77,7 +75,7 @@ public class ShutteringPostProcessTest {
 
         assertThat(stateChangedEvent.getCommandId(), is(commandId));
         assertThat(stateChangedEvent.getSystemCommand(), is(systemCommand));
-        assertThat(stateChangedEvent.getCommandState(), is(COMPLETE));
+        assertThat(stateChangedEvent.getCommandState(), is(COMMAND_COMPLETE));
         assertThat(stateChangedEvent.getStatusChangedAt(), is(stateChangedAt));
         assertThat(stateChangedEvent.getMessage(), is("UNSHUTTER completed successfully for [ShutteringExecutor_1, ShutteringExecutor_2]"));
     }
@@ -111,7 +109,7 @@ public class ShutteringPostProcessTest {
 
         assertThat(stateChangedEvent.getCommandId(), is(commandId));
         assertThat(stateChangedEvent.getSystemCommand(), is(systemCommand));
-        assertThat(stateChangedEvent.getCommandState(), is(FAILED));
+        assertThat(stateChangedEvent.getCommandState(), is(COMMAND_FAILED));
         assertThat(stateChangedEvent.getStatusChangedAt(), is(stateChangedAt));
         assertThat(stateChangedEvent.getMessage(), is("SHUTTER failed. The following ShutteringExecutors failed: [ShutteringExecutor_1, ShutteringExecutor_2]"));
     }

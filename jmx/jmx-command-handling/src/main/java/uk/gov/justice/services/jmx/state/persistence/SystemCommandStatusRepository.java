@@ -5,10 +5,10 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static uk.gov.justice.services.common.converter.ZonedDateTimes.fromSqlTimestamp;
 import static uk.gov.justice.services.common.converter.ZonedDateTimes.toSqlTimestamp;
-import static uk.gov.justice.services.jmx.state.domain.CommandState.valueOf;
+import static uk.gov.justice.services.jmx.api.domain.CommandState.valueOf;
 
 import uk.gov.justice.services.jdbc.persistence.SystemJdbcDataSourceProvider;
-import uk.gov.justice.services.jmx.state.domain.SystemCommandStatus;
+import uk.gov.justice.services.jmx.api.domain.SystemCommandStatus;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -136,7 +136,7 @@ public class SystemCommandStatusRepository {
             }
 
         } catch (SQLException e) {
-            throw new SystemCommandStatusPersistenceException("Failed to insert SystemCommandStatus", e);
+            throw new SystemCommandStatusPersistenceException("Failed to find latest SystemCommandStatus", e);
         }
     }
 

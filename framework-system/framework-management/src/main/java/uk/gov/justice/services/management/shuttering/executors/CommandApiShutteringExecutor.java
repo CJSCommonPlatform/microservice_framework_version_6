@@ -1,6 +1,5 @@
 package uk.gov.justice.services.management.shuttering.executors;
 
-import static uk.gov.justice.services.management.shuttering.api.ShutteringResult.shutteringFailed;
 import static uk.gov.justice.services.management.shuttering.api.ShutteringResult.shutteringSucceeded;
 
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
@@ -34,61 +33,34 @@ public class CommandApiShutteringExecutor implements ShutteringExecutor {
     @Override
     public ShutteringResult shutter(final UUID commandId, final SystemCommand systemCommand) {
 
-        final String name = getClass().getSimpleName();
+        logger.info("Shuttering Command API");
 
-        try {
-            logger.info("Shuttering Command API");
+        commandApiShutteringBean.shutter();
 
-            commandApiShutteringBean.shutter();
+        logger.info("Shuttering of Command API complete");
 
-            logger.info("Shuttering of Command API complete");
-
-            return shutteringSucceeded(
-                    name,
-                    commandId,
-                    "Command API shuttered with no errors",
-                    systemCommand
-            );
-        } catch (final Exception e) {
-            logger.error("Shuttering of command API failed", e);
-            return shutteringFailed(
-                    name,
-                    commandId,
-                    "Shuttering of Command API failed: " + e.getMessage(),
-                    systemCommand,
-                    e
-            );
-        }
+        return shutteringSucceeded(
+                getName(),
+                commandId,
+                "Command API shuttered with no errors",
+                systemCommand
+        );
     }
 
     @Override
     public ShutteringResult unshutter(final UUID commandId, final SystemCommand systemCommand) {
 
-        final String name = getClass().getSimpleName();
+        logger.info("Unshuttering Command API");
 
-        try {
+        commandApiShutteringBean.unshutter();
 
-            logger.info("Unshuttering Command API");
+        logger.info("Unshuttering of Command API complete");
 
-            commandApiShutteringBean.unshutter();
-
-            logger.info("Unshuttering of Command API complete");
-
-            return shutteringSucceeded(
-                    name,
-                    commandId,
-                    "Command API unshuttered with no errors",
-                    systemCommand
-            );
-        } catch (final Exception e) {
-            logger.error("Unshuttering of command API failed", e);
-            return shutteringFailed(
-                    name,
-                    commandId,
-                    "Unshuttering of Command API failed: " + e.getMessage(),
-                    systemCommand,
-                    e
-            );
-        }
+        return shutteringSucceeded(
+                getName(),
+                commandId,
+                "Command API unshuttered with no errors",
+                systemCommand
+        );
     }
 }

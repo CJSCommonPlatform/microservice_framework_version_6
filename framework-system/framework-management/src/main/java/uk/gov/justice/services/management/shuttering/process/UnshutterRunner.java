@@ -20,19 +20,26 @@ public class UnshutterRunner {
     private ShutteringExecutorProvider shutteringExecutorProvider;
 
     @Inject
+    private ShutteringFailedHandler shutteringFailedHandler;
+
+    @Inject
     private Logger logger;
 
     public List<ShutteringResult> runUnshuttering(final UUID commandId, final SystemCommand systemCommand) {
         return shutteringExecutorProvider.getShutteringExecutors().stream()
                 .filter(ShutteringExecutor::shouldUnshutter)
-                .map(shutteringExecutor -> uhshutter(commandId, systemCommand, shutteringExecutor))
+                .map(shutteringExecutor -> unshutter(commandId, systemCommand, shutteringExecutor))
                 .collect(toList());
     }
 
-    private ShutteringResult uhshutter(final UUID commandId, final SystemCommand systemCommand, final ShutteringExecutor shutteringExecutor) {
+    private ShutteringResult unshutter(final UUID commandId, final SystemCommand systemCommand, final ShutteringExecutor shutteringExecutor) {
 
         logger.info(format("Unshuttering %s", shutteringExecutor.getName()));
 
-        return shutteringExecutor.unshutter(commandId, systemCommand);
+        try {
+            return shutteringExecutor.unshutter(commandId, systemCommand);
+        } catch (final Throwable e) {
+            return shutteringFailedHandler.onShutteringFailed(commandId, systemCommand, shutteringExecutor, e);
+        }
     }
 }

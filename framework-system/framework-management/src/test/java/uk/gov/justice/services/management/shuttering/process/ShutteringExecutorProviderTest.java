@@ -1,42 +1,26 @@
 package uk.gov.justice.services.management.shuttering.process;
 
 import static com.google.common.collect.Sets.newHashSet;
-import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.hasItem;
-import static org.junit.Assert.*;
-
-import com.google.common.collect.Sets;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
-
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.core.extension.util.TestBean.of;
+
+import uk.gov.justice.services.framework.utilities.cdi.CdiInstanceResolver;
+import uk.gov.justice.services.management.shuttering.api.ShutteringExecutor;
+
+import java.util.List;
+import java.util.Set;
+
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeanManager;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.*;
-import static uk.gov.justice.services.core.extension.util.TestBean.of;
-
-import uk.gov.justice.services.core.extension.util.TestBean;
-import uk.gov.justice.services.framework.utilities.cdi.CdiInstanceResolver;
-import uk.gov.justice.services.management.shuttering.api.ShutteringExecutor;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.inject.Inject;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ShutteringExecutorProviderTest {

@@ -18,11 +18,11 @@ public interface ShutteringExecutor {
         return false;
     }
 
-    default ShutteringResult shutter(final UUID commandId, final SystemCommand systemCommand) {
+    default ShutteringResult shutter(final UUID commandId, final SystemCommand systemCommand) throws ShutteringFailedException {
         throw new UnsupportedOperationException("Method not implemented");
     }
 
-    default ShutteringResult unshutter(final UUID commandId, final SystemCommand systemCommand) {
+    default ShutteringResult unshutter(final UUID commandId, final SystemCommand systemCommand) throws ShutteringFailedException {
         throw new UnsupportedOperationException("Method not implemented");
     }
 }

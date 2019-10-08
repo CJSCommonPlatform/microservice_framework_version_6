@@ -2,15 +2,21 @@ package uk.gov.justice.services.management.shuttering.process;
 
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
-import static org.junit.Assert.*;
-
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
-
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import uk.gov.justice.services.jmx.api.command.ShutterCommand;
+import uk.gov.justice.services.jmx.api.command.SystemCommand;
+import uk.gov.justice.services.management.shuttering.api.ShutteringExecutor;
+import uk.gov.justice.services.management.shuttering.api.ShutteringResult;
+
+import java.util.List;
+import java.util.UUID;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,24 +25,14 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.*;
-
-import uk.gov.justice.services.jmx.api.command.ShutterCommand;
-import uk.gov.justice.services.jmx.api.command.SystemCommand;
-import uk.gov.justice.services.management.shuttering.api.ShutteringExecutor;
-
-import java.util.UUID;
-
-import javax.inject.Inject;
-
 @RunWith(MockitoJUnitRunner.class)
 public class ShutterRunnerTest {
 
     @Mock
     private ShutteringExecutorProvider shutteringExecutorProvider;
+
+    @Mock
+    private ShutteringFailedHandler shutteringFailedHandler;
 
     @Mock
     private Logger logger;
@@ -55,6 +51,9 @@ public class ShutterRunnerTest {
         final ShutteringExecutor shutteringExecutor_3 = mock(ShutteringExecutor.class);
         final ShutteringExecutor shutteringExecutor_4 = mock(ShutteringExecutor.class);
 
+        final ShutteringResult shutteringResult_1 = mock(ShutteringResult.class);
+        final ShutteringResult shutteringResult_3 = mock(ShutteringResult.class);
+
         when(shutteringExecutorProvider.getShutteringExecutors()).thenReturn(asList(
                 shutteringExecutor_1,
                 shutteringExecutor_2,
@@ -68,14 +67,65 @@ public class ShutterRunnerTest {
         when(shutteringExecutor_1.getName()).thenReturn("Executor 1");
         when(shutteringExecutor_3.getName()).thenReturn("Executor 3");
 
-        shutterRunner.runShuttering(commandId, systemCommand);
+        when(shutteringExecutor_1.shutter(commandId, systemCommand)).thenReturn(shutteringResult_1);
+        when(shutteringExecutor_3.shutter(commandId, systemCommand)).thenReturn(shutteringResult_3);
+
+        final List<ShutteringResult> shutteringResults = shutterRunner.runShuttering(commandId, systemCommand);
+
+        assertThat(shutteringResults.size(), is(2));
+        assertThat(shutteringResults, hasItem(shutteringResult_1));
+        assertThat(shutteringResults, hasItem(shutteringResult_3));
 
         verify(logger).info("Shuttering Executor 1");
-        verify(shutteringExecutor_1).shutter(commandId, systemCommand);
         verify(logger).info("Shuttering Executor 3");
-        verify(shutteringExecutor_3).shutter(commandId, systemCommand);
 
         verify(shutteringExecutor_2, never()).shutter(commandId, systemCommand);
         verify(shutteringExecutor_4, never()).shutter(commandId, systemCommand);
+    }
+
+    @Test
+    public void shouldHandleUnshutteringExceptions() throws Exception {
+
+        final NullPointerException nullPointerException = new NullPointerException("Oooops");
+
+        final UUID commandId = randomUUID();
+        final SystemCommand systemCommand = new ShutterCommand();
+
+        final ShutteringExecutor shutteringExecutor_1 = mock(ShutteringExecutor.class);
+        final ShutteringExecutor shutteringExecutor_2 = mock(ShutteringExecutor.class);
+        final ShutteringExecutor shutteringExecutor_3 = mock(ShutteringExecutor.class);
+        final ShutteringExecutor shutteringExecutor_4 = mock(ShutteringExecutor.class);
+
+        final ShutteringResult failureResult = mock(ShutteringResult.class);
+        final ShutteringResult shutteringResult_3 = mock(ShutteringResult.class);
+
+        when(shutteringExecutorProvider.getShutteringExecutors()).thenReturn(asList(
+                shutteringExecutor_1,
+                shutteringExecutor_2,
+                shutteringExecutor_3,
+                shutteringExecutor_4
+        ));
+
+        when(shutteringExecutor_1.shouldShutter()).thenReturn(true);
+        when(shutteringExecutor_3.shouldShutter()).thenReturn(true);
+
+        when(shutteringExecutor_1.getName()).thenReturn("Executor 1");
+        when(shutteringExecutor_3.getName()).thenReturn("Executor 3");
+
+        when(shutteringExecutor_1.shutter(commandId, systemCommand)).thenThrow(nullPointerException);
+        when(shutteringExecutor_3.shutter(commandId, systemCommand)).thenReturn(shutteringResult_3);
+
+        when(shutteringFailedHandler.onShutteringFailed(
+                commandId,
+                systemCommand,
+                shutteringExecutor_1,
+                nullPointerException
+        )).thenReturn(failureResult);
+
+        final List<ShutteringResult> shutteringResults = shutterRunner.runShuttering(commandId, systemCommand);
+
+        assertThat(shutteringResults.size(), is(2));
+        assertThat(shutteringResults, hasItem(failureResult));
+        assertThat(shutteringResults, hasItem(shutteringResult_3));
     }
 }

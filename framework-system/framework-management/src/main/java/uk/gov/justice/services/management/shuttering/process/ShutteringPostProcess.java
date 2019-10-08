@@ -1,8 +1,8 @@
 package uk.gov.justice.services.management.shuttering.process;
 
 import static java.lang.String.format;
-import static uk.gov.justice.services.jmx.state.domain.CommandState.COMPLETE;
-import static uk.gov.justice.services.jmx.state.domain.CommandState.FAILED;
+import static uk.gov.justice.services.jmx.api.domain.CommandState.COMMAND_COMPLETE;
+import static uk.gov.justice.services.jmx.api.domain.CommandState.COMMAND_FAILED;
 
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
@@ -45,7 +45,7 @@ public class ShutteringPostProcess {
         systemCommandStateChangedEventFirer.fire(new SystemCommandStateChangedEvent(
                 commandId,
                 systemCommand,
-                COMPLETE,
+                COMMAND_COMPLETE,
                 clock.now(),
                 message
         ));
@@ -70,7 +70,7 @@ public class ShutteringPostProcess {
         systemCommandStateChangedEventFirer.fire(new SystemCommandStateChangedEvent(
                 commandId,
                 systemCommand,
-                FAILED,
+                COMMAND_FAILED,
                 clock.now(),
                 message
         ));

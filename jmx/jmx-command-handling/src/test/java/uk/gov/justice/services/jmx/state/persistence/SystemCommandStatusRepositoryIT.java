@@ -8,12 +8,12 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.jmx.api.command.CatchupCommand.CATCHUP;
 import static uk.gov.justice.services.jmx.api.command.IndexerCatchupCommand.INDEXER_CATCHUP;
-import static uk.gov.justice.services.jmx.state.domain.CommandState.COMPLETE;
-import static uk.gov.justice.services.jmx.state.domain.CommandState.IN_PROGRESS;
+import static uk.gov.justice.services.jmx.api.domain.CommandState.COMMAND_COMPLETE;
+import static uk.gov.justice.services.jmx.api.domain.CommandState.COMMAND_IN_PROGRESS;
 
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.jdbc.persistence.SystemJdbcDataSourceProvider;
-import uk.gov.justice.services.jmx.state.domain.SystemCommandStatus;
+import uk.gov.justice.services.jmx.api.domain.SystemCommandStatus;
 import uk.gov.justice.services.test.utils.persistence.TestJdbcDataSourceProvider;
 
 import java.sql.Connection;
@@ -66,21 +66,21 @@ public class SystemCommandStatusRepositoryIT {
         final SystemCommandStatus catchupCommandStatus_1 = new SystemCommandStatus(
                 catchupCommandId,
                 CATCHUP,
-                IN_PROGRESS,
+                COMMAND_IN_PROGRESS,
                 now.minusMinutes(10),
                 "Catchup started successfully"
         );
         final SystemCommandStatus indexCommandStatus = new SystemCommandStatus(
                 randomUUID(),
                 INDEXER_CATCHUP,
-                IN_PROGRESS,
+                COMMAND_IN_PROGRESS,
                 now.minusMinutes(5),
                 "Indexing of events started successfully"
         );
         final SystemCommandStatus catchupCommandStatus_2 = new SystemCommandStatus(
                 catchupCommandId,
                 CATCHUP,
-                COMPLETE,
+                COMMAND_COMPLETE,
                 now,
                 "Catchup complete"
         );
@@ -105,21 +105,21 @@ public class SystemCommandStatusRepositoryIT {
         final SystemCommandStatus catchupCommandStatus_1 = new SystemCommandStatus(
                 catchupCommandId,
                 CATCHUP,
-                IN_PROGRESS,
+                COMMAND_IN_PROGRESS,
                 now.minusMinutes(10),
                 "Catchup started successfully"
         );
         final SystemCommandStatus indexCommandStatus = new SystemCommandStatus(
                 randomUUID(),
                 INDEXER_CATCHUP,
-                IN_PROGRESS,
+                COMMAND_IN_PROGRESS,
                 now.minusMinutes(5),
                 "Indexing of events started successfully"
         );
         final SystemCommandStatus catchupCommandStatus_2 = new SystemCommandStatus(
                 catchupCommandId,
                 CATCHUP,
-                COMPLETE,
+                COMMAND_COMPLETE,
                 now,
                 "Catchup complete"
         );
@@ -144,21 +144,21 @@ public class SystemCommandStatusRepositoryIT {
         final SystemCommandStatus catchupCommandStatus_1 = new SystemCommandStatus(
                 catchupCommandId,
                 CATCHUP,
-                IN_PROGRESS,
+                COMMAND_IN_PROGRESS,
                 now.minusMinutes(10),
                 "Catchup started successfully"
         );
         final SystemCommandStatus indexCommandStatus = new SystemCommandStatus(
                 randomUUID(),
                 INDEXER_CATCHUP,
-                IN_PROGRESS,
+                COMMAND_IN_PROGRESS,
                 now.minusMinutes(5),
                 "Indexing of events started successfully"
         );
         final SystemCommandStatus catchupCommandStatus_2 = new SystemCommandStatus(
                 catchupCommandId,
                 CATCHUP,
-                COMPLETE,
+                COMMAND_COMPLETE,
                 now,
                 "Catchup complete"
         );

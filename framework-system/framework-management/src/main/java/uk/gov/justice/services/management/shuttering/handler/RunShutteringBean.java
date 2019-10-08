@@ -23,8 +23,6 @@ public class RunShutteringBean {
 
     @Transactional(REQUIRED)
     public void runShuttering(final UUID commandId, final SystemCommand systemCommand) {
-        mdcLogger.mdcLoggerConsumer().accept(() -> {
-            shutteringProcessRunner.runShuttering(commandId, systemCommand);
-        });
+        mdcLogger.mdcLoggerConsumer().accept(() -> shutteringProcessRunner.runShuttering(commandId, systemCommand));
     }
 }

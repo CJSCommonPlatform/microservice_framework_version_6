@@ -2,35 +2,22 @@ package uk.gov.justice.services.management.shuttering.process;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.CoreMatchers.hasItems;
-import static org.junit.Assert.*;
-
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
-
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.jmx.api.domain.CommandState.COMMAND_COMPLETE;
+import static uk.gov.justice.services.jmx.api.domain.CommandState.COMMAND_FAILED;
+import static uk.gov.justice.services.jmx.api.domain.CommandState.COMMAND_IN_PROGRESS;
+
+import uk.gov.justice.services.management.shuttering.api.ShutteringResult;
+
+import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.*;
-import static uk.gov.justice.services.jmx.state.domain.CommandState.COMPLETE;
-import static uk.gov.justice.services.jmx.state.domain.CommandState.FAILED;
-import static uk.gov.justice.services.jmx.state.domain.CommandState.IN_PROGRESS;
-
-import uk.gov.justice.services.jmx.state.domain.CommandState;
-import uk.gov.justice.services.management.shuttering.api.ShutteringResult;
-
-import java.util.List;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ShutteringResultsMapperTest {
@@ -46,10 +33,10 @@ public class ShutteringResultsMapperTest {
         final ShutteringResult shutteringResult_3 = mock(ShutteringResult.class);
         final ShutteringResult shutteringResult_4 = mock(ShutteringResult.class);
 
-        when(shutteringResult_1.getCommandState()).thenReturn(FAILED);
-        when(shutteringResult_2.getCommandState()).thenReturn(COMPLETE);
-        when(shutteringResult_3.getCommandState()).thenReturn(IN_PROGRESS);
-        when(shutteringResult_4.getCommandState()).thenReturn(COMPLETE);
+        when(shutteringResult_1.getCommandState()).thenReturn(COMMAND_FAILED);
+        when(shutteringResult_2.getCommandState()).thenReturn(COMMAND_COMPLETE);
+        when(shutteringResult_3.getCommandState()).thenReturn(COMMAND_IN_PROGRESS);
+        when(shutteringResult_4.getCommandState()).thenReturn(COMMAND_COMPLETE);
 
         final List<ShutteringResult> successfulResults = shutteringResultsMapper.getSuccessfulResults(asList(
                 shutteringResult_1,
@@ -70,10 +57,10 @@ public class ShutteringResultsMapperTest {
         final ShutteringResult shutteringResult_3 = mock(ShutteringResult.class);
         final ShutteringResult shutteringResult_4 = mock(ShutteringResult.class);
 
-        when(shutteringResult_1.getCommandState()).thenReturn(FAILED);
-        when(shutteringResult_2.getCommandState()).thenReturn(COMPLETE);
-        when(shutteringResult_3.getCommandState()).thenReturn(FAILED);
-        when(shutteringResult_4.getCommandState()).thenReturn(IN_PROGRESS);
+        when(shutteringResult_1.getCommandState()).thenReturn(COMMAND_FAILED);
+        when(shutteringResult_2.getCommandState()).thenReturn(COMMAND_COMPLETE);
+        when(shutteringResult_3.getCommandState()).thenReturn(COMMAND_FAILED);
+        when(shutteringResult_4.getCommandState()).thenReturn(COMMAND_IN_PROGRESS);
 
         final List<ShutteringResult> failedResults = shutteringResultsMapper.getFailedResults(asList(
                 shutteringResult_1,

@@ -1,10 +1,11 @@
-package uk.gov.justice.services.jmx.state.domain;
+package uk.gov.justice.services.jmx.api.domain;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
-public class SystemCommandStatus {
+public class SystemCommandStatus implements Serializable {
 
     private final UUID commandId;
     private final String systemCommand;

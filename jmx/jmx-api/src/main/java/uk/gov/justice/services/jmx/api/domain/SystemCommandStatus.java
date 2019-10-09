@@ -1,23 +1,21 @@
-package uk.gov.justice.services.jmx.state.events;
+package uk.gov.justice.services.jmx.api.domain;
 
-import uk.gov.justice.services.jmx.api.command.SystemCommand;
-import uk.gov.justice.services.jmx.api.domain.CommandState;
-
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
-public class SystemCommandStateChangedEvent {
+public class SystemCommandStatus implements Serializable {
 
     private final UUID commandId;
-    private final SystemCommand systemCommand;
+    private final String systemCommand;
     private final CommandState commandState;
     private final ZonedDateTime statusChangedAt;
     private final String message;
 
-    public SystemCommandStateChangedEvent(
+    public SystemCommandStatus(
             final UUID commandId,
-            final SystemCommand systemCommand,
+            final String systemCommand,
             final CommandState commandState,
             final ZonedDateTime statusChangedAt,
             final String message) {
@@ -32,7 +30,7 @@ public class SystemCommandStateChangedEvent {
         return commandId;
     }
 
-    public SystemCommand getSystemCommand() {
+    public String getSystemCommandName() {
         return systemCommand;
     }
 
@@ -51,8 +49,8 @@ public class SystemCommandStateChangedEvent {
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
-        if (!(o instanceof SystemCommandStateChangedEvent)) return false;
-        final SystemCommandStateChangedEvent that = (SystemCommandStateChangedEvent) o;
+        if (!(o instanceof SystemCommandStatus)) return false;
+        final SystemCommandStatus that = (SystemCommandStatus) o;
         return Objects.equals(commandId, that.commandId) &&
                 Objects.equals(systemCommand, that.systemCommand) &&
                 commandState == that.commandState &&
@@ -67,12 +65,12 @@ public class SystemCommandStateChangedEvent {
 
     @Override
     public String toString() {
-        return "SystemCommandStateEvent{" +
+        return "CommandStatus{" +
                 "commandId=" + commandId +
                 ", systemCommand=" + systemCommand +
                 ", commandState=" + commandState +
                 ", statusChangedAt=" + statusChangedAt +
-                ", message='" + message + '\'' +
+                ", message=" + message +
                 '}';
     }
 }

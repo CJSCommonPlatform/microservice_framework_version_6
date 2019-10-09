@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.common.util.UtcClock;
+import uk.gov.justice.services.management.shuttering.executors.StoredCommandSender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.JmsSender;

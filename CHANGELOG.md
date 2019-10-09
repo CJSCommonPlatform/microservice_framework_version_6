@@ -5,6 +5,16 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.2.0-M3] - 2018-10-09
+### Added
+- Refactored Shuttering to no longer use events. 
+- All Shuttering Executors now implement the ShutteringExecutor interface
+- JMX bean can now be pinged to get command status: 
+    - COMMAND_RECEIVED
+    - COMMAND_IN_PROGRESS
+    - COMMAND_COMPLETE
+    - COMMAND_FAILED
+
 ## [6.2.0-M2] - 2018-10-02
 ### Added
 - Added commandId to all SystemEvents

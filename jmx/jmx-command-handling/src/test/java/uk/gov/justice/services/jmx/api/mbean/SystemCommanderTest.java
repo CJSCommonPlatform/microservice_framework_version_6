@@ -1,6 +1,9 @@
 package uk.gov.justice.services.jmx.api.mbean;
 
 import static java.util.Arrays.asList;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
+import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
@@ -9,15 +12,15 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.jmx.api.state.ApplicationManagementState.SHUTTERED;
 
+import uk.gov.justice.services.jmx.api.CommandNotFoundException;
 import uk.gov.justice.services.jmx.api.UnsupportedSystemCommandException;
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
-import uk.gov.justice.services.jmx.api.state.ApplicationManagementState;
-import uk.gov.justice.services.jmx.command.ApplicationManagementStateRegistry;
+import uk.gov.justice.services.jmx.api.domain.SystemCommandStatus;
 import uk.gov.justice.services.jmx.command.SystemCommandScanner;
 import uk.gov.justice.services.jmx.command.TestCommand;
 import uk.gov.justice.services.jmx.runner.AsynchronousCommandRunner;
+import uk.gov.justice.services.jmx.state.observers.SystemCommandStateBean;
 
 import java.util.List;
 import java.util.UUID;
@@ -44,7 +47,7 @@ public class SystemCommanderTest {
     private SystemCommandScanner systemCommandScanner;
 
     @Mock
-    private ApplicationManagementStateRegistry applicationManagementStateRegistry;
+    private SystemCommandStateBean systemCommandStateBean;
 
     @InjectMocks
     private SystemCommander systemCommander;
@@ -102,12 +105,28 @@ public class SystemCommanderTest {
     }
 
     @Test
-    public void shouldGetTheApplicationState() throws Exception {
+    public void shouldGetSystemCommandStatus() throws Exception {
 
-        final ApplicationManagementState applicationManagementState = SHUTTERED;
+        final UUID commandId = randomUUID();
 
-        when(applicationManagementStateRegistry.getApplicationManagementState()).thenReturn(applicationManagementState);
+        final SystemCommandStatus systemCommandStatus = mock(SystemCommandStatus.class);
+        when(systemCommandStateBean.getCommandStatus(commandId)).thenReturn(of(systemCommandStatus));
 
-        assertThat(systemCommander.getApplicationState(), is(applicationManagementState));
+        assertThat(systemCommander.getCommandStatus(commandId), is(systemCommandStatus));
+    }
+
+    @Test
+    public void shouldThrowExceptionIfSystemCommandNotFound() throws Exception {
+
+        final UUID commandId = fromString("08fe90e9-c35b-4850-9af2-e5e743f6736e");
+
+        when(systemCommandStateBean.getCommandStatus(commandId)).thenReturn(empty());
+
+        try {
+            systemCommander.getCommandStatus(commandId);
+            fail();
+        } catch (CommandNotFoundException expected) {
+            assertThat(expected.getMessage(), is("No SystemCommand found with id 08fe90e9-c35b-4850-9af2-e5e743f6736e"));
+        }
     }
 }

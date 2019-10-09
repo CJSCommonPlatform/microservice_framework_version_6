@@ -1,7 +1,5 @@
 package uk.gov.justice.services.core.extension.util;
 
-import static com.google.common.collect.Sets.newHashSet;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Set;
@@ -10,29 +8,27 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
 
-import com.google.common.collect.Sets;
+public class TestBean<T> implements Bean {
 
+    private final Class<T> beanClass;
 
-public class TestBean implements Bean<Object> {
-
-    private final Class<?> beanClass;
-
-    public static TestBean of(final Class<?> beanClass) {
+    @SuppressWarnings("unchecked")
+    public static <T> Bean<T> of(final Class<T> beanClass) {
         return new TestBean(beanClass);
     }
 
-    private TestBean(final Class<?> beanClass) {
+    private TestBean(final Class<T> beanClass) {
         this.beanClass = beanClass;
     }
 
     @Override
-    public Class<?> getBeanClass() {
+    public Class<T> getBeanClass() {
         return beanClass;
     }
 
     @Override
     public Set<InjectionPoint> getInjectionPoints() {
-        return newHashSet();
+        return null;
     }
 
     @Override
@@ -41,23 +37,23 @@ public class TestBean implements Bean<Object> {
     }
 
     @Override
-    public Object create(CreationalContext<Object> creationalContext) {
+    public Object create(final CreationalContext creationalContext) {
         return null;
     }
 
     @Override
-    public void destroy(Object o, CreationalContext<Object> creationalContext) {
+    public void destroy(final Object instance, final CreationalContext creationalContext) {
 
     }
 
     @Override
     public Set<Type> getTypes() {
-        return newHashSet();
+        return null;
     }
 
     @Override
     public Set<Annotation> getQualifiers() {
-        return newHashSet();
+        return null;
     }
 
     @Override
@@ -72,7 +68,7 @@ public class TestBean implements Bean<Object> {
 
     @Override
     public Set<Class<? extends Annotation>> getStereotypes() {
-        return newHashSet();
+        return null;
     }
 
     @Override

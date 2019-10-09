@@ -7,6 +7,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.common.polling.MultiIteratingPollerFactory;
+import uk.gov.justice.services.management.shuttering.executors.CommandApiShutteringBean;
+import uk.gov.justice.services.management.shuttering.executors.StoredCommandSender;
 import uk.gov.justice.services.messaging.jms.EnvelopeSenderSelector;
 import uk.gov.justice.services.shuttering.domain.StoredCommand;
 import uk.gov.justice.services.shuttering.persistence.StoredCommandRepository;

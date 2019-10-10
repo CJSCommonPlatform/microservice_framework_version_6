@@ -10,7 +10,7 @@ import static uk.gov.justice.services.test.utils.common.host.TestHostProvider.ge
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.getValueOfField;
 
 import uk.gov.justice.services.jmx.api.command.AddTriggerCommand;
-import uk.gov.justice.services.jmx.api.command.CatchupCommand;
+import uk.gov.justice.services.jmx.api.command.EventCatchupCommand;
 import uk.gov.justice.services.jmx.api.command.IndexerCatchupCommand;
 import uk.gov.justice.services.jmx.api.command.RebuildCommand;
 import uk.gov.justice.services.jmx.api.command.RemoveTriggerCommand;
@@ -72,7 +72,7 @@ public class SystemCommandCallerTest {
 
         systemCommandCaller.callCatchup();
 
-        verify(systemCommanderMBean).call(new CatchupCommand());
+        verify(systemCommanderMBean).call(new EventCatchupCommand());
         verify(systemCommanderClient).close();
     }
 

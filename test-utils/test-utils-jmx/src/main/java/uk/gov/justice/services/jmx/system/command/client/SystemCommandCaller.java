@@ -4,7 +4,7 @@ import static uk.gov.justice.services.jmx.system.command.client.connection.JmxPa
 import static uk.gov.justice.services.test.utils.common.host.TestHostProvider.getHost;
 
 import uk.gov.justice.services.jmx.api.command.AddTriggerCommand;
-import uk.gov.justice.services.jmx.api.command.CatchupCommand;
+import uk.gov.justice.services.jmx.api.command.EventCatchupCommand;
 import uk.gov.justice.services.jmx.api.command.IndexerCatchupCommand;
 import uk.gov.justice.services.jmx.api.command.RebuildCommand;
 import uk.gov.justice.services.jmx.api.command.RemoveTriggerCommand;
@@ -54,7 +54,7 @@ public class SystemCommandCaller {
     }
 
     public void callCatchup() {
-        callSystemCommand(new CatchupCommand());
+        callSystemCommand(new EventCatchupCommand());
     }
 
     public void callIndexerCatchup() {

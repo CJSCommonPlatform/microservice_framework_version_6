@@ -9,7 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.jmx.api.SystemCommandException;
-import uk.gov.justice.services.jmx.api.command.CatchupCommand;
+import uk.gov.justice.services.jmx.api.command.EventCatchupCommand;
 import uk.gov.justice.services.jmx.api.command.PingCommand;
 import uk.gov.justice.services.jmx.api.command.RebuildCommand;
 import uk.gov.justice.services.jmx.api.command.ShutterCommand;
@@ -42,7 +42,7 @@ public class DefaultSystemCommandStoreTest {
 
         final SystemCommand rebuildCommand = new RebuildCommand();
         final SystemCommand pingCommand = new PingCommand();
-        final SystemCommand catchupCommand = new CatchupCommand();
+        final SystemCommand catchupCommand = new EventCatchupCommand();
 
         when(systemCommandHandlerProxy_1.getCommandName()).thenReturn(rebuildCommand.getName());
         when(systemCommandHandlerProxy_2.getCommandName()).thenReturn(pingCommand.getName());

@@ -10,8 +10,6 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
 
-import com.google.common.collect.Sets;
-
 
 public class TestBean implements Bean<Object> {
 

@@ -5,7 +5,7 @@ import static uk.gov.justice.services.jmx.api.domain.CommandState.COMMAND_COMPLE
 import static uk.gov.justice.services.jmx.api.domain.CommandState.COMMAND_FAILED;
 
 import uk.gov.justice.services.common.util.UtcClock;
-import uk.gov.justice.services.jmx.api.command.SystemCommand;
+import uk.gov.justice.services.jmx.api.command.ApplicationShutteringCommand;
 import uk.gov.justice.services.jmx.state.events.SystemCommandStateChangedEvent;
 import uk.gov.justice.services.management.shuttering.api.ShutteringResult;
 
@@ -31,45 +31,45 @@ public class ShutteringPostProcess {
     @Inject
     private Logger logger;
 
-    public void completeShutteringSuccessfully(final List<ShutteringResult> successfulResults, final UUID commandId, final SystemCommand systemCommand) {
+    public void completeShutteringSuccessfully(final List<ShutteringResult> successfulResults, final UUID commandId, final ApplicationShutteringCommand applicationShutteringCommand) {
 
-        final String systemCommandName = systemCommand.getName();
+        final String applicationShutteringCommandName = applicationShutteringCommand.getName();
 
         final List<String> shutteringExecutorNames = shutteringResultsMapper.getShutteringExecutorNames(successfulResults);
 
         final String message = format(
                 "%s completed successfully for %s",
-                systemCommandName,
+                applicationShutteringCommandName,
                 shutteringExecutorNames);
 
         systemCommandStateChangedEventFirer.fire(new SystemCommandStateChangedEvent(
                 commandId,
-                systemCommand,
+                applicationShutteringCommand,
                 COMMAND_COMPLETE,
                 clock.now(),
                 message
         ));
     }
 
-    public void completeShutteringWithFailures(final List<ShutteringResult> failureResults, final UUID commandId, final SystemCommand systemCommand) {
+    public void completeShutteringWithFailures(final List<ShutteringResult> failureResults, final UUID commandId, final ApplicationShutteringCommand applicationShutteringCommand) {
 
-        final String systemCommandName = systemCommand.getName();
+        final String applicationShutteringCommandName = applicationShutteringCommand.getName();
 
-        logger.error(format("%s failed with the following %d errors:", systemCommandName, failureResults.size()));
+        logger.error(format("%s failed with the following %d errors:", applicationShutteringCommandName, failureResults.size()));
 
-        failureResults.forEach(shutteringResult -> logger.error(format("%s Error: %s", systemCommandName, shutteringResult.getMessage())));
+        failureResults.forEach(shutteringResult -> logger.error(format("%s Error: %s", applicationShutteringCommandName, shutteringResult.getMessage())));
 
         final List<String> shutteringExecutorNames = shutteringResultsMapper
                 .getShutteringExecutorNames(failureResults);
 
         final String message = format(
                 "%s failed. The following ShutteringExecutors failed: %s",
-                systemCommandName,
+                applicationShutteringCommandName,
                 shutteringExecutorNames);
 
         systemCommandStateChangedEventFirer.fire(new SystemCommandStateChangedEvent(
                 commandId,
-                systemCommand,
+                applicationShutteringCommand,
                 COMMAND_FAILED,
                 clock.now(),
                 message

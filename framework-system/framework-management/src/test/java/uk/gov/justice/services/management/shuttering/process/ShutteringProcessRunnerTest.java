@@ -8,7 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.common.util.UtcClock;
-import uk.gov.justice.services.jmx.api.command.SystemCommand;
+import uk.gov.justice.services.jmx.api.command.ApplicationShutteringCommand;
 import uk.gov.justice.services.jmx.state.events.SystemCommandStateChangedEvent;
 import uk.gov.justice.services.management.shuttering.api.ShutteringResult;
 
@@ -61,11 +61,11 @@ public class ShutteringProcessRunnerTest {
         final String commandName = "SHUTTER";
 
         final UUID commandId = randomUUID();
-        final SystemCommand systemCommand = mock(SystemCommand.class);
+        final ApplicationShutteringCommand applicationShutteringCommand = mock(ApplicationShutteringCommand.class);
 
         final ZonedDateTime stateChangedAt = new UtcClock().now();
 
-        when(systemCommand.getName()).thenReturn(commandName);
+        when(applicationShutteringCommand.getName()).thenReturn(commandName);
         when(clock.now()).thenReturn(stateChangedAt);
 
         final List<ShutteringResult> results = singletonList(mock(ShutteringResult.class));
@@ -74,13 +74,13 @@ public class ShutteringProcessRunnerTest {
 
         when(shutteringExecutorsRunner.findAndRunShutteringExecutors(
                 commandId,
-                systemCommand
+                applicationShutteringCommand
         )).thenReturn(results);
 
         when(shutteringResultsMapper.getFailedResults(results)).thenReturn(failureResults);
         when(shutteringResultsMapper.getSuccessfulResults(results)).thenReturn(successfulResults);
 
-        shutteringProcessRunner.runShuttering(commandId, systemCommand);
+        shutteringProcessRunner.runShuttering(commandId, applicationShutteringCommand);
 
         final InOrder inOrder = inOrder(
                 logger,
@@ -90,7 +90,7 @@ public class ShutteringProcessRunnerTest {
         inOrder.verify(logger).info("Running SHUTTER");
         inOrder.verify(systemCommandStateChangedEventFirer).fire(systemCommandStateChangedEventCaptor.capture());
         inOrder.verify(logger).info("SHUTTER ran with 1 success(es) and 0 error(s)");
-        inOrder.verify(shutteringPostProcess).completeShutteringSuccessfully(successfulResults, commandId, systemCommand);
+        inOrder.verify(shutteringPostProcess).completeShutteringSuccessfully(successfulResults, commandId, applicationShutteringCommand);
 
     }
 
@@ -100,11 +100,11 @@ public class ShutteringProcessRunnerTest {
         final String commandName = "SHUTTER";
 
         final UUID commandId = randomUUID();
-        final SystemCommand systemCommand = mock(SystemCommand.class);
+        final ApplicationShutteringCommand applicationShutteringCommand = mock(ApplicationShutteringCommand.class);
 
         final ZonedDateTime stateChangedAt = new UtcClock().now();
 
-        when(systemCommand.getName()).thenReturn(commandName);
+        when(applicationShutteringCommand.getName()).thenReturn(commandName);
         when(clock.now()).thenReturn(stateChangedAt);
 
         final List<ShutteringResult> results = singletonList(mock(ShutteringResult.class));
@@ -113,13 +113,13 @@ public class ShutteringProcessRunnerTest {
 
         when(shutteringExecutorsRunner.findAndRunShutteringExecutors(
                 commandId,
-                systemCommand
+                applicationShutteringCommand
         )).thenReturn(results);
 
         when(shutteringResultsMapper.getFailedResults(results)).thenReturn(failureResults);
         when(shutteringResultsMapper.getSuccessfulResults(results)).thenReturn(successfulResults);
 
-        shutteringProcessRunner.runShuttering(commandId, systemCommand);
+        shutteringProcessRunner.runShuttering(commandId, applicationShutteringCommand);
 
         final InOrder inOrder = inOrder(
                 logger,
@@ -129,6 +129,6 @@ public class ShutteringProcessRunnerTest {
         inOrder.verify(logger).info("Running SHUTTER");
         inOrder.verify(systemCommandStateChangedEventFirer).fire(systemCommandStateChangedEventCaptor.capture());
         inOrder.verify(logger).info("SHUTTER ran with 1 success(es) and 1 error(s)");
-        inOrder.verify(shutteringPostProcess).completeShutteringWithFailures(failureResults, commandId, systemCommand);
+        inOrder.verify(shutteringPostProcess).completeShutteringWithFailures(failureResults, commandId, applicationShutteringCommand);
     }
 }

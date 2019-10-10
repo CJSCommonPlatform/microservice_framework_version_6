@@ -5,6 +5,11 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.2.0-M4] - 2018-10-10
+### Changed
+- EventCatchupCommand and IndexerCatchupCommand now both have a common interface: CatchupCommand
+- ShutterCommand and UnshutterCommand now both have a common interface: ApplicationShutteringCommand
+
 ## [6.2.0-M3] - 2018-10-09
 ### Added
 - Refactored Shuttering to no longer use events. 

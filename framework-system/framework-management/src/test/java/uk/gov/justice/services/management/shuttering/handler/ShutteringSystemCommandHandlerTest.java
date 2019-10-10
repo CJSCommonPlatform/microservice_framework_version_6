@@ -38,7 +38,7 @@ public class ShutteringSystemCommandHandlerTest {
 
         shutteringSystemCommandHandler.onShutterRequested(shutterCommand, commandId);
 
-        inOrder.verify(logger).info("Received SHUTTER system command");
+        inOrder.verify(logger).info("Received SHUTTER application shuttering command");
         inOrder.verify(runShutteringBean).runShuttering(commandId, shutterCommand);
     }
 
@@ -52,7 +52,7 @@ public class ShutteringSystemCommandHandlerTest {
 
         shutteringSystemCommandHandler.onUnshutterRequested(shutterCommand, commandId);
 
-        inOrder.verify(logger).info("Received UNSHUTTER system command");
+        inOrder.verify(logger).info("Received UNSHUTTER application shuttering command");
         inOrder.verify(runShutteringBean).runShuttering(commandId, shutterCommand);
     }
 }

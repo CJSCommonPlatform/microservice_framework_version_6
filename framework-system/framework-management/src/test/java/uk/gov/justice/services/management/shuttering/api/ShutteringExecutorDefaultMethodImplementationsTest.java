@@ -6,7 +6,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
-import uk.gov.justice.services.jmx.api.command.SystemCommand;
+import uk.gov.justice.services.jmx.api.command.ApplicationShutteringCommand;
 import uk.gov.justice.services.management.shuttering.process.ShutteringExecutorWithNoImplementations;
 
 import java.util.UUID;
@@ -37,10 +37,10 @@ public class ShutteringExecutorDefaultMethodImplementationsTest {
     public void shouldThrowUnsupportedOperationExceptionBuDefaultForShutter() throws Exception {
 
         final UUID commandId = randomUUID();
-        final SystemCommand systemCommand = mock(SystemCommand.class);
+        final ApplicationShutteringCommand applicationShutteringCommand = mock(ApplicationShutteringCommand.class);
 
         try {
-            new ShutteringExecutorWithNoImplementations().shutter(commandId, systemCommand);
+            new ShutteringExecutorWithNoImplementations().shutter(commandId, applicationShutteringCommand);
             fail();
         } catch (final UnsupportedOperationException expected) {
             assertThat(expected.getMessage(), is("Method not implemented"));
@@ -51,10 +51,10 @@ public class ShutteringExecutorDefaultMethodImplementationsTest {
     public void shouldThrowUnsupportedOperationExceptionBuDefaultForUnshutter() throws Exception {
 
         final UUID commandId = randomUUID();
-        final SystemCommand systemCommand = mock(SystemCommand.class);
+        final ApplicationShutteringCommand applicationShutteringCommand = mock(ApplicationShutteringCommand.class);
 
         try {
-            new ShutteringExecutorWithNoImplementations().unshutter(commandId, systemCommand);
+            new ShutteringExecutorWithNoImplementations().unshutter(commandId, applicationShutteringCommand);
             fail();
         } catch (final UnsupportedOperationException expected) {
             assertThat(expected.getMessage(), is("Method not implemented"));

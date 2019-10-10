@@ -7,7 +7,7 @@ import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.jmx.api.domain.CommandState.COMMAND_IN_PROGRESS;
 
 import uk.gov.justice.services.common.util.UtcClock;
-import uk.gov.justice.services.jmx.api.command.CatchupCommand;
+import uk.gov.justice.services.jmx.api.command.EventCatchupCommand;
 import uk.gov.justice.services.jmx.api.domain.CommandState;
 import uk.gov.justice.services.jmx.api.domain.SystemCommandStatus;
 import uk.gov.justice.services.jmx.state.events.SystemCommandStateChangedEvent;
@@ -39,7 +39,7 @@ public class SystemCommandStateHandlerTest {
     public void shouldHandleSystemCommand() throws Exception {
 
         final UUID commandId = randomUUID();
-        final CatchupCommand systemCommand = new CatchupCommand();
+        final EventCatchupCommand systemCommand = new EventCatchupCommand();
         final CommandState commandState = COMMAND_IN_PROGRESS;
         final ZonedDateTime statusChangedAt = new UtcClock().now();
         final String message = "message";

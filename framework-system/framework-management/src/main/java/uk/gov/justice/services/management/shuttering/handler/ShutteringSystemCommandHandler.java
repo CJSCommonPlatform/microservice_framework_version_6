@@ -4,8 +4,8 @@ import static java.lang.String.format;
 import static uk.gov.justice.services.jmx.api.command.ShutterCommand.SHUTTER;
 import static uk.gov.justice.services.jmx.api.command.UnshutterCommand.UNSHUTTER;
 
+import uk.gov.justice.services.jmx.api.command.ApplicationShutteringCommand;
 import uk.gov.justice.services.jmx.api.command.ShutterCommand;
-import uk.gov.justice.services.jmx.api.command.SystemCommand;
 import uk.gov.justice.services.jmx.api.command.UnshutterCommand;
 import uk.gov.justice.services.jmx.command.HandlesSystemCommand;
 
@@ -33,8 +33,8 @@ public class ShutteringSystemCommandHandler {
         doRun(unshutterCommand, commandId);
     }
 
-    private void doRun(final SystemCommand systemCommand, final UUID commandId) {
-        logger.info(format("Received %s system command", systemCommand.getName()));
-        runShutteringBean.runShuttering(commandId, systemCommand);
+    private void doRun(final ApplicationShutteringCommand applicationShutteringCommand, final UUID commandId) {
+        logger.info(format("Received %s application shuttering command", applicationShutteringCommand.getName()));
+        runShutteringBean.runShuttering(commandId, applicationShutteringCommand);
     }
 }

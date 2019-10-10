@@ -8,7 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.jmx.api.domain.CommandState.COMMAND_FAILED;
 
-import uk.gov.justice.services.jmx.api.command.SystemCommand;
+import uk.gov.justice.services.jmx.api.command.ApplicationShutteringCommand;
 import uk.gov.justice.services.jmx.api.command.UnshutterCommand;
 import uk.gov.justice.services.management.shuttering.api.ShutteringExecutor;
 import uk.gov.justice.services.management.shuttering.api.ShutteringResult;
@@ -38,7 +38,7 @@ public class ShutteringFailedHandlerTest {
         final UUID commandId = UUID.randomUUID();
         final String shutteringExecutorName = "ShutteringExecutorName";
 
-        final SystemCommand systemCommand = new UnshutterCommand();
+        final ApplicationShutteringCommand applicationShutteringCommand = new UnshutterCommand();
         final ShutteringExecutor shutteringExecutor = mock(ShutteringExecutor.class);
 
         final NullPointerException nullPointerException = new NullPointerException("Ooops");
@@ -47,7 +47,7 @@ public class ShutteringFailedHandlerTest {
 
         final ShutteringResult shutteringResult = shutteringFailedHandler.onShutteringFailed(
                 commandId,
-                systemCommand,
+                applicationShutteringCommand,
                 shutteringExecutor,
                 nullPointerException
         );
@@ -56,7 +56,7 @@ public class ShutteringFailedHandlerTest {
         assertThat(shutteringResult.getCommandState(), is(COMMAND_FAILED));
         assertThat(shutteringResult.getMessage(), is("UNSHUTTER failed for ShutteringExecutorName. java.lang.NullPointerException: Ooops"));
         assertThat(shutteringResult.getShutteringExecutorName(), is(shutteringExecutorName));
-        assertThat(shutteringResult.getSystemCommand(), is(systemCommand));
+        assertThat(shutteringResult.getSystemCommand(), is(applicationShutteringCommand));
         assertThat(shutteringResult.getException(), is(of(nullPointerException)));
 
         verify(logger).error("UNSHUTTER failed for ShutteringExecutorName. java.lang.NullPointerException: Ooops", nullPointerException);

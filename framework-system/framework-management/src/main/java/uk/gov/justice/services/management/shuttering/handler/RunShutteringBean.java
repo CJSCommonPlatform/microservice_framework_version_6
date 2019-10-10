@@ -2,7 +2,7 @@ package uk.gov.justice.services.management.shuttering.handler;
 
 import static javax.transaction.Transactional.TxType.REQUIRED;
 
-import uk.gov.justice.services.jmx.api.command.SystemCommand;
+import uk.gov.justice.services.jmx.api.command.ApplicationShutteringCommand;
 import uk.gov.justice.services.jmx.logging.MdcLogger;
 import uk.gov.justice.services.management.shuttering.process.ShutteringProcessRunner;
 
@@ -22,7 +22,7 @@ public class RunShutteringBean {
     private ShutteringProcessRunner shutteringProcessRunner;
 
     @Transactional(REQUIRED)
-    public void runShuttering(final UUID commandId, final SystemCommand systemCommand) {
-        mdcLogger.mdcLoggerConsumer().accept(() -> shutteringProcessRunner.runShuttering(commandId, systemCommand));
+    public void runShuttering(final UUID commandId, final ApplicationShutteringCommand applicationShutteringCommand) {
+        mdcLogger.mdcLoggerConsumer().accept(() -> shutteringProcessRunner.runShuttering(commandId, applicationShutteringCommand));
     }
 }

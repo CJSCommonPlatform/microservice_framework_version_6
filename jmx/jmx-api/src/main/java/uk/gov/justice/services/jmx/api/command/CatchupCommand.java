@@ -1,11 +1,10 @@
 package uk.gov.justice.services.jmx.api.command;
 
-public class CatchupCommand extends BaseSystemCommand {
+import static uk.gov.justice.services.jmx.api.command.EventCatchupCommand.CATCHUP;
 
-    public static final String CATCHUP = "CATCHUP";
-    private static final String DESCRIPTION = "Catches up and republishes all Events since the last known event";
+public interface CatchupCommand extends SystemCommand {
 
-    public CatchupCommand() {
-        super(CATCHUP, DESCRIPTION);
+    default boolean isEventCatchup() {
+        return CATCHUP.equals(getName());
     }
 }

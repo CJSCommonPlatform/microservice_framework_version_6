@@ -3,7 +3,7 @@ package uk.gov.justice.services.management.shuttering.process;
 import static java.lang.String.format;
 import static uk.gov.justice.services.management.shuttering.api.ShutteringResult.shutteringFailed;
 
-import uk.gov.justice.services.jmx.api.command.SystemCommand;
+import uk.gov.justice.services.jmx.api.command.ApplicationShutteringCommand;
 import uk.gov.justice.services.management.shuttering.api.ShutteringExecutor;
 import uk.gov.justice.services.management.shuttering.api.ShutteringResult;
 
@@ -20,13 +20,13 @@ public class ShutteringFailedHandler {
 
     public ShutteringResult onShutteringFailed(
             final UUID commandId,
-            final SystemCommand systemCommand,
+            final ApplicationShutteringCommand applicationShutteringCommand,
             final ShutteringExecutor shutteringExecutor,
             final Throwable exception) {
 
         final String message = format(
                 "%s failed for %s. %s: %s",
-                systemCommand.getName(),
+                applicationShutteringCommand.getName(),
                 shutteringExecutor.getName(),
                 exception.getClass().getName(),
                 exception.getMessage());
@@ -37,7 +37,7 @@ public class ShutteringFailedHandler {
                 shutteringExecutor.getName(),
                 commandId,
                 message,
-                systemCommand,
+                applicationShutteringCommand,
                 exception
         );
     }

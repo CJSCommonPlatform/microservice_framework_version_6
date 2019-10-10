@@ -10,8 +10,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import uk.gov.justice.services.jmx.api.command.ApplicationShutteringCommand;
 import uk.gov.justice.services.jmx.api.command.ShutterCommand;
-import uk.gov.justice.services.jmx.api.command.SystemCommand;
 import uk.gov.justice.services.management.shuttering.api.ShutteringExecutor;
 import uk.gov.justice.services.management.shuttering.api.ShutteringResult;
 
@@ -44,7 +44,7 @@ public class UnshutterRunnerTest {
     public void shouldRunUnshutteringOnShutteringExecutorIfTheExecutorSupportsIt() throws Exception {
 
         final UUID commandId = randomUUID();
-        final SystemCommand systemCommand = new ShutterCommand();
+        final ApplicationShutteringCommand applicationShutteringCommand = new ShutterCommand();
 
         final ShutteringExecutor shutteringExecutor_1 = mock(ShutteringExecutor.class);
         final ShutteringExecutor shutteringExecutor_2 = mock(ShutteringExecutor.class);
@@ -67,11 +67,11 @@ public class UnshutterRunnerTest {
         when(shutteringExecutor_1.getName()).thenReturn("Executor 1");
         when(shutteringExecutor_3.getName()).thenReturn("Executor 3");
 
-        when(shutteringExecutor_1.unshutter(commandId, systemCommand)).thenReturn(shutteringResult_1);
-        when(shutteringExecutor_3.unshutter(commandId, systemCommand)).thenReturn(shutteringResult_3);
+        when(shutteringExecutor_1.unshutter(commandId, applicationShutteringCommand)).thenReturn(shutteringResult_1);
+        when(shutteringExecutor_3.unshutter(commandId, applicationShutteringCommand)).thenReturn(shutteringResult_3);
 
 
-        final List<ShutteringResult> shutteringResults = unshutterRunner.runUnshuttering(commandId, systemCommand);
+        final List<ShutteringResult> shutteringResults = unshutterRunner.runUnshuttering(commandId, applicationShutteringCommand);
 
         assertThat(shutteringResults.size(), is(2));
         assertThat(shutteringResults, hasItem(shutteringResult_1));
@@ -79,8 +79,8 @@ public class UnshutterRunnerTest {
 
         verify(logger).info("Unshuttering Executor 1");
         verify(logger).info("Unshuttering Executor 3");
-        verify(shutteringExecutor_2, never()).unshutter(commandId, systemCommand);
-        verify(shutteringExecutor_4, never()).unshutter(commandId, systemCommand);
+        verify(shutteringExecutor_2, never()).unshutter(commandId, applicationShutteringCommand);
+        verify(shutteringExecutor_4, never()).unshutter(commandId, applicationShutteringCommand);
     }
 
     @Test
@@ -89,7 +89,7 @@ public class UnshutterRunnerTest {
         final NullPointerException nullPointerException = new NullPointerException("Ooops");
 
         final UUID commandId = randomUUID();
-        final SystemCommand systemCommand = new ShutterCommand();
+        final ApplicationShutteringCommand applicationShutteringCommand = new ShutterCommand();
 
         final ShutteringExecutor shutteringExecutor_1 = mock(ShutteringExecutor.class);
         final ShutteringExecutor shutteringExecutor_2 = mock(ShutteringExecutor.class);
@@ -112,17 +112,17 @@ public class UnshutterRunnerTest {
         when(shutteringExecutor_1.getName()).thenReturn("Executor 1");
         when(shutteringExecutor_3.getName()).thenReturn("Executor 3");
 
-        when(shutteringExecutor_1.unshutter(commandId, systemCommand)).thenThrow(nullPointerException);
-        when(shutteringExecutor_3.unshutter(commandId, systemCommand)).thenReturn(shutteringResult_3);
+        when(shutteringExecutor_1.unshutter(commandId, applicationShutteringCommand)).thenThrow(nullPointerException);
+        when(shutteringExecutor_3.unshutter(commandId, applicationShutteringCommand)).thenReturn(shutteringResult_3);
 
         when(shutteringFailedHandler.onShutteringFailed(
                 commandId,
-                systemCommand,
+                applicationShutteringCommand,
                 shutteringExecutor_1,
                 nullPointerException)
         ).thenReturn(failureResult);
 
-        final List<ShutteringResult> shutteringResults = unshutterRunner.runUnshuttering(commandId, systemCommand);
+        final List<ShutteringResult> shutteringResults = unshutterRunner.runUnshuttering(commandId, applicationShutteringCommand);
 
         assertThat(shutteringResults.size(), is(2));
         assertThat(shutteringResults, hasItem(failureResult));

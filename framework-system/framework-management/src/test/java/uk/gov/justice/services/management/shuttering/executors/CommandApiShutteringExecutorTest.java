@@ -8,7 +8,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static uk.gov.justice.services.jmx.api.domain.CommandState.COMMAND_COMPLETE;
 
-import uk.gov.justice.services.jmx.api.command.SystemCommand;
+import uk.gov.justice.services.jmx.api.command.ApplicationShutteringCommand;
 import uk.gov.justice.services.management.shuttering.api.ShutteringResult;
 
 import java.util.UUID;
@@ -49,13 +49,13 @@ public class CommandApiShutteringExecutorTest {
     public void shouldCallTheShutteringBeanAndShutter() throws Exception {
 
         final UUID commandId = randomUUID();
-        final SystemCommand systemCommand = mock(SystemCommand.class);
+        final ApplicationShutteringCommand applicationShutteringCommand = mock(ApplicationShutteringCommand.class);
 
-        final ShutteringResult shutteringResult = commandApiShutteringExecutor.shutter(commandId, systemCommand);
+        final ShutteringResult shutteringResult = commandApiShutteringExecutor.shutter(commandId, applicationShutteringCommand);
 
         assertThat(shutteringResult.getCommandId(), is(commandId));
         assertThat(shutteringResult.getCommandState(), is(COMMAND_COMPLETE));
-        assertThat(shutteringResult.getSystemCommand(), is(systemCommand));
+        assertThat(shutteringResult.getSystemCommand(), is(applicationShutteringCommand));
         assertThat(shutteringResult.getMessage(), is("Command API shuttered with no errors"));
         assertThat(shutteringResult.getShutteringExecutorName(), is("CommandApiShutteringExecutor"));
         assertThat(shutteringResult.getException(), is(empty()));
@@ -71,13 +71,13 @@ public class CommandApiShutteringExecutorTest {
     public void shouldCallTheShutteringBeanAndUnshutter() throws Exception {
 
         final UUID commandId = randomUUID();
-        final SystemCommand systemCommand = mock(SystemCommand.class);
+        final ApplicationShutteringCommand applicationShutteringCommand = mock(ApplicationShutteringCommand.class);
 
-        final ShutteringResult shutteringResult = commandApiShutteringExecutor.unshutter(commandId, systemCommand);
+        final ShutteringResult shutteringResult = commandApiShutteringExecutor.unshutter(commandId, applicationShutteringCommand);
 
         assertThat(shutteringResult.getCommandId(), is(commandId));
         assertThat(shutteringResult.getCommandState(), is(COMMAND_COMPLETE));
-        assertThat(shutteringResult.getSystemCommand(), is(systemCommand));
+        assertThat(shutteringResult.getSystemCommand(), is(applicationShutteringCommand));
         assertThat(shutteringResult.getMessage(), is("Command API unshuttered with no errors"));
         assertThat(shutteringResult.getShutteringExecutorName(), is("CommandApiShutteringExecutor"));
         assertThat(shutteringResult.getException(), is(empty()));

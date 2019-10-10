@@ -2,7 +2,7 @@ package uk.gov.justice.services.management.shuttering.executors;
 
 import static uk.gov.justice.services.management.shuttering.api.ShutteringResult.shutteringSucceeded;
 
-import uk.gov.justice.services.jmx.api.command.SystemCommand;
+import uk.gov.justice.services.jmx.api.command.ApplicationShutteringCommand;
 import uk.gov.justice.services.management.shuttering.api.ShutteringExecutor;
 import uk.gov.justice.services.management.shuttering.api.ShutteringResult;
 
@@ -31,7 +31,7 @@ public class CommandApiShutteringExecutor implements ShutteringExecutor {
     }
 
     @Override
-    public ShutteringResult shutter(final UUID commandId, final SystemCommand systemCommand) {
+    public ShutteringResult shutter(final UUID commandId, final ApplicationShutteringCommand applicationShutteringCommand) {
 
         logger.info("Shuttering Command API");
 
@@ -43,12 +43,12 @@ public class CommandApiShutteringExecutor implements ShutteringExecutor {
                 getName(),
                 commandId,
                 "Command API shuttered with no errors",
-                systemCommand
+                applicationShutteringCommand
         );
     }
 
     @Override
-    public ShutteringResult unshutter(final UUID commandId, final SystemCommand systemCommand) {
+    public ShutteringResult unshutter(final UUID commandId, final ApplicationShutteringCommand applicationShutteringCommand) {
 
         logger.info("Unshuttering Command API");
 
@@ -60,7 +60,7 @@ public class CommandApiShutteringExecutor implements ShutteringExecutor {
                 getName(),
                 commandId,
                 "Command API unshuttered with no errors",
-                systemCommand
+                applicationShutteringCommand
         );
     }
 }

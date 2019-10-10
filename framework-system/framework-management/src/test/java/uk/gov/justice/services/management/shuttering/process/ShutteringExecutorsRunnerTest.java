@@ -1,16 +1,9 @@
 package uk.gov.justice.services.management.shuttering.process;
 
 import static java.util.UUID.randomUUID;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import uk.gov.justice.services.jmx.api.SystemCommandException;
 import uk.gov.justice.services.jmx.api.command.ShutterCommand;
-import uk.gov.justice.services.jmx.api.command.SystemCommand;
 import uk.gov.justice.services.jmx.api.command.UnshutterCommand;
 
 import java.util.UUID;
@@ -37,37 +30,21 @@ public class ShutteringExecutorsRunnerTest {
     public void shouldRunShutteringIfCommandIsShutterCommand() throws Exception {
 
         final UUID commandId = randomUUID();
-        final SystemCommand systemCommand = new ShutterCommand();
+        final ShutterCommand shutterCommand = new ShutterCommand();
 
-        shutteringExecutorsRunner.findAndRunShutteringExecutors(commandId, systemCommand);
+        shutteringExecutorsRunner.findAndRunShutteringExecutors(commandId, shutterCommand);
 
-        verify(shutterRunner).runShuttering(commandId, systemCommand);
+        verify(shutterRunner).runShuttering(commandId, shutterCommand);
     }
 
     @Test
     public void shouldRunUnshutteringIfCommandIsUnshutterCommand() throws Exception {
 
         final UUID commandId = randomUUID();
-        final SystemCommand systemCommand = new UnshutterCommand();
+        final UnshutterCommand unshutterCommand = new UnshutterCommand();
 
-        shutteringExecutorsRunner.findAndRunShutteringExecutors(commandId, systemCommand);
+        shutteringExecutorsRunner.findAndRunShutteringExecutors(commandId, unshutterCommand);
 
-        verify(unshutterRunner).runUnshuttering(commandId, systemCommand);
-    }
-
-    @Test
-    public void shouldThrowExceptionIfCommandIsNeitherShutteringOrUnshuttering() throws Exception {
-
-        final UUID commandId = randomUUID();
-        final SystemCommand systemCommand = mock(SystemCommand.class);
-
-        when(systemCommand.getName()).thenReturn("RANDOM_COMMAND");
-
-        try {
-            shutteringExecutorsRunner.findAndRunShutteringExecutors(commandId, systemCommand);
-            fail();
-        } catch (final SystemCommandException expected) {
-            assertThat(expected.getMessage(), is("Failed to run shutter command. Command RANDOM_COMMAND is not supported"));
-        }
+        verify(unshutterRunner).runUnshuttering(commandId, unshutterCommand);
     }
 }

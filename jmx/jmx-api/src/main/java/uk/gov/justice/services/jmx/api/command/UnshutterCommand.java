@@ -1,6 +1,6 @@
 package uk.gov.justice.services.jmx.api.command;
 
-public class UnshutterCommand extends BaseSystemCommand {
+public class UnshutterCommand extends BaseSystemCommand implements ApplicationShutteringCommand {
 
     public static final String UNSHUTTER = "UNSHUTTER";
     private static final String DESCRIPTION = "Unshutters the application.";

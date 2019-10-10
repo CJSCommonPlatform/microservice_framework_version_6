@@ -3,7 +3,7 @@ package uk.gov.justice.services.management.shuttering.process;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
-import uk.gov.justice.services.jmx.api.command.SystemCommand;
+import uk.gov.justice.services.jmx.api.command.ApplicationShutteringCommand;
 import uk.gov.justice.services.management.shuttering.api.ShutteringExecutor;
 import uk.gov.justice.services.management.shuttering.api.ShutteringResult;
 
@@ -25,21 +25,21 @@ public class ShutterRunner {
     @Inject
     private Logger logger;
 
-    public List<ShutteringResult> runShuttering(final UUID commandId, final SystemCommand systemCommand) {
+    public List<ShutteringResult> runShuttering(final UUID commandId, final ApplicationShutteringCommand applicationShutteringCommand) {
         return shutteringExecutorProvider.getShutteringExecutors().stream()
                 .filter(ShutteringExecutor::shouldShutter)
-                .map(shutteringExecutor -> shutter(commandId, systemCommand, shutteringExecutor))
+                .map(shutteringExecutor -> shutter(commandId, applicationShutteringCommand, shutteringExecutor))
                 .collect(toList());
     }
 
-    private ShutteringResult shutter(final UUID commandId, final SystemCommand systemCommand, final ShutteringExecutor shutteringExecutor) {
+    private ShutteringResult shutter(final UUID commandId, final ApplicationShutteringCommand applicationShutteringCommand, final ShutteringExecutor shutteringExecutor) {
 
         logger.info(format("Shuttering %s", shutteringExecutor.getName()));
 
         try {
-            return shutteringExecutor.shutter(commandId, systemCommand);
+            return shutteringExecutor.shutter(commandId, applicationShutteringCommand);
         } catch (final Throwable e) {
-            return shutteringFailedHandler.onShutteringFailed(commandId, systemCommand, shutteringExecutor, e);
+            return shutteringFailedHandler.onShutteringFailed(commandId, applicationShutteringCommand, shutteringExecutor, e);
         }
     }
 }

@@ -5,7 +5,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import uk.gov.justice.services.jmx.api.command.SystemCommand;
+import uk.gov.justice.services.jmx.api.command.ApplicationShutteringCommand;
 import uk.gov.justice.services.jmx.logging.MdcLogger;
 import uk.gov.justice.services.management.shuttering.process.ShutteringProcessRunner;
 
@@ -36,12 +36,12 @@ public class RunShutteringBeanTest {
     public void shouldRunShutteringInMdcLogging() throws Exception {
 
         final UUID commandId = randomUUID();
-        final SystemCommand systemCommand = mock(SystemCommand.class);
+        final ApplicationShutteringCommand applicationShutteringCommand = mock(ApplicationShutteringCommand.class);
 
         when(mdcLogger.mdcLoggerConsumer()).thenReturn(testConsumer);
 
-        runShutteringBean.runShuttering(commandId, systemCommand);
+        runShutteringBean.runShuttering(commandId, applicationShutteringCommand);
 
-        verify(shutteringProcessRunner).runShuttering(commandId, systemCommand);
+        verify(shutteringProcessRunner).runShuttering(commandId, applicationShutteringCommand);
     }
 }

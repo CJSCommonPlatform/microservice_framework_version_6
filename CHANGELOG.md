@@ -5,16 +5,20 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
-## [6.2.0-M5] - 2018-10-14
+## [6.2.0-M6] - 2019-10-14
+### Added
+- MDC service component logging interceptor
+
+## [6.2.0-M5] - 2019-10-14
 ### Changed
 - Ping command now supports command state
 
-## [6.2.0-M4] - 2018-10-10
+## [6.2.0-M4] - 2019-10-10
 ### Changed
 - EventCatchupCommand and IndexerCatchupCommand now both have a common interface: CatchupCommand
 - ShutterCommand and UnshutterCommand now both have a common interface: ApplicationShutteringCommand
 
-## [6.2.0-M3] - 2018-10-09
+## [6.2.0-M3] - 2019-10-09
 ### Added
 - Refactored Shuttering to no longer use events. 
 - All Shuttering Executors now implement the ShutteringExecutor interface
@@ -24,67 +28,67 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
     - COMMAND_COMPLETE
     - COMMAND_FAILED
 
-## [6.2.0-M2] - 2018-10-02
+## [6.2.0-M2] - 2019-10-02
 ### Added
 - Added commandId to all SystemEvents
 
-## [6.2.0-M1] - 2018-10-02
+## [6.2.0-M1] - 2019-10-02
 ### Added
 - Observer for SystemCommand lifecycle to allow for querying the current state of a SystemCommand
 - New table in the system database 'system_command_status'
 
-## [6.1.2] - 2018-10-04
+## [6.1.2] - 2019-10-04
 ### Changed
 - Storing of Commands whilst shuttered is now idempotent 
 - Do not shutter the JmsEnvelopeSender when called from the Command-Controller component
 
-## [6.1.1] - 2018-10-01
+## [6.1.1] - 2019-10-01
 ### Added
 - Injectable debug logger that logs only if debug logging is set. 
 
-## [6.1.0] - 2018-09-28
+## [6.1.0] - 2019-09-28
 ### Changed
 - All SystemCommandHandler methods now also take a mandatory commandId as a parameter
 - SystemCommander JMX bean now returns a unique command id for each command that it runs
 
-## [6.0.16] - 2018-09-23
+## [6.0.16] - 2019-09-23
 ### Changed
 - Renamed ValidateCatchupCommand to VerifyCatchupCommand
 - Added MBeanClientConnectionException to the JMX client classes to show that a connection error occurred
 
-## [6.0.15] - 2018-09-19
+## [6.0.15] - 2019-09-19
 ### Added
 - New SystemCommands: AddTriggerCommand, RemoveTriggerCommand and ValidateCatchupCommand
 ### Changed
 - Updated framework-api to 4.1.0
 
-## [6.0.14] - 2018-09-11
+## [6.0.14] - 2019-09-11
 ### Changed
 - System commands now run using a ManagedExecutor rather than an asynchronous EJB
 
-## [6.0.13] - 2018-09-10
+## [6.0.13] - 2019-09-10
 ### Changed
 - SystemCommandStore moved to an interface implemented by DefaultSystemCommandStore. This is to allow stubbing in integration tests
 
-## [6.0.12] - 2018-09-08
+## [6.0.12] - 2019-09-08
 ### Changed
 - All JMX SystemCommands are now run asynchronously. i.e the call to the JMX bean will return immediately
 - The JMX SystemCommandBean now only throws 2 Exceptions
     1. UnsupportedSystemCommandException. If the command is unrecognised by the context. 
     2. SystemCommandFailedException. On any other failure. NB. this Exception also contains the stacktrace of the server side exception
 
-## [6.0.11] - 2018-08-30
+## [6.0.11] - 2019-08-30
 ### Added
 - ordering to subscriptions descriptor yamls
 
 ### Fixed
 - JdbcDataSourceProvider can now handle multiple DataSources
 
-## [6.0.10] - 2018-08-28
+## [6.0.10] - 2019-08-28
 ### Added
 - JMX SystemCommands can now be disabled for a context
 
-## [6.0.9] - 2018-08-21
+## [6.0.9] - 2019-08-21
 ### Fixed
 - JsonSchemaValidationMatcher now supports yaml/json/schema location
 

@@ -3,14 +3,11 @@ package uk.gov.justice.services.management.shuttering.handler;
 import static java.util.UUID.randomUUID;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.jmx.api.command.ApplicationShutteringCommand;
-import uk.gov.justice.services.jmx.logging.MdcLogger;
 import uk.gov.justice.services.management.shuttering.process.ShutteringProcessRunner;
 
 import java.util.UUID;
-import java.util.function.Consumer;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,23 +19,16 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class RunShutteringBeanTest {
 
     @Mock
-    private MdcLogger mdcLogger;
-
-    @Mock
     private ShutteringProcessRunner shutteringProcessRunner;
 
     @InjectMocks
     private RunShutteringBean runShutteringBean;
 
-    private Consumer<Runnable> testConsumer = Runnable::run;
-
     @Test
-    public void shouldRunShutteringInMdcLogging() throws Exception {
+    public void shouldRunShuttering() throws Exception {
 
         final UUID commandId = randomUUID();
         final ApplicationShutteringCommand applicationShutteringCommand = mock(ApplicationShutteringCommand.class);
-
-        when(mdcLogger.mdcLoggerConsumer()).thenReturn(testConsumer);
 
         runShutteringBean.runShuttering(commandId, applicationShutteringCommand);
 

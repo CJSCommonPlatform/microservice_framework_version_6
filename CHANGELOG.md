@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.2.0-M5] - 2018-10-14
+### Changed
+- Ping command now supports command state
+
 ## [6.2.0-M4] - 2018-10-10
 ### Changed
 - EventCatchupCommand and IndexerCatchupCommand now both have a common interface: CatchupCommand

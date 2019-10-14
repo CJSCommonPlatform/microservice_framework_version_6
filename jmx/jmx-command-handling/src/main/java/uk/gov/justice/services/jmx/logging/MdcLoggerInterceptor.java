@@ -7,37 +7,30 @@ import static uk.gov.justice.services.common.log.LoggerConstants.SERVICE_CONTEXT
 
 import uk.gov.justice.services.common.configuration.ServiceContextNameProvider;
 
-import java.util.function.Consumer;
-
 import javax.inject.Inject;
+import javax.interceptor.AroundInvoke;
+import javax.interceptor.InvocationContext;
 
 import org.slf4j.MDC;
 
-public class MdcLogger {
+public class MdcLoggerInterceptor {
 
     @Inject
     private ServiceContextNameProvider serviceContextNameProvider;
 
-    public void addServiceContextName() {
+    @AroundInvoke
+    public Object addRequestDataToMdc(final InvocationContext invocationContext) throws Exception {
+
         ofNullable(serviceContextNameProvider.getServiceContextName())
                 .ifPresent(value -> {
                     final String jsonAsString = createObjectBuilder().add(SERVICE_CONTEXT, value).build().toString();
                     MDC.put(REQUEST_DATA, jsonAsString);
                 });
-    }
 
-    public void clearRequestData() {
+        final Object result = invocationContext.proceed();
+
         MDC.remove(REQUEST_DATA);
-    }
 
-    public Consumer<Runnable> mdcLoggerConsumer() {
-        return runnable -> {
-            try {
-                addServiceContextName();
-                runnable.run();
-            } finally {
-                clearRequestData();
-            }
-        };
+        return result;
     }
 }

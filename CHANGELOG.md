@@ -5,44 +5,23 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
-## [6.2.0-M7] - 2019-10-15
+## [6.2.0] - 2019-10-15
 
-### Changed
-- RunShutteringBean now runs its own shuttering and no longer delegates to ShutteringProcessRunner
-### Removed
-- ShutteringProcessRunner
-
-## [6.2.0-M6] - 2019-10-14
 ### Added
-- MDC service component logging interceptor
-
-## [6.2.0-M5] - 2019-10-14
-### Changed
-- Ping command now supports command state
-
-## [6.2.0-M4] - 2019-10-10
-### Changed
-- EventCatchupCommand and IndexerCatchupCommand now both have a common interface: CatchupCommand
-- ShutterCommand and UnshutterCommand now both have a common interface: ApplicationShutteringCommand
-
-## [6.2.0-M3] - 2019-10-09
-### Added
-- Refactored Shuttering to no longer use events. 
-- All Shuttering Executors now implement the ShutteringExecutor interface
 - JMX bean can now be pinged to get command status: 
     - COMMAND_RECEIVED
     - COMMAND_IN_PROGRESS
     - COMMAND_COMPLETE
     - COMMAND_FAILED
-
-## [6.2.0-M2] - 2019-10-02
-### Added
 - Added commandId to all SystemEvents
-
-## [6.2.0-M1] - 2019-10-02
-### Added
-- Observer for SystemCommand lifecycle to allow for querying the current state of a SystemCommand
+- All Shuttering Executors now implement the ShutteringExecutor interface
 - New table in the system database 'system_command_status'
+
+### Changed
+- All commands now have state that can be queried by the JMX client
+- MDC service component logging interceptor
+- EventCatchupCommand and IndexerCatchupCommand now both have a common interface: CatchupCommand
+- ShutterCommand and UnshutterCommand now both have a common interface: ApplicationShutteringCommand
 
 ## [6.1.2] - 2019-10-04
 ### Changed

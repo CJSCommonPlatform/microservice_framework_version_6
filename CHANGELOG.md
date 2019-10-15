@@ -5,6 +5,13 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.2.0-M7] - 2019-10-15
+
+### Changed
+- RunShutteringBean now runs its own shuttering and no longer delegates to ShutteringProcessRunner
+### Removed
+- ShutteringProcessRunner
+
 ## [6.2.0-M6] - 2019-10-14
 ### Added
 - MDC service component logging interceptor

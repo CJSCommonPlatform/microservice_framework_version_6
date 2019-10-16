@@ -11,7 +11,7 @@ import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.framework.utilities.exceptions.StackTraceProvider;
 import uk.gov.justice.services.jmx.api.SystemCommandException;
-import uk.gov.justice.services.jmx.api.SystemCommandFailedException;
+import uk.gov.justice.services.jmx.api.SystemCommandInvocationFailedException;
 import uk.gov.justice.services.jmx.command.SystemCommandHandlerProxy;
 import uk.gov.justice.services.jmx.command.SystemCommandStore;
 import uk.gov.justice.services.jmx.command.TestCommand;
@@ -83,7 +83,7 @@ public class SystemCommandRunnerTest {
         try {
             systemCommandRunner.run(testCommand, commandId);
             fail();
-        } catch (final SystemCommandFailedException expected) {
+        } catch (final SystemCommandInvocationFailedException expected) {
             assertThat(expected.getMessage(), is("Failed to run System Command 'TEST_COMMAND'. Caused by uk.gov.justice.services.jmx.api.SystemCommandException: Ooops"));
             assertThat(expected.getServerStackTrace(), is(stackTrace));
             assertThat(expected.getCause(), is(nullValue()));

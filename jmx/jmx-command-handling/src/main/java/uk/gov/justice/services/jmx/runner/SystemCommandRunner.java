@@ -4,7 +4,7 @@ import static java.lang.String.format;
 import static javax.transaction.Transactional.TxType.NEVER;
 
 import uk.gov.justice.services.framework.utilities.exceptions.StackTraceProvider;
-import uk.gov.justice.services.jmx.api.SystemCommandFailedException;
+import uk.gov.justice.services.jmx.api.SystemCommandInvocationFailedException;
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
 import uk.gov.justice.services.jmx.command.SystemCommandStore;
 
@@ -40,7 +40,7 @@ public class SystemCommandRunner {
             final String message = format("Failed to run System Command '%s'", systemCommand.getName());
             logger.error(message, e);
 
-            throw new SystemCommandFailedException(
+            throw new SystemCommandInvocationFailedException(
                     message + ". Caused by " + e.getClass().getName() + ": " + e.getMessage(),
                     stackTraceProvider.getStackTrace(e));
         }

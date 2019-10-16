@@ -5,6 +5,11 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.2.1-M1] - 2019-10-16
+### Changed
+- Renamed SystemCommandFailedException to SystemCommandInvocationFailedException 
+for better exception handling in the JMX client
+
 ## [6.2.0] - 2019-10-15
 
 ### Added

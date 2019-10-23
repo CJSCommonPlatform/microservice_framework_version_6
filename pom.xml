@@ -47,8 +47,8 @@
         <common-bom.version>2.4.0</common-bom.version>
         <test-utils.version>1.24.3</test-utils.version>
         <framework-api.version>4.1.0</framework-api.version>
-        <utilities.version>1.20.2</utilities.version>
-        <json-schema-catalog.version>1.7.4</json-schema-catalog.version>
+        <utilities.version>1.20.3</utilities.version>
+        <json-schema-catalog.version>1.7.5</json-schema-catalog.version>
         <embedded-artemis.version>1.2.0</embedded-artemis.version>
         <jboss-ejb3-ext-api.version>2.2.0.Final</jboss-ejb3-ext-api.version>
     </properties>

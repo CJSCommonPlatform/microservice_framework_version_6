@@ -2,12 +2,19 @@ package uk.gov.justice.services.jmx.runner;
 
 import static java.lang.String.format;
 import static javax.transaction.Transactional.TxType.NEVER;
+import static javax.transaction.Transactional.TxType.REQUIRES_NEW;
+import static uk.gov.justice.services.jmx.api.domain.CommandState.COMMAND_IN_PROGRESS;
+import static uk.gov.justice.services.jmx.api.domain.CommandState.COMMAND_RECEIVED;
 
 import uk.gov.justice.services.framework.utilities.exceptions.StackTraceProvider;
 import uk.gov.justice.services.jmx.api.SystemCommandInvocationFailedException;
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
+import uk.gov.justice.services.jmx.api.domain.CommandState;
+import uk.gov.justice.services.jmx.api.domain.SystemCommandStatus;
 import uk.gov.justice.services.jmx.command.SystemCommandStore;
+import uk.gov.justice.services.jmx.state.persistence.SystemCommandStatusRepository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.inject.Inject;

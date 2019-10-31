@@ -14,7 +14,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.jmx.api.CommandNotFoundException;
-import uk.gov.justice.services.jmx.api.UnsupportedSystemCommandException;
+import uk.gov.justice.services.jmx.api.UnrunnableSystemCommandException;
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
 import uk.gov.justice.services.jmx.api.domain.SystemCommandStatus;
 import uk.gov.justice.services.jmx.command.SystemCommandScanner;
@@ -32,7 +32,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.slf4j.Logger;
-
 
 @RunWith(MockitoJUnitRunner.class)
 public class SystemCommanderTest {
@@ -53,12 +52,12 @@ public class SystemCommanderTest {
     private SystemCommander systemCommander;
 
     @Test
-    public void shouldRunTheSystemCommandIfSuppoorted() throws Exception {
+    public void shouldRunTheSystemCommandIfSupported() throws Exception {
 
         final UUID commandId = randomUUID();
         final TestCommand testCommand = new TestCommand();
 
-        when(asynchronousCommandRunner.isSupported(testCommand)).thenReturn(true);
+        when(asynchronousCommandRunner.commandNotSupported(testCommand)).thenReturn(false);
         when(asynchronousCommandRunner.run(testCommand)).thenReturn(commandId);
 
         assertThat(systemCommander.call(testCommand), is(commandId));
@@ -74,13 +73,29 @@ public class SystemCommanderTest {
 
         final TestCommand testCommand = new TestCommand();
 
-        when(asynchronousCommandRunner.isSupported(testCommand)).thenReturn(false);
+        when(asynchronousCommandRunner.commandNotSupported(testCommand)).thenReturn(true);
 
         try {
             systemCommander.call(testCommand);
             fail();
-        } catch (final UnsupportedSystemCommandException expected) {
+        } catch (final UnrunnableSystemCommandException expected) {
             assertThat(expected.getMessage(), is("The system command 'TEST_COMMAND' is not supported on this context."));
+        }
+    }
+
+    @Test
+    public void shouldFailIfPreviousSystemCommandIsInProgress() throws Exception {
+
+        final TestCommand testCommand = new TestCommand();
+
+        when(asynchronousCommandRunner.commandNotSupported(testCommand)).thenReturn(false);
+        when(systemCommandStateBean.commandInProgress(testCommand)).thenReturn(true);
+
+        try {
+            systemCommander.call(testCommand);
+            fail();
+        } catch (final UnrunnableSystemCommandException expected) {
+            assertThat(expected.getMessage(), is("Cannot run system command 'TEST_COMMAND'. A previous call to that command is still in progress."));
         }
     }
 

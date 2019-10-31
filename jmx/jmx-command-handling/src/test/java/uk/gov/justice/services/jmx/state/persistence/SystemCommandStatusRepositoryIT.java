@@ -1,6 +1,7 @@
 package uk.gov.justice.services.jmx.state.persistence;
 
 import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -13,6 +14,7 @@ import static uk.gov.justice.services.jmx.api.domain.CommandState.COMMAND_IN_PRO
 
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.jdbc.persistence.SystemJdbcDataSourceProvider;
+import uk.gov.justice.services.jmx.api.command.EventCatchupCommand;
 import uk.gov.justice.services.jmx.api.domain.SystemCommandStatus;
 import uk.gov.justice.services.test.utils.persistence.TestJdbcDataSourceProvider;
 
@@ -137,7 +139,7 @@ public class SystemCommandStatusRepositoryIT {
     }
 
     @Test
-    public void shouldGetTheLatestStatusOfACommand() throws Exception {
+    public void shouldGetTheLatestStatusOfACommandById() throws Exception {
 
         final ZonedDateTime now = new UtcClock().now();
         final UUID catchupCommandId = randomUUID();
@@ -167,7 +169,7 @@ public class SystemCommandStatusRepositoryIT {
         systemCommandStatusRepository.add(indexCommandStatus);
         systemCommandStatusRepository.add(catchupCommandStatus_2);
 
-        final Optional<SystemCommandStatus> latestStatus = systemCommandStatusRepository.findLatestStatus(catchupCommandId);
+        final Optional<SystemCommandStatus> latestStatus = systemCommandStatusRepository.findLatestStatusById(catchupCommandId);
 
         if (latestStatus.isPresent()) {
             assertThat(latestStatus.get(), is(catchupCommandStatus_2));
@@ -179,6 +181,49 @@ public class SystemCommandStatusRepositoryIT {
     @Test
     public void shouldReturnEmptyIfNoLatestStatusFound() throws Exception {
 
-        assertThat(systemCommandStatusRepository.findLatestStatus(randomUUID()), is(empty()));
+        assertThat(systemCommandStatusRepository.findLatestStatusById(randomUUID()), is(empty()));
+    }
+
+    @Test
+    public void shouldGetTheLatestStatusOfACommand() throws Exception {
+
+        final ZonedDateTime now = new UtcClock().now();
+        final UUID catchupCommandId = randomUUID();
+        final SystemCommandStatus indexerCommandStatus_1 = new SystemCommandStatus(
+                catchupCommandId,
+                INDEXER_CATCHUP,
+                COMMAND_IN_PROGRESS,
+                now.minusMinutes(2),
+                "Catchup started successfully"
+        );
+        final SystemCommandStatus latestCommandStatus = new SystemCommandStatus(
+                randomUUID(),
+                CATCHUP,
+                COMMAND_IN_PROGRESS,
+                now,
+                "Indexing of events started successfully"
+        );
+        final SystemCommandStatus catchupCommandStatus_2 = new SystemCommandStatus(
+                catchupCommandId,
+                CATCHUP,
+                COMMAND_COMPLETE,
+                now.minusMinutes(5),
+                "Catchup complete"
+        );
+
+        systemCommandStatusRepository.add(indexerCommandStatus_1);
+        systemCommandStatusRepository.add(latestCommandStatus);
+        systemCommandStatusRepository.add(catchupCommandStatus_2);
+
+        final Optional<SystemCommandStatus> latestStatus = systemCommandStatusRepository.findLatestStatusByType(new EventCatchupCommand());
+
+        assertThat(latestStatus, is(of(latestCommandStatus)));
+    }
+
+
+    @Test
+    public void shouldReturnEmptyIfNoLatestStatusFoundByType() throws Exception {
+
+        assertThat(systemCommandStatusRepository.findLatestStatusByType(new EventCatchupCommand()), is(empty()));
     }
 }

@@ -8,6 +8,8 @@ import static uk.gov.justice.services.common.converter.ZonedDateTimes.toSqlTimes
 import static uk.gov.justice.services.jmx.api.domain.CommandState.valueOf;
 
 import uk.gov.justice.services.jdbc.persistence.SystemJdbcDataSourceProvider;
+import uk.gov.justice.services.jmx.api.command.SystemCommand;
+import uk.gov.justice.services.jmx.api.domain.CommandState;
 import uk.gov.justice.services.jmx.api.domain.SystemCommandStatus;
 
 import java.sql.Connection;
@@ -40,13 +42,19 @@ public class SystemCommandStatusRepository {
             "WHERE command_id = ? " +
             "ORDER BY status_changed_at";
 
-    private static final String FIND_LATEST = "SELECT " +
+    private static final String FIND_LATEST_BY_ID = "SELECT " +
             "command_id, command_name, command_state, status_changed_at, message " +
             "FROM system_command_status " +
             "WHERE command_id = ? " +
             "ORDER BY status_changed_at DESC " +
             "LIMIT 1";
 
+    private static final String FIND_LATEST_BY_TYPE = "SELECT " +
+            "command_id, command_name, command_state, status_changed_at, message " +
+            "FROM system_command_status " +
+            "WHERE command_name = ? " +
+            "ORDER BY status_changed_at DESC " +
+            "LIMIT 1";
 
     @Inject
     private SystemJdbcDataSourceProvider systemJdbcDataSourceProvider;
@@ -66,7 +74,7 @@ public class SystemCommandStatusRepository {
 
             preparedStatement.executeUpdate();
 
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new SystemCommandStatusPersistenceException("Failed to insert SystemCommandStatus", e);
         }
     }
@@ -85,7 +93,7 @@ public class SystemCommandStatusRepository {
                 systemCommandStatuses.add(systemCommandStatus);
             }
 
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new SystemCommandStatusPersistenceException("Failed to find all SystemCommandStatus", e);
         }
 
@@ -108,18 +116,18 @@ public class SystemCommandStatusRepository {
                 }
             }
 
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new SystemCommandStatusPersistenceException(format("Failed to find SystemCommandStatus for command id %s", commandId), e);
         }
 
         return systemCommandStatuses;
     }
 
-    public Optional<SystemCommandStatus> findLatestStatus(final UUID commandId) {
+    public Optional<SystemCommandStatus> findLatestStatusById(final UUID commandId) {
         final DataSource systemDataSource = systemJdbcDataSourceProvider.getDataSource();
 
         try (final Connection connection = systemDataSource.getConnection();
-             final PreparedStatement preparedStatement = connection.prepareStatement(FIND_LATEST)) {
+             final PreparedStatement preparedStatement = connection.prepareStatement(FIND_LATEST_BY_ID)) {
 
             preparedStatement.setObject(1, commandId);
 
@@ -135,8 +143,33 @@ public class SystemCommandStatusRepository {
                 return empty();
             }
 
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new SystemCommandStatusPersistenceException("Failed to find latest SystemCommandStatus", e);
+        }
+    }
+
+    public Optional<SystemCommandStatus> findLatestStatusByType(final SystemCommand systemCommand) {
+        final DataSource systemDataSource = systemJdbcDataSourceProvider.getDataSource();
+
+        try (final Connection connection = systemDataSource.getConnection();
+             final PreparedStatement preparedStatement = connection.prepareStatement(FIND_LATEST_BY_TYPE)) {
+
+            preparedStatement.setString(1, systemCommand.getName());
+
+            try (final ResultSet resultSet = preparedStatement.executeQuery()) {
+
+                if (resultSet.next()) {
+
+                    final SystemCommandStatus systemCommandStatus = toSystemCommandStatus(resultSet);
+
+                    return of(systemCommandStatus);
+                }
+
+                return empty();
+            }
+
+        } catch (final SQLException e) {
+            throw new SystemCommandStatusPersistenceException(format("Failed to find latest SystemCommandStatus for %s", systemCommand.getName()), e);
         }
     }
 

@@ -4,6 +4,8 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Changed
+- Commands now fail with an UnrunnableSystemCommandException if the command is already in progress
 
 ## [6.2.2] - 2019-10-23
 ### Added

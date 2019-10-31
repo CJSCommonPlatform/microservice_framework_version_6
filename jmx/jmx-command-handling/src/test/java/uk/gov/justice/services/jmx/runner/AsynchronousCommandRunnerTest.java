@@ -90,6 +90,6 @@ public class AsynchronousCommandRunnerTest {
 
         when(systemCommandRunner.isSupported(systemCommand)).thenReturn(supported);
 
-        assertThat(asynchronousCommandRunner.isSupported(systemCommand), is(supported));
+        assertThat(asynchronousCommandRunner.commandNotSupported(systemCommand), is(false));
     }
 }

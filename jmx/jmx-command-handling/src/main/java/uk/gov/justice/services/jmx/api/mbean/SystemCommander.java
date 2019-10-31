@@ -3,7 +3,7 @@ package uk.gov.justice.services.jmx.api.mbean;
 import static java.lang.String.format;
 
 import uk.gov.justice.services.jmx.api.CommandNotFoundException;
-import uk.gov.justice.services.jmx.api.UnsupportedSystemCommandException;
+import uk.gov.justice.services.jmx.api.UnrunnableSystemCommandException;
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
 import uk.gov.justice.services.jmx.api.domain.SystemCommandStatus;
 import uk.gov.justice.services.jmx.command.SystemCommandScanner;
@@ -36,11 +36,13 @@ public class SystemCommander implements SystemCommanderMBean {
 
         logger.info(format("Received System Command '%s'", systemCommand.getName()));
 
-        if(asynchronousCommandRunnerBean.isSupported(systemCommand)) {
-            return asynchronousCommandRunnerBean.run(systemCommand);
-        } else {
-           throw new UnsupportedSystemCommandException(format("The system command '%s' is not supported on this context.", systemCommand.getName()));
+        if(asynchronousCommandRunnerBean.commandNotSupported(systemCommand)) {
+           throw new UnrunnableSystemCommandException(format("The system command '%s' is not supported on this context.", systemCommand.getName()));
+        } if(systemCommandStateBean.commandInProgress(systemCommand)) {
+           throw new UnrunnableSystemCommandException(format("Cannot run system command '%s'. A previous call to that command is still in progress.", systemCommand.getName()));
         }
+
+        return asynchronousCommandRunnerBean.run(systemCommand);
     }
 
     @Override

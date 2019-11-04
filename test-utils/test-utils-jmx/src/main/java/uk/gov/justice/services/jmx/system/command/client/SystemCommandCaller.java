@@ -11,6 +11,7 @@ import uk.gov.justice.services.jmx.api.command.RemoveTriggerCommand;
 import uk.gov.justice.services.jmx.api.command.ShutterCommand;
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
 import uk.gov.justice.services.jmx.api.command.UnshutterCommand;
+import uk.gov.justice.services.jmx.api.command.ValidatePublishedEventsCommand;
 import uk.gov.justice.services.jmx.api.command.VerifyCatchupCommand;
 import uk.gov.justice.services.jmx.system.command.client.connection.JmxParameters;
 
@@ -79,6 +80,10 @@ public class SystemCommandCaller {
 
     public void callValidateCatchup() {
         callSystemCommand(new VerifyCatchupCommand());
+    }
+
+    public void callValidatePublishedEvents() {
+        callSystemCommand(new ValidatePublishedEventsCommand());
     }
 
     private void callSystemCommand(final SystemCommand systemCommand) {

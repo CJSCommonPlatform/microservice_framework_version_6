@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.2.5] - 2019-11-04
+### Changed
+- Update json-schema-catalog to 1.7.6
+
 ## [6.2.4] - 2019-11-04
 ### Added
 - New command ValidatePublishedEventsCommand that is for checking that all events fulfil their schemas

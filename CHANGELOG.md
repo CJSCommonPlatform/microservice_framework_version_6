@@ -5,6 +5,10 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.2.4] - 2019-11-04
+### Added
+- New command ValidatePublishedEventsCommand that is for checking that all events fulfil their schemas
+
 ## [6.2.3] - 2019-10-31
 ### Changed
 - Commands now fail with an UnrunnableSystemCommandException if the command is already in progress

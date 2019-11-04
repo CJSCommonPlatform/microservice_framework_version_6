@@ -16,6 +16,7 @@ import uk.gov.justice.services.jmx.api.command.RebuildCommand;
 import uk.gov.justice.services.jmx.api.command.RemoveTriggerCommand;
 import uk.gov.justice.services.jmx.api.command.ShutterCommand;
 import uk.gov.justice.services.jmx.api.command.UnshutterCommand;
+import uk.gov.justice.services.jmx.api.command.ValidatePublishedEventsCommand;
 import uk.gov.justice.services.jmx.api.command.VerifyCatchupCommand;
 import uk.gov.justice.services.jmx.api.mbean.SystemCommanderMBean;
 import uk.gov.justice.services.jmx.system.command.client.connection.Credentials;
@@ -199,6 +200,27 @@ public class SystemCommandCallerTest {
         systemCommandCaller.callValidateCatchup();
 
         verify(systemCommanderMBean).call(new VerifyCatchupCommand());
+        verify(systemCommanderClient).close();
+    }
+
+    @Test
+    public void shouldCallValidatePublishedEvents() throws Exception {
+
+        final String contextName = "contextName";
+
+        final JmxParameters jmxParameters = mock(JmxParameters.class);
+        final SystemCommanderClient systemCommanderClient = mock(SystemCommanderClient.class);
+        final SystemCommanderMBean systemCommanderMBean = mock(SystemCommanderMBean.class);
+
+        final SystemCommandCaller systemCommandCaller = new SystemCommandCaller(jmxParameters, testSystemCommanderClientFactory);
+
+        when(jmxParameters.getContextName()).thenReturn(contextName);
+        when(testSystemCommanderClientFactory.create(jmxParameters)).thenReturn(systemCommanderClient);
+        when(systemCommanderClient.getRemote(contextName)).thenReturn(systemCommanderMBean);
+
+        systemCommandCaller.callValidatePublishedEvents();
+
+        verify(systemCommanderMBean).call(new ValidatePublishedEventsCommand());
         verify(systemCommanderClient).close();
     }
 

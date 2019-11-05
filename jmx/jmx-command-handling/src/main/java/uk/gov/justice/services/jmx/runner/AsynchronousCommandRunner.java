@@ -45,10 +45,6 @@ public class AsynchronousCommandRunner {
         return commandId;
     }
 
-    public boolean commandNotSupported(final SystemCommand systemCommand) {
-        return ! systemCommandRunner.isSupported(systemCommand);
-    }
-
     private void fireCommandReceived(final UUID commandId, final SystemCommand systemCommand) {
         final String commandName = systemCommand.getName();
         systemCommandStateBean.addSystemCommandState(new SystemCommandStatus(

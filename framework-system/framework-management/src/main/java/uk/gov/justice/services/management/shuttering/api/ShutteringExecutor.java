@@ -1,6 +1,6 @@
 package uk.gov.justice.services.management.shuttering.api;
 
-import uk.gov.justice.services.jmx.api.command.ApplicationShutteringCommand;
+import uk.gov.justice.services.management.shuttering.commands.ApplicationShutteringCommand;
 
 import java.util.UUID;
 

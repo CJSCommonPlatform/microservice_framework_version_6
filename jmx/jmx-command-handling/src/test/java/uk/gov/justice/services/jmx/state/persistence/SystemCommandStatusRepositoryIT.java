@@ -7,15 +7,14 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.jmx.api.command.EventCatchupCommand.CATCHUP;
-import static uk.gov.justice.services.jmx.api.command.IndexerCatchupCommand.INDEXER_CATCHUP;
 import static uk.gov.justice.services.jmx.api.domain.CommandState.COMMAND_COMPLETE;
 import static uk.gov.justice.services.jmx.api.domain.CommandState.COMMAND_IN_PROGRESS;
+import static uk.gov.justice.services.jmx.command.TestCommand.TEST_COMMAND;
 
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.jdbc.persistence.SystemJdbcDataSourceProvider;
-import uk.gov.justice.services.jmx.api.command.EventCatchupCommand;
 import uk.gov.justice.services.jmx.api.domain.SystemCommandStatus;
+import uk.gov.justice.services.jmx.command.TestCommand;
 import uk.gov.justice.services.test.utils.persistence.TestJdbcDataSourceProvider;
 
 import java.sql.Connection;
@@ -67,21 +66,21 @@ public class SystemCommandStatusRepositoryIT {
         final UUID catchupCommandId = randomUUID();
         final SystemCommandStatus catchupCommandStatus_1 = new SystemCommandStatus(
                 catchupCommandId,
-                CATCHUP,
+                TEST_COMMAND,
                 COMMAND_IN_PROGRESS,
                 now.minusMinutes(10),
                 "Catchup started successfully"
         );
         final SystemCommandStatus indexCommandStatus = new SystemCommandStatus(
                 randomUUID(),
-                INDEXER_CATCHUP,
+                TEST_COMMAND,
                 COMMAND_IN_PROGRESS,
                 now.minusMinutes(5),
                 "Indexing of events started successfully"
         );
         final SystemCommandStatus catchupCommandStatus_2 = new SystemCommandStatus(
                 catchupCommandId,
-                CATCHUP,
+                TEST_COMMAND,
                 COMMAND_COMPLETE,
                 now,
                 "Catchup complete"
@@ -106,21 +105,21 @@ public class SystemCommandStatusRepositoryIT {
         final UUID catchupCommandId = randomUUID();
         final SystemCommandStatus catchupCommandStatus_1 = new SystemCommandStatus(
                 catchupCommandId,
-                CATCHUP,
+                TEST_COMMAND,
                 COMMAND_IN_PROGRESS,
                 now.minusMinutes(10),
                 "Catchup started successfully"
         );
         final SystemCommandStatus indexCommandStatus = new SystemCommandStatus(
                 randomUUID(),
-                INDEXER_CATCHUP,
+                TEST_COMMAND,
                 COMMAND_IN_PROGRESS,
                 now.minusMinutes(5),
                 "Indexing of events started successfully"
         );
         final SystemCommandStatus catchupCommandStatus_2 = new SystemCommandStatus(
                 catchupCommandId,
-                CATCHUP,
+                TEST_COMMAND,
                 COMMAND_COMPLETE,
                 now,
                 "Catchup complete"
@@ -145,21 +144,21 @@ public class SystemCommandStatusRepositoryIT {
         final UUID catchupCommandId = randomUUID();
         final SystemCommandStatus catchupCommandStatus_1 = new SystemCommandStatus(
                 catchupCommandId,
-                CATCHUP,
+                TEST_COMMAND,
                 COMMAND_IN_PROGRESS,
                 now.minusMinutes(10),
                 "Catchup started successfully"
         );
         final SystemCommandStatus indexCommandStatus = new SystemCommandStatus(
                 randomUUID(),
-                INDEXER_CATCHUP,
+                TEST_COMMAND,
                 COMMAND_IN_PROGRESS,
                 now.minusMinutes(5),
                 "Indexing of events started successfully"
         );
         final SystemCommandStatus catchupCommandStatus_2 = new SystemCommandStatus(
                 catchupCommandId,
-                CATCHUP,
+                TEST_COMMAND,
                 COMMAND_COMPLETE,
                 now,
                 "Catchup complete"
@@ -191,21 +190,21 @@ public class SystemCommandStatusRepositoryIT {
         final UUID catchupCommandId = randomUUID();
         final SystemCommandStatus indexerCommandStatus_1 = new SystemCommandStatus(
                 catchupCommandId,
-                INDEXER_CATCHUP,
+                TEST_COMMAND,
                 COMMAND_IN_PROGRESS,
                 now.minusMinutes(2),
                 "Catchup started successfully"
         );
         final SystemCommandStatus latestCommandStatus = new SystemCommandStatus(
                 randomUUID(),
-                CATCHUP,
+                TEST_COMMAND,
                 COMMAND_IN_PROGRESS,
                 now,
                 "Indexing of events started successfully"
         );
         final SystemCommandStatus catchupCommandStatus_2 = new SystemCommandStatus(
                 catchupCommandId,
-                CATCHUP,
+                TEST_COMMAND,
                 COMMAND_COMPLETE,
                 now.minusMinutes(5),
                 "Catchup complete"
@@ -215,7 +214,7 @@ public class SystemCommandStatusRepositoryIT {
         systemCommandStatusRepository.add(latestCommandStatus);
         systemCommandStatusRepository.add(catchupCommandStatus_2);
 
-        final Optional<SystemCommandStatus> latestStatus = systemCommandStatusRepository.findLatestStatusByType(new EventCatchupCommand());
+        final Optional<SystemCommandStatus> latestStatus = systemCommandStatusRepository.findLatestStatusByType(new TestCommand());
 
         assertThat(latestStatus, is(of(latestCommandStatus)));
     }
@@ -224,6 +223,6 @@ public class SystemCommandStatusRepositoryIT {
     @Test
     public void shouldReturnEmptyIfNoLatestStatusFoundByType() throws Exception {
 
-        assertThat(systemCommandStatusRepository.findLatestStatusByType(new EventCatchupCommand()), is(empty()));
+        assertThat(systemCommandStatusRepository.findLatestStatusByType(new TestCommand()), is(empty()));
     }
 }

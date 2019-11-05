@@ -6,7 +6,6 @@ import java.util.List;
 
 public interface SystemCommandStore {
 
-    boolean isSupported(final SystemCommand systemCommand);
     SystemCommandHandlerProxy findCommandProxy(final SystemCommand systemCommand);
     void store(final List<SystemCommandHandlerProxy> systemCommandProxies);
 }

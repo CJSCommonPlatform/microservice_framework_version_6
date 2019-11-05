@@ -16,7 +16,10 @@ import static org.mockito.Mockito.when;
 import uk.gov.justice.services.jmx.api.CommandNotFoundException;
 import uk.gov.justice.services.jmx.api.UnrunnableSystemCommandException;
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
+import uk.gov.justice.services.jmx.api.command.SystemCommandDetails;
 import uk.gov.justice.services.jmx.api.domain.SystemCommandStatus;
+import uk.gov.justice.services.jmx.command.CommandConverter;
+import uk.gov.justice.services.jmx.command.SystemCommandLocator;
 import uk.gov.justice.services.jmx.command.SystemCommandScanner;
 import uk.gov.justice.services.jmx.command.TestCommand;
 import uk.gov.justice.services.jmx.runner.AsynchronousCommandRunner;
@@ -37,7 +40,7 @@ import org.slf4j.Logger;
 public class SystemCommanderTest {
 
     @Mock
-    private Logger logger;
+    private SystemCommandLocator systemCommandLocator;
 
     @Mock
     private AsynchronousCommandRunner asynchronousCommandRunner;
@@ -48,6 +51,12 @@ public class SystemCommanderTest {
     @Mock
     private SystemCommandStateBean systemCommandStateBean;
 
+    @Mock
+    private CommandConverter commandConverter;
+
+    @Mock
+    private Logger logger;
+
     @InjectMocks
     private SystemCommander systemCommander;
 
@@ -57,10 +66,10 @@ public class SystemCommanderTest {
         final UUID commandId = randomUUID();
         final TestCommand testCommand = new TestCommand();
 
-        when(asynchronousCommandRunner.commandNotSupported(testCommand)).thenReturn(false);
+        when(systemCommandLocator.forName(testCommand.getName())).thenReturn(of(testCommand));
         when(asynchronousCommandRunner.run(testCommand)).thenReturn(commandId);
 
-        assertThat(systemCommander.call(testCommand), is(commandId));
+        assertThat(systemCommander.call("TEST_COMMAND"), is(commandId));
 
         final InOrder inOrder = inOrder(logger, asynchronousCommandRunner);
 
@@ -73,10 +82,10 @@ public class SystemCommanderTest {
 
         final TestCommand testCommand = new TestCommand();
 
-        when(asynchronousCommandRunner.commandNotSupported(testCommand)).thenReturn(true);
+        when(systemCommandLocator.forName(testCommand.getName())).thenReturn(empty());
 
         try {
-            systemCommander.call(testCommand);
+            systemCommander.call("TEST_COMMAND");
             fail();
         } catch (final UnrunnableSystemCommandException expected) {
             assertThat(expected.getMessage(), is("The system command 'TEST_COMMAND' is not supported on this context."));
@@ -88,11 +97,11 @@ public class SystemCommanderTest {
 
         final TestCommand testCommand = new TestCommand();
 
-        when(asynchronousCommandRunner.commandNotSupported(testCommand)).thenReturn(false);
+        when(systemCommandLocator.forName(testCommand.getName())).thenReturn(of(testCommand));
         when(systemCommandStateBean.commandInProgress(testCommand)).thenReturn(true);
 
         try {
-            systemCommander.call(testCommand);
+            systemCommander.call("TEST_COMMAND");
             fail();
         } catch (final UnrunnableSystemCommandException expected) {
             assertThat(expected.getMessage(), is("Cannot run system command 'TEST_COMMAND'. A previous call to that command is still in progress."));
@@ -106,17 +115,25 @@ public class SystemCommanderTest {
         final SystemCommand systemCommand_2 = mock(SystemCommand.class);
         final SystemCommand systemCommand_3 = mock(SystemCommand.class);
 
+        final SystemCommandDetails systemCommandDetails_1 = mock(SystemCommandDetails.class);
+        final SystemCommandDetails systemCommandDetails_2 = mock(SystemCommandDetails.class);
+        final SystemCommandDetails systemCommandDetails_3 = mock(SystemCommandDetails.class);
+
         when(systemCommandScanner.findCommands()).thenReturn(asList(
                 systemCommand_1,
                 systemCommand_2,
                 systemCommand_3));
 
-        final List<SystemCommand> systemCommands = systemCommander.listCommands();
+        when(commandConverter.toCommandDetails(systemCommand_1)).thenReturn(systemCommandDetails_1);
+        when(commandConverter.toCommandDetails(systemCommand_2)).thenReturn(systemCommandDetails_2);
+        when(commandConverter.toCommandDetails(systemCommand_3)).thenReturn(systemCommandDetails_3);
 
-        assertThat(systemCommands.size(), is(3));
-        assertThat(systemCommands, hasItem(systemCommand_1));
-        assertThat(systemCommands, hasItem(systemCommand_2));
-        assertThat(systemCommands, hasItem(systemCommand_3));
+        final List<SystemCommandDetails> systemCommandDetails = systemCommander.listCommands();
+
+        assertThat(systemCommandDetails.size(), is(3));
+        assertThat(systemCommandDetails, hasItem(systemCommandDetails_1));
+        assertThat(systemCommandDetails, hasItem(systemCommandDetails_2));
+        assertThat(systemCommandDetails, hasItem(systemCommandDetails_3));
     }
 
     @Test

@@ -5,10 +5,10 @@ import static javax.transaction.Transactional.TxType.REQUIRED;
 import static uk.gov.justice.services.jmx.api.domain.CommandState.COMMAND_IN_PROGRESS;
 
 import uk.gov.justice.services.common.util.UtcClock;
-import uk.gov.justice.services.jmx.api.command.ApplicationShutteringCommand;
 import uk.gov.justice.services.jmx.logging.MdcLoggerInterceptor;
 import uk.gov.justice.services.jmx.state.events.SystemCommandStateChangedEvent;
 import uk.gov.justice.services.management.shuttering.api.ShutteringResult;
+import uk.gov.justice.services.management.shuttering.commands.ApplicationShutteringCommand;
 import uk.gov.justice.services.management.shuttering.process.ShutteringExecutorsRunner;
 import uk.gov.justice.services.management.shuttering.process.ShutteringPostProcess;
 import uk.gov.justice.services.management.shuttering.process.ShutteringResultsMapper;

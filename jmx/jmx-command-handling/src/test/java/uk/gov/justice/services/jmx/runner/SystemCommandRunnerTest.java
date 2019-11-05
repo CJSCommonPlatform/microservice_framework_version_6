@@ -41,17 +41,6 @@ public class SystemCommandRunnerTest {
     private SystemCommandRunner systemCommandRunner;
 
     @Test
-    public void shouldReturnFalseIfCommandUnsupported() throws Exception {
-
-        final TestCommand testCommand = new TestCommand();
-        final boolean supported = true;
-
-        when(systemCommandStore.isSupported(testCommand)).thenReturn(supported);
-
-        assertThat(systemCommandRunner.isSupported(testCommand), is(supported));
-    }
-
-    @Test
     public void shouldFindTheCorrectProxyForTheCommandAndInvoke() throws Exception {
 
         final UUID commandId = UUID.randomUUID();

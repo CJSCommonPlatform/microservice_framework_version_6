@@ -1,13 +1,13 @@
 package uk.gov.justice.services.management.shuttering.handler;
 
 import static java.lang.String.format;
-import static uk.gov.justice.services.jmx.api.command.ShutterCommand.SHUTTER;
-import static uk.gov.justice.services.jmx.api.command.UnshutterCommand.UNSHUTTER;
+import static uk.gov.justice.services.management.shuttering.commands.ShutterCommand.SHUTTER;
+import static uk.gov.justice.services.management.shuttering.commands.UnshutterCommand.UNSHUTTER;
 
-import uk.gov.justice.services.jmx.api.command.ApplicationShutteringCommand;
-import uk.gov.justice.services.jmx.api.command.ShutterCommand;
-import uk.gov.justice.services.jmx.api.command.UnshutterCommand;
 import uk.gov.justice.services.jmx.command.HandlesSystemCommand;
+import uk.gov.justice.services.management.shuttering.commands.ApplicationShutteringCommand;
+import uk.gov.justice.services.management.shuttering.commands.ShutterCommand;
+import uk.gov.justice.services.management.shuttering.commands.UnshutterCommand;
 
 import java.util.UUID;
 

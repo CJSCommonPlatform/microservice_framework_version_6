@@ -9,9 +9,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.framework.utilities.cdi.CdiInstanceResolver;
-import uk.gov.justice.services.jmx.api.command.EventCatchupCommand;
-import uk.gov.justice.services.jmx.api.command.IndexerCatchupCommand;
-import uk.gov.justice.services.jmx.api.command.RebuildCommand;
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
 
 import java.util.List;
@@ -60,9 +57,9 @@ public class BlacklistedCommandsScannerTest {
         final Set<SystemCommand> blacklistedCommands = blacklistedCommandsScanner.scanForBlacklistedCommands(cdiBeans, beanManager);
 
         assertThat(blacklistedCommands.size(), is(3));
-        assertThat(blacklistedCommands, hasItem(new EventCatchupCommand()));
-        assertThat(blacklistedCommands, hasItem(new RebuildCommand()));
-        assertThat(blacklistedCommands, hasItem(new IndexerCatchupCommand()));
+        assertThat(blacklistedCommands, hasItem(new SystemCommand_1()));
+        assertThat(blacklistedCommands, hasItem(new SystemCommand_2()));
+        assertThat(blacklistedCommands, hasItem(new SystemCommand_3()));
     }
 }
 
@@ -71,8 +68,8 @@ class BlacklistedCommands_1 implements BlacklistedCommands {
     @Override
     public List<SystemCommand> getBlackListedCommands() {
         return asList(
-                new EventCatchupCommand(),
-                new RebuildCommand()
+                new SystemCommand_1(),
+                new SystemCommand_2()
         );
     }
 }
@@ -82,8 +79,8 @@ class BlacklistedCommands_2 implements BlacklistedCommands {
     @Override
     public List<SystemCommand> getBlackListedCommands() {
         return asList(
-                new EventCatchupCommand(),
-                new IndexerCatchupCommand()
+                new SystemCommand_2(),
+                new SystemCommand_3()
         );
     }
 }

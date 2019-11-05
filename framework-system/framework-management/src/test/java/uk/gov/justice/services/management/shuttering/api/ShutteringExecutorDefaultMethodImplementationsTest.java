@@ -6,7 +6,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
-import uk.gov.justice.services.jmx.api.command.ApplicationShutteringCommand;
+import uk.gov.justice.services.management.shuttering.commands.ApplicationShutteringCommand;
 import uk.gov.justice.services.management.shuttering.process.ShutteringExecutorWithNoImplementations;
 
 import java.util.UUID;

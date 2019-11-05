@@ -5,6 +5,12 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.2.6] - 2019-11-07
+### Changed
+- JMX client is now called using the command name as a String rather than the SystemCommand itself.
+- SystemCommands moved out to the projects that contain their CommandHandlers rather than centralised in
+framework.
+
 ## [6.2.5] - 2019-11-04
 ### Changed
 - Update json-schema-catalog to 1.7.6

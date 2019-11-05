@@ -10,10 +10,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import uk.gov.justice.services.jmx.api.command.ApplicationShutteringCommand;
-import uk.gov.justice.services.jmx.api.command.ShutterCommand;
 import uk.gov.justice.services.management.shuttering.api.ShutteringExecutor;
 import uk.gov.justice.services.management.shuttering.api.ShutteringResult;
+import uk.gov.justice.services.management.shuttering.commands.ApplicationShutteringCommand;
+import uk.gov.justice.services.management.shuttering.commands.ShutterCommand;
 
 import java.util.List;
 import java.util.UUID;

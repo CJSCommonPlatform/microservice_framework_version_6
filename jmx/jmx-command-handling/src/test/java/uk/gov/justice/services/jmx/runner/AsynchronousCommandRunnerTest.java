@@ -81,15 +81,4 @@ public class AsynchronousCommandRunnerTest {
         assertThat(getValueOfField(runSystemCommandTask, "systemCommand", SystemCommand.class), is(systemCommand));
         assertThat(getValueOfField(runSystemCommandTask, "commandId", UUID.class), is(commandId));
     }
-
-    @Test
-    public void shouldCheckThatCommandIsSupported() throws Exception {
-
-        final boolean supported = true;
-        final SystemCommand systemCommand = new TestCommand();
-
-        when(systemCommandRunner.isSupported(systemCommand)).thenReturn(supported);
-
-        assertThat(asynchronousCommandRunner.commandNotSupported(systemCommand), is(false));
-    }
 }

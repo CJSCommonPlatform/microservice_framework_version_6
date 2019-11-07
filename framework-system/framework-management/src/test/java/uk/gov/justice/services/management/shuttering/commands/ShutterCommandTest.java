@@ -1,4 +1,4 @@
-package uk.gov.justice.services.jmx.api.command;
+package uk.gov.justice.services.management.shuttering.commands;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -9,14 +9,14 @@ import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class EventCatchupCommandTest {
+public class ShutterCommandTest {
 
     @InjectMocks
-    private EventCatchupCommand eventCatchupCommand;
+    private ShutterCommand shutterCommand;
 
     @Test
-    public void shouldBeEventCatchupCommand() throws Exception {
+    public void shouldNotBeUnshutterCommand() throws Exception {
 
-        assertThat(eventCatchupCommand.isEventCatchup(), is(true));
+        assertThat(shutterCommand.isUnshuttering(), is(false));
     }
 }

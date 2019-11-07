@@ -12,11 +12,11 @@ import static uk.gov.justice.services.jmx.api.domain.CommandState.COMMAND_COMPLE
 import static uk.gov.justice.services.jmx.api.domain.CommandState.COMMAND_FAILED;
 
 import uk.gov.justice.services.common.util.UtcClock;
-import uk.gov.justice.services.jmx.api.command.ApplicationShutteringCommand;
-import uk.gov.justice.services.jmx.api.command.ShutterCommand;
-import uk.gov.justice.services.jmx.api.command.UnshutterCommand;
 import uk.gov.justice.services.jmx.state.events.SystemCommandStateChangedEvent;
 import uk.gov.justice.services.management.shuttering.api.ShutteringResult;
+import uk.gov.justice.services.management.shuttering.commands.ApplicationShutteringCommand;
+import uk.gov.justice.services.management.shuttering.commands.ShutterCommand;
+import uk.gov.justice.services.management.shuttering.commands.UnshutterCommand;
 
 import java.time.ZonedDateTime;
 import java.util.List;

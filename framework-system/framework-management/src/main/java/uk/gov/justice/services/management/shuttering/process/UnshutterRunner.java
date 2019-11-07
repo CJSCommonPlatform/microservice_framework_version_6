@@ -3,9 +3,9 @@ package uk.gov.justice.services.management.shuttering.process;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
-import uk.gov.justice.services.jmx.api.command.ApplicationShutteringCommand;
 import uk.gov.justice.services.management.shuttering.api.ShutteringExecutor;
 import uk.gov.justice.services.management.shuttering.api.ShutteringResult;
+import uk.gov.justice.services.management.shuttering.commands.ApplicationShutteringCommand;
 
 import java.util.List;
 import java.util.UUID;

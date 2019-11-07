@@ -8,10 +8,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.jmx.api.domain.CommandState.COMMAND_FAILED;
 
-import uk.gov.justice.services.jmx.api.command.ApplicationShutteringCommand;
-import uk.gov.justice.services.jmx.api.command.UnshutterCommand;
 import uk.gov.justice.services.management.shuttering.api.ShutteringExecutor;
 import uk.gov.justice.services.management.shuttering.api.ShutteringResult;
+import uk.gov.justice.services.management.shuttering.commands.ApplicationShutteringCommand;
+import uk.gov.justice.services.management.shuttering.commands.UnshutterCommand;
 
 import java.util.UUID;
 

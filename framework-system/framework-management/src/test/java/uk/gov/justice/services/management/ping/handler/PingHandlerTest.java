@@ -11,8 +11,8 @@ import static uk.gov.justice.services.jmx.api.domain.CommandState.COMMAND_COMPLE
 import static uk.gov.justice.services.jmx.api.domain.CommandState.COMMAND_IN_PROGRESS;
 
 import uk.gov.justice.services.common.util.UtcClock;
-import uk.gov.justice.services.jmx.api.command.PingCommand;
 import uk.gov.justice.services.jmx.state.events.SystemCommandStateChangedEvent;
+import uk.gov.justice.services.management.ping.commands.PingCommand;
 
 import java.time.ZonedDateTime;
 import java.util.List;

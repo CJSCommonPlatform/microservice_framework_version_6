@@ -3,8 +3,8 @@ package uk.gov.justice.services.management.shuttering.process;
 import static java.util.UUID.randomUUID;
 import static org.mockito.Mockito.verify;
 
-import uk.gov.justice.services.jmx.api.command.ShutterCommand;
-import uk.gov.justice.services.jmx.api.command.UnshutterCommand;
+import uk.gov.justice.services.management.shuttering.commands.ShutterCommand;
+import uk.gov.justice.services.management.shuttering.commands.UnshutterCommand;
 
 import java.util.UUID;
 

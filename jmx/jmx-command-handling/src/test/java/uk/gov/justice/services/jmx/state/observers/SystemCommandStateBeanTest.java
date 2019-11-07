@@ -14,7 +14,6 @@ import static uk.gov.justice.services.jmx.api.domain.CommandState.COMMAND_IN_PRO
 import static uk.gov.justice.services.jmx.api.domain.CommandState.COMMAND_RECEIVED;
 
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
-import uk.gov.justice.services.jmx.api.domain.CommandState;
 import uk.gov.justice.services.jmx.api.domain.SystemCommandStatus;
 import uk.gov.justice.services.jmx.state.persistence.SystemCommandStatusRepository;
 

@@ -8,8 +8,8 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static uk.gov.justice.services.jmx.api.domain.CommandState.COMMAND_COMPLETE;
 
-import uk.gov.justice.services.jmx.api.command.ApplicationShutteringCommand;
 import uk.gov.justice.services.management.shuttering.api.ShutteringResult;
+import uk.gov.justice.services.management.shuttering.commands.ApplicationShutteringCommand;
 
 import java.util.UUID;
 

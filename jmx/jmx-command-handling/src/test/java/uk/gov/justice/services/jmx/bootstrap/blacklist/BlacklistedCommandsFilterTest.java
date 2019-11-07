@@ -3,20 +3,8 @@ package uk.gov.justice.services.jmx.bootstrap.blacklist;
 import static com.google.common.collect.Sets.newHashSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.justice.services.jmx.api.command.EventCatchupCommand.CATCHUP;
-import static uk.gov.justice.services.jmx.api.command.IndexerCatchupCommand.INDEXER_CATCHUP;
-import static uk.gov.justice.services.jmx.api.command.PingCommand.PING;
-import static uk.gov.justice.services.jmx.api.command.RebuildCommand.REBUILD;
-import static uk.gov.justice.services.jmx.api.command.ShutterCommand.SHUTTER;
-import static uk.gov.justice.services.jmx.api.command.UnshutterCommand.UNSHUTTER;
 
-import uk.gov.justice.services.jmx.api.command.EventCatchupCommand;
-import uk.gov.justice.services.jmx.api.command.IndexerCatchupCommand;
-import uk.gov.justice.services.jmx.api.command.PingCommand;
-import uk.gov.justice.services.jmx.api.command.RebuildCommand;
-import uk.gov.justice.services.jmx.api.command.ShutterCommand;
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
-import uk.gov.justice.services.jmx.api.command.UnshutterCommand;
 
 import java.util.Set;
 
@@ -34,21 +22,22 @@ public class BlacklistedCommandsFilterTest {
     @Test
     public void shouldReturnTrueIfTheHandlesSystemCommandNameIdDoesNotMatchAnyOfTheNamesOfTheBlacklistedSystemCommands() throws Exception {
 
+        final SystemCommand_1 systemCommand_1 = new SystemCommand_1();
+        final SystemCommand_2 systemCommand_2 = new SystemCommand_2();
+        final SystemCommand_3 systemCommand_3 = new SystemCommand_3();
+
         final Set<SystemCommand> blacklistedCommands = newHashSet(
-                new ShutterCommand(),
-                new UnshutterCommand(),
-                new EventCatchupCommand(),
-                new PingCommand(),
-                new RebuildCommand(),
-                new IndexerCatchupCommand()
+                systemCommand_1,
+                systemCommand_2,
+                systemCommand_3
         );
 
-        assertThat(blacklistedCommandsFilter.isSystemCommandAllowed(SHUTTER, blacklistedCommands), is(false));
-        assertThat(blacklistedCommandsFilter.isSystemCommandAllowed(UNSHUTTER, blacklistedCommands), is(false));
-        assertThat(blacklistedCommandsFilter.isSystemCommandAllowed(CATCHUP, blacklistedCommands), is(false));
-        assertThat(blacklistedCommandsFilter.isSystemCommandAllowed(PING, blacklistedCommands), is(false));
-        assertThat(blacklistedCommandsFilter.isSystemCommandAllowed(REBUILD, blacklistedCommands), is(false));
-        assertThat(blacklistedCommandsFilter.isSystemCommandAllowed(INDEXER_CATCHUP, blacklistedCommands), is(false));
+        assertThat(blacklistedCommandsFilter.isSystemCommandAllowed(systemCommand_1.getName(), blacklistedCommands), is(false));
+        assertThat(blacklistedCommandsFilter.isSystemCommandAllowed(systemCommand_2.getName(), blacklistedCommands), is(false));
+        assertThat(blacklistedCommandsFilter.isSystemCommandAllowed(systemCommand_3.getName(), blacklistedCommands), is(false));
         assertThat(blacklistedCommandsFilter.isSystemCommandAllowed("SOME_OTHER_COMMAND", blacklistedCommands), is(true));
     }
+
 }
+
+

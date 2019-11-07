@@ -27,11 +27,6 @@ public class DefaultSystemCommandStore  implements SystemCommandStore{
     private Logger logger;
 
     @Override
-    public boolean isSupported(final SystemCommand systemCommand) {
-        return handlers.containsKey(systemCommand.getName());
-    }
-
-    @Override
     public SystemCommandHandlerProxy findCommandProxy(final SystemCommand systemCommand) {
 
         final SystemCommandHandlerProxy systemCommandHandlerProxy = handlers.get(

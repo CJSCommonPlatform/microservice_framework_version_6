@@ -9,7 +9,6 @@ import static uk.gov.justice.services.jmx.api.domain.CommandState.valueOf;
 
 import uk.gov.justice.services.jdbc.persistence.SystemJdbcDataSourceProvider;
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
-import uk.gov.justice.services.jmx.api.domain.CommandState;
 import uk.gov.justice.services.jmx.api.domain.SystemCommandStatus;
 
 import java.sql.Connection;

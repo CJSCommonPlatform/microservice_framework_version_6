@@ -14,18 +14,18 @@ public class EnvelopeSenderSelector {
     @Inject
     private ShutteringStoreSender shutteringStoreSender;
 
-    private AtomicBoolean shuttered = new AtomicBoolean(false);
+    private AtomicBoolean suspended = new AtomicBoolean(false);
 
     public EnvelopeSender getEnvelopeSender() {
 
-        if (shuttered.get()) {
+        if (suspended.get()) {
             return shutteringStoreSender;
         }
 
         return jmsSender;
     }
 
-    public void setShuttered(final boolean shuttered) {
-        this.shuttered.set(shuttered);
+    public void setSuspended(final boolean shuttered) {
+        this.suspended.set(shuttered);
     }
 }

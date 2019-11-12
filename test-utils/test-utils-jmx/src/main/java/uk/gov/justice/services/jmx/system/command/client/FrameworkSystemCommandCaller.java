@@ -5,8 +5,8 @@ import static uk.gov.justice.services.test.utils.common.host.TestHostProvider.ge
 
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
 import uk.gov.justice.services.jmx.system.command.client.connection.JmxParameters;
-import uk.gov.justice.services.management.shuttering.commands.ShutterCommand;
-import uk.gov.justice.services.management.shuttering.commands.UnshutterCommand;
+import uk.gov.justice.services.management.suspension.commands.SuspendCommand;
+import uk.gov.justice.services.management.suspension.commands.UnsuspendCommand;
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -44,11 +44,11 @@ public class FrameworkSystemCommandCaller {
     }
 
     public void callShutter() {
-        callSystemCommand(new ShutterCommand());
+        callSystemCommand(new SuspendCommand());
     }
 
     public void callUnshutter() {
-        callSystemCommand(new UnshutterCommand());
+        callSystemCommand(new UnsuspendCommand());
     }
 
     private void callSystemCommand(final SystemCommand systemCommand) {

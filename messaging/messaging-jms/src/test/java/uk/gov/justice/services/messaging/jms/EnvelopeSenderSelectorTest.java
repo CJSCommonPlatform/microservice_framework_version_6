@@ -9,7 +9,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-
 @RunWith(MockitoJUnitRunner.class)
 public class EnvelopeSenderSelectorTest {
 
@@ -29,14 +28,14 @@ public class EnvelopeSenderSelectorTest {
     }
 
     @Test
-    public void shouldGetTheShutteringStoreSenderIfShutteredIsSetToTrue() throws Exception {
+    public void shouldGetTheShutteringStoreSenderIfSuspendedIsSetToTrue() throws Exception {
 
         assertThat(envelopeSenderSelector.getEnvelopeSender(), is(jmsSender));
 
-        envelopeSenderSelector.setShuttered(true);
+        envelopeSenderSelector.setSuspended(true);
         assertThat(envelopeSenderSelector.getEnvelopeSender(), is(shutteringStoreSender));
 
-        envelopeSenderSelector.setShuttered(false);
+        envelopeSenderSelector.setSuspended(false);
         assertThat(envelopeSenderSelector.getEnvelopeSender(), is(jmsSender));
     }
 }

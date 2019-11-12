@@ -6,8 +6,8 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.management.shuttering.commands.ShutterCommand.SHUTTER;
-import static uk.gov.justice.services.management.shuttering.commands.UnshutterCommand.UNSHUTTER;
+import static uk.gov.justice.services.management.suspension.commands.SuspendCommand.SUSPEND;
+import static uk.gov.justice.services.management.suspension.commands.UnsuspendCommand.UNSUSPEND;
 import static uk.gov.justice.services.test.utils.common.host.TestHostProvider.getHost;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.getValueOfField;
 
@@ -45,7 +45,7 @@ public class FrameworkSystemCommandCallerTest {
 
         frameworkSystemCommandCaller.callShutter();
 
-        verify(systemCommanderMBean).call(SHUTTER);
+        verify(systemCommanderMBean).call(SUSPEND);
         verify(systemCommanderClient).close();
     }
 
@@ -66,7 +66,7 @@ public class FrameworkSystemCommandCallerTest {
 
         frameworkSystemCommandCaller.callUnshutter();
 
-        verify(systemCommanderMBean).call(UNSHUTTER);
+        verify(systemCommanderMBean).call(UNSUSPEND);
         verify(systemCommanderClient).close();
     }
 

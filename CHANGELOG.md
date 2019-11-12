@@ -4,6 +4,8 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [6.4.0] - 2019-11-12
 ### Changed
 - SHUTTER command renamed to SUSPEND
 - UNSHUTTER command renamed to UNSUSPEND

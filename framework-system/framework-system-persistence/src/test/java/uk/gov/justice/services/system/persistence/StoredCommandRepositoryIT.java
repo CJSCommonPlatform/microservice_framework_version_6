@@ -1,4 +1,4 @@
-package uk.gov.justice.services.shuttering.persistence;
+package uk.gov.justice.services.system.persistence;
 
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
@@ -13,7 +13,7 @@ import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.jdbc.persistence.JdbcResultSetStreamer;
 import uk.gov.justice.services.jdbc.persistence.PreparedStatementWrapperFactory;
 import uk.gov.justice.services.jdbc.persistence.SystemJdbcDataSourceProvider;
-import uk.gov.justice.services.shuttering.domain.StoredCommand;
+import uk.gov.justice.services.system.domain.StoredCommand;
 import uk.gov.justice.services.test.utils.persistence.TestJdbcDataSourceProvider;
 
 import java.time.ZonedDateTime;
@@ -37,9 +37,11 @@ public class StoredCommandRepositoryIT {
     @Mock
     private SystemJdbcDataSourceProvider systemJdbcDataSourceProvider;
 
+    @SuppressWarnings("unused")
     @Spy
     private PreparedStatementWrapperFactory preparedStatementWrapperFactory = new PreparedStatementWrapperFactory();
 
+    @SuppressWarnings("unused")
     @Spy
     private JdbcResultSetStreamer jdbcResultSetStreamer = new JdbcResultSetStreamer();
 

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet
+            id="framework-system-004"
+            author="TechPod"
+            logicalFilePath="004-add-event-handling-error-log-table.xml">
+
+        <createTable tableName="event_error_log">
+            <column name="event_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="event_number" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="component" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="message_id" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="metadata" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payload" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="error_message" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="stacktrace" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="errored_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey tableName="event_error_log" columnNames="event_id"/>
+
+        <rollback>
+            <dropTable tableName="event_error_log"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

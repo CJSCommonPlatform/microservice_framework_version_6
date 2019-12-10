@@ -1,4 +1,4 @@
-package uk.gov.justice.services.shuttering.domain;
+package uk.gov.justice.services.system.domain;
 
 import java.time.ZonedDateTime;
 import java.util.Objects;

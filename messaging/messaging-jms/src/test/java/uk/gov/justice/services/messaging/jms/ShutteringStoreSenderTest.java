@@ -11,8 +11,8 @@ import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.Metadata;
-import uk.gov.justice.services.shuttering.domain.StoredCommand;
-import uk.gov.justice.services.shuttering.persistence.StoredCommandRepository;
+import uk.gov.justice.services.system.domain.StoredCommand;
+import uk.gov.justice.services.system.persistence.StoredCommandRepository;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;

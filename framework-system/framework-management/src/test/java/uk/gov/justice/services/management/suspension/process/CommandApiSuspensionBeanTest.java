@@ -10,8 +10,8 @@ import uk.gov.justice.services.common.polling.MultiIteratingPollerFactory;
 import uk.gov.justice.services.management.suspension.executors.CommandApiSuspensionBean;
 import uk.gov.justice.services.management.suspension.executors.StoredCommandSender;
 import uk.gov.justice.services.messaging.jms.EnvelopeSenderSelector;
-import uk.gov.justice.services.shuttering.domain.StoredCommand;
-import uk.gov.justice.services.shuttering.persistence.StoredCommandRepository;
+import uk.gov.justice.services.system.domain.StoredCommand;
+import uk.gov.justice.services.system.persistence.StoredCommandRepository;
 import uk.gov.justice.services.test.utils.common.polling.DummyMultiIteratingPoller;
 
 import java.util.stream.Stream;

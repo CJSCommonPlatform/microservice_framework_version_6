@@ -10,8 +10,8 @@ import uk.gov.justice.services.management.suspension.executors.StoredCommandSend
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.JmsSender;
-import uk.gov.justice.services.shuttering.domain.StoredCommand;
-import uk.gov.justice.services.shuttering.persistence.StoredCommandRepository;
+import uk.gov.justice.services.system.domain.StoredCommand;
+import uk.gov.justice.services.system.persistence.StoredCommandRepository;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;

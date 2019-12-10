@@ -5,8 +5,8 @@ import static javax.transaction.Transactional.TxType.REQUIRES_NEW;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectEnvelopeConverter;
 import uk.gov.justice.services.messaging.jms.JmsSender;
-import uk.gov.justice.services.shuttering.domain.StoredCommand;
-import uk.gov.justice.services.shuttering.persistence.StoredCommandRepository;
+import uk.gov.justice.services.system.domain.StoredCommand;
+import uk.gov.justice.services.system.persistence.StoredCommandRepository;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;

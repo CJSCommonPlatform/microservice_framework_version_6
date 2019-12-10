@@ -1,4 +1,4 @@
-package uk.gov.justice.services.shuttering.persistence;
+package uk.gov.justice.services.system.persistence;
 
 import static java.lang.String.format;
 import static uk.gov.justice.services.common.converter.ZonedDateTimes.fromSqlTimestamp;
@@ -8,7 +8,7 @@ import uk.gov.justice.services.jdbc.persistence.JdbcResultSetStreamer;
 import uk.gov.justice.services.jdbc.persistence.PreparedStatementWrapper;
 import uk.gov.justice.services.jdbc.persistence.PreparedStatementWrapperFactory;
 import uk.gov.justice.services.jdbc.persistence.SystemJdbcDataSourceProvider;
-import uk.gov.justice.services.shuttering.domain.StoredCommand;
+import uk.gov.justice.services.system.domain.StoredCommand;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -63,12 +63,12 @@ public class StoredCommandRepository {
                     );
 
                 } catch (final SQLException e) {
-                    throw new StoredCommandPersistenceException("Failed to get stored command stream", e);
+                    throw new SystemPersistenceException("Failed to get stored command stream", e);
                 }
             });
 
         } catch (final SQLException e) {
-            throw new StoredCommandPersistenceException("Failed to get stored command", e);
+            throw new SystemPersistenceException("Failed to get stored command", e);
 
         }
     }
@@ -91,7 +91,7 @@ public class StoredCommandRepository {
             }
 
         } catch (final SQLException e) {
-            throw new StoredCommandPersistenceException("Failed to insert stored command", e);
+            throw new SystemPersistenceException("Failed to insert stored command", e);
         }
     }
 
@@ -106,7 +106,7 @@ public class StoredCommandRepository {
             preparedStatement.executeUpdate();
 
         } catch (final SQLException e) {
-            throw new StoredCommandPersistenceException(format("Failed to delete stored command with envelope id '%s'", envelopeId), e);
+            throw new SystemPersistenceException(format("Failed to delete stored command with envelope id '%s'", envelopeId), e);
         }
     }
 
@@ -118,7 +118,7 @@ public class StoredCommandRepository {
             preparedStatement.executeUpdate();
 
         } catch (final SQLException e) {
-            throw new StoredCommandPersistenceException("Failed to truncate stored_command table", e);
+            throw new SystemPersistenceException("Failed to truncate stored_command table", e);
         }
     }
 }

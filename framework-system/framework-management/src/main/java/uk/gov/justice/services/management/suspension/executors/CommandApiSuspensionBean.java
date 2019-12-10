@@ -5,8 +5,8 @@ import static javax.transaction.Transactional.TxType.REQUIRED;
 import uk.gov.justice.services.common.polling.MultiIteratingPoller;
 import uk.gov.justice.services.common.polling.MultiIteratingPollerFactory;
 import uk.gov.justice.services.messaging.jms.EnvelopeSenderSelector;
-import uk.gov.justice.services.shuttering.domain.StoredCommand;
-import uk.gov.justice.services.shuttering.persistence.StoredCommandRepository;
+import uk.gov.justice.services.system.domain.StoredCommand;
+import uk.gov.justice.services.system.persistence.StoredCommandRepository;
 
 import java.util.stream.Stream;
 

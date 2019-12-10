@@ -4,6 +4,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+- Add table in system database 'event_error_log' for storing errors with events that failed to process
 
 ## [6.4.0] - 2019-11-12
 ### Changed

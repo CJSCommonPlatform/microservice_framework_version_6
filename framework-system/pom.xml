@@ -16,5 +16,6 @@
         <module>framework-management</module>
         <module>framework-system-persistence</module>
         <module>framework-system-liquibase</module>
+        <module>framework-system-errors</module>
     </modules>
 </project>

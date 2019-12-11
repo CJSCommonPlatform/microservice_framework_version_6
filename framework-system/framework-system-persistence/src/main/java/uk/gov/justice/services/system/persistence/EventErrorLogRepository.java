@@ -1,5 +1,6 @@
 package uk.gov.justice.services.system.persistence;
 
+import static javax.transaction.Transactional.TxType.REQUIRES_NEW;
 import static uk.gov.justice.services.common.converter.ZonedDateTimes.fromSqlTimestamp;
 import static uk.gov.justice.services.common.converter.ZonedDateTimes.toSqlTimestamp;
 
@@ -17,15 +18,16 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.sql.DataSource;
+import javax.transaction.Transactional;
 
 public class EventErrorLogRepository {
 
     private static final String INSERT_EVENT_ERROR_LOG_SQL = "INSERT INTO event_error_log " +
-            "(event_id, event_number, component, message_id, metadata, payload, error_message, stacktrace, errored_at) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "(event_id, event_number, component, message_id, metadata, payload, error_message, stacktrace, errored_at, comments) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String FIND_ALL_EVENT_ERROR_LOG_SQL = "SELECT " +
-            "event_id, event_number, component, message_id, metadata, payload, error_message, stacktrace, errored_at " +
+            "event_id, event_number, component, message_id, metadata, payload, error_message, stacktrace, errored_at, comments " +
             "FROM event_error_log";
 
     private static final String TRUNCATE_EVENT_ERROR_LOG_SQL = "TRUNCATE event_error_log CASCADE";
@@ -33,6 +35,7 @@ public class EventErrorLogRepository {
     @Inject
     private SystemJdbcDataSourceProvider systemJdbcDataSourceProvider;
 
+    @Transactional(REQUIRES_NEW)
     public void save(final EventError eventError) {
 
         final DataSource dataSource = systemJdbcDataSourceProvider.getDataSource();
@@ -49,6 +52,7 @@ public class EventErrorLogRepository {
             preparedStatement.setString(7, eventError.getErrorMessage());
             preparedStatement.setString(8, eventError.getStacktrace());
             preparedStatement.setTimestamp(9, toSqlTimestamp(eventError.getErroredAt()));
+            preparedStatement.setString(10, eventError.getComments());
             preparedStatement.executeUpdate();
         } catch (final SQLException e) {
             throw new SystemPersistenceException("Failed to insert into event_error_log", e);
@@ -74,6 +78,7 @@ public class EventErrorLogRepository {
                 final String errorMessage = resultSet.getString("error_message");
                 final String stacktrace = resultSet.getString("stacktrace");
                 final ZonedDateTime erroredAt = fromSqlTimestamp(resultSet.getTimestamp("errored_at"));
+                final String comment = resultSet.getString("comments");
 
                 final EventError eventError = new EventError(
                         eventId,
@@ -84,7 +89,8 @@ public class EventErrorLogRepository {
                         payload,
                         errorMessage,
                         stacktrace,
-                        erroredAt
+                        erroredAt,
+                        comment
                 );
 
                 eventErrors.add(eventError);

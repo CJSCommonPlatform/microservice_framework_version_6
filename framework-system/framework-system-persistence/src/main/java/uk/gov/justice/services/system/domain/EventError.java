@@ -15,6 +15,7 @@ public class EventError {
     private final String errorMessage;
     private final String stacktrace;
     private final ZonedDateTime erroredAt;
+    private final String comments;
 
     public EventError(
             final UUID eventId,
@@ -25,7 +26,8 @@ public class EventError {
             final String payload,
             final String errorMessage,
             final String stacktrace,
-            final ZonedDateTime erroredAt) {
+            final ZonedDateTime erroredAt,
+            final String comments) {
         this.eventId = eventId;
         this.eventNumber = eventNumber;
         this.component = component;
@@ -35,6 +37,7 @@ public class EventError {
         this.errorMessage = errorMessage;
         this.stacktrace = stacktrace;
         this.erroredAt = erroredAt;
+        this.comments = comments;
     }
 
     public UUID getEventId() {
@@ -73,6 +76,10 @@ public class EventError {
         return erroredAt;
     }
 
+    public String getComments() {
+        return comments;
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
@@ -86,12 +93,13 @@ public class EventError {
                 Objects.equals(payload, that.payload) &&
                 Objects.equals(errorMessage, that.errorMessage) &&
                 Objects.equals(stacktrace, that.stacktrace) &&
-                Objects.equals(erroredAt, that.erroredAt);
+                Objects.equals(erroredAt, that.erroredAt) &&
+                Objects.equals(comments, that.comments);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(eventId, eventNumber, component, messageId, metadata, payload, errorMessage, stacktrace, erroredAt);
+        return Objects.hash(eventId, eventNumber, component, messageId, metadata, payload, errorMessage, stacktrace, erroredAt, comments);
     }
 
     @Override
@@ -106,6 +114,7 @@ public class EventError {
                 ", errorMessage='" + errorMessage + '\'' +
                 ", stacktrace='" + stacktrace + '\'' +
                 ", erroredAt=" + erroredAt +
+                ", comments='" + comments + '\'' +
                 '}';
     }
 }

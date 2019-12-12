@@ -1,5 +1,7 @@
 package uk.gov.justice.services.system.persistence;
 
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -12,6 +14,7 @@ import uk.gov.justice.services.test.utils.persistence.TestJdbcDataSourceProvider
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import javax.sql.DataSource;
 
@@ -50,7 +53,8 @@ public class EventErrorLogRepositoryIT {
                 "payload_1",
                 "errorMessage_1",
                 "stacktrace_1",
-                now
+                now,
+                "comment_1"
         );
         final EventError eventError_2 = new EventError(
                 randomUUID(),
@@ -61,7 +65,8 @@ public class EventErrorLogRepositoryIT {
                 "payload_2",
                 "errorMessage_2",
                 "stacktrace_2",
-                then
+                then,
+                "comment_2"
         );
 
         eventErrorLogRepository.save(eventError_1);

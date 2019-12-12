@@ -6,6 +6,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 ## [Unreleased]
 - Update framework-api to 4.2.0
 - Add table in system database 'event_error_log' for storing errors with events that failed to process
+- New SystemErrorService for reporting system errors
 
 ## [6.4.0] - 2019-11-12
 ### Changed

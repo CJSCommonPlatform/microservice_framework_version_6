@@ -6,10 +6,10 @@ import java.util.UUID;
 
 public class EventError {
 
+    private final String messageId;
+    private final String component;
     private final UUID eventId;
     private final Long eventNumber;
-    private final String component;
-    private final String messageId;
     private final String metadata;
     private final String payload;
     private final String errorMessage;
@@ -18,20 +18,20 @@ public class EventError {
     private final String comments;
 
     public EventError(
+            final String messageId,
+            final String component,
             final UUID eventId,
             final Long eventNumber,
-            final String component,
-            final String messageId,
             final String metadata,
             final String payload,
             final String errorMessage,
             final String stacktrace,
             final ZonedDateTime erroredAt,
             final String comments) {
+        this.messageId = messageId;
+        this.component = component;
         this.eventId = eventId;
         this.eventNumber = eventNumber;
-        this.component = component;
-        this.messageId = messageId;
         this.metadata = metadata;
         this.payload = payload;
         this.errorMessage = errorMessage;
@@ -40,20 +40,20 @@ public class EventError {
         this.comments = comments;
     }
 
-    public UUID getEventId() {
-        return eventId;
-    }
-
-    public Long getEventNumber() {
-        return eventNumber;
+    public String getMessageId() {
+        return messageId;
     }
 
     public String getComponent() {
         return component;
     }
 
-    public String getMessageId() {
-        return messageId;
+    public UUID getEventId() {
+        return eventId;
+    }
+
+    public Long getEventNumber() {
+        return eventNumber;
     }
 
     public String getMetadata() {
@@ -85,10 +85,10 @@ public class EventError {
         if (this == o) return true;
         if (!(o instanceof EventError)) return false;
         final EventError that = (EventError) o;
-        return Objects.equals(eventId, that.eventId) &&
-                Objects.equals(eventNumber, that.eventNumber) &&
+        return Objects.equals(messageId, that.messageId) &&
                 Objects.equals(component, that.component) &&
-                Objects.equals(messageId, that.messageId) &&
+                Objects.equals(eventId, that.eventId) &&
+                Objects.equals(eventNumber, that.eventNumber) &&
                 Objects.equals(metadata, that.metadata) &&
                 Objects.equals(payload, that.payload) &&
                 Objects.equals(errorMessage, that.errorMessage) &&
@@ -99,16 +99,16 @@ public class EventError {
 
     @Override
     public int hashCode() {
-        return Objects.hash(eventId, eventNumber, component, messageId, metadata, payload, errorMessage, stacktrace, erroredAt, comments);
+        return Objects.hash(messageId, component, eventId, eventNumber, metadata, payload, errorMessage, stacktrace, erroredAt, comments);
     }
 
     @Override
     public String toString() {
         return "EventError{" +
-                "eventId=" + eventId +
-                ", eventNumber=" + eventNumber +
+                "messageId='" + messageId + '\'' +
                 ", component='" + component + '\'' +
-                ", messageId='" + messageId + '\'' +
+                ", eventId=" + eventId +
+                ", eventNumber=" + eventNumber +
                 ", metadata='" + metadata + '\'' +
                 ", payload='" + payload + '\'' +
                 ", errorMessage='" + errorMessage + '\'' +

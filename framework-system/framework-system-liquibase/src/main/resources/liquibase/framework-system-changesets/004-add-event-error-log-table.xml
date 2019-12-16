@@ -10,16 +10,16 @@
             logicalFilePath="004-add-event-handling-error-log-table.xml">
 
         <createTable tableName="event_error_log">
-            <column name="event_id" type="uuid">
-                <constraints nullable="false"/>
-            </column>
-            <column name="event_number" type="BIGINT">
+            <column name="message_id" type="TEXT">
                 <constraints nullable="false"/>
             </column>
             <column name="component" type="TEXT">
                 <constraints nullable="false"/>
             </column>
-            <column name="message_id" type="TEXT">
+            <column name="event_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="event_number" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
             <column name="metadata" type="TEXT">
@@ -37,9 +37,12 @@
             <column name="errored_at" type="TIMESTAMP WITH TIME ZONE">
                 <constraints nullable="false"/>
             </column>
+            <column name="comments" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
         </createTable>
 
-        <addPrimaryKey tableName="event_error_log" columnNames="event_id"/>
+        <addPrimaryKey tableName="event_error_log" columnNames="message_id,component"/>
 
         <rollback>
             <dropTable tableName="event_error_log"/>

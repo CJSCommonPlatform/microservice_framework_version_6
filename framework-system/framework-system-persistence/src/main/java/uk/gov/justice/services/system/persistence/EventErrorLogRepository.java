@@ -81,10 +81,10 @@ public class EventErrorLogRepository {
                 final String comment = resultSet.getString("comments");
 
                 final EventError eventError = new EventError(
+                        messageId,
+                        component,
                         eventId,
                         eventNumber,
-                        component,
-                        messageId,
                         metadata,
                         payload,
                         errorMessage,

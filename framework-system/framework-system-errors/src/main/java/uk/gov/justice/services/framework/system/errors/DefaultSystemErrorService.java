@@ -45,10 +45,10 @@ public class DefaultSystemErrorService implements SystemErrorService {
         final Optional<Long> eventNumber = metadata.eventNumber();
 
         final EventError eventError = new EventError(
+                messageId,
+                componentName,
                 eventId,
                 eventNumber.orElse(MISSING_EVENT_NUMBER),
-                componentName,
-                messageId,
                 metadata.asJsonObject().toString(),
                 jsonEnvelope.payload().toString(),
                 exception.getMessage(),

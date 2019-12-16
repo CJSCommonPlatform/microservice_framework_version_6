@@ -45,10 +45,10 @@ public class EventErrorLogRepositoryIT {
         final ZonedDateTime then = now.plusSeconds(23);
 
         final EventError eventError_1 = new EventError(
+                "messageId_1",
+                "component_1",
                 randomUUID(),
                 1L,
-                "component_1",
-                "messageId_1",
                 "metadata_1",
                 "payload_1",
                 "errorMessage_1",
@@ -57,10 +57,10 @@ public class EventErrorLogRepositoryIT {
                 "comment_1"
         );
         final EventError eventError_2 = new EventError(
+                "messageId_2",
+                "component_2",
                 randomUUID(),
                 2L,
-                "component_2",
-                "messageId_2",
                 "metadata_2",
                 "payload_2",
                 "errorMessage_2",

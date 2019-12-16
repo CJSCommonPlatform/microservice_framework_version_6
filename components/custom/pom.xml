@@ -5,7 +5,7 @@
     <parent>
         <artifactId>components</artifactId>
         <groupId>uk.gov.justice.services</groupId>
-        <version>6.5.0-M1</version>
+        <version>6.5.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 

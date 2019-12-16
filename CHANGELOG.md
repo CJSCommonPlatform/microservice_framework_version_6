@@ -4,6 +4,8 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [6.5.0-M1] - 2019-12-16
 - Update framework-api to 4.2.0
 - Add table in system database 'event_error_log' for storing errors with events that failed to process
 - New SystemErrorService for reporting system errors

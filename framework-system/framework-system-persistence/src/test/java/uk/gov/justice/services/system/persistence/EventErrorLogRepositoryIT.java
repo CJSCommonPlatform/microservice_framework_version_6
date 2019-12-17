@@ -1,5 +1,7 @@
 package uk.gov.justice.services.system.persistence;
 
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -12,6 +14,7 @@ import uk.gov.justice.services.test.utils.persistence.TestJdbcDataSourceProvider
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import javax.sql.DataSource;
 
@@ -44,28 +47,28 @@ public class EventErrorLogRepositoryIT {
         final EventError eventError_1 = new EventError(
                 "messageId_1",
                 "component_1",
-                randomUUID(),
                 "eventName_1",
-                1L,
+                randomUUID(),
+                of(randomUUID()),
+                of(1L),
                 "metadata_1",
                 "payload_1",
                 "errorMessage_1",
                 "stacktrace_1",
-                now,
-                "comment_1"
+                now
         );
         final EventError eventError_2 = new EventError(
                 "messageId_2",
                 "component_2",
-                randomUUID(),
                 "eventName_2",
-                2L,
+                randomUUID(),
+                of(randomUUID()),
+                of(2L),
                 "metadata_2",
                 "payload_2",
                 "errorMessage_2",
                 "stacktrace_2",
-                then,
-                "comment_2"
+                then
         );
 
         eventErrorLogRepository.save(eventError_1);
@@ -77,5 +80,73 @@ public class EventErrorLogRepositoryIT {
 
         assertThat(eventErrors.get(0), is(eventError_1));
         assertThat(eventErrors.get(1), is(eventError_2));
+    }
+
+    @Test
+    public void shouldHandleMissingEventNumber() throws Exception {
+
+        final DataSource systemDataSource = new TestJdbcDataSourceProvider().getSystemDataSource("framework");
+        when(systemJdbcDataSourceProvider.getDataSource()).thenReturn(systemDataSource);
+
+        eventErrorLogRepository.deleteAll();
+
+        final ZonedDateTime now = new UtcClock().now();
+
+        final EventError eventError = new EventError(
+                "messageId",
+                "component",
+                "eventName",
+                randomUUID(),
+                of(randomUUID()),
+                empty(),
+                "metadata",
+                "payload",
+                "errorMessage",
+                "stacktrace",
+                now
+        );
+
+        eventErrorLogRepository.save(eventError);
+
+        final List<EventError> eventErrors = eventErrorLogRepository.findAll();
+
+        assertThat(eventErrors.size(), is(1));
+
+        assertThat(eventErrors.get(0), is(eventError));
+        assertThat(eventErrors.get(0).getEventNumber(), is(empty()));
+    }
+
+    @Test
+    public void shouldHandleMissingStreamId() throws Exception {
+
+        final DataSource systemDataSource = new TestJdbcDataSourceProvider().getSystemDataSource("framework");
+        when(systemJdbcDataSourceProvider.getDataSource()).thenReturn(systemDataSource);
+
+        eventErrorLogRepository.deleteAll();
+
+        final ZonedDateTime now = new UtcClock().now();
+
+        final EventError eventError = new EventError(
+                "messageId",
+                "component",
+                "eventName",
+                randomUUID(),
+                empty(),
+                of(1L),
+                "metadata",
+                "payload",
+                "errorMessage",
+                "stacktrace",
+                now
+        );
+
+        eventErrorLogRepository.save(eventError);
+
+        final List<EventError> eventErrors = eventErrorLogRepository.findAll();
+
+        assertThat(eventErrors.size(), is(1));
+
+        assertThat(eventErrors.get(0), is(eventError));
+        assertThat(eventErrors.get(0).getStreamId(), is(empty()));
     }
 }

@@ -1,7 +1,5 @@
 package uk.gov.justice.services.system.persistence;
 
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -14,7 +12,6 @@ import uk.gov.justice.services.test.utils.persistence.TestJdbcDataSourceProvider
 
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import javax.sql.DataSource;
 
@@ -48,6 +45,7 @@ public class EventErrorLogRepositoryIT {
                 "messageId_1",
                 "component_1",
                 randomUUID(),
+                "eventName_1",
                 1L,
                 "metadata_1",
                 "payload_1",
@@ -60,6 +58,7 @@ public class EventErrorLogRepositoryIT {
                 "messageId_2",
                 "component_2",
                 randomUUID(),
+                "eventName_2",
                 2L,
                 "metadata_2",
                 "payload_2",

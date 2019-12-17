@@ -23,11 +23,13 @@ import javax.transaction.Transactional;
 public class EventErrorLogRepository {
 
     private static final String INSERT_EVENT_ERROR_LOG_SQL = "INSERT INTO event_error_log " +
-            "(event_id, event_number, component, message_id, metadata, payload, error_message, stacktrace, errored_at, comments) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "(message_id, component, event_name, event_id, event_number, " +
+            "metadata, payload, error_message, stacktrace, errored_at, comments) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String FIND_ALL_EVENT_ERROR_LOG_SQL = "SELECT " +
-            "event_id, event_number, component, message_id, metadata, payload, error_message, stacktrace, errored_at, comments " +
+            "message_id, component, event_name, event_id, event_number, " +
+            "metadata, payload, error_message, stacktrace, errored_at, comments " +
             "FROM event_error_log";
 
     private static final String TRUNCATE_EVENT_ERROR_LOG_SQL = "TRUNCATE event_error_log CASCADE";
@@ -43,16 +45,17 @@ public class EventErrorLogRepository {
         try (final Connection connection = dataSource.getConnection();
              final PreparedStatement preparedStatement = connection.prepareStatement(INSERT_EVENT_ERROR_LOG_SQL)) {
 
-            preparedStatement.setObject(1, eventError.getEventId());
-            preparedStatement.setLong(2, eventError.getEventNumber());
-            preparedStatement.setString(3, eventError.getComponent());
-            preparedStatement.setString(4, eventError.getMessageId());
-            preparedStatement.setString(5, eventError.getMetadata());
-            preparedStatement.setString(6, eventError.getPayload());
-            preparedStatement.setString(7, eventError.getErrorMessage());
-            preparedStatement.setString(8, eventError.getStacktrace());
-            preparedStatement.setTimestamp(9, toSqlTimestamp(eventError.getErroredAt()));
-            preparedStatement.setString(10, eventError.getComments());
+            preparedStatement.setString(1, eventError.getMessageId());
+            preparedStatement.setString(2, eventError.getComponent());
+            preparedStatement.setString(3, eventError.getEventName());
+            preparedStatement.setObject(4, eventError.getEventId());
+            preparedStatement.setLong(5, eventError.getEventNumber());
+            preparedStatement.setString(6, eventError.getMetadata());
+            preparedStatement.setString(7, eventError.getPayload());
+            preparedStatement.setString(8, eventError.getErrorMessage());
+            preparedStatement.setString(9, eventError.getStacktrace());
+            preparedStatement.setTimestamp(10, toSqlTimestamp(eventError.getErroredAt()));
+            preparedStatement.setString(11, eventError.getComments());
             preparedStatement.executeUpdate();
         } catch (final SQLException e) {
             throw new SystemPersistenceException("Failed to insert into event_error_log", e);
@@ -69,10 +72,11 @@ public class EventErrorLogRepository {
              final ResultSet resultSet = preparedStatement.executeQuery()) {
 
             while (resultSet.next()) {
+                final String messageId = resultSet.getString("message_id");
+                final String component = resultSet.getString("component");
+                final String eventName = resultSet.getString("event_name");
                 final UUID eventId = (UUID) resultSet.getObject("event_id");
                 final long eventNumber = resultSet.getLong("event_number");
-                final String component = resultSet.getString("component");
-                final String messageId = resultSet.getString("message_id");
                 final String metadata = resultSet.getString("metadata");
                 final String payload = resultSet.getString("payload");
                 final String errorMessage = resultSet.getString("error_message");
@@ -84,6 +88,7 @@ public class EventErrorLogRepository {
                         messageId,
                         component,
                         eventId,
+                        eventName,
                         eventNumber,
                         metadata,
                         payload,

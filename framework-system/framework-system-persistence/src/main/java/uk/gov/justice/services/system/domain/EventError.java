@@ -9,6 +9,7 @@ public class EventError {
     private final String messageId;
     private final String component;
     private final UUID eventId;
+    private final String eventName;
     private final Long eventNumber;
     private final String metadata;
     private final String payload;
@@ -21,6 +22,7 @@ public class EventError {
             final String messageId,
             final String component,
             final UUID eventId,
+            final String eventName,
             final Long eventNumber,
             final String metadata,
             final String payload,
@@ -31,6 +33,7 @@ public class EventError {
         this.messageId = messageId;
         this.component = component;
         this.eventId = eventId;
+        this.eventName = eventName;
         this.eventNumber = eventNumber;
         this.metadata = metadata;
         this.payload = payload;
@@ -50,6 +53,10 @@ public class EventError {
 
     public UUID getEventId() {
         return eventId;
+    }
+
+    public String getEventName() {
+        return eventName;
     }
 
     public Long getEventNumber() {
@@ -88,18 +95,18 @@ public class EventError {
         return Objects.equals(messageId, that.messageId) &&
                 Objects.equals(component, that.component) &&
                 Objects.equals(eventId, that.eventId) &&
+                Objects.equals(eventName, that.eventName) &&
                 Objects.equals(eventNumber, that.eventNumber) &&
                 Objects.equals(metadata, that.metadata) &&
                 Objects.equals(payload, that.payload) &&
                 Objects.equals(errorMessage, that.errorMessage) &&
-                Objects.equals(stacktrace, that.stacktrace) &&
                 Objects.equals(erroredAt, that.erroredAt) &&
                 Objects.equals(comments, that.comments);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(messageId, component, eventId, eventNumber, metadata, payload, errorMessage, stacktrace, erroredAt, comments);
+        return Objects.hash(messageId, component, eventId, eventName, eventNumber, metadata, payload, errorMessage, stacktrace, erroredAt, comments);
     }
 
     @Override
@@ -108,11 +115,11 @@ public class EventError {
                 "messageId='" + messageId + '\'' +
                 ", component='" + component + '\'' +
                 ", eventId=" + eventId +
+                ", eventName='" + eventName + '\'' +
                 ", eventNumber=" + eventNumber +
                 ", metadata='" + metadata + '\'' +
                 ", payload='" + payload + '\'' +
                 ", errorMessage='" + errorMessage + '\'' +
-                ", stacktrace='" + stacktrace + '\'' +
                 ", erroredAt=" + erroredAt +
                 ", comments='" + comments + '\'' +
                 '}';

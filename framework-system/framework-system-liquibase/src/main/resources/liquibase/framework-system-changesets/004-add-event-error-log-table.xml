@@ -19,6 +19,9 @@
             <column name="event_id" type="uuid">
                 <constraints nullable="false"/>
             </column>
+            <column name="event_name" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
             <column name="event_number" type="BIGINT">
                 <constraints nullable="false"/>
             </column>

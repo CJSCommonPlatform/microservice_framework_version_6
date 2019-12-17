@@ -16,14 +16,17 @@
             <column name="component" type="TEXT">
                 <constraints nullable="false"/>
             </column>
-            <column name="event_id" type="uuid">
-                <constraints nullable="false"/>
-            </column>
             <column name="event_name" type="TEXT">
                 <constraints nullable="false"/>
             </column>
-            <column name="event_number" type="BIGINT">
+            <column name="event_id" type="uuid">
                 <constraints nullable="false"/>
+            </column>
+            <column name="stream_id" type="uuid">
+                <constraints nullable="true"/>
+            </column>
+            <column name="event_number" type="BIGINT">
+                <constraints nullable="true"/>
             </column>
             <column name="metadata" type="TEXT">
                 <constraints nullable="false"/>
@@ -39,9 +42,6 @@
             </column>
             <column name="errored_at" type="TIMESTAMP WITH TIME ZONE">
                 <constraints nullable="false"/>
-            </column>
-            <column name="comments" type="TEXT">
-                <constraints nullable="true"/>
             </column>
         </createTable>
 

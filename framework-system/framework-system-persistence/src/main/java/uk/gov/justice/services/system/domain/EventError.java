@@ -2,45 +2,46 @@ package uk.gov.justice.services.system.domain;
 
 import java.time.ZonedDateTime;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 public class EventError {
 
     private final String messageId;
     private final String component;
-    private final UUID eventId;
     private final String eventName;
-    private final Long eventNumber;
+    private final UUID eventId;
+    private final Optional<UUID> streamId;
+    private final Optional<Long> eventNumber;
     private final String metadata;
     private final String payload;
     private final String errorMessage;
     private final String stacktrace;
     private final ZonedDateTime erroredAt;
-    private final String comments;
 
     public EventError(
             final String messageId,
             final String component,
-            final UUID eventId,
             final String eventName,
-            final Long eventNumber,
+            final UUID eventId,
+            final Optional<UUID> streamId,
+            final Optional<Long> eventNumber,
             final String metadata,
             final String payload,
             final String errorMessage,
             final String stacktrace,
-            final ZonedDateTime erroredAt,
-            final String comments) {
+            final ZonedDateTime erroredAt) {
         this.messageId = messageId;
         this.component = component;
-        this.eventId = eventId;
         this.eventName = eventName;
+        this.eventId = eventId;
+        this.streamId = streamId;
         this.eventNumber = eventNumber;
         this.metadata = metadata;
         this.payload = payload;
         this.errorMessage = errorMessage;
         this.stacktrace = stacktrace;
         this.erroredAt = erroredAt;
-        this.comments = comments;
     }
 
     public String getMessageId() {
@@ -51,15 +52,19 @@ public class EventError {
         return component;
     }
 
-    public UUID getEventId() {
-        return eventId;
-    }
-
     public String getEventName() {
         return eventName;
     }
 
-    public Long getEventNumber() {
+    public UUID getEventId() {
+        return eventId;
+    }
+
+    public Optional<UUID> getStreamId() {
+        return streamId;
+    }
+
+    public Optional<Long> getEventNumber() {
         return eventNumber;
     }
 
@@ -83,10 +88,6 @@ public class EventError {
         return erroredAt;
     }
 
-    public String getComments() {
-        return comments;
-    }
-
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
@@ -94,19 +95,20 @@ public class EventError {
         final EventError that = (EventError) o;
         return Objects.equals(messageId, that.messageId) &&
                 Objects.equals(component, that.component) &&
-                Objects.equals(eventId, that.eventId) &&
                 Objects.equals(eventName, that.eventName) &&
+                Objects.equals(eventId, that.eventId) &&
+                Objects.equals(streamId, that.streamId) &&
                 Objects.equals(eventNumber, that.eventNumber) &&
                 Objects.equals(metadata, that.metadata) &&
                 Objects.equals(payload, that.payload) &&
                 Objects.equals(errorMessage, that.errorMessage) &&
-                Objects.equals(erroredAt, that.erroredAt) &&
-                Objects.equals(comments, that.comments);
+                Objects.equals(stacktrace, that.stacktrace) &&
+                Objects.equals(erroredAt, that.erroredAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(messageId, component, eventId, eventName, eventNumber, metadata, payload, errorMessage, stacktrace, erroredAt, comments);
+        return Objects.hash(messageId, component, eventName, eventId, streamId, eventNumber, metadata, payload, errorMessage, stacktrace, erroredAt);
     }
 
     @Override
@@ -114,14 +116,13 @@ public class EventError {
         return "EventError{" +
                 "messageId='" + messageId + '\'' +
                 ", component='" + component + '\'' +
-                ", eventId=" + eventId +
                 ", eventName='" + eventName + '\'' +
+                ", eventId=" + eventId +
+                ", streamId=" + streamId +
                 ", eventNumber=" + eventNumber +
                 ", metadata='" + metadata + '\'' +
-                ", payload='" + payload + '\'' +
                 ", errorMessage='" + errorMessage + '\'' +
                 ", erroredAt=" + erroredAt +
-                ", comments='" + comments + '\'' +
                 '}';
     }
 }

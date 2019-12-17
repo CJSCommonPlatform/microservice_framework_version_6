@@ -56,6 +56,7 @@ public class DefaultSystemErrorServiceTest {
 
         final String messageId = "message id";
         final String componentName = "EVENT_LISTENER";
+        final String eventName = "context.events.an.event";
         final String errorMessage = "Help help we're all going to die";
         final Throwable exception = new NullPointerException(errorMessage);
         final Long eventNumber = 239874L;
@@ -72,6 +73,7 @@ public class DefaultSystemErrorServiceTest {
 
         when(jsonEnvelope.metadata()).thenReturn(metadata);
         when(metadata.id()).thenReturn(eventId);
+        when(metadata.name()).thenReturn(eventName);
         when(metadata.eventNumber()).thenReturn(of(eventNumber));
 
         when(metadata.asJsonObject()).thenReturn(metadataJsonObject);
@@ -96,11 +98,12 @@ public class DefaultSystemErrorServiceTest {
 
         assertThat(eventError.getMessageId(), is(messageId));
         assertThat(eventError.getComponent(), is(componentName));
-        assertThat(eventError.getErrorMessage(), is(errorMessage));
-        assertThat(eventError.getEventNumber(), is(eventNumber));
         assertThat(eventError.getEventId(), is(eventId));
+        assertThat(eventError.getEventName(), is(eventName));
+        assertThat(eventError.getEventNumber(), is(eventNumber));
         assertThat(eventError.getMetadata(), is(metadataJson));
         assertThat(eventError.getPayload(), is(payloadJson));
+        assertThat(eventError.getErrorMessage(), is(errorMessage));
         assertThat(eventError.getStacktrace(), is(stackTrace));
         assertThat(eventError.getErroredAt(), is(erroredAt));
         assertThat(eventError.getComments(), is(AN_EMPTY_STRING));
@@ -111,6 +114,7 @@ public class DefaultSystemErrorServiceTest {
 
         final String messageId = "message id";
         final String componentName = "EVENT_LISTENER";
+        final String eventName = "context.events.an.event";
         final String errorMessage = "Help help we're all going to die";
         final Throwable exception = new NullPointerException(errorMessage);
         final UUID eventId = randomUUID();
@@ -126,6 +130,7 @@ public class DefaultSystemErrorServiceTest {
 
         when(jsonEnvelope.metadata()).thenReturn(metadata);
         when(metadata.id()).thenReturn(eventId);
+        when(metadata.name()).thenReturn(eventName);
         when(metadata.eventNumber()).thenReturn(empty());
 
         when(metadata.asJsonObject()).thenReturn(metadataJsonObject);
@@ -150,6 +155,7 @@ public class DefaultSystemErrorServiceTest {
 
         assertThat(eventError.getMessageId(), is(messageId));
         assertThat(eventError.getComponent(), is(componentName));
+        assertThat(eventError.getEventName(), is(eventName));
         assertThat(eventError.getErrorMessage(), is(errorMessage));
         assertThat(eventError.getEventNumber(), is(-1L));
         assertThat(eventError.getEventId(), is(eventId));

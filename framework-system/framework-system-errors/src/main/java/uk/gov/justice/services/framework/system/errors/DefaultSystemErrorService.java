@@ -42,12 +42,14 @@ public class DefaultSystemErrorService implements SystemErrorService {
 
         final Metadata metadata = jsonEnvelope.metadata();
         final UUID eventId = metadata.id();
+        final String eventName = metadata.name();
         final Optional<Long> eventNumber = metadata.eventNumber();
 
         final EventError eventError = new EventError(
                 messageId,
                 componentName,
                 eventId,
+                eventName,
                 eventNumber.orElse(MISSING_EVENT_NUMBER),
                 metadata.asJsonObject().toString(),
                 jsonEnvelope.payload().toString(),

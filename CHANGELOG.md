@@ -4,6 +4,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+## [6.4.1] - 2020-04-09
 ### Added
 - Added get file-service datasource to TestJdbcDataSourceProvider
 

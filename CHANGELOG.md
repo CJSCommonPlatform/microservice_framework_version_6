@@ -5,7 +5,7 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
-## [6.4.2-M1] - 2020-04-23
+## [6.4.2] - 2020-04-23
 ### Changed
 - Update framework-api to 4.3.0
 

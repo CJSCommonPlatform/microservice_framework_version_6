@@ -5,6 +5,14 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 
 ## [Unreleased]
 
+## [6.4.2] - 2020-04-23
+### Changed
+- Update framework-api to 4.3.0
+
+## [6.4.1] - 2020-04-09
+### Added
+- Added get file-service datasource to TestJdbcDataSourceProvider
+
 ## [6.4.0] - 2019-11-12
 ### Changed
 - SHUTTER command renamed to SUSPEND

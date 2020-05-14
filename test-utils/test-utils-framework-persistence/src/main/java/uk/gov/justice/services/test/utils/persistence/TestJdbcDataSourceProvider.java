@@ -34,6 +34,10 @@ public class TestJdbcDataSourceProvider {
 
     }
 
+    public DataSource getFileServiceDataSource() {
+        return getDataSource("fileservice", "fileservice");
+    }
+
     private DataSource getDataSource(final String contextName, final String databaseName) {
 
         final PGSimpleDataSource dataSource = new PGSimpleDataSource();
